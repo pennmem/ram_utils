@@ -112,7 +112,9 @@ params.serialize('params_serialized.mat')
 params_loaded = MatlabIO()
 params_loaded.deserialize('params_serialized.mat')
 
-print 'params_loaded=',params_loaded.eeg.durationMS
+print 'params_loaded.eeg.durationMS=',params_loaded.eeg.durationMS
+
+print 'params_loaded.pow.freqbins=',params_loaded.pow.freqBins
 
 
 # eeg_loaded.load()
