@@ -8,7 +8,7 @@ from MatlabIO import MatlabIO
 class pow(MatlabIO):
 
     def __init__(self):
-        MatlabIO.__init__(self)
+        # MatlabIO.__init__(self)
         self.type = 'fft_slep'
         self.freqs = np.logspace(np.log10(1), np.log10(200), 50)
         self.logTrans = 1
@@ -29,7 +29,7 @@ class pow(MatlabIO):
 class eeg(MatlabIO):
 
     def __init__(self):
-        MatlabIO.__init__(self)
+        # MatlabIO.__init__(self)
 
 
         self.durationMS = 4000
@@ -57,7 +57,7 @@ class eeg(MatlabIO):
 
 class params(MatlabIO):
     def __init__(self):
-        MatlabIO.__init__(self)
+        # MatlabIO.__init__(self)
         self.eeg = eeg()
         self.pow = pow()
 
