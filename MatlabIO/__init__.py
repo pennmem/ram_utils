@@ -5,9 +5,11 @@ import scipy.io as sio
 
 
 class MatlabIO(object):
+    __class_name = ''
     def __init__(self):
+        pass
 
-        self._name = ''
+        # self._name = ''
 
     # def items(self):
     #     '''
@@ -51,10 +53,10 @@ class MatlabIO(object):
         a_dict={}
         top_level_name = type(self).__name__
 
-        print '\n\n\n top_level_name=',top_level_name, ' self__name = ', self._name
+        print '\n\n\n top_level_name=',top_level_name, ' self__name = ', self.__class_name
         if top_level_name == 'MatlabIO':
-            if self._name != '':
-                top_level_name = self._name
+            if self.__class_name != '':
+                top_level_name = self.__class_name
 
         # a_dict[type(self).__name__] = {}
         a_dict[top_level_name] = {}
@@ -104,7 +106,7 @@ class MatlabIO(object):
             print 'first_level_name, first_level_val=',(first_level_name, first_level_val)
             if not(first_level_name.startswith('__') and first_level_name.endswith('__')):
                 print 'setting '
-                self._name = first_level_name
+                self.__class_name = first_level_name
 
                 print 'first_level_name, first_level_val=',(first_level_name, first_level_val)
                 print 'dir(first_level_val)=',dir(first_level_val)
@@ -124,5 +126,5 @@ class MatlabIO(object):
         #     if not(name.startswith('__') and name.endswith('__')):
         #         print 'name=',name, ' val=', val, 'type =', type(val)
         #         setattr(self,name,val)
-        print 'after deserializetion_name =  ', self._name
+        print 'after deserializetion_name =  ', self.__class_name
         pass
