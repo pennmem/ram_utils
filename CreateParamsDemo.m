@@ -1,4 +1,4 @@
-function [params] = CreateParamsDemo(params_path)
+cleafunction [params] = CreateParamsDemo(params_path)
 
 load(params_path)
 whos

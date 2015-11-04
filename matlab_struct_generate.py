@@ -1,42 +1,14 @@
 __author__ = 'm'
-import scipy.io as sio
+
 import numpy as np
 
-import inspect
-
-class MatlabIO(object):
-    def __init__(self):pass
-
-    def items(self):
-        for class_member in inspect.getmembers(self, lambda a : not(inspect.isroutine(a))):
-
-            class_member_name = class_member[0]
-            class_member_val = class_member[1]
-
-            if not(class_member_name.startswith('__') and class_member_name.endswith('__')):
-                # print 'class_member_name=', class_member_name
-                yield class_member_name, class_member_val
-
-    def serialize(self, name, format='matlab'):
-        sio.savemat(name, self)
+from MatlabIO import MatlabIO
 
 
-    def deserialize(self, name, format='matlab'):
-        res = sio.loadmat(name,squeeze_me=True, struct_as_record=False)
-        # print res
-        # print '\n\n\n'
+class pow(MatlabIO):
 
-        # name and val are names and values of the attributes read from .mat file
-        for name,val in res.items():
-            if not(name.startswith('__') and name.endswith('__')):
-                # print 'name=',name, ' val=', val, 'type =', type(val)
-                setattr(self,name,val)
-
-        pass
-
-
-class Pow(MatlabIO):
     def __init__(self):
+        MatlabIO.__init__(self)
         self.type = 'fft_slep'
         self.freqs = np.logspace(np.log10(1), np.log10(200), 50)
         self.logTrans = 1
@@ -54,9 +26,12 @@ class Pow(MatlabIO):
         self.freqBins = self.freqs
         self.zscore = 1
 
-class Eeg(MatlabIO):
+class eeg(MatlabIO):
 
     def __init__(self):
+        MatlabIO.__init__(self)
+
+
         self.durationMS = 4000
         self.offsetMS = -1000
 
@@ -76,56 +51,109 @@ class Eeg(MatlabIO):
                             ]
                             )
 
-
-
         self.HilbertNames = ['Theta (4-8 Hz)','Alpha (8-12 Hz)','Low Gamma (30-50 Hz)','High Gamma (70-100 Hz)'];
 
 
 
-class Params(MatlabIO):
+class params(MatlabIO):
     def __init__(self):
-        self.eeg = Eeg()
-        self.pow = Pow()
+        MatlabIO.__init__(self)
+        self.eeg = eeg()
+        self.pow = pow()
 
-
-print 'dupa - serializing'
-
-eeg = Eeg()
-
-eeg.serialize('eeg_serialized_new.mat')
-
-eeg_loaded = MatlabIO()
-
-eeg_loaded.deserialize('eeg_serialized_new.mat')
-
-print '*************************************results section'
-print 'eeg_loaded.durationMS=', eeg_loaded.durationMS
-print 'eeg_loaded.filtfreq=', eeg_loaded.filtfreq, ' type=',type(eeg_loaded.filtfreq)
+# class Params(MatlabIO):
+#     def __init__(self):
+#         self.params = params()
 
 
 
-print '\n\n\n*************************************composite section'
 
-params = Params()
-params.serialize('params_serialized.mat')
+if __name__ == "__main__":
+    import sys
 
-params_loaded = MatlabIO()
-params_loaded.deserialize('params_serialized.mat')
+    # eeg = eeg()
+    #
+    # eeg.serialize('eeg_serialized_new1.mat')
+    #
+    # eeg_loaded = MatlabIO()
+    #
+    # eeg_loaded.deserialize('eeg_serialized_new1.mat')
+    #
+    # print dir(eeg_loaded)
+    # print eeg_loaded.filttype
 
-print 'params_loaded.eeg.durationMS=',params_loaded.eeg.durationMS
+    # sys.exit()
+    #
+    #
+    # print 'dupa'
 
-print 'params_loaded.pow.freqbins=',params_loaded.pow.freqBins
+    params = params()
+    params.serialize('params_serialized_proper_struct.mat')
+
+    params_loaded = MatlabIO()
+    params_loaded.deserialize('params_serialized_proper_struct.mat')
 
 
-# eeg_loaded.load()
 
-# eeg_loaded  = eeg.load('eeg_serialized.mat')
-#
-#
-#
-#
-# print 'eeg_loaded=',eeg_loaded
-#
-#
-# # print 'eeg_loaded[durationMS]=', eeg_loaded['durationMS']
-# print 'eeg_loaded[durationMS]=', eeg_loaded.durationMS
+    #
+    #
+    #
+    print 'params_loaded.Params=',dir(params_loaded)
+
+    params_loaded.serialize('params_serialized_proper_struct_check.mat')
+
+
+    # import scipy.io as sio
+    #
+    # a_dict = {'eeg':params.eeg, 'pow':params.pow}
+    # sio.savemat('saved_struct.mat', {'params': a_dict})
+
+
+
+
+    # print 'dupa - serializing'
+    #
+    # eeg = Eeg()
+    #
+    # eeg.serialize('eeg_serialized_new.mat')
+    #
+    # eeg_loaded = MatlabIO()
+    #
+    # eeg_loaded.deserialize('eeg_serialized_new.mat')
+    #
+    # print '*************************************results section'
+    # print 'eeg_loaded.durationMS=', eeg_loaded.durationMS
+    # print 'eeg_loaded.filtfreq=', eeg_loaded.filtfreq, ' type=',type(eeg_loaded.filtfreq)
+    #
+    #
+    #
+    # print '\n\n\n*************************************composite section'
+    #
+    # params = Params()
+    # params.serialize('params_serialized.mat')
+    #
+    # params_loaded = MatlabIO()
+    # params_loaded.deserialize('params_serialized.mat')
+    #
+    # print 'params_loaded.eeg.durationMS=',params_loaded.eeg.durationMS
+    #
+    # print 'params_loaded.pow.freqbins=',params_loaded.pow.freqBins
+    #
+    #
+    # params_loaded.serialize('params_serialized_2.mat')
+    #
+    # print '***************************** checking deserialization again'
+    # params_loaded_2 = MatlabIO()
+    # params_loaded_2.deserialize('params_serialized.mat')
+    #
+    # print 'params_loaded_2.eeg.durationMS=',params_loaded_2.eeg.durationMS
+    #
+    # print 'params_loaded_2.pow.freqbins=',params_loaded_2.pow.freqBins
+    #
+    # print 'params_loaded_2.items=',params_loaded_2.items
+
+
+
+
+
+
