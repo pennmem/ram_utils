@@ -268,3 +268,71 @@ class MatlabIOREADER(object):
         #         setattr(self,name,val)
         # print 'after deserializetion_name =  ', self.__class_name
         pass
+
+
+class MatlabIOSimple(object):
+    __class_name = ''
+    def __init__(self):
+        pass
+
+        # self._name = ''
+
+    # def items(self):
+    #     '''
+    #     Generator that returns followin pairs: class member name, class member value
+    #     It only returns non-special members i.e. those whose names do not start with '__' and end with '__'
+    #     :return:
+    #     '''
+    #     for class_member in inspect.getmembers(self, lambda a : not(inspect.isroutine(a))):
+    #
+    #         class_member_name = class_member[0]
+    #         class_member_val = class_member[1]
+    #
+    #         if not(class_member_name.startswith('__') and class_member_name.endswith('__')):
+    #             print 'class_member_name=', class_member_name
+    #             yield class_member_name, {class_member_name:class_member_val}
+
+    # def serialize(self, name, format='matlab'):
+    #     sio.savemat(name, self)
+
+
+
+
+    def fill_dict(self,a_dict):
+        for class_member in inspect.getmembers(self, lambda a : not(inspect.isroutine(a))):
+
+            class_member_name = class_member[0]
+            class_member_val = class_member[1]
+
+            if not(class_member_name.startswith('__') and class_member_name.endswith('__')):
+                # print 'class_member_name=', class_member_name
+                if isinstance(class_member_val, MatlabIO):
+                    a_dict[class_member_name] = {}
+                    class_member_val.fill_dict(a_dict[class_member_name])
+                    # print 'GOT MATLAB IO CLASS'
+                else:
+                    # print 'LEAF CLASS'
+                    a_dict[class_member_name] = class_member_val
+
+    def serialize(self, name, format='matlab'):
+        a_dict={}
+        self.fill_dict(a_dict)
+
+        print a_dict
+        sio.savemat(name, a_dict)
+
+
+
+
+    def deserialize(self, name, format='matlab'):
+        res = sio.loadmat(name,squeeze_me=True, struct_as_record=False)
+        print res
+        print '\n\n\n'
+
+        for attr_name, attr_val in res.items():
+            if not(attr_name .startswith('__') and attr_name .endswith('__')):
+                # print 'attr_name=',attr_name
+                    # , ' val=', val, 'type =', type(val)
+                print 'fetching ',attr_name
+                setattr(self, attr_name , attr_val)
+
