@@ -2,7 +2,7 @@ __author__ = 'm'
 
 import numpy as np
 
-from MatlabIO import MatlabIO, MatlabIOREADER,MatlabIOSimple
+from MatlabIO import MatlabIO_OLD, MatlabIOREADER,MatlabIO
 
 #
 # class pow(object):
@@ -119,14 +119,14 @@ class eeg(object):
 
 
 
-class params(object):
+class params(MatlabIO):
     def __init__(self):
         # MatlabIO.__init__(self)
         self.eeg = eeg()
         self.pow = pow()
 
 
-class Serializer(MatlabIOSimple):
+class Serializer(MatlabIO):
     params = params()
 
 
@@ -163,7 +163,7 @@ if __name__ == "__main__":
     serializer.serialize('params_serializer.mat')
 
 
-    serializer_check = MatlabIOSimple()
+    serializer_check = MatlabIO()
     serializer_check.deserialize('params_serializer.mat')
 
     print 'dir()=',dir(serializer_check)
@@ -174,14 +174,14 @@ if __name__ == "__main__":
     serializer_check.serialize('params_serializer_check.mat')
 
 
-    sys.exit()
 
 
-    group_psl = MatlabIOREADER()
+
+    group_psl = MatlabIO()
     group_psl.deserialize('GroupPSL.mat')
     print group_psl.GroupPSL[0].Subject
 
-    ps2_events_reader = MatlabIOREADER()
+    ps2_events_reader = MatlabIO()
 
     ps2_events_reader.deserialize('PS2Events.mat')
 
@@ -213,7 +213,7 @@ if __name__ == "__main__":
     params = params()
     params.serialize('params_serialized_proper_struct.mat')
 
-    params_loaded = MatlabIO()
+    params_loaded = MatlabIO_OLD()
     params_loaded.deserialize('params_serialized_proper_struct.mat')
     print 'params_loaded.eeg.durationsMS=',params_loaded.eeg.durationMS
 
@@ -245,7 +245,7 @@ if __name__ == "__main__":
     print res['GroupPSL'][0].Subject
 
 
-    group_psl = MatlabIO()
+    group_psl = MatlabIO_OLD()
     group_psl.deserialize('GroupPSL.mat')
 
 

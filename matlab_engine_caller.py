@@ -43,14 +43,14 @@ print "area1=", area1
 
 import numpy as np
 
-from MatlabIO import MatlabIO
+from MatlabIO import MatlabIO_OLD
 
-params_loaded = MatlabIO()
+params_loaded = MatlabIO_OLD()
 params_loaded.deserialize('params_serialized.mat')
 
 eng.CreateParamsDemo('params_serialized.mat')
 
-params_serialized_from_matlab = MatlabIO()
+params_serialized_from_matlab = MatlabIO_OLD()
 params_serialized_from_matlab.deserialize('params_serialized_from_matlab.mat')
 
 
