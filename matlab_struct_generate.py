@@ -2,7 +2,7 @@ __author__ = 'm'
 
 import numpy as np
 
-from MatlabIO import MatlabIO
+from MatlabIO import MatlabIO, MatlabIOREADER
 
 
 class pow(MatlabIO):
@@ -68,6 +68,7 @@ class params(MatlabIO):
 
 
 
+
 if __name__ == "__main__":
     import sys
 
@@ -87,12 +88,22 @@ if __name__ == "__main__":
     #
     # print 'dupa'
 
+    group_psl = MatlabIOREADER()
+    group_psl.deserialize('GroupPSL.mat')
+    print group_psl.GroupPSL[0].Subject
+
+
+
+    sys.exit()
+
     params = params()
     params.serialize('params_serialized_proper_struct.mat')
 
     params_loaded = MatlabIO()
     params_loaded.deserialize('params_serialized_proper_struct.mat')
+    print 'params_loaded.eeg.durationsMS=',params_loaded.eeg.durationMS
 
+    print 'dir(params_loaded)=',dir(params_loaded)
 
 
     #
@@ -101,6 +112,32 @@ if __name__ == "__main__":
     print 'params_loaded.Params=',dir(params_loaded)
 
     params_loaded.serialize('params_serialized_proper_struct_check.mat')
+
+
+
+
+
+
+    print ''
+
+    import inspect
+    import scipy.io as sio
+
+    res = sio.loadmat('GroupPSL.mat', squeeze_me=True, struct_as_record=False)
+
+
+
+    print dir(res)
+    print res['GroupPSL'][0].Subject
+
+
+    group_psl = MatlabIO()
+    group_psl.deserialize('GroupPSL.mat')
+
+
+    print 'group_psl=',group_psl
+    print dir(group_psl)
+    print group_psl.items()
 
 
     # import scipy.io as sio
