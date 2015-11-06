@@ -18,7 +18,7 @@ class MatlabIO(object):
 
             if not(class_member_name.startswith('__') and class_member_name.endswith('__')):
                 # print 'class_member_name=', class_member_name
-                if isinstance(class_member_val, MatlabIO_OLD):
+                if isinstance(class_member_val, MatlabIO):
                     a_dict[class_member_name] = {}
                     class_member_val.fill_dict(a_dict[class_member_name])
                     # print 'GOT MATLAB IO CLASS'
@@ -36,6 +36,8 @@ class MatlabIO(object):
 
     def deserialize(self, name, format='matlab'):
         res = sio.loadmat(name,squeeze_me=True, struct_as_record=False)
+        # res = sio.loadmat(name,squeeze_me=True, struct_as_record=True)
+
         # print res
         # print '\n\n\n'
 
