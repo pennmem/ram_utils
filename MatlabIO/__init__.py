@@ -1,14 +1,9 @@
+from MatlabIO import *
+
 __author__ = 'm'
 
 
-
-from MatlabIO import *
-
-
-
-
 def serialize_objects_in_matlab_format(file_name, *object_name_pairs):
-
 
     class Serializer(MatlabIO):
         def __init__(self):
@@ -50,6 +45,13 @@ def deserialize_objects_from_matlab_format(file_name,*object_names):
 
     return object_dict
 
+def deserialize_single_object_from_matlab_format(file_name,object_name):
+
+    object_dict = deserialize_objects_from_matlab_format(file_name,object_name)
+    try:
+        return object_dict[object_name]
+    except LookupError:
+        return None
 
 # class MatlabIO(object):
 #     __class_name = ''

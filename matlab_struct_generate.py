@@ -206,13 +206,13 @@ if __name__ == "__main__":
 
     print "object_dict['params']=", object_dict['params'].eeg.durationMS
 
-    sys.exit()
 
-    # print serializer_check.params['eeg']
 
-    # sys.exit()
-
-    serializer_check.serialize('params_serializer_check.mat')
+    # # print serializer_check.params['eeg']
+    #
+    # # sys.exit()
+    #
+    # serializer_check.serialize('params_serializer_check.mat')
 
 
 
@@ -220,12 +220,19 @@ if __name__ == "__main__":
     PostStimBuff = 50  # buffer in ms to leave following stim offset
 
 
-    group_psl_reader = MatlabIO()
-    group_psl_reader.deserialize('GroupPSL.mat')
-    group_psl = group_psl_reader.GroupPSL
-    print group_psl[0].Subject
+    # group_psl_reader = MatlabIO()
+    # group_psl_reader.deserialize('GroupPSL.mat')
+    # group_psl = group_psl_reader.GroupPSL
+    # print group_psl[0].Subject
 
+    # group_psl  = deserialize_objects_from_matlab_format('GroupPSL.mat','GroupPSL')['GroupPSL']
+    group_psl = deserialize_single_object_from_matlab_format('GroupPSL.mat','GroupPSL')
+
+    print group_psl[0].Subject
+    sys.exit()
     #
+
+
     paramsPS_reader = MatlabIO()
     paramsPS_reader.deserialize('paramsPS.mat')
 
