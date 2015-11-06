@@ -295,12 +295,6 @@ if __name__ == "__main__":
 
 
 
-
-
-
-
-
-
         DataMat = None;
 
         workspace_dir = '/home1/mswat/scratch/py_run_4/'
