@@ -153,23 +153,6 @@ if __name__ == "__main__":
     import sys
     from os.path import *
 
-
-    # eeg = eeg()
-    #
-    # eeg.serialize('eeg_serialized_new1.mat')
-    #
-    # eeg_loaded = MatlabIO()
-    #
-    # eeg_loaded.deserialize('eeg_serialized_new1.mat')
-    #
-    # print dir(eeg_loaded)
-    # print eeg_loaded.filttype
-
-    # sys.exit()
-    #
-    #
-    # print 'dupa'
-
     DataMatExample = np.ones((4,5),dtype=float)
 
     serialize_objects_in_matlab_format('data_mat_demo.mat',(DataMatExample,'DataMatExample'))
@@ -182,94 +165,33 @@ if __name__ == "__main__":
 
 
 
-
-
+    # params = params()
     #
-    # serializer = Serializer()
-    # serializer.serialize('params_serializer.mat')
+    # serialize_objects_in_matlab_format('new_serializer_demo.mat',(params,'params'))
     #
+    # object_dict = deserialize_objects_from_matlab_format('new_serializer_demo.mat','params')
     #
-    # serializer_check = MatlabIO()
-    # serializer_check.deserialize('params_serializer.mat')
+    # print "object_dict['params']=", object_dict['params'].eeg.durationMS
 
-
-
-    # print 'dir()=',dir(serializer_check)
-    #
-    # print serializer_check.params.eeg.durationMS
-
-    params = params()
-
-    serialize_objects_in_matlab_format('new_serializer_demo.mat',(params,'params'))
-
-    object_dict = deserialize_objects_from_matlab_format('new_serializer_demo.mat','params')
-
-    print "object_dict['params']=", object_dict['params'].eeg.durationMS
-
-
-
-    # # print serializer_check.params['eeg']
-    #
-    # # sys.exit()
-    #
-    # serializer_check.serialize('params_serializer_check.mat')
 
 
 
 
     PostStimBuff = 50  # buffer in ms to leave following stim offset
 
-
-    # group_psl_reader = MatlabIO()
-    # group_psl_reader.deserialize('GroupPSL.mat')
-    # group_psl = group_psl_reader.GroupPSL
-    # print group_psl[0].Subject
-
-    # group_psl  = deserialize_objects_from_matlab_format('GroupPSL.mat','GroupPSL')['GroupPSL']
     group_psl = deserialize_single_object_from_matlab_format('GroupPSL.mat','GroupPSL')
+    # print group_psl[0].Subject
+    paramsPS = deserialize_single_object_from_matlab_format('paramsPS.mat','params')
+    bpFull = deserialize_single_object_from_matlab_format('bpFull.mat','bpFull')
+    bp = deserialize_single_object_from_matlab_format('bp.mat','bp')
 
-    print group_psl[0].Subject
-    sys.exit()
-    #
-
-
-    paramsPS_reader = MatlabIO()
-    paramsPS_reader.deserialize('paramsPS.mat')
-
-    paramsPS = paramsPS_reader.params
-
-
-    bpFull_reader = MatlabIO()
-    bpFull_reader.deserialize('bpFull.mat')
-
-    bpFull = bpFull_reader.bpFull
-
-
-    bp_reader = MatlabIO()
-    bp_reader.deserialize('bp.mat')
-
-    bp = bp_reader.bp
-
-    # Weights_reader = MatlabIO()
-    #
-    # Weights_reader.deserialize('Weights.mat')
-    #
-    # Weights = Weights_reader.Weights
-
-
-
-
-    ps2_events_reader = MatlabIO()
-
-    ps2_events_reader.deserialize('PS2Events.mat')
-
-    ps2_events = ps2_events_reader.PS2Events
-
-
-    print 'ps2_events=',ps2_events
-
+    ps2_events = deserialize_single_object_from_matlab_format('PS2Events.mat','PS2Events')
     ps2_events_size = len(ps2_events)
-    print 'number of ps2 events = ', ps2_events_size
+
+
+    # Weights = deserialize_single_object_from_matlab_format('Weights.mat','Weights')
+
+
 
 
     for i in xrange(1, ps2_events_size):
