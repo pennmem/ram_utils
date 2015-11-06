@@ -18,5 +18,7 @@ print "***************** MATLAB Engine WORKING *************************"
 
 def add_matlab_search_paths(*path_strings):
     for path_str in path_strings:
-        matlab_engine.matlab_path_set(abspath(expanduser(path_str)))
+        matlab_engine.addpath(matlab_engine.genpath(abspath(expanduser(path_str))))
+
+        # matlab_engine.matlab_path_set(abspath(expanduser(path_str)))
         # matlab_engine.matlab_path_set(abspath(expanduser('~/matlab_extern1')))
