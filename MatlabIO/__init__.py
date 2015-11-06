@@ -1,52 +1,99 @@
 __author__ = 'm'
 
-import inspect
-import scipy.io as sio
 
 
-class MatlabIO(object):
-    __class_name = ''
-    def __init__(self):
-        pass
+from MatlabIO import *
 
 
-    def fill_dict(self,a_dict):
-        for class_member in inspect.getmembers(self, lambda a : not(inspect.isroutine(a))):
-
-            class_member_name = class_member[0]
-            class_member_val = class_member[1]
-
-            if not(class_member_name.startswith('__') and class_member_name.endswith('__')):
-                # print 'class_member_name=', class_member_name
-                if isinstance(class_member_val, MatlabIO):
-                    a_dict[class_member_name] = {}
-                    class_member_val.fill_dict(a_dict[class_member_name])
-                    # print 'GOT MATLAB IO CLASS'
-                else:
-                    # print 'LEAF CLASS'
-                    a_dict[class_member_name] = class_member_val
-
-    def serialize(self, name, format='matlab'):
-        a_dict={}
-        self.fill_dict(a_dict)
-
-        print a_dict
-        sio.savemat(name, a_dict)
 
 
-    def deserialize(self, name, format='matlab'):
-        res = sio.loadmat(name,squeeze_me=True, struct_as_record=False)
-        # res = sio.loadmat(name,squeeze_me=True, struct_as_record=True)
+def serialize_objects_in_matlab_format(file_name, *object_name_pairs):
 
-        # print res
-        # print '\n\n\n'
 
-        for attr_name, attr_val in res.items():
-            if not(attr_name .startswith('__') and attr_name .endswith('__')):
-                # print 'attr_name=',attr_name
-                    # , ' val=', val, 'type =', type(val)
-                # print 'fetching ',attr_name
-                setattr(self, attr_name , attr_val)
+    class Serializer(MatlabIO):
+        def __init__(self):
+            pass
+
+    serializer = Serializer()
+    for obj,name in object_name_pairs:
+        setattr(serializer, name, obj)
+
+    serializer.serialize(file_name)
+
+def deserialize_objects_from_matlab_format(file_name,*object_names):
+
+
+    # store deserialized objects in the dictionary and return it later
+    object_dict = {}
+
+    try:
+        deserializer = MatlabIO()
+        deserializer.deserialize(file_name)
+    except IOError:
+        raise IOError('Could not deserialize ' + file_name)
+
+    object_names_not_found = []
+    for object_name in object_names:
+        try:
+
+            object_dict[object_name] = getattr(deserializer,object_name)
+
+        except AttributeError:
+            object_names_not_found.append(object_name)
+
+    if len(object_names_not_found):
+
+        print 'WARNING: Could not retrieve the following objects:'
+
+        for object_name in object_names_not_found:
+            print object_name
+
+    return object_dict
+
+
+# class MatlabIO(object):
+#     __class_name = ''
+#     def __init__(self):
+#         pass
+#
+#
+#     def fill_dict(self,a_dict):
+#         for class_member in inspect.getmembers(self, lambda a : not(inspect.isroutine(a))):
+#
+#             class_member_name = class_member[0]
+#             class_member_val = class_member[1]
+#
+#             if not(class_member_name.startswith('__') and class_member_name.endswith('__')):
+#                 # print 'class_member_name=', class_member_name
+#                 if isinstance(class_member_val, MatlabIO):
+#                     a_dict[class_member_name] = {}
+#                     class_member_val.fill_dict(a_dict[class_member_name])
+#                     # print 'GOT MATLAB IO CLASS'
+#                 else:
+#                     # print 'LEAF CLASS'
+#                     a_dict[class_member_name] = class_member_val
+#
+#     def serialize(self, name, format='matlab'):
+#         a_dict={}
+#         self.fill_dict(a_dict)
+#
+#         print a_dict
+#         sio.savemat(name, a_dict)
+#
+#
+#     def deserialize(self, name, format='matlab'):
+#         res = sio.loadmat(name,squeeze_me=True, struct_as_record=False)
+#         # res = sio.loadmat(name,squeeze_me=True, struct_as_record=True)
+#
+#         # print res
+#         # print '\n\n\n'
+#
+#         for attr_name, attr_val in res.items():
+#             if not(attr_name .startswith('__') and attr_name .endswith('__')):
+#                 # print 'attr_name=',attr_name
+#                     # , ' val=', val, 'type =', type(val)
+#                 # print 'fetching ',attr_name
+#                 setattr(self, attr_name , attr_val)
 
 
 

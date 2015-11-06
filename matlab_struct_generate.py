@@ -3,7 +3,7 @@ __author__ = 'm'
 import numpy as np
 import numpy.matlib as npm
 
-from MatlabIO import MatlabIO
+from MatlabIO import *
 
 #
 # class pow(object):
@@ -144,6 +144,8 @@ def indices(a, func):
 
 
 
+# dataMatExampleSerializer.serialize('DataMatExample.mat')
+
 
 
 
@@ -168,17 +170,44 @@ if __name__ == "__main__":
     #
     # print 'dupa'
 
+    DataMatExample = np.ones((4,5),dtype=float)
 
-    serializer = Serializer()
-    serializer.serialize('params_serializer.mat')
+    serialize_objects_in_matlab_format('data_mat_demo.mat',(DataMatExample,'DataMatExample'))
+
+    object_dict = deserialize_objects_from_matlab_format('data_mat_demo.mat','DataMatExample','my_data')
+
+    print object_dict
 
 
-    serializer_check = MatlabIO()
-    serializer_check.deserialize('params_serializer.mat')
 
-    print 'dir()=',dir(serializer_check)
 
-    print serializer_check.params.eeg.durationMS
+
+
+
+    #
+    # serializer = Serializer()
+    # serializer.serialize('params_serializer.mat')
+    #
+    #
+    # serializer_check = MatlabIO()
+    # serializer_check.deserialize('params_serializer.mat')
+
+
+
+    # print 'dir()=',dir(serializer_check)
+    #
+    # print serializer_check.params.eeg.durationMS
+
+    params = params()
+
+    serialize_objects_in_matlab_format('new_serializer_demo.mat',(params,'params'))
+
+    object_dict = deserialize_objects_from_matlab_format('new_serializer_demo.mat','params')
+
+    print "object_dict['params']=", object_dict['params'].eeg.durationMS
+
+    sys.exit()
+
     # print serializer_check.params['eeg']
 
     # sys.exit()
@@ -214,6 +243,11 @@ if __name__ == "__main__":
 
     bp = bp_reader.bp
 
+    # Weights_reader = MatlabIO()
+    #
+    # Weights_reader.deserialize('Weights.mat')
+    #
+    # Weights = Weights_reader.Weights
 
 
 
@@ -223,6 +257,7 @@ if __name__ == "__main__":
     ps2_events_reader.deserialize('PS2Events.mat')
 
     ps2_events = ps2_events_reader.PS2Events
+
 
     print 'ps2_events=',ps2_events
 
@@ -365,7 +400,7 @@ if __name__ == "__main__":
                 pattern_PostStim[:, iEv] = np.nanmean(PowMat[: , PreStimInds[iEv,:],iEv],1)
                 pattern_PreStim[:, iEv] = np.nanmean(PowMat[:, PreStimInds[iEv,:],iEv],1)
 
-            DataMat_PostStim
+            # DataMat_PostStim
         #     DataMat.PostStim(:,iElec,:) = reshape(pattern.PostStim,50,1,[]);
         #     DataMat.PreStim(:,iElec,:) = reshape(pattern.PreStim,50,1,[]);
 
@@ -393,7 +428,26 @@ if __name__ == "__main__":
         # DataMat.PreStim = reshape(DataMat.PreStim,nElecs*length(params.pow.freqs),[]);
 
 
+        DataMatExample = np.ones((4,5),dtype=float)
 
+        serialize_objects_in_matlab_format('data_mat_demo.mat',(DataMatExample,'DataMatExample'))
+
+
+        # class DataMatExampleSerializer(MatlabIO):
+        #     def __init__(self,dataMatExample):
+        #         self.DataMatExample = dataMatExample
+        #
+        # dataMatExampleSerializer = DataMatExampleSerializer(DataMatExample)
+        #
+        # dataMatExampleSerializer.serialize('DataMatExample.mat')
+
+
+
+
+
+        
+        # SessPostProb.Post = glmval([Weights.MeanIntercept;W'],DataMat.PostStim','logit');
+        # SessPostProb.Pre = glmval([Weights.MeanIntercept;W'],DataMat.PreStim','logit');
 
 
 
