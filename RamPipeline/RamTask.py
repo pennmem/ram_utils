@@ -11,6 +11,9 @@ class RamTask(object):
     def get_pipeline(self):
         return self.pipeline
 
+    def get_workspace_dir(self):
+        return self.pipeline.workspace_dir
+
     def set_pipeline(self,pipeline):
         self.pipeline = pipeline
     #     self.__name='Task'
