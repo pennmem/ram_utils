@@ -69,7 +69,11 @@ class RamTask(object):
                 self.make_dir_tree(os.path.join(self.pipeline.workspace_dir, dst_relative_path))
 
             file_resource_base_name = os.path.basename(file_resource)
-            shutil.copy(file_resource, os.path.join(self.pipeline.workspace_dir, dst_relative_path, file_resource_base_name))
+            try:
+                target_path= os.path.abspath(os.path.join(self.pipeline.workspace_dir, dst_relative_path, file_resource_base_name))
+                shutil.copy(file_resource, target_path)
+            except IOError:
+                print 'Could not copy file: ',file_resource, ' to ', target_path
 
     def move_file_resources_to_workspace(self):
         '''
@@ -86,7 +90,11 @@ class RamTask(object):
                 self.make_dir_tree(os.path.join(self.pipeline.workspace_dir, dst_relative_path))
 
             file_resource_base_name = os.path.basename(file_resource)
-            shutil.move(file_resource, os.path.join(self.pipeline.workspace_dir, dst_relative_path, file_resource_base_name))
+            try:
+                target_path= os.path.abspath(os.path.join(self.pipeline.workspace_dir, dst_relative_path, file_resource_base_name))
+                shutil.move(file_resource, target_path)
+            except IOError:
+                print 'Could not move file: ',file_resource, ' to ', target_path
 
 
     def get_pipeline(self):

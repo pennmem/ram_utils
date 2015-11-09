@@ -89,6 +89,7 @@ class Table:
 
       if type(data) is not types.ListType:
          raise ValueError, "data should be a list"
+      print 'data=',data
       if len(data) != self.numcols:
          raise ValueError, \
                "Error, length of data mush match number of table columns"
@@ -172,6 +173,8 @@ class Table:
                fp.write("\\sidehead{%s}\n" % self.data_labels[i])
 
          rows = []
+         print 'data=',data
+
          for j in range(numpy.shape(data[0])[0]):
             rows.append([])
             for k in range(len(data)):

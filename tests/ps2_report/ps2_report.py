@@ -56,15 +56,45 @@ class GenerateTex(RamTask):
         # self.set_file_resources_to_copy('ps2_report.tex')
         self.set_file_resources_to_move('report.tex', dst='reports')
 
+        import numpy as np
+        a = np.fromfunction(lambda x,y: (x+1)*y, shape=(4,4))
+
+        import TexUtils
+        patient_table = TexUtils.generate_tex_table(caption='Numpy_table', header=['col1', 'col2', 'col3'], columns=[ a[:, 1] , a[:, 2], a[:, 3] ], label='tab:numpy_table')
+        print 'patient_table=\n',patient_table
+
         replace_dict={
             '<HEADER_LEFT>':'RAM FR1 report v 2.0',
             '<DATE>': str(datetime.date.today()),
-            '<SECTION_TITLE>': 'R1074M RAM FR1 Free Recall Report'
+            '<SECTION_TITLE>': 'R1074M RAM FR1 Free Recall Report',
+            '<PATIENT_TABLE>': patient_table,
+            '<PT>': '\b'
 
         }
 
 
         TextTemplateUtils.replace_template(template_file_name=tex_template, replace_dict=replace_dict)
+
+
+class GenerateTexTable(RamTask):
+    def __init__(self): RamTask.__init__(self)
+
+    def run(self):
+        import numpy as np
+        a = np.fromfunction(lambda x,y: (x+1)*y, shape=(4,4))
+        print a
+        print a[:,1]
+        print a[:,2]
+        print a[:,3]
+
+        import TexUtils
+        self.set_file_resources_to_move('mytable.tex', dst='reports')
+        TexUtils.generate_tex_table(caption='Numpy_table', header=['col1', 'col2', 'col3'], columns=[ a[:, 1] , a[:, 2], a[:, 3] ], label='tab:numpy_table')
+
+
+
+
+
 
 
 
@@ -77,6 +107,8 @@ ps_report_pipeline.add_task(ComputePowersAndClassifierTask())
 ps_report_pipeline.add_task(SaveEventsTask())
 
 ps_report_pipeline.add_task(GenerateTex())
+
+# ps_report_pipeline.add_task(GenerateTexTable())
 
 
 ps_report_pipeline.execute_pipeline()

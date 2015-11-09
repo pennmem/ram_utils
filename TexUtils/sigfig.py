@@ -4,6 +4,7 @@ import types,re,string
 
 epat = re.compile(r'^([^e]+)e(.+)$')
 
+
 def round_sig(x, n):
    '''round floating point x to n significant figures'''
    if type(n) is not types.IntType:
