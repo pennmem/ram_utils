@@ -31,6 +31,8 @@
 \section*{<SECTION_TITLE>}
 
 
+<PT>
+
 <PATIENT_TABLE>
 
 \begin{tabular}{ccc}
