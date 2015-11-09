@@ -12,11 +12,15 @@ except ImportError,e:
     sys.exit()
 
 print "***************** Starting MATLAB Engine *************************"
-matlab_engine = matlab.engine.start_matlab()
+matlab_engine = None
+# matlab_engine = matlab.engine.start_matlab()
 print "***************** MATLAB Engine WORKING *************************"
 
 
 def add_matlab_search_paths(*path_strings):
+    if not matlab_engine:
+        return
+
     for path_str in path_strings:
         matlab_engine.addpath(matlab_engine.genpath(abspath(expanduser(path_str))))
 

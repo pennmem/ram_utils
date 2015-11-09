@@ -109,6 +109,8 @@ class RamPipeline(object):
             else:
                 print 'RUNNING TASK: ', task_name,' obj=',task
                 task.run()
+                task.copy_file_resources_to_workspace() # copies only those resources that user requested to be copied
+                task.move_file_resources_to_workspace() # moves only those resources that user requested to be moved
                 self.create_file_in_workspace_dir(task_completed_file_name,'w')
 
 
