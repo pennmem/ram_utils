@@ -138,6 +138,8 @@ if __name__ == "__main__":
 
         DataMat = None;
 
+        # set it up to point to your local directory with report output and make sure
+        #
         workspace_dir = '/home1/mswat/scratch/py_run_4/'
         subject_id = 'R1086M'
 
