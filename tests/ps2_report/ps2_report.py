@@ -68,13 +68,13 @@ class GenerateTex(RamTask):
             '<DATE>': str(datetime.date.today()),
             '<SECTION_TITLE>': 'R1074M RAM FR1 Free Recall Report',
             '<PATIENT_TABLE>': patient_table,
-            '<PT>': '\b'
+            # '<PT>': r'\begin'
 
         }
 
 
         TextTemplateUtils.replace_template(template_file_name=tex_template, replace_dict=replace_dict)
-
+        raise
 
 class GenerateTexTable(RamTask):
     def __init__(self): RamTask.__init__(self)
@@ -96,7 +96,9 @@ class GenerateTexTable(RamTask):
 
 
 
+a = 'my \n string'
 
+print a.encode('string-escape')
 
 ps_report_pipeline = PS2ReportPipeline(subject_id='R1086M', workspace_dir='~/scratch/py_run_6/', matlab_paths=['~/RAM_MATLAB','.'])
 
