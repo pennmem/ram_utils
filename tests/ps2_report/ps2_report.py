@@ -74,10 +74,35 @@ class GenerateTex(RamTask):
 
 
         TextTemplateUtils.replace_template(template_file_name=tex_template, replace_dict=replace_dict)
-        raise
+        # raise
+
+
+class ExtractWeightsTask(MatlabRamTask):
+    def __init__(self):
+        MatlabRamTask.__init__(self)
+        self.set_mark_as_completed(False)
+
+    def run(self):
+        from MatlabIO import deserialize_single_object_from_matlab_format, serialize_objects_in_matlab_format
+        classifier_output_file_name = 'R1086M_RAM_FR1_L2LR_Freq_Time-Enc_CV-list_Pen-154.45.mat'
+        classifier_output_location = 'biomarker/L2LR/Feat_Freq'
+        # classifier_output_file_name_full = join(self.get_workspace_dir(),classifier_output_location, classifier_output_file_name )
+        classifier_output_file_name_full = self.get_path_to_file_in_workspace(classifier_output_location, classifier_output_file_name)
+
+        res = deserialize_single_object_from_matlab_format(classifier_output_file_name_full,'res')
+
+        serialize_objects_in_matlab_format(self.get_path_to_file_in_workspace('Weights.mat'), (res.Weights,'Weights'))
+        # save weights in matlab format
+        print 'res.Weights=',res.Weights
+        # print 'res.W0=',res.W0
+        # raise
+
+
 
 class GenerateTexTable(RamTask):
-    def __init__(self): RamTask.__init__(self)
+    def __init__(self):
+        RamTask.__init__(self)
+
 
     def run(self):
         import numpy as np
@@ -92,8 +117,30 @@ class GenerateTexTable(RamTask):
         TexUtils.generate_tex_table(caption='Numpy_table', header=['col1', 'col2', 'col3'], columns=[ a[:, 1] , a[:, 2], a[:, 3] ], label='tab:numpy_table')
 
 
+class GeneratePlots(RamTask):
+    def __init__(self):
+        RamTask.__init__(self)
+        self.set_mark_as_completed(False)
 
+    def run(self):
+        from PlotUtils import PanelPlot
+        import numpy as np
 
+        panel_plot = PanelPlot(i_max=2, j_max=2, title='Random Data', x_axis_title='x_axis_label', y_axis_title='y_axis_random')
+
+        panel_plot.add_plot_data(0, 0, x=np.arange(10), y=np.random.rand(10), title='data00')
+        panel_plot.add_plot_data(0, 1, x=np.arange(10), y=np.random.rand(10), title='data01')
+        panel_plot.add_plot_data(1, 0, x=np.arange(10), y=np.random.rand(10), title='data10')
+        panel_plot.add_plot_data(1, 1, x=np.arange(10), y=np.random.rand(10), yerr=np.random.rand(10), title='data11')
+        plot = panel_plot.generate_plot()
+        plot.subplots_adjust(wspace=0.3, hspace=0.3)
+        # plt.savefig(join(plotsDir, quantity_name+'.png'), dpi=300,bboxinches='tight')
+
+        plot_out_fname = self.get_path_to_file_in_workspace('reports/demo_2.pdf')
+
+        plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+        # plot.savefig('demo.png')
+        # plot.show()
 
 
 a = 'my \n string'
@@ -109,6 +156,12 @@ ps_report_pipeline.add_task(ComputePowersAndClassifierTask())
 ps_report_pipeline.add_task(SaveEventsTask())
 
 ps_report_pipeline.add_task(GenerateTex())
+
+ps_report_pipeline.add_task(GeneratePlots())
+
+
+
+ps_report_pipeline.add_task(ExtractWeightsTask())
 
 # ps_report_pipeline.add_task(GenerateTexTable())
 
