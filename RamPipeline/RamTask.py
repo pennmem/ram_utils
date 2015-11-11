@@ -16,7 +16,8 @@ class RamTask(object):
     file_resources_to_move = defaultdict() # {file_resource:dst_dir}
     mark_as_completed = True
 
-    def __init__(self):
+    def __init__(self, mark_as_completed=True):
+        self.set_mark_as_completed(mark_as_completed)
         pass
 
     def set_pipeline(self, pipeline):
@@ -235,7 +236,7 @@ class RamTask(object):
         import shutil
         import os
 
-        for file_resource, dst_relative_path in self.file_resources_to_copy:
+        for file_resource, dst_relative_path in self.file_resources_to_copy.items():
             if dst_relative_path != '':
                 self.make_dir_tree(os.path.join(self.pipeline.workspace_dir, dst_relative_path))
 

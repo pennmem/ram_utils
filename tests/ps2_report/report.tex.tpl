@@ -9,6 +9,7 @@
 \usepackage{mathtools}
 \usepackage{array}
 \usepackage{enumitem}
+\usepackage{deluxetable}
 \usepackage{sidecap} \usepackage{soul}
 \usepackage[small,bf,it]{caption}
 \setlength\belowcaptionskip{2pt}
@@ -31,50 +32,10 @@
 \section*{<SECTION_TITLE>}
 
 
-<PT>
 
-<PATIENT_TABLE>
 
-\begin{tabular}{ccc}
-\begin{minipage}[htbp]{250pt}
- \input{../RAM_FR_blurb.tex}
-\begin{itemize}\item\textbf{Number of sessions: }1\item\textbf{Number of electrodes: }80\end{itemize}\end{minipage}
-&
-\begin{tabular}{|c|c|c|}
-\hline Session \# & Date & Length (min)\\
-\hline 0 & 27-Aug-2015 & 55.8 \\ 
-\hline 
- \end{tabular} 
-\end{tabular}
-\vspace{0.3 in}
 
-\begin{table}[!h]
-\centering
-\begin{tabular}{c|c|c|c}
-\multicolumn{4}{c}{\textbf{Free Recall}} \\ 
-\hline
-300 words  &56 correct (18.7\%) &3 PLI (1.0\%) &2 ELI (0.7\%) \\ \hline 
-\end{tabular}
-\caption{An intrusion was a word that was vocalized during the retrieval period that was not studied on the most recent list. Intrusions were either words from a previous list (\textbf{PLI}: prior-list intrusions) or words that were not studied at all (\textbf{ELI}: extra-list intrusions).}
-\end{table}
 
-\begin{table}[!h]
-\centering
-\begin{tabular}{c|c|c}
-\multicolumn{3}{c}{\textbf{Math distractor}} \\ 
-\hline
-76 math problems  &63 correct (82.9\%) &2.9 problems per list  \\ \hline 
-\end{tabular}
-\caption{After each list, the patient was given 20 seconds to perform as many arithmetic problems as possible, which served as a distractor before the beginning of recall.}
-\end{table}
-
-\begin{figure}[!h]
-\centering
-\subfigure[]{\includegraphics[scale=0.4]{~/reports/RAM_FR1/R1074M/analyses/behav/0/SPC_RAM_FR1_R1074M.eps}}
-\subfigure[]{\includegraphics[scale=0.4]{~/reports/RAM_FR1/R1074M/analyses/behav/0/PFR_RAM_FR1_R1074M.eps}}
-\caption{\textbf{Free recall:} (a) Overall probability of recall as a function of serial position. (b) Probability of FIRST recall as a function of serial position.}
-
-\end{figure}
 
 \clearpage
 

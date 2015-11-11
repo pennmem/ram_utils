@@ -46,7 +46,7 @@ class SaveEventsTask(MatlabRamTask):
 
 
 class GenerateTex(RamTask):
-    def __init__(self): RamTask.__init__(self)
+    def __init__(self, mark_as_completed=True): RamTask.__init__(self, mark_as_completed)
 
     def run(self):
         import TextTemplateUtils
@@ -55,6 +55,7 @@ class GenerateTex(RamTask):
 
         # self.set_file_resources_to_copy('ps2_report.tex')
         self.set_file_resources_to_move('report.tex', dst='reports')
+        self.set_file_resources_to_copy('deluxetable.sty', dst='reports')
 
         import numpy as np
         a = np.fromfunction(lambda x,y: (x+1)*y, shape=(4,4))
@@ -69,18 +70,14 @@ class GenerateTex(RamTask):
             '<SECTION_TITLE>': 'R1074M RAM FR1 Free Recall Report',
             '<PATIENT_TABLE>': patient_table,
             # '<PT>': r'\begin'
-
         }
 
-
         TextTemplateUtils.replace_template(template_file_name=tex_template, replace_dict=replace_dict)
-        # raise
 
 
 class ExtractWeightsTask(MatlabRamTask):
-    def __init__(self):
-        MatlabRamTask.__init__(self)
-        self.set_mark_as_completed(False)
+    def __init__(self, mark_as_completed=True):
+        MatlabRamTask.__init__(self, mark_as_completed)
 
     def run(self):
         from MatlabIO import deserialize_single_object_from_matlab_format, serialize_objects_in_matlab_format
@@ -95,7 +92,6 @@ class ExtractWeightsTask(MatlabRamTask):
         # save weights in matlab format
         print 'res.Weights=',res.Weights
         # print 'res.W0=',res.W0
-        # raise
 
 
 
@@ -118,9 +114,9 @@ class GenerateTexTable(RamTask):
 
 
 class GeneratePlots(RamTask):
-    def __init__(self):
-        RamTask.__init__(self)
-        self.set_mark_as_completed(False)
+    def __init__(self,mark_as_completed=True):
+        RamTask.__init__(self, mark_as_completed)
+
 
     def run(self):
         from PlotUtils import PanelPlot
@@ -142,6 +138,20 @@ class GeneratePlots(RamTask):
         # plot.savefig('demo.png')
         # plot.show()
 
+class GenerateReportPDF(RamTask):
+    def __init__(self, mark_as_completed=True):
+        RamTask.__init__(self, mark_as_completed)
+
+    def run(self):
+        from subprocess import call
+        call(['ls','-l'])
+        call(['module load Tex'], shell=True)
+        # call(["module", "load", "Tex"])
+        call(["pdflatex", self.get_path_to_file_in_workspace('reports/report.tex')])
+
+
+
+
 
 a = 'my \n string'
 
@@ -155,13 +165,16 @@ ps_report_pipeline.add_task(ComputePowersAndClassifierTask())
 
 ps_report_pipeline.add_task(SaveEventsTask())
 
-ps_report_pipeline.add_task(GenerateTex())
+ps_report_pipeline.add_task(GenerateTex(mark_as_completed=False))
 
-ps_report_pipeline.add_task(GeneratePlots())
+# ps_report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
 
 
 
-ps_report_pipeline.add_task(ExtractWeightsTask())
+ps_report_pipeline.add_task(ExtractWeightsTask(mark_as_completed=False))
+
+ps_report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
+
 
 # ps_report_pipeline.add_task(GenerateTexTable())
 
