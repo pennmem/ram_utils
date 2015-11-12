@@ -219,14 +219,21 @@ class PSReportingTask(RamTask):
                 DeltaStdevHigh[i] = stdev
 
             # PLOT ALL 6 ARRAYS HERE: DeltaMeanAll, DeltaStdevAll, DeltaMeanLow, DeltaStdevLow, DeltaMeanHigh, DeltaStdevHigh
+            data_point_indexes = np.arange(1,len(amps)+1)
+            # print 'x_axis_amps_counters=',x_axis_amps_counters
+            # print 'amps=',amps
+            # sys.exit()
 
+            # self.pipeline.add_object_to_pass('amp_all', [x_axis_amps_counters, DeltaMeanAll, DeltaStdevAll, amps])
+            # self.pipeline.add_object_to_pass('amp_low', [x_axis_amps_counters, DeltaMeanLow, DeltaStdevLow, amps])
+            # self.pipeline.add_object_to_pass('amp_high', [x_axis_amps_counters, DeltaMeanHigh, DeltaStdevHigh, amps])
 
-            DeltaMeanAll = np.empty(n_freqs)
-            DeltaStdevAll = np.empty(n_freqs)
-            DeltaMeanLow = np.empty(n_freqs)
-            DeltaStdevLow = np.empty(n_freqs)
-            DeltaMeanHigh = np.empty(n_freqs)
-            DeltaStdevHigh = np.empty(n_freqs)
+            DeltaMeanAll_freq = np.empty(n_freqs)
+            DeltaStdevAll_freq = np.empty(n_freqs)
+            DeltaMeanLow_freq = np.empty(n_freqs)
+            DeltaStdevLow_freq = np.empty(n_freqs)
+            DeltaMeanHigh_freq = np.empty(n_freqs)
+            DeltaStdevHigh_freq = np.empty(n_freqs)
 
             for i,freq in enumerate(freqs):
                 freq_sel = (freqs_ev==freq)
@@ -235,33 +242,65 @@ class PSReportingTask(RamTask):
 
                 mean = np.nanmean(ProbDiffAll)
                 if isnan(mean): mean = 0.0
-                DeltaMeanAll[i] = mean
+                DeltaMeanAll_freq[i] = mean
 
                 stdev = np.nanstd(ProbDiffAll, ddof=1)
                 if isnan(stdev): stdev = 0.0
-                DeltaStdevAll[i] = stdev
+                DeltaStdevAll_freq[i] = stdev
 
                 ProbDiffLow = ProbDiff[freq_sel & low_terc_inds]
 
                 mean = np.nanmean(ProbDiffLow)
                 if isnan(mean): mean = 0.0
-                DeltaMeanLow[i] = mean
+                DeltaMeanLow_freq[i] = mean
 
                 stdev = np.nanstd(ProbDiffLow, ddof=1)
                 if isnan(stdev): stdev = 0.0
-                DeltaStdevLow[i] = stdev
+                DeltaStdevLow_freq[i] = stdev
 
                 ProbDiffHigh = ProbDiff[freq_sel & high_terc_inds]
 
                 mean = np.nanmean(ProbDiffHigh)
                 if isnan(mean): mean = 0.0
-                DeltaMeanHigh[i] = mean
+                DeltaMeanHigh_freq[i] = mean
 
                 stdev = np.nanstd(ProbDiffHigh, ddof=1)
                 if isnan(stdev): stdev = 0.0
-                DeltaStdevHigh[i] = stdev
+                DeltaStdevHigh_freq[i] = stdev
 
             # PLOT ALL 6 ARRAYS HERE: DeltaMeanAll, DeltaStdevAll, DeltaMeanLow, DeltaStdevLow, DeltaMeanHigh, DeltaStdevHigh
+            data_point_indexes_freq = np.arange(1,len(freqs)+1)
+            # self.pipeline.add_object_to_pass('freq_all',[freqs,DeltaMeanAll_freq,DeltaStdevAll_freq])
+            # self.pipeline.add_object_to_pass('freq_low',[freqs,DeltaMeanLow_freq,DeltaStdevLow_freq])
+            # self.pipeline.add_object_to_pass('freq_high',[freqs,DeltaMeanHigh_freq,DeltaStdevHigh_freq])
+
+            from collections import namedtuple
+            PlotSpecs = namedtuple(typename='PlotSpecs', field_names='x y yerr x_tick_labels ylim')
+            # computting y axis limits
+            min_plot = np.min(np.hstack((DeltaMeanAll_freq-DeltaStdevAll_freq, DeltaMeanLow_freq-DeltaStdevLow_freq, DeltaMeanHigh_freq-DeltaStdevHigh_freq, DeltaMeanAll-DeltaStdevAll, DeltaMeanLow-DeltaStdevLow, DeltaMeanHigh-DeltaStdevHigh)))
+            max_plot = np.max(np.hstack((DeltaMeanAll_freq+DeltaStdevAll_freq, DeltaMeanLow_freq+DeltaStdevLow_freq, DeltaMeanHigh_freq+DeltaStdevHigh_freq, DeltaMeanAll+DeltaStdevAll, DeltaMeanLow+DeltaStdevLow, DeltaMeanHigh+DeltaStdevHigh)))
+            ylim=[min_plot-0.1*(max_plot-min_plot), max_plot+0.1*(max_plot-min_plot)]
+
+
+            
+            # min_amp_array = np.min(np.hstack((DeltaMeanAll-DeltaStdevAll, DeltaMeanLow-DeltaStdevLow, DeltaMeanHigh-DeltaStdevHigh)))
+            # max_amp_array = np.max(np.hstack((DeltaMeanAll+DeltaStdevAll, DeltaMeanLow+DeltaStdevLow, DeltaMeanHigh+DeltaStdevHigh)))
+            #
+            # ylim_amp=[min_amp_array-0.1*(max_amp_array-min_amp_array), max_amp_array+0.1*(max_amp_array-min_amp_array)]
+
+
+            self.pipeline.add_object_to_pass('amp_all', PlotSpecs(x=data_point_indexes, y=DeltaMeanAll, yerr= DeltaStdevAll, x_tick_labels=amps, ylim=ylim))
+            self.pipeline.add_object_to_pass('amp_low', PlotSpecs(x=data_point_indexes, y=DeltaMeanLow, yerr= DeltaStdevLow, x_tick_labels=amps, ylim=ylim))
+            self.pipeline.add_object_to_pass('amp_high', PlotSpecs(x=data_point_indexes, y=DeltaMeanHigh, yerr= DeltaStdevHigh, x_tick_labels=amps, ylim=ylim))
+
+
+
+
+
+            self.pipeline.add_object_to_pass('freq_all', PlotSpecs(x=data_point_indexes_freq, y=DeltaMeanAll_freq, yerr= DeltaStdevAll_freq, x_tick_labels=freqs, ylim=ylim))
+            self.pipeline.add_object_to_pass('freq_low', PlotSpecs(x=data_point_indexes_freq, y=DeltaMeanLow_freq, yerr= DeltaStdevLow_freq, x_tick_labels=freqs, ylim=ylim))
+            self.pipeline.add_object_to_pass('freq_high', PlotSpecs(x=data_point_indexes_freq, y=DeltaMeanHigh_freq, yerr= DeltaStdevHigh_freq, x_tick_labels=freqs, ylim=ylim))
+
 
 
         ISI_min = np.nanmin([ev.ISI for ev in ps2_events])

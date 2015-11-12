@@ -131,22 +131,79 @@ class GeneratePlots(RamTask):
     def run(self):
         from PlotUtils import PanelPlot
         import numpy as np
+        panel_plot = PanelPlot(i_max=3, j_max=2, title='', x_axis_title='Stimulation Amplitude (mA)', y_axis_title='$\Delta$ Post-Pre Stim Biomarker')
 
-        panel_plot = PanelPlot(i_max=2, j_max=2, title='Random Data', x_axis_title='x_axis_label', y_axis_title='y_axis_random')
+        plot_specs = self.pipeline.get_passed_object('amp_all')
+        print 'plot_specs=',plot_specs
+        # panel_plot.add_plot_data(0, 0, plot_specs.x, plot_specs.y, yerr=plot_specs.yerr, title='(a)')
+        panel_plot.add_plot_data(0, 0, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(a)', ylim=plot_specs.ylim)
 
-        panel_plot.add_plot_data(0, 0, x=np.arange(10), y=np.random.rand(10), title='data00')
-        panel_plot.add_plot_data(0, 1, x=np.arange(10), y=np.random.rand(10), title='data01')
-        panel_plot.add_plot_data(1, 0, x=np.arange(10), y=np.random.rand(10), title='data10')
-        panel_plot.add_plot_data(1, 1, x=np.arange(10), y=np.random.rand(10), yerr=np.random.rand(10), title='data11')
+        plot_specs = self.pipeline.get_passed_object('amp_low')
+        panel_plot.add_plot_data(1, 0, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(c)', ylim=plot_specs.ylim)
+
+        plot_specs = self.pipeline.get_passed_object('amp_high')
+        panel_plot.add_plot_data(2, 0, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(e)', ylim=plot_specs.ylim)
+
+        plot_specs = self.pipeline.get_passed_object('freq_all')
+        panel_plot.add_plot_data(0, 1, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(b)', ylim=plot_specs.ylim)
+
+        plot_specs = self.pipeline.get_passed_object('freq_low')
+        panel_plot.add_plot_data(1, 1, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(d)', ylim=plot_specs.ylim)
+
+        plot_specs = self.pipeline.get_passed_object('freq_high')
+        panel_plot.add_plot_data(2, 1, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(f)', ylim=plot_specs.ylim)
+
+
+
+
+        # pd = self.pipeline.get_passed_object('amp_low')
+        # panel_plot.add_plot_data(1, 0, x=pd[0], y=pd[1], yerr=pd[2], title='(c)')
+        #
+        # pd = self.pipeline.get_passed_object('amp_high')
+        # panel_plot.add_plot_data(2, 0, x=pd[0], y=pd[1], yerr=pd[2], title='(e)')
+
+
+        # pd = self.pipeline.get_passed_object('freq_all')
+        # panel_plot.add_plot_data(0, 1, x=pd[0], y=pd[1], yerr=pd[2], title='(b)')
+        #
+        # pd = self.pipeline.get_passed_object('freq_low')
+        # panel_plot.add_plot_data(1, 1, x=pd[0], y=pd[1], yerr=pd[2], title='(d)')
+        #
+        # pd = self.pipeline.get_passed_object('freq_high')
+        # panel_plot.add_plot_data(2, 1, x=pd[0], y=pd[1], yerr=pd[2], title='(f)')
+
+
+
+        # panel_plot.add_plot_data(0, 1, x=np.arange(10), y=np.random.rand(10), title='data01')
+        # panel_plot.add_plot_data(1, 0, x=np.arange(10), y=np.random.rand(10), title='data10')
+        # panel_plot.add_plot_data(1, 1, x=np.arange(10), y=np.random.rand(10), yerr=np.random.rand(10), title='data11')
         plot = panel_plot.generate_plot()
         plot.subplots_adjust(wspace=0.3, hspace=0.3)
         # plt.savefig(join(plotsDir, quantity_name+'.png'), dpi=300,bboxinches='tight')
 
-        plot_out_fname = self.get_path_to_file_in_workspace('reports/demo_2.pdf')
+        plot_out_fname = self.get_path_to_file_in_workspace('reports/report_plot.pdf')
 
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
         # plot.savefig('demo.png')
         # plot.show()
+
+
+
+        # panel_plot = PanelPlot(i_max=2, j_max=2, title='Random Data', x_axis_title='x_axis_label', y_axis_title='y_axis_random')
+        #
+        # panel_plot.add_plot_data(0, 0, x=np.arange(10), y=np.random.rand(10), title='data00')
+        # panel_plot.add_plot_data(0, 1, x=np.arange(10), y=np.random.rand(10), title='data01')
+        # panel_plot.add_plot_data(1, 0, x=np.arange(10), y=np.random.rand(10), title='data10')
+        # panel_plot.add_plot_data(1, 1, x=np.arange(10), y=np.random.rand(10), yerr=np.random.rand(10), title='data11')
+        # plot = panel_plot.generate_plot()
+        # plot.subplots_adjust(wspace=0.3, hspace=0.3)
+        # # plt.savefig(join(plotsDir, quantity_name+'.png'), dpi=300,bboxinches='tight')
+        #
+        # plot_out_fname = self.get_path_to_file_in_workspace('reports/demo_2.pdf')
+        #
+        # plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+        # # plot.savefig('demo.png')
+        # # plot.show()
 
 class GenerateReportPDF(RamTask):
     def __init__(self, mark_as_completed=True):
@@ -169,27 +226,27 @@ print a.encode('string-escape')
 
 ps_report_pipeline = PS2ReportPipeline(subject_id='R1086M', workspace_dir='~/scratch/py_run_7/', matlab_paths=['~/RAM_MATLAB','.'])
 
-ps_report_pipeline.add_task(CreateParamsTask())
-
-ps_report_pipeline.add_task(ComputePowersAndClassifierTask())
-
-ps_report_pipeline.add_task(SaveEventsTask())
-
-ps_report_pipeline.add_task(PrepareBPSTask(mark_as_completed=False))
-
+# ps_report_pipeline.add_task(CreateParamsTask())
+#
+# ps_report_pipeline.add_task(ComputePowersAndClassifierTask())
+#
+# ps_report_pipeline.add_task(SaveEventsTask())
+#
+# ps_report_pipeline.add_task(PrepareBPSTask())
+# ps_report_pipeline.add_task(ExtractWeightsTask(mark_as_completed=False))
 
 ########################## UNCOMMENT
-ps_report_pipeline.add_task(GenerateTex(mark_as_completed=False))
+# ps_report_pipeline.add_task(GenerateTex(mark_as_completed=False))
 
 from PSReportingTask import PSReportingTask
 ps_report_pipeline.add_task(PSReportingTask(mark_as_completed=False))
 
 
-# ps_report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
+ps_report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
 
 
 
-ps_report_pipeline.add_task(ExtractWeightsTask(mark_as_completed=False))
+
 
 # ps_report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 

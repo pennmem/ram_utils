@@ -8,6 +8,13 @@ class RamPipeline(object):
     def __init__(self):
         self.task_registry = TaskRegistry()
         self.workspace_dir = ''
+        self.passed_objects_dict={}
+
+    def add_object_to_pass(self, name, obj):
+        self.passed_objects_dict[name] = obj
+
+    def get_passed_object(self,name):
+        return self.passed_objects_dict[name]
 
     def set_workspace_dir(self, output_dir):
         import os
