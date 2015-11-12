@@ -54,16 +54,45 @@ class SaveEventsTask(MatlabRamTask):
         self.eng.SaveEvents(self.pipeline.subject_id, self.get_workspace_dir())
 
 
+# class GenerateTex(RamTask):
+#     def __init__(self, mark_as_completed=True): RamTask.__init__(self, mark_as_completed)
+#
+#     def run(self):
+#         import TextTemplateUtils
+#         import datetime
+#         tex_template = 'report.tex.tpl'
+#
+#         # self.set_file_resources_to_copy('ps2_report.tex')
+#         self.set_file_resources_to_move('report.tex', dst='reports')
+#         self.set_file_resources_to_copy('deluxetable.sty', dst='reports')
+#
+#         import numpy as np
+#         a = np.fromfunction(lambda x,y: (x+1)*y, shape=(4,4))
+#
+#         import TexUtils
+#         patient_table = TexUtils.generate_tex_table(caption='Numpy_table', header=['col1', 'col2', 'col3'], columns=[ a[:, 1] , a[:, 2], a[:, 3] ], label='tab:numpy_table')
+#         print 'patient_table=\n',patient_table
+#
+#         replace_dict={
+#             '<HEADER_LEFT>':'RAM FR1 report v 2.0',
+#             '<DATE>': str(datetime.date.today()),
+#             '<SECTION_TITLE>': 'R1074M RAM FR1 Free Recall Report',
+#             '<PATIENT_TABLE>': patient_table,
+#             # '<PT>': r'\begin'
+#         }
+#
+#         TextTemplateUtils.replace_template(template_file_name=tex_template, replace_dict=replace_dict)
+
 class GenerateTex(RamTask):
     def __init__(self, mark_as_completed=True): RamTask.__init__(self, mark_as_completed)
 
     def run(self):
         import TextTemplateUtils
         import datetime
-        tex_template = 'report.tex.tpl'
+        tex_template = 'ps2_report.tex.tpl'
 
         # self.set_file_resources_to_copy('ps2_report.tex')
-        self.set_file_resources_to_move('report.tex', dst='reports')
+        self.set_file_resources_to_move('ps2_report.tex', dst='reports')
         self.set_file_resources_to_copy('deluxetable.sty', dst='reports')
 
         import numpy as np
@@ -74,10 +103,10 @@ class GenerateTex(RamTask):
         print 'patient_table=\n',patient_table
 
         replace_dict={
-            '<HEADER_LEFT>':'RAM FR1 report v 2.0',
+            '<SUBJECT_ID>':self.pipeline.subject_id,
             '<DATE>': str(datetime.date.today()),
-            '<SECTION_TITLE>': 'R1074M RAM FR1 Free Recall Report',
-            '<PATIENT_TABLE>': patient_table,
+            # '<SECTION_TITLE>': 'R1074M RAM FR1 Free Recall Report',
+            # '<PATIENT_TABLE>': patient_table,
             # '<PT>': r'\begin'
         }
 
@@ -212,9 +241,14 @@ class GenerateReportPDF(RamTask):
     def run(self):
         from subprocess import call
         call(['ls','-l'])
-        call(['module load Tex'], shell=True)
+        # call(['module load Tex'], shell=True)
         # call(["module", "load", "Tex"])
-        call(["pdflatex", self.get_path_to_file_in_workspace('reports/report.tex')])
+        # call(["module load Tex;pdflatex -shell-escape", self.get_path_to_file_in_workspace('reports/R1086M_PS2_report.tex')], shell=True)
+        # call(["module load Tex;pdflatex -shell-escape ~/scratch/py_run_7/R1086M/reports/R1086M_PS2_report.tex"], shell=True)
+        # call(["module load Tex;pdflatex -shell-escape "+self.get_path_to_file_in_workspace('reports/R1086M_PS2_report.tex')], shell=True)
+
+        texinputs_set_str = r'export TEXINPUTS="'+self.get_path_to_file_in_workspace('reports')+'":$TEXINPUTS;'
+        call([texinputs_set_str+"module load Tex;pdflatex -shell-escape "+self.get_path_to_file_in_workspace('reports/ps2_report.tex')], shell=True)
 
 
 
@@ -236,19 +270,20 @@ ps_report_pipeline = PS2ReportPipeline(subject_id='R1086M', workspace_dir='~/scr
 # ps_report_pipeline.add_task(ExtractWeightsTask(mark_as_completed=False))
 
 ########################## UNCOMMENT
-# ps_report_pipeline.add_task(GenerateTex(mark_as_completed=False))
+
 
 from PSReportingTask import PSReportingTask
-ps_report_pipeline.add_task(PSReportingTask(mark_as_completed=False))
+# ps_report_pipeline.add_task(PSReportingTask(mark_as_completed=False))
 
 
-ps_report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
+# ps_report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
+
+
+ps_report_pipeline.add_task(GenerateTex(mark_as_completed=False))
 
 
 
-
-
-# ps_report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
+ps_report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
 
 # ps_report_pipeline.add_task(GenerateTexTable())
