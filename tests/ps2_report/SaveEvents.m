@@ -16,8 +16,19 @@ a=10
 % bm_params = params
 
 
-[GroupPSL,~] = RAM_GetPSL('RAM_PS', {Subject});
-save(fullfile(output_dir,'GroupPSL.mat'),'GroupPSL')
+% [GroupPSL,errors] = RAM_GetPSL('RAM_PS', {Subject});
+
+% b = output_dir
+
+% c= fullfile(output_dir,'GroupPSL.mat')
+
+% if ~isempty(errors)
+%     for i=1:length(errors)
+%         fprintf(errors)
+%     end
+% end
+
+% save(fullfile(output_dir,'GroupPSL.mat'),'GroupPSL')
 
 PS2Events = get_sub_events('RAM_PS',Subject);
 PS2Events = PS2Events(strcmp({PS2Events.experiment},'PS2'));

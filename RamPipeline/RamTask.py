@@ -180,7 +180,7 @@ class RamTask(object):
                 print 'skipping: '+dir_name_full_path+ ' perhaps it already exists'
                 pass
 
-
+        return dir_name_dict
 
 
     def set_file_resources_to_copy(self, *file_resources, **kwds):
