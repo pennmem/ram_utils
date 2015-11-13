@@ -93,6 +93,49 @@ class SaveEventsTask(MatlabRamTask):
 #
 #         TextTemplateUtils.replace_template(template_file_name=tex_template, replace_dict=replace_dict)
 
+# class GenerateTex(RamTask):
+#     def __init__(self, mark_as_completed=True): RamTask.__init__(self, mark_as_completed)
+#
+#     def run(self):
+#         import TextTemplateUtils
+#         import datetime
+#         tex_template = 'ps2_report.tex.tpl'
+#
+#         # self.set_file_resources_to_copy('ps2_report.tex')
+#         self.set_file_resources_to_move('ps2_report.tex', dst='reports')
+#         # self.set_file_resources_to_copy('deluxetable.sty', dst='reports')
+#
+#         import numpy as np
+#         a = np.fromfunction(lambda x,y: (x+1)*y, shape=(4,4))
+#
+#         from TexUtils.matrix2latex import matrix2latex
+#
+#         # patient_table_data=[[1, "21 Oct 2015", "30"],[5, "27 Oct 2015", "28"]]
+#         # patient_table_tex = matrix2latex(patient_table_data, None, "tabular", alignment='|c|c|c|', headerRow=["Session \\#", "Date", "Length (min)"])
+#
+#         session_data_tex_table = matrix2latex(self.pipeline.get_passed_object('SESSION_DATA'), None, "tabular", alignment='|c|c|c|', headerRow=["Session \\#", "Date", "Length (min)"])
+#
+#             # TexUtils.generate_tex_table(caption='Numpy_table', header=['col1', 'col2', 'col3'], columns=[ a[:, 1] , a[:, 2], a[:, 3] ], label='tab:numpy_table')
+#         print 'session_data_tex_table=\n',session_data_tex_table
+#
+#         replace_dict={
+#             '<SUBJECT_ID>':self.pipeline.subject_id,
+#             '<DATE>': str(datetime.date.today()),
+#             # '<SECTION_TITLE>': 'R1074M RAM FR1 Free Recall Report',
+#             '<SESSION_DATA>': session_data_tex_table,
+#             '<DURATION>': self.pipeline.get_passed_object('DURATION'),
+#             '<ISI_MID>': self.pipeline.get_passed_object('ISI_MID'),
+#             '<ISI_HALF_RANGE>': self.pipeline.get_passed_object('ISI_HALF_RANGE'),
+#             '<NUMBER_OF_SESSIONS>':self.pipeline.get_passed_object('NUMBER_OF_SESSIONS'),
+#             '<NUMBER_OF_ELECTRODES>':self.pipeline.get_passed_object('NUMBER_OF_ELECTRODES'),
+#             '<STIMTAG>': self.pipeline.get_passed_object('STIMTAG'),
+#             # '<PT>': r'\begin'
+#         }
+#
+#         TextTemplateUtils.replace_template(template_file_name=tex_template, replace_dict=replace_dict)
+
+
+
 class GenerateTex(RamTask):
     def __init__(self, mark_as_completed=True): RamTask.__init__(self, mark_as_completed)
 
@@ -100,40 +143,54 @@ class GenerateTex(RamTask):
         import TextTemplateUtils
         import datetime
         tex_template = 'ps2_report.tex.tpl'
+        tex_session_template = 'ps2_session.tex.tpl'
 
         # self.set_file_resources_to_copy('ps2_report.tex')
         self.set_file_resources_to_move('ps2_report.tex', dst='reports')
-        self.set_file_resources_to_copy('deluxetable.sty', dst='reports')
+        # self.set_file_resources_to_copy('deluxetable.sty', dst='reports')
 
         import numpy as np
         a = np.fromfunction(lambda x,y: (x+1)*y, shape=(4,4))
 
         from TexUtils.matrix2latex import matrix2latex
 
-        # patient_table_data=[[1, "21 Oct 2015", "30"],[5, "27 Oct 2015", "28"]]
-        # patient_table_tex = matrix2latex(patient_table_data, None, "tabular", alignment='|c|c|c|', headerRow=["Session \\#", "Date", "Length (min)"])
+
+        tex_session_pages_str = ''
+        session_summary_array = self.pipeline.get_passed_object('session_summary_array')
+
+        for session_summary in session_summary_array:
+            replace_dict = {'<PLOT_FILE>':'report_plot_'+session_summary.name+'.pdf',
+                            '<STIMTAG>': session_summary.stimtag,
+                            '<DURATION>': session_summary.duration,
+                            '<ISI_MID>': session_summary.isi_mid,
+                            '<ISI_HALF_RANGE>': session_summary.isi_half_range,
+                            }
+
+            tex_session_pages_str += TextTemplateUtils.replace_template_to_string(tex_session_template,replace_dict)
+            tex_session_pages_str += '\n'
+
+        session_summary = session_summary_array[0]
+
+        # replace_template_to_string
+
 
         session_data_tex_table = matrix2latex(self.pipeline.get_passed_object('SESSION_DATA'), None, "tabular", alignment='|c|c|c|', headerRow=["Session \\#", "Date", "Length (min)"])
 
-            # TexUtils.generate_tex_table(caption='Numpy_table', header=['col1', 'col2', 'col3'], columns=[ a[:, 1] , a[:, 2], a[:, 3] ], label='tab:numpy_table')
-        print 'session_data_tex_table=\n',session_data_tex_table
+
+        # print 'session_data_tex_table=\n',session_data_tex_table
 
         replace_dict={
             '<SUBJECT_ID>':self.pipeline.subject_id,
-            '<DATE>': str(datetime.date.today()),
-            # '<SECTION_TITLE>': 'R1074M RAM FR1 Free Recall Report',
+            '<DATE>': datetime.date.today(),
             '<SESSION_DATA>': session_data_tex_table,
-            '<DURATION>': self.pipeline.get_passed_object('DURATION'),
-            '<ISI_MID>': self.pipeline.get_passed_object('ISI_MID'),
-            '<ISI_HALF_RANGE>': self.pipeline.get_passed_object('ISI_HALF_RANGE'),
             '<NUMBER_OF_SESSIONS>':self.pipeline.get_passed_object('NUMBER_OF_SESSIONS'),
             '<NUMBER_OF_ELECTRODES>':self.pipeline.get_passed_object('NUMBER_OF_ELECTRODES'),
-            '<STIMTAG>': self.pipeline.get_passed_object('STIMTAG'),
-            # '<PT>': r'\begin'
+
+            '<REPORT_PAGES>':tex_session_pages_str
+
         }
 
         TextTemplateUtils.replace_template(template_file_name=tex_template, replace_dict=replace_dict)
-
 
 
 
@@ -198,70 +255,99 @@ class GeneratePlots(RamTask):
 
         self.create_dir_in_workspace('reports')
 
+        session_summary_array = self.pipeline.get_passed_object('session_summary_array')
+
         from PlotUtils import PanelPlot
-        import numpy as np
-        panel_plot = PanelPlot(i_max=3, j_max=2, title='', x_axis_title='Stimulation Amplitude (mA)', y_axis_title='$\Delta$ Post-Pre Stim Biomarker')
+        for session_summary in session_summary_array:
+            panel_plot = PanelPlot(i_max=3, j_max=2, title='', x_axis_title='Stimulation Amplitude (mA)', y_axis_title='$\Delta$ Post-Pre Stim Biomarker')
 
-        plot_specs = self.pipeline.get_passed_object('amp_all')
-        print 'plot_specs=',plot_specs
-        # panel_plot.add_plot_data(0, 0, plot_specs.x, plot_specs.y, yerr=plot_specs.yerr, title='(a)')
-        panel_plot.add_plot_data(0, 0, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(a)', ylim=plot_specs.ylim)
-
-        plot_specs = self.pipeline.get_passed_object('amp_low')
-        panel_plot.add_plot_data(1, 0, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(c)', ylim=plot_specs.ylim)
-
-        plot_specs = self.pipeline.get_passed_object('amp_high')
-        panel_plot.add_plot_data(2, 0, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(e)', ylim=plot_specs.ylim)
-
-        plot_specs = self.pipeline.get_passed_object('freq_all')
-        panel_plot.add_plot_data(0, 1, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(b)', ylim=plot_specs.ylim)
-
-        plot_specs = self.pipeline.get_passed_object('freq_low')
-        panel_plot.add_plot_data(1, 1, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(d)', ylim=plot_specs.ylim)
-
-        plot_specs = self.pipeline.get_passed_object('freq_high')
-        panel_plot.add_plot_data(2, 1, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(f)', ylim=plot_specs.ylim)
-
-        plot = panel_plot.generate_plot()
-        plot.subplots_adjust(wspace=0.3, hspace=0.3)
-        # plt.savefig(join(plotsDir, quantity_name+'.png'), dpi=300,bboxinches='tight')
-
-        plot_out_fname = self.get_path_to_file_in_workspace('reports/report_plot_session.pdf')
-
-        plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
-
-        # ------------------------------------------- Combined accross sessions
+            for plot_panel_index, pd in session_summary.plot_data_dict.items():
+                print 'plot_panel_index=',plot_panel_index
+                print 'pd.x=',pd.x
+                print 'pd.y=',pd.y
+                panel_plot.add_plot_data(plot_panel_index[0], plot_panel_index[1], x=pd.x, y=pd.y, yerr=pd.yerr, x_tick_labels=pd.x_tick_labels, title='(a)', ylim=pd.ylim)
 
 
-        panel_plot = PanelPlot(i_max=3, j_max=2, title='All Sessions combined', x_axis_title='Stimulation Amplitude (mA)', y_axis_title='$\Delta$ Post-Pre Stim Biomarker')
+            plot = panel_plot.generate_plot()
+            plot.subplots_adjust(wspace=0.3, hspace=0.3)
+            # plt.savefig(join(plotsDir, quantity_name+'.png'), dpi=300,bboxinches='tight')
 
-        plot_specs = self.pipeline.get_passed_object('tot_amp_all')
-        print 'plot_specs=',plot_specs
-        # panel_plot.add_plot_data(0, 0, plot_specs.x, plot_specs.y, yerr=plot_specs.yerr, title='(a)')
-        panel_plot.add_plot_data(0, 0, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(a)', ylim=plot_specs.ylim)
+            plot_out_fname = self.get_path_to_file_in_workspace('reports/report_plot_'+session_summary.name+'.pdf')
 
-        plot_specs = self.pipeline.get_passed_object('tot_amp_low')
-        panel_plot.add_plot_data(1, 0, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(c)', ylim=plot_specs.ylim)
+            plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
-        plot_specs = self.pipeline.get_passed_object('tot_amp_high')
-        panel_plot.add_plot_data(2, 0, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(e)', ylim=plot_specs.ylim)
 
-        plot_specs = self.pipeline.get_passed_object('tot_freq_all')
-        panel_plot.add_plot_data(0, 1, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(b)', ylim=plot_specs.ylim)
-
-        plot_specs = self.pipeline.get_passed_object('tot_freq_low')
-        panel_plot.add_plot_data(1, 1, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(d)', ylim=plot_specs.ylim)
-
-        plot_specs = self.pipeline.get_passed_object('tot_freq_high')
-        panel_plot.add_plot_data(2, 1, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(f)', ylim=plot_specs.ylim)
-
-        plot = panel_plot.generate_plot()
-        plot.subplots_adjust(wspace=0.3, hspace=0.3)
-        # plt.savefig(join(plotsDir, quantity_name+'.png'), dpi=300,bboxinches='tight')
-
-        plot_out_fname = self.get_path_to_file_in_workspace('reports/report_plot_tot.pdf')
-
-        plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+        #     plot_specs = self.pipeline.get_passed_object('amp_all')
+        #     print 'plot_specs=',plot_specs
+        #     # panel_plot.add_plot_data(0, 0, plot_specs.x, plot_specs.y, yerr=plot_specs.yerr, title='(a)')
+        #     panel_plot.add_plot_data(0, 0, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(a)', ylim=plot_specs.ylim)
+        #
+        #
+        #
+        # from PlotUtils import PanelPlot
+        # import numpy as np
+        # panel_plot = PanelPlot(i_max=3, j_max=2, title='', x_axis_title='Stimulation Amplitude (mA)', y_axis_title='$\Delta$ Post-Pre Stim Biomarker')
+        #
+        # plot_specs = self.pipeline.get_passed_object('amp_all')
+        # print 'plot_specs=',plot_specs
+        # # panel_plot.add_plot_data(0, 0, plot_specs.x, plot_specs.y, yerr=plot_specs.yerr, title='(a)')
+        # panel_plot.add_plot_data(0, 0, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(a)', ylim=plot_specs.ylim)
+        #
+        # plot_specs = self.pipeline.get_passed_object('amp_low')
+        # panel_plot.add_plot_data(1, 0, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(c)', ylim=plot_specs.ylim)
+        #
+        # plot_specs = self.pipeline.get_passed_object('amp_high')
+        # panel_plot.add_plot_data(2, 0, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(e)', ylim=plot_specs.ylim)
+        #
+        # plot_specs = self.pipeline.get_passed_object('freq_all')
+        # panel_plot.add_plot_data(0, 1, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(b)', ylim=plot_specs.ylim)
+        #
+        # plot_specs = self.pipeline.get_passed_object('freq_low')
+        # panel_plot.add_plot_data(1, 1, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(d)', ylim=plot_specs.ylim)
+        #
+        # plot_specs = self.pipeline.get_passed_object('freq_high')
+        # panel_plot.add_plot_data(2, 1, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(f)', ylim=plot_specs.ylim)
+        #
+        # plot = panel_plot.generate_plot()
+        # plot.subplots_adjust(wspace=0.3, hspace=0.3)
+        # # plt.savefig(join(plotsDir, quantity_name+'.png'), dpi=300,bboxinches='tight')
+        #
+        # plot_out_fname = self.get_path_to_file_in_workspace('reports/report_plot_session.pdf')
+        #
+        # plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+        #
+        # # ------------------------------------------- Combined accross sessions
+        #
+        #
+        # panel_plot = PanelPlot(i_max=3, j_max=2, title='All Sessions combined', x_axis_title='Stimulation Amplitude (mA)', y_axis_title='$\Delta$ Post-Pre Stim Biomarker')
+        #
+        # plot_specs = self.pipeline.get_passed_object('tot_amp_all')
+        # print 'plot_specs=',plot_specs
+        # # panel_plot.add_plot_data(0, 0, plot_specs.x, plot_specs.y, yerr=plot_specs.yerr, title='(a)')
+        # panel_plot.add_plot_data(0, 0, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(a)', ylim=plot_specs.ylim)
+        #
+        # plot_specs = self.pipeline.get_passed_object('tot_amp_low')
+        # panel_plot.add_plot_data(1, 0, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(c)', ylim=plot_specs.ylim)
+        #
+        # plot_specs = self.pipeline.get_passed_object('tot_amp_high')
+        # panel_plot.add_plot_data(2, 0, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(e)', ylim=plot_specs.ylim)
+        #
+        # plot_specs = self.pipeline.get_passed_object('tot_freq_all')
+        # panel_plot.add_plot_data(0, 1, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(b)', ylim=plot_specs.ylim)
+        #
+        # plot_specs = self.pipeline.get_passed_object('tot_freq_low')
+        # panel_plot.add_plot_data(1, 1, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(d)', ylim=plot_specs.ylim)
+        #
+        # plot_specs = self.pipeline.get_passed_object('tot_freq_high')
+        # panel_plot.add_plot_data(2, 1, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(f)', ylim=plot_specs.ylim)
+        #
+        # plot = panel_plot.generate_plot()
+        # plot.subplots_adjust(wspace=0.3, hspace=0.3)
+        # # plt.savefig(join(plotsDir, quantity_name+'.png'), dpi=300,bboxinches='tight')
+        #
+        # plot_out_fname = self.get_path_to_file_in_workspace('reports/report_plot_tot.pdf')
+        #
+        # plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
 
 
@@ -311,10 +397,10 @@ ps_report_pipeline.add_task(PSReportingTask(mark_as_completed=False))
 #
 #
 ps_report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
-
-
+#
+#
 ps_report_pipeline.add_task(GenerateTex(mark_as_completed=False))
-
+#
 ps_report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
 
