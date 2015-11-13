@@ -1,5 +1,6 @@
 __author__ = 'm'
 
+from matrix2latex import *
 from Table import *
 from sigfig import *
 
