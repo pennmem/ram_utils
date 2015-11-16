@@ -131,9 +131,9 @@ params.pow.onsetInd     = find(winEnds<(winSize/2),1,'last');
 baseStart = -650; baseEnd = -50;
 params.pow.baseBins     = intersect(find(winStarts>=baseStart),find(winEnds<=baseEnd));
 
-params.events           = @(events)strcmp({events.type},'STIMULATING') & strcmp({events.experiment},'PS2');
+params.events           = @(events)ismember({events.type},{'STIMULATING','BEGIN_BURST','STIM_SINGLE_PULSE'}) &...
+                            ~strcmp({events.experiment},'PS0');
 
 params.savedir = saveDir;
 
 end
-

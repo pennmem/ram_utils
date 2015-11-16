@@ -1,103 +1,39 @@
-__author__ = 'm'
-
 from RamPipeline import *
 from MatlabUtils import *
 from MatlabIO import *
 
-from math import isnan
 import numpy as np
 import numpy.matlib as npm
 
 import time
 
-from collections import namedtuple
+from collections import OrderedDict
 
 from PlotUtils import PlotData
+
+from delta_stat import DeltaStats
+
+__author__ = 'm'
+
 
 def indices(a, func):
     return [i for (i, val) in enumerate(a) if func(val)]
 
+
 def logit(alpha, betas, x):
     return 1.0 / (1.0 + np.exp(-(alpha+np.dot(betas, x))))
 
-def calculate_stats(event_vals, param_grid, prob_diff, quantile_inds):
-    n = len(param_grid)
-    mean_array = np.empty(n)
-    stddev_array = np.empty(n)
-    # print 'event_vals.shape=',event_vals.shape
 
-    print 'prob_diff.shape=',prob_diff.shape
-    print 'quantile_inds.shape=',quantile_inds.shape
+def is_stim_event(event):
+    return event.type in ['STIMULATING','BEGIN_BURST','STIM_SINGLE_PULSE']
 
-    for i,param in enumerate(param_grid):
-        param_sel = (event_vals == param)
-        prob_diff_loc = prob_diff[param_sel & quantile_inds]
-
-        mean = np.nanmean(prob_diff_loc)
-        if isnan(mean): mean = 0.0
-        mean_array[i] = mean
-
-        stdev = np.nanstd(prob_diff_loc, ddof=1)
-        if isnan(stdev): stdev = 0.0
-        stddev_array[i] = stdev
-
-    return mean_array, stddev_array
-
-# def calculate_plot(event_vals, param_grid, ProbDiff, low_terc_inds, high_terc_inds):
-#     n = len(param_grid)
-#
-#     DeltaMeanAll = np.empty(n)
-#     DeltaStdevAll = np.empty(n)
-#     DeltaMeanLow = np.empty(n)
-#     DeltaStdevLow = np.empty(n)
-#     DeltaMeanHigh = np.empty(n)
-#     DeltaStdevHigh = np.empty(n)
-#
-#     for i,param in enumerate(param_grid):
-#         param_sel = (event_vals==param)
-#
-#         ProbDiffAll = ProbDiff[param_sel]
-#
-#         mean = np.nanmean(ProbDiffAll)
-#         if isnan(mean): mean = 0.0
-#         DeltaMeanAll[i] = mean
-#
-#         stdev = np.nanstd(ProbDiffAll, ddof=1)
-#         if isnan(stdev): stdev = 0.0
-#         DeltaStdevAll[i] = stdev
-#
-#         ProbDiffLow = ProbDiff[param_sel & low_terc_inds]
-#
-#         mean = np.nanmean(ProbDiffLow)
-#         if isnan(mean): mean = 0.0
-#         DeltaMeanLow[i] = mean
-#
-#         stdev = np.nanstd(ProbDiffLow, ddof=1)
-#         if isnan(stdev): stdev = 0.0
-#         DeltaStdevLow[i] = stdev
-#
-#         ProbDiffHigh = ProbDiff[param_sel & high_terc_inds]
-#
-#         mean = np.nanmean(ProbDiffHigh)
-#         if isnan(mean): mean = 0.0
-#         DeltaMeanHigh[i] = mean
-#
-#         stdev = np.nanstd(ProbDiffHigh, ddof=1)
-#         if isnan(stdev): stdev = 0.0
-#         DeltaStdevHigh[i] = stdev
-#
-#     return DeltaMeanAll, DeltaStdevAll, DeltaMeanLow, DeltaStdevLow, DeltaMeanHigh, DeltaStdevHigh
-
-
-from collections import OrderedDict
 
 class SessionSummary(object):
-
     def __init__(self):
         self.plot_data_dict = OrderedDict() # {panel_plot_coordinate (0,0) : PlotData}
-
-        self.duration = None
+        self.constant_name = self.constant_value = self.constant_unit = None
         self.stimtag = None
+        self.parameter1 = self.parameter2 = None
         self.name = None
         self.date = None
         self.length = None
@@ -105,16 +41,15 @@ class SessionSummary(object):
         self.isi_half_range = None
 
 
-
 class PSReportingTask(RamTask):
     def __init__(self, mark_as_completed=True):
         RamTask.__init__(self, mark_as_completed)
 
     def run(self):
-        PostStimBuff = 50  # buffer in ms to leave following stim offset
+        subject_id = self.pipeline.subject_id
+        experiment = self.pipeline.experiment
 
-        # group_psl = deserialize_single_object_from_matlab_format('GroupPSL.mat','GroupPSL')
-        # print group_psl[0].Subject
+        PostStimBuff = 50  # buffer in ms to leave following stim offset
 
         w_dir = self.get_workspace_dir()
 
@@ -124,110 +59,62 @@ class PSReportingTask(RamTask):
 
         Weights = deserialize_single_object_from_matlab_format(join(w_dir,'Weights.mat'),'Weights')
 
-        ps2_events = deserialize_single_object_from_matlab_format(join(w_dir,'PS2Events.mat'),'PS2Events')
-        ps2_events_size = len(ps2_events)
+        ps_events = deserialize_single_object_from_matlab_format(join(w_dir,'PSEvents.mat'),'PSEvents')
+        ps_events_size = len(ps_events)
 
-        for ev in ps2_events:
+        for ev in ps_events:
             ev.ISI = np.nan
 
-        for i in xrange(1, ps2_events_size):
-            ev_curr = ps2_events[i]
-            ev_prev = ps2_events[i-1]
-            #print 'i=',i,' event = ', ev_curr, ' event_type = ', ev_curr.type, ' session = ',ev_curr.session
+        for i in xrange(1, ps_events_size):
+            ev_curr = ps_events[i]
+            ev_prev = ps_events[i-1]
             if ev_curr.session == ev_prev.session:
-                if ev_curr.type=='STIMULATING' and ev_prev.type=='STIMULATING':
+                if is_stim_event(ev_curr) and is_stim_event(ev_prev):
                     ev_curr.ISI = ev_curr.mstime - ev_prev.mstime
 
-        indicator = np.ones(ps2_events_size, dtype=bool)
+        ps_events = [ev for ev in ps_events if is_stim_event(ev)]
 
-        for i, ind_flag in enumerate(indicator):
-            if ps2_events[i].type!='STIMULATING':
-                indicator[i]=False
+        print 'stim events size = ', len(ps_events)
 
-        ps2_events = ps2_events[indicator]
+        ps_sessions  = np.unique([e.session for e in ps_events])
+        # print 'ps_sessions=',ps_sessions
 
-        print 'stimulation_events_size = ',len(ps2_events)
-
-        ps2_sessions  = np.unique([e.session for e in ps2_events])
-        # print 'ps2_sessions=',ps2_sessions
-
-        self.pipeline.add_object_to_pass('NUMBER_OF_SESSIONS',str(len(ps2_sessions)))
-        self.pipeline.add_object_to_pass('NUMBER_OF_ELECTRODES',str(len(bp)))
+        self.pipeline.add_object_to_pass('NUMBER_OF_SESSIONS',len(ps_sessions))
+        self.pipeline.add_object_to_pass('NUMBER_OF_ELECTRODES',len(bp))
 
         session_data = []
-
-        for SessNum in ps2_sessions:
-
-
-
-            SessEv = [ev for ev in ps2_events if ev.session == SessNum]
-            timestamps = [ev.mstime for ev in SessEv]
-
-            firstTimestamp = min(timestamps)
-            lastTimestamp = max(timestamps)
-            SessLength = (lastTimestamp-firstTimestamp)/1000./60.
-
-            SessDate = time.strftime('%Y-%m-%d', time.localtime(lastTimestamp/1000))
-            print SessDate
-            session_data.append([SessNum,SessDate, SessLength])
-
-
-        self.pipeline.add_object_to_pass('SESSION_DATA',session_data)
 
         all_durs_ev = np.array([])
         all_amps_ev = np.array([])
         all_freqs_ev = np.array([])
+        all_burfs_ev = np.array([])
 
         all_durs = np.array([])
         all_amps = np.array([])
         all_freqs = np.array([])
+        all_burfs = np.array([])
 
         ProbPostAllSessions = np.array([])
         ProbPreAllSessions = np.array([])
         ProbDiffAllSessions = np.array([])
 
-        from collections import OrderedDict
-
-
         session_summary_array = []
 
-        for SessNum in ps2_sessions:
-
+        for SessNum in ps_sessions:
             session_summary = SessionSummary() # object that contains all the report related information for a given session
-
-
-            SessEv = [ev for ev in ps2_events if ev.session == SessNum]
-
+            SessEv = [ev for ev in ps_events if ev.session == SessNum]
 
             timestamps = [ev.mstime for ev in SessEv]
-
             firstTimestamp = min(timestamps)
             lastTimestamp = max(timestamps)
-            SessLength = (lastTimestamp-firstTimestamp)/1000./60.
-
+            SessLength = (lastTimestamp-firstTimestamp)/60000.0
             SessDate = time.strftime('%Y-%m-%d', time.localtime(lastTimestamp/1000))
-            print SessDate
-
-
+            session_data.append([SessNum, SessDate, SessLength])
 
             SessName = 'Sess%02d' % SessNum
 
-
-
-
-            print SessName
-
             StimTag = SessEv[0].stimAnodeTag + '-' + SessEv[0].stimCathodeTag
-            self.pipeline.add_object_to_pass('STIMTAG',StimTag)
-
-
-
-
-            # for group in group_psl:
-            #
-            #     if SessNum in np.array(group.Sessions):
-            #         StimTag = group.StimElecTag
-            #         break
+            #self.pipeline.add_object_to_pass('STIMTAG',StimTag)
 
             ISI_min = np.nanmin([ev.ISI for ev in SessEv])
             ISI_max = np.nanmax([ev.ISI for ev in SessEv])
@@ -236,25 +123,21 @@ class PSReportingTask(RamTask):
 
             print 'Session =', SessName, ' StimTag =', StimTag, ' ISI =', ISI_mid, '+/-', ISI_halfrange
 
-
-
-
             durs_ev = [s.pulse_duration for s in SessEv]
             amps_ev = [s.amplitude for s in SessEv]
             freqs_ev = [s.pulse_frequency for s in SessEv]
+            burfs_ev = [s.burst_frequency for s in SessEv]
 
             all_durs_ev = np.hstack((all_durs_ev, durs_ev))
             all_amps_ev = np.hstack((all_amps_ev, amps_ev))
             all_freqs_ev = np.hstack((all_freqs_ev, freqs_ev))
+            all_burfs_ev = np.hstack((all_burfs_ev, burfs_ev))
 
             durs = np.unique(durs_ev)
             amps = np.unique(amps_ev)
             freqs = np.unique(freqs_ev)
+            burfs = np.unique(burfs_ev)
 
-
-            # self.pipeline.add_object_to_pass('DURATION',str(durs[0]))
-
-            session_summary.duration = durs[0]
             session_summary.name = SessName
             session_summary.length = SessLength
             session_summary.date = SessDate
@@ -262,11 +145,10 @@ class PSReportingTask(RamTask):
             session_summary.isi_mid = ISI_mid
             session_summary.isi_half_range = ISI_halfrange
 
-
-
             all_durs = np.hstack((all_durs, durs))
             all_amps = np.hstack((all_amps, amps))
             all_freqs = np.hstack((all_freqs, freqs))
+            all_burfs = np.hstack((all_burfs, burfs))
 
             StimOnBin = np.ones(len(SessEv), dtype=np.int)*paramsPS.pow.onsetInd
 
@@ -277,20 +159,18 @@ class PSReportingTask(RamTask):
             PostStimInds = np.empty((len(PostStimBin),len(paramsPS.pow.baseBins)), dtype=np.int)
 
             for iEv in xrange(len(SessEv)):
-                PostStimBin[iEv] = indices(paramsPS.pow.timeBins[:,0], lambda x: x <= SessEv[iEv].pulse_duration+PostStimBuff)[-1]
+                dur = SessEv[iEv].pulse_duration
+                if dur == -999: dur = durs[-1]
+                PostStimBin[iEv] = indices(paramsPS.pow.timeBins[:,0], lambda x: x <= dur+PostStimBuff)[-1]
                 PostStimInds[iEv,:] = range(PostStimBin[iEv], PostStimBin[iEv]+len(paramsPS.pow.baseBins))
 
-            DataMat_PostStim = np.empty((50,len(bp),len(SessEv)));
-            DataMat_PreStim = np.empty((50,len(bp),len(SessEv)));
-
-            # set it up to point to your local directory with report output and make sure
-            subject_id = self.pipeline.subject_id
-            # workspace_dir = '/Volumes/RHINO/scratch/busygin/PS2_reporting'
-            # workspace_dir = '/home1/mswat/scratch/busygin/PS2_reporting'
+            DataMat_PostStim = np.empty((50,len(bp),len(SessEv)))
+            DataMat_PreStim = np.empty((50,len(bp),len(SessEv)))
 
             workspace_dir = self.get_workspace_dir()
             for iElec in xrange(len(bp)):
                 power_file_name = abspath(join(workspace_dir,'power',subject_id, SessName,'%d-%d_Pow_bin_zs.mat'%(bp[iElec].channel[0],bp[iElec].channel[1])))
+                print power_file_name
 
                 bp_session_reader = MatlabIO()
                 bp_session_reader.deserialize(power_file_name)
@@ -303,8 +183,8 @@ class PSReportingTask(RamTask):
                     pattern_PostStim[:, iEv] = np.nanmean(PowMat[:, PostStimInds[iEv,:],iEv],1)
                     pattern_PreStim[:, iEv] = np.nanmean(PowMat[:, PreStimInds[iEv,:],iEv],1)
 
-                DataMat_PostStim[:,iElec,:] = pattern_PostStim;
-                DataMat_PreStim[:,iElec,:] = pattern_PreStim;
+                DataMat_PostStim[:,iElec,:] = pattern_PostStim
+                DataMat_PreStim[:,iElec,:] = pattern_PreStim
 
             DataMat_PostStim = DataMat_PostStim.reshape(50*len(bp),len(SessEv), order='F')
             DataMat_PreStim = DataMat_PreStim.reshape(50*len(bp),len(SessEv), order='F')
@@ -320,147 +200,111 @@ class PSReportingTask(RamTask):
             ProbPreAllSessions = np.hstack((ProbPreAllSessions, ProbPre))
             ProbDiffAllSessions = np.hstack((ProbDiffAllSessions, ProbDiff))
 
-            low_terc_thresh = np.percentile(ProbPre, 100.0/3.0)
-            high_terc_thresh = np.percentile(ProbPre, 2.0*100.0/3.0)
+            ev_vals = None
+            param_grid = None
+            if experiment == 'PS1':
+                ev_vals = [freqs_ev, durs_ev]
+                param_grid = [freqs, durs]
+                session_summary.constant_name = 'Amplitude'
+                session_summary.constant_value = amps[0]
+                session_summary.constant_unit = 'mA'
+                session_summary.parameter1 = 'Pulse Frequency'
+                session_summary.parameter2 = 'Duration'
+            elif experiment == 'PS2':
+                ev_vals = [freqs_ev, amps_ev]
+                param_grid = [freqs, amps]
+                session_summary.constant_name = 'Duration'
+                session_summary.constant_value = durs[-1]
+                session_summary.constant_unit = 'ms'
+                session_summary.parameter1 = 'Pulse Frequency'
+                session_summary.parameter2 = 'Amplitude'
+            elif experiment == 'PS3':
+                ev_vals = [freqs_ev, burfs_ev]
+                param_grid = [freqs, burfs]
+                session_summary.constant_name = 'Amplitude'
+                session_summary.constant_value = amps[0]
+                session_summary.constant_unit = 'mA'
+                session_summary.parameter1 = 'Pulse Frequency'
+                session_summary.parameter2 = 'Burst Frequency'
 
+            delta_stats = DeltaStats(2, ev_vals, param_grid, ProbPre, ProbDiff, 1.0/3.0)
+            delta_stats.run()
 
-            print np.ones(len(ProbDiff), dtype=np.bool)
+            data_point_indexes_left = np.arange(1,len(param_grid[0])+1)
+            data_point_indexes_right = np.arange(1,len(param_grid[1])+1)
 
-            print 'size ProbDiff=', ProbDiff.shape
-            print 'size np.ones(len(ProbDiff)=', np.ones(len(ProbDiff)).shape
-
-            DeltaMeanAll_amp, DeltaStdevAll_amp = calculate_stats(amps_ev, amps, ProbDiff, np.ones(len(ProbDiff), dtype=np.bool))
-            DeltaMeanLow_amp, DeltaStdevLow_amp = calculate_stats(amps_ev, amps, ProbDiff, (ProbPre<=low_terc_thresh))
-            DeltaMeanHigh_amp, DeltaStdevHigh_amp = calculate_stats(amps_ev, amps, ProbDiff, (ProbPre>=high_terc_thresh))
-
-            DeltaMeanAll_freq, DeltaStdevAll_freq = calculate_stats(freqs_ev, freqs, ProbDiff, np.ones(len(ProbDiff), dtype=np.bool))
-            DeltaMeanLow_freq, DeltaStdevLow_freq = calculate_stats(freqs_ev, freqs, ProbDiff, (ProbPre<=low_terc_thresh))
-            DeltaMeanHigh_freq, DeltaStdevHigh_freq = calculate_stats(freqs_ev, freqs, ProbDiff, (ProbPre>=high_terc_thresh))
-
-
-            
-            # DeltaMeanAll_amp, DeltaStdevAll_amp, DeltaMeanLow_amp, DeltaStdevLow_amp, DeltaMeanHigh_amp, DeltaStdevHigh_amp = calculate_plot(amps_ev, amps, ProbDiff, low_terc_inds, high_terc_inds)
-            # DeltaMeanAll_freq, DeltaStdevAll_freq, DeltaMeanLow_freq, DeltaStdevLow_freq, DeltaMeanHigh_freq, DeltaStdevHigh_freq = calculate_plot(freqs_ev, freqs, ProbDiff, low_terc_inds, high_terc_inds)
-
-            data_point_indexes_amp = np.arange(1,len(amps)+1)
-            # print 'x_axis_amps_counters=',x_axis_amps_counters
-            # print 'amps=',amps
-            # sys.exit()
-
-            # self.pipeline.add_object_to_pass('amp_all', [x_axis_amps_counters, DeltaMeanAll, DeltaStdevAll, amps])
-            # self.pipeline.add_object_to_pass('amp_low', [x_axis_amps_counters, DeltaMeanLow, DeltaStdevLow, amps])
-            # self.pipeline.add_object_to_pass('amp_high', [x_axis_amps_counters, DeltaMeanHigh, DeltaStdevHigh, amps])
-
-            data_point_indexes_freq = np.arange(1,len(freqs)+1)
-            # self.pipeline.add_object_to_pass('freq_all',[freqs,DeltaMeanAll_freq,DeltaStdevAll_freq])
-            # self.pipeline.add_object_to_pass('freq_low',[freqs,DeltaMeanLow_freq,DeltaStdevLow_freq])
-            # self.pipeline.add_object_to_pass('freq_high',[freqs,DeltaMeanHigh_freq,DeltaStdevHigh_freq])
-
-            # PlotSpecs = namedtuple(typename='PlotSpecs', field_names='x y yerr x_tick_labels ylim')
             # computting y axis limits
-            min_plot = np.min(np.hstack((DeltaMeanAll_freq-DeltaStdevAll_freq, DeltaMeanLow_freq-DeltaStdevLow_freq, DeltaMeanHigh_freq-DeltaStdevHigh_freq, DeltaMeanAll_amp-DeltaStdevAll_amp, DeltaMeanLow_amp-DeltaStdevLow_amp, DeltaMeanHigh_amp-DeltaStdevHigh_amp)))
-            max_plot = np.max(np.hstack((DeltaMeanAll_freq+DeltaStdevAll_freq, DeltaMeanLow_freq+DeltaStdevLow_freq, DeltaMeanHigh_freq+DeltaStdevHigh_freq, DeltaMeanAll_amp+DeltaStdevAll_amp, DeltaMeanLow_amp+DeltaStdevLow_amp, DeltaMeanHigh_amp+DeltaStdevHigh_amp)))
-            ylim=[min_plot-0.1*(max_plot-min_plot), max_plot+0.1*(max_plot-min_plot)]
+            min_plot, max_plot = delta_stats.y_range()
+            ylim = [min_plot-0.1*(max_plot-min_plot), max_plot+0.1*(max_plot-min_plot)]
 
+            x_tick_labels = [x if x>0 else 'PULSE' for x in param_grid[0]]
+            session_summary.plot_data_dict[(0,0)] = PlotData(x=data_point_indexes_left, y=delta_stats.mean_all[0], yerr=delta_stats.stdev_all[0], x_tick_labels=x_tick_labels, ylim=ylim)
+            session_summary.plot_data_dict[(1,0)] = PlotData(x=data_point_indexes_left, y=delta_stats.mean_low[0], yerr=delta_stats.stdev_low[0], x_tick_labels=x_tick_labels, ylim=ylim)
+            session_summary.plot_data_dict[(2,0)] = PlotData(x=data_point_indexes_left, y=delta_stats.mean_high[0], yerr=delta_stats.stdev_high[0], x_tick_labels=x_tick_labels, ylim=ylim)
 
-            
-            # min_amp_array = np.min(np.hstack((DeltaMeanAll-DeltaStdevAll, DeltaMeanLow-DeltaStdevLow, DeltaMeanHigh-DeltaStdevHigh)))
-            # max_amp_array = np.max(np.hstack((DeltaMeanAll+DeltaStdevAll, DeltaMeanLow+DeltaStdevLow, DeltaMeanHigh+DeltaStdevHigh)))
-            #
-            # ylim_amp=[min_amp_array-0.1*(max_amp_array-min_amp_array), max_amp_array+0.1*(max_amp_array-min_amp_array)]
-            
-            session_summary.plot_data_dict[(0,0)] = PlotData(x=data_point_indexes_amp, y=DeltaMeanAll_amp, yerr= DeltaStdevAll_amp, x_tick_labels=amps, ylim=ylim)
-            session_summary.plot_data_dict[(1,0)] = PlotData(x=data_point_indexes_amp, y=DeltaMeanLow_amp, yerr= DeltaStdevLow_amp, x_tick_labels=amps, ylim=ylim)
-            session_summary.plot_data_dict[(2,0)] = PlotData(x=data_point_indexes_amp, y=DeltaMeanHigh_amp, yerr= DeltaStdevHigh_amp, x_tick_labels=amps, ylim=ylim)
-    
-            session_summary.plot_data_dict[(0,1)] = PlotData(x=data_point_indexes_freq, y=DeltaMeanAll_freq, yerr= DeltaStdevAll_freq, x_tick_labels=freqs, ylim=ylim)
-            session_summary.plot_data_dict[(1,1)] = PlotData(x=data_point_indexes_freq, y=DeltaMeanLow_freq, yerr= DeltaStdevLow_freq, x_tick_labels=freqs, ylim=ylim)
-            session_summary.plot_data_dict[(2,1)] = PlotData(x=data_point_indexes_freq, y=DeltaMeanHigh_freq, yerr= DeltaStdevHigh_freq, x_tick_labels=freqs, ylim=ylim)
-            print 'SESSION_NAME=',session_summary.name
-            print 'session_summary.plot_data_dict[(0,0)]=',session_summary.plot_data_dict[(0,0)].x,'\n',session_summary.plot_data_dict[(0,0)].y
+            x_tick_labels = param_grid[1]
+            session_summary.plot_data_dict[(0,1)] = PlotData(x=data_point_indexes_right, y=delta_stats.mean_all[1], yerr=delta_stats.stdev_all[1], x_tick_labels=x_tick_labels, ylim=ylim)
+            session_summary.plot_data_dict[(1,1)] = PlotData(x=data_point_indexes_right, y=delta_stats.mean_low[1], yerr=delta_stats.stdev_low[1], x_tick_labels=x_tick_labels, ylim=ylim)
+            session_summary.plot_data_dict[(2,1)] = PlotData(x=data_point_indexes_right, y=delta_stats.mean_high[1], yerr=delta_stats.stdev_high[1], x_tick_labels=x_tick_labels, ylim=ylim)
 
             session_summary_array.append(session_summary)
 
-            # session_summary.plot_data_dict[(0,0)] = 
-            # self.pipeline.add_object_to_pass('amp_all', PlotSpecs(x=data_point_indexes_amp, y=DeltaMeanAll_amp, yerr= DeltaStdevAll_amp, x_tick_labels=amps, ylim=ylim))
-            # self.pipeline.add_object_to_pass('amp_low', PlotSpecs(x=data_point_indexes_amp, y=DeltaMeanLow_amp, yerr= DeltaStdevLow_amp, x_tick_labels=amps, ylim=ylim))
-            # self.pipeline.add_object_to_pass('amp_high', PlotSpecs(x=data_point_indexes_amp, y=DeltaMeanHigh_amp, yerr= DeltaStdevHigh_amp, x_tick_labels=amps, ylim=ylim))
-            # 
-            # 
-            # self.pipeline.add_object_to_pass('freq_all', PlotSpecs(x=data_point_indexes_freq, y=DeltaMeanAll_freq, yerr= DeltaStdevAll_freq, x_tick_labels=freqs, ylim=ylim))
-            # self.pipeline.add_object_to_pass('freq_low', PlotSpecs(x=data_point_indexes_freq, y=DeltaMeanLow_freq, yerr= DeltaStdevLow_freq, x_tick_labels=freqs, ylim=ylim))
-            # self.pipeline.add_object_to_pass('freq_high', PlotSpecs(x=data_point_indexes_freq, y=DeltaMeanHigh_freq, yerr= DeltaStdevHigh_freq, x_tick_labels=freqs, ylim=ylim))
+        self.pipeline.add_object_to_pass('SESSION_DATA',session_data)
+        self.pipeline.add_object_to_pass('session_summary_array',session_summary_array)
 
-
-        cumulative_session_summary = SessionSummary()
-
-
-        ISI_min = np.nanmin([ev.ISI for ev in ps2_events])
-        ISI_max = np.nanmax([ev.ISI for ev in ps2_events])
+        ISI_min = np.nanmin([ev.ISI for ev in ps_events])
+        ISI_max = np.nanmax([ev.ISI for ev in ps_events])
         ISI_mid = (ISI_max+ISI_min) / 2.0
         ISI_halfrange = ISI_max - ISI_mid
 
         print 'ISI =', ISI_mid, '+/-', ISI_halfrange
-        # self.pipeline.add_object_to_pass('ISI_MID',str(ISI_mid))
-        # self.pipeline.add_object_to_pass('ISI_HALF_RANGE',str(ISI_halfrange))
 
-
-        cumulative_session_summary.name = 'Cumulative'
-        cumulative_session_summary.isi_mid = ISI_mid
-        cumulative_session_summary.isi_half_range = ISI_halfrange
+        self.pipeline.add_object_to_pass('CUMULATIVE_ISI_MID',ISI_mid)
+        self.pipeline.add_object_to_pass('CUMULATIVE_ISI_HALF_RANGE',ISI_halfrange)
 
         durs = np.unique(all_durs)
         amps = np.unique(all_amps)
         freqs = np.unique(all_freqs)
+        burfs = np.unique(all_burfs)
 
-        low_terc_thresh = np.percentile(ProbPreAllSessions, 100.0/3.0)
-        high_terc_thresh = np.percentile(ProbPreAllSessions, 2.0*100.0/3.0)
+        ev_vals = None
+        param_grid = None
+        if experiment == 'PS1':
+            ev_vals = [all_freqs_ev, all_durs_ev]
+            param_grid = [freqs, durs]
+            self.pipeline.add_object_to_pass('CUMULATIVE_PARAMETER1', 'Pulse Frequency')
+            self.pipeline.add_object_to_pass('CUMULATIVE_PARAMETER2', 'Duration')
+        elif experiment == 'PS2':
+            ev_vals = [all_freqs_ev, all_amps_ev]
+            param_grid = [freqs, amps]
+            self.pipeline.add_object_to_pass('CUMULATIVE_PARAMETER1', 'Pulse Frequency')
+            self.pipeline.add_object_to_pass('CUMULATIVE_PARAMETER2', 'Amplitude')
+        elif experiment == 'PS3':
+            ev_vals = [all_freqs_ev, all_burfs_ev]
+            param_grid = [freqs, burfs]
+            self.pipeline.add_object_to_pass('CUMULATIVE_PARAMETER1', 'Pulse Frequency')
+            self.pipeline.add_object_to_pass('CUMULATIVE_PARAMETER2', 'Burst Frequency')
 
-        low_terc_inds = (ProbPreAllSessions<=low_terc_thresh)
-        high_terc_inds = (ProbPreAllSessions>=high_terc_thresh)
+        delta_stats = DeltaStats(2, ev_vals, param_grid, ProbPreAllSessions, ProbDiffAllSessions, 1.0/3.0)
+        delta_stats.run()
 
-        # TotDeltaMeanAll_amp, TotDeltaStdevAll_amp, TotDeltaMeanLow_amp, TotDeltaStdevLow_amp, TotDeltaMeanHigh_amp, TotDeltaStdevHigh_amp = calculate_plot(all_amps_ev, amps, ProbDiffAllSessions, low_terc_inds, high_terc_inds)
-        # TotDeltaMeanAll_freq, TotDeltaStdevAll_freq, TotDeltaMeanLow_freq, TotDeltaStdevLow_freq, TotDeltaMeanHigh_freq, TotDeltaStdevHigh_freq = calculate_plot(all_freqs_ev, freqs, ProbDiffAllSessions, low_terc_inds, high_terc_inds)
+        data_point_indexes_left = np.arange(1,len(param_grid[0])+1)
+        data_point_indexes_right = np.arange(1,len(param_grid[1])+1)
 
-        CumulativeDeltaMeanAll_amp, CumulativeDeltaStdevAll_amp = calculate_stats(all_amps_ev, amps, ProbDiffAllSessions, np.ones(len(ProbDiffAllSessions), dtype=np.bool))
-        CumulativeDeltaMeanLow_amp, CumulativeDeltaStdevLow_amp = calculate_stats(all_amps_ev, amps, ProbDiffAllSessions, (ProbPreAllSessions<=low_terc_thresh))
-        CumulativeDeltaMeanHigh_amp, CumulativeDeltaStdevHigh_amp = calculate_stats(all_amps_ev, amps, ProbDiffAllSessions, (ProbPreAllSessions>=high_terc_thresh))
+        # computing y axis limits
+        min_plot, max_plot = delta_stats.y_range()
+        ylim = [min_plot-0.1*(max_plot-min_plot), max_plot+0.1*(max_plot-min_plot)]
 
-        CumulativeDeltaMeanAll_freq, CumulativeDeltaStdevAll_freq = calculate_stats(all_freqs_ev, freqs, ProbDiffAllSessions, np.ones(len(ProbDiffAllSessions), dtype=np.bool))
-        CumulativeDeltaMeanLow_freq, CumulativeDeltaStdevLow_freq = calculate_stats(all_freqs_ev, freqs, ProbDiffAllSessions, (ProbPreAllSessions<=low_terc_thresh))
-        CumulativeDeltaMeanHigh_freq, CumulativeDeltaStdevHigh_freq = calculate_stats(all_freqs_ev, freqs, ProbDiffAllSessions, (ProbPreAllSessions>=high_terc_thresh))
+        cumulative_plot_data_dict = OrderedDict()
 
+        x_tick_labels = [x if x>0 else 'PULSE' for x in param_grid[0]]
+        cumulative_plot_data_dict[(0,0)] = PlotData(x=data_point_indexes_left, y=delta_stats.mean_all[0], yerr=delta_stats.stdev_all[0], x_tick_labels=x_tick_labels, ylim=ylim)
+        cumulative_plot_data_dict[(1,0)] = PlotData(x=data_point_indexes_left, y=delta_stats.mean_low[0], yerr=delta_stats.stdev_low[0], x_tick_labels=x_tick_labels, ylim=ylim)
+        cumulative_plot_data_dict[(2,0)] = PlotData(x=data_point_indexes_left, y=delta_stats.mean_high[0], yerr=delta_stats.stdev_high[0], x_tick_labels=x_tick_labels, ylim=ylim)
 
-        data_point_indexes_amp = np.arange(1,len(amps)+1)
-        data_point_indexes_freq = np.arange(1,len(freqs)+1)
+        x_tick_labels = param_grid[1]
+        cumulative_plot_data_dict[(0,1)] = PlotData(x=data_point_indexes_right, y=delta_stats.mean_all[1], yerr=delta_stats.stdev_all[1], x_tick_labels=x_tick_labels, ylim=ylim)
+        cumulative_plot_data_dict[(1,1)] = PlotData(x=data_point_indexes_right, y=delta_stats.mean_low[1], yerr=delta_stats.stdev_low[1], x_tick_labels=x_tick_labels, ylim=ylim)
+        cumulative_plot_data_dict[(2,1)] = PlotData(x=data_point_indexes_right, y=delta_stats.mean_high[1], yerr=delta_stats.stdev_high[1], x_tick_labels=x_tick_labels, ylim=ylim)
 
-        # PlotSpecs = namedtuple(typename='PlotSpecs', field_names='x y yerr x_tick_labels ylim')
-
-
-
-        # computting y axis limits
-        min_plot = np.min(np.hstack((CumulativeDeltaMeanAll_freq-CumulativeDeltaStdevAll_freq, CumulativeDeltaMeanLow_freq-CumulativeDeltaStdevLow_freq, CumulativeDeltaMeanHigh_freq-CumulativeDeltaStdevHigh_freq, CumulativeDeltaMeanAll_amp-CumulativeDeltaStdevAll_amp, CumulativeDeltaMeanLow_amp-CumulativeDeltaStdevLow_amp, CumulativeDeltaMeanHigh_amp-CumulativeDeltaStdevHigh_amp)))
-        max_plot = np.max(np.hstack((CumulativeDeltaMeanAll_freq+CumulativeDeltaStdevAll_freq, CumulativeDeltaMeanLow_freq+CumulativeDeltaStdevLow_freq, CumulativeDeltaMeanHigh_freq+CumulativeDeltaStdevHigh_freq, CumulativeDeltaMeanAll_amp+CumulativeDeltaStdevAll_amp, CumulativeDeltaMeanLow_amp+CumulativeDeltaStdevLow_amp, CumulativeDeltaMeanHigh_amp+CumulativeDeltaStdevHigh_amp)))
-        ylim=[min_plot-0.1*(max_plot-min_plot), max_plot+0.1*(max_plot-min_plot)]
-
-        cumulative_session_summary.plot_data_dict[(0,0)] = PlotData(x=data_point_indexes_amp, y=CumulativeDeltaMeanAll_amp, yerr= CumulativeDeltaStdevAll_amp, x_tick_labels=amps, ylim=ylim)
-        cumulative_session_summary.plot_data_dict[(1,0)] = PlotData(x=data_point_indexes_amp, y=CumulativeDeltaMeanLow_amp, yerr= CumulativeDeltaStdevLow_amp, x_tick_labels=amps, ylim=ylim)
-        cumulative_session_summary.plot_data_dict[(2,0)] = PlotData(x=data_point_indexes_amp, y=CumulativeDeltaMeanHigh_amp, yerr= CumulativeDeltaStdevHigh_amp, x_tick_labels=amps, ylim=ylim)
-
-        cumulative_session_summary.plot_data_dict[(0,1)] = PlotData(x=data_point_indexes_freq, y=CumulativeDeltaMeanAll_freq, yerr= CumulativeDeltaStdevAll_freq, x_tick_labels=freqs, ylim=ylim)
-        cumulative_session_summary.plot_data_dict[(1,1)] = PlotData(x=data_point_indexes_freq, y=CumulativeDeltaMeanLow_freq, yerr= CumulativeDeltaStdevLow_freq, x_tick_labels=freqs, ylim=ylim)
-        cumulative_session_summary.plot_data_dict[(2,1)] = PlotData(x=data_point_indexes_freq, y=CumulativeDeltaMeanHigh_freq, yerr= CumulativeDeltaStdevHigh_freq, x_tick_labels=freqs, ylim=ylim)
-
-        # self.pipeline.add_object_to_pass('tot_amp_all', PlotData(x=data_point_indexes_amp, y=TotDeltaMeanAll_amp, yerr= TotDeltaStdevAll_amp, x_tick_labels=amps, ylim=ylim))
-        # self.pipeline.add_object_to_pass('tot_amp_low', PlotData(x=data_point_indexes_amp, y=TotDeltaMeanLow_amp, yerr= TotDeltaStdevLow_amp, x_tick_labels=amps, ylim=ylim))
-        # self.pipeline.add_object_to_pass('tot_amp_high', PlotData(x=data_point_indexes_amp, y=TotDeltaMeanHigh_amp, yerr= TotDeltaStdevHigh_amp, x_tick_labels=amps, ylim=ylim))
-
-
-        # self.pipeline.add_object_to_pass('tot_freq_all', PlotData(x=data_point_indexes_freq, y=TotDeltaMeanAll_freq, yerr= TotDeltaStdevAll_freq, x_tick_labels=freqs, ylim=ylim))
-        # self.pipeline.add_object_to_pass('tot_freq_low', PlotData(x=data_point_indexes_freq, y=TotDeltaMeanLow_freq, yerr= TotDeltaStdevLow_freq, x_tick_labels=freqs, ylim=ylim))
-        # self.pipeline.add_object_to_pass('tot_freq_high', PlotData(x=data_point_indexes_freq, y=TotDeltaMeanHigh_freq, yerr= TotDeltaStdevHigh_freq, x_tick_labels=freqs, ylim=ylim))
-
-
-        session_summary_array.append(cumulative_session_summary)
-
-        self.pipeline.add_object_to_pass('session_summary_array',session_summary_array)
+        self.pipeline.add_object_to_pass('cumulative_plot_data_dict', cumulative_plot_data_dict)
