@@ -1,4 +1,4 @@
-from RamTask import *
+from RamTask import RamTask
 from MatlabRamTask import *
 from RamPipeline import *
 from TaskRegistry import *

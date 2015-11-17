@@ -13,7 +13,7 @@ except ImportError,e:
 
 print "***************** Starting MATLAB Engine *************************"
 matlab_engine = None
-# matlab_engine = matlab.engine.start_matlab()
+matlab_engine = matlab.engine.start_matlab()
 print "***************** MATLAB Engine WORKING *************************"
 
 

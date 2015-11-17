@@ -7,6 +7,8 @@ from distutils.dir_util import mkpath
 
 
 
+
+
 class RamTask(object):
 
     outputs = []
@@ -15,10 +17,35 @@ class RamTask(object):
     file_resources_to_copy = defaultdict()
     file_resources_to_move = defaultdict() # {file_resource:dst_dir}
     mark_as_completed = True
+    __name=None
 
     def __init__(self, mark_as_completed=True):
         self.set_mark_as_completed(mark_as_completed)
         pass
+
+    def set_name(self,name):
+        self.__name=name
+
+    def name(self):
+        return self.__name
+
+    def get_task_completed_file_name(self):
+        '''
+        retunrs name of the task
+        :param task: task object object derived from RamTask or MatlabRamTask
+        :return: task name - this is the name of the derived class
+        '''
+
+        return join(self.workspace_dir, self.name() + '.completed')
+
+    def is_completed(self):
+        '''
+        returns flag indicating if the task was completed or not
+        :param task: task object - object derived from RamTask or MatlabRamTask
+        :return: bool indicating if the file marking the completeion of hte task is present or not.
+        In the Future we will use SHA1 key for more robust completion of the completed task
+        '''
+        return isfile(self.get_task_completed_file_name())
 
     def set_pipeline(self, pipeline):
         """
@@ -48,7 +75,7 @@ class RamTask(object):
         :param flag:boolean flag
         :return:None
         '''
-        self.mark_as_completed  = False
+        self.mark_as_completed  = flag
 
     def open_file_in_workspace_dir(self,file_name, mode='r'):
         """
@@ -102,7 +129,9 @@ class RamTask(object):
         :return: (file object, full_path_to the file)
         """
 
-        file_name_to_file_obj_full_path_dict = self.create_multiple_files_in_workspace_dir(file_name=file_name, mode=mode)
+
+        file_name_to_file_obj_full_path_dict = self.create_multiple_files_in_workspace_dir(file_name, mode=mode)
+
         try:
             return file_name_to_file_obj_full_path_dict[file_name] # returns a tuple (file object, full file name)
         except LookupError:
@@ -114,7 +143,7 @@ class RamTask(object):
         Creates multiple file names in the workspace
         :param rel_file_names: comma-separated list of file names relative to the workspacedir
         :param options:
-        default option is mode = 'w'. Othe options can be specified using mode='file mode'
+        default option is mode = 'w'. Other options can be specified using mode='file mode'
         :return: dictionary {relative_file_path:(file object, full_path_to_created_file)}
         """
 
@@ -129,9 +158,10 @@ class RamTask(object):
 
         for rel_file_name in rel_file_names:
 
-            output_file_name = join(self.workspace_dir, rel_file_nam)
+            output_file_name = join(self.workspace_dir, rel_file_name)
             output_file_name = abspath(output_file_name)# normalizing path
             dir_for_output_file_name = dirname(output_file_name)
+
 
             try:
                 mkpath(dir_for_output_file_name)
@@ -139,9 +169,9 @@ class RamTask(object):
                 raise IOError('Could not create directory path %s'%dir_for_output_file_name)
 
             try:
-                file_name_to_file_obj_full_path_dict[rel_file_nam] = (open(output_file_name, mode),output_file_name)
+                file_name_to_file_obj_full_path_dict[rel_file_name] = (open(output_file_name, mode),output_file_name)
                 # return open(output_file_name, mode),output_file_name
-            except:
+            except IOError:
                 raise IOError ('COULD NOT OPEN '+output_file_name+' in mode='+mode)
 
         return file_name_to_file_obj_full_path_dict

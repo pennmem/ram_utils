@@ -63,76 +63,6 @@ class SaveEventsTask(MatlabRamTask):
         self.eng.SaveEvents(self.pipeline.subject_id, self.pipeline.experiment, self.get_workspace_dir())
 
 
-# class GenerateTex(RamTask):
-#     def __init__(self, mark_as_completed=True): RamTask.__init__(self, mark_as_completed)
-#
-#     def run(self):
-#         import TextTemplateUtils
-#         import datetime
-#         tex_template = 'report.tex.tpl'
-#
-#         # self.set_file_resources_to_copy('ps2_report.tex')
-#         self.set_file_resources_to_move('report.tex', dst='reports')
-#         self.set_file_resources_to_copy('deluxetable.sty', dst='reports')
-#
-#         import numpy as np
-#         a = np.fromfunction(lambda x,y: (x+1)*y, shape=(4,4))
-#
-#         import TexUtils
-#         patient_table = TexUtils.generate_tex_table(caption='Numpy_table', header=['col1', 'col2', 'col3'], columns=[ a[:, 1] , a[:, 2], a[:, 3] ], label='tab:numpy_table')
-#         print 'patient_table=\n',patient_table
-#
-#         replace_dict={
-#             '<HEADER_LEFT>':'RAM FR1 report v 2.0',
-#             '<DATE>': str(datetime.date.today()),
-#             '<SECTION_TITLE>': 'R1074M RAM FR1 Free Recall Report',
-#             '<PATIENT_TABLE>': patient_table,
-#             # '<PT>': r'\begin'
-#         }
-#
-#         TextTemplateUtils.replace_template(template_file_name=tex_template, replace_dict=replace_dict)
-
-# class GenerateTex(RamTask):
-#     def __init__(self, mark_as_completed=True): RamTask.__init__(self, mark_as_completed)
-#
-#     def run(self):
-#         import TextTemplateUtils
-#         import datetime
-#         tex_template = 'ps2_report.tex.tpl'
-#
-#         # self.set_file_resources_to_copy('ps2_report.tex')
-#         self.set_file_resources_to_move('ps2_report.tex', dst='reports')
-#         # self.set_file_resources_to_copy('deluxetable.sty', dst='reports')
-#
-#         import numpy as np
-#         a = np.fromfunction(lambda x,y: (x+1)*y, shape=(4,4))
-#
-#         from TexUtils.matrix2latex import matrix2latex
-#
-#         # patient_table_data=[[1, "21 Oct 2015", "30"],[5, "27 Oct 2015", "28"]]
-#         # patient_table_tex = matrix2latex(patient_table_data, None, "tabular", alignment='|c|c|c|', headerRow=["Session \\#", "Date", "Length (min)"])
-#
-#         session_data_tex_table = matrix2latex(self.pipeline.get_passed_object('SESSION_DATA'), None, "tabular", alignment='|c|c|c|', headerRow=["Session \\#", "Date", "Length (min)"])
-#
-#             # TexUtils.generate_tex_table(caption='Numpy_table', header=['col1', 'col2', 'col3'], columns=[ a[:, 1] , a[:, 2], a[:, 3] ], label='tab:numpy_table')
-#         print 'session_data_tex_table=\n',session_data_tex_table
-#
-#         replace_dict={
-#             '<SUBJECT_ID>':self.pipeline.subject_id,
-#             '<DATE>': str(datetime.date.today()),
-#             # '<SECTION_TITLE>': 'R1074M RAM FR1 Free Recall Report',
-#             '<SESSION_DATA>': session_data_tex_table,
-#             '<DURATION>': self.pipeline.get_passed_object('DURATION'),
-#             '<ISI_MID>': self.pipeline.get_passed_object('ISI_MID'),
-#             '<ISI_HALF_RANGE>': self.pipeline.get_passed_object('ISI_HALF_RANGE'),
-#             '<NUMBER_OF_SESSIONS>':self.pipeline.get_passed_object('NUMBER_OF_SESSIONS'),
-#             '<NUMBER_OF_ELECTRODES>':self.pipeline.get_passed_object('NUMBER_OF_ELECTRODES'),
-#             '<STIMTAG>': self.pipeline.get_passed_object('STIMTAG'),
-#             # '<PT>': r'\begin'
-#         }
-#
-#         TextTemplateUtils.replace_template(template_file_name=tex_template, replace_dict=replace_dict)
-
 
 
 class GenerateTex(RamTask):
@@ -301,81 +231,6 @@ class GeneratePlots(RamTask):
 
 
 
-
-        #     plot_specs = self.pipeline.get_passed_object('amp_all')
-        #     print 'plot_specs=',plot_specs
-        #     # panel_plot.add_plot_data(0, 0, plot_specs.x, plot_specs.y, yerr=plot_specs.yerr, title='(a)')
-        #     panel_plot.add_plot_data(0, 0, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(a)', ylim=plot_specs.ylim)
-        #
-        #
-        #
-        # from PlotUtils import PanelPlot
-        # import numpy as np
-        # panel_plot = PanelPlot(i_max=3, j_max=2, title='', x_axis_title='Stimulation Amplitude (mA)', y_axis_title='$\Delta$ Post-Pre Stim Biomarker')
-        #
-        # plot_specs = self.pipeline.get_passed_object('amp_all')
-        # print 'plot_specs=',plot_specs
-        # # panel_plot.add_plot_data(0, 0, plot_specs.x, plot_specs.y, yerr=plot_specs.yerr, title='(a)')
-        # panel_plot.add_plot_data(0, 0, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(a)', ylim=plot_specs.ylim)
-        #
-        # plot_specs = self.pipeline.get_passed_object('amp_low')
-        # panel_plot.add_plot_data(1, 0, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(c)', ylim=plot_specs.ylim)
-        #
-        # plot_specs = self.pipeline.get_passed_object('amp_high')
-        # panel_plot.add_plot_data(2, 0, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(e)', ylim=plot_specs.ylim)
-        #
-        # plot_specs = self.pipeline.get_passed_object('freq_all')
-        # panel_plot.add_plot_data(0, 1, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(b)', ylim=plot_specs.ylim)
-        #
-        # plot_specs = self.pipeline.get_passed_object('freq_low')
-        # panel_plot.add_plot_data(1, 1, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(d)', ylim=plot_specs.ylim)
-        #
-        # plot_specs = self.pipeline.get_passed_object('freq_high')
-        # panel_plot.add_plot_data(2, 1, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(f)', ylim=plot_specs.ylim)
-        #
-        # plot = panel_plot.generate_plot()
-        # plot.subplots_adjust(wspace=0.3, hspace=0.3)
-        # # plt.savefig(join(plotsDir, quantity_name+'.png'), dpi=300,bboxinches='tight')
-        #
-        # plot_out_fname = self.get_path_to_file_in_workspace('reports/report_plot_session.pdf')
-        #
-        # plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
-        #
-        # # ------------------------------------------- Combined accross sessions
-        #
-        #
-        # panel_plot = PanelPlot(i_max=3, j_max=2, title='All Sessions combined', x_axis_title='Stimulation Amplitude (mA)', y_axis_title='$\Delta$ Post-Pre Stim Biomarker')
-        #
-        # plot_specs = self.pipeline.get_passed_object('tot_amp_all')
-        # print 'plot_specs=',plot_specs
-        # # panel_plot.add_plot_data(0, 0, plot_specs.x, plot_specs.y, yerr=plot_specs.yerr, title='(a)')
-        # panel_plot.add_plot_data(0, 0, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(a)', ylim=plot_specs.ylim)
-        #
-        # plot_specs = self.pipeline.get_passed_object('tot_amp_low')
-        # panel_plot.add_plot_data(1, 0, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(c)', ylim=plot_specs.ylim)
-        #
-        # plot_specs = self.pipeline.get_passed_object('tot_amp_high')
-        # panel_plot.add_plot_data(2, 0, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(e)', ylim=plot_specs.ylim)
-        #
-        # plot_specs = self.pipeline.get_passed_object('tot_freq_all')
-        # panel_plot.add_plot_data(0, 1, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(b)', ylim=plot_specs.ylim)
-        #
-        # plot_specs = self.pipeline.get_passed_object('tot_freq_low')
-        # panel_plot.add_plot_data(1, 1, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(d)', ylim=plot_specs.ylim)
-        #
-        # plot_specs = self.pipeline.get_passed_object('tot_freq_high')
-        # panel_plot.add_plot_data(2, 1, x=plot_specs.x, y=plot_specs.y, yerr=plot_specs.yerr, x_tick_labels=plot_specs.x_tick_labels, title='(f)', ylim=plot_specs.ylim)
-        #
-        # plot = panel_plot.generate_plot()
-        # plot.subplots_adjust(wspace=0.3, hspace=0.3)
-        # # plt.savefig(join(plotsDir, quantity_name+'.png'), dpi=300,bboxinches='tight')
-        #
-        # plot_out_fname = self.get_path_to_file_in_workspace('reports/report_plot_tot.pdf')
-        #
-        # plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
-
-
-
 class GenerateReportPDF(RamTask):
     def __init__(self, mark_as_completed=True):
         RamTask.__init__(self, mark_as_completed)
@@ -391,6 +246,47 @@ class GenerateReportPDF(RamTask):
 
         texinputs_set_str = r'export TEXINPUTS="'+self.get_path_to_file_in_workspace('reports')+'":$TEXINPUTS;'
         call([texinputs_set_str+"module load Tex;pdflatex -shell-escape "+self.get_path_to_file_in_workspace('reports/ps2_report.tex')], shell=True)
+
+
+import argparse
+import os
+from os.path import *
+
+# COMMAND LINE PARSING
+# command line example: python ps2_repo
+
+parser = argparse.ArgumentParser(description='Run Parameter Search Report Generator')
+parser.add_argument('--subject', required=True, action='store')
+parser.add_argument('--experiment', required=True,  action='store')
+parser.add_argument('--workspace-dir',required=False, action='store')
+parser.add_argument('--matlab-path',required=False, action='append')
+
+args = parser.parse_args()
+
+print 'args.subject=',args.subject
+print 'args.experiment=',args.experiment
+print 'args.workspace_dir=',args.workspace_dir
+
+if not args.workspace_dir:
+    args.workspace_dir = abspath(join(expanduser('~'),'scratch',args.experiment, args.subject))
+    print 'default workspace dir = ', args.workspace_dir
+else:
+    print 'users workspace dir = ', abspath(expanduser(args.workspace_dir))
+
+if not args.matlab_path:
+    # args.matlab_paths = '.'
+    args.matlab_path=[os.getcwd()]
+    print 'default matlab_path = ', args.matlab_path
+
+else:
+
+    args.matlab_path = [abspath(expanduser(path)) for path in args.matlab_path]
+    args.matlab_path.insert(0,os.getcwd())
+
+    print 'users matlab_path = ', args.matlab_path
+    # print 'users matlab_path = ', abspath(expanduser(args.matlab_path))
+
+
 
 
 ps_report_pipeline = PS2ReportPipeline(subject_id='R1056M', experiment='PS1', workspace_dir='/scratch/busygin/py_run_8/', matlab_paths=['~/eeg','~/matlab/beh_toolbox','~/RAM/RAM_reporting','~/RAM/RAM_sys2Biomarkers','.'])

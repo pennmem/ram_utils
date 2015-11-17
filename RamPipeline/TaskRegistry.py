@@ -7,7 +7,8 @@ class TaskRegistry(object):
     def register_task(self,task):
         # print 'task=',dir(task)
         # print 'type(x).__name__=',type(task).__name__
-        self.task_dict[type(task).__name__] = task
+        task.set_name(type(task).__name__)
+        self.task_dict[task.name()] = task
 
         # self.task_dict[]=task
 
