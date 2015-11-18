@@ -51,9 +51,11 @@ ps_report_pipeline.add_task(SaveEventsTask())
 
 ps_report_pipeline.add_task(PrepareBPSTask())
 
+
+# ------------------------------------ Report Generating tasks
 ps_report_pipeline.add_task(ExtractWeightsTask(mark_as_completed=True))
-#
-# # ------------------------------------ Report Generating tasks
+
+
 # #  does actual analysis of the PS2 data - passes cumulative_plot_data_dict
 ps_report_pipeline.add_task(PSReportingTask(mark_as_completed=False))
 #
