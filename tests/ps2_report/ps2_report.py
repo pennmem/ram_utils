@@ -142,13 +142,13 @@ class ExtractWeightsTask(MatlabRamTask):
 
         classifier_output_location = 'biomarker/L2LR/Feat_Freq'
         from glob import glob
-        self.get_path_to_file_in_workspace(classifier_output_location)
+        self.get_path_to_resource_in_workspace(classifier_output_location)
 
-        classifier_files = glob(self.get_path_to_file_in_workspace(classifier_output_location)+'/*.mat')
+        classifier_files = glob(self.get_path_to_resource_in_workspace(classifier_output_location)+'/*.mat')
         try:
             classifier_output_file_name_full = classifier_files[0] # picking first file, there shuld be just one file there!
         except IndexError:
-            print 'Could not locate *.mat in '+self.get_path_to_file_in_workspace(classifier_output_location)
+            print 'Could not locate *.mat in '+self.get_path_to_resource_in_workspace(classifier_output_location)
             sys.exit()
 
         # classifier_output_file_name_full = join(self.get_workspace_dir(),classifier_output_location, classifier_output_file_name )
@@ -157,7 +157,7 @@ class ExtractWeightsTask(MatlabRamTask):
 
         res = deserialize_single_object_from_matlab_format(classifier_output_file_name_full,'res')
 
-        serialize_objects_in_matlab_format(self.get_path_to_file_in_workspace('Weights.mat'), (res.Weights,'Weights'))
+        serialize_objects_in_matlab_format(self.get_path_to_resource_in_workspace('Weights.mat'), (res.Weights,'Weights'))
         # save weights in matlab format
         print 'res.Weights=',res.Weights
         # print 'res.W0=',res.W0
@@ -206,7 +206,7 @@ class GeneratePlots(RamTask):
             plot.subplots_adjust(wspace=0.3, hspace=0.3)
             # plt.savefig(join(plotsDir, quantity_name+'.png'), dpi=300,bboxinches='tight')
 
-            plot_out_fname = self.get_path_to_file_in_workspace('reports/report_plot_'+session_summary.name+'.pdf')
+            plot_out_fname = self.get_path_to_resource_in_workspace('reports/report_plot_'+session_summary.name+'.pdf')
 
             plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
@@ -225,7 +225,7 @@ class GeneratePlots(RamTask):
         plot.subplots_adjust(wspace=0.3, hspace=0.3)
         # plt.savefig(join(plotsDir, quantity_name+'.png'), dpi=300,bboxinches='tight')
 
-        plot_out_fname = self.get_path_to_file_in_workspace('reports/report_plot_Cumulative.pdf')
+        plot_out_fname = self.get_path_to_resource_in_workspace('reports/report_plot_Cumulative.pdf')
 
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
@@ -244,8 +244,8 @@ class GenerateReportPDF(RamTask):
         # call(["module load Tex;pdflatex -shell-escape ~/scratch/py_run_7/R1086M/reports/R1086M_PS2_report.tex"], shell=True)
         # call(["module load Tex;pdflatex -shell-escape "+self.get_path_to_file_in_workspace('reports/R1086M_PS2_report.tex')], shell=True)
 
-        texinputs_set_str = r'export TEXINPUTS="'+self.get_path_to_file_in_workspace('reports')+'":$TEXINPUTS;'
-        call([texinputs_set_str+"module load Tex;pdflatex -shell-escape "+self.get_path_to_file_in_workspace('reports/ps2_report.tex')], shell=True)
+        texinputs_set_str = r'export TEXINPUTS="'+self.get_path_to_resource_in_workspace('reports')+'":$TEXINPUTS;'
+        call([texinputs_set_str+"module load Tex;pdflatex -shell-escape "+self.get_path_to_resource_in_workspace('reports/ps2_report.tex')], shell=True)
 
 
 import argparse

@@ -11,17 +11,18 @@ from distutils.dir_util import mkpath
 
 class RamTask(object):
 
-    outputs = []
-    pipeline = None
-    workspace_dir = None
-    file_resources_to_copy = defaultdict()
-    file_resources_to_move = defaultdict() # {file_resource:dst_dir}
-    mark_as_completed = True
-    __name=None
 
     def __init__(self, mark_as_completed=True):
+        self.outputs = []
+        self.pipeline = None
+        self.workspace_dir = None
+        self.file_resources_to_copy = defaultdict()
+        self.file_resources_to_move = defaultdict() # {file_resource:dst_dir}
+        self.mark_as_completed = True
+        self.__name=None
+
         self.set_mark_as_completed(mark_as_completed)
-        pass
+
 
     def set_name(self,name):
         self.__name=name
@@ -291,7 +292,6 @@ class RamTask(object):
 
         import shutil
         import os
-
         for file_resource, dst_relative_path in self.file_resources_to_move.items():
 
             if dst_relative_path != '':
@@ -305,7 +305,7 @@ class RamTask(object):
                 print 'Could not move file: ',file_resource, ' to ', target_path
 
 
-    def get_path_to_file_in_workspace(self, *rel_path_components):
+    def get_path_to_resource_in_workspace(self, *rel_path_components):
         """
         Returns absolute path to the rel_path_component assuming that rel_path_component is specified w.r.t workspace_dir
         :param rel_path_components: path relative to the workspace dir
@@ -370,6 +370,6 @@ if __name__ == '__main__':
     print 'rt.workspace_dir = ', rt.workspace_dir
     print 'rt.get_workspace_dir=',rt.get_workspace_dir()
 
-    print 'get_path_to_file_in_workspace = ', rt.get_path_to_file_in_workspace('abc/cba/cbos','mst')
+    print 'get_path_to_file_in_workspace = ', rt.get_path_to_resource_in_workspace('abc/cba/cbos','mst')
 
     # print 'this is get_path_to_file_in_workspace=',rt.get_path_to_file_in_workspace('demo1')

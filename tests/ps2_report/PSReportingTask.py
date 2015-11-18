@@ -160,7 +160,9 @@ class PSReportingTask(RamTask):
 
             for iEv in xrange(len(SessEv)):
                 dur = SessEv[iEv].pulse_duration
-                if dur == -999: dur = durs[-1]
+                if dur == -999:
+                    dur = durs[-1]
+
                 PostStimBin[iEv] = indices(paramsPS.pow.timeBins[:,0], lambda x: x <= dur+PostStimBuff)[-1]
                 PostStimInds[iEv,:] = range(PostStimBin[iEv], PostStimBin[iEv]+len(paramsPS.pow.baseBins))
 

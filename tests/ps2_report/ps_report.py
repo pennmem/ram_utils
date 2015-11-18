@@ -2,6 +2,8 @@
 # python ps_report.py --subject=R1056M --experiment=PS2 --workspace-dir=~/scratch/py_9 --matlab-path=~/eeg --matlab-path=~/matlab/beh_toolbox --matlab-path=~/RAM/RAM_reporting --matlab-path=~/RAM/RAM_sys2Biomarkers --python-path=~/RAM_UTILS_GIT
 
 # python ps_report.py --subject=R1056M --experiment=PS2 --workspace-dir=/data10/scratch/mswat/py_run_9 --matlab-path=~/eeg --matlab-path=~/matlab/beh_toolbox --matlab-path=~/RAM/RAM_reporting --matlab-path=~/RAM/RAM_sys2Biomarkers --python-path=~/RAM_UTILS_GIT
+
+# python ps_report.py --subject=R1086M --experiment=PS2 --workspace-dir=/data10/scratch/mswat/R1086M_2 --matlab-path=~/eeg --matlab-path=~/matlab/beh_toolbox --matlab-path=~/RAM/RAM_reporting --matlab-path=~/RAM/RAM_sys2Biomarkers --matlab-path=~/RAM_UTILS_GIT/tests/ps2_report/AuxiliaryMatlab --python-path=~/RAM_UTILS_GIT
 import sys
 from setup_utils import parse_command_line, configure_python_paths
 
@@ -59,14 +61,14 @@ ps_report_pipeline.add_task(ExtractWeightsTask(mark_as_completed=True))
 # #  does actual analysis of the PS2 data - passes cumulative_plot_data_dict
 ps_report_pipeline.add_task(PSReportingTask(mark_as_completed=False))
 #
-# #  generates plots for the report
-# ps_report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
+#  generates plots for the report
+ps_report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
 #
-# #  generates tex for the reports
-# ps_report_pipeline.add_task(GenerateTex(mark_as_completed=False))
+#  generates tex for the reports
+ps_report_pipeline.add_task(GenerateTex(mark_as_completed=False))
 #
 # # compiles generted tex to PDF
-# ps_report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
+ps_report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 #
 # # starts processing pipeline
 ps_report_pipeline.execute_pipeline()
