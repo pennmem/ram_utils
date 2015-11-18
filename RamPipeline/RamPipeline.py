@@ -15,11 +15,11 @@ class RamPipeline(object):
         #  flag indicating if Matlab tasks are present
         self.matlab_tasks_present = False
 
-    def add_object_to_pass(self, name, obj):
-        self.passed_objects_dict[name] = obj
-
-    def get_passed_object(self, name):
-        return self.passed_objects_dict[name]
+    # def pass_object(self, name, obj):
+    #     self.passed_objects_dict[name] = obj
+    #
+    # def get_passed_object(self, name):
+    #     return self.passed_objects_dict[name]
 
     def set_workspace_dir(self, output_dir):
         import os
@@ -48,7 +48,7 @@ class RamPipeline(object):
 
         # Sets up Matlab Paths
         if self.matlab_paths:
-            print 'will add paths=', self.matlab_paths
+            print 'Will add the following Matlab paths: ', self.matlab_paths
             MatlabUtils.add_matlab_search_paths(*self.matlab_paths)
 
         # sys.exit()

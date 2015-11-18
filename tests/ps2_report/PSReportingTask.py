@@ -79,8 +79,8 @@ class PSReportingTask(RamTask):
         ps_sessions  = np.unique([e.session for e in ps_events])
         # print 'ps_sessions=',ps_sessions
 
-        self.pipeline.add_object_to_pass('NUMBER_OF_SESSIONS',len(ps_sessions))
-        self.pipeline.add_object_to_pass('NUMBER_OF_ELECTRODES',len(bp))
+        self.pass_object('NUMBER_OF_SESSIONS',len(ps_sessions))
+        self.pass_object('NUMBER_OF_ELECTRODES',len(bp))
 
         session_data = []
 
@@ -249,8 +249,8 @@ class PSReportingTask(RamTask):
 
             session_summary_array.append(session_summary)
 
-        self.pipeline.add_object_to_pass('SESSION_DATA',session_data)
-        self.pipeline.add_object_to_pass('session_summary_array',session_summary_array)
+        self.pass_object('SESSION_DATA',session_data)
+        self.pass_object('session_summary_array',session_summary_array)
 
         ISI_min = np.nanmin([ev.ISI for ev in ps_events])
         ISI_max = np.nanmax([ev.ISI for ev in ps_events])
@@ -259,8 +259,8 @@ class PSReportingTask(RamTask):
 
         print 'ISI =', ISI_mid, '+/-', ISI_halfrange
 
-        self.pipeline.add_object_to_pass('CUMULATIVE_ISI_MID',ISI_mid)
-        self.pipeline.add_object_to_pass('CUMULATIVE_ISI_HALF_RANGE',ISI_halfrange)
+        self.pass_object('CUMULATIVE_ISI_MID',ISI_mid)
+        self.pass_object('CUMULATIVE_ISI_HALF_RANGE',ISI_halfrange)
 
         durs = np.unique(all_durs)
         amps = np.unique(all_amps)
@@ -272,18 +272,18 @@ class PSReportingTask(RamTask):
         if experiment == 'PS1':
             ev_vals = [all_freqs_ev, all_durs_ev]
             param_grid = [freqs, durs]
-            self.pipeline.add_object_to_pass('CUMULATIVE_PARAMETER1', 'Pulse Frequency')
-            self.pipeline.add_object_to_pass('CUMULATIVE_PARAMETER2', 'Duration')
+            self.pass_object('CUMULATIVE_PARAMETER1', 'Pulse Frequency')
+            self.pass_object('CUMULATIVE_PARAMETER2', 'Duration')
         elif experiment == 'PS2':
             ev_vals = [all_freqs_ev, all_amps_ev]
             param_grid = [freqs, amps]
-            self.pipeline.add_object_to_pass('CUMULATIVE_PARAMETER1', 'Pulse Frequency')
-            self.pipeline.add_object_to_pass('CUMULATIVE_PARAMETER2', 'Amplitude')
+            self.pass_object('CUMULATIVE_PARAMETER1', 'Pulse Frequency')
+            self.pass_object('CUMULATIVE_PARAMETER2', 'Amplitude')
         elif experiment == 'PS3':
             ev_vals = [all_freqs_ev, all_burfs_ev]
             param_grid = [freqs, burfs]
-            self.pipeline.add_object_to_pass('CUMULATIVE_PARAMETER1', 'Pulse Frequency')
-            self.pipeline.add_object_to_pass('CUMULATIVE_PARAMETER2', 'Burst Frequency')
+            self.pass_object('CUMULATIVE_PARAMETER1', 'Pulse Frequency')
+            self.pass_object('CUMULATIVE_PARAMETER2', 'Burst Frequency')
 
         delta_stats = DeltaStats(2, ev_vals, param_grid, ProbPreAllSessions, ProbDiffAllSessions, 1.0/3.0)
         delta_stats.run()
@@ -307,4 +307,4 @@ class PSReportingTask(RamTask):
         cumulative_plot_data_dict[(1,1)] = PlotData(x=data_point_indexes_right, y=delta_stats.mean_low[1], yerr=delta_stats.stdev_low[1], x_tick_labels=x_tick_labels, ylim=ylim)
         cumulative_plot_data_dict[(2,1)] = PlotData(x=data_point_indexes_right, y=delta_stats.mean_high[1], yerr=delta_stats.stdev_high[1], x_tick_labels=x_tick_labels, ylim=ylim)
 
-        self.pipeline.add_object_to_pass('cumulative_plot_data_dict', cumulative_plot_data_dict)
+        self.pass_object('cumulative_plot_data_dict', cumulative_plot_data_dict)

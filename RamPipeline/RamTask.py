@@ -29,6 +29,12 @@ class RamTask(object):
     def name(self):
         return self.__name
 
+    def pass_object(self, name, obj):
+        self.pipeline.passed_objects_dict[name] = obj
+
+    def get_passed_object(self, name):
+        return self.pipeline.passed_objects_dict[name]
+
     def get_task_completed_file_name(self):
         '''
         retunrs name of the task

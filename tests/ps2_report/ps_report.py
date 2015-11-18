@@ -1,6 +1,7 @@
 # command line example:
 # python ps_report.py --subject=R1056M --experiment=PS2 --workspace-dir=~/scratch/py_9 --matlab-path=~/eeg --matlab-path=~/matlab/beh_toolbox --matlab-path=~/RAM/RAM_reporting --matlab-path=~/RAM/RAM_sys2Biomarkers --python-path=~/RAM_UTILS_GIT
 
+# python ps_report.py --subject=R1056M --experiment=PS2 --workspace-dir=/data10/scratch/mswat/py_run_9 --matlab-path=~/eeg --matlab-path=~/matlab/beh_toolbox --matlab-path=~/RAM/RAM_reporting --matlab-path=~/RAM/RAM_sys2Biomarkers --python-path=~/RAM_UTILS_GIT
 import sys
 from setup_utils import parse_command_line, configure_python_paths
 
@@ -27,10 +28,8 @@ class PSReportPipeline(RamPipeline):
         RamPipeline.__init__(self)
         self.subject_id = subject_id
         self.experiment = experiment
-        # self.set_workspace_dir(workspace_dir + self.subject_id)
         self.set_workspace_dir(workspace_dir)
         self.matlab_paths = matlab_paths
-
         self.add_matlab_search_paths(matlab_paths)
 
 
@@ -44,19 +43,19 @@ ps_report_pipeline = PSReportPipeline(subject_id=args.subject, experiment=args.e
 #  ----------------------------------- Matlab Tasks
 ps_report_pipeline.add_task(CreateParamsTask())
 
-# ps_report_pipeline.add_task(ComputePowersAndClassifierTask())
-#
-# ps_report_pipeline.add_task(ComputePowersPSTask())
-# #
-# ps_report_pipeline.add_task(SaveEventsTask())
-#
-# ps_report_pipeline.add_task(PrepareBPSTask())
-#
-# ps_report_pipeline.add_task(ExtractWeightsTask(mark_as_completed=False))
+ps_report_pipeline.add_task(ComputePowersAndClassifierTask())
+
+ps_report_pipeline.add_task(ComputePowersPSTask())
+
+ps_report_pipeline.add_task(SaveEventsTask())
+
+ps_report_pipeline.add_task(PrepareBPSTask())
+
+ps_report_pipeline.add_task(ExtractWeightsTask(mark_as_completed=True))
 #
 # # ------------------------------------ Report Generating tasks
 # #  does actual analysis of the PS2 data - passes cumulative_plot_data_dict
-# ps_report_pipeline.add_task(PSReportingTask(mark_as_completed=False))
+ps_report_pipeline.add_task(PSReportingTask(mark_as_completed=False))
 #
 # #  generates plots for the report
 # ps_report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
