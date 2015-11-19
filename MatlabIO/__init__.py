@@ -5,6 +5,37 @@ import numpy as np
 __author__ = 'm'
 
 
+def get_numpy_type_dict():
+    from collections import defaultdict
+    # d = defaultdict(set)
+    numpy_type_dict = defaultdict(list)
+    
+    
+    for name in dir(np):
+        obj = getattr(np, name)
+    
+        if hasattr(obj, 'dtype'):
+            print 'name=',name
+            print 'obj=',obj
+    
+            try:
+                npn = obj(0) # creating object of a type in the dtype list
+                print 'npn=',npn
+                nat = npn.item()
+                print('%s (%r) -> %s'%(name, npn.dtype.char, type(nat)))
+    
+                # d[type(nat)].add(npn.dtype.char)
+                numpy_type_dict[type(nat)].append(npn.dtype.char)
+    
+            except:
+                pass
+    
+
+    return numpy_type_dict
+
+numpy_type_dict = get_numpy_type_dict()
+
+
 def serialize_objects_in_matlab_format(file_name, *object_name_pairs):
 
     class Serializer(MatlabIO):
@@ -137,10 +168,20 @@ def reinterpret_matlab_matrix_as_structured_array(matlab_matrix_as_python_obj, m
     template_element_record_format =  get_record_format(template_element )
     # print '--------- extracted template_element_recort_format=',template_element_record_format
 
+    # idx = 1
+    # # template_element_record_format_1 = {'names':template_element_record_format['names'][:idx],'formats':template_element_record_format['formats'][:idx]}
+    #
+    # template_element_record_format_1 = {'names':['aa'],'formats':[('<f8',())]}
+    # # print '--------- extracted new_template=',template_element_record_format_1
+    #
+    # reconstructed_array = np.recarray(shape=matlab_matrix_as_python_obj.shape, dtype=template_element_record_format_1)
+    #
+    # # reconstructed_array = np.recarray(shape=matlab_matrix_as_python_obj.shape, dtype=template_element_record_format)
+    # print 'reconstructed_array=',reconstructed_array
+    # return reconstructed_array
+    # # sys.exit()
 
     reconstructed_array = np.recarray(shape=matlab_matrix_as_python_obj.shape, dtype=template_element_record_format)
-    # print 'reconstructed_array=',reconstructed_array
-    # sys.exit()
 
     for field_name in template_element_record_format['names']:
 
@@ -164,29 +205,6 @@ def reinterpret_matlab_matrix_as_structured_array(matlab_matrix_as_python_obj, m
 
 
 
-from collections import defaultdict
-# d = defaultdict(set)
-d = defaultdict(list)
-
-
-for name in dir(np):
-    obj = getattr(np, name)
-
-    if hasattr(obj, 'dtype'):
-        print 'name=',name
-        print 'obj=',obj
-
-        try:
-            npn = obj(0) # creating object of a type in the dtype list
-            print 'npn=',npn
-            nat = npn.item()
-            print('%s (%r) -> %s'%(name, npn.dtype.char, type(nat)))
-
-            # d[type(nat)].add(npn.dtype.char)
-            d[type(nat)].append(npn.dtype.char)
-
-        except:
-            pass
 
 
 def determine_numpy_type_abbreviation(inspect_member_info, default_string_length=16):
@@ -201,13 +219,21 @@ def determine_numpy_type_abbreviation(inspect_member_info, default_string_length
         print 'class_member_val.shape=', class_member_val.shape
         print 'class_member_val.dtype.descr=', class_member_val.dtype.descr
 
-        numpy_type_char_abbreviation = (class_member_val.dtype.descr[0][1],class_member_val.shape)
+        # in case inferred array has zero size we will mark it as Python object
+            # '0'
+
+        shape = class_member_val.shape
+        if shape[0] == 0:
+            numpy_type_char_abbreviation = 'O'
+
+
+        # numpy_type_char_abbreviation = (class_member_val.dtype.descr[0][1], shape)
         print 'numpy_type_char_abbreviation=',numpy_type_char_abbreviation
         # sys.exit()
     else:
 
         # ('f2', '>f8', (2, 3))
-        numpy_type_char_abbreviation = d[class_member_type][0]
+        numpy_type_char_abbreviation = numpy_type_dict[class_member_type][0]
         if numpy_type_char_abbreviation == 'S':
             numpy_type_char_abbreviation = 'S'+str(default_string_length)
         elif numpy_type_char_abbreviation == 'U':
@@ -231,8 +257,14 @@ def get_record_format(obj):
     for class_member, class_member_name, class_member_value in get_non_special_class_members(obj):
         print 'class_member, class_member_name, class_member_value=',(class_member, class_member_name, class_member_value)
 
+        print 'class_member=',class_member
+        print 'class_member_name=',class_member_name
+        print 'class_member_value',class_member_value
+
+
         try:
             numpy_type_abbreviation = determine_numpy_type_abbreviation(class_member)
+            print 'numpy_type_abbreviation=',numpy_type_abbreviation
         except:
             print 'COULD NOT DETERMINE FORMAT FOR:'
             print 'class_member_name=',class_member_value
