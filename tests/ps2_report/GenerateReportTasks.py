@@ -37,11 +37,13 @@ class GenerateTex(RamTask):
     def run(self):
         import TextTemplateUtils
         import datetime
-        tex_template = 'ps2_report.tex.tpl'
-        tex_session_template = 'ps2_session.tex.tpl'
+        tex_template = 'ps_report.tex.tpl'
+        tex_session_template = 'ps_session.tex.tpl'
 
-        # self.set_file_resources_to_copy('ps2_report.tex')
-        self.set_file_resources_to_move('ps2_report.tex', dst='reports')
+        report_tex_file_name = self.pipeline.experiment+'-'+self.pipeline.subject_id+'-'+'report.tex'
+        self.pass_object('report_tex_file_name',report_tex_file_name)
+
+        self.set_file_resources_to_move(report_tex_file_name, dst='reports')
         # self.set_file_resources_to_copy('deluxetable.sty', dst='reports')
 
         import numpy as np
@@ -93,7 +95,8 @@ class GenerateTex(RamTask):
             '<CUMULATIVE_PARAMETER2>': self.get_passed_object('CUMULATIVE_PARAMETER2')
         }
 
-        TextTemplateUtils.replace_template(template_file_name=tex_template, replace_dict=replace_dict)
+
+        TextTemplateUtils.replace_template(template_file_name=tex_template, out_file_name=report_tex_file_name, replace_dict=replace_dict)
 
 
 
@@ -132,9 +135,9 @@ class GeneratePlots(RamTask):
         panel_plot = PanelPlot(i_max=3, j_max=2, title='', y_axis_title='$\Delta$ Post-Pre Stim Biomarker')
 
         for plot_panel_index, pd in cumulative_plot_data_dict.iteritems():
-            print 'plot_panel_index=', plot_panel_index
-            print 'pd.x=', pd.x
-            print 'pd.y=', pd.y
+            # print 'plot_panel_index=', plot_panel_index
+            # print 'pd.x=', pd.x
+            # print 'pd.y=', pd.y
             plot_letter = chr(ord('a') + 2 * plot_panel_index[0] + plot_panel_index[1])
             panel_plot.add_plot_data(plot_panel_index[0], plot_panel_index[1], x=pd.x, y=pd.y, yerr=pd.yerr,
                                      x_tick_labels=pd.x_tick_labels, title='(' + plot_letter + ')', ylim=pd.ylim)
@@ -165,11 +168,16 @@ class GenerateReportPDF(RamTask):
 
         texinputs_set_str = r'export TEXINPUTS="' + output_directory + '":$TEXINPUTS;'
 
+
+        report_file_name = self.pipeline.experiment+'-'+self.pipeline.subject_id+'-'+'report.tex'
+
+        report_tex_file_name = self.get_passed_object('report_tex_file_name')
+
         pdflatex_command_str = texinputs_set_str \
                                + 'module load Tex;pdflatex '\
                                + ' -output-directory '+output_directory\
                                + ' -shell-escape ' \
-                               + self.get_path_to_resource_in_workspace('reports/ps2_report.tex')
+                               + self.get_path_to_resource_in_workspace('reports/'+report_tex_file_name)
 
         call([pdflatex_command_str], shell=True)
 

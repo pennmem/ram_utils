@@ -4,9 +4,9 @@ __author__ = 'm'
 import os
 import re
 
-def replace_template(template_file_name,replace_dict={}):
+def replace_template(template_file_name,out_file_name, replace_dict={}):
 
-    out_file_name,ext = os.path.splitext(template_file_name)
+    # out_file_name,ext = os.path.splitext(template_file_name)
 
     in_file = open(template_file_name,'r')
     out_file = open(out_file_name,'w')

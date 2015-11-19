@@ -6,7 +6,7 @@ import argparse
 import os
 from os.path import *
 
-def parse_command_line():
+def parse_command_line(command_line_emulation_argument_list=None):
 
     # COMMAND LINE PARSING
     # command line example:
@@ -20,8 +20,10 @@ def parse_command_line():
 
     parser.add_argument('--python-path',required=False, action='append')
 
-
-    args = parser.parse_args()
+    if command_line_emulation_argument_list:
+        args = parser.parse_args(command_line_emulation_argument_list)
+    else:
+        args = parser.parse_args()
 
     # making sure that sensible workspace directory is set if user does not provide one
     if not args.workspace_dir:
