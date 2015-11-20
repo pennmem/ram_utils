@@ -35,11 +35,13 @@ class ComputeClassifier(RamTask):
         recalls = self.get_passed_object('recalls')
 
 
-
-
         lr_classifier = self.compute_classifier(pow_mat, recalls)
 
+        self.pass_object('lr_classifier',lr_classifier)
+
         joblib.dump(lr_classifier, self.get_path_to_resource_in_workspace(self.pipeline.subject_id+'_lr.pkl'))
+
+
 
     def compute_classifier(self, pow_mat, recalls):
         print 'Computing logistic regression:', pow_mat.shape[0], 'samples', pow_mat.shape[1], 'features'
