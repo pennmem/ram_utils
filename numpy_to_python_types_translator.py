@@ -81,7 +81,7 @@ def create_dtype_stub(obj, entry_list=[]):
 
 
 
-        numpy_type_abbreviation = determine_numpy_type_abbreviation(class_member)
+        numpy_type_abbreviation = determine_dtype_abbreviation(class_member)
         format_list.append(numpy_type_abbreviation)
 
     return {'names': names_list, 'formats': format_list}
@@ -183,7 +183,7 @@ class EEG(object):
 
 
 
-                numpy_type_abbreviation = determine_numpy_type_abbreviation(class_member)
+                numpy_type_abbreviation = determine_dtype_abbreviation(class_member)
                 format_list.append(numpy_type_abbreviation)
 
         def special_member_filter(a):

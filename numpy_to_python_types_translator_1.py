@@ -81,7 +81,7 @@ def create_dtype_stub(obj, entry_list=[]):
 
 
 
-        numpy_type_abbreviation = determine_numpy_type_abbreviation(class_member)
+        numpy_type_abbreviation = determine_dtype_abbreviation(class_member)
         format_list.append(numpy_type_abbreviation)
 
     return {'names': names_list, 'formats': format_list}
@@ -114,7 +114,7 @@ def get_record_format(obj):
         print 'class_member, class_member_name, class_member_value=',(class_member, class_member_name, class_member_value)
 
         try:
-            numpy_type_abbreviation = determine_numpy_type_abbreviation(class_member)
+            numpy_type_abbreviation = determine_dtype_abbreviation(class_member)
         except:
             print 'COULD NOT DETERMINE FORMAT FOR:'
             print 'class_member_name=',class_member_value
@@ -152,7 +152,7 @@ class EEG(object):
 
         for class_member, class_member_name, class_member_value in get_non_special_class_members(self):
             names_list.append(class_member_name)
-            numpy_type_abbreviation = determine_numpy_type_abbreviation(class_member)
+            numpy_type_abbreviation = determine_dtype_abbreviation(class_member)
             format_list.append(numpy_type_abbreviation)
 
 
