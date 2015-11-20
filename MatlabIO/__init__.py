@@ -4,6 +4,21 @@ import numpy as np
 
 __author__ = 'm'
 
+# mapping from python type specification (scipy loadmat will report those) to numpy dtype string abbreviation
+numpy_type_dict = {
+    type(int()): '<i8',
+    type(long()): '<i8',
+    type(np.float128()): '<f16',
+    type(np.complex256()): '<c32',
+    type(complex()): '<c16',
+    type(str()): '|S1',
+    type(unicode()): '|U1',
+    type(bool()): '|b1',
+    type(float()): '<f8',
+
+}
+
+
 
 def get_numpy_type_dict():
     from collections import defaultdict
@@ -15,25 +30,71 @@ def get_numpy_type_dict():
         obj = getattr(np, name)
     
         if hasattr(obj, 'dtype'):
-            print 'name=',name
-            print 'obj=',obj
+            # print 'name=',name
+            # print 'obj=',obj
     
             try:
                 npn = obj(0) # creating object of a type in the dtype list
-                print 'npn=',npn
+                # print 'npn=',npn
                 nat = npn.item()
-                print('%s (%r) -> %s'%(name, npn.dtype.char, type(nat)))
+                # print('%s (%r) -> %s'%(name, npn.dtype.char, type(nat)))
     
                 # d[type(nat)].add(npn.dtype.char)
-                numpy_type_dict[type(nat)].append(npn.dtype.char)
-    
+                # numpy_type_dict[type(nat)].append(npn.dtype.char)
+                numpy_type_dict[type(nat)].append(npn.dtype.str)
             except:
                 pass
-    
+    for key, val in numpy_type_dict.items():
+        print str(key)+':'+str(val)
 
     return numpy_type_dict
 
-numpy_type_dict = get_numpy_type_dict()
+#
+# numpy_type_dict = get_numpy_type_dict()
+
+
+
+
+def determine_numpy_type_abbreviation(inspect_member_info, default_string_length=16):
+    class_member_name = inspect_member_info[0]
+    class_member_val = inspect_member_info[1]
+    class_member_type = type(class_member_val)
+
+    if class_member_type.__name__ == 'ndarray':
+        # print 'found array'
+        # print 'class_member_val=', class_member_val
+        # print 'class_member_val.dtype=', class_member_val.dtype
+        # print 'class_member_val.shape=', class_member_val.shape
+        # print 'class_member_val.dtype.descr=', class_member_val.dtype.descr
+
+        # in case inferred array has zero size we will mark it as Python object
+            # '0'
+
+        shape = class_member_val.shape
+        if shape[0] == 0:
+            numpy_type_char_abbreviation = 'O'
+
+        else:
+            numpy_type_char_abbreviation = (class_member_val.dtype.descr[0][1], shape)
+
+
+        # sys.exit()
+    else:
+
+        # ('f2', '>f8', (2, 3))
+        # numpy_type_char_abbreviation = numpy_type_dict[class_member_type][0]
+        numpy_type_char_abbreviation = numpy_type_dict[class_member_type]
+
+        if numpy_type_char_abbreviation == '|S1':
+            numpy_type_char_abbreviation = '|S'+str(default_string_length)
+        elif numpy_type_char_abbreviation == '|U1':
+            numpy_type_char_abbreviation = '|U'+str(default_string_length)
+
+    return numpy_type_char_abbreviation
+
+
+
+
 
 
 def serialize_objects_in_matlab_format(file_name, *object_name_pairs):
@@ -132,8 +193,8 @@ def read_matlab_matrices_as_numpy_structured_arrays(file_name, *object_names):
     var_record_dict = deserialize_objects_from_matlab_format_struct_as_record(file_name,*object_names)
     var_object_dict = deserialize_objects_from_matlab_format(file_name,*object_names)
 
-    print 'var_record_dict=',var_record_dict
-    print 'var_object_dict=',var_object_dict
+    # print 'var_record_dict=',var_record_dict
+    # print 'var_object_dict=',var_object_dict
 
     structured_array_dict = {}
 
@@ -188,7 +249,7 @@ def reinterpret_matlab_matrix_as_structured_array(matlab_matrix_as_python_obj, m
         # print 'field_name = ', field_name
         # print 'array_value=',matlab_matrix_structured [field_name]
         field_val = getattr(template_element ,field_name)
-        print field_val, type(field_val).__name__
+        # print field_val, type(field_val).__name__
         field_val_type = type(field_val).__name__
 
         if field_val_type == 'ndarray':
@@ -207,45 +268,13 @@ def reinterpret_matlab_matrix_as_structured_array(matlab_matrix_as_python_obj, m
 
 
 
-def determine_numpy_type_abbreviation(inspect_member_info, default_string_length=16):
-    class_member_name = inspect_member_info[0]
-    class_member_val = inspect_member_info[1]
-    class_member_type = type(class_member_val)
-
-    if class_member_type.__name__ == 'ndarray':
-        print 'found array'
-        print 'class_member_val=', class_member_val
-        print 'class_member_val.dtype=', class_member_val.dtype
-        print 'class_member_val.shape=', class_member_val.shape
-        print 'class_member_val.dtype.descr=', class_member_val.dtype.descr
-
-        # in case inferred array has zero size we will mark it as Python object
-            # '0'
-
-        shape = class_member_val.shape
-        if shape[0] == 0:
-            numpy_type_char_abbreviation = 'O'
-
-
-        # numpy_type_char_abbreviation = (class_member_val.dtype.descr[0][1], shape)
-        print 'numpy_type_char_abbreviation=',numpy_type_char_abbreviation
-        # sys.exit()
-    else:
-
-        # ('f2', '>f8', (2, 3))
-        numpy_type_char_abbreviation = numpy_type_dict[class_member_type][0]
-        if numpy_type_char_abbreviation == 'S':
-            numpy_type_char_abbreviation = 'S'+str(default_string_length)
-        elif numpy_type_char_abbreviation == 'U':
-            numpy_type_char_abbreviation = 'U'+str(default_string_length)
-
-    return numpy_type_char_abbreviation
 
 def get_non_special_class_members(obj):
     for class_member in inspect.getmembers(obj, lambda a: not(inspect.isroutine(a))):
         class_member_name = class_member[0]
         class_member_val = class_member[1]
         class_member_type = type(class_member_val).__name__
+
         if not(class_member_name.startswith('__') and class_member_name.endswith('__')):
             yield class_member, class_member_name,class_member_val
 
@@ -255,16 +284,16 @@ def get_record_format(obj):
 
 
     for class_member, class_member_name, class_member_value in get_non_special_class_members(obj):
-        print 'class_member, class_member_name, class_member_value=',(class_member, class_member_name, class_member_value)
-
-        print 'class_member=',class_member
-        print 'class_member_name=',class_member_name
-        print 'class_member_value',class_member_value
+        # print 'class_member, class_member_name, class_member_value=',(class_member, class_member_name, class_member_value)
+        #
+        # print 'class_member=',class_member
+        # print 'class_member_name=',class_member_name
+        # print 'class_member_value',class_member_value
 
 
         try:
             numpy_type_abbreviation = determine_numpy_type_abbreviation(class_member)
-            print 'numpy_type_abbreviation=',numpy_type_abbreviation
+            # print 'numpy_type_abbreviation=',numpy_type_abbreviation
         except:
             print 'COULD NOT DETERMINE FORMAT FOR:'
             print 'class_member_name=',class_member_value
