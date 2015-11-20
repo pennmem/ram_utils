@@ -128,6 +128,14 @@ def get_record_format(obj):
 
     return {'names': names_list, 'formats': format_list}
 
+class MyClass(object):
+    def __init__(self):
+
+        self.ca = 30L
+        self.aa = 10.
+        self.ab = 'dupa' # ass
+        self.m = np.ones((2,2) , dtype=np.float)
+
 
 class EEG(object):
     def __init__(self):
@@ -136,6 +144,7 @@ class EEG(object):
         self.aa = 10.
         self.ab = 'dupa'
         self.m = np.ones((2,2) , dtype=np.float)
+        self.my_klass = MyClass()
 
 
     def to_record(self):

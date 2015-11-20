@@ -97,7 +97,8 @@ class RamPipeline(object):
             task_completed_file_name = task.get_task_completed_file_name()
 
             if task.is_completed():
-                print 'SKIPPING COMPLETED TASK: ', task_name, ' obj=', task
+                print 'RESTORING COMPLETED TASK: ', task_name, ' obj=', task
+                task.restore()
 
             else:
                 print 'RUNNING TASK: ', task_name, ' obj=', task

@@ -356,7 +356,12 @@ class RamTask(object):
     # def __set_name(self, name):
     #     self.__name = name
 
-
+    def restore(self):
+        '''
+        Core function that restores saved results of the task so that following tasks in the pipeline can continue
+        :return:
+        '''
+        pass
     def run(self):
         '''
         Core function of the task object - needs to be reimplmented in each subslacc deriving from RamTask
