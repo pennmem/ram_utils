@@ -11,45 +11,65 @@ import matplotlib.pyplot as plt
 
 class PlotData(object):
     # def __init__(self, x, y, xerr=None, yerr=None, x_tick_labels=None, y_tick_labels=None, title=''):
-    def __init__(self, x, y, **options):
+    def __init__(self, **options):
+        '''
+        Initializes PlotData
+        :param options: options are  'x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels','title',
+        'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos','xlabel','ylabel'
+        :return:
+        '''
         self.ylabel_fontsize = 12
         self.xlabel_fontsize = 12
 
-        for option_name in ['xerr', 'yerr', 'x_tick_labels', 'y_tick_labels','title', 'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos']:
+        for option_name in ['x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels','title',
+                            'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos', 'xlabel','ylabel']:
             try:
                 setattr(self, option_name, options[option_name])
                 print 'option_name=',option_name,' val=',options[option_name], ' value_check = ', getattr(self, option_name)
             except LookupError:
                 setattr(self, option_name, None)
 
-        self.x = x
-        self.y = y
-
-        # self.xerr = xerr
-        # self.yerr = yerr
-        # self.x_tick_labels = x_tick_labels
-        # self.y_tick_labels = y_tick_labels
-        #
-        # self.title = title
+        if self.x is None or self.y is None:
+            raise AttributeError('PlotData requires that x and y attributes are initialized. Use PlotData(x=x_array,y=y_array) syntax')
 
 
 class PanelPlot(object):
 
-    def __init__(self, i_max, j_max, title='', x_axis_title='', y_axis_title=''):
-        self.i_max = i_max
-        self.j_max = j_max
-        self.title = title
-        self.x_axis_title = x_axis_title
-        self.y_axis_title = y_axis_title
+    def __init__(self, **options):
+        '''
+        Initializes PanelPlot
+        :param options: options are: 'i_max', 'j_max', 'title', 'xtitle', 'ytitle', 'wspace', 'hspace'
+        :return: None
+        '''
+        for option_name in ['i_max', 'j_max', 'title', 'xtitle', 'ytitle', 'wspace', 'hspace']:
+            try:
+                setattr(self, option_name, options[option_name])
+                print 'option_name=',option_name,' val=',options[option_name], ' value_check = ', getattr(self, option_name)
+            except LookupError:
+                setattr(self, option_name, None)
 
-        self.plot_data_matrix = [[None for x in range(j_max)] for x in range(i_max)]
 
-    def add_plot_data(self,i_panel, j_panel, x, y, **options):
+        self.plot_data_matrix = [[None for x in range(self.j_max)] for x in range(self.i_max)]
 
+    def add_plot_data(self,i_panel, j_panel, **options):
+        '''
+        Adds PlotData to the proper location in the panel plot
+        :param i_panel: x position of the plot in the panel grid
+        :param j_panel: y position of the plot in the panel grid
+        :param options: same options you would pass to PlotData. if one of the options is plot_data than
+        the rest of the options gets ignored
+        :return:None
+        '''
 
-        print 'i',i_panel,' j ',j_panel, ' x ',x, ' y ',y
+        print 'i',i_panel,' j ',j_panel
         print 'options=',options
-        self.plot_data_matrix[i_panel][j_panel] = PlotData(x, y, **options)
+        try:
+            pd = options['plot_data']
+        except LookupError:
+            pd = PlotData(**options)
+
+        self.plot_data_matrix[i_panel][j_panel] = pd
+        # self.plot_data_matrix[i_panel][j_panel] = PlotData(x, y, **options)
 
 
     # def add_plot_data(self,i_panel, j_panel, x, y,xerr=None, yerr=None, title=''):
@@ -57,11 +77,31 @@ class PanelPlot(object):
     #     self.plot_data_matrix[i_panel][j_panel] = PlotData(x, y, xerr=xerr, yerr=yerr, title=title)
 
     def generate_plot(self):
+        '''
+        grid layout numbering is as follows:
+        ---------------------------------------------
+        |
+        |   (0,0)       (0,1)       (0,2)
+        |
+        |
+        |
+        |
+        |   (1,0)       (1,1)       (1,2)
+        |
+        |
+        |
+        |
+        |   (2,0)       (2,1)       (2,2)
+        |
+        ---------------------------------------------
+        :return:
+        '''
+
         fig  = plt.figure(figsize=(15,15))
         fig.suptitle(self.title, fontsize=16, fontweight='bold')
         # fig.text(x=0.5, y=0.95, s='Minimum 2 cells per cluster' ,fontsize=14, horizontalalignment='center')
 
-        fig.text(x=0.5, y=0.02, s=self.x_axis_title ,fontsize=16, fontweight='bold',horizontalalignment='center')
+        fig.text(x=0.5, y=0.02, s=self.xtitle ,fontsize=16, fontweight='bold',horizontalalignment='center')
         import itertools
         for i, j in itertools.product(xrange(self.i_max), xrange(self.j_max)):
 
@@ -72,10 +112,23 @@ class PanelPlot(object):
 
             ax = plt.subplot2grid((self.i_max,self.j_max),(i, j))
 
+            # ax.set_aspect('equal', adjustable='box')
 
-            if j == 0 :
 
-                ax.set_ylabel(self.y_axis_title,fontsize=pd.ylabel_fontsize)
+            # y axis labels
+            if pd.ylabel is None:
+                if j == 0 :
+                    ax.set_ylabel(self.ytitle,fontsize=pd.ylabel_fontsize)
+            else:
+                ax.set_ylabel(pd.ylabel,fontsize=pd.ylabel_fontsize)
+
+            # x axis labels
+            if pd.xlabel is None:
+                pass
+            else:
+                ax.set_xlabel(pd.xlabel,fontsize=pd.xlabel_fontsize)
+
+
 
             print 'pd=',pd
 
@@ -114,7 +167,11 @@ class PanelPlot(object):
             #     ax.set_xticks(pd.x)
             #     ax.set_xticklabels(pd.x_tick_labels)
 
-            ax.set_xlabel(pd.title, fontsize=pd.xlabel_fontsize)
+            # ax.set_xlabel(pd.title, fontsize=pd.xlabel_fontsize)
+        if self.wspace is None or self.hspace is None:
+            pass
+        else:
+            fig.subplots_adjust(wspace=self.wspace, hspace=self.hspace)
 
         return plt
 
@@ -125,7 +182,7 @@ def generate_panel_plot():
 print ''
 if __name__== '__main__':
 
-    panel_plot = PanelPlot(i_max=2, j_max=2, title='Random Data 1', x_axis_title='x_axis_label', y_axis_title='y_axis_random')
+    panel_plot = PanelPlot(i_max=2, j_max=2, title='Random Data 1', xtitle='x_axis_label', ytitle='y_axis_random')
 
     panel_plot.add_plot_data(0,0,x=np.arange(10),y=np.random.rand(10), title='data00')
     panel_plot.add_plot_data(0,1,x=np.arange(10),y=np.random.rand(10), title='data01')
