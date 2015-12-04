@@ -2,7 +2,7 @@ from RamPipeline import *
 
 import numpy as np
 from scipy.stats import ttest_ind
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegression,LogisticRegressionCV
 from sklearn.metrics import roc_auc_score
 from sklearn.externals import joblib
 
@@ -49,7 +49,7 @@ class XValTTest(RamTask):
 
             print 'Session', s_out
 
-            insample_sel = (events.session!=s_out)
+            insample_sel = (events.session!=s_out) & (events.list > 2)
             insample_events = events[insample_sel]
 
             insample_pow_mat = pow_mat[insample_sel,:]
@@ -69,11 +69,13 @@ class XValTTest(RamTask):
                 num_features = insample_pow_mat_tmp.shape[1]
                 print num_features, 'features selected'
 
-                lr_classifier = LogisticRegression(penalty=self.params.penalty_type)
+                # lr_classifier = LogisticRegression(penalty=self.params.penalty_type)
+
+                lr_classifier = LogisticRegressionCV()
 
                 lr_classifier.fit(insample_pow_mat_tmp, insample_recalls)
 
-                outsample_sel = ~insample_sel
+                outsample_sel = (~insample_sel) & (events.list > 2)
                 outsample_events = events[outsample_sel]
 
                 outsample_pow_mat = pow_mat[outsample_sel,:]

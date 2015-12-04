@@ -13,11 +13,17 @@ if len(sys.argv)>2:
 
     args = parse_command_line()
 
+# R1051J had 3 sessions
+# R1060M had 4 sessions
+# R1061T had 4 sessions
+# R1065J had 6 sessions
+# R1092J_2 had 3 sessions
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1060M',
+    command_line_emulation_argument_list = ['--subject','R1061T',
                                             '--task','RAM_FR1',
                                             '--workspace-dir','~/scratch/FR1_reports',
+
                                             # '--mount-point','/Users/m/',
                                             '--mount-point','/Volumes/rhino_root',
                                             '--python-path','~/PTSA_GIT',
@@ -89,17 +95,18 @@ params = Params()
 
 
 class ReportPipeline(RamPipeline):
-    def __init__(self, subject, task, workspace_dir, mount_point=None):
+    def __init__(self, subject, output_dir, task, workspace_dir, mount_point=None):
         RamPipeline.__init__(self)
         self.subject = subject
         self.task = self.experiment = task
         self.mount_point = mount_point
         self.set_workspace_dir(workspace_dir)
+        self.output_dir = output_dir
 
 
 
 # sets up processing pipeline
-report_pipeline = ReportPipeline(subject=args.subject, task=args.task,
+report_pipeline = ReportPipeline(subject=args.subject, task=args.task,output_dir=expanduser(args.workspace_dir),
                                        workspace_dir=join(args.workspace_dir,args.task+'_'+args.subject), mount_point=args.mount_point)
 
 report_pipeline.add_task(EventPreparation(mark_as_completed=False))
