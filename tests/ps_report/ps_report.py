@@ -14,12 +14,12 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1086M',
+    command_line_emulation_argument_list = ['--subject','R1089P',
                                             '--experiment','PS2',
-                                            '--workspace-dir','/Users/m/scratch/mswat/Python_pipeline',
+                                            '--workspace-dir','/Users/m/scratch/PS_reports',
                                             '--mount-point','/Volumes/rhino_root',
-                                            '--python-path','~/RAM_UTILS_GIT',
-                                            '--python-path','~/PTSA_INSTALL'
+                                            # '--python-path','~/python/ptsa/build/lib.linux-x86_64-2.7',
+                                            '--python-path','~/RAM_UTILS_GIT'
                                             ]
     args = parse_command_line(command_line_emulation_argument_list)
 
@@ -29,21 +29,13 @@ configure_python_paths(args.python_path)
 
 import numpy as np
 from RamPipeline import RamPipeline
-from RamPipeline import MatlabRamTask, RamTask
-# from RamPipeline import *
 
-
-# from MatlabTasks import *
-# from GenerateReportTasks import *
-# from PSReportingTask import PSReportingTask
-
-
-from EventPreparation import EventPreparation
+from FR1EventPreparation import FR1EventPreparation
 from PSEventPreparation import PSEventPreparation
 
 from ComputeFR1Powers import ComputeFR1Powers
 
-from ComputePowersPS import ComputePowersPS
+from ComputePSPowers import ComputePSPowers
 
 from TalPreparation import TalPreparation
 
@@ -53,33 +45,44 @@ from ComputeProbabilityDeltas import ComputeProbabilityDeltas
 
 from ComposeSessionSummary import ComposeSessionSummary
 
+from GenerateReportTasks import *
+
 
 # turn it into command line options
 
 class Params(object):
     def __init__(self):
-        self.fr1_start_time = -0.5
-        self.fr1_end_time = 2.1
+        self.fr1_start_time = 0.0
+        self.fr1_end_time = 1.6
         self.fr1_buf = 1.0
 
-        self.ps_pre_start_time = -1.0
-        self.ps_pre_end_time = 0.0
-        self.ps_pre_buf = 1.0
+        self.ps_start_time = -0.5
+        self.ps_end_time = 0.0
+        self.ps_buf = 1.0
+        self.ps_offset = 0.1
 
-        self.ps_post_offset = 0.1
+        self.filt_order = 4
 
-        # eeghz = 500
-        # powhz = 50
         self.freqs = np.logspace(np.log10(3), np.log10(180), 12)
+
+        self.log_powers = True
+
+        self.timewin_start = 0
+        self.timewin_step = 5
+        self.timewin_end = 85
+        self.timewin_width = 25
+
+        self.penalty_type = 'l1'
+        self.Cs = np.logspace(np.log10(1e-2), np.log10(1e4), 22)
 
 
 params = Params()
 
 
 class ReportPipeline(RamPipeline):
-    def __init__(self, subject_id, experiment, workspace_dir, mount_point=None):
+    def __init__(self, subject, experiment, workspace_dir, mount_point=None):
         RamPipeline.__init__(self)
-        self.subject_id = subject_id
+        self.subject = subject
         self.experiment = experiment
         self.mount_point = mount_point
         self.set_workspace_dir(workspace_dir)
@@ -87,57 +90,30 @@ class ReportPipeline(RamPipeline):
 
 
 # sets up processing pipeline
-report_pipeline = ReportPipeline(subject_id=args.subject, experiment=args.experiment,
-                                       workspace_dir=args.workspace_dir, mount_point=args.mount_point)
+report_pipeline = ReportPipeline(subject=args.subject, experiment=args.experiment,
+                                       workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point)
 
-# ps_report_pipeline = PS2ReportPipeline(subject_id='R1056M', experiment='PS1', workspace_dir='/scratch/busygin/py_run_8/', matlab_paths=['~/eeg','~/matlab/beh_toolbox','~/RAM/RAM_reporting','~/RAM/RAM_sys2Biomarkers','.'])
+report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
 
-#  ----------------------------------- Matlab Tasks
-# creates parameter .mat file - to match Youssef's code
-report_pipeline.add_task(EventPreparation(task='RAM_FR1',mark_as_completed=False))
+report_pipeline.add_task(TalPreparation(mark_as_completed=False))
 
-report_pipeline.add_task(TalPreparation(task='RAM_FR1',mark_as_completed=False))
+report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=True))
 
-report_pipeline.add_task(ComputeFR1Powers(params = params, task='RAM_FR1',mark_as_completed=True))
+report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 
-report_pipeline.add_task(ComputeClassifier(params = params, task='RAM_FR1',mark_as_completed=False))
+report_pipeline.add_task(PSEventPreparation(mark_as_completed=False))
 
-report_pipeline.add_task(PSEventPreparation(task='RAM_FR1',mark_as_completed=False))
+report_pipeline.add_task(ComputePSPowers(params=params, mark_as_completed=True))
 
-report_pipeline.add_task(ComputePowersPS(params = params, task='RAM_FR1',mark_as_completed=True))
+report_pipeline.add_task(ComputeProbabilityDeltas(params=params, mark_as_completed=True))
 
-report_pipeline.add_task(ComputeProbabilityDeltas(params = params, task='RAM_FR1',mark_as_completed=True))
+report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(ComposeSessionSummary(params = params, task='RAM_FR1',mark_as_completed=True))
+report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
 
+report_pipeline.add_task(GenerateTex(mark_as_completed=False))
 
+report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
-# # Computes FR1 Spectral Powers and classifier - calls Youssef's code
-# ps_report_pipeline.add_task(ComputePowersAndClassifierTask())
-#
-# # Computes Spectral Powers for Parameter Search Stimulation sessions
-# ps_report_pipeline.add_task(ComputePowersPSTask())
-#
-# # Saves Events Stimulation events for a given PS session
-# ps_report_pipeline.add_task(SaveEventsTask())
-#
-# ps_report_pipeline.add_task(PrepareBPSTask())
-
-
-# # ------------------------------------ Report Generating tasks
-# ps_report_pipeline.add_task(ExtractWeightsTask(mark_as_completed=True))
-#
-# # #  does actual analysis of the PS2 data - passes cumulative_plot_data_dict
-# ps_report_pipeline.add_task(PSReportingTask(mark_as_completed=False))
-# #
-# #  generates plots for the report
-# ps_report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
-# #
-# #  generates tex for the reports
-# ps_report_pipeline.add_task(GenerateTex(mark_as_completed=False))
-# #
-# # # compiles generted tex to PDF
-# ps_report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
-#
-# # starts processing pipeline
+# starts processing pipeline
 report_pipeline.execute_pipeline()

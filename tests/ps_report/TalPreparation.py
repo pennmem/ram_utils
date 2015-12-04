@@ -3,26 +3,23 @@ __author__ = 'm'
 import numpy as np
 import os
 
-
 from get_bipolar_subj_elecs import get_bipolar_subj_elecs
-
 
 from RamPipeline import *
 
+
 class TalPreparation(RamTask):
-    def __init__(self, task, mark_as_completed=True):
+    def __init__(self, mark_as_completed=True):
         RamTask.__init__(self, mark_as_completed)
-        self.task=task
 
     def run(self):
-        events = self.get_passed_object(self.task+'_events')
+        events = self.get_passed_object('FR1_events')
         tal_info = get_bps(events)
         channels = get_single_elecs_from_bps(tal_info)
         print len(channels), 'single electrodes', len(tal_info), 'bipolar pairs'
 
         self.pass_object('tal_info',tal_info)
         self.pass_object('channels',channels)
-
 
 
 def get_bps(events):
@@ -40,6 +37,4 @@ def get_single_elecs_from_bps(tal_info):
 
 def get_dataroot(events):
     dataroots = np.unique([esrc.dataroot for esrc in events.esrc])
-    if len(dataroots) != 1:
-        raise ValueError('Invalid number of dataroots: %d' % len(dataroots))
     return dataroots[0]

@@ -1,32 +1,34 @@
 __author__ = 'm'
 
-from sys import argv
-import os
 import os.path
 import re
 import numpy as np
+import pandas as pd
 from scipy.io import loadmat
-from scipy.stats.mstats import zscore
 
 from ptsa.data.events import Events
 from ptsa.data.rawbinwrapper import RawBinWrapper
 
-from get_bipolar_subj_elecs import get_bipolar_subj_elecs
-
-from ptsa.wavelet import phase_pow_multi
-
-
 from RamPipeline import *
 
+
 class PSEventPreparation(RamTask):
-    def __init__(self, task, mark_as_completed=True):
+    def __init__(self, mark_as_completed=True):
         RamTask.__init__(self, mark_as_completed)
-        self.task = task
 
     def run(self):
+        subject = self.pipeline.subject
         experiment = self.pipeline.experiment
-        events = Events(get_events(subject=self.pipeline.subject_id, task='RAM_PS', path_prefix=self.pipeline.mount_point))
+
+        try:
+            events = Events(get_events(subject=subject, task='RAM_PS', path_prefix=self.pipeline.mount_point))
+        except IOError:
+            raise Exception('No parameter search for subject %s' % subject)
+
         events = events[events.experiment == experiment]
+
+        if events.size == 0:
+            raise Exception('No %s events for subject %s' % (experiment,subject))
 
         events = correct_eegfile_field(events)
         events = self.attach_raw_bin_wrappers(events)
@@ -34,14 +36,18 @@ class PSEventPreparation(RamTask):
         sessions = np.unique(events.session)
         print experiment, 'sessions:', sessions
 
+        events = pd.DataFrame.from_records(events)
+
         events = compute_isi(events)
 
         is_stim_event_type_vec = np.vectorize(is_stim_event_type)
         events = events[is_stim_event_type_vec(events.type)]
+
         print len(events), 'stim', experiment, 'events'
 
-        # self.pass_object('task',self.task)
-        self.pass_object(experiment+'_events',events)
+        events = Events(events.to_records(index=False))
+
+        self.pass_object(experiment+'_events', events)
 
 
     def attach_raw_bin_wrappers(self, events):
@@ -77,19 +83,18 @@ def is_stim_event_type(event_type):
 def compute_isi(events):
     print 'Computing ISI'
 
-    events = events.add_fields(isi=np.float)
-    events.isi = np.nan
+    events['isi'] = np.nan
 
     for i in xrange(1,len(events)):
-        curr_ev = events[i]
+        curr_ev = events.ix[i]
         if is_stim_event_type(curr_ev.type):
-            prev_ev = events[i-1]
+            prev_ev = events.ix[i-1]
             if curr_ev.session == prev_ev.session:
                 if is_stim_event_type(prev_ev.type) or prev_ev.type == 'BURST':
                     prev_mstime = prev_ev.mstime
                     if prev_ev.pulse_duration > 0:
                         prev_mstime += prev_ev.pulse_duration
-                    curr_ev.isi = curr_ev.mstime - prev_mstime
+                    events.isi.values[i] = curr_ev.mstime - prev_mstime
 
     return events
 
@@ -112,5 +117,3 @@ def correct_eegfile_field(events):
         ev.eegfile = ev.eegfile.replace('eeg.reref', 'eeg.noreref')
         ev.eegfile = re.sub(data_dir_bad, data_dir_good, ev.eegfile)
     return events
-
-

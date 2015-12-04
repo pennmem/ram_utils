@@ -2,34 +2,6 @@ __author__ = 'm'
 
 from RamPipeline import *
 
-class ExtractWeightsTask(RamTask):
-    def __init__(self, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
-
-    def run(self):
-        # saves Weights.mat
-        from MatlabIO import deserialize_single_object_from_matlab_format, serialize_objects_in_matlab_format
-        # classifier_output_file_name = 'R1086M_RAM_FR1_L2LR_Freq_Time-Enc_CV-list_Pen-154.45.mat'
-
-        classifier_output_location = 'biomarker/L2LR/Feat_Freq'
-        from glob import glob
-        self.get_path_to_resource_in_workspace(classifier_output_location)
-
-        classifier_files = glob(self.get_path_to_resource_in_workspace(classifier_output_location) + '/*.mat')
-        try:
-            classifier_output_file_name_full = classifier_files[
-                0]  # picking first file, there shuld be just one file there!
-        except IndexError:
-            print 'Could not locate *.mat in ' + self.get_path_to_resource_in_workspace(classifier_output_location)
-            sys.exit()
-
-        res = deserialize_single_object_from_matlab_format(classifier_output_file_name_full, 'res')
-
-        serialize_objects_in_matlab_format(self.get_path_to_resource_in_workspace('Weights.mat'), (res.Weights, 'Weights'))
-        # save weights in matlab format
-        print 'res.Weights=', res.Weights
-        # print 'res.W0=',res.W0
-
 
 class GenerateTex(RamTask):
     def __init__(self, mark_as_completed=True): RamTask.__init__(self, mark_as_completed)
@@ -40,7 +12,7 @@ class GenerateTex(RamTask):
         tex_template = 'ps_report.tex.tpl'
         tex_session_template = 'ps_session.tex.tpl'
 
-        report_tex_file_name = self.pipeline.experiment+'-'+self.pipeline.subject_id+'-'+'report.tex'
+        report_tex_file_name = self.pipeline.experiment + '-' + self.pipeline.subject + '-' + 'report.tex'
         self.pass_object('report_tex_file_name',report_tex_file_name)
 
         self.set_file_resources_to_move(report_tex_file_name, dst='reports')
@@ -55,7 +27,7 @@ class GenerateTex(RamTask):
         session_summary_array = self.get_passed_object('session_summary_array')
 
         for session_summary in session_summary_array:
-            replace_dict = {'<PLOT_FILE>': 'report_plot_' + session_summary.name + '.pdf',
+            replace_dict = {'<PLOT_FILE>': self.pipeline.experiment + '-' + self.pipeline.subject + '-report_plot_' + session_summary.name + '.pdf',
                             '<STIMTAG>': session_summary.stimtag,
                             '<CONSTANT_NAME>': session_summary.constant_name,
                             '<CONSTANT_VALUE>': session_summary.constant_value,
@@ -81,7 +53,7 @@ class GenerateTex(RamTask):
         # print 'session_data_tex_table=\n',session_data_tex_table
 
         replace_dict = {
-            '<SUBJECT_ID>': self.pipeline.subject_id,
+            '<SUBJECT_ID>': self.pipeline.subject,
             '<EXPERIMENT>': self.pipeline.experiment,
             '<DATE>': datetime.date.today(),
             '<SESSION_DATA>': session_data_tex_table,
@@ -90,7 +62,7 @@ class GenerateTex(RamTask):
             '<REPORT_PAGES>': tex_session_pages_str,
             '<CUMULATIVE_ISI_MID>': self.get_passed_object('CUMULATIVE_ISI_MID'),
             '<CUMULATIVE_ISI_HALF_RANGE>': self.get_passed_object('CUMULATIVE_ISI_HALF_RANGE'),
-            '<CUMULATIVE_PLOT_FILE>': 'report_plot_Cumulative.pdf',
+            '<CUMULATIVE_PLOT_FILE>': self.pipeline.experiment + '-' + self.pipeline.subject + '-report_plot_Cumulative.pdf',
             '<CUMULATIVE_PARAMETER1>': self.get_passed_object('CUMULATIVE_PARAMETER1'),
             '<CUMULATIVE_PARAMETER2>': self.get_passed_object('CUMULATIVE_PARAMETER2')
         }
@@ -112,41 +84,51 @@ class GeneratePlots(RamTask):
 
         from PlotUtils import PanelPlot
         for session_summary in session_summary_array:
-            panel_plot = PanelPlot(i_max=3, j_max=2, title='', y_axis_title='$\Delta$ Post-Pre Stim Biomarker')
+            panel_plot = PanelPlot(i_max=3, j_max=2, title='',xtitle='', ytitle='$\Delta$ Post-Pre Classifier Output', wspace=0.3,hspace=0.3)
+
+
 
             for plot_panel_index, pd in session_summary.plot_data_dict.iteritems():
-                print 'plot_panel_index=', plot_panel_index
-                print 'pd.x=', pd.x
-                print 'pd.y=', pd.y
                 plot_letter = chr(ord('a') + 2 * plot_panel_index[0] + plot_panel_index[1])
-                panel_plot.add_plot_data(plot_panel_index[0], plot_panel_index[1], x=pd.x, y=pd.y, yerr=pd.yerr,
-                                         x_tick_labels=pd.x_tick_labels, title='(' + plot_letter + ')', ylim=pd.ylim)
+                pd.xlabel = '(' + plot_letter + ')'
+                pd.ylabel = '$\Delta$ Post-Pre Classifier Output'
+                pd.xhline_pos=0.0
+                panel_plot.add_plot_data(plot_panel_index[0], plot_panel_index[1],plot_data=pd)
+
+                # panel_plot.add_plot_data(plot_panel_index[0], plot_panel_index[1], x=pd.x, y=pd.y, yerr=pd.yerr,
+                #                          x_tick_labels=pd.x_tick_labels, title='(' + plot_letter + ')', ylim=pd.ylim)
 
             plot = panel_plot.generate_plot()
-            plot.subplots_adjust(wspace=0.3, hspace=0.3)
+            # plot.subplots_adjust(wspace=0.3, hspace=0.3)
             # plt.savefig(join(plotsDir, quantity_name+'.png'), dpi=300,bboxinches='tight')
 
-            plot_out_fname = self.get_path_to_resource_in_workspace('reports/report_plot_' + session_summary.name + '.pdf')
+            plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + self.pipeline.experiment + '-' + self.pipeline.subject + '-report_plot_' + session_summary.name + '.pdf')
 
             plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
         cumulative_plot_data_dict = self.get_passed_object('cumulative_plot_data_dict')
 
-        panel_plot = PanelPlot(i_max=3, j_max=2, title='', y_axis_title='$\Delta$ Post-Pre Stim Biomarker')
+        panel_plot = PanelPlot(i_max=3, j_max=2, title='', y_axis_title='$\Delta$ Post-Pre Classifier Output')
 
         for plot_panel_index, pd in cumulative_plot_data_dict.iteritems():
             # print 'plot_panel_index=', plot_panel_index
             # print 'pd.x=', pd.x
             # print 'pd.y=', pd.y
             plot_letter = chr(ord('a') + 2 * plot_panel_index[0] + plot_panel_index[1])
-            panel_plot.add_plot_data(plot_panel_index[0], plot_panel_index[1], x=pd.x, y=pd.y, yerr=pd.yerr,
-                                     x_tick_labels=pd.x_tick_labels, title='(' + plot_letter + ')', ylim=pd.ylim)
+            pd.xlabel = '(' + plot_letter + ')'
+            pd.ylabel = '$\Delta$ Post-Pre Classifier Output'
+            pd.xhline_pos=0.0
+
+            panel_plot.add_plot_data(plot_panel_index[0], plot_panel_index[1], plot_data=pd)
+
+            # panel_plot.add_plot_data(plot_panel_index[0], plot_panel_index[1], x=pd.x, y=pd.y, yerr=pd.yerr,
+            #                          x_tick_labels=pd.x_tick_labels, title='(' + plot_letter + ')', ylim=pd.ylim)
 
         plot = panel_plot.generate_plot()
         plot.subplots_adjust(wspace=0.3, hspace=0.3)
         # plt.savefig(join(plotsDir, quantity_name+'.png'), dpi=300,bboxinches='tight')
 
-        plot_out_fname = self.get_path_to_resource_in_workspace('reports/report_plot_Cumulative.pdf')
+        plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + self.pipeline.experiment + '-' + self.pipeline.subject + '-report_plot_Cumulative.pdf')
 
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
@@ -169,7 +151,7 @@ class GenerateReportPDF(RamTask):
         texinputs_set_str = r'export TEXINPUTS="' + output_directory + '":$TEXINPUTS;'
 
 
-        report_file_name = self.pipeline.experiment+'-'+self.pipeline.subject_id+'-'+'report.tex'
+        report_file_name = self.pipeline.experiment+'-'+self.pipeline.subject+'-'+'report.tex'
 
         report_tex_file_name = self.get_passed_object('report_tex_file_name')
 
