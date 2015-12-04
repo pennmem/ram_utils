@@ -19,7 +19,7 @@ numpy_type_dict = {
 }
 
 
-def determine_dtype_abbreviation(inspect_member_info, default_string_length=16):
+def determine_dtype_abbreviation(inspect_member_info, default_string_length=256):
     '''
     Determines numpy dtype abbreviation for a given type returned by type() fcn
 

@@ -15,7 +15,7 @@ class PlotData(object):
         self.ylabel_fontsize = 12
         self.xlabel_fontsize = 12
 
-        for option_name in ['xerr', 'yerr', 'x_tick_labels', 'y_tick_labels','title', 'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim']:
+        for option_name in ['xerr', 'yerr', 'x_tick_labels', 'y_tick_labels','title', 'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos']:
             try:
                 setattr(self, option_name, options[option_name])
                 print 'option_name=',option_name,' val=',options[option_name], ' value_check = ', getattr(self, option_name)
@@ -101,6 +101,9 @@ class PanelPlot(object):
             if pd.ylim:
                 ax.set_ylim(pd.ylim)
 
+            if pd.xhline_pos is not None:
+                ax.axhline(y=pd.xhline_pos, color='k', ls='dashed')
+            # ax.axhline(y=0.5, color='k', ls='dashed')
 
 
             # if pd.xlim:
