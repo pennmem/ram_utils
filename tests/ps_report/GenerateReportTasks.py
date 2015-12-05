@@ -155,6 +155,8 @@ class GenerateReportPDF(RamTask):
 
         report_tex_file_name = self.get_passed_object('report_tex_file_name')
 
+
+        # + '/Library/TeX/texbin/pdflatex '\
         pdflatex_command_str = texinputs_set_str \
                                + 'module load Tex;pdflatex '\
                                + ' -output-directory '+output_directory\
