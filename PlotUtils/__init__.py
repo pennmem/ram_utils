@@ -15,14 +15,16 @@ class PlotData(object):
         '''
         Initializes PlotData
         :param options: options are  'x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels','title',
-        'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos','xlabel','ylabel','linestyle','color','marker'
+        'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos','xlabel','ylabel','linestyle','color','marker',
+        'levelline'
         :return:
         '''
         self.ylabel_fontsize = 12
         self.xlabel_fontsize = 12
 
         for option_name in ['x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels','title',
-                            'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos', 'xlabel','ylabel','linestyle','color','marker']:
+                            'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos', 'xlabel','ylabel',
+                            'linestyle','color','marker','levelline']:
             try:
                 setattr(self, option_name, options[option_name])
                 print 'option_name=',option_name,' val=',options[option_name], ' value_check = ', getattr(self, option_name)
@@ -49,14 +51,15 @@ class BarPlotData(object):
         Initializes PlotData
         :param options: options are  'x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels','title',
         'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos','xlabel','ylabel','linestyle','color','marker',
-        'barcolors'
+        'levelline', 'barcolors'
         :return:
         '''
         self.ylabel_fontsize = 12
         self.xlabel_fontsize = 12
 
         for option_name in ['x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels','title',
-                            'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos', 'xlabel','ylabel','linestyle','color','marker','barcolors']:
+                            'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos', 'xlabel','ylabel',
+                            'linestyle','color','marker','levelline','barcolors']:
             try:
                 setattr(self, option_name, options[option_name])
                 print 'option_name=',option_name,' val=',options[option_name], ' value_check = ', getattr(self, option_name)
@@ -231,8 +234,18 @@ class PanelPlot(object):
             if pd.ylim:
                 ax.set_ylim(pd.ylim)
 
+
+            # LEVEL_LINE
+            if pd.levelline is not None:
+                levelline = ax.plot(pd.levelline[0],pd.levelline[1], ls='--', color='black')
+
+
+            #HORIZONTAL LINE
             if pd.xhline_pos is not None:
                 ax.axhline(y=pd.xhline_pos, color='black', ls='dashed')
+
+
+
             # ax.axhline(y=0.5, color='k', ls='dashed')
 
 
@@ -261,7 +274,7 @@ if __name__== '__main__':
 
     panel_plot = PanelPlot(xfigsize=15,yfigsize=7.5,  i_max=1, j_max=2, title='Random Data 1', xtitle='x_axis_label', ytitle='y_axis_random')
 
-    panel_plot.add_plot_data(0,0,x=np.arange(10),y=np.random.rand(10), title='data00',linestyle='dashed',color='green',marker='s')
+    panel_plot.add_plot_data(0,0,x=np.arange(10),y=np.random.rand(10), title='data00',linestyle='dashed',color='green',marker='s',levelline=[[0,10],[0,1]] )
     bpd = BarPlotData(x=np.arange(10),y=np.random.rand(10), title='data01',yerr=np.random.rand(10)*0.1,
                       x_tick_labels=['a0','a1','a2','a3','a4','a5','a6','a7','a8','a9'],
                       barcolors=['r','g','b','r','g','b','r','g','b','r'])
