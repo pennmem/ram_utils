@@ -15,19 +15,29 @@ class PlotData(object):
         '''
         Initializes PlotData
         :param options: options are  'x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels','title',
-        'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos','xlabel','ylabel'
+        'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos','xlabel','ylabel','linestyle','color','marker'
         :return:
         '''
         self.ylabel_fontsize = 12
         self.xlabel_fontsize = 12
 
         for option_name in ['x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels','title',
-                            'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos', 'xlabel','ylabel']:
+                            'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos', 'xlabel','ylabel','linestyle','color','marker']:
             try:
                 setattr(self, option_name, options[option_name])
                 print 'option_name=',option_name,' val=',options[option_name], ' value_check = ', getattr(self, option_name)
             except LookupError:
                 setattr(self, option_name, None)
+
+        # setting reasonable defaults
+        if self.linestyle is None:
+            self.linestyle='-'
+        if self.color is None:
+            self.color='black'
+        if self.marker is None:
+            self.marker=''
+
+
 
         if self.x is None or self.y is None:
             raise AttributeError('PlotData requires that x and y attributes are initialized. Use PlotData(x=x_array,y=y_array) syntax')
@@ -38,10 +48,10 @@ class PanelPlot(object):
     def __init__(self, **options):
         '''
         Initializes PanelPlot
-        :param options: options are: 'i_max', 'j_max', 'title', 'xtitle', 'ytitle', 'wspace', 'hspace'
+        :param options: options are: 'i_max', 'j_max', 'title', 'xtitle', 'ytitle', 'wspace', 'hspace','xfigsize','yfigsize'
         :return: None
         '''
-        for option_name in ['i_max', 'j_max', 'title', 'xtitle', 'ytitle', 'wspace', 'hspace']:
+        for option_name in ['i_max', 'j_max', 'title', 'xtitle', 'ytitle', 'wspace', 'hspace','xfigsize','yfigsize']:
             try:
                 setattr(self, option_name, options[option_name])
                 print 'option_name=',option_name,' val=',options[option_name], ' value_check = ', getattr(self, option_name)
@@ -97,7 +107,12 @@ class PanelPlot(object):
         :return:
         '''
 
-        fig  = plt.figure(figsize=(15,15))
+        fig = None
+        if self.xfigsize is None or self.yfigsize is None:
+            fig  = plt.figure(figsize=(15,15))
+        else:
+            fig  = plt.figure(figsize=(self.xfigsize,self.yfigsize))
+
         if self.title is None:
             self.title = ''
         if self.xtitle is None:
@@ -154,14 +169,19 @@ class PanelPlot(object):
 
             else:
 
-                ax.plot(pd.x,pd.y,'bs', label=pd.title)
+                # lines = ax.plot(pd.x,pd.y,'bs', label=pd.title)
+                # flierprops = dict(marker='o', markerfacecolor='green', markersize=12,
+                #   linestyle='none')
+# linestyles[axisNum], color=color, markersize=10
+                lines = ax.plot(pd.x,pd.y, pd.marker, ls=pd.linestyle, color=pd.color, label=pd.title)
+
                 ax.set_xlim([np.min(pd.x)-0.5, np.max(pd.x)+0.5])
 
             if pd.ylim:
                 ax.set_ylim(pd.ylim)
 
             if pd.xhline_pos is not None:
-                ax.axhline(y=pd.xhline_pos, color='k', ls='dashed')
+                ax.axhline(y=pd.xhline_pos, color='black', ls='dashed')
             # ax.axhline(y=0.5, color='k', ls='dashed')
 
 
@@ -188,12 +208,12 @@ def generate_panel_plot():
 print ''
 if __name__== '__main__':
 
-    panel_plot = PanelPlot(i_max=2, j_max=2, title='Random Data 1', xtitle='x_axis_label', ytitle='y_axis_random')
+    panel_plot = PanelPlot(xfigsize=15,yfigsize=7.5,  i_max=1, j_max=2, title='Random Data 1', xtitle='x_axis_label', ytitle='y_axis_random')
 
-    panel_plot.add_plot_data(0,0,x=np.arange(10),y=np.random.rand(10), title='data00')
+    panel_plot.add_plot_data(0,0,x=np.arange(10),y=np.random.rand(10), title='data00',linestyle='dashed',color='green',marker='s')
     panel_plot.add_plot_data(0,1,x=np.arange(10),y=np.random.rand(10), title='data01')
-    panel_plot.add_plot_data(1,0,x=np.arange(10),y=np.random.rand(10), title='data10')
-    panel_plot.add_plot_data(1,1,x=np.arange(10),y=np.random.rand(10), yerr=np.random.rand(10), title='data11')
+    # panel_plot.add_plot_data(1,0,x=np.arange(10),y=np.random.rand(10), title='data10')
+    # panel_plot.add_plot_data(1,1,x=np.arange(10),y=np.random.rand(10), yerr=np.random.rand(10), title='data11')
     plot = panel_plot.generate_plot()
     plot.subplots_adjust(wspace=0.3, hspace=0.3)
     # plt.savefig(join(plotsDir, quantity_name+'.png'), dpi=300,bboxinches='tight')
