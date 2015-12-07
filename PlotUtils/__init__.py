@@ -42,6 +42,39 @@ class PlotData(object):
         if self.x is None or self.y is None:
             raise AttributeError('PlotData requires that x and y attributes are initialized. Use PlotData(x=x_array,y=y_array) syntax')
 
+class BarPlotData(object):
+    # def __init__(self, x, y, xerr=None, yerr=None, x_tick_labels=None, y_tick_labels=None, title=''):
+    def __init__(self, **options):
+        '''
+        Initializes PlotData
+        :param options: options are  'x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels','title',
+        'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos','xlabel','ylabel','linestyle','color','marker'
+        :return:
+        '''
+        self.ylabel_fontsize = 12
+        self.xlabel_fontsize = 12
+
+        for option_name in ['x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels','title',
+                            'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos', 'xlabel','ylabel','linestyle','color','marker']:
+            try:
+                setattr(self, option_name, options[option_name])
+                print 'option_name=',option_name,' val=',options[option_name], ' value_check = ', getattr(self, option_name)
+            except LookupError:
+                setattr(self, option_name, None)
+
+        # setting reasonable defaults
+        if self.linestyle is None:
+            self.linestyle='-'
+        if self.color is None:
+            self.color='black'
+        if self.marker is None:
+            self.marker=''
+
+
+
+        if self.x is None or self.y is None:
+            raise AttributeError('PlotData requires that x and y attributes are initialized. Use PlotData(x=x_array,y=y_array) syntax')
+
 
 class PanelPlot(object):
 
@@ -153,29 +186,43 @@ class PanelPlot(object):
 
             print 'pd=',pd
 
-            if pd.xerr is not None or pd.yerr is not None:
-                # xerr=[xerr, 2*xerr],
-                ax.errorbar(pd.x, pd.y, yerr=pd.yerr, fmt='--o')
-                ax.set_xlim([np.min(pd.x)-0.5, np.max(pd.x)+0.5])
-                # if pd.xlim:
-                    # ax.set_xlim(pd.xlim)
+            if isinstance(pd,PlotData):
+
+                if pd.xerr is not None or pd.yerr is not None:
+                    # xerr=[xerr, 2*xerr],
+                    ax.errorbar(pd.x, pd.y, yerr=pd.yerr, fmt='--o')
+                    ax.set_xlim([np.min(pd.x)-0.5, np.max(pd.x)+0.5])
+                    # if pd.xlim:
+                        # ax.set_xlim(pd.xlim)
 
 
+                    if pd.x_tick_labels is not None:
+                        ax.set_xticks(pd.x)
+                        ax.set_xticklabels(pd.x_tick_labels)
+
+
+
+                else:
+
+                    # lines = ax.plot(pd.x,pd.y,'bs', label=pd.title)
+                    # flierprops = dict(marker='o', markerfacecolor='green', markersize=12,
+                    #   linestyle='none')
+    # linestyles[axisNum], color=color, markersize=10
+                    lines = ax.plot(pd.x,pd.y, pd.marker, ls=pd.linestyle, color=pd.color, label=pd.title)
+
+                    ax.set_xlim([np.min(pd.x)-0.5, np.max(pd.x)+0.5])
+
+            # BAR_PLOT_DATA - bar plots
+            elif isinstance(pd,BarPlotData):
+                inds = np.arange(len(pd.x))
+                width = 0.33;
+                rects1 = ax.bar(inds, pd.y, width, color='r',yerr=pd.yerr)
                 if pd.x_tick_labels is not None:
                     ax.set_xticks(pd.x)
                     ax.set_xticklabels(pd.x_tick_labels)
 
 
 
-            else:
-
-                # lines = ax.plot(pd.x,pd.y,'bs', label=pd.title)
-                # flierprops = dict(marker='o', markerfacecolor='green', markersize=12,
-                #   linestyle='none')
-# linestyles[axisNum], color=color, markersize=10
-                lines = ax.plot(pd.x,pd.y, pd.marker, ls=pd.linestyle, color=pd.color, label=pd.title)
-
-                ax.set_xlim([np.min(pd.x)-0.5, np.max(pd.x)+0.5])
 
             if pd.ylim:
                 ax.set_ylim(pd.ylim)
@@ -211,7 +258,9 @@ if __name__== '__main__':
     panel_plot = PanelPlot(xfigsize=15,yfigsize=7.5,  i_max=1, j_max=2, title='Random Data 1', xtitle='x_axis_label', ytitle='y_axis_random')
 
     panel_plot.add_plot_data(0,0,x=np.arange(10),y=np.random.rand(10), title='data00',linestyle='dashed',color='green',marker='s')
-    panel_plot.add_plot_data(0,1,x=np.arange(10),y=np.random.rand(10), title='data01')
+    bpd = BarPlotData(x=np.arange(10),y=np.random.rand(10), title='data01',yerr=np.random.rand(10)*0.1,x_tick_labels=['a0','a1','a2','a3','a4','a5','a6','a7','a8','a9'])
+    panel_plot.add_plot_data(0,1,plot_data=bpd)
+    # panel_plot.add_plot_data(0,1,x=np.arange(10),y=np.random.rand(10), title='data01')
     # panel_plot.add_plot_data(1,0,x=np.arange(10),y=np.random.rand(10), title='data10')
     # panel_plot.add_plot_data(1,1,x=np.arange(10),y=np.random.rand(10), yerr=np.random.rand(10), title='data11')
     plot = panel_plot.generate_plot()
