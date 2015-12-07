@@ -46,7 +46,8 @@ class BaseEventReader(object):
             indicator = np.empty(len(evs), dtype=bool)
             indicator[:] = False
             for i, ev in enumerate(evs):
-                indicator[i] = type(evs[i].eegfile).__name__.startswith('unicode')
+                indicator[i] = (type(evs[i].eegfile).__name__.startswith('unicode')) & (len(str(evs[i].eegfile)) > 3)
+
 
             evs = evs[indicator]
 

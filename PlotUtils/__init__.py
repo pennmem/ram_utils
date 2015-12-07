@@ -98,6 +98,12 @@ class PanelPlot(object):
         '''
 
         fig  = plt.figure(figsize=(15,15))
+        if self.title is None:
+            self.title = ''
+        if self.xtitle is None:
+            self.xtitle = ''
+
+
         fig.suptitle(self.title, fontsize=16, fontweight='bold')
         # fig.text(x=0.5, y=0.95, s='Minimum 2 cells per cluster' ,fontsize=14, horizontalalignment='center')
 
