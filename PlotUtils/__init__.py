@@ -48,14 +48,15 @@ class BarPlotData(object):
         '''
         Initializes PlotData
         :param options: options are  'x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels','title',
-        'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos','xlabel','ylabel','linestyle','color','marker'
+        'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos','xlabel','ylabel','linestyle','color','marker',
+        'barcolors'
         :return:
         '''
         self.ylabel_fontsize = 12
         self.xlabel_fontsize = 12
 
         for option_name in ['x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels','title',
-                            'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos', 'xlabel','ylabel','linestyle','color','marker']:
+                            'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos', 'xlabel','ylabel','linestyle','color','marker','barcolors']:
             try:
                 setattr(self, option_name, options[option_name])
                 print 'option_name=',option_name,' val=',options[option_name], ' value_check = ', getattr(self, option_name)
@@ -216,11 +217,14 @@ class PanelPlot(object):
             elif isinstance(pd,BarPlotData):
                 inds = np.arange(len(pd.x))
                 width = 0.33;
-                rects1 = ax.bar(inds, pd.y, width, color='r',yerr=pd.yerr)
+                rects = ax.bar(inds, pd.y, width, color='r',yerr=pd.yerr)
                 if pd.x_tick_labels is not None:
                     ax.set_xticks(pd.x)
                     ax.set_xticklabels(pd.x_tick_labels)
 
+                if pd.barcolors is not None:
+                    for i, rect  in enumerate(rects):
+                        rect.set_color(pd.barcolors[i])
 
 
 
@@ -258,7 +262,9 @@ if __name__== '__main__':
     panel_plot = PanelPlot(xfigsize=15,yfigsize=7.5,  i_max=1, j_max=2, title='Random Data 1', xtitle='x_axis_label', ytitle='y_axis_random')
 
     panel_plot.add_plot_data(0,0,x=np.arange(10),y=np.random.rand(10), title='data00',linestyle='dashed',color='green',marker='s')
-    bpd = BarPlotData(x=np.arange(10),y=np.random.rand(10), title='data01',yerr=np.random.rand(10)*0.1,x_tick_labels=['a0','a1','a2','a3','a4','a5','a6','a7','a8','a9'])
+    bpd = BarPlotData(x=np.arange(10),y=np.random.rand(10), title='data01',yerr=np.random.rand(10)*0.1,
+                      x_tick_labels=['a0','a1','a2','a3','a4','a5','a6','a7','a8','a9'],
+                      barcolors=['r','g','b','r','g','b','r','g','b','r'])
     panel_plot.add_plot_data(0,1,plot_data=bpd)
     # panel_plot.add_plot_data(0,1,x=np.arange(10),y=np.random.rand(10), title='data01')
     # panel_plot.add_plot_data(1,0,x=np.arange(10),y=np.random.rand(10), title='data10')
