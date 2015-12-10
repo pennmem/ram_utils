@@ -1,6 +1,7 @@
 __author__ = 'm'
 
 import numpy as np
+import xray
 
 class ButterworthFiler(object):
     def __init__(self):
@@ -49,7 +50,7 @@ class ButterworthFiler(object):
         self.time_series = time_series
 
     def get_output(self):
-        return self.time_series
+        return self.filtered_time_series
 
     def filter(self):
 
@@ -70,6 +71,16 @@ class ButterworthFiler(object):
                                        self.freq_range, self.samplerate, self.filt_type,
                                        self.order,axis=self.time_axis)
 
+
+        self.filtered_time_series = xray.DataArray(
+            filtered_array,
+            coords = [xray.DataArray(coord.copy()) for coord_name, coord in self.time_series.coords.items() ]
+        )
+
+
+        # l = [xray.DataArray(coord.copy()) for coord_name, coord in self.time_series.coords.items() ]
+
+        return self.filtered_time_series
 
         # attrs = self._attrs.copy()
         # for k in self._required_attrs.keys():

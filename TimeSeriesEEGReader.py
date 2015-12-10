@@ -210,7 +210,7 @@ class TimeSeriesEEGReader(object):
         eventdata_xray = xray.DataArray(eventdata.base.base.base, coords=[cdim,events,tdim], dims=['channels','events','time'])
 
 
-        eventdata_xray = eventdata_xray[:,event_indices_restore_sort_order_array,:]
+        # eventdata_xray = eventdata_xray[:,event_indices_restore_sort_order_array,:] #### RESTORE THIS
 
 
 

@@ -106,7 +106,11 @@ class ComputeFR1Powers(RamTask):
 
 
                 bp_data_new = eegs_new[elec1] - eegs_new[elec2]
-                b_filter.set_input()
+                b_filter.set_input(bp_data_new)
+                b_filter.filter()
+
+                bp_data_new_filtered = b_filter.get_output()
+
 
 
                 for ev in xrange(5):
