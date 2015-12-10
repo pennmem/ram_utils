@@ -50,9 +50,12 @@ class XValPlots(RamTask):
 
         x = threshold_values
         y = np.empty_like(x)
-        yerr = np.empty_like(x)
+        yerr_min = np.empty_like(x)
+        yerr_max = np.empty_like(x)
+
         y_features = np.empty_like(x)
-        y_features_err = np.empty_like(x)
+        y_features_err_max = np.empty_like(x)
+        y_features_err_min = np.empty_like(x)
 
         for i,t_thresh in enumerate(threshold_values):
             auc_results_t_thresh = auc_results[auc_results.t_thresh == t_thresh]
@@ -63,23 +66,27 @@ class XValPlots(RamTask):
             auc_max = np.max(auc_results_t_thresh.auc)
 
             y[i] = auc_median
-            yerr[i] = auc_max-auc_median
-
+            yerr_min[i] = -auc_min+auc_median
+            yerr_max[i] = auc_max-auc_median
 
             num_features_mean = np.mean(auc_results_t_thresh.num_features)
             num_features_median = np.median(auc_results_t_thresh.num_features)
             num_features_min = np.min(auc_results_t_thresh.num_features)
             num_features_max = np.max(auc_results_t_thresh.num_features)
-            
+
+
+
             y_features[i] = num_features_median
-            y_features_err[i] = num_features_max - num_features_median
+            y_features_err_min[i] = -num_features_min + num_features_median
+            y_features_err_max[i] = num_features_max - num_features_median
 
 
-        pd = PlotData(x=x, y=y, yerr=yerr, xhline_pos=0.5, ylim=(0.0, 1.0),ylabel='AUC', xlabel='t-threshold')
-        pd_features = PlotData(x=x, y=y_features,yerr=y_features_err,ylabel='Number of features', xlabel='t-threshold')
 
-        pd1 = PlotData(x=x, y=y, yerr=yerr, xhline_pos=0.5, ylim=(0.0, 1.0),ylabel='AUC', xlabel='t-threshold_1')
-        pd_features1 = PlotData(x=x, y=y_features,yerr=y_features_err,ylabel='Number of features', xlabel='t-threshold_1')
+        pd = PlotData(x=x, y=y, yerr=[yerr_min,yerr_max], xhline_pos=0.5, ylim=(0.0, 1.0),ylabel='AUC', xlabel='t-threshold')
+        pd_features = PlotData(x=x, y=y_features,yerr=[y_features_err_min, y_features_err_max],ylabel='Number of features', xlabel='t-threshold')
+
+        pd1 = PlotData(x=x, y=y, yerr=[yerr_min,yerr_max], xhline_pos=0.5, ylim=(0.0, 1.0),ylabel='AUC', xlabel='t-threshold_1')
+        pd_features1 = PlotData(x=x, y=y_features,yerr=[y_features_err_min, y_features_err_max],ylabel='Number of features', xlabel='t-threshold_1')
 
 
 

@@ -130,6 +130,12 @@ position
     Default is '[' + 'htp' + ']'
     If you want to place your table manually, do not use the table environment.
 
+colormatrix
+    used to color text in particular cells of the table. When using this option colormatrix must have same dimension as
+    matr
+
+
+
 Note that many of these options only has an effect when typesetting a table,
 if the correct environment is not given the arguments are simply ignored.
     '''

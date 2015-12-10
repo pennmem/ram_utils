@@ -112,7 +112,7 @@ class GeneratePlots(RamTask):
 
         from PlotUtils import PanelPlot
         for session_summary in session_summary_array:
-            panel_plot = PanelPlot(i_max=3, j_max=2, title='', y_axis_title='$\Delta$ Post-Pre Stim Biomarker')
+            panel_plot = PanelPlot(i_max=3, j_max=2, title='', ytitle='$\Delta$ Post-Pre Stim Biomarker')
 
             for plot_panel_index, pd in session_summary.plot_data_dict.iteritems():
                 print 'plot_panel_index=', plot_panel_index
@@ -132,7 +132,7 @@ class GeneratePlots(RamTask):
 
         cumulative_plot_data_dict = self.get_passed_object('cumulative_plot_data_dict')
 
-        panel_plot = PanelPlot(i_max=3, j_max=2, title='', y_axis_title='$\Delta$ Post-Pre Stim Biomarker')
+        panel_plot = PanelPlot(i_max=3, j_max=2, title='', ytitle='$\Delta$ Post-Pre Stim Biomarker')
 
         for plot_panel_index, pd in cumulative_plot_data_dict.iteritems():
             # print 'plot_panel_index=', plot_panel_index

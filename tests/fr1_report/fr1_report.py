@@ -20,12 +20,12 @@ if len(sys.argv)>2:
 # R1092J_2 had 3 sessions
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1061T',
+    command_line_emulation_argument_list = ['--subject','R1060M',
                                             '--task','RAM_FR1',
-                                            '--workspace-dir','~/scratch/FR1_reports',
+                                            '--workspace-dir','~/scratch/FR1_DEBUG',
 
-                                            # '--mount-point','/Users/m/',
-                                            '--mount-point','/Volumes/rhino_root',
+                                            '--mount-point','/Users/m/',
+                                            # '--mount-point','/Volumes/rhino_root',
                                             '--python-path','~/PTSA_GIT',
                                             '--python-path','~/RAM_UTILS_GIT'
                                             ]
@@ -39,7 +39,8 @@ import numpy as np
 from RamPipeline import RamPipeline
 from RamPipeline import RamTask
 
-from EventPreparation import EventPreparation
+# from EventPreparation import EventPreparation
+from EventPreparation_new import EventPreparation_new
 
 from ComputeFR1Powers import ComputeFR1Powers
 
@@ -59,9 +60,9 @@ from ComputeClassifier import ComputeClassifier
 
 from CheckClassifier import CheckClassifier
 
-#from ComposeSessionSummary import ComposeSessionSummary
-
-#from GenerateReportTasks import *
+# from ComposeSessionSummary import ComposeSessionSummary
+#
+# from GenerateReportTasks import *
 
 
 # turn it into command line options
@@ -109,15 +110,15 @@ class ReportPipeline(RamPipeline):
 report_pipeline = ReportPipeline(subject=args.subject, task=args.task,output_dir=expanduser(args.workspace_dir),
                                        workspace_dir=join(args.workspace_dir,args.task+'_'+args.subject), mount_point=args.mount_point)
 
-report_pipeline.add_task(EventPreparation(mark_as_completed=False))
+report_pipeline.add_task(EventPreparation_new(mark_as_completed=False))
 
 report_pipeline.add_task(TalPreparation(mark_as_completed=False))
 
 report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=True))
 
-report_pipeline.add_task(ComputeTTest(params=params, mark_as_completed=True))
+#report_pipeline.add_task(ComputeTTest(params=params, mark_as_completed=True))
 
-report_pipeline.add_task(CheckTTest(params=params, mark_as_completed=False))
+#report_pipeline.add_task(CheckTTest(params=params, mark_as_completed=False))
 
 report_pipeline.add_task(XValTTest(params=params, mark_as_completed=False))
 
@@ -128,13 +129,13 @@ report_pipeline.add_task(XValPlots(params=params, mark_as_completed=False))
 #
 # #report_pipeline.add_task(CheckClassifier(params=params, mark_as_completed=False))
 #
-# #report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
+# report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
 #
-# #report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
+# report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
 #
-# #report_pipeline.add_task(GenerateTex(mark_as_completed=False))
+# report_pipeline.add_task(GenerateTex(mark_as_completed=False))
 #
-# #report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
+# report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
 # starts processing pipeline
 report_pipeline.execute_pipeline()
