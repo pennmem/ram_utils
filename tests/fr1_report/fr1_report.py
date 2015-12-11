@@ -107,8 +107,11 @@ class ReportPipeline(RamPipeline):
 
 
 # sets up processing pipeline
-report_pipeline = ReportPipeline(subject=args.subject, task=args.task,output_dir=expanduser(args.workspace_dir),
-                                       workspace_dir=join(args.workspace_dir,args.task+'_'+args.subject), mount_point=args.mount_point)
+report_pipeline = ReportPipeline(subject=args.subject,
+                                 task=args.task,
+                                 output_dir=expanduser(args.workspace_dir),
+                                 workspace_dir=join(args.workspace_dir,args.task+'_'+args.subject),
+                                 mount_point=args.mount_point)
 
 report_pipeline.add_task(EventPreparation_new(mark_as_completed=False))
 

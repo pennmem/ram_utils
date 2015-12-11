@@ -115,6 +115,9 @@ class ComputeFR1Powers(RamTask):
 
                 for ev in xrange(5):
                     pow_ev = phase_pow_multi(self.params.freqs, bp_data[ev], to_return='power')
+
+                    pow_ev_new = phase_pow_multi(self.params.freqs, bp_data_new[ev], to_return='power',samplerates=time_series_reader.samplerate)
+
                     #
                     # if not np.all(pow_ev > 0.):
                     #     raise RuntimeError('BEFORE LOG: negative power for electrodes'+str(bp)+' event=%s'%str((ev.session,ev.list,ev.serialpos)))
