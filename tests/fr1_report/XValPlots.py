@@ -50,9 +50,12 @@ class XValPlots(RamTask):
 
         x = threshold_values
         y = np.empty_like(x)
-        yerr = np.empty_like(x)
+        yerr_min = np.empty_like(x)
+        yerr_max = np.empty_like(x)
+
         y_features = np.empty_like(x)
-        y_features_err = np.empty_like(x)
+        y_features_err_max = np.empty_like(x)
+        y_features_err_min = np.empty_like(x)
 
         for i,t_thresh in enumerate(threshold_values):
             auc_results_t_thresh = auc_results[auc_results.t_thresh == t_thresh]
@@ -63,23 +66,52 @@ class XValPlots(RamTask):
             auc_max = np.max(auc_results_t_thresh.auc)
 
             y[i] = auc_median
-            yerr[i] = auc_max-auc_median
-
+            yerr_min[i] = -auc_min+auc_median
+            yerr_max[i] = auc_max-auc_median
 
             num_features_mean = np.mean(auc_results_t_thresh.num_features)
             num_features_median = np.median(auc_results_t_thresh.num_features)
             num_features_min = np.min(auc_results_t_thresh.num_features)
             num_features_max = np.max(auc_results_t_thresh.num_features)
-            
+
+
+
             y_features[i] = num_features_median
-            y_features_err[i] = num_features_max - num_features_median
+            y_features_err_min[i] = -num_features_min + num_features_median
+            y_features_err_max[i] = num_features_max - num_features_median
 
 
-        pd = PlotData(x=x, y=y, yerr=yerr, xhline_pos=0.5, ylim=(0.0, 1.0),ylabel='AUC', xlabel='t-threshold')
-        pd_features = PlotData(x=x, y=y_features,yerr=y_features_err,ylabel='Number of features', xlabel='t-threshold')
 
-        pd1 = PlotData(x=x, y=y, yerr=yerr, xhline_pos=0.5, ylim=(0.0, 1.0),ylabel='AUC', xlabel='t-threshold_1')
-        pd_features1 = PlotData(x=x, y=y_features,yerr=y_features_err,ylabel='Number of features', xlabel='t-threshold_1')
+        pd = PlotData(x=x, y=y, yerr=[yerr_min,yerr_max], xhline_pos=0.5, ylim=(0.0, 1.0),ylabel='AUC', xlabel='t-threshold')
+        pd_features = PlotData(x=x, y=y_features,yerr=[y_features_err_min, y_features_err_max],ylabel='Number of features', xlabel='t-threshold')
+
+        pd1 = PlotData(x=x, y=y, yerr=[yerr_min,yerr_max], xhline_pos=0.5, ylim=(0.0, 1.0),ylabel='AUC', xlabel='t-threshold_1')
+        pd_features1 = PlotData(x=x, y=y_features,yerr=[y_features_err_min, y_features_err_max],ylabel='Number of features', xlabel='t-threshold_1')
+
+
+        #     auc_mean = np.mean(auc_results_t_thresh.auc)
+        #     auc_median = np.median(auc_results_t_thresh.auc)
+        #     auc_min = np.min(auc_results_t_thresh.auc)
+        #     auc_max = np.max(auc_results_t_thresh.auc)
+        #
+        #     y[i] = auc_median
+        #     yerr[i] = auc_max-auc_median
+        #
+        #
+        #     num_features_mean = np.mean(auc_results_t_thresh.num_features)
+        #     num_features_median = np.median(auc_results_t_thresh.num_features)
+        #     num_features_min = np.min(auc_results_t_thresh.num_features)
+        #     num_features_max = np.max(auc_results_t_thresh.num_features)
+        #
+        #     y_features[i] = num_features_median
+        #     y_features_err[i] = num_features_max - num_features_median
+        #
+        #
+        # pd = PlotData(x=x, y=y, yerr=yerr, xhline_pos=0.5, ylim=(0.0, 1.0),ylabel='AUC', xlabel='t-threshold')
+        # pd_features = PlotData(x=x, y=y_features,yerr=y_features_err,ylabel='Number of features', xlabel='t-threshold')
+        #
+        # pd1 = PlotData(x=x, y=y, yerr=yerr, xhline_pos=0.5, ylim=(0.0, 1.0),ylabel='AUC', xlabel='t-threshold_1')
+        # pd_features1 = PlotData(x=x, y=y_features,yerr=y_features_err,ylabel='Number of features', xlabel='t-threshold_1')
 
 
 
@@ -87,7 +119,8 @@ class XValPlots(RamTask):
 
         pd_dict={(0,0):pd, (0,1):pd_features}
 
-        panel_plot = PanelPlot(i_max=2, j_max=2, title='', ytitle='AUC',wspace=0.3,hspace=0.3)
+        panel_plot = PanelPlot(i_max=1, j_max=2, title='', ytitle='AUC',wspace=0.3,hspace=0.3,xfigsize=15,yfigsize=7.5)
+
 
         for plot_panel_index, pd in pd_dict.iteritems():
             print 'plot_panel_index=', plot_panel_index
@@ -123,9 +156,24 @@ class XValPlots(RamTask):
         # # plt.savefig(join(plotsDir, quantity_name+'.png'), dpi=300,bboxinches='tight')
         #
         # plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + self.pipeline.experiment + '-' + self.pipeline.subject + '-report_plot_Cumulative.pdf')
-
-        plot_out_fname = join(self.pipeline.output_dir, 'plot_'+self.pipeline.subject+'.pdf')
+        #
+        plot_out_fname = join(self.pipeline.output_dir, 'plot_'+self.pipeline.subject+'_'+self.params.penalty_type+'.pdf')
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+
+        bpd = self.get_passed_object('bar_plot_data')
+        bar_panel_plot = PanelPlot(i_max=1, j_max=1, title=self.pipeline.subject+': Penalty parameter c=1/$\lambda$', ytitle='',wspace=0.3,hspace=0.3,xfigsize=5.0,yfigsize=5.0, xlabel_fontsize=6)
+        bar_panel_plot.add_plot_data(0, 0, plot_data=bpd)
+        bar_plot = bar_panel_plot.generate_plot()
+
+        bar_plot.tick_params(axis='both', which='major', labelsize=6)
+        bar_plot.tick_params(axis='both', which='minor', labelsize=6)
+
+        bar_plot_out_fname = join(self.pipeline.output_dir, 'plot_penalty'+self.pipeline.subject+'_'+self.params.penalty_type+'.pdf')
+
+        bar_plot.savefig(bar_plot_out_fname, dpi=300, bboxinches='tight')
+
+
+
 
 
 

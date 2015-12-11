@@ -10,6 +10,9 @@ from scipy.stats import describe
 
 import normalize
 
+from PlotUtils import *
+
+
 class XValResults(object):
     def __init__(self):
         self.auc_results = None
@@ -44,6 +47,9 @@ class XValTTest(RamTask):
         xval_results.auc_results =  np.recarray((len(t_thresh_array)*len(sessions),),dtype=[('t_thresh', float), ('outsample_session', int), ('auc', float), ('num_features',int) ])
 
 
+        cs_list = []
+
+        log_file, log_file_path = self.create_file_in_workspace_dir('xval.log','w')
         i=0
         for s_out in sessions:
 
@@ -71,9 +77,13 @@ class XValTTest(RamTask):
 
                 # lr_classifier = LogisticRegression(penalty=self.params.penalty_type)
 
-                lr_classifier = LogisticRegressionCV()
+                lr_classifier = LogisticRegressionCV(Cs=np.logspace(np.log10(1e-6), np.log10(1), 22))
 
                 lr_classifier.fit(insample_pow_mat_tmp, insample_recalls)
+                print >> log_file,s_out,'   ', t_thresh,'   ',lr_classifier.C_[0]
+
+                cs_list.append(lr_classifier.C_[0])
+
 
                 outsample_sel = (~insample_sel) & (events.list > 2)
                 outsample_events = events[outsample_sel]
@@ -93,4 +103,12 @@ class XValTTest(RamTask):
                 xval_results.auc_results[i].num_features = num_features
                 i+=1
 
+        cs_values,cs_counts =np.unique(cs_list, return_counts=True)
+
+        bpd = BarPlotData(x=np.arange(len(cs_counts)),y=cs_counts, title='C penalty 1/$lambda$',
+                          x_tick_labels=map(lambda x: '%.2e'%x ,cs_values),
+                          color='red')
+
+        self.pass_object('bar_plot_data',bpd)
+        log_file.close()
         self.pass_object(name='xval_results',obj=xval_results)
