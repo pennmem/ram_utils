@@ -87,7 +87,7 @@ class Params(object):
 
         self.ttest_frange = (70.0, 200.0)
 
-        self.penalty_type = 'l2'
+        self.penalty_type = 'l1'
         self.Cs = np.logspace(np.log10(1e-2), np.log10(1e4), 22)
 
 

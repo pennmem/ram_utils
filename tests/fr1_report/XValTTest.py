@@ -49,7 +49,7 @@ class XValTTest(RamTask):
 
         cs_list = []
 
-        log_file, log_file_path = self.create_file_in_workspace_dir('xval.log','w')
+        log_file, log_file_path = self.create_file_in_workspace_dir('xval_'+self.params.penalty_type+'.log','w')
         i=0
         for s_out in sessions:
 
@@ -77,10 +77,16 @@ class XValTTest(RamTask):
 
                 # lr_classifier = LogisticRegression(penalty=self.params.penalty_type)
 
-                lr_classifier = LogisticRegressionCV(Cs=np.logspace(np.log10(1e-6), np.log10(1), 22))
+                lr_classifier = LogisticRegressionCV(Cs=np.logspace(np.log10(1e-10), np.log10(1e-2), 22))
 
                 lr_classifier.fit(insample_pow_mat_tmp, insample_recalls)
-                print >> log_file,s_out,'   ', t_thresh,'   ',lr_classifier.C_[0]
+                from scipy.stats import describe
+
+                print >> log_file,s_out,'   ', t_thresh,'   ',lr_classifier.intercept_[0],'   ',lr_classifier.C_[0], describe(lr_classifier.coef_[0])
+
+
+
+
 
                 cs_list.append(lr_classifier.C_[0])
 
