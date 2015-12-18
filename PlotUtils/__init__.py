@@ -371,7 +371,72 @@ def generate_panel_plot():
     pass
 
 
-print ''
+def draw_brick_heatmap(plot_data):
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+    import pandas
+
+    fig, ax = plt.subplots()
+
+    pd = plot_data
+
+    if isinstance(pd.df, pandas.DataFrame):
+        df = pd.df
+    else:
+
+        df = pandas.DataFrame(pd.df, columns=x_tick_labels, index=np.array(y_tick_labels)[::-1])
+
+
+    # colormap = sns.palplot(sns.color_palette("coolwarm", 7))
+    # sns.set_palette(colormap)
+
+    if pd.val_lim:
+        ax = sns.heatmap(df, cmap='bwr', fmt="d", vmin=pd.val_lim[0], vmax=pd.val_lim[1])
+    else:
+        ax = sns.heatmap(df, cmap='bwr', fmt="d")
+
+    xpos, ypos = np.meshgrid(ax.get_xticks(), ax.get_yticks())
+
+    for x, y in zip(xpos.flat, ypos.flat):
+        print 'x,y=', (x, y)
+        # ax.text(x, y, 20.0, color='k', ha="center", va="center",)
+
+
+        # for (i,x), (j,y) in zip(enumerate(xpos.flat), enumerate(ypos.flat)):
+        #     print 'i,j=',(i,j)
+        #     print 'x,y=',(x,y)
+
+        # ax.text(x, y, 20.0, color='k', ha="center", va="center")
+        # ax.text(x, y, annotate_dict[(i,j)], color='k', ha="center", va="center")
+
+    from itertools import product
+    xticks = ax.get_xticks()
+    yticks = ax.get_yticks()
+
+    xticks_numbered = zip(np.arange(len(xticks)), xticks)
+    yticks_numbered = zip(np.arange(len(yticks)), yticks)
+
+    annotate_dict = {(i, j): i * j for i, j in product(range(6), range(6))}
+
+    if pd.annot_dict is not None:
+
+        for (i, x), (j, y) in product(xticks_numbered, yticks_numbered):
+            print 'x_tuple=', (i, x), ' y_tuple=', (i, y)
+            try:
+                ax.text(x, y, pd.annot_dict[(i, j)], color='k', ha="center", va="center")
+            except LookupError:
+                pass
+
+    if pd.xlabel:
+        ax.set_xlabel(pd.xlabel, fontsize=pd.xlabel_fontsize)
+    if pd.ylabel:
+        ax.set_ylabel(pd.ylabel, fontsize=pd.ylabel_fontsize)
+    if pd.title:
+        ax.set_title(pd.title)
+
+    return fig, ax
+
+
 if __name__ == '__main__':
     panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=2, j_max=2, title='Random Data 1', xtitle='x_axis_label',
                            ytitle='y_axis_random')
@@ -413,4 +478,22 @@ if __name__ == '__main__':
 
     plot.savefig('demo_1.pdf', dpi=300, bboxinches='tight')
 
-    print 'GOT HERE'
+
+    # standalone brick heatmap plot
+    data_frame = np.random.rand(6, 5)
+    annotation_dictionary = {(0, 0): 10, (1, 2): 20}
+    from itertools import product
+
+    annotation_dictionary = {(i, j): i * j for i, j in product(range(6), range(6))}
+
+    x_tick_labels = ['x0', 'x1', 'x2', 'x3', 'x4']
+    y_tick_labels = ['y0', 'y1', 'y2', 'y3', 'y4', 'y5']
+
+    hpd = BrickHeatmapPlotData(df=data_frame, annot_dict=annotation_dictionary, title='random_data_brick_plot',
+                               x_tick_labels=x_tick_labels, y_tick_labels=y_tick_labels, xlabel='XLABEL',
+                               ylabel='YLABEL', val_lim=[-1.5, 1.5])
+
+
+    fig,ax = draw_brick_heatmap(hpd)
+    fig.savefig('heatmap_example.png')
+
