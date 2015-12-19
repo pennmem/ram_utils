@@ -175,7 +175,7 @@ class PanelPlot(object):
             df = pd.df
         else:
 
-            df = pandas.DataFrame(pd.df, columns=x_tick_labels, index=np.array(y_tick_labels)[::-1])
+            df = pandas.DataFrame(pd.df, columns=x_tick_labels, index=np.array(y_tick_labels))
 
 
         # colormap = sns.palplot(sns.color_palette("coolwarm", 7))
@@ -205,18 +205,42 @@ class PanelPlot(object):
         yticks = ax.get_yticks()
 
         xticks_numbered = zip(np.arange(len(xticks)), xticks)
-        yticks_numbered = zip(np.arange(len(yticks)), yticks)
+        # yticks_numbered = zip(np.arange(len(yticks)), yticks)
+        yticks_numbered = zip(np.arange(len(yticks))[::-1], yticks) # had to invert y axis to achieve numpy matrix ordering
 
-        annotate_dict = {(i, j): i * j for i, j in product(range(6), range(6))}
+
 
         if pd.annot_dict is not None:
 
-            for (i, x), (j, y) in product(xticks_numbered, yticks_numbered):
-                print 'x_tuple=', (i, x), ' y_tuple=', (i, y)
+
+            # implementing numpy matrix ordering - (0,0) is upper left corner
+            for  (j,y), (i, x),  in product(yticks_numbered,xticks_numbered):
+                # print 'x_tuple=', (i, x), ' y_tuple=', (j, y)
+                # print pd.annot_dict[(j,i)]
+
                 try:
-                    ax.text(x, y, pd.annot_dict[(i, j)], color='k', ha="center", va="center")
+                    ax.text(x,y, pd.annot_dict[(j, i)], color='k', ha="center", va="center")
                 except LookupError:
+                    print 'COULD NOT GET i,j = ',(j,i)
                     pass
+
+        # from itertools import product
+        # xticks = ax.get_xticks()
+        # yticks = ax.get_yticks()
+        #
+        # xticks_numbered = zip(np.arange(len(xticks)), xticks)
+        # yticks_numbered = zip(np.arange(len(yticks)), yticks)
+        #
+        # annotate_dict = {(i, j): i * j for i, j in product(range(6), range(6))}
+        #
+        # if pd.annot_dict is not None:
+        #
+        #     for (i, x), (j, y) in product(xticks_numbered, yticks_numbered):
+        #         print 'x_tuple=', (i, x), ' y_tuple=', (i, y)
+        #         try:
+        #             ax.text(x, y, pd.annot_dict[(i, j)], color='k', ha="center", va="center")
+        #         except LookupError:
+        #             pass
 
         if pd.xlabel:
             ax.set_xlabel(pd.xlabel, fontsize=pd.xlabel_fontsize)
@@ -384,7 +408,7 @@ def draw_brick_heatmap(plot_data):
         df = pd.df
     else:
 
-        df = pandas.DataFrame(pd.df, columns=x_tick_labels, index=np.array(y_tick_labels)[::-1])
+        df = pandas.DataFrame(pd.df, columns=x_tick_labels, index=np.array(y_tick_labels))
 
 
     # colormap = sns.palplot(sns.color_palette("coolwarm", 7))
@@ -414,18 +438,26 @@ def draw_brick_heatmap(plot_data):
     yticks = ax.get_yticks()
 
     xticks_numbered = zip(np.arange(len(xticks)), xticks)
-    yticks_numbered = zip(np.arange(len(yticks)), yticks)
+    # yticks_numbered = zip(np.arange(len(yticks)), yticks)
+    yticks_numbered = zip(np.arange(len(yticks))[::-1], yticks) # had to invert y axis to achieve numpy matrix ordering
 
-    annotate_dict = {(i, j): i * j for i, j in product(range(6), range(6))}
+
 
     if pd.annot_dict is not None:
 
-        for (i, x), (j, y) in product(xticks_numbered, yticks_numbered):
-            print 'x_tuple=', (i, x), ' y_tuple=', (i, y)
+
+        # implementing numpy matrix ordering - (0,0) is upper left corner
+        for  (j,y), (i, x),  in product(yticks_numbered,xticks_numbered):
+            # print 'x_tuple=', (i, x), ' y_tuple=', (j, y)
+            # print pd.annot_dict[(j,i)]
+
             try:
-                ax.text(x, y, pd.annot_dict[(i, j)], color='k', ha="center", va="center")
+                ax.text(x,y, pd.annot_dict[(j, i)], color='k', ha="center", va="center")
             except LookupError:
+                print 'COULD NOT GET i,j = ',(j,i)
                 pass
+
+
 
     if pd.xlabel:
         ax.set_xlabel(pd.xlabel, fontsize=pd.xlabel_fontsize)
@@ -480,14 +512,15 @@ if __name__ == '__main__':
 
 
     # standalone brick heatmap plot
-    data_frame = np.random.rand(6, 5)
+    data_frame = np.random.rand(7, 5)
     annotation_dictionary = {(0, 0): 10, (1, 2): 20}
     from itertools import product
 
-    annotation_dictionary = {(i, j): i * j for i, j in product(range(6), range(6))}
+    annotation_dictionary = {(i, j): i * j for i, j in product(range(7), range(5))}
+
 
     x_tick_labels = ['x0', 'x1', 'x2', 'x3', 'x4']
-    y_tick_labels = ['y0', 'y1', 'y2', 'y3', 'y4', 'y5']
+    y_tick_labels = ['y0', 'y1', 'y2', 'y3', 'y4', 'y5','y6']
 
     hpd = BrickHeatmapPlotData(df=data_frame, annot_dict=annotation_dictionary, title='random_data_brick_plot',
                                x_tick_labels=x_tick_labels, y_tick_labels=y_tick_labels, xlabel='XLABEL',
