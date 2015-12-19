@@ -175,7 +175,7 @@ class PanelPlot(object):
             df = pd.df
         else:
 
-            df = pandas.DataFrame(pd.df, columns=x_tick_labels, index=np.array(y_tick_labels))
+            df = pandas.DataFrame(pd.df, columns=pd.x_tick_labels, index=np.array(pd.y_tick_labels))
 
 
         # colormap = sns.palplot(sns.color_palette("coolwarm", 7))
@@ -408,7 +408,7 @@ def draw_brick_heatmap(plot_data):
         df = pd.df
     else:
 
-        df = pandas.DataFrame(pd.df, columns=x_tick_labels, index=np.array(y_tick_labels))
+        df = pandas.DataFrame(pd.df, columns=pd.x_tick_labels, index=np.array(pd.y_tick_labels))
 
 
     # colormap = sns.palplot(sns.color_palette("coolwarm", 7))
