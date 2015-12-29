@@ -2,11 +2,11 @@ __author__ = 'm'
 
 import sys
 
-sys.path.append('/Users/m/PTSA_GIT')
+sys.path.append('/Users/m/PTSA_NEW_GIT')
 
 from RamPipeline import *
 
-from EventReader import EventReader
+from ptsa.data.readers.BaseEventReader import BaseEventReader
 
 
 class EventPreparation(RamTask):
@@ -14,9 +14,9 @@ class EventPreparation(RamTask):
         RamTask.__init__(self, mark_as_completed)
 
     def run(self):
-        e_path = '/Volumes/rhino_root/data/events/RAM_FR1/R1060M_events.mat'
-
-        e_reader = EventReader(event_file=e_path, eliminate_events_with_no_eeg=True,
+        # e_path = '/Volumes/rhino_root/data/events/RAM_FR1/R1060M_events.mat'
+        e_path = '/Users/m/data/events/RAM_FR1/R1060M_events.mat'
+        e_reader = BaseEventReader(event_file=e_path, eliminate_events_with_no_eeg=True,
                                data_dir_prefix='/Volumes/rhino_root')
 
         e_reader.read()

@@ -26,7 +26,7 @@ else: # emulate command line
 
                                             '--mount-point','/Users/m/',
                                             # '--mount-point','/Volumes/rhino_root',
-                                            '--python-path','~/PTSA_GIT',
+                                            '--python-path','~/PTSA_NEW_GIT',
                                             '--python-path','~/RAM_UTILS_GIT'
                                             ]
     args = parse_command_line(command_line_emulation_argument_list)
@@ -50,9 +50,9 @@ class ComputePipeline(RamPipeline):
 # sets up processing pipeline
 compute_pipeline = ComputePipeline(workspace_dir='~/scratch/documentation_demo')
 
-# compute_pipeline.add_task(EventPreparation(mark_as_completed=False))
+compute_pipeline.add_task(EventPreparation(mark_as_completed=False))
 #
-# compute_pipeline.add_task(EEGRawPreparation(mark_as_completed=False))
+compute_pipeline.add_task(EEGRawPreparation(mark_as_completed=False))
 
 compute_pipeline.add_task(PlotTask(mark_as_completed=False))
 
