@@ -90,7 +90,7 @@ class BrickHeatmapPlotData(object):
         Initializes PlotData
         :param options: options are 'df', 'annot_dict','val_lim','x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels','title',
         'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos','xlabel','ylabel','linestyle','color','marker',
-        'levelline', 'barcolors'
+        'levelline', 'barcolors','colorbar_title','colorbar_title_location'
         :return:
         '''
         self.ylabel_fontsize = 12
@@ -99,7 +99,7 @@ class BrickHeatmapPlotData(object):
         for option_name in ['df', 'annot_dict', 'val_lim', 'x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels',
                             'title',
                             'ylabel_fontsize', 'ylabel_fontsize', 'xlim', 'ylim', 'xhline_pos', 'xlabel', 'ylabel',
-                            'linestyle', 'color', 'marker', 'levelline', 'barcolors']:
+                            'linestyle', 'color', 'marker', 'levelline', 'barcolors','colorbar_title','colorbar_title_location']:
             try:
                 setattr(self, option_name, options[option_name])
                 print 'option_name=', option_name, ' val=', options[option_name], ' value_check = ', getattr(self,
@@ -178,7 +178,7 @@ class PanelPlot(object):
             df = pd.df
         else:
 
-            df = pandas.DataFrame(pd.df, columns=x_tick_labels, index=np.array(y_tick_labels))
+            df = pandas.DataFrame(pd.df, columns=pd.x_tick_labels, index=np.array(pd.y_tick_labels))
 
 
         # colormap = sns.palplot(sns.color_palette("coolwarm", 7))
@@ -367,7 +367,25 @@ class PanelPlot(object):
                         rect.set_color(pd.barcolors[i])
 
 
-                if pd.xlim:
+
+            elif isinstance(pd, BrickHeatmapPlotData):
+                self.draw_brick_heatmap(pd, ax)
+                # ax.text(0.9, 0.95, "Bin:", ha ='left', fontsize = 15)
+                if pd.colorbar_title:
+                    if pd.colorbar_title_location is not None:
+
+                        ax.text(pd.colorbar_title_location[0], pd.colorbar_title_location[1],pd.colorbar_title,
+                                fontsize=12, rotation=270)
+                    else:
+                        ax.text(6.0, 5,pd.colorbar_title,
+                                fontsize=12, rotation=270)
+
+
+
+
+
+
+            if pd.xlim:
                     ax.set_xlim(pd.xlim)
 
 
@@ -476,6 +494,17 @@ def draw_brick_heatmap(plot_data):
                 pass
 
 
+    # ax.text(6.0, 3.5,'Right the plot', fontsize=10, rotation=270)
+
+    if pd.colorbar_title:
+        if pd.colorbar_title_location is not None:
+
+            ax.text(pd.colorbar_title_location[0], pd.colorbar_title_location[1],pd.colorbar_title,
+                    fontsize=12, rotation=270)
+        else:
+            ax.text(6.0, 5,pd.colorbar_title,
+                    fontsize=12, rotation=270)
+
 
     if pd.xlabel:
         ax.set_xlabel(pd.xlabel, fontsize=pd.xlabel_fontsize)
@@ -519,7 +548,10 @@ if __name__ == '__main__':
 
     hpd = BrickHeatmapPlotData(df=data_frame, annot_dict=annotation_dictionary, title='random_data_brick_plot',
                                x_tick_labels=x_tick_labels, y_tick_labels=y_tick_labels, xlabel='XLABEL',
-                               ylabel='YLABEL', val_lim=[-1.5, 1.5])
+                               ylabel='YLABEL', val_lim=[-1.5, 1.5],
+                               colorbar_title = 't-stat for random data',
+                               colorbar_title_location = [6.0,4.5],
+                               )
 
     panel_plot.add_plot_data(1, 1, plot_data=hpd)
 
@@ -542,7 +574,10 @@ if __name__ == '__main__':
 
     hpd = BrickHeatmapPlotData(df=data_frame, annot_dict=annotation_dictionary, title='random_data_brick_plot',
                                x_tick_labels=x_tick_labels, y_tick_labels=y_tick_labels, xlabel='XLABEL',
-                               ylabel='YLABEL', val_lim=[-1.5, 1.5])
+                               ylabel='YLABEL', val_lim=[-1.5, 1.5],
+                               colorbar_title = 't-stat for random data',
+                               colorbar_title_location = [6.0,4.5]
+                               )
 
 
     fig,ax = draw_brick_heatmap(hpd)
