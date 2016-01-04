@@ -37,8 +37,9 @@ configure_python_paths(args.python_path)
 
 import numpy as np
 from RamPipeline import RamPipeline
-from EventPreparation import EventPreparation
-from EEGRawPreparation import EEGRawPreparation
+# from EventPreparation import EventPreparation
+# from EEGRawPreparation import EEGRawPreparation
+# from EEGRawComparison import EEGRawComparison
 from PlotTask import PlotTask
 
 
@@ -51,7 +52,7 @@ class ComputePipeline(RamPipeline):
 compute_pipeline = ComputePipeline(workspace_dir='~/scratch/documentation_demo')
 
 compute_pipeline.add_task(EventPreparation(mark_as_completed=False))
-#
+
 compute_pipeline.add_task(EEGRawPreparation(mark_as_completed=False))
 
 compute_pipeline.add_task(PlotTask(mark_as_completed=False))
