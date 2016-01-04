@@ -372,11 +372,13 @@ class PanelPlot(object):
                 self.draw_brick_heatmap(pd, ax)
                 # ax.text(0.9, 0.95, "Bin:", ha ='left', fontsize = 15)
                 if pd.colorbar_title:
+                    # colorbar locqation coordinates are measured in number of data samples (rows, columns)
                     if pd.colorbar_title_location is not None:
 
                         ax.text(pd.colorbar_title_location[0], pd.colorbar_title_location[1],pd.colorbar_title,
                                 fontsize=12, rotation=270)
                     else:
+
                         ax.text(6.0, 5,pd.colorbar_title,
                                 fontsize=12, rotation=270)
 
