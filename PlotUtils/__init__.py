@@ -594,7 +594,7 @@ if __name__ == '__main__':
                         x_tick_labels=['a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9'],
                         barcolors=['r', 'g', 'b', 'r', 'g', 'b', 'r', 'g', 'b', 'r'], alpha=0.2)
 
-    pd_1 = PlotData(x=np.arange(10), y=np.random.rand(10), title='data00', linestyle='dashed',
+    pd_1 = PlotData(x=np.arange(10), y=np.random.rand(10), title='data00', linestyle='',
                     color='green', marker='s', levelline=[[0, 10], [0, 1]])
     pdc.add_plot_data(pd_1)
     pdc.add_plot_data(bpd_1)
