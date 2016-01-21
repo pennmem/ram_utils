@@ -60,7 +60,7 @@ class BarPlotData(object):
 
         for option_name in ['x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels','title',
                             'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos', 'xlabel','ylabel',
-                            'linestyle','color','marker','levelline','barcolors','barwidth']:
+                            'linestyle','color','marker','levelline','barcolors','barwidth','alpha']:
             try:
                 setattr(self, option_name, options[option_name])
                 print 'option_name=',option_name,' val=',options[option_name], ' value_check = ', getattr(self, option_name)
@@ -120,6 +120,25 @@ class BrickHeatmapPlotData(object):
                 'BrickHeatmapPlotData requires that df attribute is initialized - it can be pandas DataFrame object of simply 2D numpy array. Use PlotData(df=df) syntax')
 
 
+class PlotDataCollection(object):
+    def __init__(self, **options):
+
+        for option_name in ['df', 'annot_dict', 'val_lim', 'x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels',
+                            'title',
+                            'ylabel_fontsize', 'ylabel_fontsize', 'xlim', 'ylim', 'xhline_pos', 'xlabel', 'ylabel',
+                            'linestyle', 'color', 'marker', 'levelline', 'barcolors','colorbar_title','colorbar_title_location']:
+            try:
+                setattr(self, option_name, options[option_name])
+                print 'option_name=', option_name, ' val=', options[option_name], ' value_check = ', getattr(self,
+                                                                                                             option_name)
+            except LookupError:
+                setattr(self, option_name, None)
+
+        self.plot_data_list = []
+
+    def add_plot_data(self,pd):
+        self.plot_data_list.append(pd)
+
 class PanelPlot(object):
 
     def __init__(self, **options):
@@ -157,6 +176,27 @@ class PanelPlot(object):
 
         self.plot_data_matrix[i_panel][j_panel] = pd
         # self.plot_data_matrix[i_panel][j_panel] = PlotData(x, y, **options)
+
+
+    def add_plot_data_collection(self,i_panel, j_panel, **options):
+        '''
+        Adds PlotData to the proper location in the panel plot
+        :param i_panel: x position of the plot in the panel grid
+        :param j_panel: y position of the plot in the panel grid
+        :param options: same options you would pass to PlotData. if one of the options is plot_data than
+        the rest of the options gets ignored
+        :return:None
+        '''
+
+        print 'i',i_panel,' j ',j_panel
+        print 'options=',options
+        try:
+            pd = options['plot_data_collection']
+        except LookupError:
+            pd = PlotDataCollection(**options)
+
+        self.plot_data_matrix[i_panel][j_panel] = pd
+
 
 
     # def add_plot_data(self,i_panel, j_panel, x, y,xerr=None, yerr=None, title=''):
@@ -252,6 +292,119 @@ class PanelPlot(object):
         if pd.title:
             ax.set_title(pd.title)
 
+    def process_PlotData(self,pd,ax):
+
+        if pd.xerr is not None or pd.yerr is not None:
+            # xerr=[xerr, 2*xerr],
+            ax.errorbar(pd.x, pd.y, yerr=pd.yerr, fmt='--o')
+            # ax.set_xlim([np.min(pd.x)-0.5, np.max(pd.x)+0.5])
+            # if pd.xlim:
+                # ax.set_xlim(pd.xlim)
+
+
+            if pd.x_tick_labels is not None:
+                ax.set_xticks(pd.x)
+                ax.set_xticklabels(pd.x_tick_labels)
+
+
+
+        else:
+
+            # lines = ax.plot(pd.x,pd.y,'bs', label=pd.title)
+            # flierprops = dict(marker='o', markerfacecolor='green', markersize=12,
+            #   linestyle='none')
+# linestyles[axisNum], color=color, markersize=10
+            lines = ax.plot(pd.x,pd.y, pd.marker, ls=pd.linestyle, color=pd.color, label=pd.title)
+
+
+        if pd.xlim:
+            ax.set_xlim(pd.xlim)
+
+        else:
+            ax.set_xlim([np.min(pd.x)-0.5, np.max(pd.x)+0.5])
+
+        if pd.xlim:
+                ax.set_xlim(pd.xlim)
+
+
+
+        if pd.ylim:
+            ax.set_ylim(pd.ylim)
+
+
+
+
+        # LEVEL_LINE
+        if pd.levelline is not None:
+            levelline = ax.plot(pd.levelline[0],pd.levelline[1], ls='--', color='black')
+
+
+        #HORIZONTAL LINE
+        if pd.xhline_pos is not None:
+            ax.axhline(y=pd.xhline_pos, color='black', ls='dashed')
+
+
+
+    def process_BarPlotData(self,pd,ax):
+        inds = np.arange(len(pd.x))
+        alpha = 1.0
+        if pd.alpha is not None:
+            alpha = pd.alpha
+        rects = ax.bar(inds-0.5*pd.barwidth, pd.y, pd.barwidth, color='r',yerr=pd.yerr,alpha=alpha)
+        if pd.x_tick_labels is not None:
+            ax.set_xticks(pd.x)
+            ax.set_xticklabels(pd.x_tick_labels)
+
+        if pd.barcolors is not None:
+            for i, rect  in enumerate(rects):
+                rect.set_color(pd.barcolors[i])
+
+
+        if pd.xlim:
+                ax.set_xlim(pd.xlim)
+
+
+
+        if pd.ylim:
+            ax.set_ylim(pd.ylim)
+
+
+
+
+        # LEVEL_LINE
+        if pd.levelline is not None:
+            levelline = ax.plot(pd.levelline[0],pd.levelline[1], ls='--', color='black')
+
+
+        #HORIZONTAL LINE
+        if pd.xhline_pos is not None:
+            ax.axhline(y=pd.xhline_pos, color='black', ls='dashed')
+
+
+    def process_BrickHeatmapPlotData(self,pd,ax):
+
+        self.draw_brick_heatmap(pd, ax)
+        # ax.text(0.9, 0.95, "Bin:", ha ='left', fontsize = 15)
+        if pd.colorbar_title:
+            # colorbar locqation coordinates are measured in number of data samples (rows, columns)
+            if pd.colorbar_title_location is not None:
+
+                ax.text(pd.colorbar_title_location[0], pd.colorbar_title_location[1],pd.colorbar_title,
+                        fontsize=12, rotation=270)
+            else:
+
+                ax.text(6.0, 5,pd.colorbar_title,
+                        fontsize=12, rotation=270)
+
+
+        # LEVEL_LINE
+        if pd.levelline is not None:
+            levelline = ax.plot(pd.levelline[0],pd.levelline[1], ls='--', color='black')
+
+
+        #HORIZONTAL LINE
+        if pd.xhline_pos is not None:
+            ax.axhline(y=pd.xhline_pos, color='black', ls='dashed')
 
     def generate_plot(self):
         '''
@@ -316,109 +469,24 @@ class PanelPlot(object):
             else:
                 ax.set_xlabel(pd.xlabel,fontsize=pd.xlabel_fontsize)
 
+            # print 'pd=',pd
 
+            if isinstance(pd, PlotDataCollection):
+                plot_data_list = pd.plot_data_list
+            else:
+                plot_data_list=[pd]
 
-            print 'pd=',pd
-
-            if isinstance(pd,PlotData):
-
-                if pd.xerr is not None or pd.yerr is not None:
-                    # xerr=[xerr, 2*xerr],
-                    ax.errorbar(pd.x, pd.y, yerr=pd.yerr, fmt='--o')
-                    # ax.set_xlim([np.min(pd.x)-0.5, np.max(pd.x)+0.5])
-                    # if pd.xlim:
-                        # ax.set_xlim(pd.xlim)
-
-
-                    if pd.x_tick_labels is not None:
-                        ax.set_xticks(pd.x)
-                        ax.set_xticklabels(pd.x_tick_labels)
-
-
-
-                else:
-
-                    # lines = ax.plot(pd.x,pd.y,'bs', label=pd.title)
-                    # flierprops = dict(marker='o', markerfacecolor='green', markersize=12,
-                    #   linestyle='none')
-    # linestyles[axisNum], color=color, markersize=10
-                    lines = ax.plot(pd.x,pd.y, pd.marker, ls=pd.linestyle, color=pd.color, label=pd.title)
-
-
-                if pd.xlim:
-                    ax.set_xlim(pd.xlim)
-
-                else:
-                    ax.set_xlim([np.min(pd.x)-0.5, np.max(pd.x)+0.5])
-
-
-
-            # BAR_PLOT_DATA - bar plots
-            elif isinstance(pd,BarPlotData):
-                inds = np.arange(len(pd.x))
-
-                rects = ax.bar(inds-0.5*pd.barwidth, pd.y, pd.barwidth, color='r',yerr=pd.yerr)
-                if pd.x_tick_labels is not None:
-                    ax.set_xticks(pd.x)
-                    ax.set_xticklabels(pd.x_tick_labels)
-
-                if pd.barcolors is not None:
-                    for i, rect  in enumerate(rects):
-                        rect.set_color(pd.barcolors[i])
-
-
-
-            elif isinstance(pd, BrickHeatmapPlotData):
-                self.draw_brick_heatmap(pd, ax)
-                # ax.text(0.9, 0.95, "Bin:", ha ='left', fontsize = 15)
-                if pd.colorbar_title:
-                    # colorbar locqation coordinates are measured in number of data samples (rows, columns)
-                    if pd.colorbar_title_location is not None:
-
-                        ax.text(pd.colorbar_title_location[0], pd.colorbar_title_location[1],pd.colorbar_title,
-                                fontsize=12, rotation=270)
-                    else:
-
-                        ax.text(6.0, 5,pd.colorbar_title,
-                                fontsize=12, rotation=270)
+            for pd_instance in plot_data_list:
+                if isinstance(pd_instance,PlotData):
+                    self.process_PlotData(pd_instance,ax)
+                elif isinstance(pd_instance,BarPlotData):
+                    self.process_BarPlotData(pd_instance,ax)
+                elif isinstance(pd_instance,BrickHeatmapPlotData):
+                    self.process_BrickHeatmapPlotData(pd_instance,ax)
 
 
 
 
-
-
-            if pd.xlim:
-                    ax.set_xlim(pd.xlim)
-
-
-
-            if pd.ylim:
-                ax.set_ylim(pd.ylim)
-
-
-
-
-            # LEVEL_LINE
-            if pd.levelline is not None:
-                levelline = ax.plot(pd.levelline[0],pd.levelline[1], ls='--', color='black')
-
-
-            #HORIZONTAL LINE
-            if pd.xhline_pos is not None:
-                ax.axhline(y=pd.xhline_pos, color='black', ls='dashed')
-
-
-
-            # ax.axhline(y=0.5, color='k', ls='dashed')
-
-
-            # if pd.xlim:
-            #     # ax.set_xlim(pd.xlim)
-            #     ax.set_xlim([np.min(pd.x)-0.5, np.max(pd.x)+0.5])
-            #
-            # if pd.x_tick_labels is not None:
-            #     ax.set_xticks(pd.x)
-            #     ax.set_xticklabels(pd.x_tick_labels)
 
             # ax.set_xlabel(pd.title, fontsize=pd.xlabel_fontsize)
         if self.wspace is None or self.hspace is None:
@@ -556,6 +624,19 @@ if __name__ == '__main__':
                                )
 
     panel_plot.add_plot_data(1, 1, plot_data=hpd)
+
+
+    pdc = PlotDataCollection()
+    bpd_1 = BarPlotData(x=np.arange(10), y=np.random.rand(10), title='data01', yerr=np.random.rand(10) * 0.1,
+                      x_tick_labels=['a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9'],
+                      barcolors=['r', 'g', 'b', 'r', 'g', 'b', 'r', 'g', 'b', 'r'], alpha=0.2)
+
+    pd_1 = PlotData(x=np.arange(10), y=np.random.rand(10), title='data00', linestyle='dashed',
+                             color='green', marker='s', levelline=[[0, 10], [0, 1]])
+    pdc.add_plot_data(pd_1)
+    pdc.add_plot_data(bpd_1)
+
+    panel_plot.add_plot_data_collection(1, 0, plot_data_collection=pdc)
 
     plot = panel_plot.generate_plot()
     plot.subplots_adjust(wspace=0.3, hspace=0.3)
