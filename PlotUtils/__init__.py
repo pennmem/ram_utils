@@ -4,6 +4,7 @@ import numpy as np
 
 # this makes matplotlib independend of the X server - comes handy on clusters
 import matplotlib
+
 matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
@@ -22,27 +23,28 @@ class PlotData(object):
         self.ylabel_fontsize = 12
         self.xlabel_fontsize = 12
 
-        for option_name in ['x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels','title',
-                            'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos', 'xlabel','ylabel',
-                            'linestyle','color','marker','levelline']:
+        for option_name in ['x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels', 'title',
+                            'ylabel_fontsize', 'ylabel_fontsize', 'xlim', 'ylim', 'xhline_pos', 'xlabel', 'ylabel',
+                            'linestyle', 'color', 'marker', 'levelline']:
             try:
                 setattr(self, option_name, options[option_name])
-                print 'option_name=',option_name,' val=',options[option_name], ' value_check = ', getattr(self, option_name)
+                print 'option_name=', option_name, ' val=', options[option_name], ' value_check = ', getattr(self,
+                                                                                                             option_name)
             except LookupError:
                 setattr(self, option_name, None)
 
         # setting reasonable defaults
         if self.linestyle is None:
-            self.linestyle='-'
+            self.linestyle = '-'
         if self.color is None:
-            self.color='black'
+            self.color = 'black'
         if self.marker is None:
-            self.marker=''
-
-
+            self.marker = ''
 
         if self.x is None or self.y is None:
-            raise AttributeError('PlotData requires that x and y attributes are initialized. Use PlotData(x=x_array,y=y_array) syntax')
+            raise AttributeError(
+                'PlotData requires that x and y attributes are initialized. Use PlotData(x=x_array,y=y_array) syntax')
+
 
 class BarPlotData(object):
     # def __init__(self, x, y, xerr=None, yerr=None, x_tick_labels=None, y_tick_labels=None, title=''):
@@ -57,30 +59,29 @@ class BarPlotData(object):
         self.ylabel_fontsize = 12
         self.xlabel_fontsize = 12
 
-
-        for option_name in ['x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels','title',
-                            'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos', 'xlabel','ylabel',
-                            'linestyle','color','marker','levelline','barcolors','barwidth','alpha']:
+        for option_name in ['x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels', 'title',
+                            'ylabel_fontsize', 'ylabel_fontsize', 'xlim', 'ylim', 'xhline_pos', 'xlabel', 'ylabel',
+                            'linestyle', 'color', 'marker', 'levelline', 'barcolors', 'barwidth', 'alpha']:
             try:
                 setattr(self, option_name, options[option_name])
-                print 'option_name=',option_name,' val=',options[option_name], ' value_check = ', getattr(self, option_name)
+                print 'option_name=', option_name, ' val=', options[option_name], ' value_check = ', getattr(self,
+                                                                                                             option_name)
             except LookupError:
                 setattr(self, option_name, None)
 
         # setting reasonable defaults
         if self.linestyle is None:
-            self.linestyle='-'
+            self.linestyle = '-'
         if self.color is None:
-            self.color='black'
+            self.color = 'black'
         if self.marker is None:
-            self.marker=''
+            self.marker = ''
         if self.barwidth is None:
             self.barwidth = 0.5
 
-
-
         if self.x is None or self.y is None:
-            raise AttributeError('PlotData requires that x and y attributes are initialized. Use PlotData(x=x_array,y=y_array) syntax')
+            raise AttributeError(
+                'PlotData requires that x and y attributes are initialized. Use PlotData(x=x_array,y=y_array) syntax')
 
 
 class BrickHeatmapPlotData(object):
@@ -99,7 +100,8 @@ class BrickHeatmapPlotData(object):
         for option_name in ['df', 'annot_dict', 'val_lim', 'x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels',
                             'title',
                             'ylabel_fontsize', 'ylabel_fontsize', 'xlim', 'ylim', 'xhline_pos', 'xlabel', 'ylabel',
-                            'linestyle', 'color', 'marker', 'levelline', 'barcolors','colorbar_title','colorbar_title_location']:
+                            'linestyle', 'color', 'marker', 'levelline', 'barcolors', 'colorbar_title',
+                            'colorbar_title_location']:
             try:
                 setattr(self, option_name, options[option_name])
                 print 'option_name=', option_name, ' val=', options[option_name], ' value_check = ', getattr(self,
@@ -126,7 +128,8 @@ class PlotDataCollection(object):
         for option_name in ['df', 'annot_dict', 'val_lim', 'x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels',
                             'title',
                             'ylabel_fontsize', 'ylabel_fontsize', 'xlim', 'ylim', 'xhline_pos', 'xlabel', 'ylabel',
-                            'linestyle', 'color', 'marker', 'levelline', 'barcolors','colorbar_title','colorbar_title_location']:
+                            'linestyle', 'color', 'marker', 'levelline', 'barcolors', 'colorbar_title',
+                            'colorbar_title_location']:
             try:
                 setattr(self, option_name, options[option_name])
                 print 'option_name=', option_name, ' val=', options[option_name], ' value_check = ', getattr(self,
@@ -136,28 +139,28 @@ class PlotDataCollection(object):
 
         self.plot_data_list = []
 
-    def add_plot_data(self,pd):
+    def add_plot_data(self, pd):
         self.plot_data_list.append(pd)
 
-class PanelPlot(object):
 
+class PanelPlot(object):
     def __init__(self, **options):
         '''
         Initializes PanelPlot
         :param options: options are: 'i_max', 'j_max', 'title', 'xtitle', 'ytitle', 'wspace', 'hspace','xfigsize','yfigsize'
         :return: None
         '''
-        for option_name in ['i_max', 'j_max', 'title', 'xtitle', 'ytitle', 'wspace', 'hspace','xfigsize','yfigsize']:
+        for option_name in ['i_max', 'j_max', 'title', 'xtitle', 'ytitle', 'wspace', 'hspace', 'xfigsize', 'yfigsize']:
             try:
                 setattr(self, option_name, options[option_name])
-                print 'option_name=',option_name,' val=',options[option_name], ' value_check = ', getattr(self, option_name)
+                print 'option_name=', option_name, ' val=', options[option_name], ' value_check = ', getattr(self,
+                                                                                                             option_name)
             except LookupError:
                 setattr(self, option_name, None)
 
-
         self.plot_data_matrix = [[None for x in range(self.j_max)] for x in range(self.i_max)]
 
-    def add_plot_data(self,i_panel, j_panel, **options):
+    def add_plot_data(self, i_panel, j_panel, **options):
         '''
         Adds PlotData to the proper location in the panel plot
         :param i_panel: x position of the plot in the panel grid
@@ -167,8 +170,8 @@ class PanelPlot(object):
         :return:None
         '''
 
-        print 'i',i_panel,' j ',j_panel
-        print 'options=',options
+        print 'i', i_panel, ' j ', j_panel
+        print 'options=', options
         try:
             pd = options['plot_data']
         except LookupError:
@@ -177,8 +180,7 @@ class PanelPlot(object):
         self.plot_data_matrix[i_panel][j_panel] = pd
         # self.plot_data_matrix[i_panel][j_panel] = PlotData(x, y, **options)
 
-
-    def add_plot_data_collection(self,i_panel, j_panel, **options):
+    def add_plot_data_collection(self, i_panel, j_panel, **options):
         '''
         Adds PlotData to the proper location in the panel plot
         :param i_panel: x position of the plot in the panel grid
@@ -188,16 +190,14 @@ class PanelPlot(object):
         :return:None
         '''
 
-        print 'i',i_panel,' j ',j_panel
-        print 'options=',options
+        print 'i', i_panel, ' j ', j_panel
+        print 'options=', options
         try:
             pd = options['plot_data_collection']
         except LookupError:
             pd = PlotDataCollection(**options)
 
         self.plot_data_matrix[i_panel][j_panel] = pd
-
-
 
     # def add_plot_data(self,i_panel, j_panel, x, y,xerr=None, yerr=None, title=''):
     #
@@ -249,22 +249,20 @@ class PanelPlot(object):
 
         xticks_numbered = zip(np.arange(len(xticks)), xticks)
         # yticks_numbered = zip(np.arange(len(yticks)), yticks)
-        yticks_numbered = zip(np.arange(len(yticks))[::-1], yticks) # had to invert y axis to achieve numpy matrix ordering
-
-
+        yticks_numbered = zip(np.arange(len(yticks))[::-1],
+                              yticks)  # had to invert y axis to achieve numpy matrix ordering
 
         if pd.annot_dict is not None:
 
-
             # implementing numpy matrix ordering - (0,0) is upper left corner
-            for  (j,y), (i, x),  in product(yticks_numbered,xticks_numbered):
+            for (j, y), (i, x), in product(yticks_numbered, xticks_numbered):
                 # print 'x_tuple=', (i, x), ' y_tuple=', (j, y)
                 # print pd.annot_dict[(j,i)]
 
                 try:
-                    ax.text(x,y, pd.annot_dict[(j, i)], color='k', ha="center", va="center")
+                    ax.text(x, y, pd.annot_dict[(j, i)], color='k', ha="center", va="center")
                 except LookupError:
-                    print 'COULD NOT GET i,j = ',(j,i)
+                    print 'COULD NOT GET i,j = ', (j, i)
                     pass
 
         # from itertools import product
@@ -292,14 +290,14 @@ class PanelPlot(object):
         if pd.title:
             ax.set_title(pd.title)
 
-    def process_PlotData(self,pd,ax):
+    def process_PlotData(self, pd, ax):
 
         if pd.xerr is not None or pd.yerr is not None:
             # xerr=[xerr, 2*xerr],
             ax.errorbar(pd.x, pd.y, yerr=pd.yerr, fmt='--o')
             # ax.set_xlim([np.min(pd.x)-0.5, np.max(pd.x)+0.5])
             # if pd.xlim:
-                # ax.set_xlim(pd.xlim)
+            # ax.set_xlim(pd.xlim)
 
 
             if pd.x_tick_labels is not None:
@@ -313,75 +311,48 @@ class PanelPlot(object):
             # lines = ax.plot(pd.x,pd.y,'bs', label=pd.title)
             # flierprops = dict(marker='o', markerfacecolor='green', markersize=12,
             #   linestyle='none')
-# linestyles[axisNum], color=color, markersize=10
-            lines = ax.plot(pd.x,pd.y, pd.marker, ls=pd.linestyle, color=pd.color, label=pd.title)
-
+            # linestyles[axisNum], color=color, markersize=10
+            lines = ax.plot(pd.x, pd.y, pd.marker, ls=pd.linestyle, color=pd.color, label=pd.title)
 
         if pd.xlim:
             ax.set_xlim(pd.xlim)
 
         else:
-            ax.set_xlim([np.min(pd.x)-0.5, np.max(pd.x)+0.5])
+            ax.set_xlim([np.min(pd.x) - 0.5, np.max(pd.x) + 0.5])
 
         if pd.xlim:
-                ax.set_xlim(pd.xlim)
-
-
+            ax.set_xlim(pd.xlim)
 
         if pd.ylim:
             ax.set_ylim(pd.ylim)
 
+        self.process_extra_lines(pd,ax)
 
-
-
-        # LEVEL_LINE
-        if pd.levelline is not None:
-            levelline = ax.plot(pd.levelline[0],pd.levelline[1], ls='--', color='black')
-
-
-        #HORIZONTAL LINE
-        if pd.xhline_pos is not None:
-            ax.axhline(y=pd.xhline_pos, color='black', ls='dashed')
-
-
-
-    def process_BarPlotData(self,pd,ax):
+    def process_BarPlotData(self, pd, ax):
         inds = np.arange(len(pd.x))
         alpha = 1.0
         if pd.alpha is not None:
             alpha = pd.alpha
-        rects = ax.bar(inds-0.5*pd.barwidth, pd.y, pd.barwidth, color='r',yerr=pd.yerr,alpha=alpha)
+        rects = ax.bar(inds - 0.5 * pd.barwidth, pd.y, pd.barwidth, color='r', yerr=pd.yerr, alpha=alpha)
         if pd.x_tick_labels is not None:
             ax.set_xticks(pd.x)
             ax.set_xticklabels(pd.x_tick_labels)
 
         if pd.barcolors is not None:
-            for i, rect  in enumerate(rects):
+            for i, rect in enumerate(rects):
                 rect.set_color(pd.barcolors[i])
 
-
         if pd.xlim:
-                ax.set_xlim(pd.xlim)
-
-
+            ax.set_xlim(pd.xlim)
 
         if pd.ylim:
             ax.set_ylim(pd.ylim)
 
 
+        self.process_extra_lines(pd,ax)
 
 
-        # LEVEL_LINE
-        if pd.levelline is not None:
-            levelline = ax.plot(pd.levelline[0],pd.levelline[1], ls='--', color='black')
-
-
-        #HORIZONTAL LINE
-        if pd.xhline_pos is not None:
-            ax.axhline(y=pd.xhline_pos, color='black', ls='dashed')
-
-
-    def process_BrickHeatmapPlotData(self,pd,ax):
+    def process_BrickHeatmapPlotData(self, pd, ax):
 
         self.draw_brick_heatmap(pd, ax)
         # ax.text(0.9, 0.95, "Bin:", ha ='left', fontsize = 15)
@@ -389,22 +360,24 @@ class PanelPlot(object):
             # colorbar locqation coordinates are measured in number of data samples (rows, columns)
             if pd.colorbar_title_location is not None:
 
-                ax.text(pd.colorbar_title_location[0], pd.colorbar_title_location[1],pd.colorbar_title,
+                ax.text(pd.colorbar_title_location[0], pd.colorbar_title_location[1], pd.colorbar_title,
                         fontsize=12, rotation=270)
             else:
 
-                ax.text(6.0, 5,pd.colorbar_title,
+                ax.text(6.0, 5, pd.colorbar_title,
                         fontsize=12, rotation=270)
 
+        self.process_extra_lines(pd,ax)
 
+    def process_extra_lines(self,pd,ax):
         # LEVEL_LINE
         if pd.levelline is not None:
-            levelline = ax.plot(pd.levelline[0],pd.levelline[1], ls='--', color='black')
+            levelline = ax.plot(pd.levelline[0], pd.levelline[1], ls='--', color='black')
 
-
-        #HORIZONTAL LINE
+        # HORIZONTAL LINE
         if pd.xhline_pos is not None:
             ax.axhline(y=pd.xhline_pos, color='black', ls='dashed')
+
 
     def generate_plot(self):
         '''
@@ -429,66 +402,61 @@ class PanelPlot(object):
 
         fig = None
         if self.xfigsize is None or self.yfigsize is None:
-            fig  = plt.figure(figsize=(15,15))
+            fig = plt.figure(figsize=(15, 15))
         else:
-            fig  = plt.figure(figsize=(self.xfigsize,self.yfigsize))
+            fig = plt.figure(figsize=(self.xfigsize, self.yfigsize))
 
         if self.title is None:
             self.title = ''
         if self.xtitle is None:
             self.xtitle = ''
 
-
         fig.suptitle(self.title, fontsize=16, fontweight='bold')
         # fig.text(x=0.5, y=0.95, s='Minimum 2 cells per cluster' ,fontsize=14, horizontalalignment='center')
 
-        fig.text(x=0.5, y=0.02, s=self.xtitle ,fontsize=16, fontweight='bold',horizontalalignment='center')
+        fig.text(x=0.5, y=0.02, s=self.xtitle, fontsize=16, fontweight='bold', horizontalalignment='center')
         import itertools
         for i, j in itertools.product(xrange(self.i_max), xrange(self.j_max)):
 
             pd = self.plot_data_matrix[i][j]
             if pd is None:
-                print 'Could not find plot data for panel coordinates (i,j)= ',(i,j)
+                print 'Could not find plot data for panel coordinates (i,j)= ', (i, j)
                 continue
 
-            ax = plt.subplot2grid((self.i_max,self.j_max),(i, j))
+            ax = plt.subplot2grid((self.i_max, self.j_max), (i, j))
 
             # ax.set_aspect('equal', adjustable='box')
 
 
             # y axis labels
             if pd.ylabel is None:
-                if j == 0 :
-                    ax.set_ylabel(self.ytitle,fontsize=pd.ylabel_fontsize)
+                if j == 0:
+                    ax.set_ylabel(self.ytitle, fontsize=pd.ylabel_fontsize)
             else:
-                ax.set_ylabel(pd.ylabel,fontsize=pd.ylabel_fontsize)
+                ax.set_ylabel(pd.ylabel, fontsize=pd.ylabel_fontsize)
 
             # x axis labels
             if pd.xlabel is None:
                 pass
             else:
-                ax.set_xlabel(pd.xlabel,fontsize=pd.xlabel_fontsize)
+                ax.set_xlabel(pd.xlabel, fontsize=pd.xlabel_fontsize)
 
             # print 'pd=',pd
 
             if isinstance(pd, PlotDataCollection):
                 plot_data_list = pd.plot_data_list
             else:
-                plot_data_list=[pd]
+                plot_data_list = [pd]
 
             for pd_instance in plot_data_list:
-                if isinstance(pd_instance,PlotData):
-                    self.process_PlotData(pd_instance,ax)
-                elif isinstance(pd_instance,BarPlotData):
-                    self.process_BarPlotData(pd_instance,ax)
-                elif isinstance(pd_instance,BrickHeatmapPlotData):
-                    self.process_BrickHeatmapPlotData(pd_instance,ax)
+                if isinstance(pd_instance, PlotData):
+                    self.process_PlotData(pd_instance, ax)
+                elif isinstance(pd_instance, BarPlotData):
+                    self.process_BarPlotData(pd_instance, ax)
+                elif isinstance(pd_instance, BrickHeatmapPlotData):
+                    self.process_BrickHeatmapPlotData(pd_instance, ax)
 
-
-
-
-
-            # ax.set_xlabel(pd.title, fontsize=pd.xlabel_fontsize)
+                    # ax.set_xlabel(pd.title, fontsize=pd.xlabel_fontsize)
         if self.wspace is None or self.hspace is None:
             pass
         else:
@@ -545,22 +513,19 @@ def draw_brick_heatmap(plot_data):
 
     xticks_numbered = zip(np.arange(len(xticks)), xticks)
     # yticks_numbered = zip(np.arange(len(yticks)), yticks)
-    yticks_numbered = zip(np.arange(len(yticks))[::-1], yticks) # had to invert y axis to achieve numpy matrix ordering
-
-
+    yticks_numbered = zip(np.arange(len(yticks))[::-1], yticks)  # had to invert y axis to achieve numpy matrix ordering
 
     if pd.annot_dict is not None:
 
-
         # implementing numpy matrix ordering - (0,0) is upper left corner
-        for  (j,y), (i, x),  in product(yticks_numbered,xticks_numbered):
+        for (j, y), (i, x), in product(yticks_numbered, xticks_numbered):
             # print 'x_tuple=', (i, x), ' y_tuple=', (j, y)
             # print pd.annot_dict[(j,i)]
 
             try:
-                ax.text(x,y, pd.annot_dict[(j, i)], color='k', ha="center", va="center")
+                ax.text(x, y, pd.annot_dict[(j, i)], color='k', ha="center", va="center")
             except LookupError:
-                print 'COULD NOT GET i,j = ',(j,i)
+                print 'COULD NOT GET i,j = ', (j, i)
                 pass
 
 
@@ -569,12 +534,11 @@ def draw_brick_heatmap(plot_data):
     if pd.colorbar_title:
         if pd.colorbar_title_location is not None:
 
-            ax.text(pd.colorbar_title_location[0], pd.colorbar_title_location[1],pd.colorbar_title,
+            ax.text(pd.colorbar_title_location[0], pd.colorbar_title_location[1], pd.colorbar_title,
                     fontsize=12, rotation=270)
         else:
-            ax.text(6.0, 5,pd.colorbar_title,
+            ax.text(6.0, 5, pd.colorbar_title,
                     fontsize=12, rotation=270)
-
 
     if pd.xlabel:
         ax.set_xlabel(pd.xlabel, fontsize=pd.xlabel_fontsize)
@@ -619,20 +583,19 @@ if __name__ == '__main__':
     hpd = BrickHeatmapPlotData(df=data_frame, annot_dict=annotation_dictionary, title='random_data_brick_plot',
                                x_tick_labels=x_tick_labels, y_tick_labels=y_tick_labels, xlabel='XLABEL',
                                ylabel='YLABEL', val_lim=[-1.5, 1.5],
-                               colorbar_title = 't-stat for random data',
-                               colorbar_title_location = [6.0,4.5],
+                               colorbar_title='t-stat for random data',
+                               colorbar_title_location=[6.0, 4.5],
                                )
 
     panel_plot.add_plot_data(1, 1, plot_data=hpd)
 
-
     pdc = PlotDataCollection()
     bpd_1 = BarPlotData(x=np.arange(10), y=np.random.rand(10), title='data01', yerr=np.random.rand(10) * 0.1,
-                      x_tick_labels=['a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9'],
-                      barcolors=['r', 'g', 'b', 'r', 'g', 'b', 'r', 'g', 'b', 'r'], alpha=0.2)
+                        x_tick_labels=['a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9'],
+                        barcolors=['r', 'g', 'b', 'r', 'g', 'b', 'r', 'g', 'b', 'r'], alpha=0.2)
 
     pd_1 = PlotData(x=np.arange(10), y=np.random.rand(10), title='data00', linestyle='dashed',
-                             color='green', marker='s', levelline=[[0, 10], [0, 1]])
+                    color='green', marker='s', levelline=[[0, 10], [0, 1]])
     pdc.add_plot_data(pd_1)
     pdc.add_plot_data(bpd_1)
 
@@ -651,17 +614,15 @@ if __name__ == '__main__':
 
     annotation_dictionary = {(i, j): i * j for i, j in product(range(7), range(5))}
 
-
     x_tick_labels = ['x0', 'x1', 'x2', 'x3', 'x4']
-    y_tick_labels = ['y0', 'y1', 'y2', 'y3', 'y4', 'y5','y6']
+    y_tick_labels = ['y0', 'y1', 'y2', 'y3', 'y4', 'y5', 'y6']
 
     hpd = BrickHeatmapPlotData(df=data_frame, annot_dict=annotation_dictionary, title='random_data_brick_plot',
                                x_tick_labels=x_tick_labels, y_tick_labels=y_tick_labels, xlabel='XLABEL',
                                ylabel='YLABEL', val_lim=[-1.5, 1.5],
-                               colorbar_title = 't-stat for random data',
-                               colorbar_title_location = [6.0,4.5]
+                               colorbar_title='t-stat for random data',
+                               colorbar_title_location=[6.0, 4.5]
                                )
 
-
-    fig,ax = draw_brick_heatmap(hpd)
+    fig, ax = draw_brick_heatmap(hpd)
     fig.savefig('heatmap_example.png')
