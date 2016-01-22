@@ -589,17 +589,26 @@ if __name__ == '__main__':
 
     panel_plot.add_plot_data(1, 1, plot_data=hpd)
 
+    ###################################### PLOT DATA COLLECTION
     pdc = PlotDataCollection()
+
     bpd_1 = BarPlotData(x=np.arange(10), y=np.random.rand(10), title='data01', yerr=np.random.rand(10) * 0.1,
                         x_tick_labels=['a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9'],
                         barcolors=['r', 'g', 'b', 'r', 'g', 'b', 'r', 'g', 'b', 'r'], alpha=0.2)
 
-    pd_1 = PlotData(x=np.arange(10), y=np.random.rand(10), title='data00', linestyle='',
+    pd_1 = PlotData(x=np.arange(1,11,2), y=np.random.rand(5), title='', linestyle='',
                     color='green', marker='s', levelline=[[0, 10], [0, 1]])
+    pd_2 = PlotData(x=np.arange(0,10,2), y=np.random.rand(5), title='', linestyle='',
+                    color='blue', marker='*' )
+
     pdc.add_plot_data(pd_1)
+    pdc.add_plot_data(pd_2)
     pdc.add_plot_data(bpd_1)
 
     panel_plot.add_plot_data_collection(1, 0, plot_data_collection=pdc)
+
+
+    ###################################### END OF PLOT DATA COLLECTION
 
     plot = panel_plot.generate_plot()
     plot.subplots_adjust(wspace=0.3, hspace=0.3)
