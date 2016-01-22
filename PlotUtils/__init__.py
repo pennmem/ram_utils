@@ -551,11 +551,44 @@ def draw_brick_heatmap(plot_data):
 
 
 if __name__ == '__main__':
+    panel_plot_0 = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=1, title='SHIFTED DATA 1', xtitle='x_axis_label',
+                           ytitle='y_axis_random')
+
+    pdc = PlotDataCollection()
+
+
+    pd_1 = PlotData(x=np.arange(10,dtype=np.float), y=np.random.rand(10), yerr=np.random.rand(10), title='', linestyle='',
+                    color='green', marker='s', levelline=[[0, 10], [0, 1]])
+    pd_2 = PlotData(x=np.arange(10,dtype=np.float)-0.1, y=np.random.rand(10), yerr=np.random.rand(10), title='', linestyle='',
+                    color='blue', marker='*' )
+
+
+
+    pdc.add_plot_data(pd_1)
+    pdc.add_plot_data(pd_2)
+
+
+    panel_plot_0.add_plot_data_collection(0, 0, plot_data_collection=pdc)
+
+
+
+    plot = panel_plot_0.generate_plot()
+    plot.subplots_adjust(wspace=0.3, hspace=0.3)
+
+    plot.savefig('demo_shift.pdf', dpi=300, bboxinches='tight')
+
+
+
     panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=2, j_max=2, title='Random Data 1', xtitle='x_axis_label',
                            ytitle='y_axis_random')
 
+
     panel_plot.add_plot_data(0, 0, x=np.arange(10), y=np.random.rand(10), title='data00', linestyle='dashed',
                              color='green', marker='s', levelline=[[0, 10], [0, 1]])
+
+
+
+
     bpd = BarPlotData(x=np.arange(10), y=np.random.rand(10), title='data01', yerr=np.random.rand(10) * 0.1,
                       x_tick_labels=['a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9'],
                       barcolors=['r', 'g', 'b', 'r', 'g', 'b', 'r', 'g', 'b', 'r'])
