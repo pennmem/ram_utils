@@ -25,7 +25,7 @@ class PlotData(object):
 
         for option_name in ['x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels', 'title',
                             'ylabel_fontsize', 'ylabel_fontsize', 'xlim', 'ylim', 'xhline_pos', 'xlabel', 'ylabel',
-                            'linestyle', 'color', 'marker', 'levelline']:
+                            'linestyle', 'color', 'marker', 'levelline','label']:
             try:
                 setattr(self, option_name, options[option_name])
                 print 'option_name=', option_name, ' val=', options[option_name], ' value_check = ', getattr(self,
@@ -40,6 +40,9 @@ class PlotData(object):
             self.color = 'black'
         if self.marker is None:
             self.marker = ''
+
+        if self.label is None:
+            self.label = ''
 
         if self.x is None or self.y is None:
             raise AttributeError(
@@ -61,7 +64,7 @@ class BarPlotData(object):
 
         for option_name in ['x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels', 'title',
                             'ylabel_fontsize', 'ylabel_fontsize', 'xlim', 'ylim', 'xhline_pos', 'xlabel', 'ylabel',
-                            'linestyle', 'color', 'marker', 'levelline', 'barcolors', 'barwidth', 'alpha']:
+                            'linestyle', 'color', 'marker', 'levelline', 'barcolors', 'barwidth', 'alpha','label']:
             try:
                 setattr(self, option_name, options[option_name])
                 print 'option_name=', option_name, ' val=', options[option_name], ' value_check = ', getattr(self,
@@ -78,6 +81,10 @@ class BarPlotData(object):
             self.marker = ''
         if self.barwidth is None:
             self.barwidth = 0.5
+
+        if self.label is None:
+            self.label = ''
+
 
         if self.x is None or self.y is None:
             raise AttributeError(
@@ -101,7 +108,7 @@ class BrickHeatmapPlotData(object):
                             'title',
                             'ylabel_fontsize', 'ylabel_fontsize', 'xlim', 'ylim', 'xhline_pos', 'xlabel', 'ylabel',
                             'linestyle', 'color', 'marker', 'levelline', 'barcolors', 'colorbar_title',
-                            'colorbar_title_location']:
+                            'colorbar_title_location','label']:
             try:
                 setattr(self, option_name, options[option_name])
                 print 'option_name=', option_name, ' val=', options[option_name], ' value_check = ', getattr(self,
@@ -117,6 +124,9 @@ class BrickHeatmapPlotData(object):
         if self.marker is None:
             self.marker = ''
 
+        if self.label is None:
+            self.label = ''
+
         if self.df is None:
             raise AttributeError(
                 'BrickHeatmapPlotData requires that df attribute is initialized - it can be pandas DataFrame object of simply 2D numpy array. Use PlotData(df=df) syntax')
@@ -129,7 +139,7 @@ class PlotDataCollection(object):
                             'title',
                             'ylabel_fontsize', 'ylabel_fontsize', 'xlim', 'ylim', 'xhline_pos', 'xlabel', 'ylabel',
                             'linestyle', 'color', 'marker', 'levelline', 'barcolors', 'colorbar_title',
-                            'colorbar_title_location']:
+                            'colorbar_title_location','legend_pos','legend_on']:
             try:
                 setattr(self, option_name, options[option_name])
                 print 'option_name=', option_name, ' val=', options[option_name], ' value_check = ', getattr(self,
@@ -138,6 +148,8 @@ class PlotDataCollection(object):
                 setattr(self, option_name, None)
 
         self.plot_data_list = []
+        if self.legend_on is None:
+            self.legend_on=False
 
     def add_plot_data(self, pd):
         self.plot_data_list.append(pd)
@@ -290,11 +302,38 @@ class PanelPlot(object):
         if pd.title:
             ax.set_title(pd.title)
 
+    def process_PlotDataCollection(self,pd, ax):
+
+        min_x_list=[]
+        max_x_list=[]
+
+        for pd_instance in pd.plot_data_list:
+            min_x_list.append(np.min(pd_instance.x))
+            max_x_list.append(np.max(pd_instance.x))
+            if isinstance(pd_instance, PlotData):
+                self.process_PlotData(pd_instance, ax)
+            elif isinstance(pd_instance, BarPlotData):
+                self.process_BarPlotData(pd_instance, ax)
+            elif isinstance(pd_instance, BrickHeatmapPlotData):
+                self.process_BrickHeatmapPlotData(pd_instance, ax)
+
+        if pd.xlim:
+            ax.set_xlim(pd.xlim)
+        else:
+            ax.set_xlim([np.min(min_x_list) - 0.5, np.max(max_x_list) + 0.5])
+
+
+        if pd.legend_on:
+            if pd.legend_pos is not None:
+                ax.legend(bbox_to_anchor=pd.legend_pos)
+            else:
+                ax.legend()
+
     def process_PlotData(self, pd, ax):
 
         if pd.xerr is not None or pd.yerr is not None:
             # xerr=[xerr, 2*xerr],
-            ax.errorbar(pd.x, pd.y, yerr=pd.yerr, fmt='--o')
+            lines = ax.errorbar(pd.x, pd.y, yerr=pd.yerr, fmt='--o', label=pd.label)
             # ax.set_xlim([np.min(pd.x)-0.5, np.max(pd.x)+0.5])
             # if pd.xlim:
             # ax.set_xlim(pd.xlim)
@@ -312,7 +351,7 @@ class PanelPlot(object):
             # flierprops = dict(marker='o', markerfacecolor='green', markersize=12,
             #   linestyle='none')
             # linestyles[axisNum], color=color, markersize=10
-            lines = ax.plot(pd.x, pd.y, pd.marker, ls=pd.linestyle, color=pd.color, label=pd.title)
+            lines = ax.plot(pd.x, pd.y, pd.marker, ls=pd.linestyle, color=pd.color, label=pd.label)
 
         if pd.xlim:
             ax.set_xlim(pd.xlim)
@@ -328,12 +367,13 @@ class PanelPlot(object):
 
         self.process_extra_lines(pd,ax)
 
+
     def process_BarPlotData(self, pd, ax):
         inds = np.arange(len(pd.x))
         alpha = 1.0
         if pd.alpha is not None:
             alpha = pd.alpha
-        rects = ax.bar(inds - 0.5 * pd.barwidth, pd.y, pd.barwidth, color='r', yerr=pd.yerr, alpha=alpha)
+        rects = ax.bar(inds - 0.5 * pd.barwidth, pd.y, pd.barwidth, color='r', yerr=pd.yerr, alpha=alpha, label=pd.label)
         if pd.x_tick_labels is not None:
             ax.set_xticks(pd.x)
             ax.set_xticklabels(pd.x_tick_labels)
@@ -443,18 +483,42 @@ class PanelPlot(object):
 
             # print 'pd=',pd
 
+
             if isinstance(pd, PlotDataCollection):
                 plot_data_list = pd.plot_data_list
             else:
                 plot_data_list = [pd]
 
-            for pd_instance in plot_data_list:
-                if isinstance(pd_instance, PlotData):
-                    self.process_PlotData(pd_instance, ax)
-                elif isinstance(pd_instance, BarPlotData):
-                    self.process_BarPlotData(pd_instance, ax)
-                elif isinstance(pd_instance, BrickHeatmapPlotData):
-                    self.process_BrickHeatmapPlotData(pd_instance, ax)
+            # for pd_instance in plot_data_list:
+            #     if isinstance(pd_instance, PlotData):
+            #         self.process_PlotData(pd_instance, ax)
+            #     elif isinstance(pd_instance, BarPlotData):
+            #         self.process_BarPlotData(pd_instance, ax)
+            #     elif isinstance(pd_instance, BrickHeatmapPlotData):
+            #         self.process_BrickHeatmapPlotData(pd_instance, ax)
+            #
+            if isinstance(pd, PlotDataCollection):
+                self.process_PlotDataCollection(pd, ax)
+            elif isinstance(pd, PlotData):
+                self.process_PlotData(pd, ax)
+            elif isinstance(pd, BarPlotData):
+                self.process_BarPlotData(pd, ax)
+            elif isinstance(pd, BrickHeatmapPlotData):
+                self.process_BrickHeatmapPlotData(pd, ax)
+
+
+            # if isinstance(pd, PlotDataCollection):
+            #     plot_data_list = pd.plot_data_list
+            # else:
+            #     plot_data_list = [pd]
+            # 
+            # for pd_instance in plot_data_list:
+            #     if isinstance(pd_instance, PlotData):
+            #         self.process_PlotData(pd_instance, ax)
+            #     elif isinstance(pd_instance, BarPlotData):
+            #         self.process_BarPlotData(pd_instance, ax)
+            #     elif isinstance(pd_instance, BrickHeatmapPlotData):
+            #         self.process_BrickHeatmapPlotData(pd_instance, ax)
 
                     # ax.set_xlabel(pd.title, fontsize=pd.xlabel_fontsize)
         if self.wspace is None or self.hspace is None:
@@ -554,13 +618,14 @@ if __name__ == '__main__':
     panel_plot_0 = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=1, title='SHIFTED DATA 1', xtitle='x_axis_label',
                            ytitle='y_axis_random')
 
-    pdc = PlotDataCollection()
+    pdc = PlotDataCollection(legend_on=True)
+# yerr=np.random.rand(10),
+# yerr=np.random.rand(10),
 
-
-    pd_1 = PlotData(x=np.arange(10,dtype=np.float), y=np.random.rand(10), yerr=np.random.rand(10), title='', linestyle='',
-                    color='green', marker='s', levelline=[[0, 10], [0, 1]])
-    pd_2 = PlotData(x=np.arange(10,dtype=np.float)-0.1, y=np.random.rand(10), yerr=np.random.rand(10), title='', linestyle='',
-                    color='blue', marker='*' )
+    pd_1 = PlotData(x=np.arange(10,dtype=np.float), y=np.random.rand(10), yerr=np.random.rand(10),  title='', linestyle='',
+                    color='green', marker='s', levelline=[[0, 10], [0, 1]],label='green_series')
+    pd_2 = PlotData(x=np.arange(5,dtype=np.float)-0.1, y=np.random.rand(5), yerr=np.random.rand(5), title='', linestyle='',
+                    color='blue', marker='*',label='blue_series')
 
 
 
