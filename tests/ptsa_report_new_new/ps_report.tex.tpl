@@ -79,8 +79,8 @@ $\bullet$ Youden's $J$-stat threshold = $<J-THRESH>$
 
 \begin{figure}[!h]
 \centering
-\subfigure{\includegraphics[scale=0.53]{<CUMULATIVE_PLOT_FILE>}}
-\caption{Left: <CUMULATIVE_PARAMETER1> vs classifier delta. Right: <CUMULATIVE_PARAMETER2> vs classifier delta. All trials: (a,b). Lowest tercile: (c,d). Highest tercile: (e,f).}
+\subfigure{\includegraphics[scale=0.45]{<CUMULATIVE_PLOT_FILE>}}
+%\caption{Left: <CUMULATIVE_PARAMETER1> vs classifier delta. Right: <CUMULATIVE_PARAMETER2> vs classifier delta. All trials: (a,b). Lowest tercile: (c,d). Highest tercile: (e,f).}
 \end{figure}
 
 \end{document}

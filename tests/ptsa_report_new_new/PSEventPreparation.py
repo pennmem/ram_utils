@@ -72,7 +72,7 @@ class PSEventPreparation(RamTask):
         events = events.to_records(index=False)
         # events = Events(events.to_records(index=False))
         #
-        # joblib.dump(events, self.get_path_to_resource_in_workspace(subject+'-'+experiment+'-ps_events.pkl'))
+        joblib.dump(events, self.get_path_to_resource_in_workspace(subject+'-'+experiment+'-ps_events.pkl'))
         self.pass_object(experiment+'_events', events)
 
 

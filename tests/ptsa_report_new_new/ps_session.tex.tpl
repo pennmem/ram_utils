@@ -25,8 +25,8 @@
 
 \begin{figure}[!h]
 \centering
-\subfigure{\includegraphics[scale=0.53]{<PLOT_FILE>}}
-\caption{Left: <PARAMETER1> vs classifier delta. Right: <PARAMETER2> vs classifier delta. All trials: (a,b). Lowest tercile: (c,d). Highest tercile: (e,f).}
+\subfigure{\includegraphics[scale=0.45]{<PLOT_FILE>}}
+%\caption{Left: <PARAMETER1> vs classifier delta. Right: <PARAMETER2> vs classifier delta. All trials: (a,b). Lowest tercile: (c,d). Highest tercile: (e,f).}
 \end{figure}
 
 \clearpage
