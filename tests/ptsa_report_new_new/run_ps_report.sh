@@ -1,0 +1,1 @@
+python ps_report.py --subject=$1 --experiment=PS2 --workspace-dir=/scratch/busygin/PS2 --mount-point="" --python-path=/home1/busygin/ram_utils --python-path=/home1/busygin/python/ptsa/build/lib.linux-x86_64-2.7
