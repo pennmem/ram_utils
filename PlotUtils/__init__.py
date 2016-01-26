@@ -454,7 +454,8 @@ class PanelPlot(object):
         fig.suptitle(self.title, fontsize=16, fontweight='bold')
         # fig.text(x=0.5, y=0.95, s='Minimum 2 cells per cluster' ,fontsize=14, horizontalalignment='center')
 
-        fig.text(x=0.5, y=0.02, s=self.xtitle, fontsize=16, fontweight='bold', horizontalalignment='center')
+        # fig.text(x=0.5, y=0.02, s=self.xtitle, fontsize=16, fontweight='bold', horizontalalignment='center')
+        fig.text(x=0.5, y=0.02, s=self.xtitle, horizontalalignment='center')
         import itertools
         for i, j in itertools.product(xrange(self.i_max), xrange(self.j_max)):
 
@@ -480,6 +481,7 @@ class PanelPlot(object):
                 pass
             else:
                 ax.set_xlabel(pd.xlabel, fontsize=pd.xlabel_fontsize)
+
 
             # print 'pd=',pd
 
@@ -616,7 +618,7 @@ def draw_brick_heatmap(plot_data):
 
 if __name__ == '__main__':
     panel_plot_0 = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=1, title='SHIFTED DATA 1', xtitle='x_axis_label',
-                           ytitle='y_axis_random')
+                           ytitle='y_axis_random', xlabel='skdjhskdhksjhksdhk')
 
     pdc = PlotDataCollection(legend_on=True)
 # yerr=np.random.rand(10),
