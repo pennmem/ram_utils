@@ -111,13 +111,15 @@ class GeneratePlots(RamTask):
 
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
-
         session_summary_array = self.get_passed_object('session_summary_array')
+        param1_name = self.get_passed_object('CUMULATIVE_PARAMETER1')
+        param1_unit = self.get_passed_object('CUMULATIVE_UNIT1')
+        param1_title = '%s (%s)' % (param1_name,param1_unit)
 
         for session_summary in session_summary_array:
-            panel_plot = PanelPlot(i_max=1, j_max=1, title='',xtitle='FREQUENCY', ytitle='$\Delta$ Post-Pre Classifier Output', wspace=0.3,hspace=0.3)
+            panel_plot = PanelPlot(i_max=1, j_max=1, title='', xtitle=param1_title, ytitle='$\Delta$ Post-Pre Classifier Output', wspace=0.3, hspace=0.3)
 
-            pdc = PlotDataCollection(legend_on=True) #,xlabel='skjdhskdhksjdhks')
+            pdc = PlotDataCollection(legend_on=True)
             
             for v,p in session_summary.plots.iteritems():
                 p.xhline_pos=0.0
@@ -133,11 +135,12 @@ class GeneratePlots(RamTask):
 
         cumulative_plots = self.get_passed_object('cumulative_plots')
 
-        panel_plot = PanelPlot(i_max=1, j_max=1, title='', y_axis_title='$\Delta$ Post-Pre Classifier Output')
+        panel_plot = PanelPlot(i_max=1, j_max=1, title='', xtitle=param1_title, y_axis_title='$\Delta$ Post-Pre Classifier Output')
 
-        pdc = PlotDataCollection()
+        pdc = PlotDataCollection(legend_on=True)
 
         for v,p in cumulative_plots.iteritems():
+            p.xhline_pos=0.0
             pdc.add_plot_data(p)
 
         panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)

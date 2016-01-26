@@ -12,12 +12,13 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1050M',
-                                            '--experiment','PS3',
-                                            '--workspace-dir','/scratch/busygin/PS3_revised2',
+    command_line_emulation_argument_list = ['--subject','R1124J_1',
+                                            '--experiment','PS2',
+                                            '--workspace-dir','/scratch/busygin/PS2_new_new',
                                             '--mount-point','',
-                                            '--python-path','/home1/busygin/ram_utils',
-                                            '--python-path','/home1/busygin/python/ptsa/build/lib.linux-x86_64-2.7'
+                                            '--python-path','/home1/busygin/ram_utils_new_ptsa',
+                                            '--python-path','/home1/busygin/python/ptsa_new',
+                                            '--python-path','/home1/busygin/python/xray-0.6.1'
                                             ]
     args = parse_command_line(command_line_emulation_argument_list)
 

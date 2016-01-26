@@ -14,7 +14,7 @@ from mne.stats import f_mway_rm
 from sklearn.externals import joblib
 
 
-def delta_plot_data(ps_table, param1_name, param2_name):
+def delta_plot_data(ps_table, param1_name, param2_name, param2_unit):
     plots = dict()
     param1_vals = sorted(ps_table[param1_name].unique())
     param2_vals = sorted(ps_table[param2_name].unique())
@@ -29,7 +29,7 @@ def delta_plot_data(ps_table, param1_name, param2_name):
         plots[val2] = PlotData(x=np.arange(1,len(param1_vals)+1)-p2*0.1,
                                y=means, yerr=sems,
                                x_tick_labels=[x if x>0 else 'PULSE' for x in param1_vals],
-                               label=str(param2_name)+' '+str(val2)
+                               label=param2_name+' '+str(val2)+' '+param2_unit
                                )
     return plots
 
@@ -91,25 +91,34 @@ class ComposeSessionSummary(RamTask):
 	self.pass_object('AUC', xval_output[-1].auc)
 
         param1_name = param2_name = None
+        param1_unit = param2_unit = None
         const_param_name = const_unit = None
         if experiment == 'PS1':
             param1_name = 'Pulse Frequency'
             param2_name = 'Duration'
+            param1_unit = 'Hz'
+            param2_unit = 'ms'
             const_param_name = 'Amplitude'
             const_unit = 'mA'
         elif experiment == 'PS2':
             param1_name = 'Pulse Frequency'
             param2_name = 'Amplitude'
+            param1_unit = 'Hz'
+            param2_unit = 'mA'
             const_param_name = 'Duration'
             const_unit = 'ms'
         elif experiment == 'PS3':
             param1_name = 'Burst Frequency'
             param2_name = 'Pulse Frequency'
+            param1_unit = 'Hz'
+            param2_unit = 'Hz'
             const_param_name = 'Duration'
             const_unit = 'ms'
 
         self.pass_object('CUMULATIVE_PARAMETER1', param1_name)
         self.pass_object('CUMULATIVE_PARAMETER2', param2_name)
+
+        self.pass_object('CUMULATIVE_UNIT1', param1_unit)
 
         session_data = []
         session_summary_array = []
@@ -152,7 +161,7 @@ class ComposeSessionSummary(RamTask):
             session_summary.parameter1 = param1_name
             session_summary.parameter2 = param2_name
             session_summary.constant_name = const_param_name
-            session_summary.constant_value = ps_session_table[const_param_name].unique()[0]
+            session_summary.constant_value = ps_session_table[const_param_name].unique().max()
             session_summary.constant_unit = const_unit
 
             anova = anova_test(ps_session_table, param1_name, param2_name)
@@ -161,7 +170,7 @@ class ComposeSessionSummary(RamTask):
                 session_summary.anova_pvalues = anova[1]
                 joblib.dump(anova, self.get_path_to_resource_in_workspace(subject + '-' + experiment + '-anova.pkl'))
 
-            session_summary.plots = delta_plot_data(ps_session_table[ps_session_table['prob_pre']<thresh], param1_name, param2_name)
+            session_summary.plots = delta_plot_data(ps_session_table[ps_session_table['prob_pre']<thresh], param1_name, param2_name, param2_unit)
 
             session_summary_array.append(session_summary)
 
@@ -178,6 +187,6 @@ class ComposeSessionSummary(RamTask):
         self.pass_object('CUMULATIVE_ISI_MID', isi_mid)
         self.pass_object('CUMULATIVE_ISI_HALF_RANGE', isi_halfrange)
 
-        cumulative_plots = delta_plot_data(ps_table[ps_table['prob_pre']<thresh], param1_name, param2_name)
+        cumulative_plots = delta_plot_data(ps_table[ps_table['prob_pre']<thresh], param1_name, param2_name, param2_unit)
 
         self.pass_object('cumulative_plots', cumulative_plots)
