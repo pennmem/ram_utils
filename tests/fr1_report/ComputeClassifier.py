@@ -74,33 +74,23 @@ class ComputeClassifier(RamTask):
 
         sessions = np.unique(event_sessions)
 
-        if len(sessions) > 1:
-            for sess in sessions:
-                insample_mask = (event_sessions != sess)
-                insample_pow_mat = self.pow_mat[insample_mask]
-                insample_recalls = recalls[insample_mask]
+        for sess in sessions:
+            insample_mask = (event_sessions != sess)
+            insample_pow_mat = self.pow_mat[insample_mask]
+            insample_recalls = recalls[insample_mask]
 
-                self.lr_classifier.fit(insample_pow_mat, insample_recalls)
+            self.lr_classifier.fit(insample_pow_mat, insample_recalls)
 
-                outsample_mask = ~insample_mask
-                outsample_pow_mat = self.pow_mat[outsample_mask]
-                outsample_recalls = recalls[outsample_mask]
+            outsample_mask = ~insample_mask
+            outsample_pow_mat = self.pow_mat[outsample_mask]
+            outsample_recalls = recalls[outsample_mask]
 
-                outsample_probs = self.lr_classifier.predict_proba(outsample_pow_mat)[:,1]
-                if not permuted:
-                    self.xval_output[sess] = ModelOutput(outsample_recalls, outsample_probs)
-                    self.xval_output[sess].compute_roc()
-                    self.xval_output[sess].compute_tercile_stats()
-                probs[outsample_mask] = outsample_probs
-
-        else: # only one session available; using insample classifier
-            self.lr_classifier.fit(self.pow_mat, recalls)
-            probs[:] = self.lr_classifier.predict_proba(self.pow_mat)[:,1]
+            outsample_probs = self.lr_classifier.predict_proba(outsample_pow_mat)[:,1]
             if not permuted:
-                sess = sessions[0]
-                self.xval_output[sess] = ModelOutput(recalls, probs)
+                self.xval_output[sess] = ModelOutput(outsample_recalls, outsample_probs)
                 self.xval_output[sess].compute_roc()
                 self.xval_output[sess].compute_tercile_stats()
+            probs[outsample_mask] = outsample_probs
 
         if not permuted:
             self.xval_output[-1] = ModelOutput(recalls, probs)
@@ -109,7 +99,7 @@ class ComputeClassifier(RamTask):
 
         return probs
 
-    def permuted_AUCs(self, event_sessions, recalls):
+    def permuted_loso_AUCs(self, event_sessions, recalls):
         n_perm = self.params.n_perm
         permuted_recalls = np.array(recalls)
         AUCs = np.empty(shape=n_perm, dtype=np.float)
@@ -120,6 +110,46 @@ class ComputeClassifier(RamTask):
                 shuffle(sess_permuted_recalls)
                 permuted_recalls[sel] = sess_permuted_recalls
             probs = self.run_loso_xval(event_sessions, permuted_recalls, permuted=True)
+            AUCs[i] = roc_auc_score(recalls, probs)
+            print 'AUC =', AUCs[i]
+        return AUCs
+
+    def run_lolo_xval(self, sess, event_lists, recalls, permuted=False):
+        probs = np.empty_like(recalls, dtype=np.float)
+
+        lists = np.unique(event_lists)
+
+        for lst in lists:
+            insample_mask = (event_lists != lst)
+            insample_pow_mat = self.pow_mat[insample_mask]
+            insample_recalls = recalls[insample_mask]
+
+            self.lr_classifier.fit(insample_pow_mat, insample_recalls)
+
+            outsample_mask = ~insample_mask
+            outsample_pow_mat = self.pow_mat[outsample_mask]
+
+            probs[outsample_mask] = self.lr_classifier.predict_proba(outsample_pow_mat)[:,1]
+
+        if not permuted:
+            xval_output = ModelOutput(recalls, probs)
+            xval_output.compute_roc()
+            xval_output.compute_tercile_stats()
+            self.xval_output[sess] = self.xval_output[-1] = xval_output
+
+        return probs
+
+    def permuted_lolo_AUCs(self, sess, event_lists, recalls):
+        n_perm = self.params.n_perm
+        permuted_recalls = np.array(recalls)
+        AUCs = np.empty(shape=n_perm, dtype=np.float)
+        for i in xrange(n_perm):
+            for lst in event_lists:
+                sel = (event_lists == lst)
+                list_permuted_recalls = permuted_recalls[sel]
+                shuffle(list_permuted_recalls)
+                permuted_recalls[sel] = list_permuted_recalls
+            probs = self.run_lolo_xval(sess, event_lists, permuted_recalls, permuted=True)
             AUCs[i] = roc_auc_score(recalls, probs)
             print 'AUC =', AUCs[i]
         return AUCs
@@ -140,11 +170,22 @@ class ComputeClassifier(RamTask):
         event_sessions = events.session
         recalls = events.recalled
 
-        print 'Performing permutation test'
-        self.perm_AUCs = self.permuted_AUCs(event_sessions, recalls)
+        sessions = np.unique(event_sessions)
+        if len(sessions) > 1:
+            print 'Performing permutation test'
+            self.perm_AUCs = self.permuted_loso_AUCs(event_sessions, recalls)
 
-        print 'Performing leave-one-session-out xval'
-        self.run_loso_xval(event_sessions, recalls, permuted=False)
+            print 'Performing leave-one-session-out xval'
+            self.run_loso_xval(event_sessions, recalls, permuted=False)
+        else:
+            sess = sessions[0]
+            event_lists = events.list
+
+            print 'Performing in-session permutation test'
+            self.perm_AUCs = self.permuted_lolo_AUCs(sess, event_lists, recalls)
+
+            print 'Performing leave-one-list-out xval'
+            self.run_lolo_xval(sess, event_lists, recalls, permuted=False)
 
         print 'AUC =', self.xval_output[-1].auc
 

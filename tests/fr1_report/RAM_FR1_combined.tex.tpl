@@ -99,7 +99,7 @@ of the classifier encoding efficiency estimate for each encoded word.}
 
 $\bullet$ Area Under Curve = $<AUC>$\%
 
-$\bullet$ Permutation test $p$-value = $<PERM-P-VALUE>$
+$\bullet$ Permutation test $p$-value $<PERM-P-VALUE>$
 
 $\bullet$ Youden's $J$-stat threshold = $<J-THRESH>$
 

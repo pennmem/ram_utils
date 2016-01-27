@@ -13,11 +13,11 @@ if len(sys.argv)>2:
 
 else: # emulate command line
     command_line_emulation_argument_list = ['--subject','R1086M',
-                                            '--task','RAM_CatFR1',
-                                            '--workspace-dir','/scratch/busygin/CatFR1_reports',
+                                            '--task','RAM_FR1',
+                                            '--workspace-dir','/scratch/busygin/FR1_reports_new_new',
                                             '--mount-point','',
-                                            '--python-path','/home1/busygin/ram_utils',
-                                            '--python-path','/home1/busygin/python/ptsa/build/lib.linux-x86_64-2.7'
+                                            '--python-path','/home1/busygin/ram_utils_new_ptsa',
+                                            '--python-path','/home1/busygin/python/ptsa_new'
                                             ]
     args = parse_command_line(command_line_emulation_argument_list)
 
@@ -60,20 +60,17 @@ from GenerateReportTasks import *
 
 class Params(object):
     def __init__(self):
+        self.width = 5
+
         self.fr1_start_time = 0.0
-        self.fr1_end_time = 1.6
-        self.fr1_buf = 1.0
+        self.fr1_end_time = 1.366
+        self.fr1_buf = 1.365
 
         self.filt_order = 4
 
         self.freqs = np.logspace(np.log10(3), np.log10(180), 8)
 
         self.log_powers = True
-
-        self.timewin_start = 0
-        self.timewin_step = 5
-        self.timewin_end = 85
-        self.timewin_width = 25
 
         self.ttest_frange = (70.0, 200.0)
 
@@ -95,7 +92,7 @@ class ReportPipeline(RamPipeline):
         self.set_workspace_dir(workspace_dir)
 
 
-task = 'RAM_CatFR1'
+task = 'RAM_FR1'
 
 
 def find_subjects_by_task(task):
