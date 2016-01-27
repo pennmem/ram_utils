@@ -5,6 +5,8 @@ import os
 
 from get_bipolar_subj_elecs import get_bipolar_subj_elecs
 
+from sklearn.externals import joblib
+
 from RamPipeline import *
 
 
@@ -20,6 +22,12 @@ class TalPreparation(RamTask):
 
         self.pass_object('bipolar_pairs', bipolar_pairs)
         self.pass_object('monopolar_channels', monopolar_channels)
+
+        for i,bp in enumerate(bipolar_pairs):
+            bipolar_pairs.tagName[i] = bp.tagName.upper()
+        loc_tag = dict(zip(bipolar_pairs.tagName, bipolar_pairs.locTag))
+        self.pass_object('loc_tag', loc_tag)
+        joblib.dump(loc_tag, self.get_path_to_resource_in_workspace(self.pipeline.subject+'-loc_tag.pkl'))
 
 
     def get_bps(self, events):

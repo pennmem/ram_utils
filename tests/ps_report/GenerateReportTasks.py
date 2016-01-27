@@ -34,6 +34,7 @@ class GenerateTex(RamTask):
             replace_dict = {'<SESS_NUM>': session_summary.sess_num,
                             '<PLOT_FILE>': self.pipeline.experiment + '-' + self.pipeline.subject + '-report_plot_' + session_summary.name + '.pdf',
                             '<STIMTAG>': session_summary.stimtag,
+                            '<REGION>': session_summary.region_of_interest,
                             '<CONSTANT_NAME>': session_summary.constant_name,
                             '<CONSTANT_VALUE>': session_summary.constant_value,
                             '<CONSTANT_UNIT>': session_summary.constant_unit,

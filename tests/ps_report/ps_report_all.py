@@ -18,7 +18,6 @@ else: # emulate command line
                                             '--mount-point','',
                                             '--python-path','/home1/busygin/ram_utils_new_ptsa',
                                             '--python-path','/home1/busygin/python/ptsa_new',
-                                            '--python-path','/home1/busygin/python/xray-0.6.1'
                                             ]
     args = parse_command_line(command_line_emulation_argument_list)
 

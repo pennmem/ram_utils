@@ -76,7 +76,7 @@ class ComposeSessionSummary(RamTask):
 
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
-        # loc_info = self.get_passed_object('loc_info')
+        loc_tag = self.get_passed_object('loc_tag')
         xval_output = self.get_passed_object('xval_output')
 
         ps_table = self.get_passed_object('ps_table')
@@ -139,11 +139,10 @@ class ComposeSessionSummary(RamTask):
 
             session_name = 'Sess%02d' % session
 
-            stim_anode_tag = ps_session_table.stimAnodeTag.values[0]
-            stim_cathode_tag = ps_session_table.stimCathodeTag.values[0]
+            stim_anode_tag = ps_session_table.stimAnodeTag.values[0].upper()
+            stim_cathode_tag = ps_session_table.stimCathodeTag.values[0].upper()
             stim_tag = stim_anode_tag + '-' + stim_cathode_tag
-            # if loc_info[stim_tag] != '':
-            #     stim_tag += ' (%s)' % loc_info[stim_anode_tag]
+            roi = '{\em not found in bpTalStruct}' if (stim_tag not in loc_tag) or (loc_tag[stim_tag] in ['', '[]']) else loc_tag[stim_tag]
 
             isi_min = ps_session_table.isi.min()
             isi_max = ps_session_table.isi.max()
@@ -156,6 +155,7 @@ class ComposeSessionSummary(RamTask):
             session_summary.length = session_length
             session_summary.date = session_date
             session_summary.stimtag = stim_tag
+            session_summary.region_of_interest = roi
             session_summary.isi_mid = isi_mid
             session_summary.isi_half_range = isi_halfrange
             session_summary.parameter1 = param1_name

@@ -8,6 +8,7 @@ class SessionSummary(object):
         self.plots = None
         self.constant_name = self.constant_value = self.constant_unit = None
         self.stimtag = None
+        self.region_of_interest = None
         self.parameter1 = self.parameter2 = None
         self.name = None
         self.date = None
