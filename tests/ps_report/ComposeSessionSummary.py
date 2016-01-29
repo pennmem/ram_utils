@@ -37,7 +37,7 @@ def delta_plot_data(ps_table, param1_name, param2_name, param2_unit):
 
 
 def anova_test(ps_table, param1_name, param2_name):
-    if len(ps_table) < 4:
+    if len(ps_table) < 10:
         return None
     ps_lm = ols('prob_diff ~ C(%s) * C(%s)' % (param1_name,param2_name), data=ps_table).fit()
     anova = anova_lm(ps_lm)
@@ -229,7 +229,7 @@ class ComposeSessionSummary(RamTask):
                 session_summary.anova_fvalues = anova[0]
                 session_summary.anova_pvalues = anova[1]
 
-                if anova[1][0] < 0.06: # first param significant
+                if anova[1][0] < 0.05: # first param significant
                     param1_ttest_table = ttest_one_param(ps_session_low_table, param1_name)
                     if sess_loc_tag is not None:
                         if sess_loc_tag in anova_param1_sv:
@@ -238,7 +238,7 @@ class ComposeSessionSummary(RamTask):
                             anova_param1_sv[sess_loc_tag] = [param1_ttest_table]
                     session_summary.param1_ttest_table = format_ttest_table(param1_ttest_table)
 
-                if anova[1][1] < 0.06: # second param significant
+                if anova[1][1] < 0.05: # second param significant
                     param2_ttest_table = ttest_one_param(ps_session_low_table, param2_name)
                     if sess_loc_tag is not None:
                         if sess_loc_tag in anova_param2_sv:
@@ -247,7 +247,7 @@ class ComposeSessionSummary(RamTask):
                             anova_param2_sv[sess_loc_tag] = [param2_ttest_table]
                     session_summary.param2_ttest_table = format_ttest_table(param2_ttest_table)
 
-                if anova[1][2] < 0.06: # interaction is significant
+                if anova[1][2] < 0.05: # interaction is significant
                     param12_ttest_table = ttest_interaction(ps_session_low_table, param1_name, param2_name)
                     if sess_loc_tag is not None:
                         if sess_loc_tag in anova_param12_sv:
