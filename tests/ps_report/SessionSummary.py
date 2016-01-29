@@ -6,10 +6,9 @@ class SessionSummary(object):
     def __init__(self):
         self.sess_num = None
         self.plots = None
-        self.constant_name = self.constant_value = self.constant_unit = None
         self.stimtag = None
         self.region_of_interest = None
-        self.parameter1 = self.parameter2 = None
+        self.const_param_value = None
         self.name = None
         self.date = None
         self.length = None
@@ -17,3 +16,15 @@ class SessionSummary(object):
         self.isi_half_range = None
         self.anova_fvalues = [np.nan, np.nan, np.nan]
         self.anova_pvalues = [np.nan, np.nan, np.nan]
+        # self.param1_best = None
+        # self.t1 = None
+        # self.p1 = None
+        self.param1_ttest_table = None
+        # self.param2_best = None
+        # self.t2 = None
+        # self.p2 = None
+        self.param2_ttest_table = None
+        # self.param12_best = None
+        # self.t12 = None
+        # self.p12 = None
+        self.param12_ttest_table = None

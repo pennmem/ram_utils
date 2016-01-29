@@ -4,12 +4,10 @@
 \begin{tabular}{ccc}
 \begin{minipage}[htbp]{160pt}
 \textbf{Parameters:} \\
-%\begin{itemize}
 $\bullet$ <CONSTANT_NAME>: $<CONSTANT_VALUE>$ <CONSTANT_UNIT> \\
 $\bullet$ ISI: $<ISI_MID>$ ($\pm <ISI_HALF_RANGE>$) ms \\
 $\bullet$ Channel: <STIMTAG> \\
 $\bullet$ Region: <REGION>
-%\end{itemize}
 \end{minipage}
 &
 \begin{minipage}[htbp]{280pt}
@@ -26,7 +24,11 @@ $\bullet$ Region: <REGION>
 
 \begin{figure}[!h]
 \centering
-\subfigure{\includegraphics[scale=0.45]{<PLOT_FILE>}}
+\subfigure{\includegraphics[scale=0.4]{<PLOT_FILE>}}
 \end{figure}
+
+<PARAM1_TTEST_TABLE>
+<PARAM2_TTEST_TABLE>
+<PARAM12_TTEST_TABLE>
 
 \clearpage

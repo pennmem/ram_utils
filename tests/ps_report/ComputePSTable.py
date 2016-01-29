@@ -33,10 +33,10 @@ class ComputePSTable(RamTask):
         self.ps_table = pd.DataFrame()
         self.ps_table['session'] = ps_events.session
         self.ps_table['mstime'] = ps_events.mstime
-        self.ps_table['Pulse Frequency'] = ps_events.pulse_frequency
+        self.ps_table['Pulse_Frequency'] = ps_events.pulse_frequency
         self.ps_table['Amplitude'] = ps_events.amplitude
         self.ps_table['Duration'] = ps_events.pulse_duration
-        self.ps_table['Burst Frequency'] = ps_events.burst_frequency
+        self.ps_table['Burst_Frequency'] = ps_events.burst_frequency
         self.ps_table['stimAnode'] = ps_events.stimAnode
         self.ps_table['stimAnodeTag'] = ps_events.stimAnodeTag
         self.ps_table['stimCathode'] = ps_events.stimCathode

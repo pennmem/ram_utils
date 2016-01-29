@@ -9,7 +9,9 @@ from SessionSummary import SessionSummary
 
 from PlotUtils import PlotData
 
-from mne.stats import f_mway_rm
+from statsmodels.formula.api import ols
+from statsmodels.stats.anova import anova_lm
+from scipy.stats import ttest_ind
 
 from sklearn.externals import joblib
 
@@ -35,31 +37,80 @@ def delta_plot_data(ps_table, param1_name, param2_name, param2_unit):
 
 
 def anova_test(ps_table, param1_name, param2_name):
-    param1_vals = sorted(ps_table[param1_name].unique())
-    n1 = len(param1_vals)
-
-    param2_vals = sorted(ps_table[param2_name].unique())
-    n2 = len(param2_vals)
-
-    table = []
-    for val1 in param1_vals:
-        ps_table_val1 = ps_table[ps_table[param1_name]==val1]
-        for val2 in param2_vals:
-            ps_table_val1_val2 = ps_table_val1[ps_table_val1[param2_name]==val2]
-            table.append(list(ps_table_val1_val2['prob_diff'].values))
-
-    min_len = min([len(p) for p in table])
-
-    print 'ANOVA test with', min_len, 'samples'
-
-    if min_len < 3:
+    if len(ps_table) < 4:
         return None
+    ps_lm = ols('prob_diff ~ C(%s) * C(%s)' % (param1_name,param2_name), data=ps_table).fit()
+    anova = anova_lm(ps_lm)
+    return (anova['F'].values[0:3], anova['PR(>F)'].values[0:3])
 
-    table = [p[:min_len] for p in table]
-    table = np.stack(table, axis=1)
 
-    f_vals, p_vals = f_mway_rm(table, [n1,n2])
-    return (f_vals, p_vals)
+# def ttest_one_param(ps_table, param_name):
+#     param_vals = sorted(ps_table[param_name].unique())
+#     val_max = param_vals[np.argmax([ps_table[ps_table[param_name]==val]['prob_diff'].mean() for val in param_vals])]
+#     val_max_sel = (ps_table[param_name]==val_max)
+#     population1 = ps_table[val_max_sel]['prob_diff'].values
+#     population2 = ps_table[~val_max_sel]['prob_diff'].values
+#     t,p = ttest_ind(population1, population2)
+#     return val_max,t,p
+
+
+def ttest_one_param(ps_table, param_name):
+    ttest_table = []
+    param_vals = sorted(ps_table[param_name].unique())
+    for val in param_vals:
+        val_sel = (ps_table[param_name]==val)
+        population1 = ps_table[val_sel]['prob_diff'].values
+        population2 = ps_table[~val_sel]['prob_diff'].values
+        t,p = ttest_ind(population1, population2)
+        if p<0.05 and t>0.0:
+            ttest_table.append([val, p, t])
+    return ttest_table
+
+
+# def ttest_interaction(ps_table, param1_name, param2_name):
+#     param1_vals = sorted(ps_table[param1_name].unique())
+#     param2_vals = sorted(ps_table[param2_name].unique())
+#     mean_max = -1.0
+#     val1_max = val2_max = None
+#     for val1 in param1_vals:
+#         for val2 in param2_vals:
+#             ps_table_val1_val2 = ps_table[(ps_table[param1_name]==val1) & (ps_table[param2_name]==val2)]
+#             mean = ps_table_val1_val2['prob_diff'].mean()
+#             if mean > mean_max:
+#                 mean_max = mean
+#                 val1_max = val1
+#                 val2_max = val2
+#
+#     val_max_sel = (ps_table[param1_name]==val1_max) & (ps_table[param2_name]==val2_max)
+#
+#     population1 = ps_table[val_max_sel]['prob_diff'].values
+#     population2 = ps_table[~val_max_sel]['prob_diff'].values
+#     t,p = ttest_ind(population1, population2)
+#     return (val1_max,val2_max),t,p
+
+
+def ttest_interaction(ps_table, param1_name, param2_name):
+    ttest_table = []
+    param1_vals = sorted(ps_table[param1_name].unique())
+    param2_vals = sorted(ps_table[param2_name].unique())
+    for val1 in param1_vals:
+        val1_sel = (ps_table[param1_name]==val1)
+        for val2 in param2_vals:
+            val2_sel = (ps_table[param2_name]==val2)
+            sel = val1_sel & val2_sel
+            population1 = ps_table[sel]['prob_diff'].values
+            population2 = ps_table[~sel]['prob_diff'].values
+            t,p = ttest_ind(population1, population2)
+            if p<0.05 and t>0.0:
+                ttest_table.append([val1, val2, p, t])
+    return ttest_table
+
+
+def format_ttest_table(ttest_table):
+    for row in ttest_table:
+        row[-1] = '$t = %.3f$' % row[-1]
+        row[-2] = '$p %s$' % ('\leq 0.001' if row[-2]<=0.001 else ('= %.3f'%row[-2]))
+    return ttest_table
 
 
 class ComposeSessionSummary(RamTask):
@@ -88,40 +139,48 @@ class ComposeSessionSummary(RamTask):
 
         thresh = xval_output[-1].jstat_thresh
 
-	self.pass_object('AUC', xval_output[-1].auc)
+        self.pass_object('AUC', xval_output[-1].auc)
 
         param1_name = param2_name = None
         param1_unit = param2_unit = None
         const_param_name = const_unit = None
         if experiment == 'PS1':
-            param1_name = 'Pulse Frequency'
+            param1_name = 'Pulse_Frequency'
             param2_name = 'Duration'
             param1_unit = 'Hz'
             param2_unit = 'ms'
             const_param_name = 'Amplitude'
             const_unit = 'mA'
         elif experiment == 'PS2':
-            param1_name = 'Pulse Frequency'
+            param1_name = 'Pulse_Frequency'
             param2_name = 'Amplitude'
             param1_unit = 'Hz'
             param2_unit = 'mA'
             const_param_name = 'Duration'
             const_unit = 'ms'
         elif experiment == 'PS3':
-            param1_name = 'Burst Frequency'
-            param2_name = 'Pulse Frequency'
+            param1_name = 'Burst_Frequency'
+            param2_name = 'Pulse_Frequency'
             param1_unit = 'Hz'
             param2_unit = 'Hz'
             const_param_name = 'Duration'
             const_unit = 'ms'
 
-        self.pass_object('CUMULATIVE_PARAMETER1', param1_name)
-        self.pass_object('CUMULATIVE_PARAMETER2', param2_name)
+        self.pass_object('param1_name', param1_name.replace('_', ' '))
+        self.pass_object('param1_unit', param1_unit)
 
-        self.pass_object('CUMULATIVE_UNIT1', param1_unit)
+        self.pass_object('param2_name', param2_name.replace('_', ' '))
+        self.pass_object('param2_unit', param2_unit)
+
+        self.pass_object('const_param_name', const_param_name)
+        self.pass_object('const_unit', const_unit)
 
         session_data = []
         session_summary_array = []
+
+        anova_param1_sv = dict()
+        anova_param2_sv = dict()
+        anova_param12_sv = dict()
 
         for session in sessions:
             ps_session_table = ps_table[ps_table.session==session]
@@ -142,7 +201,8 @@ class ComposeSessionSummary(RamTask):
             stim_anode_tag = ps_session_table.stimAnodeTag.values[0].upper()
             stim_cathode_tag = ps_session_table.stimCathodeTag.values[0].upper()
             stim_tag = stim_anode_tag + '-' + stim_cathode_tag
-            roi = '{\em not found in bpTalStruct}' if (stim_tag not in loc_tag) or (loc_tag[stim_tag] in ['', '[]']) else loc_tag[stim_tag]
+            sess_loc_tag = None if (stim_tag not in loc_tag) or (loc_tag[stim_tag] in ['', '[]']) else loc_tag[stim_tag]
+            roi = '{\em locTag not found}' if sess_loc_tag is None else sess_loc_tag
 
             isi_min = ps_session_table.isi.min()
             isi_max = ps_session_table.isi.max()
@@ -158,24 +218,52 @@ class ComposeSessionSummary(RamTask):
             session_summary.region_of_interest = roi
             session_summary.isi_mid = isi_mid
             session_summary.isi_half_range = isi_halfrange
-            session_summary.parameter1 = param1_name
-            session_summary.parameter2 = param2_name
-            session_summary.constant_name = const_param_name
-            session_summary.constant_value = ps_session_table[const_param_name].unique().max()
-            session_summary.constant_unit = const_unit
+            session_summary.const_param_value = ps_session_table[const_param_name].unique().max()
 
-            anova = anova_test(ps_session_table, param1_name, param2_name)
+            ps_session_low_table = pd.DataFrame(ps_session_table[ps_session_table['prob_pre']<thresh])
+
+            session_summary.plots = delta_plot_data(ps_session_low_table, param1_name, param2_name, param2_unit)
+
+            anova = anova_test(ps_session_low_table, param1_name, param2_name)
             if anova is not None:
                 session_summary.anova_fvalues = anova[0]
                 session_summary.anova_pvalues = anova[1]
-                joblib.dump(anova, self.get_path_to_resource_in_workspace(subject + '-' + experiment + '-anova.pkl'))
 
-            session_summary.plots = delta_plot_data(ps_session_table[ps_session_table['prob_pre']<thresh], param1_name, param2_name, param2_unit)
+                if anova[1][0] < 0.06: # first param significant
+                    param1_ttest_table = ttest_one_param(ps_session_low_table, param1_name)
+                    if sess_loc_tag is not None:
+                        if sess_loc_tag in anova_param1_sv:
+                            anova_param1_sv[sess_loc_tag].append(param1_ttest_table)
+                        else:
+                            anova_param1_sv[sess_loc_tag] = [param1_ttest_table]
+                    session_summary.param1_ttest_table = format_ttest_table(param1_ttest_table)
+
+                if anova[1][1] < 0.06: # second param significant
+                    param2_ttest_table = ttest_one_param(ps_session_low_table, param2_name)
+                    if sess_loc_tag is not None:
+                        if sess_loc_tag in anova_param2_sv:
+                            anova_param2_sv[sess_loc_tag].append(param2_ttest_table)
+                        else:
+                            anova_param2_sv[sess_loc_tag] = [param2_ttest_table]
+                    session_summary.param2_ttest_table = format_ttest_table(param2_ttest_table)
+
+                if anova[1][2] < 0.06: # interaction is significant
+                    param12_ttest_table = ttest_interaction(ps_session_low_table, param1_name, param2_name)
+                    if sess_loc_tag is not None:
+                        if sess_loc_tag in anova_param12_sv:
+                            anova_param12_sv[sess_loc_tag].append(param12_ttest_table)
+                        else:
+                            anova_param12_sv[sess_loc_tag] = [param12_ttest_table]
+                    session_summary.param12_ttest_table = format_ttest_table(param12_ttest_table)
 
             session_summary_array.append(session_summary)
 
         self.pass_object('SESSION_DATA', session_data)
         self.pass_object('session_summary_array', session_summary_array)
+
+        joblib.dump(anova_param1_sv, self.get_path_to_resource_in_workspace(subject + '-' + experiment + '-anova_%s_sv.pkl'%param1_name))
+        joblib.dump(anova_param2_sv, self.get_path_to_resource_in_workspace(subject + '-' + experiment + '-anova_%s_sv.pkl'%param2_name))
+        joblib.dump(anova_param12_sv, self.get_path_to_resource_in_workspace(subject + '-' + experiment + '-anova_%s-%s_sv.pkl'%(param1_name,param2_name)))
 
         isi_min = ps_table.isi.min()
         isi_max = ps_table.isi.max()
