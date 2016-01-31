@@ -23,6 +23,157 @@ all_durs = [-999, 50, 250, 500, 1000, 1500]
 all_burst_freqs = [-999, 3, 4, 5, 6, 7, 8]
 
 
+def duration_plot(ps1_dur_table):
+    regions = []
+    durs = []
+
+    table = ps1_dur_table[ps1_dur_table['Significant']>0]
+    for c in table.index:
+        regions.append(c[0])
+        durs.append(c[1])
+
+    regions = np.unique(regions)
+    n_regions = len(regions)
+
+    durs = np.unique(durs)
+    n_durs = len(durs)
+
+    plot_data = np.zeros(shape=(n_regions,n_durs), dtype=float)
+    text = dict()
+
+    for i,reg in enumerate(regions):
+        for j,dur in enumerate(durs):
+            t = 0
+            s = 0
+            if (reg,dur) in table.index:
+                t = table['Total'][(reg,dur)]
+                s = table['Significant'][(reg,dur)]
+            if t>0:
+                plot_data[i,j] = s / float(t)
+                text[(i,j)] = '%d/%d' % (s,t)
+
+    return BrickHeatmapPlotData(df=plot_data, annot_dict=text, title='PS1 Aggregate Report for Duration', x_tick_labels=durs, y_tick_labels=regions, xlabel='Duration (ms)', ylabel='Region')
+
+
+def amplitude_plot(ps2_amp_table):
+    regions = []
+    amps = []
+
+    table = ps2_amp_table[ps2_amp_table['Significant']>0]
+    for c in table.index:
+        regions.append(c[0])
+        amps.append(c[1])
+
+    regions = np.unique(regions)
+    n_regions = len(regions)
+
+    amps = np.unique(amps)
+    n_amps = len(amps)
+
+    plot_data = np.zeros(shape=(n_regions,n_amps), dtype=float)
+    text = dict()
+
+    for i,reg in enumerate(regions):
+        for j,amp in enumerate(amps):
+            t = 0
+            s = 0
+            if (reg,amp) in table.index:
+                t = table['Total'][(reg,amp)]
+                s = table['Significant'][(reg,amp)]
+            if t>0:
+                plot_data[i,j] = s / float(t)
+                text[(i,j)] = '%d/%d' % (s,t)
+
+    return BrickHeatmapPlotData(df=plot_data, annot_dict=text, title='PS2 Aggregate Report for Amplitude', x_tick_labels=amps, y_tick_labels=regions, xlabel='Amplitude (mA)', ylabel='Region')
+
+
+def ps3_frequency_plot(ps3_freq_table):
+    regions = []
+    freqs = []
+
+    table = ps3_freq_table[ps3_freq_table['Significant']>0]
+    for c in table.index:
+        regions.append(c[0])
+        freqs.append(c[1])
+
+    regions = np.unique(regions)
+    n_regions = len(regions)
+
+    freqs = np.unique(freqs)
+    n_freqs = len(freqs)
+
+    plot_data = np.zeros(shape=(n_regions,n_freqs), dtype=float)
+    text = dict()
+
+    for i,reg in enumerate(regions):
+        for j,freq in enumerate(freqs):
+            t = 0
+            s = 0
+            if (reg,freq) in table.index:
+                t = table['Total'][(reg,freq)]
+                s = table['Significant'][(reg,freq)]
+            if t>0:
+                plot_data[i,j] = s / float(t)
+                text[(i,j)] = '%d/%d' % (s,t)
+
+    return BrickHeatmapPlotData(df=plot_data, annot_dict=text, title='PS3 Aggregate Report for Pulse Frequency', x_tick_labels=freqs, y_tick_labels=regions, xlabel='Pulse Frequency (Hz)', ylabel='Region')
+
+
+def frequency_plot(ps1_freq_table, ps2_freq_table, ps3_burst_freq_table):
+    regions = []
+    freqs = []
+
+    table1 = ps1_freq_table[ps1_freq_table['Significant']>0]
+    for c in table1.index:
+        regions.append(c[0])
+        freqs.append(c[1])
+
+    table2 = ps2_freq_table[ps2_freq_table['Significant']>0]
+    for c in table2.index:
+        regions.append(c[0])
+        freqs.append(c[1])
+
+    table3 = ps3_burst_freq_table[ps3_burst_freq_table['Significant']>0]
+    for c in table3.index:
+        regions.append(c[0])
+        freqs.append(c[1])
+
+    regions = np.unique(regions)
+    n_regions = len(regions)
+
+    freqs = np.unique(freqs)
+    n_freqs = len(freqs)
+
+    plot_data = np.zeros(shape=(n_regions,n_freqs), dtype=float)
+    text = dict()
+
+    for i,reg in enumerate(regions):
+        for j,freq in enumerate(freqs):
+            t = 0
+            s = 0
+            if freq>=10:
+                if (reg,freq) in table1.index:
+                    t += table1['Total'][(reg,freq)]
+                    s += table1['Significant'][(reg,freq)]
+                if (reg,freq) in table2.index:
+                    t += table2['Total'][(reg,freq)]
+                    s += table2['Significant'][(reg,freq)]
+            elif freq>0:
+                if (reg,freq) in table3.index:
+                    t += table3['Total'][(reg,freq)]
+                    s += table3['Significant'][(reg,freq)]
+            else:
+                if (reg,freq) in table2.index:
+                    t += table2['Total'][(reg,freq)]
+                    s += table2['Significant'][(reg,freq)]
+            if t>0:
+                plot_data[i,j] = s / float(t)
+                text[(i,j)] = '%d/%d' % (s,t)
+
+    x_tick_labels = [x if x>0 else 'PULSE' for x in freqs]
+    return BrickHeatmapPlotData(df=plot_data, annot_dict=text, title='PS1,PS2,PS3 Aggregate Report for Pulse/Burst Frequency', x_tick_labels=x_tick_labels, y_tick_labels=regions, xlabel='Pulse or Burst Frequency (Hz)', ylabel='Region')
+
+
 class PS(object):
     def __init__(self, param1_name, param2_name):
         self.param1_name = param1_name
@@ -48,9 +199,9 @@ class PS(object):
         self.param1_vals = sorted(self.table1[self.param1_name].unique())
         self.param2_vals = sorted(self.table2[self.param2_name].unique())
         self.param1_param2_vals = self.table12[[self.param1_name, self.param2_name]].drop_duplicates()
-        self.table12 = self.table12.groupby(['Region', self.param1_name, self.param2_name]).size().to_frame()
-        self.table1 = self.table1.groupby(['Region', self.param1_name]).size().to_frame()
-        self.table2 = self.table2.groupby(['Region', self.param2_name]).size().to_frame()
+        self.table12 = self.table12.groupby(['Region', self.param1_name, self.param2_name]).size().to_frame(name='Total')
+        self.table1 = self.table1.groupby(['Region', self.param1_name]).size().to_frame(name='Total')
+        self.table2 = self.table2.groupby(['Region', self.param2_name]).size().to_frame(name='Total')
 
     def add_anova_counts(self, anova1_files, anova2_files, anova12_files):
         self.table1['Significant'] = 0
@@ -113,3 +264,24 @@ ps3_anova12_files = glob('/scratch/busygin/PS3/R*/*-anova_Burst_Frequency-Pulse_
 ps3 = PS('Burst_Frequency', 'Pulse_Frequency')
 ps3.collect_counts(ps3_table_files)
 ps3.add_anova_counts(ps3_anova1_files, ps3_anova2_files, ps3_anova12_files)
+
+with PdfPages('/scratch/busygin/PS Aggregate Report.pdf') as pdf:
+    plot = frequency_plot(ps1.table1, ps2.table1, ps3.table1)
+    fig,ax = draw_brick_heatmap(plot)
+    pdf.savefig()
+    plt.clf()
+
+    plot = ps3_frequency_plot(ps3.table2)
+    fig,ax = draw_brick_heatmap(plot)
+    pdf.savefig()
+    plt.clf()
+
+    plot = amplitude_plot(ps2.table2)
+    fig,ax = draw_brick_heatmap(plot)
+    pdf.savefig()
+    plt.clf()
+
+    plot = duration_plot(ps1.table2)
+    fig,ax = draw_brick_heatmap(plot)
+    pdf.savefig()
+    plt.clf()
