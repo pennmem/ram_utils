@@ -170,7 +170,7 @@ class GeneratePlots(RamTask):
         param1_title = '%s (%s)' % (param1_name,param1_unit)
 
         for session_summary in session_summary_array:
-            panel_plot = PanelPlot(i_max=1, j_max=1, title='', xtitle=param1_title, ytitle='$\Delta$ Post-Pre Classifier Output', wspace=0.3, hspace=0.3)
+            panel_plot = PanelPlot(i_max=1, j_max=1, title='', xtitle=param1_title, xtitle_fontsize=24, ytitle='$\Delta$ Post-Pre Classifier Output',ytitle_fontsize=24, wspace=0.3, hspace=0.3)
 
             pdc = PlotDataCollection(legend_on=True)
             
