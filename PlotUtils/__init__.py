@@ -16,7 +16,7 @@ class PlotData(object):
         '''
         Initializes PlotData
         :param options: options are  'x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels','title',
-        'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos','xlabel','ylabel','linestyle','color','marker',
+        'xlabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos','xlabel','ylabel','linestyle','color','marker',
         'levelline'
         :return:
         '''
@@ -55,7 +55,7 @@ class BarPlotData(object):
         '''
         Initializes PlotData
         :param options: options are  'x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels','title',
-        'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos','xlabel','ylabel','linestyle','color','marker',
+        'xlabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos','xlabel','ylabel','linestyle','color','marker',
         'levelline', 'barcolors','barwidth'
         :return:
         '''
@@ -97,7 +97,7 @@ class BrickHeatmapPlotData(object):
         '''
         Initializes PlotData
         :param options: options are 'df', 'annot_dict','val_lim','x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels','title',
-        'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos','xlabel','ylabel','linestyle','color','marker',
+        'xlabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos','xlabel','ylabel','linestyle','color','marker',
         'levelline', 'barcolors','colorbar_title','colorbar_title_location'
         :return:
         '''
@@ -137,7 +137,7 @@ class PlotDataCollection(object):
 
         for option_name in ['df', 'annot_dict', 'val_lim', 'x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels',
                             'title',
-                            'ylabel_fontsize', 'ylabel_fontsize', 'xlim', 'ylim', 'xhline_pos', 'xlabel', 'ylabel',
+                            'xlabel_fontsize', 'ylabel_fontsize', 'xlim', 'ylim', 'xhline_pos', 'xlabel', 'ylabel',
                             'linestyle', 'color', 'marker', 'levelline', 'barcolors', 'colorbar_title',
                             'colorbar_title_location','legend_pos','legend_on']:
             try:
@@ -475,6 +475,8 @@ class PanelPlot(object):
         if self.ytitle_fontsize is not None:
             ytitle_fontsize = self.ytitle_fontsize
 
+        # if self.i_max>=1 or self.j_max>=1:
+        #
 
         fig.text(x=0.5, y=0.02, s=self.xtitle, fontsize=xtitle_fontsize,  horizontalalignment='center')
 
@@ -508,11 +510,23 @@ class PanelPlot(object):
                 ax.set_ylabel(pd.ylabel, fontsize=ytitle_fontsize)
 
 
+            # fig.text(x=0.5, y=0.02, s=self.xtitle, fontsize=xtitle_fontsize,  horizontalalignment='center')
+
+
             # x axis labels
-            if pd.xlabel is None:
+            if self.xtitle is None:
                 pass
             else:
                 ax.set_xlabel(pd.xlabel, fontsize=pd.xlabel_fontsize)
+
+
+            # # x axis labels
+            # ax.set_xlabel('', fontsize=pd.xlabel_fontsize)
+            #
+            # if pd.xlabel is None:
+            #     pass
+            # else:
+            #     ax.set_xlabel(pd.xlabel, fontsize=pd.xlabel_fontsize)
 
 
             # print 'pd=',pd

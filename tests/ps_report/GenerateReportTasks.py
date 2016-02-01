@@ -153,6 +153,7 @@ class GeneratePlots(RamTask):
         ylim = np.max(np.abs(pc_diff_from_mean)) + 5.0
         if ylim > 100.0:
             ylim = 100.0
+        # pd2 = BarPlotData(x=(0,1,2), y=pc_diff_from_mean, ylim=[-ylim,ylim], xlabel='Tercile of Classifier Estimate\n(b)', ylabel='Recall Change From Mean (%)', x_tick_labels=['Low', 'Middle', 'High'], xhline_pos=0.0, barcolors=['grey','grey', 'grey'], barwidth=0.5)
         pd2 = BarPlotData(x=(0,1,2), y=pc_diff_from_mean, ylim=[-ylim,ylim], xlabel='Tercile of Classifier Estimate\n(b)', ylabel='Recall Change From Mean (%)', x_tick_labels=['Low', 'Middle', 'High'], xhline_pos=0.0, barcolors=['grey','grey', 'grey'], barwidth=0.5)
 
         panel_plot.add_plot_data(0, 0, plot_data=pd1)
@@ -171,13 +172,18 @@ class GeneratePlots(RamTask):
 
 
         for session_summary in session_summary_array:
-            panel_plot = PanelPlot(i_max=1, j_max=1, title='', xtitle=param1_title, xtitle_fontsize=24, ytitle='$\Delta$ Post-Pre Classifier Output',ytitle_fontsize=24, wspace=0.3, hspace=0.3)
+            # panel_plot = PanelPlot(i_max=1, j_max=1, title='', xtitle=param1_title, xtitle_fontsize=24, ytitle='$\Delta$ Post-Pre Classifier Output',ytitle_fontsize=24, wspace=0.3, hspace=0.3)
+
+            panel_plot = PanelPlot(i_max=1, j_max=1, title='', ytitle='$\Delta$ Post-Pre Classifier Output',ytitle_fontsize=24, wspace=0.3, hspace=0.3)
 
             pdc = PlotDataCollection(legend_on=True)
-            
+            pdc.xlabel = param1_title
+            pdc.xlabel_fontsize = 24
+
             for v,p in session_summary.plots.iteritems():
                 p.xhline_pos=0.0
                 pdc.add_plot_data(p)
+
 
             panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
 
@@ -189,9 +195,14 @@ class GeneratePlots(RamTask):
 
         cumulative_plots = self.get_passed_object('cumulative_plots')
 
-        panel_plot = PanelPlot(i_max=1, j_max=1, title='', xtitle=param1_title, y_axis_title='$\Delta$ Post-Pre Classifier Output')
+
+
+        # panel_plot = PanelPlot(i_max=1, j_max=1, title='', xtitle=param1_title, y_axis_title='$\Delta$ Post-Pre Classifier Output')
+        panel_plot = PanelPlot(i_max=1, j_max=1, title='',ytitle='$\Delta$ Post-Pre Classifier Output', ytitle_fontsize=24)
 
         pdc = PlotDataCollection(legend_on=True)
+        pdc.xlabel = param1_title
+        pdc.xlabel_fontsize = 24
 
         for v,p in cumulative_plots.iteritems():
             p.xhline_pos=0.0
