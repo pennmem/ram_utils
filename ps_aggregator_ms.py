@@ -358,23 +358,31 @@ ps3.add_anova_counts(ps3_anova1_files, ps3_anova2_files, ps3_anova12_files)
 
 with PdfPages('/scratch/mswat/PS Aggregate Report.pdf') as pdf:
     plot = frequency_plot(ps1.table1, ps2.table1, ps3.table1)
-    plot.cmap = matplotlib.cm.get_cmap('Reds')
+    plot.cmap = matplotlib.cm.get_cmap('Blues')
     plot.annotation_font_color='lawngreen'
+    plot.colorbar_title='Fraction of Significant Subjects'
+    plot.colorbar_title_location=[1.2,0.7]
     fig,ax = draw_brick_heatmap(plot)
     pdf.savefig()
     plt.clf()
 
     plot = ps3_frequency_plot(ps3.table2)
-    plot.cmap = matplotlib.cm.get_cmap('Reds')
+    plot.cmap = matplotlib.cm.get_cmap('Blues')
     plot.annotation_font_color='lawngreen'
+    plot.colorbar_title='Fraction of Significant Subjects'
+    plot.colorbar_title_location=[1.2,0.7]
+
 
     fig,ax = draw_brick_heatmap(plot)
     pdf.savefig()
     plt.clf()
 
     plot = amplitude_plot(ps2.table2)
-    plot.cmap = matplotlib.cm.get_cmap('Reds')
-    plot.annotation_font_color='lawngreen'
+    plot.cmap = matplotlib.cm.get_cmap('Greys')
+    plot.annotation_font_color='dodgerblue'
+    plot.colorbar_title='Fraction of Significant Subjects'
+    plot.colorbar_title_location=[1.2,0.7]
+
 
     fig,ax = draw_brick_heatmap(plot)
     pdf.savefig()
