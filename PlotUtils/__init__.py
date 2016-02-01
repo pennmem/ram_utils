@@ -108,7 +108,7 @@ class BrickHeatmapPlotData(object):
                             'title',
                             'ylabel_fontsize', 'ylabel_fontsize', 'xlim', 'ylim', 'xhline_pos', 'xlabel', 'ylabel',
                             'linestyle', 'color', 'marker', 'levelline', 'barcolors', 'colorbar_title',
-                            'colorbar_title_location','label', 'cmap']:
+                            'colorbar_title_location','label', 'cmap','annotation_font_color']:
             try:
                 setattr(self, option_name, options[option_name])
                 print 'option_name=', option_name, ' val=', options[option_name], ' value_check = ', getattr(self,
@@ -268,6 +268,11 @@ class PanelPlot(object):
         yticks_numbered = zip(np.arange(len(yticks))[::-1],
                               yticks)  # had to invert y axis to achieve numpy matrix ordering
 
+        annotation_font_color = 'k'
+        if pd.annotation_font_color is not None:
+            annotation_font_color=pd.annotation_font_color
+
+
         if pd.annot_dict is not None:
 
             # implementing numpy matrix ordering - (0,0) is upper left corner
@@ -276,7 +281,7 @@ class PanelPlot(object):
                 # print pd.annot_dict[(j,i)]
 
                 try:
-                    ax.text(x, y, pd.annot_dict[(j, i)], color='k', ha="center", va="center")
+                    ax.text(x, y, pd.annot_dict[(j, i)], color=annotation_font_color, ha="center", va="center")
                 except LookupError:
                     print 'COULD NOT GET i,j = ', (j, i)
                     pass
@@ -305,6 +310,8 @@ class PanelPlot(object):
             ax.set_ylabel(pd.ylabel, fontsize=pd.ylabel_fontsize)
         if pd.title:
             ax.set_title(pd.title)
+
+
 
     def process_PlotDataCollection(self,pd, ax):
 
@@ -553,6 +560,8 @@ class PanelPlot(object):
         else:
             fig.subplots_adjust(wspace=self.wspace, hspace=self.hspace)
 
+        fig.tight_layout()
+
         return plt
 
 
@@ -566,6 +575,8 @@ def draw_brick_heatmap(plot_data):
     import pandas
 
     fig, ax = plt.subplots()
+
+
 
     pd = plot_data
 
@@ -611,6 +622,10 @@ def draw_brick_heatmap(plot_data):
     # yticks_numbered = zip(np.arange(len(yticks)), yticks)
     yticks_numbered = zip(np.arange(len(yticks))[::-1], yticks)  # had to invert y axis to achieve numpy matrix ordering
 
+    annotation_font_color = 'k'
+    if pd.annotation_font_color is not None:
+        annotation_font_color = pd. annotation_font_color
+
     if pd.annot_dict is not None:
 
         # implementing numpy matrix ordering - (0,0) is upper left corner
@@ -619,7 +634,7 @@ def draw_brick_heatmap(plot_data):
             # print pd.annot_dict[(j,i)]
 
             try:
-                ax.text(x, y, pd.annot_dict[(j, i)], color='k', ha="center", va="center")
+                ax.text(x, y, pd.annot_dict[(j, i)], color=annotation_font_color, ha="center", va="center")
             except LookupError:
                 print 'COULD NOT GET i,j = ', (j, i)
                 pass
@@ -642,6 +657,8 @@ def draw_brick_heatmap(plot_data):
         ax.set_ylabel(pd.ylabel, fontsize=pd.ylabel_fontsize)
     if pd.title:
         ax.set_title(pd.title)
+
+    fig.tight_layout()
 
     return fig, ax
 
