@@ -162,7 +162,7 @@ class PanelPlot(object):
         :param options: options are: 'i_max', 'j_max', 'title', 'xtitle', 'ytitle', 'wspace', 'hspace','xfigsize','yfigsize'
         :return: None
         '''
-        for option_name in ['i_max', 'j_max', 'title', 'xtitle', 'ytitle', 'wspace', 'hspace', 'xfigsize', 'yfigsize']:
+        for option_name in ['i_max', 'j_max', 'title', 'xtitle','xtitle_fontsize', 'ytitle', 'ytitle_fontsize', 'wspace', 'hspace', 'xfigsize', 'yfigsize']:
             try:
                 setattr(self, option_name, options[option_name])
                 print 'option_name=', option_name, ' val=', options[option_name], ' value_check = ', getattr(self,
@@ -455,7 +455,18 @@ class PanelPlot(object):
         # fig.text(x=0.5, y=0.95, s='Minimum 2 cells per cluster' ,fontsize=14, horizontalalignment='center')
 
         # fig.text(x=0.5, y=0.02, s=self.xtitle, fontsize=16, fontweight='bold', horizontalalignment='center')
-        fig.text(x=0.5, y=0.02, s=self.xtitle, horizontalalignment='center')
+        #
+        xtitle_fontsize = 16
+        if self.xtitle_fontsize is not None:
+            xtitle_fontsize = self.xtitle_fontsize
+
+        ytitle_fontsize = 16
+        if self.ytitle_fontsize is not None:
+            ytitle_fontsize = self.ytitle_fontsize
+
+
+        fig.text(x=0.5, y=0.02, s=self.xtitle, fontsize=xtitle_fontsize,  horizontalalignment='center')
+
         import itertools
         for i, j in itertools.product(xrange(self.i_max), xrange(self.j_max)):
 
@@ -469,12 +480,22 @@ class PanelPlot(object):
             # ax.set_aspect('equal', adjustable='box')
 
 
+            # # y axis labels
+            # if pd.ylabel is None:
+            #     if j == 0:
+            #         ax.set_ylabel(self.ytitle, fontsize=pd.ylabel_fontsize)
+            #
+            # else:
+            #     ax.set_ylabel(pd.ylabel, fontsize=pd.ylabel_fontsize)
+
             # y axis labels
             if pd.ylabel is None:
                 if j == 0:
-                    ax.set_ylabel(self.ytitle, fontsize=pd.ylabel_fontsize)
+                    ax.set_ylabel(self.ytitle, fontsize=ytitle_fontsize)
+
             else:
-                ax.set_ylabel(pd.ylabel, fontsize=pd.ylabel_fontsize)
+                ax.set_ylabel(pd.ylabel, fontsize=ytitle_fontsize)
+
 
             # x axis labels
             if pd.xlabel is None:
@@ -617,8 +638,8 @@ def draw_brick_heatmap(plot_data):
 
 
 if __name__ == '__main__':
-    panel_plot_0 = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=1, title='SHIFTED DATA 1', xtitle='x_axis_label',
-                           ytitle='y_axis_random', xlabel='skdjhskdhksjhksdhk')
+    panel_plot_0 = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=1, title='SHIFTED DATA 1', xtitle='x_axis_label',xtitle_fontsize=36,
+                           ytitle='y_axis_random', ytitle_fontsize=36, xlabel='skdjhskdhksjhksdhk')
 
     pdc = PlotDataCollection(legend_on=True)
 # yerr=np.random.rand(10),
