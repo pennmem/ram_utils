@@ -11,7 +11,7 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1093J_1',
+    command_line_emulation_argument_list = ['--subject','R1122E',
                                             '--experiment','PS2',
                                             '--workspace-dir','/scratch/busygin/PS2',
                                             '--mount-point','',
