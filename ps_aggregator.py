@@ -197,7 +197,7 @@ def freq_dur_plot(ps1_freq_dur_table):
                 plot_data[i,j] = s / float(t)
                 text[(i,j)] = '%d/%d' % (s,t)
 
-    return BrickHeatmapPlotData(df=plot_data, annot_dict=text, title='PS1 Aggregate Report for Frequency $\\times$ Duration', x_tick_labels=freqs_durs, y_tick_labels=regions, xlabel='Frequency (Hz) $\times$ Duration (ms)', ylabel='Region')
+    return BrickHeatmapPlotData(df=plot_data, annot_dict=text, title='PS1 Aggregate Report for Frequency $\\times$ Duration', x_tick_labels=freqs_durs, y_tick_labels=regions, xlabel='Frequency (Hz) $\\times$ Duration (ms)', ylabel='Region')
 
 
 def freq_amp_plot(ps2_freq_amp_table):
@@ -229,7 +229,7 @@ def freq_amp_plot(ps2_freq_amp_table):
                 plot_data[i,j] = s / float(t)
                 text[(i,j)] = '%d/%d' % (s,t)
 
-    return BrickHeatmapPlotData(df=plot_data, annot_dict=text, title='PS2 Aggregate Report for Frequency $\\times$ Amplitude', x_tick_labels=freqs_amps, y_tick_labels=regions, xlabel='Frequency (Hz) $\times$ Amplitude (mA)', ylabel='Region')
+    return BrickHeatmapPlotData(df=plot_data, annot_dict=text, title='PS2 Aggregate Report for Frequency $\\times$ Amplitude', x_tick_labels=freqs_amps, y_tick_labels=regions, xlabel='Frequency (Hz) $\\times$ Amplitude (mA)', ylabel='Region')
 
 
 def burst_pulse_plot(ps3_burst_pulse_table):
