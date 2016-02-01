@@ -108,7 +108,7 @@ class BrickHeatmapPlotData(object):
                             'title',
                             'ylabel_fontsize', 'ylabel_fontsize', 'xlim', 'ylim', 'xhline_pos', 'xlabel', 'ylabel',
                             'linestyle', 'color', 'marker', 'levelline', 'barcolors', 'colorbar_title',
-                            'colorbar_title_location','label']:
+                            'colorbar_title_location','label', 'cmap']:
             try:
                 setattr(self, option_name, options[option_name])
                 print 'option_name=', option_name, ' val=', options[option_name], ' value_check = ', getattr(self,
@@ -236,10 +236,14 @@ class PanelPlot(object):
         # colormap = sns.palplot(sns.color_palette("coolwarm", 7))
         # sns.set_palette(colormap)
 
+        cmap ='bwr'
+        if pd.cmap is not None:
+            cmap = pd.cmap
+
         if pd.val_lim:
-            ax = sns.heatmap(df, cmap='bwr', fmt="d", vmin=pd.val_lim[0], vmax=pd.val_lim[1])
+            ax = sns.heatmap(df, cmap=cmap, fmt="d", vmin=pd.val_lim[0], vmax=pd.val_lim[1])
         else:
-            ax = sns.heatmap(df, cmap='bwr', fmt="d")
+            ax = sns.heatmap(df, cmap=cmap, fmt="d")
 
         xpos, ypos = np.meshgrid(ax.get_xticks(), ax.get_yticks())
 
@@ -575,10 +579,15 @@ def draw_brick_heatmap(plot_data):
     # colormap = sns.palplot(sns.color_palette("coolwarm", 7))
     # sns.set_palette(colormap)
 
+    cmap ='bwr'
+    if pd.cmap is not None:
+        cmap = pd.cmap
+
+
     if pd.val_lim:
-        ax = sns.heatmap(df, cmap='bwr', fmt="d", vmin=pd.val_lim[0], vmax=pd.val_lim[1])
+        ax = sns.heatmap(df, cmap=cmap, fmt="d", vmin=pd.val_lim[0], vmax=pd.val_lim[1])
     else:
-        ax = sns.heatmap(df, cmap='bwr', fmt="d")
+        ax = sns.heatmap(df, cmap=cmap, fmt="d")
 
     xpos, ypos = np.meshgrid(ax.get_xticks(), ax.get_yticks())
 
@@ -746,12 +755,16 @@ if __name__ == '__main__':
 
     x_tick_labels = ['x0', 'x1', 'x2', 'x3', 'x4']
     y_tick_labels = ['y0', 'y1', 'y2', 'y3', 'y4', 'y5', 'y6']
-
+#
+    cmap = matplotlib.cm.get_cmap('Blues')
+    import seaborn as sns
     hpd = BrickHeatmapPlotData(df=data_frame, annot_dict=annotation_dictionary, title='random_data_brick_plot',
                                x_tick_labels=x_tick_labels, y_tick_labels=y_tick_labels, xlabel='XLABEL',
                                ylabel='YLABEL', val_lim=[-1.5, 1.5],
                                colorbar_title='t-stat for random data',
-                               colorbar_title_location=[6.0, 4.5]
+                               colorbar_title_location=[6.0, 4.5],
+
+                               cmap = cmap
                                )
 
     fig, ax = draw_brick_heatmap(hpd)
