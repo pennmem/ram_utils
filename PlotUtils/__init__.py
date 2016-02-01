@@ -645,11 +645,19 @@ def draw_brick_heatmap(plot_data):
     if pd.colorbar_title:
         if pd.colorbar_title_location is not None:
 
-            ax.text(pd.colorbar_title_location[0], pd.colorbar_title_location[1], pd.colorbar_title,
+            # ax.text(pd.colorbar_title_location[0], pd.colorbar_title_location[1], pd.colorbar_title,
+            #         fontsize=12, rotation=270)
+
+            ax.text(len(xticks)*pd.colorbar_title_location[0], len(yticks)*pd.colorbar_title_location[1], pd.colorbar_title,
                     fontsize=12, rotation=270)
+
         else:
-            ax.text(6.0, 5, pd.colorbar_title,
+            # ax.text(6.0, 5, pd.colorbar_title,
+            #         fontsize=12, rotation=270)
+
+            ax.text(len(xticks)*1.2, len(yticks)*0.5, pd.colorbar_title,
                     fontsize=12, rotation=270)
+
 
     if pd.xlabel:
         ax.set_xlabel(pd.xlabel, fontsize=pd.xlabel_fontsize)
@@ -779,7 +787,7 @@ if __name__ == '__main__':
                                x_tick_labels=x_tick_labels, y_tick_labels=y_tick_labels, xlabel='XLABEL',
                                ylabel='YLABEL', val_lim=[-1.5, 1.5],
                                colorbar_title='t-stat for random data',
-                               colorbar_title_location=[6.0, 4.5],
+                               colorbar_title_location=[1.2, 0.5],
 
                                cmap = cmap
                                )
