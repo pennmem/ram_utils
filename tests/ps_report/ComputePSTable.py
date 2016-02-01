@@ -22,6 +22,7 @@ class ComputePSTable(RamTask):
         experiment = self.pipeline.experiment
 
         ps_events = self.get_passed_object(experiment+'_events')
+        loc_tag = self.get_passed_object('loc_tag')
 
         lr_classifier = self.get_passed_object('lr_classifier')
 
@@ -30,6 +31,11 @@ class ComputePSTable(RamTask):
 
         prob_pre, prob_diff = self.compute_prob_deltas(ps_pow_mat_pre, ps_pow_mat_post, lr_classifier)
 
+        #define region
+        bipolar_label = pd.Series(ps_events.stimAnodeTag) + '-' + pd.Series(ps_events.stimCathodeTag)
+        bipolar_label = bipolar_label.apply(lambda bp: bp.upper())
+        region = bipolar_label.apply(lambda bp: None if not (bp in loc_tag) or loc_tag[bp]=='' or loc_tag[bp]=='[]' else loc_tag[bp])
+
         self.ps_table = pd.DataFrame()
         self.ps_table['session'] = ps_events.session
         self.ps_table['mstime'] = ps_events.mstime
@@ -37,10 +43,9 @@ class ComputePSTable(RamTask):
         self.ps_table['Amplitude'] = ps_events.amplitude
         self.ps_table['Duration'] = ps_events.pulse_duration
         self.ps_table['Burst_Frequency'] = ps_events.burst_frequency
-        self.ps_table['stimAnode'] = ps_events.stimAnode
         self.ps_table['stimAnodeTag'] = ps_events.stimAnodeTag
-        self.ps_table['stimCathode'] = ps_events.stimCathode
         self.ps_table['stimCathodeTag'] = ps_events.stimCathodeTag
+        self.ps_table['Region'] = region
         self.ps_table['prob_pre'] = prob_pre
         self.ps_table['prob_diff'] = prob_diff
         self.ps_table['isi'] = ps_events.isi

@@ -30,30 +30,23 @@ class PSEventPreparation(RamTask):
         subject = self.pipeline.subject
         experiment = self.pipeline.experiment
 
-
-
-
-
         from ptsa.data.readers import BaseEventReader
         e_path = os.path.join(self.pipeline.mount_point , 'data', 'events', 'RAM_PS', self.pipeline.subject + '_events.mat')
         e_reader = BaseEventReader(event_file=e_path, eliminate_events_with_no_eeg=True, use_ptsa_events_class=False)
 
         events = e_reader.read()
 
-
-
-
-
-
         # try:
         #     events = Events(get_events(subject=subject, task='RAM_PS', path_prefix=self.pipeline.mount_point))
         # except IOError:
         #     raise Exception('No parameter search for subject %s' % subject)
         #
-        # events = events[events.experiment == experiment]
-        #
-        # if events.size == 0:
-        #     raise Exception('No %s events for subject %s' % (experiment,subject))
+
+        events = events[events.experiment == experiment]
+        
+        if len(events) == 0:
+            raise Exception('No %s events for subject %s' % (experiment,subject))
+
         #
         # events = correct_eegfile_field(events)
         # events = self.attach_raw_bin_wrappers(events)

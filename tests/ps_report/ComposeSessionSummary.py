@@ -3,6 +3,7 @@ __author__ = 'm'
 import numpy as np
 import pandas as pd
 import time
+from copy import deepcopy
 
 from RamPipeline import *
 from SessionSummary import SessionSummary
@@ -107,10 +108,11 @@ def ttest_interaction(ps_table, param1_name, param2_name):
 
 
 def format_ttest_table(ttest_table):
-    for row in ttest_table:
+    result = deepcopy(ttest_table)
+    for row in result:
         row[-1] = '$t = %.3f$' % row[-1]
         row[-2] = '$p %s$' % ('\leq 0.001' if row[-2]<=0.001 else ('= %.3f'%row[-2]))
-    return ttest_table
+    return result
 
 
 class ComposeSessionSummary(RamTask):
@@ -224,6 +226,11 @@ class ComposeSessionSummary(RamTask):
 
             session_summary.plots = delta_plot_data(ps_session_low_table, param1_name, param2_name, param2_unit)
 
+            if sess_loc_tag is not None and not (sess_loc_tag in anova_param1_sv):
+                anova_param1_sv[sess_loc_tag] = []
+                anova_param2_sv[sess_loc_tag] = []
+                anova_param12_sv[sess_loc_tag] = []
+
             anova = anova_test(ps_session_low_table, param1_name, param2_name)
             if anova is not None:
                 session_summary.anova_fvalues = anova[0]
@@ -231,30 +238,24 @@ class ComposeSessionSummary(RamTask):
 
                 if anova[1][0] < 0.05: # first param significant
                     param1_ttest_table = ttest_one_param(ps_session_low_table, param1_name)
-                    if sess_loc_tag is not None:
-                        if sess_loc_tag in anova_param1_sv:
+                    if len(param1_ttest_table) > 0:
+                        if sess_loc_tag is not None:
                             anova_param1_sv[sess_loc_tag].append(param1_ttest_table)
-                        else:
-                            anova_param1_sv[sess_loc_tag] = [param1_ttest_table]
-                    session_summary.param1_ttest_table = format_ttest_table(param1_ttest_table)
+                        session_summary.param1_ttest_table = format_ttest_table(param1_ttest_table)
 
                 if anova[1][1] < 0.05: # second param significant
                     param2_ttest_table = ttest_one_param(ps_session_low_table, param2_name)
-                    if sess_loc_tag is not None:
-                        if sess_loc_tag in anova_param2_sv:
+                    if len(param2_ttest_table) > 0:
+                        if sess_loc_tag is not None:
                             anova_param2_sv[sess_loc_tag].append(param2_ttest_table)
-                        else:
-                            anova_param2_sv[sess_loc_tag] = [param2_ttest_table]
-                    session_summary.param2_ttest_table = format_ttest_table(param2_ttest_table)
+                        session_summary.param2_ttest_table = format_ttest_table(param2_ttest_table)
 
                 if anova[1][2] < 0.05: # interaction is significant
                     param12_ttest_table = ttest_interaction(ps_session_low_table, param1_name, param2_name)
-                    if sess_loc_tag is not None:
-                        if sess_loc_tag in anova_param12_sv:
+                    if len(param12_ttest_table) > 0:
+                        if sess_loc_tag is not None:
                             anova_param12_sv[sess_loc_tag].append(param12_ttest_table)
-                        else:
-                            anova_param12_sv[sess_loc_tag] = [param12_ttest_table]
-                    session_summary.param12_ttest_table = format_ttest_table(param12_ttest_table)
+                        session_summary.param12_ttest_table = format_ttest_table(param12_ttest_table)
 
             session_summary_array.append(session_summary)
 
