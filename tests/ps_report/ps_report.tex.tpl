@@ -23,7 +23,7 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{<EXPERIMENT> report v 2.0}
+\lhead{<EXPERIMENT> report v 2.1}
 \chead{Subject: \textbf{<SUBJECT>}}
 \rhead{Date created: <DATE>}
 \begin{document}
@@ -71,15 +71,39 @@ $\bullet$ Youden's $J$-stat threshold = $<J-THRESH>$
 
 \section*{\hfil Combined Report \hfil}
 
-\textbf{Parameters:}
-\begin{itemize}
-  \item ISI: $<CUMULATIVE_ISI_MID>$ ($\pm <CUMULATIVE_ISI_HALF_RANGE>$) ms
-  \item All channels
-\end{itemize}
+\begin{tabular}{ccc}
+\begin{minipage}[htbp]{160pt}
+\textbf{Parameters:} \\
+$\bullet$ ISI: $<CUMULATIVE_ISI_MID>$ ($\pm <CUMULATIVE_ISI_HALF_RANGE>$) ms \\
+$\bullet$ All channels
+\end{minipage}
+&
+\begin{minipage}[htbp]{280pt}
+\centering
+\textbf{Two-factor ANOVA}
+
+\begin{tabular}{|c|c|c|c|}
+\hline & <CUMULATIVE_PARAMETER1> & <CUMULATIVE_PARAMETER2> & <CUMULATIVE_PARAMETER1> $\times$ <CUMULATIVE_PARAMETER2> \\
+\hline $F$ & $<CUMULATIVE_FVALUE1>$ & $<CUMULATIVE_FVALUE2>$ & $<CUMULATIVE_FVALUE12>$ \\
+\hline $p$ & $<CUMULATIVE_PVALUE1>$ & $<CUMULATIVE_PVALUE2>$ & $<CUMULATIVE_PVALUE12>$ \\
+\hline
+\end{tabular}
+\end{minipage}
+\end{tabular}
+
+%\textbf{Parameters:}
+%\begin{itemize}
+%  \item ISI: $<CUMULATIVE_ISI_MID>$ ($\pm <CUMULATIVE_ISI_HALF_RANGE>$) ms
+%  \item All channels
+%\end{itemize}
 
 \begin{figure}[!h]
 \centering
-\subfigure{\includegraphics[scale=0.4]{<CUMULATIVE_PLOT_FILE>}}
+\subfigure{\includegraphics[scale=0.35]{<CUMULATIVE_PLOT_FILE>}}
 \end{figure}
+
+<CUMULATIVE_PARAM1_TTEST_TABLE>
+<CUMULATIVE_PARAM2_TTEST_TABLE>
+<CUMULATIVE_PARAM12_TTEST_TABLE>
 
 \end{document}

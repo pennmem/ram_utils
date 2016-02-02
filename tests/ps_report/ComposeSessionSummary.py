@@ -276,6 +276,35 @@ class ComposeSessionSummary(RamTask):
         self.pass_object('CUMULATIVE_ISI_MID', isi_mid)
         self.pass_object('CUMULATIVE_ISI_HALF_RANGE', isi_halfrange)
 
-        cumulative_plots = delta_plot_data(ps_table[ps_table['prob_pre']<thresh], param1_name, param2_name, param2_unit)
+        ps_low_table = ps_table[ps_table['prob_pre']<thresh]
 
+        cumulative_plots = delta_plot_data(ps_low_table, param1_name, param2_name, param2_unit)
         self.pass_object('cumulative_plots', cumulative_plots)
+
+        cumulative_anova_fvalues = cumulative_anova_pvalues = None
+        cumulative_param1_ttest_table = cumulative_param2_ttest_table = cumulative_param12_ttest_table = None
+        anova = anova_test(ps_low_table, param1_name, param2_name)
+        if anova is not None:
+            cumulative_anova_fvalues = anova[0]
+            cumulative_anova_pvalues = anova[1]
+            if anova[1][0] < 0.05:
+                param1_ttest_table = ttest_one_param(ps_low_table, param1_name)
+                if len(param1_ttest_table) > 0:
+                    cumulative_param1_ttest_table = format_ttest_table(param1_ttest_table)
+
+            if anova[1][1] < 0.05:
+                param2_ttest_table = ttest_one_param(ps_low_table, param2_name)
+                if len(param2_ttest_table) > 0:
+                    cumulative_param2_ttest_table = format_ttest_table(param2_ttest_table)
+
+            if anova[1][2] < 0.05:
+                param12_ttest_table = ttest_interaction(ps_low_table, param1_name, param2_name)
+                if len(param12_ttest_table) > 0:
+                    cumulative_param12_ttest_table = format_ttest_table(param12_ttest_table)
+
+        self.pass_object('CUMULATIVE_ANOVA_FVALUES', cumulative_anova_fvalues)
+        self.pass_object('CUMULATIVE_ANOVA_PVALUES', cumulative_anova_pvalues)
+
+        self.pass_object('CUMULATIVE_PARAM1_TTEST_TABLE', cumulative_param1_ttest_table)
+        self.pass_object('CUMULATIVE_PARAM2_TTEST_TABLE', cumulative_param2_ttest_table)
+        self.pass_object('CUMULATIVE_PARAM12_TTEST_TABLE', cumulative_param12_ttest_table)

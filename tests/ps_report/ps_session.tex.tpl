@@ -11,7 +11,9 @@ $\bullet$ Region: <REGION>
 \end{minipage}
 &
 \begin{minipage}[htbp]{280pt}
-\textbf{Two-factor ANOVA for <PARAMETER1> $\times$ <PARAMETER2>}
+\centering
+\textbf{Two-factor ANOVA}
+% {<PARAMETER1> $\times$ <PARAMETER2>}
 
 \begin{tabular}{|c|c|c|c|}
 \hline & <PARAMETER1> & <PARAMETER2> & <PARAMETER1> $\times$ <PARAMETER2> \\

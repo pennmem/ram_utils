@@ -38,6 +38,13 @@ class GenerateTex(RamTask):
         const_param_name = self.get_passed_object('const_param_name')
         const_unit = self.get_passed_object('const_unit')
 
+        cumulative_anova_fvalues = self.get_passed_object('CUMULATIVE_ANOVA_FVALUES')
+        cumulative_anova_pvalues = self.get_passed_object('CUMULATIVE_ANOVA_PVALUES')
+
+        cumulative_param1_ttest_table = self.get_passed_object('CUMULATIVE_PARAM1_TTEST_TABLE')
+        cumulative_param2_ttest_table = self.get_passed_object('CUMULATIVE_PARAM2_TTEST_TABLE')
+        cumulative_param12_ttest_table = self.get_passed_object('CUMULATIVE_PARAM12_TTEST_TABLE')
+
         session_summary_array = self.get_passed_object('session_summary_array')
 
         tex_session_pages_str = ''
@@ -108,6 +115,32 @@ class GenerateTex(RamTask):
         xval_output = self.get_passed_object('xval_output')
         perm_test_pvalue = self.get_passed_object('pvalue')
 
+        param1_ttest_table = ''
+        if cumulative_param1_ttest_table is not None:
+            ttest_replace_dict = {'<PARAMETER>': param1_name,
+                                  '<UNIT>': param1_unit,
+                                  '<TABLE>': latex_table(cumulative_param1_ttest_table, hlines=False)
+                                 }
+            param1_ttest_table = TextTemplateUtils.replace_template_to_string(tex_ttest_table1_template, ttest_replace_dict)
+
+        param2_ttest_table = ''
+        if cumulative_param2_ttest_table is not None:
+            ttest_replace_dict = {'<PARAMETER>': param2_name,
+                                  '<UNIT>': param2_unit,
+                                  '<TABLE>': latex_table(cumulative_param2_ttest_table, hlines=False)
+                                  }
+            param2_ttest_table = TextTemplateUtils.replace_template_to_string(tex_ttest_table1_template, ttest_replace_dict)
+
+        param12_ttest_table = ''
+        if cumulative_param12_ttest_table is not None:
+            ttest_replace_dict = {'<PARAMETER1>': param1_name,
+                                  '<UNIT1>': param1_unit,
+                                  '<PARAMETER2>': param2_name,
+                                  '<UNIT2>': param2_unit,
+                                  '<TABLE>': latex_table(cumulative_param12_ttest_table, hlines=False)
+                                  }
+            param12_ttest_table = TextTemplateUtils.replace_template_to_string(tex_ttest_table2_template, ttest_replace_dict)
+
         replace_dict = {
             '<SUBJECT>': self.pipeline.subject.replace('_', '\\textunderscore'),
             '<EXPERIMENT>': self.pipeline.experiment,
@@ -121,6 +154,15 @@ class GenerateTex(RamTask):
             '<CUMULATIVE_PLOT_FILE>': self.pipeline.experiment + '-' + self.pipeline.subject + '-report_plot_Cumulative.pdf',
             '<CUMULATIVE_PARAMETER1>': param1_name,
             '<CUMULATIVE_PARAMETER2>': param2_name,
+            '<CUMULATIVE_FVALUE1>': '%.2f' % cumulative_anova_fvalues[0],
+            '<CUMULATIVE_FVALUE2>': '%.2f' % cumulative_anova_fvalues[1],
+            '<CUMULATIVE_FVALUE12>': '%.2f' % cumulative_anova_fvalues[2],
+            '<CUMULATIVE_PVALUE1>': pvalue_formatting(cumulative_anova_pvalues[0]),
+            '<CUMULATIVE_PVALUE2>': pvalue_formatting(cumulative_anova_pvalues[1]),
+            '<CUMULATIVE_PVALUE12>': pvalue_formatting(cumulative_anova_pvalues[2]),
+            '<CUMULATIVE_PARAM1_TTEST_TABLE>': param1_ttest_table,
+            '<CUMULATIVE_PARAM2_TTEST_TABLE>': param2_ttest_table,
+            '<CUMULATIVE_PARAM12_TTEST_TABLE>': param12_ttest_table,
             '<AUC>': '%.2f' % (100*xval_output[-1].auc),
             '<PERM-P-VALUE>': pvalue_formatting(perm_test_pvalue),
             '<J-THRESH>': '%.3f' % xval_output[-1].jstat_thresh,
