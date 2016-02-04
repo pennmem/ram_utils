@@ -12,8 +12,11 @@ class GetLocalization(RamTask):
     def run(self):
         subject = self.pipeline.subject
 
-        l_path = join(self.pipeline.mount_point, 'data/eeg', subject, 'docs/localization', subject+' Localization.xlsx')
-
-        df = loc_to_df(l_path)
+        df = None
+        try:
+            l_path = join(self.pipeline.mount_point, 'data/eeg', subject, 'docs/localization', subject+' Localization.xlsx')
+            df = loc_to_df(l_path)
+        except:
+            df = dict()
 
         self.pass_object('loc_info', df)
