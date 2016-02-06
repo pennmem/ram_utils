@@ -188,10 +188,14 @@ class ComputePSPowers(RamTask):
                     sess_pow_mat_post[ev,i,:] = np.nanmean(pow_ev_stripped, axis=1)
 
             sess_pow_mat_pre = sess_pow_mat_pre.reshape((n_events, n_bps*n_freqs))
-            sess_pow_mat_pre = zscore(sess_pow_mat_pre, axis=0, ddof=1)
+            #sess_pow_mat_pre = zscore(sess_pow_mat_pre, axis=0, ddof=1)
 
             sess_pow_mat_post = sess_pow_mat_post.reshape((n_events, n_bps*n_freqs))
-            sess_pow_mat_post = zscore(sess_pow_mat_post, axis=0, ddof=1)
+            #sess_pow_mat_post = zscore(sess_pow_mat_post, axis=0, ddof=1)
+
+            sess_pow_mat_joint = zscore(np.vstack((sess_pow_mat_pre,sess_pow_mat_post)), axis=0, ddof=1)
+            sess_pow_mat_pre = sess_pow_mat_joint[:n_events,...]
+            sess_pow_mat_post = sess_pow_mat_joint[n_events:,...]
 
             pow_mat_pre = np.vstack((pow_mat_pre,sess_pow_mat_pre)) if pow_mat_pre is not None else sess_pow_mat_pre
             pow_mat_post = np.vstack((pow_mat_post,sess_pow_mat_post)) if pow_mat_post is not None else sess_pow_mat_post
