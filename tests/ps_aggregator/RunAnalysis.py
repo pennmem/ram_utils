@@ -6,10 +6,10 @@ import pandas as pd
 from PlotUtils import PlotData
 
 
-def frequency_plot_data(ps_table):
+def frequency_plot_data(ps_table, regions):
     plots = dict()
     #areas = sorted(ps_table['Area'].unique())
-    areas = ['HC', 'MLTC', 'Frontal']
+    areas = ['HC', 'MTLC', 'Frontal']
     regions = ['CA1', 'DG', 'PRC']
     freqs = sorted(ps_table['Pulse_Frequency'].unique())
 
@@ -50,7 +50,7 @@ def frequency_plot_data(ps_table):
 def duration_plot(ps_table):
     plots = dict()
     #areas = sorted(ps_table['Area'].unique())
-    areas = ['HC', 'MLTC']
+    areas = ['HC', 'MTLC']
     regions = ['CA1', 'DG', 'PRC']
     durs = [250, 500, 1000]   #sorted(ps_table['Duration'].unique())
 
@@ -88,10 +88,10 @@ def duration_plot(ps_table):
     return plots
 
 
-def amplitude_plot(ps_table):
+def amplitude_plot(ps_table, regions):
     plots = dict()
     #areas = sorted(ps_table['Area'].unique())
-    areas = ['HC', 'MLTC']
+    areas = ['HC', 'MTLC']
     regions = ['CA1', 'DG', 'PRC']
     amps = [0.25, 0.5, 0.75]  #sorted(ps_table['Amplitude'].unique())
 
@@ -136,8 +136,10 @@ class RunAnalysis(RamTask):
 
     def run(self):
         ps_table = self.get_passed_object('ps_table')
+        region_total = self.get_passed_object('region_session_total')
+        regions = [r for r,c in region_total.iteritems() if c>=5]
 
-        frequency_plot = frequency_plot_data(ps_table)
+        frequency_plot = frequency_plot_data(ps_table, regions)
         self.pass_object('frequency_plot', frequency_plot)
 
         low_freq_ps_table = ps_table[(ps_table['Pulse_Frequency']==10) | (ps_table['Pulse_Frequency']==25)]
@@ -152,9 +154,9 @@ class RunAnalysis(RamTask):
         self.pass_object('high_freq_duration_plot', high_freq_duration_plot)
 
         low_freq_ps2_table = low_freq_ps_table[low_freq_ps_table['Experiment']=='PS2']
-        low_freq_amplitude_plot = amplitude_plot(low_freq_ps2_table)
+        low_freq_amplitude_plot = amplitude_plot(low_freq_ps2_table, regions)
         self.pass_object('low_freq_amplitude_plot', low_freq_amplitude_plot)
 
         high_freq_ps2_table = high_freq_ps_table[high_freq_ps_table['Experiment']=='PS2']
-        high_freq_amplitude_plot = amplitude_plot(high_freq_ps2_table)
+        high_freq_amplitude_plot = amplitude_plot(high_freq_ps2_table, regions)
         self.pass_object('high_freq_amplitude_plot', high_freq_amplitude_plot)

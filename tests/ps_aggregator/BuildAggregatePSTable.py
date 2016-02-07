@@ -28,7 +28,7 @@ def brain_area(region):
 class BuildAggregatePSTable(RamTask):
     def __init__(self, params, mark_as_completed=True):
         RamTask.__init__(self, mark_as_completed)
-        #self.params = params
+        self.params = params
         self.ps_table = None
 
     def restore(self):
@@ -38,7 +38,7 @@ class BuildAggregatePSTable(RamTask):
     def run(self):
         task = self.pipeline.task
 
-        ps1_root = self.get_path_to_resource_in_workspace('PS1/')
+        ps1_root = self.get_path_to_resource_in_workspace('PS1_offset/')
         ps1_subjects = sorted([s for s in os.listdir(ps1_root) if s[:2]=='R1'])
         ps1_tables = []
         for subject in ps1_subjects:
@@ -47,9 +47,14 @@ class BuildAggregatePSTable(RamTask):
                 xval_output = joblib.load(join(ps1_root, subject, subject+'-'+task+'-xval_output.pkl'))
                 thresh = xval_output[-1].jstat_thresh
                 ps1_table = ps1_table[ps1_table['prob_pre']<thresh]
+                ps1_table.dropna(inplace=True)
                 ps1_table['Region'] = ps1_table['Region'].apply(lambda s: s.replace('Left ','').replace('Right ',''))
                 ps1_table['Area'] = ps1_table['Region'].apply(brain_area)
                 ps1_table['Subject'] = subject
+                control_table = pd.read_pickle(join(ps1_root, subject, subject+'-'+task+'-control_table.pkl'))
+                baseline_delta = control_table['prob_diff_500'].mean()
+                if self.params.baseline_correction:
+                    ps1_table['prob_diff'] -= baseline_delta
                 ps1_tables.append(ps1_table)
             except IOError:
                 pass
@@ -57,7 +62,7 @@ class BuildAggregatePSTable(RamTask):
         ps1_tables = pd.concat(ps1_tables, ignore_index=True)
         ps1_tables['Experiment'] = 'PS1'
 
-        ps2_root = self.get_path_to_resource_in_workspace('PS2/')
+        ps2_root = self.get_path_to_resource_in_workspace('PS2_offset/')
         ps2_subjects = sorted([s for s in os.listdir(ps2_root) if s[:2]=='R1'])
         ps2_tables = []
         for subject in ps2_subjects:
@@ -70,6 +75,10 @@ class BuildAggregatePSTable(RamTask):
                 ps2_table['Region'] = ps2_table['Region'].apply(lambda s: s.replace('Left ','').replace('Right ',''))
                 ps2_table['Area'] = ps2_table['Region'].apply(brain_area)
                 ps2_table['Subject'] = subject
+                control_table = pd.read_pickle(join(ps2_root, subject, subject+'-'+task+'-control_table.pkl'))
+                baseline_delta = control_table['prob_diff_500'].mean()
+                if self.params.baseline_correction:
+                    ps2_table['prob_diff'] -= baseline_delta
                 ps2_tables.append(ps2_table)
             except IOError:
                 pass

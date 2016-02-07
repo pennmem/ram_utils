@@ -27,6 +27,8 @@ from RamPipeline import RamPipeline
 
 from BuildAggregatePSTable import BuildAggregatePSTable
 
+from CountSessions import CountSessions
+
 from RunAnalysis import RunAnalysis
 
 from GenerateReportTasks import *
@@ -36,7 +38,7 @@ from GenerateReportTasks import *
 
 class Params(object):
     def __init__(self):
-        self.width = 5
+        self.baseline_correction = False
 
 
 params = Params()
@@ -56,13 +58,15 @@ report_pipeline = ReportPipeline(workspace_dir=args.workspace_dir, mount_point=a
 
 report_pipeline.add_task(BuildAggregatePSTable(params=params, mark_as_completed=True))
 
+report_pipeline.add_task(CountSessions(params=params, mark_as_completed=False))
+
 report_pipeline.add_task(RunAnalysis(params=params, mark_as_completed=False))
 
 report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
 
-# report_pipeline.add_task(GenerateTex(mark_as_completed=False))
-#
-# report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
+report_pipeline.add_task(GenerateTex(mark_as_completed=False))
+
+report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
 # starts processing pipeline
 report_pipeline.execute_pipeline()
