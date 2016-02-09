@@ -96,7 +96,7 @@ class ComputeControlPowers(RamTask):
             #
             # eegs = time_series_reader.read(monopolar_channels)
 
-            eeg_reader = EEGReader(events=sess_events, channels=list(monopolar_channels),
+            eeg_reader = EEGReader(events=sess_events, channels = monopolar_channels,
                                    start_time=start_time, end_time=end_time, buffer_time=self.params.control_buf)
 
             eegs = eeg_reader.read()
@@ -110,7 +110,7 @@ class ComputeControlPowers(RamTask):
             #eegs[...,2731:4096] = eegs[...,2729:1364:-1]
 
             if self.samplerate is None:
-                self.samplerate = eegs.samplerate
+                self.samplerate = float(eegs.samplerate)
                 winsize = int(round(self.samplerate*(self.params.control_end_time-self.params.control_start_time+2*self.params.control_buf)))
                 bufsize = int(round(self.samplerate*self.params.control_buf))
                 print 'samplerate =', self.samplerate, 'winsize =', winsize, 'bufsize =', bufsize

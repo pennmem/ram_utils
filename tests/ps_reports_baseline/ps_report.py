@@ -11,13 +11,49 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1062J',
-                                            '--experiment','PS1',
-                                            '--workspace-dir','/scratch/busygin/PS1',
+    # command_line_emulation_argument_list = ['--subject','R1062J',
+    #                                         '--experiment','PS1',
+    #                                         '--workspace-dir','/scratch/busygin/PS1',
+    #                                         '--mount-point','',
+    #                                         '--python-path','/home1/busygin/ram_utils_new_ptsa',
+    #                                         '--python-path','/home1/busygin/python/ptsa_new'
+
+
+    # command_line_emulation_argument_list = ['--subject','R1062J',
+    #                                         '--experiment','PS1',
+    #                                         '--workspace-dir','/scratch/mswat/PS1',
+    #                                         '--mount-point','',
+    #                                         '--python-path','/home1/mswat/RAM_UTILS_GIT',
+    #                                         '--python-path','/home1/mswat/PTSA_NEW_GIT'
+    #                                         ]
+
+    # command_line_emulation_argument_list = ['--subject','R1086M',
+    #                                         '--experiment','PS2',
+    #                                         '--workspace-dir','/scratch/mswat/PS2',
+    #                                         '--mount-point','',
+    #                                         '--python-path','/home1/mswat/RAM_UTILS_GIT',
+    #                                         '--python-path','/home1/mswat/PTSA_NEW_GIT'
+    #                                         ]
+
+    # command_line_emulation_argument_list = ['--subject','R1124J_1',
+    #                                         '--experiment','PS2',
+    #                                         '--workspace-dir','/scratch/mswat/PS2',
+    #                                         '--mount-point','',
+    #                                         '--python-path','/home1/mswat/RAM_UTILS_GIT',
+    #                                         '--python-path','/home1/mswat/PTSA_NEW_GIT'
+    #                                         ]
+
+    command_line_emulation_argument_list = ['--subject','R1104D',
+                                            '--experiment','PS2',
+                                            '--workspace-dir','/scratch/mswat/PS2',
                                             '--mount-point','',
-                                            '--python-path','/home1/busygin/ram_utils_new_ptsa',
-                                            '--python-path','/home1/busygin/python/ptsa_new'
+                                            '--python-path','/home1/mswat/RAM_UTILS_GIT',
+                                            '--python-path','/home1/mswat/PTSA_NEW_GIT'
                                             ]
+
+
+
+
     args = parse_command_line(command_line_emulation_argument_list)
 
 configure_python_paths(args.python_path)

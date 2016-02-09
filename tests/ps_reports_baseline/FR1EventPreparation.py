@@ -21,7 +21,7 @@ class FR1EventPreparation(RamTask):
 
         from ptsa.data.readers import BaseEventReader
         e_path = os.path.join(self.pipeline.mount_point , 'data', 'events', task, self.pipeline.subject + '_events.mat')
-        e_reader = BaseEventReader(event_file=e_path, eliminate_events_with_no_eeg=True, use_ptsa_events_class=False)
+        e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
         events = e_reader.read()
 
