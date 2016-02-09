@@ -11,9 +11,9 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1101T',
-                                            '--experiment','PS2',
-                                            '--workspace-dir','/scratch/busygin/PS2',
+    command_line_emulation_argument_list = ['--subject','R1062J',
+                                            '--experiment','PS1',
+                                            '--workspace-dir','/scratch/busygin/PS1',
                                             '--mount-point','',
                                             '--python-path','/home1/busygin/ram_utils_new_ptsa',
                                             '--python-path','/home1/busygin/python/ptsa_new'
@@ -40,6 +40,7 @@ from TalPreparation import TalPreparation
 
 from ComputeClassifier import ComputeClassifier
 
+from ComputeControlTable import ComputeControlTable
 from ComputePSTable import ComputePSTable
 
 from ComposeSessionSummary import ComposeSessionSummary
@@ -111,6 +112,8 @@ report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True
 report_pipeline.add_task(ComputeControlPowers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputePSPowers(params=params, mark_as_completed=True))
+
+report_pipeline.add_task(ComputeControlTable(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputePSTable(params=params, mark_as_completed=True))
 

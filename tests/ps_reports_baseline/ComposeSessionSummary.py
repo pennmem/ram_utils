@@ -239,10 +239,10 @@ class ComposeSessionSummary(RamTask):
                 session_summary.anova_pvalues = anova[1]
 
                 if anova[1][0] < 0.05: # first param significant
-                    if sess_loc_tag in anova_significance:
-                        anova_significance[sess_loc_tag][0] = True
+                    if stim_tag in anova_significance:
+                        anova_significance[stim_tag][0] = True
                     else:
-                        anova_significance[sess_loc_tag] = np.array([True, False, False], dtype=np.bool)
+                        anova_significance[stim_tag] = np.array([True, False, False], dtype=np.bool)
                     param1_ttest_table = ttest_one_param(ps_session_low_table, param1_name)
                     if len(param1_ttest_table) > 0:
                         if sess_loc_tag is not None:
@@ -250,10 +250,10 @@ class ComposeSessionSummary(RamTask):
                         session_summary.param1_ttest_table = format_ttest_table(param1_ttest_table)
 
                 if anova[1][1] < 0.05: # second param significant
-                    if sess_loc_tag in anova_significance:
-                        anova_significance[sess_loc_tag][1] = True
+                    if stim_tag in anova_significance:
+                        anova_significance[stim_tag][1] = True
                     else:
-                        anova_significance[sess_loc_tag] = np.array([False, True, False], dtype=np.bool)
+                        anova_significance[stim_tag] = np.array([False, True, False], dtype=np.bool)
                     param2_ttest_table = ttest_one_param(ps_session_low_table, param2_name)
                     if len(param2_ttest_table) > 0:
                         if sess_loc_tag is not None:
@@ -261,10 +261,10 @@ class ComposeSessionSummary(RamTask):
                         session_summary.param2_ttest_table = format_ttest_table(param2_ttest_table)
 
                 if anova[1][2] < 0.05: # interaction is significant
-                    if sess_loc_tag in anova_significance:
-                        anova_significance[sess_loc_tag][2] = True
+                    if stim_tag in anova_significance:
+                        anova_significance[stim_tag][2] = True
                     else:
-                        anova_significance[sess_loc_tag] = np.array([False, False, True], dtype=np.bool)
+                        anova_significance[stim_tag] = np.array([False, False, True], dtype=np.bool)
                     param12_ttest_table = ttest_interaction(ps_session_low_table, param1_name, param2_name)
                     if len(param12_ttest_table) > 0:
                         if sess_loc_tag is not None:
