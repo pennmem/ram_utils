@@ -40,7 +40,7 @@ class CountSessions(RamTask):
         self.region_session_total = dict.fromkeys(regions,0)
         self.area_session_total = dict.fromkeys(areas,0)
 
-        stim_groups = ps_table.groupby(['Subject','stimAnodeTag','stimCathodeTag'])
+        stim_groups = ps_table.groupby(['Subject','stimAnodeTag','stimCathodeTag','Experiment'])
 
         for idx,gr in stim_groups:
             region = gr['Region'].unique()

@@ -40,6 +40,20 @@ class Params(object):
     def __init__(self):
         self.baseline_correction = False
 
+        #self.frequency_plot_regions = ['CA1', 'DG', 'PRC']
+        self.frequency_plot_regions = []
+        self.frequency_plot_areas = ['HC', 'MTLC', 'Frontal']
+
+        #self.duration_plot_regions = ['CA1', 'DG', 'PRC']
+        self.duration_plot_regions = []
+        self.duration_plot_areas = ['HC', 'MTLC', 'Frontal']
+
+        #self.amplitude_plot_regions = ['CA1', 'DG', 'PRC']
+        self.amplitude_plot_regions = []
+        self.amplitude_plot_areas = ['HC', 'MTLC']
+
+        self.anova_areas = ['HC', 'MTLC', 'Frontal']
+
 
 params = Params()
 

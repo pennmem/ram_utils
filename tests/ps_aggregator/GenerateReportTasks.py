@@ -30,42 +30,99 @@ class GenerateTex(RamTask):
         area_total = self.get_passed_object('area_session_total')
 
         region_total = sorted(zip(region_total.keys(), region_total.values()))
+        region_total.append(('Total',sum([v[1] for v in region_total])))
+
         area_total = sorted(zip(area_total.keys(), area_total.values()))
+
+        fvalue_rf = self.get_passed_object('fvalue_rf')
+        pvalue_rf = self.get_passed_object('pvalue_rf')
+
+        fvalue_ra_low = self.get_passed_object('fvalue_ra_low')
+        pvalue_ra_low = self.get_passed_object('pvalue_ra_low')
+
+        fvalue_ra_high = self.get_passed_object('fvalue_ra_high')
+        pvalue_ra_high = self.get_passed_object('pvalue_ra_high')
+
+        fvalue_rd_low = self.get_passed_object('fvalue_rd_low')
+        pvalue_rd_low = self.get_passed_object('pvalue_rd_low')
+
+        fvalue_rd_high = self.get_passed_object('fvalue_rd_high')
+        pvalue_rd_high = self.get_passed_object('pvalue_rd_high')
+
+        # replace_dict = {
+        #     '<DATE>': datetime.date.today(),
+        #     '<FREQUENCY_PLOT_FILE>': 'ps_frequency_aggregate_plots.pdf',
+        #     '<FVALUERF1>': '%.2f' % fvalue_rf[0],
+        #     '<FVALUERF2>': '%.2f' % fvalue_rf[1],
+        #     '<FVALUERF12>': '%.2f' % fvalue_rf[2],
+        #     '<PVALUERF1>': pvalue_formatting(pvalue_rf[0]),
+        #     '<PVALUERF2>': pvalue_formatting(pvalue_rf[1]),
+        #     '<PVALUERF12>': pvalue_formatting(pvalue_rf[2]),
+        #     '<AMPLITUDE_LOW_PLOT_FILE>': 'ps_amplitude_low_aggregate_plots.pdf',
+        #     '<FVALUERALOW1>': '%.2f' % fvalue_ra_low[0],
+        #     '<FVALUERALOW2>': '%.2f' % fvalue_ra_low[1],
+        #     '<FVALUERALOW12>': '%.2f' % fvalue_ra_low[2],
+        #     '<PVALUERALOW1>': pvalue_formatting(pvalue_ra_low[0]),
+        #     '<PVALUERALOW2>': pvalue_formatting(pvalue_ra_low[1]),
+        #     '<PVALUERALOW12>': pvalue_formatting(pvalue_ra_low[2]),
+        #     '<AMPLITUDE_HIGH_PLOT_FILE>': 'ps_amplitude_high_aggregate_plots.pdf',
+        #     '<FVALUERAHIGH1>': '%.2f' % fvalue_ra_high[0],
+        #     '<FVALUERAHIGH2>': '%.2f' % fvalue_ra_high[1],
+        #     '<FVALUERAHIGH12>': '%.2f' % fvalue_ra_high[2],
+        #     '<PVALUERAHIGH1>': pvalue_formatting(pvalue_ra_high[0]),
+        #     '<PVALUERAHIGH2>': pvalue_formatting(pvalue_ra_high[1]),
+        #     '<PVALUERAHIGH12>': pvalue_formatting(pvalue_ra_high[2]),
+        #     '<DURATION_LOW_PLOT_FILE>': 'ps_duration_low_aggregate_plots.pdf',
+        #     '<FVALUERDLOW1>': '%.2f' % fvalue_rd_low[0],
+        #     '<FVALUERDLOW2>': '%.2f' % fvalue_rd_low[1],
+        #     '<FVALUERDLOW12>': '%.2f' % fvalue_rd_low[2],
+        #     '<PVALUERDLOW1>': pvalue_formatting(pvalue_rd_low[0]),
+        #     '<PVALUERDLOW2>': pvalue_formatting(pvalue_rd_low[1]),
+        #     '<PVALUERDLOW12>': pvalue_formatting(pvalue_rd_low[2]),
+        #     '<DURATION_HIGH_PLOT_FILE>': 'ps_duration_high_aggregate_plots.pdf',
+        #     '<FVALUERDHIGH1>': '%.2f' % fvalue_rd_high[0],
+        #     '<FVALUERDHIGH2>': '%.2f' % fvalue_rd_high[1],
+        #     '<FVALUERDHIGH12>': '%.2f' % fvalue_rd_high[2],
+        #     '<PVALUERDHIGH1>': pvalue_formatting(pvalue_rd_high[0]),
+        #     '<PVALUERDHIGH2>': pvalue_formatting(pvalue_rd_high[1]),
+        #     '<PVALUERDHIGH12>': pvalue_formatting(pvalue_rd_high[2]),
+        #     '<REGION_SESSION_TOTAL_DATA>': latex_table(region_total, hlines=False)
+        # }
 
         replace_dict = {
             '<DATE>': datetime.date.today(),
             '<FREQUENCY_PLOT_FILE>': 'ps_frequency_aggregate_plots.pdf',
-            '<FVALUERF1>': np.nan,
-            '<FVALUERF2>': np.nan,
-            '<FVALUERF12>': np.nan,
+            '<FVALUERF1>': '%.2f' % np.nan,
+            '<FVALUERF2>': '%.2f' % np.nan,
+            '<FVALUERF12>': '%.2f' % np.nan,
             '<PVALUERF1>': pvalue_formatting(np.nan),
             '<PVALUERF2>': pvalue_formatting(np.nan),
             '<PVALUERF12>': pvalue_formatting(np.nan),
             '<AMPLITUDE_LOW_PLOT_FILE>': 'ps_amplitude_low_aggregate_plots.pdf',
-            '<FVALUERALOW1>': np.nan,
-            '<FVALUERALOW2>': np.nan,
-            '<FVALUERALOW12>': np.nan,
+            '<FVALUERALOW1>': '%.2f' % np.nan,
+            '<FVALUERALOW2>': '%.2f' % np.nan,
+            '<FVALUERALOW12>': '%.2f' % np.nan,
             '<PVALUERALOW1>': pvalue_formatting(np.nan),
             '<PVALUERALOW2>': pvalue_formatting(np.nan),
             '<PVALUERALOW12>': pvalue_formatting(np.nan),
             '<AMPLITUDE_HIGH_PLOT_FILE>': 'ps_amplitude_high_aggregate_plots.pdf',
-            '<FVALUERAHIGH1>': np.nan,
-            '<FVALUERAHIGH2>': np.nan,
-            '<FVALUERAHIGH12>': np.nan,
+            '<FVALUERAHIGH1>': '%.2f' % np.nan,
+            '<FVALUERAHIGH2>': '%.2f' % np.nan,
+            '<FVALUERAHIGH12>': '%.2f' % np.nan,
             '<PVALUERAHIGH1>': pvalue_formatting(np.nan),
             '<PVALUERAHIGH2>': pvalue_formatting(np.nan),
             '<PVALUERAHIGH12>': pvalue_formatting(np.nan),
             '<DURATION_LOW_PLOT_FILE>': 'ps_duration_low_aggregate_plots.pdf',
-            '<FVALUERDLOW1>': np.nan,
-            '<FVALUERDLOW2>': np.nan,
-            '<FVALUERDLOW12>': np.nan,
+            '<FVALUERDLOW1>': '%.2f' % np.nan,
+            '<FVALUERDLOW2>': '%.2f' % np.nan,
+            '<FVALUERDLOW12>': '%.2f' % np.nan,
             '<PVALUERDLOW1>': pvalue_formatting(np.nan),
             '<PVALUERDLOW2>': pvalue_formatting(np.nan),
             '<PVALUERDLOW12>': pvalue_formatting(np.nan),
             '<DURATION_HIGH_PLOT_FILE>': 'ps_duration_high_aggregate_plots.pdf',
-            '<FVALUERDHIGH1>': np.nan,
-            '<FVALUERDHIGH2>': np.nan,
-            '<FVALUERDHIGH12>': np.nan,
+            '<FVALUERDHIGH1>': '%.2f' % np.nan,
+            '<FVALUERDHIGH2>': '%.2f' % np.nan,
+            '<FVALUERDHIGH12>': '%.2f' % np.nan,
             '<PVALUERDHIGH1>': pvalue_formatting(np.nan),
             '<PVALUERDHIGH2>': pvalue_formatting(np.nan),
             '<PVALUERDHIGH12>': pvalue_formatting(np.nan),
