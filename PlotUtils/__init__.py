@@ -735,3 +735,21 @@ if __name__ == '__main__':
 
     fig, ax = draw_brick_heatmap(hpd)
     fig.savefig('heatmap_example.png')
+
+
+    ###################################### BAR PLOT DATA COLLECTION
+    panel_plot_1 = PanelPlot(xfigsize=5, yfigsize=5, i_max=1, j_max=1, title='BAR_PLOT_DEMO', xtitle='x_axis_label',
+                           ytitle='y_axis_random', xlabel='skdjhskdhksjhksdhk')
+
+    bpd = BarPlotData(x=np.arange(10), y=np.random.rand(10), title='data01', yerr=np.random.rand(10) * 0.1,
+                      x_tick_labels=['a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9'],
+                      barcolors=['r', 'g', 'b', 'r', 'g', 'b', 'r', 'g', 'b', 'r'])
+
+    panel_plot_1.add_plot_data(0, 0, plot_data=bpd)
+
+    plot = panel_plot_1.generate_plot()
+    plot.subplots_adjust(wspace=0.3, hspace=0.3)
+
+    plot.savefig('bar_plot_demo_1.png', dpi=300, bboxinches='tight')
+
+    ###################################### END BAR PLOT DATA COLLECTION
