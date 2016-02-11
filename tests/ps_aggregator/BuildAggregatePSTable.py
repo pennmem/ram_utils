@@ -38,24 +38,32 @@ class BuildAggregatePSTable(RamTask):
     def run(self):
         task = self.pipeline.task
 
-        ps1_root = self.get_path_to_resource_in_workspace('PS1/')
-        ps1_subjects = sorted([s for s in os.listdir(ps1_root) if s[:2]=='R1'])
+        ps1_root = self.get_path_to_resource_in_workspace('PS1_joint/')
+        ps1_subjects = sorted([s for s in os.listdir(ps1_root) if s[:2] in ['R1','TJ']])
         ps1_tables = []
         for subject in ps1_subjects:
             try:
                 ps1_table = pd.read_pickle(join(ps1_root, subject, subject+'-PS1-ps_table.pkl'))
                 del ps1_table['isi']
-                xval_output = joblib.load(join(ps1_root, subject, subject+'-'+task+'-xval_output.pkl'))
+                xval_output = control_table = None
+                try:
+                    xval_output = joblib.load(join(ps1_root, subject, subject+'-'+task+'-xval_output.pkl'))
+                    if self.params.baseline_correction:
+                        control_table = pd.read_pickle(join(ps1_root, subject, subject+'-'+task+'-control_table.pkl'))
+                        baseline_delta = control_table['prob_diff_500'].mean()
+                        ps1_table['prob_diff'] -= baseline_delta
+                except IOError:
+                    xval_output = joblib.load(join(ps1_root, subject, subject+'-xval_output.pkl'))
+                    if self.params.baseline_correction:
+                        control_table = pd.read_pickle(join(ps1_root, subject, subject+'-control_table.pkl'))
+                        baseline_delta = control_table['prob_diff_500'].mean()
+                        ps1_table['prob_diff'] -= baseline_delta
                 thresh = xval_output[-1].jstat_thresh
                 ps1_table = ps1_table[ps1_table['prob_pre']<thresh]
                 ps1_table.dropna(inplace=True)
                 ps1_table['Region'] = ps1_table['Region'].apply(lambda s: s.replace('Left ','').replace('Right ',''))
                 ps1_table['Area'] = ps1_table['Region'].apply(brain_area)
                 ps1_table['Subject'] = subject
-                control_table = pd.read_pickle(join(ps1_root, subject, subject+'-'+task+'-control_table.pkl'))
-                baseline_delta = control_table['prob_diff_500'].mean()
-                if self.params.baseline_correction:
-                    ps1_table['prob_diff'] -= baseline_delta
                 ps1_tables.append(ps1_table)
             except IOError:
                 pass
@@ -63,24 +71,32 @@ class BuildAggregatePSTable(RamTask):
         ps1_tables = pd.concat(ps1_tables, ignore_index=True)
         ps1_tables['Experiment'] = 'PS1'
 
-        ps2_root = self.get_path_to_resource_in_workspace('PS2/')
+        ps2_root = self.get_path_to_resource_in_workspace('PS2_joint/')
         ps2_subjects = sorted([s for s in os.listdir(ps2_root) if s[:2]=='R1'])
         ps2_tables = []
         for subject in ps2_subjects:
             try:
                 ps2_table = pd.read_pickle(join(ps2_root, subject, subject+'-PS2-ps_table.pkl'))
                 del ps2_table['isi']
-                xval_output = joblib.load(join(ps2_root, subject, subject+'-'+task+'-xval_output.pkl'))
+                xval_output = control_table = None
+                try:
+                    xval_output = joblib.load(join(ps2_root, subject, subject+'-'+task+'-xval_output.pkl'))
+                    if self.params.baseline_correction:
+                        control_table = pd.read_pickle(join(ps2_root, subject, subject+'-'+task+'-control_table.pkl'))
+                        baseline_delta = control_table['prob_diff_500'].mean()
+                        ps2_table['prob_diff'] -= baseline_delta
+                except IOError:
+                    xval_output = joblib.load(join(ps2_root, subject, subject+'-xval_output.pkl'))
+                    if self.params.baseline_correction:
+                        control_table = pd.read_pickle(join(ps2_root, subject, subject+'-control_table.pkl'))
+                        baseline_delta = control_table['prob_diff_500'].mean()
+                        ps2_table['prob_diff'] -= baseline_delta
                 thresh = xval_output[-1].jstat_thresh
                 ps2_table = ps2_table[ps2_table['prob_pre']<thresh]
                 ps2_table.dropna(inplace=True)
                 ps2_table['Region'] = ps2_table['Region'].apply(lambda s: s.replace('Left ','').replace('Right ',''))
                 ps2_table['Area'] = ps2_table['Region'].apply(brain_area)
                 ps2_table['Subject'] = subject
-                control_table = pd.read_pickle(join(ps2_root, subject, subject+'-'+task+'-control_table.pkl'))
-                baseline_delta = control_table['prob_diff_500'].mean()
-                if self.params.baseline_correction:
-                    ps2_table['prob_diff'] -= baseline_delta
                 ps2_tables.append(ps2_table)
             except IOError:
                 pass

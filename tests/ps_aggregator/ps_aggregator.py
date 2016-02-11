@@ -11,7 +11,7 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--workspace-dir','/scratch/busygin',
+    command_line_emulation_argument_list = ['--workspace-dir','/scratch/busygin/ps_aggregator',
                                             '--mount-point','',
                                             '--python-path','/home1/busygin/ram_utils_new_ptsa'
                                             ]
