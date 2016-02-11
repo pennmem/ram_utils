@@ -142,7 +142,7 @@ class GeneratePlots(RamTask):
             plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
             if task == 'RAM_CatFR1':
-                panel_plot = PanelPlot(xfigsize=6.0, yfigsize=6.0, i_max=1, j_max=1, title='', wspace=0.3, hspace=0.3)
+                panel_plot = PanelPlot(xfigsize=6.0, yfigsize=6.0, i_max=1, j_max=1, title='', xtitle='',wspace=0.3, hspace=0.3)
                 pd = BarPlotData(x=[0,1], y=[session_summary.irt_within_cat,  session_summary.irt_between_cat], ylabel='IRT (msec)',xlabel='', x_tick_labels=['Within Cat', 'Between Cat'], barcolors=['grey','grey'], barwidth=0.5)
                 panel_plot.add_plot_data(0, 0, plot_data=pd)
                 plot = panel_plot.generate_plot()
@@ -184,8 +184,8 @@ class GeneratePlots(RamTask):
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
         if task == 'RAM_CatFR1':
-            panel_plot = PanelPlot(xfigsize=6.0, yfigsize=6.0, i_max=1, j_max=1, title='', wspace=0.3, hspace=0.3)
-            pd = BarPlotData(x=[0,1], y=[cumulative_summary.irt_within_cat, cumulative_summary.irt_between_cat], ylabel='IRT (msec)', x_tick_labels=['Within Cat', 'Between Cat'], barcolors=['grey','grey'], barwidth=0.5)
+            panel_plot = PanelPlot(xfigsize=6.0, yfigsize=6.0, i_max=1, j_max=1, title='',xtitle='', wspace=0.3, hspace=0.3)
+            pd = BarPlotData(x=[0,1], y=[cumulative_summary.irt_within_cat, cumulative_summary.irt_between_cat], ylabel='IRT (msec)', xlabel='',x_tick_labels=['Within Cat', 'Between Cat'], barcolors=['grey','grey'], barwidth=0.5)
             panel_plot.add_plot_data(0, 0, plot_data=pd)
             plot = panel_plot.generate_plot()
             plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-irt_plot_combined.pdf')
