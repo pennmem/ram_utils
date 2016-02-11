@@ -16,7 +16,7 @@ class PlotData(object):
         '''
         Initializes PlotData
         :param options: options are  'x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels','title',
-        'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos','xlabel','ylabel','linestyle','color','marker',
+        'xlabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos','xlabel','ylabel','linestyle','color','marker',
         'levelline'
         :return:
         '''
@@ -55,7 +55,7 @@ class BarPlotData(object):
         '''
         Initializes PlotData
         :param options: options are  'x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels','title',
-        'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos','xlabel','ylabel','linestyle','color','marker',
+        'xlabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos','xlabel','ylabel','linestyle','color','marker',
         'levelline', 'barcolors','barwidth'
         :return:
         '''
@@ -97,7 +97,7 @@ class BrickHeatmapPlotData(object):
         '''
         Initializes PlotData
         :param options: options are 'df', 'annot_dict','val_lim','x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels','title',
-        'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos','xlabel','ylabel','linestyle','color','marker',
+        'xlabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos','xlabel','ylabel','linestyle','color','marker',
         'levelline', 'barcolors','colorbar_title','colorbar_title_location'
         :return:
         '''
@@ -108,7 +108,7 @@ class BrickHeatmapPlotData(object):
                             'title',
                             'ylabel_fontsize', 'ylabel_fontsize', 'xlim', 'ylim', 'xhline_pos', 'xlabel', 'ylabel',
                             'linestyle', 'color', 'marker', 'levelline', 'barcolors', 'colorbar_title',
-                            'colorbar_title_location','label']:
+                            'colorbar_title_location','label', 'cmap','annotation_font_color']:
             try:
                 setattr(self, option_name, options[option_name])
                 print 'option_name=', option_name, ' val=', options[option_name], ' value_check = ', getattr(self,
@@ -137,7 +137,7 @@ class PlotDataCollection(object):
 
         for option_name in ['df', 'annot_dict', 'val_lim', 'x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels',
                             'title',
-                            'ylabel_fontsize', 'ylabel_fontsize', 'xlim', 'ylim', 'xhline_pos', 'xlabel', 'ylabel',
+                            'xlabel_fontsize', 'ylabel_fontsize', 'xlim', 'ylim', 'xhline_pos', 'xlabel', 'ylabel',
                             'linestyle', 'color', 'marker', 'levelline', 'barcolors', 'colorbar_title',
                             'colorbar_title_location','legend_pos','legend_on']:
             try:
@@ -162,7 +162,7 @@ class PanelPlot(object):
         :param options: options are: 'i_max', 'j_max', 'title', 'xtitle', 'ytitle', 'wspace', 'hspace','xfigsize','yfigsize'
         :return: None
         '''
-        for option_name in ['i_max', 'j_max', 'title', 'xtitle', 'ytitle', 'wspace', 'hspace', 'xfigsize', 'yfigsize']:
+        for option_name in ['i_max', 'j_max', 'title', 'xtitle','xtitle_fontsize', 'ytitle', 'ytitle_fontsize', 'wspace', 'hspace', 'xfigsize', 'yfigsize']:
             try:
                 setattr(self, option_name, options[option_name])
                 print 'option_name=', option_name, ' val=', options[option_name], ' value_check = ', getattr(self,
@@ -236,10 +236,14 @@ class PanelPlot(object):
         # colormap = sns.palplot(sns.color_palette("coolwarm", 7))
         # sns.set_palette(colormap)
 
+        cmap ='bwr'
+        if pd.cmap is not None:
+            cmap = pd.cmap
+
         if pd.val_lim:
-            ax = sns.heatmap(df, cmap='bwr', fmt="d", vmin=pd.val_lim[0], vmax=pd.val_lim[1])
+            ax = sns.heatmap(df, cmap=cmap, fmt="d", vmin=pd.val_lim[0], vmax=pd.val_lim[1])
         else:
-            ax = sns.heatmap(df, cmap='bwr', fmt="d")
+            ax = sns.heatmap(df, cmap=cmap, fmt="d")
 
         xpos, ypos = np.meshgrid(ax.get_xticks(), ax.get_yticks())
 
@@ -264,6 +268,11 @@ class PanelPlot(object):
         yticks_numbered = zip(np.arange(len(yticks))[::-1],
                               yticks)  # had to invert y axis to achieve numpy matrix ordering
 
+        annotation_font_color = 'k'
+        if pd.annotation_font_color is not None:
+            annotation_font_color=pd.annotation_font_color
+
+
         if pd.annot_dict is not None:
 
             # implementing numpy matrix ordering - (0,0) is upper left corner
@@ -272,7 +281,7 @@ class PanelPlot(object):
                 # print pd.annot_dict[(j,i)]
 
                 try:
-                    ax.text(x, y, pd.annot_dict[(j, i)], color='k', ha="center", va="center")
+                    ax.text(x, y, pd.annot_dict[(j, i)], color=annotation_font_color, ha="center", va="center")
                 except LookupError:
                     print 'COULD NOT GET i,j = ', (j, i)
                     pass
@@ -301,6 +310,8 @@ class PanelPlot(object):
             ax.set_ylabel(pd.ylabel, fontsize=pd.ylabel_fontsize)
         if pd.title:
             ax.set_title(pd.title)
+
+
 
     def process_PlotDataCollection(self,pd, ax):
 
@@ -455,7 +466,20 @@ class PanelPlot(object):
         # fig.text(x=0.5, y=0.95, s='Minimum 2 cells per cluster' ,fontsize=14, horizontalalignment='center')
 
         # fig.text(x=0.5, y=0.02, s=self.xtitle, fontsize=16, fontweight='bold', horizontalalignment='center')
-        fig.text(x=0.5, y=0.02, s=self.xtitle, horizontalalignment='center')
+        #
+        xtitle_fontsize = 16
+        if self.xtitle_fontsize is not None:
+            xtitle_fontsize = self.xtitle_fontsize
+
+        ytitle_fontsize = 16
+        if self.ytitle_fontsize is not None:
+            ytitle_fontsize = self.ytitle_fontsize
+
+        # if self.i_max>=1 or self.j_max>=1:
+        #
+
+        fig.text(x=0.5, y=0.02, s=self.xtitle, fontsize=xtitle_fontsize,  horizontalalignment='center')
+
         import itertools
         for i, j in itertools.product(xrange(self.i_max), xrange(self.j_max)):
 
@@ -469,18 +493,40 @@ class PanelPlot(object):
             # ax.set_aspect('equal', adjustable='box')
 
 
+            # # y axis labels
+            # if pd.ylabel is None:
+            #     if j == 0:
+            #         ax.set_ylabel(self.ytitle, fontsize=pd.ylabel_fontsize)
+            #
+            # else:
+            #     ax.set_ylabel(pd.ylabel, fontsize=pd.ylabel_fontsize)
+
             # y axis labels
             if pd.ylabel is None:
                 if j == 0:
-                    ax.set_ylabel(self.ytitle, fontsize=pd.ylabel_fontsize)
+                    ax.set_ylabel(self.ytitle, fontsize=ytitle_fontsize)
+
             else:
-                ax.set_ylabel(pd.ylabel, fontsize=pd.ylabel_fontsize)
+                ax.set_ylabel(pd.ylabel, fontsize=ytitle_fontsize)
+
+
+            # fig.text(x=0.5, y=0.02, s=self.xtitle, fontsize=xtitle_fontsize,  horizontalalignment='center')
+
 
             # x axis labels
-            if pd.xlabel is None:
+            if self.xtitle is None:
                 pass
             else:
                 ax.set_xlabel(pd.xlabel, fontsize=pd.xlabel_fontsize)
+
+
+            # # x axis labels
+            # ax.set_xlabel('', fontsize=pd.xlabel_fontsize)
+            #
+            # if pd.xlabel is None:
+            #     pass
+            # else:
+            #     ax.set_xlabel(pd.xlabel, fontsize=pd.xlabel_fontsize)
 
 
             # print 'pd=',pd
@@ -528,6 +574,8 @@ class PanelPlot(object):
         else:
             fig.subplots_adjust(wspace=self.wspace, hspace=self.hspace)
 
+        fig.tight_layout()
+
         return plt
 
 
@@ -542,6 +590,8 @@ def draw_brick_heatmap(plot_data):
 
     fig, ax = plt.subplots()
 
+
+
     pd = plot_data
 
     if isinstance(pd.df, pandas.DataFrame):
@@ -554,10 +604,15 @@ def draw_brick_heatmap(plot_data):
     # colormap = sns.palplot(sns.color_palette("coolwarm", 7))
     # sns.set_palette(colormap)
 
+    cmap ='bwr'
+    if pd.cmap is not None:
+        cmap = pd.cmap
+
+
     if pd.val_lim:
-        ax = sns.heatmap(df, cmap='bwr', fmt="d", vmin=pd.val_lim[0], vmax=pd.val_lim[1])
+        ax = sns.heatmap(df, cmap=cmap, fmt="d", vmin=pd.val_lim[0], vmax=pd.val_lim[1])
     else:
-        ax = sns.heatmap(df, cmap='bwr', fmt="d")
+        ax = sns.heatmap(df, cmap=cmap, fmt="d")
 
     xpos, ypos = np.meshgrid(ax.get_xticks(), ax.get_yticks())
 
@@ -581,6 +636,10 @@ def draw_brick_heatmap(plot_data):
     # yticks_numbered = zip(np.arange(len(yticks)), yticks)
     yticks_numbered = zip(np.arange(len(yticks))[::-1], yticks)  # had to invert y axis to achieve numpy matrix ordering
 
+    annotation_font_color = 'k'
+    if pd.annotation_font_color is not None:
+        annotation_font_color = pd. annotation_font_color
+
     if pd.annot_dict is not None:
 
         # implementing numpy matrix ordering - (0,0) is upper left corner
@@ -589,7 +648,7 @@ def draw_brick_heatmap(plot_data):
             # print pd.annot_dict[(j,i)]
 
             try:
-                ax.text(x, y, pd.annot_dict[(j, i)], color='k', ha="center", va="center")
+                ax.text(x, y, pd.annot_dict[(j, i)], color=annotation_font_color, ha="center", va="center")
             except LookupError:
                 print 'COULD NOT GET i,j = ', (j, i)
                 pass
@@ -600,11 +659,19 @@ def draw_brick_heatmap(plot_data):
     if pd.colorbar_title:
         if pd.colorbar_title_location is not None:
 
-            ax.text(pd.colorbar_title_location[0], pd.colorbar_title_location[1], pd.colorbar_title,
+            # ax.text(pd.colorbar_title_location[0], pd.colorbar_title_location[1], pd.colorbar_title,
+            #         fontsize=12, rotation=270)
+
+            ax.text(len(xticks)*pd.colorbar_title_location[0], len(yticks)*pd.colorbar_title_location[1], pd.colorbar_title,
                     fontsize=12, rotation=270)
+
         else:
-            ax.text(6.0, 5, pd.colorbar_title,
+            # ax.text(6.0, 5, pd.colorbar_title,
+            #         fontsize=12, rotation=270)
+
+            ax.text(len(xticks)*1.2, len(yticks)*0.5, pd.colorbar_title,
                     fontsize=12, rotation=270)
+
 
     if pd.xlabel:
         ax.set_xlabel(pd.xlabel, fontsize=pd.xlabel_fontsize)
@@ -613,12 +680,14 @@ def draw_brick_heatmap(plot_data):
     if pd.title:
         ax.set_title(pd.title)
 
+    fig.tight_layout()
+
     return fig, ax
 
 
 if __name__ == '__main__':
-    panel_plot_0 = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=1, title='SHIFTED DATA 1', xtitle='x_axis_label',
-                           ytitle='y_axis_random', xlabel='skdjhskdhksjhksdhk')
+    panel_plot_0 = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=1, title='SHIFTED DATA 1', xtitle='x_axis_label',xtitle_fontsize=36,
+                           ytitle='y_axis_random', ytitle_fontsize=36, xlabel='skdjhskdhksjhksdhk')
 
     pdc = PlotDataCollection(legend_on=True)
 # yerr=np.random.rand(10),
@@ -725,12 +794,16 @@ if __name__ == '__main__':
 
     x_tick_labels = ['x0', 'x1', 'x2', 'x3', 'x4']
     y_tick_labels = ['y0', 'y1', 'y2', 'y3', 'y4', 'y5', 'y6']
-
+#
+    cmap = matplotlib.cm.get_cmap('Blues')
+    import seaborn as sns
     hpd = BrickHeatmapPlotData(df=data_frame, annot_dict=annotation_dictionary, title='random_data_brick_plot',
                                x_tick_labels=x_tick_labels, y_tick_labels=y_tick_labels, xlabel='XLABEL',
                                ylabel='YLABEL', val_lim=[-1.5, 1.5],
                                colorbar_title='t-stat for random data',
-                               colorbar_title_location=[6.0, 4.5]
+                               colorbar_title_location=[1.2, 0.5],
+
+                               cmap = cmap
                                )
 
     fig, ax = draw_brick_heatmap(hpd)
