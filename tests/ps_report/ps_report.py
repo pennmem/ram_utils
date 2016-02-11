@@ -1,11 +1,8 @@
 # command line example:
-# python ps_report.py --subject=R1056M --experiment=PS2 --workspace-dir=~/scratch/py_9 --matlab-path=~/eeg --matlab-path=~/matlab/beh_toolbox --matlab-path=~/RAM/RAM_reporting --matlab-path=~/RAM/RAM_sys2Biomarkers --python-path=~/RAM_UTILS_GIT
 
-# python ps_report.py --subject=R1056M --experiment=PS2 --workspace-dir=/data10/scratch/mswat/py_run_9 --matlab-path=~/eeg --matlab-path=~/matlab/beh_toolbox --matlab-path=~/RAM/RAM_reporting --matlab-path=~/RAM/RAM_sys2Biomarkers --python-path=~/RAM_UTILS_GIT
-
-# python ps_report.py --subject=R1086M --experiment=PS2 --workspace-dir=/data10/scratch/mswat/R1086M_2 --matlab-path=~/eeg --matlab-path=~/matlab/beh_toolbox --matlab-path=~/RAM/RAM_reporting --matlab-path=~/RAM/RAM_sys2Biomarkers --matlab-path=~/RAM_UTILS_GIT/tests/ps2_report/AuxiliaryMatlab --python-path=~/RAM_UTILS_GIT
 import sys
 from setup_utils import parse_command_line, configure_python_paths
+from os.path import join
 
 # -------------------------------processing command line
 if len(sys.argv)>2:
@@ -14,18 +11,19 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1089P',
+    command_line_emulation_argument_list = ['--subject','R1122E',
                                             '--experiment','PS2',
-                                            '--workspace-dir','/Users/m/scratch/PS_reports',
-                                            '--mount-point','/Volumes/rhino_root',
-                                            # '--python-path','~/python/ptsa/build/lib.linux-x86_64-2.7',
-                                            '--python-path','~/RAM_UTILS_GIT'
+                                            '--workspace-dir','/scratch/busygin/PS2',
+                                            '--mount-point','',
+                                            '--python-path','/home1/busygin/ram_utils_new_ptsa',
+                                            '--python-path','/home1/busygin/python/ptsa_new'
                                             ]
     args = parse_command_line(command_line_emulation_argument_list)
 
 configure_python_paths(args.python_path)
 
 # ------------------------------- end of processing command line
+
 
 import numpy as np
 from RamPipeline import RamPipeline
@@ -41,7 +39,7 @@ from TalPreparation import TalPreparation
 
 from ComputeClassifier import ComputeClassifier
 
-from ComputeProbabilityDeltas import ComputeProbabilityDeltas
+from ComputePSTable import ComputePSTable
 
 from ComposeSessionSummary import ComposeSessionSummary
 
@@ -52,28 +50,27 @@ from GenerateReportTasks import *
 
 class Params(object):
     def __init__(self):
-        self.fr1_start_time = 0.0
-        self.fr1_end_time = 1.6
-        self.fr1_buf = 1.0
+        self.width = 5
 
-        self.ps_start_time = -0.5
+        self.fr1_start_time = 0.0
+        self.fr1_end_time = 1.366
+        self.fr1_buf = 1.365
+
+        self.ps_start_time = -1.0
         self.ps_end_time = 0.0
         self.ps_buf = 1.0
         self.ps_offset = 0.1
 
         self.filt_order = 4
 
-        self.freqs = np.logspace(np.log10(3), np.log10(180), 12)
+        self.freqs = np.logspace(np.log10(3), np.log10(180), 8)
 
         self.log_powers = True
 
-        self.timewin_start = 0
-        self.timewin_step = 5
-        self.timewin_end = 85
-        self.timewin_width = 25
+        self.penalty_type = 'l2'
+        self.C = 7.2e-4
 
-        self.penalty_type = 'l1'
-        self.Cs = np.logspace(np.log10(1e-2), np.log10(1e4), 22)
+        self.n_perm = 200
 
 
 params = Params()
@@ -83,6 +80,7 @@ class ReportPipeline(RamPipeline):
     def __init__(self, subject, experiment, workspace_dir, mount_point=None):
         RamPipeline.__init__(self)
         self.subject = subject
+        self.task = 'RAM_FR1'
         self.experiment = experiment
         self.mount_point = mount_point
         self.set_workspace_dir(workspace_dir)
@@ -95,17 +93,17 @@ report_pipeline = ReportPipeline(subject=args.subject, experiment=args.experimen
 
 report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
 
+report_pipeline.add_task(PSEventPreparation(mark_as_completed=False))
+
 report_pipeline.add_task(TalPreparation(mark_as_completed=False))
 
 report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 
-report_pipeline.add_task(PSEventPreparation(mark_as_completed=False))
-
 report_pipeline.add_task(ComputePSPowers(params=params, mark_as_completed=True))
 
-report_pipeline.add_task(ComputeProbabilityDeltas(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputePSTable(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
 

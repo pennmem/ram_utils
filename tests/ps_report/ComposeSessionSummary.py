@@ -1,16 +1,118 @@
 __author__ = 'm'
 
 import numpy as np
+import pandas as pd
 import time
+from copy import deepcopy
 
 from RamPipeline import *
 from SessionSummary import SessionSummary
 
-from collections import OrderedDict
-
 from PlotUtils import PlotData
 
-from delta_stat import DeltaStats
+from statsmodels.formula.api import ols
+from statsmodels.stats.anova import anova_lm
+from scipy.stats import ttest_ind
+
+from sklearn.externals import joblib
+
+
+def delta_plot_data(ps_table, param1_name, param2_name, param2_unit):
+    plots = dict()
+    param1_vals = sorted(ps_table[param1_name].unique())
+    param2_vals = sorted(ps_table[param2_name].unique())
+    for p2, val2 in enumerate(param2_vals):
+        ps_table_val2 = ps_table[ps_table[param2_name]==val2]
+        means = np.empty(len(param1_vals), dtype=float)
+        sems = np.empty(len(param1_vals), dtype=float)
+        for i,val1 in enumerate(param1_vals):
+            ps_table_val1_val2 = ps_table_val2[ps_table_val2[param1_name]==val1]
+            means[i] = ps_table_val1_val2['prob_diff'].mean()
+            sems[i] = ps_table_val1_val2['prob_diff'].sem()
+        plots[val2] = PlotData(x=np.arange(1,len(param1_vals)+1)-p2*0.1,
+                               y=means, yerr=sems,
+                               x_tick_labels=[x if x>0 else 'PULSE' for x in param1_vals],
+                               label=param2_name+' '+str(val2)+' '+param2_unit
+                               )
+    return plots
+
+
+def anova_test(ps_table, param1_name, param2_name):
+    if len(ps_table) < 10:
+        return None
+    ps_lm = ols('prob_diff ~ C(%s) * C(%s)' % (param1_name,param2_name), data=ps_table).fit()
+    anova = anova_lm(ps_lm)
+    return (anova['F'].values[0:3], anova['PR(>F)'].values[0:3])
+
+
+# def ttest_one_param(ps_table, param_name):
+#     param_vals = sorted(ps_table[param_name].unique())
+#     val_max = param_vals[np.argmax([ps_table[ps_table[param_name]==val]['prob_diff'].mean() for val in param_vals])]
+#     val_max_sel = (ps_table[param_name]==val_max)
+#     population1 = ps_table[val_max_sel]['prob_diff'].values
+#     population2 = ps_table[~val_max_sel]['prob_diff'].values
+#     t,p = ttest_ind(population1, population2)
+#     return val_max,t,p
+
+
+def ttest_one_param(ps_table, param_name):
+    ttest_table = []
+    param_vals = sorted(ps_table[param_name].unique())
+    for val in param_vals:
+        val_sel = (ps_table[param_name]==val)
+        population1 = ps_table[val_sel]['prob_diff'].values
+        population2 = ps_table[~val_sel]['prob_diff'].values
+        t,p = ttest_ind(population1, population2)
+        if p<0.05 and t>0.0:
+            ttest_table.append([val, p, t])
+    return ttest_table
+
+
+# def ttest_interaction(ps_table, param1_name, param2_name):
+#     param1_vals = sorted(ps_table[param1_name].unique())
+#     param2_vals = sorted(ps_table[param2_name].unique())
+#     mean_max = -1.0
+#     val1_max = val2_max = None
+#     for val1 in param1_vals:
+#         for val2 in param2_vals:
+#             ps_table_val1_val2 = ps_table[(ps_table[param1_name]==val1) & (ps_table[param2_name]==val2)]
+#             mean = ps_table_val1_val2['prob_diff'].mean()
+#             if mean > mean_max:
+#                 mean_max = mean
+#                 val1_max = val1
+#                 val2_max = val2
+#
+#     val_max_sel = (ps_table[param1_name]==val1_max) & (ps_table[param2_name]==val2_max)
+#
+#     population1 = ps_table[val_max_sel]['prob_diff'].values
+#     population2 = ps_table[~val_max_sel]['prob_diff'].values
+#     t,p = ttest_ind(population1, population2)
+#     return (val1_max,val2_max),t,p
+
+
+def ttest_interaction(ps_table, param1_name, param2_name):
+    ttest_table = []
+    param1_vals = sorted(ps_table[param1_name].unique())
+    param2_vals = sorted(ps_table[param2_name].unique())
+    for val1 in param1_vals:
+        val1_sel = (ps_table[param1_name]==val1)
+        for val2 in param2_vals:
+            val2_sel = (ps_table[param2_name]==val2)
+            sel = val1_sel & val2_sel
+            population1 = ps_table[sel]['prob_diff'].values
+            population2 = ps_table[~sel]['prob_diff'].values
+            t,p = ttest_ind(population1, population2)
+            if p<0.05 and t>0.0:
+                ttest_table.append([val1, val2, p, t])
+    return ttest_table
+
+
+def format_ttest_table(ttest_table):
+    result = deepcopy(ttest_table)
+    for row in result:
+        row[-1] = '$t = %.3f$' % row[-1]
+        row[-2] = '$p %s$' % ('\leq 0.001' if row[-2]<=0.001 else ('= %.3f'%row[-2]))
+    return result
 
 
 class ComposeSessionSummary(RamTask):
@@ -22,197 +124,187 @@ class ComposeSessionSummary(RamTask):
         pass
 
     def run(self):
+        subject = self.pipeline.subject
         experiment = self.pipeline.experiment
 
-        events = self.get_passed_object(experiment+'_events')
-        tal_info = self.get_passed_object('tal_info')
+        monopolar_channels = self.get_passed_object('monopolar_channels')
+        bipolar_pairs = self.get_passed_object('bipolar_pairs')
+        loc_tag = self.get_passed_object('loc_tag')
+        xval_output = self.get_passed_object('xval_output')
 
-        prob_pre = self.get_passed_object('prob_pre')
-        prob_diff = self.get_passed_object('prob_diff')
+        ps_table = self.get_passed_object('ps_table')
 
-        sessions = np.unique(events.session)
+        sessions = sorted(ps_table.session.unique())
 
         self.pass_object('NUMBER_OF_SESSIONS', len(sessions))
-        self.pass_object('NUMBER_OF_ELECTRODES', len(tal_info))
+        self.pass_object('NUMBER_OF_ELECTRODES', len(monopolar_channels))
+
+        thresh = xval_output[-1].jstat_thresh
+
+        self.pass_object('AUC', xval_output[-1].auc)
+
+        param1_name = param2_name = None
+        param1_unit = param2_unit = None
+        const_param_name = const_unit = None
+        if experiment == 'PS1':
+            param1_name = 'Pulse_Frequency'
+            param2_name = 'Duration'
+            param1_unit = 'Hz'
+            param2_unit = 'ms'
+            const_param_name = 'Amplitude'
+            const_unit = 'mA'
+        elif experiment == 'PS2':
+            param1_name = 'Pulse_Frequency'
+            param2_name = 'Amplitude'
+            param1_unit = 'Hz'
+            param2_unit = 'mA'
+            const_param_name = 'Duration'
+            const_unit = 'ms'
+        elif experiment == 'PS3':
+            param1_name = 'Burst_Frequency'
+            param2_name = 'Pulse_Frequency'
+            param1_unit = 'Hz'
+            param2_unit = 'Hz'
+            const_param_name = 'Duration'
+            const_unit = 'ms'
+
+        self.pass_object('param1_name', param1_name.replace('_', ' '))
+        self.pass_object('param1_unit', param1_unit)
+
+        self.pass_object('param2_name', param2_name.replace('_', ' '))
+        self.pass_object('param2_unit', param2_unit)
+
+        self.pass_object('const_param_name', const_param_name)
+        self.pass_object('const_unit', const_unit)
 
         session_data = []
-
-        all_durs_ev = np.array([])
-        all_amps_ev = np.array([])
-        all_freqs_ev = np.array([])
-        all_burfs_ev = np.array([])
-
-        all_durs = np.array([])
-        all_amps = np.array([])
-        all_freqs = np.array([])
-        all_burfs = np.array([])
-
         session_summary_array = []
 
-        prob_array_idx = 0
+        anova_param1_sv = dict()
+        anova_param2_sv = dict()
+        anova_param12_sv = dict()
 
         for session in sessions:
+            ps_session_table = ps_table[ps_table.session==session]
+
             session_summary = SessionSummary()
 
-            session_events = events[events.session == session]
-            n_sess_events = len(session_events)
+            session_summary.sess_num = session
 
-            timestamps = session_events.mstime
-            first_time_stamp = np.min(timestamps)
-            last_time_stamp = np.max(timestamps)
-            session_length = (last_time_stamp - first_time_stamp) / 60000.0
-            session_date = time.strftime('%Y-%m-%d', time.localtime(last_time_stamp/1000))
+            first_time_stamp = ps_session_table.mstime.min()
+            last_time_stamp = ps_session_table.mstime.max()
+            session_length = '%.2f' % ((last_time_stamp - first_time_stamp) / 60000.0)
+            session_date = time.strftime('%d-%b-%Y', time.localtime(last_time_stamp/1000))
 
             session_data.append([session, session_date, session_length])
 
             session_name = 'Sess%02d' % session
 
-            stim_tag = session_events[0].stimAnodeTag + '-' + session_events[0].stimCathodeTag
+            stim_anode_tag = ps_session_table.stimAnodeTag.values[0].upper()
+            stim_cathode_tag = ps_session_table.stimCathodeTag.values[0].upper()
+            stim_tag = stim_anode_tag + '-' + stim_cathode_tag
+            sess_loc_tag = None if (stim_tag not in loc_tag) or (loc_tag[stim_tag] in ['', '[]']) else loc_tag[stim_tag]
+            roi = '{\em locTag not found}' if sess_loc_tag is None else sess_loc_tag
 
-            isi_min = np.nanmin(session_events.isi)
-            isi_max = np.nanmax(session_events.isi)
+            isi_min = ps_session_table.isi.min()
+            isi_max = ps_session_table.isi.max()
             isi_mid = (isi_max+isi_min) / 2.0
             isi_halfrange = isi_max - isi_mid
 
             print 'Session =', session_name, ' StimTag =', stim_tag, ' ISI =', isi_mid, '+/-', isi_halfrange
 
-            durs_ev = session_events.pulse_duration
-            amps_ev = session_events.amplitude
-            freqs_ev = session_events.pulse_frequency
-            burfs_ev = session_events.burst_frequency
-
-            all_durs_ev = np.hstack((all_durs_ev, durs_ev))
-            all_amps_ev = np.hstack((all_amps_ev, amps_ev))
-            all_freqs_ev = np.hstack((all_freqs_ev, freqs_ev))
-            all_burfs_ev = np.hstack((all_burfs_ev, burfs_ev))
-
-            durs = np.unique(durs_ev)
-            amps = np.unique(amps_ev)
-            freqs = np.unique(freqs_ev)
-            burfs = np.unique(burfs_ev)
-
             session_summary.name = session_name
             session_summary.length = session_length
             session_summary.date = session_date
             session_summary.stimtag = stim_tag
+            session_summary.region_of_interest = roi
             session_summary.isi_mid = isi_mid
             session_summary.isi_half_range = isi_halfrange
+            session_summary.const_param_value = ps_session_table[const_param_name].unique().max()
 
-            session_prob_pre = prob_pre[prob_array_idx:prob_array_idx+n_sess_events]
-            session_prob_diff = prob_diff[prob_array_idx:prob_array_idx+n_sess_events]
+            ps_session_low_table = pd.DataFrame(ps_session_table[ps_session_table['prob_pre']<thresh])
 
-            all_durs = np.hstack((all_durs, durs))
-            all_amps = np.hstack((all_amps, amps))
-            all_freqs = np.hstack((all_freqs, freqs))
-            all_burfs = np.hstack((all_burfs, burfs))
+            session_summary.plots = delta_plot_data(ps_session_low_table, param1_name, param2_name, param2_unit)
 
-            ev_vals = None
-            param_grid = None
-            if experiment == 'PS1':
-                ev_vals = [freqs_ev, durs_ev]
-                param_grid = [freqs, durs]
-                session_summary.constant_name = 'Amplitude'
-                session_summary.constant_value = amps[0]
-                session_summary.constant_unit = 'mA'
-                session_summary.parameter1 = 'Pulse Frequency'
-                session_summary.parameter2 = 'Duration'
-            elif experiment == 'PS2':
-                ev_vals = [freqs_ev, amps_ev]
-                param_grid = [freqs, amps]
-                session_summary.constant_name = 'Duration'
-                session_summary.constant_value = durs[-1]
-                session_summary.constant_unit = 'ms'
-                session_summary.parameter1 = 'Pulse Frequency'
-                session_summary.parameter2 = 'Amplitude'
-            elif experiment == 'PS3':
-                ev_vals = [freqs_ev, burfs_ev]
-                param_grid = [freqs, burfs]
-                session_summary.constant_name = 'Amplitude'
-                session_summary.constant_value = amps[0]
-                session_summary.constant_unit = 'mA'
-                session_summary.parameter1 = 'Pulse Frequency'
-                session_summary.parameter2 = 'Burst Frequency'
+            if sess_loc_tag is not None and not (sess_loc_tag in anova_param1_sv):
+                anova_param1_sv[sess_loc_tag] = []
+                anova_param2_sv[sess_loc_tag] = []
+                anova_param12_sv[sess_loc_tag] = []
 
-            delta_stats = DeltaStats(2, ev_vals, param_grid, session_prob_pre, session_prob_diff, 1.0/3.0)
-            delta_stats.run()
+            anova = anova_test(ps_session_low_table, param1_name, param2_name)
+            if anova is not None:
+                session_summary.anova_fvalues = anova[0]
+                session_summary.anova_pvalues = anova[1]
 
-            data_point_indexes_left = np.arange(1,len(param_grid[0])+1)
-            data_point_indexes_right = np.arange(1,len(param_grid[1])+1)
+                if anova[1][0] < 0.05: # first param significant
+                    param1_ttest_table = ttest_one_param(ps_session_low_table, param1_name)
+                    if len(param1_ttest_table) > 0:
+                        if sess_loc_tag is not None:
+                            anova_param1_sv[sess_loc_tag].append(param1_ttest_table)
+                        session_summary.param1_ttest_table = format_ttest_table(param1_ttest_table)
 
-            # computting y axis limits
-            min_plot, max_plot = delta_stats.y_range()
-            ylim = [min_plot-0.1*(max_plot-min_plot), max_plot+0.1*(max_plot-min_plot)]
+                if anova[1][1] < 0.05: # second param significant
+                    param2_ttest_table = ttest_one_param(ps_session_low_table, param2_name)
+                    if len(param2_ttest_table) > 0:
+                        if sess_loc_tag is not None:
+                            anova_param2_sv[sess_loc_tag].append(param2_ttest_table)
+                        session_summary.param2_ttest_table = format_ttest_table(param2_ttest_table)
 
-            x_tick_labels = [x if x>0 else 'PULSE' for x in param_grid[0]]
-            session_summary.plot_data_dict[(0,0)] = PlotData(x=data_point_indexes_left, y=delta_stats.mean_all[0], yerr=delta_stats.stdev_all[0], x_tick_labels=x_tick_labels, ylim=ylim)
-            session_summary.plot_data_dict[(1,0)] = PlotData(x=data_point_indexes_left, y=delta_stats.mean_low[0], yerr=delta_stats.stdev_low[0], x_tick_labels=x_tick_labels, ylim=ylim)
-            session_summary.plot_data_dict[(2,0)] = PlotData(x=data_point_indexes_left, y=delta_stats.mean_high[0], yerr=delta_stats.stdev_high[0], x_tick_labels=x_tick_labels, ylim=ylim)
-
-            x_tick_labels = param_grid[1]
-            session_summary.plot_data_dict[(0,1)] = PlotData(x=data_point_indexes_right, y=delta_stats.mean_all[1], yerr=delta_stats.stdev_all[1], x_tick_labels=x_tick_labels, ylim=ylim)
-            session_summary.plot_data_dict[(1,1)] = PlotData(x=data_point_indexes_right, y=delta_stats.mean_low[1], yerr=delta_stats.stdev_low[1], x_tick_labels=x_tick_labels, ylim=ylim)
-            session_summary.plot_data_dict[(2,1)] = PlotData(x=data_point_indexes_right, y=delta_stats.mean_high[1], yerr=delta_stats.stdev_high[1], x_tick_labels=x_tick_labels, ylim=ylim)
+                if anova[1][2] < 0.05: # interaction is significant
+                    param12_ttest_table = ttest_interaction(ps_session_low_table, param1_name, param2_name)
+                    if len(param12_ttest_table) > 0:
+                        if sess_loc_tag is not None:
+                            anova_param12_sv[sess_loc_tag].append(param12_ttest_table)
+                        session_summary.param12_ttest_table = format_ttest_table(param12_ttest_table)
 
             session_summary_array.append(session_summary)
-
-            prob_array_idx += len(session_events)
 
         self.pass_object('SESSION_DATA', session_data)
         self.pass_object('session_summary_array', session_summary_array)
 
-        isi_min = np.nanmin(events.isi)
-        isi_max = np.nanmax(events.isi)
+        joblib.dump(anova_param1_sv, self.get_path_to_resource_in_workspace(subject + '-' + experiment + '-anova_%s_sv.pkl'%param1_name))
+        joblib.dump(anova_param2_sv, self.get_path_to_resource_in_workspace(subject + '-' + experiment + '-anova_%s_sv.pkl'%param2_name))
+        joblib.dump(anova_param12_sv, self.get_path_to_resource_in_workspace(subject + '-' + experiment + '-anova_%s-%s_sv.pkl'%(param1_name,param2_name)))
+
+        isi_min = ps_table.isi.min()
+        isi_max = ps_table.isi.max()
         isi_mid = (isi_max+isi_min) / 2.0
         isi_halfrange = isi_max - isi_mid
 
         print 'ISI =', isi_mid, '+/-', isi_halfrange
 
-        self.pass_object('CUMULATIVE_ISI_MID',isi_mid)
-        self.pass_object('CUMULATIVE_ISI_HALF_RANGE',isi_halfrange)
+        self.pass_object('CUMULATIVE_ISI_MID', isi_mid)
+        self.pass_object('CUMULATIVE_ISI_HALF_RANGE', isi_halfrange)
 
-        durs = np.unique(all_durs)
-        amps = np.unique(all_amps)
-        freqs = np.unique(all_freqs)
-        burfs = np.unique(all_burfs)
+        ps_low_table = ps_table[ps_table['prob_pre']<thresh]
 
-        ev_vals = None
-        param_grid = None
-        if experiment == 'PS1':
-            ev_vals = [all_freqs_ev, all_durs_ev]
-            param_grid = [freqs, durs]
-            self.pass_object('CUMULATIVE_PARAMETER1', 'Pulse Frequency')
-            self.pass_object('CUMULATIVE_PARAMETER2', 'Duration')
-        elif experiment == 'PS2':
-            ev_vals = [all_freqs_ev, all_amps_ev]
-            param_grid = [freqs, amps]
-            self.pass_object('CUMULATIVE_PARAMETER1', 'Pulse Frequency')
-            self.pass_object('CUMULATIVE_PARAMETER2', 'Amplitude')
-        elif experiment == 'PS3':
-            ev_vals = [all_freqs_ev, all_burfs_ev]
-            param_grid = [freqs, burfs]
-            self.pass_object('CUMULATIVE_PARAMETER1', 'Pulse Frequency')
-            self.pass_object('CUMULATIVE_PARAMETER2', 'Burst Frequency')
+        cumulative_plots = delta_plot_data(ps_low_table, param1_name, param2_name, param2_unit)
+        self.pass_object('cumulative_plots', cumulative_plots)
 
-        delta_stats = DeltaStats(2, ev_vals, param_grid, prob_pre, prob_diff, 1.0/3.0)
-        delta_stats.run()
+        cumulative_anova_fvalues = cumulative_anova_pvalues = None
+        cumulative_param1_ttest_table = cumulative_param2_ttest_table = cumulative_param12_ttest_table = None
+        anova = anova_test(ps_low_table, param1_name, param2_name)
+        if anova is not None:
+            cumulative_anova_fvalues = anova[0]
+            cumulative_anova_pvalues = anova[1]
+            if anova[1][0] < 0.05:
+                param1_ttest_table = ttest_one_param(ps_low_table, param1_name)
+                if len(param1_ttest_table) > 0:
+                    cumulative_param1_ttest_table = format_ttest_table(param1_ttest_table)
 
-        data_point_indexes_left = np.arange(1,len(param_grid[0])+1)
-        data_point_indexes_right = np.arange(1,len(param_grid[1])+1)
+            if anova[1][1] < 0.05:
+                param2_ttest_table = ttest_one_param(ps_low_table, param2_name)
+                if len(param2_ttest_table) > 0:
+                    cumulative_param2_ttest_table = format_ttest_table(param2_ttest_table)
 
-        # computing y axis limits
-        min_plot, max_plot = delta_stats.y_range()
-        ylim = [min_plot-0.1*(max_plot-min_plot), max_plot+0.1*(max_plot-min_plot)]
+            if anova[1][2] < 0.05:
+                param12_ttest_table = ttest_interaction(ps_low_table, param1_name, param2_name)
+                if len(param12_ttest_table) > 0:
+                    cumulative_param12_ttest_table = format_ttest_table(param12_ttest_table)
 
-        cumulative_plot_data_dict = OrderedDict()
+        self.pass_object('CUMULATIVE_ANOVA_FVALUES', cumulative_anova_fvalues)
+        self.pass_object('CUMULATIVE_ANOVA_PVALUES', cumulative_anova_pvalues)
 
-        x_tick_labels = [x if x>0 else 'PULSE' for x in param_grid[0]]
-        cumulative_plot_data_dict[(0,0)] = PlotData(x=data_point_indexes_left, y=delta_stats.mean_all[0], yerr=delta_stats.stdev_all[0], x_tick_labels=x_tick_labels, ylim=ylim)
-        cumulative_plot_data_dict[(1,0)] = PlotData(x=data_point_indexes_left, y=delta_stats.mean_low[0], yerr=delta_stats.stdev_low[0], x_tick_labels=x_tick_labels, ylim=ylim)
-        cumulative_plot_data_dict[(2,0)] = PlotData(x=data_point_indexes_left, y=delta_stats.mean_high[0], yerr=delta_stats.stdev_high[0], x_tick_labels=x_tick_labels, ylim=ylim)
-
-        x_tick_labels = param_grid[1]
-        cumulative_plot_data_dict[(0,1)] = PlotData(x=data_point_indexes_right, y=delta_stats.mean_all[1], yerr=delta_stats.stdev_all[1], x_tick_labels=x_tick_labels, ylim=ylim)
-        cumulative_plot_data_dict[(1,1)] = PlotData(x=data_point_indexes_right, y=delta_stats.mean_low[1], yerr=delta_stats.stdev_low[1], x_tick_labels=x_tick_labels, ylim=ylim)
-        cumulative_plot_data_dict[(2,1)] = PlotData(x=data_point_indexes_right, y=delta_stats.mean_high[1], yerr=delta_stats.stdev_high[1], x_tick_labels=x_tick_labels, ylim=ylim)
-
-        self.pass_object('cumulative_plot_data_dict', cumulative_plot_data_dict)
+        self.pass_object('CUMULATIVE_PARAM1_TTEST_TABLE', cumulative_param1_ttest_table)
+        self.pass_object('CUMULATIVE_PARAM2_TTEST_TABLE', cumulative_param2_ttest_table)
+        self.pass_object('CUMULATIVE_PARAM12_TTEST_TABLE', cumulative_param12_ttest_table)

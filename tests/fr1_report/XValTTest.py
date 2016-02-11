@@ -69,9 +69,7 @@ class XValTTest(RamTask):
                 num_features = insample_pow_mat_tmp.shape[1]
                 print num_features, 'features selected'
 
-                # lr_classifier = LogisticRegression(penalty=self.params.penalty_type)
-
-                lr_classifier = LogisticRegressionCV()
+                lr_classifier = LogisticRegression(penalty=self.params.penalty_type, solver='liblinear')
 
                 lr_classifier.fit(insample_pow_mat_tmp, insample_recalls)
 

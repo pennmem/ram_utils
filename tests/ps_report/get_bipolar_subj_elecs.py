@@ -11,7 +11,10 @@ def get_bipolar_subj_elecs(
         raise ValueError('Invalid number of files! '+str(talfile)+'\n' +str(subjpath))
     else:
         talfile = talfile[0]
-    tf = loadmat(talfile,struct_as_record=True,squeeze_me=True)['bpTalStruct']
+    try:
+        tf = loadmat(talfile,struct_as_record=True,squeeze_me=True)['bpTalStruct']
+    except KeyError:
+        tf = loadmat(talfile,struct_as_record=True,squeeze_me=True)['subjTalEvents']
 
     dtypes_surf = [('x', np.float), ('y', np.float), ('z', np.float),
                    ('bpDistance', np.float), ('anatRegion', '|S64'),
@@ -31,7 +34,7 @@ def get_bipolar_subj_elecs(
               ('z', np.float), ('Loc1', '|S64'), ('Loc2', '|S64'),
               ('Loc3', '|S64'), ('Loc4', '|S64'), ('Loc5', '|S64'),
               ('Loc6', '|S64'), ('Montage', '|S20'), ('eNames', '|S20'),
-              ('eType', '|S8'), ('bpDistance', np.float),
+              ('eType', '|S8'), ('bpDistance', np.float), ('distance', np.float),
               ('avgSurf', dtypes_surf), ('indivSurf', dtypes_surf), ('locTag', '|S20')]
 
     new_tf = np.rec.recarray(len(tf),dtype=dtypes)
@@ -41,13 +44,12 @@ def get_bipolar_subj_elecs(
     for c,chan in enumerate(tf['channel']):
         channel_str[c] = np.zeros(2,'|S8')
         for i,indivchan in enumerate(chan):
-            channel_str[c][i] = '%03d' % indivchan
-            # if indivchan<10:
-            #     channel_str[c][i] = '00'+str(indivchan)
-            # elif indivchan<100:
-            #     channel_str[c][i] = '0'+str(indivchan)
-            # else:
-            #     channel_str[c][i] = str(indivchan)
+            if indivchan<10:
+                channel_str[c][i] = '00'+str(indivchan)
+            elif indivchan<100:
+                channel_str[c][i] = '0'+str(indivchan)
+            else:
+                channel_str[c][i] = str(indivchan)          
     for field in tf.dtype.names:
         if ((field == 'avgSurf') | (field == 'indivSurf')):
             for f,field_surf in enumerate(tf[0][field].dtype.names):
@@ -67,7 +69,7 @@ def get_bipolar_subj_elecs(
     goodleadspath = subjpath+taldir+'/good_leads.txt'
     if leadsonly:
         leads = np.array([lead.strip() for lead in open(leadspath,'Ur').readlines()])
-        leads = np.int8(leads[leads!=''])
+        leads = np.uint16(leads[leads!=''])
         # only keep electrodes with neural data (i.e., electrodes that are
         # in /data/eeg/[subj]/tal/leads.txt
         good_indices = np.arange(len(new_tf))
@@ -77,7 +79,7 @@ def get_bipolar_subj_elecs(
     if exclude_bad_leads:
         try:
             bad_leads = np.array([lead.strip() for lead in open(badleadspath,'r').readlines()])
-            bad_leads = np.int8(bad_leads[bad_leads!=''])
+            bad_leads = np.uint16(bad_leads[bad_leads!=''])
             # get rid of electrodes over epileptic regions (i.e., electrodes that are
             # in /data/eeg/[subj]/tal/bad_leads.txt
             good_indices = np.arange(len(new_tf))
@@ -88,7 +90,7 @@ def get_bipolar_subj_elecs(
             print(badleadspath + ' does not exist ... trying good_leads.txt')
             try:
                 good_leads = np.array([lead.strip() for lead in open(goodleadspath,'r').readlines()])
-                good_leads = np.int8(good_leads[good_leads!=''])
+                good_leads = np.uint16(good_leads[good_leads!=''])
                 # only keep electrodes over good regions (i.e., electrodes that are
                 # in /data/eeg/[subj]/tal/good_leads.txt
                 good_indices = np.arange(len(new_tf))
@@ -125,13 +127,13 @@ def get_bipolar_subj_elecs(
 # # good_leads = [np.int(lead.strip()) for lead in open(goodleadspath,'r').readlines()]
 
 # leads = np.array([lead.strip() for lead in open(leadspath,'r').readlines()])
-# leads = np.int8(leads[leads!=''])
+# leads = np.uint16(leads[leads!=''])
 
 # bad_leads = np.array([lead.strip() for lead in open(badleadspath,'r').readlines()])
-# bad_leads = np.int8(bad_leads[bad_leads!=''])
+# bad_leads = np.uint16(bad_leads[bad_leads!=''])
 
 # # good_leads = np.array([lead.strip() for lead in open(goodleadspath,'r').readlines()])
-# # good_leads = np.int8(good_leads[good_leads!=''])
+# # good_leads = np.uint16(good_leads[good_leads!=''])
 
 # dtypes = [('subject', '|S12'), ('channel', list), ('tagName', '|S32'),
 #           ('grpName', '|S20'), ('x', np.float), ('y', np.float), ('z', np.float),
