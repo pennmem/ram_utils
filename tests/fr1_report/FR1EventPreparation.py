@@ -2,9 +2,6 @@ __author__ = 'm'
 
 import os
 import os.path
-import re
-import numpy as np
-from scipy.io import loadmat
 
 from ptsa.data.readers import BaseEventReader
 
@@ -19,19 +16,11 @@ class FR1EventPreparation(RamTask):
         task = self.pipeline.task
 
         e_path = os.path.join(self.pipeline.mount_point , 'data', 'events', task, self.pipeline.subject + '_events.mat')
-        e_reader = BaseEventReader(event_file=e_path, eliminate_events_with_no_eeg=True, use_ptsa_events_class=False)
+        e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
         events = e_reader.read()
 
         self.pass_object(self.pipeline.task+'_all_events', events)
-
-        # events = Events(get_events(subject=self.pipeline.subject, task=task, path_prefix=self.pipeline.mount_point))
-
-        # events = correct_eegfile_field(events)
-        # ev_order = np.argsort(events, order=('session','list','mstime'))
-        # events = events[ev_order]
-        #
-        # events = self.attach_raw_bin_wrappers(events)
 
         intr_events = events[(events.intrusion!=-999) & (events.intrusion!=0)]
 

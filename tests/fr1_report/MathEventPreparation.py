@@ -1,6 +1,11 @@
 from RamPipeline import *
 
-from BaseEventReader import BaseEventReader
+import os
+import os.path
+
+# from BaseEventReader import BaseEventReader
+
+from ptsa.data.readers import BaseEventReader
 
 
 class MathEventPreparation(RamTask):
@@ -12,8 +17,8 @@ class MathEventPreparation(RamTask):
         #    return
 
         try:
-            e_path = join(self.pipeline.mount_point, 'data/events', self.pipeline.task, self.pipeline.subject+'_math.mat')
-            e_reader = BaseEventReader(event_file=e_path, eliminate_events_with_no_eeg=False, data_dir_prefix=self.pipeline.mount_point)
+            e_path = os.path.join(self.pipeline.mount_point, 'data/events', self.pipeline.task, self.pipeline.subject+'_math.mat')
+            e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=False)
 
             events = e_reader.read()
 

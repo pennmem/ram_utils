@@ -15,12 +15,12 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1122E',
-                                            '--task','RAM_FR1',
-                                            '--workspace-dir','/scratch/busygin/FR1_reports_new_new',
+    command_line_emulation_argument_list = ['--subject','R1127P_2',
+                                            '--task','RAM_CatFR1',
+                                            '--workspace-dir','/scratch/busygin/CatFR1_reports_new_new',
                                             '--mount-point','',
                                             '--python-path','/home1/busygin/ram_utils_new_ptsa',
-                                            '--python-path','/home1/busygin/python/ptsa_new'
+                                            '--python-path','/home1/busygin/python/ptsa_latest'
                                             ]
     args = parse_command_line(command_line_emulation_argument_list)
 
