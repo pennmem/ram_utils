@@ -135,15 +135,28 @@ class GeneratePlots(RamTask):
         serial_positions = np.arange(1,13)
 
         for session_summary in session_summary_array:
-            panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', wspace=0.3, hspace=0.3)
+            panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', wspace=0.3, hspace=0.3, labelsize=20)
 
             pd1 = PlotData(x=serial_positions, y=session_summary.prob_recall, xlim=(0,12), ylim=(0.0, 1.0), xlabel='Serial position\n(a)', ylabel='Probability of recall')
+            pd1.xlabel_fontsize = 20
+            pd1.ylabel_fontsize = 20
             pd2 = PlotData(x=serial_positions, y=session_summary.prob_first_recall, xlim=(0,12), ylim=(0.0, 1.0), xlabel='Serial position\n(b)', ylabel='Probability of first recall')
+            pd2.xlabel_fontsize = 20
+            pd2.ylabel_fontsize = 20
+
+            # panel_plot.add_plot_data(0, 0, plot_data=pd1)
+            # panel_plot.add_plot_data(0, 1, plot_data=pd2)
+            #
+            # plot = panel_plot.generate_plot()
 
             panel_plot.add_plot_data(0, 0, plot_data=pd1)
+
             panel_plot.add_plot_data(0, 1, plot_data=pd2)
 
             plot = panel_plot.generate_plot()
+
+
+
 
             plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-prob_recall_plot_' + session_summary.name + '.pdf')
 
@@ -157,9 +170,14 @@ class GeneratePlots(RamTask):
                 plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-irt_plot_' + session_summary.name + '.pdf')
                 plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
-            panel_plot = PanelPlot(xfigsize=10.0, yfigsize=10.0, i_max=1, j_max=1, title='', xlabel='List', ylabel='# of items')
+            panel_plot = PanelPlot(xfigsize=10.0, yfigsize=10.0, i_max=1, j_max=1, title='', xlabel='List', ylabel='# of items', labelsize=20)
 
             pdc = PlotDataCollection()
+            #----------------- FORMATTING
+            pdc.xlabel = 'List number'
+            pdc.xlabel_fontsize = 20
+            pdc.ylabel ='# recalled words'
+            pdc.ylabel_fontsize = 20
 
             n_lists = len(session_summary.n_stims_per_list)
 
@@ -167,9 +185,9 @@ class GeneratePlots(RamTask):
 
             bpd_1 = BarPlotData(x=np.arange(n_lists), y=session_summary.n_stims_per_list, title='', alpha=0.1)
             pd_1 = PlotData(x=np.where(session_summary.is_stim_list)[0], y=session_summary.n_recalls_per_list[session_summary.is_stim_list],
-                    title='', linestyle='', color='red', marker='o')
+                    title='', linestyle='', color='red', marker='o',markersize=20)
             pd_2 = PlotData(x=np.where(~session_summary.is_stim_list)[0], y=session_summary.n_recalls_per_list[~session_summary.is_stim_list],
-                    title='', linestyle='', color='blue', marker='o')
+                    title='', linestyle='', color='blue', marker='o',markersize=20)
             print 'np.where(session_summary.is_stim_list)[0]=',np.where(session_summary.is_stim_list)[0]
             print 'np.where(~session_summary.is_stim_list)[0]=',np.where(~session_summary.is_stim_list)[0]
             pdc.add_plot_data(pd_1)
@@ -179,6 +197,8 @@ class GeneratePlots(RamTask):
             panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
 
             plot = panel_plot.generate_plot()
+
+
 
             plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-stim_and_recall_plot_' + session_summary.name + '.pdf')
 
