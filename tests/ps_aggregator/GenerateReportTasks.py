@@ -92,6 +92,7 @@ class GenerateTex(RamTask):
         replace_dict = {
             '<DATE>': datetime.date.today(),
             '<FREQUENCY_PLOT_FILE>': 'ps_frequency_aggregate_plots.pdf',
+            '<REGION_FREQUENCY_EXPERIMENT_COUNT_TABLE>': latex_table(self.get_passed_object('n_region_frequency_experiment')),
             '<FVALUERF1>': '%.2f' % np.nan,
             '<FVALUERF2>': '%.2f' % np.nan,
             '<FVALUERF12>': '%.2f' % np.nan,

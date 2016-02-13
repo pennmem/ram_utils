@@ -11,10 +11,17 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--workspace-dir','/scratch/busygin/ps_aggregator',
-                                            '--mount-point','',
-                                            '--python-path','/home1/busygin/ram_utils_new_ptsa'
+
+    # command_line_emulation_argument_list = ['--workspace-dir','/scratch/busygin/ps_aggregator',
+    #                                         '--mount-point','',
+    #                                         '--python-path','/home1/busygin/ram_utils_new_ptsa'
+    #                                         ]
+
+    command_line_emulation_argument_list = ['--workspace-dir','/Users/busygin/scratch',
+                                            '--mount-point','/Volumes/RHINO',
+                                            '--python-path','/Users/busygin/ram_utils_new_ptsa'
                                             ]
+
     args = parse_command_line(command_line_emulation_argument_list)
 
 configure_python_paths(args.python_path)
@@ -42,7 +49,7 @@ class Params(object):
 
         #self.frequency_plot_regions = ['CA1', 'DG', 'PRC']
         self.frequency_plot_regions = []
-        self.frequency_plot_areas = ['HC', 'MTLC', 'Frontal']
+        self.frequency_plot_areas = ['HC', 'MTLC', 'Frontal', 'Undetermined']
 
         #self.duration_plot_regions = ['CA1', 'DG', 'PRC']
         self.duration_plot_regions = []

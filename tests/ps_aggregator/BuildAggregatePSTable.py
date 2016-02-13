@@ -21,6 +21,8 @@ def brain_area(region):
         return 'Frontal'
     elif region in ['STG', 'TC']:
         return 'Temporal'
+    elif region == 'Undetermined':
+        return 'Undetermined'
     else:
         return ''
 
@@ -38,8 +40,8 @@ class BuildAggregatePSTable(RamTask):
     def run(self):
         task = self.pipeline.task
 
-        ps1_root = self.get_path_to_resource_in_workspace('PS1_joint/')
-        ps1_subjects = sorted([s for s in os.listdir(ps1_root) if s[:2] in ['R1','TJ']])
+        ps1_root = self.get_path_to_resource_in_workspace('PS1/')
+        ps1_subjects = sorted([s for s in os.listdir(ps1_root) if s[:2]=='R1'])
         ps1_tables = []
         for subject in ps1_subjects:
             try:
@@ -60,8 +62,8 @@ class BuildAggregatePSTable(RamTask):
                         ps1_table['prob_diff'] -= baseline_delta
                 thresh = xval_output[-1].jstat_thresh
                 ps1_table = ps1_table[ps1_table['prob_pre']<thresh]
-                ps1_table.dropna(inplace=True)
-                ps1_table['Region'] = ps1_table['Region'].apply(lambda s: s.replace('Left ','').replace('Right ',''))
+                ps1_table['prob_diff_centralized'] = ps1_table['prob_diff'] - ps1_table['prob_diff'].mean()
+                ps1_table['Region'] = ps1_table['Region'].apply(lambda s: 'Undetermined' if s is None else s.replace('Left ','').replace('Right ',''))
                 ps1_table['Area'] = ps1_table['Region'].apply(brain_area)
                 ps1_table['Subject'] = subject
                 ps1_tables.append(ps1_table)
@@ -71,7 +73,7 @@ class BuildAggregatePSTable(RamTask):
         ps1_tables = pd.concat(ps1_tables, ignore_index=True)
         ps1_tables['Experiment'] = 'PS1'
 
-        ps2_root = self.get_path_to_resource_in_workspace('PS2_joint/')
+        ps2_root = self.get_path_to_resource_in_workspace('PS2/')
         ps2_subjects = sorted([s for s in os.listdir(ps2_root) if s[:2]=='R1'])
         ps2_tables = []
         for subject in ps2_subjects:
@@ -93,8 +95,8 @@ class BuildAggregatePSTable(RamTask):
                         ps2_table['prob_diff'] -= baseline_delta
                 thresh = xval_output[-1].jstat_thresh
                 ps2_table = ps2_table[ps2_table['prob_pre']<thresh]
-                ps2_table.dropna(inplace=True)
-                ps2_table['Region'] = ps2_table['Region'].apply(lambda s: s.replace('Left ','').replace('Right ',''))
+                ps2_table['prob_diff_centralized'] = ps2_table['prob_diff'] - ps2_table['prob_diff'].mean()
+                ps2_table['Region'] = ps2_table['Region'].apply(lambda s: 'Undetermined' if s is None else s.replace('Left ','').replace('Right ',''))
                 ps2_table['Area'] = ps2_table['Region'].apply(brain_area)
                 ps2_table['Subject'] = subject
                 ps2_tables.append(ps2_table)

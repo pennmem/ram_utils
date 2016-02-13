@@ -33,6 +33,12 @@
 \subfigure{\includegraphics[scale=0.4]{<FREQUENCY_PLOT_FILE>}}
 \end{figure}
 
+\textbf{\hfil Experiment count \hfil}
+
+\begin{tabular}{|l|c|c|c|c|c|c|}
+<REGION_FREQUENCY_EXPERIMENT_COUNT_TABLE>
+\end{tabular}
+
 \clearpage
 
 \section*{\hfil PS2 Region $\times$ Amplitude Analysis ($10$ and $25$ Hz) \hfil}
