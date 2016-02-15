@@ -92,6 +92,8 @@ class GenerateTex(RamTask):
         replace_dict = {
             '<DATE>': datetime.date.today(),
             '<FREQUENCY_PLOT_FILE>': 'ps_frequency_aggregate_plots.pdf',
+            '<CENTRALIZED_FREQUENCY_PLOT_FILE>': 'ps_centralized_frequency_aggregate_plots.pdf',
+            '<FREQUENCY_PROJECTION_PLOT_FILE>': 'ps_frequency_projection_plots.pdf',
             '<REGION_FREQUENCY_EXPERIMENT_COUNT_TABLE>': latex_table(self.get_passed_object('n_region_frequency_experiment')),
             '<FVALUERF1>': '%.2f' % np.nan,
             '<FVALUERF2>': '%.2f' % np.nan,
@@ -141,17 +143,21 @@ class GeneratePlots(RamTask):
         self.create_dir_in_workspace('reports')
 
         frequency_plot_data = self.get_passed_object('frequency_plot')
+        centralized_frequency_plot_data = self.get_passed_object('centralized_frequency_plot')
+        frequency_region_plot_data = self.get_passed_object('frequency_region_plot')
+        frequency_frequency_plot_data = self.get_passed_object('frequency_frequency_plot')
+
         low_freq_duration_plot_data = self.get_passed_object('low_freq_duration_plot')
         high_freq_duration_plot_data = self.get_passed_object('high_freq_duration_plot')
         low_freq_amplitude_plot_data = self.get_passed_object('low_freq_amplitude_plot')
         high_freq_amplitude_plot_data = self.get_passed_object('high_freq_amplitude_plot')
 
 
-        panel_plot = PanelPlot(i_max=1, j_max=1, title='', ytitle='$\Delta$ Post-Pre Classifier Output', ytitle_fontsize=24, wspace=0.3, hspace=0.3)
+        panel_plot = PanelPlot(xfigsize=11, yfigsize=11, i_max=1, j_max=1, title='', ytitle='$\Delta$ Post-Pre Classifier Output', ytitle_fontsize=16, wspace=0.3, hspace=0.3)
 
         pdc = PlotDataCollection(legend_on=True)
         pdc.xlabel = 'Pulse Frequency (Hz)'
-        pdc.xlabel_fontsize = 24
+        pdc.xlabel_fontsize = 16
         for v,p in frequency_plot_data.iteritems():
             p.xhline_pos=0.0
             pdc.add_plot_data(p)
@@ -163,6 +169,28 @@ class GeneratePlots(RamTask):
 
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
+        #panel_plot = PanelPlot(i_max=1, j_max=1, title='', ytitle='$\Delta$ Post-Pre Classifier Output', ytitle_fontsize=24, wspace=0.3, hspace=0.3)
+        #
+        #pdc = PlotDataCollection(legend_on=True)
+        #pdc.xlabel = 'Pulse Frequency (Hz)'
+        #pdc.xlabel_fontsize = 24
+        #for v,p in centralized_frequency_plot_data.iteritems():
+        #    p.xhline_pos=0.0
+        #    pdc.add_plot_data(p)
+        #panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
+        #
+        #plot = panel_plot.generate_plot()
+        #
+        #plot_out_fname = self.get_path_to_resource_in_workspace('reports/ps_centralized_frequency_aggregate_plots.pdf')
+        #
+        #plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+
+        panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', ytitle='$\Delta$ Post-Pre Classifier Output', wspace=0.3, hspace=0.3)
+        panel_plot.add_plot_data(0, 0, plot_data=frequency_region_plot_data)
+        panel_plot.add_plot_data(0, 1, plot_data=frequency_frequency_plot_data)
+        plot = panel_plot.generate_plot()
+        plot_out_fname = self.get_path_to_resource_in_workspace('reports/ps_frequency_projection_plots.pdf')
+        plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
         panel_plot = PanelPlot(i_max=1, j_max=1, title='', ytitle='$\Delta$ Post-Pre Classifier Output', ytitle_fontsize=24, wspace=0.3, hspace=0.3)
 

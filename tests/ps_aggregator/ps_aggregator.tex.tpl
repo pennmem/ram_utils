@@ -33,6 +33,11 @@
 \subfigure{\includegraphics[scale=0.4]{<FREQUENCY_PLOT_FILE>}}
 \end{figure}
 
+\begin{figure}[!h]
+\centering
+\subfigure{\includegraphics[scale=0.4]{<FREQUENCY_PROJECTION_PLOT_FILE>}}
+\end{figure}
+
 \textbf{\hfil Experiment count \hfil}
 
 \begin{tabular}{|l|c|c|c|c|c|c|}
@@ -40,6 +45,15 @@
 \end{tabular}
 
 \clearpage
+
+%\section*{\hfil PS1,PS2 Region $\times$ Pulse Frequency Analysis \hfil}
+%
+%\begin{figure}[!h]
+%\centering
+%\subfigure{\includegraphics[scale=0.4]{<CENTRALIZED_FREQUENCY_PLOT_FILE>}}
+%\end{figure}
+%
+%\clearpage
 
 \section*{\hfil PS2 Region $\times$ Amplitude Analysis ($10$ and $25$ Hz) \hfil}
 
