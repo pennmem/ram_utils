@@ -35,7 +35,7 @@ def get_bipolar_subj_elecs(
               ('Loc3', '|S64'), ('Loc4', '|S64'), ('Loc5', '|S64'),
               ('Loc6', '|S64'), ('Montage', '|S20'), ('eNames', '|S20'),
               ('eType', '|S8'), ('bpDistance', np.float), ('distance', np.float),
-              ('avgSurf', dtypes_surf), ('indivSurf', dtypes_surf), ('locTag', '|S20')]
+              ('avgSurf', dtypes_surf), ('indivSurf', dtypes_surf), ('locTag', '|S64')]
 
     new_tf = np.rec.recarray(len(tf),dtype=dtypes)
     new_tf_surf = np.rec.recarray(len(tf),dtype=dtypes_surf)
