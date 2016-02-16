@@ -13,8 +13,8 @@ if len(sys.argv)>2:
 
 else: # emulate command line
     command_line_emulation_argument_list = ['--subject','R1124J_1',
-                                            '--experiment','PS2',
-                                            '--workspace-dir','/scratch/busygin/PS2_joint',
+                                            '--experiment','PS3',
+                                            '--workspace-dir','/scratch/busygin/PS3_joint',
                                             '--mount-point','',
                                             '--python-path','/home1/busygin/ram_utils_new_ptsa',
                                             '--python-path','/home1/busygin/python/ptsa_latest',
@@ -103,7 +103,7 @@ def find_subjects_by_task(task):
 
 
 subjects = find_subjects_by_task(task)
-subjects.append('TJ086')
+#subjects.append('TJ086')
 subjects.sort()
 
 for subject in subjects:
@@ -113,7 +113,7 @@ for subject in subjects:
 
     report_pipeline.add_task(FREventPreparation(params=params, mark_as_completed=False))
 
-    #report_pipeline.add_task(ControlEventPreparation(mark_as_completed=False))
+    report_pipeline.add_task(ControlEventPreparation(params=params, mark_as_completed=False))
 
     report_pipeline.add_task(PSEventPreparation(mark_as_completed=False))
 
@@ -123,11 +123,11 @@ for subject in subjects:
 
     report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 
-    #report_pipeline.add_task(ComputeControlPowers(params=params, mark_as_completed=True))
+    report_pipeline.add_task(ComputeControlPowers(params=params, mark_as_completed=True))
 
     report_pipeline.add_task(ComputePSPowers(params=params, mark_as_completed=True))
 
-    #report_pipeline.add_task(ComputeControlTable(params=params, mark_as_completed=True))
+    report_pipeline.add_task(ComputeControlTable(params=params, mark_as_completed=True))
 
     report_pipeline.add_task(ComputePSTable(params=params, mark_as_completed=True))
 
@@ -142,6 +142,6 @@ for subject in subjects:
     # starts processing pipeline
     try:
         report_pipeline.execute_pipeline()
-    except Exception as e:
-        print e
+    except:
+        #print e
         pass

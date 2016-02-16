@@ -11,13 +11,12 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1065J',
-                                         '--experiment','PS1',
-                                         '--workspace-dir','/scratch/busygin/PS1_joint',
+    command_line_emulation_argument_list = ['--subject','R1050M',
+                                         '--experiment','PS2',
+                                         '--workspace-dir','/scratch/busygin/PS2_joint',
                                          '--mount-point','',
                                          '--python-path','/home1/busygin/ram_utils_new_ptsa',
                                          '--python-path','/home1/busygin/python/ptsa_latest']
-
 
     args = parse_command_line(command_line_emulation_argument_list)
 
@@ -103,7 +102,7 @@ report_pipeline = ReportPipeline(subject=args.subject, experiment=args.experimen
 
 report_pipeline.add_task(FREventPreparation(params=params, mark_as_completed=False))
 
-#report_pipeline.add_task(ControlEventPreparation(mark_as_completed=False))
+report_pipeline.add_task(ControlEventPreparation(params=params, mark_as_completed=False))
 
 report_pipeline.add_task(PSEventPreparation(mark_as_completed=False))
 
@@ -113,11 +112,11 @@ report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 
-#report_pipeline.add_task(ComputeControlPowers(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputeControlPowers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputePSPowers(params=params, mark_as_completed=True))
 
-#report_pipeline.add_task(ComputeControlTable(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputeControlTable(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputePSTable(params=params, mark_as_completed=True))
 

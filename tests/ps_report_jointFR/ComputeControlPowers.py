@@ -20,18 +20,17 @@ class ComputeControlPowers(RamTask):
 
     def restore(self):
         subject = self.pipeline.subject
-        task = self.pipeline.task
 
-        self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-control_pow_mat_pre.pkl'))
+        self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-control_pow_mat_pre.pkl'))
         self.pass_object('control_pow_mat_pre', self.pow_mat)
 
-        self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-control_pow_mat_0.45.pkl'))
+        self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-control_pow_mat_0.45.pkl'))
         self.pass_object('control_pow_mat_045', self.pow_mat)
 
-        self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-control_pow_mat_0.7.pkl'))
+        self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-control_pow_mat_0.7.pkl'))
         self.pass_object('control_pow_mat_07', self.pow_mat)
 
-        self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-control_pow_mat_1.2.pkl'))
+        self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-control_pow_mat_1.2.pkl'))
         self.pass_object('control_pow_mat_12', self.pow_mat)
 
         #self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
@@ -39,9 +38,8 @@ class ComputeControlPowers(RamTask):
 
     def run(self):
         subject = self.pipeline.subject
-        task = self.pipeline.task
 
-        events = self.get_passed_object(task+'_control_events')
+        events = self.get_passed_object('control_events')
 
         sessions = np.unique(events.session)
         print 'sessions:', sessions
@@ -53,22 +51,22 @@ class ComputeControlPowers(RamTask):
 
         self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs, self.params.control_start_time, self.params.control_end_time, False, True)
         self.pass_object('control_pow_mat_pre', self.pow_mat)
-        joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-' + task + '-control_pow_mat_pre.pkl'))
+        joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-control_pow_mat_pre.pkl'))
 
         self.samplerate = None
         self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs, self.params.control_start_time+0.45, self.params.control_end_time+0.45, True, False)
         self.pass_object('control_pow_mat_045', self.pow_mat)
-        joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-' + task + '-control_pow_mat_0.45.pkl'))
+        joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-control_pow_mat_0.45.pkl'))
 
         self.samplerate = None
         self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs, self.params.control_start_time+0.7, self.params.control_end_time+0.7, True, False)
         self.pass_object('control_pow_mat_07', self.pow_mat)
-        joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-' + task + '-control_pow_mat_0.7.pkl'))
+        joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-control_pow_mat_0.7.pkl'))
 
         self.samplerate = None
         self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs, self.params.control_start_time+1.2, self.params.control_end_time+1.2, True, False)
         self.pass_object('control_pow_mat_12', self.pow_mat)
-        joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-' + task + '-control_pow_mat_1.2.pkl'))
+        joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-control_pow_mat_1.2.pkl'))
 
         #self.pass_object('samplerate', self.samplerate)
 

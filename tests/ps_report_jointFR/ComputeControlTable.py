@@ -13,13 +13,11 @@ class ComputeControlTable(RamTask):
 
     def restore(self):
         subject = self.pipeline.subject
-        task = self.pipeline.task
-        self.control_table = pd.read_pickle(self.get_path_to_resource_in_workspace(subject + '-' + task + '-control_table.pkl'))
+        self.control_table = pd.read_pickle(self.get_path_to_resource_in_workspace(subject + '-control_table.pkl'))
         self.pass_object('control_table', self.control_table)
 
     def run(self):
         subject = self.pipeline.subject
-        task = self.pipeline.task
 
         lr_classifier = self.get_passed_object('lr_classifier')
         xval_output = self.get_passed_object('xval_output')
@@ -49,4 +47,4 @@ class ComputeControlTable(RamTask):
         self.control_table['prob_diff_1000'] = control_prob_12 - control_prob_pre
 
         self.pass_object('control_table', self.control_table)
-        self.control_table.to_pickle(self.get_path_to_resource_in_workspace(subject + '-' + task + '-control_table.pkl'))
+        self.control_table.to_pickle(self.get_path_to_resource_in_workspace(subject + '-control_table.pkl'))
