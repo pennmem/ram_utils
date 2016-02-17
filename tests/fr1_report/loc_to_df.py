@@ -44,7 +44,7 @@ def loc_to_df(excelFile):
             for cell in row:
                 #rowLen+=1;
                 #f.write(str(cell.value)+'\t')
-                r.append(str(cell.value))
+                r.append(str(cell.value).replace('_','\\textunderscore'))
             #if rowLen>maxLen:
             #    maxLen = rowLen
             #f.write('\t'*(maxLen-rowLen))

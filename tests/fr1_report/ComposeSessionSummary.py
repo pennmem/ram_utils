@@ -38,7 +38,7 @@ def make_ttest_table(bipolar_pairs, loc_info, ttest_results):
 
 def make_ttest_table_header(loc_info):
     table_format = table_header = None
-    if 'Das Volumetric Atlas Location' in loc_info:
+    if ('Das Volumetric Atlas Location' in loc_info) or ('Freesurfer Desikan Killiany Surface Atlas Location' in loc_info):
         table_format = 'C{.75cm} C{2.5cm} C{4cm} C{4cm} C{1.25cm} C{1.25cm}'
         table_header = r'Type & Electrode Pair & Atlas Loc1 & Atlas Loc2 & \textit{p} & \textit{t}-stat'
     else:
@@ -199,7 +199,7 @@ class ComposeSessionSummary(RamTask):
             # ttest_data = [list(a) for a in zip(bipolar_pairs.eType,  bipolar_pairs.tagName, ttest[session][1], ttest[session][0])]
             session_ttest = ttest[session]
             if isinstance(session_ttest,tuple):
-                if 'Das Volumetric Atlas Location' in loc_info:
+                if ('Das Volumetric Atlas Location' in loc_info) or ('Freesurfer Desikan Killiany Surface Atlas Location' in loc_info):
                     session_ttest_data.append([[None, None, None, None, np.nan, np.nan]])
                 else:
                     session_ttest_data.append([[None, None, np.nan, np.nan]])
