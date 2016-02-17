@@ -77,7 +77,7 @@ class ComputePSPowers(RamTask):
             #             buffer_time=self.params.ps_buf, eoffset='eegoffset', keep_buffer=True, eoffset_in_time=False)
 
 
-            eeg_pre_reader = EEGReader(events=sess_events, channels=monopolar_channels_list,
+            eeg_pre_reader = EEGReader(events=sess_events, channels=np.array(monopolar_channels_list),
                                    start_time=pre_start_time,
                                    end_time=pre_end_time, buffer_time=self.params.ps_buf)
 
@@ -86,7 +86,9 @@ class ComputePSPowers(RamTask):
 
             if samplerate is None:
                 # samplerate = round(eegs_pre.samplerate)
-                samplerate = eegs_pre.attrs['samplerate']
+                # samplerate = eegs_pre.attrs['samplerate']
+
+                samplerate = float(eegs_pre['samplerate'])
 
                 winsize = int(round(samplerate*(pre_end_time-pre_start_time+2*self.params.ps_buf)))
                 bufsize = int(round(samplerate*self.params.ps_buf))
@@ -96,15 +98,15 @@ class ComputePSPowers(RamTask):
 
             # mirroring
             nb_ = int(round(samplerate*(self.params.ps_buf)))
-            eegs_pre[...,-nb_:] = eegs_pre[...,-nb_-1:-2*nb_-1:-1]
+            eegs_pre[...,-nb_:] = eegs_pre[...,-nb_-2:-2*nb_-2:-1]
 
             dim3_pre = eegs_pre.shape[2]  # because post-stim time inreval does not align for all stim events (stims have different duration)
                                           # we have to take care of aligning eegs_post ourselves time dim to dim3
 
             # eegs_post = np.zeros_like(eegs_pre)
 
-            from ptsa.data.TimeSeriesXray import TimeSeriesXray
-            eegs_post = TimeSeriesXray(np.zeros_like(eegs_pre),dims=eegs_pre.dims,coords=eegs_pre.coords)
+            from ptsa.data.TimeSeriesX import TimeSeriesX
+            eegs_post = TimeSeriesX(np.zeros_like(eegs_pre),dims=eegs_pre.dims,coords=eegs_pre.coords)
 
 
             post_start_time = self.params.ps_offset
@@ -122,15 +124,12 @@ class ComputePSPowers(RamTask):
                 #             end_time=post_end_time+ev_offset, buffer_time=self.params.ps_buf,
                 #             eoffset='eegoffset', keep_buffer=True, eoffset_in_time=False)
 
-                eeg_post_reader = EEGReader(events=sess_events[i_ev:i_ev+1], channels=monopolar_channels_list,
+                eeg_post_reader = EEGReader(events=sess_events[i_ev:i_ev+1], channels=np.array(monopolar_channels_list),
                                        start_time=post_start_time+ev_offset,
                                        end_time=post_end_time+ev_offset, buffer_time=self.params.ps_buf)
 
                 eeg_post = eeg_post_reader.read()
 
-
-
-                
                 dim3_post = eeg_post.shape[2]
                 # here we take care of possible mismatch of time dim length
                 if dim3_pre == dim3_post:
@@ -141,7 +140,7 @@ class ComputePSPowers(RamTask):
                     eegs_post[:,i_ev:i_ev+1,:-1] = eeg_post
 
             # mirroring
-            eegs_post[...,:nb_] = eegs_post[...,2*nb_-1:nb_-1:-1]
+            eegs_post[...,:nb_] = eegs_post[...,2*nb_:nb_:-1]
 
             print 'Computing', experiment, 'powers'
 
@@ -161,8 +160,9 @@ class ComputePSPowers(RamTask):
             #     elec1 = np.where(channels == bp[0])[0][0]
             #     elec2 = np.where(channels == bp[1])[0][0]
 
+
                 bp_data_pre = eegs_pre[elec1] - eegs_pre[elec2]
-                bp_data_pre.attrs['samplerate'] = samplerate
+                # bp_data_pre.attrs['samplerate'] = samplerate
 
                 bp_data_pre = bp_data_pre.filtered([58,62], filt_type='stop', order=self.params.filt_order)
                 for ev in xrange(n_events):
@@ -175,7 +175,7 @@ class ComputePSPowers(RamTask):
                     sess_pow_mat_pre[ev,i,:] = np.nanmean(pow_ev_stripped, axis=1)
 
                 bp_data_post = eegs_post[elec1] - eegs_post[elec2]
-                bp_data_post.attrs['samplerate'] = samplerate
+                # bp_data_post.attrs['samplerate'] = samplerate
 
                 bp_data_post = bp_data_post.filtered([58,62], filt_type='stop', order=self.params.filt_order)
                 for ev in xrange(n_events):

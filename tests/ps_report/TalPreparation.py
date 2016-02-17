@@ -15,7 +15,7 @@ class TalPreparation(RamTask):
         RamTask.__init__(self, mark_as_completed)
 
     def run(self):
-        events = self.get_passed_object(self.pipeline.task+'_events')
+        events = self.get_passed_object('FR_events')
         bipolar_pairs = self.get_bps(events)
         monopolar_channels = get_single_elecs_from_bps(bipolar_pairs)
         print len(monopolar_channels), 'single electrodes', len(bipolar_pairs), 'bipolar pairs'

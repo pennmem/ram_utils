@@ -166,7 +166,7 @@ class GenerateTex(RamTask):
             '<AUC>': '%.2f' % (100*xval_output[-1].auc),
             '<PERM-P-VALUE>': pvalue_formatting(perm_test_pvalue),
             '<J-THRESH>': '%.3f' % xval_output[-1].jstat_thresh,
-            '<ROC_AND_TERC_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-roc_and_terc_plot_combined.pdf'
+            '<ROC_AND_TERC_PLOT_FILE>': self.pipeline.subject + '-roc_and_terc_plot_combined.pdf'
         }
 
         TextTemplateUtils.replace_template(template_file_name=tex_template, out_file_name=report_tex_file_name, replace_dict=replace_dict)
@@ -203,7 +203,7 @@ class GeneratePlots(RamTask):
 
         plot = panel_plot.generate_plot()
 
-        plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + self.pipeline.task + '-' + self.pipeline.subject + '-roc_and_terc_plot_combined.pdf')
+        plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + self.pipeline.subject + '-roc_and_terc_plot_combined.pdf')
 
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
