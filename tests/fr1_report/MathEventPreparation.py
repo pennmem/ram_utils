@@ -3,7 +3,7 @@ from RamPipeline import *
 import os
 import os.path
 
-# from BaseEventReader import BaseEventReader
+import numpy as np
 
 from ptsa.data.readers import BaseEventReader
 
@@ -13,14 +13,13 @@ class MathEventPreparation(RamTask):
         RamTask.__init__(self, mark_as_completed)
 
     def run(self):
-        #if self.pipeline.task != 'RAM_FR1':
-        #    return
-
         try:
             e_path = os.path.join(self.pipeline.mount_point, 'data/events', self.pipeline.task, self.pipeline.subject+'_math.mat')
             e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=False)
 
             events = e_reader.read()
+            ev_order = np.argsort(events, order=('session','mstime'))
+            events = events[ev_order]
 
             events = events[events.type == 'PROB']
 

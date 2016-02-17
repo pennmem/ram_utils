@@ -2,6 +2,7 @@ __author__ = 'm'
 
 import os
 import os.path
+import numpy as np
 
 from ptsa.data.readers import BaseEventReader
 
@@ -19,6 +20,8 @@ class FR1EventPreparation(RamTask):
         e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
         events = e_reader.read()
+        ev_order = np.argsort(events, order=('session','list','mstime'))
+        events = events[ev_order]
 
         self.pass_object(self.pipeline.task+'_all_events', events)
 

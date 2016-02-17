@@ -76,6 +76,14 @@ class ComputeFR1Powers(RamTask):
                                    end_time=self.params.fr1_end_time, buffer_time=self.params.fr1_buf)
 
             eegs = eeg_reader.read()
+            if eeg_reader.removed_bad_data():
+                print 'REMOVED SOME BAD EVENTS !!!'
+                sess_events = eegs['events'].data.view(np.recarray)
+                n_events = len(sess_events)
+                events = np.hstack((events[events.session!=sess],sess_events))
+                ev_order = np.argsort(events, order=('session','list','mstime'))
+                events = events[ev_order]
+                self.pass_object(self.pipeline.task+'_events', events)
 
             # print 'eegs=',eegs.values[0,0,:2],eegs.values[0,0,-2:]
             # sys.exit()
