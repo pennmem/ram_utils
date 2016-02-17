@@ -98,6 +98,12 @@ class ComputeControlPowers(RamTask):
                                    start_time=start_time, end_time=end_time, buffer_time=self.params.control_buf)
 
             eegs = eeg_reader.read()
+            if eeg_reader.removed_bad_data():
+                print 'REMOVED SOME BAD EVENTS !!!'
+                sess_events = eegs['events'].data.view(np.recarray)
+                n_events = len(sess_events)
+                events = np.hstack((events[events.session!=sess],sess_events))
+                self.pass_object('control_events', events)
 
             # print 'eegs=',eegs.values[0,0,:2],eegs.values[0,0,-2:]
             # sys.exit()

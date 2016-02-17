@@ -35,6 +35,8 @@ class PSEventPreparation(RamTask):
         e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
         events = e_reader.read()
+        ev_order = np.argsort(events, order=('session','mstime'))
+        events = events[ev_order]
 
         # try:
         #     events = Events(get_events(subject=subject, task='RAM_PS', path_prefix=self.pipeline.mount_point))

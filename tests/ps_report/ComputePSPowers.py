@@ -82,6 +82,12 @@ class ComputePSPowers(RamTask):
                                    end_time=pre_end_time, buffer_time=self.params.ps_buf)
 
             eegs_pre = eeg_pre_reader.read()
+            if eeg_pre_reader.removed_bad_data():
+                print 'REMOVED SOME BAD EVENTS !!!'
+                sess_events = eegs_pre['events'].data.view(np.recarray)
+                n_events = len(sess_events)
+                events = np.hstack((events[events.session!=sess],sess_events))
+                self.pass_object(self.pipeline.experiment+'_events', events)
 
 
             if samplerate is None:
