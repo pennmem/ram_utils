@@ -35,7 +35,7 @@ class FREventPreparation(RamTask):
                 if events is None:
                     events = catfr1_events
                 else:
-                    catfr1_events.session = -catfr1_events.session-1
+                    catfr1_events.session += 100
                     fields = list(set(events.dtype.names).intersection(catfr1_events.dtype.names))
                     events = np.hstack((events[fields],catfr1_events[fields])).view(np.recarray)
             except IOError:
