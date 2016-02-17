@@ -11,13 +11,13 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1122E',
-                                            '--experiment','PS2',
-                                            '--workspace-dir','/scratch/busygin/PS2',
-                                            '--mount-point','',
-                                            '--python-path','/home1/busygin/ram_utils_new_ptsa',
-                                            '--python-path','/home1/busygin/python/ptsa_new'
-                                            ]
+    command_line_emulation_argument_list = ['--subject','R1138T_1',
+                                         '--experiment','PS2',
+                                         '--workspace-dir','/scratch/busygin/PS2_joint',
+                                         '--mount-point','',
+                                         '--python-path','/home1/busygin/ram_utils_new_ptsa',
+                                         '--python-path','/home1/busygin/python/ptsa_latest']
+
     args = parse_command_line(command_line_emulation_argument_list)
 
 configure_python_paths(args.python_path)
@@ -28,17 +28,19 @@ configure_python_paths(args.python_path)
 import numpy as np
 from RamPipeline import RamPipeline
 
-from FR1EventPreparation import FR1EventPreparation
+from FREventPreparation import FREventPreparation
+from ControlEventPreparation import ControlEventPreparation
 from PSEventPreparation import PSEventPreparation
 
-from ComputeFR1Powers import ComputeFR1Powers
-
+from ComputeFRPowers import ComputeFRPowers
+from ComputeControlPowers import ComputeControlPowers
 from ComputePSPowers import ComputePSPowers
 
 from TalPreparation import TalPreparation
 
 from ComputeClassifier import ComputeClassifier
 
+from ComputeControlTable import ComputeControlTable
 from ComputePSTable import ComputePSTable
 
 from ComposeSessionSummary import ComposeSessionSummary
@@ -56,6 +58,10 @@ class Params(object):
         self.fr1_end_time = 1.366
         self.fr1_buf = 1.365
 
+        self.control_start_time = -1.0
+        self.control_end_time = 0.0
+        self.control_buf = 1.0
+
         self.ps_start_time = -1.0
         self.ps_end_time = 0.0
         self.ps_buf = 1.0
@@ -72,6 +78,9 @@ class Params(object):
 
         self.n_perm = 200
 
+        self.include_fr1 = True
+        self.include_catfr1 = True
+
 
 params = Params()
 
@@ -80,7 +89,7 @@ class ReportPipeline(RamPipeline):
     def __init__(self, subject, experiment, workspace_dir, mount_point=None):
         RamPipeline.__init__(self)
         self.subject = subject
-        self.task = 'RAM_FR1'
+        #self.task = 'RAM_FR1'
         self.experiment = experiment
         self.mount_point = mount_point
         self.set_workspace_dir(workspace_dir)
@@ -91,17 +100,23 @@ class ReportPipeline(RamPipeline):
 report_pipeline = ReportPipeline(subject=args.subject, experiment=args.experiment,
                                        workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point)
 
-report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
+report_pipeline.add_task(FREventPreparation(params=params, mark_as_completed=False))
+
+report_pipeline.add_task(ControlEventPreparation(params=params, mark_as_completed=False))
 
 report_pipeline.add_task(PSEventPreparation(mark_as_completed=False))
 
 report_pipeline.add_task(TalPreparation(mark_as_completed=False))
 
-report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 
+report_pipeline.add_task(ComputeControlPowers(params=params, mark_as_completed=True))
+
 report_pipeline.add_task(ComputePSPowers(params=params, mark_as_completed=True))
+
+report_pipeline.add_task(ComputeControlTable(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputePSTable(params=params, mark_as_completed=True))
 

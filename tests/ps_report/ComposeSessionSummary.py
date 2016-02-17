@@ -184,6 +184,8 @@ class ComposeSessionSummary(RamTask):
         anova_param2_sv = dict()
         anova_param12_sv = dict()
 
+        anova_significance = dict()
+
         for session in sessions:
             ps_session_table = ps_table[ps_table.session==session]
 
@@ -237,6 +239,10 @@ class ComposeSessionSummary(RamTask):
                 session_summary.anova_pvalues = anova[1]
 
                 if anova[1][0] < 0.05: # first param significant
+                    if stim_tag in anova_significance:
+                        anova_significance[stim_tag][0] = True
+                    else:
+                        anova_significance[stim_tag] = np.array([True, False, False], dtype=np.bool)
                     param1_ttest_table = ttest_one_param(ps_session_low_table, param1_name)
                     if len(param1_ttest_table) > 0:
                         if sess_loc_tag is not None:
@@ -244,6 +250,10 @@ class ComposeSessionSummary(RamTask):
                         session_summary.param1_ttest_table = format_ttest_table(param1_ttest_table)
 
                 if anova[1][1] < 0.05: # second param significant
+                    if stim_tag in anova_significance:
+                        anova_significance[stim_tag][1] = True
+                    else:
+                        anova_significance[stim_tag] = np.array([False, True, False], dtype=np.bool)
                     param2_ttest_table = ttest_one_param(ps_session_low_table, param2_name)
                     if len(param2_ttest_table) > 0:
                         if sess_loc_tag is not None:
@@ -251,6 +261,10 @@ class ComposeSessionSummary(RamTask):
                         session_summary.param2_ttest_table = format_ttest_table(param2_ttest_table)
 
                 if anova[1][2] < 0.05: # interaction is significant
+                    if stim_tag in anova_significance:
+                        anova_significance[stim_tag][2] = True
+                    else:
+                        anova_significance[stim_tag] = np.array([False, False, True], dtype=np.bool)
                     param12_ttest_table = ttest_interaction(ps_session_low_table, param1_name, param2_name)
                     if len(param12_ttest_table) > 0:
                         if sess_loc_tag is not None:
@@ -265,6 +279,9 @@ class ComposeSessionSummary(RamTask):
         joblib.dump(anova_param1_sv, self.get_path_to_resource_in_workspace(subject + '-' + experiment + '-anova_%s_sv.pkl'%param1_name))
         joblib.dump(anova_param2_sv, self.get_path_to_resource_in_workspace(subject + '-' + experiment + '-anova_%s_sv.pkl'%param2_name))
         joblib.dump(anova_param12_sv, self.get_path_to_resource_in_workspace(subject + '-' + experiment + '-anova_%s-%s_sv.pkl'%(param1_name,param2_name)))
+
+        if len(anova_significance) > 0:
+            joblib.dump(anova_significance, self.get_path_to_resource_in_workspace(subject + '-' + experiment + '-anova_significance.pkl'))
 
         isi_min = ps_table.isi.min()
         isi_max = ps_table.isi.max()
