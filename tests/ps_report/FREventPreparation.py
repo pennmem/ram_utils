@@ -30,8 +30,8 @@ class FREventPreparation(RamTask):
                 e_path = os.path.join(self.pipeline.mount_point , 'data/events/RAM_CatFR1', self.pipeline.subject + '_events.mat')
                 e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
                 catfr1_events = e_reader.read()
-                ev_order = np.argsort(events, order=('session','list','mstime'))
-                events = events[ev_order]
+                ev_order = np.argsort(catfr1_events, order=('session','list','mstime'))
+                catfr1_events = catfr1_events[ev_order]
                 if events is None:
                     events = catfr1_events
                 else:
