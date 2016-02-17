@@ -22,8 +22,10 @@ def make_atlas_loc(tag, atlas_loc, comments):
 
 def make_ttest_table(bipolar_pairs, loc_info, ttest_results):
     ttest_data = None
-    if 'Das Volumetric Atlas Location' in loc_info:
-        atlas_loc = loc_info['Das Volumetric Atlas Location']
+    has_depth = ('Das Volumetric Atlas Location' in loc_info)
+    has_surface_only = ('Freesurfer Desikan Killiany Surface Atlas Location' in loc_info)
+    if has_depth or has_surface_only:
+        atlas_loc = loc_info['Das Volumetric Atlas Location' if has_depth else 'Freesurfer Desikan Killiany Surface Atlas Location']
         comments = loc_info['Comments']
         n = len(bipolar_pairs)
         ttest_data = [list(a) for a in zip(bipolar_pairs.eType, bipolar_pairs.tagName, [None] * n, [None] * n, ttest_results[1], ttest_results[0])]
