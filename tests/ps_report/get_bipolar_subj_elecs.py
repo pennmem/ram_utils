@@ -14,7 +14,10 @@ def get_bipolar_subj_elecs(
     try:
         tf = loadmat(talfile,struct_as_record=True,squeeze_me=True)['bpTalStruct']
     except KeyError:
-        tf = loadmat(talfile,struct_as_record=True,squeeze_me=True)['subjTalEvents']
+        try:
+            tf = loadmat(talfile,struct_as_record=True,squeeze_me=True)['subjTalEvents']
+        except KeyError:
+            tf = loadmat(talfile,struct_as_record=True,squeeze_me=True)['virtualTalStruct']
 
     dtypes_surf = [('x', np.float), ('y', np.float), ('z', np.float),
                    ('bpDistance', np.float), ('anatRegion', '|S64'),
