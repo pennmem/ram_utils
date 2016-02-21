@@ -120,10 +120,8 @@ class ComputePSPowers(RamTask):
             post_start_time = self.params.ps_offset
             post_end_time = self.params.ps_offset + (self.params.ps_end_time - self.params.ps_start_time)
             for i_ev in xrange(n_events):
-                ev_offset = sess_events[i_ev].pulse_duration
+                ev_offset = sess_events[i_ev].pulse_duration if experiment!='PS3' else sess_events[i_ev].train_duration
                 if ev_offset > 0:
-                    if experiment == 'PS3' and sess_events[i_ev].nBursts > 0:
-                        ev_offset *= sess_events[i_ev].nBursts + 1
                     ev_offset *= 0.001
                 else:
                     ev_offset = 0.0

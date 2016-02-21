@@ -49,10 +49,6 @@ class PSEventPreparation(RamTask):
         if len(events) == 0:
             raise Exception('No %s events for subject %s' % (experiment,subject))
 
-        #
-        # events = correct_eegfile_field(events)
-        # events = self.attach_raw_bin_wrappers(events)
-
         sessions = np.unique(events.session)
         print experiment, 'sessions:', sessions
 
@@ -61,11 +57,21 @@ class PSEventPreparation(RamTask):
         events = compute_isi(events)
 
         is_stim_event_type_vec = np.vectorize(is_stim_event_type)
-        events = events[is_stim_event_type_vec(events.type)]
+        stim_mask = is_stim_event_type_vec(events.type)
+        if experiment == 'PS3':
+            stim_inds = np.where(stim_mask)[0]
+            stim_events = pd.DataFrame(events[stim_mask])
+            last_burst_inds = stim_inds + stim_events['nBursts'].values
+            last_bursts = events.ix[last_burst_inds]
+            events = stim_events
+            events['train_duration'] = last_bursts['mstime'].values - events['mstime'].values + last_bursts['pulse_duration'].values
+        else:
+            events = events[stim_mask]
+
+        events = events.to_records(index=False)
 
         print len(events), 'stim', experiment, 'events'
 
-        events = events.to_records(index=False)
         # events = Events(events.to_records(index=False))
         #
         # joblib.dump(events, self.get_path_to_resource_in_workspace(subject+'-'+experiment+'-ps_events.pkl'))
