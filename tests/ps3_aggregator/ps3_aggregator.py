@@ -11,7 +11,7 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--workspace-dir','/scratch/busygin',
+    command_line_emulation_argument_list = ['--workspace-dir','/scratch/busygin/ps_aggregator_joint',
                                             '--mount-point','',
                                             '--python-path','/home1/busygin/ram_utils_new_ptsa'
                                             ]
@@ -39,11 +39,11 @@ from GenerateReportTasks import *
 
 class Params(object):
     def __init__(self):
-        self.baseline_correction = False
+        self.baseline_correction = True
 
         #self.frequency_plot_regions = ['CA1', 'DG', 'PRC']
         self.frequency_plot_regions = []
-        self.frequency_plot_areas = ['HC', 'Frontal',]
+        self.frequency_plot_areas = ['HC', 'Frontal']
 
         self.anova_areas = ['HC', 'Frontal']
 
