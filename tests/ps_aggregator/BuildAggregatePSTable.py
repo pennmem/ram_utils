@@ -3,8 +3,11 @@ from RamPipeline import *
 import os
 from os.path import join
 
+import numpy as np
 import pandas as pd
 from sklearn.externals import joblib
+
+from bisect import bisect_right
 
 
 # HC: CA1/CA2/CA2/DG
@@ -25,6 +28,11 @@ def brain_area(region):
         return 'Undetermined'
     else:
         return ''
+
+
+def prob2perf(probs, true_labels, p):
+    idx = bisect_right(probs, p)
+    return np.sum(true_labels[0:idx]) / float(idx) if idx>0 else 0.0
 
 
 class BuildAggregatePSTable(RamTask):
@@ -61,8 +69,22 @@ class BuildAggregatePSTable(RamTask):
                         baseline_delta = control_table['prob_diff_500'].mean()
                         ps1_table['prob_diff'] -= baseline_delta
                 thresh = xval_output[-1].jstat_thresh
-                ps1_table = ps1_table[ps1_table['prob_pre']<thresh]
+                #ps1_table = ps1_table[ps1_table['prob_pre']<thresh]
+                ps1_table['J_thresh'] = thresh
                 ps1_table['prob_diff_centralized'] = ps1_table['prob_diff'] - ps1_table['prob_diff'].mean()
+
+                probs = xval_output[-1].probs
+                true_labels = xval_output[-1].true_labels
+                performance_map = sorted(zip(probs,true_labels))
+                probs, true_labels = zip(*performance_map)
+                probs = np.array(probs)
+                true_labels = np.array(true_labels)
+
+                # this piece is ugly but I don't know the right pythonic way to express it
+                ps1_table['perf_diff'] = 0.0
+                for i in xrange(len(ps1_table)):
+                    ps1_table['perf_diff'].values[i] = prob2perf(probs, true_labels, (ps1_table['prob_pre'].values[i]+ps1_table['prob_diff'].values[i]+1e-6)) - prob2perf(probs, true_labels, ps1_table['prob_pre'].values[i])
+
                 ps1_table['Region'] = ps1_table['Region'].apply(lambda s: 'Undetermined' if s is None else s.replace('Left ','').replace('Right ',''))
                 ps1_table['Area'] = ps1_table['Region'].apply(brain_area)
                 ps1_table['Subject'] = subject
@@ -94,8 +116,22 @@ class BuildAggregatePSTable(RamTask):
                         baseline_delta = control_table['prob_diff_500'].mean()
                         ps2_table['prob_diff'] -= baseline_delta
                 thresh = xval_output[-1].jstat_thresh
-                ps2_table = ps2_table[ps2_table['prob_pre']<thresh]
+                #ps2_table = ps2_table[ps2_table['prob_pre']<thresh]
+                ps2_table['J_thresh'] = thresh
                 ps2_table['prob_diff_centralized'] = ps2_table['prob_diff'] - ps2_table['prob_diff'].mean()
+
+                probs = xval_output[-1].probs
+                true_labels = xval_output[-1].true_labels
+                performance_map = sorted(zip(probs,true_labels))
+                probs, true_labels = zip(*performance_map)
+                probs = np.array(probs)
+                true_labels = np.array(true_labels)
+
+                # this piece is ugly but I don't know the right pythonic way to express it
+                ps2_table['perf_diff'] = 0.0
+                for i in xrange(len(ps2_table)):
+                    ps2_table['perf_diff'].values[i] = prob2perf(probs, true_labels, (ps2_table['prob_pre'].values[i]+ps2_table['prob_diff'].values[i]+1e-6)) - prob2perf(probs, true_labels, ps2_table['prob_pre'].values[i])
+
                 ps2_table['Region'] = ps2_table['Region'].apply(lambda s: 'Undetermined' if s is None else s.replace('Left ','').replace('Right ',''))
                 ps2_table['Area'] = ps2_table['Region'].apply(brain_area)
                 ps2_table['Subject'] = subject

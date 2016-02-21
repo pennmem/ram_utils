@@ -34,20 +34,20 @@ class GenerateTex(RamTask):
 
         area_total = sorted(zip(area_total.keys(), area_total.values()))
 
-        fvalue_rf = self.get_passed_object('fvalue_rf')
-        pvalue_rf = self.get_passed_object('pvalue_rf')
-
-        fvalue_ra_low = self.get_passed_object('fvalue_ra_low')
-        pvalue_ra_low = self.get_passed_object('pvalue_ra_low')
-
-        fvalue_ra_high = self.get_passed_object('fvalue_ra_high')
-        pvalue_ra_high = self.get_passed_object('pvalue_ra_high')
-
-        fvalue_rd_low = self.get_passed_object('fvalue_rd_low')
-        pvalue_rd_low = self.get_passed_object('pvalue_rd_low')
-
-        fvalue_rd_high = self.get_passed_object('fvalue_rd_high')
-        pvalue_rd_high = self.get_passed_object('pvalue_rd_high')
+        # fvalue_rf = self.get_passed_object('fvalue_rf')
+        # pvalue_rf = self.get_passed_object('pvalue_rf')
+        #
+        # fvalue_ra_low = self.get_passed_object('fvalue_ra_low')
+        # pvalue_ra_low = self.get_passed_object('pvalue_ra_low')
+        #
+        # fvalue_ra_high = self.get_passed_object('fvalue_ra_high')
+        # pvalue_ra_high = self.get_passed_object('pvalue_ra_high')
+        #
+        # fvalue_rd_low = self.get_passed_object('fvalue_rd_low')
+        # pvalue_rd_low = self.get_passed_object('pvalue_rd_low')
+        #
+        # fvalue_rd_high = self.get_passed_object('fvalue_rd_high')
+        # pvalue_rd_high = self.get_passed_object('pvalue_rd_high')
 
         # replace_dict = {
         #     '<DATE>': datetime.date.today(),
