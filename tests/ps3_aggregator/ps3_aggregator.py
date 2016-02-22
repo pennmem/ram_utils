@@ -40,6 +40,11 @@ from GenerateReportTasks import *
 class Params(object):
     def __init__(self):
         self.baseline_correction = True
+        #self.output_param = 'perf_diff'
+        #self.output_title = '$\Delta$ Post-Pre Expected Performance (%)'
+
+        self.output_param = 'prob_diff'
+        self.output_title = '$\Delta$ Post-Pre Classifier Output'
 
         #self.frequency_plot_regions = ['CA1', 'DG', 'PRC']
         self.frequency_plot_regions = []
@@ -69,7 +74,7 @@ report_pipeline.add_task(CountSessions(params=params, mark_as_completed=False))
 
 report_pipeline.add_task(RunAnalysis(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
+report_pipeline.add_task(GeneratePlots(params=params, mark_as_completed=False))
 
 report_pipeline.add_task(GenerateTex(mark_as_completed=False))
 

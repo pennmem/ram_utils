@@ -46,8 +46,9 @@ class GenerateTex(RamTask):
 
 
 class GeneratePlots(RamTask):
-    def __init__(self, mark_as_completed=True):
+    def __init__(self, params, mark_as_completed=True):
         RamTask.__init__(self, mark_as_completed)
+        self.params = params
 
     def run(self):
         self.create_dir_in_workspace('reports')
@@ -57,7 +58,7 @@ class GeneratePlots(RamTask):
         frequency_region_plot_data = self.get_passed_object('frequency_region_plot')
         frequency_frequency_plot_data = self.get_passed_object('frequency_frequency_plot')
 
-        panel_plot = PanelPlot(xfigsize=11, yfigsize=11, i_max=1, j_max=1, title='', ytitle='$\Delta$ Post-Pre Classifier Output', ytitle_fontsize=16, wspace=0.3, hspace=0.3)
+        panel_plot = PanelPlot(xfigsize=11, yfigsize=11, i_max=1, j_max=1, title='', ytitle=self.params.output_title, ytitle_fontsize=16, wspace=0.3, hspace=0.3)
 
         pdc = PlotDataCollection(legend_on=True)
         pdc.xlabel = 'Burst Frequency (Hz)'
@@ -73,7 +74,7 @@ class GeneratePlots(RamTask):
 
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
-        panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', ytitle='$\Delta$ Post-Pre Classifier Output', wspace=0.3, hspace=0.3)
+        panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', ytitle=self.params.output_title, wspace=0.3, hspace=0.3)
         panel_plot.add_plot_data(0, 0, plot_data=frequency_region_plot_data)
         panel_plot.add_plot_data(0, 1, plot_data=frequency_frequency_plot_data)
         plot = panel_plot.generate_plot()
