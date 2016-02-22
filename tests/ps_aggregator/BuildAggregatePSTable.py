@@ -83,7 +83,7 @@ class BuildAggregatePSTable(RamTask):
                 # this piece is ugly but I don't know the right pythonic way to express it
                 ps1_table['perf_diff'] = 0.0
                 for i in xrange(len(ps1_table)):
-                    ps1_table['perf_diff'].values[i] = prob2perf(probs, true_labels, (ps1_table['prob_pre'].values[i]+ps1_table['prob_diff'].values[i]+1e-6)) - prob2perf(probs, true_labels, ps1_table['prob_pre'].values[i])
+                    ps1_table['perf_diff'].values[i] = 100.0 * (prob2perf(probs, true_labels, (ps1_table['prob_pre'].values[i]+ps1_table['prob_diff'].values[i]+1e-6)) - prob2perf(probs, true_labels, ps1_table['prob_pre'].values[i]))
 
                 ps1_table['Region'] = ps1_table['Region'].apply(lambda s: 'Undetermined' if s is None else s.replace('Left ','').replace('Right ',''))
                 ps1_table['Area'] = ps1_table['Region'].apply(brain_area)
@@ -130,7 +130,7 @@ class BuildAggregatePSTable(RamTask):
                 # this piece is ugly but I don't know the right pythonic way to express it
                 ps2_table['perf_diff'] = 0.0
                 for i in xrange(len(ps2_table)):
-                    ps2_table['perf_diff'].values[i] = prob2perf(probs, true_labels, (ps2_table['prob_pre'].values[i]+ps2_table['prob_diff'].values[i]+1e-6)) - prob2perf(probs, true_labels, ps2_table['prob_pre'].values[i])
+                    ps2_table['perf_diff'].values[i] = 100.0 * (prob2perf(probs, true_labels, (ps2_table['prob_pre'].values[i]+ps2_table['prob_diff'].values[i]+1e-6)) - prob2perf(probs, true_labels, ps2_table['prob_pre'].values[i]))
 
                 ps2_table['Region'] = ps2_table['Region'].apply(lambda s: 'Undetermined' if s is None else s.replace('Left ','').replace('Right ',''))
                 ps2_table['Area'] = ps2_table['Region'].apply(brain_area)

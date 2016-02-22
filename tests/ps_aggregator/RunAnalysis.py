@@ -50,7 +50,7 @@ class RegionFrequencyAnalysis(object):
                     print 'delta sem =', sems[j]-centralized_sems[j]
                     table_line.append(len(ps_table_area_freq[['Subject','stimAnodeTag','stimCathodeTag']].drop_duplicates()))
                 self.plots[area] = PlotData(x=np.arange(1,len(self.freqs)+1)-i*0.05,
-                                y=means, yerr=sems, ylim=(min(0.0,np.nanmin(means-sems)),np.nanmax(means+sems)+0.025),
+                                y=means, yerr=sems, #ylim=(min(0.0,np.nanmin(means-sems)),np.nanmax(means+sems)+0.025),
                                 x_tick_labels=[x if x>0 else 'PULSE' for x in self.freqs],
                                 label=area
                                 )
@@ -61,7 +61,8 @@ class RegionFrequencyAnalysis(object):
                                 )
                 self.n_experiments.append(table_line)
                 area_mean[i] = self.ps_table[area_sel][self.output_param].mean()
-                area_sem[i] = self.ps_table[area_sel]['prob_diff_centralized'].sem()
+                area_sem[i] = self.ps_table[area_sel][self.output_param].sem()
+                #area_sem[i] = self.ps_table[area_sel]['prob_diff_centralized'].sem()
 
         for i,region in enumerate(regions):
             region_sel = (ps_table['Region']==region)
@@ -78,7 +79,7 @@ class RegionFrequencyAnalysis(object):
                 centralized_sems[j] = ps_table_region_freq[self.output_param].sem()
                 table_line.append(len(ps_table_region_freq[['Subject','stimAnodeTag','stimCathodeTag']].drop_duplicates()))
             self.plots[region] = PlotData(x=np.arange(1,len(self.freqs)+1)-i*0.05,
-                            y=means, yerr=sems, ylim=(min(0.0,np.nanmin(means-sems)),np.nanmax(means+sems)+0.025),
+                            y=means, yerr=sems, #ylim=(min(0.0,np.nanmin(means-sems)),np.nanmax(means+sems)+0.025),
                             x_tick_labels=[x if x>0 else 'PULSE' for x in self.freqs],
                             label=region
                             )
@@ -97,7 +98,8 @@ class RegionFrequencyAnalysis(object):
             freq_sel = (self.ps_table['Pulse_Frequency']==freq)
             ps_table_freq = self.ps_table[freq_sel]
             freq_mean[i] = ps_table_freq[self.output_param].mean()
-            freq_sem[i] = ps_table_freq['prob_diff_centralized'].sem()
+            freq_sem[i] = ps_table_freq[self.output_param].sem()
+            #freq_sem[i] = ps_table_freq['prob_diff_centralized'].sem()
 
         area_ymin = np.min(area_mean-area_sem)
         area_ymax = np.max(area_mean+area_sem)
@@ -105,10 +107,10 @@ class RegionFrequencyAnalysis(object):
         freq_ymin = np.min(freq_mean-freq_sem)
         freq_ymax = np.max(freq_mean+freq_sem)
 
-        ylim = (min(0.0,min(area_ymin,freq_ymin)-0.001), max(area_ymax,freq_ymax)+0.001)
+        #ylim = (min(0.0,min(area_ymin,freq_ymin)-0.001), max(area_ymax,freq_ymax)+0.001)
 
-        self.region_plot = BarPlotData(x=np.arange(len(self.areas)+len(self.regions)), y=area_mean, yerr=area_sem, ylim=ylim, ylabel='', xlabel='Region', x_tick_labels=self.areas+self.regions, barcolors=['grey']*(len(self.areas)+len(self.regions)), barwidth=0.5)
-        self.frequency_plot = PlotData(x=np.arange(1,len(self.freqs)+1), y=freq_mean, yerr=freq_sem, ylim=ylim, xlabel='Frequency (Hz)', x_tick_labels=[x if x>0 else 'PULSE' for x in self.freqs])
+        self.region_plot = BarPlotData(x=np.arange(len(self.areas)+len(self.regions)), y=area_mean, yerr=area_sem, ylabel='', xlabel='Region', x_tick_labels=self.areas+self.regions, barcolors=['grey']*(len(self.areas)+len(self.regions)), barwidth=0.5)
+        self.frequency_plot = PlotData(x=np.arange(1,len(self.freqs)+1), y=freq_mean, yerr=freq_sem, xlabel='Frequency (Hz)', x_tick_labels=[x if x>0 else 'PULSE' for x in self.freqs])
 
 
 def duration_plot(ps_table, output_param, regions, areas):

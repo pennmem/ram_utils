@@ -136,8 +136,9 @@ class GenerateTex(RamTask):
 
 
 class GeneratePlots(RamTask):
-    def __init__(self, mark_as_completed=True):
+    def __init__(self, params, mark_as_completed=True):
         RamTask.__init__(self, mark_as_completed)
+        self.params = params
 
     def run(self):
         self.create_dir_in_workspace('reports')
@@ -153,7 +154,7 @@ class GeneratePlots(RamTask):
         high_freq_amplitude_plot_data = self.get_passed_object('high_freq_amplitude_plot')
 
 
-        panel_plot = PanelPlot(xfigsize=11, yfigsize=11, i_max=1, j_max=1, title='', ytitle='$\Delta$ Post-Pre Classifier Output', ytitle_fontsize=16, wspace=0.3, hspace=0.3)
+        panel_plot = PanelPlot(xfigsize=11, yfigsize=11, i_max=1, j_max=1, title='', ytitle=self.params.output_title, ytitle_fontsize=16, wspace=0.3, hspace=0.3)
 
         pdc = PlotDataCollection(legend_on=True)
         pdc.xlabel = 'Pulse Frequency (Hz)'
@@ -169,30 +170,14 @@ class GeneratePlots(RamTask):
 
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
-        #panel_plot = PanelPlot(i_max=1, j_max=1, title='', ytitle='$\Delta$ Post-Pre Classifier Output', ytitle_fontsize=24, wspace=0.3, hspace=0.3)
-        #
-        #pdc = PlotDataCollection(legend_on=True)
-        #pdc.xlabel = 'Pulse Frequency (Hz)'
-        #pdc.xlabel_fontsize = 24
-        #for v,p in centralized_frequency_plot_data.iteritems():
-        #    p.xhline_pos=0.0
-        #    pdc.add_plot_data(p)
-        #panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
-        #
-        #plot = panel_plot.generate_plot()
-        #
-        #plot_out_fname = self.get_path_to_resource_in_workspace('reports/ps_centralized_frequency_aggregate_plots.pdf')
-        #
-        #plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
-
-        panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', ytitle='$\Delta$ Post-Pre Classifier Output', wspace=0.3, hspace=0.3)
+        panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', ytitle=self.params.output_title, wspace=0.3, hspace=0.3)
         panel_plot.add_plot_data(0, 0, plot_data=frequency_region_plot_data)
         panel_plot.add_plot_data(0, 1, plot_data=frequency_frequency_plot_data)
         plot = panel_plot.generate_plot()
         plot_out_fname = self.get_path_to_resource_in_workspace('reports/ps_frequency_projection_plots.pdf')
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
-        panel_plot = PanelPlot(i_max=1, j_max=1, title='', ytitle='$\Delta$ Post-Pre Classifier Output', ytitle_fontsize=24, wspace=0.3, hspace=0.3)
+        panel_plot = PanelPlot(i_max=1, j_max=1, title='', ytitle=self.params.output_title, ytitle_fontsize=24, wspace=0.3, hspace=0.3)
 
         pdc = PlotDataCollection(legend_on=True)
         pdc.xlabel = 'Duration (ms)'
@@ -209,7 +194,7 @@ class GeneratePlots(RamTask):
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
 
-        panel_plot = PanelPlot(i_max=1, j_max=1, title='', ytitle='$\Delta$ Post-Pre Classifier Output', ytitle_fontsize=24, wspace=0.3, hspace=0.3)
+        panel_plot = PanelPlot(i_max=1, j_max=1, title='', ytitle=self.params.output_title, ytitle_fontsize=24, wspace=0.3, hspace=0.3)
 
         pdc = PlotDataCollection(legend_on=True)
         pdc.xlabel = 'Duration (ms)'
@@ -226,7 +211,7 @@ class GeneratePlots(RamTask):
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
 
-        panel_plot = PanelPlot(i_max=1, j_max=1, title='', ytitle='$\Delta$ Post-Pre Classifier Output', ytitle_fontsize=24, wspace=0.3, hspace=0.3)
+        panel_plot = PanelPlot(i_max=1, j_max=1, title='', ytitle=self.params.output_title, ytitle_fontsize=24, wspace=0.3, hspace=0.3)
 
         pdc = PlotDataCollection(legend_on=True)
         pdc.xlabel = 'Amplitude (mA)'
@@ -243,7 +228,7 @@ class GeneratePlots(RamTask):
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
 
-        panel_plot = PanelPlot(i_max=1, j_max=1, title='', ytitle='$\Delta$ Post-Pre Classifier Output', ytitle_fontsize=24, wspace=0.3, hspace=0.3)
+        panel_plot = PanelPlot(i_max=1, j_max=1, title='', ytitle=self.params.output_title, ytitle_fontsize=24, wspace=0.3, hspace=0.3)
 
         pdc = PlotDataCollection(legend_on=True)
         pdc.xlabel = 'Amplitude (mA)'
