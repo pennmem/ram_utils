@@ -90,7 +90,8 @@ class RegionFrequencyAnalysis(object):
                             )
             self.n_experiments.append(table_line)
             area_mean[len(self.areas)+i] = self.ps_table[region_sel][self.output_param].mean()
-            area_sem[len(self.areas)+i] = self.ps_table[region_sel]['prob_diff_centralized'].sem()
+            area_sem[len(self.areas)+i] = self.ps_table[region_sel][self.output_param].sem()
+            #area_sem[len(self.areas)+i] = self.ps_table[region_sel]['prob_diff_centralized'].sem()
 
         freq_mean = np.zeros(len(self.freqs), dtype=float)
         freq_sem = np.zeros(len(self.freqs), dtype=float)
