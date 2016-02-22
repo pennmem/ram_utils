@@ -71,9 +71,16 @@ class ComputeFR1Powers(RamTask):
             #
             # eegs = time_series_reader.read(monopolar_channels)
 
+            # VERSION 2/22/2016
+            # eeg_reader = EEGReader(events=sess_events, channels=monopolar_channels,
+            #                        start_time=self.params.fr1_start_time,
+            #                        end_time=self.params.fr1_end_time, buffer_time=self.params.fr1_buf)
+
+            # VERSION WITH MIRRORING
             eeg_reader = EEGReader(events=sess_events, channels=monopolar_channels,
                                    start_time=self.params.fr1_start_time,
-                                   end_time=self.params.fr1_end_time, buffer_time=self.params.fr1_buf)
+                                   end_time=self.params.fr1_end_time, buffer_time=0.0)
+
 
             eegs = eeg_reader.read()
             if eeg_reader.removed_bad_data():
@@ -85,14 +92,13 @@ class ComputeFR1Powers(RamTask):
                 events = events[ev_order]
                 self.pass_object(self.pipeline.task+'_events', events)
 
-            # print 'eegs=',eegs.values[0,0,:2],eegs.values[0,0,-2:]
-            # sys.exit()
-            #
-            # a = eegs[0]-eegs[1]
 
             # mirroring
             #eegs[...,:1365] = eegs[...,2730:1365:-1]
             #eegs[...,2731:4096] = eegs[...,2729:1364:-1]
+
+            eegs = eegs.add_mirror_buffer(duration=self.params.fr1_buf)
+
 
             if self.samplerate is None:
                 self.samplerate = float(eegs.samplerate)
