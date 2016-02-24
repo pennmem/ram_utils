@@ -44,8 +44,8 @@ class PlotDataBase(OptionsObject):
             PDO(name='x_tick_labels'),
             PDO(name='y_tick_labels'),
             PDO(name='title'),
-            PDO(name='xlabel_fontsize', default_value=20),
-            PDO(name='ylabel_fontsize', default_value=20),
+            PDO(name='xlabel_fontsize', default_value=12),
+            PDO(name='ylabel_fontsize', default_value=12),
             PDO(name='xlim'),
             PDO(name='ylim'),
             PDO(name='xhline_pos'),
@@ -61,7 +61,6 @@ class PlotDataBase(OptionsObject):
         ]
 
         self.init_options(option_list, options)
-
 
     def sanity_check(self):
         if self.x is None or self.y is None:
@@ -214,6 +213,7 @@ class PlotDataCollection(PlotDataBase):
         except:
             return [None, None]
 
+
 class PanelPlot(OptionsObject):
     def __init__(self, **options):
         '''
@@ -225,26 +225,24 @@ class PanelPlot(OptionsObject):
 
         PDO = self.PDO
         option_list = [
-            PDO(name='i_max',default_value=1),
-            PDO(name='j_max',default_value=1),
+            PDO(name='i_max', default_value=1),
+            PDO(name='j_max', default_value=1),
             PDO(name='title'),
             PDO(name='xtitle'),
-            PDO(name='xtitle_fontsize',default_value=20),
+            PDO(name='xtitle_fontsize', default_value=None),
             PDO(name='ytitle'),
-            PDO(name='ytitle_fontsize',default_value=20),
-            PDO(name='wspace',default_value=0.3),
-            PDO(name='hspace',default_value=0.3),
-            PDO(name='xfigsize',default_value=15.0),
-            PDO(name='yfigsize',default_value=15.0),
-            PDO(name='labelsize',default_value=20), # determines font size for tick labels
+            PDO(name='ytitle_fontsize', default_value=None),
+            PDO(name='wspace', default_value=0.3),
+            PDO(name='hspace', default_value=0.3),
+            PDO(name='xfigsize', default_value=15.0),
+            PDO(name='yfigsize', default_value=15.0),
+            PDO(name='labelsize', default_value=None),  # determines font size for tick labels
 
         ]
 
         self.init_options(option_list, options)
 
-
         self.plot_data_matrix = [[None for x in range(self.j_max)] for x in range(self.i_max)]
-
 
     def add_plot_data(self, i_panel, j_panel, **options):
         '''
@@ -282,7 +280,6 @@ class PanelPlot(OptionsObject):
 
         self.plot_data_matrix[i_panel][j_panel] = pd
 
-
     def draw_brick_heatmap(self, plot_data, ax):
         pd = plot_data
         import seaborn as sns
@@ -310,7 +307,6 @@ class PanelPlot(OptionsObject):
 
         xpos, ypos = np.meshgrid(ax.get_xticks(), ax.get_yticks())
 
-
         from itertools import product
         xticks = ax.get_xticks()
         yticks = ax.get_yticks()
@@ -336,7 +332,6 @@ class PanelPlot(OptionsObject):
                 except LookupError:
                     print 'COULD NOT GET i,j = ', (j, i)
                     pass
-
 
         if pd.xlabel:
             ax.set_xlabel(pd.xlabel, fontsize=pd.xlabel_fontsize)
@@ -378,7 +373,6 @@ class PanelPlot(OptionsObject):
 
         if pd.xerr is not None or pd.yerr is not None:
             lines = ax.errorbar(pd.x, pd.y, yerr=pd.yerr, fmt='--o', label=pd.label)
-
 
             if pd.x_tick_labels is not None:
                 ax.set_xticks(pd.x)
@@ -490,7 +484,6 @@ class PanelPlot(OptionsObject):
         xtitle_fontsize = self.xtitle_fontsize
         ytitle_fontsize = self.ytitle_fontsize
 
-
         fig.text(x=0.5, y=0.02, s=self.xtitle, fontsize=xtitle_fontsize, horizontalalignment='center')
 
         import itertools
@@ -513,15 +506,11 @@ class PanelPlot(OptionsObject):
             else:
                 ax.set_ylabel(pd.ylabel, fontsize=pd.ylabel_fontsize)
 
-
-
             # x axis labels
             if self.xtitle is None:
                 pass
             else:
                 ax.set_xlabel(pd.xlabel, fontsize=pd.xlabel_fontsize)
-
-
 
             if isinstance(pd, PlotDataCollection):
                 plot_data_list = pd.plot_data_list
@@ -586,7 +575,6 @@ def draw_brick_heatmap(plot_data):
 
     xpos, ypos = np.meshgrid(ax.get_xticks(), ax.get_yticks())
 
-
     from itertools import product
     xticks = ax.get_xticks()
     yticks = ax.get_yticks()
@@ -616,7 +604,6 @@ def draw_brick_heatmap(plot_data):
 
     if pd.colorbar_title:
         if pd.colorbar_title_location is not None:
-
 
             ax.text(len(xticks) * pd.colorbar_title_location[0], len(yticks) * pd.colorbar_title_location[1],
                     pd.colorbar_title,
@@ -756,9 +743,9 @@ if __name__ == '__main__':
 
     ###################################### BAR PLOT DATA COLLECTION
     panel_plot_1 = PanelPlot(xfigsize=5, yfigsize=5, i_max=1, j_max=1, title='BAR_PLOT_DEMO', xtitle='',
-                             ytitle='y_axis_random', xlabel='skdjhskdhksjhksdhk')
+                             )
 
-    bpd = BarPlotData(x=np.arange(20), y=np.random.rand(20), xlabel='x_axis_label', title='data01',
+    bpd = BarPlotData(x=np.arange(20), y=np.random.rand(20), xlabel='x_axis_label', ylabel='y_axis_label', title='data01',
                       yerr=np.random.rand(20) * 0.1,
                       x_tick_labels=['a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9'] * 2,
                       barcolors=['r', 'g', 'b', 'r', 'g', 'b', 'r', 'g', 'b', 'r'] * 2
@@ -774,5 +761,6 @@ if __name__ == '__main__':
     # plot.savefig('bar_plot_demo_1.png', bboxinches='tight')
     plot.savefig('bar_plot_demo_1.png')
     plot.savefig('bar_plot_demo_1.pdf', dpi=300, bboxinches='tight')
+    # plot.savefig('bar_plot_demo_1.pdf', dpi=100)
 
     ###################################### END BAR PLOT DATA COLLECTION
