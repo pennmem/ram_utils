@@ -23,7 +23,7 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{<EXPERIMENT> report v 2.3}
+\lhead{<EXPERIMENT> report v 2.4}
 \chead{Subject: \textbf{<SUBJECT>}}
 \rhead{Date created: <DATE>}
 \begin{document}
@@ -62,8 +62,6 @@ of the classifier encoding efficiency estimate for each encoded word.}
 $\bullet$ Area Under Curve = $<AUC>$\%
 
 $\bullet$ Permutation test $p$-value $<PERM-P-VALUE>$
-
-$\bullet$ Youden's $J$-stat threshold = $<J-THRESH>$
 
 \clearpage
 
