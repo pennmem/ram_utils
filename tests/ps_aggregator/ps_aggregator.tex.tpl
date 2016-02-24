@@ -19,10 +19,10 @@
 
 \section*{\hfil PS1,PS2 Region $\times$ Pulse Frequency Analysis \hfil}
 
-\begin{figure}[!h]
-\centering
-\subfigure{\includegraphics[scale=0.4]{<FREQUENCY_PLOT_FILE>}}
-\end{figure}
+%\begin{figure}[!h]
+%\centering
+%\subfigure{\includegraphics[scale=0.4]{<FREQUENCY_PLOT_FILE>}}
+%\end{figure}
 
 \begin{figure}[!h]
 \centering
