@@ -1,0 +1,124 @@
+FR3 Reporting and Analysis Tool
+
+To analyze subjects' data and to generate reports you will need to install several core dependencies as outlined below:
+ 1) INSTALLING PYTHON DISTRIBUTION
+ Go to Continuum Analytics Download website (https://www.continuum.io/downloads) and download Anaconda for your platform.
+ Open installer and follow directions on the screen. The installer will install Python interpreter and most of the Python
+ dependencies that are needed to run RAM analysis and reporting tools
+
+ 2)INSTALING ADDITIONAL PYTHON PACKAGES
+ While Anaconda provides rich set of Python tools we still need to add additional Python packages to be able to run
+ reporting and analysis tools. To install those dependencies open a terminal and type:
+
+ conda install scikit-learn h5py netcdf4 seaborn memory_profiler
+
+ Follow instructions on the screen to complete the installation
+
+ Finally, to install pywavelets package type the following in the terminal:
+
+ pip install PyWavelets
+
+ 3) INSTALLING FAST C++ WAVELET IMPLEMENTATION
+ First you need to get source code for the repository with fast C++ wavelets implementation. TO do this in your terminal
+ type the following:
+
+  git clone https://github.com/busygin/morlet .
+  git checkout branch flex
+
+  To proceed further, make sure you have the following dependencies on your machine
+  a) c/c++ compiler
+  b) SWIG (www.swig.org)
+  c) FFT3W libraries (www.fftw.org)
+  d) cmake (www.cmake.org)
+
+
+ Once you have those installed on your machine, execute the following command in your terminal as one line command:
+
+  cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX:PATH=$INSTALL_PREFIX -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=10.6
+  -DCMAKE_BUILD_TYPE:STRING=Release
+  -DCMAKE_INSTALL_PREFIX:PATH=<INSTALLATION_DIR>
+  -DPYTHON_EXECUTABLE:FILEPATH=<PATH_TO_PYTHON_EXECUTABLE>
+  -DPYTHON_INCLUDE_DIR:PATH=<PATH_TO_PYTHON_INCLUDE_DIR>
+  -DPYTHON_LIBRARY:FILEPATH=<PATH_TO_PYTHON_LIBRARY>
+  -DNUMPY_INCLUDE_DIR:FILEPATH=<PATH_TO_NUMPY_INCLUDE_DIR>
+  -DFFTW_LIB_DIR:FILEPATH=<PATH_TO_FFTW_LIBRARY_DIR>
+  -DFFTW_INCLUDE_DIR:FILEPATH=<PATH_TO_FFTW_INCLUDE_DIR>
+
+
+
+where:
+
+<INSTALLATION_DIR> - points to the directory where you want to store fast C++ wavelets library and its Python wrapper
+
+<PATH_TO_PYTHON_EXECUTABLE> - points to Python executable
+(necessary to specify when you have multiple Python installations)
+
+<PATH_TO_PYTHON_INCLUDE_DIR> - points to directory with Python header files
+(necessary to specify when you have multiple Python installations)
+
+<PATH_TO_PYTHON_LIBRARY> - points to Python library
+(necessary to specify when you have multiple Python installations)
+
+<PATH_TO_NUMPY_INCLUDE_DIR> -  points to directory with Numpy header files
+(necessary to specify when you have multiple Python installations)
+
+<PATH_TO_FFTW_LIBRARY_DIR> - points to directory containint fft3w library
+
+<PATH_TO_FFTW_INCLUDE_DIR> - points to directory with FFTW header files
+
+
+After you execute the above command type:
+
+make
+
+followed by
+
+make install
+
+At this point you have all dependencies needed to use RAM reporting and analysis tools.
+
+To install RAM Analysis and reporting tools on your machine clone ram_utils and ptsa_new repositories by typing in the terminal:
+
+
+git clone https://github.com/maciekswat/ram_utils.git .
+git checkout new_ptsa
+
+git https://github.com/maciekswat/ptsa_new.git .
+git checkout xray_orig_ptsa
+
+
+At this point you need to either copy RAM data to your machine or ssh-mount rhino2 directory that has RAM data. Let me assume
+that the the RAM data directory is mounted on your machine as:
+
+ /RAM_DATA
+
+RUNNING FR3 REPORT GENERATOR:
+
+To run closed-loop (FR3) report generator go to the directory where you cloned ram_utils to - I denote it as <RAM_UTILS_DIR>:
+
+cd <RAM_UTILS_DIR>/tests/fr3_report_DARPA
+in the terminal type the following as a one line command:
+
+python fr3_report.py --subject=<SUBJECT_CODE> --task=RAM_FR3 --workspace-dir=<OUTPUT_DIR_FOR_REPORTS>
+--mount-point=<MOUNT_POINT_OF_RAM_DATA> --python-path=<RAM_UTILS_DIR> --python-path=<PTSA_NEW_DIR> --python-path=<CPP_WAVELET_DIR>
+
+where :
+
+<SUBJECT_CODE> - denotes identifier of a given subject e.g. R1124J
+
+<OUTPUT_DIR_FOR_REPORTS> is a directory where you want the reports to be written
+
+<MOUNT_POINT_OF_RAM_DATA> - is a directory where RAM data is copied to or mounted at (in our example it was /RAM_DATA)
+
+<RAM_UTILS_DIR> - directory where you cloned ram_utils
+
+<PTSA_NEW_DIR> - directory where you cloned ptsa_new
+
+<CPP_WAVELET_DIR> - directory where you installed fast c++ wavelets and corresponding Python wrapper
+
+If you follow the instructions, at this point you should have generated a sample report for closed loop session. Please see
+source code for implementation details
+
+
+
+
