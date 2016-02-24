@@ -11,8 +11,62 @@ import matplotlib.pyplot as plt
 
 
 class PlotDataBase(object):
-    def __init__(self):
-        pass
+    def __init__(self,**options):
+        self.ylabel_fontsize = 12
+        self.xlabel_fontsize = 12
+        option_list = ['x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels', 'title',
+                            'xlabel_fontsize', 'ylabel_fontsize', 'xlim', 'ylim', 'xhline_pos', 'xlabel', 'ylabel',
+                            'linestyle', 'color', 'marker', 'markersize', 'levelline', 'label']
+
+        self.init_options(option_list,options)
+        # for option_name in option_list:
+        #     try:
+        #         setattr(self, option_name, options[option_name])
+        #         print 'option_name=', option_name, ' val=', options[option_name], ' value_check = ', getattr(self,
+        #                                                                                                      option_name)
+        #     except LookupError:
+        #         setattr(self, option_name, None)
+        #
+        # # setting reasonable defaults
+        # if self.linestyle is None:
+        #     self.linestyle = '-'
+        # if self.color is None:
+        #     self.color = 'black'
+        # if self.marker is None:
+        #     self.marker = ''
+        #
+        # if self.label is None:
+        #     self.label = ''
+
+        # if self.x is None or self.y is None:
+        #     raise AttributeError(
+        #         'PlotData requires that x and y attributes are initialized. Use PlotData(x=x_array,y=y_array) syntax')
+
+    def init_options(self,option_list,options={}):
+        for option_name in option_list:
+            try:
+                setattr(self, option_name, options[option_name])
+                print 'option_name=', option_name, ' val=', options[option_name], ' value_check = ', getattr(self,
+                                                                                                             option_name)
+            except LookupError:
+                setattr(self, option_name, None)
+
+        # setting reasonable defaults
+        if self.linestyle is None:
+            self.linestyle = '-'
+        if self.color is None:
+            self.color = 'black'
+        if self.marker is None:
+            self.marker = ''
+
+        if self.label is None:
+            self.label = ''
+
+    def sanity_check(self):
+        if self.x is None or self.y is None:
+            raise AttributeError(
+                'PlotData requires that x and y attributes are initialized. Use PlotData(x=x_array,y=y_array) syntax')
+
 
     def get_yrange(self):
         if self.yerr is not None:
@@ -49,34 +103,34 @@ class PlotData(PlotDataBase):
         'levelline'
         :return:
         '''
-        PlotDataBase.__init__(self)
-        self.ylabel_fontsize = 12
-        self.xlabel_fontsize = 12
-
-        for option_name in ['x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels', 'title',
-                            'xlabel_fontsize', 'ylabel_fontsize', 'xlim', 'ylim', 'xhline_pos', 'xlabel', 'ylabel',
-                            'linestyle', 'color', 'marker', 'markersize', 'levelline', 'label']:
-            try:
-                setattr(self, option_name, options[option_name])
-                print 'option_name=', option_name, ' val=', options[option_name], ' value_check = ', getattr(self,
-                                                                                                             option_name)
-            except LookupError:
-                setattr(self, option_name, None)
-
-        # setting reasonable defaults
-        if self.linestyle is None:
-            self.linestyle = '-'
-        if self.color is None:
-            self.color = 'black'
-        if self.marker is None:
-            self.marker = ''
-
-        if self.label is None:
-            self.label = ''
-
-        if self.x is None or self.y is None:
-            raise AttributeError(
-                'PlotData requires that x and y attributes are initialized. Use PlotData(x=x_array,y=y_array) syntax')
+        PlotDataBase.__init__(self,**options)
+        # self.ylabel_fontsize = 12
+        # self.xlabel_fontsize = 12
+        #
+        # for option_name in ['x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels', 'title',
+        #                     'xlabel_fontsize', 'ylabel_fontsize', 'xlim', 'ylim', 'xhline_pos', 'xlabel', 'ylabel',
+        #                     'linestyle', 'color', 'marker', 'markersize', 'levelline', 'label']:
+        #     try:
+        #         setattr(self, option_name, options[option_name])
+        #         print 'option_name=', option_name, ' val=', options[option_name], ' value_check = ', getattr(self,
+        #                                                                                                      option_name)
+        #     except LookupError:
+        #         setattr(self, option_name, None)
+        #
+        # # setting reasonable defaults
+        # if self.linestyle is None:
+        #     self.linestyle = '-'
+        # if self.color is None:
+        #     self.color = 'black'
+        # if self.marker is None:
+        #     self.marker = ''
+        #
+        # if self.label is None:
+        #     self.label = ''
+        #
+        # if self.x is None or self.y is None:
+        #     raise AttributeError(
+        #         'PlotData requires that x and y attributes are initialized. Use PlotData(x=x_array,y=y_array) syntax')
 
 
 class BarPlotData(PlotDataBase):
@@ -111,6 +165,7 @@ class BarPlotData(PlotDataBase):
             self.color = 'black'
         if self.marker is None:
             self.marker = ''
+
         if self.barwidth is None:
             self.barwidth = 0.5
 
