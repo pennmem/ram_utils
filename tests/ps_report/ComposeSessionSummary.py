@@ -128,8 +128,6 @@ class ComposeSessionSummary(RamTask):
         experiment = self.pipeline.experiment
 
         monopolar_channels = self.get_passed_object('monopolar_channels')
-        bipolar_pairs = self.get_passed_object('bipolar_pairs')
-        loc_tag = self.get_passed_object('loc_tag')
         xval_output = self.get_passed_object('xval_output')
 
         ps_table = self.get_passed_object('ps_table')
@@ -205,7 +203,7 @@ class ComposeSessionSummary(RamTask):
             stim_anode_tag = ps_session_table.stimAnodeTag.values[0].upper()
             stim_cathode_tag = ps_session_table.stimCathodeTag.values[0].upper()
             stim_tag = stim_anode_tag + '-' + stim_cathode_tag
-            sess_loc_tag = None if (stim_tag not in loc_tag) or (loc_tag[stim_tag] in ['', '[]']) else loc_tag[stim_tag]
+            sess_loc_tag = ps_session_table.Region.values[0]
             roi = '{\em locTag not found}' if sess_loc_tag is None else sess_loc_tag
 
             isi_min = ps_session_table.isi.min()

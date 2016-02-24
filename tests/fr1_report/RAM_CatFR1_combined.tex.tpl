@@ -24,12 +24,12 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{RAM CatFR1 report v 2.4}
+\lhead{RAM CatFR1 report v 2.5}
 \rhead{Date created: <DATE>}
 \begin{document}
 
 
-\section*{<SUBJECT> CatRAM FR1 Free Recall Report}
+\section*{<SUBJECT> RAM CatFR1 Free Recall Report}
 
 \begin{tabular}{ccc}
 \begin{minipage}[htbp]{250pt}
