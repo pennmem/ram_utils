@@ -29,7 +29,7 @@
 \begin{document}
 
 
-\section*{<SUBJECT> CatRAM FR1 Free Recall Report}
+\section*{<SUBJECT> RAM CatFR1 Free Recall Report}
 
 \begin{tabular}{ccc}
 \begin{minipage}[htbp]{250pt}
