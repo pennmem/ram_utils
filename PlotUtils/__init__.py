@@ -12,44 +12,17 @@ from collections import namedtuple
 
 PlotDataOption = namedtuple('PlotDataOption', ['name', 'default_value'])
 
-class PlotDataBase(object):
-    def __init__(self,**options):
 
-        PDO=self.PDO
+class OptionsObject(object):
+    def __init__(self):
+        pass
 
+    def PDO(self, name, default_value=None):
+        return PlotDataOption(name=name, default_value=default_value)
 
-        option_list =[
-            PDO(name='x'),
-            PDO(name='y'),
-            PDO(name='xerr'),
-            PDO(name='yerr'),
-            PDO(name='x_tick_labels'),
-            PDO(name='y_tick_labels'),
-            PDO(name='title'),
-            PDO(name='xlabel_fontsize',default_value=12),
-            PDO(name='ylabel_fontsize',default_value=12),
-            PDO(name='xlim'),
-            PDO(name='ylim'),
-            PDO(name='xhline_pos'),
-            PDO(name='xlabel'),
-            PDO(name='ylabel'),
-            PDO(name='linestyle',default_value='-'),
-            PDO(name='color',default_value='black'),
-            PDO(name='marker',default_value=''),
-            PDO(name='markersize'),
-            PDO(name='levelline'),
-            PDO(name='label',default_value=''),
-
-        ]
-
-        self.init_options(option_list,options)
-
-    def PDO(self,name,default_value=None):
-        return PlotDataOption(name=name,default_value=default_value)
-
-    def init_options(self,option_list,options={}):
+    def init_options(self, option_list, options={}):
         for option in option_list:
-            if hasattr(self,option.name): continue
+            if hasattr(self, option.name): continue
             try:
                 setattr(self, option.name, options[option.name])
                 print 'option_name=', option.name, ' val=', options[option.name], ' value_check = ', getattr(self,
@@ -58,17 +31,48 @@ class PlotDataBase(object):
                 setattr(self, option.name, option.default_value)
 
 
+class PlotDataBase(OptionsObject):
+    def __init__(self, **options):
+
+        PDO = self.PDO
+
+        option_list = [
+            PDO(name='x'),
+            PDO(name='y'),
+            PDO(name='xerr'),
+            PDO(name='yerr'),
+            PDO(name='x_tick_labels'),
+            PDO(name='y_tick_labels'),
+            PDO(name='title'),
+            PDO(name='xlabel_fontsize', default_value=20),
+            PDO(name='ylabel_fontsize', default_value=20),
+            PDO(name='xlim'),
+            PDO(name='ylim'),
+            PDO(name='xhline_pos'),
+            PDO(name='xlabel'),
+            PDO(name='ylabel'),
+            PDO(name='linestyle', default_value='-'),
+            PDO(name='color', default_value='black'),
+            PDO(name='marker', default_value=''),
+            PDO(name='markersize'),
+            PDO(name='levelline'),
+            PDO(name='label', default_value=''),
+
+        ]
+
+        self.init_options(option_list, options)
+
+
     def sanity_check(self):
         if self.x is None or self.y is None:
             raise AttributeError(
 
-                self.__class__.__name__+' requires that x and y attributes are initialized. Use PlotData(x=x_array,y=y_array) syntax')
-
+                self.__class__.__name__ + ' requires that x and y attributes are initialized. Use PlotData(x=x_array,y=y_array) syntax')
 
     def get_yrange(self):
         if self.yerr is not None:
             try:
-                return [np.min(self.y-self.yerr), np.max(self.y+self.yerr)]
+                return [np.min(self.y - self.yerr), np.max(self.y + self.yerr)]
             except:
                 return [None, None]
         else:
@@ -80,7 +84,7 @@ class PlotDataBase(object):
     def get_xrange(self):
         if self.xerr is not None:
             try:
-                return [np.min(self.x-self.xerr), np.max(self.x+self.xerr)]
+                return [np.min(self.x - self.xerr), np.max(self.x + self.xerr)]
             except:
                 return [None, None]
         else:
@@ -100,8 +104,9 @@ class PlotData(PlotDataBase):
         'levelline'
         :return:
         '''
-        PlotDataBase.__init__(self,**options)
+        PlotDataBase.__init__(self, **options)
         self.sanity_check()
+
 
 class BarPlotData(PlotDataBase):
     # def __init__(self, x, y, xerr=None, yerr=None, x_tick_labels=None, y_tick_labels=None, title=''):
@@ -113,18 +118,19 @@ class BarPlotData(PlotDataBase):
         'levelline', 'barcolors','barwidth'
         :return:
         '''
-        PlotDataBase.__init__(self,**options)
+        PlotDataBase.__init__(self, **options)
 
         PDO = self.PDO
 
         option_list = [
 
-            PDO(name='barcolors',default_value=''),
-            PDO(name='barwidth',default_value=0.5),
-            PDO(name='alpha',default_value=0.5),
+            PDO(name='barcolors', default_value=''),
+            PDO(name='barwidth', default_value=0.5),
+            PDO(name='alpha', default_value=0.5),
         ]
-        self.init_options(option_list,options)
+        self.init_options(option_list, options)
         self.sanity_check()
+
 
 class BrickHeatmapPlotData(PlotDataBase):
     # def __init__(self, x, y, xerr=None, yerr=None, x_tick_labels=None, y_tick_labels=None, title=''):
@@ -133,7 +139,7 @@ class BrickHeatmapPlotData(PlotDataBase):
         Initializes PlotData
         :return:
         '''
-        PlotDataBase.__init__(self,**options)
+        PlotDataBase.__init__(self, **options)
 
         PDO = self.PDO
 
@@ -147,28 +153,27 @@ class BrickHeatmapPlotData(PlotDataBase):
             PDO(name='cmap'),
             PDO(name='annotation_font_color'),
         ]
-        self.init_options(option_list,options)
+        self.init_options(option_list, options)
         self.sanity_check()
 
     def sanity_check(self):
         if self.df is None:
             raise AttributeError(
-                self.__class__.__name__+' requires that df attribute is initialized - it can be pandas DataFrame object of simply 2D numpy array. Use PlotData(df=df) syntax')
+                self.__class__.__name__ + ' requires that df attribute is initialized - it can be pandas DataFrame object of simply 2D numpy array. Use PlotData(df=df) syntax')
 
 
 class PlotDataCollection(PlotDataBase):
     def __init__(self, **options):
-        PlotDataBase.__init__(self,**options)
+        PlotDataBase.__init__(self, **options)
 
         self.plot_data_list = []
         PDO = self.PDO
 
         option_list = [
             PDO(name='legend_pos'),
-            PDO(name='legend_on',default_value=False),
+            PDO(name='legend_on', default_value=False),
         ]
-        self.init_options(option_list,options)
-
+        self.init_options(option_list, options)
 
     def add_plot_data(self, pd):
         self.plot_data_list.append(pd)
@@ -180,12 +185,12 @@ class PlotDataCollection(PlotDataBase):
 
             for pd_instance in self.plot_data_list:
                 if pd_instance.yerr is not None:
-
-                    min_list.append(np.min(pd_instance.y-pd_instance.yerr))
-                    max_list.append(np.max(pd_instance.y+pd_instance.yerr))
+                    yerr = pd_instance.yerr
                 else:
-                    min_list.append(np.min(pd_instance.y))
-                    max_list.append(np.max(pd_instance.y))
+                    yerr = np.zeros_like(pd_instance.y)
+
+                min_list.append(np.min(pd_instance.y - yerr))
+                max_list.append(np.max(pd_instance.y + yerr))
 
             return [np.min(min_list), np.max(max_list)]
         except:
@@ -198,34 +203,48 @@ class PlotDataCollection(PlotDataBase):
 
             for pd_instance in self.plot_data_list:
                 if pd_instance.xerr is not None:
-                    min_list.append(np.min(pd_instance.x-pd_instance.xerr))
-                    max_list.append(np.max(pd_instance.x+pd_instance.xerr))
+                    xerr = pd_instance.xerr
                 else:
-                    min_list.append(np.min(pd_instance.x))
-                    max_list.append(np.max(pd_instance.x))
+                    xerr = np.zeros_like(pd_instance.x)
+
+                min_list.append(np.min(pd_instance.x - xerr))
+                max_list.append(np.max(pd_instance.x + xerr))
 
             return [np.min(min_list), np.max(max_list)]
         except:
             return [None, None]
 
-
-class PanelPlot(object):
+class PanelPlot(OptionsObject):
     def __init__(self, **options):
         '''
         Initializes PanelPlot
         :param options: options are: 'i_max', 'j_max', 'title', 'xtitle', 'ytitle', 'wspace', 'hspace','xfigsize','yfigsize'
         :return: None
         '''
-        for option_name in ['i_max', 'j_max', 'title', 'xtitle', 'xtitle_fontsize', 'ytitle', 'ytitle_fontsize',
-                            'wspace', 'hspace', 'xfigsize', 'yfigsize', 'labelsize']:
-            try:
-                setattr(self, option_name, options[option_name])
-                print 'option_name=', option_name, ' val=', options[option_name], ' value_check = ', getattr(self,
-                                                                                                             option_name)
-            except LookupError:
-                setattr(self, option_name, None)
+        OptionsObject.__init__(self)
+
+        PDO = self.PDO
+        option_list = [
+            PDO(name='i_max',default_value=1),
+            PDO(name='j_max',default_value=1),
+            PDO(name='title'),
+            PDO(name='xtitle'),
+            PDO(name='xtitle_fontsize',default_value=20),
+            PDO(name='ytitle'),
+            PDO(name='ytitle_fontsize',default_value=20),
+            PDO(name='wspace',default_value=0.3),
+            PDO(name='hspace',default_value=0.3),
+            PDO(name='xfigsize',default_value=15.0),
+            PDO(name='yfigsize',default_value=15.0),
+            PDO(name='labelsize',default_value=20), # determines font size for tick labels
+
+        ]
+
+        self.init_options(option_list, options)
+
 
         self.plot_data_matrix = [[None for x in range(self.j_max)] for x in range(self.i_max)]
+
 
     def add_plot_data(self, i_panel, j_panel, **options):
         '''
@@ -245,7 +264,6 @@ class PanelPlot(object):
             pd = PlotData(**options)
 
         self.plot_data_matrix[i_panel][j_panel] = pd
-        # self.plot_data_matrix[i_panel][j_panel] = PlotData(x, y, **options)
 
     def add_plot_data_collection(self, i_panel, j_panel, **options):
         '''
@@ -257,18 +275,12 @@ class PanelPlot(object):
         :return:None
         '''
 
-        print 'i', i_panel, ' j ', j_panel
-        print 'options=', options
         try:
             pd = options['plot_data_collection']
         except LookupError:
             pd = PlotDataCollection(**options)
 
         self.plot_data_matrix[i_panel][j_panel] = pd
-
-    # def add_plot_data(self,i_panel, j_panel, x, y,xerr=None, yerr=None, title=''):
-    #
-    #     self.plot_data_matrix[i_panel][j_panel] = PlotData(x, y, xerr=xerr, yerr=yerr, title=title)
 
 
     def draw_brick_heatmap(self, plot_data, ax):
@@ -277,9 +289,6 @@ class PanelPlot(object):
         import matplotlib.pyplot as plt
 
         import pandas
-        from pandas import DataFrame
-
-        # data = np.arange(30).reshape(6,5)
 
         if isinstance(pd.df, pandas.DataFrame):
             df = pd.df
@@ -301,24 +310,13 @@ class PanelPlot(object):
 
         xpos, ypos = np.meshgrid(ax.get_xticks(), ax.get_yticks())
 
-        for x, y in zip(xpos.flat, ypos.flat):
-            print 'x,y=', (x, y)
-            # ax.text(x, y, 20.0, color='k', ha="center", va="center",)
-
-
-            # for (i,x), (j,y) in zip(enumerate(xpos.flat), enumerate(ypos.flat)):
-            #     print 'i,j=',(i,j)
-            #     print 'x,y=',(x,y)
-
-            # ax.text(x, y, 20.0, color='k', ha="center", va="center")
-            # ax.text(x, y, annotate_dict[(i,j)], color='k', ha="center", va="center")
 
         from itertools import product
         xticks = ax.get_xticks()
         yticks = ax.get_yticks()
 
         xticks_numbered = zip(np.arange(len(xticks)), xticks)
-        # yticks_numbered = zip(np.arange(len(yticks)), yticks)
+
         yticks_numbered = zip(np.arange(len(yticks))[::-1],
                               yticks)  # had to invert y axis to achieve numpy matrix ordering
 
@@ -339,23 +337,6 @@ class PanelPlot(object):
                     print 'COULD NOT GET i,j = ', (j, i)
                     pass
 
-        # from itertools import product
-        # xticks = ax.get_xticks()
-        # yticks = ax.get_yticks()
-        #
-        # xticks_numbered = zip(np.arange(len(xticks)), xticks)
-        # yticks_numbered = zip(np.arange(len(yticks)), yticks)
-        #
-        # annotate_dict = {(i, j): i * j for i, j in product(range(6), range(6))}
-        #
-        # if pd.annot_dict is not None:
-        #
-        #     for (i, x), (j, y) in product(xticks_numbered, yticks_numbered):
-        #         print 'x_tuple=', (i, x), ' y_tuple=', (i, y)
-        #         try:
-        #             ax.text(x, y, pd.annot_dict[(i, j)], color='k', ha="center", va="center")
-        #         except LookupError:
-        #             pass
 
         if pd.xlabel:
             ax.set_xlabel(pd.xlabel, fontsize=pd.xlabel_fontsize)
@@ -387,8 +368,6 @@ class PanelPlot(object):
         if pd.ylim:
             ax.set_ylim(pd.ylim)
 
-
-
         if pd.legend_on:
             if pd.legend_pos is not None:
                 ax.legend(bbox_to_anchor=pd.legend_pos)
@@ -398,25 +377,15 @@ class PanelPlot(object):
     def process_PlotData(self, pd, ax):
 
         if pd.xerr is not None or pd.yerr is not None:
-            # xerr=[xerr, 2*xerr],
             lines = ax.errorbar(pd.x, pd.y, yerr=pd.yerr, fmt='--o', label=pd.label)
-            # ax.set_xlim([np.min(pd.x)-0.5, np.max(pd.x)+0.5])
-            # if pd.xlim:
-            # ax.set_xlim(pd.xlim)
 
 
             if pd.x_tick_labels is not None:
                 ax.set_xticks(pd.x)
                 ax.set_xticklabels(pd.x_tick_labels)
 
-
-
         else:
 
-            # lines = ax.plot(pd.x,pd.y,'bs', label=pd.title)
-            # flierprops = dict(marker='o', markerfacecolor='green', markersize=12,
-            #   linestyle='none')
-            # linestyles[axisNum], color=color, markersize=10
             if not pd.markersize:
                 pd.markersize = 5.0
             lines = ax.plot(pd.x, pd.y, pd.marker, markersize=pd.markersize, ls=pd.linestyle, color=pd.color,
@@ -506,11 +475,7 @@ class PanelPlot(object):
         :return:
         '''
 
-        fig = None
-        if self.xfigsize is None or self.yfigsize is None:
-            fig = plt.figure(figsize=(15, 15))
-        else:
-            fig = plt.figure(figsize=(self.xfigsize, self.yfigsize))
+        fig = plt.figure(figsize=(self.xfigsize, self.yfigsize))
 
         if self.title is None:
             self.title = ''
@@ -522,16 +487,9 @@ class PanelPlot(object):
 
         # fig.text(x=0.5, y=0.02, s=self.xtitle, fontsize=16, fontweight='bold', horizontalalignment='center')
         #
-        xtitle_fontsize = 16
-        if self.xtitle_fontsize is not None:
-            xtitle_fontsize = self.xtitle_fontsize
+        xtitle_fontsize = self.xtitle_fontsize
+        ytitle_fontsize = self.ytitle_fontsize
 
-        ytitle_fontsize = 16
-        if self.ytitle_fontsize is not None:
-            ytitle_fontsize = self.ytitle_fontsize
-
-        # if self.i_max>=1 or self.j_max>=1:
-        #
 
         fig.text(x=0.5, y=0.02, s=self.xtitle, fontsize=xtitle_fontsize, horizontalalignment='center')
 
@@ -547,15 +505,6 @@ class PanelPlot(object):
 
             # ax.set_aspect('equal', adjustable='box')
 
-
-            # # y axis labels
-            # if pd.ylabel is None:
-            #     if j == 0:
-            #         ax.set_ylabel(self.ytitle, fontsize=pd.ylabel_fontsize)
-            #
-            # else:
-            #     ax.set_ylabel(pd.ylabel, fontsize=pd.ylabel_fontsize)
-
             # y axis labels
             if pd.ylabel is None:
                 if j == 0:
@@ -564,7 +513,6 @@ class PanelPlot(object):
             else:
                 ax.set_ylabel(pd.ylabel, fontsize=pd.ylabel_fontsize)
 
-            # fig.text(x=0.5, y=0.02, s=self.xtitle, fontsize=xtitle_fontsize,  horizontalalignment='center')
 
 
             # x axis labels
@@ -573,16 +521,6 @@ class PanelPlot(object):
             else:
                 ax.set_xlabel(pd.xlabel, fontsize=pd.xlabel_fontsize)
 
-            # # x axis labels
-            # ax.set_xlabel('', fontsize=pd.xlabel_fontsize)
-            #
-            # if pd.xlabel is None:
-            #     pass
-            # else:
-            #     ax.set_xlabel(pd.xlabel, fontsize=pd.xlabel_fontsize)
-
-
-            # print 'pd=',pd
 
 
             if isinstance(pd, PlotDataCollection):
@@ -590,14 +528,6 @@ class PanelPlot(object):
             else:
                 plot_data_list = [pd]
 
-            # for pd_instance in plot_data_list:
-            #     if isinstance(pd_instance, PlotData):
-            #         self.process_PlotData(pd_instance, ax)
-            #     elif isinstance(pd_instance, BarPlotData):
-            #         self.process_BarPlotData(pd_instance, ax)
-            #     elif isinstance(pd_instance, BrickHeatmapPlotData):
-            #         self.process_BrickHeatmapPlotData(pd_instance, ax)
-            #
             if isinstance(pd, PlotDataCollection):
                 self.process_PlotDataCollection(pd, ax)
             elif isinstance(pd, PlotData):
@@ -613,21 +543,6 @@ class PanelPlot(object):
                 # [tick.label.set_fontsize(self.labelsize) for tick in ax.xaxis.get_major_ticks()]
                 # [tick.label.set_fontsize(self.labelsize) for tick in ax.yaxis.get_major_ticks()]
 
-
-                # if isinstance(pd, PlotDataCollection):
-                #     plot_data_list = pd.plot_data_list
-                # else:
-                #     plot_data_list = [pd]
-                #
-                # for pd_instance in plot_data_list:
-                #     if isinstance(pd_instance, PlotData):
-                #         self.process_PlotData(pd_instance, ax)
-                #     elif isinstance(pd_instance, BarPlotData):
-                #         self.process_BarPlotData(pd_instance, ax)
-                #     elif isinstance(pd_instance, BrickHeatmapPlotData):
-                #         self.process_BrickHeatmapPlotData(pd_instance, ax)
-
-                # ax.set_xlabel(pd.title, fontsize=pd.xlabel_fontsize)
         if self.wspace is None or self.hspace is None:
             pass
         else:
@@ -671,17 +586,6 @@ def draw_brick_heatmap(plot_data):
 
     xpos, ypos = np.meshgrid(ax.get_xticks(), ax.get_yticks())
 
-    for x, y in zip(xpos.flat, ypos.flat):
-        print 'x,y=', (x, y)
-        # ax.text(x, y, 20.0, color='k', ha="center", va="center",)
-
-
-        # for (i,x), (j,y) in zip(enumerate(xpos.flat), enumerate(ypos.flat)):
-        #     print 'i,j=',(i,j)
-        #     print 'x,y=',(x,y)
-
-        # ax.text(x, y, 20.0, color='k', ha="center", va="center")
-        # ax.text(x, y, annotate_dict[(i,j)], color='k', ha="center", va="center")
 
     from itertools import product
     xticks = ax.get_xticks()
@@ -713,16 +617,12 @@ def draw_brick_heatmap(plot_data):
     if pd.colorbar_title:
         if pd.colorbar_title_location is not None:
 
-            # ax.text(pd.colorbar_title_location[0], pd.colorbar_title_location[1], pd.colorbar_title,
-            #         fontsize=12, rotation=270)
 
             ax.text(len(xticks) * pd.colorbar_title_location[0], len(yticks) * pd.colorbar_title_location[1],
                     pd.colorbar_title,
                     fontsize=12, rotation=270)
 
         else:
-            # ax.text(6.0, 5, pd.colorbar_title,
-            #         fontsize=12, rotation=270)
 
             ax.text(len(xticks) * 1.2, len(yticks) * 0.5, pd.colorbar_title,
                     fontsize=12, rotation=270)
