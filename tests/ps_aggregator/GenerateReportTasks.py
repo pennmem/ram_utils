@@ -91,7 +91,7 @@ class GenerateTex(RamTask):
 
         replace_dict = {
             '<DATE>': datetime.date.today(),
-            '<FREQUENCY_PLOT_FILE>': 'ps_frequency_aggregate_plots.pdf',
+            # '<FREQUENCY_PLOT_FILE>': 'ps_frequency_aggregate_plots.pdf',
             '<CENTRALIZED_FREQUENCY_PLOT_FILE>': 'ps_centralized_frequency_aggregate_plots.pdf',
             '<FREQUENCY_PROJECTION_PLOT_FILE>': 'ps_frequency_projection_plots.pdf',
             '<REGION_FREQUENCY_EXPERIMENT_COUNT_TABLE>': latex_table(self.get_passed_object('n_region_frequency_experiment')),
@@ -154,7 +154,15 @@ class GeneratePlots(RamTask):
         high_freq_amplitude_plot_data = self.get_passed_object('high_freq_amplitude_plot')
 
 
-        panel_plot = PanelPlot(xfigsize=11, yfigsize=11, i_max=1, j_max=1, title='', ytitle=self.params.output_title, ytitle_fontsize=16, wspace=0.3, hspace=0.3)
+        # panel_plot = PanelPlot(xfigsize=11, yfigsize=11, i_max=1, j_max=1, title='', ytitle=self.params.output_title, ytitle_fontsize=16, wspace=0.3, hspace=0.3)
+        #
+        # panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
+        #
+        # plot = panel_plot.generate_plot()
+        #
+        # plot_out_fname = self.get_path_to_resource_in_workspace('reports/ps_frequency_aggregate_plots.pdf')
+        #
+        # plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
         pdc = PlotDataCollection(legend_on=True)
         pdc.xlabel = 'Pulse Frequency (Hz)'
@@ -162,17 +170,57 @@ class GeneratePlots(RamTask):
         for v,p in frequency_plot_data.iteritems():
             p.xhline_pos=0.0
             pdc.add_plot_data(p)
+
+
+        # panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=3, title='', ytitle=self.params.output_title, wspace=0.3, hspace=0.3)
+        panel_plot = PanelPlot(xfigsize=18.5, yfigsize=7.5, i_max=1, j_max=3, title='', ytitle=self.params.output_title, labelsize=20, ytitle_fontsize = 20)
+        min_y_list =[]
+        max_y_list =[]
+
+        r =pdc.get_yrange()
+        min_y_list.append(r[0])
+        max_y_list.append(r[1])
+
+        r =frequency_region_plot_data.get_yrange()
+        min_y_list.append(r[0])
+        max_y_list.append(r[1])
+
+        r =frequency_frequency_plot_data.get_yrange()
+        min_y_list.append(r[0])
+        max_y_list.append(r[1])
+
+        y_min = np.min(min_y_list)
+        y_max = np.max(max_y_list)
+        r = y_max - y_min
+        y_min -= 0.05*r
+        y_max += 0.15*r
+
+        pdc.ylim=[y_min,y_max]
+        frequency_region_plot_data.ylim=[y_min,y_max]
+        frequency_frequency_plot_data.ylim=[y_min,y_max]
+
+        pdc.xhline_pos = 0.0
+        frequency_region_plot_data.xhline_pos = 0.0
+        frequency_frequency_plot_data.xhline_pos = 0.0
+
+        # label fontsize
+        pdc.xlabel_fontsize = 20
+        pdc.ylabel_fontsize = 20
+        frequency_region_plot_data.xlabel_fontsize = 20
+        frequency_region_plot_data.ylabel_fontsize = 20
+        frequency_frequency_plot_data.xlabel_fontsize = 20
+        frequency_frequency_plot_data.ylabel_fontsize = 20
+
+
+        print '[y_min,y_max]=',[y_min,y_max]
+
+
+
         panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
+        panel_plot.add_plot_data(0, 1, plot_data=frequency_region_plot_data)
+        panel_plot.add_plot_data(0, 2, plot_data=frequency_frequency_plot_data)
 
-        plot = panel_plot.generate_plot()
 
-        plot_out_fname = self.get_path_to_resource_in_workspace('reports/ps_frequency_aggregate_plots.pdf')
-
-        plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
-
-        panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', ytitle=self.params.output_title, wspace=0.3, hspace=0.3)
-        panel_plot.add_plot_data(0, 0, plot_data=frequency_region_plot_data)
-        panel_plot.add_plot_data(0, 1, plot_data=frequency_frequency_plot_data)
         plot = panel_plot.generate_plot()
         plot_out_fname = self.get_path_to_resource_in_workspace('reports/ps_frequency_projection_plots.pdf')
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
