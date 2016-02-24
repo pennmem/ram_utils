@@ -8,64 +8,61 @@ import matplotlib
 matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
+from collections import namedtuple
 
+PlotDataOption = namedtuple('PlotDataOption', ['name', 'default_value'])
 
 class PlotDataBase(object):
     def __init__(self,**options):
-        self.ylabel_fontsize = 12
-        self.xlabel_fontsize = 12
-        option_list = ['x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels', 'title',
-                            'xlabel_fontsize', 'ylabel_fontsize', 'xlim', 'ylim', 'xhline_pos', 'xlabel', 'ylabel',
-                            'linestyle', 'color', 'marker', 'markersize', 'levelline', 'label']
+
+        PDO=self.PDO
+
+
+        option_list =[
+            PDO(name='x'),
+            PDO(name='y'),
+            PDO(name='xerr'),
+            PDO(name='yerr'),
+            PDO(name='x_tick_labels'),
+            PDO(name='y_tick_labels'),
+            PDO(name='title'),
+            PDO(name='xlabel_fontsize',default_value=12),
+            PDO(name='ylabel_fontsize',default_value=12),
+            PDO(name='xlim'),
+            PDO(name='ylim'),
+            PDO(name='xhline_pos'),
+            PDO(name='xlabel'),
+            PDO(name='ylabel'),
+            PDO(name='linestyle',default_value='-'),
+            PDO(name='color',default_value='black'),
+            PDO(name='marker',default_value=''),
+            PDO(name='markersize'),
+            PDO(name='levelline'),
+            PDO(name='label',default_value=''),
+
+        ]
 
         self.init_options(option_list,options)
-        # for option_name in option_list:
-        #     try:
-        #         setattr(self, option_name, options[option_name])
-        #         print 'option_name=', option_name, ' val=', options[option_name], ' value_check = ', getattr(self,
-        #                                                                                                      option_name)
-        #     except LookupError:
-        #         setattr(self, option_name, None)
-        #
-        # # setting reasonable defaults
-        # if self.linestyle is None:
-        #     self.linestyle = '-'
-        # if self.color is None:
-        #     self.color = 'black'
-        # if self.marker is None:
-        #     self.marker = ''
-        #
-        # if self.label is None:
-        #     self.label = ''
 
-        # if self.x is None or self.y is None:
-        #     raise AttributeError(
-        #         'PlotData requires that x and y attributes are initialized. Use PlotData(x=x_array,y=y_array) syntax')
+    def PDO(self,name,default_value=None):
+        return PlotDataOption(name=name,default_value=default_value)
 
     def init_options(self,option_list,options={}):
-        for option_name in option_list:
+        for option in option_list:
+            if hasattr(self,option.name): continue
             try:
-                setattr(self, option_name, options[option_name])
-                print 'option_name=', option_name, ' val=', options[option_name], ' value_check = ', getattr(self,
-                                                                                                             option_name)
+                setattr(self, option.name, options[option.name])
+                print 'option_name=', option.name, ' val=', options[option.name], ' value_check = ', getattr(self,
+                                                                                                             option.name)
             except LookupError:
-                setattr(self, option_name, None)
+                setattr(self, option.name, option.default_value)
 
-        # setting reasonable defaults
-        if self.linestyle is None:
-            self.linestyle = '-'
-        if self.color is None:
-            self.color = 'black'
-        if self.marker is None:
-            self.marker = ''
-
-        if self.label is None:
-            self.label = ''
 
     def sanity_check(self):
         if self.x is None or self.y is None:
             raise AttributeError(
-                'PlotData requires that x and y attributes are initialized. Use PlotData(x=x_array,y=y_array) syntax')
+
+                self.__class__.__name__+' requires that x and y attributes are initialized. Use PlotData(x=x_array,y=y_array) syntax')
 
 
     def get_yrange(self):
@@ -104,34 +101,7 @@ class PlotData(PlotDataBase):
         :return:
         '''
         PlotDataBase.__init__(self,**options)
-        # self.ylabel_fontsize = 12
-        # self.xlabel_fontsize = 12
-        #
-        # for option_name in ['x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels', 'title',
-        #                     'xlabel_fontsize', 'ylabel_fontsize', 'xlim', 'ylim', 'xhline_pos', 'xlabel', 'ylabel',
-        #                     'linestyle', 'color', 'marker', 'markersize', 'levelline', 'label']:
-        #     try:
-        #         setattr(self, option_name, options[option_name])
-        #         print 'option_name=', option_name, ' val=', options[option_name], ' value_check = ', getattr(self,
-        #                                                                                                      option_name)
-        #     except LookupError:
-        #         setattr(self, option_name, None)
-        #
-        # # setting reasonable defaults
-        # if self.linestyle is None:
-        #     self.linestyle = '-'
-        # if self.color is None:
-        #     self.color = 'black'
-        # if self.marker is None:
-        #     self.marker = ''
-        #
-        # if self.label is None:
-        #     self.label = ''
-        #
-        # if self.x is None or self.y is None:
-        #     raise AttributeError(
-        #         'PlotData requires that x and y attributes are initialized. Use PlotData(x=x_array,y=y_array) syntax')
-
+        self.sanity_check()
 
 class BarPlotData(PlotDataBase):
     # def __init__(self, x, y, xerr=None, yerr=None, x_tick_labels=None, y_tick_labels=None, title=''):
@@ -143,101 +113,62 @@ class BarPlotData(PlotDataBase):
         'levelline', 'barcolors','barwidth'
         :return:
         '''
-        PlotDataBase.__init__(self)
-        self.ylabel_fontsize = 12
-        self.xlabel_fontsize = 12
+        PlotDataBase.__init__(self,**options)
 
-        for option_name in ['x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels', 'title',
-                            'xlabel_fontsize', 'ylabel_fontsize', 'xlim', 'ylim', 'xhline_pos', 'xlabel', 'ylabel',
-                            'linestyle', 'color', 'marker', 'markersize', 'levelline', 'barcolors', 'barwidth', 'alpha',
-                            'label']:
-            try:
-                setattr(self, option_name, options[option_name])
-                print 'option_name=', option_name, ' val=', options[option_name], ' value_check = ', getattr(self,
-                                                                                                             option_name)
-            except LookupError:
-                setattr(self, option_name, None)
+        PDO = self.PDO
 
-        # setting reasonable defaults
-        if self.linestyle is None:
-            self.linestyle = '-'
-        if self.color is None:
-            self.color = 'black'
-        if self.marker is None:
-            self.marker = ''
+        option_list = [
 
-        if self.barwidth is None:
-            self.barwidth = 0.5
-
-        if self.label is None:
-            self.label = ''
-
-        if self.x is None or self.y is None:
-            raise AttributeError(
-                'PlotData requires that x and y attributes are initialized. Use PlotData(x=x_array,y=y_array) syntax')
-
+            PDO(name='barcolors',default_value=''),
+            PDO(name='barwidth',default_value=0.5),
+            PDO(name='alpha',default_value=0.5),
+        ]
+        self.init_options(option_list,options)
+        self.sanity_check()
 
 class BrickHeatmapPlotData(PlotDataBase):
     # def __init__(self, x, y, xerr=None, yerr=None, x_tick_labels=None, y_tick_labels=None, title=''):
     def __init__(self, **options):
         '''
         Initializes PlotData
-        :param options: options are 'df', 'annot_dict','val_lim','x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels','title',
-        'xlabel_fontsize','ylabel_fontsize', 'xlim','ylim','xhline_pos','xlabel','ylabel','linestyle','color','marker',
-        'levelline', 'barcolors','colorbar_title','colorbar_title_location'
         :return:
         '''
-        PlotDataBase.__init__(self)
-        self.ylabel_fontsize = 12
-        self.xlabel_fontsize = 12
+        PlotDataBase.__init__(self,**options)
 
-        for option_name in ['df', 'annot_dict', 'val_lim', 'x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels',
-                            'title',
-                            'xlabel_fontsize', 'ylabel_fontsize', 'xlim', 'ylim', 'xhline_pos', 'xlabel', 'ylabel',
-                            'linestyle', 'color', 'marker', 'markersize', 'levelline', 'barcolors', 'colorbar_title',
-                            'colorbar_title_location', 'label', 'cmap', 'annotation_font_color']:
-            try:
-                setattr(self, option_name, options[option_name])
-                print 'option_name=', option_name, ' val=', options[option_name], ' value_check = ', getattr(self,
-                                                                                                             option_name)
-            except LookupError:
-                setattr(self, option_name, None)
+        PDO = self.PDO
 
-        # setting reasonable defaults
-        if self.linestyle is None:
-            self.linestyle = '-'
-        if self.color is None:
-            self.color = 'black'
-        if self.marker is None:
-            self.marker = ''
+        option_list = [
 
-        if self.label is None:
-            self.label = ''
+            PDO(name='df'),
+            PDO(name='annot_dict'),
+            PDO(name='val_lim'),
+            PDO(name='colorbar_title'),
+            PDO(name='colorbar_title_location'),
+            PDO(name='cmap'),
+            PDO(name='annotation_font_color'),
+        ]
+        self.init_options(option_list,options)
+        self.sanity_check()
 
+    def sanity_check(self):
         if self.df is None:
             raise AttributeError(
-                'BrickHeatmapPlotData requires that df attribute is initialized - it can be pandas DataFrame object of simply 2D numpy array. Use PlotData(df=df) syntax')
+                self.__class__.__name__+' requires that df attribute is initialized - it can be pandas DataFrame object of simply 2D numpy array. Use PlotData(df=df) syntax')
 
 
 class PlotDataCollection(PlotDataBase):
     def __init__(self, **options):
-        PlotDataBase.__init__(self)
-
-        for option_name in ['df', 'annot_dict', 'val_lim', 'x', 'y', 'xerr', 'yerr', 'x_tick_labels', 'y_tick_labels',
-                            'title',
-                            'xlabel_fontsize', 'ylabel_fontsize', 'xlim', 'ylim', 'xhline_pos', 'xlabel', 'ylabel',
-                            'linestyle', 'color', 'marker', 'markersize', 'levelline', 'barcolors', 'colorbar_title',
-                            'colorbar_title_location', 'legend_pos', 'legend_on']:
-            try:
-                setattr(self, option_name, options[option_name])
-                print 'option_name=', option_name, ' val=', options[option_name], ' value_check = ', getattr(self,
-                                                                                                             option_name)
-            except LookupError:
-                setattr(self, option_name, None)
+        PlotDataBase.__init__(self,**options)
 
         self.plot_data_list = []
-        if self.legend_on is None:
-            self.legend_on = False
+        PDO = self.PDO
+
+        option_list = [
+            PDO(name='legend_pos'),
+            PDO(name='legend_on',default_value=False),
+        ]
+        self.init_options(option_list,options)
+
 
     def add_plot_data(self, pd):
         self.plot_data_list.append(pd)
