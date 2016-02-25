@@ -54,17 +54,17 @@ class ComputeControlPowers(RamTask):
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-control_pow_mat_pre.pkl'))
 
         self.samplerate = None
-        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs, self.params.control_start_time+0.45, self.params.control_end_time+0.45, True, False)
+        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs, self.params.control_start_time+1.45, self.params.control_end_time+1.45, True, False)
         self.pass_object('control_pow_mat_045', self.pow_mat)
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-control_pow_mat_0.45.pkl'))
 
         self.samplerate = None
-        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs, self.params.control_start_time+0.7, self.params.control_end_time+0.7, True, False)
+        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs, self.params.control_start_time+1.7, self.params.control_end_time+1.7, True, False)
         self.pass_object('control_pow_mat_07', self.pow_mat)
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-control_pow_mat_0.7.pkl'))
 
         self.samplerate = None
-        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs, self.params.control_start_time+1.2, self.params.control_end_time+1.2, True, False)
+        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs, self.params.control_start_time+2.2, self.params.control_end_time+2.2, True, False)
         self.pass_object('control_pow_mat_12', self.pow_mat)
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-control_pow_mat_1.2.pkl'))
 
