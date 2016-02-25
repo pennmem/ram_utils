@@ -194,7 +194,7 @@ class RunAnalysis(RamTask):
         #region_total = self.get_passed_object('region_session_total')
         #regions = [r for r,c in region_total.iteritems() if c>=5]
 
-        self.analyze(self.ps_table[self.ps_table['prob_pre']<self.ps_table['J_thresh']], name_prefix='')
+        self.analyze(self.ps_table[self.ps_table['prob_pre']<self.ps_table['J_thresh']], name_prefix='low_quantile_')
         self.analyze(self.ps_table[self.ps_table['prob_pre']>self.ps_table['J_thresh']], name_prefix='high_quantile_')
         self.analyze(self.ps_table, name_prefix='all_')
 
@@ -203,7 +203,7 @@ class RunAnalysis(RamTask):
         rf.run(ps_subtable, self.params.frequency_plot_regions, self.params.frequency_plot_areas)
         self.pass_object(name_prefix+'frequency_plot', rf.plots)
         self.pass_object(name_prefix+'centralized_frequency_plot', rf.centralized_plots)
-        self.pass_object(name_prefix+'n_region_frequency_experiment', rf.n_experiments)
+        self.pass_object('n_region_frequency_experiment', rf.n_experiments)
         self.pass_object(name_prefix+'frequency_frequency_plot', rf.frequency_plot)
         self.pass_object(name_prefix+'frequency_region_plot', rf.region_plot)
 
