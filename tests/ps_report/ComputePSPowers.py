@@ -153,8 +153,8 @@ class ComputePSPowers(RamTask):
             sess_pow_mat_pre = np.empty(shape=(n_events, n_bps, n_freqs), dtype=np.float)
             sess_pow_mat_post = np.empty_like(sess_pow_mat_pre)
 
-            for i,ti in enumerate(bipolar_pairs):
-                bp = ti['channel_str']
+            for i,bp in enumerate(bipolar_pairs):
+                # bp = ti['channel_str']
                 print 'Computing powers for bipolar pair', bp
                 elec1 = np.where(monopolar_channels == bp[0])[0][0]
                 elec2 = np.where(monopolar_channels == bp[1])[0][0]
