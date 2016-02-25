@@ -58,8 +58,8 @@ class Params(object):
         self.fr1_end_time = 1.366
         self.fr1_buf = 1.365
 
-        self.control_start_time = -1.0
-        self.control_end_time = 0.0
+        self.control_start_time = -1.1
+        self.control_end_time = -0.1
         self.control_buf = 1.0
 
         self.ps_start_time = -1.0
