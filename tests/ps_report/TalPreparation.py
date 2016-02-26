@@ -23,23 +23,26 @@ class TalPreparation(RamTask):
         tal_reader = TalReader(filename=tal_path)
         tal_stim_only_reader = TalStimOnlyReader(filename=tal_stim_only_path)
 
-        bipolar_pairs = tal_reader.read()
+        bpTalStruct = tal_reader.read()
         monopolar_channels = tal_reader.get_monopolar_channels()
+        bipolar_pairs = tal_reader.get_bipolar_pairs()
 
-        for i,bp in enumerate(bipolar_pairs):
-            bipolar_pairs.tagName[i] = bp.tagName.upper()
+        for i,bp in enumerate(bpTalStruct):
+            bpTalStruct.tagName[i] = bp.tagName.upper()
 
-        loc_tag = dict(zip(bipolar_pairs.tagName, bipolar_pairs.locTag))
+        loc_tag = dict(zip(bpTalStruct.tagName, bpTalStruct.locTag))
 
-        self.pass_object('bipolar_pairs', bipolar_pairs)
+        # self.pass_object('bipolar_pairs', bipolar_pairs)
         self.pass_object('monopolar_channels', monopolar_channels)
+        self.pass_object('bipolar_pairs', bipolar_pairs)
+
 
         try:
-            stim_bipolar_pairs = tal_stim_only_reader.read()
-            for i,bp in enumerate(stim_bipolar_pairs):
-                stim_bipolar_pairs.tagName[i] = bp.tagName.upper()
+            virtualTalStruct = tal_stim_only_reader.read()
+            for i,bp in enumerate(virtualTalStruct):
+                virtualTalStruct.tagName[i] = bp.tagName.upper()
 
-            loc_tag.update(dict(zip(stim_bipolar_pairs.tagName, stim_bipolar_pairs.locTag)))
+            loc_tag.update(dict(zip(virtualTalStruct.tagName, virtualTalStruct.locTag)))
 
         except IOError:
                 pass
