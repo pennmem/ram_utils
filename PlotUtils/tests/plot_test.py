@@ -27,12 +27,16 @@ pd_2 = PlotData(x=np.arange(5, dtype=np.float) - 0.1, y=np.random.rand(5), yerr=
 pdc = PlotDataCollection(legend_on=True)
 pdc.xlabel = 'x_axis_pdc'
 pdc.ylabel = 'y_pdc'
+pdc.xlabel_fontsize = 20
+pdc.ylabel_fontsize = 20
+
 pdc.add_plot_data(pd_1)
 pdc.add_plot_data(pd_2)
 
 
 pd_3 = PlotData(x=np.arange(5, dtype=np.float) - 0.1, y=np.random.rand(5), yerr=np.random.rand(5),
                 xlabel='x_axis_3' , ylabel='series_3',
+                xlabel_fontsize = 20,ylabel_fontsize = 20,
                 color='red', marker='*', label='blue_series')
 
 
