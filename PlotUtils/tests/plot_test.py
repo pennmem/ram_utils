@@ -20,9 +20,9 @@ plot.savefig('panel_separate_y_titles.png')
 
 
 pd_1 = PlotData(x=np.arange(10, dtype=np.float), y=np.random.rand(10), yerr=np.random.rand(10),
-                color='green', marker='s', levelline=[[0, 10], [0, 1]], label='green_series')
+                 marker='s', levelline=[[0, 10], [0, 1]], label='green_series')
 pd_2 = PlotData(x=np.arange(5, dtype=np.float) - 0.1, y=np.random.rand(5), yerr=np.random.rand(5),
-                color='blue', marker='*', label='blue_series')
+                 marker='*', markersize=20.0, label='blue_series')
 
 pdc = PlotDataCollection(legend_on=True)
 pdc.xlabel = 'x_axis_pdc'
@@ -37,7 +37,7 @@ pdc.add_plot_data(pd_2)
 pd_3 = PlotData(x=np.arange(5, dtype=np.float) - 0.1, y=np.random.rand(5), yerr=np.random.rand(5),
                 xlabel='x_axis_3_new' , ylabel='series_3',
                 xlabel_fontsize = 20,ylabel_fontsize = 20,
-                color='black', marker='*', markersize=10.0, elinewidth=3.0, label='black_series')
+                color='black', marker='*', markersize=20.0, elinewidth=3.0, label='black_series')
 
 
 panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='PANEL TITLE PDC')
