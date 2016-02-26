@@ -52,7 +52,7 @@ class PlotDataBase(OptionsObject):
             PDO(name='xlabel'),
             PDO(name='ylabel'),
             PDO(name='linestyle', default_value='-'),
-            PDO(name='color', default_value='black'),
+            PDO(name='color'),
             PDO(name='marker', default_value='o'),
             PDO(name='markersize', default_value=5.0),
             PDO(name='levelline'),
