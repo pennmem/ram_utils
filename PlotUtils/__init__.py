@@ -53,10 +53,12 @@ class PlotDataBase(OptionsObject):
             PDO(name='ylabel'),
             PDO(name='linestyle', default_value='-'),
             PDO(name='color', default_value='black'),
-            PDO(name='marker', default_value=''),
-            PDO(name='markersize'),
+            PDO(name='marker', default_value='o'),
+            PDO(name='markersize', default_value=5.0),
             PDO(name='levelline'),
             PDO(name='label', default_value=''),
+            PDO(name='elinewidth', default_value=1), # width of the error bar
+
 
         ]
 
@@ -372,7 +374,7 @@ class PanelPlot(OptionsObject):
     def process_PlotData(self, pd, ax):
 
         if pd.xerr is not None or pd.yerr is not None:
-            lines = ax.errorbar(pd.x, pd.y, yerr=pd.yerr, fmt='--o', label=pd.label)
+            lines = ax.errorbar(pd.x, pd.y, yerr=pd.yerr, elinewidth=pd.elinewidth, fmt='--o',marker=pd.marker, markersize=pd.markersize,color=pd.color, label=pd.label)
 
             if pd.x_tick_labels is not None:
                 ax.set_xticks(pd.x)
@@ -538,6 +540,8 @@ class PanelPlot(OptionsObject):
             fig.subplots_adjust(wspace=self.wspace, hspace=self.hspace)
 
         fig.tight_layout()
+
+        # plt.tight_layout(pad=3.0, w_pad=0.0, h_pad=0.0)
 
         return plt
 

@@ -3,7 +3,7 @@ import sys
 
 pd_1 = PlotData(x=np.arange(10, dtype=np.float), y=np.random.rand(10), yerr=np.random.rand(10),
                 ylabel='series_1',xlabel='x_axis_1',
-                color='green', marker='s', levelline=[[0, 10], [0, 1]], label='green_series')
+                color='green',  levelline=[[0, 10], [0, 1]], label='green_series')
 pd_2 = PlotData(x=np.arange(5, dtype=np.float) - 0.1, y=np.random.rand(5), yerr=np.random.rand(5),
                 xlabel='x_axis_2' , ylabel='series_2',
                 color='blue', marker='*', label='blue_series')
@@ -35,12 +35,13 @@ pdc.add_plot_data(pd_2)
 
 
 pd_3 = PlotData(x=np.arange(5, dtype=np.float) - 0.1, y=np.random.rand(5), yerr=np.random.rand(5),
-                xlabel='x_axis_3' , ylabel='series_3',
+                xlabel='x_axis_3_new' , ylabel='series_3',
                 xlabel_fontsize = 20,ylabel_fontsize = 20,
-                color='red', marker='*', label='blue_series')
+                color='black', marker='*', markersize=10.0, elinewidth=3.0, label='black_series')
 
 
 panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='PANEL TITLE PDC')
+
 
 panel_plot.add_plot_data(0,0,plot_data=pdc)
 panel_plot.add_plot_data(0,1,plot_data=pd_3)
@@ -53,7 +54,7 @@ plot.savefig('panel_separate_y_titles_pdc.png')
 
 
 
-sys.exit()
+
 ##############################################################
 
 
@@ -177,6 +178,7 @@ panel_plot_1 = PanelPlot(xfigsize=5, yfigsize=5, i_max=1, j_max=1, title='BAR_PL
 
 bpd = BarPlotData(x=np.arange(20), y=np.random.rand(20), xlabel='x_axis_label', ylabel='y_axis_label', title='data01',
                   yerr=np.random.rand(20) * 0.1,
+                  elinewidth=2.5,
                   x_tick_labels=['a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9'] * 2,
                   barcolors=['r', 'g', 'b', 'r', 'g', 'b', 'r', 'g', 'b', 'r'] * 2
                   )
