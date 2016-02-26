@@ -13,7 +13,6 @@ $\bullet$ Region: <REGION>
 \begin{minipage}[htbp]{280pt}
 \centering
 \textbf{Two-factor ANOVA}
-% {<PARAMETER1> $\times$ <PARAMETER2>}
 
 \begin{tabular}{|c|c|c|c|}
 \hline & <PARAMETER1> & <PARAMETER2> & <PARAMETER1> $\times$ <PARAMETER2> \\
@@ -25,11 +24,20 @@ $\bullet$ Region: <REGION>
 \end{tabular}
 
 \begin{figure}[!h]
-\centering
-\subfigure{\includegraphics[scale=0.4]{<LOW_QUANTILE_PLOT_FILE>}}
-\subfigure{\includegraphics[scale=0.4]{<HIGH_QUANTILE_PLOT_FILE>}}
-\subfigure{\includegraphics[scale=0.4]{<ALL_PLOT_FILE>}}
+\begin{subfigure}[!h]{\linewidth}
+\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<LOW_QUANTILE_PLOT_FILE>}
+\subcaption{Lower Half of Pre-Stim Classifier Output}
+\end{subfigure}
+\begin{subfigure}[!h]{\linewidth}
+\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<HIGH_QUANTILE_PLOT_FILE>}
+\subcaption{Upper Half of Pre-Stim Classifier Output}
+\end{subfigure}
+\begin{subfigure}[!h]{\linewidth}
+\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<ALL_PLOT_FILE>}
+\subcaption{All Trials}
+\end{subfigure}
 \end{figure}
+
 
 <PARAM1_TTEST_TABLE>
 <PARAM2_TTEST_TABLE>

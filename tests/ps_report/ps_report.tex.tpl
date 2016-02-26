@@ -1,17 +1,10 @@
 \documentclass[a4paper]{article} 
-\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
-\usepackage{graphicx,multirow} 
-\usepackage{epstopdf} 
-\usepackage{subfigure,amsmath} 
-\usepackage{wrapfig}
-\usepackage{booktabs}
-\usepackage{longtable} 
-\usepackage{pdfpages}
-\usepackage{mathtools}
-\usepackage{array}
-\usepackage{enumitem}
-\usepackage[small,bf,it]{caption}
-\setlength\belowcaptionskip{2pt}
+
+\usepackage[table]{xcolor}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage[skip=0pt]{subcaption}
+%\setlength\belowcaptionskip{2pt}
 
 \addtolength{\oddsidemargin}{-.875in} 
 \addtolength{\evensidemargin}{-.875in} 
@@ -52,7 +45,7 @@
 
 \begin{figure}[!h]
 \centering
-\subfigure{\includegraphics[scale=0.45]{<ROC_AND_TERC_PLOT_FILE>}}
+\includegraphics[scale=0.45]{<ROC_AND_TERC_PLOT_FILE>}
 \caption{\textbf{(a)} ROC curve for the subject;
 \textbf{(b)} Subject recall performance represented as
 percentage devation from the (subject) mean, separated by tercile
@@ -89,17 +82,20 @@ $\bullet$ All channels
 \end{minipage}
 \end{tabular}
 
-%\textbf{Parameters:}
-%\begin{itemize}
-%  \item ISI: $<CUMULATIVE_ISI_MID>$ ($\pm <CUMULATIVE_ISI_HALF_RANGE>$) ms
-%  \item All channels
-%\end{itemize}
-
 \begin{figure}[!h]
 \centering
-\subfigure{\includegraphics[scale=0.4]{<CUMULATIVE_LOW_QUANTILE_PLOT_FILE>}}
-\subfigure{\includegraphics[scale=0.4]{<CUMULATIVE_HIGH_QUANTILE_PLOT_FILE>}}
-\subfigure{\includegraphics[scale=0.4]{<CUMULATIVE_ALL_PLOT_FILE>}}
+\begin{subfigure}[!h]{\linewidth}
+\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<CUMULATIVE_LOW_QUANTILE_PLOT_FILE>}
+\subcaption{Lower Half of Pre-Stim Classifier Output}
+\end{subfigure}
+\begin{subfigure}[!h]{\linewidth}
+\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<CUMULATIVE_HIGH_QUANTILE_PLOT_FILE>}
+\subcaption{Upper Half of Pre-Stim Classifier Output}
+\end{subfigure}
+\begin{subfigure}[!h]{\linewidth}
+\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<CUMULATIVE_ALL_PLOT_FILE>}
+\subcaption{All Trials}
+\end{subfigure}
 \end{figure}
 
 <CUMULATIVE_PARAM1_TTEST_TABLE>

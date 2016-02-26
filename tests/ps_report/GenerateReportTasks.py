@@ -189,17 +189,16 @@ class GeneratePlots(RamTask):
         xval_output = self.get_passed_object('xval_output')
         fr1_summary = xval_output[-1]
 
-        panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', wspace=0.3, hspace=0.3)
+        panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, labelsize=16, wspace=5.0)
 
-        pd1 = PlotData(x=fr1_summary.fpr, y=fr1_summary.tpr, xlim=[0.0,1.0], ylim=[0.0,1.0], xlabel='False Alarm Rate\n(a)', ylabel='Hit Rate', levelline=((0.0,1.0),(0.0,1.0)))
+        pd1 = PlotData(x=fr1_summary.fpr, y=fr1_summary.tpr, xlim=[0.0,1.0], ylim=[0.0,1.0], xlabel='False Alarm Rate\n(a)', ylabel='Hit Rate', xlabel_fontsize=20, ylabel_fontsize=20, levelline=((0.0,1.0),(0.0,1.0)), color='k', markersize=1.0)
 
         pc_diff_from_mean = (fr1_summary.low_pc_diff_from_mean, fr1_summary.mid_pc_diff_from_mean, fr1_summary.high_pc_diff_from_mean)
 
         ylim = np.max(np.abs(pc_diff_from_mean)) + 5.0
         if ylim > 100.0:
             ylim = 100.0
-        # pd2 = BarPlotData(x=(0,1,2), y=pc_diff_from_mean, ylim=[-ylim,ylim], xlabel='Tercile of Classifier Estimate\n(b)', ylabel='Recall Change From Mean (%)', x_tick_labels=['Low', 'Middle', 'High'], xhline_pos=0.0, barcolors=['grey','grey', 'grey'], barwidth=0.5)
-        pd2 = BarPlotData(x=(0,1,2), y=pc_diff_from_mean, ylim=[-ylim,ylim], xlabel='Tercile of Classifier Estimate\n(b)', ylabel='Recall Change From Mean (%)', x_tick_labels=['Low', 'Middle', 'High'], xhline_pos=0.0, barcolors=['grey','grey', 'grey'], barwidth=0.5)
+        pd2 = BarPlotData(x=(0,1,2), y=pc_diff_from_mean, ylim=[-ylim,ylim], xlabel='Tercile of Classifier Estimate\n(b)', ylabel='Recall Change From Mean (%)', x_tick_labels=['Low', 'Middle', 'High'], xlabel_fontsize=20, ylabel_fontsize=20, xhline_pos=0.0, barcolors=['grey','grey', 'grey'], barwidth=0.5)
 
         panel_plot.add_plot_data(0, 0, plot_data=pd1)
         panel_plot.add_plot_data(0, 1, plot_data=pd2)
@@ -221,7 +220,6 @@ class GeneratePlots(RamTask):
 
             pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='$\Delta$ Post-Pre Classifier Output', xlabel_fontsize=20, ylabel_fontsize=20)
             for v,p in session_summary.low_quantile_classifier_delta_plot.iteritems():
-                p.xhline_pos=0.0
                 pdc.add_plot_data(p)
 
             panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
@@ -244,7 +242,6 @@ class GeneratePlots(RamTask):
 
             pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='$\Delta$ Post-Pre Classifier Output', xlabel_fontsize=20, ylabel_fontsize=20)
             for v,p in session_summary.high_quantile_classifier_delta_plot.iteritems():
-                p.xhline_pos=0.0
                 pdc.add_plot_data(p)
 
             panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
@@ -267,7 +264,6 @@ class GeneratePlots(RamTask):
 
             pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='$\Delta$ Post-Pre Classifier Output', xlabel_fontsize=20, ylabel_fontsize=20)
             for v,p in session_summary.all_classifier_delta_plot.iteritems():
-                p.xhline_pos=0.0
                 pdc.add_plot_data(p)
 
             panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
@@ -300,7 +296,6 @@ class GeneratePlots(RamTask):
 
         pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='$\Delta$ Post-Pre Classifier Output', xlabel_fontsize=20, ylabel_fontsize=20)
         for v,p in cumulative_low_quantile_classifier_delta_plot.iteritems():
-            p.xhline_pos=0.0
             pdc.add_plot_data(p)
 
         panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
@@ -323,7 +318,6 @@ class GeneratePlots(RamTask):
 
         pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='$\Delta$ Post-Pre Classifier Output', xlabel_fontsize=20, ylabel_fontsize=20)
         for v,p in cumulative_high_quantile_classifier_delta_plot.iteritems():
-            p.xhline_pos=0.0
             pdc.add_plot_data(p)
 
         panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
@@ -346,7 +340,6 @@ class GeneratePlots(RamTask):
 
         pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='$\Delta$ Post-Pre Classifier Output', xlabel_fontsize=20, ylabel_fontsize=20)
         for v,p in cumulative_all_classifier_delta_plot.iteritems():
-            p.xhline_pos=0.0
             pdc.add_plot_data(p)
 
         panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)

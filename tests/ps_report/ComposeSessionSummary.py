@@ -36,12 +36,13 @@ def classifier_delta_plot_data(ps_table, control_series, param1_name, param2_nam
                                label=param2_name+' '+str(val2)+' '+param2_unit
                                )
     control_means = np.empty(len(param1_vals)+1, dtype=float)
-    control_means[0] = control_series.mean()
+    control_mean = control_series.mean()
+    control_means[0] = control_mean
     control_means[1:] = np.NAN
     control_sems = np.empty(len(param1_vals)+1, dtype=float)
     control_sems[0] = control_series.sem()
     control_sems[1:] = np.NAN
-    plots['CONTROL'] = PlotData(x=np.arange(1,len(param1_vals)+2), y=control_means, yerr=control_sems, x_tick_labels=['CTRL']+[x if x>0 else 'PULSE' for x in param1_vals])
+    plots['CONTROL'] = PlotData(x=np.arange(1,len(param1_vals)+2), y=control_means, yerr=control_sems, x_tick_labels=['CTRL']+[x if x>0 else 'PULSE' for x in param1_vals], xhline_pos=control_mean, color='k', markersize=10.0, elinewidth=3.0)
     return plots
 
 
