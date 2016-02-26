@@ -16,9 +16,11 @@ from scipy.stats import ttest_ind
 
 from sklearn.externals import joblib
 
+from collections import OrderedDict
 
-def delta_plot_data(ps_table, param1_name, param2_name, param2_unit):
-    plots = dict()
+
+def classifier_delta_plot_data(ps_table, control_series, param1_name, param2_name, param2_unit):
+    plots = OrderedDict()
     param1_vals = sorted(ps_table[param1_name].unique())
     param2_vals = sorted(ps_table[param2_name].unique())
     for p2, val2 in enumerate(param2_vals):
@@ -29,9 +31,34 @@ def delta_plot_data(ps_table, param1_name, param2_name, param2_unit):
             ps_table_val1_val2 = ps_table_val2[ps_table_val2[param1_name]==val1]
             means[i] = ps_table_val1_val2['prob_diff'].mean()
             sems[i] = ps_table_val1_val2['prob_diff'].sem()
-        plots[val2] = PlotData(x=np.arange(1,len(param1_vals)+1)-p2*0.1,
+        plots[val2] = PlotData(x=np.arange(2,len(param1_vals)+2)-p2*0.1,
                                y=means, yerr=sems,
-                               x_tick_labels=[x if x>0 else 'PULSE' for x in param1_vals],
+                               label=param2_name+' '+str(val2)+' '+param2_unit
+                               )
+    control_means = np.empty(len(param1_vals)+1, dtype=float)
+    control_means[0] = control_series.mean()
+    control_means[1:] = np.NAN
+    control_sems = np.empty(len(param1_vals)+1, dtype=float)
+    control_sems[0] = control_series.sem()
+    control_sems[1:] = np.NAN
+    plots['CONTROL'] = PlotData(x=np.arange(1,len(param1_vals)+2), y=control_means, yerr=control_sems, x_tick_labels=['CTRL']+[x if x>0 else 'PULSE' for x in param1_vals])
+    return plots
+
+
+def recall_delta_plot_data(ps_table, delta_column_name, param1_name, param2_name, param2_unit):
+    plots = OrderedDict()
+    param1_vals = sorted(ps_table[param1_name].unique())
+    param2_vals = sorted(ps_table[param2_name].unique())
+    for p2, val2 in enumerate(param2_vals):
+        ps_table_val2 = ps_table[ps_table[param2_name]==val2]
+        means = np.empty(len(param1_vals), dtype=float)
+        sems = np.empty(len(param1_vals), dtype=float)
+        for i,val1 in enumerate(param1_vals):
+            ps_table_val1_val2 = ps_table_val2[ps_table_val2[param1_name]==val1]
+            means[i] = ps_table_val1_val2[delta_column_name].mean()
+            sems[i] = ps_table_val1_val2[delta_column_name].sem()
+        plots[val2] = PlotData(x=np.arange(1,len(param1_vals)+1)-p2*0.1,
+                               y=means, yerr=sems, x_tick_labels=[x if x>0 else 'PULSE' for x in param1_vals],
                                label=param2_name+' '+str(val2)+' '+param2_unit
                                )
     return plots
@@ -131,6 +158,7 @@ class ComposeSessionSummary(RamTask):
         xval_output = self.get_passed_object('xval_output')
 
         ps_table = self.get_passed_object('ps_table')
+        control_table = self.get_passed_object('control_table')
 
         sessions = sorted(ps_table.session.unique())
 
@@ -138,6 +166,8 @@ class ComposeSessionSummary(RamTask):
         self.pass_object('NUMBER_OF_ELECTRODES', len(monopolar_channels))
 
         thresh = xval_output[-1].jstat_thresh
+        control_low_table = control_table[control_table['prob_pre']<thresh]
+        control_high_table = control_table[control_table['prob_pre']>1.0-thresh]
 
         self.pass_object('AUC', xval_output[-1].auc)
 
@@ -223,8 +253,16 @@ class ComposeSessionSummary(RamTask):
             session_summary.const_param_value = ps_session_table[const_param_name].unique().max()
 
             ps_session_low_table = pd.DataFrame(ps_session_table[ps_session_table['prob_pre']<thresh])
+            ps_session_high_table = pd.DataFrame(ps_session_table[ps_session_table['prob_pre']>1.0-thresh])
 
-            session_summary.plots = delta_plot_data(ps_session_low_table, param1_name, param2_name, param2_unit)
+            session_summary.low_quantile_classifier_delta_plot = classifier_delta_plot_data(ps_session_low_table, control_low_table['prob_diff_500'], param1_name, param2_name, param2_unit)
+            session_summary.low_quantile_recall_delta_plot = recall_delta_plot_data(ps_session_low_table, 'perf_diff_with_control_low', param1_name, param2_name, param2_unit)
+
+            session_summary.high_quantile_classifier_delta_plot = classifier_delta_plot_data(ps_session_high_table, control_high_table['prob_diff_500'], param1_name, param2_name, param2_unit)
+            session_summary.high_quantile_recall_delta_plot = recall_delta_plot_data(ps_session_high_table, 'perf_diff_with_control_high', param1_name, param2_name, param2_unit)
+
+            session_summary.all_classifier_delta_plot = classifier_delta_plot_data(ps_session_table, control_table['prob_diff_500'], param1_name, param2_name, param2_unit)
+            session_summary.all_recall_delta_plot = recall_delta_plot_data(ps_session_table, 'perf_diff', param1_name, param2_name, param2_unit)
 
             if sess_loc_tag is not None and not (sess_loc_tag in anova_param1_sv):
                 anova_param1_sv[sess_loc_tag] = []
@@ -292,9 +330,25 @@ class ComposeSessionSummary(RamTask):
         self.pass_object('CUMULATIVE_ISI_HALF_RANGE', isi_halfrange)
 
         ps_low_table = ps_table[ps_table['prob_pre']<thresh]
+        ps_high_table = ps_table[ps_table['prob_pre']>1.0-thresh]
 
-        cumulative_plots = delta_plot_data(ps_low_table, param1_name, param2_name, param2_unit)
-        self.pass_object('cumulative_plots', cumulative_plots)
+        cumulative_low_quantile_classifier_delta_plot = classifier_delta_plot_data(ps_low_table, control_low_table['prob_diff_500'], param1_name, param2_name, param2_unit)
+        cumulative_low_quantile_recall_delta_plot = recall_delta_plot_data(ps_low_table, 'perf_diff_with_control_low', param1_name, param2_name, param2_unit)
+
+        cumulative_high_quantile_classifier_delta_plot = classifier_delta_plot_data(ps_high_table, control_high_table['prob_diff_500'], param1_name, param2_name, param2_unit)
+        cumulative_high_quantile_recall_delta_plot = recall_delta_plot_data(ps_high_table, 'perf_diff_with_control_high', param1_name, param2_name, param2_unit)
+
+        cumulative_all_classifier_delta_plot = classifier_delta_plot_data(ps_table, control_table['prob_diff_500'], param1_name, param2_name, param2_unit)
+        cumulative_all_recall_delta_plot = recall_delta_plot_data(ps_table, 'perf_diff', param1_name, param2_name, param2_unit)
+
+        self.pass_object('cumulative_low_quantile_classifier_delta_plot', cumulative_low_quantile_classifier_delta_plot)
+        self.pass_object('cumulative_low_quantile_recall_delta_plot', cumulative_low_quantile_recall_delta_plot)
+
+        self.pass_object('cumulative_high_quantile_classifier_delta_plot', cumulative_high_quantile_classifier_delta_plot)
+        self.pass_object('cumulative_high_quantile_recall_delta_plot', cumulative_high_quantile_recall_delta_plot)
+
+        self.pass_object('cumulative_all_classifier_delta_plot', cumulative_all_classifier_delta_plot)
+        self.pass_object('cumulative_all_recall_delta_plot', cumulative_all_recall_delta_plot)
 
         cumulative_anova_fvalues = cumulative_anova_pvalues = None
         cumulative_param1_ttest_table = cumulative_param2_ttest_table = cumulative_param12_ttest_table = None

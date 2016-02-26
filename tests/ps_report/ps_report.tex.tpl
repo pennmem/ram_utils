@@ -23,7 +23,7 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{<EXPERIMENT> report v 2.4}
+\lhead{<EXPERIMENT> report v 3.0}
 \chead{Subject: \textbf{<SUBJECT>}}
 \rhead{Date created: <DATE>}
 \begin{document}
@@ -97,7 +97,9 @@ $\bullet$ All channels
 
 \begin{figure}[!h]
 \centering
-\subfigure{\includegraphics[scale=0.35]{<CUMULATIVE_PLOT_FILE>}}
+\subfigure{\includegraphics[scale=0.4]{<CUMULATIVE_LOW_QUANTILE_PLOT_FILE>}}
+\subfigure{\includegraphics[scale=0.4]{<CUMULATIVE_HIGH_QUANTILE_PLOT_FILE>}}
+\subfigure{\includegraphics[scale=0.4]{<CUMULATIVE_ALL_PLOT_FILE>}}
 \end{figure}
 
 <CUMULATIVE_PARAM1_TTEST_TABLE>

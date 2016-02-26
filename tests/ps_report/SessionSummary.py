@@ -5,7 +5,12 @@ import numpy as np
 class SessionSummary(object):
     def __init__(self):
         self.sess_num = None
-        self.plots = None
+        self.low_quantile_classifier_delta_plot = None
+        self.low_quantile_recall_delta_plot = None
+        self.high_quantile_classifier_delta_plot = None
+        self.high_quantile_recall_delta_plot = None
+        self.all_classifier_delta_plot = None
+        self.all_recall_delta_plot = None
         self.stimtag = None
         self.region_of_interest = None
         self.const_param_value = None

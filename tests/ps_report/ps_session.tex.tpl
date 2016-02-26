@@ -26,7 +26,9 @@ $\bullet$ Region: <REGION>
 
 \begin{figure}[!h]
 \centering
-\subfigure{\includegraphics[scale=0.35]{<PLOT_FILE>}}
+\subfigure{\includegraphics[scale=0.4]{<LOW_QUANTILE_PLOT_FILE>}}
+\subfigure{\includegraphics[scale=0.4]{<HIGH_QUANTILE_PLOT_FILE>}}
+\subfigure{\includegraphics[scale=0.4]{<ALL_PLOT_FILE>}}
 \end{figure}
 
 <PARAM1_TTEST_TABLE>

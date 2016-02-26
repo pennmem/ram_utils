@@ -84,7 +84,9 @@ class GenerateTex(RamTask):
             conditional_clearpage = '\\clearpage\n' if n_ttest_tables>0 else ''
 
             replace_dict = {'<SESS_NUM>': session_summary.sess_num,
-                            '<PLOT_FILE>': self.pipeline.experiment + '-' + self.pipeline.subject + '-report_plot_' + session_summary.name + '.pdf',
+                            '<LOW_QUANTILE_PLOT_FILE>': self.pipeline.experiment + '-' + self.pipeline.subject + '-low_quantile_plot_' + session_summary.name + '.pdf',
+                            '<HIGH_QUANTILE_PLOT_FILE>': self.pipeline.experiment + '-' + self.pipeline.subject + '-high_quantile_plot_' + session_summary.name + '.pdf',
+                            '<ALL_PLOT_FILE>': self.pipeline.experiment + '-' + self.pipeline.subject + '-all_plot_' + session_summary.name + '.pdf',
                             '<STIMTAG>': session_summary.stimtag,
                             '<REGION>': session_summary.region_of_interest,
                             '<CONSTANT_NAME>': const_param_name,
@@ -151,7 +153,9 @@ class GenerateTex(RamTask):
             '<REPORT_PAGES>': tex_session_pages_str,
             '<CUMULATIVE_ISI_MID>': self.get_passed_object('CUMULATIVE_ISI_MID'),
             '<CUMULATIVE_ISI_HALF_RANGE>': self.get_passed_object('CUMULATIVE_ISI_HALF_RANGE'),
-            '<CUMULATIVE_PLOT_FILE>': self.pipeline.experiment + '-' + self.pipeline.subject + '-report_plot_Cumulative.pdf',
+            '<CUMULATIVE_LOW_QUANTILE_PLOT_FILE>': self.pipeline.experiment + '-' + self.pipeline.subject + '-low_quantile_plot_Cumulative.pdf',
+            '<CUMULATIVE_HIGH_QUANTILE_PLOT_FILE>': self.pipeline.experiment + '-' + self.pipeline.subject + '-high_quantile_plot_Cumulative.pdf',
+            '<CUMULATIVE_ALL_PLOT_FILE>': self.pipeline.experiment + '-' + self.pipeline.subject + '-all_plot_Cumulative.pdf',
             '<CUMULATIVE_PARAMETER1>': param1_name,
             '<CUMULATIVE_PARAMETER2>': param2_name,
             '<CUMULATIVE_FVALUE1>': '%.2f' % cumulative_anova_fvalues[0],
@@ -165,7 +169,6 @@ class GenerateTex(RamTask):
             '<CUMULATIVE_PARAM12_TTEST_TABLE>': param12_ttest_table,
             '<AUC>': '%.2f' % (100*xval_output[-1].auc),
             '<PERM-P-VALUE>': pvalue_formatting(perm_test_pvalue),
-            '<J-THRESH>': '%.3f' % xval_output[-1].jstat_thresh,
             '<ROC_AND_TERC_PLOT_FILE>': self.pipeline.subject + '-roc_and_terc_plot_combined.pdf'
         }
 
@@ -214,49 +217,153 @@ class GeneratePlots(RamTask):
 
 
         for session_summary in session_summary_array:
-            # panel_plot = PanelPlot(i_max=1, j_max=1, title='', xtitle=param1_title, xtitle_fontsize=24, ytitle='$\Delta$ Post-Pre Classifier Output',ytitle_fontsize=24, wspace=0.3, hspace=0.3)
+            panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=2, labelsize=16, wspace=5.0)
 
-            panel_plot = PanelPlot(i_max=1, j_max=1, title='', ytitle='$\Delta$ Post-Pre Classifier Output',ytitle_fontsize=24, wspace=0.3, hspace=0.3)
-
-            pdc = PlotDataCollection(legend_on=True)
-            pdc.xlabel = param1_title
-            pdc.xlabel_fontsize = 24
-
-            for v,p in session_summary.plots.iteritems():
+            pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='$\Delta$ Post-Pre Classifier Output', xlabel_fontsize=20, ylabel_fontsize=20)
+            for v,p in session_summary.low_quantile_classifier_delta_plot.iteritems():
                 p.xhline_pos=0.0
                 pdc.add_plot_data(p)
 
-
             panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
+
+            pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='$\Delta$ Expected Recall Performance (%)', xlabel_fontsize=20, ylabel_fontsize=20)
+            for v,p in session_summary.low_quantile_recall_delta_plot.iteritems():
+                p.xhline_pos=0.0
+                pdc.add_plot_data(p)
+
+            panel_plot.add_plot_data_collection(0, 1, plot_data_collection=pdc)
 
             plot = panel_plot.generate_plot()
 
-            plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + self.pipeline.experiment + '-' + self.pipeline.subject + '-report_plot_' + session_summary.name + '.pdf')
+            plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + self.pipeline.experiment + '-' + self.pipeline.subject + '-low_quantile_plot_' + session_summary.name + '.pdf')
 
             plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
-        cumulative_plots = self.get_passed_object('cumulative_plots')
+
+            panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=2, labelsize=16, wspace=5.0)
+
+            pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='$\Delta$ Post-Pre Classifier Output', xlabel_fontsize=20, ylabel_fontsize=20)
+            for v,p in session_summary.high_quantile_classifier_delta_plot.iteritems():
+                p.xhline_pos=0.0
+                pdc.add_plot_data(p)
+
+            panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
+
+            pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='$\Delta$ Expected Recall Performance (%)', xlabel_fontsize=20, ylabel_fontsize=20)
+            for v,p in session_summary.high_quantile_recall_delta_plot.iteritems():
+                p.xhline_pos=0.0
+                pdc.add_plot_data(p)
+
+            panel_plot.add_plot_data_collection(0, 1, plot_data_collection=pdc)
+
+            plot = panel_plot.generate_plot()
+
+            plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + self.pipeline.experiment + '-' + self.pipeline.subject + '-high_quantile_plot_' + session_summary.name + '.pdf')
+
+            plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
 
+            panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=2, labelsize=16, wspace=5.0)
 
-        # panel_plot = PanelPlot(i_max=1, j_max=1, title='', xtitle=param1_title, y_axis_title='$\Delta$ Post-Pre Classifier Output')
-        panel_plot = PanelPlot(i_max=1, j_max=1, title='',ytitle='$\Delta$ Post-Pre Classifier Output', ytitle_fontsize=24)
+            pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='$\Delta$ Post-Pre Classifier Output', xlabel_fontsize=20, ylabel_fontsize=20)
+            for v,p in session_summary.all_classifier_delta_plot.iteritems():
+                p.xhline_pos=0.0
+                pdc.add_plot_data(p)
 
-        pdc = PlotDataCollection(legend_on=True)
-        pdc.xlabel = param1_title
-        pdc.xlabel_fontsize = 24
+            panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
 
-        for v,p in cumulative_plots.iteritems():
+            pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='$\Delta$ Expected Recall Performance (%)', xlabel_fontsize=20, ylabel_fontsize=20)
+            for v,p in session_summary.all_recall_delta_plot.iteritems():
+                p.xhline_pos=0.0
+                pdc.add_plot_data(p)
+
+            panel_plot.add_plot_data_collection(0, 1, plot_data_collection=pdc)
+
+            plot = panel_plot.generate_plot()
+
+            plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + self.pipeline.experiment + '-' + self.pipeline.subject + '-all_plot_' + session_summary.name + '.pdf')
+
+            plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+
+
+        cumulative_low_quantile_classifier_delta_plot = self.get_passed_object('cumulative_low_quantile_classifier_delta_plot')
+        cumulative_low_quantile_recall_delta_plot = self.get_passed_object('cumulative_low_quantile_recall_delta_plot')
+
+        cumulative_high_quantile_classifier_delta_plot = self.get_passed_object('cumulative_high_quantile_classifier_delta_plot')
+        cumulative_high_quantile_recall_delta_plot = self.get_passed_object('cumulative_high_quantile_recall_delta_plot')
+
+        cumulative_all_classifier_delta_plot = self.get_passed_object('cumulative_all_classifier_delta_plot')
+        cumulative_all_recall_delta_plot = self.get_passed_object('cumulative_all_recall_delta_plot')
+
+
+        panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=2, labelsize=16, wspace=5.0)
+
+        pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='$\Delta$ Post-Pre Classifier Output', xlabel_fontsize=20, ylabel_fontsize=20)
+        for v,p in cumulative_low_quantile_classifier_delta_plot.iteritems():
             p.xhline_pos=0.0
             pdc.add_plot_data(p)
 
         panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
 
+        pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='$\Delta$ Expected Recall Performance (%)', xlabel_fontsize=20, ylabel_fontsize=20)
+        for v,p in cumulative_low_quantile_recall_delta_plot.iteritems():
+            p.xhline_pos=0.0
+            pdc.add_plot_data(p)
+
+        panel_plot.add_plot_data_collection(0, 1, plot_data_collection=pdc)
+
         plot = panel_plot.generate_plot()
 
-        plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + self.pipeline.experiment + '-' + self.pipeline.subject + '-report_plot_Cumulative.pdf')
+        plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + self.pipeline.experiment + '-' + self.pipeline.subject + '-low_quantile_plot_Cumulative.pdf')
 
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+
+
+        panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=2, labelsize=16, wspace=5.0)
+
+        pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='$\Delta$ Post-Pre Classifier Output', xlabel_fontsize=20, ylabel_fontsize=20)
+        for v,p in cumulative_high_quantile_classifier_delta_plot.iteritems():
+            p.xhline_pos=0.0
+            pdc.add_plot_data(p)
+
+        panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
+
+        pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='$\Delta$ Expected Recall Performance (%)', xlabel_fontsize=20, ylabel_fontsize=20)
+        for v,p in cumulative_high_quantile_recall_delta_plot.iteritems():
+            p.xhline_pos=0.0
+            pdc.add_plot_data(p)
+
+        panel_plot.add_plot_data_collection(0, 1, plot_data_collection=pdc)
+
+        plot = panel_plot.generate_plot()
+
+        plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + self.pipeline.experiment + '-' + self.pipeline.subject + '-high_quantile_plot_Cumulative.pdf')
+
+        plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+
+
+        panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=2, labelsize=16, wspace=5.0)
+
+        pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='$\Delta$ Post-Pre Classifier Output', xlabel_fontsize=20, ylabel_fontsize=20)
+        for v,p in cumulative_all_classifier_delta_plot.iteritems():
+            p.xhline_pos=0.0
+            pdc.add_plot_data(p)
+
+        panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
+
+        pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='$\Delta$ Expected Recall Performance (%)', xlabel_fontsize=20, ylabel_fontsize=20)
+        for v,p in cumulative_all_recall_delta_plot.iteritems():
+            p.xhline_pos=0.0
+            pdc.add_plot_data(p)
+
+        panel_plot.add_plot_data_collection(0, 1, plot_data_collection=pdc)
+
+        plot = panel_plot.generate_plot()
+
+        plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + self.pipeline.experiment + '-' + self.pipeline.subject + '-all_plot_Cumulative.pdf')
+
+        plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+
 
 
 class GenerateReportPDF(RamTask):
