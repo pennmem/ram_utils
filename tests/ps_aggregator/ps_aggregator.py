@@ -40,25 +40,26 @@ from GenerateReportTasks import *
 class Params(object):
     def __init__(self):
         self.baseline_correction = True
-        self.output_param = 'perf_diff'
-        self.output_title = '$\Delta$ Post-Pre Expected Performance (%)'
 
-        #self.output_param = 'prob_diff'
-        #self.output_title = '$\Delta$ Post-Pre Classifier Output'
+        #self.output_param = 'perf_diff'
+        #self.output_title = '$\Delta$ Post-Pre Expected Performance (%)'
+
+        self.output_param = 'prob_diff'
+        self.output_title = '$\Delta$ Post-Pre Classifier Output'
 
         #self.frequency_plot_regions = ['CA1', 'DG', 'PRC']
         self.frequency_plot_regions = []
-        self.frequency_plot_areas = ['HC', 'MTLC', 'Frontal']
+        self.frequency_plot_areas = ['HC', 'MTLC', 'Cing-PFC', 'Other']
 
         #self.duration_plot_regions = ['CA1', 'DG', 'PRC']
         self.duration_plot_regions = []
-        self.duration_plot_areas = ['HC', 'MTLC', 'Frontal']
+        self.duration_plot_areas = ['HC', 'MTLC', 'Cing-PFC', 'Other']
 
         #self.amplitude_plot_regions = ['CA1', 'DG', 'PRC']
         self.amplitude_plot_regions = []
-        self.amplitude_plot_areas = ['HC', 'MTLC']
+        self.amplitude_plot_areas = ['HC', 'MTLC', 'Cing-PFC', 'Other']
 
-        self.anova_areas = ['HC', 'MTLC', 'Frontal']
+        self.anova_areas = ['HC', 'MTLC', 'Cing-PFC', 'Other']
 
 
 params = Params()

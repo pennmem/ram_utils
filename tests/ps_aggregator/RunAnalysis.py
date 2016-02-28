@@ -1,5 +1,7 @@
 from RamPipeline import *
 
+from collections import OrderedDict
+
 import numpy as np
 import pandas as pd
 #import statsmodels.formula.api as smf
@@ -22,8 +24,7 @@ class RegionFrequencyAnalysis(object):
 
     def run(self, ps_table, regions, areas):
         self.ps_table = ps_table
-        self.plots = dict()
-        self.centralized_plots = dict()
+        self.plots = OrderedDict()
         #areas = sorted(ps_table['Area'].unique())
         self.regions = regions
         self.areas = areas
@@ -37,17 +38,12 @@ class RegionFrequencyAnalysis(object):
                 area_sel = (self.ps_table['Area']==area)
                 means = np.empty(len(self.freqs), dtype=float)
                 sems = np.empty(len(self.freqs), dtype=float)
-                #centralized_means = np.empty(len(self.freqs), dtype=float)
-                centralized_sems = np.empty(len(self.freqs), dtype=float)
                 table_line = [area]
                 for j,freq in enumerate(self.freqs):
                     freq_sel = (self.ps_table['Pulse_Frequency']==freq)
                     ps_table_area_freq = self.ps_table[area_sel & freq_sel]
                     means[j] = ps_table_area_freq[self.output_param].mean()
                     sems[j] = ps_table_area_freq[self.output_param].sem()
-                    #centralized_means[j] = ps_table_area_freq['prob_diff_centralized'].mean()
-                    centralized_sems[j] = ps_table_area_freq['prob_diff_centralized'].sem()
-                    print 'delta sem =', sems[j]-centralized_sems[j]
                     table_line.append(len(ps_table_area_freq[['Subject','stimAnodeTag','stimCathodeTag']].drop_duplicates()))
                 self.plots[area] = PlotData(x=np.arange(1,len(self.freqs)+1)-i*0.05,
                                 y=means, yerr=sems,
@@ -57,36 +53,26 @@ class RegionFrequencyAnalysis(object):
                 self.n_experiments.append(table_line)
                 area_mean[i] = self.ps_table[area_sel][self.output_param].mean()
                 area_sem[i] = self.ps_table[area_sel][self.output_param].sem()
-                #area_sem[i] = self.ps_table[area_sel]['prob_diff_centralized'].sem()
 
         for i,region in enumerate(regions):
             region_sel = (ps_table['Region']==region)
             means = np.empty(len(self.freqs), dtype=float)
             sems = np.empty(len(self.freqs), dtype=float)
-            #centralized_means = np.empty(len(self.freqs), dtype=float)
-            centralized_sems = np.empty(len(self.freqs), dtype=float)
             table_line = [region]
             for j,freq in enumerate(self.freqs):
                 freq_sel = (self.ps_table['Pulse_Frequency']==freq)
                 ps_table_region_freq = self.ps_table[region_sel & freq_sel]
                 means[j] = ps_table_region_freq[self.output_param].mean()
                 sems[j] = ps_table_region_freq[self.output_param].sem()
-                centralized_sems[j] = ps_table_region_freq[self.output_param].sem()
                 table_line.append(len(ps_table_region_freq[['Subject','stimAnodeTag','stimCathodeTag']].drop_duplicates()))
             self.plots[region] = PlotData(x=np.arange(1,len(self.freqs)+1)-i*0.05,
-                            y=means, yerr=sems, #ylim=(min(0.0,np.nanmin(means-sems)),np.nanmax(means+sems)+0.025),
-                            x_tick_labels=[x if x>0 else 'PULSE' for x in self.freqs],
-                            label=region
-                            )
-            self.centralized_plots[region] = PlotData(x=np.arange(1,len(self.freqs)+1)-i*0.05,
-                            y=means, yerr=centralized_sems,
+                            y=means, yerr=sems,
                             x_tick_labels=[x if x>0 else 'PULSE' for x in self.freqs],
                             label=region
                             )
             self.n_experiments.append(table_line)
             area_mean[len(self.areas)+i] = self.ps_table[region_sel][self.output_param].mean()
             area_sem[len(self.areas)+i] = self.ps_table[region_sel][self.output_param].sem()
-            #area_sem[len(self.areas)+i] = self.ps_table[region_sel]['prob_diff_centralized'].sem()
 
         freq_mean = np.zeros(len(self.freqs), dtype=float)
         freq_sem = np.zeros(len(self.freqs), dtype=float)
@@ -95,14 +81,13 @@ class RegionFrequencyAnalysis(object):
             ps_table_freq = self.ps_table[freq_sel]
             freq_mean[i] = ps_table_freq[self.output_param].mean()
             freq_sem[i] = ps_table_freq[self.output_param].sem()
-            #freq_sem[i] = ps_table_freq['prob_diff_centralized'].sem()
 
         self.region_plot = BarPlotData(x=np.arange(len(self.areas)+len(self.regions)), y=area_mean, yerr=area_sem, ylabel='', xlabel='Region', x_tick_labels=self.areas+self.regions, barcolors=['grey']*(len(self.areas)+len(self.regions)), barwidth=0.5)
         self.frequency_plot = PlotData(x=np.arange(1,len(self.freqs)+1), y=freq_mean, yerr=freq_sem, xlabel='Frequency (Hz)', x_tick_labels=[x if x>0 else 'PULSE' for x in self.freqs])
 
 
 def duration_plot(ps_table, output_param, regions, areas):
-    plots = dict()
+    plots = OrderedDict()
     #areas = sorted(ps_table['Area'].unique())
     #areas = ['HC', 'MTLC']
     #regions = ['CA1', 'DG', 'PRC']
@@ -143,11 +128,11 @@ def duration_plot(ps_table, output_param, regions, areas):
 
 
 def amplitude_plot(ps_table, output_param, regions, areas):
-    plots = dict()
+    plots = OrderedDict()
     #areas = sorted(ps_table['Area'].unique())
     #areas = ['HC', 'MTLC']
     #regions = ['CA1', 'DG', 'PRC']
-    amps = [x for x in sorted(ps_table['Amplitude'].unique()) if x<=1.5]
+    amps = [x for x in sorted(ps_table['Amplitude'].unique()) if x<1.001 and x>0.001]
 
     for i,area in enumerate(areas):
         if area!='':
@@ -194,15 +179,20 @@ class RunAnalysis(RamTask):
         #region_total = self.get_passed_object('region_session_total')
         #regions = [r for r,c in region_total.iteritems() if c>=5]
 
-        self.analyze(self.ps_table[self.ps_table['prob_pre']<self.ps_table['J_thresh']], name_prefix='low_quantile_')
-        self.analyze(self.ps_table[self.ps_table['prob_pre']>self.ps_table['J_thresh']], name_prefix='high_quantile_')
-        self.analyze(self.ps_table, name_prefix='all_')
+        name_suffix = '_with_control_low' if self.params.baseline_correction else ''
+        self.analyze(self.ps_table[self.ps_table['prob_pre']<self.ps_table['thresh']], name_prefix='low_quantile_', name_suffix=name_suffix)
 
-    def analyze(self, ps_subtable, name_prefix):
-        rf = RegionFrequencyAnalysis(self.params.output_param)
+        name_suffix = '_with_control_high' if self.params.baseline_correction else ''
+        self.analyze(self.ps_table[self.ps_table['prob_pre']>self.ps_table['thresh']], name_prefix='high_quantile_', name_suffix=name_suffix)
+
+        self.analyze(self.ps_table, name_prefix='all_', name_suffix='')
+
+    def analyze(self, ps_subtable, name_prefix, name_suffix):
+        output_param = self.params.output_param + name_suffix
+
+        rf = RegionFrequencyAnalysis(output_param)
         rf.run(ps_subtable, self.params.frequency_plot_regions, self.params.frequency_plot_areas)
         self.pass_object(name_prefix+'frequency_plot', rf.plots)
-        self.pass_object(name_prefix+'centralized_frequency_plot', rf.centralized_plots)
         self.pass_object('n_region_frequency_experiment', rf.n_experiments)
         self.pass_object(name_prefix+'frequency_frequency_plot', rf.frequency_plot)
         self.pass_object(name_prefix+'frequency_region_plot', rf.region_plot)
@@ -211,19 +201,19 @@ class RunAnalysis(RamTask):
         high_freq_ps_table = ps_subtable[(ps_subtable['Pulse_Frequency']==100) | (ps_subtable['Pulse_Frequency']==200)]
 
         low_freq_ps1_table = low_freq_ps_table[low_freq_ps_table['Experiment']=='PS1']
-        low_freq_duration_plot = duration_plot(low_freq_ps1_table, self.params.output_param, self.params.duration_plot_regions, self.params.duration_plot_areas)
+        low_freq_duration_plot = duration_plot(low_freq_ps1_table, output_param, self.params.duration_plot_regions, self.params.duration_plot_areas)
         self.pass_object(name_prefix+'low_freq_duration_plot', low_freq_duration_plot)
 
         high_freq_ps1_table = high_freq_ps_table[high_freq_ps_table['Experiment']=='PS1']
-        high_freq_duration_plot = duration_plot(high_freq_ps1_table, self.params.output_param, self.params.duration_plot_regions, self.params.duration_plot_areas)
+        high_freq_duration_plot = duration_plot(high_freq_ps1_table, output_param, self.params.duration_plot_regions, self.params.duration_plot_areas)
         self.pass_object(name_prefix+'high_freq_duration_plot', high_freq_duration_plot)
 
         low_freq_ps2_table = low_freq_ps_table[low_freq_ps_table['Experiment']=='PS2']
-        low_freq_amplitude_plot = amplitude_plot(low_freq_ps2_table, self.params.output_param, self.params.amplitude_plot_regions, self.params.amplitude_plot_areas)
+        low_freq_amplitude_plot = amplitude_plot(low_freq_ps2_table, output_param, self.params.amplitude_plot_regions, self.params.amplitude_plot_areas)
         self.pass_object(name_prefix+'low_freq_amplitude_plot', low_freq_amplitude_plot)
 
         high_freq_ps2_table = high_freq_ps_table[high_freq_ps_table['Experiment']=='PS2']
-        high_freq_amplitude_plot = amplitude_plot(high_freq_ps2_table, self.params.output_param, self.params.amplitude_plot_regions, self.params.amplitude_plot_areas)
+        high_freq_amplitude_plot = amplitude_plot(high_freq_ps2_table, output_param, self.params.amplitude_plot_regions, self.params.amplitude_plot_areas)
         self.pass_object(name_prefix+'high_freq_amplitude_plot', high_freq_amplitude_plot)
 
         #self.run_anova()

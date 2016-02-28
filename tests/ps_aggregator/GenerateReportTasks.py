@@ -174,14 +174,12 @@ class GeneratePlots(RamTask):
 
 
 
-        pdc = PlotDataCollection(legend_on=True)
-        pdc.xlabel = 'Pulse Frequency (Hz)'
-        pdc.xlabel_fontsize = 16
+        pdc = PlotDataCollection(legend_on=True, xlabel='Pulse Frequency (Hz)', xlabel_fontsize=15)
         for v,p in low_quantile_frequency_plot_data.iteritems():
             p.xhline_pos=0.0
             pdc.add_plot_data(p)
 
-        panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=3, title='', ytitle=self.params.output_title, labelsize=20, ytitle_fontsize=20)
+        panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=3, ytitle=self.params.output_title, labelsize=16, ytitle_fontsize=18)
         min_y_list = []
         max_y_list = []
 
@@ -201,7 +199,9 @@ class GeneratePlots(RamTask):
         y_max = np.max(max_y_list)
         r = y_max - y_min
         y_min -= 0.05*r
-        y_max += 0.15*r
+        y_max += 0.40*r
+        if y_min>0.0: y_min=0.0
+        if y_max<0.0: y_max=0.0
 
         pdc.ylim=[y_min,y_max]
         low_quantile_frequency_region_plot_data.ylim=[y_min,y_max]
@@ -212,12 +212,12 @@ class GeneratePlots(RamTask):
         low_quantile_frequency_frequency_plot_data.xhline_pos = 0.0
 
         # label fontsize
-        pdc.xlabel_fontsize = 20
-        pdc.ylabel_fontsize = 20
-        low_quantile_frequency_region_plot_data.xlabel_fontsize = 20
-        low_quantile_frequency_region_plot_data.ylabel_fontsize = 20
-        low_quantile_frequency_frequency_plot_data.xlabel_fontsize = 20
-        low_quantile_frequency_frequency_plot_data.ylabel_fontsize = 20
+        pdc.xlabel_fontsize = 16
+        pdc.ylabel_fontsize = 16
+        low_quantile_frequency_region_plot_data.xlabel_fontsize = 16
+        low_quantile_frequency_region_plot_data.ylabel_fontsize = 16
+        low_quantile_frequency_frequency_plot_data.xlabel_fontsize = 16
+        low_quantile_frequency_frequency_plot_data.ylabel_fontsize = 16
 
         panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
         panel_plot.add_plot_data(0, 1, plot_data=low_quantile_frequency_region_plot_data)
@@ -228,14 +228,12 @@ class GeneratePlots(RamTask):
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
 
-        pdc = PlotDataCollection(legend_on=True)
-        pdc.xlabel = 'Pulse Frequency (Hz)'
-        pdc.xlabel_fontsize = 16
+        pdc = PlotDataCollection(legend_on=True, xlabel='Pulse Frequency (Hz)', xlabel_fontsize=15)
         for v,p in high_quantile_frequency_plot_data.iteritems():
             p.xhline_pos=0.0
             pdc.add_plot_data(p)
 
-        panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=3, title='', ytitle=self.params.output_title, labelsize=20, ytitle_fontsize=20)
+        panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=3, ytitle=self.params.output_title, labelsize=16, ytitle_fontsize=18)
         min_y_list = []
         max_y_list = []
 
@@ -255,7 +253,9 @@ class GeneratePlots(RamTask):
         y_max = np.max(max_y_list)
         r = y_max - y_min
         y_min -= 0.05*r
-        y_max += 0.15*r
+        y_max += 0.20*r
+        if y_min>0.0: y_min=0.0
+        if y_max<0.0: y_max=0.0
 
         pdc.ylim=[y_min,y_max]
         high_quantile_frequency_region_plot_data.ylim=[y_min,y_max]
@@ -266,12 +266,12 @@ class GeneratePlots(RamTask):
         high_quantile_frequency_frequency_plot_data.xhline_pos = 0.0
 
         # label fontsize
-        pdc.xlabel_fontsize = 20
-        pdc.ylabel_fontsize = 20
-        high_quantile_frequency_region_plot_data.xlabel_fontsize = 20
-        high_quantile_frequency_region_plot_data.ylabel_fontsize = 20
-        high_quantile_frequency_frequency_plot_data.xlabel_fontsize = 20
-        high_quantile_frequency_frequency_plot_data.ylabel_fontsize = 20
+        pdc.xlabel_fontsize = 16
+        pdc.ylabel_fontsize = 16
+        high_quantile_frequency_region_plot_data.xlabel_fontsize = 16
+        high_quantile_frequency_region_plot_data.ylabel_fontsize = 16
+        high_quantile_frequency_frequency_plot_data.xlabel_fontsize = 16
+        high_quantile_frequency_frequency_plot_data.ylabel_fontsize = 16
 
         panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
         panel_plot.add_plot_data(0, 1, plot_data=high_quantile_frequency_region_plot_data)
@@ -282,14 +282,12 @@ class GeneratePlots(RamTask):
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
 
-        pdc = PlotDataCollection(legend_on=True)
-        pdc.xlabel = 'Pulse Frequency (Hz)'
-        pdc.xlabel_fontsize = 16
+        pdc = PlotDataCollection(legend_on=True, xlabel='Pulse Frequency (Hz)', xlabel_fontsize=15)
         for v,p in all_frequency_plot_data.iteritems():
             p.xhline_pos=0.0
             pdc.add_plot_data(p)
 
-        panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=3, title='', ytitle=self.params.output_title, labelsize=20, ytitle_fontsize=20)
+        panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=3, title='', ytitle=self.params.output_title, labelsize=16, ytitle_fontsize=18)
         min_y_list = []
         max_y_list = []
 
@@ -309,7 +307,9 @@ class GeneratePlots(RamTask):
         y_max = np.max(max_y_list)
         r = y_max - y_min
         y_min -= 0.05*r
-        y_max += 0.15*r
+        y_max += 0.20*r
+        if y_min>0.0: y_min=0.0
+        if y_max<0.0: y_max=0.0
 
         pdc.ylim=[y_min,y_max]
         all_frequency_region_plot_data.ylim=[y_min,y_max]
@@ -320,12 +320,12 @@ class GeneratePlots(RamTask):
         all_frequency_frequency_plot_data.xhline_pos = 0.0
 
         # label fontsize
-        pdc.xlabel_fontsize = 20
-        pdc.ylabel_fontsize = 20
-        all_frequency_region_plot_data.xlabel_fontsize = 20
-        all_frequency_region_plot_data.ylabel_fontsize = 20
-        all_frequency_frequency_plot_data.xlabel_fontsize = 20
-        all_frequency_frequency_plot_data.ylabel_fontsize = 20
+        pdc.xlabel_fontsize = 16
+        pdc.ylabel_fontsize = 16
+        all_frequency_region_plot_data.xlabel_fontsize = 16
+        all_frequency_region_plot_data.ylabel_fontsize = 16
+        all_frequency_frequency_plot_data.xlabel_fontsize = 16
+        all_frequency_frequency_plot_data.ylabel_fontsize = 16
 
         panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
         panel_plot.add_plot_data(0, 1, plot_data=all_frequency_region_plot_data)
@@ -336,7 +336,7 @@ class GeneratePlots(RamTask):
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
 
-        panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=2, title='', ytitle=self.params.output_title, labelsize=20, ytitle_fontsize=20)
+        panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=2, ytitle=self.params.output_title, labelsize=20, ytitle_fontsize=20)
 
         pdc = PlotDataCollection(legend_on=True)
         pdc.xlabel = 'Duration (ms)'
@@ -361,7 +361,7 @@ class GeneratePlots(RamTask):
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
 
-        panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=2, title='', ytitle=self.params.output_title, labelsize=20, ytitle_fontsize=20)
+        panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=2, ytitle=self.params.output_title, labelsize=20, ytitle_fontsize=20)
 
         pdc = PlotDataCollection(legend_on=True)
         pdc.xlabel = 'Duration (ms)'
@@ -386,7 +386,7 @@ class GeneratePlots(RamTask):
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
 
-        panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=2, title='', ytitle=self.params.output_title, labelsize=20, ytitle_fontsize=20)
+        panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=2, ytitle=self.params.output_title, labelsize=20, ytitle_fontsize=20)
 
         pdc = PlotDataCollection(legend_on=True)
         pdc.xlabel = 'Duration (ms)'
@@ -411,7 +411,7 @@ class GeneratePlots(RamTask):
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
 
-        panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=2, title='', ytitle=self.params.output_title, labelsize=20, ytitle_fontsize=20)
+        panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=2, ytitle=self.params.output_title, labelsize=20, ytitle_fontsize=20)
 
         pdc = PlotDataCollection(legend_on=True)
         pdc.xlabel = 'Amplitude (mA)'

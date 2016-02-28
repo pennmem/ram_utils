@@ -7,32 +7,20 @@ import numpy as np
 import pandas as pd
 from sklearn.externals import joblib
 
-from bisect import bisect_right
-
-
-# HC: CA1/CA2/CA2/DG
-# MTLC: PRC/PHC
-# Frontal: ACg, DLPFC
-# Temporal (non-MTLC): STG/TC
 
 def brain_area(region):
-    if region in ['CA1', 'CA2', 'CA3', 'DG']:
+    if region in ['CA1', 'CA2', 'CA3', 'DG', 'Sub']:
         return 'HC'
-    elif region in ['PHC', 'PRC']:
+    elif region in ['PHC', 'PRC', 'EC']:
         return 'MTLC'
-    elif region in ['ACg', 'DLPFC']:
-        return 'Frontal'
-    elif region in ['STG', 'TC']:
-        return 'Temporal'
+    elif region in ['ACg', 'PCg', 'DLPFC']:
+        return 'Cing-PFC'
+    #elif region in ['STG', 'TC']:
+    #    return 'Temporal'
     elif region == 'Undetermined':
         return 'Undetermined'
     else:
-        return ''
-
-
-def prob2perf(probs, true_labels, p):
-    idx = bisect_right(probs, p)
-    return np.sum(true_labels[0:idx]) / float(idx) if idx>0 else 0.0
+        return 'Other'
 
 
 class BuildAggregatePSTable(RamTask):
@@ -55,36 +43,13 @@ class BuildAggregatePSTable(RamTask):
             try:
                 ps1_table = pd.read_pickle(join(ps1_root, subject, subject+'-PS1-ps_table.pkl'))
                 del ps1_table['isi']
-                xval_output = control_table = None
+                xval_output = None
                 try:
-                    xval_output = joblib.load(join(ps1_root, subject, subject+'-'+task+'-xval_output.pkl'))
-                    if self.params.baseline_correction:
-                        control_table = pd.read_pickle(join(ps1_root, subject, subject+'-'+task+'-control_table.pkl'))
-                        baseline_delta = control_table['prob_diff_500'].mean()
-                        ps1_table['prob_diff'] -= baseline_delta
-                except IOError:
                     xval_output = joblib.load(join(ps1_root, subject, subject+'-xval_output.pkl'))
-                    if self.params.baseline_correction:
-                        control_table = pd.read_pickle(join(ps1_root, subject, subject+'-control_table.pkl'))
-                        baseline_delta = control_table['prob_diff_500'].mean()
-                        ps1_table['prob_diff'] -= baseline_delta
+                except IOError:
+                    xval_output = joblib.load(join(ps1_root, subject, subject+'-'+task+'-xval_output.pkl'))
                 thresh = xval_output[-1].jstat_thresh
-                #ps1_table = ps1_table[ps1_table['prob_pre']<thresh]
-                ps1_table['J_thresh'] = thresh
-                ps1_table['prob_diff_centralized'] = ps1_table['prob_diff'] - ps1_table['prob_diff'].mean()
-
-                probs = xval_output[-1].probs
-                true_labels = xval_output[-1].true_labels
-                performance_map = sorted(zip(probs,true_labels))
-                probs, true_labels = zip(*performance_map)
-                probs = np.array(probs)
-                true_labels = np.array(true_labels)
-
-                # this piece is ugly but I don't know the right pythonic way to express it
-                ps1_table['perf_diff'] = 0.0
-                for i in xrange(len(ps1_table)):
-                    ps1_table['perf_diff'].values[i] = 100.0 * (prob2perf(probs, true_labels, (ps1_table['prob_pre'].values[i]+ps1_table['prob_diff'].values[i]+1e-6)) - prob2perf(probs, true_labels, ps1_table['prob_pre'].values[i]))
-
+                ps1_table['thresh'] = thresh
                 ps1_table['Region'] = ps1_table['Region'].apply(lambda s: 'Undetermined' if s is None else s.replace('Left ','').replace('Right ',''))
                 ps1_table['Area'] = ps1_table['Region'].apply(brain_area)
                 ps1_table['Subject'] = subject
@@ -102,36 +67,13 @@ class BuildAggregatePSTable(RamTask):
             try:
                 ps2_table = pd.read_pickle(join(ps2_root, subject, subject+'-PS2-ps_table.pkl'))
                 del ps2_table['isi']
-                xval_output = control_table = None
+                xval_output = None
                 try:
-                    xval_output = joblib.load(join(ps2_root, subject, subject+'-'+task+'-xval_output.pkl'))
-                    if self.params.baseline_correction:
-                        control_table = pd.read_pickle(join(ps2_root, subject, subject+'-'+task+'-control_table.pkl'))
-                        baseline_delta = control_table['prob_diff_500'].mean()
-                        ps2_table['prob_diff'] -= baseline_delta
-                except IOError:
                     xval_output = joblib.load(join(ps2_root, subject, subject+'-xval_output.pkl'))
-                    if self.params.baseline_correction:
-                        control_table = pd.read_pickle(join(ps2_root, subject, subject+'-control_table.pkl'))
-                        baseline_delta = control_table['prob_diff_500'].mean()
-                        ps2_table['prob_diff'] -= baseline_delta
+                except IOError:
+                    xval_output = joblib.load(join(ps2_root, subject, subject+'-'+task+'-xval_output.pkl'))
                 thresh = xval_output[-1].jstat_thresh
-                #ps2_table = ps2_table[ps2_table['prob_pre']<thresh]
-                ps2_table['J_thresh'] = thresh
-                ps2_table['prob_diff_centralized'] = ps2_table['prob_diff'] - ps2_table['prob_diff'].mean()
-
-                probs = xval_output[-1].probs
-                true_labels = xval_output[-1].true_labels
-                performance_map = sorted(zip(probs,true_labels))
-                probs, true_labels = zip(*performance_map)
-                probs = np.array(probs)
-                true_labels = np.array(true_labels)
-
-                # this piece is ugly but I don't know the right pythonic way to express it
-                ps2_table['perf_diff'] = 0.0
-                for i in xrange(len(ps2_table)):
-                    ps2_table['perf_diff'].values[i] = 100.0 * (prob2perf(probs, true_labels, (ps2_table['prob_pre'].values[i]+ps2_table['prob_diff'].values[i]+1e-6)) - prob2perf(probs, true_labels, ps2_table['prob_pre'].values[i]))
-
+                ps2_table['thresh'] = thresh
                 ps2_table['Region'] = ps2_table['Region'].apply(lambda s: 'Undetermined' if s is None else s.replace('Left ','').replace('Right ',''))
                 ps2_table['Area'] = ps2_table['Region'].apply(brain_area)
                 ps2_table['Subject'] = subject

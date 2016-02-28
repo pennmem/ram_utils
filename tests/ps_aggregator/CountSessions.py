@@ -32,7 +32,7 @@ class CountSessions(RamTask):
 
         regions = sorted(ps_table['Region'].unique())
         areas = sorted(ps_table['Area'].unique())
-        areas.remove('')
+        #areas.remove('')
 
         print 'Regions:', regions
         print 'Areas:', areas
