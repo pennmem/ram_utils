@@ -2,7 +2,6 @@
 
 \usepackage[table]{xcolor}
 \usepackage{graphicx}
-\usepackage{caption}
 \usepackage[skip=0pt]{subcaption}
 %\setlength\belowcaptionskip{2pt}
 
@@ -97,6 +96,8 @@ $\bullet$ All channels
 \subcaption{All Trials}
 \end{subfigure}
 \end{figure}
+
+<CUMULATIVE_ADHOC_PAGE_TITLE>
 
 <CUMULATIVE_PARAM1_TTEST_TABLE>
 <CUMULATIVE_PARAM2_TTEST_TABLE>

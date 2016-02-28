@@ -81,7 +81,10 @@ class GenerateTex(RamTask):
                 param12_ttest_table = TextTemplateUtils.replace_template_to_string(tex_ttest_table2_template, ttest_replace_dict)
                 n_ttest_tables += 1
 
-            conditional_clearpage = '\\clearpage\n' if n_ttest_tables>0 else ''
+            adhoc_page_title = ''
+            if n_ttest_tables > 0:
+                adhoc_page_title = '\\clearpage\n'
+                adhoc_page_title += '\n\\subsection*{\\hfil Ad hoc significance analysis for session %d \\hfil}\n\n' % session_summary.sess_num
 
             replace_dict = {'<SESS_NUM>': session_summary.sess_num,
                             '<LOW_QUANTILE_PLOT_FILE>': self.pipeline.experiment + '-' + self.pipeline.subject + '-low_quantile_plot_' + session_summary.name + '.pdf',
@@ -102,10 +105,10 @@ class GenerateTex(RamTask):
                             '<PVALUE1>': pvalue_formatting(session_summary.anova_pvalues[0]),
                             '<PVALUE2>': pvalue_formatting(session_summary.anova_pvalues[1]),
                             '<PVALUE12>': pvalue_formatting(session_summary.anova_pvalues[2]),
+                            '<ADHOC_PAGE_TITLE>': adhoc_page_title,
                             '<PARAM1_TTEST_TABLE>': param1_ttest_table,
                             '<PARAM2_TTEST_TABLE>': param2_ttest_table,
-                            '<PARAM12_TTEST_TABLE>': param12_ttest_table,
-                            'CONDITIONAL_CLEARPAGE': conditional_clearpage
+                            '<PARAM12_TTEST_TABLE>': param12_ttest_table
                             }
 
             tex_session_pages_str += TextTemplateUtils.replace_template_to_string(tex_session_template, replace_dict)
@@ -117,6 +120,8 @@ class GenerateTex(RamTask):
         xval_output = self.get_passed_object('xval_output')
         perm_test_pvalue = self.get_passed_object('pvalue')
 
+        n_ttest_tables = 0
+
         param1_ttest_table = ''
         if cumulative_param1_ttest_table is not None:
             ttest_replace_dict = {'<PARAMETER>': param1_name,
@@ -124,6 +129,7 @@ class GenerateTex(RamTask):
                                   '<TABLE>': latex_table(cumulative_param1_ttest_table, hlines=False)
                                  }
             param1_ttest_table = TextTemplateUtils.replace_template_to_string(tex_ttest_table1_template, ttest_replace_dict)
+            n_ttest_tables += 1
 
         param2_ttest_table = ''
         if cumulative_param2_ttest_table is not None:
@@ -132,6 +138,7 @@ class GenerateTex(RamTask):
                                   '<TABLE>': latex_table(cumulative_param2_ttest_table, hlines=False)
                                   }
             param2_ttest_table = TextTemplateUtils.replace_template_to_string(tex_ttest_table1_template, ttest_replace_dict)
+            n_ttest_tables += 1
 
         param12_ttest_table = ''
         if cumulative_param12_ttest_table is not None:
@@ -142,6 +149,12 @@ class GenerateTex(RamTask):
                                   '<TABLE>': latex_table(cumulative_param12_ttest_table, hlines=False)
                                   }
             param12_ttest_table = TextTemplateUtils.replace_template_to_string(tex_ttest_table2_template, ttest_replace_dict)
+            n_ttest_tables += 1
+
+        cumulative_adhoc_page_title = ''
+        if n_ttest_tables > 0:
+            cumulative_adhoc_page_title = '\\clearpage\n'
+            cumulative_adhoc_page_title += '\n\\subsection*{\\hfil Ad hoc significance analysis (combined) \\hfil}\n\n'
 
         replace_dict = {
             '<SUBJECT>': self.pipeline.subject.replace('_', '\\textunderscore'),
@@ -164,6 +177,7 @@ class GenerateTex(RamTask):
             '<CUMULATIVE_PVALUE1>': pvalue_formatting(cumulative_anova_pvalues[0]),
             '<CUMULATIVE_PVALUE2>': pvalue_formatting(cumulative_anova_pvalues[1]),
             '<CUMULATIVE_PVALUE12>': pvalue_formatting(cumulative_anova_pvalues[2]),
+            '<CUMULATIVE_ADHOC_PAGE_TITLE>': cumulative_adhoc_page_title,
             '<CUMULATIVE_PARAM1_TTEST_TABLE>': param1_ttest_table,
             '<CUMULATIVE_PARAM2_TTEST_TABLE>': param2_ttest_table,
             '<CUMULATIVE_PARAM12_TTEST_TABLE>': param12_ttest_table,

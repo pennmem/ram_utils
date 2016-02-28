@@ -92,7 +92,7 @@ def ttest_one_param(ps_table, param_name):
         population2 = ps_table[~val_sel]['prob_diff'].values
         t,p = ttest_ind(population1, population2)
         if p<0.05 and t>0.0:
-            ttest_table.append([val, p, t])
+            ttest_table.append([val if val>=0 else 'PULSE', p, t])
     return ttest_table
 
 
@@ -131,7 +131,7 @@ def ttest_interaction(ps_table, param1_name, param2_name):
             population2 = ps_table[~sel]['prob_diff'].values
             t,p = ttest_ind(population1, population2)
             if p<0.05 and t>0.0:
-                ttest_table.append([val1, val2, p, t])
+                ttest_table.append([val1 if val1>=0 else 'PULSE', val2, p, t])
     return ttest_table
 
 

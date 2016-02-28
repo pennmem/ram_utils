@@ -30,7 +30,11 @@ class TalPreparation(RamTask):
         for i,bp in enumerate(bpTalStruct):
             bpTalStruct.tagName[i] = bp.tagName.upper()
 
-        loc_tag = dict(zip(bpTalStruct.tagName, bpTalStruct.locTag))
+        loc_tag = dict()
+        try:
+            loc_tag = dict(zip(bpTalStruct.tagName, bpTalStruct.locTag))
+        except AttributeError:
+            pass
 
         # self.pass_object('bipolar_pairs', bipolar_pairs)
         self.pass_object('monopolar_channels', monopolar_channels)

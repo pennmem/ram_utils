@@ -38,6 +38,7 @@ $\bullet$ Region: <REGION>
 \end{subfigure}
 \end{figure}
 
+<ADHOC_PAGE_TITLE>
 
 <PARAM1_TTEST_TABLE>
 <PARAM2_TTEST_TABLE>
