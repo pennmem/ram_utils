@@ -127,10 +127,10 @@ class GeneratePlots(RamTask):
         serial_positions = np.arange(1,13)
 
         for session_summary in session_summary_array:
-            panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', wspace=0.3, hspace=0.3)
+            panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, labelsize=18, wspace=20.0)
 
-            pd1 = PlotData(x=serial_positions, y=session_summary.prob_recall, xlim=(0,12), ylim=(0.0, 1.0), xlabel='Serial position\n(a)', ylabel='Probability of recall')
-            pd2 = PlotData(x=serial_positions, y=session_summary.prob_first_recall, xlim=(0,12), ylim=(0.0, 1.0), xlabel='Serial position\n(b)', ylabel='Probability of first recall')
+            pd1 = PlotData(x=serial_positions, y=session_summary.prob_recall, xlim=(0,12), ylim=(0.0, 1.0), xlabel='Serial position\n(a)', ylabel='Probability of recall', xlabel_fontsize=18, ylabel_fontsize=18)
+            pd2 = PlotData(x=serial_positions, y=session_summary.prob_first_recall, xlim=(0,12), ylim=(0.0, 1.0), xlabel='Serial position\n(b)', ylabel='Probability of first recall', xlabel_fontsize=18, ylabel_fontsize=18)
 
             panel_plot.add_plot_data(0, 0, plot_data=pd1)
             panel_plot.add_plot_data(0, 1, plot_data=pd2)
@@ -142,21 +142,21 @@ class GeneratePlots(RamTask):
             plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
             if task == 'RAM_CatFR1':
-                panel_plot = PanelPlot(xfigsize=6.0, yfigsize=6.0, i_max=1, j_max=1, title='', xtitle='',wspace=0.3, hspace=0.3)
-                pd = BarPlotData(x=[0,1], y=[session_summary.irt_within_cat,  session_summary.irt_between_cat], ylabel='IRT (msec)',xlabel='', x_tick_labels=['Within Cat', 'Between Cat'], barcolors=['grey','grey'], barwidth=0.5)
+                panel_plot = PanelPlot(xfigsize=6.0, yfigsize=6.0, i_max=1, j_max=1, title='', xtitle='', labelsize=18)
+                pd = BarPlotData(x=[0,1], y=[session_summary.irt_within_cat,  session_summary.irt_between_cat], ylabel='IRT (msec)',xlabel='', x_tick_labels=['Within Cat', 'Between Cat'], barcolors=['grey','grey'], barwidth=0.5, xlabel_fontsize=18, ylabel_fontsize=18)
                 panel_plot.add_plot_data(0, 0, plot_data=pd)
                 plot = panel_plot.generate_plot()
                 plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-irt_plot_' + session_summary.name + '.pdf')
                 plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
-            panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', wspace=0.3, hspace=0.3)
+            panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', labelsize=18)
 
-            pd1 = PlotData(x=session_summary.fpr, y=session_summary.tpr, xlim=[0.0,1.0], ylim=[0.0,1.0], xlabel='False Alarm Rate\n(a)', ylabel='Hit Rate', levelline=((0.0,1.0),(0.0,1.0)))
+            pd1 = PlotData(x=session_summary.fpr, y=session_summary.tpr, xlim=[0.0,1.0], ylim=[0.0,1.0], xlabel='False Alarm Rate\n(a)', ylabel='Hit Rate', levelline=((0.0,1.0),(0.0,1.0)), color='k', markersize=1.0, xlabel_fontsize=18, ylabel_fontsize=18)
 
             ylim = np.max(np.abs(session_summary.pc_diff_from_mean)) + 5.0
             if ylim > 100.0:
                 ylim = 100.0
-            pd2 = BarPlotData(x=(0,1,2), y=session_summary.pc_diff_from_mean, ylim=[-ylim,ylim], xlabel='Tercile of Classifier Estimate\n(b)', ylabel='Recall Change From Mean (%)', x_tick_labels=['Low', 'Middle', 'High'], xhline_pos=0.0, barcolors=['grey','grey', 'grey'], barwidth=0.5)
+            pd2 = BarPlotData(x=(0,1,2), y=session_summary.pc_diff_from_mean, ylim=[-ylim,ylim], xlabel='Tercile of Classifier Estimate\n(b)', ylabel='Recall Change From Mean (%)', x_tick_labels=['Low', 'Middle', 'High'], xhline_pos=0.0, barcolors=['grey','grey', 'grey'], xlabel_fontsize=18, ylabel_fontsize=18, barwidth=0.5)
 
             panel_plot.add_plot_data(0, 0, plot_data=pd1)
             panel_plot.add_plot_data(0, 1, plot_data=pd2)
@@ -169,10 +169,10 @@ class GeneratePlots(RamTask):
 
         cumulative_summary = self.get_passed_object('cumulative_summary')
 
-        panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', wspace=0.3, hspace=0.3)
+        panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, labelsize=18, wspace=20.0)
 
-        pd1 = PlotData(x=serial_positions, y=cumulative_summary.prob_recall, xlim=(0, 12), ylim=(0.0, 1.0), xlabel='Serial position\n(a)', ylabel='Probability of recall')
-        pd2 = PlotData(x=serial_positions, y=cumulative_summary.prob_first_recall, xlim=(0, 12), ylim=(0.0, 1.0), xlabel='Serial position\n(b)', ylabel='Probability of first recall')
+        pd1 = PlotData(x=serial_positions, y=cumulative_summary.prob_recall, xlim=(0, 12), ylim=(0.0, 1.0), xlabel='Serial position\n(a)', ylabel='Probability of recall', xlabel_fontsize=18, ylabel_fontsize=18)
+        pd2 = PlotData(x=serial_positions, y=cumulative_summary.prob_first_recall, xlim=(0, 12), ylim=(0.0, 1.0), xlabel='Serial position\n(b)', ylabel='Probability of first recall', xlabel_fontsize=18, ylabel_fontsize=18)
 
         panel_plot.add_plot_data(0, 0, plot_data=pd1)
         panel_plot.add_plot_data(0, 1, plot_data=pd2)
@@ -184,21 +184,21 @@ class GeneratePlots(RamTask):
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
         if task == 'RAM_CatFR1':
-            panel_plot = PanelPlot(xfigsize=6.0, yfigsize=6.0, i_max=1, j_max=1, title='',xtitle='', wspace=0.3, hspace=0.3)
-            pd = BarPlotData(x=[0,1], y=[cumulative_summary.irt_within_cat, cumulative_summary.irt_between_cat], ylabel='IRT (msec)', xlabel='',x_tick_labels=['Within Cat', 'Between Cat'], barcolors=['grey','grey'], barwidth=0.5)
+            panel_plot = PanelPlot(xfigsize=6.0, yfigsize=6.0, i_max=1, j_max=1, title='',xtitle='', labelsize=18)
+            pd = BarPlotData(x=[0,1], y=[cumulative_summary.irt_within_cat, cumulative_summary.irt_between_cat], ylabel='IRT (msec)', xlabel='',x_tick_labels=['Within Cat', 'Between Cat'], barcolors=['grey','grey'], barwidth=0.5, xlabel_fontsize=18, ylabel_fontsize=18)
             panel_plot.add_plot_data(0, 0, plot_data=pd)
             plot = panel_plot.generate_plot()
             plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-irt_plot_combined.pdf')
             plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
-        panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', wspace=0.3, hspace=0.3)
+        panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', labelsize=18)
 
-        pd1 = PlotData(x=cumulative_summary.fpr, y=cumulative_summary.tpr, xlim=[0.0,1.0], ylim=[0.0,1.0], xlabel='False Alarm Rate\n(a)', ylabel='Hit Rate', levelline=((0.001,0.999),(0.001,0.999)))
+        pd1 = PlotData(x=cumulative_summary.fpr, y=cumulative_summary.tpr, xlim=[0.0,1.0], ylim=[0.0,1.0], xlabel='False Alarm Rate\n(a)', ylabel='Hit Rate', levelline=((0.001,0.999),(0.001,0.999)), color='k', markersize=1.0, xlabel_fontsize=18, ylabel_fontsize=18)
 
         ylim = np.max(np.abs(cumulative_summary.pc_diff_from_mean)) + 5.0
         if ylim > 100.0:
             ylim = 100.0
-        pd2 = BarPlotData(x=(0,1,2), y=cumulative_summary.pc_diff_from_mean, ylim=[-ylim,ylim], xlabel='Tercile of Classifier Estimate\n(b)', ylabel='Recall Change From Mean (%)', x_tick_labels=['Low', 'Middle', 'High'], xhline_pos=0.0, barcolors=['grey','grey', 'grey'],barwidth=0.5)
+        pd2 = BarPlotData(x=(0,1,2), y=cumulative_summary.pc_diff_from_mean, ylim=[-ylim,ylim], xlabel='Tercile of Classifier Estimate\n(b)', ylabel='Recall Change From Mean (%)', x_tick_labels=['Low', 'Middle', 'High'], xhline_pos=0.0, barcolors=['grey','grey', 'grey'], xlabel_fontsize=18, ylabel_fontsize=18, barwidth=0.5)
 
         panel_plot.add_plot_data(0, 0, plot_data=pd1)
         panel_plot.add_plot_data(0, 1, plot_data=pd2)

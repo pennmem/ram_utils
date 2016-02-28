@@ -2,7 +2,6 @@
 \usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
 \usepackage{graphicx,multirow} 
 \usepackage{epstopdf} 
-\usepackage{subfigure,amsmath} 
 \usepackage{wrapfig} 
 \usepackage{longtable} 
 \usepackage{pdfpages}
@@ -66,7 +65,7 @@ $<N_MATH>$ math problems & $<N_CORRECT_MATH>$ correct ($<PC_CORRECT_MATH>$\%) & 
 
 \begin{figure}[!h]
 \centering
-\subfigure[]{\includegraphics[scale=0.4]{<PROB_RECALL_PLOT_FILE>}}
+\includegraphics[scale=0.4]{<PROB_RECALL_PLOT_FILE>}
 \caption{\textbf{Free recall:} (a) Overall probability of recall as a function of serial position. (b) Probability of FIRST recall as a function of serial position.}
 \end{figure}
 
@@ -90,7 +89,7 @@ $<N_MATH>$ math problems & $<N_CORRECT_MATH>$ correct ($<PC_CORRECT_MATH>$\%) & 
 
 \begin{figure}[!h]
 \centering
-\subfigure{\includegraphics[scale=0.45]{<ROC_AND_TERC_PLOT_FILE>}}
+\includegraphics[scale=0.45]{<ROC_AND_TERC_PLOT_FILE>}
 \caption{\textbf{(a)} ROC curve for the subject;
 \textbf{(b)} Subject recall performance represented as
 percentage devation from the (subject) mean, separated by tercile

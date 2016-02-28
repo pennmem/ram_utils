@@ -2,7 +2,6 @@
 \usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
 \usepackage{graphicx,multirow} 
 \usepackage{epstopdf} 
-\usepackage{subfigure,amsmath} 
 \usepackage{wrapfig} 
 \usepackage{longtable} 
 \usepackage{pdfpages}
@@ -66,12 +65,12 @@ $<N_WORDS>$ words & $<N_CORRECT_WORDS>$ correct ($<PC_CORRECT_WORDS>$\%) &$<N_PL
 
 \begin{figure}[!h]
 \centering
-\subfigure{\includegraphics[scale=0.4]{<PROB_RECALL_PLOT_FILE>}}
+\includegraphics[scale=0.4]{<PROB_RECALL_PLOT_FILE>}
 \caption{\textbf{Free recall:} (a) Overall probability of recall as a function of serial position. (b) Probability of FIRST recall as a function of serial position.}
 \end{figure}
 \begin{figure}[!h]
 \centering
-\subfigure{\includegraphics[scale=0.4]{<IRT_PLOT_FILE>}}
+\includegraphics[scale=0.4]{<IRT_PLOT_FILE>}
 \caption{\textbf{Free recall:} Inter-response times for transitions within and between categories.}
 \end{figure}
 
@@ -95,7 +94,7 @@ $<N_WORDS>$ words & $<N_CORRECT_WORDS>$ correct ($<PC_CORRECT_WORDS>$\%) &$<N_PL
 
 \begin{figure}[!h]
 \centering
-\subfigure{\includegraphics[scale=0.45]{<ROC_AND_TERC_PLOT_FILE>}}
+\includegraphics[scale=0.45]{<ROC_AND_TERC_PLOT_FILE>}
 \caption{\textbf{(a)} ROC curve for the subject;
 \textbf{(b)} Subject recall performance represented as
 percentage devation from the (subject) mean, separated by tercile
