@@ -24,7 +24,7 @@ pd_1 = PlotData(x=np.arange(10, dtype=np.float), y=np.random.rand(10), yerr=np.r
 pd_2 = PlotData(x=np.arange(5, dtype=np.float) - 0.1, y=np.random.rand(5), yerr=np.random.rand(5),
                  marker='*', markersize=20.0, label='blue_series')
 
-pdc = PlotDataCollection(legend_on=True)
+pdc = PlotDataCollection(legend_on=True,legend_loc=3)
 pdc.xlabel = 'x_axis_pdc'
 pdc.ylabel = 'y_pdc'
 pdc.xlabel_fontsize = 20
@@ -75,6 +75,7 @@ pd_2 = PlotData(x=np.arange(5, dtype=np.float) - 0.1, y=np.random.rand(5), yerr=
 
 pdc.add_plot_data(pd_1)
 pdc.add_plot_data(pd_2)
+pdc.legend_pos=(0.2,0.2)
 
 panel_plot_0.add_plot_data_collection(0, 0, plot_data_collection=pdc)
 

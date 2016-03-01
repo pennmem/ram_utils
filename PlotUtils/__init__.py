@@ -172,6 +172,7 @@ class PlotDataCollection(PlotDataBase):
 
         option_list = [
             PDO(name='legend_pos'),
+            PDO(name='legend_loc'),
             PDO(name='legend_on', default_value=False),
         ]
         self.init_options(option_list, options)
@@ -366,7 +367,9 @@ class PanelPlot(OptionsObject):
             ax.set_ylim(pd.ylim)
 
         if pd.legend_on:
-            if pd.legend_pos is not None:
+            if pd.legend_loc is not None:
+                ax.legend(loc=pd.legend_loc)
+            elif pd.legend_pos is not None:
                 ax.legend(bbox_to_anchor=pd.legend_pos)
             else:
                 ax.legend()
