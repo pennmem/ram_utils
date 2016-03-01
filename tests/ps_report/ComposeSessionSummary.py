@@ -68,17 +68,17 @@ def recall_delta_plot_data(ps_table, delta_column_name, param1_name, param2_name
 def anova_test(ps_table, param1_name, param2_name):
     if len(ps_table) < 10:
         return None
-    ps_lm = ols('prob_diff ~ C(%s) * C(%s)' % (param1_name,param2_name), data=ps_table).fit()
+    ps_lm = ols('perf_diff ~ C(%s) * C(%s)' % (param1_name,param2_name), data=ps_table).fit()
     anova = anova_lm(ps_lm)
     return (anova['F'].values[0:3], anova['PR(>F)'].values[0:3])
 
 
 # def ttest_one_param(ps_table, param_name):
 #     param_vals = sorted(ps_table[param_name].unique())
-#     val_max = param_vals[np.argmax([ps_table[ps_table[param_name]==val]['prob_diff'].mean() for val in param_vals])]
+#     val_max = param_vals[np.argmax([ps_table[ps_table[param_name]==val]['perf_diff'].mean() for val in param_vals])]
 #     val_max_sel = (ps_table[param_name]==val_max)
-#     population1 = ps_table[val_max_sel]['prob_diff'].values
-#     population2 = ps_table[~val_max_sel]['prob_diff'].values
+#     population1 = ps_table[val_max_sel]['perf_diff'].values
+#     population2 = ps_table[~val_max_sel]['perf_diff'].values
 #     t,p = ttest_ind(population1, population2)
 #     return val_max,t,p
 
@@ -88,8 +88,8 @@ def ttest_one_param(ps_table, param_name):
     param_vals = sorted(ps_table[param_name].unique())
     for val in param_vals:
         val_sel = (ps_table[param_name]==val)
-        population1 = ps_table[val_sel]['prob_diff'].values
-        population2 = ps_table[~val_sel]['prob_diff'].values
+        population1 = ps_table[val_sel]['perf_diff'].values
+        population2 = ps_table[~val_sel]['perf_diff'].values
         t,p = ttest_ind(population1, population2)
         if p<0.05 and t>0.0:
             ttest_table.append([val if val>=0 else 'PULSE', p, t])
@@ -104,7 +104,7 @@ def ttest_one_param(ps_table, param_name):
 #     for val1 in param1_vals:
 #         for val2 in param2_vals:
 #             ps_table_val1_val2 = ps_table[(ps_table[param1_name]==val1) & (ps_table[param2_name]==val2)]
-#             mean = ps_table_val1_val2['prob_diff'].mean()
+#             mean = ps_table_val1_val2['perf_diff'].mean()
 #             if mean > mean_max:
 #                 mean_max = mean
 #                 val1_max = val1
@@ -112,8 +112,8 @@ def ttest_one_param(ps_table, param_name):
 #
 #     val_max_sel = (ps_table[param1_name]==val1_max) & (ps_table[param2_name]==val2_max)
 #
-#     population1 = ps_table[val_max_sel]['prob_diff'].values
-#     population2 = ps_table[~val_max_sel]['prob_diff'].values
+#     population1 = ps_table[val_max_sel]['perf_diff'].values
+#     population2 = ps_table[~val_max_sel]['perf_diff'].values
 #     t,p = ttest_ind(population1, population2)
 #     return (val1_max,val2_max),t,p
 
@@ -127,8 +127,8 @@ def ttest_interaction(ps_table, param1_name, param2_name):
         for val2 in param2_vals:
             val2_sel = (ps_table[param2_name]==val2)
             sel = val1_sel & val2_sel
-            population1 = ps_table[sel]['prob_diff'].values
-            population2 = ps_table[~sel]['prob_diff'].values
+            population1 = ps_table[sel]['perf_diff'].values
+            population2 = ps_table[~sel]['perf_diff'].values
             t,p = ttest_ind(population1, population2)
             if p<0.05 and t>0.0:
                 ttest_table.append([val1 if val1>=0 else 'PULSE', val2, p, t])
@@ -270,7 +270,8 @@ class ComposeSessionSummary(RamTask):
                 anova_param2_sv[sess_loc_tag] = []
                 anova_param12_sv[sess_loc_tag] = []
 
-            anova = anova_test(ps_session_low_table, param1_name, param2_name)
+            #anova = anova_test(ps_session_low_table, param1_name, param2_name)
+            anova = anova_test(ps_session_table, param1_name, param2_name)
             if anova is not None:
                 session_summary.anova_fvalues = anova[0]
                 session_summary.anova_pvalues = anova[1]

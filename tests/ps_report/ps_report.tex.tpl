@@ -2,7 +2,7 @@
 
 \usepackage[table]{xcolor}
 \usepackage{graphicx}
-\usepackage[skip=0pt]{subcaption}
+%\usepackage[skip=0pt]{subcaption}
 %\setlength\belowcaptionskip{2pt}
 
 \addtolength{\oddsidemargin}{-.875in} 
@@ -15,7 +15,7 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{<EXPERIMENT> report v 3.0}
+\lhead{<EXPERIMENT> report v 3.1}
 \chead{Subject: \textbf{<SUBJECT>}}
 \rhead{Date created: <DATE>}
 \begin{document}
@@ -83,18 +83,23 @@ $\bullet$ All channels
 
 \begin{figure}[!h]
 \centering
-\begin{subfigure}[!h]{\linewidth}
-\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<CUMULATIVE_LOW_QUANTILE_PLOT_FILE>}
-\subcaption{Lower Half of Pre-Stim Classifier Output}
-\end{subfigure}
-\begin{subfigure}[!h]{\linewidth}
-\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<CUMULATIVE_HIGH_QUANTILE_PLOT_FILE>}
-\subcaption{Upper Half of Pre-Stim Classifier Output}
-\end{subfigure}
-\begin{subfigure}[!h]{\linewidth}
+%\begin{subfigure}[!h]{\linewidth}
+%\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<CUMULATIVE_LOW_QUANTILE_PLOT_FILE>}
+%\subcaption{Lower Half of Pre-Stim Classifier Output}
+%\end{subfigure}
+%\begin{subfigure}[!h]{\linewidth}
+%\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<CUMULATIVE_HIGH_QUANTILE_PLOT_FILE>}
+%\subcaption{Upper Half of Pre-Stim Classifier Output}
+%\end{subfigure}
+%\begin{subfigure}[!h]{\linewidth}
 \includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<CUMULATIVE_ALL_PLOT_FILE>}
-\subcaption{All Trials}
-\end{subfigure}
+\caption{\textbf{(a)} Means and standard errors of difference in classifier output post- and pre-stim;
+\textbf{(b)} Means and standard errors of}
+\[ \textrm{Expected Recall Change} = \frac{N_{recalls}(C \leq C_{\textrm{post}})/N_{items}(C \leq C_{\textrm{post}}) - N_{recalls}(C \leq C_{\textrm{pre}})/N_{items}(C \leq C_{\textrm{pre}})}{N_{recalls}/N_{items}}, \]
+\raggedright
+where $C_{\textrm{pre}}$ is pre-stim classifier output, $C_{\textrm{post}}$ is post-stim classifier output.
+%\subcaption{All Trials}
+%\end{subfigure}
 \end{figure}
 
 <CUMULATIVE_ADHOC_PAGE_TITLE>

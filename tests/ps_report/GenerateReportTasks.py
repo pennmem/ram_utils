@@ -83,8 +83,8 @@ class GenerateTex(RamTask):
 
             adhoc_page_title = ''
             if n_ttest_tables > 0:
-                adhoc_page_title = '\\clearpage\n'
-                adhoc_page_title += '\n\\subsection*{\\hfil Post hoc significance analysis for session %d \\hfil}\n\n' % session_summary.sess_num
+                #adhoc_page_title = '\\clearpage\n'
+                adhoc_page_title = '\n\\subsection*{\\hfil Post hoc significance analysis \\hfil}\n\n' % session_summary.sess_num
 
             replace_dict = {'<SESS_NUM>': session_summary.sess_num,
                             '<LOW_QUANTILE_PLOT_FILE>': self.pipeline.experiment + '-' + self.pipeline.subject + '-low_quantile_plot_' + session_summary.name + '.pdf',
@@ -153,8 +153,8 @@ class GenerateTex(RamTask):
 
         cumulative_adhoc_page_title = ''
         if n_ttest_tables > 0:
-            cumulative_adhoc_page_title = '\\clearpage\n'
-            cumulative_adhoc_page_title += '\n\\subsection*{\\hfil Post hoc significance analysis (combined) \\hfil}\n\n'
+            #cumulative_adhoc_page_title = '\\clearpage\n'
+            cumulative_adhoc_page_title = '\n\\subsection*{\\hfil Post hoc significance analysis \\hfil}\n\n'
 
         replace_dict = {
             '<SUBJECT>': self.pipeline.subject.replace('_', '\\textunderscore'),
@@ -238,7 +238,7 @@ class GeneratePlots(RamTask):
 
             panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
 
-            pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='$\Delta$ Expected Recall Performance (%)', xlabel_fontsize=20, ylabel_fontsize=20)
+            pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='Expected Recall Change (%)', xlabel_fontsize=20, ylabel_fontsize=20)
             for v,p in session_summary.low_quantile_recall_delta_plot.iteritems():
                 p.xhline_pos=0.0
                 pdc.add_plot_data(p)
@@ -260,7 +260,7 @@ class GeneratePlots(RamTask):
 
             panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
 
-            pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='$\Delta$ Expected Recall Performance (%)', xlabel_fontsize=20, ylabel_fontsize=20)
+            pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='Expected Recall Change (%)', xlabel_fontsize=20, ylabel_fontsize=20)
             for v,p in session_summary.high_quantile_recall_delta_plot.iteritems():
                 p.xhline_pos=0.0
                 pdc.add_plot_data(p)
@@ -276,13 +276,13 @@ class GeneratePlots(RamTask):
 
             panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=2, labelsize=16, wspace=5.0)
 
-            pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='$\Delta$ Post-Pre Classifier Output', xlabel_fontsize=20, ylabel_fontsize=20)
+            pdc = PlotDataCollection(legend_on=True, xlabel=param1_title+'\n(a)', ylabel='$\Delta$ Post-Pre Classifier Output', xlabel_fontsize=20, ylabel_fontsize=20)
             for v,p in session_summary.all_classifier_delta_plot.iteritems():
                 pdc.add_plot_data(p)
 
             panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
 
-            pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='$\Delta$ Expected Recall Performance (%)', xlabel_fontsize=20, ylabel_fontsize=20)
+            pdc = PlotDataCollection(legend_on=True, xlabel=param1_title+'\n(b)', ylabel='Expected Recall Change (%)', xlabel_fontsize=20, ylabel_fontsize=20)
             for v,p in session_summary.all_recall_delta_plot.iteritems():
                 p.xhline_pos=0.0
                 pdc.add_plot_data(p)
@@ -314,7 +314,7 @@ class GeneratePlots(RamTask):
 
         panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
 
-        pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='$\Delta$ Expected Recall Performance (%)', xlabel_fontsize=20, ylabel_fontsize=20)
+        pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='Expected Recall Change (%)', xlabel_fontsize=20, ylabel_fontsize=20)
         for v,p in cumulative_low_quantile_recall_delta_plot.iteritems():
             p.xhline_pos=0.0
             pdc.add_plot_data(p)
@@ -336,7 +336,7 @@ class GeneratePlots(RamTask):
 
         panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
 
-        pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='$\Delta$ Expected Recall Performance (%)', xlabel_fontsize=20, ylabel_fontsize=20)
+        pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='Expected Recall Change (%)', xlabel_fontsize=20, ylabel_fontsize=20)
         for v,p in cumulative_high_quantile_recall_delta_plot.iteritems():
             p.xhline_pos=0.0
             pdc.add_plot_data(p)
@@ -352,13 +352,13 @@ class GeneratePlots(RamTask):
 
         panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=2, labelsize=16, wspace=5.0)
 
-        pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='$\Delta$ Post-Pre Classifier Output', xlabel_fontsize=20, ylabel_fontsize=20)
+        pdc = PlotDataCollection(legend_on=True, xlabel=param1_title+'\n(a)', ylabel='$\Delta$ Post-Pre Classifier Output', xlabel_fontsize=20, ylabel_fontsize=20)
         for v,p in cumulative_all_classifier_delta_plot.iteritems():
             pdc.add_plot_data(p)
 
         panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
 
-        pdc = PlotDataCollection(legend_on=True, xlabel=param1_title, ylabel='$\Delta$ Expected Recall Performance (%)', xlabel_fontsize=20, ylabel_fontsize=20)
+        pdc = PlotDataCollection(legend_on=True, xlabel=param1_title+'\n(b)', ylabel='Expected Recall Change (%)', xlabel_fontsize=20, ylabel_fontsize=20)
         for v,p in cumulative_all_recall_delta_plot.iteritems():
             p.xhline_pos=0.0
             pdc.add_plot_data(p)

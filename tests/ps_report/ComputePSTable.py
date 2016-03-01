@@ -60,6 +60,7 @@ class ComputePSTable(RamTask):
         probs, true_labels = zip(*performance_map)
         probs = np.array(probs)
         true_labels = np.array(true_labels)
+        total_recall_performance = np.sum(true_labels) / float(len(true_labels))
 
         # the code below is not pythonic, but I'll figure it out later
         perf_diff = np.zeros(n_events, dtype=float)
@@ -68,8 +69,8 @@ class ComputePSTable(RamTask):
         perf_diff_control_low = np.zeros(n_events, dtype=float)
         perf_diff_control_high = np.zeros(n_events, dtype=float)
         for i in xrange(n_events):
-            perf_pre = prob2perf(probs, true_labels, prob_pre[i])
-            perf_diff[i] = 100.0*(prob2perf(probs, true_labels, prob_pre[i]+prob_diff[i]+1e-6) - perf_pre)
+            perf_pre = prob2perf(probs, true_labels, prob_pre[i]+1e-7)
+            perf_diff[i] = 100.0*(prob2perf(probs, true_labels, prob_pre[i]+prob_diff[i]+1e-7) - perf_pre) / total_recall_performance
             prob_diff_low = prob_diff_high = prob_diff[i]
             if experiment=='PS2' or experiment=='PS3':
                 prob_diff_low -= control_low_500
@@ -87,8 +88,8 @@ class ComputePSTable(RamTask):
 
             prob_diff_control_low[i] = prob_diff_low
             prob_diff_control_high[i] = prob_diff_high
-            perf_diff_control_low[i] = 100.0*(prob2perf(probs, true_labels, prob_pre[i]+prob_diff_low+1e-6) - perf_pre)
-            perf_diff_control_high[i] = 100.0*(prob2perf(probs, true_labels, prob_pre[i]+prob_diff_high+1e-6) - perf_pre)
+            perf_diff_control_low[i] = 100.0*(prob2perf(probs, true_labels, prob_pre[i]+prob_diff_low+1e-6) - perf_pre) / total_recall_performance
+            perf_diff_control_high[i] = 100.0*(prob2perf(probs, true_labels, prob_pre[i]+prob_diff_high+1e-6) - perf_pre) / total_recall_performance
 
         #define region
         bipolar_label = pd.Series(ps_events.stimAnodeTag) + '-' + pd.Series(ps_events.stimCathodeTag)
