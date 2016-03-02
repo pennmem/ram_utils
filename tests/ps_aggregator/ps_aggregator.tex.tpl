@@ -62,22 +62,22 @@ CA1, CA2, CA3, DG, Sub & PRC, PHC, EC & PCg, ACg, DLPFC \\
 \clearpage
 
 \subsection*{\hfil PS1,PS2 Region $\times$ Pulse Frequency Analysis \hfil}
-%{\color{blue} Blue: HC}; {\color{green} Green: MTLC}; {\color{red} Red: Cing-PFC}; {\color{cyan} Cyan: Other}
 
 \begin{figure}[!h]
 \centering
+%\begin{subfigure}[!h]{\linewidth}
+%\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<LOW_QUANTILE_FREQUENCY_PLOT_FILE>}
+%\caption{Lower Half of Pre-Stim Classifier Output}
+%\end{subfigure}
+%\begin{subfigure}[!h]{\linewidth}
+%\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<HIGH_QUANTILE_FREQUENCY_PLOT_FILE>}
+%\caption{Upper Half of Pre-Stim Classifier Output}
+%\end{subfigure}
 \begin{subfigure}[!h]{\linewidth}
-\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<LOW_QUANTILE_FREQUENCY_PLOT_FILE>}
-\caption{Lower Half of Pre-Stim Classifier Output}
+\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<ALL_FREQUENCY_CLASSIFIER_DELTA_PLOT_FILE>}
 \end{subfigure}
-\vspace{10pt}
 \begin{subfigure}[!h]{\linewidth}
-\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<HIGH_QUANTILE_FREQUENCY_PLOT_FILE>}
-\caption{Upper Half of Pre-Stim Classifier Output}
-\end{subfigure}
-\begin{subfigure}[!h]{\linewidth}
-\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<ALL_FREQUENCY_PLOT_FILE>}
-\caption{All Trials}
+\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<ALL_FREQUENCY_RECALL_CHANGE_PLOT_FILE>}
 \end{subfigure}
 \end{figure}
 
@@ -89,17 +89,19 @@ CA1, CA2, CA3, DG, Sub & PRC, PHC, EC & PCg, ACg, DLPFC \\
 
 \begin{figure}[!h]
 \centering
+%\begin{subfigure}[!h]{\linewidth}
+%\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<LOW_QUANTILE_AMPLITUDE_PLOT_FILE>}
+%\subcaption{Lower Half of Pre-Stim Classifier Output}
+%\end{subfigure}
+%\begin{subfigure}[!h]{\linewidth}
+%\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<HIGH_QUANTILE_AMPLITUDE_PLOT_FILE>}
+%\subcaption{Upper Half of Pre-Stim Classifier Output}
+%\end{subfigure}
 \begin{subfigure}[!h]{\linewidth}
-\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<LOW_QUANTILE_AMPLITUDE_PLOT_FILE>}
-\subcaption{Lower Half of Pre-Stim Classifier Output}
+\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<ALL_AMPLITUDE_CLASSIFIER_DELTA_PLOT_FILE>}
 \end{subfigure}
 \begin{subfigure}[!h]{\linewidth}
-\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<HIGH_QUANTILE_AMPLITUDE_PLOT_FILE>}
-\subcaption{Upper Half of Pre-Stim Classifier Output}
-\end{subfigure}
-\begin{subfigure}[!h]{\linewidth}
-\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<ALL_AMPLITUDE_PLOT_FILE>}
-\subcaption{All Trials}
+\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<ALL_AMPLITUDE_RECALL_CHANGE_PLOT_FILE>}
 \end{subfigure}
 \end{figure}
 
@@ -111,17 +113,19 @@ CA1, CA2, CA3, DG, Sub & PRC, PHC, EC & PCg, ACg, DLPFC \\
 
 \begin{figure}[!h]
 \centering
+%\begin{subfigure}[!h]{\linewidth}
+%\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<LOW_QUANTILE_DURATION_PLOT_FILE>}
+%\subcaption{Lower Half of Pre-Stim Classifier Output}
+%\end{subfigure}
+%\begin{subfigure}[!h]{\linewidth}
+%\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<HIGH_QUANTILE_DURATION_PLOT_FILE>}
+%\subcaption{Upper Half of Pre-Stim Classifier Output}
+%\end{subfigure}
 \begin{subfigure}[!h]{\linewidth}
-\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<LOW_QUANTILE_DURATION_PLOT_FILE>}
-\subcaption{Lower Half of Pre-Stim Classifier Output}
+\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<ALL_DURATION_CLASSIFIER_DELTA_PLOT_FILE>}
 \end{subfigure}
 \begin{subfigure}[!h]{\linewidth}
-\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<HIGH_QUANTILE_DURATION_PLOT_FILE>}
-\subcaption{Upper Half of Pre-Stim Classifier Output}
-\end{subfigure}
-\begin{subfigure}[!h]{\linewidth}
-\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<ALL_DURATION_PLOT_FILE>}
-\subcaption{All Trials}
+\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<ALL_DURATION_RECALL_CHANGE_PLOT_FILE>}
 \end{subfigure}
 \end{figure}
 

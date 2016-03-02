@@ -179,42 +179,43 @@ class RunAnalysis(RamTask):
         #region_total = self.get_passed_object('region_session_total')
         #regions = [r for r,c in region_total.iteritems() if c>=5]
 
-        name_suffix = '_with_control_low' if self.params.baseline_correction else ''
-        self.analyze(self.ps_table[self.ps_table['prob_pre']<self.ps_table['thresh']], name_prefix='low_quantile_', name_suffix=name_suffix)
+        #name_suffix = '_with_control_low' if self.params.baseline_correction else ''
+        #self.analyze(self.ps_table[self.ps_table['prob_pre']<self.ps_table['thresh']], name_prefix='low_quantile_', name_suffix=name_suffix)
 
-        name_suffix = '_with_control_high' if self.params.baseline_correction else ''
-        self.analyze(self.ps_table[self.ps_table['prob_pre']>self.ps_table['thresh']], name_prefix='high_quantile_', name_suffix=name_suffix)
+        #name_suffix = '_with_control_high' if self.params.baseline_correction else ''
+        #self.analyze(self.ps_table[self.ps_table['prob_pre']>self.ps_table['thresh']], name_prefix='high_quantile_', name_suffix=name_suffix)
 
-        self.analyze(self.ps_table, name_prefix='all_', name_suffix='')
+        self.analyze(self.ps_table, 'prob_diff', name_prefix='all_', name_suffix='')
+        self.analyze(self.ps_table, 'perf_diff', name_prefix='all_', name_suffix='')
 
-    def analyze(self, ps_subtable, name_prefix, name_suffix):
-        output_param = self.params.output_param + name_suffix
+    def analyze(self, output_param, ps_subtable, name_prefix, name_suffix):
+        #output_param = self.params.output_param + name_suffix
 
         rf = RegionFrequencyAnalysis(output_param)
         rf.run(ps_subtable, self.params.frequency_plot_regions, self.params.frequency_plot_areas)
-        self.pass_object(name_prefix+'frequency_plot', rf.plots)
+        self.pass_object(name_prefix+'_'+output_param+'_frequency_plot', rf.plots)
         self.pass_object('n_region_frequency_experiment', rf.n_experiments)
-        self.pass_object(name_prefix+'frequency_frequency_plot', rf.frequency_plot)
-        self.pass_object(name_prefix+'frequency_region_plot', rf.region_plot)
+        self.pass_object(name_prefix+'_'+output_param+'_frequency_frequency_plot', rf.frequency_plot)
+        self.pass_object(name_prefix+'_'+output_param+'_frequency_region_plot', rf.region_plot)
 
         low_freq_ps_table = ps_subtable[(ps_subtable['Pulse_Frequency']==10) | (ps_subtable['Pulse_Frequency']==25)]
         high_freq_ps_table = ps_subtable[(ps_subtable['Pulse_Frequency']==100) | (ps_subtable['Pulse_Frequency']==200)]
 
         low_freq_ps1_table = low_freq_ps_table[low_freq_ps_table['Experiment']=='PS1']
         low_freq_duration_plot = duration_plot(low_freq_ps1_table, output_param, self.params.duration_plot_regions, self.params.duration_plot_areas)
-        self.pass_object(name_prefix+'low_freq_duration_plot', low_freq_duration_plot)
+        self.pass_object(name_prefix+'_'+output_param+'_low_freq_duration_plot', low_freq_duration_plot)
 
         high_freq_ps1_table = high_freq_ps_table[high_freq_ps_table['Experiment']=='PS1']
         high_freq_duration_plot = duration_plot(high_freq_ps1_table, output_param, self.params.duration_plot_regions, self.params.duration_plot_areas)
-        self.pass_object(name_prefix+'high_freq_duration_plot', high_freq_duration_plot)
+        self.pass_object(name_prefix+'_'+output_param+'_high_freq_duration_plot', high_freq_duration_plot)
 
         low_freq_ps2_table = low_freq_ps_table[low_freq_ps_table['Experiment']=='PS2']
         low_freq_amplitude_plot = amplitude_plot(low_freq_ps2_table, output_param, self.params.amplitude_plot_regions, self.params.amplitude_plot_areas)
-        self.pass_object(name_prefix+'low_freq_amplitude_plot', low_freq_amplitude_plot)
+        self.pass_object(name_prefix+'_'+output_param+'_low_freq_amplitude_plot', low_freq_amplitude_plot)
 
         high_freq_ps2_table = high_freq_ps_table[high_freq_ps_table['Experiment']=='PS2']
         high_freq_amplitude_plot = amplitude_plot(high_freq_ps2_table, output_param, self.params.amplitude_plot_regions, self.params.amplitude_plot_areas)
-        self.pass_object(name_prefix+'high_freq_amplitude_plot', high_freq_amplitude_plot)
+        self.pass_object(name_prefix+'_'+output_param+'_high_freq_amplitude_plot', high_freq_amplitude_plot)
 
         #self.run_anova()
 
