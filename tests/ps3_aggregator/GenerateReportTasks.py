@@ -57,13 +57,18 @@ class GeneratePlots(RamTask):
     def run(self):
         self.create_dir_in_workspace('reports')
 
-        prob_diff_frequency_plot_data = self.get_passed_object('all_prob_diff_frequency_plot')
-        prob_diff_frequency_region_plot_data = self.get_passed_object('all_prob_diff_frequency_region_plot')
-        prob_diff_frequency_frequency_plot_data = self.get_passed_object('all_prob_diff_frequency_frequency_plot')
+        self.create_plots('')
+        self.create_plots('_100')
+        self.create_plots('_200')
 
-        perf_diff_frequency_plot_data = self.get_passed_object('all_perf_diff_frequency_plot')
-        perf_diff_frequency_region_plot_data = self.get_passed_object('all_perf_diff_frequency_region_plot')
-        perf_diff_frequency_frequency_plot_data = self.get_passed_object('all_perf_diff_frequency_frequency_plot')
+    def create_plots(self, pf):
+        prob_diff_frequency_plot_data = self.get_passed_object('all%s_prob_diff_frequency_plot' % pf)
+        prob_diff_frequency_region_plot_data = self.get_passed_object('all%s_prob_diff_frequency_region_plot' % pf)
+        prob_diff_frequency_frequency_plot_data = self.get_passed_object('all%s_prob_diff_frequency_frequency_plot' % pf)
+
+        perf_diff_frequency_plot_data = self.get_passed_object('all%s_perf_diff_frequency_plot' % pf)
+        perf_diff_frequency_region_plot_data = self.get_passed_object('all%s_perf_diff_frequency_region_plot' % pf)
+        perf_diff_frequency_frequency_plot_data = self.get_passed_object('all%s_perf_diff_frequency_frequency_plot' % pf)
 
 
         pdc = PlotDataCollection(legend_on=True, legend_loc=3, xlabel='Burst Frequency (Hz)', xlabel_fontsize=15)
@@ -71,7 +76,7 @@ class GeneratePlots(RamTask):
             p.xhline_pos=0.0
             pdc.add_plot_data(p)
 
-        panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=3, ytitle=self.params.output_title, labelsize=16, ytitle_fontsize=18)
+        panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=3, ytitle='$\Delta$ Post-Pre Classifier Output', labelsize=16, ytitle_fontsize=18)
         min_y_list = []
         max_y_list = []
 
@@ -116,7 +121,7 @@ class GeneratePlots(RamTask):
         panel_plot.add_plot_data(0, 2, plot_data=prob_diff_frequency_frequency_plot_data)
 
         plot = panel_plot.generate_plot()
-        plot_out_fname = self.get_path_to_resource_in_workspace('reports/ps3_prob_diff_frequency_plot.pdf')
+        plot_out_fname = self.get_path_to_resource_in_workspace('reports/ps3_prob_diff%s_frequency_plot.pdf' % pf)
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
 
@@ -125,7 +130,7 @@ class GeneratePlots(RamTask):
             p.xhline_pos=0.0
             pdc.add_plot_data(p)
 
-        panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=3, ytitle=self.params.output_title, labelsize=16, ytitle_fontsize=18)
+        panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=3, ytitle='Expected Recall Change (%)', labelsize=16, ytitle_fontsize=18)
         min_y_list = []
         max_y_list = []
 
@@ -170,243 +175,8 @@ class GeneratePlots(RamTask):
         panel_plot.add_plot_data(0, 2, plot_data=perf_diff_frequency_frequency_plot_data)
 
         plot = panel_plot.generate_plot()
-        plot_out_fname = self.get_path_to_resource_in_workspace('reports/ps3_perf_diff_frequency_plot.pdf')
+        plot_out_fname = self.get_path_to_resource_in_workspace('reports/ps3_perf_diff%s_frequency_plot.pdf' % pf)
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
-
-
-        prob_diff_frequency_plot_data = self.get_passed_object('all_prob_diff_100_frequency_plot')
-        prob_diff_frequency_region_plot_data = self.get_passed_object('all_prob_diff_100_frequency_region_plot')
-        prob_diff_frequency_frequency_plot_data = self.get_passed_object('all_prob_diff_100_frequency_frequency_plot')
-
-        perf_diff_frequency_plot_data = self.get_passed_object('all_perf_diff_100_frequency_plot')
-        perf_diff_frequency_region_plot_data = self.get_passed_object('all_perf_diff_100_frequency_region_plot')
-        perf_diff_frequency_frequency_plot_data = self.get_passed_object('all_perf_diff_100_frequency_frequency_plot')
-
-
-        pdc = PlotDataCollection(legend_on=True, legend_loc=3, xlabel='Burst Frequency (Hz)', xlabel_fontsize=15)
-        for v,p in prob_diff_frequency_plot_data.iteritems():
-            p.xhline_pos=0.0
-            pdc.add_plot_data(p)
-
-        panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=3, ytitle=self.params.output_title, labelsize=16, ytitle_fontsize=18)
-        min_y_list = []
-        max_y_list = []
-
-        r = pdc.get_yrange()
-        min_y_list.append(r[0])
-        max_y_list.append(r[1])
-
-        r = prob_diff_frequency_region_plot_data.get_yrange()
-        min_y_list.append(r[0])
-        max_y_list.append(r[1])
-
-        r = prob_diff_frequency_frequency_plot_data.get_yrange()
-        min_y_list.append(r[0])
-        max_y_list.append(r[1])
-
-        y_min = np.min(min_y_list)
-        y_max = np.max(max_y_list)
-        r = y_max - y_min
-        y_min -= 0.05*r
-        y_max += 0.05*r
-        if y_min>0.0: y_min=0.0
-        if y_max<0.0: y_max=0.0
-
-        pdc.ylim=[y_min,y_max]
-        prob_diff_frequency_region_plot_data.ylim=[y_min,y_max]
-        prob_diff_frequency_frequency_plot_data.ylim=[y_min,y_max]
-
-        pdc.xhline_pos = 0.0
-        prob_diff_frequency_region_plot_data.xhline_pos = 0.0
-        prob_diff_frequency_frequency_plot_data.xhline_pos = 0.0
-
-        # label fontsize
-        pdc.xlabel_fontsize = 16
-        pdc.ylabel_fontsize = 16
-        prob_diff_frequency_region_plot_data.xlabel_fontsize = 16
-        prob_diff_frequency_region_plot_data.ylabel_fontsize = 16
-        prob_diff_frequency_frequency_plot_data.xlabel_fontsize = 16
-        prob_diff_frequency_frequency_plot_data.ylabel_fontsize = 16
-
-        panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
-        panel_plot.add_plot_data(0, 1, plot_data=prob_diff_frequency_region_plot_data)
-        panel_plot.add_plot_data(0, 2, plot_data=prob_diff_frequency_frequency_plot_data)
-
-        plot = panel_plot.generate_plot()
-        plot_out_fname = self.get_path_to_resource_in_workspace('reports/ps3_prob_diff_100_frequency_plot.pdf')
-        plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
-
-
-        pdc = PlotDataCollection(legend_on=True, legend_loc=3, xlabel='Burst Frequency (Hz)', xlabel_fontsize=15)
-        for v,p in perf_diff_frequency_plot_data.iteritems():
-            p.xhline_pos=0.0
-            pdc.add_plot_data(p)
-
-        panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=3, ytitle=self.params.output_title, labelsize=16, ytitle_fontsize=18)
-        min_y_list = []
-        max_y_list = []
-
-        r = pdc.get_yrange()
-        min_y_list.append(r[0])
-        max_y_list.append(r[1])
-
-        r = perf_diff_frequency_region_plot_data.get_yrange()
-        min_y_list.append(r[0])
-        max_y_list.append(r[1])
-
-        r = perf_diff_frequency_frequency_plot_data.get_yrange()
-        min_y_list.append(r[0])
-        max_y_list.append(r[1])
-
-        y_min = np.min(min_y_list)
-        y_max = np.max(max_y_list)
-        r = y_max - y_min
-        y_min -= 0.05*r
-        y_max += 0.05*r
-        if y_min>0.0: y_min=0.0
-        if y_max<0.0: y_max=0.0
-
-        pdc.ylim=[y_min,y_max]
-        perf_diff_frequency_region_plot_data.ylim=[y_min,y_max]
-        perf_diff_frequency_frequency_plot_data.ylim=[y_min,y_max]
-
-        pdc.xhline_pos = 0.0
-        perf_diff_frequency_region_plot_data.xhline_pos = 0.0
-        perf_diff_frequency_frequency_plot_data.xhline_pos = 0.0
-
-        # label fontsize
-        pdc.xlabel_fontsize = 16
-        pdc.ylabel_fontsize = 16
-        perf_diff_frequency_region_plot_data.xlabel_fontsize = 16
-        perf_diff_frequency_region_plot_data.ylabel_fontsize = 16
-        perf_diff_frequency_frequency_plot_data.xlabel_fontsize = 16
-        perf_diff_frequency_frequency_plot_data.ylabel_fontsize = 16
-
-        panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
-        panel_plot.add_plot_data(0, 1, plot_data=perf_diff_frequency_region_plot_data)
-        panel_plot.add_plot_data(0, 2, plot_data=perf_diff_frequency_frequency_plot_data)
-
-        plot = panel_plot.generate_plot()
-        plot_out_fname = self.get_path_to_resource_in_workspace('reports/ps3_perf_diff_100_frequency_plot.pdf')
-        plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
-
-
-        prob_diff_frequency_plot_data = self.get_passed_object('all_prob_diff_200_frequency_plot')
-        prob_diff_frequency_region_plot_data = self.get_passed_object('all_prob_diff_200_frequency_region_plot')
-        prob_diff_frequency_frequency_plot_data = self.get_passed_object('all_prob_diff_200_frequency_frequency_plot')
-
-        perf_diff_frequency_plot_data = self.get_passed_object('all_perf_diff_200_frequency_plot')
-        perf_diff_frequency_region_plot_data = self.get_passed_object('all_perf_diff_200_frequency_region_plot')
-        perf_diff_frequency_frequency_plot_data = self.get_passed_object('all_perf_diff_200_frequency_frequency_plot')
-
-
-        pdc = PlotDataCollection(legend_on=True, legend_loc=3, xlabel='Burst Frequency (Hz)', xlabel_fontsize=15)
-        for v,p in prob_diff_frequency_plot_data.iteritems():
-            p.xhline_pos=0.0
-            pdc.add_plot_data(p)
-
-        panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=3, ytitle=self.params.output_title, labelsize=16, ytitle_fontsize=18)
-        min_y_list = []
-        max_y_list = []
-
-        r = pdc.get_yrange()
-        min_y_list.append(r[0])
-        max_y_list.append(r[1])
-
-        r = prob_diff_frequency_region_plot_data.get_yrange()
-        min_y_list.append(r[0])
-        max_y_list.append(r[1])
-
-        r = prob_diff_frequency_frequency_plot_data.get_yrange()
-        min_y_list.append(r[0])
-        max_y_list.append(r[1])
-
-        y_min = np.min(min_y_list)
-        y_max = np.max(max_y_list)
-        r = y_max - y_min
-        y_min -= 0.05*r
-        y_max += 0.05*r
-        if y_min>0.0: y_min=0.0
-        if y_max<0.0: y_max=0.0
-
-        pdc.ylim=[y_min,y_max]
-        prob_diff_frequency_region_plot_data.ylim=[y_min,y_max]
-        prob_diff_frequency_frequency_plot_data.ylim=[y_min,y_max]
-
-        pdc.xhline_pos = 0.0
-        prob_diff_frequency_region_plot_data.xhline_pos = 0.0
-        prob_diff_frequency_frequency_plot_data.xhline_pos = 0.0
-
-        # label fontsize
-        pdc.xlabel_fontsize = 16
-        pdc.ylabel_fontsize = 16
-        prob_diff_frequency_region_plot_data.xlabel_fontsize = 16
-        prob_diff_frequency_region_plot_data.ylabel_fontsize = 16
-        prob_diff_frequency_frequency_plot_data.xlabel_fontsize = 16
-        prob_diff_frequency_frequency_plot_data.ylabel_fontsize = 16
-
-        panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
-        panel_plot.add_plot_data(0, 1, plot_data=prob_diff_frequency_region_plot_data)
-        panel_plot.add_plot_data(0, 2, plot_data=prob_diff_frequency_frequency_plot_data)
-
-        plot = panel_plot.generate_plot()
-        plot_out_fname = self.get_path_to_resource_in_workspace('reports/ps3_prob_diff_200_frequency_plot.pdf')
-        plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
-
-
-        pdc = PlotDataCollection(legend_on=True, legend_loc=3, xlabel='Burst Frequency (Hz)', xlabel_fontsize=15)
-        for v,p in perf_diff_frequency_plot_data.iteritems():
-            p.xhline_pos=0.0
-            pdc.add_plot_data(p)
-
-        panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=3, ytitle=self.params.output_title, labelsize=16, ytitle_fontsize=18)
-        min_y_list = []
-        max_y_list = []
-
-        r = pdc.get_yrange()
-        min_y_list.append(r[0])
-        max_y_list.append(r[1])
-
-        r = perf_diff_frequency_region_plot_data.get_yrange()
-        min_y_list.append(r[0])
-        max_y_list.append(r[1])
-
-        r = perf_diff_frequency_frequency_plot_data.get_yrange()
-        min_y_list.append(r[0])
-        max_y_list.append(r[1])
-
-        y_min = np.min(min_y_list)
-        y_max = np.max(max_y_list)
-        r = y_max - y_min
-        y_min -= 0.05*r
-        y_max += 0.05*r
-        if y_min>0.0: y_min=0.0
-        if y_max<0.0: y_max=0.0
-
-        pdc.ylim=[y_min,y_max]
-        perf_diff_frequency_region_plot_data.ylim=[y_min,y_max]
-        perf_diff_frequency_frequency_plot_data.ylim=[y_min,y_max]
-
-        pdc.xhline_pos = 0.0
-        perf_diff_frequency_region_plot_data.xhline_pos = 0.0
-        perf_diff_frequency_frequency_plot_data.xhline_pos = 0.0
-
-        # label fontsize
-        pdc.xlabel_fontsize = 16
-        pdc.ylabel_fontsize = 16
-        perf_diff_frequency_region_plot_data.xlabel_fontsize = 16
-        perf_diff_frequency_region_plot_data.ylabel_fontsize = 16
-        perf_diff_frequency_frequency_plot_data.xlabel_fontsize = 16
-        perf_diff_frequency_frequency_plot_data.ylabel_fontsize = 16
-
-        panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
-        panel_plot.add_plot_data(0, 1, plot_data=perf_diff_frequency_region_plot_data)
-        panel_plot.add_plot_data(0, 2, plot_data=perf_diff_frequency_frequency_plot_data)
-
-        plot = panel_plot.generate_plot()
-        plot_out_fname = self.get_path_to_resource_in_workspace('reports/ps3_perf_diff_200_frequency_plot.pdf')
-        plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
-
 
 
 class GenerateReportPDF(RamTask):
