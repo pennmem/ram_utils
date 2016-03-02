@@ -2,10 +2,7 @@
 
 \usepackage{graphicx}
 \usepackage{caption}
-\setlength{\abovecaptionskip}{0pt}
-\usepackage[skip=0pt]{subcaption}
-
-\usepackage{color}
+\setlength{\abovecaptionskip}{2pt}
 
 \addtolength{\oddsidemargin}{-.875in}
 \addtolength{\evensidemargin}{-.875in}
@@ -65,20 +62,19 @@ CA1, CA2, CA3, DG, Sub & PRC, PHC, EC & PCg, ACg, DLPFC \\
 
 \begin{figure}[!h]
 \centering
-%\begin{subfigure}[!h]{\linewidth}
-%\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<LOW_QUANTILE_FREQUENCY_PLOT_FILE>}
-%\caption{Lower Half of Pre-Stim Classifier Output}
-%\end{subfigure}
-%\begin{subfigure}[!h]{\linewidth}
-%\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<HIGH_QUANTILE_FREQUENCY_PLOT_FILE>}
-%\caption{Upper Half of Pre-Stim Classifier Output}
-%\end{subfigure}
-\begin{subfigure}[!h]{\linewidth}
-\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<ALL_FREQUENCY_CLASSIFIER_DELTA_PLOT_FILE>}
-\end{subfigure}
-\begin{subfigure}[!h]{\linewidth}
-\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<ALL_FREQUENCY_RECALL_CHANGE_PLOT_FILE>}
-\end{subfigure}
+\includegraphics[scale=0.4]{<ALL_FREQUENCY_CLASSIFIER_DELTA_PLOT_FILE>}
+\caption{Cumulative means and standard errors of difference in classifier output post- and pre-stim}
+\end{figure}
+
+\vspace{1cm}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.4]{<ALL_FREQUENCY_RECALL_CHANGE_PLOT_FILE>}
+\caption{Cumulative means and standard errors of:}
+\[ \textrm{Expected Recall Change} = \frac{N_{recalls}(C \leq C_{\textrm{post}})/N_{items}(C \leq C_{\textrm{post}}) - N_{recalls}(C \leq C_{\textrm{pre}})/N_{items}(C \leq C_{\textrm{pre}})}{N_{recalls}/N_{items}}, \]
+\raggedright
+where $C_{\textrm{pre}}$ is pre-stim classifier output, $C_{\textrm{post}}$ is post-stim classifier output.
 \end{figure}
 
 \clearpage
@@ -89,20 +85,19 @@ CA1, CA2, CA3, DG, Sub & PRC, PHC, EC & PCg, ACg, DLPFC \\
 
 \begin{figure}[!h]
 \centering
-%\begin{subfigure}[!h]{\linewidth}
-%\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<LOW_QUANTILE_AMPLITUDE_PLOT_FILE>}
-%\subcaption{Lower Half of Pre-Stim Classifier Output}
-%\end{subfigure}
-%\begin{subfigure}[!h]{\linewidth}
-%\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<HIGH_QUANTILE_AMPLITUDE_PLOT_FILE>}
-%\subcaption{Upper Half of Pre-Stim Classifier Output}
-%\end{subfigure}
-\begin{subfigure}[!h]{\linewidth}
-\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<ALL_AMPLITUDE_CLASSIFIER_DELTA_PLOT_FILE>}
-\end{subfigure}
-\begin{subfigure}[!h]{\linewidth}
-\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<ALL_AMPLITUDE_RECALL_CHANGE_PLOT_FILE>}
-\end{subfigure}
+\includegraphics[scale=0.4]{<ALL_AMPLITUDE_CLASSIFIER_DELTA_PLOT_FILE>}
+\caption{Cumulative means and standard errors of difference in classifier output post- and pre-stim}
+\end{figure}
+
+\vspace{1cm}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.4]{<ALL_AMPLITUDE_RECALL_CHANGE_PLOT_FILE>}
+\caption{Cumulative means and standard errors of:}
+\[ \textrm{Expected Recall Change} = \frac{N_{recalls}(C \leq C_{\textrm{post}})/N_{items}(C \leq C_{\textrm{post}}) - N_{recalls}(C \leq C_{\textrm{pre}})/N_{items}(C \leq C_{\textrm{pre}})}{N_{recalls}/N_{items}}, \]
+\raggedright
+where $C_{\textrm{pre}}$ is pre-stim classifier output, $C_{\textrm{post}}$ is post-stim classifier output.
 \end{figure}
 
 \clearpage
@@ -113,20 +108,19 @@ CA1, CA2, CA3, DG, Sub & PRC, PHC, EC & PCg, ACg, DLPFC \\
 
 \begin{figure}[!h]
 \centering
-%\begin{subfigure}[!h]{\linewidth}
-%\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<LOW_QUANTILE_DURATION_PLOT_FILE>}
-%\subcaption{Lower Half of Pre-Stim Classifier Output}
-%\end{subfigure}
-%\begin{subfigure}[!h]{\linewidth}
-%\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<HIGH_QUANTILE_DURATION_PLOT_FILE>}
-%\subcaption{Upper Half of Pre-Stim Classifier Output}
-%\end{subfigure}
-\begin{subfigure}[!h]{\linewidth}
-\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<ALL_DURATION_CLASSIFIER_DELTA_PLOT_FILE>}
-\end{subfigure}
-\begin{subfigure}[!h]{\linewidth}
-\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<ALL_DURATION_RECALL_CHANGE_PLOT_FILE>}
-\end{subfigure}
+\includegraphics[scale=0.4]{<ALL_DURATION_CLASSIFIER_DELTA_PLOT_FILE>}
+\caption{Cumulative means and standard errors of difference in classifier output post- and pre-stim}
+\end{figure}
+
+\vspace{1cm}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.4]{<ALL_DURATION_RECALL_CHANGE_PLOT_FILE>}
+\caption{Cumulative means and standard errors of:}
+\[ \textrm{Expected Recall Change} = \frac{N_{recalls}(C \leq C_{\textrm{post}})/N_{items}(C \leq C_{\textrm{post}}) - N_{recalls}(C \leq C_{\textrm{pre}})/N_{items}(C \leq C_{\textrm{pre}})}{N_{recalls}/N_{items}}, \]
+\raggedright
+where $C_{\textrm{pre}}$ is pre-stim classifier output, $C_{\textrm{post}}$ is post-stim classifier output.
 \end{figure}
 
 
