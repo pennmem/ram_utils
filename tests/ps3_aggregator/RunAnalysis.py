@@ -78,12 +78,6 @@ class RegionFrequencyAnalysis(object):
         freq_mean = burst_frequency_groups[self.output_param].mean().values
         freq_sem = burst_frequency_groups[self.output_param].sem().values
 
-        area_ymin = np.nanmin(area_mean-area_sem)
-        area_ymax = np.nanmax(area_mean+area_sem)
-
-        freq_ymin = np.nanmin(freq_mean-freq_sem)
-        freq_ymax = np.nanmax(freq_mean+freq_sem)
-
         self.region_plot = BarPlotData(x=np.arange(len(self.areas)+len(self.regions)), y=area_mean, yerr=area_sem, ylabel='', xlabel='Region', x_tick_labels=self.areas+self.regions, barcolors=['grey']*(len(self.areas)+len(self.regions)), barwidth=0.5)
         self.frequency_plot = PlotData(x=np.arange(1,len(self.freqs)+1), y=freq_mean, yerr=freq_sem, xlabel='Burst Frequency (Hz)', x_tick_labels=self.freqs)
 
@@ -100,41 +94,20 @@ class RunAnalysis(RamTask):
         #regions = [r for r,c in region_total.iteritems() if c>=5]
 
         ps_table_100 = self.ps_table[self.ps_table['Pulse_Frequency']==100]
-
-        name_suffix = '_with_control_low' if self.params.baseline_correction else ''
-        self.analyze(ps_table_100[ps_table_100['prob_pre']<ps_table_100['thresh']], name_prefix='low_quantile_100_', name_suffix=name_suffix)
-
-        name_suffix = '_with_control_high' if self.params.baseline_correction else ''
-        self.analyze(ps_table_100[ps_table_100['prob_pre']>ps_table_100['thresh']], name_prefix='high_quantile_100_', name_suffix=name_suffix)
-
-        self.analyze(ps_table_100, name_prefix='all_100_', name_suffix='')
-
+        self.analyze(ps_table_100, output_param='prob_diff', name_prefix='all_100_', name_suffix='')
+        self.analyze(ps_table_100, output_param='perf_diff', name_prefix='all_100_', name_suffix='')
 
         ps_table_200 = self.ps_table[self.ps_table['Pulse_Frequency']==200]
+        self.analyze(ps_table_200, output_param='prob_diff', name_prefix='all_200_', name_suffix='')
+        self.analyze(ps_table_200, output_param='perf_diff', name_prefix='all_200_', name_suffix='')
 
-        name_suffix = '_with_control_low' if self.params.baseline_correction else ''
-        self.analyze(ps_table_200[ps_table_200['prob_pre']<ps_table_200['thresh']], name_prefix='low_quantile_200_', name_suffix=name_suffix)
+        self.analyze(self.ps_table, output_param='prob_diff', name_prefix='all_', name_suffix='')
+        self.analyze(self.ps_table, output_param='perf_diff', name_prefix='all_', name_suffix='')
 
-        name_suffix = '_with_control_high' if self.params.baseline_correction else ''
-        self.analyze(ps_table_200[ps_table_200['prob_pre']>ps_table_200['thresh']], name_prefix='high_quantile_200_', name_suffix=name_suffix)
-
-        self.analyze(ps_table_200, name_prefix='all_200_', name_suffix='')
-
-
-        name_suffix = '_with_control_low' if self.params.baseline_correction else ''
-        self.analyze(self.ps_table[self.ps_table['prob_pre']<self.ps_table['thresh']], name_prefix='low_quantile_', name_suffix=name_suffix)
-
-        name_suffix = '_with_control_high' if self.params.baseline_correction else ''
-        self.analyze(self.ps_table[self.ps_table['prob_pre']>self.ps_table['thresh']], name_prefix='high_quantile_', name_suffix=name_suffix)
-
-        self.analyze(self.ps_table, name_prefix='all_', name_suffix='')
-
-    def analyze(self, ps_subtable, name_prefix, name_suffix):
-        output_param = self.params.output_param + name_suffix
-
+    def analyze(self, ps_subtable, output_param, name_prefix, name_suffix):
         rf = RegionFrequencyAnalysis(output_param)
         rf.run(ps_subtable, self.params.frequency_plot_regions, self.params.frequency_plot_areas)
-        self.pass_object(name_prefix+'frequency_plot', rf.plots)
+        self.pass_object(name_prefix+output_param+'_frequency_plot', rf.plots)
         self.pass_object('n_region_frequency_experiment', rf.n_experiments)
-        self.pass_object(name_prefix+'frequency_frequency_plot', rf.frequency_plot)
-        self.pass_object(name_prefix+'frequency_region_plot', rf.region_plot)
+        self.pass_object(name_prefix+output_param+'_frequency_frequency_plot', rf.frequency_plot)
+        self.pass_object(name_prefix+output_param+'_frequency_region_plot', rf.region_plot)

@@ -11,7 +11,7 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--workspace-dir','/scratch/busygin/ps_aggregator_joint',
+    command_line_emulation_argument_list = ['--workspace-dir','/scratch/busygin/ps_aggregator',
                                             '--mount-point','',
                                             '--python-path','/home1/busygin/ram_utils_new_ptsa'
                                             ]
@@ -39,13 +39,13 @@ from GenerateReportTasks import *
 
 class Params(object):
     def __init__(self):
-        self.baseline_correction = True
+        #self.baseline_correction = True
 
         #self.output_param = 'perf_diff'
         #self.output_title = '$\Delta$ Post-Pre Expected Performance (%)'
 
-        self.output_param = 'prob_diff'
-        self.output_title = '$\Delta$ Post-Pre Classifier Output'
+        #self.output_param = 'prob_diff'
+        #self.output_title = '$\Delta$ Post-Pre Classifier Output'
 
         self.frequency_plot_regions = []
         self.frequency_plot_areas = ['HC', 'MTLC', 'Cing-PFC', 'Other']
