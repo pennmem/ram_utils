@@ -281,7 +281,7 @@ class ComposeSessionSummary(RamTask):
                         anova_significance[stim_tag][0] = True
                     else:
                         anova_significance[stim_tag] = np.array([True, False, False], dtype=np.bool)
-                    param1_ttest_table = ttest_one_param(ps_session_low_table, param1_name)
+                    param1_ttest_table = ttest_one_param(ps_session_table, param1_name)
                     if len(param1_ttest_table) > 0:
                         if sess_loc_tag is not None:
                             anova_param1_sv[sess_loc_tag].append(param1_ttest_table)
@@ -292,7 +292,7 @@ class ComposeSessionSummary(RamTask):
                         anova_significance[stim_tag][1] = True
                     else:
                         anova_significance[stim_tag] = np.array([False, True, False], dtype=np.bool)
-                    param2_ttest_table = ttest_one_param(ps_session_low_table, param2_name)
+                    param2_ttest_table = ttest_one_param(ps_session_table, param2_name)
                     if len(param2_ttest_table) > 0:
                         if sess_loc_tag is not None:
                             anova_param2_sv[sess_loc_tag].append(param2_ttest_table)
@@ -303,7 +303,7 @@ class ComposeSessionSummary(RamTask):
                         anova_significance[stim_tag][2] = True
                     else:
                         anova_significance[stim_tag] = np.array([False, False, True], dtype=np.bool)
-                    param12_ttest_table = ttest_interaction(ps_session_low_table, param1_name, param2_name)
+                    param12_ttest_table = ttest_interaction(ps_session_table, param1_name, param2_name)
                     if len(param12_ttest_table) > 0:
                         if sess_loc_tag is not None:
                             anova_param12_sv[sess_loc_tag].append(param12_ttest_table)
@@ -354,22 +354,22 @@ class ComposeSessionSummary(RamTask):
 
         cumulative_anova_fvalues = cumulative_anova_pvalues = None
         cumulative_param1_ttest_table = cumulative_param2_ttest_table = cumulative_param12_ttest_table = None
-        anova = anova_test(ps_low_table, param1_name, param2_name)
+        anova = anova_test(ps_table, param1_name, param2_name)
         if anova is not None:
             cumulative_anova_fvalues = anova[0]
             cumulative_anova_pvalues = anova[1]
             if anova[1][0] < 0.05:
-                param1_ttest_table = ttest_one_param(ps_low_table, param1_name)
+                param1_ttest_table = ttest_one_param(ps_table, param1_name)
                 if len(param1_ttest_table) > 0:
                     cumulative_param1_ttest_table = format_ttest_table(param1_ttest_table)
 
             if anova[1][1] < 0.05:
-                param2_ttest_table = ttest_one_param(ps_low_table, param2_name)
+                param2_ttest_table = ttest_one_param(ps_table, param2_name)
                 if len(param2_ttest_table) > 0:
                     cumulative_param2_ttest_table = format_ttest_table(param2_ttest_table)
 
             if anova[1][2] < 0.05:
-                param12_ttest_table = ttest_interaction(ps_low_table, param1_name, param2_name)
+                param12_ttest_table = ttest_interaction(ps_table, param1_name, param2_name)
                 if len(param12_ttest_table) > 0:
                     cumulative_param12_ttest_table = format_ttest_table(param12_ttest_table)
 
