@@ -10,38 +10,67 @@ from RamPipeline import *
 
 
 class FREventPreparation(RamTask):
-    def __init__(self, mark_as_completed=True):
+    def __init__(self, params, mark_as_completed=True):
         RamTask.__init__(self, mark_as_completed)
+        self.params = params
 
     def run(self):
-        task = self.pipeline.task
+        events = None
+        if self.params.include_fr1:
+            try:
+                e_path = os.path.join(self.pipeline.mount_point , 'data/events/RAM_FR1', self.pipeline.subject + '_events.mat')
+                e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
+                events = e_reader.read()
+                ev_order = np.argsort(events, order=('session','list','mstime'))
+                events = events[ev_order]
+                events = events[events.type == 'WORD']
+            except IOError:
+                print 'No FR1 events found'
 
-        e_path = os.path.join(self.pipeline.mount_point , 'data/events', task, self.pipeline.subject + '_events.mat')
-        e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
+        if self.params.include_catfr1:
+            try:
+                e_path = os.path.join(self.pipeline.mount_point , 'data/events/RAM_CatFR1', self.pipeline.subject + '_events.mat')
+                e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
+                catfr1_events = e_reader.read()
+                ev_order = np.argsort(catfr1_events, order=('session','list','mstime'))
+                catfr1_events = catfr1_events[ev_order]
+                catfr1_events = catfr1_events[catfr1_events.type == 'WORD']
+                if events is None:
+                    events = catfr1_events
+                else:
+                    catfr1_events.session += 100
+                    fields = list(set(events.dtype.names).intersection(catfr1_events.dtype.names))
+                    events = np.hstack((events[fields],catfr1_events[fields])).view(np.recarray)
+            except IOError:
+                print 'No CatFR1 events found'
 
-        events = e_reader.read()
-        events = events[events.type == 'WORD']
-        ev_order = np.argsort(events, order=('session','list','mstime'))
-        events = events[ev_order]
+        if self.params.include_fr3:
+            try:
+                e_path = os.path.join(self.pipeline.mount_point , 'data/events/RAM_FR3', self.pipeline.subject + '_events.mat')
+                e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
+                fr3_events = e_reader.read()
+                ev_order = np.argsort(fr3_events, order=('session','list','mstime'))
+                fr3_events = fr3_events[ev_order]
+                fr3_events = fr3_events[(fr3_events.type == 'WORD') & (fr3_events.stimList == 0)]
+                fr3_events.session += 200
+                fields = list(set(events.dtype.names).intersection(fr3_events.dtype.names))
+                events = np.hstack((events[fields],fr3_events[fields])).view(np.recarray)
+            except IOError:
+                print 'No FR3 events found'
 
-        print len(events), task, 'WORD events'
-
-        task3 = task.replace('FR1','FR3')
-
-        try:
-            e_path = os.path.join(self.pipeline.mount_point , 'data/events', task3, self.pipeline.subject + '_events.mat')
-            e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
-            events3 = e_reader.read()
-
-            events3 = events3[(events3.type == 'WORD') & (events3.stimList == 0)]
-            ev_order = np.argsort(events3, order=('session','list','mstime'))
-            events3 = events3[ev_order]
-
-            events3.session += 100
-            fields = list(set(events.dtype.names).intersection(events3.dtype.names))
-            events = np.hstack((events[fields],events3[fields])).view(np.recarray)
-        except IOError:
-            pass
+        if self.params.include_catfr3:
+            try:
+                e_path = os.path.join(self.pipeline.mount_point , 'data/events/RAM_CatFR3', self.pipeline.subject + '_events.mat')
+                e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
+                catfr3_events = e_reader.read()
+                ev_order = np.argsort(catfr3_events, order=('session','list','mstime'))
+                catfr3_events = catfr3_events[ev_order]
+                catfr3_events = catfr3_events[(catfr3_events.type == 'WORD') & (catfr3_events.stimList == 0)]
+                catfr3_events.session += 300
+                fields = list(set(events.dtype.names).intersection(catfr3_events.dtype.names))
+                events = np.hstack((events[fields],catfr3_events[fields])).view(np.recarray)
+            except IOError:
+                print 'No CatFR3 events found'
 
         print len(events), 'WORD events in total'
 

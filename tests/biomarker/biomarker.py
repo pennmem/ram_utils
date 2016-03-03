@@ -15,8 +15,8 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1127P_2',
-                                            '--task','RAM_CatFR1',
+    command_line_emulation_argument_list = ['--subject','R1145J_1',
+                                            '--task','RAM_FR1',
                                             '--workspace-dir','/scratch/busygin/biomarkers',
                                             '--mount-point','',
                                             '--python-path','/home1/busygin/ram_utils_new_ptsa',
@@ -60,6 +60,11 @@ class Params(object):
     def __init__(self):
         self.version = '2.00'
 
+        self.include_fr1 = True
+        self.include_catfr1 = True
+        self.include_fr3 = True
+        self.include_catfr3 = True
+
         self.width = 5
 
         self.fr1_start_time = 0.0
@@ -97,7 +102,7 @@ class ReportPipeline(RamPipeline):
 report_pipeline = ReportPipeline(subject=args.subject, task=args.task,
                                        workspace_dir=join(args.workspace_dir,args.task+'_'+args.subject), mount_point=args.mount_point)
 
-report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
+report_pipeline.add_task(FREventPreparation(params=params, mark_as_completed=False))
 
 report_pipeline.add_task(TalPreparation(mark_as_completed=False))
 
