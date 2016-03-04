@@ -11,6 +11,16 @@ def prob2perf(probs, true_labels, p):
     return np.sum(true_labels[0:idx]) / float(idx) if idx>0 else 0.0
 
 
+def bipolar_label_to_loc_tag(bp, loc_tag):
+    if bp=='' or bp=='[]':
+        return None
+    label = bp[0]+'-'+bp[1]
+    if label in loc_tag:
+        return loc_tag[label]
+    label = bp[1]+'-'+bp[0]
+    return loc_tag[label] if label in loc_tag else None
+
+
 class ComputePSTable(RamTask):
     def __init__(self, params, mark_as_completed=True):
         RamTask.__init__(self, mark_as_completed)
@@ -88,13 +98,12 @@ class ComputePSTable(RamTask):
 
             prob_diff_control_low[i] = prob_diff_low
             prob_diff_control_high[i] = prob_diff_high
-            perf_diff_control_low[i] = 100.0*(prob2perf(probs, true_labels, prob_pre[i]+prob_diff_low+1e-6) - perf_pre) / total_recall_performance
-            perf_diff_control_high[i] = 100.0*(prob2perf(probs, true_labels, prob_pre[i]+prob_diff_high+1e-6) - perf_pre) / total_recall_performance
+            perf_diff_control_low[i] = 100.0*(prob2perf(probs, true_labels, prob_pre[i]+prob_diff_low+1e-7) - perf_pre) / total_recall_performance
+            perf_diff_control_high[i] = 100.0*(prob2perf(probs, true_labels, prob_pre[i]+prob_diff_high+1e-7) - perf_pre) / total_recall_performance
 
         #define region
-        bipolar_label = pd.Series(ps_events.stimAnodeTag) + '-' + pd.Series(ps_events.stimCathodeTag)
-        bipolar_label = bipolar_label.apply(lambda bp: bp.upper())
-        region = bipolar_label.apply(lambda bp: None if not (bp in loc_tag) or loc_tag[bp]=='' or loc_tag[bp]=='[]' else loc_tag[bp])
+        bipolar_label = pd.Series(zip([s.upper() for s in ps_events.stimAnodeTag], [s.upper() for s in ps_events.stimCathodeTag]))
+        region = bipolar_label.apply(lambda bp: bipolar_label_to_loc_tag(bp, loc_tag))
 
         self.ps_table = pd.DataFrame()
         self.ps_table['session'] = ps_events.session
