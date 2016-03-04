@@ -23,7 +23,7 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{RAM CatFR1 report v 2.5}
+\lhead{RAM CatFR1 report v 2.6}
 \rhead{Date created: <DATE>}
 \begin{document}
 
@@ -104,9 +104,7 @@ $\bullet$ Area Under Curve = $<AUC>$\%
 
 $\bullet$ Permutation test $p$-value $<PERM-P-VALUE>$
 
-$\bullet$ Youden's $J$-stat threshold = $<J-THRESH>$
-
-$\bullet$ Percentage of would-be stimulated items = $<J-PERC>$\%
+$\bullet$ Median of classifier output = $<J-THRESH>$
 
 %\begin{figure}[!h]
 %\centering

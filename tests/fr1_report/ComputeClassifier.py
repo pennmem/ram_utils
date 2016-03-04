@@ -36,9 +36,11 @@ class ModelOutput(object):
         except ValueError:
             return
         self.fpr, self.tpr, self.thresholds = roc_curve(self.true_labels, self.probs)
-        idx = np.argmax(self.tpr-self.fpr)
-        self.jstat_thresh = self.thresholds[idx]
-        self.jstat_quantile = np.sum(self.probs <= self.jstat_thresh) / float(self.probs.size)
+        self.jstat_quantile = 0.5
+        self.jstat_thresh = np.median(self.probs)
+        # idx = np.argmax(self.tpr-self.fpr)
+        # self.jstat_thresh = self.thresholds[idx]
+        # self.jstat_quantile = np.sum(self.probs <= self.jstat_thresh) / float(self.probs.size)
 
     def compute_tercile_stats(self):
         thresh_low = np.percentile(self.probs, 100.0/3.0)
