@@ -63,6 +63,7 @@ class ComputePSPowers(RamTask):
 
         monopolar_channels_list = list(monopolar_channels)
         for sess in sessions:
+
             sess_events = events[events.session == sess]
             # print type(sess_events)
 
@@ -82,6 +83,7 @@ class ComputePSPowers(RamTask):
                                    end_time=pre_end_time, buffer_time=self.params.ps_buf)
 
             eegs_pre = eeg_pre_reader.read()
+
             if eeg_pre_reader.removed_bad_data():
                 print 'REMOVED SOME BAD EVENTS !!!'
                 sess_events = eegs_pre['events'].values.view(np.recarray)
@@ -119,6 +121,59 @@ class ComputePSPowers(RamTask):
 
             post_start_time = self.params.ps_offset
             post_end_time = self.params.ps_offset + (self.params.ps_end_time - self.params.ps_start_time)
+
+#---------------------------------------------------------------
+
+            from ptsa.data.readers import BaseRawReader
+
+            post_start_offsets = np.copy(sess_events.eegoffset)
+
+
+            for i_ev in xrange(n_events):
+                ev_offset = sess_events[i_ev].pulse_duration if experiment!='PS3' else sess_events[i_ev].train_duration
+                if ev_offset > 0:
+                    ev_offset *= 0.001
+                else:
+                    ev_offset = 0.0
+
+                post_start_offsets[i_ev] += (ev_offset + post_start_time - self.params.ps_buf)*samplerate
+
+            read_size = eegs_pre['time'].shape[0]
+            dataroot = sess_events[0].eegfile
+            brr = BaseRawReader(dataroot = dataroot, start_offsets=post_start_offsets, channels=np.array(monopolar_channels_list),read_size = read_size)
+
+            eegs_post , read_ok_mask= brr.read()
+
+
+            # #removing bad events from both pre and post eegs
+            if np.any(~read_ok_mask):
+                # print 'YES'
+                read_mask_ok_events = np.all(read_ok_mask,axis=0)
+                eegs_post = eegs_post[:, read_mask_ok_events, :]
+                # sess_events = sess_events[read_mask_ok_events]
+                eegs_pre = eegs_pre [:, read_mask_ok_events, :]
+
+                # FIXING ARRAY ALL EVENTS - MAKE IT A FUNCTION!
+                sess_events = eegs_pre['events'].values.view(np.recarray)
+                n_events = len(sess_events)
+                events = np.hstack((events[events.session!=sess],sess_events)).view(np.recarray)
+                ev_order = np.argsort(events, order=('session','mstime'))
+                events = events[ev_order]
+                self.pass_object(self.pipeline.experiment+'_events', events)
+
+
+
+            eegs_post = eegs_post.rename({'offsets':'time','start_offsets':'events'})
+            eegs_post['events'] = sess_events
+            eegs_post['time'] = eegs_pre['time'].data
+            eegs_post = TimeSeriesX(eegs_post)
+
+
+
+
+
+#---------------------------------------------------------------
+            eegs_post_1 = TimeSeriesX(np.zeros_like(eegs_pre),dims=eegs_pre.dims,coords=eegs_pre.coords)
             for i_ev in xrange(n_events):
                 ev_offset = sess_events[i_ev].pulse_duration if experiment!='PS3' else sess_events[i_ev].train_duration
                 if ev_offset > 0:
@@ -134,16 +189,16 @@ class ComputePSPowers(RamTask):
                                        start_time=post_start_time+ev_offset,
                                        end_time=post_end_time+ev_offset, buffer_time=self.params.ps_buf)
 
-                eeg_post = eeg_post_reader.read()
+                eeg_post_1 = eeg_post_reader.read()
 
-                dim3_post = eeg_post.shape[2]
+                dim3_post = eeg_post_1.shape[2]
                 # here we take care of possible mismatch of time dim length
                 if dim3_pre == dim3_post:
-                    eegs_post[:,i_ev:i_ev+1,:] = eeg_post
+                    eegs_post_1[:,i_ev:i_ev+1,:] = eeg_post_1
                 elif dim3_pre < dim3_post:
-                    eegs_post[:,i_ev:i_ev+1,:] = eeg_post[:,:,:-1]
+                    eegs_post_1[:,i_ev:i_ev+1,:] = eeg_post_1[:,:,:-1]
                 else:
-                    eegs_post[:,i_ev:i_ev+1,:-1] = eeg_post
+                    eegs_post_1[:,i_ev:i_ev+1,:-1] = eeg_post_1
 
             # mirroring
             eegs_post[...,:nb_] = eegs_post[...,2*nb_:nb_:-1]
