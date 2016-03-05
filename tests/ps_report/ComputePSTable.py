@@ -11,14 +11,19 @@ def prob2perf(probs, true_labels, p):
     return np.sum(true_labels[0:idx]) / float(idx) if idx>0 else 0.0
 
 
-def bipolar_label_to_loc_tag(bp, loc_tag):
+def bipolar_label_to_loc_tag(bp, loc_tags):
     if bp=='' or bp=='[]':
         return None
     label = bp[0]+'-'+bp[1]
-    if label in loc_tag:
-        return loc_tag[label]
+    if label in loc_tags:
+        lt = loc_tags[label]
+        return lt if lt!='' and lt!='[]' else None
     label = bp[1]+'-'+bp[0]
-    return loc_tag[label] if label in loc_tag else None
+    if label in loc_tags:
+        lt = loc_tags[label]
+        return lt if lt!='' and lt!='[]' else None
+    else:
+        return None
 
 
 class ComputePSTable(RamTask):
