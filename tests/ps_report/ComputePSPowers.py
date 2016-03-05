@@ -9,7 +9,7 @@ from morlet import MorletWaveletTransform
 from sklearn.externals import joblib
 
 from ptsa.data.events import Events
-from ptsa.data.readers import EEGReader
+from ptsa.data.readers import EEGReader,BaseRawReader
 
 
 class ComputePSPowers(RamTask):
@@ -122,9 +122,9 @@ class ComputePSPowers(RamTask):
             post_start_time = self.params.ps_offset
             post_end_time = self.params.ps_offset + (self.params.ps_end_time - self.params.ps_start_time)
 
-#---------------------------------------------------------------
 
-            from ptsa.data.readers import BaseRawReader
+
+
 
             post_start_offsets = np.copy(sess_events.eegoffset)
 
@@ -172,33 +172,6 @@ class ComputePSPowers(RamTask):
 
 
 
-#---------------------------------------------------------------
-            eegs_post_1 = TimeSeriesX(np.zeros_like(eegs_pre),dims=eegs_pre.dims,coords=eegs_pre.coords)
-            for i_ev in xrange(n_events):
-                ev_offset = sess_events[i_ev].pulse_duration if experiment!='PS3' else sess_events[i_ev].train_duration
-                if ev_offset > 0:
-                    ev_offset *= 0.001
-                else:
-                    ev_offset = 0.0
-
-                # eeg_post = Events(sess_events[i_ev:i_ev+1]).get_data(channels=channels, start_time=post_start_time+ev_offset,
-                #             end_time=post_end_time+ev_offset, buffer_time=self.params.ps_buf,
-                #             eoffset='eegoffset', keep_buffer=True, eoffset_in_time=False)
-
-                eeg_post_reader = EEGReader(events=sess_events[i_ev:i_ev+1], channels=np.array(monopolar_channels_list),
-                                       start_time=post_start_time+ev_offset,
-                                       end_time=post_end_time+ev_offset, buffer_time=self.params.ps_buf)
-
-                eeg_post_1 = eeg_post_reader.read()
-
-                dim3_post = eeg_post_1.shape[2]
-                # here we take care of possible mismatch of time dim length
-                if dim3_pre == dim3_post:
-                    eegs_post_1[:,i_ev:i_ev+1,:] = eeg_post_1
-                elif dim3_pre < dim3_post:
-                    eegs_post_1[:,i_ev:i_ev+1,:] = eeg_post_1[:,:,:-1]
-                else:
-                    eegs_post_1[:,i_ev:i_ev+1,:-1] = eeg_post_1
 
             # mirroring
             eegs_post[...,:nb_] = eegs_post[...,2*nb_:nb_:-1]
