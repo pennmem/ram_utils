@@ -34,25 +34,117 @@ class JSONNodeList(list):
 
         return s_loc
 
+class MyOrderedDict(collections.OrderedDict):
+    def __init__(self, *args, **kwds):
+        collections.OrderedDict.__init__(self,*args,**kwds)
+
+
+class OrdDictSub(collections.OrderedDict):
+    def __init__(self,*args, **kwds):
+        super(OrdDictSub, self).__init__(*args, **kwds)
+
+
+# class JSONNode(collections.OrderedDict):
+#     def __init__(self, *args):
+#         collections.OrderedDict.__init__(self)
+#
+#         self.default_indent = 4
+#
+#         l = list(args)
+#         if len(l) / 2:
+#             l.append('')
+#         l_iter = iter(l)
+#
+#         # Note: izip will call internally next() on every iterable passed to izip
+#         # this in effect produces "pairwise iteration" if we pass an iterator pointing to the same
+#         for key, val in izip(l_iter, l_iter):
+#             print (str(key), val)
+#             self[key] = val
+#
+#     def get_header(self,indent):
+#         pass
+#
+#     def output(self, node_name='',indent=0):
+#         indent_loc = indent
+#         if node_name:
+#             s_loc = ' ' * indent_loc +'"'+ node_name+ '"'+': {\n'
+#         else:
+#             s_loc = ' ' * indent_loc + '{\n'
+#         indent_loc += self.default_indent
+#
+#         num_keys = len(self.keys())
+#         for i, (k, v) in enumerate(self.items()):
+#
+#             if isinstance(v, JSONNode) or isinstance(v, JSONNodeList):
+#                 s_loc += v.output(k,indent_loc)
+#
+#                 if i == num_keys-1:
+#                     s_loc += '\n'
+#                     # s_loc += ' ' * indent_loc + '}\n'
+#                 else:
+#                     s_loc += ',\n'
+#                     # s_loc += ' ' * indent_loc+'},\n'
+#                     # s_loc += ' ' * indent_loc+',\n'
+#             else:
+#                 s_loc += ' ' * indent_loc
+#                 # s_loc += '"'+k + '"'+ ': ' + v + ',\n'
+#                 s_loc += '"'+k + '"'+ ': ' + v
+#
+#                 if i == num_keys-1:
+#                     s_loc += '\n'
+#                     # s_loc += ' ' * indent_loc + '}\n'
+#                 else:
+#                     # s_loc += ',\n'
+#                     s_loc += ',\n'
+#
+#         # s_loc=s_loc[:-2]+'\n'
+#         indent_loc -= self.default_indent
+#         # s_loc += ' ' * indent_loc + '},\n'
+#
+#         s_loc += ' ' * indent_loc + '}'
+#
+#         return s_loc
+#
+
 class JSONNode(collections.OrderedDict):
-    def __init__(self, *args):
-        collections.OrderedDict.__init__(self)
+    def __init__(self, *args,**kwds):
+        collections.OrderedDict.__init__(self,*args,**kwds)
 
         self.default_indent = 4
 
-        l = list(args)
-        if len(l) / 2:
-            l.append('')
-        l_iter = iter(l)
-
-        # Note: izip will call internally next() on every iterable passed to izip
-        # this in effect produces "pairwise iteration" if we pass an iterator pointing to the same
-        for key, val in izip(l_iter, l_iter):
-            print (str(key), val)
-            self[key] = val
+        # l = list(args)
+        # if len(l) / 2:
+        #     l.append('')
+        # l_iter = iter(l)
+        #
+        # # Note: izip will call internally next() on every iterable passed to izip
+        # # this in effect produces "pairwise iteration" if we pass an iterator pointing to the same
+        # for key, val in izip(l_iter, l_iter):
+        #     print (str(key), val)
+        #     self[key] = val
 
     def get_header(self,indent):
         pass
+
+    def output_list(self, lst, node_name='', indent=0):
+        indent_loc = indent
+        # s_loc = ' '*indent_loc+'[\n'
+        s_loc = ' ' * indent_loc +'"'+ node_name+ '"'+': [\n'
+        num_items = len(lst)
+
+        for item_num,item in enumerate(lst):
+            if isinstance(item, JSONNode):
+                s_loc += item.output(indent=indent_loc)
+                if item_num == num_items-1:
+                    s_loc += ' '*indent_loc+'\n'
+                else:
+                    s_loc += ',\n'
+            else:
+                raise TypeError('Trying to output element of type '+str(type(item))+'. Note that list elements in '+self.__class__.__name__+'  can be only of type JSONNode')
+
+        s_loc += ' '*indent_loc+']'
+
+        return s_loc
 
     def output(self, node_name='',indent=0):
         indent_loc = indent
@@ -65,7 +157,7 @@ class JSONNode(collections.OrderedDict):
         num_keys = len(self.keys())
         for i, (k, v) in enumerate(self.items()):
 
-            if isinstance(v, JSONNode) or isinstance(v, JSONNodeList):
+            if isinstance(v, JSONNode):
                 s_loc += v.output(k,indent_loc)
 
                 if i == num_keys-1:
@@ -75,10 +167,22 @@ class JSONNode(collections.OrderedDict):
                     s_loc += ',\n'
                     # s_loc += ' ' * indent_loc+'},\n'
                     # s_loc += ' ' * indent_loc+',\n'
+            elif isinstance(v, list):
+
+                s_loc += self.output_list(lst=v,node_name=k, indent = indent_loc)
+
+                if i == num_keys-1:
+                    s_loc += '\n'
+                    # s_loc += ' ' * indent_loc + '}\n'
+                else:
+                    s_loc += ',\n'
+                    # s_loc += ' ' * indent_loc+'},\n'
+                    # s_loc += ' ' * indent_loc+',\n'
+
             else:
                 s_loc += ' ' * indent_loc
                 # s_loc += '"'+k + '"'+ ': ' + v + ',\n'
-                s_loc += '"'+k + '"'+ ': ' + v
+                s_loc += '"'+k + '"'+ ': ' + str(v)
 
                 if i == num_keys-1:
                     s_loc += '\n'
@@ -97,12 +201,12 @@ class JSONNode(collections.OrderedDict):
 
 
 
+od = collections.OrderedDict( a='b'   )
 
 
-
-t_jn = JSONNode('tal_bipolar', 'path')
-subject_jn =  JSONNode('code','12','code1','13')
-subject_jn1 =  JSONNode('code','112','code1','113')
+t_jn = JSONNode(tal_bipolar='path')
+subject_jn =  JSONNode(code='12',code1='13')
+subject_jn1 =  JSONNode(code='112',code1='113')
 
 j_list = JSONNodeList([subject_jn,subject_jn1])
 
@@ -110,7 +214,7 @@ print j_list.output(indent = 4)
 
 
 
-jn = JSONNode('navigation', subject_jn,'mavigation', subject_jn1)
+jn = JSONNode(navigation='subject_jn',mavigation=subject_jn1)
 
 jn = JSONNode()
 jn['navigation'] = subject_jn
@@ -139,6 +243,15 @@ with open("j.json",'r') as json_file:
     json_data = json.load(json_file)
     print json_data
     print json.dumps(json_data,indent=4)
+
+
+with open("j.json",'r') as json_file:
+    # json_data = json.load(json_file, object_pairs_hook=collections.OrderedDict)
+    # json_data = json.load(json_file, object_pairs_hook=OrdDictSub)
+    # json_data = json.load(json_file, object_pairs_hook=MyOrderedDict)
+    json_data = json.load(json_file, object_pairs_hook=JSONNode)
+    print json_data
+    print json_data.output()
 
 
 subject_navigation_R1060M={
