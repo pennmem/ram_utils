@@ -1,54 +1,51 @@
 import json
-from collections import OrderedDict as OD
 import collections
-from itertools import izip
-
 import sys
 
 
 class JSONNode(collections.OrderedDict):
-    def __init__(self, *args,**kwds):
-        collections.OrderedDict.__init__(self,*args,**kwds)
+    def __init__(self, *args, **kwds):
+        collections.OrderedDict.__init__(self, *args, **kwds)
 
         self.default_indent = 4
 
-    def read(self,filename):
+    @staticmethod
+    def read(self, filename):
 
-        with open(filename,'r') as json_file:
+        with open(filename, 'r') as json_file:
             json_node = json.load(json_file, object_pairs_hook=self.__class__)
 
         return json_node
 
-    def write(self,filename):
+    def write(self, filename):
 
-        with open(filename,'w') as json_file:
+        with open(filename, 'w') as json_file:
             json_file.write(self.output())
-
 
     def output_list(self, lst, node_name='', indent=0):
         indent_loc = indent
-        # s_loc = ' '*indent_loc+'[\n'
-        s_loc = ' ' * indent_loc +'"'+ node_name+ '"'+': [\n'
+        s_loc = ' ' * indent_loc + '"' + node_name + '"' + ': [\n'
         num_items = len(lst)
 
-        for item_num,item in enumerate(lst):
+        for item_num, item in enumerate(lst):
             if isinstance(item, JSONNode):
                 s_loc += item.output(indent=indent_loc)
-                if item_num == num_items-1:
-                    s_loc += ' '*indent_loc+'\n'
+                if item_num == num_items - 1:
+                    s_loc += ' ' * indent_loc + '\n'
                 else:
                     s_loc += ',\n'
             else:
-                raise TypeError('Trying to output element of type '+str(type(item))+'. Note that list elements in '+self.__class__.__name__+'  can be only of type JSONNode')
+                raise TypeError('Trying to output element of type ' + str(type(
+                    item)) + '. Note that list elements in ' + self.__class__.__name__ + '  can be only of type JSONNode')
 
-        s_loc += ' '*indent_loc+']'
+        s_loc += ' ' * indent_loc + ']'
 
         return s_loc
 
-    def output(self, node_name='',indent=0):
+    def output(self, node_name='', indent=0):
         indent_loc = indent
         if node_name:
-            s_loc = ' ' * indent_loc +'"'+ node_name+ '"'+': {\n'
+            s_loc = ' ' * indent_loc + '"' + node_name + '"' + ': {\n'
         else:
             s_loc = ' ' * indent_loc + '{\n'
         indent_loc += self.default_indent
@@ -57,18 +54,18 @@ class JSONNode(collections.OrderedDict):
         for i, (k, v) in enumerate(self.items()):
 
             if isinstance(v, JSONNode):
-                s_loc += v.output(k,indent_loc)
+                s_loc += v.output(k, indent_loc)
 
-                if i == num_keys-1:
+                if i == num_keys - 1:
                     s_loc += '\n'
 
                 else:
                     s_loc += ',\n'
             elif isinstance(v, list):
 
-                s_loc += self.output_list(lst=v,node_name=k, indent = indent_loc)
+                s_loc += self.output_list(lst=v, node_name=k, indent=indent_loc)
 
-                if i == num_keys-1:
+                if i == num_keys - 1:
                     s_loc += '\n'
 
                 else:
@@ -76,9 +73,9 @@ class JSONNode(collections.OrderedDict):
 
             else:
                 s_loc += ' ' * indent_loc
-                s_loc += '"'+k + '"'+ ': ' + str(v)
+                s_loc += '"' + k + '"' + ': ' + str(v)
 
-                if i == num_keys-1:
+                if i == num_keys - 1:
                     s_loc += '\n'
                 else:
                     s_loc += ',\n'
@@ -151,38 +148,38 @@ if __name__ =='__main__':
         print json_data.output()
 
 
-    subject_navigation_R1060M={
-        'subject':{'code':'R1060M'},
-        'electrode_info':{
-            'tal_bipolar':{'path':'eeg/R1060M/tal/R1060M_talLocs_database_bipol.mat','sha1':'sjhdgskjhdgwueygfuysdgvkjhsadi'},
-            'tal_monopolar':{'path':'eeg/R1060M/tal/R1111M_talLocs_database_monopol.mat', 'sha1':'sjhdgskjhdgwueygfuysdgvkjhsadi'},
-        },
-        'eeg_data':{
-            'eeg_noreref_dir':{'path':'eeg/R1060M/eeg.noreref'},
-            'eeg_reref_dir':{'path':'eeg/R1060M/eeg.reref'},
-        },
-        'experiments':{
-            'FR1':{
-                'events':{'path':'events/RAM_FR1/R1060M_events.mat','sha1':'sjhdgskjhdgwueygfuysdgvkjhsadi'},
-                'math_events':{'path':'events/RAM_FR1/R1060M_math.mat','sha1':'sjhdgskjhdgwueygfuysdgvkjhsadi'},
-                'experiment_info':{'path':'events/RAM_FR1/R1060M_expinfo.mat','sha1':'sjhdgskjhdgwueygfuysdgvkjhsadi'},
-                'experiment_description':'Free Recall - record only'
-            },
-            'FR2':{
-                'events':{'path':'events/RAM_FR2/R1060M_events.mat','sha1':'sjhdgskjhdgwueygfuysdgvkjhsadi'},
-                'math_events':{'path':'events/RAM_FR2/R1060M_math.mat','sha1':'sjhdgskjhdgwueygfuysdgvkjhsadi'},
-                'experiment_info':{'path':'events/RAM_FR2/R1060M_expinfo.mat','sha1':'sjhdgskjhdgwueygfuysdgvkjhsadi'},
-                'experiment_description':'Free Recall - open-loop 5 second stimulation '
-            },
-            'PS':{
-                'events':{'path':'events/RAM_PS/R1060M_events.mat','sha1':'sjhdgskjhdgwueygfuysdgvkjhsadi'},
-                'experiment_info':{'path':'events/RAM_FR1/R1060M_expinfo.mat','sha1':'sjhdgskjhdgwueygfuysdgvkjhsadi'},
-                'experiment_description':'Parameter Search - Stimulation Experiments'
-            }
-
-        }
-
-    }
-
-
-
+    # subject_navigation_R1060M={
+    #     'subject':{'code':'R1060M'},
+    #     'electrode_info':{
+    #         'tal_bipolar':{'path':'eeg/R1060M/tal/R1060M_talLocs_database_bipol.mat','sha1':'sjhdgskjhdgwueygfuysdgvkjhsadi'},
+    #         'tal_monopolar':{'path':'eeg/R1060M/tal/R1111M_talLocs_database_monopol.mat', 'sha1':'sjhdgskjhdgwueygfuysdgvkjhsadi'},
+    #     },
+    #     'eeg_data':{
+    #         'eeg_noreref_dir':{'path':'eeg/R1060M/eeg.noreref'},
+    #         'eeg_reref_dir':{'path':'eeg/R1060M/eeg.reref'},
+    #     },
+    #     'experiments':{
+    #         'FR1':{
+    #             'events':{'path':'events/RAM_FR1/R1060M_events.mat','sha1':'sjhdgskjhdgwueygfuysdgvkjhsadi'},
+    #             'math_events':{'path':'events/RAM_FR1/R1060M_math.mat','sha1':'sjhdgskjhdgwueygfuysdgvkjhsadi'},
+    #             'experiment_info':{'path':'events/RAM_FR1/R1060M_expinfo.mat','sha1':'sjhdgskjhdgwueygfuysdgvkjhsadi'},
+    #             'experiment_description':'Free Recall - record only'
+    #         },
+    #         'FR2':{
+    #             'events':{'path':'events/RAM_FR2/R1060M_events.mat','sha1':'sjhdgskjhdgwueygfuysdgvkjhsadi'},
+    #             'math_events':{'path':'events/RAM_FR2/R1060M_math.mat','sha1':'sjhdgskjhdgwueygfuysdgvkjhsadi'},
+    #             'experiment_info':{'path':'events/RAM_FR2/R1060M_expinfo.mat','sha1':'sjhdgskjhdgwueygfuysdgvkjhsadi'},
+    #             'experiment_description':'Free Recall - open-loop 5 second stimulation '
+    #         },
+    #         'PS':{
+    #             'events':{'path':'events/RAM_PS/R1060M_events.mat','sha1':'sjhdgskjhdgwueygfuysdgvkjhsadi'},
+    #             'experiment_info':{'path':'events/RAM_FR1/R1060M_expinfo.mat','sha1':'sjhdgskjhdgwueygfuysdgvkjhsadi'},
+    #             'experiment_description':'Parameter Search - Stimulation Experiments'
+    #         }
+    #
+    #     }
+    #
+    # }
+    #
+    #
+    #
