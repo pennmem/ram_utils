@@ -48,8 +48,8 @@ $\bullet$ Region: <REGION>
 $\bullet$ $N_1$ is \#recalls, $N_0$ is \#non-recalls, $N=N_1+N_0$; \\
 $\bullet$ $\xi_{\textrm{post}} = \ln \frac{C_{\textrm{post}}}{1-C_{\textrm{post}}}$ is inverse logit of classifier post-stim output $C_{\textrm{post}}$; \\
 $\bullet$ $\xi_{\textrm{pre}} = \ln \frac{C_{\textrm{pre}}}{1-C_{\textrm{pre}}}$ is inverse logit of classifier pre-stim output $C_{\textrm{pre}}$; \\
-$\bullet$ $\Phi_1 = {\cal N}(\mu_1,\sigma_1)$ is Normal fit for inverse logit of classifier output for recalls; \\
-$\bullet$ $\Phi_0 = {\cal N}(\mu_0,\sigma_0)$ is Normal fit for inverse logit of classifier output for non-recalls.
+$\bullet$ $\Phi_1,\Phi_0$ are cdfs of Normal fits for inverse logit of classifier output for recalls/non-recalls with equal variance.
+%$\bullet$ $\Phi_0 = {\cal N}(\mu_0,\sigma)$ is Normal fit for inverse logit of classifier output for non-recalls.
 
 <ADHOC_PAGE_TITLE>
 

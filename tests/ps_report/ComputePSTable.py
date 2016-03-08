@@ -7,6 +7,7 @@ from sklearn.externals import joblib
 from bisect import bisect_right
 from scipy.stats import norm
 import sys
+from scipy.stats import describe
 
 
 # def prob2perf(probs, true_labels, p):
@@ -15,12 +16,16 @@ import sys
 
 
 def prob2perf_norm(xval_output, p):
-    p_norm = log(p/(1.0-p))
-    fi1 = norm.cdf(p_norm, loc=xval_output.mean1, scale=xval_output.std1)
-    fi0 = norm.cdf(p_norm, loc=xval_output.mean0, scale=xval_output.std0)
+    fi1 = fi0 = 1.0
+
+    if p < 1e-6:
+        return 0.0
+    elif p < 1.0 - 1e-6:
+        p_norm = log(p/(1.0-p))
+        fi1 = norm.cdf(p_norm, loc=xval_output.mean1, scale=xval_output.pooled_std)
+        fi0 = norm.cdf(p_norm, loc=xval_output.mean0, scale=xval_output.pooled_std)
+
     r = xval_output.n1*fi1 / (xval_output.n1*fi1 + xval_output.n0*fi0)
-    #print 'p_norm =', p_norm, 'fi1 =', fi1, 'fi0 =', fi0, 'r =', r
-    #sys.exit(0)
     return r
 
 
@@ -70,6 +75,10 @@ class ComputePSTable(RamTask):
         n_events = len(ps_events)
 
         prob_pre, prob_diff = self.compute_prob_deltas(ps_pow_mat_pre, ps_pow_mat_post, lr_classifier)
+        #print 'prob_pre', describe(prob_pre)
+        #print 'prob_diff', describe(prob_diff)
+        #print 'prob_post', describe(prob_pre+prob_diff)
+        #sys.exit(0)
 
         control_table_low = control_table[control_table['prob_pre']<thresh]
         control_table_high = control_table[control_table['prob_pre']>1.0-thresh]

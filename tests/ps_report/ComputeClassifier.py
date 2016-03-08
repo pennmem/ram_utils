@@ -1,5 +1,6 @@
 from RamPipeline import *
 
+from math import sqrt
 import numpy as np
 from scipy.stats.mstats import zscore
 from sklearn.linear_model import LogisticRegression
@@ -7,7 +8,7 @@ from sklearn.metrics import roc_auc_score, roc_curve
 from random import shuffle
 from sklearn.externals import joblib
 
-#import sys
+import sys
 
 
 def normalize_sessions(pow_mat, events):
@@ -33,10 +34,11 @@ class ModelOutput(object):
         self.high_pc_diff_from_mean = np.nan
         self.n1 = np.nan
         self.mean1 = np.nan
-        self.std1 = np.nan
+        #self.std1 = np.nan
         self.n0 = np.nan
         self.mean0 = np.nan
-        self.std0 = np.nan
+        #self.std0 = np.nan
+        self.pooled_std = np.nan
 
     def compute_normal_approx(self):
         class1_mask = (self.true_labels==1)
@@ -44,17 +46,23 @@ class ModelOutput(object):
         self.n1 = len(class1_probs)
         class1_normal = np.log(class1_probs/(1.0-class1_probs))
         self.mean1 = np.mean(class1_normal)
-        self.std1 = np.std(class1_normal, ddof=1)
-        print 'Positive class: mean =', self.mean1, 'stdev =', self.std1, 'n =', self.n1
+        #self.std1 = np.std(class1_normal, ddof=1)
+        var1 = np.var(class1_normal, ddof=1)
+        print 'Positive class: mean =', self.mean1, 'variance =', var1, 'n =', self.n1
 
         class0_probs = self.probs[~class1_mask]
         self.n0 = len(class0_probs)
         class0_normal = np.log(class0_probs/(1.0-class0_probs))
         self.mean0 = np.mean(class0_normal)
-        self.std0 = np.std(class0_normal, ddof=1)
-        print 'Negative class: mean =', self.mean0, 'stdev =', self.std0, 'n =', self.n0
+        #self.std0 = np.std(class0_normal, ddof=1)
+        var0 = np.var(class0_normal, ddof=1)
+        print 'Negative class: mean =', self.mean0, 'variance =', var0, 'n =', self.n0
 
-        #sys.exit(0)
+        self.pooled_std = sqrt((var1*(self.n1-1) + var0*(self.n0-1)) / (self.n1+self.n0-2))
+
+        if self.mean1 < self.mean0:
+            print 'BAD CLASSIFIER: recall class mean is less than non-recall class mean!!'
+            sys.exit(0)
 
     def compute_roc(self):
         try:
