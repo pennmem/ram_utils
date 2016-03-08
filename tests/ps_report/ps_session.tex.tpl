@@ -1,4 +1,6 @@
 
+\clearpage
+
 \section*{\hfil Session <SESS_NUM> \hfil}
 
 \begin{tabular}{ccc}
@@ -35,18 +37,22 @@ $\bullet$ Region: <REGION>
 %\begin{subfigure}[!h]{\linewidth}
 \includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{<ALL_PLOT_FILE>}
 \caption{\textbf{(a)} Means and standard errors of difference in classifier output post- and pre-stim;
-\textbf{(b)} Means and standard errors of}
-\[ \textrm{Expected Recall Change} = \frac{N_{recalls}(C \leq C_{\textrm{post}})/N_{items}(C \leq C_{\textrm{post}}) - N_{recalls}(C \leq C_{\textrm{pre}})/N_{items}(C \leq C_{\textrm{pre}})}{N_{recalls}/N_{items}}, \]
-\raggedright
-where $C_{\textrm{pre}}$ is pre-stim classifier output, $C_{\textrm{post}}$ is post-stim classifier output.
+\textbf{(b)} Means and standard errors of {\em Expected Recall Change:}}
+%\[ \textrm{Expected Recall Change} = \frac{N_{recalls}(C \leq C_{\textrm{post}})/N_{items}(C \leq C_{\textrm{post}}) - N_{recalls}(C \leq C_{\textrm{pre}})/N_{items}(C \leq C_{\textrm{pre}})}{N_{recalls}/N_{items}}, \]
+%\raggedright
+%where $C_{\textrm{pre}}$ is pre-stim classifier output, $C_{\textrm{post}}$ is post-stim classifier output.
 %\subcaption{All Trials}
 %\end{subfigure}
 \end{figure}
+\[ \textrm{Expected Recall Change} = \left. \left( \frac{N_1 \Phi_1(\xi_{\textrm{post}})}{N_1 \Phi_1(\xi_{\textrm{post}}) + N_0 \Phi_0(\xi_{\textrm{post}})} - \frac{N_1 \Phi_1(\xi_{\textrm{pre}})}{N_1 \Phi_1(\xi_{\textrm{pre}}) + N_0 \Phi_0(\xi_{\textrm{pre}})}\right) \middle/ (N_1/N) \right., \]
+$\bullet$ $N_1$ is \#recalls, $N_0$ is \#non-recalls, $N=N_1+N_0$; \\
+$\bullet$ $\xi_{\textrm{post}} = \ln \frac{C_{\textrm{post}}}{1-C_{\textrm{post}}}$ is inverse logit of classifier post-stim output $C_{\textrm{post}}$; \\
+$\bullet$ $\xi_{\textrm{pre}} = \ln \frac{C_{\textrm{pre}}}{1-C_{\textrm{pre}}}$ is inverse logit of classifier pre-stim output $C_{\textrm{pre}}$; \\
+$\bullet$ $\Phi_1 = {\cal N}(\mu_1,\sigma_1)$ is Normal fit for inverse logit of classifier output for recalls; \\
+$\bullet$ $\Phi_0 = {\cal N}(\mu_0,\sigma_0)$ is Normal fit for inverse logit of classifier output for non-recalls.
 
 <ADHOC_PAGE_TITLE>
 
 <PARAM1_TTEST_TABLE>
 <PARAM2_TTEST_TABLE>
 <PARAM12_TTEST_TABLE>
-
-\clearpage

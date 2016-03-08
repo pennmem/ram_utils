@@ -7,6 +7,8 @@ from sklearn.metrics import roc_auc_score, roc_curve
 from random import shuffle
 from sklearn.externals import joblib
 
+#import sys
+
 
 def normalize_sessions(pow_mat, events):
     sessions = np.unique(events.session)
@@ -29,6 +31,30 @@ class ModelOutput(object):
         self.low_pc_diff_from_mean = np.nan
         self.mid_pc_diff_from_mean = np.nan
         self.high_pc_diff_from_mean = np.nan
+        self.n1 = np.nan
+        self.mean1 = np.nan
+        self.std1 = np.nan
+        self.n0 = np.nan
+        self.mean0 = np.nan
+        self.std0 = np.nan
+
+    def compute_normal_approx(self):
+        class1_mask = (self.true_labels==1)
+        class1_probs = self.probs[class1_mask]
+        self.n1 = len(class1_probs)
+        class1_normal = np.log(class1_probs/(1.0-class1_probs))
+        self.mean1 = np.mean(class1_normal)
+        self.std1 = np.std(class1_normal, ddof=1)
+        print 'Positive class: mean =', self.mean1, 'stdev =', self.std1, 'n =', self.n1
+
+        class0_probs = self.probs[~class1_mask]
+        self.n0 = len(class0_probs)
+        class0_normal = np.log(class0_probs/(1.0-class0_probs))
+        self.mean0 = np.mean(class0_normal)
+        self.std0 = np.std(class0_normal, ddof=1)
+        print 'Negative class: mean =', self.mean0, 'stdev =', self.std0, 'n =', self.n0
+
+        #sys.exit(0)
 
     def compute_roc(self):
         try:
@@ -95,6 +121,7 @@ class ComputeClassifier(RamTask):
             self.xval_output[-1] = ModelOutput(recalls, probs)
             self.xval_output[-1].compute_roc()
             self.xval_output[-1].compute_tercile_stats()
+            self.xval_output[-1].compute_normal_approx()
 
         return probs
 
@@ -134,6 +161,7 @@ class ComputeClassifier(RamTask):
             xval_output = ModelOutput(recalls, probs)
             xval_output.compute_roc()
             xval_output.compute_tercile_stats()
+            xval_output.compute_normal_approx()
             self.xval_output[sess] = self.xval_output[-1] = xval_output
 
         return probs
