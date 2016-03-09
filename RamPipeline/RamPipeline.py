@@ -1,7 +1,8 @@
 from TaskRegistry import TaskRegistry
 from MatlabRamTask import MatlabRamTask
 from os.path import *
-
+from JSONUtils import JSONNode
+# from DataMonitor import RamPopulator
 
 class RamPipeline(object):
     def __init__(self):
@@ -14,6 +15,8 @@ class RamPipeline(object):
 
         #  flag indicating if Matlab tasks are present
         self.matlab_tasks_present = False
+        self.json_status_node = None
+        self.json_latest_status_node = None
 
     # def pass_object(self, name, obj):
     #     self.passed_objects_dict[name] = obj
@@ -63,6 +66,15 @@ class RamPipeline(object):
         self.matlab_paths = paths
 
 
+    def read_status(self):
+        json_index_file = join(self.workspace_dir,'_status','index.json')
+        self.json_status_node = JSONNode.read(filename=json_index_file)
+        # rp = RamPopulator()
+        # self.json_latest_status_node = rp.create_subject_JSON_stub(subject_code=self.)
+
+    def get_status(self):
+        return self.json_status_node
+
     def execute_pipeline(self):
         '''
         Executes pipeline
@@ -77,7 +89,12 @@ class RamPipeline(object):
         matlab_engine_started = False
         matlab_engine = None
 
+        self.read_status()
+
         for task_name, task in self.task_registry.task_dict.items():
+
+            task.check_dependent_resources()
+
             if isinstance(task, MatlabRamTask):
                 if task.is_completed():
                     continue  # we do not want to start Matlab for tasks that already completed
