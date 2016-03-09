@@ -1,14 +1,32 @@
 from RamPipeline import *
 
+from math import log
 import numpy as np
 import pandas as pd
 from sklearn.externals import joblib
 from bisect import bisect_right
+from scipy.stats import norm
+import sys
+from scipy.stats import describe
 
 
-def prob2perf(probs, true_labels, p):
-    idx = bisect_right(probs, p)
-    return np.sum(true_labels[0:idx]) / float(idx) if idx>0 else 0.0
+# def prob2perf(probs, true_labels, p):
+#     idx = bisect_right(probs, p)
+#     return np.sum(true_labels[0:idx]) / float(idx) if idx>0 else 0.0
+
+
+def prob2perf_norm(xval_output, p):
+    fi1 = fi0 = 1.0
+
+    if p < 1e-6:
+        return 0.0
+    elif p < 1.0 - 1e-6:
+        p_norm = log(p/(1.0-p))
+        fi1 = norm.cdf(p_norm, loc=xval_output.mean1, scale=xval_output.pooled_std)
+        fi0 = norm.cdf(p_norm, loc=xval_output.mean0, scale=xval_output.pooled_std)
+
+    r = xval_output.n1*fi1 / (xval_output.n1*fi1 + xval_output.n0*fi0)
+    return r
 
 
 def bipolar_label_to_loc_tag(bp, loc_tags):
@@ -57,6 +75,10 @@ class ComputePSTable(RamTask):
         n_events = len(ps_events)
 
         prob_pre, prob_diff = self.compute_prob_deltas(ps_pow_mat_pre, ps_pow_mat_post, lr_classifier)
+        #print 'prob_pre', describe(prob_pre)
+        #print 'prob_diff', describe(prob_diff)
+        #print 'prob_post', describe(prob_pre+prob_diff)
+        #sys.exit(0)
 
         control_table_low = control_table[control_table['prob_pre']<thresh]
         control_table_high = control_table[control_table['prob_pre']>1.0-thresh]
@@ -84,8 +106,10 @@ class ComputePSTable(RamTask):
         perf_diff_control_low = np.zeros(n_events, dtype=float)
         perf_diff_control_high = np.zeros(n_events, dtype=float)
         for i in xrange(n_events):
-            perf_pre = prob2perf(probs, true_labels, prob_pre[i]+1e-7)
-            perf_diff[i] = 100.0*(prob2perf(probs, true_labels, prob_pre[i]+prob_diff[i]+1e-7) - perf_pre) / total_recall_performance
+            #perf_pre = prob2perf(probs, true_labels, prob_pre[i]+1e-7)
+            #perf_diff[i] = 100.0*(prob2perf(probs, true_labels, prob_pre[i]+prob_diff[i]+1e-7) - perf_pre) / total_recall_performance
+            perf_pre = prob2perf_norm(xval_output[-1], prob_pre[i])
+            perf_diff[i] = 100.0*(prob2perf_norm(xval_output[-1], prob_pre[i]+prob_diff[i]) - perf_pre) / total_recall_performance
             prob_diff_low = prob_diff_high = prob_diff[i]
             if experiment=='PS2' or experiment=='PS3':
                 prob_diff_low -= control_low_500
@@ -103,8 +127,10 @@ class ComputePSTable(RamTask):
 
             prob_diff_control_low[i] = prob_diff_low
             prob_diff_control_high[i] = prob_diff_high
-            perf_diff_control_low[i] = 100.0*(prob2perf(probs, true_labels, prob_pre[i]+prob_diff_low+1e-7) - perf_pre) / total_recall_performance
-            perf_diff_control_high[i] = 100.0*(prob2perf(probs, true_labels, prob_pre[i]+prob_diff_high+1e-7) - perf_pre) / total_recall_performance
+            # perf_diff_control_low[i] = 100.0*(prob2perf(probs, true_labels, prob_pre[i]+prob_diff_low+1e-7) - perf_pre) / total_recall_performance
+            # perf_diff_control_high[i] = 100.0*(prob2perf(probs, true_labels, prob_pre[i]+prob_diff_high+1e-7) - perf_pre) / total_recall_performance
+            perf_diff_control_low[i] = 100.0*(prob2perf_norm(xval_output[-1], prob_pre[i]+prob_diff_low) - perf_pre) / total_recall_performance
+            perf_diff_control_high[i] = 100.0*(prob2perf_norm(xval_output[-1], prob_pre[i]+prob_diff_high) - perf_pre) / total_recall_performance
 
         #define region
         bipolar_label = pd.Series(zip([s.upper() for s in ps_events.stimAnodeTag], [s.upper() for s in ps_events.stimCathodeTag]))
