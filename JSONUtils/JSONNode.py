@@ -2,6 +2,8 @@ import json
 import collections
 import sys
 from itertools import izip
+from os.path import *
+import os
 
 class JSONNode(collections.OrderedDict):
     def __init__(self, *args, **kwds):
@@ -11,11 +13,15 @@ class JSONNode(collections.OrderedDict):
 
     @staticmethod
     def read(filename):
+        try:
+            with open(filename, 'r') as json_file:
+                json_node = json.load(json_file, object_pairs_hook=JSONNode)
+            return json_node
+        except IOError:
+            print 'Could not open ' + filename
+            return None
 
-        with open(filename, 'r') as json_file:
-            json_node = json.load(json_file, object_pairs_hook=JSONNode)
 
-        return json_node
 
     @staticmethod
     def initialize_form_list(*args):
@@ -35,6 +41,10 @@ class JSONNode(collections.OrderedDict):
 
 
     def write(self, filename):
+        try:
+            os.makedirs(dirname(filename))
+        except IOError:
+            pass
 
         with open(filename, 'w') as json_file:
             json_file.write(self.output())
