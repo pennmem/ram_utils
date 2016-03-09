@@ -115,13 +115,26 @@ class RamPopulator(object):
         # print root_node.output()
         return root_node
 if __name__ == '__main__':
-    rp = RamPopulator()
-    subject_dir_target = '/Users/m/data1/subjects'
+    # rp = RamPopulator()
+    # subject_dir_target = '/Users/m/data1/subjects'
+    # subject_list = rp.get_list_of_subjects(protocol='R1')
+    # rp.create_subject_info_dir(path=subject_dir_target)
+    # rp.create_subject_JSON_stub(subject_code='R1060M')
+    #
+    # for subject_code in subject_list:
+    #     subject_node = rp.create_subject_JSON_stub(subject_code=subject_code)
+    #     subject_node.write(filename=join(subject_dir_target,subject_code,'index.json'))
 
+
+    rp = RamPopulator()
+
+    rp.mount_point = '/Users/m/data/'
+    rp.subject_dir_source = join(rp.mount_point,'eeg')
+
+    target_dir = '/Users/m/scratch/auto_tracker'
     subject_list = rp.get_list_of_subjects(protocol='R1')
-    rp.create_subject_info_dir(path=subject_dir_target)
-    rp.create_subject_JSON_stub(subject_code='R1060M')
+
 
     for subject_code in subject_list:
         subject_node = rp.create_subject_JSON_stub(subject_code=subject_code)
-        subject_node.write(filename=join(subject_dir_target,subject_code,'index.json'))
+        subject_node.write(filename=join(target_dir,subject_code,'_status','index.json'))
