@@ -125,7 +125,7 @@ class BarPlotData(PlotDataBase):
 
         option_list = [
 
-            PDO(name='barcolors', default_value=''),
+            PDO(name='barcolors', default_value=None),
             PDO(name='barwidth', default_value=0.5),
             PDO(name='alpha', default_value=0.5),
         ]
