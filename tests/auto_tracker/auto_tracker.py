@@ -86,7 +86,7 @@ class ReportPipeline(RamPipeline):
 report_pipeline = ReportPipeline(subject=args.subject, experiment=args.experiment,
                                        workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point)
 
-report_pipeline.add_task(JSONStubPreparation(params=params, mark_as_completed=True  ))
+report_pipeline.add_task(JSONStubPreparation(params=params, mark_as_completed=True))
 report_pipeline.add_task(FREventPreparation(params=params, mark_as_completed=False))
 
 # starts processing pipeline
