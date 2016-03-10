@@ -14,10 +14,12 @@ class JSONStubPreparation(RamTask):
         RamTask.__init__(self, mark_as_completed)
         self.params = params
 
-        self.add_dependent_resource(resource_name='FR1_events',
-                                    json_node_access_list = ['experiments','FR1','events'])
+        # self.add_dependent_resource(resource_name='FR1_events',
+        #                             json_node_access_list = ['experiments','FR1','events'])
+        if self.dependency_inventory:
+            self.dependency_inventory.add_dependent_resource(resource_name='FR1_events',
+                                        access_path = ['experiments','FR1','events'])
 
-    # def run(self):
     #     json_stub_path = join(self.pipeline.workspace_dir,'_status','index.json')
     #     if not isfile(json_stub_path):
     #         rp = RamPopulator()
