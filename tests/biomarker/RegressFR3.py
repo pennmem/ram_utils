@@ -39,6 +39,8 @@ class RegressFR3(RamTask):
 
         thresh = self.xval_output[-1].jstat_thresh
 
+        print 'thresh =', thresh
+
         realtime_probs = np.array(get_biomarker_probs(), dtype=float)
         offline_probs = np.empty_like(realtime_probs)
         realtime_decisions = np.empty(len(realtime_probs), dtype=np.int)
@@ -74,7 +76,7 @@ class RegressFR3(RamTask):
                     for i,p in enumerate(list_probs):
                         realtime_prob = realtime_probs[i_bio_prob]
                         offline_probs[i_bio_prob] = p
-                        realtime_decision = int(list_stim_item_mask[i])
+                        realtime_decision = int(realtime_prob<thresh)
                         realtime_decisions[i_bio_prob] = realtime_decision
                         offline_decision = int(p<thresh)
                         offline_decisions[i_bio_prob] = offline_decision
