@@ -43,7 +43,7 @@ class JSONNode(collections.OrderedDict):
     def write(self, filename):
         try:
             os.makedirs(dirname(filename))
-        except IOError:
+        except OSError:
             pass
 
         with open(filename, 'w') as json_file:
