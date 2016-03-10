@@ -2,20 +2,21 @@ from TaskRegistry import TaskRegistry
 from MatlabRamTask import MatlabRamTask
 from os.path import *
 from JSONUtils import JSONNode
-# from DataMonitor import RamPopulator
+from DataMonitor import RamPopulator
 
 class RamPipeline(object):
     def __init__(self):
         self.task_registry = TaskRegistry()
         self.workspace_dir = ''
         self.passed_objects_dict = {}
+        self.mount_point = '/'
 
         #  stores matlab paths
         self.matlab_paths = None
 
         #  flag indicating if Matlab tasks are present
         self.matlab_tasks_present = False
-        self.json_status_node = None
+        self.json_saved_data_status_node = None
         self.json_latest_status_node = None
 
     # def pass_object(self, name, obj):
@@ -65,15 +66,29 @@ class RamPipeline(object):
         '''
         self.matlab_paths = paths
 
+    def genrate_latest_data_status(self):
+        if not self.json_saved_data_status_node:
+            self.read_saved_data_status()
 
-    def read_status(self):
+        if self.json_saved_data_status_node:
+            subject_code = self.json_saved_data_status_node['subject']['code']
+            rp = RamPopulator()
+            rp.mount_point = self.mount_point
+            self.json_latest_status_node = rp.create_subject_JSON_stub(subject_code=subject_code)
+            print self.json_latest_status_node.output()
+
+
+    def get_latest_data_status(self):
+        return self.json_latest_status_node
+
+    def read_saved_data_status(self):
         json_index_file = join(self.workspace_dir,'_status','index.json')
-        self.json_status_node = JSONNode.read(filename=json_index_file)
+        self.json_saved_data_status_node = JSONNode.read(filename=json_index_file)
         # rp = RamPopulator()
         # self.json_latest_status_node = rp.create_subject_JSON_stub(subject_code=self.)
 
-    def get_status(self):
-        return self.json_status_node
+    def get_saved_data_status(self):
+        return self.json_saved_data_status_node
 
     def execute_pipeline(self):
         '''
@@ -89,7 +104,8 @@ class RamPipeline(object):
         matlab_engine_started = False
         matlab_engine = None
 
-        self.read_status()
+        self.read_saved_data_status()
+        self. genrate_latest_data_status()
 
         for task_name, task in self.task_registry.task_dict.items():
 
@@ -125,3 +141,6 @@ class RamPipeline(object):
 
                 if task.mark_as_completed:
                     task.create_file_in_workspace_dir(task_completed_file_name, 'w')
+
+        if self.json_latest_status_node:
+            self.json_latest_status_node.write(join(self.workspace_dir,'_status','index.json'))

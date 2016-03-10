@@ -25,12 +25,17 @@ class RamTask(object):
         self.set_mark_as_completed(mark_as_completed)
         self.__dependent_resources__ = OrderedDict()
 
+    # def read_status(self):
+    #     json_index_file = join(self.workspace_dir,'_status','index.json')
+    #     return JSONNode.read(filename=json_index_file)
+
     def add_dependent_resource(self,resource_name,json_node_access_list):
         self.__dependent_resources__[resource_name] = json_node_access_list
 
     def check_dependent_resources(self):
 
-        status_json_node = self.pipeline.get_status()
+        status_json_node = self.pipeline.get_saved_data_status()
+        # status_json_node = self.read_status()
         if status_json_node is None:
             print 'Could not findsaved file status json stub'
             return
@@ -47,7 +52,7 @@ class RamTask(object):
             md5 = compute_md5_key(full_resource_path)
 
             if md5 != resource_node['md5']:
-                print 'RESOUCE HAS CHANGED !!!!!!!!!!!!!!!!!!'
+                print 'RESOUCE HAS CHANGED .RERUNNING TASK!!!!!!!!!!!!!!!!!!'
                 os.remove(self.get_task_completed_file_name())
             print resource_node.output()
 
