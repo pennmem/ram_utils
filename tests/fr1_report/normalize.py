@@ -29,13 +29,13 @@ def normalize_pow_mat(stripped_pow_mat, events, sessions, outsample_session=None
             insample_mask = ~outsample_mask & sess_event_mask
             insample_median = np.median(normal_mat[insample_mask], axis=0)
             normal_mat[insample_mask] -= insample_median
-            insample_norm = norm(normal_mat[insample_mask], ord=1, axis=0)
+            insample_norm = norm(normal_mat[insample_mask], axis=0)
             normal_mat[insample_mask] /= insample_norm
             normal_mat[outsample_mask] -= insample_median
             normal_mat[outsample_mask] /= insample_norm
         else:
             med = np.median(normal_mat[sess_event_mask], axis=0)
             normal_mat[sess_event_mask] -= med
-            nrm = norm(normal_mat[sess_event_mask], ord=1, axis=0)
+            nrm = norm(normal_mat[sess_event_mask], axis=0)
             normal_mat[sess_event_mask] /= nrm
     return normal_mat, outsample_mask
