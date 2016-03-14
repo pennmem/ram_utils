@@ -9,13 +9,13 @@ from operator import itemgetter
 def make_atlas_loc(tag, atlas_loc, comments):
 
     def colon_connect(s1, s2):
-        return s1 if (s2=='' or s2 is np.nan) else s2 if (s1=='' or s1 is np.nan) else s1 + ': ' + s2
+        return s1 if (s2 is None or s2=='' or s2 is np.nan) else s2 if (s1 is None or s1=='' or s1 is np.nan) else s1 + ': ' + s2
 
     e1, e2 = tag.split('-')
     if (e1 in atlas_loc.index) and (e2 in atlas_loc.index):
-        return colon_connect(atlas_loc.ix[e1], comments.ix[e1]), colon_connect(atlas_loc.ix[e2], comments.ix[e2])
+        return colon_connect(atlas_loc.ix[e1], comments.ix[e1] if comments is not None else None), colon_connect(atlas_loc.ix[e2], comments.ix[e2] if comments is not None else None)
     elif tag in atlas_loc.index:
-        return colon_connect(atlas_loc.ix[tag], comments.ix[tag]), colon_connect(atlas_loc.ix[tag], comments.ix[tag])
+        return colon_connect(atlas_loc.ix[tag], comments.ix[tag] if comments is not None else None), colon_connect(atlas_loc.ix[tag], comments.ix[tag] if comments is not None else None)
     else:
         return '--', '--'
 
@@ -26,7 +26,7 @@ def make_ttest_table(bipolar_pairs, loc_info, ttest_results):
     has_surface_only = ('Freesurfer Desikan Killiany Surface Atlas Location' in loc_info)
     if has_depth or has_surface_only:
         atlas_loc = loc_info['Das Volumetric Atlas Location' if has_depth else 'Freesurfer Desikan Killiany Surface Atlas Location']
-        comments = loc_info['Comments']
+        comments = loc_info['Comments'] if ('Comments' in loc_info) else None
         n = len(bipolar_pairs)
         ttest_data = [list(a) for a in zip(bipolar_pairs.eType, bipolar_pairs.tagName, [None] * n, [None] * n, ttest_results[1], ttest_results[0])]
         for i, tag in enumerate(bipolar_pairs.tagName):
