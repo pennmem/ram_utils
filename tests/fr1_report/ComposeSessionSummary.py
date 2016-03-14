@@ -2,6 +2,7 @@ from RamPipeline import *
 from SessionSummary import SessionSummary
 
 import numpy as np
+import pandas as pd
 import time
 from operator import itemgetter
 
@@ -9,10 +10,10 @@ from operator import itemgetter
 def make_atlas_loc(tag, atlas_loc, comments):
 
     def colon_connect(s1, s2):
-        if not isinstance(s1, basestring):
-            s1 = s1[0]
-        if not isinstance(s2, basestring):
-            s2 = s2[0]
+        if isinstance(s1, pd.Series):
+            s1 = s1.values[0]
+        if isinstance(s2, pd.Series):
+            s2 = s2.values[0]
         return s1 if (s2 is None or s2=='' or s2 is np.nan) else s2 if (s1 is None or s1=='' or s1 is np.nan) else s1 + ': ' + s2
 
     e1, e2 = tag.split('-')
