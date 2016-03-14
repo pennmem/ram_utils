@@ -33,23 +33,24 @@ class RamPopulator(object):
         node = JSONNode()
 
         p = join(prefix,subject_code+'_events.mat')
-        node['events'] = JSONNode.initialize_form_list(
-            'path',p,
-            'md5',compute_md5_key(join(self.mount_point,'data', p))
-        )
+        self.attach_single_file_JSON_stub(parent_node=node,
+                                          json_stub_name='events',
+                                          full_path=join(self.mount_point,'data', p),
+                                          partial_path=p)
 
-        if experiment_name not in ('PS'):
-            p = join(prefix,subject_code+'_math.mat')
-            node['math_events'] = JSONNode.initialize_form_list(
-                'path',p,
-                'md5',compute_md5_key(join(self.mount_point,'data', p))
-            )
+        p = join(prefix,subject_code+'_math.mat')
+        self.attach_single_file_JSON_stub(parent_node=node,
+                                          json_stub_name='math_events',
+                                          full_path=join(self.mount_point,'data', p),
+                                          partial_path=p)
+
 
         p = join(prefix,subject_code+'_expinfo.mat')
-        node['info'] = JSONNode.initialize_form_list(
-            'path',p,
-            'md5',compute_md5_key(join(self.mount_point,'data', p))
-        )
+        self.attach_single_file_JSON_stub(parent_node=node,
+                                          json_stub_name='info',
+                                          full_path=join(self.mount_point,'data', p),
+                                          partial_path=p)
+
 
         node['description'] = description
 
@@ -77,16 +78,20 @@ class RamPopulator(object):
 
         # ------------------- electrodes ---------------------------------
         electrodes_info = root_node.add_child_node('electrodes_info')
-        tal_bipolar_node = electrodes_info.add_child_node('tal_bipolar')
 
         p = join('eeg',subject_code,'tal',subject_code+'_talLocs_database_bipol.mat')
-        tal_bipolar_node['path'] = p
-        tal_bipolar_node['md5'] = compute_md5_key(join(self.mount_point,'data', p))
+        self.attach_single_file_JSON_stub(parent_node=electrodes_info,
+                                          json_stub_name='tal_bipolar',
+                                          full_path=join(self.mount_point,'data', p),
+                                          partial_path=p)
 
-        tal_monopolar_node = electrodes_info.add_child_node('tal_monopolar')
+
         p = join('eeg',subject_code,'tal',subject_code+'_talLocs_database_monopol.mat')
-        tal_monopolar_node['path'] = p
-        tal_monopolar_node['md5'] = compute_md5_key(join(self.mount_point,'data', p))
+        self.attach_single_file_JSON_stub(parent_node=electrodes_info,
+                                          json_stub_name='tal_monopolar',
+                                          full_path=join(self.mount_point,'data', p),
+                                          partial_path=p)
+
 
         # --------------------- eeg ---------------------------------
         eeg_node = root_node.add_child_node('eeg')
@@ -110,17 +115,6 @@ class RamPopulator(object):
                                           partial_path=p)
 
 
-        # eeg_params_reref_node = eeg_node.add_child_node('params_reref')
-        # p = join('eeg',subject_code,'eeg.reref','params.txt')
-        # eeg_params_reref_node['path'] = p
-        # eeg_params_reref_node['md5'] = compute_md5_key(join(self.mount_point,'data', p))
-
-
-
-        # eeg_params_noreref_node = eeg_node.add_child_node('params_noreref')
-        # p = join('eeg',subject_code,'eeg.noreref','params.txt')
-        # eeg_params_noreref_node['path'] = p
-        # eeg_params_noreref_node['md5'] = compute_md5_key(join(self.mount_point,'data', p))
 
         # --------------------- experiments ---------------------------------
         experiments_node = root_node.add_child_node('experiments')
@@ -214,49 +208,6 @@ class RamPopulator(object):
             description='Parameter Search - stimulation-only task - no recal tasks'
         )
         experiments_node.add_child_node('PS',ps_node)
-
-        # # --------------------- FR1 ------------------------------------------
-        #
-        # fr1_node = experiments_node.add_child_node('FR1')
-        # fr1_prefix = 'events/RAM_FR1'
-        # p = join(fr1_prefix,subject_code+'_events.mat')
-        # fr1_node['events'] = JSONNode.initialize_form_list(
-        #     'path',p,
-        #     'md5',compute_md5_key(join(self.mount_point,'data', p))
-        # )
-        #
-        # p = join(fr1_prefix,subject_code+'_math.mat')
-        # fr1_node['math_events'] = JSONNode.initialize_form_list(
-        #     'path',p,
-        #     'md5',compute_md5_key(join(self.mount_point,'data', p))
-        # )
-        #
-        # p = join(fr1_prefix,subject_code+'_expinfo.mat')
-        # fr1_node['info'] = JSONNode.initialize_form_list(
-        #     'path',p,
-        #     'md5',compute_md5_key(join(self.mount_point,'data', p))
-        # )
-        #
-        # fr1_node['description'] = 'Free Recall - record-only experiment'
-        #
-        # # --------------------- PS ------------------------------------------
-        #
-        # ps_node = experiments_node.add_child_node('PS')
-        # ps_prefix = 'events/RAM_PS'
-        # p = join(ps_prefix,subject_code+'_events.mat')
-        # ps_node['events'] = JSONNode.initialize_form_list(
-        #     'path',p,
-        #     'md5',compute_md5_key(join(self.mount_point,'data', p))
-        # )
-        #
-        # p = join(ps_prefix,subject_code+'_expinfo.mat')
-        # ps_node['info'] = JSONNode.initialize_form_list(
-        #     'path',p,
-        #     'md5',compute_md5_key(join(self.mount_point,'data', p))
-        # )
-        #
-        # ps_node['description'] = 'Parameter Search - stimulation-only task - no recal tasks'
-        #
 
         # print root_node.output()
         return root_node
