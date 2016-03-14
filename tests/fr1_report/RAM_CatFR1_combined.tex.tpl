@@ -23,7 +23,7 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{RAM CatFR1 report v 2.6}
+\lhead{RAM CatFR1 report v 2.7}
 \rhead{Date created: <DATE>}
 \begin{document}
 
@@ -31,12 +31,12 @@
 \section*{<SUBJECT> RAM CatFR1 Free Recall Report}
 
 \begin{tabular}{ccc}
-\begin{minipage}[htbp]{250pt}
+\begin{minipage}[htbp]{200pt}
 In the free recall task, participants are presented with a list of words, one after the other, and later asked to recall as many words as possible in any order.
 \begin{itemize}\item\textbf{Number of sessions: }$<NUMBER_OF_SESSIONS>$\item\textbf{Number of electrodes: }$<NUMBER_OF_ELECTRODES>$\end{itemize}\end{minipage}
 &
-\begin{tabular}{|c|c|c|}
-\hline Session \# & Date & Length (min)\\
+\begin{tabular}{|c|c|c|c|c|}
+\hline Session \# & Date & Length (min) & \#lists & Perf \\
 <SESSION_DATA>
 \end{tabular}
 \end{tabular}

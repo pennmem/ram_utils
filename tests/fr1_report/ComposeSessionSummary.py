@@ -115,8 +115,6 @@ class ComposeSessionSummary(RamTask):
             session_length = '%.2f' % ((last_time_stamp - first_time_stamp) / 60000.0)
             session_date = time.strftime('%d-%b-%Y', time.localtime(last_time_stamp/1000))
 
-            session_data.append([session, session_date, session_length])
-
             session_name = 'Sess%02d' % session
 
             print 'Session =', session_name
@@ -139,6 +137,9 @@ class ComposeSessionSummary(RamTask):
 
             lists = np.unique(session_events.list)
             n_lists = len(lists)
+
+            session_data.append([session, session_date, session_length, n_lists, '$%.2f$\\%%' % session_summary.pc_correct_words])
+
             prob_first_recall = np.zeros(len(positions), dtype=float)
             session_irt_within_cat = []
             session_irt_between_cat = []
