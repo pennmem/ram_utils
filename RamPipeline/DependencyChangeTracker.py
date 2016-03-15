@@ -1,4 +1,4 @@
-from DataMonitor import RamPopulator
+from DataMonitor import RamPopulatorLegacy
 from JSONUtils import JSONNode
 from DataMonitor import compute_md5_key
 from os.path import *
@@ -11,19 +11,27 @@ class DependencyChangeTracker(object):
         self.workspace_dir = ''
 
     def initialize(self):
-        self.genrate_latest_data_status()
+        self.generate_latest_data_status()
 
-    def genrate_latest_data_status(self):
+    def generate_latest_data_status(self):
         if not self.json_saved_data_status_node:
             self.read_saved_data_status()
 
-        if self.json_saved_data_status_node:
-            subject_code = self.json_saved_data_status_node['subject']['code']
-            rp = RamPopulator()
-            rp.mount_point = self.mount_point
-            self.json_latest_status_node = rp.create_subject_JSON_stub(subject_code=subject_code)
-            # print self.json_latest_status_node.output()
 
+
+
+        # if self.json_saved_data_status_node:
+
+        # subject_code = self.json_saved_data_status_node['subject']['code']
+        subject_code = basename(self.workspace_dir)
+        rp = RamPopulatorLegacy()
+        rp.mount_point = self.mount_point
+        self.json_latest_status_node = rp.create_subject_JSON_stub(subject_code=subject_code)
+        # print self.json_latest_status_node.output()
+
+
+        if not self.json_saved_data_status_node: # if saved json stub was not found
+            self.json_saved_data_status_node = self.json_latest_status_node
 
     def get_latest_data_status(self):
         return self.json_latest_status_node
