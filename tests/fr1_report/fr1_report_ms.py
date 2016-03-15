@@ -15,14 +15,24 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1111M',
-                                            '--task','RAM_FR1',
-                                            '--workspace-dir','/Users/m/scratch/FR1_reports_ms',
-                                            '--mount-point','/Volumes/rhino_root',
-                                            '--python-path','/Users/m/RAM_UTILS_GIT',
-                                            '--python-path','/Users/m/PTSA_NEW_GIT',
+    command_line_emulation_argument_list = ['--subject','R1127P_2',
+                                            '--task','RAM_CatFR1',
+                                            '--workspace-dir','/scratch/busygin/CatFR1_reports_new_new',
+                                            '--mount-point','',
+                                            '--python-path','/home1/busygin/ram_utils_new_ptsa',
+                                            '--python-path','/home1/busygin/python/ptsa_latest',
                                             # '--exit-on-no-change'
                                             ]
+
+    # command_line_emulation_argument_list = ['--subject','R1111M',
+    #                                         '--task','RAM_FR1',
+    #                                         '--workspace-dir','/Users/m/scratch/FR1_reports_ms',
+    #                                         '--mount-point','/Volumes/rhino_root',
+    #                                         '--python-path','/Users/m/RAM_UTILS_GIT',
+    #                                         '--python-path','/Users/m/PTSA_NEW_GIT',
+    #                                         # '--exit-on-no-change'
+    #                                         ]
+
     args = parse_command_line(command_line_emulation_argument_list)
 
 configure_python_paths(args.python_path)

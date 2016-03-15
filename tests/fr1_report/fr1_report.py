@@ -20,8 +20,19 @@ else: # emulate command line
                                             '--workspace-dir','/scratch/busygin/CatFR1_reports_new_new',
                                             '--mount-point','',
                                             '--python-path','/home1/busygin/ram_utils_new_ptsa',
-                                            '--python-path','/home1/busygin/python/ptsa_latest'
+                                            '--python-path','/home1/busygin/python/ptsa_latest',
+                                            # '--exit-on-no-change'
                                             ]
+
+    # command_line_emulation_argument_list = ['--subject','R1111M',
+    #                                         '--task','RAM_FR1',
+    #                                         '--workspace-dir','/Users/m/scratch/FR1_reports_ms',
+    #                                         '--mount-point','/Volumes/rhino_root',
+    #                                         '--python-path','/Users/m/RAM_UTILS_GIT',
+    #                                         '--python-path','/Users/m/PTSA_NEW_GIT',
+    #                                         # '--exit-on-no-change'
+    #                                         ]
+
     args = parse_command_line(command_line_emulation_argument_list)
 
 configure_python_paths(args.python_path)
@@ -31,6 +42,7 @@ configure_python_paths(args.python_path)
 import numpy as np
 from RamPipeline import RamPipeline
 from RamPipeline import RamTask
+from ReportUtils.DependencyChangeTrackerLegacy import DependencyChangeTrackerLegacy
 
 from FR1EventPreparation import FR1EventPreparation
 
@@ -85,20 +97,24 @@ class Params(object):
 
 params = Params()
 
-
+# from ReportUtils import ReportPipeline
 class ReportPipeline(RamPipeline):
-    def __init__(self, subject, task, workspace_dir, mount_point=None):
+    def __init__(self, subject, task, workspace_dir, mount_point=None, exit_on_no_change=False):
         RamPipeline.__init__(self)
+        self.exit_on_no_change = exit_on_no_change
         self.subject = subject
         self.task = self.experiment = task
         self.mount_point = mount_point
         self.set_workspace_dir(workspace_dir)
+        dependency_tracker = DependencyChangeTrackerLegacy(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point)
+
+        self.set_dependency_tracker(dependency_tracker=dependency_tracker)
 
 
 
 # sets up processing pipeline
 report_pipeline = ReportPipeline(subject=args.subject, task=args.task,
-                                       workspace_dir=join(args.workspace_dir,args.task+'_'+args.subject), mount_point=args.mount_point)
+                                       workspace_dir=join(args.workspace_dir,args.task+'_'+args.subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change)
 
 report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
 
