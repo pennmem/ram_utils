@@ -4,7 +4,7 @@ from JSONUtils import JSONNode
 
 from key_utils import compute_md5_key
 
-class RamPopulatorLegacy(object):
+class DataLayoutJSONUtilsLegacy(object):
     def __init__(self):
         self.mount_point = '/Users/m/'
         self.subject_dir_target = join(self.mount_point,'data/subjects')
@@ -215,7 +215,7 @@ if __name__ == '__main__':
     # j_tot.add_child_node('task2',j1)
     # print j_tot.output()
 
-    rp = RamPopulatorLegacy()
+    rp = DataLayoutJSONUtilsLegacy()
     subject_dir_target = '/Users/m/data1/subjects_legacy'
     subject_list = rp.get_list_of_subjects(protocol='R1')
     # rp.create_subject_info_dir(path=subject_dir_target)
@@ -223,7 +223,7 @@ if __name__ == '__main__':
     print node.output()
 
 
-    rp = RamPopulatorLegacy()
+    rp = DataLayoutJSONUtilsLegacy()
     subject_dir_target = '/Users/m/data1/subjects_legacy'
     subject_list = rp.get_list_of_subjects(protocol='R1')
     rp.create_subject_info_dir(path=subject_dir_target)
@@ -235,7 +235,7 @@ if __name__ == '__main__':
         subject_node.write(filename=join(subject_dir_target,subject_code,'index.json'))
     #
 
-    # rp = RamPopulator()
+    # rp = DataLayoutJSONUtils()
     #
     # rp.mount_point = '/Users/m/data/'
     # rp.subject_dir_source = join(rp.mount_point,'eeg')

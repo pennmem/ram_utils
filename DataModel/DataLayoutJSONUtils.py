@@ -10,7 +10,7 @@ from collections import namedtuple
 
 SplitSubjectCode = namedtuple(typename='SplitSubjectCode',field_names=['protocol','id','site','montage'])
 
-class RamPopulator(object):
+class DataLayoutJSONUtils(object):
     def __init__(self,target_root_dir='/Users/m/data1'):
         self.mount_point = '/Users/m/'
         self.subject_dir_target = join(self.mount_point,'data/subjects')
@@ -626,7 +626,7 @@ class RamPopulator(object):
 
 if __name__ == '__main__':
 
-    # rp = RamPopulator()
+    # rp = DataLayoutJSONUtils()
     # rp.split_subject_code('r1060M_1')
     # sys.exit()
 
@@ -642,7 +642,7 @@ if __name__ == '__main__':
     # j_tot.add_child_node('task2',j1)
     # print j_tot.output()
 
-    # rp = RamPopulator()
+    # rp = DataLayoutJSONUtils()
     # subject_dir_target = '/Users/m/data1/subjects'
     # subject_list = rp.get_list_of_subjects(protocol='R1')
     # # rp.create_subject_info_dir(path=subject_dir_target)
@@ -650,7 +650,7 @@ if __name__ == '__main__':
     # print node.output()
 
 
-    rp = RamPopulator()
+    rp = DataLayoutJSONUtils()
     subject_dir_target = '/Users/m/data1/'
     subject_list = rp.get_list_of_subjects(protocol='R1')
     rp.create_subject_info_dir(path=subject_dir_target)
@@ -667,7 +667,7 @@ if __name__ == '__main__':
                             )
 
 
-    # rp = RamPopulator()
+    # rp = DataLayoutJSONUtils()
     #
     # rp.mount_point = '/Users/m/data/'
     # rp.subject_dir_source = join(rp.mount_point,'eeg')
