@@ -18,7 +18,7 @@ class JSONStubPreparation(RamTask):
         #                             json_node_access_list = ['experiments','FR1','events'])
         if self.dependency_inventory:
             self.dependency_inventory.add_dependent_resource(resource_name='FR1_events',
-                                        access_path = ['experiments','FR1','events'])
+                                        access_path = ['experiments','fr1','events'])
 
     #     json_stub_path = join(self.pipeline.workspace_dir,'_status','index.json')
     #     if not isfile(json_stub_path):

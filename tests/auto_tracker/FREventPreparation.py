@@ -13,11 +13,11 @@ class FREventPreparation(RamTask):
         RamTask.__init__(self, mark_as_completed)
         self.params = params
         if self.dependency_inventory:
-            self.dependency_inventory.add_dependent_resource(resource_name='FR1_events',
-                                        access_path = ['experiments','FR1','events'])
+            self.dependency_inventory.add_dependent_resource(resource_name='fr1_events',
+                                        access_path = ['experiments','fr1','events'])
 
-            self.dependency_inventory.add_dependent_resource(resource_name='tal_bipolar',
-                                        access_path = ['electrodes_info','tal_bipolar'])
+            self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
+                                        access_path = ['electrodes','bipolar'])
 
 
     def run(self):
