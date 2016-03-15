@@ -92,6 +92,19 @@ class DataLayoutJSONUtilsLegacy(object):
                                           full_path=join(self.mount_point,'data', p),
                                           partial_path=p)
 
+        p = join('eeg',subject_code,'tal',subject_code+'_talLocs_database_stimOnly.mat')
+        self.attach_single_file_JSON_stub(parent_node=electrodes_info,
+                                          json_stub_name='stim_only',
+                                          full_path=join(self.mount_point,'data', p),
+                                          partial_path=p)
+
+
+        p = join('eeg',subject_code,'docs','localization',subject_code+' Localization.xlsx')
+        self.attach_single_file_JSON_stub(parent_node=electrodes_info,
+                                          json_stub_name='localization',
+                                          full_path=join(self.mount_point,'data', p),
+                                          partial_path=p)
+
 
         # --------------------- eeg ---------------------------------
         eeg_node = root_node.add_child_node('eeg')
