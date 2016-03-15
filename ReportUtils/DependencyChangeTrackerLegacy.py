@@ -4,7 +4,7 @@ from DataModel import compute_md5_key
 from os.path import *
 
 from RamPipeline.DependencyChangeTrackerBase import DependencyChangeTrackerBase
-
+import warnings
 class DependencyChangeTrackerLegacy(DependencyChangeTrackerBase):
     '''
     This is meant to be a general API for dependency tracking
@@ -85,7 +85,11 @@ class DependencyChangeTrackerLegacy(DependencyChangeTrackerBase):
                 try:
                     resource_node = resource_node[node_name]
                 except KeyError:
-                    raise KeyError('Could not locate node = ' + node_name)
+                    warnings.warn("Could not locate node "+node_name,RuntimeWarning)
+                    change_flag = True
+                    return change_flag
+
+                    # raise KeyError('Could not locate node = ' + node_name)
 
             full_resource_path = join(self.mount_point,'data', resource_node['path'])
             print 'full_resource_path=',full_resource_path
