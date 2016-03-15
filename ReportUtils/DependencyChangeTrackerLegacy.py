@@ -3,7 +3,7 @@ from JSONUtils import JSONNode
 from DataModel import compute_md5_key
 from os.path import *
 
-from DependencyChangeTrackerBase import DependencyChangeTrackerBase
+from RamPipeline.DependencyChangeTrackerBase import DependencyChangeTrackerBase
 
 class DependencyChangeTrackerLegacy(DependencyChangeTrackerBase):
     '''

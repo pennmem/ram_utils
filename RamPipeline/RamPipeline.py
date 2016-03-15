@@ -1,11 +1,11 @@
-from TaskRegistry import TaskRegistry
-from MatlabRamTask import MatlabRamTask
-from os.path import *
 import os
-from JSONUtils import JSONNode
-from DataModel import DataLayoutJSONUtils
+from os.path import *
 
-from DependencyChangeTrackerLegacy import DependencyChangeTrackerLegacy
+from DataModel import DataLayoutJSONUtils
+from JSONUtils import JSONNode
+from MatlabRamTask import MatlabRamTask
+from TaskRegistry import TaskRegistry
+
 
 class RamPipeline(object):
     def __init__(self):
@@ -140,7 +140,6 @@ class RamPipeline(object):
         Executes pipeline
         :return:None
         '''
-        import os
         # determine if there are any of the Matlab tasks. Only then start Matlab engine
         #  checking form MatlabRamTask subclasses objects. One such objects are found we initialize matlab engine and
         #  pass matlab engine instance to those objects so that they can call matlab routines
