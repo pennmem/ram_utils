@@ -16,6 +16,16 @@ class ComputeFR1Powers(RamTask):
         self.samplerate = None
         self.wavelet_transform = MorletWaveletTransform()
 
+        if self.dependency_inventory:
+            self.dependency_inventory.add_dependent_resource(resource_name='fr1_events',
+                                        access_path = ['experiments','fr1','events'])
+
+            self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
+                                        access_path = ['electrodes','bipolar'])
+
+
+
+
     def restore(self):
         subject = self.pipeline.subject
         task = self.pipeline.task
