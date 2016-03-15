@@ -60,11 +60,15 @@ class DataLayoutJSONUtilsLegacy(object):
 
     def attach_single_file_JSON_stub(self, parent_node, json_stub_name, full_path, partial_path=''):
         node = JSONNode()
-        if not isfile(full_path):
-            return
+        # if not isfile(full_path):
+        #     return
 
         node['path'] = partial_path if partial_path else full_path
-        node['md5'] = compute_md5_key(full_path)
+
+        if not isfile(full_path):
+            node['md5'] = ''
+        else:
+            node['md5'] = compute_md5_key(full_path)
 
         parent_node.add_child_node(json_stub_name,node)
 
