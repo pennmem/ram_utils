@@ -3,7 +3,7 @@ from MatlabRamTask import MatlabRamTask
 from os.path import *
 import os
 from JSONUtils import JSONNode
-from DataMonitor import RamPopulator
+from DataModel import DataLayoutJSONUtils
 
 from DependencyChangeTrackerLegacy import DependencyChangeTrackerLegacy
 
@@ -77,7 +77,7 @@ class RamPipeline(object):
 
         if self.json_saved_data_status_node:
             subject_code = self.json_saved_data_status_node['subject']['code']
-            rp = RamPopulator()
+            rp = DataLayoutJSONUtils()
             rp.mount_point = self.mount_point
             self.json_latest_status_node = rp.create_subject_JSON_stub(subject_code=subject_code)
             # print self.json_latest_status_node.output()
@@ -89,7 +89,7 @@ class RamPipeline(object):
     def read_saved_data_status(self):
         json_index_file = join(self.workspace_dir,'_status','index.json')
         self.json_saved_data_status_node = JSONNode.read(filename=json_index_file)
-        # rp = RamPopulator()
+        # rp = DataLayoutJSONUtils()
         # self.json_latest_status_node = rp.create_subject_JSON_stub(subject_code=self.)
 
     def get_saved_data_status(self):

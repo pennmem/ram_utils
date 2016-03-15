@@ -1,6 +1,6 @@
-from DataMonitor import RamPopulatorLegacy
+from DataModel import DataLayoutJSONUtilsLegacy
 from JSONUtils import JSONNode
-from DataMonitor import compute_md5_key
+from DataModel import compute_md5_key
 from os.path import *
 
 from DependencyChangeTrackerBase import DependencyChangeTrackerBase
@@ -39,7 +39,7 @@ class DependencyChangeTrackerLegacy(DependencyChangeTrackerBase):
 
         # subject_code = self.json_saved_data_status_node['subject']['code']
         subject_code = self.subject
-        rp = RamPopulatorLegacy()
+        rp = DataLayoutJSONUtilsLegacy()
         rp.mount_point = self.mount_point
         self.json_latest_status_node = rp.create_subject_JSON_stub(subject_code=subject_code)
         # print self.json_latest_status_node.output()
@@ -54,7 +54,7 @@ class DependencyChangeTrackerLegacy(DependencyChangeTrackerBase):
     def read_saved_data_status(self):
         json_index_file = join(self.workspace_dir,'_status','index.json')
         self.json_saved_data_status_node = JSONNode.read(filename=json_index_file)
-        # rp = RamPopulator()
+        # rp = DataLayoutJSONUtils()
         # self.json_latest_status_node = rp.create_subject_JSON_stub(subject_code=self.)
 
     def get_saved_data_status(self):

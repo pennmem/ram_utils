@@ -6,7 +6,7 @@ from os.path import *
 from distutils.dir_util import mkpath
 
 from JSONUtils import JSONNode
-from DataMonitor import compute_md5_key
+from DataModel import compute_md5_key
 from DependencyInventory import DependencyInventory
 
 
