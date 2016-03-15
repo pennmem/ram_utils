@@ -412,6 +412,9 @@ class RamTask(object):
     # def __set_name(self, name):
     #     self.__name = name
 
+    def initialize(self):
+        pass
+
     def restore(self):
         '''
         Core function that restores saved results of the task so that following tasks in the pipeline can continue

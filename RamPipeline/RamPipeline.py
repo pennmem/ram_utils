@@ -139,6 +139,11 @@ class RamPipeline(object):
 
                 task.set_matlab_engine(matlab_engine)
 
+
+    def initialize_tasks(self):
+        for task_name, task in self.task_registry.task_dict.items():
+            task.initialize()
+
     def execute_pipeline(self):
         '''
         Executes pipeline
@@ -152,6 +157,8 @@ class RamPipeline(object):
         matlab_engine_started = False
         matlab_engine = None
 
+
+        self.initialize_tasks()
 
         self.prepare_matlab_tasks()
 
