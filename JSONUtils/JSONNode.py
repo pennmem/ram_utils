@@ -50,11 +50,31 @@ class JSONNode(collections.OrderedDict):
             json_file.write(self.output())
 
     def add_child_node(self, *args, **kwds):
+        node = None
         try:
-            self[args[0]]=JSONNode()
-            return self[args[0]]
+            node_name = args[0]
         except IndexError:
             return None
+
+        try:
+            node = args[1]
+            if not isinstance(node,JSONNode):
+                return None
+        except IndexError:
+            pass
+
+
+        if node:
+            self[node_name] = node
+        else:
+            self[node_name] = JSONNode()
+
+        return self[node_name]
+        # try:
+        #     self[args[0]]=JSONNode()
+        #     return self[args[0]]
+        # except IndexError:
+        #     return None
 
 
     def output_list(self, lst, node_name='', indent=0):
