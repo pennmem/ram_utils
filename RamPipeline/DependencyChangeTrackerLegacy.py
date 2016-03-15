@@ -3,12 +3,30 @@ from JSONUtils import JSONNode
 from DataMonitor import compute_md5_key
 from os.path import *
 
-class DependencyChangeTracker(object):
-    def __init__(self):
+from DependencyChangeTrackerBase import DependencyChangeTrackerBase
+
+class DependencyChangeTrackerLegacy(DependencyChangeTrackerBase):
+    '''
+    This is meant to be a general API for dependency tracking
+    '''
+    def __init__(self,*args,**kwds):
+        try:
+            self.subject=kwds['subject']
+        except KeyError:
+            self.subject=''
+
+        try:
+            self.workspace_dir=kwds['workspace_dir']
+        except KeyError:
+            self.workspace_dir=''
+
+        try:
+            self.mount_point=kwds['mount_point']
+        except KeyError:
+            self.mount_point=''
+
         self.json_saved_data_status_node = None
         self.json_latest_status_node = None
-        self.mount_point = ''
-        self.workspace_dir = ''
 
     def initialize(self):
         self.generate_latest_data_status()
@@ -17,13 +35,10 @@ class DependencyChangeTracker(object):
         if not self.json_saved_data_status_node:
             self.read_saved_data_status()
 
-
-
-
         # if self.json_saved_data_status_node:
 
         # subject_code = self.json_saved_data_status_node['subject']['code']
-        subject_code = basename(self.workspace_dir)
+        subject_code = self.subject
         rp = RamPopulatorLegacy()
         rp.mount_point = self.mount_point
         self.json_latest_status_node = rp.create_subject_JSON_stub(subject_code=subject_code)
@@ -49,7 +64,7 @@ class DependencyChangeTracker(object):
         if self.json_latest_status_node:
             self.json_latest_status_node.write(join(self.workspace_dir,'_status','index.json'))
 
-    def dependency_change(self, task):
+    def check_dependency_change(self, task):
         change_flag = False
 
         dependency_inventory = task.get_dependency_inventory()

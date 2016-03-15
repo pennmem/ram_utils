@@ -5,7 +5,7 @@ import os
 from JSONUtils import JSONNode
 from DataMonitor import RamPopulator
 
-from DependencyChangeTracker import DependencyChangeTracker
+from DependencyChangeTrackerLegacy import DependencyChangeTrackerLegacy
 
 class RamPipeline(object):
     def __init__(self):
@@ -95,18 +95,18 @@ class RamPipeline(object):
     def get_saved_data_status(self):
         return self.json_saved_data_status_node
 
+    def set_dependency_tracker(self,dependency_tracker):
+        self.dependency_change_tracker = dependency_tracker
+
     def resolve_dependencies(self):
 
-        self.dependency_change_tracker = DependencyChangeTracker()
-        self.dependency_change_tracker.workspace_dir = self.workspace_dir
-        self.dependency_change_tracker.mount_point = self.mount_point
 
         self.dependency_change_tracker.initialize()
 
         if self.dependency_change_tracker:
             for task_name, task in self.task_registry.task_dict.items():
 
-                change_flag = self.dependency_change_tracker.dependency_change(task)
+                change_flag = self.dependency_change_tracker.check_dependency_change(task)
                 if change_flag:
 
                     try:
@@ -149,19 +149,11 @@ class RamPipeline(object):
         matlab_engine_started = False
         matlab_engine = None
 
-        # self.dependency_change_tracker = DependencyChangeTracker()
-        # self.dependency_change_tracker.workspace_dir = self.workspace_dir
-        # self.dependency_change_tracker.mount_point = self.mount_point
-        #
-        # self.dependency_change_tracker.initialize()
-
-        # self.read_saved_data_status()
-        # self. genrate_latest_data_status()
-
 
         self.prepare_matlab_tasks()
 
-        self.resolve_dependencies()
+        if self.dependency_change_tracker:
+            self.resolve_dependencies()
 
         # executing pipeline
         for task_name, task in self.task_registry.task_dict.items():
@@ -184,5 +176,3 @@ class RamPipeline(object):
 
         if self.dependency_change_tracker:
             self.dependency_change_tracker.write_latest_data_status()
-        # if self.json_latest_status_node:
-        #     self.json_latest_status_node.write(join(self.workspace_dir,'_status','index.json'))
