@@ -2,6 +2,8 @@ import json
 import collections
 import sys
 from itertools import izip
+from os.path import *
+import os
 
 class JSONNode(collections.OrderedDict):
     def __init__(self, *args, **kwds):
@@ -11,11 +13,15 @@ class JSONNode(collections.OrderedDict):
 
     @staticmethod
     def read(filename):
+        try:
+            with open(filename, 'r') as json_file:
+                json_node = json.load(json_file, object_pairs_hook=JSONNode)
+            return json_node
+        except IOError:
+            print 'Could not open ' + filename
+            return None
 
-        with open(filename, 'r') as json_file:
-            json_node = json.load(json_file, object_pairs_hook=JSONNode)
 
-        return json_node
 
     @staticmethod
     def initialize_form_list(*args):
@@ -35,16 +41,40 @@ class JSONNode(collections.OrderedDict):
 
 
     def write(self, filename):
+        try:
+            os.makedirs(dirname(filename))
+        except OSError:
+            pass
 
         with open(filename, 'w') as json_file:
             json_file.write(self.output())
 
     def add_child_node(self, *args, **kwds):
+        node = None
         try:
-            self[args[0]]=JSONNode()
-            return self[args[0]]
+            node_name = args[0]
         except IndexError:
             return None
+
+        try:
+            node = args[1]
+            if not isinstance(node,JSONNode):
+                return None
+        except IndexError:
+            pass
+
+
+        if node:
+            self[node_name] = node
+        else:
+            self[node_name] = JSONNode()
+
+        return self[node_name]
+        # try:
+        #     self[args[0]]=JSONNode()
+        #     return self[args[0]]
+        # except IndexError:
+        #     return None
 
 
     def output_list(self, lst, node_name='', indent=0):
