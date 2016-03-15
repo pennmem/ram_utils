@@ -5,7 +5,7 @@
 
 # python ps_report.py --subject=R1086M --task=FR1 --workspace-dir=/data10/scratch/mswat/R1086M_2 --matlab-path=~/eeg --matlab-path=~/matlab/beh_toolbox --matlab-path=~/RAM/RAM_reporting --matlab-path=~/RAM/RAM_sys2Biomarkers --matlab-path=~/RAM_UTILS_GIT/tests/ps2_report/AuxiliaryMatlab --python-path=~/RAM_UTILS_GIT
 import sys
-from os.path import *
+
 from setup_utils import parse_command_line, configure_python_paths
 
 # -------------------------------processing command line
@@ -15,23 +15,33 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1127P_2',
-                                            '--task','RAM_CatFR1',
-                                            '--workspace-dir','/scratch/busygin/CatFR1_reports_new_new',
-                                            '--mount-point','',
-                                            '--python-path','/home1/busygin/ram_utils_new_ptsa',
-                                            '--python-path','/home1/busygin/python/ptsa_latest',
-                                            # '--exit-on-no-change'
-                                            ]
+    # command_line_emulation_argument_list = ['--subject','R1127P_2',
+    #                                         '--task','RAM_CatFR1',
+    #                                         '--workspace-dir','/scratch/busygin/CatFR1_reports_new_new',
+    #                                         '--mount-point','',
+    #                                         '--python-path','/home1/busygin/ram_utils_new_ptsa',
+    #                                         '--python-path','/home1/busygin/python/ptsa_latest',
+    #                                         # '--exit-on-no-change'
+    #                                         ]
 
-    # command_line_emulation_argument_list = ['--subject','R1111M',
-    #                                         '--task','RAM_FR1',
-    #                                         '--workspace-dir','/Users/m/scratch/FR1_reports_ms',
+    # command_line_emulation_argument_list = ['--subject','R1127P_2',
+    #                                         '--task','RAM_CatFR1',
+    #                                         '--workspace-dir','/Users/m/scratch/CatFR1_reports_ms',
     #                                         '--mount-point','/Volumes/rhino_root',
     #                                         '--python-path','/Users/m/RAM_UTILS_GIT',
     #                                         '--python-path','/Users/m/PTSA_NEW_GIT',
     #                                         # '--exit-on-no-change'
     #                                         ]
+
+    command_line_emulation_argument_list = ['--subject','R1060M',
+                                            '--task','RAM_FR1',
+                                            '--workspace-dir','/Users/m/scratch/FR1_reports_ms',
+                                            '--mount-point','/Volumes/rhino_root',
+                                            '--python-path','/Users/m/RAM_UTILS_GIT',
+                                            '--python-path','/Users/m/PTSA_NEW_GIT',
+                                            # '--exit-on-no-change'
+                                            ]
+
 
     args = parse_command_line(command_line_emulation_argument_list)
 
@@ -39,9 +49,6 @@ configure_python_paths(args.python_path)
 
 # ------------------------------- end of processing command line
 
-import numpy as np
-from RamPipeline import RamPipeline
-from RamPipeline import RamTask
 from ReportUtils.DependencyChangeTrackerLegacy import DependencyChangeTrackerLegacy
 
 from FR1EventPreparation import FR1EventPreparation

@@ -1,8 +1,8 @@
-from glob import glob
 import re
-
 import sys
+from glob import glob
 from os.path import *
+
 from setup_utils import parse_command_line, configure_python_paths
 
 # -------------------------------processing command line
@@ -27,7 +27,6 @@ configure_python_paths(args.python_path)
 
 import numpy as np
 from RamPipeline import RamPipeline
-from RamPipeline import RamTask
 
 from FR1EventPreparation import FR1EventPreparation
 

@@ -1,8 +1,7 @@
-from glob import glob
 import re
-
 import sys
-from os.path import *
+from glob import glob
+
 from setup_utils import parse_command_line, configure_python_paths
 
 # -------------------------------processing command line
@@ -25,10 +24,6 @@ configure_python_paths(args.python_path)
 
 # ------------------------------- end of processing command line
 
-import numpy as np
-from RamPipeline import RamPipeline
-from RamPipeline import RamTask
-
 from FR1EventPreparation import FR1EventPreparation
 
 from MathEventPreparation import MathEventPreparation
@@ -42,10 +37,6 @@ from GetLocalization import GetLocalization
 from ComputeTTest import ComputeTTest
 
 #from CheckTTest import CheckTTest
-
-from XValTTest import XValTTest
-
-from XValPlots import XValPlots
 
 from ComputeClassifier import ComputeClassifier
 

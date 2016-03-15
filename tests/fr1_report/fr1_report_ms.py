@@ -5,7 +5,7 @@
 
 # python ps_report.py --subject=R1086M --task=FR1 --workspace-dir=/data10/scratch/mswat/R1086M_2 --matlab-path=~/eeg --matlab-path=~/matlab/beh_toolbox --matlab-path=~/RAM/RAM_reporting --matlab-path=~/RAM/RAM_sys2Biomarkers --matlab-path=~/RAM_UTILS_GIT/tests/ps2_report/AuxiliaryMatlab --python-path=~/RAM_UTILS_GIT
 import sys
-from os.path import *
+
 from setup_utils import parse_command_line, configure_python_paths
 
 # -------------------------------processing command line
@@ -39,9 +39,6 @@ configure_python_paths(args.python_path)
 
 # ------------------------------- end of processing command line
 
-import numpy as np
-from RamPipeline import RamPipeline
-from RamPipeline import RamTask
 from ReportUtils.DependencyChangeTrackerLegacy import DependencyChangeTrackerLegacy
 
 from FR1EventPreparation import FR1EventPreparation
