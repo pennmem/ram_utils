@@ -1,2 +1,3 @@
 from key_utils import compute_md5_key
 from RamPopulator import RamPopulator
+from RamPopulatorLegacy import RamPopulatorLegacy
