@@ -21,6 +21,8 @@ class RamPipeline(object):
         self.matlab_tasks_present = False
 
         self.dependency_change_tracker = None
+
+        self.exit_on_no_change = False
         # self.json_saved_data_status_node = None
         # self.json_latest_status_node = None
 
@@ -103,12 +105,13 @@ class RamPipeline(object):
 
         self.dependency_change_tracker.initialize()
 
+        change_counter = 0
         if self.dependency_change_tracker:
             for task_name, task in self.task_registry.task_dict.items():
 
                 change_flag = self.dependency_change_tracker.check_dependency_change(task)
                 if change_flag:
-
+                    change_counter +=1
                     try:
                         #removing task_completed_file
                         os.remove(task.get_task_completed_file_name())
@@ -116,6 +119,7 @@ class RamPipeline(object):
                     except OSError:
                         pass
 
+        return change_counter
 
     def prepare_matlab_tasks(self):
         for task_name, task in self.task_registry.task_dict.items():
@@ -152,7 +156,10 @@ class RamPipeline(object):
         self.prepare_matlab_tasks()
 
         if self.dependency_change_tracker:
-            self.resolve_dependencies()
+            change_counter = self.resolve_dependencies()
+
+            if not change_counter and self.exit_on_no_change:
+                return
 
         # executing pipeline
         for task_name, task in self.task_registry.task_dict.items():
