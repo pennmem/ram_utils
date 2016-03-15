@@ -4,7 +4,7 @@ import os
 import os.path
 import numpy as np
 
-from DataMonitor import RamPopulator
+from DataModel import DataLayoutJSONUtils
 
 from RamPipeline import *
 from JSONUtils import JSONNode
@@ -22,7 +22,7 @@ class JSONStubPreparation(RamTask):
 
     #     json_stub_path = join(self.pipeline.workspace_dir,'_status','index.json')
     #     if not isfile(json_stub_path):
-    #         rp = RamPopulator()
+    #         rp = DataLayoutJSONUtils()
     #         j_stub = rp.create_subject_JSON_stub(subject_code=self.pipeline.subject)
     #         print j_stub.output()
     #
@@ -37,7 +37,7 @@ class JSONStubPreparation(RamTask):
         print 'RUNNING JSONStubPreparation'
         # json_stub_path = join(self.pipeline.workspace_dir,'_status','index.json')
         # if not isfile(json_stub_path):
-        #     rp = RamPopulator()
+        #     rp = DataLayoutJSONUtils()
         #     j_stub = rp.create_subject_JSON_stub(subject_code=self.pipeline.subject)
         #     print j_stub.output()
         #

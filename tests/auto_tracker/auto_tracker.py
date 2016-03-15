@@ -30,6 +30,8 @@ configure_python_paths(args.python_path)
 import numpy as np
 from RamPipeline import RamPipeline
 
+from RamPipeline.DependencyChangeTrackerLegacy import DependencyChangeTrackerLegacy
+
 from FREventPreparation import FREventPreparation
 from JSONStubPreparation import JSONStubPreparation
 
@@ -79,12 +81,18 @@ class ReportPipeline(RamPipeline):
         self.experiment = experiment
         self.mount_point = mount_point
         self.set_workspace_dir(workspace_dir)
+        dependency_tracker = DependencyChangeTrackerLegacy(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point)
+
+        self.set_dependency_tracker(dependency_tracker=dependency_tracker)
 
 
 
 # sets up processing pipeline
 report_pipeline = ReportPipeline(subject=args.subject, experiment=args.experiment,
                                        workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point)
+
+
+
 
 report_pipeline.add_task(JSONStubPreparation(params=params, mark_as_completed=True))
 report_pipeline.add_task(FREventPreparation(params=params, mark_as_completed=True))
