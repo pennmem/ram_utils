@@ -12,13 +12,24 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1124J_1',
-                                            '--experiment','PS3',
-                                            '--workspace-dir','/scratch/busygin/PS3_joint',
-                                            '--mount-point','',
-                                            '--python-path','/home1/busygin/ram_utils_new_ptsa',
-                                            '--python-path','/home1/busygin/python/ptsa_latest',
+    # command_line_emulation_argument_list = ['--subject','R1124J_1',
+    #                                         '--experiment','PS3',
+    #                                         '--workspace-dir','/scratch/busygin/PS3_joint',
+    #                                         '--mount-point','',
+    #                                         '--python-path','/home1/busygin/ram_utils_new_ptsa',
+    #                                         '--python-path','/home1/busygin/python/ptsa_latest',
+    #                                         ]
+
+    command_line_emulation_argument_list = ['--subject','R1149N',
+                                         '--experiment','PS2',
+                                         '--workspace-dir','/Users/m/scratch/PS2_ms_check',
+                                         # '--mount-point','/Volumes/rhino_root/',
+                                         '--mount-point','//Users/m/',
+                                         '--python-path','/Users/m/RAM_UTILS_GIT',
+                                         '--python-path','/Users/m/PTSA_NEW_GIT',
+                                         '--exit-on-no-change'
                                             ]
+
     args = parse_command_line(command_line_emulation_argument_list)
 
 configure_python_paths(args.python_path)
@@ -27,6 +38,9 @@ configure_python_paths(args.python_path)
 
 import numpy as np
 from RamPipeline import RamPipeline
+from ReportUtils.DependencyChangeTrackerLegacy import DependencyChangeTrackerLegacy
+from ReportUtils import MissingExperimentError, MissingDataError
+
 
 from FREventPreparation import FREventPreparation
 from ControlEventPreparation import ControlEventPreparation
@@ -84,21 +98,33 @@ class Params(object):
 
 params = Params()
 
-
 class ReportPipeline(RamPipeline):
-    def __init__(self, subject, experiment, workspace_dir, mount_point=None):
+    def __init__(self, subject, experiment, workspace_dir, mount_point=None, exit_on_no_change=False):
         RamPipeline.__init__(self)
+        self.exit_on_no_change = exit_on_no_change
         self.subject = subject
         self.experiment = experiment
         self.mount_point = mount_point
         self.set_workspace_dir(workspace_dir)
+        dependency_tracker = DependencyChangeTrackerLegacy(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point)
+
+        self.set_dependency_tracker(dependency_tracker=dependency_tracker)
+
+# class ReportPipeline(RamPipeline):
+#     def __init__(self, subject, experiment, workspace_dir, mount_point=None):
+#         RamPipeline.__init__(self)
+#         self.subject = subject
+#         self.experiment = experiment
+#         self.mount_point = mount_point
+#         self.set_workspace_dir(workspace_dir)
 
 
 task = 'RAM_PS'
 
 
 def find_subjects_by_task(task):
-    ev_files = glob('/data/events/%s/R*_events.mat' % task)
+    # ev_files = glob('/data/events/%s/R*_events.mat' % task)
+    ev_files = glob(args.mount_point+'/data/events/%s/R*_events.mat' % task)
     return [re.search(r'R\d\d\d\d[A-Z](_\d+)?', f).group() for f in ev_files]
 
 
@@ -106,10 +132,23 @@ subjects = find_subjects_by_task(task)
 #subjects.append('TJ086')
 subjects.sort()
 
+subject_fail_list = []
+subject_missing_experiment_list = []
+subject_missing_data_list = []
+
 for subject in subjects:
+    print subject
     # sets up processing pipeline
-    report_pipeline = ReportPipeline(subject=subject, experiment=args.experiment,
-                                       workspace_dir=join(args.workspace_dir,subject), mount_point=args.mount_point)
+    # report_pipeline = ReportPipeline(subject=subject, experiment=args.experiment,
+    #                                    workspace_dir=join(args.workspace_dir,subject), mount_point=args.mount_point)
+
+    report_pipeline = ReportPipeline(subject=subject,
+                                     experiment=args.experiment,
+                                     workspace_dir=join(args.workspace_dir,subject),
+                                     mount_point=args.mount_point,
+                                     # exit_on_no_change=args.exit_on_no_change
+                                     )
+
 
     report_pipeline.add_task(FREventPreparation(params=params, mark_as_completed=False))
 
@@ -142,6 +181,19 @@ for subject in subjects:
     # starts processing pipeline
     try:
         report_pipeline.execute_pipeline()
-    except:
-        #print e
-        pass
+    except KeyboardInterrupt:
+        print 'GOT KEYBOARD INTERUPT. EXITING'
+        sys.exit()
+    except MissingExperimentError:
+        subject_missing_experiment_list.append(subject)
+    except MissingDataError:
+        subject_missing_data_list.append(subject)
+
+    # except:
+    #     subject_fail_list.append(subject)
+    #     pass
+
+print 'all subjects = ', subjects
+print 'subject_fail_list=',subject_fail_list
+print 'subject_missing_experiment_list=',subject_missing_experiment_list
+print 'subject_missing_data_list=', subject_missing_data_list

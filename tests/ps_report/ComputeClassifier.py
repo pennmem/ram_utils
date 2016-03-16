@@ -7,6 +7,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, roc_curve
 from random import shuffle
 from sklearn.externals import joblib
+import warnings
 
 import sys
 
@@ -126,7 +127,9 @@ class ComputeClassifier(RamTask):
             insample_pow_mat = self.pow_mat[insample_mask]
             insample_recalls = recalls[insample_mask]
 
-            self.lr_classifier.fit(insample_pow_mat, insample_recalls)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                self.lr_classifier.fit(insample_pow_mat, insample_recalls)
 
             outsample_mask = ~insample_mask
             outsample_pow_mat = self.pow_mat[outsample_mask]
@@ -174,7 +177,9 @@ class ComputeClassifier(RamTask):
                 insample_pow_mat = self.pow_mat[insample_mask]
                 insample_recalls = recalls[insample_mask]
 
-                self.lr_classifier.fit(insample_pow_mat, insample_recalls)
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    self.lr_classifier.fit(insample_pow_mat, insample_recalls)
 
                 outsample_mask = ~insample_mask
                 outsample_pow_mat = self.pow_mat[outsample_mask]
@@ -256,7 +261,9 @@ class ComputeClassifier(RamTask):
         print 'thresh =', self.xval_output[-1].jstat_thresh, 'quantile =', self.xval_output[-1].jstat_quantile
 
         # Finally, fitting classifier on all available data
-        self.lr_classifier.fit(self.pow_mat, recalls)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self.lr_classifier.fit(self.pow_mat, recalls)
 
         self.pass_object('lr_classifier', self.lr_classifier)
         self.pass_object('xval_output', self.xval_output)

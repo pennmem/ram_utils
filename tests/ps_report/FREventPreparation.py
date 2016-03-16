@@ -6,14 +6,14 @@ import numpy as np
 from ptsa.data.readers import BaseEventReader
 
 from RamPipeline import *
-
+from ReportUtils import MissingExperimentError
 
 class FREventPreparation(RamTask):
     def __init__(self, params, mark_as_completed=True):
         RamTask.__init__(self, mark_as_completed)
         self.params = params
 
-    def run(self):
+    def run_fcn(self):
         events = None
         if self.params.include_fr1:
             try:
@@ -46,3 +46,9 @@ class FREventPreparation(RamTask):
         print len(events), 'WORD events'
 
         self.pass_object('FR_events', events)
+
+    def run(self):
+        try:
+            self.run_fcn()
+        except Exception:
+            raise MissingExperimentError('Missing FR1 or CatFR1 experiment')

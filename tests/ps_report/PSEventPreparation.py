@@ -1,18 +1,10 @@
 __author__ = 'm'
 
-import os.path
-import re
 import numpy as np
 import pandas as pd
-from scipy.io import loadmat
-
-from ptsa.data.events import Events
-from ptsa.data.rawbinwrapper import RawBinWrapper
 
 from RamPipeline import *
-
-from sklearn.externals import joblib
-
+from ReportUtils import MissingExperimentError, MissingDataError
 
 class PSEventPreparation(RamTask):
     def __init__(self, mark_as_completed=True):
@@ -34,20 +26,26 @@ class PSEventPreparation(RamTask):
         e_path = os.path.join(self.pipeline.mount_point , 'data', 'events', 'RAM_PS', self.pipeline.subject + '_events.mat')
         e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
-        events = e_reader.read()
-        ev_order = np.argsort(events, order=('session','mstime'))
-        events = events[ev_order]
+        try:
+            events = e_reader.read()
+            ev_order = np.argsort(events, order=('session','mstime'))
+            events = events[ev_order]
 
-        # try:
-        #     events = Events(get_events(subject=subject, task='RAM_PS', path_prefix=self.pipeline.mount_point))
-        # except IOError:
-        #     raise Exception('No parameter search for subject %s' % subject)
-        #
+            # try:
+            #     events = Events(get_events(subject=subject, task='RAM_PS', path_prefix=self.pipeline.mount_point))
+            # except IOError:
+            #     raise Exception('No parameter search for subject %s' % subject)
+            #
 
-        events = events[events.experiment == experiment]
-        
+            events = events[events.experiment == experiment]
+
+        except Exception:
+            raise MissingDataError('Missing or Corrupt PS event file')
+
         if len(events) == 0:
-            raise Exception('No %s events for subject %s' % (experiment,subject))
+            # raise Exception('No %s events for subject %s' % (experiment,subject))
+
+            raise MissingExperimentError('No %s events for subject %s' % (experiment,subject))
 
         sessions = np.unique(events.session)
         print experiment, 'sessions:', sessions

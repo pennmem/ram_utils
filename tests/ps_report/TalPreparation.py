@@ -10,14 +10,14 @@ from get_bipolar_subj_elecs import get_bipolar_subj_elecs
 from sklearn.externals import joblib
 
 from RamPipeline import *
+from ReportUtils import MissingDataError
 
 
 class TalPreparation(RamTask):
     def __init__(self, mark_as_completed=True):
         RamTask.__init__(self, mark_as_completed)
 
-    def run(self):
-
+    def run_fcn(self):
         tal_path = os.path.join(self.pipeline.mount_point,'data/eeg',self.pipeline.subject,'tal',self.pipeline.subject+'_talLocs_database_bipol.mat')
         tal_stim_only_path = os.path.join(self.pipeline.mount_point,'data/eeg',self.pipeline.subject,'tal',self.pipeline.subject+'_talLocs_database_stimOnly.mat')
         tal_reader = TalReader(filename=tal_path)
@@ -84,6 +84,11 @@ class TalPreparation(RamTask):
         # self.pass_object('loc_tag', loc_tag)
         # joblib.dump(loc_tag, self.get_path_to_resource_in_workspace(self.pipeline.subject+'-loc_tag.pkl'))
 
+    def run(self):
+        try:
+            self.run()
+        except Exception:
+            raise MissingDataError('Missing or corrupt electrodes data ')
 
 def get_single_elecs_from_bps(bipolar_pairs):
     monopolar_channels = np.array([], dtype=np.dtype('|S32'))
