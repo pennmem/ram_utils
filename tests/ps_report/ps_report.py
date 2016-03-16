@@ -1,8 +1,8 @@
 # command line example:
 
 import sys
+
 from setup_utils import parse_command_line, configure_python_paths
-from os.path import join
 
 # -------------------------------processing command line
 if len(sys.argv)>2:
@@ -11,12 +11,13 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1136N',
-                                         '--experiment','PS2',
-                                         '--workspace-dir','/scratch/busygin/PS2_joint',
-                                         '--mount-point','',
-                                         '--python-path','/home1/busygin/ram_utils_new_ptsa',
-                                         '--python-path','/home1/busygin/python/ptsa_latest']
+    command_line_emulation_argument_list = ['--subject','R1150J',
+                                            '--experiment','PS2',
+                                            '--workspace-dir','/scratch/busygin/PS2',
+                                            '--mount-point','',
+                                            '--python-path','/home1/busygin/ram_utils_new_ptsa',
+                                            '--python-path','/home1/busygin/python/ptsa_latest'
+                                           ]
 
     args = parse_command_line(command_line_emulation_argument_list)
 
@@ -25,8 +26,7 @@ configure_python_paths(args.python_path)
 # ------------------------------- end of processing command line
 
 
-import numpy as np
-from RamPipeline import RamPipeline
+from ReportUtils.DependencyChangeTrackerLegacy import DependencyChangeTrackerLegacy
 
 from FREventPreparation import FREventPreparation
 from ControlEventPreparation import ControlEventPreparation
@@ -84,21 +84,36 @@ class Params(object):
 
 params = Params()
 
-
 class ReportPipeline(RamPipeline):
-    def __init__(self, subject, experiment, workspace_dir, mount_point=None):
+    def __init__(self, subject, experiment, workspace_dir, mount_point=None, exit_on_no_change=False):
         RamPipeline.__init__(self)
+        self.exit_on_no_change = exit_on_no_change
         self.subject = subject
-        #self.task = 'RAM_FR1'
         self.experiment = experiment
         self.mount_point = mount_point
         self.set_workspace_dir(workspace_dir)
+        dependency_tracker = DependencyChangeTrackerLegacy(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point)
+
+        self.set_dependency_tracker(dependency_tracker=dependency_tracker)
+
+
+
+# class ReportPipeline(RamPipeline):
+#     def __init__(self, subject, experiment, workspace_dir, mount_point=None):
+#         RamPipeline.__init__(self)
+#         self.subject = subject
+#         #self.task = 'RAM_FR1'
+#         self.experiment = experiment
+#         self.mount_point = mount_point
+#         self.set_workspace_dir(workspace_dir)
 
 
 
 # sets up processing pipeline
 report_pipeline = ReportPipeline(subject=args.subject, experiment=args.experiment,
-                                       workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point)
+                                       workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point,
+                                 exit_on_no_change=args.exit_on_no_change
+                                 )
 
 report_pipeline.add_task(FREventPreparation(params=params, mark_as_completed=False))
 
