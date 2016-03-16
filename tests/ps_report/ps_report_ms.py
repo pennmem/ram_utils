@@ -35,11 +35,22 @@ else: # emulate command line
                                             ]
 
 
+    # command_line_emulation_argument_list = ['--subject','R1149N',
+    #                                      '--experiment','PS2',
+    #                                      '--workspace-dir','/scratch/mswat/PS2_ms',
+    #                                      '--mount-point','',
+    #                                      '--python-path','/home1/mswat/RAM_UTILS_GIT',
+    #                                      '--python-path','/home1/mswat/PTSA_NEW_GIT',
+    #                                      '--exit-on-no-change'
+    #                                         ]
+
+
 
     args = parse_command_line(command_line_emulation_argument_list)
 
 configure_python_paths(args.python_path)
 
+print sys.path
 # ------------------------------- end of processing command line
 
 

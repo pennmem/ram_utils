@@ -20,15 +20,27 @@ else: # emulate command line
     #                                         '--python-path','/home1/busygin/python/ptsa_latest',
     #                                         ]
 
-    command_line_emulation_argument_list = ['--subject','R1149N',
+    # command_line_emulation_argument_list = ['--subject','R1149N',
+    #                                      '--experiment','PS2',
+    #                                      '--workspace-dir','/Users/m/scratch/PS2_ms_check',
+    #                                      # '--mount-point','/Volumes/rhino_root/',
+    #                                      '--mount-point','//Users/m/',
+    #                                      '--python-path','/Users/m/RAM_UTILS_GIT',
+    #                                      '--python-path','/Users/m/PTSA_NEW_GIT',
+    #                                      '--exit-on-no-change'
+    #                                         ]
+
+    command_line_emulation_argument_list = [
+                                         '--subject','R1149N',
                                          '--experiment','PS2',
-                                         '--workspace-dir','/Users/m/scratch/PS2_ms_check',
+                                         '--workspace-dir','/scratch/mswat/PS2_ms_check',
                                          # '--mount-point','/Volumes/rhino_root/',
-                                         '--mount-point','//Users/m/',
-                                         '--python-path','/Users/m/RAM_UTILS_GIT',
-                                         '--python-path','/Users/m/PTSA_NEW_GIT',
+                                         '--mount-point','',
+                                         '--python-path','/home1/mswat/RAM_UTILS_GIT',
+                                         '--python-path','/home1/mswat/PTSA_NEW_GIT',
                                          '--exit-on-no-change'
                                             ]
+
 
     args = parse_command_line(command_line_emulation_argument_list)
 
@@ -136,7 +148,7 @@ subject_fail_list = []
 subject_missing_experiment_list = []
 subject_missing_data_list = []
 
-for subject in subjects:
+for subject in subjects[36:]:
     print subject
     # sets up processing pipeline
     # report_pipeline = ReportPipeline(subject=subject, experiment=args.experiment,
@@ -189,9 +201,9 @@ for subject in subjects:
     except MissingDataError:
         subject_missing_data_list.append(subject)
 
-    # except:
-    #     subject_fail_list.append(subject)
-    #     pass
+    except:
+        subject_fail_list.append(subject)
+        pass
 
 print 'all subjects = ', subjects
 print 'subject_fail_list=',subject_fail_list
