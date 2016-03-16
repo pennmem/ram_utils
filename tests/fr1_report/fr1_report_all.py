@@ -135,5 +135,8 @@ for subject in subjects:
     # starts processing pipeline
     try:
         report_pipeline.execute_pipeline()
+    except KeyboardInterrupt:
+        print 'GOT KEYBOARD INTERUPT. EXITING'
+        sys.exit()
     except:
         print 'Failed for', subject
