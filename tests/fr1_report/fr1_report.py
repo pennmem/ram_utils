@@ -15,33 +15,14 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    # command_line_emulation_argument_list = ['--subject','R1127P_2',
-    #                                         '--task','RAM_CatFR1',
-    #                                         '--workspace-dir','/scratch/busygin/CatFR1_reports_new_new',
-    #                                         '--mount-point','',
-    #                                         '--python-path','/home1/busygin/ram_utils_new_ptsa',
-    #                                         '--python-path','/home1/busygin/python/ptsa_latest',
-    #                                         # '--exit-on-no-change'
-    #                                         ]
-
-    # command_line_emulation_argument_list = ['--subject','R1127P_2',
-    #                                         '--task','RAM_CatFR1',
-    #                                         '--workspace-dir','/Users/m/scratch/CatFR1_reports_ms',
-    #                                         '--mount-point','/Volumes/rhino_root',
-    #                                         '--python-path','/Users/m/RAM_UTILS_GIT',
-    #                                         '--python-path','/Users/m/PTSA_NEW_GIT',
-    #                                         # '--exit-on-no-change'
-    #                                         ]
-
-    command_line_emulation_argument_list = ['--subject','R1060M',
-                                            '--task','RAM_FR1',
-                                            '--workspace-dir','/Users/m/scratch/FR1_reports_ms',
-                                            '--mount-point','/Volumes/rhino_root',
-                                            '--python-path','/Users/m/RAM_UTILS_GIT',
-                                            '--python-path','/Users/m/PTSA_NEW_GIT',
+    command_line_emulation_argument_list = ['--subject','R1004D',
+                                            '--task','RAM_CatFR1',
+                                            '--workspace-dir','/scratch/busygin/CatFR1_reports',
+                                            '--mount-point','',
+                                            '--python-path','/home1/busygin/ram_utils_new_ptsa',
+                                            '--python-path','/home1/busygin/python/ptsa_latest'
                                             # '--exit-on-no-change'
                                             ]
-
 
     args = parse_command_line(command_line_emulation_argument_list)
 
@@ -60,6 +41,8 @@ from ComputeFR1Powers import ComputeFR1Powers
 from TalPreparation import TalPreparation
 
 from GetLocalization import GetLocalization
+
+from ComputeFR1HFPowers import ComputeFR1HFPowers
 
 from ComputeTTest import ComputeTTest
 
@@ -91,10 +74,12 @@ class Params(object):
         self.filt_order = 4
 
         self.freqs = np.logspace(np.log10(3), np.log10(180), 8)
+        self.hfs = np.logspace(np.log10(2), np.log10(200), 50)
+        self.hfs = self.hfs[self.hfs>=70.0]
 
         self.log_powers = True
 
-        self.ttest_frange = (70.0, 200.0)
+        #self.ttest_frange = (70.0, 200.0)
 
         self.penalty_type = 'l2'
         self.C = 7.2e-4
@@ -132,6 +117,8 @@ report_pipeline.add_task(TalPreparation(mark_as_completed=False))
 report_pipeline.add_task(GetLocalization(mark_as_completed=False))
 
 report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=True))
+
+report_pipeline.add_task(ComputeFR1HFPowers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeTTest(params=params, mark_as_completed=False))
 
