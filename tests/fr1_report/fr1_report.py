@@ -15,7 +15,7 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1004D',
+    command_line_emulation_argument_list = ['--subject','R1065J',
                                             '--task','RAM_CatFR1',
                                             '--workspace-dir','/scratch/busygin/CatFR1_reports',
                                             '--mount-point','',
@@ -70,6 +70,10 @@ class Params(object):
         self.fr1_start_time = 0.0
         self.fr1_end_time = 1.366
         self.fr1_buf = 1.365
+
+        self.hfs_start_time = 0.0
+        self.hfs_end_time = 1.6
+        self.hfs_buf = 1.0
 
         self.filt_order = 4
 

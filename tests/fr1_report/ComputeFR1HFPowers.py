@@ -68,25 +68,9 @@ class ComputeFR1HFPowers(RamTask):
 
             print 'Loading EEG for', n_events, 'events of session', sess
 
-            # eegs = Events(sess_events).get_data(channels=channels, start_time=self.params.fr1_start_time, end_time=self.params.fr1_end_time,
-            #                             buffer_time=self.params.fr1_buf, eoffset='eegoffset', keep_buffer=True, eoffset_in_time=False)
-
-            # from ptsa.data.readers import TimeSeriesEEGReader
-            # time_series_reader = TimeSeriesEEGReader(events=sess_events, start_time=self.params.fr1_start_time,
-            #                                  end_time=self.params.fr1_end_time, buffer_time=self.params.fr1_buf, keep_buffer=True)
-            #
-            # eegs = time_series_reader.read(monopolar_channels)
-
-            # VERSION 2/22/2016
-            # eeg_reader = EEGReader(events=sess_events, channels=monopolar_channels,
-            #                        start_time=self.params.fr1_start_time,
-            #                        end_time=self.params.fr1_end_time, buffer_time=self.params.fr1_buf)
-
-            # VERSION WITH MIRRORING
             eeg_reader = EEGReader(events=sess_events, channels=monopolar_channels,
-                                   start_time=self.params.fr1_start_time,
-                                   end_time=self.params.fr1_end_time, buffer_time=0.0)
-
+                                   start_time=self.params.hfs_start_time,
+                                   end_time=self.params.hfs_end_time, buffer_time=self.params.hfs_buf)
 
             eegs = eeg_reader.read()
             if eeg_reader.removed_bad_data():
@@ -98,14 +82,12 @@ class ComputeFR1HFPowers(RamTask):
                 events = events[ev_order]
                 self.pass_object(self.pipeline.task+'_events', events)
 
-
-            eegs = eegs.add_mirror_buffer(duration=self.params.fr1_buf)
-
+            #eegs = eegs.add_mirror_buffer(duration=self.params.hfs_buf)
 
             if self.samplerate is None:
                 self.samplerate = float(eegs.samplerate)
-                winsize = int(round(self.samplerate*(self.params.fr1_end_time-self.params.fr1_start_time+2*self.params.fr1_buf)))
-                bufsize = int(round(self.samplerate*self.params.fr1_buf))
+                winsize = int(round(self.samplerate*(self.params.hfs_end_time-self.params.hfs_start_time+2*self.params.hfs_buf)))
+                bufsize = int(round(self.samplerate*self.params.hfs_buf))
                 print 'samplerate =', self.samplerate, 'winsize =', winsize, 'bufsize =', bufsize
                 pow_ev = np.empty(shape=n_hfs*winsize, dtype=float)
                 self.wavelet_transform.init(self.params.width, self.params.hfs[0], self.params.hfs[-1], n_hfs, self.samplerate, winsize)
@@ -131,6 +113,7 @@ class ComputeFR1HFPowers(RamTask):
                         np.log10(pow_ev_stripped, out=pow_ev_stripped)
                     sess_pow_mat[ev,i,:] = np.nanmean(pow_ev_stripped, axis=1)
 
-            sess_pow_mat = zscore(np.reshape(sess_pow_mat, (n_events, n_bps*n_hfs)), axis=0, ddof=1)
+            sess_pow_mat = zscore(sess_pow_mat, axis=0, ddof=1)
+            sess_pow_mat = np.nanmean(sess_pow_mat, axis=2)
 
             self.pow_mat = np.vstack((self.pow_mat,sess_pow_mat)) if self.pow_mat is not None else sess_pow_mat

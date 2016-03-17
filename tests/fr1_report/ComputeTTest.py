@@ -4,6 +4,8 @@ import numpy as np
 from scipy.stats import ttest_ind
 from sklearn.externals import joblib
 
+import sys
+
 
 class ComputeTTest(RamTask):
     def __init__(self, params, mark_as_completed=True):
@@ -48,6 +50,8 @@ class ComputeTTest(RamTask):
         nonrecalled_pow_mat = pow_mat[~recalls,:]
 
         t,p = ttest_ind(recalled_pow_mat, nonrecalled_pow_mat, axis=0)
+        #print t.shape
+        #sys.exit(0)
         self.ttest[-1] = (t,p)
 
         self.pass_object('ttest', self.ttest)
