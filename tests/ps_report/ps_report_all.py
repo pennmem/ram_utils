@@ -52,6 +52,7 @@ import numpy as np
 from RamPipeline import RamPipeline
 from ReportUtils.DependencyChangeTrackerLegacy import DependencyChangeTrackerLegacy
 from ReportUtils import MissingExperimentError, MissingDataError
+from ReportUtils import ReportSummary, ReportStatus
 
 
 from FREventPreparation import FREventPreparation
@@ -72,6 +73,8 @@ from ComputePSTable import ComputePSTable
 from ComposeSessionSummary import ComposeSessionSummary
 
 from GenerateReportTasks import *
+
+
 
 
 # turn it into command line options
@@ -148,7 +151,9 @@ subject_fail_list = []
 subject_missing_experiment_list = []
 subject_missing_data_list = []
 
-for subject in subjects[36:]:
+report_summary = ReportSummary()
+
+for subject in subjects[36:38]:
     print subject
     # sets up processing pipeline
     # report_pipeline = ReportPipeline(subject=subject, experiment=args.experiment,
@@ -196,12 +201,16 @@ for subject in subjects[36:]:
     except KeyboardInterrupt:
         print 'GOT KEYBOARD INTERUPT. EXITING'
         sys.exit()
-    except MissingExperimentError:
+    except MissingExperimentError as mee:
+        report_summary.add_report_status(subject=subject,status_obj=mee.status)
         subject_missing_experiment_list.append(subject)
-    except MissingDataError:
+    except MissingDataError as mde:
+        report_summary.add_report_status(subject=subject,status_obj=mde.status)
         subject_missing_data_list.append(subject)
 
-    except:
+    except Exception as e:
+        rs = ReportStatus(subject=subject,exception=e)
+        report_summary.add_report_status(subject=subject,status_obj=rs)
         subject_fail_list.append(subject)
         pass
 

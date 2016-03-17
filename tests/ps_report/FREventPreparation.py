@@ -6,7 +6,7 @@ import numpy as np
 from ptsa.data.readers import BaseEventReader
 
 from RamPipeline import *
-from ReportUtils import MissingExperimentError,MissingDataError
+from ReportUtils import MissingExperimentError,MissingDataError,ReportStatus
 
 class FREventPreparation(RamTask):
     def __init__(self, params, mark_as_completed=True):
@@ -83,5 +83,13 @@ class FREventPreparation(RamTask):
 
             self.pass_object('FR_events', events)
 
+            raise Exception('sjhdjshdk')
+
         except Exception:
+            rs = ReportStatus(subject=self.pipeline.subject)
+            excpt = MissingDataError(
+                message='Missing FR1 or CatFR1 data (%s,%s) for subject %s '%(fr1_e_path,catfr1_e_path,self.pipeline.subject),
+                status=rs
+            )
+
             raise MissingDataError('Missing FR1 or CatFR1 data (%s,%s) for subject %s '%(fr1_e_path,catfr1_e_path,self.pipeline.subject) )
