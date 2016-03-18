@@ -20,26 +20,26 @@ else: # emulate command line
     #                                         '--python-path','/home1/busygin/python/ptsa_latest',
     #                                         ]
 
-    # command_line_emulation_argument_list = ['--subject','R1149N',
-    #                                      '--experiment','PS2',
-    #                                      '--workspace-dir','/Users/m/scratch/PS2_ms_check',
-    #                                      # '--mount-point','/Volumes/rhino_root/',
-    #                                      '--mount-point','//Users/m/',
-    #                                      '--python-path','/Users/m/RAM_UTILS_GIT',
-    #                                      '--python-path','/Users/m/PTSA_NEW_GIT',
-    #                                      '--exit-on-no-change'
-    #                                         ]
-
     command_line_emulation_argument_list = [
-                                         '--subject','R1149N',
                                          '--experiment','PS2',
-                                         '--workspace-dir','/scratch/mswat/PS2_ms_check',
+                                         '--workspace-dir','/Users/m/scratch/PS2_ms_check',
                                          # '--mount-point','/Volumes/rhino_root/',
-                                         '--mount-point','',
-                                         '--python-path','/home1/mswat/RAM_UTILS_GIT',
-                                         '--python-path','/home1/mswat/PTSA_NEW_GIT',
+                                         '--mount-point','//Users/m/',
+                                         '--python-path','/Users/m/RAM_UTILS_GIT',
+                                         '--python-path','/Users/m/PTSA_NEW_GIT',
                                          '--exit-on-no-change'
                                             ]
+
+    # command_line_emulation_argument_list = [
+    #                                      '--subject','R1149N',
+    #                                      '--experiment','PS2',
+    #                                      '--workspace-dir','/scratch/mswat/PS2_ms_check',
+    #                                      # '--mount-point','/Volumes/rhino_root/',
+    #                                      '--mount-point','',
+    #                                      '--python-path','/home1/mswat/RAM_UTILS_GIT',
+    #                                      '--python-path','/home1/mswat/PTSA_NEW_GIT',
+    #                                      '--exit-on-no-change'
+    #                                         ]
 
 
     args = parse_command_line(command_line_emulation_argument_list)
@@ -52,7 +52,7 @@ import numpy as np
 from RamPipeline import RamPipeline
 from ReportUtils.DependencyChangeTrackerLegacy import DependencyChangeTrackerLegacy
 from ReportUtils import MissingExperimentError, MissingDataError
-from ReportUtils import ReportSummary, ReportStatus
+from ReportUtils import ReportSummaryInventory,ReportSummary
 
 
 from FREventPreparation import FREventPreparation
@@ -121,9 +121,22 @@ class ReportPipeline(RamPipeline):
         self.experiment = experiment
         self.mount_point = mount_point
         self.set_workspace_dir(workspace_dir)
-        dependency_tracker = DependencyChangeTrackerLegacy(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point)
 
+        dependency_tracker = DependencyChangeTrackerLegacy(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point)
         self.set_dependency_tracker(dependency_tracker=dependency_tracker)
+
+        self.report_summary = ReportSummary()
+
+    def add_report_error(self,error):
+        self.report_summary.add_report_error(error)
+
+    def add_report_status(self,status):
+        self.report_summary.add_report_status(status)
+
+
+    def get_report_summary(self):
+        return self.report_summary
+
 
 # class ReportPipeline(RamPipeline):
 #     def __init__(self, subject, experiment, workspace_dir, mount_point=None):
@@ -151,7 +164,9 @@ subject_fail_list = []
 subject_missing_experiment_list = []
 subject_missing_data_list = []
 
-report_summary = ReportSummary()
+# report_summary = ReportSummary()
+rsi = ReportSummaryInventory()
+
 
 for subject in subjects[36:38]:
     print subject
@@ -202,19 +217,39 @@ for subject in subjects[36:38]:
         print 'GOT KEYBOARD INTERUPT. EXITING'
         sys.exit()
     except MissingExperimentError as mee:
-        report_summary.add_report_status(subject=subject,status_obj=mee.status)
+        report_pipeline.add_report_error(error=mee)
         subject_missing_experiment_list.append(subject)
     except MissingDataError as mde:
-        report_summary.add_report_status(subject=subject,status_obj=mde.status)
+        report_pipeline.add_report_error(error=mde)
         subject_missing_data_list.append(subject)
 
-    except Exception as e:
-        rs = ReportStatus(subject=subject,exception=e)
-        report_summary.add_report_status(subject=subject,status_obj=rs)
-        subject_fail_list.append(subject)
-        pass
+    rsi.add_report_summary(report_summary=report_pipeline.get_report_summary())
+    # except Exception as e:
+    #     rs = ReportStatus(subject=subject,exception=e)
+    #     report_summary.add_report_status(subject=subject,status_obj=rs)
+    #     subject_fail_list.append(subject)
+    #     pass
+
+    # except KeyboardInterrupt:
+    #     print 'GOT KEYBOARD INTERUPT. EXITING'
+    #     sys.exit()
+    # except MissingExperimentError as mee:
+    #     report_pipeline.report_summary.add_report_status(subject=subject,status_obj=mee.status)
+    #     subject_missing_experiment_list.append(subject)
+    # except MissingDataError as mde:
+    #     report_pipeline.report_summary.add_report_status(subject=subject,status_obj=mde.status)
+    #     subject_missing_data_list.append(subject)
+    #
+    # # except Exception as e:
+    # #     rs = ReportStatus(subject=subject,exception=e)
+    # #     report_summary.add_report_status(subject=subject,status_obj=rs)
+    # #     subject_fail_list.append(subject)
+    # #     pass
 
 print 'all subjects = ', subjects
 print 'subject_fail_list=',subject_fail_list
 print 'subject_missing_experiment_list=',subject_missing_experiment_list
 print 'subject_missing_data_list=', subject_missing_data_list
+
+print 'this is summary for all reports report ', rsi.compose_summary()
+# print report_pipeline.report_summary.compose_summary()

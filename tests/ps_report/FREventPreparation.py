@@ -6,9 +6,9 @@ import numpy as np
 from ptsa.data.readers import BaseEventReader
 
 from RamPipeline import *
-from ReportUtils import MissingExperimentError,MissingDataError,ReportStatus
+from ReportUtils import MissingExperimentError,MissingDataError,ReportStatus, ReportRamTask
 
-class FREventPreparation(RamTask):
+class FREventPreparation(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
         RamTask.__init__(self, mark_as_completed)
         self.params = params
@@ -48,7 +48,9 @@ class FREventPreparation(RamTask):
         # self.pass_object('FR_events', events)
 
     def run(self):
+        self.add_report_status(message='OK')
         try:
+
 
             events = None
             if self.params.include_fr1:
@@ -83,13 +85,22 @@ class FREventPreparation(RamTask):
 
             self.pass_object('FR_events', events)
 
-            raise Exception('sjhdjshdk')
+            # raise Exception('sjhdjshdk')
+
+            # rs = ReportStatus(subject=self.pipeline.subject,task=self.__class__.__name__,message='OK')
+            # self.pipeline.report_summary.add_report_status(self.pipeline.subject,status_obj=rs)
+
+            self.add_report_status(message='OK')
 
         except Exception:
-            rs = ReportStatus(subject=self.pipeline.subject)
-            excpt = MissingDataError(
-                message='Missing FR1 or CatFR1 data (%s,%s) for subject %s '%(fr1_e_path,catfr1_e_path,self.pipeline.subject),
-                status=rs
-            )
-
-            raise MissingDataError('Missing FR1 or CatFR1 data (%s,%s) for subject %s '%(fr1_e_path,catfr1_e_path,self.pipeline.subject) )
+            self.raise_and_log_report_exception(
+                                                exception_type='MissingDataError',
+                                                exception_message='Missing FR1 or CatFR1 events data (%s,%s)'%(fr1_e_path,catfr1_e_path)
+                                                )
+            # rs = ReportStatus(subject=self.pipeline.subject)
+            # excpt = MissingDataError(
+            #     message='Missing FR1 or CatFR1 events data (%s,%s) for subject %s '%(fr1_e_path,catfr1_e_path,self.pipeline.subject),
+            #     status=rs
+            # )
+            # raise excpt
+            # raise MissingDataError('Missing FR1 or CatFR1 data (%s,%s) for subject %s '%(fr1_e_path,catfr1_e_path,self.pipeline.subject) )
