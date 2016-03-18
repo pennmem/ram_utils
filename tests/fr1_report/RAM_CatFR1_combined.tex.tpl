@@ -23,7 +23,7 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{RAM CatFR1 report v 2.7}
+\lhead{RAM CatFR1 report v 2.8}
 \rhead{Date created: <DATE>}
 \begin{document}
 

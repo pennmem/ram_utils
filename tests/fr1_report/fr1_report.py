@@ -15,9 +15,9 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1065J',
-                                            '--task','RAM_CatFR1',
-                                            '--workspace-dir','/scratch/busygin/CatFR1_reports',
+    command_line_emulation_argument_list = ['--subject','R1108J_1',
+                                            '--task','RAM_FR1',
+                                            '--workspace-dir','/scratch/busygin/FR1_reports',
                                             '--mount-point','',
                                             '--python-path','/home1/busygin/ram_utils_new_ptsa',
                                             '--python-path','/home1/busygin/python/ptsa_latest'

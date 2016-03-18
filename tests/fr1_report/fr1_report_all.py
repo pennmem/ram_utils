@@ -12,8 +12,8 @@ if len(sys.argv)>2:
 
 else: # emulate command line
     command_line_emulation_argument_list = ['--subject','R1086M',
-                                            '--task','RAM_CatFR1',
-                                            '--workspace-dir','/scratch/busygin/CatFR1_reports',
+                                            '--task','RAM_FR1',
+                                            '--workspace-dir','/scratch/busygin/FR1_reports',
                                             '--mount-point','',
                                             '--python-path','/home1/busygin/ram_utils_new_ptsa',
                                             '--python-path','/home1/busygin/python/ptsa_latest',
@@ -94,7 +94,7 @@ class ReportPipeline(RamPipeline):
         self.set_dependency_tracker(dependency_tracker=dependency_tracker)
 
 
-task = 'RAM_CatFR1'
+task = 'RAM_FR1'
 
 
 def find_subjects_by_task(task):
@@ -103,6 +103,11 @@ def find_subjects_by_task(task):
 
 
 subjects = find_subjects_by_task(task)
+subjects.remove('R1061T')
+subjects.remove('R1085C')
+subjects.remove('R1090C')
+subjects.remove('R1092J_2')
+subjects.remove('R1093J_1')
 subjects.sort()
 
 for subject in subjects:
