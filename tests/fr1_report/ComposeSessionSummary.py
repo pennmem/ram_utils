@@ -70,12 +70,9 @@ class ComposeSessionSummary(RamTask):
     def __init__(self, params, mark_as_completed=True):
         RamTask.__init__(self, mark_as_completed)
         self.params = params
-
         if self.dependency_inventory:
-
             self.dependency_inventory.add_dependent_resource(resource_name='localization',
                                         access_path = ['electrodes','localization'])
-
 
     def run(self):
         subject = self.pipeline.subject
