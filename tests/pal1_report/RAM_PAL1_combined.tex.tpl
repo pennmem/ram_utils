@@ -23,21 +23,22 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{RAM FR1 report v 2.6}
+\lhead{RAM PAL1 report v 2.0}
 \rhead{Date created: <DATE>}
 \begin{document}
 
 
-\section*{<SUBJECT> RAM FR1 Free Recall Report}
+\section*{<SUBJECT> RAM PAL1 Report}
 
 \begin{tabular}{ccc}
-\begin{minipage}[htbp]{250pt}
-In the free recall task, participants are presented with a list of words, one after the other, and later asked to recall as many words as possible in any order.
+\begin{minipage}[htbp]{200pt}
+In the paired associates task, participants are presented with a list of pairs of words. Later, the participants are presented with a single word
+and asked to recall the word it was paired with.
 \begin{itemize}\item\textbf{Number of sessions: }$<NUMBER_OF_SESSIONS>$\item\textbf{Number of electrodes: }$<NUMBER_OF_ELECTRODES>$\end{itemize}
 \end{minipage}
 &
-\begin{tabular}{|c|c|c|}
-\hline Session \# & Date & Length (min)\\
+\begin{tabular}{|c|c|c|c|c|}
+\hline Session \# & Date & Length (min) & \#lists & Perf \\
 <SESSION_DATA>
 \end{tabular}
 \end{tabular}
@@ -45,13 +46,24 @@ In the free recall task, participants are presented with a list of words, one af
 
 \begin{table}[!h]
 \centering
-\begin{tabular}{c|c|c|c}
-\multicolumn{4}{c}{\textbf{Free Recall}} \\ 
+\begin{tabular}{c|c|c|c|c|c|c}
+\textbf{Pairs}  & \textbf{Correct}  & \shortstack{\textbf{Wilson's}\\\textbf{interval}} & \textbf{Voc pass}  & \shortstack{\textbf{Nonvoc}\\\textbf{pass}}  & \textbf{PLI} & \textbf{ELI} \\
 \hline
-$<N_WORDS>$ words & $<N_CORRECT_WORDS>$ correct ($<PC_CORRECT_WORDS>$\%) &$<N_PLI>$ PLI ($<PC_PLI>$\%) &$<N_ELI>$ ELI ($<PC_ELI>$\%) \\ \hline 
+$<N_PAIRS>$ & $<N_CORRECT_PAIRS>$ ($<PC_CORRECT_PAIRS>$\%) & $<WILSON1>$-$<WILSON2>$\% & $<N_VOC_PASS>$ ($<PC_VOC_PASS>$\%) & $<N_NONVOC_PASS>$ ($<PC_NONVOC_PASS>$\%) & $<N_PLI>$ ($<PC_PLI>$\%) & $<N_ELI>$ ($<PC_ELI>$\%) \\
+\hline
 \end{tabular}
-\caption{An intrusion was a word that was vocalized during the retrieval period that was not studied on the most recent list. Intrusions were either words from a previous list (\textbf{PLI}: prior-list intrusions) or words that were not studied at all (\textbf{ELI}: extra-list intrusions).}
+\caption{An intrusion is a vocalized word that was incorrect. Intrusions are either words from a previous list (\textbf{PLI}: prior-list intrusions) or words that were not studied at all (\textbf{ELI}: extra-list intrusions).}
 \end{table}
+
+%\begin{table}[!h]
+%\centering
+%\begin{tabular}{c|c|c|c}
+%\multicolumn{4}{c}{\textbf{Free Recall}} \\
+%\hline
+%$<N_WORDS>$ words & $<N_CORRECT_WORDS>$ correct ($<PC_CORRECT_WORDS>$\%) &$<N_PLI>$ PLI ($<PC_PLI>$\%) &$<N_ELI>$ ELI ($<PC_ELI>$\%) \\ \hline
+%\end{tabular}
+%\caption{An intrusion was a word that was vocalized during the retrieval period that was not studied on the most recent list. Intrusions were either words from a previous list (\textbf{PLI}: prior-list intrusions) or words that were not studied at all (\textbf{ELI}: extra-list intrusions).}
+%\end{table}
 
 \begin{table}[!h]
 \centering
@@ -66,7 +78,7 @@ $<N_MATH>$ math problems & $<N_CORRECT_MATH>$ correct ($<PC_CORRECT_MATH>$\%) & 
 \begin{figure}[!h]
 \centering
 \includegraphics[scale=0.4]{<PROB_RECALL_PLOT_FILE>}
-\caption{\textbf{Free recall:} (a) Overall probability of recall as a function of serial position. (b) Probability of FIRST recall as a function of serial position.}
+\caption{\textbf{Paired Associates:} Probability of recall as a function of serial position.}
 \end{figure}
 
 \clearpage

@@ -80,15 +80,20 @@ class GenerateTex(RamTask):
         cumulative_ttest_tex_table = latex_table(self.get_passed_object('cumulative_ttest_data'))
 
         replace_dict = {'<PROB_RECALL_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-prob_recall_plot_combined.pdf',
-                        '<IRT_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-irt_plot_combined.pdf',
                         '<DATE>': datetime.date.today(),
                         '<SESSION_DATA>': cumulative_data_tex_table,
                         '<SUBJECT>': subject.replace('_','\\textunderscore'),
                         '<NUMBER_OF_SESSIONS>': n_sess,
                         '<NUMBER_OF_ELECTRODES>': n_bps,
-                        '<N_WORDS>': cumulative_summary.n_words,
-                        '<N_CORRECT_WORDS>': cumulative_summary.n_correct_words,
-                        '<PC_CORRECT_WORDS>': '%.2f' % cumulative_summary.pc_correct_words,
+                        '<N_PAIRS>': cumulative_summary.n_pairs,
+                        '<N_CORRECT_PAIRS>': cumulative_summary.n_correct_pairs,
+                        '<PC_CORRECT_PAIRS>': '%.2f' % cumulative_summary.pc_correct_pairs,
+                        '<WILSON1>': '%.2f' % cumulative_summary.wilson1,
+                        '<WILSON2>': '%.2f' % cumulative_summary.wilson2,
+                        '<N_VOC_PASS>': cumulative_summary.n_voc_pass,
+                        '<PC_VOC_PASS>': '%.2f' % cumulative_summary.pc_voc_pass,
+                        '<N_NONVOC_PASS>': cumulative_summary.n_nonvoc_pass,
+                        '<PC_NONVOC_PASS>': cumulative_summary.pc_nonvoc_pass,
                         '<N_PLI>': cumulative_summary.n_pli,
                         '<PC_PLI>': '%.2f' % cumulative_summary.pc_pli,
                         '<N_ELI>': cumulative_summary.n_eli,
@@ -124,7 +129,7 @@ class GeneratePlots(RamTask):
 
         # session_summary_array = self.get_passed_object('session_summary_array')
 
-        serial_positions = np.arange(1,13)
+        serial_positions = np.arange(1,7)
 
         # for session_summary in session_summary_array:
         #     panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, labelsize=18, wspace=20.0)
@@ -169,27 +174,16 @@ class GeneratePlots(RamTask):
 
         cumulative_summary = self.get_passed_object('cumulative_summary')
 
-        panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, labelsize=18, wspace=20.0)
+        panel_plot = PanelPlot(xfigsize=7.5, yfigsize=7.5, i_max=1, j_max=1, labelsize=18, wspace=20.0)
 
-        pd1 = PlotData(x=serial_positions, y=cumulative_summary.prob_recall, xlim=(0, 12), ylim=(0.0, 1.0), xlabel='Serial position\n(a)', ylabel='Probability of recall', xlabel_fontsize=18, ylabel_fontsize=18)
-        pd2 = PlotData(x=serial_positions, y=cumulative_summary.prob_first_recall, xlim=(0, 12), ylim=(0.0, 1.0), xlabel='Serial position\n(b)', ylabel='Probability of first recall', xlabel_fontsize=18, ylabel_fontsize=18)
-
+        pd1 = PlotData(x=serial_positions, y=cumulative_summary.prob_recall, xlim=(0, 6), ylim=(0.0, 1.0), xlabel='Serial position\n(a)', ylabel='Probability of recall', xlabel_fontsize=18, ylabel_fontsize=18)
         panel_plot.add_plot_data(0, 0, plot_data=pd1)
-        panel_plot.add_plot_data(0, 1, plot_data=pd2)
 
         plot = panel_plot.generate_plot()
 
         plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-prob_recall_plot_combined.pdf')
 
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
-
-        if task == 'RAM_CatFR1':
-            panel_plot = PanelPlot(xfigsize=6.0, yfigsize=6.0, i_max=1, j_max=1, title='',xtitle='', labelsize=18)
-            pd = BarPlotData(x=[0,1], y=[cumulative_summary.irt_within_cat, cumulative_summary.irt_between_cat], ylabel='IRT (msec)', xlabel='',x_tick_labels=['Within Cat', 'Between Cat'], barcolors=['grey','grey'], barwidth=0.5, xlabel_fontsize=18, ylabel_fontsize=18)
-            panel_plot.add_plot_data(0, 0, plot_data=pd)
-            plot = panel_plot.generate_plot()
-            plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-irt_plot_combined.pdf')
-            plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
         panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', labelsize=18)
 
