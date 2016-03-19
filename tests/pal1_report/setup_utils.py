@@ -17,8 +17,8 @@ def parse_command_line(command_line_emulation_argument_list=None):
     parser.add_argument('--task', required=True,  action='store')
     parser.add_argument('--workspace-dir',required=False, action='store')
     parser.add_argument('--mount-point',required=False, action='store')
-
     parser.add_argument('--python-path',required=False, action='append')
+    parser.add_argument('--exit-on-no-change', dest='exit_on_no_change', action='store_true')
 
     if command_line_emulation_argument_list:
         args = parser.parse_args(command_line_emulation_argument_list)
@@ -35,14 +35,15 @@ def parse_command_line(command_line_emulation_argument_list=None):
     else:
         args.mount_point = abspath(expanduser(args.mount_point))
 
-
     # Converting python search paths to proper format
     if not args.python_path:
         args.python_path=[os.getcwd()]
-
     else:
         args.python_path = [abspath(expanduser(path)) for path in args.python_path]
         args.python_path.insert(0,os.getcwd())
+
+    if not args.exit_on_no_change:
+        args.exit_on_no_change = False
 
     return args
 

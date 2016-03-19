@@ -24,6 +24,15 @@ else: # emulate command line
                                             # '--exit-on-no-change'
                                             ]
 
+    # command_line_emulation_argument_list = ['--subject','R1048E',
+    #                                         '--task','RAM_FR1',
+    #                                         '--workspace-dir','/Users/busygin/scratch/FR1_reports',
+    #                                         '--mount-point','/Volumes/RHINO',
+    #                                         '--python-path','/Users/busygin/ram_utils_new_ptsa',
+    #                                         '--python-path','/Users/busygin/ptsa_latest',
+    #                                         '--python-path','/Users/busygin/cpp/morlet_flex_install'
+    #                                         ]
+
     args = parse_command_line(command_line_emulation_argument_list)
 
 configure_python_paths(args.python_path)
@@ -46,15 +55,7 @@ from ComputeFR1HFPowers import ComputeFR1HFPowers
 
 from ComputeTTest import ComputeTTest
 
-#from CheckTTest import CheckTTest
-
-#from XValTTest import XValTTest
-
-#from XValPlots import XValPlots
-
 from ComputeClassifier import ComputeClassifier
-
-#from CheckClassifier import CheckClassifier
 
 from ComposeSessionSummary import ComposeSessionSummary
 
@@ -83,8 +84,6 @@ class Params(object):
 
         self.log_powers = True
 
-        #self.ttest_frange = (70.0, 200.0)
-
         self.penalty_type = 'l2'
         self.C = 7.2e-4
 
@@ -93,7 +92,7 @@ class Params(object):
 
 params = Params()
 
-# from ReportUtils import ReportPipeline
+
 class ReportPipeline(RamPipeline):
     def __init__(self, subject, task, workspace_dir, mount_point=None, exit_on_no_change=False):
         RamPipeline.__init__(self)
@@ -126,23 +125,14 @@ report_pipeline.add_task(ComputeFR1HFPowers(params=params, mark_as_completed=Tru
 
 report_pipeline.add_task(ComputeTTest(params=params, mark_as_completed=False))
 
-#report_pipeline.add_task(CheckTTest(params=params, mark_as_completed=False))
-
-#report_pipeline.add_task(XValTTest(params=params, mark_as_completed=False))
-
-#report_pipeline.add_task(XValPlots(params=params, mark_as_completed=False))
-
-#
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
-#
-# #report_pipeline.add_task(CheckClassifier(params=params, mark_as_completed=False))
-#
+
 report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
-#
+
 report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
-#
+
 report_pipeline.add_task(GenerateTex(mark_as_completed=False))
-#
+
 report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
 # starts processing pipeline

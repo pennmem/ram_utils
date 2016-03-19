@@ -1,8 +1,7 @@
+import sys
 from glob import glob
 import re
 
-import sys
-from os.path import *
 from setup_utils import parse_command_line, configure_python_paths
 
 # -------------------------------processing command line
@@ -12,12 +11,13 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1086M',
-                                            '--task','RAM_CatFR1',
-                                            '--workspace-dir','/scratch/busygin/CatFR1_reports_mirroring',
+    command_line_emulation_argument_list = ['--subject','R1028M',
+                                            '--task','RAM_PAL1',
+                                            '--workspace-dir','/scratch/busygin/PAL1_reports',
                                             '--mount-point','',
                                             '--python-path','/home1/busygin/ram_utils_new_ptsa',
-                                            '--python-path','/home1/busygin/python/ptsa_latest'
+                                            '--python-path','/home1/busygin/python/ptsa_latest',
+                                            #'--exit-on-no-change'
                                             ]
     args = parse_command_line(command_line_emulation_argument_list)
 
@@ -25,31 +25,23 @@ configure_python_paths(args.python_path)
 
 # ------------------------------- end of processing command line
 
-import numpy as np
-from RamPipeline import RamPipeline
-from RamPipeline import RamTask
+from ReportUtils.DependencyChangeTrackerLegacy import DependencyChangeTrackerLegacy
 
-from PAL1EventPreparation import FR1EventPreparation
+from PAL1EventPreparation import PAL1EventPreparation
 
 from MathEventPreparation import MathEventPreparation
 
-from ComputePAL1Powers import ComputeFR1Powers
+from ComputePAL1Powers import ComputePAL1Powers
 
 from TalPreparation import TalPreparation
 
 from GetLocalization import GetLocalization
 
+from ComputePAL1HFPowers import ComputePAL1HFPowers
+
 from ComputeTTest import ComputeTTest
 
-#from CheckTTest import CheckTTest
-
-from XValTTest import XValTTest
-
-from XValPlots import XValPlots
-
 from ComputeClassifier import ComputeClassifier
-
-#from CheckClassifier import CheckClassifier
 
 from ComposeSessionSummary import ComposeSessionSummary
 
@@ -62,17 +54,21 @@ class Params(object):
     def __init__(self):
         self.width = 5
 
-        self.fr1_start_time = 0.0
-        self.fr1_end_time = 1.366
-        self.fr1_buf = 1.365
+        self.pal1_start_time = 1.0
+        self.pal1_end_time = 3.0
+        self.pal1_buf = 1.0
+
+        self.hfs_start_time = 1.0
+        self.hfs_end_time = 3.0
+        self.hfs_buf = 1.0
 
         self.filt_order = 4
 
         self.freqs = np.logspace(np.log10(3), np.log10(180), 8)
+        self.hfs = np.logspace(np.log10(2), np.log10(200), 50)
+        self.hfs = self.hfs[self.hfs>=70.0]
 
         self.log_powers = True
-
-        self.ttest_frange = (70.0, 200.0)
 
         self.penalty_type = 'l2'
         self.C = 7.2e-4
@@ -84,15 +80,18 @@ params = Params()
 
 
 class ReportPipeline(RamPipeline):
-    def __init__(self, subject, task, workspace_dir, mount_point=None):
+    def __init__(self, subject, task, workspace_dir, mount_point=None, exit_on_no_change=False):
         RamPipeline.__init__(self)
+        self.exit_on_no_change = exit_on_no_change
         self.subject = subject
         self.task = self.experiment = task
         self.mount_point = mount_point
         self.set_workspace_dir(workspace_dir)
+        dependency_tracker = DependencyChangeTrackerLegacy(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point)
 
+        self.set_dependency_tracker(dependency_tracker=dependency_tracker)
 
-task = 'RAM_CatFR1'
+task = 'RAM_PAL1'
 
 
 def find_subjects_by_task(task):
@@ -108,7 +107,7 @@ for subject in subjects:
 
     # sets up processing pipeline
     report_pipeline = ReportPipeline(subject=subject, task=task,
-                                           workspace_dir=join(args.workspace_dir,task+'_'+subject), mount_point=args.mount_point)
+                                           workspace_dir=join(args.workspace_dir,task+'_'+subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change)
 
     report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
 
@@ -118,31 +117,25 @@ for subject in subjects:
 
     report_pipeline.add_task(GetLocalization(mark_as_completed=False))
 
-    report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=True))
+    report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=True))
 
-    report_pipeline.add_task(ComputeTTest(params=params, mark_as_completed=True))
+    report_pipeline.add_task(ComputePAL1HFPowers(params=params, mark_as_completed=True))
 
-    #report_pipeline.add_task(CheckTTest(params=params, mark_as_completed=False))
+    report_pipeline.add_task(ComputeTTest(params=params, mark_as_completed=False))
 
-    #report_pipeline.add_task(XValTTest(params=params, mark_as_completed=False))
-
-    #report_pipeline.add_task(XValPlots(params=params, mark_as_completed=False))
-
-    #
     report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
-    #
-    # #report_pipeline.add_task(CheckClassifier(params=params, mark_as_completed=False))
-    #
+
     report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
-    #
+
     report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
-    #
+
     report_pipeline.add_task(GenerateTex(mark_as_completed=False))
-    #
+
     report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
     # starts processing pipeline
     try:
         report_pipeline.execute_pipeline()
-    except:
-        print 'Failed for', subject
+    except KeyboardInterrupt:
+        print 'GOT KEYBOARD INTERUPT. EXITING'
+        sys.exit()

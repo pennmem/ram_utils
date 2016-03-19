@@ -1,6 +1,6 @@
-import re
 import sys
 from glob import glob
+import re
 
 from setup_utils import parse_command_line, configure_python_paths
 
@@ -70,8 +70,6 @@ class Params(object):
 
         self.log_powers = True
 
-        #self.ttest_frange = (70.0, 200.0)
-
         self.penalty_type = 'l2'
         self.C = 7.2e-4
 
@@ -93,8 +91,7 @@ class ReportPipeline(RamPipeline):
 
         self.set_dependency_tracker(dependency_tracker=dependency_tracker)
 
-
-task = 'RAM_FR1'
+task = 'RAM_PAL1'
 
 
 def find_subjects_by_task(task):
