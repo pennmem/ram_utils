@@ -10,7 +10,7 @@ from ReportUtils import MissingExperimentError,MissingDataError,ReportStatus, Re
 
 class FREventPreparation(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(FREventPreparation,self).__init__(mark_as_completed)
         self.params = params
 
     # def run_fcn(self):

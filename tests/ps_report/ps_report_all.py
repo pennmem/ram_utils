@@ -130,8 +130,8 @@ class ReportPipeline(RamPipeline):
     def add_report_error(self,error):
         self.report_summary.add_report_error(error)
 
-    def add_report_status(self,status):
-        self.report_summary.add_report_status(status)
+    def add_report_status_obj(self,status_obj):
+        self.report_summary.add_report_status_obj(status_obj)
 
 
     def get_report_summary(self):
@@ -251,5 +251,5 @@ print 'subject_fail_list=',subject_fail_list
 print 'subject_missing_experiment_list=',subject_missing_experiment_list
 print 'subject_missing_data_list=', subject_missing_data_list
 
-print 'this is summary for all reports report ', rsi.compose_summary()
+print 'this is summary for all reports report ', rsi.compose_summary(detailed=True)
 # print report_pipeline.report_summary.compose_summary()

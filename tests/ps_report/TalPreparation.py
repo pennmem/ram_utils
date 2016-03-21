@@ -15,7 +15,8 @@ from ReportUtils import MissingDataError,ReportRamTask
 
 class TalPreparation(ReportRamTask):
     def __init__(self, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(TalPreparation,self).__init__(mark_as_completed)
+
 
     def run(self):
         try:

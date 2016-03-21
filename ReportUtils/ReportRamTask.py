@@ -8,7 +8,7 @@ class ReportRamTask(RamTask):
 
     def add_report_status(self, message=''):
         rs = ReportStatus(task=self.__class__.__name__, message=message)
-        self.pipeline.report_summary.add_report_status(status_obj=rs)
+        self.pipeline.report_summary.add_report_status_obj(status_obj=rs)
         self.pipeline.report_summary.set_subject(self.pipeline.subject)
 
     def raise_and_log_report_exception(self, exception_type='', exception_message=''):
