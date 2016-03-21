@@ -88,7 +88,7 @@ class DependencyChangeTrackerLegacy(DependencyChangeTrackerBase):
                     resource_node = resource_node[node_name]
                 except KeyError:
                     warnings.warn("Could not locate node " + node_name, RuntimeWarning)
-                    self.changed_resources[json_node_access_list.join('->')] = 'non_existent_resource'
+                    self.changed_resources[' -> '.join(json_node_access_list)] = 'non_existent_resource'
                     change_flag = True
                     return change_flag
 

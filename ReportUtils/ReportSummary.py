@@ -90,7 +90,9 @@ class ReportSummary(object):
 
                 s += '------ Changed  Resources -----\n'
                 for resource, change_type in self.changed_resources.items():
-                    s += 'Changed resource : ' + resource + ' change type: ' + change_type + '\n'
+                    s += 'Changed resource : ' + resource + '\n'
+                    s += 'Change type: ' + change_type + '\n'
+                    s += '\n'
                     # s += str(self.changed_resources) + '\n'
 
         return s
