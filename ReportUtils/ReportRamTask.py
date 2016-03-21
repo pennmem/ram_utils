@@ -22,6 +22,13 @@ class ReportRamTask(RamTask):
         self.pipeline.report_summary.add_report_status_obj(status_obj=rs)
 
 
+    def add_report_file(self,file):
+        self.pipeline.report_summary.add_report_file(file=file)
+
+    def add_report_link(self,link):
+        self.pipeline.report_summary.add_report_link(link=link)
+
+
     def pre(self):
         self.pipeline.report_summary.set_subject(self.pipeline.subject)
 

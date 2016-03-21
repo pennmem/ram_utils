@@ -374,9 +374,9 @@ class GeneratePlots(ReportRamTask):
 
 
 
-class GenerateReportPDF(RamTask):
+class GenerateReportPDF(ReportRamTask):
     def __init__(self, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(GenerateReportPDF,self).__init__(mark_as_completed)
 
 
     # def initialize(self):
@@ -419,3 +419,7 @@ class GenerateReportPDF(RamTask):
                                + self.get_path_to_resource_in_workspace('reports/'+report_tex_file_name)
 
         call([pdflatex_command_str], shell=True)
+
+        report_core_file_name, ext = splitext(report_tex_file_name)
+        report_file = join(output_directory,report_core_file_name+'.pdf')
+        self.add_report_file(file=report_file)
