@@ -22,7 +22,6 @@ else: # emulate command line
                                             '--python-path','/home1/busygin/python/ptsa_latest'
                                             # '--exit-on-no-change'
                                             ]
-
     args = parse_command_line(command_line_emulation_argument_list)
 
 configure_python_paths(args.python_path)
@@ -74,8 +73,6 @@ class Params(object):
 
         self.log_powers = True
 
-        #self.ttest_frange = (70.0, 200.0)
-
         self.penalty_type = 'l2'
         self.C = 7.2e-4
 
@@ -84,9 +81,9 @@ class Params(object):
 
 params = Params()
 
-# from ReportUtils import ReportPipeline
+
 class ReportPipeline(RamPipeline):
-    def __init__(self, subject, task, workspace_dir, mount_point=None, exit_on_no_change=False):
+    def __init__(self, subject, workspace_dir, mount_point=None, exit_on_no_change=False):
         RamPipeline.__init__(self)
         self.exit_on_no_change = exit_on_no_change
         self.subject = subject
@@ -100,8 +97,8 @@ class ReportPipeline(RamPipeline):
 
 
 # sets up processing pipeline
-report_pipeline = ReportPipeline(subject=args.subject, task='RAM_FR1',
-                                       workspace_dir=join(args.workspace_dir,'RAM_FR1_'+args.subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change)
+report_pipeline = ReportPipeline(subject=args.subject,
+                                       workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change)
 
 report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
 
@@ -117,23 +114,14 @@ report_pipeline.add_task(ComputeFR1HFPowers(params=params, mark_as_completed=Tru
 
 report_pipeline.add_task(ComputeTTest(params=params, mark_as_completed=False))
 
-#report_pipeline.add_task(CheckTTest(params=params, mark_as_completed=False))
-
-#report_pipeline.add_task(XValTTest(params=params, mark_as_completed=False))
-
-#report_pipeline.add_task(XValPlots(params=params, mark_as_completed=False))
-
-#
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
-#
-# #report_pipeline.add_task(CheckClassifier(params=params, mark_as_completed=False))
-#
+
 report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
-#
+
 report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
-#
+
 report_pipeline.add_task(GenerateTex(mark_as_completed=False))
-#
+
 report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
 # starts processing pipeline

@@ -1,6 +1,6 @@
-import re
 import sys
 from glob import glob
+import re
 
 from setup_utils import parse_command_line, configure_python_paths
 
@@ -12,8 +12,7 @@ if len(sys.argv)>2:
 
 else: # emulate command line
     command_line_emulation_argument_list = ['--subject','R1086M',
-                                            '--task','RAM_FR1',
-                                            '--workspace-dir','/scratch/busygin/FR1_reports',
+                                            '--workspace-dir','/scratch/busygin/FR1_joint_reports',
                                             '--mount-point','',
                                             '--python-path','/home1/busygin/ram_utils_new_ptsa',
                                             '--python-path','/home1/busygin/python/ptsa_latest',
@@ -70,8 +69,6 @@ class Params(object):
 
         self.log_powers = True
 
-        #self.ttest_frange = (70.0, 200.0)
-
         self.penalty_type = 'l2'
         self.C = 7.2e-4
 
@@ -82,11 +79,11 @@ params = Params()
 
 
 class ReportPipeline(RamPipeline):
-    def __init__(self, subject, task, workspace_dir, mount_point=None, exit_on_no_change=False):
+    def __init__(self, subject, workspace_dir, mount_point=None, exit_on_no_change=False):
         RamPipeline.__init__(self)
         self.exit_on_no_change = exit_on_no_change
         self.subject = subject
-        self.task = self.experiment = task
+        self.task = self.experiment = 'RAM_FR1'
         self.mount_point = mount_point
         self.set_workspace_dir(workspace_dir)
         dependency_tracker = DependencyChangeTrackerLegacy(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point)
@@ -94,28 +91,23 @@ class ReportPipeline(RamPipeline):
         self.set_dependency_tracker(dependency_tracker=dependency_tracker)
 
 
-task = 'RAM_FR1'
-
-
 def find_subjects_by_task(task):
     ev_files = glob(args.mount_point + ('/data/events/%s/R*_events.mat' % task))
     return [re.search(r'R\d\d\d\d[A-Z](_\d+)?', f).group() for f in ev_files]
 
 
-subjects = find_subjects_by_task(task)
-subjects.remove('R1061T')
-subjects.remove('R1085C')
-subjects.remove('R1090C')
-subjects.remove('R1092J_2')
-subjects.remove('R1093J_1')
+subjects = list(set(find_subjects_by_task('RAM_FR1')).intersection(find_subjects_by_task('RAM_CatFR1')))
 subjects.sort()
 
+#print subjects
+#sys.exit(0)
+
 for subject in subjects:
-    print '--Generating', task, 'report for', subject
+    print '--Generating FR1&CatFR1 joint report for', subject
 
     # sets up processing pipeline
-    report_pipeline = ReportPipeline(subject=subject, task=task,
-                                           workspace_dir=join(args.workspace_dir,task+'_'+subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change)
+    report_pipeline = ReportPipeline(subject=subject,
+                                           workspace_dir=join(args.workspace_dir,subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change)
 
     report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
 

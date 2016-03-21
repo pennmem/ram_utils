@@ -1,0 +1,1 @@
+python fr1_catfr1_joint_report.py --subject=$1 --workspace-dir=/scratch/pwanda/FR1_CatFR1_joint_reports --mount-point='' --python-path=/home2/losu/ram_utils --python-path=/home2/losu/python/ptsa_latest
