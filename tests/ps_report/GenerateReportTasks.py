@@ -9,14 +9,15 @@ from PlotUtils import PlotData, BarPlotData, PlotDataCollection, PanelPlot
 import TextTemplateUtils
 
 from latex_table import latex_table
-
+from ReportUtils import ReportRamTask
 
 def pvalue_formatting(p):
     return '\leq 0.001' if p<=0.001 else ('%.3f'%p)
 
 
-class GenerateTex(RamTask):
-    def __init__(self, mark_as_completed=True): RamTask.__init__(self, mark_as_completed)
+class GenerateTex(ReportRamTask):
+    def __init__(self, mark_as_completed=True):
+        super(GenerateTex,self).__init__(mark_as_completed)
 
     def run(self):
         tex_template = 'ps_report.tex.tpl'
@@ -191,9 +192,9 @@ class GenerateTex(RamTask):
 
 
 
-class GeneratePlots(RamTask):
+class GeneratePlots(ReportRamTask):
     def __init__(self, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(GeneratePlots,self).__init__(mark_as_completed)
 
     def run(self):
         #experiment = self.pipeline.experiment

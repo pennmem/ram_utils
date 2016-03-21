@@ -52,7 +52,6 @@ class ReportSummary(object):
     def add_report_error_status(self, error_status):
         self.report_error_status = error_status
 
-
     def add_report_error(self, error):
         error_rs = ReportStatus(error=error)
         self.report_error_status = error_rs
@@ -69,7 +68,8 @@ class ReportSummary(object):
 
         for status in self.report_status_list:
             s += 'Task: ' + status.task + ' : ' + status.message + '\n'
-            s += 'file: ' + status.file + '-------- line: ' + str(status.line) + ' \n'
+            if status.file and status.line >= 0:
+                s += 'file: ' + status.file + '-------- line: ' + str(status.line) + ' \n'
 
         return s
 
@@ -93,8 +93,9 @@ class ReportSummary(object):
                 s += 'Error: '
 
             s += str(self.report_error_status.error) + '\n'
-            s += 'File:'+ self.report_error_status.file+ ' line: '+str(self.report_error_status.line)
-            s += '---------------------------\n'
+            if self.report_error_status.file and self.report_error_status.line >= 0:
+                s += 'File:' + self.report_error_status.file + '---------------------------'+' line: ' + str(self.report_error_status.line)+'\n'
+
 
         if detailed:
             s += '\nDetailed report\n'

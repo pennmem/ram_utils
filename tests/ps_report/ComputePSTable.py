@@ -8,7 +8,7 @@ from bisect import bisect_right
 from scipy.stats import norm
 import sys
 from scipy.stats import describe
-
+from ReportUtils import ReportRamTask
 
 # def prob2perf(probs, true_labels, p):
 #     idx = bisect_right(probs, p)
@@ -44,9 +44,9 @@ def bipolar_label_to_loc_tag(bp, loc_tags):
         return None
 
 
-class ComputePSTable(RamTask):
+class ComputePSTable(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(ComputePSTable,self).__init__(mark_as_completed)
         self.params = params
         self.ps_table = None
 

@@ -5,12 +5,9 @@ import os
 
 from ptsa.data.readers import TalReader, TalStimOnlyReader
 
-from get_bipolar_subj_elecs import get_bipolar_subj_elecs
-
 from sklearn.externals import joblib
 
-from RamPipeline import *
-from ReportUtils import MissingDataError,ReportRamTask
+from ReportUtils import ReportRamTask
 
 
 class TalPreparation(ReportRamTask):
@@ -19,7 +16,6 @@ class TalPreparation(ReportRamTask):
 
 
     def run(self):
-
 
 
         self.add_report_status(message='OK')

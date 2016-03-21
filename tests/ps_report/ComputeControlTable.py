@@ -3,11 +3,12 @@ from RamPipeline import *
 import numpy as np
 import pandas as pd
 from sklearn.externals import joblib
+from ReportUtils import ReportRamTask
 
 
-class ComputeControlTable(RamTask):
+class ComputeControlTable(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(ComputeControlTable,self).__init__(mark_as_completed)
         self.params = params
         self.control_table = None
 
