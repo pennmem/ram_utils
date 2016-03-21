@@ -27,7 +27,7 @@ else: # emulate command line
                                          '--mount-point','//Users/m/',
                                          '--python-path','/Users/m/RAM_UTILS_GIT',
                                          '--python-path','/Users/m/PTSA_NEW_GIT',
-                                         '--exit-on-no-change'
+                                         # '--exit-on-no-change'
                                             ]
 
     # command_line_emulation_argument_list = [
@@ -49,10 +49,9 @@ configure_python_paths(args.python_path)
 # ------------------------------- end of processing command line
 
 import numpy as np
-from RamPipeline import RamPipeline
-from ReportUtils.DependencyChangeTrackerLegacy import DependencyChangeTrackerLegacy
 from ReportUtils import MissingExperimentError, MissingDataError
 from ReportUtils import ReportSummaryInventory,ReportSummary
+from ReportUtils import ReportPipelineBase
 
 
 from FREventPreparation import FREventPreparation
@@ -73,8 +72,6 @@ from ComputePSTable import ComputePSTable
 from ComposeSessionSummary import ComposeSessionSummary
 
 from GenerateReportTasks import *
-
-
 
 
 # turn it into command line options
@@ -113,38 +110,10 @@ class Params(object):
 
 params = Params()
 
-class ReportPipeline(RamPipeline):
+class ReportPipeline(ReportPipelineBase):
     def __init__(self, subject, experiment, workspace_dir, mount_point=None, exit_on_no_change=False):
-        RamPipeline.__init__(self)
-        self.exit_on_no_change = exit_on_no_change
-        self.subject = subject
+        super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change)
         self.experiment = experiment
-        self.mount_point = mount_point
-        self.set_workspace_dir(workspace_dir)
-
-        dependency_tracker = DependencyChangeTrackerLegacy(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point)
-        self.set_dependency_tracker(dependency_tracker=dependency_tracker)
-
-        self.report_summary = ReportSummary()
-
-    def add_report_error(self,error):
-        self.report_summary.add_report_error(error)
-
-    def add_report_status_obj(self,status_obj):
-        self.report_summary.add_report_status_obj(status_obj)
-
-
-    def get_report_summary(self):
-        return self.report_summary
-
-
-# class ReportPipeline(RamPipeline):
-#     def __init__(self, subject, experiment, workspace_dir, mount_point=None):
-#         RamPipeline.__init__(self)
-#         self.subject = subject
-#         self.experiment = experiment
-#         self.mount_point = mount_point
-#         self.set_workspace_dir(workspace_dir)
 
 
 task = 'RAM_PS'
@@ -171,14 +140,12 @@ rsi = ReportSummaryInventory()
 for subject in subjects[36:38]:
     print subject
     # sets up processing pipeline
-    # report_pipeline = ReportPipeline(subject=subject, experiment=args.experiment,
-    #                                    workspace_dir=join(args.workspace_dir,subject), mount_point=args.mount_point)
 
     report_pipeline = ReportPipeline(subject=subject,
                                      experiment=args.experiment,
                                      workspace_dir=join(args.workspace_dir,subject),
                                      mount_point=args.mount_point,
-                                     # exit_on_no_change=args.exit_on_no_change
+                                     exit_on_no_change=args.exit_on_no_change
                                      )
 
 
@@ -217,34 +184,20 @@ for subject in subjects[36:38]:
         print 'GOT KEYBOARD INTERUPT. EXITING'
         sys.exit()
     except MissingExperimentError as mee:
-        report_pipeline.add_report_error(error=mee)
-        subject_missing_experiment_list.append(subject)
+        pass
+        # report_pipeline.add_report_error(error=mee)
+        # subject_missing_experiment_list.append(subject)
     except MissingDataError as mde:
-        report_pipeline.add_report_error(error=mde)
-        subject_missing_data_list.append(subject)
+        pass
+    except Exception as e:
+        report_pipeline.add_report_error(error=e)
+
+        # report_pipeline.add_report_error(error=mde)
+        # subject_missing_data_list.append(subject)
+    # except Exception as e:
+
 
     rsi.add_report_summary(report_summary=report_pipeline.get_report_summary())
-    # except Exception as e:
-    #     rs = ReportStatus(subject=subject,exception=e)
-    #     report_summary.add_report_status(subject=subject,status_obj=rs)
-    #     subject_fail_list.append(subject)
-    #     pass
-
-    # except KeyboardInterrupt:
-    #     print 'GOT KEYBOARD INTERUPT. EXITING'
-    #     sys.exit()
-    # except MissingExperimentError as mee:
-    #     report_pipeline.report_summary.add_report_status(subject=subject,status_obj=mee.status)
-    #     subject_missing_experiment_list.append(subject)
-    # except MissingDataError as mde:
-    #     report_pipeline.report_summary.add_report_status(subject=subject,status_obj=mde.status)
-    #     subject_missing_data_list.append(subject)
-    #
-    # # except Exception as e:
-    # #     rs = ReportStatus(subject=subject,exception=e)
-    # #     report_summary.add_report_status(subject=subject,status_obj=rs)
-    # #     subject_fail_list.append(subject)
-    # #     pass
 
 print 'all subjects = ', subjects
 print 'subject_fail_list=',subject_fail_list

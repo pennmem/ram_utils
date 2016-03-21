@@ -6,9 +6,12 @@ import pandas as pd
 from RamPipeline import *
 from ReportUtils import MissingExperimentError, MissingDataError
 
-class PSEventPreparation(RamTask):
+from ReportUtils import ReportRamTask
+
+
+class PSEventPreparation(ReportRamTask):
     def __init__(self, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(PSEventPreparation,self).__init__(mark_as_completed)
 
     def restore(self):
         # subject = self.pipeline.subject
@@ -40,12 +43,24 @@ class PSEventPreparation(RamTask):
             events = events[events.experiment == experiment]
 
         except Exception:
-            raise MissingDataError('Missing or Corrupt PS event file')
+            # raise MissingDataError('Missing or Corrupt PS event file')
+
+            self.raise_and_log_report_exception(
+                                                exception_type='MissingDataError',
+                                                exception_message='Missing or Corrupt PS event file'
+                                                )
+
 
         if len(events) == 0:
             # raise Exception('No %s events for subject %s' % (experiment,subject))
 
-            raise MissingExperimentError('No %s events for subject %s' % (experiment,subject))
+            # raise MissingExperimentError('No %s events for subject %s' % (experiment,subject))
+            self.raise_and_log_report_exception(
+                                                exception_type='MissingExperimentError',
+                                                exception_message='No %s events for subject %s' % (experiment,subject)
+                                                )
+
+
 
         sessions = np.unique(events.session)
         print experiment, 'sessions:', sessions

@@ -19,6 +19,10 @@ class TalPreparation(ReportRamTask):
 
 
     def run(self):
+
+
+
+        self.add_report_status(message='OK')
         try:
 
             tal_path = os.path.join(self.pipeline.mount_point,'data/eeg',self.pipeline.subject,'tal',self.pipeline.subject+'_talLocs_database_bipol.mat')
@@ -60,7 +64,12 @@ class TalPreparation(ReportRamTask):
             self.add_report_status(message='OK')
 
         except Exception:
-            raise MissingDataError('Missing or corrupt electrodes data %s for subject %s '%(tal_path,self.pipeline.subject))
+            # raise MissingDataError('Missing or corrupt electrodes data %s for subject %s '%(tal_path,self.pipeline.subject))
+
+            self.raise_and_log_report_exception(
+                                                exception_type='MissingDataError',
+                                                exception_message='Missing or corrupt electrodes data %s for subject %s '%(tal_path,self.pipeline.subject)
+                                                )
 
 
 
