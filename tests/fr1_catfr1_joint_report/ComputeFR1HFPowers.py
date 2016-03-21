@@ -17,17 +17,14 @@ class ComputeFR1HFPowers(RamTask):
         self.samplerate = None
         self.wavelet_transform = MorletWaveletTransform()
 
-
     def initialize(self):
-        task_prefix = 'cat' if self.pipeline.task == 'RAM_CatFR1' else ''
         if self.dependency_inventory:
-
-            self.dependency_inventory.add_dependent_resource(resource_name=task_prefix+'fr1_events',
-                                        access_path = ['experiments',task_prefix+'fr1','events'])
-
+            self.dependency_inventory.add_dependent_resource(resource_name='fr1_events',
+                                        access_path = ['experiments','fr1','events'])
+            self.dependency_inventory.add_dependent_resource(resource_name='catfr1_events',
+                                        access_path = ['experiments','catfr1','events'])
             self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
                                         access_path = ['electrodes','bipolar'])
-
 
     def restore(self):
         subject = self.pipeline.subject
