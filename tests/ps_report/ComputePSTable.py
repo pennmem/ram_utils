@@ -66,6 +66,9 @@ class ComputePSTable(ReportRamTask):
             self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
                                         access_path = ['electrodes','bipolar'])
 
+            # self.dependency_inventory.add_dependent_resource(resource_name='fr1_info',
+            #                             access_path = ['experiments','fr1','info'])
+
 
     def restore(self):
         subject = self.pipeline.subject

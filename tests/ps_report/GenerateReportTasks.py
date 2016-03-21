@@ -378,6 +378,26 @@ class GenerateReportPDF(RamTask):
     def __init__(self, mark_as_completed=True):
         RamTask.__init__(self, mark_as_completed)
 
+
+    def initialize(self):
+
+        if self.dependency_inventory:
+
+            # self.dependency_inventory.add_dependent_resource(resource_name='fr1_events',
+            #                             access_path = ['experiments','fr1','events'])
+            #
+            # self.dependency_inventory.add_dependent_resource(resource_name='catfr1_events',
+            #                             access_path = ['experiments','catfr1','events'])
+            #
+            # self.dependency_inventory.add_dependent_resource(resource_name='ps_events',
+            #                             access_path = ['experiments','ps','events'])
+            #
+            # self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
+            #                             access_path = ['electrodes','bipolar'])
+
+            self.dependency_inventory.add_dependent_resource(resource_name='fr1_info',
+                                        access_path = ['experiments','fr1','info'])
+
     def run(self):
         from subprocess import call
 

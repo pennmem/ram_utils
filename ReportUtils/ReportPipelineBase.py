@@ -25,3 +25,7 @@ class ReportPipelineBase(RamPipeline):
 
     def get_report_summary(self):
         return self.report_summary
+
+    def execute_pipeline(self):
+        super(ReportPipelineBase,self).execute_pipeline()
+        self.report_summary.add_changed_resources(changed_resources=self.dependency_change_tracker.get_changed_resources())

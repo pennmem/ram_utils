@@ -23,11 +23,11 @@ else: # emulate command line
     command_line_emulation_argument_list = [
                                          '--experiment','PS2',
                                          '--workspace-dir','/Users/m/scratch/PS2_ms_check',
-                                         # '--mount-point','/Volumes/rhino_root/',
-                                         '--mount-point','//Users/m/',
+                                         '--mount-point','/Volumes/rhino_root/',
+                                         # '--mount-point','//Users/m/',
                                          '--python-path','/Users/m/RAM_UTILS_GIT',
                                          '--python-path','/Users/m/PTSA_NEW_GIT',
-                                         # '--exit-on-no-change'
+                                         '--exit-on-no-change'
                                             ]
 
     # command_line_emulation_argument_list = [
@@ -192,6 +192,13 @@ for subject in subjects[36:38]:
     except Exception as e:
         report_pipeline.add_report_error(error=e)
 
+        import traceback
+        print traceback.format_exc()
+
+        # exc_type, exc_value, exc_traceback = sys.exc_info()
+
+        print
+
         # report_pipeline.add_report_error(error=mde)
         # subject_missing_data_list.append(subject)
     # except Exception as e:
@@ -199,10 +206,11 @@ for subject in subjects[36:38]:
 
     rsi.add_report_summary(report_summary=report_pipeline.get_report_summary())
 
+
 print 'all subjects = ', subjects
 print 'subject_fail_list=',subject_fail_list
 print 'subject_missing_experiment_list=',subject_missing_experiment_list
 print 'subject_missing_data_list=', subject_missing_data_list
 
-print 'this is summary for all reports report ', rsi.compose_summary(detailed=True)
+print 'this is summary for all reports report ', rsi.compose_summary(detail_level=1)
 # print report_pipeline.report_summary.compose_summary()
