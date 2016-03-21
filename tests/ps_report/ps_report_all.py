@@ -27,7 +27,7 @@ else: # emulate command line
                                          # '--mount-point','//Users/m/',
                                          '--python-path','/Users/m/RAM_UTILS_GIT',
                                          '--python-path','/Users/m/PTSA_NEW_GIT',
-                                         '--exit-on-no-change'
+                                         # '--exit-on-no-change'
                                             ]
 
     # command_line_emulation_argument_list = [
@@ -213,4 +213,6 @@ print 'subject_missing_experiment_list=',subject_missing_experiment_list
 print 'subject_missing_data_list=', subject_missing_data_list
 
 print 'this is summary for all reports report ', rsi.compose_summary(detail_level=1)
+
+rsi.send_email_digest()
 # print report_pipeline.report_summary.compose_summary()

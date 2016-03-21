@@ -1,7 +1,8 @@
 from collections import OrderedDict
 from datetime import date
 from ReportUtils import MissingDataError, MissingExperimentError, ReportError
-
+from JSONUtils import JSONNode
+from os.path import *
 
 class ReportStatus(object):
     def __init__(self, task=None, error=None, message='', line=-1, file=''):
@@ -35,6 +36,61 @@ class ReportSummaryInventory(object):
             s += '------------------------------------------------------------------------------------\n\n'
 
         return s
+
+    def send_email_digest(self):
+        import base64
+        from email.mime.text import MIMEText
+        from datetime import date
+        import smtplib
+
+        mail_info_path = join(expanduser('~'),'.ram_report','mail_info.json')
+
+
+        mail_info = JSONNode.read(mail_info_path)
+
+        u = mail_info['u']
+        p = mail_info['p']
+        smtp_server = mail_info['server']
+        smtp_port = int(mail_info['port'])
+
+        DATE_FORMAT = "%d/%m/%Y"
+        EMAIL_SPACE = ", "
+        EMAIL_FROM = "ramdarpaproject@gmail.com"
+
+
+
+        print 'u,p,server,port=',(u,p,smtp_server,smtp_port)
+
+        mail_list_path = join(expanduser('~'),'.ram_report','mail_list.json')
+        mail_list_node = JSONNode.read(mail_list_path)
+        print mail_list_node.output()
+
+        email_list = []
+        subscribers = mail_list_node['subscribers']
+        for subscriber in subscribers:
+            print 'Name: ', subscriber['FirstName'], ' ',subscriber['LastName'],   ' email: ', subscriber['email']
+            email_list.append(subscriber['email'])
+
+
+        report_summary = self.compose_summary(detail_level=2)
+
+        msg = MIMEText(report_summary)
+
+
+        msg['Subject'] = "Daily DARPA Report Digest for" + " %s" % (date.today().strftime(DATE_FORMAT))
+        msg['To'] = EMAIL_SPACE.join(email_list)
+        msg['From'] = EMAIL_FROM
+        mail = smtplib.SMTP(smtp_server, smtp_port)
+        mail.ehlo()
+
+        mail.starttls()
+
+        mail.login(u, base64.b64decode(p))
+        mail.sendmail(EMAIL_FROM, email_list, msg.as_string())
+        mail.quit()
+
+
+
 
 
 class ReportSummary(object):
