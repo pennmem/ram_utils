@@ -117,9 +117,9 @@ class ComposeSessionSummary(RamTask):
             session_rec_events = rec_events[rec_events.session == session]
 
             session_all_events = all_events[all_events.session == session]
-            timestamps = session_all_events.mstime
-            first_time_stamp = np.min(timestamps)
-            last_time_stamp = np.max(timestamps)
+            timestamps = sorted(session_all_events.mstime)
+            first_time_stamp = timestamps[0]
+            last_time_stamp = timestamps[-3]
             session_length = '%.2f' % ((last_time_stamp - first_time_stamp) / 60000.0)
             session_date = time.strftime('%d-%b-%Y', time.localtime(last_time_stamp/1000))
 
