@@ -15,7 +15,7 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1028M',
+    command_line_emulation_argument_list = ['--subject','R1149N',
                                             '--task','RAM_PAL1',
                                             '--workspace-dir','/scratch/busygin/PAL1_reports',
                                             '--mount-point','',

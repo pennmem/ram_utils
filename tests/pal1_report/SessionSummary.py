@@ -9,8 +9,8 @@ class SessionSummary(object):
         self.n_pairs = None
         self.n_correct_pairs = None
         self.pc_correct_pairs = None
-        self.wilson1 = 8.0
-        self.wilson2 = 15.1
+        self.wilson1 = None
+        self.wilson2 = None
         self.n_voc_pass = 0
         self.pc_voc_pass = 0.0
         self.n_nonvoc_pass = 189
@@ -20,6 +20,8 @@ class SessionSummary(object):
         self.n_eli = None
         self.pc_eli = None
         self.prob_recall = None
+        self.study_lag_values = None
+        self.prob_study_lag = None
         self.n_math = 0
         self.n_correct_math = 0
         self.pc_correct_math = 0.0

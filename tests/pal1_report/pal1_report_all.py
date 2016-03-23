@@ -109,7 +109,7 @@ for subject in subjects:
     report_pipeline = ReportPipeline(subject=subject, task=task,
                                            workspace_dir=join(args.workspace_dir,task+'_'+subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change)
 
-    report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
+    report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
 
     report_pipeline.add_task(MathEventPreparation(mark_as_completed=False))
 

@@ -130,6 +130,7 @@ class GeneratePlots(RamTask):
         # session_summary_array = self.get_passed_object('session_summary_array')
 
         serial_positions = np.arange(1,7)
+        #lag_positions = np.arange(1,12)
 
         # for session_summary in session_summary_array:
         #     panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, labelsize=18, wspace=20.0)
@@ -174,10 +175,13 @@ class GeneratePlots(RamTask):
 
         cumulative_summary = self.get_passed_object('cumulative_summary')
 
-        panel_plot = PanelPlot(xfigsize=7.5, yfigsize=7.5, i_max=1, j_max=1, labelsize=18, wspace=20.0)
+        panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, labelsize=18, wspace=20.0)
 
         pd1 = PlotData(x=serial_positions, y=cumulative_summary.prob_recall, xlim=(0, 6), ylim=(0.0, 1.0), xlabel='Serial position\n(a)', ylabel='Probability of recall', xlabel_fontsize=18, ylabel_fontsize=18)
         panel_plot.add_plot_data(0, 0, plot_data=pd1)
+
+        pd2 = PlotData(x=cumulative_summary.study_lag_values, y=cumulative_summary.prob_study_lag, xlim=(0, 12), ylim=(0.0, 1.0), xlabel='Study-test Lag\n(a)', ylabel='Probability of recall', xlabel_fontsize=18, ylabel_fontsize=18)
+        panel_plot.add_plot_data(0, 1, plot_data=pd2)
 
         plot = panel_plot.generate_plot()
 

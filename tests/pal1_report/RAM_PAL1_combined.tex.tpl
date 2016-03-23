@@ -78,7 +78,7 @@ $<N_MATH>$ math problems & $<N_CORRECT_MATH>$ correct ($<PC_CORRECT_MATH>$\%) & 
 \begin{figure}[!h]
 \centering
 \includegraphics[scale=0.4]{<PROB_RECALL_PLOT_FILE>}
-\caption{\textbf{Paired Associates:} Probability of recall as a function of serial position.}
+\caption{\textbf{Paired Associates:} (a) Probability of recall as a function of serial position. (b) Probability of recall as a function of study-test lag.}
 \end{figure}
 
 \clearpage

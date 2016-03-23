@@ -6,6 +6,8 @@ import pandas as pd
 import time
 from operator import itemgetter
 
+from statsmodels.stats.proportion import proportion_confint
+
 
 def make_atlas_loc(tag, atlas_loc, comments):
 
@@ -82,6 +84,7 @@ class ComposeSessionSummary(RamTask):
         math_events = self.get_passed_object(task + '_math_events')
         intr_events = self.get_passed_object(task + '_intr_events')
         rec_events = self.get_passed_object(task + '_rec_events')
+        test_probe_events = self.get_passed_object(task + '_test_probe_events')
         all_events = self.get_passed_object(task + '_all_events')
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
@@ -101,8 +104,9 @@ class ComposeSessionSummary(RamTask):
         session_summary_array = []
         session_ttest_data = []
 
-        positions = np.unique(events.serialpos)
         total_list_counter = 0
+        n_success_per_lag = np.zeros(11, dtype=np.int)
+        n_events_per_lag = np.zeros(11, dtype=np.int)
 
         for session in sessions:
             session_summary = SessionSummary()
@@ -112,10 +116,12 @@ class ComposeSessionSummary(RamTask):
 
             session_rec_events = rec_events[rec_events.session == session]
 
+            session_test_probe_events = test_probe_events[test_probe_events.session == session]
+
             session_all_events = all_events[all_events.session == session]
-            timestamps = session_all_events.mstime
-            first_time_stamp = np.min(timestamps)
-            last_time_stamp = np.max(timestamps)
+            timestamps = sorted(session_all_events.mstime)
+            first_time_stamp = timestamps[0]
+            last_time_stamp = timestamps[-3]
             session_length = '%.2f' % ((last_time_stamp - first_time_stamp) / 60000.0)
             session_date = time.strftime('%d-%b-%Y', time.localtime(last_time_stamp/1000))
 
@@ -132,18 +138,28 @@ class ComposeSessionSummary(RamTask):
             session_summary.pc_correct_pairs = 100*session_summary.n_correct_pairs / float(session_summary.n_pairs)
 
             positions = np.unique(session_events.serialpos)
-            prob_recall = np.empty_like(positions, dtype=float)
+            session_summary.prob_recall = np.empty_like(positions, dtype=float)
             for i,pos in enumerate(positions):
                 pos_events = session_events[session_events.serialpos == pos]
-                prob_recall[i] = np.sum(pos_events.correct) / float(len(pos_events))
-
-            session_summary.prob_recall = prob_recall
+                session_summary.prob_recall[i] = np.sum(pos_events.correct) / float(len(pos_events))
 
             lists = np.unique(session_events.list)
             n_lists = len(lists)
             total_list_counter += n_lists
 
             session_data.append([session, session_date, session_length, n_lists, '$%.2f$\\%%' % session_summary.pc_correct_pairs])
+
+            for lst in lists:
+                list_rec_events = session_rec_events[session_rec_events.list==lst]
+                for ev in list_rec_events:
+                    lag = 5 + ev.probepos - ev.serialpos
+                    if ev.correct==1:
+                        n_success_per_lag[lag] += 1
+
+                list_test_probe_events = session_test_probe_events[session_test_probe_events.list==lst]
+                for ev in list_test_probe_events:
+                    lag = 5 + ev.probepos - ev.serialpos
+                    n_events_per_lag[lag] += 1
 
             if math_events is not None:
                 session_math_events = math_events[math_events.session == session]
@@ -154,7 +170,7 @@ class ComposeSessionSummary(RamTask):
 
             session_intr_events = intr_events[intr_events.session == session]
 
-            session_summary.n_pli = np.sum(session_intr_events.intrusion > 0)
+            session_summary.n_pli = np.sum(session_intr_events.intrusion >= 0)
             session_summary.pc_pli = 100*session_summary.n_pli / float(n_sess_events)
             session_summary.n_eli = np.sum(session_intr_events.intrusion == -1)
             session_summary.pc_eli = 100*session_summary.n_eli / float(n_sess_events)
@@ -187,7 +203,11 @@ class ComposeSessionSummary(RamTask):
         cumulative_summary = SessionSummary()
         cumulative_summary.n_pairs = len(events)
         cumulative_summary.n_correct_pairs = np.sum(events.correct)
-        cumulative_summary.pc_correct_pairs = 100*cumulative_summary.n_correct_pairs / float(cumulative_summary.n_pairs)
+        p_hat = cumulative_summary.n_correct_pairs / float(cumulative_summary.n_pairs)
+        cumulative_summary.pc_correct_pairs = 100*p_hat
+        cumulative_summary.wilson1, cumulative_summary.wilson2 = proportion_confint(cumulative_summary.n_correct_pairs, cumulative_summary.n_pairs, alpha=0.05, method='wilson')
+        cumulative_summary.wilson1 *= 100.0
+        cumulative_summary.wilson2 *= 100.0
 
         positions = np.unique(events.serialpos)
         prob_recall = np.empty_like(positions, dtype=float)
@@ -196,13 +216,27 @@ class ComposeSessionSummary(RamTask):
             prob_recall[i] = np.sum(pos_events.correct) / float(len(pos_events))
         cumulative_summary.prob_recall = prob_recall
 
+        cumulative_summary.study_lag_values = []
+        cumulative_summary.prob_study_lag = []
+        for i,n_ev in enumerate(n_events_per_lag):
+            if n_ev>0:
+                cumulative_summary.study_lag_values.append(i+1)
+                cumulative_summary.prob_study_lag.append(n_success_per_lag[i]/float(n_ev))
+
+        #cumulative_summary.prob_study_lag = np.array([n_success_per_lag[i]/float(n_events_per_lag[i]) if n_events_per_lag[i]>0 else np.nan for i in xrange(11)])
+
+        # print 'n_success_per_lag =', n_success_per_lag, 'sum =', np.sum(n_success_per_lag)
+        # print 'n_events_per_lag =', n_events_per_lag, 'sum =', np.sum(n_events_per_lag)
+        # import sys
+        # sys.exit()
+
         if math_events is not None:
             cumulative_summary.n_math = len(math_events)
             cumulative_summary.n_correct_math = np.sum(math_events.iscorrect)
             cumulative_summary.pc_correct_math = 100*cumulative_summary.n_correct_math / float(cumulative_summary.n_math)
             cumulative_summary.math_per_list = cumulative_summary.n_math / float(total_list_counter)
 
-        cumulative_summary.n_pli = np.sum(intr_events.intrusion > 0)
+        cumulative_summary.n_pli = np.sum(intr_events.intrusion >= 0)
         cumulative_summary.pc_pli = 100*cumulative_summary.n_pli / float(len(events))
         cumulative_summary.n_eli = np.sum(intr_events.intrusion == -1)
         cumulative_summary.pc_eli = 100*cumulative_summary.n_eli / float(len(events))

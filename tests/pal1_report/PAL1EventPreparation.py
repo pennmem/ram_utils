@@ -25,14 +25,21 @@ class PAL1EventPreparation(RamTask):
 
         self.pass_object(self.pipeline.task+'_all_events', events)
 
-        intr_events = events[(events.intrusion!=-999) & (events.intrusion!=0)]
+        intr_events = events[(events.intrusion!=-999) & (events.correct==0) & (events.vocalization!=1)]
 
-        rec_events = events[events.type == 'REC_EVENT']
+        # print len(intr_events)
+        # import sys
+        # sys.exit(0)
 
-        events = events[events.type == 'STUDY_PAIR']
+        rec_events = events[(events.type == 'REC_EVENT') & (events.vocalization!=1)]
+
+        test_probe_events = events[events.type == 'TEST_PROBE']
+
+        events = events[(events.type == 'STUDY_PAIR') & (events.correct!=-999)]
 
         print len(events), task, 'STUDY_PAIR events'
 
         self.pass_object(task+'_events', events)
         self.pass_object(self.pipeline.task+'_intr_events', intr_events)
         self.pass_object(self.pipeline.task+'_rec_events', rec_events)
+        self.pass_object(self.pipeline.task+'_test_probe_events', test_probe_events)
