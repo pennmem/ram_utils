@@ -100,6 +100,8 @@ def find_subjects_by_task(task):
 
 
 subjects = find_subjects_by_task(task)
+subjects.remove('R1050M')
+subjects.remove('R1136N')
 subjects.sort()
 
 for subject in subjects:

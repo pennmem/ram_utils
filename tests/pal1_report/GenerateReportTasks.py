@@ -93,7 +93,7 @@ class GenerateTex(RamTask):
                         '<N_VOC_PASS>': cumulative_summary.n_voc_pass,
                         '<PC_VOC_PASS>': '%.2f' % cumulative_summary.pc_voc_pass,
                         '<N_NONVOC_PASS>': cumulative_summary.n_nonvoc_pass,
-                        '<PC_NONVOC_PASS>': cumulative_summary.pc_nonvoc_pass,
+                        '<PC_NONVOC_PASS>': '%.2f' % cumulative_summary.pc_nonvoc_pass,
                         '<N_PLI>': cumulative_summary.n_pli,
                         '<PC_PLI>': '%.2f' % cumulative_summary.pc_pli,
                         '<N_ELI>': cumulative_summary.n_eli,

@@ -11,8 +11,8 @@ class SessionSummary(object):
         self.pc_correct_pairs = None
         self.wilson1 = None
         self.wilson2 = None
-        self.n_voc_pass = 0
-        self.pc_voc_pass = 0.0
+        self.n_voc_pass = None
+        self.pc_voc_pass = None
         self.n_nonvoc_pass = 189
         self.pc_nonvoc_pass = 63.0
         self.n_pli = None

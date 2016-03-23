@@ -20,22 +20,18 @@ class PAL1EventPreparation(RamTask):
         e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
         events = e_reader.read()
-        ev_order = np.argsort(events, order=('session','list','mstime'))
-        events = events[ev_order]
 
         self.pass_object(self.pipeline.task+'_all_events', events)
 
         intr_events = events[(events.intrusion!=-999) & (events.correct==0) & (events.vocalization!=1)]
-
-        # print len(intr_events)
-        # import sys
-        # sys.exit(0)
 
         rec_events = events[(events.type == 'REC_EVENT') & (events.vocalization!=1)]
 
         test_probe_events = events[events.type == 'TEST_PROBE']
 
         events = events[(events.type == 'STUDY_PAIR') & (events.correct!=-999)]
+        ev_order = np.argsort(events, order=('session','list','mstime'))
+        events = events[ev_order]
 
         print len(events), task, 'STUDY_PAIR events'
 

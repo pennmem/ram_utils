@@ -67,6 +67,17 @@ def format_ttest_table(table_data):
             elif color == 'blue':
                 line[:] = ['\\textbf{\\textcolor{blue}{%s}}' % s for s in line]
 
+def count_nonvoc_passes(events):
+    n_nonvoc_pass = 0
+    for i,ev in enumerate(events):
+        if ev.type == 'REC_START':
+            j = i+1
+            while events[j].resp_word == '<>':
+                j += 1
+            if events[j].type == 'REC_END':
+                n_nonvoc_pass += 1
+    return n_nonvoc_pass
+
 
 class ComposeSessionSummary(RamTask):
     def __init__(self, params, mark_as_completed=True):
@@ -203,11 +214,16 @@ class ComposeSessionSummary(RamTask):
         cumulative_summary = SessionSummary()
         cumulative_summary.n_pairs = len(events)
         cumulative_summary.n_correct_pairs = np.sum(events.correct)
-        p_hat = cumulative_summary.n_correct_pairs / float(cumulative_summary.n_pairs)
-        cumulative_summary.pc_correct_pairs = 100*p_hat
+        cumulative_summary.pc_correct_pairs = 100*cumulative_summary.n_correct_pairs / float(cumulative_summary.n_pairs)
         cumulative_summary.wilson1, cumulative_summary.wilson2 = proportion_confint(cumulative_summary.n_correct_pairs, cumulative_summary.n_pairs, alpha=0.05, method='wilson')
         cumulative_summary.wilson1 *= 100.0
         cumulative_summary.wilson2 *= 100.0
+
+        cumulative_summary.n_voc_pass = np.sum(events['pass']==1)
+        cumulative_summary.pc_voc_pass = 100*cumulative_summary.n_voc_pass / float(cumulative_summary.n_pairs)
+
+        cumulative_summary.n_nonvoc_pass = count_nonvoc_passes(all_events)
+        cumulative_summary.pc_nonvoc_pass = 100*cumulative_summary.n_nonvoc_pass / float(cumulative_summary.n_pairs)
 
         positions = np.unique(events.serialpos)
         prob_recall = np.empty_like(positions, dtype=float)
@@ -222,13 +238,6 @@ class ComposeSessionSummary(RamTask):
             if n_ev>0:
                 cumulative_summary.study_lag_values.append(i+1)
                 cumulative_summary.prob_study_lag.append(n_success_per_lag[i]/float(n_ev))
-
-        #cumulative_summary.prob_study_lag = np.array([n_success_per_lag[i]/float(n_events_per_lag[i]) if n_events_per_lag[i]>0 else np.nan for i in xrange(11)])
-
-        # print 'n_success_per_lag =', n_success_per_lag, 'sum =', np.sum(n_success_per_lag)
-        # print 'n_events_per_lag =', n_events_per_lag, 'sum =', np.sum(n_events_per_lag)
-        # import sys
-        # sys.exit()
 
         if math_events is not None:
             cumulative_summary.n_math = len(math_events)
