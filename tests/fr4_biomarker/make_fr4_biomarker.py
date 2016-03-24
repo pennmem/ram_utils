@@ -30,7 +30,7 @@ def make_biomarker(template_file='StimControlTemplate.m', out_dir='./.biomarker_
         os.mkdir(out_dir)
     make_stim_control(out_dir=out_dir)
     shutil.copy(mat_file, os.path.join(out_dir, mat_file))
-    zip_file = '%s_FR4_%s.biomarker' % (stim_config['subject'], time.strftime('%m_%d_%y'))
+    zip_file = '%s_%d-%d_FR4_%s.biomarker' % (stim_config['subject'], stim_config['anode_num'], stim_config['cathode_num'], time.strftime('%m-%d-%y'))
     zip_cmd = ['zip -9 -j  %s %s' % (zip_file,  os.path.join(out_dir, '*'))]
     subprocess.call(zip_cmd, shell=True)
     remove_files()

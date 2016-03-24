@@ -17,26 +17,26 @@
 %Purpose: Control stimulation decision for RAM system.
 
 %
-The class and methods will be called as follows:
-
-    control = StimControl.getInstance();        %Gets a handle to the single instance
-    control.initialize();                       %Call the initialize method.  Do not pass the 'this' parameter
-
-    ...                                         %Initialize is called only once per experiment
-
-    experimentState = struct;                   %A struct is used to allow for future additions
-    experimentState.phase = StimControl.PHASE_ENCODING; %It's better to use the pre-defined constants
-    experimentState.sample = 2001;              %This would be true for the second call
-    sampleSize = 2000;                          %Two seconds of data at 1K sample per second
-    dataByChannel = zeros(sampleSize, StimControl.NSP_CHANNELS);     %Would normally be filled by the Neuroport
-    control = StimControl.getInstance();        %Gets a handle to the single instance
-    stimDecision = control.stimChoice(experimentState, dataByChannel);  %Make a stim choice.  Do not pass 'this'.
-
-    ...                                         %Cleanup is called only once per experiment
-
-    control = StimControl.getInstance();        %Gets a handle to the single instance
-    control.cleanup();                          %Call the cleanup method.  Do not pass the 'this' parameter
-
+%The class and methods will be called as follows:
+%
+%    control = StimControl.getInstance();        %Gets a handle to the single instance
+%    control.initialize();                       %Call the initialize method.  Do not pass the 'this' parameter
+%
+%    ...                                         %Initialize is called only once per experiment
+%
+%    experimentState = struct;                   %A struct is used to allow for future additions
+%    experimentState.phase = StimControl.PHASE_ENCODING; %It's better to use the pre-defined constants
+%    experimentState.sample = 2001;              %This would be true for the second call
+%    sampleSize = 2000;                          %Two seconds of data at 1K sample per second
+%    dataByChannel = zeros(sampleSize, StimControl.NSP_CHANNELS);     %Would normally be filled by the Neuroport
+%    control = StimControl.getInstance();        %Gets a handle to the single instance
+%    stimDecision = control.stimChoice(experimentState, dataByChannel);  %Make a stim choice.  Do not pass 'this'.
+%
+%    ...                                         %Cleanup is called only once per experiment
+%
+%    control = StimControl.getInstance();        %Gets a handle to the single instance
+%    control.cleanup();                          %Call the cleanup method.  Do not pass the 'this' parameter
+%
 %
 classdef StimControl < handle
 
@@ -104,7 +104,7 @@ classdef StimControl < handle
                                     'pulseFrequency', $pulse_frequency,...
                                     'pulseCount', $pulse_count,...
                                     'elec1', $anode_num,...
-                                    'elec2', $cathode_num;
+                                    'elec2', $cathode_num);
 
            this.wait_after_word_on = $wait_after_word_on;
            
