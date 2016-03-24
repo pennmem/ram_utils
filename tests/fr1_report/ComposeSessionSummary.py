@@ -115,6 +115,7 @@ class ComposeSessionSummary(RamTask):
             n_sess_events = len(session_events)
 
             session_rec_events = rec_events[rec_events.session == session]
+            n_sess_rec_events = len(session_rec_events)
 
             session_all_events = all_events[all_events.session == session]
             timestamps = sorted(session_all_events.mstime)
@@ -192,9 +193,9 @@ class ComposeSessionSummary(RamTask):
             session_intr_events = intr_events[intr_events.session == session]
 
             session_summary.n_pli = np.sum(session_intr_events.intrusion > 0)
-            session_summary.pc_pli = 100*session_summary.n_pli / float(n_sess_events)
+            session_summary.pc_pli = 100*session_summary.n_pli / float(n_sess_rec_events)
             session_summary.n_eli = np.sum(session_intr_events.intrusion == -1)
-            session_summary.pc_eli = 100*session_summary.n_eli / float(n_sess_events)
+            session_summary.pc_eli = 100*session_summary.n_eli / float(n_sess_rec_events)
 
             session_xval_output = xval_output[session]
 
@@ -246,10 +247,12 @@ class ComposeSessionSummary(RamTask):
             cumulative_summary.pc_correct_math = 100*cumulative_summary.n_correct_math / float(cumulative_summary.n_math)
             cumulative_summary.math_per_list = cumulative_summary.n_math / float(total_list_counter)
 
+        n_rec_events = len(rec_events)
+
         cumulative_summary.n_pli = np.sum(intr_events.intrusion > 0)
-        cumulative_summary.pc_pli = 100*cumulative_summary.n_pli / float(len(events))
+        cumulative_summary.pc_pli = 100*cumulative_summary.n_pli / float(n_rec_events)
         cumulative_summary.n_eli = np.sum(intr_events.intrusion == -1)
-        cumulative_summary.pc_eli = 100*cumulative_summary.n_eli / float(len(events))
+        cumulative_summary.pc_eli = 100*cumulative_summary.n_eli / float(n_rec_events)
 
         cumulative_xval_output = xval_output[-1]
 
