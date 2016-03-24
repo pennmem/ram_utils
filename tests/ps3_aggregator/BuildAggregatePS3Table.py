@@ -57,6 +57,7 @@ class BuildAggregatePS3Table(RamTask):
                     xval_output = joblib.load(join(ps3_root, subject, subject+'-'+task+'-xval_output.pkl'))
                 thresh = xval_output[-1].jstat_thresh
                 ps3_table['thresh'] = thresh
+                ps3_table['locTag'] = ps3_table['Region'].apply(lambda s: 'Undetermined' if s is None else s)
                 ps3_table['Region'] = ps3_table['Region'].apply(lambda s: 'Undetermined' if s is None else s.replace('Left ','').replace('Right ',''))
                 ps3_table['Area'] = ps3_table['Region'].apply(brain_area)
                 ps3_table['Subject'] = subject

@@ -50,6 +50,7 @@ class BuildAggregatePSTable(RamTask):
                     xval_output = joblib.load(join(ps1_root, subject, subject+'-'+task+'-xval_output.pkl'))
                 thresh = xval_output[-1].jstat_thresh
                 ps1_table['thresh'] = thresh
+                ps1_table['locTag'] = ps1_table['Region'].apply(lambda s: 'Undetermined' if s is None else s)
                 ps1_table['Region'] = ps1_table['Region'].apply(lambda s: 'Undetermined' if s is None else s.replace('Left ','').replace('Right ',''))
                 ps1_table['Area'] = ps1_table['Region'].apply(brain_area)
                 ps1_table['Subject'] = subject
@@ -74,6 +75,7 @@ class BuildAggregatePSTable(RamTask):
                     xval_output = joblib.load(join(ps2_root, subject, subject+'-'+task+'-xval_output.pkl'))
                 thresh = xval_output[-1].jstat_thresh
                 ps2_table['thresh'] = thresh
+                ps2_table['locTag'] = ps2_table['Region'].apply(lambda s: 'Undetermined' if s is None else s)
                 ps2_table['Region'] = ps2_table['Region'].apply(lambda s: 'Undetermined' if s is None else s.replace('Left ','').replace('Right ',''))
                 ps2_table['Area'] = ps2_table['Region'].apply(brain_area)
                 ps2_table['Subject'] = subject

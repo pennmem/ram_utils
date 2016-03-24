@@ -1,12 +1,13 @@
-
+from collections import OrderedDict
 from collections import defaultdict
 import os
 from os.path import *
 
 from distutils.dir_util import mkpath
 
-
-
+from JSONUtils import JSONNode
+from DataModel import compute_md5_key
+from DependencyInventory import DependencyInventory
 
 
 class RamTask(object):
@@ -22,6 +23,43 @@ class RamTask(object):
         self.__name=None
 
         self.set_mark_as_completed(mark_as_completed)
+
+        self.dependency_inventory = DependencyInventory()
+
+        # self.__dependent_resources__ = OrderedDict()
+    def get_dependency_inventory(self):
+        return self.dependency_inventory
+    # def read_status(self):
+    #     json_index_file = join(self.workspace_dir,'_status','index.json')
+    #     return JSONNode.read(filename=json_index_file)
+
+    # def add_dependent_resource(self,resource_name,json_node_access_list):
+    #     self.__dependent_resources__[resource_name] = json_node_access_list
+
+    # def check_dependent_resources(self):
+    #
+    #     status_json_node = self.pipeline.get_saved_data_status()
+    #     # status_json_node = self.read_status()
+    #     if status_json_node is None:
+    #         print 'Could not findsaved file status json stub'
+    #         return
+    #     for resource_name, json_node_access_list in self.__dependent_resources__.items():
+    #         resource_node = status_json_node
+    #         for node_name in json_node_access_list:
+    #             try:
+    #                 resource_node = resource_node[node_name]
+    #             except KeyError:
+    #                 raise KeyError('Could not locate node = ' + node_name)
+    #
+    #         full_resource_path = join(self.pipeline.mount_point,'data', resource_node['path'])
+    #         print 'full_resource_path=',full_resource_path
+    #         md5 = compute_md5_key(full_resource_path)
+    #
+    #         if md5 != resource_node['md5']:
+    #             print 'RESOUCE HAS CHANGED .RERUNNING TASK!!!!!!!!!!!!!!!!!!'
+    #             os.remove(self.get_task_completed_file_name())
+    #         print resource_node.output()
+
 
 
     def set_name(self,name):
@@ -45,6 +83,23 @@ class RamTask(object):
 
         return join(self.workspace_dir, self.name() + '.completed')
 
+    def check_json_stub(self):
+        json_stub_file = join(self.workspace_dir,'index.json')
+
+
+        print 'json stub=', JSONNode.read(filename=json_stub_file)
+        print
+
+
+    # def read_status(self):
+    #     json_index_file = join(self.workspace_dir,'_status','index.json')
+    #     self.json_index_node = JSONNode.read(filename=json_index_file)
+    #
+    # def get_json_status_node(self):
+    #     return self.json_index_node
+
+
+
     def is_completed(self):
         '''
         returns flag indicating if the task was completed or not
@@ -52,6 +107,7 @@ class RamTask(object):
         :return: bool indicating if the file marking the completeion of hte task is present or not.
         In the Future we will use SHA1 key for more robust completion of the completed task
         '''
+        # self.check_json_stub()
         return isfile(self.get_task_completed_file_name())
 
     def set_pipeline(self, pipeline):
@@ -355,6 +411,9 @@ class RamTask(object):
 
     # def __set_name(self, name):
     #     self.__name = name
+
+    def initialize(self):
+        pass
 
     def restore(self):
         '''

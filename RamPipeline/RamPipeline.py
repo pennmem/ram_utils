@@ -1,6 +1,10 @@
-from TaskRegistry import TaskRegistry
-from MatlabRamTask import MatlabRamTask
+import os
 from os.path import *
+
+from DataModel import DataLayoutJSONUtils
+from JSONUtils import JSONNode
+from MatlabRamTask import MatlabRamTask
+from TaskRegistry import TaskRegistry
 
 
 class RamPipeline(object):
@@ -8,12 +12,19 @@ class RamPipeline(object):
         self.task_registry = TaskRegistry()
         self.workspace_dir = ''
         self.passed_objects_dict = {}
+        self.mount_point = '/'
 
         #  stores matlab paths
         self.matlab_paths = None
 
         #  flag indicating if Matlab tasks are present
         self.matlab_tasks_present = False
+
+        self.dependency_change_tracker = None
+
+        self.exit_on_no_change = False
+        # self.json_saved_data_status_node = None
+        # self.json_latest_status_node = None
 
     # def pass_object(self, name, obj):
     #     self.passed_objects_dict[name] = obj
@@ -24,9 +35,9 @@ class RamPipeline(object):
     def set_workspace_dir(self, output_dir):
         import os
 
-        print 'self.output_dir=', output_dir
+        # print 'self.output_dir=', output_dir
         output_dir_normalized = os.path.abspath(os.path.expanduser(output_dir))
-        print 'output_dir_normalized=', output_dir_normalized
+        # print 'output_dir_normalized=', output_dir_normalized
         self.workspace_dir = output_dir_normalized
 
         try:
@@ -62,22 +73,60 @@ class RamPipeline(object):
         '''
         self.matlab_paths = paths
 
+    def genrate_latest_data_status(self):
+        if not self.json_saved_data_status_node:
+            self.read_saved_data_status()
 
-    def execute_pipeline(self):
-        '''
-        Executes pipeline
-        :return:None
-        '''
-        import os
-        # determine if there are any of the Matlab tasks. Only then start Matlab engine
-        #  checking form MatlabRamTask subclasses objects. One such objects are found we initialize matlab engine and
-        #  pass matlab engine instance to those objects so that they can call matlab routines
+        if self.json_saved_data_status_node:
+            subject_code = self.json_saved_data_status_node['subject']['code']
+            rp = DataLayoutJSONUtils()
+            rp.mount_point = self.mount_point
+            self.json_latest_status_node = rp.create_subject_JSON_stub(subject_code=subject_code)
+            # print self.json_latest_status_node.output()
 
-        self.matlab_tasks_present = False
-        matlab_engine_started = False
-        matlab_engine = None
 
+    def get_latest_data_status(self):
+        return self.json_latest_status_node
+
+    def read_saved_data_status(self):
+        json_index_file = join(self.workspace_dir,'_status','index.json')
+        self.json_saved_data_status_node = JSONNode.read(filename=json_index_file)
+        # rp = DataLayoutJSONUtils()
+        # self.json_latest_status_node = rp.create_subject_JSON_stub(subject_code=self.)
+
+    def get_saved_data_status(self):
+        return self.json_saved_data_status_node
+
+    def set_dependency_tracker(self,dependency_tracker):
+        self.dependency_change_tracker = dependency_tracker
+
+    def resolve_dependencies(self):
+
+
+        self.dependency_change_tracker.initialize()
+
+        change_counter = 0
+        if self.dependency_change_tracker:
+            for task_name, task in self.task_registry.task_dict.items():
+
+                change_flag = self.dependency_change_tracker.check_dependency_change(task)
+                if change_flag:
+                    change_counter +=1
+                    try:
+                        #removing task_completed_file
+                        os.remove(task.get_task_completed_file_name())
+                        print 'will rerun task ', task.name()
+                    except OSError:
+                        pass
+
+        return change_counter
+
+    def prepare_matlab_tasks(self):
         for task_name, task in self.task_registry.task_dict.items():
+
+
+            # task.check_dependent_resources()
+
             if isinstance(task, MatlabRamTask):
                 if task.is_completed():
                     continue  # we do not want to start Matlab for tasks that already completed
@@ -89,6 +138,35 @@ class RamPipeline(object):
                     matlab_engine_started = True
 
                 task.set_matlab_engine(matlab_engine)
+
+
+    def initialize_tasks(self):
+        for task_name, task in self.task_registry.task_dict.items():
+            task.initialize()
+
+    def execute_pipeline(self):
+        '''
+        Executes pipeline
+        :return:None
+        '''
+        # determine if there are any of the Matlab tasks. Only then start Matlab engine
+        #  checking form MatlabRamTask subclasses objects. One such objects are found we initialize matlab engine and
+        #  pass matlab engine instance to those objects so that they can call matlab routines
+
+        self.matlab_tasks_present = False
+        matlab_engine_started = False
+        matlab_engine = None
+
+
+        self.initialize_tasks()
+
+        self.prepare_matlab_tasks()
+
+        if self.dependency_change_tracker:
+            change_counter = self.resolve_dependencies()
+
+            if not change_counter and self.exit_on_no_change:
+                return
 
         # executing pipeline
         for task_name, task in self.task_registry.task_dict.items():
@@ -108,3 +186,6 @@ class RamPipeline(object):
 
                 if task.mark_as_completed:
                     task.create_file_in_workspace_dir(task_completed_file_name, 'w')
+
+        if self.dependency_change_tracker:
+            self.dependency_change_tracker.write_latest_data_status()

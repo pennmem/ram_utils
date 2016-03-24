@@ -8,6 +8,7 @@ from sklearn.externals import joblib
 
 from ptsa.data.readers import EEGReader
 
+
 class ComputeFR1Powers(RamTask):
     def __init__(self, params, mark_as_completed=True):
         RamTask.__init__(self, mark_as_completed)
@@ -15,6 +16,14 @@ class ComputeFR1Powers(RamTask):
         self.pow_mat = None
         self.samplerate = None
         self.wavelet_transform = MorletWaveletTransform()
+
+    def initialize(self):
+        task_prefix = 'cat' if self.pipeline.task == 'RAM_CatFR1' else ''
+        if self.dependency_inventory:
+            self.dependency_inventory.add_dependent_resource(resource_name=task_prefix+'fr1_events',
+                                        access_path = ['experiments',task_prefix+'fr1','events'])
+            self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
+                                        access_path = ['electrodes','bipolar'])
 
     def restore(self):
         subject = self.pipeline.subject
@@ -35,8 +44,6 @@ class ComputeFR1Powers(RamTask):
         sessions = np.unique(events.session)
         print 'sessions:', sessions
 
-        # channels = self.get_passed_object('channels')
-        # tal_info = self.get_passed_object('tal_info')
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
 
@@ -48,7 +55,7 @@ class ComputeFR1Powers(RamTask):
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-' + task + '-pow_mat.pkl'))
         joblib.dump(self.samplerate, self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
 
-    def compute_powers(self, events, sessions,monopolar_channels , bipolar_pairs ):
+    def compute_powers(self, events, sessions,monopolar_channels, bipolar_pairs):
         n_freqs = len(self.params.freqs)
         n_bps = len(bipolar_pairs)
 
@@ -62,25 +69,9 @@ class ComputeFR1Powers(RamTask):
 
             print 'Loading EEG for', n_events, 'events of session', sess
 
-            # eegs = Events(sess_events).get_data(channels=channels, start_time=self.params.fr1_start_time, end_time=self.params.fr1_end_time,
-            #                             buffer_time=self.params.fr1_buf, eoffset='eegoffset', keep_buffer=True, eoffset_in_time=False)
-
-            # from ptsa.data.readers import TimeSeriesEEGReader
-            # time_series_reader = TimeSeriesEEGReader(events=sess_events, start_time=self.params.fr1_start_time,
-            #                                  end_time=self.params.fr1_end_time, buffer_time=self.params.fr1_buf, keep_buffer=True)
-            #
-            # eegs = time_series_reader.read(monopolar_channels)
-
-            # VERSION 2/22/2016
-            # eeg_reader = EEGReader(events=sess_events, channels=monopolar_channels,
-            #                        start_time=self.params.fr1_start_time,
-            #                        end_time=self.params.fr1_end_time, buffer_time=self.params.fr1_buf)
-
-            # VERSION WITH MIRRORING
             eeg_reader = EEGReader(events=sess_events, channels=monopolar_channels,
                                    start_time=self.params.fr1_start_time,
                                    end_time=self.params.fr1_end_time, buffer_time=0.0)
-
 
             eegs = eeg_reader.read()
             if eeg_reader.removed_bad_data():
@@ -93,12 +84,7 @@ class ComputeFR1Powers(RamTask):
                 self.pass_object(self.pipeline.task+'_events', events)
 
 
-            # mirroring
-            #eegs[...,:1365] = eegs[...,2730:1365:-1]
-            #eegs[...,2731:4096] = eegs[...,2729:1364:-1]
-
             eegs = eegs.add_mirror_buffer(duration=self.params.fr1_buf)
-
 
             if self.samplerate is None:
                 self.samplerate = float(eegs.samplerate)
@@ -112,44 +98,18 @@ class ComputeFR1Powers(RamTask):
 
             sess_pow_mat = np.empty(shape=(n_events, n_bps, n_freqs), dtype=np.float)
 
-            #monopolar_channels_np = np.array(monopolar_channels)
             for i,ti in enumerate(bipolar_pairs):
-                # print bp
-                # print monopolar_channels
-
-                # print np.where(monopolar_channels == bp[0])
-                # print np.where(monopolar_channels == bp[1])
                 bp = ti['channel_str']
                 print 'Computing powers for bipolar pair', bp
                 elec1 = np.where(monopolar_channels == bp[0])[0][0]
                 elec2 = np.where(monopolar_channels == bp[1])[0][0]
-                # print 'elec1=',elec1
-                # print 'elec2=',elec2
-                # eegs_elec1 = eegs[elec1]
-                # eegs_elec2 = eegs[elec2]
-                # print 'eegs_elec1=',eegs_elec1
-                # print 'eegs_elec2=',eegs_elec2
-                # eegs_elec1.reset_coords('channels')
-                # eegs_elec2.reset_coords('channels')
 
                 bp_data = eegs[elec1] - eegs[elec2]
                 bp_data.attrs['samplerate'] = self.samplerate
 
-                # bp_data = eegs[elec1] - eegs[elec2]
-                # bp_data = eegs[elec1] - eegs[elec2]
-                # bp_data = eegs.values[elec1] - eegs.values[elec2]
-
                 bp_data = bp_data.filtered([58,62], filt_type='stop', order=self.params.filt_order)
                 for ev in xrange(n_events):
                     self.wavelet_transform.multiphasevec(bp_data[ev][0:winsize], pow_ev)
-                    #if np.min(pow_ev) < 0.0:
-                    #    print ev, events[ev]
-                    #    joblib.dump(bp_data[ev], 'bad_bp_ev%d'%ev)
-                    #    joblib.dump(eegs[elec1][ev], 'bad_elec1_ev%d'%ev)
-                    #    joblib.dump(eegs[elec2][ev], 'bad_elec2_ev%d'%ev)
-                    #    print 'Negative powers detected'
-                    #    import sys
-                    #    sys.exit(1)
                     pow_ev_stripped = np.reshape(pow_ev, (n_freqs,winsize))[:,bufsize:winsize-bufsize]
                     if self.params.log_powers:
                         np.log10(pow_ev_stripped, out=pow_ev_stripped)

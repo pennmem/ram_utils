@@ -7,6 +7,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, roc_curve
 from random import shuffle
 from sklearn.externals import joblib
+import warnings
 
 import sys
 
@@ -102,6 +103,20 @@ class ComputeClassifier(RamTask):
         self.perm_AUCs = None
         self.pvalue = None
 
+    def initialize(self):
+
+        if self.dependency_inventory:
+
+            self.dependency_inventory.add_dependent_resource(resource_name='fr1_events',
+                                        access_path = ['experiments','fr1','events'])
+
+            self.dependency_inventory.add_dependent_resource(resource_name='catfr1_events',
+                                        access_path = ['experiments','catfr1','events'])
+
+            self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
+                                        access_path = ['electrodes','bipolar'])
+
+
     def run_loso_xval(self, event_sessions, recalls, permuted=False):
         probs = np.empty_like(recalls, dtype=np.float)
 
@@ -112,7 +127,9 @@ class ComputeClassifier(RamTask):
             insample_pow_mat = self.pow_mat[insample_mask]
             insample_recalls = recalls[insample_mask]
 
-            self.lr_classifier.fit(insample_pow_mat, insample_recalls)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                self.lr_classifier.fit(insample_pow_mat, insample_recalls)
 
             outsample_mask = ~insample_mask
             outsample_pow_mat = self.pow_mat[outsample_mask]
@@ -160,7 +177,9 @@ class ComputeClassifier(RamTask):
                 insample_pow_mat = self.pow_mat[insample_mask]
                 insample_recalls = recalls[insample_mask]
 
-                self.lr_classifier.fit(insample_pow_mat, insample_recalls)
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    self.lr_classifier.fit(insample_pow_mat, insample_recalls)
 
                 outsample_mask = ~insample_mask
                 outsample_pow_mat = self.pow_mat[outsample_mask]
@@ -242,7 +261,9 @@ class ComputeClassifier(RamTask):
         print 'thresh =', self.xval_output[-1].jstat_thresh, 'quantile =', self.xval_output[-1].jstat_quantile
 
         # Finally, fitting classifier on all available data
-        self.lr_classifier.fit(self.pow_mat, recalls)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self.lr_classifier.fit(self.pow_mat, recalls)
 
         self.pass_object('lr_classifier', self.lr_classifier)
         self.pass_object('xval_output', self.xval_output)

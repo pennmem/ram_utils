@@ -45,14 +45,14 @@ import numpy as np
 
 class StimParams(object):
     def __init__(self):
-        self.elec1 = 65
-        self.elec2 = 66
+        self.elec1 = 2
+        self.elec2 = 3
         self.amplitude = 500
         self.duration = 300
         self.trainFrequency = 1
         self.trainCount = 1
-        self.pulseFrequency = 25
-        self.pulseCount = 13
+        self.pulseFrequency = 200
+        self.pulseCount = 100
 
 # turn it into command line options
 

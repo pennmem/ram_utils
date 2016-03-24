@@ -8,6 +8,7 @@ from sklearn.externals import joblib
 
 from ptsa.data.events import Events
 from ptsa.data.readers import EEGReader
+from ReportUtils import MissingDataError
 
 class ComputeFRPowers(RamTask):
     def __init__(self, params, mark_as_completed=True):
@@ -16,6 +17,20 @@ class ComputeFRPowers(RamTask):
         self.pow_mat = None
         self.samplerate = None
         self.wavelet_transform = MorletWaveletTransform()
+
+
+    def initialize(self):
+
+        if self.dependency_inventory:
+
+            self.dependency_inventory.add_dependent_resource(resource_name='fr1_events',
+                                        access_path = ['experiments','fr1','events'])
+
+            self.dependency_inventory.add_dependent_resource(resource_name='catfr1_events',
+                                        access_path = ['experiments','catfr1','events'])
+
+            self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
+                                        access_path = ['electrodes','bipolar'])
 
     def restore(self):
         subject = self.pipeline.subject
@@ -73,8 +88,12 @@ class ComputeFRPowers(RamTask):
             eeg_reader = EEGReader(events=sess_events, channels=monopolar_channels,
                                    start_time=self.params.fr1_start_time,
                                    end_time=self.params.fr1_end_time, buffer_time=self.params.fr1_buf)
+            try:
 
-            eegs = eeg_reader.read()
+                eegs = eeg_reader.read()
+            except IOError as err:
+                raise MissingDataError('Could not read EEG file for subject %s'%(self.pipeline.subject))
+
             if eeg_reader.removed_bad_data():
                 print 'REMOVED SOME BAD EVENTS !!!'
                 sess_events = eegs['events'].values.view(np.recarray)

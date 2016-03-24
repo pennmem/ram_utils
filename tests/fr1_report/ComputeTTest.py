@@ -4,10 +4,6 @@ import numpy as np
 from scipy.stats import ttest_ind
 from sklearn.externals import joblib
 
-from scipy.stats import describe
-
-import normalize
-
 
 class ComputeTTest(RamTask):
     def __init__(self, params, mark_as_completed=True):
@@ -15,20 +11,13 @@ class ComputeTTest(RamTask):
         self.params = params
 
     def run(self):
-        print 'Computing t-stats'
-
         subject = self.pipeline.subject
         task = self.pipeline.task
 
-        pow_mat = self.get_passed_object('pow_mat')
+        pow_mat = self.get_passed_object('hf_pow_mat')
 
-        freq_sel = np.tile((self.params.freqs>=self.params.ttest_frange[0]) & (self.params.freqs<=self.params.ttest_frange[1]), pow_mat.shape[1] / self.params.freqs.size)
-        pow_mat = pow_mat[:,freq_sel]
-
-        print 'Power Matrix stats:'
-        print describe(pow_mat, axis=None, ddof=1)
-
-        #pow_mat = np.mean(pow_mat, axis=(2,3))
+        #freq_sel = np.tile((self.params.freqs>=self.params.ttest_frange[0]) & (self.params.freqs<=self.params.ttest_frange[1]), pow_mat.shape[1] / self.params.freqs.size)
+        #pow_mat = pow_mat[:,freq_sel]
 
         events = self.get_passed_object(self.pipeline.task+'_events')
         sessions = np.unique(events.session)

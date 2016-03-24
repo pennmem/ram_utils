@@ -15,10 +15,10 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1124J_1',
+    command_line_emulation_argument_list = ['--subject','R1145J_1',
                                             '--task','RAM_FR1',
-                                            '--task3', 'RAM_FR3',
-                                            '--workspace-dir','/scratch/busygin/biomarkers_new_new',
+                                            #'--task3', 'RAM_FR3',
+                                            '--workspace-dir','/scratch/busygin/biomarkers',
                                             '--mount-point','',
                                             '--python-path','/home1/busygin/ram_utils_new_ptsa',
                                             '--python-path','/home1/busygin/python/ptsa_latest'
@@ -31,7 +31,7 @@ configure_python_paths(args.python_path)
 
 from RamPipeline import RamPipeline
 
-from EventPreparation import EventPreparation
+from FREventPreparation import FREventPreparation
 from FR3EventPreparation import FR3EventPreparation
 
 from ComputeFR3Powers import ComputeFR3Powers
@@ -61,6 +61,13 @@ class StimParams(object):
 class Params(object):
     def __init__(self):
         self.version = '2.00'
+
+        self.include_fr1 = True
+        self.include_catfr1 = True
+        self.include_fr3 = False
+        self.include_catfr3 = False
+
+        self.width = 5
 
         self.fr1_start_time = 0.0
         self.fr1_end_time = 1.366
@@ -95,10 +102,10 @@ class ReportPipeline(RamPipeline):
 
 
 # sets up processing pipeline
-report_pipeline = ReportPipeline(subject=args.subject, task=args.task, task3=args.task3,
+report_pipeline = ReportPipeline(subject=args.subject, task=args.task, task3='RAM_FR3',
                                        workspace_dir=join(args.workspace_dir,args.task+'_'+args.subject), mount_point=args.mount_point)
 
-report_pipeline.add_task(EventPreparation(mark_as_completed=False))
+report_pipeline.add_task(FREventPreparation(params=params, mark_as_completed=False))
 
 report_pipeline.add_task(FR3EventPreparation(mark_as_completed=False))
 

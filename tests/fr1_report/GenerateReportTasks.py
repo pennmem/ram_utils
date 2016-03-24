@@ -16,60 +16,60 @@ class GenerateTex(RamTask):
         subject = self.pipeline.subject
         task = self.pipeline.task
 
-        tex_session_template = task + '_session.tex.tpl'
+        # tex_session_template = task + '_session.tex.tpl'
 
         n_sess = self.get_passed_object('NUMBER_OF_SESSIONS')
         n_bps = self.get_passed_object('NUMBER_OF_ELECTRODES')
 
-        session_summary_array = self.get_passed_object('session_summary_array')
-        session_ttest_data = self.get_passed_object('session_ttest_data')
+        # session_summary_array = self.get_passed_object('session_summary_array')
+        # session_ttest_data = self.get_passed_object('session_ttest_data')
 
         ttable_format = self.get_passed_object('ttable_format')
         ttable_header = self.get_passed_object('ttable_header')
 
-        report_tex_file_names = []
-        for i_sess in xrange(n_sess):
-            session_summary = session_summary_array[i_sess]
-            sess = session_summary.number
-            report_tex_file_name = '%s-%s-s%02d-report.tex' % (task,subject,sess)
-            report_tex_file_names.append(report_tex_file_name)
-
-            self.set_file_resources_to_move(report_tex_file_name, dst='reports')
-
-            session_ttest_tex_table = latex_table(session_ttest_data[i_sess])
-
-            replace_dict = {'<PROB_RECALL_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-prob_recall_plot_' + session_summary.name + '.pdf',
-                            '<IRT_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-irt_plot_' + session_summary.name + '.pdf',
-                            '<DATE>': datetime.date.today(),
-                            '<SUBJECT>': subject.replace('_','\\textunderscore'),
-                            '<NUMBER_OF_ELECTRODES>': n_bps,
-                            '<SESSION_NUMBER>': sess,
-                            '<SESSION_DATE>': session_summary.date,
-                            '<SESSION_LENGTH>': session_summary.length,
-                            '<N_WORDS>': session_summary.n_words,
-                            '<N_CORRECT_WORDS>': session_summary.n_correct_words,
-                            '<PC_CORRECT_WORDS>': '%.2f' % session_summary.pc_correct_words,
-                            '<N_PLI>': session_summary.n_pli,
-                            '<PC_PLI>': '%.2f' % session_summary.pc_pli,
-                            '<N_ELI>': session_summary.n_eli,
-                            '<PC_ELI>': '%.2f' % session_summary.pc_eli,
-                            '<N_MATH>': session_summary.n_math,
-                            '<N_CORRECT_MATH>': session_summary.n_correct_math,
-                            '<PC_CORRECT_MATH>': '%.2f' % session_summary.pc_correct_math,
-                            '<MATH_PER_LIST>': '%.2f' % session_summary.math_per_list,
-                            '<TABLE_FORMAT>': ttable_format,
-                            '<TABLE_HEADER>': ttable_header,
-                            '<SIGNIFICANT_ELECTRODES>': session_ttest_tex_table,
-                            '<AUC>': session_summary.auc,
-                            '<ROC_AND_TERC_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-roc_and_terc_plot_' + session_summary.name + '.pdf'
-                            }
-
-            TextTemplateUtils.replace_template(template_file_name=tex_session_template, out_file_name=report_tex_file_name, replace_dict=replace_dict)
-
-        self.pass_object('report_tex_file_names', report_tex_file_names)
+        # report_tex_file_names = []
+        # for i_sess in xrange(n_sess):
+        #     session_summary = session_summary_array[i_sess]
+        #     sess = session_summary.number
+        #     report_tex_file_name = '%s-%s-s%02d-report.tex' % (task,subject,sess)
+        #     report_tex_file_names.append(report_tex_file_name)
+        #
+        #     self.set_file_resources_to_move(report_tex_file_name, dst='reports')
+        #
+        #     session_ttest_tex_table = latex_table(session_ttest_data[i_sess])
+        #
+        #     replace_dict = {'<PROB_RECALL_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-prob_recall_plot_' + session_summary.name + '.pdf',
+        #                     '<IRT_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-irt_plot_' + session_summary.name + '.pdf',
+        #                     '<DATE>': datetime.date.today(),
+        #                     '<SUBJECT>': subject.replace('_','\\textunderscore'),
+        #                     '<NUMBER_OF_ELECTRODES>': n_bps,
+        #                     '<SESSION_NUMBER>': sess,
+        #                     '<SESSION_DATE>': session_summary.date,
+        #                     '<SESSION_LENGTH>': session_summary.length,
+        #                     '<N_WORDS>': session_summary.n_words,
+        #                     '<N_CORRECT_WORDS>': session_summary.n_correct_words,
+        #                     '<PC_CORRECT_WORDS>': '%.2f' % session_summary.pc_correct_words,
+        #                     '<N_PLI>': session_summary.n_pli,
+        #                     '<PC_PLI>': '%.2f' % session_summary.pc_pli,
+        #                     '<N_ELI>': session_summary.n_eli,
+        #                     '<PC_ELI>': '%.2f' % session_summary.pc_eli,
+        #                     '<N_MATH>': session_summary.n_math,
+        #                     '<N_CORRECT_MATH>': session_summary.n_correct_math,
+        #                     '<PC_CORRECT_MATH>': '%.2f' % session_summary.pc_correct_math,
+        #                     '<MATH_PER_LIST>': '%.2f' % session_summary.math_per_list,
+        #                     '<TABLE_FORMAT>': ttable_format,
+        #                     '<TABLE_HEADER>': ttable_header,
+        #                     '<SIGNIFICANT_ELECTRODES>': session_ttest_tex_table,
+        #                     '<AUC>': session_summary.auc,
+        #                     '<ROC_AND_TERC_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-roc_and_terc_plot_' + session_summary.name + '.pdf'
+        #                     }
+        #
+        #     TextTemplateUtils.replace_template(template_file_name=tex_session_template, out_file_name=report_tex_file_name, replace_dict=replace_dict)
+        #
+        # self.pass_object('report_tex_file_names', report_tex_file_names)
 
         tex_combined_template = task + '_combined.tex.tpl'
-        combined_report_tex_file_name = '%s-%s-combined-report.tex' % (task,subject)
+        combined_report_tex_file_name = '%s_%s_report.tex' % (subject,task)
 
         self.set_file_resources_to_move(combined_report_tex_file_name, dst='reports')
 
@@ -122,50 +122,50 @@ class GeneratePlots(RamTask):
 
         self.create_dir_in_workspace('reports')
 
-        session_summary_array = self.get_passed_object('session_summary_array')
+        # session_summary_array = self.get_passed_object('session_summary_array')
 
         serial_positions = np.arange(1,13)
 
-        for session_summary in session_summary_array:
-            panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, labelsize=18, wspace=20.0)
-
-            pd1 = PlotData(x=serial_positions, y=session_summary.prob_recall, xlim=(0,12), ylim=(0.0, 1.0), xlabel='Serial position\n(a)', ylabel='Probability of recall', xlabel_fontsize=18, ylabel_fontsize=18)
-            pd2 = PlotData(x=serial_positions, y=session_summary.prob_first_recall, xlim=(0,12), ylim=(0.0, 1.0), xlabel='Serial position\n(b)', ylabel='Probability of first recall', xlabel_fontsize=18, ylabel_fontsize=18)
-
-            panel_plot.add_plot_data(0, 0, plot_data=pd1)
-            panel_plot.add_plot_data(0, 1, plot_data=pd2)
-
-            plot = panel_plot.generate_plot()
-
-            plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-prob_recall_plot_' + session_summary.name + '.pdf')
-
-            plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
-
-            if task == 'RAM_CatFR1':
-                panel_plot = PanelPlot(xfigsize=6.0, yfigsize=6.0, i_max=1, j_max=1, title='', xtitle='', labelsize=18)
-                pd = BarPlotData(x=[0,1], y=[session_summary.irt_within_cat,  session_summary.irt_between_cat], ylabel='IRT (msec)',xlabel='', x_tick_labels=['Within Cat', 'Between Cat'], barcolors=['grey','grey'], barwidth=0.5, xlabel_fontsize=18, ylabel_fontsize=18)
-                panel_plot.add_plot_data(0, 0, plot_data=pd)
-                plot = panel_plot.generate_plot()
-                plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-irt_plot_' + session_summary.name + '.pdf')
-                plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
-
-            panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', labelsize=18)
-
-            pd1 = PlotData(x=session_summary.fpr, y=session_summary.tpr, xlim=[0.0,1.0], ylim=[0.0,1.0], xlabel='False Alarm Rate\n(a)', ylabel='Hit Rate', levelline=((0.0,1.0),(0.0,1.0)), color='k', markersize=1.0, xlabel_fontsize=18, ylabel_fontsize=18)
-
-            ylim = np.max(np.abs(session_summary.pc_diff_from_mean)) + 5.0
-            if ylim > 100.0:
-                ylim = 100.0
-            pd2 = BarPlotData(x=(0,1,2), y=session_summary.pc_diff_from_mean, ylim=[-ylim,ylim], xlabel='Tercile of Classifier Estimate\n(b)', ylabel='Recall Change From Mean (%)', x_tick_labels=['Low', 'Middle', 'High'], xhline_pos=0.0, barcolors=['grey','grey', 'grey'], xlabel_fontsize=18, ylabel_fontsize=18, barwidth=0.5)
-
-            panel_plot.add_plot_data(0, 0, plot_data=pd1)
-            panel_plot.add_plot_data(0, 1, plot_data=pd2)
-
-            plot = panel_plot.generate_plot()
-
-            plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-roc_and_terc_plot_' + session_summary.name + '.pdf')
-
-            plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+        # for session_summary in session_summary_array:
+        #     panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, labelsize=18, wspace=20.0)
+        #
+        #     pd1 = PlotData(x=serial_positions, y=session_summary.prob_recall, xlim=(0,12), ylim=(0.0, 1.0), xlabel='Serial position\n(a)', ylabel='Probability of recall', xlabel_fontsize=18, ylabel_fontsize=18)
+        #     pd2 = PlotData(x=serial_positions, y=session_summary.prob_first_recall, xlim=(0,12), ylim=(0.0, 1.0), xlabel='Serial position\n(b)', ylabel='Probability of first recall', xlabel_fontsize=18, ylabel_fontsize=18)
+        #
+        #     panel_plot.add_plot_data(0, 0, plot_data=pd1)
+        #     panel_plot.add_plot_data(0, 1, plot_data=pd2)
+        #
+        #     plot = panel_plot.generate_plot()
+        #
+        #     plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-prob_recall_plot_' + session_summary.name + '.pdf')
+        #
+        #     plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+        #
+        #     if task == 'RAM_CatFR1':
+        #         panel_plot = PanelPlot(xfigsize=6.0, yfigsize=6.0, i_max=1, j_max=1, title='', xtitle='', labelsize=18)
+        #         pd = BarPlotData(x=[0,1], y=[session_summary.irt_within_cat,  session_summary.irt_between_cat], ylabel='IRT (msec)',xlabel='', x_tick_labels=['Within Cat', 'Between Cat'], barcolors=['grey','grey'], barwidth=0.5, xlabel_fontsize=18, ylabel_fontsize=18)
+        #         panel_plot.add_plot_data(0, 0, plot_data=pd)
+        #         plot = panel_plot.generate_plot()
+        #         plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-irt_plot_' + session_summary.name + '.pdf')
+        #         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+        #
+        #     panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', labelsize=18)
+        #
+        #     pd1 = PlotData(x=session_summary.fpr, y=session_summary.tpr, xlim=[0.0,1.0], ylim=[0.0,1.0], xlabel='False Alarm Rate\n(a)', ylabel='Hit Rate', levelline=((0.0,1.0),(0.0,1.0)), color='k', markersize=1.0, xlabel_fontsize=18, ylabel_fontsize=18)
+        #
+        #     ylim = np.max(np.abs(session_summary.pc_diff_from_mean)) + 5.0
+        #     if ylim > 100.0:
+        #         ylim = 100.0
+        #     pd2 = BarPlotData(x=(0,1,2), y=session_summary.pc_diff_from_mean, ylim=[-ylim,ylim], xlabel='Tercile of Classifier Estimate\n(b)', ylabel='Recall Change From Mean (%)', x_tick_labels=['Low', 'Middle', 'High'], xhline_pos=0.0, barcolors=['grey','grey', 'grey'], xlabel_fontsize=18, ylabel_fontsize=18, barwidth=0.5)
+        #
+        #     panel_plot.add_plot_data(0, 0, plot_data=pd1)
+        #     panel_plot.add_plot_data(0, 1, plot_data=pd2)
+        #
+        #     plot = panel_plot.generate_plot()
+        #
+        #     plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-roc_and_terc_plot_' + session_summary.name + '.pdf')
+        #
+        #     plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
         cumulative_summary = self.get_passed_object('cumulative_summary')
 
@@ -219,16 +219,16 @@ class GenerateReportPDF(RamTask):
 
         texinputs_set_str = r'export TEXINPUTS="' + output_directory + '":$TEXINPUTS;'
 
-        report_tex_file_names = self.get_passed_object('report_tex_file_names')
-        for f in report_tex_file_names:
-            # + '/Library/TeX/texbin/pdflatex '\
-            pdflatex_command_str = texinputs_set_str \
-                                   + 'module load Tex; pdflatex '\
-                                   + ' -output-directory '+output_directory\
-                                   + ' -shell-escape ' \
-                                   + self.get_path_to_resource_in_workspace('reports/'+f)
-
-            call([pdflatex_command_str], shell=True)
+        # report_tex_file_names = self.get_passed_object('report_tex_file_names')
+        # for f in report_tex_file_names:
+        #     # + '/Library/TeX/texbin/pdflatex '\
+        #     pdflatex_command_str = texinputs_set_str \
+        #                            + 'module load Tex; pdflatex '\
+        #                            + ' -output-directory '+output_directory\
+        #                            + ' -shell-escape ' \
+        #                            + self.get_path_to_resource_in_workspace('reports/'+f)
+        #
+        #     call([pdflatex_command_str], shell=True)
 
         combined_report_tex_file_name = self.get_passed_object('combined_report_tex_file_name')
 
