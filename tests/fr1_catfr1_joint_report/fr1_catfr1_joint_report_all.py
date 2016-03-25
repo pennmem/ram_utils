@@ -108,7 +108,7 @@ subjects.sort()
 
 rsi = ReportSummaryInventory()
 
-for subject in subjects[10:12]:
+for subject in subjects:
     print '--Generating FR1&CatFR1 joint report for', subject
 
     # sets up processing pipeline
