@@ -7,10 +7,11 @@ import numpy as np
 
 from ptsa.data.readers import BaseEventReader
 
+from ReportUtils import ReportRamTask
 
-class MathEventPreparation(RamTask):
+class MathEventPreparation(ReportRamTask):
     def __init__(self, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(MathEventPreparation,self).__init__(mark_as_completed)
 
     def run(self):
         try:
@@ -26,6 +27,9 @@ class MathEventPreparation(RamTask):
             self.pass_object(self.pipeline.task+'_math_events', events)
 
         except IOError:
+            self.raise_and_log_report_exception(
+                exception_type='MissingDataError',
+                exception_message='Missing math events %s' % (e_path)
+            )
 
-            self.pass_object(self.pipeline.task+'_math_events', None)
 

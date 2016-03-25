@@ -146,7 +146,7 @@ subject_missing_data_list = []
 # report_summary = ReportSummary()
 rsi = ReportSummaryInventory()
 
-for subject in subjects[36:38]:
+for subject in subjects:
     print subject
     # sets up processing pipeline
 

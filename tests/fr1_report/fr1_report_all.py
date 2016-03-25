@@ -11,21 +11,34 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
+    # command_line_emulation_argument_list = ['--subject','R1086M',
+    #                                         '--task','RAM_FR1',
+    #                                         '--workspace-dir','/scratch/busygin/FR1_reports',
+    #                                         '--mount-point','',
+    #                                         '--python-path','/home1/busygin/ram_utils_new_ptsa',
+    #                                         '--python-path','/home1/busygin/python/ptsa_latest',
+    #                                         #'--exit-on-no-change'
+    #                                         ]
+
     command_line_emulation_argument_list = ['--subject','R1086M',
                                             '--task','RAM_FR1',
-                                            '--workspace-dir','/scratch/busygin/FR1_reports',
+                                            '--workspace-dir','/scratch/mswat/FR1_check_1',
                                             '--mount-point','',
-                                            '--python-path','/home1/busygin/ram_utils_new_ptsa',
-                                            '--python-path','/home1/busygin/python/ptsa_latest',
+                                            '--python-path','/home1/mswat/RAM_UTILS_GIT',
+                                            '--python-path','/home1/mswat/PTSA_NEW_GIT'
                                             #'--exit-on-no-change'
                                             ]
+
     args = parse_command_line(command_line_emulation_argument_list)
 
 configure_python_paths(args.python_path)
 
 # ------------------------------- end of processing command line
 
-from ReportUtils.DependencyChangeTrackerLegacy import DependencyChangeTrackerLegacy
+
+from ReportUtils import ReportSummaryInventory, ReportSummary
+from ReportUtils import ReportPipelineBase
+
 
 from FR1EventPreparation import FR1EventPreparation
 
@@ -78,21 +91,29 @@ class Params(object):
 
 params = Params()
 
+#
+# class ReportPipeline(RamPipeline):
+#     def __init__(self, subject, task, workspace_dir, mount_point=None, exit_on_no_change=False):
+#         RamPipeline.__init__(self)
+#         self.exit_on_no_change = exit_on_no_change
+#         self.subject = subject
+#         self.task = self.experiment = task
+#         self.mount_point = mount_point
+#         self.set_workspace_dir(workspace_dir)
+#         dependency_tracker = DependencyChangeTrackerLegacy(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point)
+#
+#         self.set_dependency_tracker(dependency_tracker=dependency_tracker)
 
-class ReportPipeline(RamPipeline):
+class ReportPipeline(ReportPipelineBase):
     def __init__(self, subject, task, workspace_dir, mount_point=None, exit_on_no_change=False):
-        RamPipeline.__init__(self)
-        self.exit_on_no_change = exit_on_no_change
-        self.subject = subject
-        self.task = self.experiment = task
-        self.mount_point = mount_point
-        self.set_workspace_dir(workspace_dir)
-        dependency_tracker = DependencyChangeTrackerLegacy(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point)
+        super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change)
+        self.task = task
+        self.experiment = task
 
-        self.set_dependency_tracker(dependency_tracker=dependency_tracker)
 
-task = 'RAM_PAL1'
+    # task = 'RAM_PAL1'
 
+task = 'RAM_FR1'
 
 def find_subjects_by_task(task):
     ev_files = glob(args.mount_point + ('/data/events/%s/R*_events.mat' % task))
@@ -106,6 +127,8 @@ subjects.remove('R1090C')
 subjects.remove('R1092J_2')
 subjects.remove('R1093J_1')
 subjects.sort()
+
+rsi = ReportSummaryInventory()
 
 for subject in subjects:
     print '--Generating', task, 'report for', subject
@@ -138,9 +161,21 @@ for subject in subjects:
 
     report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
-    # starts processing pipeline
-    try:
-        report_pipeline.execute_pipeline()
-    except KeyboardInterrupt:
-        print 'GOT KEYBOARD INTERUPT. EXITING'
-        sys.exit()
+    report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
+
+    report_pipeline.execute_pipeline()
+
+    rsi.add_report_summary(report_summary=report_pipeline.get_report_summary())
+
+
+
+    # # starts processing pipeline
+    # try:
+    #     report_pipeline.execute_pipeline()
+    # except KeyboardInterrupt:
+    #     print 'GOT KEYBOARD INTERUPT. EXITING'
+    #     sys.exit()
+
+print 'this is summary for all reports report ', rsi.compose_summary(detail_level=1)
+
+rsi.send_email_digest()

@@ -7,6 +7,7 @@ from ptsa.data.readers import BaseEventReader
 
 from RamPipeline import *
 from ReportUtils import ReportRamTask
+from ReportUtils import ReportRamTask
 
 class ControlEventPreparation(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):

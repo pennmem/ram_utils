@@ -35,8 +35,6 @@ configure_python_paths(args.python_path)
 # ------------------------------- end of processing command line
 
 
-from ReportUtils.DependencyChangeTrackerLegacy import DependencyChangeTrackerLegacy
-from ReportUtils import ReportSummaryInventory,ReportSummary
 from ReportUtils import ReportPipelineBase
 
 

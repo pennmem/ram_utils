@@ -11,6 +11,13 @@ import TextTemplateUtils
 from latex_table import latex_table
 from ReportUtils import ReportRamTask
 
+import re
+from collections import namedtuple
+SplitSubjectCode = namedtuple(typename='SplitSubjectCode',field_names=['protocol','id','site','montage'])
+import os
+import shutil
+
+
 def pvalue_formatting(p):
     return '\leq 0.001' if p<=0.001 else ('%.3f'%p)
 
@@ -372,11 +379,6 @@ class GeneratePlots(ReportRamTask):
 
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
-import re
-from collections import namedtuple
-SplitSubjectCode = namedtuple(typename='SplitSubjectCode',field_names=['protocol','id','site','montage'])
-import os
-import shutil
 
 class GenerateReportPDF(ReportRamTask):
     def __init__(self, mark_as_completed=True):
