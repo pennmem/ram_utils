@@ -22,6 +22,7 @@ class ReportSummaryInventory(object):
         if report_summary.subject:
             self.summary_dict[report_summary.subject] = report_summary
 
+
     def compose_summary(self, detail_level=True):
         d = date.today()
         s = 'Report status summary as of : ' + d.isoformat() + '\n'
@@ -171,10 +172,10 @@ class ReportSummary(object):
             s += 'No errors reported\n'
 
         if self.report_file:
-            s += 'Report file (Rhino2): ' + self.report_file
+            s += 'Report file (Rhino2): \n' + self.report_file + '\n'
 
         if self.report_link:
-            s += 'Report URL: ' + self.report_link
+            s += 'Report URL: \n' + self.report_link + '\n'
 
         if self.report_error_status:
             e = self.report_error_status.error

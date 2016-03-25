@@ -30,9 +30,14 @@ class ReportRamTask(RamTask):
 
 
     def pre(self):
+        if self.pipeline.report_summary is None:
+            return
         self.pipeline.report_summary.set_subject(self.pipeline.subject)
 
     def post(self):
+        if self.pipeline.report_summary is None:
+            return
+
         message = 'TASK COMPLETED OK'
         (frame, file, line,function_name, lines, index) = inspect.getouterframes(inspect.currentframe())[0]
         file, line = self.get_code_data()
