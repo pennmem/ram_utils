@@ -4,6 +4,7 @@ from ReportUtils import MissingDataError, MissingExperimentError, ReportError
 from JSONUtils import JSONNode
 from os.path import *
 
+
 class ReportStatus(object):
     def __init__(self, task=None, error=None, message='', line=-1, file=''):
         self.task = task
@@ -37,27 +38,25 @@ class ReportSummaryInventory(object):
 
         return s
 
-    def get_email_list(self,email_list_file):
-        mail_list_path = join(expanduser('~'),'.ram_report',email_list_file)
+    def get_email_list(self, email_list_file):
+        mail_list_path = join(expanduser('~'), '.ram_report', email_list_file)
         mail_list_node = JSONNode.read(mail_list_path)
         print mail_list_node.output()
 
         email_list = []
         subscribers = mail_list_node['subscribers']
         for subscriber in subscribers:
-            print 'Name: ', subscriber['FirstName'], ' ',subscriber['LastName'],   ' email: ', subscriber['email']
+            print 'Name: ', subscriber['FirstName'], ' ', subscriber['LastName'], ' email: ', subscriber['email']
             email_list.append(subscriber['email'])
 
         return email_list
 
-    def send_to_single_list(self,msg,email_list,):
+    def send_to_single_list(self, msg, email_list, ):
         import base64
-        from email.mime.text import MIMEText
         from datetime import date
         import smtplib
 
-        mail_info_path = join(expanduser('~'),'.ram_report','mail_info.json')
-
+        mail_info_path = join(expanduser('~'), '.ram_report', 'mail_info.json')
 
         mail_info = JSONNode.read(mail_info_path)
 
@@ -70,11 +69,7 @@ class ReportSummaryInventory(object):
         EMAIL_SPACE = ", "
         EMAIL_FROM = "ramdarpaproject@gmail.com"
 
-        print 'u,p,server,port=',(u,p,smtp_server,smtp_port)
-
-
-
-
+        print 'u,p,server,port=', (u, p, smtp_server, smtp_port)
 
         msg['Subject'] = "Daily DARPA Report Digest for" + " %s" % (date.today().strftime(DATE_FORMAT))
         msg['To'] = EMAIL_SPACE.join(email_list)
@@ -88,77 +83,22 @@ class ReportSummaryInventory(object):
         mail.sendmail(EMAIL_FROM, email_list, msg.as_string())
         mail.quit()
 
-
-
     def send_email_digest(self):
-        import base64
+
         from email.mime.text import MIMEText
-        from datetime import date
-        import smtplib
-        #
-        # mail_info_path = join(expanduser('~'),'.ram_report','mail_info.json')
-        #
-        #
-        # mail_info = JSONNode.read(mail_info_path)
-        #
-        # u = mail_info['u']
-        # p = mail_info['p']
-        # smtp_server = mail_info['server']
-        # smtp_port = int(mail_info['port'])
-        #
-        # DATE_FORMAT = "%d/%m/%Y"
-        # EMAIL_SPACE = ", "
-        # EMAIL_FROM = "ramdarpaproject@gmail.com"
-
-
-
-        # print 'u,p,server,port=',(u,p,smtp_server,smtp_port)
 
         # ------------ regular subscribers --------------
         email_list = self.get_email_list(email_list_file='mail_list.json')
-        report_summary = self.compose_summary(detail_level=1)
+        report_summary = self.compose_summary(detail_level=0)
         msg = MIMEText(report_summary)
-        self.send_to_single_list(msg=msg,email_list=email_list)
-
+        self.send_to_single_list(msg=msg, email_list=email_list)
 
         # ------------ developer subscribers --------------
 
         email_list_dev = self.get_email_list(email_list_file='developer_mail_list.json')
-        report_summary_dev= self.compose_summary(detail_level=2)
+        report_summary_dev = self.compose_summary(detail_level=2)
         msg_dev = MIMEText(report_summary_dev)
-        self.send_to_single_list(msg=msg_dev,email_list=email_list_dev)
-
-
-        # mail_list_path = join(expanduser('~'),'.ram_report','mail_list.json')
-        # mail_list_node = JSONNode.read(mail_list_path)
-        # print mail_list_node.output()
-        #
-        # email_list = []
-        # subscribers = mail_list_node['subscribers']
-        # for subscriber in subscribers:
-        #     print 'Name: ', subscriber['FirstName'], ' ',subscriber['LastName'],   ' email: ', subscriber['email']
-        #     email_list.append(subscriber['email'])
-
-
-        # report_summary = self.compose_summary(detail_level=1)
-
-        # msg = MIMEText(report_summary)
-        #
-        #
-        # msg['Subject'] = "Daily DARPA Report Digest for" + " %s" % (date.today().strftime(DATE_FORMAT))
-        # msg['To'] = EMAIL_SPACE.join(email_list)
-        # msg['From'] = EMAIL_FROM
-        # mail = smtplib.SMTP(smtp_server, smtp_port)
-        # mail.ehlo()
-        #
-        # mail.starttls()
-        #
-        # mail.login(u, base64.b64decode(p))
-        # mail.sendmail(EMAIL_FROM, email_list, msg.as_string())
-        # mail.quit()
-
-
-
+        self.send_to_single_list(msg=msg_dev, email_list=email_list_dev)
 
 
 class ReportSummary(object):
@@ -175,10 +115,10 @@ class ReportSummary(object):
         self.report_file = None
         self.report_link = None
 
-    def add_report_file(self,file):
+    def add_report_file(self, file):
         self.report_file = file
 
-    def add_report_link(self,link):
+    def add_report_link(self, link):
         self.report_link = link
 
     def add_changed_resources(self, changed_resources):
@@ -197,26 +137,19 @@ class ReportSummary(object):
         error_rs = ReportStatus(error=error)
         self.report_error_status = error_rs
 
-        # if isinstance(error, (MissingDataError, MissingExperimentError, ReportError)):
-        #
-        #     self.report_error_status = error_rs
-        #     # self.report_error_status = error.status
-        # else:
-        #     self.report_error = error
-
-    def detailed_status(self,detail_level=2):
+    def detailed_status(self, detail_level=2):
         s = ''
-        if detail_level>0:
-            s += '\nDetailed report level %s\n'%str(detail_level)
+        if detail_level > 0:
+            s += '\nDetailed report level %s\n' % str(detail_level)
 
-        if detail_level>1:
+        if detail_level > 1:
             for status in self.report_status_list:
                 s += '\n'
                 s += 'Task: ' + status.task + ' : ' + status.message + '\n'
                 if status.file and status.line >= 0:
                     s += 'file: ' + status.file + '-------- line: ' + str(status.line) + ' \n'
 
-        if detail_level==1:
+        if detail_level == 1:
             s += '\n'
             if len(self.changed_resources):
 
@@ -238,11 +171,10 @@ class ReportSummary(object):
             s += 'No errors reported\n'
 
         if self.report_file:
-            s += 'Report file (Rhino2): '+self.report_file
-
+            s += 'Report file (Rhino2): ' + self.report_file
 
         if self.report_link:
-            s += 'Report URL: '+self.report_link
+            s += 'Report URL: ' + self.report_link
 
         if self.report_error_status:
             e = self.report_error_status.error
@@ -263,10 +195,6 @@ class ReportSummary(object):
                     s += 'File:' + self.report_error_status.file + '---------------------------' + ' line: ' + str(
                         self.report_error_status.line) + '\n'
 
-
-
         s += self.detailed_status(detail_level=detail_level)
-        # else:
-        #     if not self.report_error:
-        #         s += ' REPORT_SUCCEFULY GENERATED'
+
         return s
