@@ -11,24 +11,24 @@ from DependencyInventory import DependencyInventory
 
 
 class RamTask(object):
-
-
     def __init__(self, mark_as_completed=True):
         self.outputs = []
         self.pipeline = None
         self.workspace_dir = None
         self.file_resources_to_copy = defaultdict()
-        self.file_resources_to_move = defaultdict() # {file_resource:dst_dir}
+        self.file_resources_to_move = defaultdict()  # {file_resource:dst_dir}
         self.mark_as_completed = True
-        self.__name=None
+        self.__name = None
 
         self.set_mark_as_completed(mark_as_completed)
 
         self.dependency_inventory = DependencyInventory()
 
         # self.__dependent_resources__ = OrderedDict()
+
     def get_dependency_inventory(self):
         return self.dependency_inventory
+
     # def read_status(self):
     #     json_index_file = join(self.workspace_dir,'_status','index.json')
     #     return JSONNode.read(filename=json_index_file)
@@ -62,8 +62,8 @@ class RamTask(object):
 
 
 
-    def set_name(self,name):
-        self.__name=name
+    def set_name(self, name):
+        self.__name = name
 
     def name(self):
         return self.__name
@@ -84,12 +84,10 @@ class RamTask(object):
         return join(self.workspace_dir, self.name() + '.completed')
 
     def check_json_stub(self):
-        json_stub_file = join(self.workspace_dir,'index.json')
-
+        json_stub_file = join(self.workspace_dir, 'index.json')
 
         print 'json stub=', JSONNode.read(filename=json_stub_file)
         print
-
 
     # def read_status(self):
     #     json_index_file = join(self.workspace_dir,'_status','index.json')
@@ -119,8 +117,7 @@ class RamTask(object):
         self.pipeline = pipeline
         self.workspace_dir = self.set_workspace_dir(self.pipeline.workspace_dir)
 
-
-    def set_workspace_dir(self,workspace_dir):
+    def set_workspace_dir(self, workspace_dir):
         """
         Sets Workspace dir
         :param workspace_dir: full path to the workspace dir
@@ -138,9 +135,9 @@ class RamTask(object):
         :param flag:boolean flag
         :return:None
         '''
-        self.mark_as_completed  = flag
+        self.mark_as_completed = flag
 
-    def open_file_in_workspace_dir(self,file_name, mode='r'):
+    def open_file_in_workspace_dir(self, file_name, mode='r'):
         """
         Opens file in the workspace directory - the default file open mode is 'r'
         :param file_name: file name relative to the workspace directory
@@ -157,7 +154,6 @@ class RamTask(object):
 
         except IOError:
             return None, None
-
 
     # def create_file_in_workspace_dir(self, file_name, mode='w'):
     #     """
@@ -192,14 +188,12 @@ class RamTask(object):
         :return: (file object, full_path_to the file)
         """
 
-
         file_name_to_file_obj_full_path_dict = self.create_multiple_files_in_workspace_dir(file_name, mode=mode)
 
         try:
-            return file_name_to_file_obj_full_path_dict[file_name] # returns a tuple (file object, full file name)
+            return file_name_to_file_obj_full_path_dict[file_name]  # returns a tuple (file object, full file name)
         except LookupError:
-            raise LookupError('Could not locate file_name: %s  in the dictionary of created files'%file_name)
-
+            raise LookupError('Could not locate file_name: %s  in the dictionary of created files' % file_name)
 
     def create_multiple_files_in_workspace_dir(self, *rel_file_names, **options):
         """
@@ -222,23 +216,21 @@ class RamTask(object):
         for rel_file_name in rel_file_names:
 
             output_file_name = join(self.workspace_dir, rel_file_name)
-            output_file_name = abspath(output_file_name)# normalizing path
+            output_file_name = abspath(output_file_name)  # normalizing path
             dir_for_output_file_name = dirname(output_file_name)
-
 
             try:
                 mkpath(dir_for_output_file_name)
             except:
-                raise IOError('Could not create directory path %s'%dir_for_output_file_name)
+                raise IOError('Could not create directory path %s' % dir_for_output_file_name)
 
             try:
-                file_name_to_file_obj_full_path_dict[rel_file_name] = (open(output_file_name, mode),output_file_name)
+                file_name_to_file_obj_full_path_dict[rel_file_name] = (open(output_file_name, mode), output_file_name)
                 # return open(output_file_name, mode),output_file_name
             except IOError:
-                raise IOError ('COULD NOT OPEN '+output_file_name+' in mode='+mode)
+                raise IOError('COULD NOT OPEN ' + output_file_name + ' in mode=' + mode)
 
         return file_name_to_file_obj_full_path_dict
-
 
     def create_dir_in_workspace(self, dir_name):
         """
@@ -270,11 +262,10 @@ class RamTask(object):
                 dir_name_dict[dir_name] = dir_name_full_path
 
             except OSError:
-                print 'skipping: '+dir_name_full_path+ ' perhaps it already exists'
+                print 'skipping: ' + dir_name_full_path + ' perhaps it already exists'
                 pass
 
         return dir_name_dict
-
 
     def set_file_resources_to_copy(self, *file_resources, **kwds):
         '''
@@ -335,10 +326,11 @@ class RamTask(object):
 
             file_resource_base_name = os.path.basename(file_resource)
             try:
-                target_path= os.path.abspath(os.path.join(self.pipeline.workspace_dir, dst_relative_path, file_resource_base_name))
+                target_path = os.path.abspath(
+                    os.path.join(self.pipeline.workspace_dir, dst_relative_path, file_resource_base_name))
                 shutil.copy(file_resource, target_path)
             except IOError:
-                print 'Could not copy file: ',file_resource, ' to ', target_path
+                print 'Could not copy file: ', file_resource, ' to ', target_path
 
     def move_file_resources_to_workspace(self):
         '''
@@ -355,11 +347,11 @@ class RamTask(object):
 
             file_resource_base_name = os.path.basename(file_resource)
             try:
-                target_path= os.path.abspath(os.path.join(self.pipeline.workspace_dir, dst_relative_path, file_resource_base_name))
+                target_path = os.path.abspath(
+                    os.path.join(self.pipeline.workspace_dir, dst_relative_path, file_resource_base_name))
                 shutil.move(file_resource, target_path)
             except IOError:
-                print 'Could not move file: ',file_resource, ' to ', target_path
-
+                print 'Could not move file: ', file_resource, ' to ', target_path
 
     def get_path_to_resource_in_workspace(self, *rel_path_components):
         """
@@ -371,7 +363,6 @@ class RamTask(object):
         assert self.workspace_dir is not None, "Workspace directory was not set"
 
         return abspath(join(self.workspace_dir, *rel_path_components))
-
 
     def get_pipeline(self):
         '''
@@ -387,7 +378,7 @@ class RamTask(object):
         '''
         return self.workspace_dir
 
-    def set_pipeline(self,pipeline):
+    def set_pipeline(self, pipeline):
         '''
         Initializes reference pointing to the pipeline object to which current task belongs to.
         This initialization is done automatically when user adds task to the pipeline
@@ -421,6 +412,21 @@ class RamTask(object):
         :return:
         '''
         pass
+
+    def pre(self):
+        """
+        Core function will be called before run - can be used in subclasses to run code just before run object gets called
+        :return:None
+        """
+        pass
+
+    def post(self):
+        """
+        Core function will be called before run - can be used in subclasses to run code right after run object gets called
+        :return:None
+        """
+        pass
+
     def run(self):
         '''
         Core function of the task object - needs to be reimplmented in each subslacc deriving from RamTask
@@ -428,12 +434,13 @@ class RamTask(object):
         '''
         pass
 
+
 if __name__ == '__main__':
     rt = RamTask()
     rt.set_workspace_dir('/Users/m/my_workspace')
     print 'rt.workspace_dir = ', rt.workspace_dir
-    print 'rt.get_workspace_dir=',rt.get_workspace_dir()
+    print 'rt.get_workspace_dir=', rt.get_workspace_dir()
 
-    print 'get_path_to_file_in_workspace = ', rt.get_path_to_resource_in_workspace('abc/cba/cbos','mst')
+    print 'get_path_to_file_in_workspace = ', rt.get_path_to_resource_in_workspace('abc/cba/cbos', 'mst')
 
     # print 'this is get_path_to_file_in_workspace=',rt.get_path_to_file_in_workspace('demo1')

@@ -5,19 +5,20 @@ import os
 
 from ptsa.data.readers import TalReader, TalStimOnlyReader
 
-from get_bipolar_subj_elecs import get_bipolar_subj_elecs
-
 from sklearn.externals import joblib
 
-from RamPipeline import *
-from ReportUtils import MissingDataError
+from ReportUtils import ReportRamTask
 
 
-class TalPreparation(RamTask):
+class TalPreparation(ReportRamTask):
     def __init__(self, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(TalPreparation,self).__init__(mark_as_completed)
+
 
     def run(self):
+
+
+        self.add_report_status(message='OK')
         try:
 
             tal_path = os.path.join(self.pipeline.mount_point,'data/eeg',self.pipeline.subject,'tal',self.pipeline.subject+'_talLocs_database_bipol.mat')
@@ -56,8 +57,15 @@ class TalPreparation(RamTask):
             self.pass_object('loc_tag', loc_tag)
             joblib.dump(loc_tag, self.get_path_to_resource_in_workspace(self.pipeline.subject+'-loc_tag.pkl'))
 
+            self.add_report_status(message='OK')
+
         except Exception:
-            raise MissingDataError('Missing or corrupt electrodes data %s for subject %s '%(tal_path,self.pipeline.subject))
+            # raise MissingDataError('Missing or corrupt electrodes data %s for subject %s '%(tal_path,self.pipeline.subject))
+
+            self.raise_and_log_report_exception(
+                                                exception_type='MissingDataError',
+                                                exception_message='Missing or corrupt electrodes data %s for subject %s '%(tal_path,self.pipeline.subject)
+                                                )
 
 
 

@@ -5,25 +5,27 @@ from os.path import *
 
 from RamPipeline.DependencyChangeTrackerBase import DependencyChangeTrackerBase
 import warnings
+from collections import OrderedDict
+
+
 class DependencyChangeTrackerLegacy(DependencyChangeTrackerBase):
-    '''
-    This is meant to be a general API for dependency tracking
-    '''
-    def __init__(self,*args,**kwds):
+
+    def __init__(self, *args, **kwds):
+        super(DependencyChangeTrackerLegacy,self).__init__(*args, **kwds)
         try:
-            self.subject=kwds['subject']
+            self.subject = kwds['subject']
         except KeyError:
-            self.subject=''
+            self.subject = ''
 
         try:
-            self.workspace_dir=kwds['workspace_dir']
+            self.workspace_dir = kwds['workspace_dir']
         except KeyError:
-            self.workspace_dir=''
+            self.workspace_dir = ''
 
         try:
-            self.mount_point=kwds['mount_point']
+            self.mount_point = kwds['mount_point']
         except KeyError:
-            self.mount_point=''
+            self.mount_point = ''
 
         self.json_saved_data_status_node = None
         self.json_latest_status_node = None
@@ -45,14 +47,14 @@ class DependencyChangeTrackerLegacy(DependencyChangeTrackerBase):
         # print self.json_latest_status_node.output()
 
 
-        if not self.json_saved_data_status_node: # if saved json stub was not found
+        if not self.json_saved_data_status_node:  # if saved json stub was not found
             self.json_saved_data_status_node = self.json_latest_status_node
 
     def get_latest_data_status(self):
         return self.json_latest_status_node
 
     def read_saved_data_status(self):
-        json_index_file = join(self.workspace_dir,'_status','index.json')
+        json_index_file = join(self.workspace_dir, '_status', 'index.json')
         self.json_saved_data_status_node = JSONNode.read(filename=json_index_file)
         # rp = DataLayoutJSONUtils()
         # self.json_latest_status_node = rp.create_subject_JSON_stub(subject_code=self.)
@@ -62,7 +64,7 @@ class DependencyChangeTrackerLegacy(DependencyChangeTrackerBase):
 
     def write_latest_data_status(self):
         if self.json_latest_status_node:
-            self.json_latest_status_node.write(join(self.workspace_dir,'_status','index.json'))
+            self.json_latest_status_node.write(join(self.workspace_dir, '_status', 'index.json'))
 
     def check_dependency_change(self, task):
         change_flag = False
@@ -85,21 +87,22 @@ class DependencyChangeTrackerLegacy(DependencyChangeTrackerBase):
                 try:
                     resource_node = resource_node[node_name]
                 except KeyError:
-                    warnings.warn("Could not locate node "+node_name,RuntimeWarning)
+                    warnings.warn("Could not locate node " + node_name, RuntimeWarning)
+                    self.changed_resources[' -> '.join(json_node_access_list)] = 'non_existent_resource'
                     change_flag = True
                     return change_flag
 
                     # raise KeyError('Could not locate node = ' + node_name)
 
-            full_resource_path = join(self.mount_point,'data', resource_node['path'])
-            print 'full_resource_path=',full_resource_path
+            full_resource_path = join(self.mount_point, 'data', resource_node['path'])
+            print 'full_resource_path=', full_resource_path
             md5 = compute_md5_key(full_resource_path)
 
             if md5 != resource_node['md5']:
-                print 'Dependency for task =',task.name(), ' has changed'
+                print 'Dependency for task =', task.name(), ' has changed'
+                self.changed_resources[full_resource_path] = 'changed_existing_resource'
+
                 change_flag = True
                 return change_flag
                 # os.remove(self.get_task_completed_file_name())
-            # print resource_node.output()
-
-
+                # print resource_node.output()

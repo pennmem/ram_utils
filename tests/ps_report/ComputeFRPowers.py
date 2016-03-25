@@ -9,10 +9,11 @@ from sklearn.externals import joblib
 from ptsa.data.events import Events
 from ptsa.data.readers import EEGReader
 from ReportUtils import MissingDataError
+from ReportUtils import ReportRamTask
 
-class ComputeFRPowers(RamTask):
+class ComputeFRPowers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(ComputeFRPowers,self).__init__(mark_as_completed)
         self.params = params
         self.pow_mat = None
         self.samplerate = None
@@ -92,7 +93,12 @@ class ComputeFRPowers(RamTask):
 
                 eegs = eeg_reader.read()
             except IOError as err:
-                raise MissingDataError('Could not read EEG file for subject %s'%(self.pipeline.subject))
+                self.raise_and_log_report_exception(
+                                                    exception_type='MissingDataError',
+                                                    exception_message='Could not read EEG file for subject %s'%(self.pipeline.subject)
+                                                    )
+
+                # raise MissingDataError('Could not read EEG file for subject %s'%(self.pipeline.subject))
 
             if eeg_reader.removed_bad_data():
                 print 'REMOVED SOME BAD EVENTS !!!'

@@ -10,9 +10,11 @@ from sklearn.externals import joblib
 from ptsa.data.events import Events
 from ptsa.data.readers import EEGReader
 
-class ComputeControlPowers(RamTask):
+from ReportUtils import ReportRamTask
+
+class ComputeControlPowers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(ComputeControlPowers,self).__init__(mark_as_completed)
         self.params = params
         self.pow_mat = None
         self.samplerate = None

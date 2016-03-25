@@ -9,14 +9,15 @@ from PlotUtils import PlotData, BarPlotData, PlotDataCollection, PanelPlot
 import TextTemplateUtils
 
 from latex_table import latex_table
-
+from ReportUtils import ReportRamTask
 
 def pvalue_formatting(p):
     return '\leq 0.001' if p<=0.001 else ('%.3f'%p)
 
 
-class GenerateTex(RamTask):
-    def __init__(self, mark_as_completed=True): RamTask.__init__(self, mark_as_completed)
+class GenerateTex(ReportRamTask):
+    def __init__(self, mark_as_completed=True):
+        super(GenerateTex,self).__init__(mark_as_completed)
 
     def run(self):
         tex_template = 'ps_report.tex.tpl'
@@ -191,9 +192,9 @@ class GenerateTex(RamTask):
 
 
 
-class GeneratePlots(RamTask):
+class GeneratePlots(ReportRamTask):
     def __init__(self, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(GeneratePlots,self).__init__(mark_as_completed)
 
     def run(self):
         #experiment = self.pipeline.experiment
@@ -373,9 +374,33 @@ class GeneratePlots(RamTask):
 
 
 
-class GenerateReportPDF(RamTask):
+class GenerateReportPDF(ReportRamTask):
     def __init__(self, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(GenerateReportPDF,self).__init__(mark_as_completed)
+
+
+    # def initialize(self):
+
+        # if self.dependency_inventory:
+
+            # self.dependency_inventory.add_dependent_resource(resource_name='fr1_events',
+            #                             access_path = ['experiments','fr1','events'])
+            #
+            # self.dependency_inventory.add_dependent_resource(resource_name='catfr1_events',
+            #                             access_path = ['experiments','catfr1','events'])
+            #
+            # self.dependency_inventory.add_dependent_resource(resource_name='ps_events',
+            #                             access_path = ['experiments','ps','events'])
+            #
+            # self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
+            #                             access_path = ['electrodes','bipolar'])
+
+            # self.dependency_inventory.add_dependent_resource(resource_name='fr1_info',
+            #                             access_path = ['experiments','fr1','info'])
+
+            # self.dependency_inventory.add_dependent_resource(resource_name='fr1_info1',
+            #                             access_path = ['experiments','fr1','info1'])
+
 
     def run(self):
         from subprocess import call
@@ -394,3 +419,7 @@ class GenerateReportPDF(RamTask):
                                + self.get_path_to_resource_in_workspace('reports/'+report_tex_file_name)
 
         call([pdflatex_command_str], shell=True)
+
+        report_core_file_name, ext = splitext(report_tex_file_name)
+        report_file = join(output_directory,report_core_file_name+'.pdf')
+        self.add_report_file(file=report_file)

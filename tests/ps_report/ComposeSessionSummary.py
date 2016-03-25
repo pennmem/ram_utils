@@ -17,7 +17,7 @@ from scipy.stats import ttest_ind
 from sklearn.externals import joblib
 
 from collections import OrderedDict
-
+from ReportUtils import ReportRamTask
 
 def classifier_delta_plot_data(ps_table, control_series, param1_name, param2_name, param2_unit):
     plots = OrderedDict()
@@ -143,9 +143,9 @@ def format_ttest_table(ttest_table):
     return result
 
 
-class ComposeSessionSummary(RamTask):
+class ComposeSessionSummary(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(ComposeSessionSummary,self).__init__(mark_as_completed)
         self.params = params
 
     def restore(self):

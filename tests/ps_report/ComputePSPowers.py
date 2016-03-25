@@ -10,11 +10,11 @@ from sklearn.externals import joblib
 
 from ptsa.data.events import Events
 from ptsa.data.readers import EEGReader,BaseRawReader
+from ReportUtils import ReportRamTask
 
-
-class ComputePSPowers(RamTask):
+class ComputePSPowers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(ComputePSPowers,self).__init__( mark_as_completed)
         self.params = params
         self.wavelet_transform = MorletWaveletTransform()
 
