@@ -88,19 +88,6 @@ class Params(object):
 params = Params()
 
 
-# class ReportPipeline(RamPipeline):
-#     def __init__(self, subject, workspace_dir, mount_point=None, exit_on_no_change=False):
-#         RamPipeline.__init__(self)
-#         self.exit_on_no_change = exit_on_no_change
-#         self.subject = subject
-#         self.task = self.experiment = 'RAM_FR1'
-#         self.mount_point = mount_point
-#         self.set_workspace_dir(workspace_dir)
-#         dependency_tracker = DependencyChangeTrackerLegacy(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point)
-#
-#         self.set_dependency_tracker(dependency_tracker=dependency_tracker)
-
-
 class ReportPipeline(ReportPipelineBase):
     def __init__(self, subject, workspace_dir, mount_point=None, exit_on_no_change=False):
         super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change)
@@ -118,8 +105,6 @@ def find_subjects_by_task(task):
 subjects = list(set(find_subjects_by_task('RAM_FR1')).intersection(find_subjects_by_task('RAM_CatFR1')))
 subjects.sort()
 
-#print subjects
-#sys.exit(0)
 
 rsi = ReportSummaryInventory()
 
@@ -160,12 +145,6 @@ for subject in subjects[10:12]:
     report_pipeline.execute_pipeline()
 
 
-    # # starts processing pipeline
-    # try:
-    #     report_pipeline.execute_pipeline()
-    # except KeyboardInterrupt:
-    #     print 'GOT KEYBOARD INTERUPT. EXITING'
-    #     sys.exit()
 
 print 'this is summary for all reports report ', rsi.compose_summary(detail_level=1)
 
