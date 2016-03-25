@@ -50,7 +50,6 @@ configure_python_paths(args.python_path)
 # ------------------------------- end of processing command line
 from ReportUtils import ReportPipelineBase
 
-from ReportUtils.DependencyChangeTrackerLegacy import DependencyChangeTrackerLegacy
 
 from FR1EventPreparation import FR1EventPreparation
 
@@ -104,17 +103,6 @@ class Params(object):
 params = Params()
 
 
-# class ReportPipeline(RamPipeline):
-#     def __init__(self, subject, task, workspace_dir, mount_point=None, exit_on_no_change=False):
-#         RamPipeline.__init__(self)
-#         self.exit_on_no_change = exit_on_no_change
-#         self.subject = subject
-#         self.task = self.experiment = task
-#         self.mount_point = mount_point
-#         self.set_workspace_dir(workspace_dir)
-#         dependency_tracker = DependencyChangeTrackerLegacy(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point)
-#
-#         self.set_dependency_tracker(dependency_tracker=dependency_tracker)
 
     class ReportPipeline(ReportPipelineBase):
         def __init__(self, subject, task, workspace_dir, mount_point=None, exit_on_no_change=False):

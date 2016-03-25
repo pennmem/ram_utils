@@ -6,7 +6,7 @@ import pandas as pd
 import time
 from operator import itemgetter
 
-
+from ReportUtils import ReportRamTask
 def make_atlas_loc(tag, atlas_loc, comments):
 
     def colon_connect(s1, s2):
@@ -66,9 +66,9 @@ def format_ttest_table(table_data):
                 line[:] = ['\\textbf{\\textcolor{blue}{%s}}' % s for s in line]
 
 
-class ComposeSessionSummary(RamTask):
+class ComposeSessionSummary(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(ComposeSessionSummary,self).__init__(mark_as_completed)
         self.params = params
 
         if self.dependency_inventory:

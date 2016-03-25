@@ -8,10 +8,12 @@ from morlet import MorletWaveletTransform
 from sklearn.externals import joblib
 
 from ptsa.data.readers import EEGReader
+from ReportUtils import ReportRamTask
 
-class ComputeFR1HFPowers(RamTask):
+class ComputeFR1HFPowers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(ComputeFR1HFPowers,self).__init__(mark_as_completed)
+
         self.params = params
         self.pow_mat = None
         self.samplerate = None

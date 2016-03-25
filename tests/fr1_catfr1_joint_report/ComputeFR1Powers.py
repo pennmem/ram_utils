@@ -8,9 +8,11 @@ from sklearn.externals import joblib
 
 from ptsa.data.readers import EEGReader
 
-class ComputeFR1Powers(RamTask):
+from ReportUtils import ReportRamTask
+
+class ComputeFR1Powers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(ComputeFR1Powers,self).__init__(mark_as_completed)
         self.params = params
         self.pow_mat = None
         self.samplerate = None

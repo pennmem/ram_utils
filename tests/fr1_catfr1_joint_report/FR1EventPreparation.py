@@ -8,11 +8,11 @@ from ptsa.data.readers import BaseEventReader
 
 from RamPipeline import *
 from ReportUtils import MissingDataError
+from ReportUtils import ReportRamTask
 
-
-class FR1EventPreparation(RamTask):
+class FR1EventPreparation(ReportRamTask):
     def __init__(self, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(FR1EventPreparation,self).__init__(mark_as_completed)
 
     def run(self):
         try:
@@ -41,7 +41,7 @@ class FR1EventPreparation(RamTask):
             except IOError:
                 pass
 
-            self.pass_object('RAM_FR1_all_events', events)
+            self.pass_object(self.pipeline.task+'_all_events', events)
 
             intr_events = events[(events.intrusion!=-999) & (events.intrusion!=0)]
 
@@ -51,12 +51,15 @@ class FR1EventPreparation(RamTask):
 
             print len(events), 'WORD events'
 
-            self.pass_object('RAM_FR1_events', events)
-            self.pass_object('RAM_FR1_intr_events', intr_events)
-            self.pass_object('RAM_FR1_rec_events', rec_events)
+            self.pass_object(self.pipeline.task+'_events', events)
+            self.pass_object(self.pipeline.task+'_intr_events', intr_events)
+            self.pass_object(self.pipeline.task+'_rec_events', rec_events)
 
         except Exception:
-            raise MissingDataError('Missing FR1 or CatFR1 data (%s,%s) for subject %s '%(fr1_e_path,catfr1_e_path,self.pipeline.subject))
+            self.raise_and_log_report_exception(
+                exception_type='MissingDataError',
+                exception_message='Missing FR1 or CatFR1 events data (%s,%s)' % (fr1_e_path, catfr1_e_path)
+            )
 
 
         # task = self.pipeline.task
