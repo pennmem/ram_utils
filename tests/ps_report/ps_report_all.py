@@ -143,8 +143,7 @@ subject_fail_list = []
 subject_missing_experiment_list = []
 subject_missing_data_list = []
 
-# report_summary = ReportSummary()
-rsi = ReportSummaryInventory()
+rsi = ReportSummaryInventory(label=args.experiment)
 
 for subject in subjects:
     print subject

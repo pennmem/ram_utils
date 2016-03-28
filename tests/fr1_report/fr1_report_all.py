@@ -115,7 +115,7 @@ subjects.remove('R1092J_2')
 subjects.remove('R1093J_1')
 subjects.sort()
 
-rsi = ReportSummaryInventory()
+rsi = ReportSummaryInventory(label=task)
 
 for subject in subjects:
     print '--Generating', task, 'report for', subject

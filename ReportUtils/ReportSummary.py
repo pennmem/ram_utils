@@ -15,27 +15,71 @@ class ReportStatus(object):
 
 
 class ReportSummaryInventory(object):
-    def __init__(self):
+    def __init__(self, label=''):
         self.summary_dict = OrderedDict()
+
+        self.reports_generated_count = 0
+        self.reports_error_count = 0
+        self.label = label
+
 
     def add_report_summary(self, report_summary):
         if report_summary.subject:
             self.summary_dict[report_summary.subject] = report_summary
 
-
-    def compose_summary(self, detail_level=True):
+    def compose_summary(self, detail_level=2):
         d = date.today()
         s = 'Report status summary as of : ' + d.isoformat() + '\n'
+
         reports_with_missing_data = OrderedDict()
         reports_with_missing_experiment = OrderedDict()
         reports_other_failure = OrderedDict()
 
+        s_details_ok = ''
+        s_details_error = ''
+
+        self.reports_generated_count = 0
+        self.reports_error_count = 0
+
         for subject, report_summary in self.summary_dict.items():
-            s += '------------------------------------------------------------------------------------\n'
+
+            s_details = ''
+            s_details += '------------------------------------------------------------------------------------\n'
             # s += 'Subject: '+subject+'\n'
             # s+='------------------------------------------------------------------------------------\n'
-            s += report_summary.summary(detail_level=detail_level)
-            s += '------------------------------------------------------------------------------------\n\n'
+            s_details += report_summary.summary(detail_level=detail_level)
+            s_details += '------------------------------------------------------------------------------------\n\n'
+
+            if report_summary.get_report_generated_flag():
+                self.reports_generated_count += 1
+                s_details_ok += s_details
+
+            if report_summary.error_flag():
+                self.reports_error_count += 1
+                s_details_error += s_details
+
+
+
+        if self.reports_generated_count:
+            s += '\n'
+            reports_word = 'reports' if self.reports_generated_count>1 else 'report'
+            s += 'Generated ' + str(self.reports_generated_count) + ' '+reports_word + '\n'
+
+        if detail_level>0:
+            if self.reports_error_count:
+                s += str(self.reports_error_count) + ' reports were not generated due to errors. see detailes below' + '\n'
+
+        s += '\n' + 'Detailed Report Generation Status' + '\n'
+
+        if self.reports_generated_count:
+
+            s+= '\n'+'--------------------------NEWLY GENERATED REPORTS-----------------------------------'+'\n'
+            s += s_details_ok
+
+        if detail_level>0:
+            if self.reports_error_count:
+                s+='\n'+'---------------------------REPORT ERRORS---------------------------------------'+'\n'
+                s += s_details_error
 
         return s
 
@@ -52,7 +96,7 @@ class ReportSummaryInventory(object):
 
         return email_list
 
-    def send_to_single_list(self, msg, email_list, ):
+    def send_to_single_list(self, subject, msg, email_list, ):
         import base64
         from datetime import date
         import smtplib
@@ -72,7 +116,8 @@ class ReportSummaryInventory(object):
 
         print 'u,p,server,port=', (u, p, smtp_server, smtp_port)
 
-        msg['Subject'] = "Daily DARPA Report Digest for" + " %s" % (date.today().strftime(DATE_FORMAT))
+        msg['Subject'] =subject
+
         msg['To'] = EMAIL_SPACE.join(email_list)
         msg['From'] = EMAIL_FROM
         mail = smtplib.SMTP(smtp_server, smtp_port)
@@ -84,22 +129,36 @@ class ReportSummaryInventory(object):
         mail.sendmail(EMAIL_FROM, email_list, msg.as_string())
         mail.quit()
 
-    def send_email_digest(self):
+    def send_email_digest(self, detail_level_list=[0,1,2]):
 
         from email.mime.text import MIMEText
+        DATE_FORMAT = "%d/%m/%Y"
 
         # ------------ regular subscribers --------------
-        email_list = self.get_email_list(email_list_file='mail_list.json')
-        report_summary = self.compose_summary(detail_level=0)
-        msg = MIMEText(report_summary)
-        self.send_to_single_list(msg=msg, email_list=email_list)
+        if self.reports_generated_count and 0 in detail_level_list:
+            email_list = self.get_email_list(email_list_file='mail_list.json')
+            report_summary = self.compose_summary(detail_level=0)
+            msg = MIMEText(report_summary)
+            subject = "Daily %s Report Digest for %s"% (self.label,date.today().strftime(DATE_FORMAT))
+            self.send_to_single_list(subject=subject,msg=msg, email_list=email_list)
 
         # ------------ developer subscribers --------------
 
-        email_list_dev = self.get_email_list(email_list_file='developer_mail_list.json')
-        report_summary_dev = self.compose_summary(detail_level=2)
-        msg_dev = MIMEText(report_summary_dev)
-        self.send_to_single_list(msg=msg_dev, email_list=email_list_dev)
+        if self.reports_generated_count or self.reports_error_count:
+            if 1 in detail_level_list:
+                email_list_dev = self.get_email_list(email_list_file='developer_mail_list.json')
+                report_summary_dev = self.compose_summary(detail_level=1)
+                msg_dev = MIMEText(report_summary_dev)
+
+                subject_dev = "Developers' %s Report Digest for %s"% (self.label,date.today().strftime(DATE_FORMAT))
+                self.send_to_single_list(subject=subject_dev, msg=msg_dev, email_list=email_list_dev)
+
+            if 2 in detail_level_list:
+                email_list_dev = self.get_email_list(email_list_file='developer_mail_list.json')
+                report_summary_dev = self.compose_summary(detail_level=2)
+                msg_dev = MIMEText(report_summary_dev)
+                subject_dev = "Detailed  Developers' %s Report Digest for %s"% (self.label,date.today().strftime(DATE_FORMAT))
+                self.send_to_single_list(subject =subject_dev, msg=msg_dev, email_list=email_list_dev)
 
 
 class ReportSummary(object):
@@ -163,19 +222,27 @@ class ReportSummary(object):
 
         return s
 
+    def get_report_generated_flag(self):
+        return bool(self.report_file)
+
+    def error_flag(self):
+        return bool(self.report_error_status)
+
     def summary(self, detail_level=2):
         s = ''
         s += '\nSubject: ' + self.subject + '\n'
         s += '------------------------------------------------------------------------------------\n'
 
-        if not self.report_error_status:
-            s += 'No errors reported\n'
+        if self.get_report_generated_flag():
+            if self.report_file:
+                s += 'Report file (Rhino2): \n' + self.report_file + '\n'
 
-        if self.report_file:
-            s += 'Report file (Rhino2): \n' + self.report_file + '\n'
+            if self.report_link:
+                s += 'Report URL: \n' + self.report_link + '\n'
 
-        if self.report_link:
-            s += 'Report URL: \n' + self.report_link + '\n'
+        # if not self.report_error_status:
+        #     s += 'No errors reported\n'
+
 
         if self.report_error_status:
             e = self.report_error_status.error

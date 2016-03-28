@@ -106,7 +106,7 @@ subjects = list(set(find_subjects_by_task('RAM_FR1')).intersection(find_subjects
 subjects.sort()
 
 
-rsi = ReportSummaryInventory()
+rsi = ReportSummaryInventory(label='RAM_FR1_CatFR1_joint')
 
 for subject in subjects:
     print '--Generating FR1&CatFR1 joint report for', subject
@@ -148,4 +148,4 @@ for subject in subjects:
 
 print 'this is summary for all reports report ', rsi.compose_summary(detail_level=1)
 
-rsi.send_email_digest()
+rsi.send_email_digest(detail_level_list=[0,1])
