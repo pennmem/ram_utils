@@ -156,7 +156,7 @@ subject_missing_data_list = []
 
 rsi = ReportSummaryInventory(label=args.experiment)
 
-for subject in subjects[:7]:
+for subject in subjects:
     print subject
     # sets up processing pipeline
 
