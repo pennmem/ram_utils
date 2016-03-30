@@ -91,8 +91,19 @@ class GenerateTex(ReportRamTask):
 
             adhoc_page_title = ''
             if n_ttest_tables > 0:
-                #adhoc_page_title = '\\clearpage\n'
-                adhoc_page_title = '\n\\subsection*{\\hfil Post hoc significance analysis \\hfil}\n\n' % session_summary.sess_num
+                adhoc_page_title = '\n\\subsection*{\\hfil Post hoc significance analysis \\hfil}\n\n'
+
+            n_significantly_above_zero_params = len(session_summary.ttest_against_zero_table)
+            ttest_against_zero_title = '\n\\subsection*{\\hfil $t$-test against zero \\hfil}\n\n' if n_significantly_above_zero_params>0 else ''
+            ttest_against_zero_table = ''
+            if n_significantly_above_zero_params > 0:
+                ttest_replace_dict = {'<PARAMETER1>': param1_name,
+                                      '<UNIT1>': param1_unit,
+                                      '<PARAMETER2>': param2_name,
+                                      '<UNIT2>': param2_unit,
+                                      '<TABLE>': latex_table(session_summary.ttest_against_zero_table, hlines=False)
+                                      }
+                ttest_against_zero_table = TextTemplateUtils.replace_template_to_string(tex_ttest_table2_template, ttest_replace_dict)
 
             replace_dict = {'<SESS_NUM>': session_summary.sess_num,
                             '<LOW_QUANTILE_PLOT_FILE>': self.pipeline.experiment + '-' + self.pipeline.subject + '-low_quantile_plot_' + session_summary.name + '.pdf',
@@ -113,6 +124,8 @@ class GenerateTex(ReportRamTask):
                             '<PVALUE1>': pvalue_formatting(session_summary.anova_pvalues[0]),
                             '<PVALUE2>': pvalue_formatting(session_summary.anova_pvalues[1]),
                             '<PVALUE12>': pvalue_formatting(session_summary.anova_pvalues[2]),
+                            '<TTEST_AGAINST_ZERO_TITLE>': ttest_against_zero_title,
+                            '<TTEST_AGAINST_ZERO_TABLE>': ttest_against_zero_table,
                             '<ADHOC_PAGE_TITLE>': adhoc_page_title,
                             '<PARAM1_TTEST_TABLE>': param1_ttest_table,
                             '<PARAM2_TTEST_TABLE>': param2_ttest_table,

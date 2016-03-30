@@ -33,3 +33,4 @@ class SessionSummary(object):
         # self.t12 = None
         # self.p12 = None
         self.param12_ttest_table = None
+        self.ttest_against_zero_table = None

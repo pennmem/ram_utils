@@ -12,7 +12,7 @@ from PlotUtils import PlotData
 
 from statsmodels.formula.api import ols
 from statsmodels.stats.anova import anova_lm
-from scipy.stats import ttest_ind
+from scipy.stats import ttest_ind, ttest_1samp
 
 from sklearn.externals import joblib
 
@@ -73,16 +73,6 @@ def anova_test(ps_table, param1_name, param2_name):
     return (anova['F'].values[0:3], anova['PR(>F)'].values[0:3])
 
 
-# def ttest_one_param(ps_table, param_name):
-#     param_vals = sorted(ps_table[param_name].unique())
-#     val_max = param_vals[np.argmax([ps_table[ps_table[param_name]==val]['perf_diff'].mean() for val in param_vals])]
-#     val_max_sel = (ps_table[param_name]==val_max)
-#     population1 = ps_table[val_max_sel]['perf_diff'].values
-#     population2 = ps_table[~val_max_sel]['perf_diff'].values
-#     t,p = ttest_ind(population1, population2)
-#     return val_max,t,p
-
-
 def ttest_one_param(ps_table, param_name):
     ttest_table = []
     param_vals = sorted(ps_table[param_name].unique())
@@ -94,28 +84,6 @@ def ttest_one_param(ps_table, param_name):
         if p<0.05 and t>0.0:
             ttest_table.append([val if val>=0 else 'PULSE', p, t])
     return ttest_table
-
-
-# def ttest_interaction(ps_table, param1_name, param2_name):
-#     param1_vals = sorted(ps_table[param1_name].unique())
-#     param2_vals = sorted(ps_table[param2_name].unique())
-#     mean_max = -1.0
-#     val1_max = val2_max = None
-#     for val1 in param1_vals:
-#         for val2 in param2_vals:
-#             ps_table_val1_val2 = ps_table[(ps_table[param1_name]==val1) & (ps_table[param2_name]==val2)]
-#             mean = ps_table_val1_val2['perf_diff'].mean()
-#             if mean > mean_max:
-#                 mean_max = mean
-#                 val1_max = val1
-#                 val2_max = val2
-#
-#     val_max_sel = (ps_table[param1_name]==val1_max) & (ps_table[param2_name]==val2_max)
-#
-#     population1 = ps_table[val_max_sel]['perf_diff'].values
-#     population2 = ps_table[~val_max_sel]['perf_diff'].values
-#     t,p = ttest_ind(population1, population2)
-#     return (val1_max,val2_max),t,p
 
 
 def ttest_interaction(ps_table, param1_name, param2_name):
@@ -141,6 +109,22 @@ def format_ttest_table(ttest_table):
         row[-1] = '$t = %.3f$' % row[-1]
         row[-2] = '$p %s$' % ('\leq 0.001' if row[-2]<=0.001 else ('= %.3f'%row[-2]))
     return result
+
+
+def ttest_against_zero(ps_table, param1_name, param2_name):
+    ttest_table = []
+    param1_vals = sorted(ps_table[param1_name].unique())
+    param2_vals = sorted(ps_table[param2_name].unique())
+    for val1 in param1_vals:
+        val1_sel = (ps_table[param1_name]==val1)
+        for val2 in param2_vals:
+            val2_sel = (ps_table[param2_name]==val2)
+            sel = val1_sel & val2_sel
+            population = ps_table[sel]['perf_diff'].values
+            t,p = ttest_1samp(population, 0.0)
+            if p<0.05 and t>0.0:
+                ttest_table.append([val1 if val1>=0 else 'PULSE', val2, p, t])
+    return ttest_table
 
 
 class ComposeSessionSummary(ReportRamTask):
@@ -308,6 +292,9 @@ class ComposeSessionSummary(ReportRamTask):
                         if sess_loc_tag is not None:
                             anova_param12_sv[sess_loc_tag].append(param12_ttest_table)
                         session_summary.param12_ttest_table = format_ttest_table(param12_ttest_table)
+
+            ttest_against_zero_table = ttest_against_zero(ps_session_table, param1_name, param2_name)
+            session_summary.ttest_against_zero_table = format_ttest_table(ttest_against_zero_table)
 
             session_summary_array.append(session_summary)
 
