@@ -51,8 +51,6 @@ $\bullet$ $\xi_{\textrm{pre}} = \ln \frac{C_{\textrm{pre}}}{1-C_{\textrm{pre}}}$
 $\bullet$ $\Phi_1,\Phi_0$ are cdfs of Normal fits for inverse logit of classifier output for recalls/non-recalls with equal variance.
 %$\bullet$ $\Phi_0 = {\cal N}(\mu_0,\sigma)$ is Normal fit for inverse logit of classifier output for non-recalls.
 
-<ADHOC_PAGE_TITLE>
+\vspace{3pc}
 
-<PARAM1_TTEST_TABLE>
-<PARAM2_TTEST_TABLE>
-<PARAM12_TTEST_TABLE>
+<TTEST_AGAINST_ZERO_TABLE>
