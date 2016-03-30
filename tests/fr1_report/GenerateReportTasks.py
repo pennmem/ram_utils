@@ -279,7 +279,9 @@ class DeployReportPDF(ReportRamTask):
         ssc = self.split_subject_code(subject)
 
         report_basename = basename(report_path)
-        report_dir = join('/protocols',ssc.protocol.lower(),'subjects',str(ssc.id)+ssc.montage,'reports',self.pipeline.experiment)
+        report_base_dir = join('protocols',ssc.protocol.lower(),'subjects',str(ssc.id)+ssc.montage,'reports')
+
+        report_dir = join(self.pipeline.mount_point,report_base_dir)
 
         if not isdir(report_dir):
             try:
@@ -293,6 +295,32 @@ class DeployReportPDF(ReportRamTask):
         shutil.copy(report_path,standard_report_path)
 
         self.add_report_file(file=standard_report_path)
+
+        standard_report_link = join(self.pipeline.report_site_URL, report_base_dir, standard_report_basename)
+        self.add_report_link(link=standard_report_link)
+
+
+
+    # def deploy_report(self,report_path):
+    #     subject = self.pipeline.subject
+    #
+    #     ssc = self.split_subject_code(subject)
+    #
+    #     report_basename = basename(report_path)
+    #     report_dir = join('/protocols',ssc.protocol.lower(),'subjects',str(ssc.id)+ssc.montage,'reports',self.pipeline.experiment)
+    #
+    #     if not isdir(report_dir):
+    #         try:
+    #             os.makedirs(report_dir)
+    #         except OSError:
+    #             return
+    #
+    #     standard_report_basename = subject+'_'+self.pipeline.experiment+'_report.pdf'
+    #     standard_report_path = join(report_dir,standard_report_basename)
+    #     # shutil.copy(report_path,join(report_dir,report_basename))
+    #     shutil.copy(report_path,standard_report_path)
+    #
+    #     self.add_report_file(file=standard_report_path)
 
 
     def run(self):

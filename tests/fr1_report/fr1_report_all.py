@@ -20,14 +20,25 @@ else: # emulate command line
     #                                         #'--exit-on-no-change'
     #                                         ]
 
+    # command_line_emulation_argument_list = ['--subject','R1086M',
+    #                                         '--task','RAM_FR1',
+    #                                         '--workspace-dir','/scratch/mswat/FR1_check_1',
+    #                                         '--mount-point','',
+    #                                         '--python-path','/home1/mswat/RAM_UTILS_GIT',
+    #                                         '--python-path','/home1/mswat/PTSA_NEW_GIT'
+    #                                         #'--exit-on-no-change'
+    #                                         ]
+
+
     command_line_emulation_argument_list = ['--subject','R1086M',
                                             '--task','RAM_FR1',
-                                            '--workspace-dir','/scratch/mswat/FR1_check_1',
-                                            '--mount-point','',
-                                            '--python-path','/home1/mswat/RAM_UTILS_GIT',
-                                            '--python-path','/home1/mswat/PTSA_NEW_GIT'
+                                            '--workspace-dir','/Users/m/scratch/mswat/FR1_check_1',
+                                            '--mount-point','/Volumes/rhino_root',
+                                            '--python-path','/Users/m/RAM_UTILS_GIT',
+                                            '--python-path','/Users/m//PTSA_NEW_GIT'
                                             #'--exit-on-no-change'
                                             ]
+
 
     args = parse_command_line(command_line_emulation_argument_list)
 
@@ -117,7 +128,7 @@ subjects.sort()
 
 rsi = ReportSummaryInventory(label=task)
 
-for subject in subjects:
+for subject in subjects[:3]:
     print '--Generating', task, 'report for', subject
 
     # sets up processing pipeline

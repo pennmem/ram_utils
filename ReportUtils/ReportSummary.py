@@ -135,27 +135,35 @@ class ReportSummaryInventory(object):
         DATE_FORMAT = "%d/%m/%Y"
 
         # ------------ regular subscribers --------------
-        if self.reports_generated_count and 0 in detail_level_list:
-            email_list = self.get_email_list(email_list_file='mail_list.json')
+
+        if 0 in detail_level_list:
+
             report_summary = self.compose_summary(detail_level=0)
-            msg = MIMEText(report_summary)
-            subject = "Daily %s Report Digest for %s"% (self.label,date.today().strftime(DATE_FORMAT))
-            self.send_to_single_list(subject=subject,msg=msg, email_list=email_list)
+
+            if self.reports_generated_count:
+                email_list = self.get_email_list(email_list_file='mail_list.json')
+
+                msg = MIMEText(report_summary)
+                subject = "Daily %s Report Digest for %s"% (self.label,date.today().strftime(DATE_FORMAT))
+                self.send_to_single_list(subject=subject,msg=msg, email_list=email_list)
 
         # ------------ developer subscribers --------------
 
-        if self.reports_generated_count or self.reports_error_count:
-            if 1 in detail_level_list:
+        if 1 in detail_level_list:
+            report_summary_dev = self.compose_summary(detail_level=1)
+            if self.reports_generated_count or self.reports_error_count:
+
                 email_list_dev = self.get_email_list(email_list_file='developer_mail_list.json')
-                report_summary_dev = self.compose_summary(detail_level=1)
+
                 msg_dev = MIMEText(report_summary_dev)
 
                 subject_dev = "Developers' %s Report Digest for %s"% (self.label,date.today().strftime(DATE_FORMAT))
                 self.send_to_single_list(subject=subject_dev, msg=msg_dev, email_list=email_list_dev)
 
-            if 2 in detail_level_list:
+        if 2 in detail_level_list:
+            report_summary_dev = self.compose_summary(detail_level=2)
+            if self.reports_generated_count or self.reports_error_count:
                 email_list_dev = self.get_email_list(email_list_file='developer_mail_list.json')
-                report_summary_dev = self.compose_summary(detail_level=2)
                 msg_dev = MIMEText(report_summary_dev)
                 subject_dev = "Detailed  Developers' %s Report Digest for %s"% (self.label,date.today().strftime(DATE_FORMAT))
                 self.send_to_single_list(subject =subject_dev, msg=msg_dev, email_list=email_list_dev)

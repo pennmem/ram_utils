@@ -19,13 +19,23 @@ else: # emulate command line
     #                                         #'--exit-on-no-change'
     #                                         ]
 
+    # command_line_emulation_argument_list = ['--subject','R1086M',
+    #                                         '--workspace-dir','/scratch/mswat/FR1_check_1',
+    #                                         '--mount-point','',
+    #                                         '--python-path','/home1/mswat/RAM_UTILS_GIT',
+    #                                         '--python-path','/home1/mswat/PTSA_NEW_GIT'
+    #                                         #'--exit-on-no-change'
+    #                                         ]
+
+
     command_line_emulation_argument_list = ['--subject','R1086M',
-                                            '--workspace-dir','/scratch/mswat/FR1_check_1',
-                                            '--mount-point','',
-                                            '--python-path','/home1/mswat/RAM_UTILS_GIT',
-                                            '--python-path','/home1/mswat/PTSA_NEW_GIT'
+                                            '--workspace-dir','/Users/m/scratch/mswat/FR1_catfr1_check_1',
+                                            '--mount-point','/Volumes/rhino_root',
+                                            '--python-path','/Users/m/RAM_UTILS_GIT',
+                                            '--python-path','/Users/m/PTSA_NEW_GIT'
                                             #'--exit-on-no-change'
                                             ]
+
 
     args = parse_command_line(command_line_emulation_argument_list)
 
@@ -91,11 +101,12 @@ params = Params()
 class ReportPipeline(ReportPipelineBase):
     def __init__(self, subject, workspace_dir, mount_point=None, exit_on_no_change=False):
         super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change)
-        self.task = self.experiment = 'RAM_FR1_CatFR1_joint'
+        self.task = 'RAM_FR1_CatFR1_joint'
+        self.experiment = self.task
 
 
 
-
+# https://stimstaging.psych.upenn.edu/rhino/protocols/r1/subjects/001/reports/FR1_report.pdf
 
 def find_subjects_by_task(task):
     ev_files = glob(args.mount_point + ('/data/events/%s/R*_events.mat' % task))
@@ -108,7 +119,7 @@ subjects.sort()
 
 rsi = ReportSummaryInventory(label='RAM_FR1_CatFR1_joint')
 
-for subject in subjects:
+for subject in subjects[:3]:
     print '--Generating FR1&CatFR1 joint report for', subject
 
     # sets up processing pipeline
@@ -143,6 +154,8 @@ for subject in subjects:
 
     # starts processing pipeline
     report_pipeline.execute_pipeline()
+
+    rsi.add_report_summary(report_summary=report_pipeline.get_report_summary())
 
 
 

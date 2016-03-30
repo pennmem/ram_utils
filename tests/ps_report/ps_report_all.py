@@ -42,13 +42,24 @@ else:  # emulate command line
     #                                         ]
 
 
+    # command_line_emulation_argument_list = [
+    #     '--experiment', 'PS2',
+    #     '--workspace-dir', '/scratch/mswat/PS2_ms_check_1',
+    #     # '--mount-point','/Volumes/rhino_root/',
+    #     # '--mount-point','/Users/m/',
+    #     '--python-path', '/home1/mswat/RAM_UTILS_GIT',
+    #     '--python-path', '/home1/mswat/PTSA_NEW_GIT',
+    #     # '--exit-on-no-change'
+    # ]
+
+
     command_line_emulation_argument_list = [
         '--experiment', 'PS2',
-        '--workspace-dir', '/scratch/mswat/PS2_ms_check_1',
-        # '--mount-point','/Volumes/rhino_root/',
+        '--workspace-dir', '/Users/m/scratch/PS2_ms_check_1',
+        '--mount-point','/Volumes/rhino_root/',
         # '--mount-point','/Users/m/',
-        '--python-path', '/home1/mswat/RAM_UTILS_GIT',
-        '--python-path', '/home1/mswat/PTSA_NEW_GIT',
+        '--python-path', '/Users/m/RAM_UTILS_GIT',
+        '--python-path', '/Users/m/PTSA_NEW_GIT',
         # '--exit-on-no-change'
     ]
 
@@ -145,7 +156,7 @@ subject_missing_data_list = []
 
 rsi = ReportSummaryInventory(label=args.experiment)
 
-for subject in subjects:
+for subject in subjects[:7]:
     print subject
     # sets up processing pipeline
 

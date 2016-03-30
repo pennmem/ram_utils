@@ -1,6 +1,7 @@
 from RamPipeline import RamTask
 from ReportUtils import MissingExperimentError, MissingDataError, ReportError, ReportStatus
 import inspect
+from os.path import *
 
 class ReportRamTask(RamTask):
     def __init__(self, mark_as_completed):
@@ -24,6 +25,7 @@ class ReportRamTask(RamTask):
 
     def add_report_file(self,file):
         self.pipeline.report_summary.add_report_file(file=file)
+
 
     def add_report_link(self,link):
         self.pipeline.report_summary.add_report_link(link=link)
