@@ -15,32 +15,14 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    # command_line_emulation_argument_list = ['--subject','R1108J_1',
-    #                                         '--task','RAM_FR1',
-    #                                         '--workspace-dir','/scratch/busygin/FR1_reports',
-    #                                         '--mount-point','',
-    #                                         '--python-path','/home1/busygin/ram_utils_new_ptsa',
-    #                                         '--python-path','/home1/busygin/python/ptsa_latest'
-    #                                         # '--exit-on-no-change'
-    #                                         ]
-
-    # command_line_emulation_argument_list = ['--subject','R1048E',
-    #                                         '--task','RAM_FR1',
-    #                                         '--workspace-dir','/Users/busygin/scratch/FR1_reports',
-    #                                         '--mount-point','/Volumes/RHINO',
-    #                                         '--python-path','/Users/busygin/ram_utils_new_ptsa',
-    #                                         '--python-path','/Users/busygin/ptsa_latest',
-    #                                         '--python-path','/Users/busygin/cpp/morlet_flex_install'
-    #                                         ]
-
-    command_line_emulation_argument_list = ['--subject','R1108J_1',
+    command_line_emulation_argument_list = ['--subject','R1111M',
                                             '--task','RAM_FR1',
-                                            '--workspace-dir','/scratch/mswat/FR1_check_1',
+                                            '--workspace-dir','/scratch/busygin/FR1_reports',
                                             '--mount-point','',
-                                            '--python-path','/home1/mswat/RAM_UTILS_GIT',
-                                            '--python-path','/home1/mswat/PTSA_NEW_GIT'
+                                            '--python-path','/home1/busygin/ram_utils_new_ptsa',
+                                            '--python-path','/home1/busygin/python/ptsa_latest'
                                             # '--exit-on-no-change'
-                                            ]
+                                           ]
 
 
     args = parse_command_line(command_line_emulation_argument_list)
@@ -103,14 +85,11 @@ class Params(object):
 params = Params()
 
 
-
-    class ReportPipeline(ReportPipelineBase):
-        def __init__(self, subject, task, workspace_dir, mount_point=None, exit_on_no_change=False):
-            super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change)
-            self.task = task
-            self.experiment = task
-
-
+class ReportPipeline(ReportPipelineBase):
+    def __init__(self, subject, task, workspace_dir, mount_point=None, exit_on_no_change=False):
+        super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change)
+        self.task = task
+        self.experiment = task
 
 
 # sets up processing pipeline
