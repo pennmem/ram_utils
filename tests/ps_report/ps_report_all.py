@@ -6,7 +6,7 @@ from setup_utils import parse_command_line, configure_python_paths
 from os.path import join
 
 # -------------------------------processing command line
-if len(sys.argv) > 2:
+if len(sys.argv) > 1:
 
     args = parse_command_line()
 

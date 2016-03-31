@@ -5,7 +5,7 @@ import re
 from setup_utils import parse_command_line, configure_python_paths
 
 # -------------------------------processing command line
-if len(sys.argv)>2:
+if len(sys.argv)>1:
 
     args = parse_command_line()
 
@@ -38,6 +38,8 @@ else: # emulate command line
 
 
     args = parse_command_line(command_line_emulation_argument_list)
+
+
 
 configure_python_paths(args.python_path)
 
@@ -96,7 +98,6 @@ class Params(object):
 
 
 params = Params()
-
 
 class ReportPipeline(ReportPipelineBase):
     def __init__(self, subject, workspace_dir, mount_point=None, exit_on_no_change=False):
