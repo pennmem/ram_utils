@@ -19,22 +19,22 @@ else: # emulate command line
     #                                         #'--exit-on-no-change'
     #                                         ]
 
-    # command_line_emulation_argument_list = ['--subject','R1086M',
-    #                                         '--workspace-dir','/scratch/mswat/FR1_check_1',
-    #                                         '--mount-point','',
-    #                                         '--python-path','/home1/mswat/RAM_UTILS_GIT',
-    #                                         '--python-path','/home1/mswat/PTSA_NEW_GIT'
-    #                                         #'--exit-on-no-change'
-    #                                         ]
-
-
-    command_line_emulation_argument_list = ['--subject','R1086M',
-                                            '--workspace-dir','/Users/m/scratch/mswat/FR1_catfr1_check_1',
-                                            '--mount-point','/Volumes/rhino_root',
-                                            '--python-path','/Users/m/RAM_UTILS_GIT',
-                                            '--python-path','/Users/m/PTSA_NEW_GIT'
+    command_line_emulation_argument_list = [
+                                            '--workspace-dir','/scratch/mswat/FR1_CatFr1_check_1',
+                                            '--mount-point','',
+                                            '--python-path','/home1/mswat/RAM_UTILS_GIT',
+                                            '--python-path','/home1/mswat/PTSA_NEW_GIT'
                                             #'--exit-on-no-change'
                                             ]
+
+
+    # command_line_emulation_argument_list = ['--subject','R1086M',
+    #                                         '--workspace-dir','/Users/m/scratch/mswat/FR1_catfr1_check_1',
+    #                                         '--mount-point','/Volumes/rhino_root',
+    #                                         '--python-path','/Users/m/RAM_UTILS_GIT',
+    #                                         '--python-path','/Users/m/PTSA_NEW_GIT'
+    #                                         #'--exit-on-no-change'
+    #                                         ]
 
 
     args = parse_command_line(command_line_emulation_argument_list)
@@ -161,4 +161,4 @@ for subject in subjects:
 
 print 'this is summary for all reports report ', rsi.compose_summary(detail_level=1)
 
-rsi.send_email_digest(detail_level_list=[0,1])
+rsi.send_email_digest(detail_level_list=[0,1,2])
