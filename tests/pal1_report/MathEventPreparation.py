@@ -8,9 +8,12 @@ import numpy as np
 from ptsa.data.readers import BaseEventReader
 
 
-class MathEventPreparation(RamTask):
+from ReportUtils import ReportRamTask
+
+class MathEventPreparation(ReportRamTask):
     def __init__(self, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(MathEventPreparation,self).__init__(mark_as_completed)
+
 
     def run(self):
         try:
