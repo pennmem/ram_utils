@@ -177,6 +177,7 @@ class ReportSummary(object):
     def __init__(self):
         self.subject = None
         self.report_error_status = None
+        self.stacktrace = None
         # self.report_error_status = None
         self.report_status_list = []
         self.changed_resources = None
@@ -201,9 +202,11 @@ class ReportSummary(object):
     def add_report_error_status(self, error_status):
         self.report_error_status = error_status
 
-    def add_report_error(self, error):
+    def add_report_error(self, error,stacktrace=None):
         error_rs = ReportStatus(error=error)
         self.report_error_status = error_rs
+        if stacktrace is not None:
+            self.stacktrace = stacktrace
 
     def detailed_status(self, detail_level=2):
         s = ''
@@ -227,6 +230,15 @@ class ReportSummary(object):
                     s += 'Change type: ' + change_type + '\n'
                     s += '\n'
                     # s += str(self.changed_resources) + '\n'
+
+        if detail_level == 2:
+            s += '\n'
+            if self.stacktrace is not None:
+
+                s += '------ Stack trace -----\n'
+                s += self.stacktrace
+                s += '\n'
+
 
         return s
 

@@ -20,8 +20,8 @@ class ReportPipelineBase(RamPipeline):
 
         self.report_site_URL  = 'https://stimstaging.psych.upenn.edu/rhino/'
 
-    def add_report_error(self,error):
-        self.report_summary.add_report_error(error)
+    def add_report_error(self,error,stacktrace=None):
+        self.report_summary.add_report_error(error,stacktrace=stacktrace)
 
     def add_report_status_obj(self,status_obj):
         self.report_summary.add_report_status_obj(status_obj)
@@ -50,10 +50,12 @@ class ReportPipelineBase(RamPipeline):
         except MissingDataError as mde:
             pass
         except Exception as e:
-            self.add_report_error(error=e)
+
 
             import traceback
             print traceback.format_exc()
+
+            self.add_report_error(error=e,stacktrace=traceback.format_exc())
 
             # exc_type, exc_value, exc_traceback = sys.exc_info()
 
