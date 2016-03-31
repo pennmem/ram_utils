@@ -11,12 +11,21 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1028M',
+    # command_line_emulation_argument_list = ['--subject','R1028M',
+    #                                         '--task','RAM_PAL1',
+    #                                         '--workspace-dir','/scratch/busygin/PAL1_reports',
+    #                                         '--mount-point','',
+    #                                         '--python-path','/home1/busygin/ram_utils_new_ptsa',
+    #                                         '--python-path','/home1/busygin/python/ptsa_latest',
+    #                                         #'--exit-on-no-change'
+    #                                         ]
+
+    command_line_emulation_argument_list = [
                                             '--task','RAM_PAL1',
-                                            '--workspace-dir','/scratch/busygin/PAL1_reports',
+                                            '--workspace-dir','/scratch/mswat/PAL1_reports',
                                             '--mount-point','',
-                                            '--python-path','/home1/busygin/ram_utils_new_ptsa',
-                                            '--python-path','/home1/busygin/python/ptsa_latest',
+                                            '--python-path','/home1/mswat/RAM_UTILS_GIT',
+                                            '--python-path','/home1/mswat/PTSA_NEW_GIT',
                                             #'--exit-on-no-change'
                                             ]
     args = parse_command_line(command_line_emulation_argument_list)
@@ -111,13 +120,13 @@ def find_subjects_by_task(task):
 
 
 subjects = find_subjects_by_task(task)
-subjects.remove('R1050M')
-subjects.remove('R1136N')
+# subjects.remove('R1050M')
+# subjects.remove('R1136N')
 subjects.sort()
 
 rsi = ReportSummaryInventory(label=task)
 
-for subject in subjects:
+for subject in subjects[:2]:
     print '--Generating', task, 'report for', subject
 
     # sets up processing pipeline

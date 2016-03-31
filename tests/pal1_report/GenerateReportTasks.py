@@ -254,6 +254,12 @@ class GenerateReportPDF(ReportRamTask):
 
         call([pdflatex_command_str], shell=True)
 
+        report_core_file_name, ext = splitext(combined_report_tex_file_name)
+        report_file = join(output_directory,report_core_file_name+'.pdf')
+
+        self.pass_object('report_file',report_file)
+
+
 class DeployReportPDF(ReportRamTask):
     def __init__(self, mark_as_completed=True):
         super(DeployReportPDF,self).__init__(mark_as_completed)
@@ -272,6 +278,8 @@ class DeployReportPDF(ReportRamTask):
 
 
     def deploy_report(self,report_path):
+
+
         subject = self.pipeline.subject
 
         ssc = self.split_subject_code(subject)
@@ -281,10 +289,13 @@ class DeployReportPDF(ReportRamTask):
 
         report_dir = join(self.pipeline.mount_point,report_base_dir)
 
+
+
         if not isdir(report_dir):
             try:
                 os.makedirs(report_dir)
             except OSError:
+
                 return
 
         standard_report_basename = subject+'_'+self.pipeline.experiment+'_report.pdf'
@@ -296,3 +307,8 @@ class DeployReportPDF(ReportRamTask):
 
         standard_report_link = join(self.pipeline.report_site_URL, report_base_dir, standard_report_basename)
         self.add_report_link(link=standard_report_link)
+
+
+    def run(self):
+        report_file = self.get_passed_object('report_file')
+        self.deploy_report(report_path=report_file)
