@@ -279,7 +279,7 @@ class DeployReportPDF(ReportRamTask):
         ssc = self.split_subject_code(subject)
 
         report_basename = basename(report_path)
-        report_base_dir = join('protocols',ssc.protocol.lower(),'subjects',str(ssc.id)+ssc.montage,'reports')
+        report_base_dir = join('protocols',ssc.protocol.lower(),'subjects',str(ssc.id),'reports')
 
         report_dir = join(self.pipeline.mount_point,report_base_dir)
 
