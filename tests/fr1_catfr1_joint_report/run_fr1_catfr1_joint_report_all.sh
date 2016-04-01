@@ -7,6 +7,7 @@ source activate rampy
 
 export PYTHONPATH="/home1/mswat/RAM_UTILS_GIT":$PYTHONPATH
 export PYTHONPATH="/home1/mswat/PTSA_NEW_GIT":$PYTHONPATH
+export PYTHONPATH="/home1/mswat/extra_libs":$PYTHONPATH
 
 current_directory=$(pwd)
 
