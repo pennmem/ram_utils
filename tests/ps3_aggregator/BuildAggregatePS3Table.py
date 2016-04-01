@@ -41,22 +41,22 @@ class BuildAggregatePS3Table(RamTask):
         self.pass_object('ps3_table', self.ps3_table)
 
     def run(self):
-        task = self.pipeline.task
+        # task = self.pipeline.task
 
-        ps3_root = self.get_path_to_resource_in_workspace('PS3/')
+        ps3_root = self.get_path_to_resource_in_workspace('PS3_reports/')
         ps3_subjects = sorted([s for s in os.listdir(ps3_root) if s[:2]=='R1'])
         ps3_tables = []
         for subject in ps3_subjects:
             try:
                 ps3_table = pd.read_pickle(join(ps3_root, subject, subject+'-PS3-ps_table.pkl'))
                 del ps3_table['isi']
-                xval_output = None
-                try:
-                    xval_output = joblib.load(join(ps3_root, subject, subject+'-xval_output.pkl'))
-                except IOError:
-                    xval_output = joblib.load(join(ps3_root, subject, subject+'-'+task+'-xval_output.pkl'))
-                thresh = xval_output[-1].jstat_thresh
-                ps3_table['thresh'] = thresh
+                # xval_output = None
+                # try:
+                #     xval_output = joblib.load(join(ps3_root, subject, subject+'-xval_output.pkl'))
+                # except IOError:
+                #     xval_output = joblib.load(join(ps3_root, subject, subject+'-'+task+'-xval_output.pkl'))
+                # thresh = xval_output[-1].jstat_thresh
+                # ps3_table['thresh'] = thresh
                 ps3_table['locTag'] = ps3_table['Region'].apply(lambda s: 'Undetermined' if s is None else s)
                 ps3_table['Region'] = ps3_table['Region'].apply(lambda s: 'Undetermined' if s is None else s.replace('Left ','').replace('Right ',''))
                 ps3_table['Area'] = ps3_table['Region'].apply(brain_area)

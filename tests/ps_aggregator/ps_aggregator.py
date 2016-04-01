@@ -74,12 +74,12 @@ class Params(object):
 params = Params()
 
 
-class ReportPipeline(RamPipeline):
-    def __init__(self, workspace_dir, mount_point=None):
-        RamPipeline.__init__(self)
-        self.task = 'RAM_FR1'
-        self.mount_point = mount_point
-        self.set_workspace_dir(workspace_dir)
+# class ReportPipeline(RamPipeline):
+#     def __init__(self, workspace_dir, mount_point=None):
+#         RamPipeline.__init__(self)
+#         self.task = 'RAM_FR1'
+#         self.mount_point = mount_point
+#         self.set_workspace_dir(workspace_dir)
 
 
 class ReportPipeline(ReportPipelineBase):
