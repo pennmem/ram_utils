@@ -195,7 +195,7 @@ for subject in subjects:
 
     report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
-    report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
+    # report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
 
     report_pipeline.execute_pipeline()
 
@@ -208,5 +208,6 @@ print 'subject_missing_data_list=', subject_missing_data_list
 
 print 'this is summary for all reports report ', rsi.compose_summary(detail_level=1)
 
+rsi.output_json_files(dir=args.status_output_dir)
 rsi.send_email_digest()
 # print report_pipeline.report_summary.compose_summary()

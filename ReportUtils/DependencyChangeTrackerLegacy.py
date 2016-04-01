@@ -5,6 +5,7 @@ from os.path import *
 
 from RamPipeline.DependencyChangeTrackerBase import DependencyChangeTrackerBase
 import warnings
+from RamPipeline import RamResource
 from collections import OrderedDict
 
 
@@ -88,7 +89,9 @@ class DependencyChangeTrackerLegacy(DependencyChangeTrackerBase):
                     resource_node = resource_node[node_name]
                 except KeyError:
                     warnings.warn("Could not locate node " + node_name, RuntimeWarning)
-                    self.changed_resources[' -> '.join(json_node_access_list)] = 'non_existent_resource'
+                    self.changed_resources[' -> '.join(json_node_access_list)] = RamResource(name=' -> '.join(json_node_access_list),task=task.name(),status='non_existent_resource')
+
+
                     change_flag = True
                     return change_flag
 
@@ -100,7 +103,7 @@ class DependencyChangeTrackerLegacy(DependencyChangeTrackerBase):
 
             if md5 != resource_node['md5']:
                 print 'Dependency for task =', task.name(), ' has changed'
-                self.changed_resources[full_resource_path] = 'changed_existing_resource'
+                self.changed_resources[full_resource_path] = RamResource(name=full_resource_path,task=task.name(),status='changed_existing_resource')
 
                 change_flag = True
                 return change_flag

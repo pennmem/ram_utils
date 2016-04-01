@@ -397,66 +397,6 @@ class GenerateReportPDF(ReportRamTask):
     def __init__(self, mark_as_completed=True):
         super(GenerateReportPDF,self).__init__(mark_as_completed)
 
-    #     self.protocol = 'R1'
-    #     self.convert_subject_code_regex = re.compile('('+self.protocol+')'+'([0-9]*)([a-zA-Z]{1,1})([\S]*)')
-    #
-    # # def initialize(self):
-    #
-    #     # if self.dependency_inventory:
-    #
-    #         # self.dependency_inventory.add_dependent_resource(resource_name='fr1_events',
-    #         #                             access_path = ['experiments','fr1','events'])
-    #         #
-    #         # self.dependency_inventory.add_dependent_resource(resource_name='catfr1_events',
-    #         #                             access_path = ['experiments','catfr1','events'])
-    #         #
-    #         # self.dependency_inventory.add_dependent_resource(resource_name='ps_events',
-    #         #                             access_path = ['experiments','ps','events'])
-    #         #
-    #         # self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
-    #         #                             access_path = ['electrodes','bipolar'])
-    #
-    #         # self.dependency_inventory.add_dependent_resource(resource_name='fr1_info',
-    #         #                             access_path = ['experiments','fr1','info'])
-    #
-    #         # self.dependency_inventory.add_dependent_resource(resource_name='fr1_info1',
-    #         #                             access_path = ['experiments','fr1','info1'])
-    #
-    #
-    #
-    #
-    # def split_subject_code(self,subject_code):
-    #     match = re.match(self.convert_subject_code_regex,subject_code)
-    #     if match:
-    #         groups = match.groups()
-    #
-    #         ssc = SplitSubjectCode(protocol=groups[0], id=groups[1],site=groups[2],montage=groups[3])
-    #         return ssc
-    #     return None
-    #
-    #
-    # def copy_report_to_web_dir(self,report_path):
-    #     subject = self.pipeline.subject
-    #
-    #     ssc = self.split_subject_code(subject)
-    #
-    #     report_basename = basename(report_path)
-    #     report_dir = join('/protocols',ssc.protocol.lower(),'subjects',str(ssc.id)+ssc.montage,'reports',self.pipeline.experiment)
-    #
-    #     if not isdir(report_dir):
-    #         try:
-    #             os.makedirs(report_dir)
-    #         except OSError:
-    #             return
-    #
-    #     standard_report_basename = subject+'_RAM_'+self.pipeline.experiment+'_report.pdf'
-    #     standard_report_path = join(report_dir,standard_report_basename)
-    #     # shutil.copy(report_path,join(report_dir,report_basename))
-    #     shutil.copy(report_path,standard_report_path)
-    #
-    #     self.add_report_file(file=standard_report_path)
-
-
 
     def run(self):
         from subprocess import call
@@ -480,79 +420,80 @@ class GenerateReportPDF(ReportRamTask):
         report_file = join(output_directory,report_core_file_name+'.pdf')
 
         self.pass_object('report_file',report_file)
+        self.pipeline.deploy_report(report_path=report_file)
 
         # self.add_report_file(file=report_file)
 
         # self.copy_report_to_web_dir(report_file)
 
 
-class DeployReportPDF(ReportRamTask):
-    def __init__(self, mark_as_completed=True):
-        super(DeployReportPDF,self).__init__(mark_as_completed)
-
-        self.protocol = 'R1'
-        self.convert_subject_code_regex = re.compile('('+self.protocol+')'+'([0-9]*)([a-zA-Z]{1,1})([\S]*)')
-
-    def split_subject_code(self,subject_code):
-        match = re.match(self.convert_subject_code_regex,subject_code)
-        if match:
-            groups = match.groups()
-
-            ssc = SplitSubjectCode(protocol=groups[0], id=groups[1],site=groups[2],montage=groups[3])
-            return ssc
-        return None
-
-
-    def deploy_report(self,report_path):
-        subject = self.pipeline.subject
-
-        ssc = self.split_subject_code(subject)
-
-        report_basename = basename(report_path)
-        report_base_dir = join('protocols',ssc.protocol.lower(),'subjects',str(ssc.id),'reports')
-
-        report_dir = join(self.pipeline.mount_point,report_base_dir)
-
-        if not isdir(report_dir):
-            try:
-                os.makedirs(report_dir)
-            except OSError:
-                return
-
-        standard_report_basename = subject+'_RAM_'+self.pipeline.experiment+'_report.pdf'
-        standard_report_path = join(report_dir,standard_report_basename)
-        # shutil.copy(report_path,join(report_dir,report_basename))
-        shutil.copy(report_path,standard_report_path)
-
-        self.add_report_file(file=standard_report_path)
-
-        standard_report_link = join(self.pipeline.report_site_URL, report_base_dir, standard_report_basename)
-        self.add_report_link(link=standard_report_link)
-
-
-
-    # def deploy_report(self,report_path):
-    #     subject = self.pipeline.subject
-    #
-    #     ssc = self.split_subject_code(subject)
-    #
-    #     report_basename = basename(report_path)
-    #     report_dir = join('/protocols',ssc.protocol.lower(),'subjects',str(ssc.id)+ssc.montage,'reports',self.pipeline.experiment)
-    #
-    #     if not isdir(report_dir):
-    #         try:
-    #             os.makedirs(report_dir)
-    #         except OSError:
-    #             return
-    #
-    #     standard_report_basename = subject+'_RAM_'+self.pipeline.experiment+'_report.pdf'
-    #     standard_report_path = join(report_dir,standard_report_basename)
-    #     # shutil.copy(report_path,join(report_dir,report_basename))
-    #     shutil.copy(report_path,standard_report_path)
-    #
-    #     self.add_report_file(file=standard_report_path)
-
-
-    def run(self):
-        report_file = self.get_passed_object('report_file')
-        self.deploy_report(report_path=report_file)
+# class DeployReportPDF(ReportRamTask):
+#     def __init__(self, mark_as_completed=True):
+#         super(DeployReportPDF,self).__init__(mark_as_completed)
+#
+#         self.protocol = 'R1'
+#         self.convert_subject_code_regex = re.compile('('+self.protocol+')'+'([0-9]*)([a-zA-Z]{1,1})([\S]*)')
+#
+#     def split_subject_code(self,subject_code):
+#         match = re.match(self.convert_subject_code_regex,subject_code)
+#         if match:
+#             groups = match.groups()
+#
+#             ssc = SplitSubjectCode(protocol=groups[0], id=groups[1],site=groups[2],montage=groups[3])
+#             return ssc
+#         return None
+#
+#
+#     def deploy_report(self,report_path):
+#         subject = self.pipeline.subject
+#
+#         ssc = self.split_subject_code(subject)
+#
+#         report_basename = basename(report_path)
+#         report_base_dir = join('protocols',ssc.protocol.lower(),'subjects',str(ssc.id),'reports')
+#
+#         report_dir = join(self.pipeline.mount_point,report_base_dir)
+#
+#         if not isdir(report_dir):
+#             try:
+#                 os.makedirs(report_dir)
+#             except OSError:
+#                 return
+#
+#         standard_report_basename = subject+'_RAM_'+self.pipeline.experiment+'_report.pdf'
+#         standard_report_path = join(report_dir,standard_report_basename)
+#         # shutil.copy(report_path,join(report_dir,report_basename))
+#         shutil.copy(report_path,standard_report_path)
+#
+#         self.add_report_file(file=standard_report_path)
+#
+#         standard_report_link = join(self.pipeline.report_site_URL, report_base_dir, standard_report_basename)
+#         self.add_report_link(link=standard_report_link)
+#
+#
+#
+#     # def deploy_report(self,report_path):
+#     #     subject = self.pipeline.subject
+#     #
+#     #     ssc = self.split_subject_code(subject)
+#     #
+#     #     report_basename = basename(report_path)
+#     #     report_dir = join('/protocols',ssc.protocol.lower(),'subjects',str(ssc.id)+ssc.montage,'reports',self.pipeline.experiment)
+#     #
+#     #     if not isdir(report_dir):
+#     #         try:
+#     #             os.makedirs(report_dir)
+#     #         except OSError:
+#     #             return
+#     #
+#     #     standard_report_basename = subject+'_RAM_'+self.pipeline.experiment+'_report.pdf'
+#     #     standard_report_path = join(report_dir,standard_report_basename)
+#     #     # shutil.copy(report_path,join(report_dir,report_basename))
+#     #     shutil.copy(report_path,standard_report_path)
+#     #
+#     #     self.add_report_file(file=standard_report_path)
+#
+#
+#     def run(self):
+#         report_file = self.get_passed_object('report_file')
+#         self.deploy_report(report_path=report_file)

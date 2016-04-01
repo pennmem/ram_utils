@@ -31,8 +31,8 @@ else: # emulate command line
     #
 
     command_line_emulation_argument_list = [
-                                            '--task','RAM_CatFR1',
-                                            '--workspace-dir','/scratch/mswat/CatFR1_check_1',
+                                            '--task','RAM_FR1',
+                                            '--workspace-dir','/Users/m/scratch/mswat/FR1_check_1',
                                             '--mount-point','/Volumes/rhino_root',
                                             '--python-path','/Users/m//RAM_UTILS_GIT',
                                             '--python-path','/Users/m/PTSA_NEW_GIT'
@@ -184,7 +184,7 @@ for subject in subjects[:2]:
 
     report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
-    report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
+    # report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
 
     report_pipeline.execute_pipeline()
 
@@ -193,6 +193,7 @@ for subject in subjects[:2]:
 
 print 'this is summary for all reports report ', rsi.compose_summary(detail_level=1)
 
-rsi.output_json_files(dir='dupa')
 
-rsi.send_email_digest()
+rsi.output_json_files(dir=args.status_output_dir)
+
+# rsi.send_email_digest()

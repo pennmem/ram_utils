@@ -21,6 +21,7 @@ def parse_command_line(command_line_emulation_argument_list=None):
     parser.add_argument('--python-path',required=False, action='append')
 
     parser.add_argument('--exit-on-no-change', dest='exit_on_no_change', action='store_true')
+    parser.add_argument('--status-output-dir',required=False, dest='status_output_dir', action='store')
 
     if command_line_emulation_argument_list:
         args = parser.parse_args(command_line_emulation_argument_list)
@@ -49,6 +50,10 @@ def parse_command_line(command_line_emulation_argument_list=None):
     if not args.exit_on_no_change:
         args.exit_on_no_change = False
 
+    if args.status_output_dir:
+        args.status_output_dir = abspath(join(args.workspace_dir,args.status_output_dir))
+    else:
+        args.status_output_dir = abspath(join(args.workspace_dir,'status_output'))
 
     return args
 

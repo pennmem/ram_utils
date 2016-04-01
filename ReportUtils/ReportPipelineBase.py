@@ -2,7 +2,13 @@ from RamPipeline import RamPipeline
 from ReportUtils.DependencyChangeTrackerLegacy import DependencyChangeTrackerLegacy
 from ReportUtils import ReportSummary
 from ReportUtils import MissingExperimentError, MissingDataError
+from ReportUtils import ReportDeployer
 import sys
+import re
+import shutil
+
+
+
 
 class ReportPipelineBase(RamPipeline):
     def __init__(self, subject, workspace_dir, mount_point=None, exit_on_no_change=False):
@@ -30,11 +36,21 @@ class ReportPipelineBase(RamPipeline):
     def get_report_summary(self):
         return self.report_summary
 
+    def deploy_report(self,report_path=''):
+        rd = ReportDeployer.ReportDeployer(pipeline=self)
+        rd.deploy_report(report_path=report_path)
+
     def execute_pipeline(self):
         # super(ReportPipelineBase,self).execute_pipeline()
         # self.report_summary.add_changed_resources(changed_resources=self.dependency_change_tracker.get_changed_resources())
 
+        if hasattr(self,'experiment'):
+            self.report_summary.add_experiment_name(exp_name=self.experiment)
+        elif hasattr(self,'task'):
+            self.report_summary.add_experiment_name(exp_name=self.task)
 
+        else:
+            self.report_summary.add_experiment_name(exp_name='Unknown_Experiment')
 
 
         try:
@@ -62,3 +78,4 @@ class ReportPipelineBase(RamPipeline):
             print
 
         self.report_summary.add_changed_resources(changed_resources=self.dependency_change_tracker.get_changed_resources())
+

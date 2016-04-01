@@ -5,6 +5,8 @@ from JSONUtils import JSONNode
 from os.path import *
 import os
 import shutil
+import base64
+
 
 class ReportStatus(object):
     def __init__(self, task=None, error=None, message='', line=-1, file=''):
@@ -14,8 +16,7 @@ class ReportStatus(object):
         self.file = file
         self.error = error
 
-    # def to_json(self):
-
+        # def to_json(self):
 
 
 class ReportSummaryInventory(object):
@@ -26,12 +27,11 @@ class ReportSummaryInventory(object):
         self.reports_error_count = 0
         self.label = label
 
-
     def add_report_summary(self, report_summary):
         if report_summary.subject:
             self.summary_dict[report_summary.subject] = report_summary
 
-    def output_json_files(self,dir=''):
+    def output_json_files(self, dir=''):
 
         if dir and not isdir(dir):
             try:
@@ -40,7 +40,8 @@ class ReportSummaryInventory(object):
                 return
 
         for subject, report_summary in self.summary_dict.items():
-            outpath  = join(dir,subject+'_'+report_summary.task()+'_report.json')
+            # outpath = join(dir, subject + '_' + report_summary.experiment_name + '_report.json')
+            outpath = join(dir, subject + '_report.json')
             jn = report_summary.to_json()
             jn.write(outpath)
 
@@ -75,27 +76,25 @@ class ReportSummaryInventory(object):
                 self.reports_error_count += 1
                 s_details_error += s_details
 
-
-
         if self.reports_generated_count:
             s += '\n'
-            reports_word = 'reports' if self.reports_generated_count>1 else 'report'
-            s += 'Generated ' + str(self.reports_generated_count) + ' '+reports_word + '\n'
+            reports_word = 'reports' if self.reports_generated_count > 1 else 'report'
+            s += 'Generated ' + str(self.reports_generated_count) + ' ' + reports_word + '\n'
 
-        if detail_level>0:
+        if detail_level > 0:
             if self.reports_error_count:
-                s += str(self.reports_error_count) + ' reports were not generated due to errors. see detailes below' + '\n'
+                s += str(
+                    self.reports_error_count) + ' reports were not generated due to errors. see detailes below' + '\n'
 
         s += '\n' + 'Detailed Report Generation Status' + '\n'
 
         if self.reports_generated_count:
-
-            s+= '\n'+'--------------------------NEWLY GENERATED REPORTS-----------------------------------'+'\n'
+            s += '\n' + '--------------------------NEWLY GENERATED REPORTS-----------------------------------' + '\n'
             s += s_details_ok
 
-        if detail_level>0:
+        if detail_level > 0:
             if self.reports_error_count:
-                s+='\n'+'---------------------------REPORT ERRORS---------------------------------------'+'\n'
+                s += '\n' + '---------------------------REPORT ERRORS---------------------------------------' + '\n'
                 s += s_details_error
 
         return s
@@ -133,7 +132,7 @@ class ReportSummaryInventory(object):
 
         print 'u,p,server,port=', (u, p, smtp_server, smtp_port)
 
-        msg['Subject'] =subject
+        msg['Subject'] = subject
 
         msg['To'] = EMAIL_SPACE.join(email_list)
         msg['From'] = EMAIL_FROM
@@ -146,7 +145,7 @@ class ReportSummaryInventory(object):
         mail.sendmail(EMAIL_FROM, email_list, msg.as_string())
         mail.quit()
 
-    def send_email_digest(self, detail_level_list=[0,1,2]):
+    def send_email_digest(self, detail_level_list=[0, 1, 2]):
 
         from email.mime.text import MIMEText
         DATE_FORMAT = "%d/%m/%Y"
@@ -161,20 +160,19 @@ class ReportSummaryInventory(object):
                 email_list = self.get_email_list(email_list_file='mail_list.json')
 
                 msg = MIMEText(report_summary)
-                subject = "Daily %s Report Digest for %s"% (self.label,date.today().strftime(DATE_FORMAT))
-                self.send_to_single_list(subject=subject,msg=msg, email_list=email_list)
+                subject = "Daily %s Report Digest for %s" % (self.label, date.today().strftime(DATE_FORMAT))
+                self.send_to_single_list(subject=subject, msg=msg, email_list=email_list)
 
         # ------------ developer subscribers --------------
 
         if 1 in detail_level_list:
             report_summary_dev = self.compose_summary(detail_level=1)
             if self.reports_generated_count or self.reports_error_count:
-
                 email_list_dev = self.get_email_list(email_list_file='developer_mail_list.json')
 
                 msg_dev = MIMEText(report_summary_dev)
 
-                subject_dev = "Developers' %s Report Digest for %s"% (self.label,date.today().strftime(DATE_FORMAT))
+                subject_dev = "Developers' %s Report Digest for %s" % (self.label, date.today().strftime(DATE_FORMAT))
                 self.send_to_single_list(subject=subject_dev, msg=msg_dev, email_list=email_list_dev)
 
         if 2 in detail_level_list:
@@ -182,8 +180,9 @@ class ReportSummaryInventory(object):
             if self.reports_generated_count or self.reports_error_count:
                 email_list_dev = self.get_email_list(email_list_file='developer_mail_list.json')
                 msg_dev = MIMEText(report_summary_dev)
-                subject_dev = "Detailed  Developers' %s Report Digest for %s"% (self.label,date.today().strftime(DATE_FORMAT))
-                self.send_to_single_list(subject =subject_dev, msg=msg_dev, email_list=email_list_dev)
+                subject_dev = "Detailed  Developers' %s Report Digest for %s" % (
+                self.label, date.today().strftime(DATE_FORMAT))
+                self.send_to_single_list(subject=subject_dev, msg=msg_dev, email_list=email_list_dev)
 
 
 class ReportSummary(object):
@@ -200,6 +199,15 @@ class ReportSummary(object):
         self.changed_resources = None
         self.report_file = None
         self.report_link = None
+        self._experiment_name = None
+
+    @property
+    def experiment_name(self):
+        return self._experiment_name if self._experiment_name is not None else ''
+
+    @experiment_name.setter
+    def experiment_name(self,val):
+        self._experiment_name  = val
 
     def task(self):
         try:
@@ -208,6 +216,8 @@ class ReportSummary(object):
 
             return ''
 
+    def add_experiment_name(self, exp_name):
+        self.experiment_name = exp_name
 
     def add_report_file(self, file):
         self.report_file = file
@@ -227,7 +237,7 @@ class ReportSummary(object):
     def add_report_error_status(self, error_status):
         self.report_error_status = error_status
 
-    def add_report_error(self, error,stacktrace=None):
+    def add_report_error(self, error, stacktrace=None):
         error_rs = ReportStatus(error=error)
         self.report_error_status = error_rs
         if stacktrace is not None:
@@ -250,39 +260,45 @@ class ReportSummary(object):
             if len(self.changed_resources):
 
                 s += '------ Changed  Resources -----\n'
-                for resource, change_type in self.changed_resources.items():
-                    s += 'Changed resource : ' + resource + '\n'
-                    s += 'Change type: ' + change_type + '\n'
+                for resource_name, resource in self.changed_resources.items():
+                    s += 'Changed resource : ' + resource_name + '\n'
+                    s += 'Change type: ' + str(resource) + '\n'
                     s += '\n'
                     # s += str(self.changed_resources) + '\n'
 
         if detail_level == 2:
             s += '\n'
             if self.stacktrace is not None:
-
                 s += '------ Stack trace -----\n'
                 s += self.stacktrace
                 s += '\n'
 
-
         return s
-
 
     def to_json(self):
         out_node = JSONNode()
+        subject_node = out_node.add_child_node('subject')
+        subject_node['id'] = self.subject
+
         exp_node = out_node.add_child_node('experiments')
 
-        task = self.task()
+        exp_node = exp_node.add_child_node(self.experiment_name)
 
-        if task:
-            task_node = exp_node.add_child_node(task)
-        else:
-            return
+        exp_node['report_file'] = self.report_file if self.report_file is not None else ''
+        exp_node['report_link'] = self.report_link if self.report_link is not None else ''
+        exp_node['error'] = '' if not self.report_error_status else str(self.report_error_status.error)
+        exp_node['stacktrace'] = '' if not self.report_error_status else base64.b64encode(str(self.stacktrace))
 
-        task_node['report_file'] = self.report_file if self.report_file is not None else ''
-        task_node['report_link'] = self.report_link if self.report_link is not None else ''
-        task_node['error'] = '' if not self.report_error_status else str(self.report_error_status.error)
-        task_node['stacktrace'] = '' if not self.report_error_status else str(self.stacktrace)
+        exp_node['changed_resources'] = []
+        changed_res_list = exp_node['changed_resources']
+        for resource_name, resource in self.changed_resources.items():
+            # res_node = JSONNode()
+            # res_node['task'] = resource
+            # res_node['resource'] = resource
+            # res_node['type'] = change_type
+            changed_res_list.append(resource.to_json())
+
+        return out_node
 
 
     def get_report_generated_flag(self):
