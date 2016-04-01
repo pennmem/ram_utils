@@ -31,7 +31,7 @@ def classifier_delta_plot_data(ps_table, control_series, param1_name, param2_nam
             ps_table_val1_val2 = ps_table_val2[ps_table_val2[param1_name]==val1]
             means[i] = ps_table_val1_val2['prob_diff'].mean()
             sems[i] = ps_table_val1_val2['prob_diff'].sem()
-        plots[val2] = PlotData(x=np.arange(2,len(param1_vals)+2)-p2*0.1,
+        plots[val2] = PlotData(x=np.arange(1,len(param1_vals)+1)-p2*0.1,
                                y=means, yerr=sems,
                                label=param2_name+' '+str(val2)+' '+param2_unit
                                )
@@ -42,7 +42,7 @@ def classifier_delta_plot_data(ps_table, control_series, param1_name, param2_nam
     control_sems = np.empty(len(param1_vals)+1, dtype=float)
     control_sems[0] = control_series.sem()
     control_sems[1:] = np.NAN
-    plots['CONTROL'] = PlotData(x=np.arange(1,len(param1_vals)+2), y=control_means, yerr=control_sems, x_tick_labels=['CTRL']+[x if x>0 else 'PULSE' for x in param1_vals], xhline_pos=control_mean, color='k', markersize=10.0, elinewidth=3.0)
+    #plots['CONTROL'] = PlotData(x=np.arange(1,len(param1_vals)+2), y=control_means, yerr=control_sems, x_tick_labels=['CTRL']+[x if x>0 else 'PULSE' for x in param1_vals], xhline_pos=control_mean, color='k', markersize=10.0, elinewidth=3.0)
     return plots
 
 
@@ -106,8 +106,8 @@ def ttest_interaction(ps_table, param1_name, param2_name):
 def format_ttest_table(ttest_table):
     result = deepcopy(ttest_table)
     for row in result:
-        row[-1] = '$t = %.3f$' % row[-1]
-        row[-2] = '$p %s$' % ('\leq 0.001' if row[-2]<=0.001 else ('= %.3f'%row[-2]))
+        row[-1] = '$%.3f$' % row[-1]
+        row[-2] = '$\leq 0.001$' if row[-2]<=0.001 else ('$%.3f$'%row[-2])
     return result
 
 
