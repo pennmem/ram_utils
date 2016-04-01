@@ -255,6 +255,7 @@ class GeneratePlots(ReportRamTask):
 
             pdc = PlotDataCollection(legend_on=True, legend_loc=3, xlabel=param1_title, ylabel='$\Delta$ Post-Pre Classifier Output', xlabel_fontsize=20, ylabel_fontsize=20)
             for v,p in session_summary.low_quantile_classifier_delta_plot.iteritems():
+                p.xhline_pos=0.0
                 pdc.add_plot_data(p)
 
             panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
@@ -277,6 +278,7 @@ class GeneratePlots(ReportRamTask):
 
             pdc = PlotDataCollection(legend_on=True, legend_loc=3, xlabel=param1_title, ylabel='$\Delta$ Post-Pre Classifier Output', xlabel_fontsize=20, ylabel_fontsize=20)
             for v,p in session_summary.high_quantile_classifier_delta_plot.iteritems():
+                p.xhline_pos=0.0
                 pdc.add_plot_data(p)
 
             panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
@@ -299,6 +301,7 @@ class GeneratePlots(ReportRamTask):
 
             pdc = PlotDataCollection(legend_on=True, legend_loc=3, xlabel=param1_title+'\n(a)', ylabel='$\Delta$ Post-Pre Classifier Output', xlabel_fontsize=20, ylabel_fontsize=20)
             for v,p in session_summary.all_classifier_delta_plot.iteritems():
+                p.xhline_pos=0.0
                 pdc.add_plot_data(p)
 
             panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
