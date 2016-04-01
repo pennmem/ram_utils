@@ -8,9 +8,19 @@ import numpy as np
 import datetime
 from subprocess import call
 
+from ReportUtils import ReportRamTask
 
-class GenerateTex(RamTask):
-    def __init__(self, mark_as_completed=True): RamTask.__init__(self, mark_as_completed)
+import re
+from collections import namedtuple
+SplitSubjectCode = namedtuple(typename='SplitSubjectCode',field_names=['protocol','id','site','montage'])
+import os
+import shutil
+
+
+class GenerateTex(ReportRamTask):
+    def __init__(self, mark_as_completed=True):
+        super(GenerateTex,self).__init__(mark_as_completed)
+
 
     def run(self):
         subject = self.pipeline.subject
@@ -117,9 +127,13 @@ class GenerateTex(RamTask):
         self.pass_object('combined_report_tex_file_name', combined_report_tex_file_name)
 
 
-class GeneratePlots(RamTask):
+
+
+
+class GeneratePlots(ReportRamTask):
     def __init__(self, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(GeneratePlots,self).__init__(mark_as_completed)
+
 
     def run(self):
         subject = self.pipeline.subject
@@ -208,9 +222,11 @@ class GeneratePlots(RamTask):
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
 
-class GenerateReportPDF(RamTask):
+
+class GenerateReportPDF(ReportRamTask):
     def __init__(self, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(GenerateReportPDF,self).__init__(mark_as_completed)
+
 
     def run(self):
         output_directory = self.get_path_to_resource_in_workspace('reports')
@@ -237,3 +253,62 @@ class GenerateReportPDF(RamTask):
                                + self.get_path_to_resource_in_workspace('reports/'+combined_report_tex_file_name)
 
         call([pdflatex_command_str], shell=True)
+
+        report_core_file_name, ext = splitext(combined_report_tex_file_name)
+        report_file = join(output_directory,report_core_file_name+'.pdf')
+
+        self.pass_object('report_file',report_file)
+
+
+class DeployReportPDF(ReportRamTask):
+    def __init__(self, mark_as_completed=True):
+        super(DeployReportPDF,self).__init__(mark_as_completed)
+
+        self.protocol = 'R1'
+        self.convert_subject_code_regex = re.compile('('+self.protocol+')'+'([0-9]*)([a-zA-Z]{1,1})([\S]*)')
+
+    def split_subject_code(self,subject_code):
+        match = re.match(self.convert_subject_code_regex,subject_code)
+        if match:
+            groups = match.groups()
+
+            ssc = SplitSubjectCode(protocol=groups[0], id=groups[1],site=groups[2],montage=groups[3])
+            return ssc
+        return None
+
+
+    def deploy_report(self,report_path):
+
+
+        subject = self.pipeline.subject
+
+        ssc = self.split_subject_code(subject)
+
+        report_basename = basename(report_path)
+        report_base_dir = join('protocols',ssc.protocol.lower(),'subjects',str(ssc.id),'reports')
+
+        report_dir = join(self.pipeline.mount_point,report_base_dir)
+
+
+
+        if not isdir(report_dir):
+            try:
+                os.makedirs(report_dir)
+            except OSError:
+
+                return
+
+        standard_report_basename = subject+'_'+self.pipeline.experiment+'_report.pdf'
+        standard_report_path = join(report_dir,standard_report_basename)
+        # shutil.copy(report_path,join(report_dir,report_basename))
+        shutil.copy(report_path,standard_report_path)
+
+        self.add_report_file(file=standard_report_path)
+
+        standard_report_link = join(self.pipeline.report_site_URL, report_base_dir, standard_report_basename)
+        self.add_report_link(link=standard_report_link)
+
+
+    def run(self):
+        report_file = self.get_passed_object('report_file')
+        self.deploy_report(report_path=report_file)

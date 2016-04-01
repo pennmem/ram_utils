@@ -3,7 +3,8 @@ from datetime import date
 from ReportUtils import MissingDataError, MissingExperimentError, ReportError
 from JSONUtils import JSONNode
 from os.path import *
-
+import os
+import shutil
 
 class ReportStatus(object):
     def __init__(self, task=None, error=None, message='', line=-1, file=''):
@@ -12,6 +13,9 @@ class ReportStatus(object):
         self.line = line
         self.file = file
         self.error = error
+
+    # def to_json(self):
+
 
 
 class ReportSummaryInventory(object):
@@ -26,6 +30,19 @@ class ReportSummaryInventory(object):
     def add_report_summary(self, report_summary):
         if report_summary.subject:
             self.summary_dict[report_summary.subject] = report_summary
+
+    def output_json_files(self,dir=''):
+
+        if dir and not isdir(dir):
+            try:
+                os.makedirs(dir)
+            except OSError:
+                return
+
+        for subject, report_summary in self.summary_dict.items():
+            outpath  = join(dir,subject+'_'+report_summary.task()+'_report.json')
+            jn = report_summary.to_json()
+            jn.write(outpath)
 
     def compose_summary(self, detail_level=2):
         d = date.today()
@@ -177,11 +194,20 @@ class ReportSummary(object):
     def __init__(self):
         self.subject = None
         self.report_error_status = None
+        self.stacktrace = None
         # self.report_error_status = None
         self.report_status_list = []
         self.changed_resources = None
         self.report_file = None
         self.report_link = None
+
+    def task(self):
+        try:
+            return self.report_status_list[0].task
+        except IndexError:
+
+            return ''
+
 
     def add_report_file(self, file):
         self.report_file = file
@@ -201,9 +227,11 @@ class ReportSummary(object):
     def add_report_error_status(self, error_status):
         self.report_error_status = error_status
 
-    def add_report_error(self, error):
+    def add_report_error(self, error,stacktrace=None):
         error_rs = ReportStatus(error=error)
         self.report_error_status = error_rs
+        if stacktrace is not None:
+            self.stacktrace = stacktrace
 
     def detailed_status(self, detail_level=2):
         s = ''
@@ -228,7 +256,34 @@ class ReportSummary(object):
                     s += '\n'
                     # s += str(self.changed_resources) + '\n'
 
+        if detail_level == 2:
+            s += '\n'
+            if self.stacktrace is not None:
+
+                s += '------ Stack trace -----\n'
+                s += self.stacktrace
+                s += '\n'
+
+
         return s
+
+
+    def to_json(self):
+        out_node = JSONNode()
+        exp_node = out_node.add_child_node('experiments')
+
+        task = self.task()
+
+        if task:
+            task_node = exp_node.add_child_node(task)
+        else:
+            return
+
+        task_node['report_file'] = self.report_file if self.report_file is not None else ''
+        task_node['report_link'] = self.report_link if self.report_link is not None else ''
+        task_node['error'] = '' if not self.report_error_status else str(self.report_error_status.error)
+        task_node['stacktrace'] = '' if not self.report_error_status else str(self.stacktrace)
+
 
     def get_report_generated_flag(self):
         return bool(self.report_file)

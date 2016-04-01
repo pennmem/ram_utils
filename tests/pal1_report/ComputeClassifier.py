@@ -61,9 +61,13 @@ class ModelOutput(object):
         self.high_pc_diff_from_mean = 100.0 * (high_terc_recall_rate-recall_rate) / recall_rate
 
 
-class ComputeClassifier(RamTask):
+
+from ReportUtils import ReportRamTask
+
+class ComputeClassifier(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(ComputeClassifier,self).__init__(mark_as_completed)
+
         self.params = params
         self.pow_mat = None
         self.lr_classifier = None

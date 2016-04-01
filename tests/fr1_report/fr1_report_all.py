@@ -5,7 +5,7 @@ import re
 from setup_utils import parse_command_line, configure_python_paths
 
 # -------------------------------processing command line
-if len(sys.argv)>2:
+if len(sys.argv)>1:
 
     args = parse_command_line()
 
@@ -20,7 +20,17 @@ else: # emulate command line
     #                                         #'--exit-on-no-change'
     #                                         ]
 
-    # command_line_emulation_argument_list = ['--subject','R1086M',
+    command_line_emulation_argument_list = [
+                                            '--task','RAM_CatFR1',
+                                            '--workspace-dir','/scratch/mswat/CatFR1_check_1',
+                                            '--mount-point','',
+                                            '--python-path','/home1/mswat/RAM_UTILS_GIT',
+                                            '--python-path','/home1/mswat/PTSA_NEW_GIT'
+                                            #'--exit-on-no-change'
+                                            ]
+
+
+    # command_line_emulation_argument_list = [
     #                                         '--task','RAM_FR1',
     #                                         '--workspace-dir','/scratch/mswat/FR1_check_1',
     #                                         '--mount-point','',
@@ -30,15 +40,15 @@ else: # emulate command line
     #                                         ]
 
 
-    command_line_emulation_argument_list = ['--subject','R1086M',
-                                            '--task','RAM_FR1',
-                                            '--workspace-dir','/Users/m/scratch/mswat/FR1_check_1',
-                                            '--mount-point','/Volumes/rhino_root',
-                                            '--python-path','/Users/m/RAM_UTILS_GIT',
-                                            '--python-path','/Users/m//PTSA_NEW_GIT'
-                                            #'--exit-on-no-change'
-                                            ]
-
+    # command_line_emulation_argument_list = ['--subject','R1086M',
+    #                                         '--task','RAM_FR1',
+    #                                         '--workspace-dir','/Users/m/scratch/mswat/FR1_check_1',
+    #                                         '--mount-point','/Volumes/rhino_root',
+    #                                         '--python-path','/Users/m/RAM_UTILS_GIT',
+    #                                         '--python-path','/Users/m//PTSA_NEW_GIT'
+    #                                         #'--exit-on-no-change'
+    #                                         ]
+    #
 
     args = parse_command_line(command_line_emulation_argument_list)
 
@@ -109,26 +119,29 @@ class ReportPipeline(ReportPipelineBase):
         self.experiment = task
 
 
-    # task = 'RAM_PAL1'
 
-task = 'RAM_FR1'
+task = args.task
+# task = 'RAM_CatFR1'
 
 def find_subjects_by_task(task):
+
     ev_files = glob(args.mount_point + ('/data/events/%s/R*_events.mat' % task))
     return [re.search(r'R\d\d\d\d[A-Z](_\d+)?', f).group() for f in ev_files]
 
 
 subjects = find_subjects_by_task(task)
-subjects.remove('R1061T')
-subjects.remove('R1085C')
-subjects.remove('R1090C')
-subjects.remove('R1092J_2')
-subjects.remove('R1093J_1')
+
+
+# subjects.remove('R1061T')
+# subjects.remove('R1085C')
+# subjects.remove('R1090C')
+# subjects.remove('R1092J_2')
+# subjects.remove('R1093J_1')
 subjects.sort()
 
 rsi = ReportSummaryInventory(label=task)
 
-for subject in subjects[:3]:
+for subject in subjects:
     print '--Generating', task, 'report for', subject
 
     # sets up processing pipeline

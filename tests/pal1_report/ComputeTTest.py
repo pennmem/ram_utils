@@ -5,10 +5,11 @@ from scipy.stats import ttest_ind
 from sklearn.externals import joblib
 
 
-class ComputeTTest(RamTask):
+from ReportUtils import ReportRamTask
+
+class ComputeTTest(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
-        self.params = params
+        super(ComputeTTest,self).__init__(mark_as_completed)
 
     def run(self):
         subject = self.pipeline.subject

@@ -8,10 +8,13 @@ from sklearn.externals import joblib
 
 from ptsa.data.readers import EEGReader
 
+from ReportUtils import ReportRamTask
 
-class ComputePAL1Powers(RamTask):
-    def __init__(self, params, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+class ComputePAL1Powers(ReportRamTask):
+    def __init__(self, params,mark_as_completed=True):
+        super(ComputePAL1Powers,self).__init__(mark_as_completed)
+
+
         self.params = params
         self.pow_mat = None
         self.samplerate = None

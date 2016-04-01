@@ -12,41 +12,66 @@ if len(sys.argv)>1:
 
 else: # emulate command line
     # command_line_emulation_argument_list = ['--subject','R1086M',
-    #                                         '--workspace-dir','/scratch/busygin/FR1_joint_reports',
+    #                                         '--task','RAM_FR1',
+    #                                         '--workspace-dir','/scratch/busygin/FR1_reports',
     #                                         '--mount-point','',
     #                                         '--python-path','/home1/busygin/ram_utils_new_ptsa',
     #                                         '--python-path','/home1/busygin/python/ptsa_latest',
     #                                         #'--exit-on-no-change'
     #                                         ]
 
+    # command_line_emulation_argument_list = [
+    #                                         '--task','RAM_CatFR1',
+    #                                         '--workspace-dir','/scratch/mswat/CatFR1_check_1',
+    #                                         '--mount-point','',
+    #                                         '--python-path','/home1/mswat/RAM_UTILS_GIT',
+    #                                         '--python-path','/home1/mswat/PTSA_NEW_GIT'
+    #                                         #'--exit-on-no-change'
+    #                                         ]
+    #
+
     command_line_emulation_argument_list = [
-                                            '--workspace-dir','/scratch/mswat/FR1_CatFr1_check_1',
-                                            '--mount-point','',
-                                            '--python-path','/home1/mswat/RAM_UTILS_GIT',
-                                            '--python-path','/home1/mswat/PTSA_NEW_GIT'
+                                            '--task','RAM_CatFR1',
+                                            '--workspace-dir','/scratch/mswat/CatFR1_check_1',
+                                            '--mount-point','/Volumes/rhino_root',
+                                            '--python-path','/Users/m//RAM_UTILS_GIT',
+                                            '--python-path','/Users/m/PTSA_NEW_GIT'
                                             #'--exit-on-no-change'
                                             ]
 
 
-    # command_line_emulation_argument_list = ['--subject','R1086M',
-    #                                         '--workspace-dir','/Users/m/scratch/mswat/FR1_catfr1_check_1',
-    #                                         '--mount-point','/Volumes/rhino_root',
-    #                                         '--python-path','/Users/m/RAM_UTILS_GIT',
-    #                                         '--python-path','/Users/m/PTSA_NEW_GIT'
+
+
+    # command_line_emulation_argument_list = [
+    #                                         '--task','RAM_FR1',
+    #                                         '--workspace-dir','/scratch/mswat/FR1_check_1',
+    #                                         '--mount-point','',
+    #                                         '--python-path','/home1/mswat/RAM_UTILS_GIT',
+    #                                         '--python-path','/home1/mswat/PTSA_NEW_GIT'
     #                                         #'--exit-on-no-change'
     #                                         ]
 
 
+    # command_line_emulation_argument_list = ['--subject','R1086M',
+    #                                         '--task','RAM_FR1',
+    #                                         '--workspace-dir','/Users/m/scratch/mswat/FR1_check_1',
+    #                                         '--mount-point','/Volumes/rhino_root',
+    #                                         '--python-path','/Users/m/RAM_UTILS_GIT',
+    #                                         '--python-path','/Users/m//PTSA_NEW_GIT'
+    #                                         #'--exit-on-no-change'
+    #                                         ]
+    #
+
     args = parse_command_line(command_line_emulation_argument_list)
-
-
 
 configure_python_paths(args.python_path)
 
 # ------------------------------- end of processing command line
 
+
 from ReportUtils import ReportSummaryInventory, ReportSummary
 from ReportUtils import ReportPipelineBase
+
 
 from FR1EventPreparation import FR1EventPreparation
 
@@ -100,32 +125,40 @@ class Params(object):
 params = Params()
 
 class ReportPipeline(ReportPipelineBase):
-    def __init__(self, subject, workspace_dir, mount_point=None, exit_on_no_change=False):
+    def __init__(self, subject, task, workspace_dir, mount_point=None, exit_on_no_change=False):
         super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change)
-        self.task = 'RAM_FR1_CatFR1_joint'
-        self.experiment = self.task
+        self.task = task
+        self.experiment = task
 
 
 
-# https://stimstaging.psych.upenn.edu/rhino/protocols/r1/subjects/001/reports/FR1_report.pdf
+task = args.task
+# task = 'RAM_CatFR1'
 
 def find_subjects_by_task(task):
+
     ev_files = glob(args.mount_point + ('/data/events/%s/R*_events.mat' % task))
     return [re.search(r'R\d\d\d\d[A-Z](_\d+)?', f).group() for f in ev_files]
 
 
-subjects = list(set(find_subjects_by_task('RAM_FR1')).intersection(find_subjects_by_task('RAM_CatFR1')))
+subjects = find_subjects_by_task(task)
+
+
+# subjects.remove('R1061T')
+# subjects.remove('R1085C')
+# subjects.remove('R1090C')
+# subjects.remove('R1092J_2')
+# subjects.remove('R1093J_1')
 subjects.sort()
 
+rsi = ReportSummaryInventory(label=task)
 
-rsi = ReportSummaryInventory(label='RAM_FR1_CatFR1_joint')
-
-for subject in subjects:
-    print '--Generating FR1&CatFR1 joint report for', subject
+for subject in subjects[:2]:
+    print '--Generating', task, 'report for', subject
 
     # sets up processing pipeline
-    report_pipeline = ReportPipeline(subject=subject,
-                                           workspace_dir=join(args.workspace_dir,subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change)
+    report_pipeline = ReportPipeline(subject=subject, task=task,
+                                           workspace_dir=join(args.workspace_dir,task+'_'+subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change)
 
     report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
 
@@ -153,13 +186,13 @@ for subject in subjects:
 
     report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
 
-    # starts processing pipeline
     report_pipeline.execute_pipeline()
 
     rsi.add_report_summary(report_summary=report_pipeline.get_report_summary())
 
 
-
 print 'this is summary for all reports report ', rsi.compose_summary(detail_level=1)
 
-rsi.send_email_digest(detail_level_list=[0,1,2])
+rsi.output_json_files(dir='dupa')
+
+rsi.send_email_digest()

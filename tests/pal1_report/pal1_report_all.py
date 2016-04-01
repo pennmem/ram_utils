@@ -5,18 +5,27 @@ import re
 from setup_utils import parse_command_line, configure_python_paths
 
 # -------------------------------processing command line
-if len(sys.argv)>2:
+if len(sys.argv)>1:
 
     args = parse_command_line()
 
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1028M',
+    # command_line_emulation_argument_list = ['--subject','R1028M',
+    #                                         '--task','RAM_PAL1',
+    #                                         '--workspace-dir','/scratch/busygin/PAL1_reports',
+    #                                         '--mount-point','',
+    #                                         '--python-path','/home1/busygin/ram_utils_new_ptsa',
+    #                                         '--python-path','/home1/busygin/python/ptsa_latest',
+    #                                         #'--exit-on-no-change'
+    #                                         ]
+
+    command_line_emulation_argument_list = [
                                             '--task','RAM_PAL1',
-                                            '--workspace-dir','/scratch/busygin/PAL1_reports',
+                                            '--workspace-dir','/scratch/mswat/PAL1_reports',
                                             '--mount-point','',
-                                            '--python-path','/home1/busygin/ram_utils_new_ptsa',
-                                            '--python-path','/home1/busygin/python/ptsa_latest',
+                                            '--python-path','/home1/mswat/RAM_UTILS_GIT',
+                                            '--python-path','/home1/mswat/PTSA_NEW_GIT',
                                             #'--exit-on-no-change'
                                             ]
     args = parse_command_line(command_line_emulation_argument_list)
@@ -25,7 +34,11 @@ configure_python_paths(args.python_path)
 
 # ------------------------------- end of processing command line
 
-from ReportUtils.DependencyChangeTrackerLegacy import DependencyChangeTrackerLegacy
+
+
+from ReportUtils import ReportSummaryInventory, ReportSummary
+from ReportUtils import ReportPipelineBase
+
 
 from PAL1EventPreparation import PAL1EventPreparation
 
@@ -79,17 +92,24 @@ class Params(object):
 params = Params()
 
 
-class ReportPipeline(RamPipeline):
-    def __init__(self, subject, task, workspace_dir, mount_point=None, exit_on_no_change=False):
-        RamPipeline.__init__(self)
-        self.exit_on_no_change = exit_on_no_change
-        self.subject = subject
-        self.task = self.experiment = task
-        self.mount_point = mount_point
-        self.set_workspace_dir(workspace_dir)
-        dependency_tracker = DependencyChangeTrackerLegacy(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point)
+# class ReportPipeline(RamPipeline):
+#     def __init__(self, subject, task, workspace_dir, mount_point=None, exit_on_no_change=False):
+#         RamPipeline.__init__(self)
+#         self.exit_on_no_change = exit_on_no_change
+#         self.subject = subject
+#         self.task = self.experiment = task
+#         self.mount_point = mount_point
+#         self.set_workspace_dir(workspace_dir)
+#         dependency_tracker = DependencyChangeTrackerLegacy(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point)
+#
+#         self.set_dependency_tracker(dependency_tracker=dependency_tracker)
 
-        self.set_dependency_tracker(dependency_tracker=dependency_tracker)
+class ReportPipeline(ReportPipelineBase):
+    def __init__(self, subject, task, workspace_dir, mount_point=None, exit_on_no_change=False):
+        super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change)
+        self.task = task
+        self.experiment = task
+
 
 task = 'RAM_PAL1'
 
@@ -100,9 +120,11 @@ def find_subjects_by_task(task):
 
 
 subjects = find_subjects_by_task(task)
-subjects.remove('R1050M')
-subjects.remove('R1136N')
+# subjects.remove('R1050M')
+# subjects.remove('R1136N')
 subjects.sort()
+
+rsi = ReportSummaryInventory(label=task)
 
 for subject in subjects:
     print '--Generating', task, 'report for', subject
@@ -135,9 +157,13 @@ for subject in subjects:
 
     report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
-    # starts processing pipeline
-    try:
-        report_pipeline.execute_pipeline()
-    except KeyboardInterrupt:
-        print 'GOT KEYBOARD INTERUPT. EXITING'
-        sys.exit()
+    report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
+
+    report_pipeline.execute_pipeline()
+
+    rsi.add_report_summary(report_summary=report_pipeline.get_report_summary())
+
+
+print 'this is summary for all reports report ', rsi.compose_summary(detail_level=1)
+
+rsi.send_email_digest()
