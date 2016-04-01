@@ -26,6 +26,7 @@ else: # emulate command line
                                             '--mount-point','',
                                             '--python-path','/home1/mswat/RAM_UTILS_GIT',
                                             '--python-path','/home1/mswat/PTSA_NEW_GIT',
+                                            '--python-path','/home1/mswat/extra_libs'
                                             #'--exit-on-no-change'
                                             ]
     args = parse_command_line(command_line_emulation_argument_list)

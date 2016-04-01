@@ -23,7 +23,8 @@ else: # emulate command line
                                             '--workspace-dir','/scratch/mswat/FR1_CatFr1_check_1',
                                             '--mount-point','',
                                             '--python-path','/home1/mswat/RAM_UTILS_GIT',
-                                            '--python-path','/home1/mswat/PTSA_NEW_GIT'
+                                            '--python-path','/home1/mswat/PTSA_NEW_GIT',
+                                            '--python-path','/home1/mswat/extra_libs'
                                             #'--exit-on-no-change'
                                             ]
 
