@@ -36,7 +36,7 @@ class BuildAggregatePSTable(RamTask):
     def run(self):
         task = self.pipeline.task
 
-        ps1_root = self.get_path_to_resource_in_workspace('PS1/')
+        ps1_root = self.get_path_to_resource_in_workspace('PS1_reports/')
         ps1_subjects = sorted([s for s in os.listdir(ps1_root) if s[:2]=='R1'])
         ps1_tables = []
         for subject in ps1_subjects:
@@ -61,7 +61,7 @@ class BuildAggregatePSTable(RamTask):
         ps1_tables = pd.concat(ps1_tables, ignore_index=True)
         ps1_tables['Experiment'] = 'PS1'
 
-        ps2_root = self.get_path_to_resource_in_workspace('PS2/')
+        ps2_root = self.get_path_to_resource_in_workspace('PS2_reports/')
         ps2_subjects = sorted([s for s in os.listdir(ps2_root) if s[:2]=='R1'])
         ps2_tables = []
         for subject in ps2_subjects:
