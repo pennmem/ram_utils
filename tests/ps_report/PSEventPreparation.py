@@ -3,6 +3,8 @@ __author__ = 'm'
 import numpy as np
 import pandas as pd
 
+from ptsa.data.readers import BaseEventReader
+
 from RamPipeline import *
 from ReportUtils import MissingExperimentError, MissingDataError
 
@@ -25,8 +27,7 @@ class PSEventPreparation(ReportRamTask):
         subject = self.pipeline.subject
         experiment = self.pipeline.experiment
 
-        from ptsa.data.readers import BaseEventReader
-        e_path = os.path.join(self.pipeline.mount_point , 'data', 'events', 'RAM_PS', self.pipeline.subject + '_events.mat')
+        e_path = os.path.join(self.pipeline.mount_point , 'data/events/RAM_PS', self.pipeline.subject + '_events.mat')
         e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
         try:
@@ -118,7 +119,7 @@ class PSEventPreparation(ReportRamTask):
 #
 #
 def is_stim_event_type(event_type):
-    return event_type in ['STIMULATING', 'BEGIN_BURST', 'STIM_SINGLE_PULSE']
+    return event_type in ['STIMULATING', 'BEGIN_BURST', 'STIM_SINGLE_PULSE', 'SHAM']
 
 def compute_isi(events):
     print 'Computing ISI'
