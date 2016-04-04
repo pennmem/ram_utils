@@ -12,21 +12,21 @@ export PYTHONPATH="/home1/mswat/extra_libs":$PYTHONPATH
 
 current_directory=$(pwd)
 
-# FR1
-cd /home1/mswat/RAM_UTILS_GIT/tests/fr1_report
-python /home1/mswat/RAM_UTILS_GIT/tests/fr1_report/fr1_report_all.py  --task=RAM_FR1 --workspace-dir=/scratch/mswat/automated_reports/FR1_reports
-
-#CatFR1
-cd /home1/mswat/RAM_UTILS_GIT/tests/fr1_report
-python /home1/mswat/RAM_UTILS_GIT/tests/fr1_report/fr1_report_all.py  --task=RAM_CatFR1 --workspace-dir=/scratch/mswat/automated_reports/CatFR1_reports
-
-# FR1 CatFR1 joint
-cd /home1/mswat/RAM_UTILS_GIT/tests/fr1_catfr1_joint_report
-python /home1/mswat/RAM_UTILS_GIT/tests/fr1_catfr1_joint_report/fr1_catfr1_joint_report_all.py   --workspace-dir=/scratch/mswat/automated_reports/FR1_CatFr1_reports
-
-# PAL1
-cd /home1/mswat/RAM_UTILS_GIT/tests/pal1_report
-python /home1/mswat/RAM_UTILS_GIT/tests/pal1_report/pal1_report_all.py  --task=RAM_PAL1 --workspace-dir=/scratch/mswat/automated_reports/PAL1_reports
+## FR1
+#cd /home1/mswat/RAM_UTILS_GIT/tests/fr1_report
+#python /home1/mswat/RAM_UTILS_GIT/tests/fr1_report/fr1_report_all.py  --task=RAM_FR1 --workspace-dir=/scratch/mswat/automated_reports/FR1_reports
+#
+##CatFR1
+#cd /home1/mswat/RAM_UTILS_GIT/tests/fr1_report
+#python /home1/mswat/RAM_UTILS_GIT/tests/fr1_report/fr1_report_all.py  --task=RAM_CatFR1 --workspace-dir=/scratch/mswat/automated_reports/CatFR1_reports
+#
+## FR1 CatFR1 joint
+#cd /home1/mswat/RAM_UTILS_GIT/tests/fr1_catfr1_joint_report
+#python /home1/mswat/RAM_UTILS_GIT/tests/fr1_catfr1_joint_report/fr1_catfr1_joint_report_all.py   --workspace-dir=/scratch/mswat/automated_reports/FR1_CatFr1_reports
+#
+## PAL1
+#cd /home1/mswat/RAM_UTILS_GIT/tests/pal1_report
+#python /home1/mswat/RAM_UTILS_GIT/tests/pal1_report/pal1_report_all.py  --task=RAM_PAL1 --workspace-dir=/scratch/mswat/automated_reports/PAL1_reports
 
 # PS1
 cd /home1/mswat/RAM_UTILS_GIT/tests/ps_report
