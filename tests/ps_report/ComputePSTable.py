@@ -131,7 +131,7 @@ class ComputePSTable(ReportRamTask):
             perf_pre = prob2perf_norm(xval_output[-1], prob_pre[i])
             perf_diff[i] = 100.0*(prob2perf_norm(xval_output[-1], prob_pre[i]+prob_diff[i]) - perf_pre) / total_recall_performance
             prob_diff_low = prob_diff_high = prob_diff[i]
-            if experiment=='PS2' or experiment=='PS3':
+            if experiment in ['PS2', 'PS2.1', 'PS3']:
                 prob_diff_low -= control_low_500
                 prob_diff_high -= control_high_500
             else:

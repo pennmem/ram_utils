@@ -118,6 +118,7 @@ class PSEventPreparation(ReportRamTask):
 #           ('eegfile','|S256'), ('eegoffset', np.int)]
 #
 #
+
 def is_stim_event_type(event_type):
     return event_type in ['STIMULATING', 'BEGIN_BURST', 'STIM_SINGLE_PULSE', 'SHAM']
 

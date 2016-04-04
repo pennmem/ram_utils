@@ -168,7 +168,7 @@ class ComposeSessionSummary(ReportRamTask):
             param2_unit = 'ms'
             const_param_name = 'Amplitude'
             const_unit = 'mA'
-        elif experiment == 'PS2':
+        elif experiment in ['PS2', 'PS2.1']:
             param1_name = 'Pulse_Frequency'
             param2_name = 'Amplitude'
             param1_unit = 'Hz'
