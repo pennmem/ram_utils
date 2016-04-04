@@ -122,6 +122,9 @@ class PSEventPreparation(ReportRamTask):
 def is_stim_event_type(event_type):
     return event_type in ['STIMULATING', 'BEGIN_BURST', 'STIM_SINGLE_PULSE', 'SHAM']
 
+def is_real_stim(event_type):
+    return event_type in ['STIMULATING', 'BEGIN_BURST', 'STIM_SINGLE_PULSE', 'SHAM']
+
 def compute_isi(events):
     print 'Computing ISI'
 
@@ -129,14 +132,16 @@ def compute_isi(events):
 
     for i in xrange(1,len(events)):
         curr_ev = events.ix[i]
-        if is_stim_event_type(curr_ev.type):
+        if is_real_stim(curr_ev.type):
             prev_ev = events.ix[i-1]
             if curr_ev.session == prev_ev.session:
-                if is_stim_event_type(prev_ev.type) or prev_ev.type == 'BURST':
+                if is_real_stim(prev_ev.type) or prev_ev.type == 'BURST':
                     prev_mstime = prev_ev.mstime
                     if prev_ev.pulse_duration > 0:
                         prev_mstime += prev_ev.pulse_duration
-                    events.isi.values[i] = curr_ev.mstime - prev_mstime
+                    dt = curr_ev.mstime - prev_mstime
+                    if dt < 7000.0:
+                        events.isi.values[i] = dt
 
     return events
 #
