@@ -422,13 +422,15 @@ class GenerateReportPDF(ReportRamTask):
         report_core_file_name, ext = splitext(report_tex_file_name)
         report_file = join(output_directory,report_core_file_name+'.pdf')
 
-        self.pass_object('report_file',report_file)
+        self.pass_object('report_file', report_file)
+
+class DeployReportPDF(ReportRamTask):
+    def __init__(self, mark_as_completed=True):
+        super(DeployReportPDF, self).__init__(mark_as_completed)
+
+    def run(self):
+        report_file = self.get_passed_object('report_file')
         self.pipeline.deploy_report(report_path=report_file)
-
-        # self.add_report_file(file=report_file)
-
-        # self.copy_report_to_web_dir(report_file)
-
 
 # class DeployReportPDF(ReportRamTask):
 #     def __init__(self, mark_as_completed=True):

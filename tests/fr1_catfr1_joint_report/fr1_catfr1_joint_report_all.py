@@ -20,7 +20,7 @@ else: # emulate command line
     #                                         ]
 
     command_line_emulation_argument_list = [
-                                            '--workspace-dir','/scratch/mswat/FR1_CatFr1_check_1',
+                                            '--workspace-dir','/scratch/mswat/automated_reports/FR1_CatFr1_check_1',
                                             '--mount-point','',
                                             '--python-path','/home1/mswat/RAM_UTILS_GIT',
                                             '--python-path','/home1/mswat/PTSA_NEW_GIT',
@@ -121,7 +121,7 @@ subjects.sort()
 
 rsi = ReportSummaryInventory(label='RAM_FR1_CatFR1_joint')
 
-for subject in subjects:
+for subject in subjects[-1:]:
     print '--Generating FR1&CatFR1 joint report for', subject
 
     # sets up processing pipeline
@@ -152,7 +152,7 @@ for subject in subjects:
 
     report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
-    # report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
+    report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
 
     # starts processing pipeline
     report_pipeline.execute_pipeline()
