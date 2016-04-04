@@ -123,7 +123,7 @@ def is_stim_event_type(event_type):
     return event_type in ['STIMULATING', 'BEGIN_BURST', 'STIM_SINGLE_PULSE', 'SHAM']
 
 def is_real_stim(event_type):
-    return event_type in ['STIMULATING', 'BEGIN_BURST', 'STIM_SINGLE_PULSE', 'SHAM']
+    return event_type in ['STIMULATING', 'BEGIN_BURST', 'STIM_SINGLE_PULSE']
 
 def compute_isi(events):
     print 'Computing ISI'
