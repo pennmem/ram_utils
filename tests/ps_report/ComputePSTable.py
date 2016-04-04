@@ -159,6 +159,7 @@ class ComputePSTable(ReportRamTask):
         self.ps_table = pd.DataFrame()
         self.ps_table['session'] = ps_events.session
         self.ps_table['mstime'] = ps_events.mstime
+        self.ps_table['sham'] = (ps_events.type == 'SHAM')
         self.ps_table['Pulse_Frequency'] = ps_events.pulse_frequency
         self.ps_table['Amplitude'] = ps_events.amplitude
         self.ps_table['Duration'] = ps_events.pulse_duration
