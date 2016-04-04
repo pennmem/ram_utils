@@ -3,7 +3,9 @@ from scipy.stats import ttest_1samp
 
 import sys
 from setup_utils import parse_command_line, configure_python_paths
-from os.path import join
+from os.path import *
+
+import shutil
 
 # -------------------------------processing command line
 if len(sys.argv)>2:
@@ -18,8 +20,7 @@ else: # emulate command line
     #                                         ]
 
     command_line_emulation_argument_list = ['--workspace-dir', '/scratch/mswat/automated_reports',
-                                            '--mount-point', '',
-                                            '--python-path', '/home1/mswat/RAM_UTILS_GIT'
+                                            '--mount-point', ''
                                             ]
 
     args = parse_command_line(command_line_emulation_argument_list)
@@ -58,4 +59,10 @@ del ttest_table['abst']
 
 ttest_table.to_pickle(join(workspace_dir,'ttest_table_params.pkl'))
 ttest_table.to_csv(join(workspace_dir,'ttest_table_params.csv'), index=False)
-ttest_table.to_excel(join(workspace_dir,'ttest_table_params.xlsx'))
+
+excel_file_path = join(workspace_dir,'ttest_table_params.xlsx')
+ttest_table.to_excel(excel_file_path)
+
+
+excel_dst = '/protocols/r1/reports/ps_aggregator_significance_table.xlsx'
+shutil.copy(excel_file_path,excel_dst)
