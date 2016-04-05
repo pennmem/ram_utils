@@ -65,6 +65,8 @@ class ComputePSPowers(ReportRamTask):
         self.pass_object('ps_pow_mat_post',ps_pow_mat_post)
 
     def compute_ps_powers(self, events, sessions, monopolar_channels, bipolar_pairs, experiment):
+        subject = self.pipeline.subject
+
         n_freqs = len(self.params.freqs)
         n_bps = len(bipolar_pairs)
 
@@ -103,6 +105,7 @@ class ComputePSPowers(ReportRamTask):
                 events = np.hstack((events[events.session!=sess],sess_events)).view(np.recarray)
                 ev_order = np.argsort(events, order=('session','mstime'))
                 events = events[ev_order]
+                joblib.dump(events, self.get_path_to_resource_in_workspace(subject+'-'+experiment+'-ps_events.pkl'))
                 self.pass_object(self.pipeline.experiment+'_events', events)
 
 
@@ -171,6 +174,7 @@ class ComputePSPowers(ReportRamTask):
                 events = np.hstack((events[events.session!=sess],sess_events)).view(np.recarray)
                 ev_order = np.argsort(events, order=('session','mstime'))
                 events = events[ev_order]
+                joblib.dump(events, self.get_path_to_resource_in_workspace(subject+'-'+experiment+'-ps_events.pkl'))
                 self.pass_object(self.pipeline.experiment+'_events', events)
 
 
@@ -216,6 +220,16 @@ class ComputePSPowers(ReportRamTask):
                     self.wavelet_transform.multiphasevec(bp_data_pre[ev][0:winsize], pow_ev)
                     #sess_pow_mat_pre[ev,i,:] = np.mean(pow_pre_ev[:,nb_:-nb_], axis=1)
                     pow_ev_stripped = np.reshape(pow_ev, (n_freqs,winsize))[:,bufsize:winsize-bufsize]
+                    pow_zeros = np.where(pow_ev_stripped==0.0)[0]
+
+                    if len(pow_zeros)>0:
+                        print 'pre', bp, ev
+                        print sess_events[ev].eegfile, sess_events[ev].eegoffset
+                        self.raise_and_log_report_exception(
+                                                exception_type='NumericalError',
+                                                exception_message='Corrupt EEG File'
+                                                )
+
                     if self.params.log_powers:
                         np.log10(pow_ev_stripped, out=pow_ev_stripped)
                     sess_pow_mat_pre[ev,i,:] = np.nanmean(pow_ev_stripped, axis=1)
@@ -229,6 +243,16 @@ class ComputePSPowers(ReportRamTask):
                     self.wavelet_transform.multiphasevec(bp_data_post[ev][0:winsize], pow_ev)
                     #sess_pow_mat_post[ev,i,:] = np.mean(pow_post_ev[:,nb_:-nb_], axis=1)
                     pow_ev_stripped = np.reshape(pow_ev, (n_freqs,winsize))[:,bufsize:winsize-bufsize]
+                    pow_zeros = np.where(pow_ev_stripped==0.0)[0]
+
+                    if len(pow_zeros)>0:
+                        print 'pre', bp, ev
+                        print sess_events[ev].eegfile, sess_events[ev].eegoffset
+                        self.raise_and_log_report_exception(
+                                                exception_type='NumericalError',
+                                                exception_message='Corrupt EEG File'
+                                                )
+
                     if self.params.log_powers:
                         np.log10(pow_ev_stripped, out=pow_ev_stripped)
                     sess_pow_mat_post[ev,i,:] = np.nanmean(pow_ev_stripped, axis=1)

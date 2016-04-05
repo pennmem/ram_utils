@@ -2,6 +2,7 @@ __author__ = 'm'
 
 import numpy as np
 import pandas as pd
+from sklearn.externals import joblib
 
 from ptsa.data.readers import BaseEventReader
 
@@ -15,13 +16,19 @@ class PSEventPreparation(ReportRamTask):
     def __init__(self, mark_as_completed=True):
         super(PSEventPreparation,self).__init__(mark_as_completed)
 
+    def initialize(self):
+        if self.dependency_inventory:
+            self.dependency_inventory.add_dependent_resource(resource_name='ps_events',
+                                        access_path = ['experiments','ps','events'])
+            self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
+                                        access_path = ['electrodes','bipolar'])
+
     def restore(self):
-        # subject = self.pipeline.subject
-        # experiment = self.pipeline.experiment
-        #
-        # events = joblib.load(self.get_path_to_resource_in_workspace(subject+'-'+experiment+'-ps_events.pkl'))
-        # self.pass_object(experiment+'_events', events)
-        pass
+        subject = self.pipeline.subject
+        experiment = self.pipeline.experiment
+
+        events = joblib.load(self.get_path_to_resource_in_workspace(subject+'-'+experiment+'-ps_events.pkl'))
+        self.pass_object(experiment+'_events', events)
 
     def run(self):
         subject = self.pipeline.subject
@@ -86,9 +93,7 @@ class PSEventPreparation(ReportRamTask):
 
         print len(events), 'stim', experiment, 'events'
 
-        # events = Events(events.to_records(index=False))
-        #
-        # joblib.dump(events, self.get_path_to_resource_in_workspace(subject+'-'+experiment+'-ps_events.pkl'))
+        joblib.dump(events, self.get_path_to_resource_in_workspace(subject+'-'+experiment+'-ps_events.pkl'))
         self.pass_object(experiment+'_events', events)
 
 
