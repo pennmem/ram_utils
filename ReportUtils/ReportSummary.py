@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from datetime import date
-from ReportUtils import MissingDataError, MissingExperimentError, ReportError
+from ReportUtils import *
 from JSONUtils import JSONNode
 from os.path import *
 import os
@@ -332,6 +332,8 @@ class ReportSummary(object):
                     s += 'Missing Data Error: '
                 elif isinstance(e, MissingExperimentError):
                     s += 'Missing Experiment Error: '
+                elif isinstance(e, NumericalError):
+                    s += 'Numerical Error: '
                 elif isinstance(e, ReportError):
                     s += 'General Report Error: '
                 else:
