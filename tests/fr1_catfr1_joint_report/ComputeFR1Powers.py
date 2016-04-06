@@ -162,6 +162,17 @@ class ComputeFR1Powers(ReportRamTask):
                     #    import sys
                     #    sys.exit(1)
                     pow_ev_stripped = np.reshape(pow_ev, (n_freqs,winsize))[:,bufsize:winsize-bufsize]
+                    pow_zeros = np.where(pow_ev_stripped==0.0)[0]
+                    if len(pow_zeros)>0:
+                        print bp, ev
+                        print sess_events[ev].eegfile, sess_events[ev].eegoffset
+                        if len(pow_zeros)>0:
+                            print bp, ev
+                            print sess_events[ev].eegfile, sess_events[ev].eegoffset
+                            self.raise_and_log_report_exception(
+                                                    exception_type='NumericalError',
+                                                    exception_message='Corrupt EEG File'
+                                                    )
                     if self.params.log_powers:
                         np.log10(pow_ev_stripped, out=pow_ev_stripped)
                     sess_pow_mat[ev,i,:] = np.nanmean(pow_ev_stripped, axis=1)

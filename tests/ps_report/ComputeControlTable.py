@@ -1,9 +1,25 @@
 from RamPipeline import *
 
+from math import log
 import numpy as np
 import pandas as pd
+from scipy.stats import norm
 from sklearn.externals import joblib
 from ReportUtils import ReportRamTask
+
+
+def prob2perf_norm(xval_output, p):
+    fi1 = fi0 = 1.0
+
+    if p < 1e-6:
+        return 0.0
+    elif p < 1.0 - 1e-6:
+        p_norm = log(p/(1.0-p))
+        fi1 = norm.cdf(p_norm, loc=xval_output.mean1, scale=xval_output.pooled_std)
+        fi0 = norm.cdf(p_norm, loc=xval_output.mean0, scale=xval_output.pooled_std)
+
+    r = xval_output.n1*fi1 / (xval_output.n1*fi1 + xval_output.n0*fi0)
+    return r
 
 
 class ComputeControlTable(ReportRamTask):
@@ -20,32 +36,47 @@ class ComputeControlTable(ReportRamTask):
     def run(self):
         subject = self.pipeline.subject
 
+        events = self.get_passed_object('control_events')
+
+        if len(events) == 0:
+            self.control_table = pd.DataFrame(columns=['session','prob_pre','prob_diff','perf_diff','subject'])
+            self.pass_object('control_table', self.control_table)
+            self.control_table.to_pickle(self.get_path_to_resource_in_workspace(subject + '-control_table.pkl'))
+            return
+
+        event_sess = np.tile(events.session, 2)
+
         lr_classifier = self.get_passed_object('lr_classifier')
-        #xval_output = self.get_passed_object('xval_output')
-        #thresh = xval_output[-1].jstat_thresh
+        xval_output = self.get_passed_object('xval_output')
 
-        control_pow_mat_pre = self.get_passed_object('control_pow_mat_pre')
-        control_prob_pre = lr_classifier.predict_proba(control_pow_mat_pre)[:,1]
-        #low_sel = (control_prob_pre < thresh)
-        #control_prob_pre = control_prob_pre[low_sel]
+        pow_mat_pre = self.get_passed_object('control_pow_mat_pre')
+        prob_pre = lr_classifier.predict_proba(pow_mat_pre)[:,1]
 
-        control_pow_mat_045 = self.get_passed_object('control_pow_mat_045')
-        control_prob_045 = lr_classifier.predict_proba(control_pow_mat_045)[:,1]
-        #control_prob_045 = control_prob_045[low_sel]
+        pow_mat_post = self.get_passed_object('control_pow_mat_post')
+        prob_post = lr_classifier.predict_proba(pow_mat_post)[:,1]
 
-        control_pow_mat_07 = self.get_passed_object('control_pow_mat_07')
-        control_prob_07 = lr_classifier.predict_proba(control_pow_mat_07)[:,1]
-        #control_prob_07 = control_prob_07[low_sel]
+        prob_diff = prob_post - prob_pre
 
-        control_pow_mat_12 = self.get_passed_object('control_pow_mat_12')
-        control_prob_12 = lr_classifier.predict_proba(control_pow_mat_12)[:,1]
-        #control_prob_12 = control_prob_12[low_sel]
+        probs = xval_output[-1].probs
+        true_labels = xval_output[-1].true_labels
+        performance_map = sorted(zip(probs,true_labels))
+        probs, true_labels = zip(*performance_map)
+        true_labels = np.array(true_labels)
+        total_recall_performance = np.sum(true_labels) / float(len(true_labels))
+
+        # the code below is not pythonic, but I'll figure it out later
+        n_events = len(event_sess)
+        perf_diff = np.zeros(n_events, dtype=float)
+        for i in xrange(n_events):
+            perf_pre = prob2perf_norm(xval_output[-1], prob_pre[i])
+            perf_diff[i] = 100.0*(prob2perf_norm(xval_output[-1], prob_pre[i]+prob_diff[i]) - perf_pre) / total_recall_performance
 
         self.control_table = pd.DataFrame()
-        self.control_table['prob_pre'] = control_prob_pre
-        self.control_table['prob_diff_250'] = control_prob_045 - control_prob_pre
-        self.control_table['prob_diff_500'] = control_prob_07 - control_prob_pre
-        self.control_table['prob_diff_1000'] = control_prob_12 - control_prob_pre
+        self.control_table['session'] = event_sess
+        self.control_table['prob_pre'] = prob_pre
+        self.control_table['prob_diff'] = prob_diff
+        self.control_table['perf_diff'] = perf_diff
+        self.control_table['subject'] = subject
 
         self.pass_object('control_table', self.control_table)
         self.control_table.to_pickle(self.get_path_to_resource_in_workspace(subject + '-control_table.pkl'))

@@ -69,9 +69,12 @@ class Params(object):
         self.fr1_end_time = 1.366
         self.fr1_buf = 1.365
 
-        self.control_start_time = -1.1
-        self.control_end_time = -0.1
-        self.control_buf = 1.0
+        self.sham1_start_time = 1.0
+        self.sham1_end_time = 2.0
+        self.sham_buf = 1.0
+
+        self.sham2_start_time = 10.0 - 3.7
+        self.sham2_end_time = 10.0 - 2.7
 
         self.ps_start_time = -1.0
         self.ps_end_time = 0.0

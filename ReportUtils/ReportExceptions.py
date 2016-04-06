@@ -25,3 +25,10 @@ class MissingDataError(ReportError):
 
         # Call the base class constructor with the parameters it needs
         super(MissingDataError, self).__init__(message=message, errors=errors,status=status)
+
+
+class NumericalError(ReportError):
+    def __init__(self, message, errors=None,status=None):
+
+        # Call the base class constructor with the parameters it needs
+        super(NumericalError, self).__init__(message=message, errors=errors,status=status)

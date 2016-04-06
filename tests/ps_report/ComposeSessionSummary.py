@@ -48,25 +48,6 @@ def plot_data(ps_table, delta_column_name, ps_sham, param1_name, param2_name, pa
     return plots
 
 
-# def recall_delta_plot_data(ps_table, delta_column_name, param1_name, param2_name, param2_unit):
-#     plots = OrderedDict()
-#     param1_vals = sorted(ps_table[param1_name].unique())
-#     param2_vals = sorted(ps_table[param2_name].unique())
-#     for p2, val2 in enumerate(param2_vals):
-#         ps_table_val2 = ps_table[ps_table[param2_name]==val2]
-#         means = np.empty(len(param1_vals), dtype=float)
-#         sems = np.empty(len(param1_vals), dtype=float)
-#         for i,val1 in enumerate(param1_vals):
-#             ps_table_val1_val2 = ps_table_val2[ps_table_val2[param1_name]==val1]
-#             means[i] = ps_table_val1_val2[delta_column_name].mean()
-#             sems[i] = ps_table_val1_val2[delta_column_name].sem()
-#         plots[val2] = PlotData(x=np.arange(1,len(param1_vals)+1)-p2*0.1,
-#                                y=means, yerr=sems, x_tick_labels=[x if x>0 else 'PULSE' for x in param1_vals],
-#                                label=param2_name+' '+str(val2)+' '+param2_unit
-#                                )
-#     return plots
-
-
 def anova_test(ps_table, param1_name, param2_name):
     if len(ps_table) < 10:
         return None
@@ -145,16 +126,12 @@ class ComposeSessionSummary(ReportRamTask):
         xval_output = self.get_passed_object('xval_output')
 
         ps_table = self.get_passed_object('ps_table')
-        control_table = self.get_passed_object('control_table')
+        ps_sham_table = self.get_passed_object('control_table')
 
         sessions = sorted(ps_table.session.unique())
 
         self.pass_object('NUMBER_OF_SESSIONS', len(sessions))
         self.pass_object('NUMBER_OF_ELECTRODES', len(monopolar_channels))
-
-        thresh = xval_output[-1].jstat_thresh
-        control_low_table = control_table[control_table['prob_pre']<thresh]
-        control_high_table = control_table[control_table['prob_pre']>1.0-thresh]
 
         self.pass_object('AUC', xval_output[-1].auc)
 
@@ -203,8 +180,7 @@ class ComposeSessionSummary(ReportRamTask):
 
         for session in sessions:
             ps_session_table = ps_table[ps_table.session==session]
-            ps_session_sham_table = ps_session_table[ps_session_table.sham]
-            ps_session_table = ps_session_table[~ps_session_table.sham]
+            ps_session_sham_table = ps_sham_table[ps_sham_table.session==session]
 
             session_summary = SessionSummary()
 
@@ -240,17 +216,6 @@ class ComposeSessionSummary(ReportRamTask):
             session_summary.isi_mid = isi_mid
             session_summary.isi_half_range = isi_halfrange
             session_summary.const_param_value = ps_session_table[const_param_name].unique().max()
-
-            ps_session_low_table = pd.DataFrame(ps_session_table[ps_session_table['prob_pre']<thresh])
-            ps_session_high_table = pd.DataFrame(ps_session_table[ps_session_table['prob_pre']>1.0-thresh])
-            ps_session_sham_low_table = pd.DataFrame(ps_session_sham_table[ps_session_sham_table['prob_pre']<thresh])
-            ps_session_sham_high_table = pd.DataFrame(ps_session_sham_table[ps_session_sham_table['prob_pre']>1.0-thresh])
-
-            session_summary.low_quantile_classifier_delta_plot = plot_data(ps_session_low_table, 'prob_diff', ps_session_sham_low_table['prob_diff'], param1_name, param2_name, param2_unit)
-            session_summary.low_quantile_recall_delta_plot = plot_data(ps_session_low_table, 'perf_diff', ps_session_sham_low_table['perf_diff'], param1_name, param2_name, param2_unit)
-
-            session_summary.high_quantile_classifier_delta_plot = plot_data(ps_session_high_table, 'prob_diff', ps_session_sham_high_table['prob_diff'], param1_name, param2_name, param2_unit)
-            session_summary.high_quantile_recall_delta_plot = plot_data(ps_session_high_table, 'perf_diff', ps_session_sham_high_table['perf_diff'], param1_name, param2_name, param2_unit)
 
             session_summary.all_classifier_delta_plot = plot_data(ps_session_table, 'prob_diff', ps_session_sham_table['prob_diff'], param1_name, param2_name, param2_unit)
             session_summary.all_recall_delta_plot = plot_data(ps_session_table, 'perf_diff', ps_session_sham_table['perf_diff'], param1_name, param2_name, param2_unit)

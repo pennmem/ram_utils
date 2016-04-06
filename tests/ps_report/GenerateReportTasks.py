@@ -191,52 +191,6 @@ class GeneratePlots(ReportRamTask):
         for session_summary in session_summary_array:
             panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=2, labelsize=16, wspace=5.0)
 
-            pdc = PlotDataCollection(legend_on=True, legend_loc=3, xlabel=param1_title, ylabel='$\Delta$ Post-Pre Classifier Output', xlabel_fontsize=20, ylabel_fontsize=20)
-            for v,p in session_summary.low_quantile_classifier_delta_plot.iteritems():
-                p.xhline_pos=0.0
-                pdc.add_plot_data(p)
-
-            panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
-
-            pdc = PlotDataCollection(legend_on=True, legend_loc=3, xlabel=param1_title, ylabel='Expected Recall Change (%)', xlabel_fontsize=20, ylabel_fontsize=20)
-            for v,p in session_summary.low_quantile_recall_delta_plot.iteritems():
-                p.xhline_pos=0.0
-                pdc.add_plot_data(p)
-
-            panel_plot.add_plot_data_collection(0, 1, plot_data_collection=pdc)
-
-            plot = panel_plot.generate_plot()
-
-            plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + self.pipeline.experiment + '-' + self.pipeline.subject + '-low_quantile_plot_' + session_summary.name + '.pdf')
-
-            plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
-
-
-            panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=2, labelsize=16, wspace=5.0)
-
-            pdc = PlotDataCollection(legend_on=True, legend_loc=3, xlabel=param1_title, ylabel='$\Delta$ Post-Pre Classifier Output', xlabel_fontsize=20, ylabel_fontsize=20)
-            for v,p in session_summary.high_quantile_classifier_delta_plot.iteritems():
-                p.xhline_pos=0.0
-                pdc.add_plot_data(p)
-
-            panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
-
-            pdc = PlotDataCollection(legend_on=True, legend_loc=3, xlabel=param1_title, ylabel='Expected Recall Change (%)', xlabel_fontsize=20, ylabel_fontsize=20)
-            for v,p in session_summary.high_quantile_recall_delta_plot.iteritems():
-                p.xhline_pos=0.0
-                pdc.add_plot_data(p)
-
-            panel_plot.add_plot_data_collection(0, 1, plot_data_collection=pdc)
-
-            plot = panel_plot.generate_plot()
-
-            plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + self.pipeline.experiment + '-' + self.pipeline.subject + '-high_quantile_plot_' + session_summary.name + '.pdf')
-
-            plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
-
-
-            panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=2, labelsize=16, wspace=5.0)
-
             pdc = PlotDataCollection(legend_on=True, legend_loc=3, xlabel=param1_title+'\n(a)', ylabel='$\Delta$ Post-Pre Classifier Output', xlabel_fontsize=20, ylabel_fontsize=20)
             for v,p in session_summary.all_classifier_delta_plot.iteritems():
                 p.xhline_pos=0.0

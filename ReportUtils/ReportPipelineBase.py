@@ -1,7 +1,7 @@
 from RamPipeline import RamPipeline
 from ReportUtils.DependencyChangeTrackerLegacy import DependencyChangeTrackerLegacy
 from ReportUtils import ReportSummary
-from ReportUtils import MissingExperimentError, MissingDataError
+from ReportUtils import MissingExperimentError, MissingDataError, NumericalError
 from ReportUtils import ReportDeployer
 import sys
 import re
@@ -64,6 +64,8 @@ class ReportPipelineBase(RamPipeline):
             # report_pipeline.add_report_error(error=mee)
             # subject_missing_experiment_list.append(subject)
         except MissingDataError as mde:
+            pass
+        except NumericalError as ne:
             pass
         except Exception as e:
 

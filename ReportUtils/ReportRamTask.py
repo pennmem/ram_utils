@@ -1,5 +1,5 @@
 from RamPipeline import RamTask
-from ReportUtils import MissingExperimentError, MissingDataError, ReportError, ReportStatus
+from ReportUtils import *
 import inspect
 from os.path import *
 
@@ -61,6 +61,14 @@ class ReportRamTask(RamTask):
                 message=exception_message,
                 # status=rs
             )
+
+        elif exception_type == 'NumericalError':
+            # rs = ReportStatus(subject=self.pipeline.subject)
+            excpt = NumericalError(
+                message=exception_message,
+                # status=rs
+            )
+
 
         else:
             # rs = ReportStatus(subject=self.pipeline.subject)
