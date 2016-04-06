@@ -138,7 +138,7 @@ report_pipeline.add_task(FREventPreparation(params=params, mark_as_completed=Fal
 
 report_pipeline.add_task(ControlEventPreparation(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(PSEventPreparation(mark_as_completed=False))
+report_pipeline.add_task(PSEventPreparation(mark_as_completed=True))
 
 report_pipeline.add_task(TalPreparation(mark_as_completed=False))
 
