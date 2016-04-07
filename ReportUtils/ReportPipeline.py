@@ -1,18 +1,10 @@
-from RamPipeline import RamPipeline
 
-from ReportUtils.DependencyChangeTrackerLegacy import DependencyChangeTrackerLegacy
+from ReportPipelineBase import ReportPipelineBase
 
-class ReportPipeline(RamPipeline):
-    def __init__(self, subject, experiment, workspace_dir, mount_point=None):
-        RamPipeline.__init__(self)
-        self.subject = subject
-        #self.task = 'RAM_FR1'
-        self.experiment = experiment
-        self.mount_point = mount_point
-        self.set_workspace_dir(workspace_dir)
-        dependency_tracker = DependencyChangeTrackerLegacy(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point)
 
-        self.set_dependency_tracker(dependency_tracker=dependency_tracker)
 
+class ReportPipeline(ReportPipelineBase):
+    def __init__(self, subject=None, experiment=None, task=None, workspace_dir=None , mount_point=None, exit_on_no_change=False,recompute_on_no_status=False):
+        super(ReportPipeline,self).__init__( subject=subject, experiment=experiment, task=task, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change,recompute_on_no_status=recompute_on_no_status)
 
 

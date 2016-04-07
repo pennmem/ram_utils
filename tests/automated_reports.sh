@@ -14,37 +14,37 @@ current_directory=$(pwd)
 
 # FR1
 cd /home1/mswat/RAM_UTILS_GIT/tests/fr1_report
-python /home1/mswat/RAM_UTILS_GIT/tests/fr1_report/fr1_report_all.py  --task=RAM_FR1 --workspace-dir=/scratch/mswat/automated_reports/FR1_reports
+python /home1/mswat/RAM_UTILS_GIT/tests/fr1_report/fr1_report_all.py  --task=RAM_FR1 --workspace-dir=/scratch/mswat/automated_reports/FR1_reports --recompute-on-no-status
 
 #CatFR1
 cd /home1/mswat/RAM_UTILS_GIT/tests/fr1_report
-python /home1/mswat/RAM_UTILS_GIT/tests/fr1_report/fr1_report_all.py  --task=RAM_CatFR1 --workspace-dir=/scratch/mswat/automated_reports/CatFR1_reports
+python /home1/mswat/RAM_UTILS_GIT/tests/fr1_report/fr1_report_all.py  --task=RAM_CatFR1 --workspace-dir=/scratch/mswat/automated_reports/CatFR1_reports --recompute-on-no-status
 
 # FR1 CatFR1 joint
 cd /home1/mswat/RAM_UTILS_GIT/tests/fr1_catfr1_joint_report
-python /home1/mswat/RAM_UTILS_GIT/tests/fr1_catfr1_joint_report/fr1_catfr1_joint_report_all.py   --workspace-dir=/scratch/mswat/automated_reports/FR1_CatFr1_reports
+python /home1/mswat/RAM_UTILS_GIT/tests/fr1_catfr1_joint_report/fr1_catfr1_joint_report_all.py   --workspace-dir=/scratch/mswat/automated_reports/FR1_CatFr1_reports --recompute-on-no-status
 
 # PAL1
 cd /home1/mswat/RAM_UTILS_GIT/tests/pal1_report
-python /home1/mswat/RAM_UTILS_GIT/tests/pal1_report/pal1_report_all.py  --task=RAM_PAL1 --workspace-dir=/scratch/mswat/automated_reports/PAL1_reports
+python /home1/mswat/RAM_UTILS_GIT/tests/pal1_report/pal1_report_all.py  --task=RAM_PAL1 --workspace-dir=/scratch/mswat/automated_reports/PAL1_reports --recompute-on-no-status
 
 # PS1
 cd /home1/mswat/RAM_UTILS_GIT/tests/ps_report
-python /home1/mswat/RAM_UTILS_GIT/tests/ps_report/ps_report_all.py  --experiment=PS1 --workspace-dir=/scratch/mswat/automated_reports/PS1_reports
+python /home1/mswat/RAM_UTILS_GIT/tests/ps_report/ps_report_all.py  --experiment=PS1 --workspace-dir=/scratch/mswat/automated_reports/PS1_reports --recompute-on-no-status
 
 
 # PS2
 cd /home1/mswat/RAM_UTILS_GIT/tests/ps_report
-python /home1/mswat/RAM_UTILS_GIT/tests/ps_report/ps_report_all.py  --experiment=PS2 --workspace-dir=/scratch/mswat/automated_reports/PS2_reports
+python /home1/mswat/RAM_UTILS_GIT/tests/ps_report/ps_report_all.py  --experiment=PS2 --workspace-dir=/scratch/mswat/automated_reports/PS2_reports --recompute-on-no-status
 
 # PS2.1
 cd /home1/mswat/RAM_UTILS_GIT/tests/ps_report
-python /home1/mswat/RAM_UTILS_GIT/tests/ps_report/ps_report_all.py  --experiment=PS2.1 --workspace-dir=/scratch/mswat/automated_reports/PS2.1_reports
+python /home1/mswat/RAM_UTILS_GIT/tests/ps_report/ps_report_all.py  --experiment=PS2.1 --workspace-dir=/scratch/mswat/automated_reports/PS2.1_reports --recompute-on-no-status
 
 
 # PS3
 cd /home1/mswat/RAM_UTILS_GIT/tests/ps_report
-python /home1/mswat/RAM_UTILS_GIT/tests/ps_report/ps_report_all.py  --experiment=PS3 --workspace-dir=/scratch/mswat/automated_reports/PS3_reports
+python /home1/mswat/RAM_UTILS_GIT/tests/ps_report/ps_report_all.py  --experiment=PS3 --workspace-dir=/scratch/mswat/automated_reports/PS3_reports --recompute-on-no-status
 
 #PS1-2 aggregator
 cd /home1/mswat/RAM_UTILS_GIT/tests/ps_aggregator

@@ -1,7 +1,7 @@
 from RamPipeline import RamPipeline
 from ReportUtils.DependencyChangeTrackerLegacy import DependencyChangeTrackerLegacy
-from ReportUtils import ReportSummary
-from ReportUtils import MissingExperimentError, MissingDataError, NumericalError
+from ReportUtils.ReportSummary import ReportSummary
+from ReportUtils.ReportExceptions import MissingExperimentError, MissingDataError, NumericalError
 from ReportUtils import ReportDeployer
 import sys
 import re
@@ -9,11 +9,13 @@ import shutil
 
 
 class ReportPipelineBase(RamPipeline):
-    def __init__(self, subject, workspace_dir, mount_point=None, exit_on_no_change=False,recompute_on_no_status=False):
+    def __init__(self, subject=None, experiment=None, task=None, workspace_dir=None , mount_point=None, exit_on_no_change=False,recompute_on_no_status=False):
         RamPipeline.__init__(self)
         self.exit_on_no_change = exit_on_no_change
         self.recompute_on_no_status = recompute_on_no_status
         self.subject = subject
+        self.experiment = experiment
+        self.task = task
 
         self.mount_point = mount_point
         self.set_workspace_dir(workspace_dir)

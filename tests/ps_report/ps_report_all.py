@@ -5,7 +5,7 @@ import sys
 from setup_utils import parse_command_line, configure_python_paths
 from os.path import join
 
-from ReportUtils import CMLParser
+from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/PS2_reports_try')
@@ -154,10 +154,10 @@ params = Params()
 #         self.experiment = experiment
 
 
-class ReportPipeline(ReportPipelineBase):
-    def __init__(self, subject, experiment, workspace_dir, mount_point=None, exit_on_no_change=False,recompute_on_no_status=False):
-        super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change,recompute_on_no_status=recompute_on_no_status)
-        self.experiment = experiment
+# class ReportPipeline(ReportPipelineBase):
+#     def __init__(self, subject, experiment, workspace_dir, mount_point=None, exit_on_no_change=False,recompute_on_no_status=False):
+#         super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change,recompute_on_no_status=recompute_on_no_status)
+#         self.experiment = experiment
 
 
 

@@ -5,7 +5,7 @@ import sys
 from setup_utils import parse_command_line, configure_python_paths
 
 
-from ReportUtils import CMLParser
+from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/PS2_reports_try')
@@ -141,11 +141,11 @@ params = Params()
 #         super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change)
 #         self.experiment = experiment
 
-class ReportPipeline(ReportPipelineBase):
-    def __init__(self, subject, experiment, workspace_dir, mount_point=None, exit_on_no_change=False,recompute_on_no_status=False):
-        super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change,recompute_on_no_status=recompute_on_no_status)
-        self.experiment = experiment
-
+# class ReportPipeline(ReportPipelineBase):
+#     def __init__(self, subject, experiment, workspace_dir, mount_point=None, exit_on_no_change=False,recompute_on_no_status=False):
+#         super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change,recompute_on_no_status=recompute_on_no_status)
+#         self.experiment = experiment
+#
 
 
 # sets up processing pipeline
@@ -154,9 +154,9 @@ class ReportPipeline(ReportPipelineBase):
 #                                  exit_on_no_change=args.exit_on_no_change
 #                                  )
 
-report_pipeline = ReportPipeline(subject=subject,
+report_pipeline = ReportPipeline(subject=args.subject,
                                  experiment=args.experiment,
-                                 workspace_dir=join(args.workspace_dir, subject),
+                                 workspace_dir=join(args.workspace_dir, args.subject),
                                  mount_point=args.mount_point,
                                  exit_on_no_change=args.exit_on_no_change,
                                  recompute_on_no_status=args.recompute_on_no_status)

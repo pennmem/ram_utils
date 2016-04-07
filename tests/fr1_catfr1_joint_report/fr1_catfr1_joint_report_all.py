@@ -2,7 +2,7 @@ import sys
 from glob import glob
 import re
 
-from ReportUtils import CMLParser
+from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/FR1_CatFr1_check_1')
@@ -118,13 +118,13 @@ params = Params()
 #         self.experiment = self.task
 
 
-class ReportPipeline(ReportPipelineBase):
-    def __init__(self, subject, workspace_dir, mount_point=None, exit_on_no_change=False,recompute_on_no_status=False):
-        super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change,recompute_on_no_status=recompute_on_no_status)
-
-
-        self.task = 'RAM_FR1_CatFR1_joint'
-        self.experiment = self.task
+# class ReportPipeline(ReportPipelineBase):
+#     def __init__(self, subject, workspace_dir, mount_point=None, exit_on_no_change=False,recompute_on_no_status=False):
+#         super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change,recompute_on_no_status=recompute_on_no_status)
+#
+#
+#         self.task = 'RAM_FR1_CatFR1_joint'
+#         self.experiment = self.task
 
 
 # https://stimstaging.psych.upenn.edu/rhino/protocols/r1/subjects/001/reports/FR1_report.pdf
@@ -149,7 +149,10 @@ for subject in subjects:
 
     # sets up processing pipeline
     report_pipeline = ReportPipeline(subject=subject,
-                                     workspace_dir=join(args.workspace_dir, subject), mount_point=args.mount_point,
+                                     task='RAM_FR1_CatFR1_joint',
+                                     experiment='RAM_FR1_CatFR1_joint',
+                                     workspace_dir=join(args.workspace_dir, subject),
+                                     mount_point=args.mount_point,
                                      exit_on_no_change=args.exit_on_no_change,
                                      recompute_on_no_status=args.recompute_on_no_status)
 
