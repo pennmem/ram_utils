@@ -139,8 +139,8 @@ class Params(object):
 params = Params()
 
 class ReportPipeline(ReportPipelineBase):
-    def __init__(self, subject, task, workspace_dir, mount_point=None, exit_on_no_change=False):
-        super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change)
+    def __init__(self, subject, task, workspace_dir, mount_point=None, exit_on_no_change=False,recompute_on_no_status=False):
+        super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change,recompute_on_no_status=recompute_on_no_status)
         self.task = task
         self.experiment = task
 
@@ -152,7 +152,7 @@ task = args.task
 def find_subjects_by_task(task):
 
     ev_files = glob(args.mount_point + ('/data/events/%s/R*_events.mat' % task))
-    return [re.search(r'R1\d\d\d[A-Z](_\d+)?', f).group() for f in ev_files]
+    return [re.search(r'R\d\d\d\d[A-Z](_\d+)?', f).group() for f in ev_files]
 
 
 subjects = find_subjects_by_task(task)
@@ -167,12 +167,14 @@ subjects.sort()
 
 rsi = ReportSummaryInventory(label=task)
 
+
 for subject in subjects:
     print '--Generating', task, 'report for', subject
 
     # sets up processing pipeline
     report_pipeline = ReportPipeline(subject=subject, task=task,
-                                           workspace_dir=join(args.workspace_dir,task+'_'+subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change)
+                                           workspace_dir=join(args.workspace_dir,task+'_'+subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change,recompute_on_no_status=args.recompute_on_no_status)
+
 
     report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
 
