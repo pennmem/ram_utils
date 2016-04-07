@@ -152,7 +152,7 @@ task = args.task
 def find_subjects_by_task(task):
 
     ev_files = glob(args.mount_point + ('/data/events/%s/R*_events.mat' % task))
-    return [re.search(r'R\d\d\d\d[A-Z](_\d+)?', f).group() for f in ev_files]
+    return [re.search(r'R1\d\d\d[A-Z](_\d+)?', f).group() for f in ev_files]
 
 
 subjects = find_subjects_by_task(task)
