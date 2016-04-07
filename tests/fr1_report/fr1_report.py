@@ -31,14 +31,6 @@ cml_parser.arg('--recompute-on-no-status')
 
 args = cml_parser.parse()
 
-# print args.recompute_on_no_status
-# sys.exit()
-
-
-
-# ------------------------------- end of processing command line
-from ReportUtils import ReportPipelineBase
-
 
 from FR1EventPreparation import FR1EventPreparation
 
@@ -90,14 +82,6 @@ class Params(object):
 
 
 params = Params()
-
-
-# class ReportPipeline(ReportPipelineBase):
-#     def __init__(self, subject, task, workspace_dir, mount_point=None, exit_on_no_change=False,recompute_on_no_status=False):
-#
-#         super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change,recompute_on_no_status=recompute_on_no_status)
-#         self.task = task
-#         self.experiment = task
 
 
 

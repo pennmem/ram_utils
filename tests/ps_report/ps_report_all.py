@@ -18,74 +18,8 @@ cml_parser.arg('--experiment','PS2')
 args = cml_parser.parse()
 
 
-
-# # -------------------------------processing command line
-# if len(sys.argv) > 1:
-#
-#     args = parse_command_line()
-#
-#
-# else:  # emulate command line
-#     # command_line_emulation_argument_list = ['--subject','R1124J_1',
-#     #                                         '--experiment','PS3',
-#     #                                         '--workspace-dir','/scratch/busygin/PS3_joint',
-#     #                                         '--mount-point','',
-#     #                                         '--python-path','/home1/busygin/ram_utils_new_ptsa',
-#     #                                         '--python-path','/home1/busygin/python/ptsa_latest',
-#     #                                         ]
-#
-#     # command_line_emulation_argument_list = [
-#     #                                      '--experiment','PS2',
-#     #                                      '--workspace-dir','/Users/m/scratch/PS2_ms_check',
-#     #                                      '--mount-point','/Volumes/rhino_root/',
-#     #                                      # '--mount-point','/Users/m/',
-#     #                                      '--python-path','/Users/m/RAM_UTILS_GIT',
-#     #                                      '--python-path','/Users/m/PTSA_NEW_GIT',
-#     #                                      # '--exit-on-no-change'
-#     #                                         ]
-#
-#     # command_line_emulation_argument_list = [
-#     #                                      '--subject','R1149N',
-#     #                                      '--experiment','PS2',
-#     #                                      '--workspace-dir','/scratch/mswat/PS2_ms_check',
-#     #                                      # '--mount-point','/Volumes/rhino_root/',
-#     #                                      '--mount-point','',
-#     #                                      '--python-path','/home1/mswat/RAM_UTILS_GIT',
-#     #                                      '--python-path','/home1/mswat/PTSA_NEW_GIT',
-#     #                                      '--exit-on-no-change'
-#     #                                         ]
-#
-#
-#     # command_line_emulation_argument_list = [
-#     #     '--experiment', 'PS2',
-#     #     '--workspace-dir', '/scratch/mswat/PS2_ms_check_1',
-#     #     # '--mount-point','/Volumes/rhino_root/',
-#     #     # '--mount-point','/Users/m/',
-#     #     '--python-path', '/home1/mswat/RAM_UTILS_GIT',
-#     #     '--python-path', '/home1/mswat/PTSA_NEW_GIT',
-#     #     # '--exit-on-no-change'
-#     # ]
-#
-#
-#     command_line_emulation_argument_list = [
-#         '--experiment', 'PS2',
-#         '--workspace-dir', '/Users/m/scratch/PS2_ms_check_1',
-#         '--mount-point','/Volumes/rhino_root/',
-#         # '--mount-point','/Users/m/',
-#         '--python-path', '/Users/m/RAM_UTILS_GIT',
-#         '--python-path', '/Users/m/PTSA_NEW_GIT',
-#         # '--exit-on-no-change'
-#     ]
-#
-#     args = parse_command_line(command_line_emulation_argument_list)
-#
-# configure_python_paths(args.python_path)
-
-# ------------------------------- end of processing command line
-
 import numpy as np
-from ReportUtils import ReportSummaryInventory, ReportSummary
-from ReportUtils import ReportPipelineBase
+from ReportUtils import ReportSummaryInventory
 
 from FREventPreparation import FREventPreparation
 from ControlEventPreparation import ControlEventPreparation
@@ -147,21 +81,6 @@ class Params(object):
 params = Params()
 
 
-# class ReportPipeline(ReportPipelineBase):
-#     def __init__(self, subject, experiment, workspace_dir, mount_point=None, exit_on_no_change=False):
-#         super(ReportPipeline, self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point,
-#                                              exit_on_no_change=exit_on_no_change)
-#         self.experiment = experiment
-
-
-# class ReportPipeline(ReportPipelineBase):
-#     def __init__(self, subject, experiment, workspace_dir, mount_point=None, exit_on_no_change=False,recompute_on_no_status=False):
-#         super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change,recompute_on_no_status=recompute_on_no_status)
-#         self.experiment = experiment
-
-
-
-
 task = 'RAM_PS'
 
 
@@ -188,13 +107,6 @@ rsi = ReportSummaryInventory(label=args.experiment)
 for subject in subjects:
     print subject
     # sets up processing pipeline
-
-    # report_pipeline = ReportPipeline(subject=subject,
-    #                                  experiment=args.experiment,
-    #                                  workspace_dir=join(args.workspace_dir, subject),
-    #                                  mount_point=args.mount_point,
-    #                                  exit_on_no_change=args.exit_on_no_change
-    #                                  )
 
     report_pipeline = ReportPipeline(subject=subject,
                                      experiment=args.experiment,

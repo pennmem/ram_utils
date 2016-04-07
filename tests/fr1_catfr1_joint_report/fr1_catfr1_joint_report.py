@@ -21,39 +21,6 @@ args = cml_parser.parse()
 
 
 
-# # -------------------------------processing command line
-# if len(sys.argv)>1:
-#
-#     args = parse_command_line()
-#
-#
-# else: # emulate command line
-#     # command_line_emulation_argument_list = ['--subject','R1147P',
-#     #                                         '--workspace-dir','/scratch/busygin/FR1_joint_reports',
-#     #                                         '--mount-point','',
-#     #                                         '--python-path','/home1/busygin/ram_utils_new_ptsa',
-#     #                                         '--python-path','/home1/busygin/python/ptsa_latest'
-#     #                                         # '--exit-on-no-change'
-#     #                                         ]
-#
-#     command_line_emulation_argument_list = ['--subject','R1147P',
-#                                             # '--task','RAM_FR1',
-#                                             '--workspace-dir','/scratch/mswat/FR1_joint_reports_check',
-#                                             '--mount-point','',
-#                                             '--python-path','/home1/mswat/RAM_UTILS_GIT',
-#                                             '--python-path','/home1/mswat/PTSA_NEW_GIT',
-#                                             '--python-path','/home1/mswat/extra_libs'
-#                                             # '--exit-on-no-change'
-#                                             ]
-#
-#     args = parse_command_line(command_line_emulation_argument_list)
-#
-# configure_python_paths(args.python_path)
-
-# ------------------------------- end of processing command line
-
-from ReportUtils import ReportPipelineBase
-
 from FR1EventPreparation import FR1EventPreparation
 
 from MathEventPreparation import MathEventPreparation
@@ -106,26 +73,7 @@ class Params(object):
 params = Params()
 
 
-
-# class ReportPipeline(ReportPipelineBase):
-#     def __init__(self, subject, workspace_dir, mount_point=None, exit_on_no_change=False):
-#         super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change)
-#         self.task = self.experiment = 'RAM_FR1_CatFR1_joint'
-#
-
-# class ReportPipeline(ReportPipelineBase):
-#     def __init__(self, subject, workspace_dir, mount_point=None, exit_on_no_change=False,recompute_on_no_status=False):
-#         super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change,recompute_on_no_status=recompute_on_no_status)
-#
-#
-#         self.task = 'RAM_FR1_CatFR1_joint'
-#         self.experiment = self.task
-
-
 # sets up processing pipeline
-# report_pipeline = ReportPipeline(subject=args.subject,
-#                                        workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change)
-
 report_pipeline = ReportPipeline(subject=args.subject,
                                  workspace_dir=join(args.workspace_dir, args.subject),
                                  task='RAM_FR1_CatFR1_joint',

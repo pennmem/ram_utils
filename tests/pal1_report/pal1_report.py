@@ -20,51 +20,6 @@ cml_parser.arg('--recompute-on-no-status')
 args = cml_parser.parse()
 
 
-# -------------------------------processing command line
-# if len(sys.argv)>1:
-#
-#     args = parse_command_line()
-#
-#
-# else: # emulate command line
-#     # command_line_emulation_argument_list = ['--subject','R1149N',
-#     #                                         '--task','RAM_PAL1',
-#     #                                         '--workspace-dir','/scratch/busygin/PAL1_reports',
-#     #                                         '--mount-point','',
-#     #                                         '--python-path','/home1/busygin/ram_utils_new_ptsa',
-#     #                                         '--python-path','/home1/busygin/python/ptsa_latest'
-#     #                                         # '--exit-on-no-change'
-#     #                                         ]
-#
-#     # command_line_emulation_argument_list = ['--subject','R1028M',
-#     #                                         '--task','RAM_PAL1',
-#     #                                         '--workspace-dir','/Users/busygin/scratch/PAL1_reports',
-#     #                                         '--mount-point','/Volumes/RHINO',
-#     #                                         '--python-path','/Users/busygin/ram_utils_new_ptsa',
-#     #                                         '--python-path','/Users/busygin/ptsa_latest',
-#     #                                         '--python-path','/Users/busygin/cpp/morlet_flex_install'
-#     #                                         ]
-#
-#     command_line_emulation_argument_list = ['--subject','R1028M',
-#                                             '--task','RAM_PAL1',
-#                                             '--workspace-dir','/scratch/mswat/PAL1_reports',
-#                                             '--mount-point','',
-#                                             '--python-path','/home1/mswat/RAM_UTILS_GIT',
-#                                             '--python-path','/home1/mswat/PTSA_NEW_GIT',
-#                                             '--python-path','/home1/mswat/extra_libs'
-#                                             # '--exit-on-no-change'
-#                                             ]
-#
-#
-#     args = parse_command_line(command_line_emulation_argument_list)
-#
-# configure_python_paths(args.python_path)
-
-# ------------------------------- end of processing command line
-
-
-from ReportUtils import ReportPipelineBase
-
 
 from PAL1EventPreparation import PAL1EventPreparation
 
@@ -117,25 +72,8 @@ class Params(object):
 
 params = Params()
 
-# class ReportPipeline(ReportPipelineBase):
-#     def __init__(self, subject, task, workspace_dir, mount_point=None, exit_on_no_change=False):
-#         super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change)
-#         self.task = task
-#         self.experiment = task
-
-# class ReportPipeline(ReportPipelineBase):
-#     def __init__(self, subject, task, workspace_dir, mount_point=None, exit_on_no_change=False,recompute_on_no_status=False):
-#         super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change,recompute_on_no_status=recompute_on_no_status)
-#         self.task = task
-#         self.experiment = task
-
-
-
 
 # sets up processing pipeline
-# report_pipeline = ReportPipeline(subject=args.subject, task=args.task,
-#                                        workspace_dir=join(args.workspace_dir,args.task+'_'+args.subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change)
-
 report_pipeline = ReportPipeline(subject=subject, task=args.task,experiment=args.task,
                                  workspace_dir=join(args.workspace_dir, task + '_' + args.subject),
                                  mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change,
