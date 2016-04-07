@@ -5,15 +5,23 @@
 
 # python ps_report.py --subject=R1086M --task=FR1 --workspace-dir=/data10/scratch/mswat/R1086M_2 --matlab-path=~/eeg --matlab-path=~/matlab/beh_toolbox --matlab-path=~/RAM/RAM_reporting --matlab-path=~/RAM/RAM_sys2Biomarkers --matlab-path=~/RAM_UTILS_GIT/tests/ps2_report/AuxiliaryMatlab --python-path=~/RAM_UTILS_GIT
 import sys
+from os.path import *
+
+# sys.path.append(join(dirname(__file__),'..','..'))
+
+print sys.path
 
 from ReportUtils import CMLParser
+
+
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--subject','R1158T')
 cml_parser.arg('--task','RAM_FR1')
-cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/FR1_reports')
-cml_parser.arg('--mount-point','')
+# cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/FR1_reports')
+# cml_parser.arg('--workspace-dir','/Users/m/automated_reports/FR1_reports')
+cml_parser.arg('--mount-point','/Volumes/rhino_root')
 cml_parser.arg('--recompute-on-no-status')
 # cml_parser.arg('--exit-on-no-change')
 # cml_parser.arg('--python-path','/home1/mswat/RAM_UTILS_GIT')
@@ -85,9 +93,9 @@ params = Params()
 
 
 class ReportPipeline(ReportPipelineBase):
-    def __init__(self, subject, task, workspace_dir, mount_point=None, exit_on_no_change=False,recomupute_on_no_status=False):
+    def __init__(self, subject, task, workspace_dir, mount_point=None, exit_on_no_change=False,recompute_on_no_status=False):
 
-        super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change,recomupute_on_no_status=recomupute_on_no_status)
+        super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change,recompute_on_no_status=recompute_on_no_status)
         self.task = task
         self.experiment = task
 
@@ -96,7 +104,7 @@ class ReportPipeline(ReportPipelineBase):
 # sets up processing pipeline
 report_pipeline = ReportPipeline(subject=args.subject, task=args.task,
                                  workspace_dir=join(args.workspace_dir,args.task+'_'+args.subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change,
-                                 recomupute_on_no_status=args.recompute_on_no_status)
+                                 recompute_on_no_status=args.recompute_on_no_status)
 
 
 report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
@@ -122,9 +130,6 @@ report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
 report_pipeline.add_task(GenerateTex(mark_as_completed=False))
 
 report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
-
-
-sys.exit()
 
 
 # starts processing pipeline

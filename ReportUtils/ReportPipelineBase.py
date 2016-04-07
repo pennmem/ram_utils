@@ -9,10 +9,10 @@ import shutil
 
 
 class ReportPipelineBase(RamPipeline):
-    def __init__(self, subject, workspace_dir, mount_point=None, exit_on_no_change=False,recomupute_on_no_status=False):
+    def __init__(self, subject, workspace_dir, mount_point=None, exit_on_no_change=False,recompute_on_no_status=False):
         RamPipeline.__init__(self)
         self.exit_on_no_change = exit_on_no_change
-        self.recomupute_on_no_status = recomupute_on_no_status
+        self.recompute_on_no_status = recompute_on_no_status
         self.subject = subject
 
         self.mount_point = mount_point
@@ -26,8 +26,6 @@ class ReportPipelineBase(RamPipeline):
 
         self.report_site_URL = 'https://stimstaging.psych.upenn.edu/rhino/'
 
-        print self.recompute_on_no_status
-        sys.exit()
 
     def add_report_error(self, error, stacktrace=None):
         self.report_summary.add_report_error(error, stacktrace=stacktrace)
@@ -46,8 +44,6 @@ class ReportPipelineBase(RamPipeline):
         # super(ReportPipelineBase,self).execute_pipeline()
         # self.report_summary.add_changed_resources(changed_resources=self.dependency_change_tracker.get_changed_resources())
 
-        print self.recompute_on_no_status
-        sys.exit()
 
         if hasattr(self, 'experiment'):
             self.report_summary.add_experiment_name(exp_name=self.experiment)
