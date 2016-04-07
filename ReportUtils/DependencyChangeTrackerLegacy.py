@@ -54,6 +54,12 @@ class DependencyChangeTrackerLegacy(DependencyChangeTrackerBase):
     def get_latest_data_status(self):
         return self.json_latest_status_node
 
+    def is_saved_status_present(self):
+        if isfile(join(self.workspace_dir, '_status', 'index.json')):
+            return True
+        else:
+            return False
+
     def read_saved_data_status(self):
         json_index_file = join(self.workspace_dir, '_status', 'index.json')
         self.json_saved_data_status_node = JSONNode.read(filename=json_index_file)

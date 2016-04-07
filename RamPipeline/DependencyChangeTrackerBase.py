@@ -32,3 +32,5 @@ class DependencyChangeTrackerBase(object):
     def check_dependency_change(self, task):
         pass
 
+    def is_saved_status_present(self):
+        pass

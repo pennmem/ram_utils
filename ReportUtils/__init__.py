@@ -5,4 +5,5 @@ from ReportSummary import *
 from ReportRamTask import *
 from ReportPipelineBase import *
 from ReportDeployer import *
+from CMLParser import *
 

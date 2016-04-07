@@ -16,14 +16,16 @@ class CMLParser(object):
         self.parser.add_argument('--mount-point', required=False, action='store')
         self.parser.add_argument('--python-path', required=False, action='append')
         self.parser.add_argument('--exit-on-no-change', dest='exit_on_no_change', action='store_true')
+        self.parser.add_argument('--recompute-on-no-status', dest='recompute_on_no_status', action='store_true')
         self.parser.add_argument('--status-output-dir', required=False, dest='status_output_dir', action='store')
 
         self.arg_list=[]
         self.arg_count_threshold = arg_count_threshold
 
-    def arg(self, name, val):
+    def arg(self, name, val=None):
         self.arg_list.append(name)
-        self.arg_list.append(val)
+        if val is not None:
+            self.arg_list.append(val)
 
     def configure_python_paths(self,paths):
         for path in paths:
@@ -55,6 +57,10 @@ class CMLParser(object):
 
         if not args.exit_on_no_change:
             args.exit_on_no_change = False
+
+
+        if not args.recompute_on_no_status:
+            args.recompute_on_no_status = False
 
         if args.status_output_dir:
             args.status_output_dir = abspath(join(args.workspace_dir, args.status_output_dir))

@@ -23,6 +23,7 @@ class RamPipeline(object):
         self.dependency_change_tracker = None
 
         self.exit_on_no_change = False
+        self.recompute_on_no_status = False
         # self.json_saved_data_status_node = None
         # self.json_latest_status_node = None
 
@@ -105,6 +106,17 @@ class RamPipeline(object):
 
         self.dependency_change_tracker.initialize()
 
+        if self.recompute_on_no_status and not self.dependency_change_tracker.is_saved_status_present():
+            for task_name, task in self.task_registry.task_dict.items():
+                try:
+                    # removing task_completed_file
+                    os.remove(task.get_task_completed_file_name())
+                    print 'will rerun task ', task.name()
+                except OSError:
+                    pass
+
+            return 1
+
         change_counter = 0
         if self.dependency_change_tracker:
             for task_name, task in self.task_registry.task_dict.items():
@@ -161,6 +173,8 @@ class RamPipeline(object):
         self.initialize_tasks()
 
         self.prepare_matlab_tasks()
+
+
 
         if self.dependency_change_tracker:
             change_counter = self.resolve_dependencies()

@@ -6,39 +6,27 @@
 # python ps_report.py --subject=R1086M --task=FR1 --workspace-dir=/data10/scratch/mswat/R1086M_2 --matlab-path=~/eeg --matlab-path=~/matlab/beh_toolbox --matlab-path=~/RAM/RAM_reporting --matlab-path=~/RAM/RAM_sys2Biomarkers --matlab-path=~/RAM_UTILS_GIT/tests/ps2_report/AuxiliaryMatlab --python-path=~/RAM_UTILS_GIT
 import sys
 
-from setup_utils import parse_command_line, configure_python_paths
-
-# -------------------------------processing command line
-if len(sys.argv)>1:
-
-    args = parse_command_line()
+from ReportUtils import CMLParser
 
 
-else: # emulate command line
-    # command_line_emulation_argument_list = ['--subject','R1111M',
-    #                                         '--task','RAM_FR1',
-    #                                         '--workspace-dir','/scratch/busygin/FR1_reports',
-    #                                         '--mount-point','',
-    #                                         '--python-path','/home1/busygin/ram_utils_new_ptsa',
-    #                                         '--python-path','/home1/busygin/python/ptsa_latest'
-    #                                         # '--exit-on-no-change'
-    #                                        ]
-
-    command_line_emulation_argument_list = ['--subject','R1111M',
-                                            '--task','RAM_FR1',
-                                            '--workspace-dir','/scratch//mswat/FR1_reports_try',
-                                            '--mount-point','',
-                                            '--python-path','/home1/mswat/RAM_UTILS_NEW',
-                                            '--python-path','/home1/mswat/PTSA_NEW_GIT',
-                                            '--python-path','/home1/mswat/extra_libs'
-                                            # '--exit-on-no-change'
-                                           ]
+cml_parser = CMLParser(arg_count_threshold=1)
+cml_parser.arg('--subject','R1158T')
+cml_parser.arg('--task','RAM_FR1')
+cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/FR1_reports')
+cml_parser.arg('--mount-point','')
+cml_parser.arg('--recompute-on-no-status')
+# cml_parser.arg('--exit-on-no-change')
+# cml_parser.arg('--python-path','/home1/mswat/RAM_UTILS_GIT')
+# cml_parser.arg('--python-path','/home1/mswat/PTSA_NEW_GIT')
+# cml_parser.arg('--python-path','/home1/mswat/extra_libs')
 
 
+args = cml_parser.parse()
 
-    args = parse_command_line(command_line_emulation_argument_list)
+# print args.recompute_on_no_status
+# sys.exit()
 
-configure_python_paths(args.python_path)
+
 
 # ------------------------------- end of processing command line
 from ReportUtils import ReportPipelineBase
@@ -97,15 +85,19 @@ params = Params()
 
 
 class ReportPipeline(ReportPipelineBase):
-    def __init__(self, subject, task, workspace_dir, mount_point=None, exit_on_no_change=False):
-        super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change)
+    def __init__(self, subject, task, workspace_dir, mount_point=None, exit_on_no_change=False,recomupute_on_no_status=False):
+
+        super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change,recomupute_on_no_status=recomupute_on_no_status)
         self.task = task
         self.experiment = task
 
 
+
 # sets up processing pipeline
 report_pipeline = ReportPipeline(subject=args.subject, task=args.task,
-                                       workspace_dir=join(args.workspace_dir,args.task+'_'+args.subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change)
+                                 workspace_dir=join(args.workspace_dir,args.task+'_'+args.subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change,
+                                 recomupute_on_no_status=args.recompute_on_no_status)
+
 
 report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
 
@@ -130,6 +122,10 @@ report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
 report_pipeline.add_task(GenerateTex(mark_as_completed=False))
 
 report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
+
+
+sys.exit()
+
 
 # starts processing pipeline
 report_pipeline.execute_pipeline()
