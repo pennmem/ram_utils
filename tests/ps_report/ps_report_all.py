@@ -5,67 +5,81 @@ import sys
 from setup_utils import parse_command_line, configure_python_paths
 from os.path import join
 
-# -------------------------------processing command line
-if len(sys.argv) > 1:
+from ReportUtils import CMLParser
 
-    args = parse_command_line()
+cml_parser = CMLParser(arg_count_threshold=1)
+cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/PS2_reports_try')
+cml_parser.arg('--mount-point','')
+cml_parser.arg('--recompute-on-no-status')
+cml_parser.arg('--experiment','PS2')
 
+# cml_parser.arg('--exit-on-no-change')
 
-else:  # emulate command line
-    # command_line_emulation_argument_list = ['--subject','R1124J_1',
-    #                                         '--experiment','PS3',
-    #                                         '--workspace-dir','/scratch/busygin/PS3_joint',
-    #                                         '--mount-point','',
-    #                                         '--python-path','/home1/busygin/ram_utils_new_ptsa',
-    #                                         '--python-path','/home1/busygin/python/ptsa_latest',
-    #                                         ]
-
-    # command_line_emulation_argument_list = [
-    #                                      '--experiment','PS2',
-    #                                      '--workspace-dir','/Users/m/scratch/PS2_ms_check',
-    #                                      '--mount-point','/Volumes/rhino_root/',
-    #                                      # '--mount-point','/Users/m/',
-    #                                      '--python-path','/Users/m/RAM_UTILS_GIT',
-    #                                      '--python-path','/Users/m/PTSA_NEW_GIT',
-    #                                      # '--exit-on-no-change'
-    #                                         ]
-
-    # command_line_emulation_argument_list = [
-    #                                      '--subject','R1149N',
-    #                                      '--experiment','PS2',
-    #                                      '--workspace-dir','/scratch/mswat/PS2_ms_check',
-    #                                      # '--mount-point','/Volumes/rhino_root/',
-    #                                      '--mount-point','',
-    #                                      '--python-path','/home1/mswat/RAM_UTILS_GIT',
-    #                                      '--python-path','/home1/mswat/PTSA_NEW_GIT',
-    #                                      '--exit-on-no-change'
-    #                                         ]
+args = cml_parser.parse()
 
 
-    # command_line_emulation_argument_list = [
-    #     '--experiment', 'PS2',
-    #     '--workspace-dir', '/scratch/mswat/PS2_ms_check_1',
-    #     # '--mount-point','/Volumes/rhino_root/',
-    #     # '--mount-point','/Users/m/',
-    #     '--python-path', '/home1/mswat/RAM_UTILS_GIT',
-    #     '--python-path', '/home1/mswat/PTSA_NEW_GIT',
-    #     # '--exit-on-no-change'
-    # ]
 
-
-    command_line_emulation_argument_list = [
-        '--experiment', 'PS2',
-        '--workspace-dir', '/Users/m/scratch/PS2_ms_check_1',
-        '--mount-point','/Volumes/rhino_root/',
-        # '--mount-point','/Users/m/',
-        '--python-path', '/Users/m/RAM_UTILS_GIT',
-        '--python-path', '/Users/m/PTSA_NEW_GIT',
-        # '--exit-on-no-change'
-    ]
-
-    args = parse_command_line(command_line_emulation_argument_list)
-
-configure_python_paths(args.python_path)
+# # -------------------------------processing command line
+# if len(sys.argv) > 1:
+#
+#     args = parse_command_line()
+#
+#
+# else:  # emulate command line
+#     # command_line_emulation_argument_list = ['--subject','R1124J_1',
+#     #                                         '--experiment','PS3',
+#     #                                         '--workspace-dir','/scratch/busygin/PS3_joint',
+#     #                                         '--mount-point','',
+#     #                                         '--python-path','/home1/busygin/ram_utils_new_ptsa',
+#     #                                         '--python-path','/home1/busygin/python/ptsa_latest',
+#     #                                         ]
+#
+#     # command_line_emulation_argument_list = [
+#     #                                      '--experiment','PS2',
+#     #                                      '--workspace-dir','/Users/m/scratch/PS2_ms_check',
+#     #                                      '--mount-point','/Volumes/rhino_root/',
+#     #                                      # '--mount-point','/Users/m/',
+#     #                                      '--python-path','/Users/m/RAM_UTILS_GIT',
+#     #                                      '--python-path','/Users/m/PTSA_NEW_GIT',
+#     #                                      # '--exit-on-no-change'
+#     #                                         ]
+#
+#     # command_line_emulation_argument_list = [
+#     #                                      '--subject','R1149N',
+#     #                                      '--experiment','PS2',
+#     #                                      '--workspace-dir','/scratch/mswat/PS2_ms_check',
+#     #                                      # '--mount-point','/Volumes/rhino_root/',
+#     #                                      '--mount-point','',
+#     #                                      '--python-path','/home1/mswat/RAM_UTILS_GIT',
+#     #                                      '--python-path','/home1/mswat/PTSA_NEW_GIT',
+#     #                                      '--exit-on-no-change'
+#     #                                         ]
+#
+#
+#     # command_line_emulation_argument_list = [
+#     #     '--experiment', 'PS2',
+#     #     '--workspace-dir', '/scratch/mswat/PS2_ms_check_1',
+#     #     # '--mount-point','/Volumes/rhino_root/',
+#     #     # '--mount-point','/Users/m/',
+#     #     '--python-path', '/home1/mswat/RAM_UTILS_GIT',
+#     #     '--python-path', '/home1/mswat/PTSA_NEW_GIT',
+#     #     # '--exit-on-no-change'
+#     # ]
+#
+#
+#     command_line_emulation_argument_list = [
+#         '--experiment', 'PS2',
+#         '--workspace-dir', '/Users/m/scratch/PS2_ms_check_1',
+#         '--mount-point','/Volumes/rhino_root/',
+#         # '--mount-point','/Users/m/',
+#         '--python-path', '/Users/m/RAM_UTILS_GIT',
+#         '--python-path', '/Users/m/PTSA_NEW_GIT',
+#         # '--exit-on-no-change'
+#     ]
+#
+#     args = parse_command_line(command_line_emulation_argument_list)
+#
+# configure_python_paths(args.python_path)
 
 # ------------------------------- end of processing command line
 
@@ -133,11 +147,19 @@ class Params(object):
 params = Params()
 
 
+# class ReportPipeline(ReportPipelineBase):
+#     def __init__(self, subject, experiment, workspace_dir, mount_point=None, exit_on_no_change=False):
+#         super(ReportPipeline, self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point,
+#                                              exit_on_no_change=exit_on_no_change)
+#         self.experiment = experiment
+
+
 class ReportPipeline(ReportPipelineBase):
-    def __init__(self, subject, experiment, workspace_dir, mount_point=None, exit_on_no_change=False):
-        super(ReportPipeline, self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point,
-                                             exit_on_no_change=exit_on_no_change)
+    def __init__(self, subject, experiment, workspace_dir, mount_point=None, exit_on_no_change=False,recompute_on_no_status=False):
+        super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change,recompute_on_no_status=recompute_on_no_status)
         self.experiment = experiment
+
+
 
 
 task = 'RAM_PS'
@@ -167,12 +189,19 @@ for subject in subjects:
     print subject
     # sets up processing pipeline
 
+    # report_pipeline = ReportPipeline(subject=subject,
+    #                                  experiment=args.experiment,
+    #                                  workspace_dir=join(args.workspace_dir, subject),
+    #                                  mount_point=args.mount_point,
+    #                                  exit_on_no_change=args.exit_on_no_change
+    #                                  )
+
     report_pipeline = ReportPipeline(subject=subject,
                                      experiment=args.experiment,
                                      workspace_dir=join(args.workspace_dir, subject),
                                      mount_point=args.mount_point,
-                                     exit_on_no_change=args.exit_on_no_change
-                                     )
+                                     exit_on_no_change=args.exit_on_no_change,
+                                     recompute_on_no_status=args.recompute_on_no_status)
 
     report_pipeline.add_task(FREventPreparation(params=params, mark_as_completed=False))
 

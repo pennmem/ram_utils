@@ -8,34 +8,47 @@ import sys
 
 from setup_utils import parse_command_line, configure_python_paths
 
-# -------------------------------processing command line
-if len(sys.argv)>1:
+from ReportUtils import CMLParser
 
-    args = parse_command_line()
+cml_parser = CMLParser(arg_count_threshold=1)
+cml_parser.arg('--subject','R1147P')
+cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/FR1_CatFr1_check_1')
+cml_parser.arg('--mount-point','')
+cml_parser.arg('--recompute-on-no-status')
+# cml_parser.arg('--exit-on-no-change')
+
+args = cml_parser.parse()
 
 
-else: # emulate command line
-    # command_line_emulation_argument_list = ['--subject','R1147P',
-    #                                         '--workspace-dir','/scratch/busygin/FR1_joint_reports',
-    #                                         '--mount-point','',
-    #                                         '--python-path','/home1/busygin/ram_utils_new_ptsa',
-    #                                         '--python-path','/home1/busygin/python/ptsa_latest'
-    #                                         # '--exit-on-no-change'
-    #                                         ]
 
-    command_line_emulation_argument_list = ['--subject','R1147P',
-                                            # '--task','RAM_FR1',
-                                            '--workspace-dir','/scratch/mswat/FR1_joint_reports_check',
-                                            '--mount-point','',
-                                            '--python-path','/home1/mswat/RAM_UTILS_GIT',
-                                            '--python-path','/home1/mswat/PTSA_NEW_GIT',
-                                            '--python-path','/home1/mswat/extra_libs'
-                                            # '--exit-on-no-change'
-                                            ]
-
-    args = parse_command_line(command_line_emulation_argument_list)
-
-configure_python_paths(args.python_path)
+# # -------------------------------processing command line
+# if len(sys.argv)>1:
+#
+#     args = parse_command_line()
+#
+#
+# else: # emulate command line
+#     # command_line_emulation_argument_list = ['--subject','R1147P',
+#     #                                         '--workspace-dir','/scratch/busygin/FR1_joint_reports',
+#     #                                         '--mount-point','',
+#     #                                         '--python-path','/home1/busygin/ram_utils_new_ptsa',
+#     #                                         '--python-path','/home1/busygin/python/ptsa_latest'
+#     #                                         # '--exit-on-no-change'
+#     #                                         ]
+#
+#     command_line_emulation_argument_list = ['--subject','R1147P',
+#                                             # '--task','RAM_FR1',
+#                                             '--workspace-dir','/scratch/mswat/FR1_joint_reports_check',
+#                                             '--mount-point','',
+#                                             '--python-path','/home1/mswat/RAM_UTILS_GIT',
+#                                             '--python-path','/home1/mswat/PTSA_NEW_GIT',
+#                                             '--python-path','/home1/mswat/extra_libs'
+#                                             # '--exit-on-no-change'
+#                                             ]
+#
+#     args = parse_command_line(command_line_emulation_argument_list)
+#
+# configure_python_paths(args.python_path)
 
 # ------------------------------- end of processing command line
 
@@ -94,15 +107,29 @@ params = Params()
 
 
 
+# class ReportPipeline(ReportPipelineBase):
+#     def __init__(self, subject, workspace_dir, mount_point=None, exit_on_no_change=False):
+#         super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change)
+#         self.task = self.experiment = 'RAM_FR1_CatFR1_joint'
+#
+
 class ReportPipeline(ReportPipelineBase):
-    def __init__(self, subject, workspace_dir, mount_point=None, exit_on_no_change=False):
-        super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change)
-        self.task = self.experiment = 'RAM_FR1_CatFR1_joint'
+    def __init__(self, subject, workspace_dir, mount_point=None, exit_on_no_change=False,recompute_on_no_status=False):
+        super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change,recompute_on_no_status=recompute_on_no_status)
+
+
+        self.task = 'RAM_FR1_CatFR1_joint'
+        self.experiment = self.task
 
 
 # sets up processing pipeline
-report_pipeline = ReportPipeline(subject=args.subject,
-                                       workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change)
+# report_pipeline = ReportPipeline(subject=args.subject,
+#                                        workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change)
+
+report_pipeline = ReportPipeline(subject=subject,
+                                 workspace_dir=join(args.workspace_dir, subject), mount_point=args.mount_point,
+                                 exit_on_no_change=args.exit_on_no_change,
+                                 recompute_on_no_status=args.recompute_on_no_status)
 
 report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
 

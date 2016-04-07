@@ -2,47 +2,58 @@ import sys
 from glob import glob
 import re
 
-from setup_utils import parse_command_line, configure_python_paths
+from ReportUtils import CMLParser
 
-# -------------------------------processing command line
-if len(sys.argv)>1:
+cml_parser = CMLParser(arg_count_threshold=1)
+cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/FR1_CatFr1_check_1')
+cml_parser.arg('--mount-point','')
+cml_parser.arg('--recompute-on-no-status')
+# cml_parser.arg('--exit-on-no-change')
 
-    args = parse_command_line()
-
-
-else: # emulate command line
-    # command_line_emulation_argument_list = ['--subject','R1086M',
-    #                                         '--workspace-dir','/scratch/busygin/FR1_joint_reports',
-    #                                         '--mount-point','',
-    #                                         '--python-path','/home1/busygin/ram_utils_new_ptsa',
-    #                                         '--python-path','/home1/busygin/python/ptsa_latest',
-    #                                         #'--exit-on-no-change'
-    #                                         ]
-
-    command_line_emulation_argument_list = [
-                                            '--workspace-dir','/scratch/mswat/automated_reports/FR1_CatFr1_check_1',
-                                            '--mount-point','',
-                                            '--python-path','/home1/mswat/RAM_UTILS_GIT',
-                                            '--python-path','/home1/mswat/PTSA_NEW_GIT',
-                                            '--python-path','/home1/mswat/extra_libs'
-                                            #'--exit-on-no-change'
-                                            ]
+args = cml_parser.parse()
 
 
-    # command_line_emulation_argument_list = ['--subject','R1086M',
-    #                                         '--workspace-dir','/Users/m/scratch/mswat/FR1_catfr1_check_1',
-    #                                         '--mount-point','/Volumes/rhino_root',
-    #                                         '--python-path','/Users/m/RAM_UTILS_GIT',
-    #                                         '--python-path','/Users/m/PTSA_NEW_GIT'
-    #                                         #'--exit-on-no-change'
-    #                                         ]
-
-
-    args = parse_command_line(command_line_emulation_argument_list)
-
-
-
-configure_python_paths(args.python_path)
+# from setup_utils import parse_command_line, configure_python_paths
+#
+# # -------------------------------processing command line
+# if len(sys.argv)>1:
+#
+#     args = parse_command_line()
+#
+#
+# else: # emulate command line
+#     # command_line_emulation_argument_list = ['--subject','R1086M',
+#     #                                         '--workspace-dir','/scratch/busygin/FR1_joint_reports',
+#     #                                         '--mount-point','',
+#     #                                         '--python-path','/home1/busygin/ram_utils_new_ptsa',
+#     #                                         '--python-path','/home1/busygin/python/ptsa_latest',
+#     #                                         #'--exit-on-no-change'
+#     #                                         ]
+#
+#     command_line_emulation_argument_list = [
+#                                             '--workspace-dir','/scratch/mswat/automated_reports/FR1_CatFr1_check_1',
+#                                             '--mount-point','',
+#                                             '--python-path','/home1/mswat/RAM_UTILS_GIT',
+#                                             '--python-path','/home1/mswat/PTSA_NEW_GIT',
+#                                             '--python-path','/home1/mswat/extra_libs'
+#                                             #'--exit-on-no-change'
+#                                             ]
+#
+#
+#     # command_line_emulation_argument_list = ['--subject','R1086M',
+#     #                                         '--workspace-dir','/Users/m/scratch/mswat/FR1_catfr1_check_1',
+#     #                                         '--mount-point','/Volumes/rhino_root',
+#     #                                         '--python-path','/Users/m/RAM_UTILS_GIT',
+#     #                                         '--python-path','/Users/m/PTSA_NEW_GIT'
+#     #                                         #'--exit-on-no-change'
+#     #                                         ]
+#
+#
+#     args = parse_command_line(command_line_emulation_argument_list)
+#
+#
+#
+# configure_python_paths(args.python_path)
 
 # ------------------------------- end of processing command line
 
@@ -100,12 +111,20 @@ class Params(object):
 
 params = Params()
 
+# class ReportPipeline(ReportPipelineBase):
+#     def __init__(self, subject, workspace_dir, mount_point=None, exit_on_no_change=False):
+#         super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change)
+#         self.task = 'RAM_FR1_CatFR1_joint'
+#         self.experiment = self.task
+
+
 class ReportPipeline(ReportPipelineBase):
-    def __init__(self, subject, workspace_dir, mount_point=None, exit_on_no_change=False):
-        super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change)
+    def __init__(self, subject, workspace_dir, mount_point=None, exit_on_no_change=False,recompute_on_no_status=False):
+        super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change,recompute_on_no_status=recompute_on_no_status)
+
+
         self.task = 'RAM_FR1_CatFR1_joint'
         self.experiment = self.task
-
 
 
 # https://stimstaging.psych.upenn.edu/rhino/protocols/r1/subjects/001/reports/FR1_report.pdf
@@ -125,8 +144,14 @@ for subject in subjects:
     print '--Generating FR1&CatFR1 joint report for', subject
 
     # sets up processing pipeline
+    # report_pipeline = ReportPipeline(subject=subject,
+    #                                        workspace_dir=join(args.workspace_dir,subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change)
+
+    # sets up processing pipeline
     report_pipeline = ReportPipeline(subject=subject,
-                                           workspace_dir=join(args.workspace_dir,subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change)
+                                     workspace_dir=join(args.workspace_dir, subject), mount_point=args.mount_point,
+                                     exit_on_no_change=args.exit_on_no_change,
+                                     recompute_on_no_status=args.recompute_on_no_status)
 
     report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
 

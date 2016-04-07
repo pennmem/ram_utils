@@ -12,6 +12,7 @@ class CMLParser(object):
         self.parser = argparse.ArgumentParser(description='Report Generator')
         self.parser.add_argument('--subject', required=False, action='store')
         self.parser.add_argument('--task', required=False, action='store')
+        self.parser.add_argument('--experiment', required=False, action='store')
         self.parser.add_argument('--workspace-dir', required=False, action='store')
         self.parser.add_argument('--mount-point', required=False, action='store')
         self.parser.add_argument('--python-path', required=False, action='append')

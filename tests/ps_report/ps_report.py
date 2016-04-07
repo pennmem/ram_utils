@@ -4,36 +4,50 @@ import sys
 
 from setup_utils import parse_command_line, configure_python_paths
 
-# -------------------------------processing command line
-if len(sys.argv)>1:
 
-    args = parse_command_line()
+from ReportUtils import CMLParser
 
+cml_parser = CMLParser(arg_count_threshold=1)
+cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/PS2_reports_try')
+cml_parser.arg('--mount-point','')
+cml_parser.arg('--recompute-on-no-status')
+cml_parser.arg('--experiment','PS2')
 
-else: # emulate command line
-    # command_line_emulation_argument_list = ['--subject','R1150J',
-    #                                         '--experiment','PS2',
-    #                                         '--workspace-dir','/scratch/busygin/PS2',
-    #                                         '--mount-point','',
-    #                                         '--python-path','/home1/busygin/ram_utils_new_ptsa',
-    #                                         '--python-path','/home1/busygin/python/ptsa_latest'
-    #                                        ]
+# cml_parser.arg('--exit-on-no-change')
 
-    command_line_emulation_argument_list = ['--subject','R1150J',
-                                            '--experiment','PS2',
-                                            '--workspace-dir','/scratch/mswat/PS2_single',
-                                            '--mount-point','',
-                                            '--python-path','/home1/mswat/RAM_UTILS_GIT',
-                                            '--python-path','/home1/mswat/PTSA_NEW_GIT',
-                                            '--python-path','/home1/mswat/extra_libs'
-                                           ]
+args = cml_parser.parse()
 
 
-    args = parse_command_line(command_line_emulation_argument_list)
-
-configure_python_paths(args.python_path)
-
-# ------------------------------- end of processing command line
+# # -------------------------------processing command line
+# if len(sys.argv)>1:
+#
+#     args = parse_command_line()
+#
+#
+# else: # emulate command line
+#     # command_line_emulation_argument_list = ['--subject','R1150J',
+#     #                                         '--experiment','PS2',
+#     #                                         '--workspace-dir','/scratch/busygin/PS2',
+#     #                                         '--mount-point','',
+#     #                                         '--python-path','/home1/busygin/ram_utils_new_ptsa',
+#     #                                         '--python-path','/home1/busygin/python/ptsa_latest'
+#     #                                        ]
+#
+#     command_line_emulation_argument_list = ['--subject','R1150J',
+#                                             '--experiment','PS2',
+#                                             '--workspace-dir','/scratch/mswat/PS2_single',
+#                                             '--mount-point','',
+#                                             '--python-path','/home1/mswat/RAM_UTILS_GIT',
+#                                             '--python-path','/home1/mswat/PTSA_NEW_GIT',
+#                                             '--python-path','/home1/mswat/extra_libs'
+#                                            ]
+#
+#
+#     args = parse_command_line(command_line_emulation_argument_list)
+#
+# configure_python_paths(args.python_path)
+#
+# # ------------------------------- end of processing command line
 
 
 from ReportUtils import ReportPipelineBase
@@ -122,17 +136,30 @@ params = Params()
 #         self.set_workspace_dir(workspace_dir)
 
 
+# class ReportPipeline(ReportPipelineBase):
+#     def __init__(self, subject, experiment, workspace_dir, mount_point=None, exit_on_no_change=False):
+#         super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change)
+#         self.experiment = experiment
+
 class ReportPipeline(ReportPipelineBase):
-    def __init__(self, subject, experiment, workspace_dir, mount_point=None, exit_on_no_change=False):
-        super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change)
+    def __init__(self, subject, experiment, workspace_dir, mount_point=None, exit_on_no_change=False,recompute_on_no_status=False):
+        super(ReportPipeline,self).__init__(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point, exit_on_no_change=exit_on_no_change,recompute_on_no_status=recompute_on_no_status)
         self.experiment = experiment
 
 
+
 # sets up processing pipeline
-report_pipeline = ReportPipeline(subject=args.subject, experiment=args.experiment,
-                                       workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point,
-                                 exit_on_no_change=args.exit_on_no_change
-                                 )
+# report_pipeline = ReportPipeline(subject=args.subject, experiment=args.experiment,
+#                                        workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point,
+#                                  exit_on_no_change=args.exit_on_no_change
+#                                  )
+
+report_pipeline = ReportPipeline(subject=subject,
+                                 experiment=args.experiment,
+                                 workspace_dir=join(args.workspace_dir, subject),
+                                 mount_point=args.mount_point,
+                                 exit_on_no_change=args.exit_on_no_change,
+                                 recompute_on_no_status=args.recompute_on_no_status)
 
 report_pipeline.add_task(FREventPreparation(params=params, mark_as_completed=False))
 
