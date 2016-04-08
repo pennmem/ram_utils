@@ -39,7 +39,7 @@ class ComputeControlTable(ReportRamTask):
         events = self.get_passed_object('control_events')
 
         if len(events) == 0:
-            self.control_table = pd.DataFrame(columns=['session','prob_pre','prob_diff','perf_diff','subject'])
+            self.control_table = pd.DataFrame(columns=['session','stimAnodeTag','stimCathodeTag','prob_pre','prob_diff','perf_diff','subject'])
             self.pass_object('control_table', self.control_table)
             self.control_table.to_pickle(self.get_path_to_resource_in_workspace(subject + '-control_table.pkl'))
             return
