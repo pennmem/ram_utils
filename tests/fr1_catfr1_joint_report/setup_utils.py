@@ -13,7 +13,7 @@ def parse_command_line(command_line_emulation_argument_list=None):
     # python ps_report.py --subject=R1056M --task=FR1 --workspace-dir=~/scratch/py_9 --matlab-path=~/eeg --matlab-path=~/matlab/beh_toolbox --matlab-path=~/RAM/RAM_reporting --matlab-path=~/RAM/RAM_sys2Biomarkers --python-path=~/RAM_UTILS_GIT
 
     parser = argparse.ArgumentParser(description='Run FR1 & CatFR1 Joint Report Generator')
-    parser.add_argument('--subject', required=True, action='store')
+    parser.add_argument('--subject', required=False, action='store')
     parser.add_argument('--workspace-dir',required=False, action='store')
     parser.add_argument('--mount-point',required=False, action='store')
 
@@ -21,6 +21,7 @@ def parse_command_line(command_line_emulation_argument_list=None):
 
 
     parser.add_argument('--exit-on-no-change', dest='exit_on_no_change', action='store_true')
+    parser.add_argument('--status-output-dir',required=False, dest='status_output_dir', action='store')
 
     if command_line_emulation_argument_list:
         args = parser.parse_args(command_line_emulation_argument_list)
@@ -50,6 +51,12 @@ def parse_command_line(command_line_emulation_argument_list=None):
 
     if not args.exit_on_no_change:
         args.exit_on_no_change = False
+
+    if args.status_output_dir:
+        args.status_output_dir = abspath(join(args.workspace_dir,args.status_output_dir))
+    else:
+        args.status_output_dir = abspath(join(args.workspace_dir,'status_output'))
+
 
     return args
 

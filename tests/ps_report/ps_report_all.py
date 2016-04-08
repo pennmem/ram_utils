@@ -5,54 +5,21 @@ import sys
 from setup_utils import parse_command_line, configure_python_paths
 from os.path import join
 
-# -------------------------------processing command line
-if len(sys.argv)>2:
+from ReportUtils import CMLParser,ReportPipeline
 
-    args = parse_command_line()
+cml_parser = CMLParser(arg_count_threshold=1)
+cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/PS2_reports_try')
+cml_parser.arg('--mount-point','')
+cml_parser.arg('--recompute-on-no-status')
+cml_parser.arg('--experiment','PS2')
 
+# cml_parser.arg('--exit-on-no-change')
 
-else: # emulate command line
-    # command_line_emulation_argument_list = ['--subject','R1124J_1',
-    #                                         '--experiment','PS3',
-    #                                         '--workspace-dir','/scratch/busygin/PS3_joint',
-    #                                         '--mount-point','',
-    #                                         '--python-path','/home1/busygin/ram_utils_new_ptsa',
-    #                                         '--python-path','/home1/busygin/python/ptsa_latest',
-    #                                         ]
+args = cml_parser.parse()
 
-    # command_line_emulation_argument_list = ['--subject','R1149N',
-    #                                      '--experiment','PS2',
-    #                                      '--workspace-dir','/Users/m/scratch/PS2_ms_check',
-    #                                      # '--mount-point','/Volumes/rhino_root/',
-    #                                      '--mount-point','//Users/m/',
-    #                                      '--python-path','/Users/m/RAM_UTILS_GIT',
-    #                                      '--python-path','/Users/m/PTSA_NEW_GIT',
-    #                                      '--exit-on-no-change'
-    #                                         ]
-
-    command_line_emulation_argument_list = [
-                                         '--subject','R1149N',
-                                         '--experiment','PS2',
-                                         '--workspace-dir','/scratch/mswat/PS2_ms_check',
-                                         # '--mount-point','/Volumes/rhino_root/',
-                                         '--mount-point','',
-                                         '--python-path','/home1/mswat/RAM_UTILS_GIT',
-                                         '--python-path','/home1/mswat/PTSA_NEW_GIT',
-                                         '--exit-on-no-change'
-                                            ]
-
-
-    args = parse_command_line(command_line_emulation_argument_list)
-
-configure_python_paths(args.python_path)
-
-# ------------------------------- end of processing command line
 
 import numpy as np
-from RamPipeline import RamPipeline
-from ReportUtils.DependencyChangeTrackerLegacy import DependencyChangeTrackerLegacy
-from ReportUtils import MissingExperimentError, MissingDataError
-
+from ReportUtils import ReportSummaryInventory
 
 from FREventPreparation import FREventPreparation
 from ControlEventPreparation import ControlEventPreparation
@@ -84,9 +51,12 @@ class Params(object):
         self.fr1_end_time = 1.366
         self.fr1_buf = 1.365
 
-        self.control_start_time = -1.1
-        self.control_end_time = -0.1
-        self.control_buf = 1.0
+        self.sham1_start_time = 1.0
+        self.sham1_end_time = 2.0
+        self.sham_buf = 1.0
+
+        self.sham2_start_time = 10.0 - 3.7
+        self.sham2_end_time = 10.0 - 2.7
 
         self.ps_start_time = -1.0
         self.ps_end_time = 0.0
@@ -110,63 +80,46 @@ class Params(object):
 
 params = Params()
 
-class ReportPipeline(RamPipeline):
-    def __init__(self, subject, experiment, workspace_dir, mount_point=None, exit_on_no_change=False):
-        RamPipeline.__init__(self)
-        self.exit_on_no_change = exit_on_no_change
-        self.subject = subject
-        self.experiment = experiment
-        self.mount_point = mount_point
-        self.set_workspace_dir(workspace_dir)
-        dependency_tracker = DependencyChangeTrackerLegacy(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point)
-
-        self.set_dependency_tracker(dependency_tracker=dependency_tracker)
-
-# class ReportPipeline(RamPipeline):
-#     def __init__(self, subject, experiment, workspace_dir, mount_point=None):
-#         RamPipeline.__init__(self)
-#         self.subject = subject
-#         self.experiment = experiment
-#         self.mount_point = mount_point
-#         self.set_workspace_dir(workspace_dir)
-
 
 task = 'RAM_PS'
 
 
 def find_subjects_by_task(task):
     # ev_files = glob('/data/events/%s/R*_events.mat' % task)
-    ev_files = glob(args.mount_point+'/data/events/%s/R*_events.mat' % task)
-    return [re.search(r'R\d\d\d\d[A-Z](_\d+)?', f).group() for f in ev_files]
+    ev_files = glob(args.mount_point + '/data/events/%s/R*_events.mat' % task)
+    return [re.search(r'R1\d\d\d[A-Z](_\d+)?', f).group() for f in ev_files]
 
 
 subjects = find_subjects_by_task(task)
-#subjects.append('TJ086')
+# subjects.append('TJ086')
 subjects.sort()
+
+
+# print "subjects=",subjects
+# sys.exit()
 
 subject_fail_list = []
 subject_missing_experiment_list = []
 subject_missing_data_list = []
 
-for subject in subjects[36:]:
+rsi = ReportSummaryInventory(label=args.experiment)
+
+for subject in subjects:
     print subject
     # sets up processing pipeline
-    # report_pipeline = ReportPipeline(subject=subject, experiment=args.experiment,
-    #                                    workspace_dir=join(args.workspace_dir,subject), mount_point=args.mount_point)
 
     report_pipeline = ReportPipeline(subject=subject,
                                      experiment=args.experiment,
-                                     workspace_dir=join(args.workspace_dir,subject),
+                                     workspace_dir=join(args.workspace_dir, subject),
                                      mount_point=args.mount_point,
-                                     # exit_on_no_change=args.exit_on_no_change
-                                     )
-
+                                     exit_on_no_change=args.exit_on_no_change,
+                                     recompute_on_no_status=args.recompute_on_no_status)
 
     report_pipeline.add_task(FREventPreparation(params=params, mark_as_completed=False))
 
     report_pipeline.add_task(ControlEventPreparation(params=params, mark_as_completed=False))
 
-    report_pipeline.add_task(PSEventPreparation(mark_as_completed=False))
+    report_pipeline.add_task(PSEventPreparation(mark_as_completed=True))
 
     report_pipeline.add_task(TalPreparation(mark_as_completed=False))
 
@@ -190,22 +143,19 @@ for subject in subjects[36:]:
 
     report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
-    # starts processing pipeline
-    try:
-        report_pipeline.execute_pipeline()
-    except KeyboardInterrupt:
-        print 'GOT KEYBOARD INTERUPT. EXITING'
-        sys.exit()
-    except MissingExperimentError:
-        subject_missing_experiment_list.append(subject)
-    except MissingDataError:
-        subject_missing_data_list.append(subject)
+    report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
 
-    except:
-        subject_fail_list.append(subject)
-        pass
+    report_pipeline.execute_pipeline()
+
+    rsi.add_report_summary(report_summary=report_pipeline.get_report_summary())
 
 print 'all subjects = ', subjects
-print 'subject_fail_list=',subject_fail_list
-print 'subject_missing_experiment_list=',subject_missing_experiment_list
+print 'subject_fail_list=', subject_fail_list
+print 'subject_missing_experiment_list=', subject_missing_experiment_list
 print 'subject_missing_data_list=', subject_missing_data_list
+
+print 'this is summary for all reports report ', rsi.compose_summary(detail_level=1)
+
+rsi.output_json_files(dir=args.status_output_dir)
+rsi.send_email_digest()
+# print report_pipeline.report_summary.compose_summary()

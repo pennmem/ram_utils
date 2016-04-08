@@ -1,11 +1,15 @@
 
+from collections import OrderedDict
 
 class DependencyChangeTrackerBase(object):
     '''
     This is meant to be a general API for dependency tracking
     '''
     def __init__(self,*args,**kwds):
-        pass
+        self.changed_resources = OrderedDict()
+
+    def get_changed_resources(self):
+        return self.changed_resources
 
     def initialize(self):
         pass
@@ -28,3 +32,5 @@ class DependencyChangeTrackerBase(object):
     def check_dependency_change(self, task):
         pass
 
+    def is_saved_status_present(self):
+        pass

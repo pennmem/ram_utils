@@ -6,42 +6,39 @@ import numpy as np
 from ptsa.data.readers import BaseEventReader
 
 from RamPipeline import *
+from ReportUtils import ReportRamTask
+from ReportUtils import ReportRamTask
 
-
-class ControlEventPreparation(RamTask):
+class ControlEventPreparation(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(ControlEventPreparation,self).__init__(mark_as_completed)
         self.params = params
 
     def run(self):
-        events = None
-        if self.params.include_fr1:
-            try:
-                e_path = os.path.join(self.pipeline.mount_point , 'data/events/RAM_FR1', self.pipeline.subject + '_math.mat')
-                e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
-                events = e_reader.read()
-                print "Got FR1 events"
-            except IOError:
-                pass
+        e_path = os.path.join(self.pipeline.mount_point , 'data/events/RAM_PS', self.pipeline.subject + '_events.mat')
+        e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
-        if self.params.include_catfr1:
-            try:
-                e_path = os.path.join(self.pipeline.mount_point , 'data/events/RAM_CatFR1', self.pipeline.subject + '_math.mat')
-                e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
-                catfr1_events = e_reader.read()
-                print "Got CatFR1 events"
-                if events is None:
-                    events = catfr1_events
-                else:
-                    print "Joining FR1 and CatFR1"
-                    catfr1_events.session = -catfr1_events.session-1
-                    fields = list(set(events.dtype.names).intersection(catfr1_events.dtype.names))
-                    events = np.hstack((events[fields],catfr1_events[fields])).view(np.recarray)
-            except IOError:
-                pass
+        try:
+            events = e_reader.read()
+            ev_order = np.argsort(events, order=('session','mstime'))
+            events = events[ev_order]
 
-        events = events[events.type == 'PROB']
+            # try:
+            #     events = Events(get_events(subject=subject, task='RAM_PS', path_prefix=self.pipeline.mount_point))
+            # except IOError:
+            #     raise Exception('No parameter search for subject %s' % subject)
+            #
 
-        print len(events), 'PROB events'
+            events = events[events.type == 'SHAM']
+
+        except Exception:
+            # raise MissingDataError('Missing or Corrupt PS event file')
+
+            self.raise_and_log_report_exception(
+                                                exception_type='MissingDataError',
+                                                exception_message='Missing or Corrupt PS event file'
+                                                )
+
+        print len(events), 'SHAM events'
 
         self.pass_object('control_events', events)

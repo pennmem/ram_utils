@@ -5,41 +5,32 @@
 
 # python ps_report.py --subject=R1086M --task=FR1 --workspace-dir=/data10/scratch/mswat/R1086M_2 --matlab-path=~/eeg --matlab-path=~/matlab/beh_toolbox --matlab-path=~/RAM/RAM_reporting --matlab-path=~/RAM/RAM_sys2Biomarkers --matlab-path=~/RAM_UTILS_GIT/tests/ps2_report/AuxiliaryMatlab --python-path=~/RAM_UTILS_GIT
 import sys
+from os.path import *
 
-from setup_utils import parse_command_line, configure_python_paths
+# sys.path.append(join(dirname(__file__),'..','..'))
 
-# -------------------------------processing command line
-if len(sys.argv)>2:
+print sys.path
 
-    args = parse_command_line()
+from ReportUtils import CMLParser,ReportPipeline
 
 
-else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1108J_1',
-                                            '--task','RAM_FR1',
-                                            '--workspace-dir','/scratch/busygin/FR1_reports',
-                                            '--mount-point','',
-                                            '--python-path','/home1/busygin/ram_utils_new_ptsa',
-                                            '--python-path','/home1/busygin/python/ptsa_latest'
-                                            # '--exit-on-no-change'
-                                            ]
 
-    # command_line_emulation_argument_list = ['--subject','R1048E',
-    #                                         '--task','RAM_FR1',
-    #                                         '--workspace-dir','/Users/busygin/scratch/FR1_reports',
-    #                                         '--mount-point','/Volumes/RHINO',
-    #                                         '--python-path','/Users/busygin/ram_utils_new_ptsa',
-    #                                         '--python-path','/Users/busygin/ptsa_latest',
-    #                                         '--python-path','/Users/busygin/cpp/morlet_flex_install'
-    #                                         ]
 
-    args = parse_command_line(command_line_emulation_argument_list)
+cml_parser = CMLParser(arg_count_threshold=1)
+cml_parser.arg('--subject','R1158T')
+cml_parser.arg('--task','RAM_FR1')
+# cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/FR1_reports')
+# cml_parser.arg('--workspace-dir','/Users/m/automated_reports/FR1_reports')
+cml_parser.arg('--mount-point','/Volumes/rhino_root')
+cml_parser.arg('--recompute-on-no-status')
+# cml_parser.arg('--exit-on-no-change')
+# cml_parser.arg('--python-path','/home1/mswat/RAM_UTILS_GIT')
+# cml_parser.arg('--python-path','/home1/mswat/PTSA_NEW_GIT')
+# cml_parser.arg('--python-path','/home1/mswat/extra_libs')
 
-configure_python_paths(args.python_path)
 
-# ------------------------------- end of processing command line
+args = cml_parser.parse()
 
-from ReportUtils.DependencyChangeTrackerLegacy import DependencyChangeTrackerLegacy
 
 from FR1EventPreparation import FR1EventPreparation
 
@@ -93,23 +84,12 @@ class Params(object):
 params = Params()
 
 
-class ReportPipeline(RamPipeline):
-    def __init__(self, subject, task, workspace_dir, mount_point=None, exit_on_no_change=False):
-        RamPipeline.__init__(self)
-        self.exit_on_no_change = exit_on_no_change
-        self.subject = subject
-        self.task = self.experiment = task
-        self.mount_point = mount_point
-        self.set_workspace_dir(workspace_dir)
-        dependency_tracker = DependencyChangeTrackerLegacy(subject=subject, workspace_dir=workspace_dir, mount_point=mount_point)
-
-        self.set_dependency_tracker(dependency_tracker=dependency_tracker)
-
-
 
 # sets up processing pipeline
-report_pipeline = ReportPipeline(subject=args.subject, task=args.task,
-                                       workspace_dir=join(args.workspace_dir,args.task+'_'+args.subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change)
+report_pipeline = ReportPipeline(subject=args.subject, task=args.task,experiment=args.task,
+                                 workspace_dir=join(args.workspace_dir,args.task+'_'+args.subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change,
+                                 recompute_on_no_status=args.recompute_on_no_status)
+
 
 report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
 
@@ -134,6 +114,7 @@ report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
 report_pipeline.add_task(GenerateTex(mark_as_completed=False))
 
 report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
+
 
 # starts processing pipeline
 report_pipeline.execute_pipeline()

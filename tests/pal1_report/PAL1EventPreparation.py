@@ -8,10 +8,11 @@ from ptsa.data.readers import BaseEventReader
 
 from RamPipeline import *
 
+from ReportUtils import ReportRamTask
 
-class PAL1EventPreparation(RamTask):
+class PAL1EventPreparation(ReportRamTask):
     def __init__(self, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(PAL1EventPreparation,self).__init__(mark_as_completed)
 
     def run(self):
         task = self.pipeline.task

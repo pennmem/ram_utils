@@ -34,22 +34,22 @@ class BuildAggregatePSTable(RamTask):
         self.pass_object('ps_table', self.ps_table)
 
     def run(self):
-        task = self.pipeline.task
+        # task = self.pipeline.task
 
-        ps1_root = self.get_path_to_resource_in_workspace('PS1/')
+        ps1_root = self.get_path_to_resource_in_workspace('PS1_reports/')
         ps1_subjects = sorted([s for s in os.listdir(ps1_root) if s[:2]=='R1'])
         ps1_tables = []
         for subject in ps1_subjects:
             try:
                 ps1_table = pd.read_pickle(join(ps1_root, subject, subject+'-PS1-ps_table.pkl'))
                 del ps1_table['isi']
-                xval_output = None
-                try:
-                    xval_output = joblib.load(join(ps1_root, subject, subject+'-xval_output.pkl'))
-                except IOError:
-                    xval_output = joblib.load(join(ps1_root, subject, subject+'-'+task+'-xval_output.pkl'))
-                thresh = xval_output[-1].jstat_thresh
-                ps1_table['thresh'] = thresh
+                # xval_output = None
+                # try:
+                #     xval_output = joblib.load(join(ps1_root, subject, subject+'-xval_output.pkl'))
+                # except IOError:
+                #     xval_output = joblib.load(join(ps1_root, subject, subject+'-'+task+'-xval_output.pkl'))
+                # thresh = xval_output[-1].jstat_thresh
+                # ps1_table['thresh'] = thresh
                 ps1_table['locTag'] = ps1_table['Region'].apply(lambda s: 'Undetermined' if s is None else s)
                 ps1_table['Region'] = ps1_table['Region'].apply(lambda s: 'Undetermined' if s is None else s.replace('Left ','').replace('Right ',''))
                 ps1_table['Area'] = ps1_table['Region'].apply(brain_area)
@@ -61,20 +61,20 @@ class BuildAggregatePSTable(RamTask):
         ps1_tables = pd.concat(ps1_tables, ignore_index=True)
         ps1_tables['Experiment'] = 'PS1'
 
-        ps2_root = self.get_path_to_resource_in_workspace('PS2/')
+        ps2_root = self.get_path_to_resource_in_workspace('PS2_reports/')
         ps2_subjects = sorted([s for s in os.listdir(ps2_root) if s[:2]=='R1'])
         ps2_tables = []
         for subject in ps2_subjects:
             try:
                 ps2_table = pd.read_pickle(join(ps2_root, subject, subject+'-PS2-ps_table.pkl'))
                 del ps2_table['isi']
-                xval_output = None
-                try:
-                    xval_output = joblib.load(join(ps2_root, subject, subject+'-xval_output.pkl'))
-                except IOError:
-                    xval_output = joblib.load(join(ps2_root, subject, subject+'-'+task+'-xval_output.pkl'))
-                thresh = xval_output[-1].jstat_thresh
-                ps2_table['thresh'] = thresh
+                # xval_output = None
+                # try:
+                #     xval_output = joblib.load(join(ps2_root, subject, subject+'-xval_output.pkl'))
+                # except IOError:
+                #     xval_output = joblib.load(join(ps2_root, subject, subject+'-'+task+'-xval_output.pkl'))
+                # thresh = xval_output[-1].jstat_thresh
+                # ps2_table['thresh'] = thresh
                 ps2_table['locTag'] = ps2_table['Region'].apply(lambda s: 'Undetermined' if s is None else s)
                 ps2_table['Region'] = ps2_table['Region'].apply(lambda s: 'Undetermined' if s is None else s.replace('Left ','').replace('Right ',''))
                 ps2_table['Area'] = ps2_table['Region'].apply(brain_area)

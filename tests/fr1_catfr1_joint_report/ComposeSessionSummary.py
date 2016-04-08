@@ -6,7 +6,7 @@ import pandas as pd
 import time
 from operator import itemgetter
 
-
+from ReportUtils import ReportRamTask
 def make_atlas_loc(tag, atlas_loc, comments):
 
     def colon_connect(s1, s2):
@@ -66,9 +66,9 @@ def format_ttest_table(table_data):
                 line[:] = ['\\textbf{\\textcolor{blue}{%s}}' % s for s in line]
 
 
-class ComposeSessionSummary(RamTask):
+class ComposeSessionSummary(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(ComposeSessionSummary,self).__init__(mark_as_completed)
         self.params = params
 
         if self.dependency_inventory:
@@ -107,9 +107,6 @@ class ComposeSessionSummary(RamTask):
         positions = np.unique(events.serialpos)
         first_recall_counter = np.zeros(positions.size, dtype=int)
         total_list_counter = 0
-
-        irt_within_cat = []
-        irt_between_cat = []
 
         for session in sessions:
             session_summary = SessionSummary()
@@ -153,8 +150,6 @@ class ComposeSessionSummary(RamTask):
             session_data.append([session_design, session_date, session_length, n_lists, '$%.2f$\\%%' % session_summary.pc_correct_words])
 
             prob_first_recall = np.zeros(len(positions), dtype=float)
-            session_irt_within_cat = []
-            session_irt_between_cat = []
             for lst in lists:
                 list_rec_events = session_rec_events[(session_rec_events.list == lst) & (session_rec_events.intrusion == 0)]
                 if list_rec_events.size > 0:
@@ -164,25 +159,8 @@ class ComposeSessionSummary(RamTask):
                         first_recall_idx = tmp[0]
                         prob_first_recall[first_recall_idx] += 1
                         first_recall_counter[first_recall_idx] += 1
-                if task == 'RAM_CatFR1':
-                    # list_rec_events = session_rec_events[session_rec_events.list == lst]
-                    for i in xrange(1,len(list_rec_events)):
-                        cur_ev = list_rec_events[i]
-                        prev_ev = list_rec_events[i-1]
-                        # if (cur_ev.intrusion == 0) and (prev_ev.intrusion == 0):
-                        dt = cur_ev.mstime - prev_ev.mstime
-                        if cur_ev.category == prev_ev.category:
-                            session_irt_within_cat.append(dt)
-                        else:
-                            session_irt_between_cat.append(dt)
             prob_first_recall /= float(n_lists)
             total_list_counter += n_lists
-
-            session_summary.irt_within_cat = sum(session_irt_within_cat) / len(session_irt_within_cat) if session_irt_within_cat else 0.0
-            session_summary.irt_between_cat = sum(session_irt_between_cat) / len(session_irt_between_cat) if session_irt_between_cat else 0.0
-
-            irt_within_cat += session_irt_within_cat
-            irt_between_cat += session_irt_between_cat
 
             session_summary.prob_first_recall = prob_first_recall
 
@@ -195,10 +173,11 @@ class ComposeSessionSummary(RamTask):
 
             session_intr_events = intr_events[intr_events.session == session]
 
+            n_sess_rec_events = len(session_rec_events)
             session_summary.n_pli = np.sum(session_intr_events.intrusion > 0)
-            session_summary.pc_pli = 100*session_summary.n_pli / float(n_sess_events)
+            session_summary.pc_pli = 100*session_summary.n_pli / float(n_sess_rec_events)
             session_summary.n_eli = np.sum(session_intr_events.intrusion == -1)
-            session_summary.pc_eli = 100*session_summary.n_eli / float(n_sess_events)
+            session_summary.pc_eli = 100*session_summary.n_eli / float(n_sess_rec_events)
 
             session_xval_output = xval_output[session]
 
@@ -231,9 +210,6 @@ class ComposeSessionSummary(RamTask):
         cumulative_summary.n_correct_words = np.sum(events.recalled)
         cumulative_summary.pc_correct_words = 100*cumulative_summary.n_correct_words / float(cumulative_summary.n_words)
 
-        cumulative_summary.irt_within_cat = sum(irt_within_cat) / len(irt_within_cat) if irt_within_cat else 0.0
-        cumulative_summary.irt_between_cat = sum(irt_between_cat) / len(irt_between_cat) if irt_between_cat else 0.0
-
         positions = np.unique(events.serialpos)
         prob_recall = np.empty_like(positions, dtype=float)
         for i,pos in enumerate(positions):
@@ -250,10 +226,11 @@ class ComposeSessionSummary(RamTask):
             cumulative_summary.pc_correct_math = 100*cumulative_summary.n_correct_math / float(cumulative_summary.n_math)
             cumulative_summary.math_per_list = cumulative_summary.n_math / float(total_list_counter)
 
+        n_rec_events = len(rec_events)
         cumulative_summary.n_pli = np.sum(intr_events.intrusion > 0)
-        cumulative_summary.pc_pli = 100*cumulative_summary.n_pli / float(len(events))
+        cumulative_summary.pc_pli = 100*cumulative_summary.n_pli / float(n_rec_events)
         cumulative_summary.n_eli = np.sum(intr_events.intrusion == -1)
-        cumulative_summary.pc_eli = 100*cumulative_summary.n_eli / float(len(events))
+        cumulative_summary.pc_eli = 100*cumulative_summary.n_eli / float(n_rec_events)
 
         cumulative_xval_output = xval_output[-1]
 

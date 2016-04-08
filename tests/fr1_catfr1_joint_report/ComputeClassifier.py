@@ -7,7 +7,7 @@ from sklearn.metrics import roc_auc_score, roc_curve
 from random import shuffle
 from sklearn.externals import joblib
 import warnings
-
+from ReportUtils import ReportRamTask
 def normalize_sessions(pow_mat, events):
     sessions = np.unique(events.session)
     for sess in sessions:
@@ -61,9 +61,9 @@ class ModelOutput(object):
         self.high_pc_diff_from_mean = 100.0 * (high_terc_recall_rate-recall_rate) / recall_rate
 
 
-class ComputeClassifier(RamTask):
+class ComputeClassifier(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(ComputeClassifier,self).__init__(mark_as_completed)
         self.params = params
         self.pow_mat = None
         self.lr_classifier = None

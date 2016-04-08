@@ -6,10 +6,11 @@ from sklearn.externals import joblib
 
 import sys
 
+from ReportUtils import ReportRamTask
 
-class ComputeTTest(RamTask):
+class ComputeTTest(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(ComputeTTest,self).__init__(mark_as_completed)
         self.params = params
 
     def run(self):

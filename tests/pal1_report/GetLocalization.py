@@ -5,9 +5,12 @@ from os.path import join
 from loc_to_df import loc_to_df
 
 
-class GetLocalization(RamTask):
+
+from ReportUtils import ReportRamTask
+
+class GetLocalization(ReportRamTask):
     def __init__(self, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(GetLocalization,self).__init__(mark_as_completed)
 
     def run(self):
         subject = self.pipeline.subject

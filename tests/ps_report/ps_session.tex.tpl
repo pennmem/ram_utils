@@ -1,15 +1,15 @@
 
 \clearpage
 
-\section*{\hfil Session <SESS_NUM> \hfil}
+\section*{\hfil Channel <STIMTAG> (<REGION>) \hfil}
 
 \begin{tabular}{ccc}
 \begin{minipage}[htbp]{160pt}
-\textbf{Parameters:} \\
-$\bullet$ <CONSTANT_NAME>: $<CONSTANT_VALUE>$ <CONSTANT_UNIT> \\
-$\bullet$ ISI: $<ISI_MID>$ ($\pm <ISI_HALF_RANGE>$) ms \\
-$\bullet$ Channel: <STIMTAG> \\
-$\bullet$ Region: <REGION>
+\begin{itemize}
+\item Session(s): <SESSIONS>
+\item <CONSTANT_NAME>: $<CONSTANT_VALUE>$ <CONSTANT_UNIT>
+\item ISI: $<ISI_MID>$ ($\pm <ISI_HALF_RANGE>$) ms
+\end{itemize}
 \end{minipage}
 &
 \begin{minipage}[htbp]{280pt}
@@ -51,8 +51,6 @@ $\bullet$ $\xi_{\textrm{pre}} = \ln \frac{C_{\textrm{pre}}}{1-C_{\textrm{pre}}}$
 $\bullet$ $\Phi_1,\Phi_0$ are cdfs of Normal fits for inverse logit of classifier output for recalls/non-recalls with equal variance.
 %$\bullet$ $\Phi_0 = {\cal N}(\mu_0,\sigma)$ is Normal fit for inverse logit of classifier output for non-recalls.
 
-<ADHOC_PAGE_TITLE>
+\vspace{3pc}
 
-<PARAM1_TTEST_TABLE>
-<PARAM2_TTEST_TABLE>
-<PARAM12_TTEST_TABLE>
+<TTEST_AGAINST_ZERO_TABLE>

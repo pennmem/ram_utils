@@ -23,17 +23,18 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{RAM CatFR1 report v 2.8}
+\lhead{RAM FR1 \& CatFR1 joint report v 2.9}
 \rhead{Date created: <DATE>}
 \begin{document}
 
 
-\section*{<SUBJECT> RAM CatFR1 Free Recall Report}
+\section*{<SUBJECT> RAM FR1 \& CatFR1 Joint Report}
 
 \begin{tabular}{ccc}
 \begin{minipage}[htbp]{200pt}
 In the free recall task, participants are presented with a list of words, one after the other, and later asked to recall as many words as possible in any order.
-\begin{itemize}\item\textbf{Number of sessions: }$<NUMBER_OF_SESSIONS>$\item\textbf{Number of electrodes: }$<NUMBER_OF_ELECTRODES>$\end{itemize}\end{minipage}
+\begin{itemize}\item\textbf{Number of sessions: }$<NUMBER_OF_SESSIONS>$\item\textbf{Number of electrodes: }$<NUMBER_OF_ELECTRODES>$\end{itemize}
+\end{minipage}
 &
 \begin{tabular}{|c|c|c|c|c|}
 \hline Session \# & Date & Length (min) & \#lists & Perf \\
@@ -52,25 +53,20 @@ $<N_WORDS>$ words & $<N_CORRECT_WORDS>$ correct ($<PC_CORRECT_WORDS>$\%) &$<N_PL
 \caption{An intrusion was a word that was vocalized during the retrieval period that was not studied on the most recent list. Intrusions were either words from a previous list (\textbf{PLI}: prior-list intrusions) or words that were not studied at all (\textbf{ELI}: extra-list intrusions).}
 \end{table}
 
-%\begin{table}[!h]
-%\centering
-%\begin{tabular}{c|c|c}
-%\multicolumn{3}{c}{\textbf{Math distractor}} \\ 
-%\hline
-%$<N_MATH>$ math problems & $<N_CORRECT_MATH>$ correct ($<PC_CORRECT_MATH>$\%) & $<MATH_PER_LIST>$ problems per list  \\ \hline 
-%\end{tabular}
-%\caption{After each list, the patient was given 20 seconds to perform as many arithmetic problems as possible, which served as a distractor before the beginning of recall.}
-%\end{table}
+\begin{table}[!h]
+\centering
+\begin{tabular}{c|c|c}
+\multicolumn{3}{c}{\textbf{Math distractor}} \\ 
+\hline
+$<N_MATH>$ math problems & $<N_CORRECT_MATH>$ correct ($<PC_CORRECT_MATH>$\%) & $<MATH_PER_LIST>$ problems per list  \\ \hline 
+\end{tabular}
+\caption{After each list, the patient was given 20 seconds to perform as many arithmetic problems as possible, which served as a distractor before the beginning of recall.}
+\end{table}
 
 \begin{figure}[!h]
 \centering
 \includegraphics[scale=0.4]{<PROB_RECALL_PLOT_FILE>}
 \caption{\textbf{Free recall:} (a) Overall probability of recall as a function of serial position. (b) Probability of FIRST recall as a function of serial position.}
-\end{figure}
-\begin{figure}[!h]
-\centering
-\includegraphics[scale=0.4]{<IRT_PLOT_FILE>}
-\caption{\textbf{Free recall:} Inter-response times for transitions within and between categories.}
 \end{figure}
 
 \clearpage
@@ -114,5 +110,6 @@ $\bullet$ Median of classifier output = $<J-THRESH>$
 %TC=temporal cortex; MTL=medial temporal lobe (including hippocampus,
 %amygdala and cortex); HC=hippocampus; OC=occipital cortex; PC=parietal cortex.}
 %\end{figure}
+
 
 \end{document}

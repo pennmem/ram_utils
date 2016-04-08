@@ -79,9 +79,12 @@ def count_nonvoc_passes(events):
     return n_nonvoc_pass
 
 
-class ComposeSessionSummary(RamTask):
+from ReportUtils import ReportRamTask
+
+class ComposeSessionSummary(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(ComposeSessionSummary,self).__init__(mark_as_completed)
+
         self.params = params
         if self.dependency_inventory:
             self.dependency_inventory.add_dependent_resource(resource_name='localization',

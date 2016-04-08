@@ -10,9 +10,11 @@ from sklearn.externals import joblib
 from ptsa.data.events import Events
 from ptsa.data.readers import EEGReader
 
-class ComputeControlPowers(RamTask):
+from ReportUtils import ReportRamTask
+
+class ComputeControlPowers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(ComputeControlPowers,self).__init__(mark_as_completed)
         self.params = params
         self.pow_mat = None
         self.samplerate = None
@@ -24,58 +26,52 @@ class ComputeControlPowers(RamTask):
         self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-control_pow_mat_pre.pkl'))
         self.pass_object('control_pow_mat_pre', self.pow_mat)
 
-        self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-control_pow_mat_0.45.pkl'))
-        self.pass_object('control_pow_mat_045', self.pow_mat)
-
-        self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-control_pow_mat_0.7.pkl'))
-        self.pass_object('control_pow_mat_07', self.pow_mat)
-
-        self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-control_pow_mat_1.2.pkl'))
-        self.pass_object('control_pow_mat_12', self.pow_mat)
-
-        #self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
-        #self.pass_object('samplerate', self.samplerate)
+        self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-control_pow_mat_post.pkl'))
+        self.pass_object('control_pow_mat_post', self.pow_mat)
 
     def run(self):
         subject = self.pipeline.subject
 
         events = self.get_passed_object('control_events')
 
+        if len(events) == 0:
+            self.pow_mat = None
+
+            self.pass_object('control_pow_mat_pre', self.pow_mat)
+            joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-control_pow_mat_pre.pkl'))
+
+            self.pass_object('control_pow_mat_post', self.pow_mat)
+            joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-control_pow_mat_post.pkl'))
+
+            return
+
         sessions = np.unique(events.session)
         print 'sessions:', sessions
 
-        # channels = self.get_passed_object('channels')
-        # tal_info = self.get_passed_object('tal_info')
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
 
-        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs, self.params.control_start_time, self.params.control_end_time, False, True)
+        pow_mat_pre1 = self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs, self.params.sham1_start_time, self.params.sham1_end_time, False, True)
+        pow_mat_pre2 = self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs, self.params.sham2_start_time, self.params.sham2_end_time, False, True)
+        self.pow_mat = np.vstack((pow_mat_pre1,pow_mat_pre2))
         self.pass_object('control_pow_mat_pre', self.pow_mat)
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-control_pow_mat_pre.pkl'))
 
-        self.samplerate = None
-        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs, self.params.control_start_time+1.45, self.params.control_end_time+1.45, True, False)
-        self.pass_object('control_pow_mat_045', self.pow_mat)
-        joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-control_pow_mat_0.45.pkl'))
+        pow_mat_post1 = self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs, self.params.sham1_start_time+1.7, self.params.sham1_end_time+1.7, True, False)
+        pow_mat_post2 = self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs, self.params.sham2_start_time+1.7, self.params.sham2_end_time+1.7, True, False)
+        self.pow_mat = np.vstack((pow_mat_post1,pow_mat_post2))
+        self.pass_object('control_pow_mat_post', self.pow_mat)
+        joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-control_pow_mat_post.pkl'))
 
-        self.samplerate = None
-        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs, self.params.control_start_time+1.7, self.params.control_end_time+1.7, True, False)
-        self.pass_object('control_pow_mat_07', self.pow_mat)
-        joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-control_pow_mat_0.7.pkl'))
-
-        self.samplerate = None
-        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs, self.params.control_start_time+2.2, self.params.control_end_time+2.2, True, False)
-        self.pass_object('control_pow_mat_12', self.pow_mat)
-        joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-control_pow_mat_1.2.pkl'))
-
-        #self.pass_object('samplerate', self.samplerate)
 
 
     def compute_powers(self, events, sessions, monopolar_channels, bipolar_pairs, start_time, end_time, mirror_front, mirror_back):
+        self.samplerate = None
+
         n_freqs = len(self.params.freqs)
         n_bps = len(bipolar_pairs)
 
-        self.pow_mat = None
+        pow_mat = None
 
         pow_ev = None
         winsize = bufsize = None
@@ -85,17 +81,8 @@ class ComputeControlPowers(RamTask):
 
             print 'Loading EEG for', n_events, 'events of session', sess
 
-            # eegs = Events(sess_events).get_data(channels=channels, start_time=self.params.control_start_time, end_time=self.params.control_end_time,
-            #                             buffer_time=self.params.control_buf, eoffset='eegoffset', keep_buffer=True, eoffset_in_time=False)
-
-            # from ptsa.data.readers import TimeSeriesEEGReader
-            # time_series_reader = TimeSeriesEEGReader(events=sess_events, start_time=self.params.control_start_time,
-            #                                  end_time=self.params.control_end_time, buffer_time=self.params.control_buf, keep_buffer=True)
-            #
-            # eegs = time_series_reader.read(monopolar_channels)
-
             eeg_reader = EEGReader(events=sess_events, channels = monopolar_channels,
-                                   start_time=start_time, end_time=end_time, buffer_time=self.params.control_buf)
+                                   start_time=start_time, end_time=end_time, buffer_time=self.params.sham_buf)
 
             eegs = eeg_reader.read()
             if eeg_reader.removed_bad_data():
@@ -115,14 +102,14 @@ class ComputeControlPowers(RamTask):
 
             if self.samplerate is None:
                 self.samplerate = float(eegs.samplerate)
-                winsize = int(round(self.samplerate*(self.params.control_end_time-self.params.control_start_time+2*self.params.control_buf)))
-                bufsize = int(round(self.samplerate*self.params.control_buf))
+                winsize = int(round(self.samplerate*(end_time-start_time+2*self.params.sham_buf)))
+                bufsize = int(round(self.samplerate*self.params.sham_buf))
                 print 'samplerate =', self.samplerate, 'winsize =', winsize, 'bufsize =', bufsize
                 pow_ev = np.empty(shape=n_freqs*winsize, dtype=float)
                 self.wavelet_transform.init(self.params.width, self.params.freqs[0], self.params.freqs[-1], n_freqs, self.samplerate, winsize)
 
             # mirroring
-            nb_ = int(round(self.samplerate*(self.params.control_buf)))
+            nb_ = int(round(self.samplerate*(self.params.sham_buf)))
             if mirror_front:
                 eegs[...,:nb_] = eegs[...,2*nb_-1:nb_-1:-1]
             if mirror_back:
@@ -176,6 +163,6 @@ class ComputeControlPowers(RamTask):
                     sess_pow_mat[ev,i,:] = np.nanmean(pow_ev_stripped, axis=1)
 
             sess_pow_mat = zscore(sess_pow_mat, axis=0, ddof=1)
-            self.pow_mat = np.concatenate((self.pow_mat,sess_pow_mat), axis=0) if self.pow_mat is not None else sess_pow_mat
+            pow_mat = np.concatenate((pow_mat,sess_pow_mat), axis=0) if pow_mat is not None else sess_pow_mat
 
-        self.pow_mat = np.reshape(self.pow_mat, (len(events), n_bps*n_freqs))
+        return np.reshape(pow_mat, (len(events), n_bps*n_freqs))

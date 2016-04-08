@@ -9,7 +9,7 @@ import datetime
 import numpy as np
 
 from latex_table import latex_table
-
+import shutil
 
 def pvalue_formatting(p):
     return '\leq 0.001' if p<=0.001 else ('%.3f'%p)
@@ -392,3 +392,15 @@ class GenerateReportPDF(RamTask):
                                + self.get_path_to_resource_in_workspace('reports/'+report_tex_file_name)
 
         call([pdflatex_command_str], shell=True)
+
+
+        report_core_file_name, ext = splitext(report_tex_file_name)
+
+
+        src = join(output_directory,report_core_file_name + '.pdf')
+        dst = '/protocols/r1/reports/ps1-2_dashboard.pdf'
+
+        shutil.copy(src,dst)
+        # self.pipeline.deploy_report(report_path=report_file)
+
+

@@ -3,14 +3,23 @@ from RamPipeline import *
 import TextTemplateUtils
 from PlotUtils import PlotData, BarPlotData, PanelPlot
 from latex_table import latex_table
-
+import re
 import numpy as np
 import datetime
 from subprocess import call
 
+from ReportUtils import ReportRamTask
 
-class GenerateTex(RamTask):
-    def __init__(self, mark_as_completed=True): RamTask.__init__(self, mark_as_completed)
+# import re
+# from collections import namedtuple
+# SplitSubjectCode = namedtuple(typename='SplitSubjectCode',field_names=['protocol','id','site','montage'])
+# import os
+# import shutil
+
+
+class GenerateTex(ReportRamTask):
+    def __init__(self, mark_as_completed=True):
+        super(GenerateTex,self).__init__(mark_as_completed)
 
     def run(self):
         subject = self.pipeline.subject
@@ -112,9 +121,9 @@ class GenerateTex(RamTask):
         self.pass_object('combined_report_tex_file_name', combined_report_tex_file_name)
 
 
-class GeneratePlots(RamTask):
+class GeneratePlots(ReportRamTask):
     def __init__(self, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(ReportRamTask,self).__init__(mark_as_completed)
 
     def run(self):
         subject = self.pipeline.subject
@@ -210,9 +219,9 @@ class GeneratePlots(RamTask):
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
 
-class GenerateReportPDF(RamTask):
+class GenerateReportPDF(ReportRamTask):
     def __init__(self, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(GenerateReportPDF,self).__init__(mark_as_completed)
 
     def run(self):
         output_directory = self.get_path_to_resource_in_workspace('reports')
@@ -239,3 +248,18 @@ class GenerateReportPDF(RamTask):
                                + self.get_path_to_resource_in_workspace('reports/'+combined_report_tex_file_name)
 
         call([pdflatex_command_str], shell=True)
+
+        report_core_file_name, ext = splitext(combined_report_tex_file_name)
+        report_file = join(output_directory,report_core_file_name+'.pdf')
+        self.pass_object('report_file',report_file)
+
+
+
+
+class DeployReportPDF(ReportRamTask):
+    def __init__(self, mark_as_completed=True):
+        super(DeployReportPDF,self).__init__(mark_as_completed)
+
+    def run(self):
+        report_file = self.get_passed_object('report_file')
+        self.pipeline.deploy_report(report_path=report_file)
