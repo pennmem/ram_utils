@@ -45,6 +45,8 @@ class ComputeControlTable(ReportRamTask):
             return
 
         event_sess = np.tile(events.session, 2)
+        stimAnodeTag = np.tile(events.stimAnodeTag, 2)
+        stimCathodeTag = np.tile(events.stimCathodeTag, 2)
 
         lr_classifier = self.get_passed_object('lr_classifier')
         xval_output = self.get_passed_object('xval_output')
@@ -73,6 +75,8 @@ class ComputeControlTable(ReportRamTask):
 
         self.control_table = pd.DataFrame()
         self.control_table['session'] = event_sess
+        self.control_table['stimAnodeTag'] = stimAnodeTag
+        self.control_table['stimCathodeTag'] = stimCathodeTag
         self.control_table['prob_pre'] = prob_pre
         self.control_table['prob_diff'] = prob_diff
         self.control_table['perf_diff'] = perf_diff

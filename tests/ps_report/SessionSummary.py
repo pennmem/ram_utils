@@ -4,7 +4,7 @@ import numpy as np
 
 class SessionSummary(object):
     def __init__(self):
-        self.sess_num = None
+        self.sessions = None
         self.low_quantile_classifier_delta_plot = None
         self.low_quantile_recall_delta_plot = None
         self.high_quantile_classifier_delta_plot = None

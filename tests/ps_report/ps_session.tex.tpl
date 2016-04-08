@@ -1,15 +1,15 @@
 
 \clearpage
 
-\section*{\hfil Session <SESS_NUM> \hfil}
+\section*{\hfil Channel <STIMTAG> (<REGION>) \hfil}
 
 \begin{tabular}{ccc}
 \begin{minipage}[htbp]{160pt}
-\textbf{Parameters:} \\
-$\bullet$ <CONSTANT_NAME>: $<CONSTANT_VALUE>$ <CONSTANT_UNIT> \\
-$\bullet$ ISI: $<ISI_MID>$ ($\pm <ISI_HALF_RANGE>$) ms \\
-$\bullet$ Channel: <STIMTAG> \\
-$\bullet$ Region: <REGION>
+\begin{itemize}
+\item Session(s): <SESSIONS>
+\item <CONSTANT_NAME>: $<CONSTANT_VALUE>$ <CONSTANT_UNIT>
+\item ISI: $<ISI_MID>$ ($\pm <ISI_HALF_RANGE>$) ms
+\end{itemize}
 \end{minipage}
 &
 \begin{minipage}[htbp]{280pt}

@@ -34,7 +34,7 @@ class PSEventPreparation(ReportRamTask):
         subject = self.pipeline.subject
         experiment = self.pipeline.experiment
 
-        e_path = os.path.join(self.pipeline.mount_point , 'data/events/RAM_PS', subject + '_events.mat')
+        e_path = os.path.join(self.pipeline.mount_point, 'data/events/RAM_PS', subject + '_events.mat')
         e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
         try:

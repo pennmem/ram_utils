@@ -98,12 +98,12 @@ class GenerateTex(ReportRamTask):
                                       }
                 ttest_against_zero_table = TextTemplateUtils.replace_template_to_string(tex_ttest_table2_template, ttest_replace_dict)
 
-            replace_dict = {'<SESS_NUM>': session_summary.sess_num,
-                            '<LOW_QUANTILE_PLOT_FILE>': self.pipeline.experiment + '-' + self.pipeline.subject + '-low_quantile_plot_' + session_summary.name + '.pdf',
-                            '<HIGH_QUANTILE_PLOT_FILE>': self.pipeline.experiment + '-' + self.pipeline.subject + '-high_quantile_plot_' + session_summary.name + '.pdf',
-                            '<ALL_PLOT_FILE>': self.pipeline.experiment + '-' + self.pipeline.subject + '-all_plot_' + session_summary.name + '.pdf',
+            replace_dict = {'<LOW_QUANTILE_PLOT_FILE>': self.pipeline.experiment + '-' + self.pipeline.subject + '-low_quantile_plot_' + session_summary.stimtag + '.pdf',
+                            '<HIGH_QUANTILE_PLOT_FILE>': self.pipeline.experiment + '-' + self.pipeline.subject + '-high_quantile_plot_' + session_summary.stimtag + '.pdf',
+                            '<ALL_PLOT_FILE>': self.pipeline.experiment + '-' + self.pipeline.subject + '-all_plot_' + session_summary.stimtag + '.pdf',
                             '<STIMTAG>': session_summary.stimtag,
                             '<REGION>': session_summary.region_of_interest,
+                            '<SESSIONS>': session_summary.sessions,
                             '<CONSTANT_NAME>': const_param_name,
                             '<CONSTANT_VALUE>': session_summary.const_param_value,
                             '<CONSTANT_UNIT>': const_unit,
@@ -207,7 +207,7 @@ class GeneratePlots(ReportRamTask):
 
             plot = panel_plot.generate_plot()
 
-            plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + self.pipeline.experiment + '-' + self.pipeline.subject + '-all_plot_' + session_summary.name + '.pdf')
+            plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + self.pipeline.experiment + '-' + self.pipeline.subject + '-all_plot_' + session_summary.stimtag + '.pdf')
 
             plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 

@@ -178,14 +178,8 @@ class ComposeSessionSummary(ReportRamTask):
 
         anova_significance = dict()
 
-        for session in sessions:
-            ps_session_table = ps_table[ps_table.session==session]
-            ps_session_sham_table = ps_sham_table[ps_sham_table.session==session]
-
-            session_summary = SessionSummary()
-
-            session_summary.sess_num = session
-
+        ps_table_by_session = ps_table.groupby(['session'])
+        for session,ps_session_table in ps_table_by_session:
             first_time_stamp = ps_session_table.mstime.min()
             last_time_stamp = ps_session_table.mstime.max()
             session_length = '%.2f' % ((last_time_stamp - first_time_stamp) / 60000.0)
@@ -193,10 +187,16 @@ class ComposeSessionSummary(ReportRamTask):
 
             session_data.append([session, session_date, session_length])
 
-            session_name = 'Sess%02d' % session
+        ps_table_by_bipolar_pair = ps_table.groupby(['stimAnodeTag','stimCathodeTag'])
+        for bipolar_pair,ps_session_table in ps_table_by_bipolar_pair:
+            ps_session_sham_table = ps_sham_table[(ps_sham_table.stimAnodeTag==bipolar_pair[0]) & (ps_sham_table.stimCathodeTag==bipolar_pair[1])]
 
-            stim_anode_tag = ps_session_table.stimAnodeTag.values[0].upper()
-            stim_cathode_tag = ps_session_table.stimCathodeTag.values[0].upper()
+            session_summary = SessionSummary()
+
+            session_summary.sessions = ps_session_table.session.unique().__str__()[1:-1]
+
+            stim_anode_tag = bipolar_pair[0].upper()
+            stim_cathode_tag = bipolar_pair[1].upper()
             stim_tag = stim_anode_tag + '-' + stim_cathode_tag
             sess_loc_tag = ps_session_table.Region.values[0]
             roi = '{\em locTag not found}' if sess_loc_tag is None else sess_loc_tag
@@ -206,11 +206,8 @@ class ComposeSessionSummary(ReportRamTask):
             isi_mid = (isi_max+isi_min) / 2.0
             isi_halfrange = isi_max - isi_mid
 
-            print 'Session =', session_name, ' StimTag =', stim_tag, ' ISI =', isi_mid, '+/-', isi_halfrange
+            print ' StimTag =', stim_tag, ' ISI =', isi_mid, '+/-', isi_halfrange
 
-            session_summary.name = session_name
-            session_summary.length = session_length
-            session_summary.date = session_date
             session_summary.stimtag = stim_tag
             session_summary.region_of_interest = roi
             session_summary.isi_mid = isi_mid
