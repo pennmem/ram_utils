@@ -52,6 +52,8 @@ from GenerateReportTasks import *
 
 class Params(object):
     def __init__(self):
+        self.fr4_exclude_first_3_lists = False
+
         self.fr1_start_time = 0.0
         self.fr1_end_time = 1.6
         self.fr1_buf = 1.0

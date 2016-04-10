@@ -155,9 +155,6 @@ class GeneratePlots(RamTask):
 
             plot = panel_plot.generate_plot()
 
-
-
-
             plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-prob_recall_plot_' + session_summary.name + '.pdf')
 
             plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
@@ -183,10 +180,10 @@ class GeneratePlots(RamTask):
 
             print 'Number of lists', n_lists
 
-            bpd_1 = BarPlotData(x=np.arange(n_lists), y=session_summary.n_stims_per_list, title='', alpha=0.1)
-            pd_1 = PlotData(x=np.where(session_summary.is_stim_list)[0], y=session_summary.n_recalls_per_list[session_summary.is_stim_list],
+            bpd_1 = BarPlotData(x=np.arange(n_lists), y=session_summary.n_stims_per_list, title='', alpha=0.2)
+            pd_1 = PlotData(x=np.where(session_summary.is_stim_list)[0], y=session_summary.n_recalls_per_list[session_summary.is_stim_list], ylim=(0,12),
                     title='', linestyle='', color='red', marker='o',markersize=20)
-            pd_2 = PlotData(x=np.where(~session_summary.is_stim_list)[0], y=session_summary.n_recalls_per_list[~session_summary.is_stim_list],
+            pd_2 = PlotData(x=np.where(~session_summary.is_stim_list)[0], y=session_summary.n_recalls_per_list[~session_summary.is_stim_list], ylim=(0,12),
                     title='', linestyle='', color='blue', marker='o',markersize=20)
             print 'np.where(session_summary.is_stim_list)[0]=',np.where(session_summary.is_stim_list)[0]
             print 'np.where(~session_summary.is_stim_list)[0]=',np.where(~session_summary.is_stim_list)[0]

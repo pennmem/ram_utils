@@ -56,8 +56,9 @@ class ComposeSessionSummary(RamTask):
             session_rec_events = rec_events[rec_events.session == session]
 
             session_all_events = all_events[all_events.session == session]
+            first_time_stamp = session_all_events[session_all_events.type=='INSTRUCT_VIDEO'][0].mstime
             timestamps = session_all_events.mstime
-            first_time_stamp = np.min(timestamps)
+            #first_time_stamp = np.min(timestamps)
             last_time_stamp = np.max(timestamps)
             session_length = '%.2f' % ((last_time_stamp - first_time_stamp) / 60000.0)
             session_date = time.strftime('%d-%b-%Y', time.localtime(last_time_stamp/1000))
@@ -142,7 +143,8 @@ class ComposeSessionSummary(RamTask):
             cumulative_n_intr_from_stim += n_intr_from_stim
 
             nonstim_list_mask = ~session_summary.is_stim_list
-            nonstim_list_mask[0:3] = False
+            if self.params.fr4_exclude_first_3_lists:
+                nonstim_list_mask[0:3] = False
             n_items_from_nonstim = np.sum(items_per_list[nonstim_list_mask])
             n_recalls_from_nonstim = np.sum(session_summary.n_recalls_per_list[nonstim_list_mask])
             n_intr_from_nonstim = np.sum(session_summary.n_intr_per_list[nonstim_list_mask])
