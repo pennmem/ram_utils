@@ -135,6 +135,8 @@ class GeneratePlots(RamTask):
 
         serial_positions = np.arange(1,13)
 
+
+
         combined_stim_pd_list = []
         combined_nostim_pd_list = []
         combined_number_stim_pd_list = []
@@ -149,7 +151,7 @@ class GeneratePlots(RamTask):
         combined_nostim_y = np.array([], dtype=np.int)
 
 
-        combined_list_number_label = np.array([],dtype=np.int)
+        combined_list_number_label = np.array([],dtype='|S32')
         combined_number_stims = np.array([], dtype=np.int)
 
         pos_counter = 0
@@ -233,8 +235,15 @@ class GeneratePlots(RamTask):
 
             # combined session  summary
 
+            # labels = np.array(['']*len(bpd_1.x),dtype='|S32')
 
+            # combined_list_number_label = np.hstack((combined_list_number_label, labels))
             combined_list_number_label = np.hstack((combined_list_number_label, np.arange(len(bpd_1.x))))
+
+            combined_list_number_label[1::5]=''
+            combined_list_number_label[2::5] = ''
+            combined_list_number_label[3::5] = ''
+            combined_list_number_label[4::5] = ''
 
             combined_stim_x = np.hstack((combined_stim_x,stim_x+pos_counter))
             combined_nostim_x = np.hstack((combined_nostim_x, nostim_x + pos_counter))
@@ -300,9 +309,12 @@ class GeneratePlots(RamTask):
         plot_combined = panel_plot_combined.generate_plot()
 
         # print plot_combined
-        #
+
         # fig, ax = plot_combined.subplots()
-        #
+
+        # for label in plot_combined.axes().xaxis.get_ticklabels():
+        #     print label
+
         # for label in ax.get_ticklabels()[::2]:
         #     label.set_visible(False)
 

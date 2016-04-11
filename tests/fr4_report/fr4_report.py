@@ -33,6 +33,15 @@ else: # emulate command line
                                             # '--python-path', '/home1/busygin/python/ptsa_latest'
                                             ]
 
+
+    # command_line_emulation_argument_list = ['--subject', 'R1076D',
+    #                                         '--task', 'RAM_FR4',
+    #                                         '--workspace-dir', 'scratch/mswat/FR4_reports',
+    #                                         '--mount-point', '/Volumes/rhino_root',
+    #                                         '--python-path', '/Users/m/RAM_UTILS_GIT',
+    #                                         '--python-path', '/Users/m/PTSA_NEW_GIT'
+    #                                         ]
+
     args = parse_command_line(command_line_emulation_argument_list)
 
 configure_python_paths(args.python_path)
