@@ -7,10 +7,11 @@ from get_bipolar_subj_elecs import get_bipolar_subj_elecs
 
 from RamPipeline import *
 
+from ReportUtils import ReportRamTask
 
-class TalPreparation(RamTask):
+class TalPreparation(ReportRamTask):
     def __init__(self, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(TalPreparation, self).__init__(mark_as_completed)
 
     def run(self):
         events = self.get_passed_object(self.pipeline.task+'_events')

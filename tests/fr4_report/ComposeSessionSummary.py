@@ -7,9 +7,13 @@ import time
 from statsmodels.stats.proportion import proportions_chisquare
 
 
-class ComposeSessionSummary(RamTask):
+
+from ReportUtils import ReportRamTask
+
+class ComposeSessionSummary(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(ComposeSessionSummary, self).__init__(mark_as_completed)
+
         self.params = params
 
     def run(self):

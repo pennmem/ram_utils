@@ -8,9 +8,12 @@ import numpy as np
 import datetime
 from subprocess import call
 
+from ReportUtils import ReportRamTask
 
-class GenerateTex(RamTask):
-    def __init__(self, mark_as_completed=True): RamTask.__init__(self, mark_as_completed)
+
+class GenerateTex(ReportRamTask):
+    def __init__(self, mark_as_completed=True):
+        super(GenerateTex,self).__init__(mark_as_completed)
 
     def run(self):
         subject = self.pipeline.subject
@@ -121,9 +124,9 @@ class GenerateTex(RamTask):
         self.pass_object('combined_report_tex_file_name', combined_report_tex_file_name)
 
 
-class GeneratePlots(RamTask):
+class GeneratePlots(ReportRamTask):
     def __init__(self, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(GeneratePlots,self).__init__(mark_as_completed)
 
     def run(self):
         subject = self.pipeline.subject
@@ -352,9 +355,9 @@ class GeneratePlots(RamTask):
             plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
 
-class GenerateReportPDF(RamTask):
+class GenerateReportPDF(ReportRamTask):
     def __init__(self, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(GenerateReportPDF,self).__init__(mark_as_completed)
 
     def run(self):
         output_directory = self.get_path_to_resource_in_workspace('reports')
