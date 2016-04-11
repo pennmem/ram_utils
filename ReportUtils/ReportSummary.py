@@ -1,6 +1,8 @@
 from collections import OrderedDict
 from datetime import date
 from ReportUtils import *
+from ReportUtils.ReportExceptions import *
+
 from JSONUtils import JSONNode
 from os.path import *
 import os

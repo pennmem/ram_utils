@@ -93,7 +93,7 @@ subjects.sort()
 rsi = ReportSummaryInventory(label=task)
 
 
-for subject in subjects:
+for subject in subjects[:10]:
     print '--Generating', task, 'report for', subject
 
     # sets up processing pipeline
