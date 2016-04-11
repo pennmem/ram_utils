@@ -90,4 +90,16 @@ $<N_STIM_INTR>/<N_TOTAL_STIM>$ ($<PC_FROM_STIM_INTR>$\%) from stim lists & $<N_N
 \end{tabular}
 \end{table}
 
+\clearpage
+
+\begin{center}
+\textbf{\Large Stim and recall analysis}
+\end{center}
+
+\begin{figure}[!h]
+\centering
+\subfigure{\includegraphics[scale=0.4]{<STIM_AND_RECALL_PLOT_FILE>}}
+\caption{\textbf{Stim and recall:} Number of stim and recalled items per list}
+\end{figure}
+
 \end{document}

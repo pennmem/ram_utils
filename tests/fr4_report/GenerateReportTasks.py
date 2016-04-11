@@ -82,6 +82,7 @@ class GenerateTex(RamTask):
         cumulative_data_tex_table = latex_table(self.get_passed_object('SESSION_DATA'))
 
         replace_dict = {'<PROB_RECALL_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-prob_recall_plot_combined.pdf',
+                        '<STIM_AND_RECALL_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-stim_and_recall_plot_combined.pdf',
                         '<IRT_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-irt_plot_combined.pdf',
                         '<DATE>': datetime.date.today(),
                         '<SESSION_DATA>': cumulative_data_tex_table,
@@ -231,7 +232,10 @@ class GeneratePlots(RamTask):
             plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
             # combined session  summary
+
+
             combined_list_number_label = np.hstack((combined_list_number_label, np.arange(len(bpd_1.x))))
+
             combined_stim_x = np.hstack((combined_stim_x,stim_x+pos_counter))
             combined_nostim_x = np.hstack((combined_nostim_x, nostim_x + pos_counter))
 
@@ -240,7 +244,7 @@ class GeneratePlots(RamTask):
             combined_stim_y = np.hstack((combined_stim_y, stim_y))
             combined_nostim_y = np.hstack((combined_nostim_y, nostim_y))
 
-            session_separator_pos = np.hstack((session_separator_pos,np.array([len(combined_list_number_label)+0.5],dtype=np.float)))
+            session_separator_pos = np.hstack((session_separator_pos,np.array([len(combined_list_number_label)-0.5],dtype=np.float)))
 
 
             pos_counter+=n_lists
@@ -294,6 +298,14 @@ class GeneratePlots(RamTask):
         panel_plot_combined.add_plot_data_collection(0, 0, plot_data_collection=pdc_combined)
         #
         plot_combined = panel_plot_combined.generate_plot()
+
+        # print plot_combined
+        #
+        # fig, ax = plot_combined.subplots()
+        #
+        # for label in ax.get_ticklabels()[::2]:
+        #     label.set_visible(False)
+
         #
         plot_out_fname = self.get_path_to_resource_in_workspace(
             'reports/' + task + '-' + subject + '-stim_and_recall_plot_combined.pdf')
