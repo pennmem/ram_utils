@@ -17,12 +17,20 @@ else: # emulate command line
     #                                         '--python-path','/home1/busygin/python/ptsa/build/lib.linux-x86_64-2.7'
     #                                         ]
 
-    command_line_emulation_argument_list = ['--subject','R1076D',
-                                            '--task','RAM_FR4',
-                                            '--workspace-dir','/scratch/busygin/FR4_reports',
-                                            '--mount-point','',
-                                            '--python-path','/home1/busygin/ram_utils',
-                                            '--python-path','/home1/busygin/python/ptsa_latest'
+    # command_line_emulation_argument_list = ['--subject','R1076D',
+    #                                         '--task','RAM_FR4',
+    #                                         '--workspace-dir','/scratch/busygin/FR4_reports',
+    #                                         '--mount-point','',
+    #                                         '--python-path','/home1/busygin/ram_utils',
+    #                                         '--python-path','/home1/busygin/python/ptsa_latest'
+    #                                         ]
+
+    command_line_emulation_argument_list = ['--subject', 'R1076D',
+                                            '--task', 'RAM_FR4',
+                                            '--workspace-dir', '/scratch/mswat/FR4_reports',
+                                            '--mount-point', '',
+                                            # '--python-path', '/home1/busygin/ram_utils',
+                                            # '--python-path', '/home1/busygin/python/ptsa_latest'
                                             ]
 
     args = parse_command_line(command_line_emulation_argument_list)

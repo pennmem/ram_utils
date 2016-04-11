@@ -134,6 +134,24 @@ class GeneratePlots(RamTask):
 
         serial_positions = np.arange(1,13)
 
+        combined_stim_pd_list = []
+        combined_nostim_pd_list = []
+        combined_number_stim_pd_list = []
+
+        session_separator_pos = np.array([],dtype=np.float)
+
+        combined_stim_x = np.array([],dtype=np.int)
+        combined_nostim_x = np.array([], dtype=np.int)
+
+
+        combined_stim_y = np.array([], dtype=np.int)
+        combined_nostim_y = np.array([], dtype=np.int)
+
+
+        combined_list_number_label = np.array([],dtype=np.int)
+        combined_number_stims = np.array([], dtype=np.int)
+
+        pos_counter = 0
         for session_summary in session_summary_array:
             panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', wspace=0.3, hspace=0.3, labelsize=20)
 
@@ -181,12 +199,23 @@ class GeneratePlots(RamTask):
             print 'Number of lists', n_lists
 
             bpd_1 = BarPlotData(x=np.arange(n_lists), y=session_summary.n_stims_per_list, title='', alpha=0.2)
-            pd_1 = PlotData(x=np.where(session_summary.is_stim_list)[0], y=session_summary.n_recalls_per_list[session_summary.is_stim_list], ylim=(0,12),
+            stim_x = np.where(session_summary.is_stim_list)[0]
+            stim_y = session_summary.n_recalls_per_list[session_summary.is_stim_list]
+            pd_1 = PlotData(x=stim_x, y=stim_y, ylim=(0,12),
                     title='', linestyle='', color='red', marker='o',markersize=20)
-            pd_2 = PlotData(x=np.where(~session_summary.is_stim_list)[0], y=session_summary.n_recalls_per_list[~session_summary.is_stim_list], ylim=(0,12),
+
+            nostim_x = np.where(~session_summary.is_stim_list)[0]
+            nostim_y = session_summary.n_recalls_per_list[~session_summary.is_stim_list]
+            pd_2 = PlotData(x=nostim_x , y=nostim_y , ylim=(0,12),
                     title='', linestyle='', color='blue', marker='o',markersize=20)
-            print 'np.where(session_summary.is_stim_list)[0]=',np.where(session_summary.is_stim_list)[0]
-            print 'np.where(~session_summary.is_stim_list)[0]=',np.where(~session_summary.is_stim_list)[0]
+
+            combined_number_stim_pd_list.append(bpd_1)
+            combined_stim_pd_list.append(pd_1)
+            combined_nostim_pd_list.append(pd_2)
+
+
+            # print 'np.where(session_summary.is_stim_list)[0]=',np.where(session_summary.is_stim_list)[0]
+            # print 'np.where(~session_summary.is_stim_list)[0]=',np.where(~session_summary.is_stim_list)[0]
             pdc.add_plot_data(pd_1)
             pdc.add_plot_data(pd_2)
             pdc.add_plot_data(bpd_1)
@@ -200,6 +229,79 @@ class GeneratePlots(RamTask):
             plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-stim_and_recall_plot_' + session_summary.name + '.pdf')
 
             plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+
+            # combined session  summary
+            combined_list_number_label = np.hstack((combined_list_number_label, np.arange(len(bpd_1.x))))
+            combined_stim_x = np.hstack((combined_stim_x,stim_x+pos_counter))
+            combined_nostim_x = np.hstack((combined_nostim_x, nostim_x + pos_counter))
+
+            combined_number_stims = np.hstack((combined_number_stims,session_summary.n_stims_per_list))
+
+            combined_stim_y = np.hstack((combined_stim_y, stim_y))
+            combined_nostim_y = np.hstack((combined_nostim_y, nostim_y))
+
+            session_separator_pos = np.hstack((session_separator_pos,np.array([len(combined_list_number_label)+0.5],dtype=np.float)))
+
+
+            pos_counter+=n_lists
+
+            # end of combined session  summary
+
+        # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        # combined plot over sessions
+
+        # empirical size of the figure based on the number of lists
+        xfigsize = 10*len(combined_list_number_label)/25.0
+
+        panel_plot_combined = PanelPlot(xfigsize=xfigsize, yfigsize=10.0, i_max=1, j_max=1, title='', xlabel='List',
+                               ylabel='# of items', labelsize=20)
+
+        bpd_combined = BarPlotData(x=np.arange(len(combined_list_number_label)), y=combined_number_stims, x_tick_labels=combined_list_number_label , title='', alpha=0.2)
+
+
+        stim_pd_combined = PlotData(x=combined_stim_x,
+                        y=combined_stim_y, ylim=(0, 12),
+                        title='', linestyle='', color='red', marker='o', markersize=20)
+
+        nostim_pd_combined = PlotData(x=combined_nostim_x,
+                                    y=combined_nostim_y, ylim=(0, 12),
+                                    title='', linestyle='', color='blue', marker='o', markersize=20)
+
+        pdc_combined = PlotDataCollection()
+        # ----------------- FORMATTING
+        pdc_combined.xlabel = 'List number'
+        pdc_combined.xlabel_fontsize = 20
+        pdc_combined.ylabel = '# recalled words'
+        pdc_combined.ylabel_fontsize = 20
+
+        n_lists = len(session_summary.n_stims_per_list)
+
+        print 'Number of lists', n_lists
+
+        pdc_combined.add_plot_data(stim_pd_combined)
+        pdc_combined.add_plot_data(nostim_pd_combined)
+        pdc_combined.add_plot_data(bpd_combined)
+
+        for separator_pos  in session_separator_pos:
+
+            x = np.arange(len(combined_list_number_label))
+            y = [0]*len(x)
+            sep_plot_data = PlotData(x=[0],y=[0],levelline=[[separator_pos, separator_pos], [0, 12]], color='white', alpha=0.0)
+            pdc_combined.add_plot_data(sep_plot_data)
+
+
+
+        panel_plot_combined.add_plot_data_collection(0, 0, plot_data_collection=pdc_combined)
+        #
+        plot_combined = panel_plot_combined.generate_plot()
+        #
+        plot_out_fname = self.get_path_to_resource_in_workspace(
+            'reports/' + task + '-' + subject + '-stim_and_recall_plot_combined.pdf')
+        #
+        plot_combined.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+
+        # end of combined plot over sessions
+        #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         cumulative_summary = self.get_passed_object('cumulative_summary')
 
