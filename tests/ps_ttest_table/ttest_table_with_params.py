@@ -57,21 +57,44 @@ def get_tal_structs_row(subject,anode_tag,cathode_tag):
         tal_structs = tal_reader.read()
 
         # sel = tal_structs[np.where(tal_structs.tagName == anode_tag+'-'+cathode_tag)]
-        sel = tal_structs[np.where((tal_structs.tagName == anode_tag)|(tal_structs.tagName == cathode_tag))]
-        if not len(sel):
-            sel = tal_structs[np.where((tal_structs.tagName == anode_tag)|(tal_structs.tagName == cathode_tag))]
+        #ORIGINAL CODE
+        # sel = tal_structs[np.where((tal_structs.tagName == anode_tag)|(tal_structs.tagName == cathode_tag))]
 
-        if not len(sel):
+        anode = tal_structs[np.where((tal_structs.tagName == anode_tag)) ]
+
+
+        cathode = tal_structs[np.where((tal_structs.tagName == cathode_tag))]
+        # print cathode
+        # sel = np.vstack((anode,cathode))
+
+        # if not len(sel):
+        #     # sel = tal_structs[np.where((tal_structs.tagName == anode_tag)|(tal_structs.tagName == cathode_tag))]
+        #     anode = tal_structs[np.where((tal_structs.tagName == anode_tag))]
+        #     cathode = tal_structs[np.where((tal_structs.tagName == cathode_tag))]
+        #     sel = np.vstack((anode, cathode))
+
+        if not len(anode) and not len(cathode):
 
             tal_path = join(mount_point,'data/eeg/',subject,'tal',subject+'_talLocs_database_stimOnly.mat')
             tal_reader = TalStimOnlyReader(filename=tal_path)
             tal_structs = tal_reader.read()
+            # ORIGINAL CODE
+            # sel = tal_structs[np.where((tal_structs.tagName == anode_tag)|(tal_structs.tagName == cathode_tag))]
 
-            sel = tal_structs[np.where((tal_structs.tagName == anode_tag)|(tal_structs.tagName == cathode_tag))]
-            if not len(sel):
-                sel = tal_structs[np.where((tal_structs.tagName == anode_tag)|(tal_structs.tagName == cathode_tag))]
+            anode = tal_structs[np.where((tal_structs.tagName == anode_tag))]
+            cathode = tal_structs[np.where((tal_structs.tagName == cathode_tag))]
+            # sel = np.vstack((anode, cathode))
 
-        return sel
+
+            # if not len(sel):
+            #     sel = tal_structs[np.where((tal_structs.tagName == anode_tag)|(tal_structs.tagName == cathode_tag))]
+
+
+        anode_ret = anode[0] if len(anode) else None
+        cathode_ret = cathode[0] if len(cathode) else None
+
+
+        return anode_ret, cathode_ret
 
 
 def extend_elec_dataframe(df):
@@ -87,13 +110,16 @@ def extend_elec_dataframe(df):
     rh_data_combined = None
 
 
-    x = np.zeros(shape=(len(df['Subject'])),dtype=np.float)
-    y = np.zeros(shape=(len(df['Subject'])),dtype=np.float)
-    z = np.zeros(shape=(len(df['Subject'])),dtype=np.float)
+    x0 = np.zeros(shape=(len(df['Subject'])),dtype=np.float)
+    y0 = np.zeros(shape=(len(df['Subject'])),dtype=np.float)
+    z0 = np.zeros(shape=(len(df['Subject'])),dtype=np.float)
+
+
+    x1 = np.zeros(shape=(len(df['Subject'])), dtype=np.float)
+    y1 = np.zeros(shape=(len(df['Subject'])), dtype=np.float)
+    z1 = np.zeros(shape=(len(df['Subject'])), dtype=np.float)
+
     eType = np.zeros(shape=(len(df['Subject'])),dtype='|S256')
-
-
-    monopol_elec_data = []
 
     for count, (index, row) in enumerate(df.iterrows()):
         # print count, index, row
@@ -103,27 +129,43 @@ def extend_elec_dataframe(df):
             subject = row['Subject']
             print subject
 
+        anode, cathode = get_tal_structs_row(subject=subject,anode_tag=row['stimAnodeTag'],cathode_tag=row['stimCathodeTag'])
+        # print sel
 
-        sel = get_tal_structs_row(subject=subject,anode_tag=row['stimAnodeTag'],cathode_tag=row['stimCathodeTag'])
 
-        for s in sel:
-            monopol_elec_data.append([subject,s.tagName,s.avgSurf.x,s.avgSurf.y,s.avgSurf.z,s.eType])
-
-        if len(sel):
-            x[count] = sel[0].avgSurf.x
-            y[count] = sel[0].avgSurf.y
-            z[count] = sel[0].avgSurf.z
-            eType[count] = sel[0].eType
+        if anode is not None:
+            x0[count] = anode.avgSurf.x
+            y0[count] = anode.avgSurf.y
+            z0[count] = anode.avgSurf.z
+            eType[count] = anode.eType
         else:
-            x[count] = np.nan
-            y[count] = np.nan
-            z[count] = np.nan
-            eType[count] = ''
+
+            x0[count] = np.nan
+            y0[count] = np.nan
+            z0[count] = np.nan
+
+        if cathode is not None:
+            x1[count] = cathode.avgSurf.x
+            y1[count] = cathode.avgSurf.y
+            z1[count] = cathode.avgSurf.z
+
+            eType[count] = cathode.eType
+        else:
+
+            x1[count] = np.nan
+            y1[count] = np.nan
+            z1[count] = np.nan
 
 
-    df['xAvgSurf'] = x
-    df['yAvgSurf'] = y
-    df['zAvgSurf'] = z
+    df['xAvgSurf_anode'] = x0
+    df['yAvgSurf_anode'] = y0
+    df['zAvgSurf_anode'] = z0
+
+
+    df['xAvgSurf_cathode'] = x1
+    df['yAvgSurf_cathode'] = y1
+    df['zAvgSurf_cathode'] = z1
+
     df['eType'] = eType
 
     return df
