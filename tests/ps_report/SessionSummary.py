@@ -5,10 +5,8 @@ import numpy as np
 class SessionSummary(object):
     def __init__(self):
         self.sessions = None
-        self.low_quantile_classifier_delta_plot = None
-        self.low_quantile_recall_delta_plot = None
-        self.high_quantile_classifier_delta_plot = None
-        self.high_quantile_recall_delta_plot = None
+        self.low_classifier_delta_plot = None
+        self.low_recall_delta_plot = None
         self.all_classifier_delta_plot = None
         self.all_recall_delta_plot = None
         self.stimtag = None

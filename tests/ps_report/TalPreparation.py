@@ -43,7 +43,6 @@ class TalPreparation(ReportRamTask):
             self.pass_object('monopolar_channels', monopolar_channels)
             self.pass_object('bipolar_pairs', bipolar_pairs)
 
-
             try:
                 virtualTalStruct = tal_stim_only_reader.read()
                 for i,bp in enumerate(virtualTalStruct):

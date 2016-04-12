@@ -124,6 +124,7 @@ class ComposeSessionSummary(ReportRamTask):
 
         monopolar_channels = self.get_passed_object('monopolar_channels')
         xval_output = self.get_passed_object('xval_output')
+        thresh = xval_output[-1].jstat_thresh
 
         ps_table = self.get_passed_object('ps_table')
         ps_sham_table = self.get_passed_object('control_table')
@@ -189,7 +190,10 @@ class ComposeSessionSummary(ReportRamTask):
 
         ps_table_by_bipolar_pair = ps_table.groupby(['stimAnodeTag','stimCathodeTag'])
         for bipolar_pair,ps_session_table in ps_table_by_bipolar_pair:
+            ps_session_table_low = ps_session_table[ps_session_table['prob_pre']<thresh]
+
             ps_session_sham_table = ps_sham_table[(ps_sham_table.stimAnodeTag==bipolar_pair[0]) & (ps_sham_table.stimCathodeTag==bipolar_pair[1])]
+            ps_session_sham_table_low = ps_session_sham_table[ps_session_sham_table['prob_pre']<thresh]
 
             session_summary = SessionSummary()
 
@@ -213,6 +217,9 @@ class ComposeSessionSummary(ReportRamTask):
             session_summary.isi_mid = isi_mid
             session_summary.isi_half_range = isi_halfrange
             session_summary.const_param_value = ps_session_table[const_param_name].unique().max()
+
+            session_summary.low_classifier_delta_plot = plot_data(ps_session_table_low, 'prob_diff', ps_session_sham_table_low['prob_diff'], param1_name, param2_name, param2_unit)
+            session_summary.low_recall_delta_plot = plot_data(ps_session_table_low, 'perf_diff', ps_session_sham_table_low['perf_diff'], param1_name, param2_name, param2_unit)
 
             session_summary.all_classifier_delta_plot = plot_data(ps_session_table, 'prob_diff', ps_session_sham_table['prob_diff'], param1_name, param2_name, param2_unit)
             session_summary.all_recall_delta_plot = plot_data(ps_session_table, 'perf_diff', ps_session_sham_table['perf_diff'], param1_name, param2_name, param2_unit)

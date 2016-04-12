@@ -3,7 +3,7 @@
 \usepackage[table]{xcolor}
 \usepackage{graphicx}
 \usepackage{grffile}
-%\usepackage[skip=0pt]{subcaption}
+\usepackage[skip=0pt]{subcaption}
 %\setlength\belowcaptionskip{2pt}
 
 \addtolength{\oddsidemargin}{-.875in} 
@@ -16,7 +16,7 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{<EXPERIMENT> report v 3.6}
+\lhead{<EXPERIMENT> report v 3.7}
 \chead{Subject: \textbf{<SUBJECT>}}
 \rhead{Date created: <DATE>}
 \begin{document}
