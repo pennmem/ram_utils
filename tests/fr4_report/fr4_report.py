@@ -10,7 +10,7 @@ from ReportUtils import CMLParser,ReportPipeline
 cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--subject','R1076D')
 cml_parser.arg('--task','RAM_FR4')
-cml_parser.arg('--workspace-dir','/scratch/mswat/FR4_reports')
+cml_parser.arg('--workspace-dir','/scratch/busygin/FR4_reports')
 cml_parser.arg('--mount-point','')
 cml_parser.arg('--recompute-on-no-status')
 
@@ -87,7 +87,7 @@ from GenerateReportTasks import *
 
 class Params(object):
     def __init__(self):
-        self.fr4_exclude_first_3_lists = False
+        self.fr4_exclude_first_3_lists = True
 
         self.fr1_start_time = 0.0
         self.fr1_end_time = 1.6
