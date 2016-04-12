@@ -10,4 +10,4 @@
 \hline
 \end{tabular}
 \end{table}
-The significance of combinations of stimulation parameters is determined by $t$-test for the null hypothesis that the expected recall change is zero.
+The significance is determined by $t$-test for the null hypothesis that the expected recall change is zero.

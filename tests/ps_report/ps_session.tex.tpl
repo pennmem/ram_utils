@@ -36,6 +36,8 @@ $\bullet$ $\xi_{\textrm{post}} = \ln \frac{C_{\textrm{post}}}{1-C_{\textrm{post}
 $\bullet$ $\xi_{\textrm{pre}} = \ln \frac{C_{\textrm{pre}}}{1-C_{\textrm{pre}}}$ is inverse logit of classifier pre-stim output $C_{\textrm{pre}}$; \\
 $\bullet$ $\Phi_1,\Phi_0$ are cdfs of Normal fits for inverse logit of classifier output for recalls/non-recalls with equal variance.
 
-\vspace{3pc}
+\vspace{1pc}
+
+<TTEST_AGAINST_SHAM_TABLE>
 
 <TTEST_AGAINST_ZERO_TABLE>

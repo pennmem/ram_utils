@@ -5,7 +5,6 @@ import pandas as pd
 import time
 from copy import deepcopy
 
-from RamPipeline import *
 from SessionSummary import SessionSummary
 
 from PlotUtils import PlotData
@@ -105,6 +104,23 @@ def ttest_against_zero(ps_table, param1_name, param2_name):
             sel = val1_sel & val2_sel
             population = ps_table[sel]['perf_diff'].values
             t,p = ttest_1samp(population, 0.0)
+            if p<0.05 and t>0.0:
+                ttest_table.append([val1 if val1>=0 else 'PULSE', val2, p, t])
+    return ttest_table
+
+
+def ttest_against_sham(ps_table, ps_sham_table, param1_name, param2_name):
+    sham = ps_sham_table['perf_diff'].values
+    ttest_table = []
+    param1_vals = sorted(ps_table[param1_name].unique())
+    param2_vals = sorted(ps_table[param2_name].unique())
+    for val1 in param1_vals:
+        val1_sel = (ps_table[param1_name]==val1)
+        for val2 in param2_vals:
+            val2_sel = (ps_table[param2_name]==val2)
+            sel = val1_sel & val2_sel
+            population = ps_table[sel]['perf_diff'].values
+            t,p = ttest_ind(population, sham)
             if p<0.05 and t>0.0:
                 ttest_table.append([val1 if val1>=0 else 'PULSE', val2, p, t])
     return ttest_table
@@ -269,6 +285,10 @@ class ComposeSessionSummary(ReportRamTask):
 
             ttest_against_zero_table = ttest_against_zero(ps_session_table, param1_name, param2_name)
             session_summary.ttest_against_zero_table = format_ttest_table(ttest_against_zero_table)
+
+            if len(ps_session_sham_table_low) > 0:
+                ttest_against_sham_table = ttest_against_sham(ps_session_table_low, ps_session_sham_table_low, param1_name, param2_name)
+                session_summary.ttest_against_sham_table = format_ttest_table(ttest_against_sham_table)
 
             session_summary_array.append(session_summary)
 
