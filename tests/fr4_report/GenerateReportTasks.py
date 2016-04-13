@@ -44,6 +44,7 @@ class GenerateTex(ReportRamTask):
                             '<SESSION_NUMBER>': sess,
                             '<SESSION_DATE>': session_summary.date,
                             '<SESSION_LENGTH>': session_summary.length,
+                            '<N_LISTS>': session_summary.n_lists,
                             '<N_WORDS>': session_summary.n_words,
                             '<N_CORRECT_WORDS>': session_summary.n_correct_words,
                             '<PC_CORRECT_WORDS>': '%.2f' % session_summary.pc_correct_words,
@@ -197,7 +198,7 @@ class GeneratePlots(ReportRamTask):
             #----------------- FORMATTING
             pdc.xlabel = 'List number'
             pdc.xlabel_fontsize = 20
-            pdc.ylabel ='# recalled words'
+            pdc.ylabel ='#items'
             pdc.ylabel_fontsize = 20
 
             n_lists = len(session_summary.n_stims_per_list)
@@ -219,9 +220,6 @@ class GeneratePlots(ReportRamTask):
             combined_stim_pd_list.append(pd_1)
             combined_nostim_pd_list.append(pd_2)
 
-
-            # print 'np.where(session_summary.is_stim_list)[0]=',np.where(session_summary.is_stim_list)[0]
-            # print 'np.where(~session_summary.is_stim_list)[0]=',np.where(~session_summary.is_stim_list)[0]
             pdc.add_plot_data(pd_1)
             pdc.add_plot_data(pd_2)
             pdc.add_plot_data(bpd_1)
@@ -267,7 +265,7 @@ class GeneratePlots(ReportRamTask):
         # combined plot over sessions
 
         # empirical size of the figure based on the number of lists
-        xfigsize = 10*len(combined_list_number_label)/25.0
+        xfigsize = 7*len(combined_list_number_label)/25.0
 
         panel_plot_combined = PanelPlot(xfigsize=xfigsize, yfigsize=10.0, i_max=1, j_max=1, title='', xlabel='List',
                                ylabel='# of items', labelsize=20)
@@ -277,17 +275,17 @@ class GeneratePlots(ReportRamTask):
 
         stim_pd_combined = PlotData(x=combined_stim_x,
                         y=combined_stim_y, ylim=(0, 12),
-                        title='', linestyle='', color='red', marker='o', markersize=20)
+                        title='', linestyle='', color='red', marker='o', markersize=12)
 
         nostim_pd_combined = PlotData(x=combined_nostim_x,
                                     y=combined_nostim_y, ylim=(0, 12),
-                                    title='', linestyle='', color='blue', marker='o', markersize=20)
+                                    title='', linestyle='', color='blue', marker='o', markersize=12)
 
         pdc_combined = PlotDataCollection()
         # ----------------- FORMATTING
         pdc_combined.xlabel = 'List number'
         pdc_combined.xlabel_fontsize = 20
-        pdc_combined.ylabel = '# recalled words'
+        pdc_combined.ylabel = '#items'
         pdc_combined.ylabel_fontsize = 20
 
         n_lists = len(session_summary.n_stims_per_list)
@@ -335,7 +333,11 @@ class GeneratePlots(ReportRamTask):
         panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', wspace=0.3, hspace=0.3)
 
         pd1 = PlotData(x=serial_positions, y=cumulative_summary.prob_recall, xlim=(0, 12), ylim=(0.0, 1.0), xlabel='Serial position\n(a)', ylabel='Probability of recall')
+        pd1.xlabel_fontsize = 20
+        pd1.ylabel_fontsize = 20
         pd2 = PlotData(x=serial_positions, y=cumulative_summary.prob_first_recall, xlim=(0, 12), ylim=(0.0, 1.0), xlabel='Serial position\n(b)', ylabel='Probability of first recall')
+        pd2.xlabel_fontsize = 20
+        pd2.ylabel_fontsize = 20
 
         panel_plot.add_plot_data(0, 0, plot_data=pd1)
         panel_plot.add_plot_data(0, 1, plot_data=pd2)

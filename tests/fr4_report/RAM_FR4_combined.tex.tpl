@@ -32,13 +32,13 @@
 \section*{<SUBJECT> RAM FR4 Free Recall Report}
 
 \begin{tabular}{ccc}
-\begin{minipage}[htbp]{250pt}
+\begin{minipage}[htbp]{200pt}
 In the free recall task, participants are presented with a list of words, one after the other, and later asked to recall as many words as possible in any order.
 \begin{itemize}\item\textbf{Number of sessions: }$<NUMBER_OF_SESSIONS>$\item\textbf{Number of electrodes: }$<NUMBER_OF_ELECTRODES>$\end{itemize}
 \end{minipage}
 &
-\begin{tabular}{|c|c|c|}
-\hline Session \# & Date & Length (min)\\
+\begin{tabular}{|c|c|c|c|c|}
+\hline Session \# & Date & Length (min) & \#lists & Perf \\
 <SESSION_DATA>
 \end{tabular}
 \end{tabular}
@@ -99,7 +99,7 @@ $<N_STIM_INTR>/<N_TOTAL_STIM>$ ($<PC_FROM_STIM_INTR>$\%) from stim lists & $<N_N
 \begin{figure}[!h]
 \centering
 \subfigure{\includegraphics[scale=0.4]{<STIM_AND_RECALL_PLOT_FILE>}}
-\caption{\textbf{Stim and recall:} Number of stim and recalled items per list}
+\caption{\textbf{Stim and recall:} Number of stims and recalled items per list. Red circles represent the number of recalled items from stim lists. Blue circles represent the number of recalled items from non-stim lists. Bars represent the number of stims per list.}
 \end{figure}
 
 \end{document}

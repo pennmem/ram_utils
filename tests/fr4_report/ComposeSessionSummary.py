@@ -58,16 +58,14 @@ class ComposeSessionSummary(ReportRamTask):
             n_sess_events = len(session_events)
 
             session_rec_events = rec_events[rec_events.session == session]
+            n_sess_rec_events = len(session_rec_events)
 
             session_all_events = all_events[all_events.session == session]
             first_time_stamp = session_all_events[session_all_events.type=='INSTRUCT_VIDEO'][0].mstime
             timestamps = session_all_events.mstime
-            #first_time_stamp = np.min(timestamps)
             last_time_stamp = np.max(timestamps)
             session_length = '%.2f' % ((last_time_stamp - first_time_stamp) / 60000.0)
             session_date = time.strftime('%d-%b-%Y', time.localtime(last_time_stamp/1000))
-
-            session_data.append([session, session_date, session_length])
 
             session_name = 'Sess%02d' % session
 
@@ -90,15 +88,18 @@ class ComposeSessionSummary(ReportRamTask):
             session_summary.prob_recall = prob_recall
 
             lists = np.unique(session_events.list)
-            n_lists = len(lists)
+            session_summary.n_lists = len(lists)
+
+            session_data.append([session, session_date, session_length, session_summary.n_lists, '$%.2f$\\%%' % session_summary.pc_correct_words])
+
             prob_first_recall = np.zeros(len(positions), dtype=float)
             session_irt_within_cat = []
             session_irt_between_cat = []
-            session_summary.n_recalls_per_list = np.zeros(n_lists, dtype=np.int)
-            session_summary.n_intr_per_list = np.zeros(n_lists, dtype=np.int)
-            session_summary.n_stims_per_list = np.zeros(n_lists, dtype=np.int)
-            session_summary.is_stim_list = np.zeros(n_lists, dtype=np.bool)
-            items_per_list = np.zeros(n_lists, dtype=np.int)
+            session_summary.n_recalls_per_list = np.zeros(session_summary.n_lists, dtype=np.int)
+            session_summary.n_intr_per_list = np.zeros(session_summary.n_lists, dtype=np.int)
+            session_summary.n_stims_per_list = np.zeros(session_summary.n_lists, dtype=np.int)
+            session_summary.is_stim_list = np.zeros(session_summary.n_lists, dtype=np.bool)
+            items_per_list = np.zeros(session_summary.n_lists, dtype=np.int)
 
             for lst in lists:
                 list_events = session_all_events[session_all_events.list == lst]
@@ -135,8 +136,8 @@ class ComposeSessionSummary(ReportRamTask):
                         else:
                             session_irt_between_cat.append(dt)
 
-            prob_first_recall /= float(n_lists)
-            total_list_counter += n_lists
+            prob_first_recall /= float(session_summary.n_lists)
+            total_list_counter += session_summary.n_lists
 
             n_items_from_stim = np.sum(items_per_list[session_summary.is_stim_list])
             n_recalls_from_stim = np.sum(session_summary.n_recalls_per_list[session_summary.is_stim_list])
@@ -187,14 +188,14 @@ class ComposeSessionSummary(ReportRamTask):
                 session_summary.n_math = len(session_math_events)
                 session_summary.n_correct_math = np.sum(session_math_events.iscorrect)
                 session_summary.pc_correct_math = 100*session_summary.n_correct_math / float(session_summary.n_math)
-                session_summary.math_per_list = session_summary.n_math / float(n_lists)
+                session_summary.math_per_list = session_summary.n_math / float(session_summary.n_lists)
 
             session_intr_events = intr_events[intr_events.session == session]
 
             session_summary.n_pli = np.sum(session_intr_events.intrusion > 0)
-            session_summary.pc_pli = 100*session_summary.n_pli / float(n_sess_events)
+            session_summary.pc_pli = 100*session_summary.n_pli / float(n_sess_rec_events)
             session_summary.n_eli = np.sum(session_intr_events.intrusion == -1)
-            session_summary.pc_eli = 100*session_summary.n_eli / float(n_sess_events)
+            session_summary.pc_eli = 100*session_summary.n_eli / float(n_sess_rec_events)
 
             session_summary_array.append(session_summary)
 
@@ -243,9 +244,11 @@ class ComposeSessionSummary(ReportRamTask):
             cumulative_summary.pc_correct_math = 100*cumulative_summary.n_correct_math / float(cumulative_summary.n_math)
             cumulative_summary.math_per_list = cumulative_summary.n_math / float(total_list_counter)
 
+        n_rec_events = len(rec_events)
+
         cumulative_summary.n_pli = np.sum(intr_events.intrusion > 0)
-        cumulative_summary.pc_pli = 100*cumulative_summary.n_pli / float(len(events))
+        cumulative_summary.pc_pli = 100*cumulative_summary.n_pli / float(n_rec_events)
         cumulative_summary.n_eli = np.sum(intr_events.intrusion == -1)
-        cumulative_summary.pc_eli = 100*cumulative_summary.n_eli / float(len(events))
+        cumulative_summary.pc_eli = 100*cumulative_summary.n_eli / float(n_rec_events)
 
         self.pass_object('cumulative_summary', cumulative_summary)
