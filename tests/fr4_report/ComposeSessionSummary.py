@@ -104,7 +104,7 @@ class ComposeSessionSummary(ReportRamTask):
             for lst in lists:
                 list_events = session_all_events[session_all_events.list == lst]
                 list_rec_events = session_rec_events[(session_rec_events.list == lst) & (session_rec_events.intrusion == 0)]
-                list_intr_events = session_rec_events[(session_rec_events.list == lst) & (session_rec_events.intrusion >= 4)]
+                list_intr_events = session_rec_events[(session_rec_events.list == lst) & (session_rec_events.intrusion > 0)]
                 list_word_events = list_events[list_events.type=='WORD']
 
                 #session_summary.n_recalls_per_list[lst-1] = len(list_rec_events)
