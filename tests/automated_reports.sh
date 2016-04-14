@@ -114,7 +114,7 @@ python /home1/mswat/RAM_UTILS_GIT/tests/fr1_report/fr1_report_all.py  --task=RAM
 #cd /home1/mswat/RAM_UTILS_GIT/tests/ps_ttest_table
 #python /home1/mswat/RAM_UTILS_GIT/tests/ps_ttest_table/ttest_table_with_params.py --workspace-dir=/scratch/mswat/automated_reports
 
-python /Users/m/RAM_UTILS_GIT/ReportUtils/ReportMailer.py\
+python /home1/mswat/RAM_UTILS_GIT/ReportUtils/ReportMailer.py\
  --status-output-dirs ${status_output_dirs[@]}
 
 
