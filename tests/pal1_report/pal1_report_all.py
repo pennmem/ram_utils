@@ -90,10 +90,16 @@ for subject in subjects:
 
     # # sets up processing pipeline
 
-    report_pipeline = ReportPipeline(subject=subject, task=task,experiment=task,
-                                     workspace_dir=join(args.workspace_dir, task + '_' + subject),
-                                     mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change,
-                                     recompute_on_no_status=args.recompute_on_no_status)
+    # report_pipeline = ReportPipeline(subject=subject, task=task,experiment=task,
+    #                                  workspace_dir=join(args.workspace_dir, task + '_' + subject),
+    #                                  mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change,
+    #                                  recompute_on_no_status=args.recompute_on_no_status)
+
+    report_pipeline = ReportPipeline(
+        args=args,
+        subject=subject,
+        workspace_dir=join(args.workspace_dir, task + '_' + subject)
+    )
 
     report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
 
@@ -129,4 +135,4 @@ for subject in subjects:
 print 'this is summary for all reports report ', rsi.compose_summary(detail_level=1)
 
 rsi.output_json_files(dir=args.status_output_dir)
-rsi.send_email_digest()
+# rsi.send_email_digest()

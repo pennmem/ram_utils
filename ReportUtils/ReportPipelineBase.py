@@ -9,19 +9,67 @@ import shutil
 
 
 class ReportPipelineBase(RamPipeline):
-    def __init__(self, subject=None, experiment=None, task=None, workspace_dir=None , mount_point=None, exit_on_no_change=False,recompute_on_no_status=False):
+    # def __init__(self, args=None, subject=None, experiment=None, task=None, workspace_dir=None , mount_point=None, exit_on_no_change=False,recompute_on_no_status=False):
+    def __init__(self, **options):
         RamPipeline.__init__(self)
-        self.exit_on_no_change = exit_on_no_change
-        self.recompute_on_no_status = recompute_on_no_status
-        self.subject = subject
-        self.experiment = experiment
-        self.task = task
+        self.__option_list = ['args','subject','experiment','task','workspace_dir','mount_point','exit_on_no_change','recompute_on_no_status']
 
-        self.mount_point = mount_point
-        self.set_workspace_dir(workspace_dir)
+        #sanity check
+        for option_name, option_val in options.iteritems():
+            if option_name not in self.__option_list:
+                raise AttributeError('Unknown option: '+option_name)
 
-        dependency_tracker = DependencyChangeTrackerLegacy(subject=subject, workspace_dir=workspace_dir,
-                                                           mount_point=mount_point)
+
+        try:
+            args = options['args']
+        except KeyError:
+            args=None
+
+
+        for option_name  in self.__option_list[1:]:
+            try:
+                # first check in kwds
+                option_val = options[option_name]
+            except KeyError:
+                try:
+                    # then check in args object
+                    option_val = getattr(args,option_name)
+                except AttributeError:
+                    # if both fail, set value to None
+                    option_val=None
+
+            setattr(self,option_name,option_val)
+        # if args is not None:
+        #
+        #
+        #     self.exit_on_no_change = args.exit_on_no_change
+        #     self.recompute_on_no_status = args.recompute_on_no_status
+        #     self.subject = args.subject
+        #     self.experiment = args.experiment
+        #     self.task = args.task
+        #     self.mount_point = args.mount_point
+        #
+        # else:
+        #     self.exit_on_no_change = exit_on_no_change
+        #     self.recompute_on_no_status = recompute_on_no_status
+        #     self.subject = subject
+        #     self.experiment = experiment
+        #     self.task = task
+        #     self.mount_point = mount_point
+        # self.workspace_dir = workspace_dir
+
+        #experiment === task when eith one is empty
+        if self.experiment and not self.task:
+            self.task=self.experiment
+
+        if not self.experiment and  self.task:
+            self.experiment = self.task
+
+        self.set_workspace_dir(self.workspace_dir)
+
+        dependency_tracker = DependencyChangeTrackerLegacy(subject=self.subject,
+                                                           workspace_dir=self.workspace_dir,
+                                                           mount_point=self.mount_point)
         self.set_dependency_tracker(dependency_tracker=dependency_tracker)
 
         self.report_summary = ReportSummary()
