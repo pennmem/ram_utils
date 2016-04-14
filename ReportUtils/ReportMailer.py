@@ -13,7 +13,8 @@ class ReportMailer(object):
     def __init__(self):
 
         self.dir_list = []
-        self.task_report_dict = defaultdict(OrderedDict)
+        # self.task_report_dict = defaultdict(OrderedDict)
+        self.task_report_dict = OrderedDict()
 
     def add_directories(self, *args):
         map(lambda d: self.dir_list.append(d), args)
@@ -123,7 +124,13 @@ class ReportMailer(object):
             jn = JSONNode.read(f)
             experiment_name = str(jn['experiments'].keys()[0])
             subject = str(jn['subject']['id'])
-            self.task_report_dict[experiment_name][subject] = jn
+            try:
+                self.task_report_dict[experiment_name][subject]=jn
+            except KeyError:
+                self.task_report_dict[experiment_name]=OrderedDict()
+                self.task_report_dict[experiment_name][subject]=jn
+
+            # self.task_report_dict[experiment_name][subject] = jn
             print self.task_report_dict[experiment_name].keys()
 
     def compose_experiment_summary_detail_0(self, node_dict):
@@ -132,7 +139,7 @@ class ReportMailer(object):
             experiment_name = str(jn['experiments'].keys()[0])
             break
 
-        s_generated_header = 'Generated the following ' + experiment_name + ' reports:\n'
+        s_generated_header = '\nGenerated the following ' + experiment_name + ' reports:\n'
 
         s_generated_body = ''
         generated_reports_num = 0
@@ -161,10 +168,10 @@ class ReportMailer(object):
             experiment_name = str(jn['experiments'].keys()[0])
             break
 
-        s_error_header = 'Report Generation Errors:\n'
+        s_error_header = 'Report Generation Errors For %s:\n' % experiment_name
         s_error_body = ''
 
-        s_generated_header = 'Generated the following ' + experiment_name + ' reports:\n'
+        s_generated_header = '\nGenerated the following ' + experiment_name + ' reports:\n'
 
         s_generated_body = ''
         generated_reports_num = 0
@@ -180,7 +187,7 @@ class ReportMailer(object):
                 generated_reports_num += 1
 
             if report_error:
-                s_error_body += 'Subject: ' + subject + '\n'
+                s_error_body += '\nSubject: ' + subject + '\n'
                 s_error_body += 'Error: \n' + report_error + '\n'
                 s_error_body += 'Stacktrace: \n' + report_stacktrace + '\n'
                 error_report_num += 1
@@ -198,17 +205,32 @@ class ReportMailer(object):
             s_error_header += '\n--------------------------------------------\n'
 
         s_summary = s_error_header + s_error_body
-        s_summary += '\n-------------------------------------------\n'
-        s_summary += s_generated_header + s_generated_body
+        # s_summary += '\n-------------------------------------------\n'
+        # s_summary += s_generated_header + s_generated_body
         print s_summary
 
         return s_summary
 
 
 if __name__ == '__main__':
-    dir_list = ['/Volumes/rhino_root/scratch/mswat/automated_reports/FR1_reports/status_output/']
 
+    import argparse
+    parser = argparse.ArgumentParser(description='Report Mailer')
+    # parser.add_argument('--status-output-dir', required=False, action='append')
+    parser.add_argument('--status-output-dirs', nargs='+')
+    args = parser.parse_args()
+    dir_list = args.status_output_dirs
+    print dir_list
     rm = ReportMailer()
     rm.add_directories(*dir_list)
     # rm.compose_summary(detail_level=0)
     rm.mail_report_summary(detail_level_list=[0, 1])
+
+
+# if __name__ == '__main__':
+#     dir_list = ['/Volumes/rhino_root/scratch/mswat/automated_reports/FR1_reports/status_output/']
+#
+#     rm = ReportMailer()
+#     rm.add_directories(*dir_list)
+#     # rm.compose_summary(detail_level=0)
+#     rm.mail_report_summary(detail_level_list=[0, 1])
