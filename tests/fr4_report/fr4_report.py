@@ -10,9 +10,12 @@ from ReportUtils import CMLParser,ReportPipeline
 cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--subject','R1076D')
 cml_parser.arg('--task','RAM_FR4')
-cml_parser.arg('--workspace-dir','/scratch/busygin/FR4_reports')
-cml_parser.arg('--mount-point','')
+cml_parser.arg('--workspace-dir','/Users/busygin/scratch/FR4_reports')
+cml_parser.arg('--mount-point','/Volumes/RHINO')
 cml_parser.arg('--recompute-on-no-status')
+cml_parser.arg('--python-path','/Users/busygin/ram_utils_new_ptsa')
+cml_parser.arg('--python-path','/Users/busygin/ptsa_latest')
+cml_parser.arg('--python-path','/Users/busygin/cpp/morlet_install')
 
 
 args = cml_parser.parse()
@@ -70,11 +73,17 @@ import numpy as np
 from RamPipeline import RamPipeline
 from RamPipeline import RamTask
 
+from FREventPreparation import FREventPreparation
+
 from EventPreparation import EventPreparation
 
 from MathEventPreparation import MathEventPreparation
 
-#from ComputeFR1Powers import ComputeFR1Powers
+from ComputeFRPowers import ComputeFRPowers
+
+from ComputeClassifier import ComputeClassifier
+
+from ComputeFR4Powers import ComputeFR4Powers
 
 from TalPreparation import TalPreparation
 
@@ -89,9 +98,11 @@ class Params(object):
     def __init__(self):
         self.fr4_exclude_first_3_lists = True
 
+        self.width = 5
+
         self.fr1_start_time = 0.0
-        self.fr1_end_time = 1.6
-        self.fr1_buf = 1.0
+        self.fr1_end_time = 1.366
+        self.fr1_buf = 1.365
 
         self.filt_order = 4
 
@@ -103,6 +114,11 @@ class Params(object):
 
         self.penalty_type = 'l2'
         self.C = 7.2e-4
+
+        self.n_perm = 200
+
+        self.include_fr1 = True
+        self.include_catfr1 = True
 
 
 params = Params()
@@ -128,13 +144,20 @@ report_pipeline = ReportPipeline(subject=args.subject, task=args.task,experiment
 # report_pipeline = ReportPipeline(subject=args.subject, task=args.task,
 #                                        workspace_dir=join(args.workspace_dir,args.task+'_'+args.subject), mount_point=args.mount_point)
 #
+
+report_pipeline.add_task(FREventPreparation(params=params, mark_as_completed=False))
+
 report_pipeline.add_task(EventPreparation(mark_as_completed=False))
 
 report_pipeline.add_task(MathEventPreparation(mark_as_completed=False))
 
 report_pipeline.add_task(TalPreparation(mark_as_completed=False))
 
-#report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
+
+report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
+
+report_pipeline.add_task(ComputeFR4Powers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
 #
