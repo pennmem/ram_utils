@@ -12,13 +12,11 @@ class StimParams(object):
         self.pulse_frequency = None
         self.burst_frequency = None
         self.pulse_duration = None
-        self.stimAnode = None
-        self.stimCathode = None
         self.stimAnodeTag = None
         self.stimCathodeTag = None
 
     def __hash__(self):
-        return hash(repr(self.stimAnode)+repr(self.stimCathode))
+        return hash(repr(self.stimAnodeTag)+repr(self.stimCathodeTag)+repr(self.pulse_frequency))
 
 
 class ComputeFR4Table(ReportRamTask):
@@ -41,6 +39,7 @@ class ComputeFR4Table(ReportRamTask):
         self.pass_object('fr4_table', self.fr4_table)
 
     def run(self):
+        channel_to_label_map = self.get_passed_object('channel_to_label_map')
         loc_tag = self.get_passed_object('loc_tag')
 
         all_events = self.get_passed_object(self.pipeline.task+'_all_events')
@@ -73,9 +72,13 @@ class ComputeFR4Table(ReportRamTask):
         for sess in sessions:
             sess_stim_events = all_events[(all_events.session==sess) & (all_events.type=='STIM')]
 
+            stim_pair = (sess_stim_events[0].stimParams.elec1,sess_stim_events[0].stimParams.elec2)
+            stim_tag = channel_to_label_map[stim_pair if stim_pair in channel_to_label_map else (sess_stim_events[0].stimParams.elec1,sess_stim_events[0].stimParams.elec2)].upper()
+            stim_anode_tag, stim_cathode_tag = stim_tag.split('-')
+
             sess_stim_params = StimParams()
-            sess_stim_params.stimAnode = sess_stim_events[0].stimParams.elec1
-            sess_stim_params.stimCathode = sess_stim_events[0].stimParams.elec2
+            sess_stim_params.stimAnodeTag = stim_anode_tag
+            sess_stim_params.stimCathodeTag = stim_cathode_tag
             sess_stim_params.pulse_frequency = sess_stim_events[0].stimParams.pulseFreq
             sess_stim_params.amplitude = sess_stim_events[0].stimParams.amplitude / 1000.0
             sess_stim_params.pulse_duration = 500

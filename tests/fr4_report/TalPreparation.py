@@ -25,6 +25,8 @@ class TalPreparation(ReportRamTask):
             monopolar_channels = tal_reader.get_monopolar_channels()
             bipolar_pairs = tal_reader.get_bipolar_pairs()
 
+            channel_to_label_map = get_channel_to_label_map(bpTalStruct)
+
             for i,bp in enumerate(bpTalStruct):
                 bpTalStruct.tagName[i] = bp.tagName.upper()
 
@@ -42,11 +44,13 @@ class TalPreparation(ReportRamTask):
                 for i,bp in enumerate(virtualTalStruct):
                     virtualTalStruct.tagName[i] = bp.tagName.upper()
 
+                #channel_to_label_map.update()
                 loc_tag.update(dict(zip(virtualTalStruct.tagName, virtualTalStruct.locTag)))
 
             except IOError:
                     pass
 
+            self.pass_object('channel_to_label_map', channel_to_label_map)
             self.pass_object('loc_tag', loc_tag)
             joblib.dump(loc_tag, self.get_path_to_resource_in_workspace(self.pipeline.subject+'-loc_tag.pkl'))
 
@@ -64,3 +68,7 @@ def get_single_elecs_from_bps(bipolar_pairs):
     for ti in bipolar_pairs:
         monopolar_channels = np.hstack((monopolar_channels, ti['channel_str']))
     return np.unique(monopolar_channels)
+
+
+def get_channel_to_label_map(bpTalStruct):
+    return dict([((ti.channel[0],ti.channel[1]), ti.tagName) for ti in bpTalStruct])
