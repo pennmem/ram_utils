@@ -91,8 +91,8 @@ class ComputeFR4Table(ReportRamTask):
 
         stim_event = all_events[all_events.type=='STIM'][0]
 
-        stim_anode = np.empty(n_events, dtype=type(stim_event.stimParams.elec1))
-        stim_cathode = np.empty(n_events, dtype=type(stim_event.stimParams.elec2))
+        stim_anode_tag = np.empty(n_events, dtype='|S16')
+        stim_cathode_tag = np.empty(n_events, dtype='|S16')
         pulse_frequency = np.empty(n_events, dtype=int)
         amplitude = np.empty(n_events, dtype=float)
         pulse_duration = np.empty(n_events, dtype=int)
@@ -100,15 +100,15 @@ class ComputeFR4Table(ReportRamTask):
 
         for stim_params,sessions in self.stim_params_to_sess.iteritems():
             sessions_mask = np.array([(ev.session in sessions) for ev in events], dtype=np.bool)
-            stim_anode[sessions_mask] = stim_params.stimAnode
-            stim_cathode[sessions_mask] = stim_params.stimCathode
+            stim_anode_tag[sessions_mask] = stim_params.stimAnodeTag
+            stim_cathode_tag[sessions_mask] = stim_params.stimCathodeTag
             pulse_frequency[sessions_mask] = stim_params.pulse_frequency
             amplitude[sessions_mask] = stim_params.amplitude
             pulse_duration[sessions_mask] = stim_params.pulse_duration
             burst_frequency[sessions_mask] = stim_params.burst_frequency
 
-        self.fr4_table['stimAnode'] = stim_anode
-        self.fr4_table['stimCathode'] = stim_cathode
+        self.fr4_table['stimAnodeTag'] = stim_anode_tag
+        self.fr4_table['stimCathodeTag'] = stim_cathode_tag
         self.fr4_table['Pulse_Frequency'] = pulse_frequency
         self.fr4_table['Amplitude'] = amplitude
         self.fr4_table['Duration'] = pulse_duration
