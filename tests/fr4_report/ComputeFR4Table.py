@@ -61,7 +61,7 @@ class ComputeFR4Table(ReportRamTask):
                 j += 1
 
         self.fr4_table = pd.DataFrame()
-        self.fr4_table['item'] = events.item
+        self.fr4_table['item'] = events['item']
         self.fr4_table['session'] = events.session
         self.fr4_table['is_stim_item'] = is_stim_item
         self.fr4_table['recalled'] = events.recalled
@@ -72,16 +72,17 @@ class ComputeFR4Table(ReportRamTask):
         sessions = np.unique(events.session)
         for sess in sessions:
             sess_stim_events = all_events[(all_events.session==sess) & (all_events.type=='STIM')]
+            sess_stim_event = sess_stim_events[-1]
 
-            stim_pair = (sess_stim_events[0].stimParams.elec1,sess_stim_events[0].stimParams.elec2)
-            stim_tag = channel_to_label_map[stim_pair if stim_pair in channel_to_label_map else (sess_stim_events[0].stimParams.elec1,sess_stim_events[0].stimParams.elec2)].upper()
+            stim_pair = (sess_stim_event.stimParams.elec1,sess_stim_event.stimParams.elec2)
+            stim_tag = channel_to_label_map[stim_pair if stim_pair in channel_to_label_map else (sess_stim_event.stimParams.elec1,sess_stim_event.stimParams.elec2)].upper()
             stim_anode_tag, stim_cathode_tag = stim_tag.split('-')
 
             sess_stim_params = StimParams()
             sess_stim_params.stimAnodeTag = stim_anode_tag
             sess_stim_params.stimCathodeTag = stim_cathode_tag
-            sess_stim_params.pulse_frequency = sess_stim_events[0].stimParams.pulseFreq
-            sess_stim_params.amplitude = sess_stim_events[0].stimParams.amplitude / 1000.0
+            sess_stim_params.pulse_frequency = sess_stim_event.stimParams.pulseFreq
+            sess_stim_params.amplitude = sess_stim_event.stimParams.amplitude / 1000.0
             sess_stim_params.pulse_duration = 500
             sess_stim_params.burst_frequency = -999
 
