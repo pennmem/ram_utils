@@ -61,6 +61,7 @@ class ComputeFR4Table(ReportRamTask):
                 j += 1
 
         self.fr4_table = pd.DataFrame()
+        self.fr4_table['item'] = events.item
         self.fr4_table['session'] = events.session
         self.fr4_table['is_stim_item'] = is_stim_item
         self.fr4_table['recalled'] = events.recalled
@@ -88,8 +89,6 @@ class ComputeFR4Table(ReportRamTask):
                 self.stim_params_to_sess[sess_stim_params].append(sess)
             else:
                 self.stim_params_to_sess[sess_stim_params] = [sess]
-
-        stim_event = all_events[all_events.type=='STIM'][0]
 
         stim_anode_tag = np.empty(n_events, dtype='|S16')
         stim_cathode_tag = np.empty(n_events, dtype='|S16')
