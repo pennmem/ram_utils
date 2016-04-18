@@ -1,4 +1,5 @@
 
+\begin{samepage}
 \begin{table}[!h]
 \centering
 \begin{tabular}{|c|c|c|c|}
@@ -11,3 +12,4 @@
 \end{tabular}
 \end{table}
 The significance is determined by $t$-test for the null hypothesis that the expected recall change is zero.
+\end{samepage}
