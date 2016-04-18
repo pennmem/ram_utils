@@ -110,7 +110,7 @@ class GenerateTex(ReportRamTask):
                                       '<UNIT2>': param2_unit,
                                       '<TABLE>': latex_table(session_summary.ttest_against_sham_table, hlines=False)
                                       }
-                ttest_against_sham_table = TextTemplateUtils.replace_template_to_string(tex_ttest_table2_template, ttest_replace_dict)
+                ttest_against_sham_table = TextTemplateUtils.replace_template_to_string(tex_ttest_against_sham_template, ttest_replace_dict)
 
             plot_replace_dict = {'<LOW_PLOT_FILE>': self.pipeline.experiment + '-' + self.pipeline.subject + '-low_plot_' + session_summary.stimtag + '.pdf',
                                 '<ALL_PLOT_FILE>': self.pipeline.experiment + '-' + self.pipeline.subject + '-all_plot_' + session_summary.stimtag + '.pdf'}
