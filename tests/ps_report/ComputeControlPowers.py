@@ -20,6 +20,18 @@ class ComputeControlPowers(ReportRamTask):
         self.samplerate = None
         self.wavelet_transform = MorletWaveletTransform()
 
+    def initialize(self):
+
+        if self.dependency_inventory:
+
+            self.dependency_inventory.add_dependent_resource(resource_name='ps_events',
+                                        access_path = ['experiments','ps','events'])
+
+
+            self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
+                                        access_path = ['electrodes','bipolar'])
+
+
     def restore(self):
         subject = self.pipeline.subject
 

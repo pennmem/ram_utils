@@ -10,6 +10,9 @@ export PYTHONPATH="/home1/mswat/PTSA_NEW_GIT":$PYTHONPATH
 
 export PYTHONPATH="/home1/mswat/extra_libs":$PYTHONPATH
 
+source /home1/mswat/.bashrc
+module load Tex/2014
+
 current_directory=$(pwd)
 
 datetime=$(date '+%Y_%m_%d_%H_%M_%S')
