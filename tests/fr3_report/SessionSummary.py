@@ -6,6 +6,7 @@ class SessionSummary(object):
         self.name = None
         self.date = None
         self.length = None
+        self.n_lists = None
         self.n_words = None
         self.n_correct_words = None
         self.pc_correct_words = None
