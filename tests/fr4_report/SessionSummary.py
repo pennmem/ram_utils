@@ -2,10 +2,10 @@ __author__ = 'm'
 
 class SessionSummary(object):
     def __init__(self):
-        self.number = None
-        self.name = None
-        self.date = None
-        self.length = None
+        self.sessions = None
+        self.stimtag = None
+        self.region_of_interest = None
+        self.frequency = None
         self.n_lists = None
         self.n_words = None
         self.n_correct_words = None
@@ -22,8 +22,8 @@ class SessionSummary(object):
         self.math_per_list = 0.0
         self.irt_within_cat = None
         self.irt_between_cat = None
+        self.list_number = None
         self.n_recalls_per_list = None
-        self.n_intr_per_list = None
         self.n_stims_per_list = None
         self.is_stim_list = None
         self.n_correct_stim = None

@@ -19,6 +19,21 @@ class StimParams(object):
         return hash(repr(self.stimAnodeTag)+repr(self.stimCathodeTag)+repr(self.pulse_frequency))
 
 
+def bipolar_label_to_loc_tag(bp, loc_tags):
+    if bp=='' or bp=='[]':
+        return 'Undetermined'
+    label = bp[0]+'-'+bp[1]
+    if label in loc_tags:
+        lt = loc_tags[label]
+        return lt if lt!='' and lt!='[]' else 'Undetermined'
+    label = bp[1]+'-'+bp[0]
+    if label in loc_tags:
+        lt = loc_tags[label]
+        return lt if lt!='' and lt!='[]' else 'Undetermined'
+    else:
+        return 'Undetermined'
+
+
 class ComputeFR4Table(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
         super(ComputeFR4Table,self).__init__(mark_as_completed)
@@ -63,6 +78,10 @@ class ComputeFR4Table(ReportRamTask):
         self.fr4_table = pd.DataFrame()
         self.fr4_table['item'] = events['item']
         self.fr4_table['session'] = events.session
+        self.fr4_table['list'] = events.list
+        self.fr4_table['serialpos'] = events.serialpos
+        self.fr4_table['itemno'] = events.itemno
+        self.fr4_table['is_stim_list'] = [(s==1) for s in events.stimList]
         self.fr4_table['is_stim_item'] = is_stim_item
         self.fr4_table['recalled'] = events.recalled
         self.fr4_table['prob'] = fr4_prob
@@ -93,6 +112,7 @@ class ComputeFR4Table(ReportRamTask):
 
         stim_anode_tag = np.empty(n_events, dtype='|S16')
         stim_cathode_tag = np.empty(n_events, dtype='|S16')
+        region = np.empty(n_events, dtype='|S64')
         pulse_frequency = np.empty(n_events, dtype=int)
         amplitude = np.empty(n_events, dtype=float)
         pulse_duration = np.empty(n_events, dtype=int)
@@ -102,6 +122,7 @@ class ComputeFR4Table(ReportRamTask):
             sessions_mask = np.array([(ev.session in sessions) for ev in events], dtype=np.bool)
             stim_anode_tag[sessions_mask] = stim_params.stimAnodeTag
             stim_cathode_tag[sessions_mask] = stim_params.stimCathodeTag
+            region[sessions_mask] = bipolar_label_to_loc_tag((stim_params.stimAnodeTag,stim_params.stimCathodeTag), loc_tag)
             pulse_frequency[sessions_mask] = stim_params.pulse_frequency
             amplitude[sessions_mask] = stim_params.amplitude
             pulse_duration[sessions_mask] = stim_params.pulse_duration
@@ -109,6 +130,7 @@ class ComputeFR4Table(ReportRamTask):
 
         self.fr4_table['stimAnodeTag'] = stim_anode_tag
         self.fr4_table['stimCathodeTag'] = stim_cathode_tag
+        self.fr4_table['Region'] = region
         self.fr4_table['Pulse_Frequency'] = pulse_frequency
         self.fr4_table['Amplitude'] = amplitude
         self.fr4_table['Duration'] = pulse_duration
