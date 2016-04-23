@@ -114,6 +114,8 @@ class ComposeSessionSummary(ReportRamTask):
                 session_summary.n_stims_per_list[list_idx] = fr4_sess_list_table.is_stim_item.sum()
                 session_summary.is_stim_list[list_idx] = fr4_sess_list_table.is_stim_list.any()
 
+            session_summary.prob_first_recall /= float(len(fr4_table_by_session_list))
+
             fr4_stim_list_table = fr4_session_table[fr4_session_table.is_stim_list]
             fr4_non_stim_list_table = fr4_session_table[~fr4_session_table.is_stim_list & (fr4_session_table['list']>=4)]
 
@@ -137,8 +139,8 @@ class ComposeSessionSummary(ReportRamTask):
                     session_summary.n_stim_intr += 1
                 if ev.intrusion in non_stim_lists:
                     session_summary.n_nonstim_intr += 1
-            session_summary.pc_from_stim_intr = session_summary.n_stim_intr / float(session_summary.n_total_stim)
-            session_summary.pc_from_nonstim_intr = session_summary.n_nonstim_intr / float(session_summary.n_total_nonstim)
+            session_summary.pc_from_stim_intr = 100*session_summary.n_stim_intr / float(session_summary.n_total_stim)
+            session_summary.pc_from_nonstim_intr = 100*session_summary.n_nonstim_intr / float(session_summary.n_total_nonstim)
 
             session_summary_array.append(session_summary)
 

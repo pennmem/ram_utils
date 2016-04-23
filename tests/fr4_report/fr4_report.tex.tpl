@@ -43,6 +43,25 @@ In the free recall task, participants are presented with a list of words, one af
 \end{tabular}
 \end{tabular}
 
+\vspace{3pc}
+
+\begin{center}
+\textbf{\Large Classifier performance}
+\end{center}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.45]{<ROC_AND_TERC_PLOT_FILE>}
+\caption{\textbf{(a)} ROC curve for the subject;
+\textbf{(b)} Subject recall performance represented as
+percentage devation from the (subject) mean, separated by tercile
+of the classifier encoding efficiency estimate for each encoded word.}
+\end{figure}
+
+$\bullet$ Area Under Curve = $<AUC>$\%
+
+$\bullet$ Permutation test $p$-value $<PERM-P-VALUE>$
+
 <REPORT_PAGES>
 
 \end{document}

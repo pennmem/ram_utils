@@ -11,6 +11,10 @@ from subprocess import call
 from ReportUtils import ReportRamTask
 
 
+def pvalue_formatting(p):
+    return '\leq 0.001' if p<=0.001 else ('%.3f'%p)
+
+
 class GenerateTex(ReportRamTask):
     def __init__(self, mark_as_completed=True):
         super(GenerateTex,self).__init__(mark_as_completed)
@@ -67,13 +71,18 @@ class GenerateTex(ReportRamTask):
             tex_session_pages_str += '\n'
 
         session_data_tex_table = latex_table(self.get_passed_object('SESSION_DATA'))
+        xval_output = self.get_passed_object('xval_output')
+        perm_test_pvalue = self.get_passed_object('pvalue')
 
         replace_dict = {'<DATE>': datetime.date.today(),
                         '<SESSION_DATA>': session_data_tex_table,
                         '<SUBJECT>': self.pipeline.subject.replace('_','\\textunderscore'),
                         '<NUMBER_OF_SESSIONS>': n_sess,
                         '<NUMBER_OF_ELECTRODES>': n_elecs,
-                        '<REPORT_PAGES>': tex_session_pages_str
+                        '<REPORT_PAGES>': tex_session_pages_str,
+                        '<AUC>': '%.2f' % (100*xval_output[-1].auc),
+                        '<PERM-P-VALUE>': pvalue_formatting(perm_test_pvalue),
+                        '<ROC_AND_TERC_PLOT_FILE>': self.pipeline.subject + '-roc_and_terc_plot.pdf'
                         }
 
         TextTemplateUtils.replace_template(template_file_name=tex_template, out_file_name=report_tex_file_name, replace_dict=replace_dict)
@@ -91,12 +100,32 @@ class GeneratePlots(ReportRamTask):
 
         self.create_dir_in_workspace('reports')
 
+        xval_output = self.get_passed_object('xval_output')
+        fr1_summary = xval_output[-1]
+
+        panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, labelsize=16, wspace=5.0)
+
+        pd1 = PlotData(x=fr1_summary.fpr, y=fr1_summary.tpr, xlim=[0.0,1.0], ylim=[0.0,1.0], xlabel='False Alarm Rate\n(a)', ylabel='Hit Rate', xlabel_fontsize=20, ylabel_fontsize=20, levelline=((0.0,1.0),(0.0,1.0)), color='k', markersize=1.0)
+
+        pc_diff_from_mean = (fr1_summary.low_pc_diff_from_mean, fr1_summary.mid_pc_diff_from_mean, fr1_summary.high_pc_diff_from_mean)
+
+        ylim = np.max(np.abs(pc_diff_from_mean)) + 5.0
+        if ylim > 100.0:
+            ylim = 100.0
+        pd2 = BarPlotData(x=(0,1,2), y=pc_diff_from_mean, ylim=[-ylim,ylim], xlabel='Tercile of Classifier Estimate\n(b)', ylabel='Recall Change From Mean (%)', x_tick_labels=['Low', 'Middle', 'High'], xlabel_fontsize=20, ylabel_fontsize=20, xhline_pos=0.0, barcolors=['grey','grey', 'grey'], barwidth=0.5)
+
+        panel_plot.add_plot_data(0, 0, plot_data=pd1)
+        panel_plot.add_plot_data(0, 1, plot_data=pd2)
+
+        plot = panel_plot.generate_plot()
+
+        plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + self.pipeline.subject + '-roc_and_terc_plot.pdf')
+
+        plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+
         session_summary_array = self.get_passed_object('session_summary_array')
 
         serial_positions = np.arange(1,13)
-
-        #session_separator_pos = np.array([],dtype=np.float)
-        #pos_counter = 0
 
         for session_summary in session_summary_array:
             panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', wspace=0.3, hspace=0.3, labelsize=20)
@@ -118,33 +147,47 @@ class GeneratePlots(ReportRamTask):
 
             plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
-            panel_plot = PanelPlot(xfigsize=10.0, yfigsize=10.0, i_max=1, j_max=1, title='', xlabel='List', ylabel='# of items', labelsize=20)
+            n_lists = len(session_summary.n_stims_per_list)
+
+            xfigsize = 7*n_lists / 25.0
+            if xfigsize < 10.0:
+                xfigsize = 10.0
+            elif xfigsize > 18.0:
+                xfigsize = 18.0
+            panel_plot = PanelPlot(xfigsize=xfigsize, yfigsize=10.0, i_max=1, j_max=1, title='', xlabel='List', ylabel='# of items', labelsize=20)
 
             pdc = PlotDataCollection()
-            #----------------- FORMATTING
             pdc.xlabel = 'List number'
             pdc.xlabel_fontsize = 20
             pdc.ylabel ='#items'
             pdc.ylabel_fontsize = 20
 
-            n_lists = len(session_summary.n_stims_per_list)
+            x_tick_labels = np.array([str(k) for k in session_summary.list_number])
+            x_tick_labels[1::5] = ''
+            x_tick_labels[2::5] = ''
+            x_tick_labels[3::5] = ''
+            x_tick_labels[4::5] = ''
 
-            print 'Number of lists', n_lists
-
-            bpd_1 = BarPlotData(x=np.arange(n_lists), y=session_summary.n_stims_per_list, title='', alpha=0.3)
+            bpd_1 = BarPlotData(x=np.arange(n_lists), y=session_summary.n_stims_per_list, x_tick_labels=x_tick_labels, title='', alpha=0.3)
             stim_x = np.where(session_summary.is_stim_list)[0]
             stim_y = session_summary.n_recalls_per_list[session_summary.is_stim_list]
             pd_1 = PlotData(x=stim_x, y=stim_y, ylim=(0,12),
-                    title='', linestyle='', color='red', marker='o',markersize=20)
+                    title='', linestyle='', color='red', marker='o',markersize=12)
 
             nostim_x = np.where(~session_summary.is_stim_list)[0]
             nostim_y = session_summary.n_recalls_per_list[~session_summary.is_stim_list]
             pd_2 = PlotData(x=nostim_x , y=nostim_y , ylim=(0,12),
-                    title='', linestyle='', color='blue', marker='o',markersize=20)
+                    title='', linestyle='', color='blue', marker='o',markersize=12)
 
             pdc.add_plot_data(pd_1)
             pdc.add_plot_data(pd_2)
             pdc.add_plot_data(bpd_1)
+
+            for i in xrange(len(session_summary.list_number)-1):
+                if session_summary.list_number[i] > session_summary.list_number[i+1]:
+                    sep_pos = i+0.5
+                    sep_plot_data = PlotData(x=[0],y=[0],levelline=[[sep_pos, sep_pos], [0, 12]], color='white', alpha=0.0)
+                    pdc.add_plot_data(sep_plot_data)
 
             panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
 

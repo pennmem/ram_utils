@@ -1,7 +1,9 @@
 
 \clearpage
 
-\subsection*{\hfil <STIMTAG> (<REGION>), <FREQUENCY> Hz, Sessions <SESSIONS>\hfil}
+\begin{center}
+\textbf{\Large <STIMTAG> (<REGION>), <FREQUENCY> Hz, Session(s): <SESSIONS>}
+\end{center}
 
 \begin{table}[!h]
 \centering
@@ -48,6 +50,8 @@ $<N_STIM_INTR>/<N_TOTAL_STIM>$ ($<PC_FROM_STIM_INTR>$\%) from stim lists & $<N_N
 \hline 
 \end{tabular}
 \end{table}
+
+\clearpage
 
 \begin{center}
 \textbf{\Large Stim and recall analysis}
