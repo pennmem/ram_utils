@@ -47,9 +47,9 @@ class Params(object):
     def __init__(self):
         self.width = 5
 
-        self.fr1_start_time = 0.0
-        self.fr1_end_time = 1.366
-        self.fr1_buf = 1.365
+        self.pal1_start_time = 1.0
+        self.pal1_end_time = 3.0
+        self.pal1_buf = 1.0
 
         self.sham1_start_time = 1.0
         self.sham1_end_time = 2.0
