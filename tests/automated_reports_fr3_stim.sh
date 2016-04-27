@@ -50,8 +50,8 @@ python /home1/mswat/RAM_UTILS_GIT/tests/fr_stim_report/fr_stim_report_all.py  --
  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir}
 
 
-#python /home1/mswat/RAM_UTILS_GIT/ReportUtils/ReportMailer.py\
-# --status-output-dirs ${status_output_dirs[@]}
+python /home1/mswat/RAM_UTILS_GIT/ReportUtils/ReportMailer.py\
+ --status-output-dirs ${status_output_dirs[@]}
 
 
 cd ${current_directory}
