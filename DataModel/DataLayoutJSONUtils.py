@@ -429,6 +429,15 @@ class DataLayoutJSONUtils(object):
         experiments_node.add_child_node('fr3',fr3_node)
 
 
+        fr4_node = self.create_experiment_JSON_stub(
+            experiment_code='fr4',
+            data_root_dir=data_root_dir,
+            subject_target_dir=subject_target_dir,
+            description='Free Recall - open-loop stimulation experiment with similar specs to FR3'
+        )
+
+        experiments_node.add_child_node('fr4',fr4_node)
+
 
         catfr1_node = self.create_experiment_JSON_stub(
             experiment_code='catfr1',

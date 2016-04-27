@@ -160,6 +160,15 @@ class DataLayoutJSONUtilsLegacy(object):
 
         experiments_node.add_child_node('fr3',fr3_node)
 
+        fr4_node = self.create_experiment_JSON_stub(
+            subject_code=subject_code,
+            prefix='events/RAM_FR4',
+            description='Free Recall - open-loop stimulation experiment with specs similar to FR3'
+        )
+
+        experiments_node.add_child_node('fr4',fr4_node)
+
+
         catfr1_node = self.create_experiment_JSON_stub(
             subject_code=subject_code,
             prefix='events/RAM_CatFR1',
@@ -184,6 +193,15 @@ class DataLayoutJSONUtilsLegacy(object):
 
         experiments_node.add_child_node('catfr3',catfr3_node)
 
+        catfr4_node = self.create_experiment_JSON_stub(
+            subject_code=subject_code,
+            prefix='events/RAM_CatFR4',
+            description='Categorized Free Recall - open-loop stimulation experiment with specs similar to CatFR3'
+        )
+
+        experiments_node.add_child_node('catfr4',catfr4_node)
+
+
         pal1_node = self.create_experiment_JSON_stub(
             subject_code=subject_code,
             prefix='events/RAM_PAL1',
@@ -207,6 +225,49 @@ class DataLayoutJSONUtilsLegacy(object):
         )
 
         experiments_node.add_child_node('pal3',pal3_node)
+
+
+        pal4_node = self.create_experiment_JSON_stub(
+            subject_code=subject_code,
+            prefix='events/RAM_PAL4',
+            description='Paired-Associate Learning- open-loop stimulation experiment with specs similar to PAL3'
+        )
+
+        experiments_node.add_child_node('pal4',pal4_node)
+
+
+        th1_node = self.create_experiment_JSON_stub(
+            subject_code=subject_code,
+            prefix='events/RAM_TH1',
+            description='Spatial Navigation Task- record-only experiment'
+        )
+
+        experiments_node.add_child_node('th1',th1_node)
+
+        th2_node = self.create_experiment_JSON_stub(
+            subject_code=subject_code,
+            prefix='events/RAM_TH2',
+            description='Spatial Navigation Task- open-loop stimulation experiment'
+        )
+
+        experiments_node.add_child_node('th2',th2_node)
+
+        th3_node = self.create_experiment_JSON_stub(
+            subject_code=subject_code,
+            prefix='events/RAM_TH3',
+            description='Spatial Navigation Task- closed-loop stimulation experiment'
+        )
+
+        experiments_node.add_child_node('th3',th3_node)
+
+
+        th4_node = self.create_experiment_JSON_stub(
+            subject_code=subject_code,
+            prefix='events/RAM_TH4',
+            description='Spatial Navigation Task- open-loop stimulation experiment with specs similar to TH3'
+        )
+
+        experiments_node.add_child_node('th4',th4_node)
 
 
         ps_node = self.create_experiment_JSON_stub(
