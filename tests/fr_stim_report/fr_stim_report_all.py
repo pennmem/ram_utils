@@ -92,6 +92,7 @@ for subject in subjects:
 
     report_pipeline = ReportPipeline(subject=subject,
                                      experiment=args.experiment,
+                                     task=task,
                                      workspace_dir=join(args.workspace_dir, subject),
                                      mount_point=args.mount_point,
                                      exit_on_no_change=args.exit_on_no_change,
@@ -120,6 +121,8 @@ for subject in subjects:
     report_pipeline.add_task(GenerateTex(mark_as_completed=False))
 
     report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
+
+    report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
 
     report_pipeline.execute_pipeline()
 
