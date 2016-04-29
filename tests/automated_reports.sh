@@ -37,6 +37,29 @@ status_output_dirs+=(${status_output_dir})
 python /home1/mswat/RAM_UTILS_GIT/tests/fr1_report/fr1_report_all.py  --task=RAM_FR1 \
  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir}
 
+# FR3
+cd /home1/mswat/RAM_UTILS_GIT/tests/fr_stim_report
+
+workspace_dir=/scratch/mswat/automated_reports/FR3_reports
+status_output_dir=${workspace_dir}/${datetime}
+status_output_dirs+=(${status_output_dir})
+
+
+python /home1/mswat/RAM_UTILS_GIT/tests/fr_stim_report/fr_stim_report_all.py  --task=RAM_FR3 \
+ --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir}
+
+# FR4
+cd /home1/mswat/RAM_UTILS_GIT/tests/fr_stim_report
+
+workspace_dir=/scratch/mswat/automated_reports/FR4_reports
+status_output_dir=${workspace_dir}/${datetime}
+status_output_dirs+=(${status_output_dir})
+
+
+python /home1/mswat/RAM_UTILS_GIT/tests/fr_stim_report/fr_stim_report_all.py  --task=RAM_FR4 \
+ --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir}
+
+
 #CatFR1
 cd /home1/mswat/RAM_UTILS_GIT/tests/fr1_report
 
