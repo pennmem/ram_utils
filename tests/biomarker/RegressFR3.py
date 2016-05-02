@@ -74,6 +74,8 @@ class RegressFR3(RamTask):
                     list_stim_item_mask = sess_stim_item_mask[list_event_mask]
                     list_probs = self.lr_classifier.predict_proba(list_pow)[:,1]
                     for i,p in enumerate(list_probs):
+                        if i_bio_prob >= len(realtime_probs):
+                            break
                         realtime_prob = realtime_probs[i_bio_prob]
                         offline_probs[i_bio_prob] = p
                         realtime_decision = int(realtime_prob<thresh)

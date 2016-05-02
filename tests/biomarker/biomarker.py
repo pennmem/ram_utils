@@ -15,11 +15,11 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1145J_1',
+    command_line_emulation_argument_list = ['--subject','R1166D',
                                             '--task','RAM_FR1',
                                             '--workspace-dir','/scratch/busygin/biomarkers',
                                             '--mount-point','',
-                                            '--python-path','/home1/busygin/ram_utils_new_ptsa',
+                                            '--python-path','/home1/busygin/ram_utils',
                                             '--python-path','/home1/busygin/python/ptsa_latest'
                                             ]
     args = parse_command_line(command_line_emulation_argument_list)
@@ -45,9 +45,10 @@ import numpy as np
 
 class StimParams(object):
     def __init__(self):
-        self.elec1 = 2
-        self.elec2 = 3
-        self.amplitude = 500
+        self.n_channels = 128
+        self.elec1 = 3
+        self.elec2 = 4
+        self.amplitude = 1000
         self.duration = 300
         self.trainFrequency = 1
         self.trainCount = 1
