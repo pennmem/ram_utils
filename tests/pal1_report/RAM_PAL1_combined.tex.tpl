@@ -23,7 +23,7 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{RAM PAL1 report v 2.0}
+\lhead{RAM PAL1 report v 2.1}
 \rhead{Date created: <DATE>}
 \begin{document}
 

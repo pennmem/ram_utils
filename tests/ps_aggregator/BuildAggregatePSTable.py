@@ -86,7 +86,32 @@ class BuildAggregatePSTable(RamTask):
         ps2_tables = pd.concat(ps2_tables, ignore_index=True)
         ps2_tables['Experiment'] = 'PS2'
 
-        self.ps_table = pd.concat([ps1_tables, ps2_tables], ignore_index=True)
+        ps2_1_root = self.get_path_to_resource_in_workspace('PS2.1_reports/')
+        ps2_1_subjects = sorted([s for s in os.listdir(ps2_1_root) if s[:2]=='R1'])
+        ps2_1_tables = []
+        for subject in ps2_1_subjects:
+            try:
+                ps2_1_table = pd.read_pickle(join(ps2_1_root, subject, subject+'-PS2.1-ps_table.pkl'))
+                del ps2_1_table['isi']
+                # xval_output = None
+                # try:
+                #     xval_output = joblib.load(join(ps2_root, subject, subject+'-xval_output.pkl'))
+                # except IOError:
+                #     xval_output = joblib.load(join(ps2_root, subject, subject+'-'+task+'-xval_output.pkl'))
+                # thresh = xval_output[-1].jstat_thresh
+                # ps2_table['thresh'] = thresh
+                ps2_1_table['locTag'] = ps2_1_table['Region'].apply(lambda s: 'Undetermined' if s is None else s)
+                ps2_1_table['Region'] = ps2_1_table['Region'].apply(lambda s: 'Undetermined' if s is None else s.replace('Left ','').replace('Right ',''))
+                ps2_1_table['Area'] = ps2_1_table['Region'].apply(brain_area)
+                ps2_1_table['Subject'] = subject
+                ps2_1_tables.append(ps2_1_table)
+            except IOError:
+                pass
+
+        ps2_1_tables = pd.concat(ps2_1_tables, ignore_index=True)
+        ps2_1_tables['Experiment'] = 'PS2.1'
+
+        self.ps_table = pd.concat([ps1_tables, ps2_tables, ps2_1_tables], ignore_index=True)
 
         self.pass_object('ps_table', self.ps_table)
         self.ps_table.to_pickle(self.get_path_to_resource_in_workspace('ps_table.pkl'))

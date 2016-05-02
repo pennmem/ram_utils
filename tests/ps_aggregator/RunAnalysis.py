@@ -209,11 +209,11 @@ class RunAnalysis(RamTask):
         high_freq_duration_plot = duration_plot(high_freq_ps1_table, output_param, self.params.duration_plot_regions, self.params.duration_plot_areas)
         self.pass_object(name_prefix+output_param+'_high_freq_duration_plot', high_freq_duration_plot)
 
-        low_freq_ps2_table = low_freq_ps_table[low_freq_ps_table['Experiment']=='PS2']
+        low_freq_ps2_table = low_freq_ps_table[(low_freq_ps_table['Experiment']=='PS2') | (low_freq_ps_table['Experiment']=='PS2.1')]
         low_freq_amplitude_plot = amplitude_plot(low_freq_ps2_table, output_param, self.params.amplitude_plot_regions, self.params.amplitude_plot_areas)
         self.pass_object(name_prefix+output_param+'_low_freq_amplitude_plot', low_freq_amplitude_plot)
 
-        high_freq_ps2_table = high_freq_ps_table[high_freq_ps_table['Experiment']=='PS2']
+        high_freq_ps2_table = high_freq_ps_table[(high_freq_ps_table['Experiment']=='PS2') | (high_freq_ps_table['Experiment']=='PS2.1')]
         high_freq_amplitude_plot = amplitude_plot(high_freq_ps2_table, output_param, self.params.amplitude_plot_regions, self.params.amplitude_plot_areas)
         self.pass_object(name_prefix+output_param+'_high_freq_amplitude_plot', high_freq_amplitude_plot)
 

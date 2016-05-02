@@ -1,6 +1,8 @@
 from collections import OrderedDict
 from datetime import date
 from ReportUtils import *
+from ReportUtils.ReportExceptions import *
+
 from JSONUtils import JSONNode
 from os.path import *
 import os
@@ -286,7 +288,7 @@ class ReportSummary(object):
 
         exp_node['report_file'] = self.report_file if self.report_file is not None else ''
         exp_node['report_link'] = self.report_link if self.report_link is not None else ''
-        exp_node['error'] = '' if not self.report_error_status else str(self.report_error_status.error)
+        exp_node['error'] = '' if not self.report_error_status else base64.b64encode(str(self.report_error_status.error))
         exp_node['stacktrace'] = '' if not self.report_error_status else base64.b64encode(str(self.stacktrace))
 
         exp_node['changed_resources'] = []

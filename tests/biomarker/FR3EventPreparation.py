@@ -30,6 +30,7 @@ class FR3EventPreparation(RamTask):
         e_path = os.path.join(self.pipeline.mount_point , 'data/events', task3, self.pipeline.subject + '_events.mat')
         e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
         all_events = e_reader.read()
+
         ev_order = np.argsort(all_events, order=('session','list','mstime'))
         all_events = all_events[ev_order]
 

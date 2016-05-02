@@ -1,48 +1,9 @@
-\documentclass[a4paper]{article} 
-\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
-\usepackage{graphicx,multirow} 
-\usepackage{epstopdf} 
-\usepackage{subfigure,amsmath} 
-\usepackage{wrapfig} 
-\usepackage{longtable} 
-\usepackage{pdfpages}
-\usepackage{mathtools}
-\usepackage{array}
-\usepackage{enumitem}
-\usepackage{booktabs}
-\usepackage{sidecap} \usepackage{soul}
-\usepackage[small,bf,it]{caption}
-\setlength\belowcaptionskip{2pt}
 
-\addtolength{\oddsidemargin}{-.875in} 
-\addtolength{\evensidemargin}{-.875in} 
-\addtolength{\textwidth}{1.75in} 
-\addtolength{\topmargin}{-.75in} 
-\addtolength{\textheight}{1.75in} 
+\clearpage
 
-\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}} 
-\usepackage{fancyhdr}
-\pagestyle{fancy}
-\fancyhf{}
-\lhead{RAM FR4 report v 1.0}
-\rhead{Date created: <DATE>}
-\begin{document}
-
-
-\section*{<SUBJECT> RAM FR4 Free Recall Report}
-
-\begin{tabular}{ccc}
-\begin{minipage}[htbp]{250pt}
-In the free recall task, participants are presented with a list of words, one after the other, and later asked to recall as many words as possible in any order.
-\begin{itemize}\item\textbf{Number of sessions: }$1$\item\textbf{Number of electrodes: }$<NUMBER_OF_ELECTRODES>$\end{itemize}\end{minipage}
-&
-\begin{tabular}{|c|c|c|}
-\hline Session \# & Date & Length (min)\\
-\hline $<SESSION_NUMBER>$ & <SESSION_DATE> & $<SESSION_LENGTH>$ \\
-\hline 
-\end{tabular}
-\end{tabular}
-\vspace{0.3 in}
+\begin{center}
+\textbf{\Large <STIMTAG> (<REGION>), <FREQUENCY> Hz, Session(s): <SESSIONS>}
+\end{center}
 
 \begin{table}[!h]
 \centering
@@ -67,7 +28,7 @@ $<N_MATH>$ math problems & $<N_CORRECT_MATH>$ correct ($<PC_CORRECT_MATH>$\%) & 
 \begin{figure}[!h]
 \centering
 \subfigure{\includegraphics[scale=0.4]{<PROB_RECALL_PLOT_FILE>}}
-\caption{\textbf{Free recall:} (a) Overall probability of recall as a function of serial position. (b) Probability of FIRST recall as a function of serial position.}
+\caption{\textbf{Free recall:} (a) Overall probability of recall as a function of serial position. (b) Probability of first recall as a function of serial position.}
 \end{figure}
 
 \begin{table}[!h]
@@ -99,7 +60,5 @@ $<N_STIM_INTR>/<N_TOTAL_STIM>$ ($<PC_FROM_STIM_INTR>$\%) from stim lists & $<N_N
 \begin{figure}[!h]
 \centering
 \subfigure{\includegraphics[scale=0.4]{<STIM_AND_RECALL_PLOT_FILE>}}
-\caption{\textbf{Stim and recall:} Number of stim and recalled items per list}
+\caption{\textbf{Stim and recall:} Number of stims and recalled items per list. Red circles represent the number of recalled items from stim lists. Blue circles represent the number of recalled items from non-stim lists. Bars represent the number of stims per list.}
 \end{figure}
-
-\end{document}

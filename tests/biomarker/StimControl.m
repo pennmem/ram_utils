@@ -58,7 +58,7 @@ classdef StimControl < handle
     % ---- Add any constants here rather than embedding them inside code below
     properties (Access = public, Constant = true)
         % Number of channels recorded
-        NSP_CHANNELS        = 144; % 128 channels recorded from the patient + 16 analog channels
+        % NSP_CHANNELS        = 144; % 128 channels recorded from the patient + 16 analog channels
 
         STIMCONTROL_VERSION = 2.00;
 
@@ -250,7 +250,15 @@ classdef StimControl < handle
 
                 % decoding procedure
 
-                dataByChannel = dataByChannel(end-this.winsize+1:end,1:128);
+                n_channels = size(dataByChannel,2)
+                if n_channels==144
+                    dataByChannel = dataByChannel(end-this.winsize+1:end,1:128);
+                else if n_channels==288
+                    dataByChannel = dataByChannel(end-this.winsize+1:end,[1:128,145:272]);
+                else
+                    fprintf('ERROR: unknown number of neuroports');
+                    return;
+
                 this.session_eeg = cat(3, this.session_eeg, dataByChannel);
 
                 dataByChannel = dataByChannel*this.bpmat;

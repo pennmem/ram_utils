@@ -11,7 +11,7 @@ from setup_utils import parse_command_line, configure_python_paths
 from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1149N')
+cml_parser.arg('--subject','R1162N')
 cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/PAL1_reports')
 cml_parser.arg('--mount-point','')
 cml_parser.arg('--recompute-on-no-status')
@@ -48,12 +48,12 @@ class Params(object):
     def __init__(self):
         self.width = 5
 
-        self.pal1_start_time = 0.5
-        self.pal1_end_time = 2.5
+        self.pal1_start_time = 0.4
+        self.pal1_end_time = 2.7
         self.pal1_buf = 1.0
 
-        self.hfs_start_time = 1.0
-        self.hfs_end_time = 3.0
+        self.hfs_start_time = 0.4
+        self.hfs_end_time = 2.7
         self.hfs_buf = 1.0
 
         self.filt_order = 4

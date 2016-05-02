@@ -15,12 +15,12 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1145J_1',
+    command_line_emulation_argument_list = ['--subject','R1166D',
                                             '--task','RAM_FR1',
                                             #'--task3', 'RAM_FR3',
                                             '--workspace-dir','/scratch/busygin/biomarkers',
                                             '--mount-point','',
-                                            '--python-path','/home1/busygin/ram_utils_new_ptsa',
+                                            '--python-path','/home1/busygin/ram_utils',
                                             '--python-path','/home1/busygin/python/ptsa_latest'
                                             ]
     args = parse_command_line(command_line_emulation_argument_list)
@@ -107,9 +107,9 @@ report_pipeline = ReportPipeline(subject=args.subject, task=args.task, task3='RA
 
 report_pipeline.add_task(FREventPreparation(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(FR3EventPreparation(mark_as_completed=False))
-
 report_pipeline.add_task(TalPreparation(mark_as_completed=False))
+
+report_pipeline.add_task(FR3EventPreparation(mark_as_completed=False))
 
 report_pipeline.add_task(ComputeFR3Powers(params=params, mark_as_completed=True))
 

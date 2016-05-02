@@ -24,7 +24,7 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{RAM FR3 report v 1.0}
+\lhead{RAM FR3 report v 1.1}
 \rhead{Date created: <DATE>}
 \begin{document}
 
@@ -32,13 +32,13 @@
 \section*{<SUBJECT> RAM FR3 Free Recall Report}
 
 \begin{tabular}{ccc}
-\begin{minipage}[htbp]{250pt}
+\begin{minipage}[htbp]{200pt}
 In the free recall task, participants are presented with a list of words, one after the other, and later asked to recall as many words as possible in any order.
 \begin{itemize}\item\textbf{Number of sessions: }$1$\item\textbf{Number of electrodes: }$<NUMBER_OF_ELECTRODES>$\end{itemize}\end{minipage}
 &
-\begin{tabular}{|c|c|c|}
-\hline Session \# & Date & Length (min)\\
-\hline $<SESSION_NUMBER>$ & <SESSION_DATE> & $<SESSION_LENGTH>$ \\
+\begin{tabular}{|c|c|c|c|c|}
+\hline Session \# & Date & Length (min) & \#lists & Perf \\
+\hline $<SESSION_NUMBER>$ & <SESSION_DATE> & $<SESSION_LENGTH>$ & $<N_LISTS>$ & $<PC_CORRECT_WORDS>$\% \\
 \hline 
 \end{tabular}
 \end{tabular}
@@ -67,7 +67,7 @@ $<N_MATH>$ math problems & $<N_CORRECT_MATH>$ correct ($<PC_CORRECT_MATH>$\%) & 
 \begin{figure}[!h]
 \centering
 \subfigure{\includegraphics[scale=0.4]{<PROB_RECALL_PLOT_FILE>}}
-\caption{\textbf{Free recall:} (a) Overall probability of recall as a function of serial position. (b) Probability of FIRST recall as a function of serial position.}
+\caption{\textbf{Free recall:} (a) Overall probability of recall as a function of serial position. (b) Probability of first recall as a function of serial position.}
 \end{figure}
 
 \begin{table}[!h]
@@ -99,7 +99,7 @@ $<N_STIM_INTR>/<N_TOTAL_STIM>$ ($<PC_FROM_STIM_INTR>$\%) from stim lists & $<N_N
 \begin{figure}[!h]
 \centering
 \subfigure{\includegraphics[scale=0.4]{<STIM_AND_RECALL_PLOT_FILE>}}
-\caption{\textbf{Stim and recall:} Number of stim and recalled items per list}
+\caption{\textbf{Stim and recall:} Number of stims and recalled items per list. Red circles represent the number of recalled items from stim lists. Blue circles represent the number of recalled items from non-stim lists. Bars represent the number of stims per list.}
 \end{figure}
 
 \end{document}

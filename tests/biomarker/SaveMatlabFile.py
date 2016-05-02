@@ -37,7 +37,7 @@ class SaveMatlabFile(RamTask):
         probs = xval_output.probs
         thresh = xval_output.jstat_thresh
 
-        mat_filename = '%s_%s_%s.biomarker.mat' % (subject, datetime.date.today(), task)
+        mat_filename = '%s_%s_FR3.biomarker.mat' % (subject, datetime.date.today())
 
         mdict = {'Bio': {'Subject': subject,
                          'Version': self.params.version,

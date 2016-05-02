@@ -6,11 +6,19 @@ from ReportUtils import CMLParser,ReportPipeline
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
+# cml_parser.arg('--task','RAM_FR1')
+# cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/FR1_reports')
+# cml_parser.arg('--mount-point','')
+# cml_parser.arg('--recompute-on-no-status')
+# # cml_parser.arg('--exit-on-no-change')
+
 cml_parser.arg('--task','RAM_FR1')
-cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/FR1_reports')
-cml_parser.arg('--mount-point','')
+cml_parser.arg('--workspace-dir','/Users/m/scratch/automated_reports/FR1_reports')
+# cml_parser.arg('--mount-point','/Users/m')
 cml_parser.arg('--recompute-on-no-status')
+# cml_parser.arg('--python-path','/Users/m/PTSA_NEW_GIT')
 # cml_parser.arg('--exit-on-no-change')
+
 
 args = cml_parser.parse()
 
@@ -97,9 +105,20 @@ for subject in subjects:
     print '--Generating', task, 'report for', subject
 
     # sets up processing pipeline
-    report_pipeline = ReportPipeline(subject=subject, task=task, experiment=task,
-                                           workspace_dir=join(args.workspace_dir,task+'_'+subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change,recompute_on_no_status=args.recompute_on_no_status)
+    # report_pipeline = ReportPipeline(subject=subject, task=task, experiment=task,
+    #                                        workspace_dir=join(args.workspace_dir,task+'_'+subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change,recompute_on_no_status=args.recompute_on_no_status)
 
+
+    # report_pipeline = ReportPipeline(subject=subject, task=task, experiment=task,
+    #                                  workspace_dir=join(args.workspace_dir, task + '_' + subject),
+    #                                  mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change,
+    #                                  recompute_on_no_status=args.recompute_on_no_status)
+
+    report_pipeline = ReportPipeline(
+                                     args=args,
+                                     subject=subject,
+                                     workspace_dir=join(args.workspace_dir, task + '_' + subject)
+                                     )
 
     report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
 
@@ -132,8 +151,8 @@ for subject in subjects:
     rsi.add_report_summary(report_summary=report_pipeline.get_report_summary())
 
 
-print 'this is summary for all reports report ', rsi.compose_summary(detail_level=1)
+# print 'this is summary for all reports report ', rsi.compose_summary(detail_level=1)
 
 rsi.output_json_files(dir=args.status_output_dir)
-rsi.send_email_digest()
+# rsi.send_email_digest()
 
