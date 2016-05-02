@@ -183,7 +183,7 @@ class DataLayoutJSONUtilsLegacy(object):
             description='Categorized Free Recall - open-loop stimulation  experiment'
         )
 
-        experiments_node.add_child_node('catfr2',catfr1_node)
+        experiments_node.add_child_node('catfr2',catfr2_node)
 
         catfr3_node = self.create_experiment_JSON_stub(
             subject_code=subject_code,

@@ -156,6 +156,19 @@ python /home1/mswat/RAM_UTILS_GIT/tests/fr1_report/fr_stim_report_all.py  --task
  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir}
 
 
+
+## TH1
+cd /home1/mswat/RAM_UTILS_GIT/tests/th1_report
+
+workspace_dir=/scratch/mswat/automated_reports/TH1_reports
+status_output_dir=${workspace_dir}/${datetime}
+status_output_dirs+=(${status_output_dir})
+
+python /home1/mswat/RAM_UTILS_GIT/tests/th1_report/th1_report_all.py  --task=RAM_TH1\
+ --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir}
+
+
+
 #PS1-2 aggregator
 cd /home1/mswat/RAM_UTILS_GIT/tests/ps_aggregator
 python /home1/mswat/RAM_UTILS_GIT/tests/ps_aggregator/ps_aggregator.py --workspace-dir=/scratch/mswat/automated_reports

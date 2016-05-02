@@ -17,6 +17,14 @@ class ComputeTH1ClassPowers(ReportRamTask):
         self.samplerate = None
         self.wavelet_transform = MorletWaveletTransform()
 
+    def initialize(self):
+        task = self.pipeline.task
+        if self.dependency_inventory:
+            self.dependency_inventory.add_dependent_resource(resource_name=task+'_events',
+                                        access_path = ['experiments','th1','events'])
+            self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
+                                        access_path = ['electrodes','bipolar'])
+
     def restore(self):
         subject = self.pipeline.subject
         task = self.pipeline.task

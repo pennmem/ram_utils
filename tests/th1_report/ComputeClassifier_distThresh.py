@@ -31,7 +31,14 @@ class ComputeClassifier_distThresh(ReportRamTask):
         self.params = params
         self.pow_mat = None
                
- 
+    def initialize(self):
+        task = self.pipeline.task
+        if self.dependency_inventory:
+            self.dependency_inventory.add_dependent_resource(resource_name=task+'_events',
+                                        access_path = ['experiments','th1','events'])
+            self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
+                                    access_path = ['electrodes','bipolar'])
+
     def run_loso_xval(self, event_sessions, recalls, permuted=False):
         probs = np.empty_like(recalls, dtype=np.float)
         sessions = np.unique(event_sessions)

@@ -14,9 +14,9 @@ cml_parser = CMLParser(arg_count_threshold=1)
 
 cml_parser.arg('--task','RAM_FR1')
 cml_parser.arg('--workspace-dir','/Users/m/scratch/automated_reports/FR1_reports')
-cml_parser.arg('--mount-point','/Users/m')
+# cml_parser.arg('--mount-point','/Users/m')
 cml_parser.arg('--recompute-on-no-status')
-cml_parser.arg('--python-path','/Users/m/PTSA_NEW_GIT')
+# cml_parser.arg('--python-path','/Users/m/PTSA_NEW_GIT')
 # cml_parser.arg('--exit-on-no-change')
 
 
