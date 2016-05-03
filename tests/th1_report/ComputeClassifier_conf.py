@@ -77,7 +77,7 @@ class ComputeClassifier_conf(ReportRamTask):
         task = self.pipeline.task
         if self.dependency_inventory:
             self.dependency_inventory.add_dependent_resource(resource_name=task+'_events',
-                                        access_path = ['experiments','th11','events'])
+                                        access_path = ['experiments','th1','events'])
             self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
                                         access_path = ['electrodes','bipolar'])
 
