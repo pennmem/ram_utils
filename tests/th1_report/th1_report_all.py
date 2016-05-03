@@ -114,7 +114,7 @@ subjects.sort()
 rsi = ReportSummaryInventory(label=task)
 
 
-for subject in subjects:
+for subject in subjects[:2]:
     print '--Generating', task, 'report for', subject
 
     # sets up processing pipeline
@@ -149,6 +149,8 @@ for subject in subjects:
     report_pipeline.add_task(GenerateTex(params=params,mark_as_completed=False))
     #
     report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
+
+    report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
 
     # starts processing pipeline
     report_pipeline.execute_pipeline()
