@@ -89,7 +89,7 @@ class ComposeSessionSummary(ReportRamTask):
 
         xval_output = self.get_passed_object('xval_output')
         perm_test_pvalue = self.get_passed_object('pvalue')
-        if self.params.doConf_classification:
+        if self.params.doConf_classification & self.get_passed_object('conf_decode_success'):
             xval_output_conf = self.get_passed_object('xval_output_conf')
             perm_test_pvalue_conf = self.get_passed_object('pvalue_conf')        
 
@@ -181,7 +181,7 @@ class ComposeSessionSummary(ReportRamTask):
         cumulative_summary.jstat_thresh = '%.3f' % cumulative_xval_output.jstat_thresh
         cumulative_summary.jstat_percentile = '%.2f' % (100.0*cumulative_xval_output.jstat_quantile)
 
-        if self.params.doConf_classification:
+        if self.params.doConf_classification & self.get_passed_object('conf_decode_success'):
             cumulative_xval_output_conf = xval_output_conf[-1]
             cumulative_summary.auc_conf = '%.2f' % (100*cumulative_xval_output_conf.auc)
             cumulative_summary.fpr_conf = cumulative_xval_output_conf.fpr

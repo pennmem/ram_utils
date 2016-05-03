@@ -25,7 +25,7 @@ class GenerateTex(ReportRamTask):
         ttable_header = self.get_passed_object('ttable_header')
 
         tex_combined_template = task + '_combined.tex.tpl'        
-        if self.params.doConf_classification:
+        if self.params.doConf_classification & self.get_passed_object('conf_decode_success'):
             tex_combined_template = task + '_combined_wConf.tex.tpl'        
         combined_report_tex_file_name = '%s_%s_report.tex' % (subject,task)
 
@@ -186,7 +186,7 @@ class GeneratePlots(ReportRamTask):
         
                 
         # confidence classifier auc and roc
-        if self.params.doConf_classification:
+        if self.params.doConf_classification & self.get_passed_object('conf_decode_success'):
             panel_plot = PanelPlot(xfigsize=15, yfigsize=7, i_max=1, j_max=2, title='', labelsize=18)        
             pd3 = PlotData(x=cumulative_summary.fpr_conf, y=cumulative_summary.tpr_conf, xlim=[0.0,1.0], ylim=[0.0,1.0], xlabel='False Alarm Rate', ylabel='Hit Rate', levelline=((0.001,0.999),(0.001,0.999)), color='k', markersize=1.0, xlabel_fontsize=18, ylabel_fontsize=18)
             ylim = np.max(np.abs(cumulative_summary.pc_diff_from_mean_conf)) + 5.0

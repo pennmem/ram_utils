@@ -177,59 +177,69 @@ class ComputeClassifier_conf(ReportRamTask):
 
 
         # self.lr_classifier_conf = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto', solver='liblinear')
-        self.lr_classifier_conf = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced', solver='liblinear')
+        self.lr_classifier_conf = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto', solver='liblinear')
         # self.lr_classifier_conf = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced',solver='liblinear',fit_intercept=False)
 
         event_sessions = events.session    
         recalls = events.confidence == 2
-        # recalls = events.distErr < 13 
 
-        sessions = np.unique(event_sessions)
-        if len(sessions) > 1:
-            print 'Performing permutation test'
-            self.perm_AUCs_conf = self.permuted_loso_AUCs(event_sessions, recalls)
+        # Don't run confidence decoding if there are too few examples in each class
+        if (np.sum(recalls==False) < 5) or (np.sum(recalls==True) < 5):
+            self.conf_decode_success = False
+            self.pass_object('conf_decode_success', self.conf_decode_success)
+            joblib.dump(self.pvalue_conf, self.get_path_to_resource_in_workspace(subject + '-' + task + '-conf_decode_success.pkl')) 
+        else:       
 
-            print 'Performing leave-one-session-out xval'
-            self.run_loso_xval(event_sessions, recalls, permuted=False)
-        else:
-            sess = sessions[0]
-            event_lists = deepcopy(events.trial)
-            skf = StratifiedKFold(recalls, n_folds=8,shuffle=True)
-            # rand_order = np.random.permutation(len(events))
-            # event_lists = event_lists[rand_order]
-            if self. params.doStratKFold:
-                skf = StratifiedKFold(recalls, n_folds=self.params.n_folds,shuffle=True)
-                for i, (train_index, test_index) in enumerate(skf):
-                    event_lists[test_index] = i
-            
-            print 'Performing in-session permutation test'
-            self.perm_AUCs_conf = self.permuted_lolo_AUCs(sess, event_lists, recalls)
+        
+            sessions = np.unique(event_sessions)
+            if len(sessions) > 1:
+                print 'Performing permutation test'
+                self.perm_AUCs_conf = self.permuted_loso_AUCs(event_sessions, recalls)
 
-            if self. params.doStratKFold:
-                print 'Performing %d-fold stratified xval'%(self.n_folds)
+                print 'Performing leave-one-session-out xval'
+                self.run_loso_xval(event_sessions, recalls, permuted=False)
             else:
-                print 'Performing leave-one-list-out xval'
-            self.run_lolo_xval(sess, event_lists, recalls, permuted=False)
+                sess = sessions[0]
+                event_lists = deepcopy(events.trial)
+                skf = StratifiedKFold(recalls, n_folds=8,shuffle=True)
+                # rand_order = np.random.permutation(len(events))
+                # event_lists = event_lists[rand_order]
+                if self. params.doStratKFold:
+                    skf = StratifiedKFold(recalls, n_folds=self.params.n_folds,shuffle=True)
+                    for i, (train_index, test_index) in enumerate(skf):
+                        event_lists[test_index] = i
+            
+                print 'Performing in-session permutation test'
+                self.perm_AUCs_conf = self.permuted_lolo_AUCs(sess, event_lists, recalls)
 
-        print 'AUC =', self.xval_output_conf[-1].auc
+                if self. params.doStratKFold:
+                    print 'Performing %d-fold stratified xval'%(self.n_folds)
+                else:
+                    print 'Performing leave-one-list-out xval'
+                self.run_lolo_xval(sess, event_lists, recalls, permuted=False)
 
-        self.pvalue_conf = np.sum(self.perm_AUCs_conf >= self.xval_output_conf[-1].auc) / float(self.perm_AUCs_conf.size)
-        print 'Perm test p-value =', self.pvalue_conf, ' mean null = ', np.mean(self.perm_AUCs_conf)
+            print 'AUC =', self.xval_output_conf[-1].auc
 
-        print 'thresh =', self.xval_output_conf[-1].jstat_thresh, 'quantile =', self.xval_output_conf[-1].jstat_quantile
+            self.pvalue_conf = np.sum(self.perm_AUCs_conf >= self.xval_output_conf[-1].auc) / float(self.perm_AUCs_conf.size)
+            print 'Perm test p-value =', self.pvalue_conf, ' mean null = ', np.mean(self.perm_AUCs_conf)
 
-        # Finally, fitting classifier on all available data
-        self.lr_classifier_conf.fit(self.pow_mat, recalls)
+            print 'thresh =', self.xval_output_conf[-1].jstat_thresh, 'quantile =', self.xval_output_conf[-1].jstat_quantile
 
-        self.pass_object('lr_classifier_conf', self.lr_classifier_conf)
-        self.pass_object('xval_output_conf', self.xval_output_conf)
-        self.pass_object('perm_AUCs_conf', self.perm_AUCs_conf)
-        self.pass_object('pvalue_conf', self.pvalue_conf)
+            # Finally, fitting classifier on all available data
+            self.lr_classifier_conf.fit(self.pow_mat, recalls)
+            self.conf_decode_success = True
 
-        joblib.dump(self.lr_classifier_conf, self.get_path_to_resource_in_workspace(subject + '-' + task + '-lr_classifier_conf.pkl'))
-        joblib.dump(self.xval_output_conf, self.get_path_to_resource_in_workspace(subject + '-' + task + '-xval_output_conf.pkl'))
-        joblib.dump(self.perm_AUCs_conf, self.get_path_to_resource_in_workspace(subject + '-' + task + '-perm_AUCs_conf.pkl'))
-        joblib.dump(self.pvalue_conf, self.get_path_to_resource_in_workspace(subject + '-' + task + '-pvalue_conf.pkl'))
+            self.pass_object('lr_classifier_conf', self.lr_classifier_conf)
+            self.pass_object('xval_output_conf', self.xval_output_conf)
+            self.pass_object('perm_AUCs_conf', self.perm_AUCs_conf)
+            self.pass_object('pvalue_conf', self.pvalue_conf)
+            self.pass_object('conf_decode_success', self.conf_decode_success)
+
+            joblib.dump(self.lr_classifier_conf, self.get_path_to_resource_in_workspace(subject + '-' + task + '-lr_classifier_conf.pkl'))
+            joblib.dump(self.xval_output_conf, self.get_path_to_resource_in_workspace(subject + '-' + task + '-xval_output_conf.pkl'))
+            joblib.dump(self.perm_AUCs_conf, self.get_path_to_resource_in_workspace(subject + '-' + task + '-perm_AUCs_conf.pkl'))
+            joblib.dump(self.pvalue_conf, self.get_path_to_resource_in_workspace(subject + '-' + task + '-pvalue_conf.pkl'))
+            joblib.dump(self.pvalue_conf, self.get_path_to_resource_in_workspace(subject + '-' + task + '-conf_decode_success.pkl'))        
 
     def restore(self):
         subject = self.pipeline.subject
@@ -239,8 +249,10 @@ class ComputeClassifier_conf(ReportRamTask):
         self.xval_output_conf = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-xval_output_conf.pkl'))
         self.perm_AUCs_conf = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-perm_AUCs_conf.pkl'))
         self.pvalue_conf = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-pvalue_conf.pkl'))
+        self.pvalue_conf = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-conf_decode_success.pkl'))        
 
         self.pass_object('lr_classifier_conf', self.lr_classifier_conf)
         self.pass_object('xval_output_conf', self.xval_output_conf)
         self.pass_object('perm_AUCs_conf', self.perm_AUCs_conf)
         self.pass_object('pvalue_conf', self.pvalue_conf)
+        self.pass_object('conf_decode_success', self.self.conf_decode_success)        
