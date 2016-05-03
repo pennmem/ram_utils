@@ -5,6 +5,8 @@ import base64
 from collections import defaultdict, OrderedDict
 from datetime import date
 import pandas as pd
+import shutil
+import os
 
 from email.mime.text import MIMEText
 
@@ -64,12 +66,15 @@ class ReportMailer(object):
         if 0 in detail_level_list:
             report_summary = self.compose_summary(detail_level=0)
 
-            # if self.reports_generated_count:
-            email_list = self.get_email_list(email_list_file='mail_list.json')
+            # will only send level 0 mail if the reports were generated
+            if report_summary.strip() != '':
 
-            msg = MIMEText(report_summary)
-            subject = "Daily Report Digest for %s" % (date.today().strftime(DATE_FORMAT))
-            self.send_to_single_list(subject=subject, msg=msg, email_list=email_list)
+                # if self.reports_generated_count:
+                email_list = self.get_email_list(email_list_file='mail_list.json')
+
+                msg = MIMEText(report_summary)
+                subject = "Daily Report Digest for %s" % (date.today().strftime(DATE_FORMAT))
+                self.send_to_single_list(subject=subject, msg=msg, email_list=email_list)
 
         if 1 in detail_level_list:
             report_summary = self.compose_summary(detail_level=1)
@@ -80,6 +85,29 @@ class ReportMailer(object):
 
             subject_dev = "Developers' Report Digest for %s" % (date.today().strftime(DATE_FORMAT))
             self.send_to_single_list(subject=subject_dev, msg=msg_dev, email_list=email_list_dev)
+
+    def output_error_log(self,error_file):
+
+        try:
+            os.makedirs(dirname(error_file))
+        except OSError:
+            pass
+
+
+        report_summary = self.compose_summary(detail_level=1)
+
+        print report_summary
+
+        msg_dev = MIMEText(report_summary)
+
+        # subject_dev = "Developers' Report Digest for %s" % (date.today().strftime(DATE_FORMAT))
+        # self.send_to_single_list(subject=subject_dev, msg=msg_dev, email_list=email_list_dev)
+
+
+        f = open(error_file,'w')
+        f.write('%s'%report_summary)
+        f.close()
+
 
     def send_to_single_list(self, subject, msg, email_list, ):
         import base64
@@ -218,13 +246,19 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Report Mailer')
     # parser.add_argument('--status-output-dir', required=False, action='append')
     parser.add_argument('--status-output-dirs', nargs='+')
+    parser.add_argument('--error-log-file',dest='error_log_file', action='store',required=False)
+
     args = parser.parse_args()
     dir_list = args.status_output_dirs
     print dir_list
+    print 'arror log file=',args.error_log_file
     rm = ReportMailer()
     rm.add_directories(*dir_list)
     # rm.compose_summary(detail_level=0)
-    rm.mail_report_summary(detail_level_list=[0, 1])
+    rm.mail_report_summary(detail_level_list=[0])
+
+    if args.error_log_file:
+        rm.output_error_log(args.error_log_file)
 
 
 # if __name__ == '__main__':

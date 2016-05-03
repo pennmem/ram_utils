@@ -80,6 +80,9 @@ rsi = ReportSummaryInventory(label='RAM_FR1_CatFR1_joint')
 
 for subject in subjects:
     print '--Generating FR1&CatFR1 joint report for', subject
+    if subject in args.skip_subjects:
+        continue
+
 
     # sets up processing pipeline
     # report_pipeline = ReportPipeline(subject=subject,

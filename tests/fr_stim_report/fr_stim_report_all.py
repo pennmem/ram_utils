@@ -88,6 +88,9 @@ rsi = ReportSummaryInventory(label=args.experiment)
 
 for subject in subjects:
     print subject
+    if subject in args.skip_subjects:
+        continue
+
     # sets up processing pipeline
 
     report_pipeline = ReportPipeline(subject=subject,

@@ -260,6 +260,9 @@ class GenerateReportPDF(ReportRamTask):
         self.pass_object('report_file',report_file)
         self.pipeline.deploy_report(report_path=report_file)
 
+
+
+
 # class DeployReportPDF(ReportRamTask):
 #     def __init__(self, mark_as_completed=True):
 #         super(DeployReportPDF,self).__init__(mark_as_completed)
