@@ -23,7 +23,7 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{RAM PAL1 report v 2.1}
+\lhead{RAM PAL1 report v 2.2}
 \rhead{Date created: <DATE>}
 \begin{document}
 
@@ -90,7 +90,7 @@ $<N_MATH>$ math problems & $<N_CORRECT_MATH>$ correct ($<PC_CORRECT_MATH>$\%) & 
 <TABLE_HEADER> \\
 <SIGNIFICANT_ELECTRODES>
 \hline
-\caption{Subsequent memory effect HFA. High frequency activity (HFA, 70-200 Hz) was measured across the word presentation interval (0 to 1600ms). At each electrode, a t-test compared HFA for subsequently recalled vs subsequently forgotten items. \textbf{Surface Electrodes:} Red - significant positive effect (subsequently \textit{remembered} HFA $>$ subsequently \textit{forgotten} HFA). Blue - significant negative effect (subsequently \textit{remembered} HFA $<$ subsequently \textit{forgotten} HFA). Black - difference not significant. \textbf{Depth Electrodes:} All bipolar pairs shown in descending order of significance Bipolar pairs that exceed significance threshold ($p < .05$) are in boldface.}
+\caption{Subsequent memory effect HFA. High frequency activity (HFA, 70-200 Hz) was measured from 400ms to 3700ms of pair presentation interval. At each electrode, a t-test compared HFA for subsequently recalled vs subsequently forgotten items. \textbf{Surface Electrodes:} Red - significant positive effect (subsequently \textit{remembered} HFA $>$ subsequently \textit{forgotten} HFA). Blue - significant negative effect (subsequently \textit{remembered} HFA $<$ subsequently \textit{forgotten} HFA). Black - difference not significant. \textbf{Depth Electrodes:} All bipolar pairs shown in descending order of significance Bipolar pairs that exceed significance threshold ($p < .05$) are in boldface.}
 \end{longtable}
 \end{center}
 
