@@ -102,7 +102,7 @@ rsi = ReportSummaryInventory(label=task)
 
 
 for subject in subjects:
-    if subject in args.skip_subjects:
+    if args.skip_subjects is not None and subject in args.skip_subjects:
         continue
     print '--Generating', task, 'report for', subject
 

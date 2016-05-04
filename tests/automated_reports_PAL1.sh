@@ -29,7 +29,7 @@ echo ${status_output_dir}
 automated_reports_dir=/scratch/mswat/automated_reports
 
 exit_on_no_change_flag=--exit-on-no-change
-#exit_on_no_change_flag=
+exit_on_no_change_flag=
 
 echo ${exit_on_no_change}
 

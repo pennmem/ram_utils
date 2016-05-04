@@ -80,7 +80,7 @@ rsi = ReportSummaryInventory(label='RAM_FR1_CatFR1_joint')
 
 for subject in subjects:
     print '--Generating FR1&CatFR1 joint report for', subject
-    if subject in args.skip_subjects:
+    if args.skip_subjects is not None and subject in args.skip_subjects:
         continue
 
 
