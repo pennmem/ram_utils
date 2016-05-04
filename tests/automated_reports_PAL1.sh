@@ -44,7 +44,7 @@ status_output_dir=${workspace_dir}/${datetime}
 status_output_dirs+=(${status_output_dir})
 
 
-python /home1/mswat/RAM_UTILS_GIT/tests/pal1_report/pal1_report_all.py  --task=RAM_PAL1 --workspace-dir=/scratch/mswat/automated_reports/PAL1_reports ${exit_on_no_change_flag}
+python /home1/mswat/RAM_UTILS_GIT/tests/pal1_report/pal1_report_all.py  --task=RAM_PAL1 --status-output-dir=${status_output_dir} --workspace-dir=/scratch/mswat/automated_reports/PAL1_reports ${exit_on_no_change_flag}
 
 
 python /home1/mswat/RAM_UTILS_GIT/ReportUtils/ReportMailer.py\
