@@ -192,7 +192,8 @@ class ComputeClassifier(ReportRamTask):
 
     def permuted_lolo_AUCs(self, events):
         n_perm = self.params.n_perm
-        recalls = events.recalled
+        # recalls = events.recalled
+        recalls = events.correct
         permuted_recalls = np.array(recalls)
         AUCs = np.empty(shape=n_perm, dtype=np.float)
         sessions = np.unique(events.session)
