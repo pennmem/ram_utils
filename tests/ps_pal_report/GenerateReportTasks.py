@@ -35,7 +35,7 @@ class GenerateTex(ReportRamTask):
         tex_ttest_table2_template = 'ttest_table2.tex.tpl'
         tex_ttest_against_sham_template = 'ttest_against_sham.tex.tpl'
 
-        report_tex_file_name = self.pipeline.experiment + '-' + self.pipeline.subject + '-' + 'report.tex'
+        report_tex_file_name = self.pipeline.experiment + '-PAL1-' + self.pipeline.subject + '-' + 'report.tex'
         self.pass_object('report_tex_file_name',report_tex_file_name)
 
         self.set_file_resources_to_move(report_tex_file_name, dst='reports')
@@ -286,7 +286,7 @@ class DeployReportPDF(ReportRamTask):
 
     def run(self):
         report_file = self.get_passed_object('report_file')
-        self.pipeline.deploy_report(report_path=report_file)
+        self.pipeline.deploy_report(report_path=report_file, classifier_experiment='PAL1')
 
 # class DeployReportPDF(ReportRamTask):
 #     def __init__(self, mark_as_completed=True):
