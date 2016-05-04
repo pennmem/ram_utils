@@ -52,8 +52,8 @@ class Params(object):
         self.pal1_end_time = 2.0
         self.pal1_buf = 1.0
 
-        self.hfs_start_time = 0.3
-        self.hfs_end_time = 3.5
+        self.hfs_start_time = 0.4
+        self.hfs_end_time = 3.7
         self.hfs_buf = 1.0
 
         self.filt_order = 4

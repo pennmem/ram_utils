@@ -16,12 +16,12 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{<EXPERIMENT> report v 3.7}
+\lhead{<EXPERIMENT>-PAL1 report v 1.0}
 \chead{Subject: \textbf{<SUBJECT>}}
 \rhead{Date created: <DATE>}
 \begin{document}
 
-\section*{<SUBJECT> RAM <EXPERIMENT> Parameter Search Report}
+\section*{<SUBJECT> RAM <EXPERIMENT> Parameter Search Report for PAL1}
 
 \begin{minipage}{0.5\textwidth}
 \begin{itemize}
@@ -40,7 +40,8 @@
 \vspace{3pc}
 
 \begin{center}
-\textbf{\Large Classifier performance}
+\textbf{\Large Classifier performance} \\
+Computed based on 400ms to 3700ms time interval of pair presentation.
 \end{center}
 
 \begin{figure}[!h]

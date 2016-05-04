@@ -30,9 +30,7 @@ class ReportDeployer(object):
         self.pipeline.report_summary.add_report_link(link=link)
 
 
-    def deploy_report(self,report_path):
-
-
+    def deploy_report(self, report_path, classifier_experiment=None):
         subject = self.pipeline.subject
 
         ssc = self.split_subject_code(subject)
@@ -52,7 +50,7 @@ class ReportDeployer(object):
 
                 return
 
-        standard_report_basename = subject+'_'+self.pipeline.experiment+'_report.pdf'
+        standard_report_basename = (subject+'_'+self.pipeline.experiment+'_report.pdf') if classifier_experiment is None else (subject+'_'+self.pipeline.experiment+'_'+classifier_experiment+'_report.pdf')
         standard_report_path = join(report_dir,standard_report_basename)
         # shutil.copy(report_path,join(report_dir,report_basename))
         shutil.copy(report_path,standard_report_path)
