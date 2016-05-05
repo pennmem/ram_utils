@@ -25,10 +25,15 @@ class SaveMatlabFile(RamTask):
         n_chs = self.params.stim_params.n_channels
 
         bpmat = np.zeros(shape=(n_chs, n_bps), dtype=np.float)
+        # for i,bp in enumerate(bipolar_pairs):
+        #     e1, e2 = bp['channel_str']
+        #     bpmat[int(e1)-1, i] = 1
+        #     bpmat[int(e2)-1, i] = -1
         for i,bp in enumerate(bipolar_pairs):
-            e1, e2 = bp['channel_str']
+            e1, e2 = bp[0],bp[1]
             bpmat[int(e1)-1, i] = 1
             bpmat[int(e2)-1, i] = -1
+
 
         lr_classifier = self.get_passed_object('lr_classifier')
         xval_output = self.get_passed_object('xval_output')[-1]
