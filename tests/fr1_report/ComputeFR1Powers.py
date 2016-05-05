@@ -98,11 +98,19 @@ class ComputeFR1Powers(ReportRamTask):
 
             sess_pow_mat = np.empty(shape=(n_events, n_bps, n_freqs), dtype=np.float)
 
-            for i,ti in enumerate(bipolar_pairs):
-                bp = ti['channel_str']
+            # for i,ti in enumerate(bipolar_pairs):
+            #     # bp = ti['channel_str']
+            #     bp = ti['channel']
+            #     print 'Computing powers for bipolar pair', bp
+            #     elec1 = np.where(monopolar_channels == bp[0])[0][0]
+            #     elec2 = np.where(monopolar_channels == bp[1])[0][0]
+
+            for i,bp in enumerate(bipolar_pairs):
+
                 print 'Computing powers for bipolar pair', bp
                 elec1 = np.where(monopolar_channels == bp[0])[0][0]
                 elec2 = np.where(monopolar_channels == bp[1])[0][0]
+
 
                 bp_data = eegs[elec1] - eegs[elec2]
                 bp_data.attrs['samplerate'] = self.samplerate

@@ -26,19 +26,19 @@ def make_atlas_loc(tag, atlas_loc, comments):
         return '--', '--'
 
 
-def make_ttest_table(bipolar_pairs, loc_info, ttest_results):
+def make_ttest_table(bp_tal_structs, loc_info, ttest_results):
     ttest_data = None
     has_depth = ('Das Volumetric Atlas Location' in loc_info)
     has_surface_only = ('Freesurfer Desikan Killiany Surface Atlas Location' in loc_info)
     if has_depth or has_surface_only:
         atlas_loc = loc_info['Das Volumetric Atlas Location' if has_depth else 'Freesurfer Desikan Killiany Surface Atlas Location']
         comments = loc_info['Comments'] if ('Comments' in loc_info) else None
-        n = len(bipolar_pairs)
-        ttest_data = [list(a) for a in zip(bipolar_pairs.eType, bipolar_pairs.tagName, [None] * n, [None] * n, ttest_results[1], ttest_results[0])]
-        for i, tag in enumerate(bipolar_pairs.tagName):
+        n = len(bp_tal_structs)
+        ttest_data = [list(a) for a in zip(bp_tal_structs.eType, bp_tal_structs.tagName, [None] * n, [None] * n, ttest_results[1], ttest_results[0])]
+        for i, tag in enumerate(bp_tal_structs.tagName):
             ttest_data[i][2], ttest_data[i][3] = make_atlas_loc(tag, atlas_loc, comments)
     else:
-        ttest_data = [list(a) for a in zip(bipolar_pairs.eType, bipolar_pairs.tagName, ttest_results[1], ttest_results[0])]
+        ttest_data = [list(a) for a in zip(bp_tal_structs.eType, bp_tal_structs.tagName, ttest_results[1], ttest_results[0])]
 
     return ttest_data
 
@@ -85,7 +85,9 @@ class ComposeSessionSummary(ReportRamTask):
         rec_events = self.get_passed_object(task + '_rec_events')
         all_events = self.get_passed_object(task + '_all_events')
         monopolar_channels = self.get_passed_object('monopolar_channels')
-        bipolar_pairs = self.get_passed_object('bipolar_pairs')
+        # bp_tal_structs = self.get_passed_object('bp_tal_structs')
+        bp_tal_structs = self.get_passed_object('bp_tal_structs')
+        
         loc_info = self.get_passed_object('loc_info')
 
         ttest = self.get_passed_object('ttest')
@@ -207,7 +209,7 @@ class ComposeSessionSummary(ReportRamTask):
 
             session_summary_array.append(session_summary)
 
-            # ttest_data = [list(a) for a in zip(bipolar_pairs.eType,  bipolar_pairs.tagName, ttest[session][1], ttest[session][0])]
+            # ttest_data = [list(a) for a in zip(bp_tal_structs.eType,  bp_tal_structs.tagName, ttest[session][1], ttest[session][0])]
             session_ttest = ttest[session]
             if isinstance(session_ttest,tuple):
                 if ('Das Volumetric Atlas Location' in loc_info) or ('Freesurfer Desikan Killiany Surface Atlas Location' in loc_info):
@@ -215,7 +217,7 @@ class ComposeSessionSummary(ReportRamTask):
                 else:
                     session_ttest_data.append([[None, None, np.nan, np.nan]])
             else:
-                ttest_data = make_ttest_table(bipolar_pairs, loc_info, session_ttest)
+                ttest_data = make_ttest_table(bp_tal_structs, loc_info, session_ttest)
                 ttest_data.sort(key=itemgetter(-2))
                 ttest_data = format_ttest_table(ttest_data)
                 session_ttest_data.append(ttest_data)
@@ -268,8 +270,8 @@ class ComposeSessionSummary(ReportRamTask):
 
         self.pass_object('cumulative_summary', cumulative_summary)
 
-        # cumulative_ttest_data = [list(a) for a in zip(bipolar_pairs.eType, bipolar_pairs.tagName, ttest[-1][1], ttest[-1][0])]
-        cumulative_ttest_data = make_ttest_table(bipolar_pairs, loc_info, ttest[-1])
+        # cumulative_ttest_data = [list(a) for a in zip(bp_tal_structs.eType, bp_tal_structs.tagName, ttest[-1][1], ttest[-1][0])]
+        cumulative_ttest_data = make_ttest_table(bp_tal_structs, loc_info, ttest[-1])
         cumulative_ttest_data.sort(key=itemgetter(-2))
         cumulative_ttest_data = format_ttest_table(cumulative_ttest_data)
 
