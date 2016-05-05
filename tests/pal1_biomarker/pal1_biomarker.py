@@ -13,11 +13,18 @@ import numpy as np
 from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
+
 cml_parser.arg('--subject','R1162N')
-cml_parser.arg('--workspace-dir','/Users/m/automated_reports/PAL1_biomarker')
-cml_parser.arg('--mount-point','/Volumes/rhino_root')
-cml_parser.arg('--python-path','/Users/m/PTSA_NEW_GIT/')
-cml_parser.arg('--python-path','/Users/m/RAM_UTILS_GIT')
+cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/PAL1_biomarker')
+cml_parser.arg('--mount-point','')
+
+
+
+# cml_parser.arg('--subject','R1162N')
+# cml_parser.arg('--workspace-dir','/Users/m/automated_reports/PAL1_biomarker')
+# cml_parser.arg('--mount-point','/Volumes/rhino_root')
+# cml_parser.arg('--python-path','/Users/m/PTSA_NEW_GIT/')
+# cml_parser.arg('--python-path','/Users/m/RAM_UTILS_GIT')
 
 
 

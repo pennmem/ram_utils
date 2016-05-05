@@ -7,7 +7,7 @@ from RamPipeline import *
 from ReportUtils import RamTask
 
 
-class TalPreparation(ReportRamTask):
+class TalPreparation(RamTask):
     def __init__(self, mark_as_completed=True):
         super(TalPreparation,self).__init__(mark_as_completed)
 
