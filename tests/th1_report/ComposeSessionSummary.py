@@ -26,19 +26,19 @@ def make_atlas_loc(tag, atlas_loc, comments):
         return '--', '--'
 
 
-def make_ttest_table(bipolar_pairs, loc_info, ttest_results):
+def make_ttest_table(bp_tal_structs, loc_info, ttest_results):
     ttest_data = None
     has_depth = ('Das Volumetric Atlas Location' in loc_info)
     has_surface_only = ('Freesurfer Desikan Killiany Surface Atlas Location' in loc_info)
     if has_depth or has_surface_only:
         atlas_loc = loc_info['Das Volumetric Atlas Location' if has_depth else 'Freesurfer Desikan Killiany Surface Atlas Location']
         comments = loc_info['Comments'] if ('Comments' in loc_info) else None
-        n = len(bipolar_pairs)
-        ttest_data = [list(a) for a in zip(bipolar_pairs.eType, bipolar_pairs.tagName, [None] * n, [None] * n, ttest_results[1], ttest_results[0])]
-        for i, tag in enumerate(bipolar_pairs.tagName):
+        n = len(bp_tal_structs)
+        ttest_data = [list(a) for a in zip(bp_tal_structs.eType, bp_tal_structs.tagName, [None] * n, [None] * n, ttest_results[1], ttest_results[0])]
+        for i, tag in enumerate(bp_tal_structs.tagName):
             ttest_data[i][2], ttest_data[i][3] = make_atlas_loc(tag, atlas_loc, comments)
     else:
-        ttest_data = [list(a) for a in zip(bipolar_pairs.eType, bipolar_pairs.tagName, ttest_results[1], ttest_results[0])]
+        ttest_data = [list(a) for a in zip(bp_tal_structs.eType, bp_tal_structs.tagName, ttest_results[1], ttest_results[0])]
     return ttest_data
 
 def make_ttest_table_header(loc_info):
@@ -82,7 +82,7 @@ class ComposeSessionSummary(ReportRamTask):
         score_events = self.get_passed_object(task + '_score_events')
         time_events = self.get_passed_object(task + '_time_events')
         monopolar_channels = self.get_passed_object('monopolar_channels')
-        bipolar_pairs = self.get_passed_object('bipolar_pairs')
+        bp_tal_structs = self.get_passed_object('bp_tal_structs')
         loc_info = self.get_passed_object('loc_info')
 
         ttest = self.get_passed_object('ttest')
@@ -195,22 +195,22 @@ class ComposeSessionSummary(ReportRamTask):
         self.pass_object('cumulative_summary', cumulative_summary)
 
         # electrode tttest data for each freq_bin
-        cumulative_ttest_data_LTA = make_ttest_table(bipolar_pairs, loc_info, ttest[0])
+        cumulative_ttest_data_LTA = make_ttest_table(bp_tal_structs, loc_info, ttest[0])
         cumulative_ttest_data_LTA.sort(key=itemgetter(-2))
         cumulative_ttest_data_LTA = format_ttest_table(cumulative_ttest_data_LTA)
         self.pass_object('cumulative_ttest_data_LTA', cumulative_ttest_data_LTA)
         
-        cumulative_ttest_data_HTA = make_ttest_table(bipolar_pairs, loc_info, ttest[1])
+        cumulative_ttest_data_HTA = make_ttest_table(bp_tal_structs, loc_info, ttest[1])
         cumulative_ttest_data_HTA.sort(key=itemgetter(-2))
         cumulative_ttest_data_HTA = format_ttest_table(cumulative_ttest_data_HTA)  
         self.pass_object('cumulative_ttest_data_HTA', cumulative_ttest_data_HTA)      
         
-        cumulative_ttest_data_G = make_ttest_table(bipolar_pairs, loc_info, ttest[2])
+        cumulative_ttest_data_G = make_ttest_table(bp_tal_structs, loc_info, ttest[2])
         cumulative_ttest_data_G.sort(key=itemgetter(-2))
         cumulative_ttest_data_G = format_ttest_table(cumulative_ttest_data_G)      
         self.pass_object('cumulative_ttest_data_G', cumulative_ttest_data_G)              
         
-        cumulative_ttest_data_HFA = make_ttest_table(bipolar_pairs, loc_info, ttest[3])
+        cumulative_ttest_data_HFA = make_ttest_table(bp_tal_structs, loc_info, ttest[3])
         cumulative_ttest_data_HFA.sort(key=itemgetter(-2))
         cumulative_ttest_data_HFA = format_ttest_table(cumulative_ttest_data_HFA)  
         self.pass_object('cumulative_ttest_data_HFA', cumulative_ttest_data_HFA)      
