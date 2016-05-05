@@ -1,41 +1,50 @@
 __author__ = 'm'
 
-import numpy as np
-import os
-
-from get_bipolar_subj_elecs import get_bipolar_subj_elecs
+from ptsa.data.readers import TalReader
 
 from RamPipeline import *
+
 from ReportUtils import ReportRamTask
+
 
 class TalPreparation(ReportRamTask):
     def __init__(self, mark_as_completed=True):
         super(TalPreparation,self).__init__(mark_as_completed)
 
+
     def run(self):
-        events = self.get_passed_object(self.pipeline.task+'_events')
-        bipolar_pairs = self.get_bps(events)
-        monopolar_channels = get_single_elecs_from_bps(bipolar_pairs)
-        print len(monopolar_channels), 'single electrodes', len(bipolar_pairs), 'bipolar pairs'
-
-        self.pass_object('bipolar_pairs', bipolar_pairs)
-        self.pass_object('monopolar_channels', monopolar_channels)
 
 
-    def get_bps(self, events):
-        #dataroot = get_dataroot(events)
-        #subjpath = os.path.dirname(os.path.dirname(dataroot))
-        subjpath = os.path.join(self.pipeline.mount_point,'data/eeg',self.pipeline.subject)
-        return get_bipolar_subj_elecs(subjpath, leadsonly=True, exclude_bad_leads=False)
+        self.add_report_status(message='OK')
+        try:
+
+            tal_path = os.path.join(self.pipeline.mount_point,'data/eeg',self.pipeline.subject,'tal',self.pipeline.subject+'_talLocs_database_bipol.mat')
+
+            tal_reader = TalReader(filename=tal_path)
 
 
-def get_single_elecs_from_bps(bipolar_pairs):
-    monopolar_channels = np.array([], dtype=np.dtype('|S32'))
-    for ti in bipolar_pairs:
-        monopolar_channels = np.hstack((monopolar_channels, ti['channel_str']))
-    return np.unique(monopolar_channels)
+            bpTalStruct = tal_reader.read()
+            monopolar_channels = tal_reader.get_monopolar_channels()
+            bipolar_pairs = tal_reader.get_bipolar_pairs()
+
+            for i,bp in enumerate(bpTalStruct):
+                bpTalStruct.tagName[i] = bp.tagName.upper()
 
 
-#def get_dataroot(events):
-#    dataroots = np.unique([esrc.dataroot for esrc in events.esrc])
-#    return dataroots[0]
+
+            self.pass_object('monopolar_channels', monopolar_channels)
+            # self.pass_object('bipolar_pairs', bpTalStruct)
+            self.pass_object('bipolar_pairs', bipolar_pairs)
+            self.pass_object('bp_tal_structs', bpTalStruct)
+
+
+            self.add_report_status(message='OK')
+
+        except Exception:
+            # raise MissingDataError('Missing or corrupt electrodes data %s for subject %s '%(tal_path,self.pipeline.subject))
+
+            self.raise_and_log_report_exception(
+                                                exception_type='MissingDataError',
+                                                exception_message='Missing or corrupt electrodes data %s for subject %s '%(tal_path,self.pipeline.subject)
+                                                )
+

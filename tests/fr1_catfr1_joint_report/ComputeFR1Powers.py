@@ -124,43 +124,20 @@ class ComputeFR1Powers(ReportRamTask):
             sess_pow_mat = np.empty(shape=(n_events, n_bps, n_freqs), dtype=np.float)
 
             #monopolar_channels_np = np.array(monopolar_channels)
-            for i,ti in enumerate(bipolar_pairs):
-                # print bp
-                # print monopolar_channels
+            for i,bp in enumerate(bipolar_pairs):
 
-                # print np.where(monopolar_channels == bp[0])
-                # print np.where(monopolar_channels == bp[1])
-                bp = ti['channel_str']
                 print 'Computing powers for bipolar pair', bp
                 elec1 = np.where(monopolar_channels == bp[0])[0][0]
                 elec2 = np.where(monopolar_channels == bp[1])[0][0]
-                # print 'elec1=',elec1
-                # print 'elec2=',elec2
-                # eegs_elec1 = eegs[elec1]
-                # eegs_elec2 = eegs[elec2]
-                # print 'eegs_elec1=',eegs_elec1
-                # print 'eegs_elec2=',eegs_elec2
-                # eegs_elec1.reset_coords('channels')
-                # eegs_elec2.reset_coords('channels')
 
                 bp_data = eegs[elec1] - eegs[elec2]
                 bp_data.attrs['samplerate'] = self.samplerate
 
-                # bp_data = eegs[elec1] - eegs[elec2]
-                # bp_data = eegs[elec1] - eegs[elec2]
-                # bp_data = eegs.values[elec1] - eegs.values[elec2]
 
                 bp_data = bp_data.filtered([58,62], filt_type='stop', order=self.params.filt_order)
                 for ev in xrange(n_events):
                     self.wavelet_transform.multiphasevec(bp_data[ev][0:winsize], pow_ev)
-                    #if np.min(pow_ev) < 0.0:
-                    #    print ev, events[ev]
-                    #    joblib.dump(bp_data[ev], 'bad_bp_ev%d'%ev)
-                    #    joblib.dump(eegs[elec1][ev], 'bad_elec1_ev%d'%ev)
-                    #    joblib.dump(eegs[elec2][ev], 'bad_elec2_ev%d'%ev)
-                    #    print 'Negative powers detected'
-                    #    import sys
-                    #    sys.exit(1)
+
                     pow_ev_stripped = np.reshape(pow_ev, (n_freqs,winsize))[:,bufsize:winsize-bufsize]
                     pow_zeros = np.where(pow_ev_stripped==0.0)[0]
                     if len(pow_zeros)>0:

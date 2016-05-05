@@ -11,11 +11,22 @@ from setup_utils import parse_command_line, configure_python_paths
 from ReportUtils import CMLParser, ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
+
 cml_parser.arg('--subject','R1147P')
-cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/FR1_CatFr1_check_1')
-cml_parser.arg('--mount-point','')
+# cml_parser.arg('--task','RAM_FR1')
+# cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/FR1_reports')
+cml_parser.arg('--workspace-dir','/Users/m/automated_reports/FR1_CatFR1_reports')
+cml_parser.arg('--mount-point','/Volumes/rhino_root')
 cml_parser.arg('--recompute-on-no-status')
 # cml_parser.arg('--exit-on-no-change')
+
+cml_parser.arg('--python-path','/Users/m/PTSA_NEW_GIT/')
+
+# cml_parser.arg('--subject','R1147P')
+# cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/FR1_CatFr1_check_1')
+# cml_parser.arg('--mount-point','')
+# cml_parser.arg('--recompute-on-no-status')
+# # cml_parser.arg('--exit-on-no-change')
 
 args = cml_parser.parse()
 
