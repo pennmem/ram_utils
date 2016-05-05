@@ -1,29 +1,41 @@
 __author__ = 'm'
 
-import numpy as np
-import os
-
-from get_bipolar_subj_elecs import get_bipolar_subj_elecs
+from ptsa.data.readers import TalReader
 
 from RamPipeline import *
 
+from ReportUtils import RamTask
 
 class TalPreparation(RamTask):
     def __init__(self, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(TalPreparation,self).__init__(mark_as_completed)
+
 
     def run(self):
-        subjpath = os.path.join(self.pipeline.mount_point,'data/eeg',self.pipeline.subject)
-        bipolar_pairs = get_bipolar_subj_elecs(subjpath, leadsonly=True, exclude_bad_leads=False)
-        monopolar_channels = get_single_elecs_from_bps(bipolar_pairs)
-        print len(monopolar_channels), 'single electrodes', len(bipolar_pairs), 'bipolar pairs'
+        try:
 
-        self.pass_object('bipolar_pairs', bipolar_pairs)
-        self.pass_object('monopolar_channels', monopolar_channels)
+            tal_path = os.path.join(self.pipeline.mount_point,'data/eeg',self.pipeline.subject,'tal',self.pipeline.subject+'_talLocs_database_bipol.mat')
+
+            tal_reader = TalReader(filename=tal_path)
 
 
-def get_single_elecs_from_bps(bipolar_pairs):
-    monopolar_channels = np.array([], dtype=np.dtype('|S32'))
-    for ti in bipolar_pairs:
-        monopolar_channels = np.hstack((monopolar_channels, ti['channel_str']))
-    return np.unique(monopolar_channels)
+            bpTalStruct = tal_reader.read()
+            monopolar_channels = tal_reader.get_monopolar_channels()
+            bipolar_pairs = tal_reader.get_bipolar_pairs()
+
+            for i,bp in enumerate(bpTalStruct):
+                bpTalStruct.tagName[i] = bp.tagName.upper()
+
+
+
+            self.pass_object('monopolar_channels', monopolar_channels)
+            self.pass_object('bipolar_pairs', bipolar_pairs)
+
+        except Exception:
+            # raise MissingDataError('Missing or corrupt electrodes data %s for subject %s '%(tal_path,self.pipeline.subject))
+
+            self.raise_and_log_report_exception(
+                                                exception_type='MissingDataError',
+                                                exception_message='Missing or corrupt electrodes data %s for subject %s '%(tal_path,self.pipeline.subject)
+                                                )
+

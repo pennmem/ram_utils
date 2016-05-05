@@ -15,12 +15,20 @@ if len(sys.argv)>2:
 
 
 else: # emulate command line
+    # command_line_emulation_argument_list = ['--subject','R1166D',
+    #                                         '--task','RAM_FR1',
+    #                                         '--workspace-dir','/scratch/busygin/biomarkers',
+    #                                         '--mount-point','',
+    #                                         '--python-path','/home1/busygin/ram_utils',
+    #                                         '--python-path','/home1/busygin/python/ptsa_latest'
+    #                                         ]
+
     command_line_emulation_argument_list = ['--subject','R1166D',
                                             '--task','RAM_FR1',
-                                            '--workspace-dir','/scratch/busygin/biomarkers',
-                                            '--mount-point','',
-                                            '--python-path','/home1/busygin/ram_utils',
-                                            '--python-path','/home1/busygin/python/ptsa_latest'
+                                            '--workspace-dir','/Users/m/automated_reports/biomarkers',
+                                            '--mount-point','/Volumes/rhino_root',
+                                            '--python-path','/Users/m/RAM_UTILS_GIT',
+                                            '--python-path','/Users/m/PTSA_NEW_GIT'
                                             ]
     args = parse_command_line(command_line_emulation_argument_list)
 

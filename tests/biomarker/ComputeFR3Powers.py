@@ -79,8 +79,8 @@ class ComputeFR3Powers(RamTask):
 
             sess_pow_mat = np.empty(shape=(n_events, n_bps, n_freqs), dtype=np.float)
 
-            for i,ti in enumerate(bipolar_pairs):
-                bp = ti['channel_str']
+            for i,bp in enumerate(bipolar_pairs):
+
                 print 'Computing powers for bipolar pair', bp
                 elec1 = np.where(monopolar_channels == bp[0])[0][0]
                 elec2 = np.where(monopolar_channels == bp[1])[0][0]
