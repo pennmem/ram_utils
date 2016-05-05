@@ -6,7 +6,12 @@ def get_bipolar_subj_elecs(
         subjpath, leadsonly=True, exclude_bad_leads=False,
         taldir='/tal', bipolfileend='_talLocs_database_bipol.mat'):
     talfile = glob(subjpath+taldir+'/*'+bipolfileend)
-    
+
+    # print 'mask=',subjpath+taldir+'/*'+bipolfileend
+    # print 'subjpath=',subjpath
+    # print 'talfile=',talfile
+
+
     if len(talfile)!=1:
         raise ValueError('Invalid number of files! '+str(talfile)+'\n' +str(subjpath))
     else:

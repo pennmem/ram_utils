@@ -53,7 +53,9 @@ exit_on_no_change_flag=--exit-on-no-change
 
 
 # FR1
-cd /home1/mswat/RAM_UTILS_GIT/tests/fr1_report
+report_code_dir=/home1/mswat/RAM_UTILS_GIT/tests/fr1_report
+cd ${report_code_dir}
+
 
 workspace_dir=/scratch/mswat/automated_reports/FR1_reports
 status_output_dir=${workspace_dir}/${datetime}
@@ -61,12 +63,14 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python /home1/mswat/RAM_UTILS_GIT/tests/fr1_report/fr1_report_all.py  --task=RAM_FR1 \
+python ${report_code_dir}/fr1_report_all.py  --task=RAM_FR1 \
  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
  --skip-subjects R1055J R1061T R1090C R1092J_2 R1093J_1 R2009P_1 R2012P_1 R2015P_1
 
 # FR3
-cd /home1/mswat/RAM_UTILS_GIT/tests/fr_stim_report
+report_code_dir=/home1/mswat/RAM_UTILS_GIT/tests/fr_stim_report
+cd ${report_code_dir}
+
 
 workspace_dir=${automated_reports_dir}/FR3_reports
 status_output_dir=${workspace_dir}/${datetime}
@@ -74,12 +78,14 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python /home1/mswat/RAM_UTILS_GIT/tests/fr_stim_report/fr_stim_report_all.py  --task=RAM_FR3 \
+python ${report_code_dir}/fr_stim_report_all.py  --task=RAM_FR3 \
  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
  --skip-subjects R1093J_1
 
 # FR4
-cd /home1/mswat/RAM_UTILS_GIT/tests/fr_stim_report
+report_code_dir=/home1/mswat/RAM_UTILS_GIT/tests/fr_stim_report
+cd ${report_code_dir}
+
 
 workspace_dir=${automated_reports_dir}/FR4_reports
 status_output_dir=${workspace_dir}/${datetime}
@@ -87,12 +93,14 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python /home1/mswat/RAM_UTILS_GIT/tests/fr_stim_report/fr_stim_report_all.py  --task=RAM_FR4 \
+python ${report_code_dir}/fr_stim_report_all.py  --task=RAM_FR4 \
  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 
 
 #CatFR1
-cd /home1/mswat/RAM_UTILS_GIT/tests/fr1_report
+report_code_dir=/home1/mswat/RAM_UTILS_GIT/tests/fr1_report
+cd ${report_code_dir}
+
 
 workspace_dir=${automated_reports_dir}/CatFR1_reports
 status_output_dir=${workspace_dir}/${datetime}
@@ -100,12 +108,15 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python /home1/mswat/RAM_UTILS_GIT/tests/fr1_report/fr1_report_all.py  --task=RAM_CatFR1 \
+python ${report_code_dir}/fr1_report_all.py  --task=RAM_CatFR1 \
  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
  --skip-subjects R1029W
 
+
 # FR1 CatFR1 joint
-cd /home1/mswat/RAM_UTILS_GIT/tests/fr1_catfr1_joint_report
+report_code_dir=/home1/mswat/RAM_UTILS_GIT/tests/fr1_catfr1_joint_report
+cd ${report_code_dir}
+
 
 workspace_dir=${automated_reports_dir}/FR1_CatFr1_reports
 status_output_dir=${workspace_dir}/${datetime}
@@ -113,13 +124,15 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python /home1/mswat/RAM_UTILS_GIT/tests/fr1_catfr1_joint_report/fr1_catfr1_joint_report_all.py --task=RAM_FR1_CatFR1_joint\
+python ${report_code_dir}/fr1_catfr1_joint_report_all.py --task=RAM_FR1_CatFR1_joint\
  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
  --skip-subjects R1061T
 
 
 # PAL1
-cd /home1/mswat/RAM_UTILS_GIT/tests/pal1_report
+report_code_dir=/home1/mswat/RAM_UTILS_GIT/tests/pal1_report
+cd ${report_code_dir}
+
 
 workspace_dir=${automated_reports_dir}/PAL1_reports
 status_output_dir=${workspace_dir}/${datetime}
@@ -127,12 +140,14 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python /home1/mswat/RAM_UTILS_GIT/tests/pal1_report/pal1_report_all.py  --task=RAM_PAL1 \
+python ${report_code_dir}/pal1_report_all.py  --task=RAM_PAL1 \
   --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
   --skip-subjects R1050M R1136N
 
 # PS1
-cd /home1/mswat/RAM_UTILS_GIT/tests/ps_report
+report_code_dir=/home1/mswat/RAM_UTILS_GIT/tests/ps_report
+cd ${report_code_dir}
+
 
 workspace_dir=${automated_reports_dir}/PS1_reports
 status_output_dir=${workspace_dir}/${datetime}
@@ -140,13 +155,14 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python /home1/mswat/RAM_UTILS_GIT/tests/ps_report/ps_report_all.py  --experiment=PS1 \
+python ${report_code_dir}/ps_report_all.py  --experiment=PS1 \
   --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
   --skip-subjects R1061T
 
 
 # PS2
-cd /home1/mswat/RAM_UTILS_GIT/tests/ps_report
+report_code_dir=/home1/mswat/RAM_UTILS_GIT/tests/ps_report
+cd ${report_code_dir}
 
 workspace_dir=${automated_reports_dir}/PS2_reports
 status_output_dir=${workspace_dir}/${datetime}
@@ -154,12 +170,15 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python /home1/mswat/RAM_UTILS_GIT/tests/ps_report/ps_report_all.py  --experiment=PS2 \
+python ${report_code_dir}/ps_report_all.py  --experiment=PS2 \
   --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
   --skip-subjects R1100D
 
 # PS2.1
-cd /home1/mswat/RAM_UTILS_GIT/tests/ps_report
+report_code_dir=/home1/mswat/RAM_UTILS_GIT/tests/ps_report
+cd ${report_code_dir}
+
+
 
 workspace_dir=${automated_reports_dir}/PS2.1_reports
 status_output_dir=${workspace_dir}/${datetime}
@@ -167,11 +186,12 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python /home1/mswat/RAM_UTILS_GIT/tests/ps_report/ps_report_all.py  --experiment=PS2.1 \
+python ${report_code_dir}/ps_report_all.py  --experiment=PS2.1 \
   --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 
 # PS3
-cd /home1/mswat/RAM_UTILS_GIT/tests/ps_report
+report_code_dir=/home1/mswat/RAM_UTILS_GIT/tests/ps_report
+cd ${report_code_dir}
 
 workspace_dir=${automated_reports_dir}/PS3_reports
 status_output_dir=${workspace_dir}/${datetime}
@@ -179,12 +199,14 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python /home1/mswat/RAM_UTILS_GIT/tests/ps_report/ps_report_all.py  --experiment=PS3 \
+python ${report_code_dir}/ps_report_all.py  --experiment=PS3 \
   --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 
 
 # FR3
-cd /home1/mswat/RAM_UTILS_GIT/tests/fr_stim_report
+report_code_dir=/home1/mswat/RAM_UTILS_GIT/tests/fr_stim_report
+cd ${report_code_dir}
+
 
 workspace_dir=${automated_reports_dir}/FR3_reports
 status_output_dir=${workspace_dir}/${datetime}
@@ -192,12 +214,15 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python /home1/mswat/RAM_UTILS_GIT/tests/fr1_report/fr_stim_report_all.py  --task=RAM_FR3 \
+python ${report_code_dir}/fr_stim_report_all.py  --task=RAM_FR3 \
  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 
 
 # FR4
-cd /home1/mswat/RAM_UTILS_GIT/tests/fr_stim_report
+
+report_code_dir=/home1/mswat/RAM_UTILS_GIT/tests/fr_stim_report
+cd ${report_code_dir}
+
 
 workspace_dir=${automated_reports_dir}/FR4_reports
 status_output_dir=${workspace_dir}/${datetime}
@@ -205,13 +230,14 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python /home1/mswat/RAM_UTILS_GIT/tests/fr1_report/fr_stim_report_all.py  --task=RAM_FR4 \
+python ${report_code_dir}/fr_stim_report_all.py  --task=RAM_FR4 \
  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 
 
 
 ## TH1
-cd /home1/mswat/RAM_UTILS_GIT/tests/th1_report
+report_code_dir=/home1/mswat/RAM_UTILS_GIT/tests/th1_report
+cd ${report_code_dir}
 
 workspace_dir=${automated_reports_dir}/TH1_reports
 status_output_dir=${workspace_dir}/${datetime}
@@ -219,7 +245,7 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python /home1/mswat/RAM_UTILS_GIT/tests/th1_report/th1_report_all.py  --task=RAM_TH1\
+python ${report_code_dir}/th1_report_all.py  --task=RAM_TH1\
  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 
 
