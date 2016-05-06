@@ -1,13 +1,12 @@
 # command line example:
-# python biomarker.py --subject=R1056M --workspace-dir=/scratch/mswat/FR3_biomarker --n-channels=128 --anode-num=3 ---cathode-num=4 --pulse-frequency=200 --pulse-count=100 --target-amplitude=10000
+# python fr3_biomarker.py --subject=R1056M --workspace-dir=/scratch/busygin/FR3_biomarkers --subject=R1145J_1 --n-channels=128 --anode=RD2-RD3 --anode-num=34 --cathode-num=35 --pulse-frequency=200 --pulse-count=100 --target-amplitude=1000
 
-import sys
 from os.path import *
 from BiomarkerUtils import CMLParserBiomarker
 
 
 cml_parser = CMLParserBiomarker(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','/scratch/mswat/FR3_biomarker')
+cml_parser.arg('--workspace-dir','/scratch/busygin/FR3_biomarkers')
 cml_parser.arg('--subject','R1145J_1')
 cml_parser.arg('--n-channels','128')
 cml_parser.arg('--anode-num','3')
@@ -39,24 +38,11 @@ import numpy as np
 
 class StimParams(object):
     def __init__(self,**kwds):
-
         self.n_channels = kwds['n_channels']
-
-        self.elec1=kwds['anode_num']
-
-        try:
-            self.anode=kwds['anode']
-        except KeyError:
-            self.anode=''
-
-
-        self.elec2=kwds['cathode_num']
-
-        try:
-            self.cathode=kwds['cathode']
-        except KeyError:
-            self.cathode=''
-
+        self.elec1 = kwds['anode_num']
+        self.anode = kwds.get('anode', '')
+        self.elec2 = kwds['cathode_num']
+        self.cathode = kwds.get('cathode', '')
         self.pulseFrequency = kwds['pulse_frequency']
         self.pulseCount = kwds['pulse_count']
         self.amplitude = kwds['target_amplitude']
@@ -64,8 +50,6 @@ class StimParams(object):
         self.duration = 300
         self.trainFrequency = 1
         self.trainCount = 1
-
-# turn it into command line options
 
 class Params(object):
     def __init__(self):
@@ -113,7 +97,6 @@ class ReportPipeline(RamPipeline):
     def __init__(self, subject, workspace_dir, mount_point=None):
         RamPipeline.__init__(self)
         self.subject = subject
-        # self.task = self.experiment = task
         self.mount_point = mount_point
         self.set_workspace_dir(workspace_dir)
 

@@ -256,14 +256,14 @@ classdef StimControl < handle
                 else if n_channels==288
                     dataByChannel = dataByChannel(end-this.winsize+1:end,[1:128,145:272]);
                 else
-                    fprintf('ERROR: unknown number of neuroports');
+                    stopSession = true;
+                    errMsg = sprintf('ERROR: %d channels detected, unknown number of neuroports\n', n_channels);
+                    fprintf(errMsg);
                     return;
 
                 this.session_eeg = cat(3, this.session_eeg, dataByChannel);
 
                 dataByChannel = dataByChannel*this.bpmat;
-
-                % fprintf('EEG mean=%f, stdev=%f\n', mean(dataByChannel(:)), std(dataByChannel(:)));
 
                 % mirroring happens here
                 flipdata = flipud(dataByChannel);
