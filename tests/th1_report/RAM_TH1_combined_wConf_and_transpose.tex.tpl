@@ -127,7 +127,7 @@ $<N_ITEMS>$ words & $<N_CORRECT_ITEMS>$ correct & $<N_TRANSPOSE_ITEMS>$ correct 
 
 \clearpage
 \begin{center}
-\textbf{\Large Multivariate classification analysis}
+\textbf{\Large Multivariate classification analysis (Rec. vs Non-Rec)}
 \end{center}
 
 \begin{figure}[!h]
@@ -135,15 +135,52 @@ $<N_ITEMS>$ words & $<N_CORRECT_ITEMS>$ correct & $<N_TRANSPOSE_ITEMS>$ correct 
 \includegraphics[scale=0.45]{<ROC_AND_TERC_PLOT_FILE>}
 \caption{\textbf{Left:} ROC curve for the subject for predicting \textit{recalled vs not recalled}; 
 \textbf{Right:} Subject recall performance represented as
-percentage deviation from the (subject) mean, separated by tercile
+percentage deviation from the (subject) mean recall rate, separated by tercile
 of the classifier encoding efficiency estimate for each encoded item.}
 \end{figure}
-
 $\bullet$ Area Under Curve = $<AUC>$\%
 
 $\bullet$ Permutation test $p$-value: $<PERM-P-VALUE>$
 
 $\bullet$ Median of classifier output = $<J-THRESH>$
+
+\begin{center}
+\textbf{\Large Multivariate classification analysis (Rec. counting transposed vs Non-Rec)}
+\end{center}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.45]{<ROC_AND_TERC_PLOT_TRANSPOSE_FILE>}
+\caption{\textbf{Left:} ROC curve for the subject for predicting \textit{recalled vs not recalled}; 
+\textbf{Right:} Subject recall performance represented as
+percentage deviation from the (subject) mean recall rate, separated by tercile
+of the classifier encoding efficiency estimate for each encoded item.}
+\end{figure}
+$\bullet$ Area Under Curve = $<AUC_TRANSPOSE>$\%
+
+$\bullet$ Permutation test $p$-value: $<PERM-P-VALUE_TRANSPOSE>$
+
+$\bullet$ Median of classifier output = $<J-THRESH_TRANSPOSE>$
+
+
+\begin{center}
+\textbf{\Large Multivariate classification analysis (High Conf. vs Mid/Low)}
+\end{center}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.45]{<ROC_AND_TERC_PLOT_CONF_FILE>}
+\caption{\textbf{Left:} ROC curve for the subject for predicting \textit{High confidence vs not high confidence responses}; 
+\textbf{Right:} Subject recall performance represented as
+percentage deviation from the (subject) mean high confidence rate, separated by tercile
+of the classifier encoding efficiency estimate for each encoded item.}
+\end{figure}
+
+$\bullet$ Area Under Curve = $<AUC_CONF>$\%
+
+$\bullet$ Permutation test $p$-value: $<PERM-P-VALUE_CONF>$
+
+% $\bullet$ Median of classifier output = $<J-THRESH>$
 
 %\begin{figure}[!h]
 %\centering

@@ -26,7 +26,10 @@ class GenerateTex(ReportRamTask):
 
         tex_combined_template = task + '_combined.tex.tpl'        
         if self.params.doConf_classification & self.get_passed_object('conf_decode_success'):
-            tex_combined_template = task + '_combined_wConf.tex.tpl'        
+            if self.params.doClass_wTranspose:
+                tex_combined_template = task + '_combined_wConf_and_transpose.tex.tpl'        
+            else:
+                tex_combined_template = task + '_combined_wConf.tex.tpl'        
         combined_report_tex_file_name = '%s_%s_report.tex' % (subject,task)
 
         self.set_file_resources_to_move(combined_report_tex_file_name, dst='reports')
@@ -49,7 +52,9 @@ class GenerateTex(ReportRamTask):
                         '<NUMBER_OF_ELECTRODES>': n_bps,
                         '<N_ITEMS>': cumulative_summary.n_items,
                         '<N_CORRECT_ITEMS>': cumulative_summary.n_correct_items,
-                        '<PC_CORRECT_WORDS>': '%.2f' % cumulative_summary.pc_correct_items,                        
+                        '<PC_CORRECT_WORDS>': '%.2f' % cumulative_summary.pc_correct_items,      
+                        '<N_TRANSPOSE_ITEMS>': cumulative_summary.n_transposed_items,
+                        '<PC_TRANSPOSE_WORDS>': '%.2f' % cumulative_summary.pc_transposed_items,        
                         '<TABLE_FORMAT>': ttable_format,
                         '<TABLE_HEADER>': ttable_header,
                         '<SIGNIFICANT_ELECTRODES_LTA>': cumulative_ttest_tex_table_LTA,
@@ -64,8 +69,13 @@ class GenerateTex(ReportRamTask):
                         '<PERM-P-VALUE_CONF>': cumulative_summary.perm_test_pvalue_conf,                        
                         '<J-THRESH>': cumulative_summary.jstat_thresh,
                         '<J-PERC>': cumulative_summary.jstat_percentile,
+                        '<AUC_TRANSPOSE>': cumulative_summary.auc_transpose,
+                        '<PERM-P-VALUE_TRANSPOSE>': cumulative_summary.perm_test_pvalue_transpose,
+                        '<J-THRESH_TRANSPOSE>': cumulative_summary.jstat_thresh_transpose,
+                        '<J-PERC_TRANSPOSE>': cumulative_summary.jstat_percentile_transpose,                        
                         '<ROC_AND_TERC_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-roc_and_terc_plot_combined.pdf',
-                        '<ROC_AND_TERC_PLOT_CONF_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-roc_and_terc_plot_combined_conf.pdf'                        
+                        '<ROC_AND_TERC_PLOT_CONF_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-roc_and_terc_plot_combined_conf.pdf',
+                        '<ROC_AND_TERC_PLOT_TRANSPOSE_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-roc_and_terc_plot_combined_transpose.pdf'                                                                        
                         }
 
         TextTemplateUtils.replace_template(template_file_name=tex_combined_template, out_file_name=combined_report_tex_file_name, replace_dict=replace_dict)
@@ -198,6 +208,20 @@ class GeneratePlots(ReportRamTask):
             plot = panel_plot.generate_plot()
             plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-roc_and_terc_plot_combined_conf.pdf')
             plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+            
+        #  classifier auc and roc with transposed responses counted as correct
+        if self.params.doClass_wTranspose:
+            panel_plot = PanelPlot(xfigsize=15, yfigsize=7, i_max=1, j_max=2, title='', labelsize=18)        
+            pd3 = PlotData(x=cumulative_summary.fpr_transpose, y=cumulative_summary.tpr_transpose, xlim=[0.0,1.0], ylim=[0.0,1.0], xlabel='False Alarm Rate', ylabel='Hit Rate', levelline=((0.001,0.999),(0.001,0.999)), color='k', markersize=1.0, xlabel_fontsize=18, ylabel_fontsize=18)
+            ylim = np.max(np.abs(cumulative_summary.pc_diff_from_mean_transpose)) + 5.0
+            if ylim > 100.0:
+                ylim = 100.0
+            pd4 = BarPlotData(x=(0,1,2), y=cumulative_summary.pc_diff_from_mean_transpose, ylim=[-ylim,ylim], xlabel='Tercile of Classifier Estimate', ylabel='Change From Mean (%)', x_tick_labels=['Low', 'Middle', 'High'], xhline_pos=0.0, barcolors=['grey','grey', 'grey'], xlabel_fontsize=18, ylabel_fontsize=18, barwidth=0.5)
+            panel_plot.add_plot_data(0, 0, plot_data=pd3)        
+            panel_plot.add_plot_data(0, 1, plot_data=pd4)                
+            plot = panel_plot.generate_plot()
+            plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-roc_and_terc_plot_combined_transpose.pdf')
+            plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')            
 
 
 class GenerateReportPDF(ReportRamTask):

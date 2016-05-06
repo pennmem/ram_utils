@@ -47,10 +47,10 @@ In the treasure hunt task, participants navigate a virtual environment and encou
 
 \begin{table}[!h]
 \centering
-\begin{tabular}{c|c}
+\begin{tabular}{c|c|c}
 \multicolumn{2}{c}{\textbf{Treasure Hunt}} \\ 
 \hline
-$<N_ITEMS>$ words & $<N_CORRECT_ITEMS>$ correct \\ \hline 
+$<N_ITEMS>$ words & $<N_CORRECT_ITEMS>$ correct & $<N_TRANSPOSE_ITEMS>$ correct counting transposed\\ \hline 
 \end{tabular}
 \caption{Items are considered correctly recalled if they are within the target circle.}
 \end{table}
