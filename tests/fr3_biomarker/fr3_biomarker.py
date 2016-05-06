@@ -1,19 +1,19 @@
 # command line example:
-# python fr3_biomarker.py --subject=R1056M --workspace-dir=/scratch/busygin/FR3_biomarkers --subject=R1145J_1 --n-channels=128 --anode=RD2-RD3 --anode-num=34 --cathode-num=35 --pulse-frequency=200 --pulse-count=100 --target-amplitude=1000
+# python fr3_biomarker.py --workspace-dir=/scratch/busygin/FR3_biomarkers --subject=R1145J_1 --n-channels=128 --anode=RD2 --anode-num=34 --cathode=RD3 --cathode-num=35 --pulse-frequency=200 --pulse-count=100 --target-amplitude=1000
 
 from os.path import *
 from BiomarkerUtils import CMLParserBiomarker
 
 
 cml_parser = CMLParserBiomarker(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','/scratch/busygin/FR3_biomarkers')
-cml_parser.arg('--subject','R1145J_1')
-cml_parser.arg('--n-channels','128')
-cml_parser.arg('--anode-num','3')
-cml_parser.arg('--cathode-num','4')
-cml_parser.arg('--pulse-frequency','200')
-cml_parser.arg('--pulse-count','100')
-cml_parser.arg('--target-amplitude','1000')
+# cml_parser.arg('--workspace-dir','/scratch/busygin/FR3_biomarkers')
+# cml_parser.arg('--subject','R1145J_1')
+# cml_parser.arg('--n-channels','128')
+# cml_parser.arg('--anode-num','3')
+# cml_parser.arg('--cathode-num','4')
+# cml_parser.arg('--pulse-frequency','200')
+# cml_parser.arg('--pulse-count','100')
+# cml_parser.arg('--target-amplitude','1000')
 
 
 args = cml_parser.parse()
