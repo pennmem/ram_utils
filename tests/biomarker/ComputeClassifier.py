@@ -36,15 +36,15 @@ class ModelOutput(object):
         except ValueError:
             return
         self.fpr, self.tpr, self.thresholds = roc_curve(self.true_labels, self.probs)
-        #idx = np.argmax(self.tpr-self.fpr)
-        #self.jstat_thresh = self.thresholds[idx]
-        #self.jstat_quantile = np.sum(self.probs <= self.jstat_thresh) / float(self.probs.size)
+        # idx = np.argmax(self.tpr-self.fpr)
+        # self.jstat_thresh = self.thresholds[idx]
+        # self.jstat_quantile = np.sum(self.probs <= self.jstat_thresh) / float(self.probs.size)
         self.jstat_quantile = 0.5
         self.jstat_thresh = np.median(self.probs)
 
     def compute_tercile_stats(self):
-        thresh_low = np.percentile(self.probs, 100.0/3.0)
-        thresh_high = np.percentile(self.probs, 2.0*100.0/3.0)
+        thresh_low = np.percentile(self.probs, 100.0 / 3.0)
+        thresh_high = np.percentile(self.probs, 2.0 * 100.0 / 3.0)
 
         low_terc_sel = (self.probs <= thresh_low)
         high_terc_sel = (self.probs >= thresh_high)
@@ -56,9 +56,9 @@ class ModelOutput(object):
 
         recall_rate = np.sum(self.true_labels) / float(self.true_labels.size)
 
-        self.low_pc_diff_from_mean = 100.0 * (low_terc_recall_rate-recall_rate) / recall_rate
-        self.mid_pc_diff_from_mean = 100.0 * (mid_terc_recall_rate-recall_rate) / recall_rate
-        self.high_pc_diff_from_mean = 100.0 * (high_terc_recall_rate-recall_rate) / recall_rate
+        self.low_pc_diff_from_mean = 100.0 * (low_terc_recall_rate - recall_rate) / recall_rate
+        self.mid_pc_diff_from_mean = 100.0 * (mid_terc_recall_rate - recall_rate) / recall_rate
+        self.high_pc_diff_from_mean = 100.0 * (high_terc_recall_rate - recall_rate) / recall_rate
 
 
 class ComputeClassifier(RamTask):
@@ -67,7 +67,7 @@ class ComputeClassifier(RamTask):
         self.params = params
         self.pow_mat = None
         self.lr_classifier = None
-        self.xval_output = dict()   # ModelOutput per session; xval_output[-1] is across all sessions
+        self.xval_output = dict()  # ModelOutput per session; xval_output[-1] is across all sessions
         self.perm_AUCs = None
         self.pvalue = None
 
@@ -87,7 +87,7 @@ class ComputeClassifier(RamTask):
             outsample_pow_mat = self.pow_mat[outsample_mask]
             outsample_recalls = recalls[outsample_mask]
 
-            outsample_probs = self.lr_classifier.predict_proba(outsample_pow_mat)[:,1]
+            outsample_probs = self.lr_classifier.predict_proba(outsample_pow_mat)[:, 1]
             if not permuted:
                 self.xval_output[sess] = ModelOutput(outsample_recalls, outsample_probs)
                 self.xval_output[sess].compute_roc()
@@ -131,7 +131,7 @@ class ComputeClassifier(RamTask):
             outsample_mask = ~insample_mask
             outsample_pow_mat = self.pow_mat[outsample_mask]
 
-            probs[outsample_mask] = self.lr_classifier.predict_proba(outsample_pow_mat)[:,1]
+            probs[outsample_mask] = self.lr_classifier.predict_proba(outsample_pow_mat)[:, 1]
 
         if not permuted:
             xval_output = ModelOutput(recalls, probs)
@@ -158,16 +158,17 @@ class ComputeClassifier(RamTask):
 
     def run(self):
         subject = self.pipeline.subject
-        task = self.pipeline.task
+
 
         events = self.get_passed_object('FR_events')
         self.pow_mat = normalize_sessions(self.get_passed_object('pow_mat'), events)
 
-        #n1 = np.sum(events.recalled)
-        #n0 = len(events) - n1
-        #w0 = (2.0/n0) / ((1.0/n0)+(1.0/n1))
-        #w1 = (2.0/n1) / ((1.0/n0)+(1.0/n1))
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto', solver='liblinear')
+        # n1 = np.sum(events.recalled)
+        # n0 = len(events) - n1
+        # w0 = (2.0/n0) / ((1.0/n0)+(1.0/n1))
+        # w1 = (2.0/n1) / ((1.0/n0)+(1.0/n1))
+        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
+                                                solver='liblinear')
 
         event_sessions = events.session
         recalls = events.recalled
@@ -204,19 +205,19 @@ class ComputeClassifier(RamTask):
         self.pass_object('perm_AUCs', self.perm_AUCs)
         self.pass_object('pvalue', self.pvalue)
 
-        joblib.dump(self.lr_classifier, self.get_path_to_resource_in_workspace(subject + '-' + task + '-lr_classifier.pkl'))
-        joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace(subject + '-' + task + '-xval_output.pkl'))
-        joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace(subject + '-' + task + '-perm_AUCs.pkl'))
-        joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject + '-' + task + '-pvalue.pkl'))
+        joblib.dump(self.lr_classifier, self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl'))
+        joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace(subject + '-xval_output.pkl'))
+        joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace(subject + '-perm_AUCs.pkl'))
+        joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject + '-pvalue.pkl'))
 
     def restore(self):
         subject = self.pipeline.subject
-        task = self.pipeline.task
 
-        self.lr_classifier = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-lr_classifier.pkl'))
-        self.xval_output = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-xval_output.pkl'))
-        self.perm_AUCs = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-perm_AUCs.pkl'))
-        self.pvalue = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-pvalue.pkl'))
+
+        self.lr_classifier = joblib.load(self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl'))
+        self.xval_output = joblib.load(self.get_path_to_resource_in_workspace(subject + '-xval_output.pkl'))
+        self.perm_AUCs = joblib.load(self.get_path_to_resource_in_workspace(subject + '-perm_AUCs.pkl'))
+        self.pvalue = joblib.load(self.get_path_to_resource_in_workspace(subject + '-pvalue.pkl'))
 
         self.pass_object('lr_classifier', self.lr_classifier)
         self.pass_object('xval_output', self.xval_output)

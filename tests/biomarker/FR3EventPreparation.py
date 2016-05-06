@@ -26,7 +26,7 @@ class FR3EventPreparation(RamTask):
         RamTask.__init__(self, mark_as_completed)
 
     def run(self):
-        task3 = self.pipeline.task3
+        task3 = 'RAM_FR3'
         e_path = os.path.join(self.pipeline.mount_point , 'data/events', task3, self.pipeline.subject + '_events.mat')
         e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
         all_events = e_reader.read()

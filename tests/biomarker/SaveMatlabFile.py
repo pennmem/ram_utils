@@ -16,7 +16,7 @@ class SaveMatlabFile(RamTask):
 
     def run(self):
         subject = self.pipeline.subject
-        task = self.pipeline.task
+
 
         events = self.get_passed_object('FR_events')
 

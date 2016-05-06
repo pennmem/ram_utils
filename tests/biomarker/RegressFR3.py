@@ -29,7 +29,7 @@ class RegressFR3(RamTask):
 
     def run(self):
         subject = self.pipeline.subject
-        task3 = self.pipeline.task3
+        task3 = 'RAM_FR3'
 
         events = self.get_passed_object(task3 + '_events')
         self.pow_mat = self.get_passed_object('pow_mat')
