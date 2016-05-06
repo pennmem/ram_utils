@@ -48,7 +48,18 @@ status_output_dirs=()
 automated_reports_dir=/scratch/mswat/automated_reports
 
 exit_on_no_change_flag=--exit-on-no-change
-#exit_on_no_change_flag=
+exit_on_no_change_flag=
+
+LOCKFILE=${automated_reports_dir}/automated_reports.lock
+# making sure only one copy of automated reports runs
+if [ -f ${LOCKFILE} ]
+then
+    echo 'Lock file ${automated_reports_dir}/automated_reports.lock is present indicating another script is running'
+    exit 1
+else
+    touch ${LOCKFILE}
+fi
+#lockfile -r 0 ${automated_reports_dir}/automated_reports.lock || exit 1
 
 
 
@@ -219,7 +230,6 @@ python ${report_code_dir}/fr_stim_report_all.py  --task=RAM_FR3 \
 
 
 # FR4
-
 report_code_dir=/home1/mswat/RAM_UTILS_GIT/tests/fr_stim_report
 cd ${report_code_dir}
 
@@ -249,18 +259,17 @@ python ${report_code_dir}/th1_report_all.py  --task=RAM_TH1\
  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 
 
+#PS1-2 aggregator
+cd /home1/mswat/RAM_UTILS_GIT/tests/ps_aggregator
+python /home1/mswat/RAM_UTILS_GIT/tests/ps_aggregator/ps_aggregator.py --workspace-dir=${automated_reports_dir}
 
-##PS1-2 aggregator
-#cd /home1/mswat/RAM_UTILS_GIT/tests/ps_aggregator
-#python /home1/mswat/RAM_UTILS_GIT/tests/ps_aggregator/ps_aggregator.py --workspace-dir=${automated_reports_dir}
-#
-##PS3 aggregator
-#cd /home1/mswat/RAM_UTILS_GIT/tests/ps3_aggregator
-#python /home1/mswat/RAM_UTILS_GIT/tests/ps3_aggregator/ps3_aggregator.py --workspace-dir=${automated_reports_dir}
-#
-##ttest significance generator
-#cd /home1/mswat/RAM_UTILS_GIT/tests/ps_ttest_table
-#python /home1/mswat/RAM_UTILS_GIT/tests/ps_ttest_table/ttest_table_with_params.py --workspace-dir=${automated_reports_dir}
+#PS3 aggregator
+cd /home1/mswat/RAM_UTILS_GIT/tests/ps3_aggregator
+python /home1/mswat/RAM_UTILS_GIT/tests/ps3_aggregator/ps3_aggregator.py --workspace-dir=${automated_reports_dir}
+
+#ttest significance generator
+cd /home1/mswat/RAM_UTILS_GIT/tests/ps_ttest_table
+python /home1/mswat/RAM_UTILS_GIT/tests/ps_ttest_table/ttest_table_with_params.py --workspace-dir=${automated_reports_dir}
 
 
 
@@ -272,5 +281,8 @@ python /home1/mswat/RAM_UTILS_GIT/ReportUtils/ReportMailer.py\
 cd ${automated_reports_dir}/error_logs
 remove_old_error_logs
 
-#
+
 cd ${current_directory}
+
+# removing lockfile
+rm -f ${LOCKFILE}
