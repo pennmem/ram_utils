@@ -260,6 +260,7 @@ classdef StimControl < handle
                     errMsg = sprintf('ERROR: %d channels detected, unknown number of neuroports\n', n_channels);
                     fprintf(errMsg);
                     return;
+                end
 
                 this.session_eeg = cat(3, this.session_eeg, dataByChannel);
 

@@ -29,6 +29,8 @@ from ComputeFRPowers import ComputeFRPowers
 
 from TalPreparation import TalPreparation
 
+from CheckElectrodeLabels import CheckElectrodeLabels
+
 from ComputeClassifier import ComputeClassifier
 
 from SaveMatlabFile import SaveMatlabFile
@@ -107,6 +109,8 @@ report_pipeline = ReportPipeline(subject=args.subject,
 report_pipeline.add_task(FREventPreparation(params=params, mark_as_completed=False))
 
 report_pipeline.add_task(TalPreparation(mark_as_completed=False))
+
+report_pipeline.add_task(CheckElectrodeLabels(params=params, mark_as_completed=False))
 
 report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 
