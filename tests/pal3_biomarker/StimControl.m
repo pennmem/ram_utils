@@ -83,15 +83,14 @@ classdef StimControl < handle
         Subject;
         StimParams;
         zscorer; % StatAccum to accumulate data for zscoring
-        n_freqs; % Number of frequencies, 8 for FR3 1.0.2 design
+        n_freqs; % Number of frequencies, 8 for PAL3 design
         bpmat;   % matrix to convert monopolar to bipolar eeg
         freqs;   % frequencies used in wavelet transform
         fs;      % sampling rate = 1000 Hz for Sys 2.x
-        winsize; % 1366 for Sys 2.0.2
-        total_winsize; % 4096 for Sys 2.0.2
-        total_downsampled_size; % 4.096 sec * 50 Hz for FR3 1.0.2
-        wait_after_word_on; % 1366 ms for FR3 1.0.2
-        bufsize; % 1.365 sec * 50 Hz for FR3 1.0.2
+        winsize; % 2300 for Sys 2.0.2
+        total_winsize; % 4300 for Sys 2.0.2
+        wait_after_word_on; % 2700 ms for PAL3
+        bufsize; % 1000 for PAL3
         phase;   % experiment phase
         W_in;    % classifier weights
         thresh;  % prob threshold
@@ -100,14 +99,10 @@ classdef StimControl < handle
         session_pows;  % collected for KS test and postmortem
         powFileName;   % file with saved powers
         Filter;        % Butterworth filter [58 62] Hz
-        trainingProb;  % collection of classifier probabilities from FR1 sessions
+        trainingProb;  % collection of classifier probabilities from PAL1 sessions
         ks_test_done;  % flag that becomes true when KS test is performed and passed
         current_word_analyzed;  % flag that says not to compute on the present word again if true
         wavelet_transformer;
-        elapsed_duration; % DEBUG: CHECK THE ELAPSED TIME DURING STIM CHOICE
-        debugFileName;
-        elapsed_tic;
-        elapsed_i;
     end
 
     % ---- Public instance methods
@@ -117,10 +112,6 @@ classdef StimControl < handle
         function initialize(this)
            % This method will be called wherever an experiment starts.  Set all persistent variables here.
            % Remember to include 'this.' in front of all variables that you want to be persistent.
-           this.elapsed_tic = tic;
-           this.elapsed_duration = nan(20*3600,1);
-           this.elapsed_i = 1;
-           
            load FILL_IN  % loads Bio struct of biomarker information
 
            this.Subject = Bio.Subject;
@@ -136,10 +127,10 @@ classdef StimControl < handle
            this.trainingProb = Bio.trainingProb;
            this.thresh = Bio.thresh;
            this.fs = Bio.fs;                  % sampling freq.
-           this.winsize = 1366;
-           this.total_winsize = 4096;
-           this.bufsize = 1365;
-           this.wait_after_word_on = 1366;
+           this.winsize = 2300;
+           this.total_winsize = 4300;
+           this.bufsize = 1000;
+           this.wait_after_word_on = 2700;
            [B,A] = butter(4, [58.0 62.0]/(this.fs/2.0), 'stop');
            this.Filter.coeffs = [B;A];
 
@@ -204,18 +195,12 @@ classdef StimControl < handle
             %       .sample         number indicating the number of samples collected from the start
             %                       of the experiment
             %
-            %   dataByChannel:      is number-of-samples x 144 matrix.  Each column contains a single channel.
-            %                       The first 128 channels come from the patient.  The remaining 16 channels
+            %   dataByChannel:      is number-of-samples x #channels matrix.  Each column contains a single channel.
+            %                       The first 128 channels come from the patient.  The next 16 channels
             %                       are analog input channels, which could include sync pulses or
-            %                       stim pulses (TBD)
+            %                       stim pulses (TBD). Repeated #neuroports times.
             % Outputs:
             %   decision (no-stim=0 or stim=1)
-            this.elapsed_duration(this.elapsed_i) = toc(this.elapsed_tic);
-            this.elapsed_tic = tic;
-            if this.elapsed_i < length(this.elapsed_duration)
-                this.elapsed_i = this.elapsed_i + 1;
-            end
-            
             decision = 0;
             stopSession = false;
             errMsg = [];
@@ -250,20 +235,21 @@ classdef StimControl < handle
 
                 % decoding procedure
 
-                n_channels = size(dataByChannel,2)
+                n_channels = size(dataByChannel,2);
                 if n_channels==144
                     dataByChannel = dataByChannel(end-this.winsize+1:end,1:128);
-                else if n_channels==288
+                elseif n_channels==288
                     dataByChannel = dataByChannel(end-this.winsize+1:end,[1:128,145:272]);
                 else
-                    fprintf('ERROR: unknown number of neuroports');
+                    stopSession = true;
+                    errMsg = sprintf('ERROR: %d channels detected, unknown number of neuroports\n', n_channels);
+                    fprintf(errMsg);
                     return;
+                end
 
                 this.session_eeg = cat(3, this.session_eeg, dataByChannel);
 
                 dataByChannel = dataByChannel*this.bpmat;
-
-                % fprintf('EEG mean=%f, stdev=%f\n', mean(dataByChannel(:)), std(dataByChannel(:)));
 
                 % mirroring happens here
                 flipdata = flipud(dataByChannel);

@@ -5,6 +5,7 @@ import os.path
 import numpy as np
 import scipy.io as spio
 from ptsa.data.readers import BaseEventReader
+from numpy.lib.recfunctions import append_fields
 
 from RamPipeline import *
 
@@ -24,7 +25,20 @@ class TH1EventPreparation(RamTask):
         events.dtype.names = ['item_name' if i=='item' else i for i in events.dtype.names]
         ev_order = np.argsort(events, order=('session','trial','mstime'))
         events = events[ev_order]
+        
+        # add in error if object locations are transposed
+        xCenter = 384.8549
+        yCenter = 358.834
+        x = events.chosenLocationX-xCenter;
+        y = events.chosenLocationY-yCenter;
+        xChest = events.locationX-xCenter;
+        yChest = events.locationY-yCenter;
+        distErr_transpose = np.sqrt((-xChest - x)**2 + (-yChest - y)**2);  
+        events = append_fields(events,'distErr_transpose',distErr_transpose,dtypes=float,usemask=False,asrecarray=True)
 
+        recalled_ifFlipped = np.zeros(np.shape(distErr_transpose),dtype=bool)
+        recalled_ifFlipped[events.isRecFromStartSide==0] = events.distErr_transpose[events.isRecFromStartSide==0]<=13
+        events = append_fields(events,'recalled_ifFlipped',recalled_ifFlipped,dtypes=float,usemask=False,asrecarray=True)        
         self.pass_object(self.pipeline.task+'_all_events', events)
 
         chest_events = events[events.type == 'CHEST']

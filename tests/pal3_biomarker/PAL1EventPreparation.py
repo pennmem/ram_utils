@@ -8,15 +8,11 @@ from ptsa.data.readers import BaseEventReader
 
 from RamPipeline import *
 
-from ReportUtils import ReportRamTask
-
-class PAL1EventPreparation(ReportRamTask):
+class PAL1EventPreparation(RamTask):
     def __init__(self, mark_as_completed=True):
-        super(PAL1EventPreparation,self).__init__(mark_as_completed)
+        RamTask.__init__(self, mark_as_completed)
 
     def run(self):
-        task = self.pipeline.task
-
         e_path = os.path.join(self.pipeline.mount_point , 'data/events/RAM_PAL1', self.pipeline.subject + '_events.mat')
         e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
@@ -34,7 +30,7 @@ class PAL1EventPreparation(ReportRamTask):
         ev_order = np.argsort(events, order=('session','list','mstime'))
         events = events[ev_order]
 
-        print len(events), task, 'STUDY_PAIR events'
+        print len(events), 'STUDY_PAIR events'
 
         self.pass_object('PAL1_events', events)
         self.pass_object('PAL1_intr_events', intr_events)

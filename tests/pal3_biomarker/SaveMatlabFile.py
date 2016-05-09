@@ -16,34 +16,24 @@ class SaveMatlabFile(RamTask):
 
     def run(self):
         subject = self.pipeline.subject
-
-
-        events = self.get_passed_object('FR_events')
-
+        events = self.get_passed_object('PAL1_events')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
-        #channels = self.get_passed_object('channels')
 
         n_bps = len(bipolar_pairs)
-        n_chs = 128  #len(channels)
+        n_chs = self.params.stim_params.n_channels
 
         bpmat = np.zeros(shape=(n_chs, n_bps), dtype=np.float)
-        # for i,bp in enumerate(bipolar_pairs):
-        #     e1, e2 = bp['channel_str']
-        #     bpmat[int(e1)-1, i] = 1
-        #     bpmat[int(e2)-1, i] = -1
-
         for i,bp in enumerate(bipolar_pairs):
             e1, e2 = bp[0],bp[1]
             bpmat[int(e1)-1, i] = 1
             bpmat[int(e2)-1, i] = -1
-
 
         lr_classifier = self.get_passed_object('lr_classifier')
         xval_output = self.get_passed_object('xval_output')[-1]
         probs = xval_output.probs
         thresh = xval_output.jstat_thresh
 
-        mat_filename = '%s_%s_FR3.biomarker.mat' % (subject, datetime.date.today())
+        mat_filename = '%s_%s_PAL3_%s_%s_%dHz_%gmA.biomarker.mat' % (subject, datetime.date.today(), self.params.stim_params.anode, self.params.stim_params.cathode, self.params.stim_params.pulseFrequency, self.params.stim_params.amplitude/1000.0)
 
         mdict = {'Bio': {'Subject': subject,
                          'Version': self.params.version,
@@ -71,9 +61,6 @@ class SaveMatlabFile(RamTask):
         replace_dict = {
             'load FILL_IN': 'load ' + mat_filename
         }
-
-        #stat_accum_in_workspace = self.get_path_to_resource_in_workspace('StatAccum.m')
-        #TextTemplateUtils.replace_template(template_file_name='StatAccum.m', out_file_name=stat_accum_in_workspace, replace_dict=replace_dict)
 
         stim_control_in_workspace = self.get_path_to_resource_in_workspace('StimControl.m')
         TextTemplateUtils.replace_template(template_file_name='StimControl.m', out_file_name=stim_control_in_workspace, replace_dict=replace_dict)

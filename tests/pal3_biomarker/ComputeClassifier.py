@@ -61,28 +61,15 @@ class ModelOutput(object):
         self.high_pc_diff_from_mean = 100.0 * (high_terc_recall_rate-recall_rate) / recall_rate
 
 
-
-from ReportUtils import ReportRamTask
-
-class ComputeClassifier(ReportRamTask):
+class ComputeClassifier(RamTask):
     def __init__(self, params, mark_as_completed=True):
-        super(ComputeClassifier,self).__init__(mark_as_completed)
-
+        RamTask.__init__(self, mark_as_completed)
         self.params = params
         self.pow_mat = None
         self.lr_classifier = None
         self.xval_output = dict()   # ModelOutput per session; xval_output[-1] is across all sessions
         self.perm_AUCs = None
         self.pvalue = None
-
-
-    def initialize(self):
-        if self.dependency_inventory:
-            self.dependency_inventory.add_dependent_resource(resource_name='PAL1_events',
-                                        access_path = ['experiments','pal1','events'])
-            self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
-                                        access_path = ['electrodes','bipolar'])
-
 
     def run_loso_xval(self, event_sessions, recalls, permuted=False):
         probs = np.empty_like(recalls, dtype=np.float)
@@ -224,18 +211,18 @@ class ComputeClassifier(ReportRamTask):
         self.pass_object('perm_AUCs', self.perm_AUCs)
         self.pass_object('pvalue', self.pvalue)
 
-        joblib.dump(self.lr_classifier, self.get_path_to_resource_in_workspace(subject + '-PAL1-lr_classifier.pkl'))
-        joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace(subject + '-PAL1-xval_output.pkl'))
-        joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace(subject + '-PAL1-perm_AUCs.pkl'))
-        joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject + '-PAL1-pvalue.pkl'))
+        joblib.dump(self.lr_classifier, self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl'))
+        joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace(subject + '-xval_output.pkl'))
+        joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace(subject + '-perm_AUCs.pkl'))
+        joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject + '-pvalue.pkl'))
 
     def restore(self):
         subject = self.pipeline.subject
 
-        self.lr_classifier = joblib.load(self.get_path_to_resource_in_workspace(subject + '-PAL1-lr_classifier.pkl'))
-        self.xval_output = joblib.load(self.get_path_to_resource_in_workspace(subject + '-PAL1-xval_output.pkl'))
-        self.perm_AUCs = joblib.load(self.get_path_to_resource_in_workspace(subject + '-PAL1-perm_AUCs.pkl'))
-        self.pvalue = joblib.load(self.get_path_to_resource_in_workspace(subject + '-PAL1-pvalue.pkl'))
+        self.lr_classifier = joblib.load(self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl'))
+        self.xval_output = joblib.load(self.get_path_to_resource_in_workspace(subject + '-xval_output.pkl'))
+        self.perm_AUCs = joblib.load(self.get_path_to_resource_in_workspace(subject + '-perm_AUCs.pkl'))
+        self.pvalue = joblib.load(self.get_path_to_resource_in_workspace(subject + '-pvalue.pkl'))
 
         self.pass_object('lr_classifier', self.lr_classifier)
         self.pass_object('xval_output', self.xval_output)

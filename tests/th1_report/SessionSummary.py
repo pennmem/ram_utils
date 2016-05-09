@@ -9,6 +9,8 @@ class SessionSummary(object):
         self.n_items = None
         self.n_correct_items = None
         self.pc_correct_items = None
+        self.n_transposed_items = None
+        self.pc_transposed_items = None        
         self.completed = None
         self.score = None
         
@@ -43,3 +45,12 @@ class SessionSummary(object):
         self.perm_test_pvalue_conf = None
         self.jstat_thresh_conf = None
         self.jstat_percentile_conf = None        
+        
+        self.fpr_transpose = None
+        self.tpr_transpose = None
+        self.auc_transpose = None
+        self.pc_diff_from_mean_transpose = None
+        self.perm_AUCs_transpose = None
+        self.perm_test_pvalue_transpose = None
+        self.jstat_thresh_transpose = None
+        self.jstat_percentile_transpose = None

@@ -8,29 +8,20 @@ from sklearn.externals import joblib
 
 from ptsa.data.readers import EEGReader
 
-from ReportUtils import ReportRamTask
 
-class ComputePAL1Powers(ReportRamTask):
+class ComputePAL1Powers(RamTask):
     def __init__(self, params,mark_as_completed=True):
-        super(ComputePAL1Powers,self).__init__(mark_as_completed)
-
+        RamTask.__init__(self, mark_as_completed)
 
         self.params = params
         self.pow_mat = None
         self.samplerate = None
         self.wavelet_transform = MorletWaveletTransform()
 
-    def initialize(self):
-        if self.dependency_inventory:
-            self.dependency_inventory.add_dependent_resource(resource_name='PAL1_events',
-                                        access_path = ['experiments','pal1','events'])
-            self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
-                                        access_path = ['electrodes','bipolar'])
-
     def restore(self):
         subject = self.pipeline.subject
 
-        self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-PAL1-pow_mat.pkl'))
+        self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
         self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
 
         self.pass_object('pow_mat', self.pow_mat)
@@ -52,7 +43,7 @@ class ComputePAL1Powers(ReportRamTask):
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
 
-        joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-PAL1-pow_mat.pkl'))
+        joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
         joblib.dump(self.samplerate, self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
 
     def compute_powers(self, events, sessions, monopolar_channels, bipolar_pairs):
