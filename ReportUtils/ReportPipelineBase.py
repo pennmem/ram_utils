@@ -74,8 +74,8 @@ class ReportPipelineBase(RamPipeline):
 
         self.report_summary = ReportSummary()
 
-        self.report_site_URL = 'https://stimstaging.psych.upenn.edu/rhino/'
-
+        # self.report_site_URL = 'https://stimstaging.psych.upenn.edu/rhino/'
+        self.report_site_URL = 'https://stim.psych.upenn.edu/rhino/'
 
     def add_report_error(self, error, stacktrace=None):
         self.report_summary.add_report_error(error, stacktrace=stacktrace)
