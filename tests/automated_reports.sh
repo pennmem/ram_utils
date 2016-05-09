@@ -48,7 +48,7 @@ status_output_dirs=()
 automated_reports_dir=/scratch/mswat/automated_reports
 
 exit_on_no_change_flag=--exit-on-no-change
-exit_on_no_change_flag=
+#exit_on_no_change_flag=
 
 LOCKFILE=${automated_reports_dir}/automated_reports.lock
 # making sure only one copy of automated reports runs
@@ -212,6 +212,64 @@ remove_old_status_dirs ${workspace_dir}
 
 python ${report_code_dir}/ps_report_all.py  --experiment=PS3 \
   --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
+
+
+
+# PAL_PS1
+report_code_dir=/home1/mswat/RAM_UTILS_GIT/tests/ps_pal_report
+cd ${report_code_dir}
+
+workspace_dir=${automated_reports_dir}/PS1_PAL_reports
+status_output_dir=${workspace_dir}/${datetime}
+status_output_dirs+=(${status_output_dir})
+
+remove_old_status_dirs ${workspace_dir}
+
+python ${report_code_dir}/ps_pal_report_all.py  --experiment=PS1 \
+  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
+
+
+# PAL_PS2
+report_code_dir=/home1/mswat/RAM_UTILS_GIT/tests/ps_pal_report
+cd ${report_code_dir}
+
+workspace_dir=${automated_reports_dir}/PS2_PAL_reports
+status_output_dir=${workspace_dir}/${datetime}
+status_output_dirs+=(${status_output_dir})
+
+remove_old_status_dirs ${workspace_dir}
+
+python ${report_code_dir}/ps_pal_report_all.py  --experiment=PS2 \
+  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
+
+
+# PAL_PS2.1
+report_code_dir=/home1/mswat/RAM_UTILS_GIT/tests/ps_pal_report
+cd ${report_code_dir}
+
+workspace_dir=${automated_reports_dir}/PS2.1_PAL_reports
+status_output_dir=${workspace_dir}/${datetime}
+status_output_dirs+=(${status_output_dir})
+
+remove_old_status_dirs ${workspace_dir}
+
+python ${report_code_dir}/ps_pal_report_all.py  --experiment=PS2.1 \
+  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
+
+
+# PAL_PS3
+report_code_dir=/home1/mswat/RAM_UTILS_GIT/tests/ps_pal_report
+cd ${report_code_dir}
+
+workspace_dir=${automated_reports_dir}/PS3_PAL_reports
+status_output_dir=${workspace_dir}/${datetime}
+status_output_dirs+=(${status_output_dir})
+
+remove_old_status_dirs ${workspace_dir}
+
+python ${report_code_dir}/ps_pal_report_all.py  --experiment=PS3 \
+  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
+
 
 
 # FR3

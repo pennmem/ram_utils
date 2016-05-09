@@ -47,10 +47,10 @@ In the treasure hunt task, participants navigate a virtual environment and encou
 
 \begin{table}[!h]
 \centering
-\begin{tabular}{c|c}
+\begin{tabular}{c|c|c}
 \multicolumn{2}{c}{\textbf{Treasure Hunt}} \\ 
 \hline
-$<N_ITEMS>$ items & $<N_CORRECT_ITEMS>$ correct \\ \hline
+$<N_ITEMS>$ words & $<N_CORRECT_ITEMS>$ correct & $<N_TRANSPOSE_ITEMS>$ correct counting transposed\\ \hline 
 \end{tabular}
 \caption{Items are considered correctly recalled if they are within the target circle.}
 \end{table}
@@ -82,7 +82,7 @@ $<N_ITEMS>$ items & $<N_CORRECT_ITEMS>$ correct \\ \hline
 <TABLE_HEADER> \\
 <SIGNIFICANT_ELECTRODES_LTA>
 \hline
-\caption{Subsequent memory effect low theta. Low theta activity (1-3 Hz) was measured across the item presentation interval ($<TIME_WIN_START>$ to $<TIME_WIN_END>$ ms). At each electrode, a t-test compared low theta for subsequently recalled vs subsequently forgotten items. \textbf{Surface Electrodes:} Red - significant positive effect (subsequently \textit{remembered} $>$ subsequently \textit{forgotten}). Blue - significant negative effect (subsequently \textit{remembered} $<$ subsequently \textit{forgotten}). Black - difference not significant. \textbf{Depth Electrodes:} All bipolar pairs shown in descending order of significance Bipolar pairs that exceed significance threshold ($p < .05$) are in boldface.}
+\caption{Subsequent memory effect low theta. Low theta activity (1-3 Hz) was measured across the word presentation interval ($<TIME_WIN_START>$ to $<TIME_WIN_END>$ ms). At each electrode, a t-test compared low theta for subsequently recalled vs subsequently forgotten items. \textbf{Surface Electrodes:} Red - significant positive effect (subsequently \textit{remembered} $>$ subsequently \textit{forgotten}). Blue - significant negative effect (subsequently \textit{remembered} $<$ subsequently \textit{forgotten}). Black - difference not significant. \textbf{Depth Electrodes:} All bipolar pairs shown in descending order of significance Bipolar pairs that exceed significance threshold ($p < .05$) are in boldface.}
 \end{longtable}
 \end{center}
 
@@ -95,7 +95,7 @@ $<N_ITEMS>$ items & $<N_CORRECT_ITEMS>$ correct \\ \hline
 <TABLE_HEADER> \\
 <SIGNIFICANT_ELECTRODES_HTA>
 \hline
-\caption{Subsequent memory effect high theta. High theta activity (3-9 Hz) was measured across the item presentation interval ($<TIME_WIN_START>$ to $<TIME_WIN_END>$ ms). At each electrode, a t-test compared high theta for subsequently recalled vs subsequently forgotten items. \textbf{Surface Electrodes:} Red - significant positive effect (subsequently \textit{remembered}  $>$ subsequently \textit{forgotten}). Blue - significant negative effect (subsequently \textit{remembered} $<$ subsequently \textit{forgotten}). Black - difference not significant. \textbf{Depth Electrodes:} All bipolar pairs shown in descending order of significance Bipolar pairs that exceed significance threshold ($p < .05$) are in boldface.}
+\caption{Subsequent memory effect high theta. High theta activity (3-9 Hz) was measured across the word presentation interval ($<TIME_WIN_START>$ to $<TIME_WIN_END>$ ms). At each electrode, a t-test compared high theta for subsequently recalled vs subsequently forgotten items. \textbf{Surface Electrodes:} Red - significant positive effect (subsequently \textit{remembered}  $>$ subsequently \textit{forgotten}). Blue - significant negative effect (subsequently \textit{remembered} $<$ subsequently \textit{forgotten}). Black - difference not significant. \textbf{Depth Electrodes:} All bipolar pairs shown in descending order of significance Bipolar pairs that exceed significance threshold ($p < .05$) are in boldface.}
 \end{longtable}
 \end{center}
 
@@ -108,7 +108,7 @@ $<N_ITEMS>$ items & $<N_CORRECT_ITEMS>$ correct \\ \hline
 <TABLE_HEADER> \\
 <SIGNIFICANT_ELECTRODES_G>
 \hline
-\caption{Subsequent memory effect gamma. Gamma activity (40-70 Hz) was measured across the item presentation interval ($<TIME_WIN_START>$ to $<TIME_WIN_END>$ ms). At each electrode, a t-test compared gamma for subsequently recalled vs subsequently forgotten items. \textbf{Surface Electrodes:} Red - significant positive effect (subsequently \textit{remembered}  $>$ subsequently \textit{forgotten}). Blue - significant negative effect (subsequently \textit{remembered} $<$ subsequently \textit{forgotten}). Black - difference not significant. \textbf{Depth Electrodes:} All bipolar pairs shown in descending order of significance Bipolar pairs that exceed significance threshold ($p < .05$) are in boldface.}
+\caption{Subsequent memory effect gamma. Gamma activity (40-70 Hz) was measured across the word presentation interval ($<TIME_WIN_START>$ to $<TIME_WIN_END>$ ms). At each electrode, a t-test compared gamma for subsequently recalled vs subsequently forgotten items. \textbf{Surface Electrodes:} Red - significant positive effect (subsequently \textit{remembered}  $>$ subsequently \textit{forgotten}). Blue - significant negative effect (subsequently \textit{remembered} $<$ subsequently \textit{forgotten}). Black - difference not significant. \textbf{Depth Electrodes:} All bipolar pairs shown in descending order of significance Bipolar pairs that exceed significance threshold ($p < .05$) are in boldface.}
 \end{longtable}
 \end{center}
 
@@ -121,7 +121,7 @@ $<N_ITEMS>$ items & $<N_CORRECT_ITEMS>$ correct \\ \hline
 <TABLE_HEADER> \\
 <SIGNIFICANT_ELECTRODES_HFA>
 \hline
-\caption{Subsequent memory effect HFA. High frequency activity (HFA, 70-200 Hz) was measured across the item presentation interval ($<TIME_WIN_START>$ to $<TIME_WIN_END>$ ms). At each electrode, a t-test compared HFA for subsequently recalled vs subsequently forgotten items. \textbf{Surface Electrodes:} Red - significant positive effect (subsequently \textit{remembered} HFA $>$ subsequently \textit{forgotten} HFA). Blue - significant negative effect (subsequently \textit{remembered} HFA $<$ subsequently \textit{forgotten} HFA). Black - difference not significant. \textbf{Depth Electrodes:} All bipolar pairs shown in descending order of significance Bipolar pairs that exceed significance threshold ($p < .05$) are in boldface.}
+\caption{Subsequent memory effect HFA. High frequency activity (HFA, 70-200 Hz) was measured across the word presentation interval ($<TIME_WIN_START>$ to $<TIME_WIN_END>$ ms). At each electrode, a t-test compared HFA for subsequently recalled vs subsequently forgotten items. \textbf{Surface Electrodes:} Red - significant positive effect (subsequently \textit{remembered} HFA $>$ subsequently \textit{forgotten} HFA). Blue - significant negative effect (subsequently \textit{remembered} HFA $<$ subsequently \textit{forgotten} HFA). Black - difference not significant. \textbf{Depth Electrodes:} All bipolar pairs shown in descending order of significance Bipolar pairs that exceed significance threshold ($p < .05$) are in boldface.}
 \end{longtable}
 \end{center}
 

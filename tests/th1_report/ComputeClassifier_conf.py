@@ -239,7 +239,7 @@ class ComputeClassifier_conf(ReportRamTask):
             joblib.dump(self.xval_output_conf, self.get_path_to_resource_in_workspace(subject + '-' + task + '-xval_output_conf.pkl'))
             joblib.dump(self.perm_AUCs_conf, self.get_path_to_resource_in_workspace(subject + '-' + task + '-perm_AUCs_conf.pkl'))
             joblib.dump(self.pvalue_conf, self.get_path_to_resource_in_workspace(subject + '-' + task + '-pvalue_conf.pkl'))
-            joblib.dump(self.pvalue_conf, self.get_path_to_resource_in_workspace(subject + '-' + task + '-conf_decode_success.pkl'))        
+            joblib.dump(self.conf_decode_success, self.get_path_to_resource_in_workspace(subject + '-' + task + '-conf_decode_success.pkl'))        
 
     def restore(self):
         subject = self.pipeline.subject
@@ -249,10 +249,10 @@ class ComputeClassifier_conf(ReportRamTask):
         self.xval_output_conf = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-xval_output_conf.pkl'))
         self.perm_AUCs_conf = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-perm_AUCs_conf.pkl'))
         self.pvalue_conf = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-pvalue_conf.pkl'))
-        self.pvalue_conf = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-conf_decode_success.pkl'))        
+        self.conf_decode_success = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-conf_decode_success.pkl'))        
 
         self.pass_object('lr_classifier_conf', self.lr_classifier_conf)
         self.pass_object('xval_output_conf', self.xval_output_conf)
         self.pass_object('perm_AUCs_conf', self.perm_AUCs_conf)
         self.pass_object('pvalue_conf', self.pvalue_conf)
-        self.pass_object('conf_decode_success', self.self.conf_decode_success)        
+        self.pass_object('conf_decode_success', self.conf_decode_success)        

@@ -89,12 +89,17 @@ class ComposeSessionSummary(ReportRamTask):
 
         xval_output = self.get_passed_object('xval_output')
         perm_test_pvalue = self.get_passed_object('pvalue')
+
         if self.params.doConf_classification & self.get_passed_object('conf_decode_success'):
             xval_output_conf = self.get_passed_object('xval_output_conf')
             perm_test_pvalue_conf = self.get_passed_object('pvalue_conf')        
 
         if self.params.doDist_classification:        
             xval_output_thresh = self.get_passed_object('model_output_thresh')
+
+        if self.params.doClass_wTranspose:
+            xval_output_transpose = self.get_passed_object('xval_output_transpose')
+            perm_test_pvalue_transpose = self.get_passed_object('pvalue_transpose') 
 
         sessions = np.unique(events.session)
 
@@ -123,7 +128,11 @@ class ComposeSessionSummary(ReportRamTask):
             session_completed = True if n_sess_events==100 else False
             n_items = len(session_events)
             n_correct_items = np.sum(session_events.recalled)
-            pc_correct_items = 100*n_correct_items / float(n_items)         
+            pc_correct_items = 100*n_correct_items / float(n_items)  
+            
+            n_correct_items_transpose   = np.sum((session_events.recalled==True)|(session_events.recalled_ifFlipped==True))
+            pc_correct_items_transpose = 100*n_correct_items_transpose / float(n_items)             
+                   
             lists = np.unique(session_events.trial)
             n_lists = len(lists)          
             print 'Session =', session_name, 'Score = ', session_score 
@@ -138,6 +147,9 @@ class ComposeSessionSummary(ReportRamTask):
         cumulative_summary.n_items = len(events)
         cumulative_summary.n_correct_items = np.sum(events.recalled)
         cumulative_summary.pc_correct_items = 100*cumulative_summary.n_correct_items / float(cumulative_summary.n_items)
+        cumulative_summary.n_transposed_items = np.sum((events.recalled==True)|(events.recalled_ifFlipped==True))
+        cumulative_summary.pc_transposed_items = 100*cumulative_summary.n_transposed_items / float(cumulative_summary.n_items)
+
 
         # analyses 1: probability correct as a function of confidence
         # analysis 2: probability histogram of of distance error for each confidence level
@@ -192,6 +204,19 @@ class ComposeSessionSummary(ReportRamTask):
             cumulative_summary.jstat_thresh_conf = '%.3f' % cumulative_xval_output_conf.jstat_thresh
             cumulative_summary.jstat_percentile_conf = '%.2f' % (100.0*cumulative_xval_output_conf.jstat_quantile)
 
+
+        if self.params.doClass_wTranspose:
+            cumulative_xval_output_transpose = xval_output_transpose[-1]
+            cumulative_summary.auc_transpose = '%.2f' % (100*cumulative_xval_output_transpose.auc)
+            cumulative_summary.fpr_transpose = cumulative_xval_output_transpose.fpr
+            cumulative_summary.tpr_transpose = cumulative_xval_output_transpose.tpr
+            cumulative_summary.pc_diff_from_mean_transpose = (cumulative_xval_output_transpose.low_pc_diff_from_mean, cumulative_xval_output_transpose.mid_pc_diff_from_mean, cumulative_xval_output_transpose.high_pc_diff_from_mean)
+            cumulative_summary.perm_AUCs_transpose = self.get_passed_object('perm_AUCs_transpose')
+            cumulative_summary.perm_test_pvalue_transpose = ('= %.3f' % perm_test_pvalue_transpose) if perm_test_pvalue_transpose>=0.001 else '\leq 0.001'
+            cumulative_summary.jstat_thresh_transpose = '%.3f' % cumulative_xval_output_transpose.jstat_thresh
+            cumulative_summary.jstat_percentile_transpose = '%.2f' % (100.0*cumulative_xval_output_transpose.jstat_quantile)
+            
+            
         self.pass_object('cumulative_summary', cumulative_summary)
 
         # electrode tttest data for each freq_bin
