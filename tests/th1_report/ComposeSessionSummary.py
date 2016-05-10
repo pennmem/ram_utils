@@ -137,7 +137,7 @@ class ComposeSessionSummary(ReportRamTask):
             n_lists = len(lists)          
             print 'Session =', session_name, 'Score = ', session_score 
 
-            session_data.append([session, session_date, session_length, n_lists, '$%.2f$\\%%' % pc_correct_items,session_completed,session_score])
+            session_data.append([session, session_date, session_length, n_lists, '$%.2f$\\%%' % pc_correct_items,session_score])
 
         self.pass_object('SESSION_DATA', session_data)
     
