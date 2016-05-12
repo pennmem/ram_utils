@@ -104,7 +104,7 @@ subject_missing_data_list = []
 
 rsi = ReportSummaryInventory(label=args.experiment)
 
-for subject in subjects[:2]:
+for subject in subjects:
     print subject
     if args.skip_subjects is not None and subject in args.skip_subjects:
         continue
