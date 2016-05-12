@@ -22,7 +22,7 @@ class ReportMailer(object):
         map(lambda d: self.dir_list.append(d), args)
 
     def compose_summary(self, detail_level=0):
-        d = self.dir_list[0]
+        # d = self.dir_list[0]
         for d in self.dir_list:
             self.extract_json_node_from_dir(d)
 

@@ -50,7 +50,11 @@ class ReportDeployer(object):
 
                 return
 
-        standard_report_basename = (subject+'_'+self.pipeline.experiment+'_report.pdf') if classifier_experiment is None else (subject+'_'+self.pipeline.experiment+'_'+classifier_experiment+'_report.pdf')
+        standard_report_basename = \
+            (subject+'_'+self.pipeline.experiment+'_report.pdf')\
+            if classifier_experiment is None else \
+            (subject+'_'+self.pipeline.experiment+'_'+classifier_experiment+'_report.pdf')
+
         standard_report_path = join(report_dir,standard_report_basename)
         # shutil.copy(report_path,join(report_dir,report_basename))
         shutil.copy(report_path,standard_report_path)

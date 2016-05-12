@@ -37,9 +37,9 @@ In the treasure hunt task, participants navigate a virtual environment and encou
 \end{minipage}
 &
 \small
-\begin{tabular}{|c|c|c|c|c|c|c|}
+\begin{tabular}{|c|c|c|c|c|c|}
     
-\hline Session \# & Date & Length (m) & \#lists & Perf & Completed & Score\\
+\hline Session \# & Date & Length (m) & \#lists & Perf & Score\\
 <SESSION_DATA>
 \end{tabular}
 \end{tabular}
@@ -48,7 +48,7 @@ In the treasure hunt task, participants navigate a virtual environment and encou
 \begin{table}[!h]
 \centering
 \begin{tabular}{c|c|c}
-\multicolumn{2}{c}{\textbf{Treasure Hunt}} \\ 
+\multicolumn{3}{c}{\textbf{Treasure Hunt}} \\ 
 \hline
 $<N_ITEMS>$ items & $<N_CORRECT_ITEMS>$ correct & $<N_TRANSPOSE_ITEMS>$ correct counting transposed\\ \hline
 \end{tabular}
