@@ -47,12 +47,12 @@ In the treasure hunt task, participants navigate a virtual environment and encou
 
 \begin{table}[!h]
 \centering
-\begin{tabular}{c|c|c}
-\multicolumn{3}{c}{\textbf{Treasure Hunt}} \\ 
+\begin{tabular}{c|c|c|c}
+\multicolumn{4}{c}{\textbf{Treasure Hunt}} \\ 
 \hline
-$<N_ITEMS>$ items & $<N_CORRECT_ITEMS>$ correct & $<N_TRANSPOSE_ITEMS>$ correct counting transposed\\ \hline
+$<N_ITEMS>$ items & $<N_CORRECT_ITEMS>$ correct & $<N_TRANSPOSE_ITEMS>$ correct counting transposed & $<MEAN_NORM_ERROR>$ mean normalized error\\ \hline
 \end{tabular}
-\caption{Items are considered correctly recalled if they are within the target circle.}
+\caption{Items are considered correctly recalled if they are within the target circle. Normalized error of 0.5 indicates chance performance.}
 \end{table}
 
 % \begin{table}[!h]
