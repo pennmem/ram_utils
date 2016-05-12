@@ -91,6 +91,11 @@ def find_subjects_by_task(task):
 
 
 subjects = find_subjects_by_task(task)
+subjects_pal = find_subjects_by_task('RAM_PAL1')
+
+subjects = sorted(list(set(subjects) & set(subjects_pal)))
+
+
 # subjects.append('TJ086')
 subjects.sort()
 
