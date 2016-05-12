@@ -36,9 +36,14 @@ class TH1EventPreparation(RamTask):
         distErr_transpose = np.sqrt((-xChest - x)**2 + (-yChest - y)**2);  
         events = append_fields(events,'distErr_transpose',distErr_transpose,dtypes=float,usemask=False,asrecarray=True)
 
+        # add field for correct if transposed
         recalled_ifFlipped = np.zeros(np.shape(distErr_transpose),dtype=bool)
         recalled_ifFlipped[events.isRecFromStartSide==0] = events.distErr_transpose[events.isRecFromStartSide==0]<=13
         events = append_fields(events,'recalled_ifFlipped',recalled_ifFlipped,dtypes=float,usemask=False,asrecarray=True)        
+        
+        # add field for error percentile (performance factor)
+        error_percentiles = self.calc_norm_dist_error(events.locationX,events.locationY,events.distErr)        
+        events = append_fields(events,'norm_err',error_percentiles,dtypes=float,usemask=False,asrecarray=True)        
         self.pass_object(self.pipeline.task+'_all_events', events)
 
         chest_events = events[events.type == 'CHEST']
@@ -76,7 +81,19 @@ class TH1EventPreparation(RamTask):
             
         # test = self.loadmat('/data/events/RAM_TH1/testevents.mat')
         # print test['events'][0].sessionScore
-                
+        
+    def calc_norm_dist_error(self,x_pos,y_pos,act_errs):
+        rand_x = np.random.uniform(359.9,409.9,100000)
+        rand_y = np.random.uniform(318.0,399.3,100000)
+        
+        error_percentiles = np.zeros(np.shape(act_errs),dtype=float)
+        for i,this_item in enumerate(zip(x_pos,y_pos,act_errs)):
+            if np.isnan(this_item[2]):
+                error_percentiles[i] = np.nan
+            else:
+                possible_errors = np.sqrt((rand_x - this_item[0])**2 + (rand_y - this_item[1])**2)
+                error_percentiles[i] = np.mean(possible_errors < this_item[2])
+        return error_percentiles
     
     # Better loadmat, from http://stackoverflow.com/questions/7008608/scipy-io-loadmat-nested-structures-i-e-dictionaries
     def loadmat(self,filename):
