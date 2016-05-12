@@ -149,6 +149,8 @@ class ComposeSessionSummary(ReportRamTask):
         cumulative_summary.pc_correct_items = 100*cumulative_summary.n_correct_items / float(cumulative_summary.n_items)
         cumulative_summary.n_transposed_items = np.sum((events.recalled==True)|(events.recalled_ifFlipped==True))
         cumulative_summary.pc_transposed_items = 100*cumulative_summary.n_transposed_items / float(cumulative_summary.n_items)
+        cumulative_summary.mean_norm_err = np.mean(events.norm_err)
+
 
 
         # analyses 1: probability correct as a function of confidence
