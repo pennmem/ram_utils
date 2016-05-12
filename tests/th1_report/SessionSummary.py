@@ -13,6 +13,7 @@ class SessionSummary(object):
         self.pc_transposed_items = None        
         self.completed = None
         self.score = None
+        self.mean_norm_err = None
         
         self.prob_by_conf = None
         self.percent_conf = None
