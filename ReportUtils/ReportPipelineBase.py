@@ -12,7 +12,8 @@ class ReportPipelineBase(RamPipeline):
     # def __init__(self, args=None, subject=None, experiment=None, task=None, workspace_dir=None , mount_point=None, exit_on_no_change=False,recompute_on_no_status=False):
     def __init__(self, **options):
         RamPipeline.__init__(self)
-        self.__option_list = ['args','subject','experiment','task','workspace_dir','mount_point','exit_on_no_change','recompute_on_no_status']
+        # experiment_label is used to label experiment in the JSON status output file
+        self.__option_list = ['args','subject','experiment','experiment_label','task','workspace_dir','mount_point','exit_on_no_change','recompute_on_no_status']
 
         #sanity check
         for option_name, option_val in options.iteritems():
@@ -59,6 +60,10 @@ class ReportPipelineBase(RamPipeline):
         # self.workspace_dir = workspace_dir
 
         #experiment === task when eith one is empty
+
+
+
+
         if self.experiment and not self.task:
             self.task=self.experiment
 
@@ -77,6 +82,9 @@ class ReportPipelineBase(RamPipeline):
         # self.report_site_URL = 'https://stimstaging.psych.upenn.edu/rhino/'
         self.report_site_URL = 'https://stim.psych.upenn.edu/rhino/'
 
+    def set_experiment_label(self,label):
+        self.experiemnt_label = label
+
     def add_report_error(self, error, stacktrace=None):
         self.report_summary.add_report_error(error, stacktrace=stacktrace)
 
@@ -94,14 +102,14 @@ class ReportPipelineBase(RamPipeline):
         # super(ReportPipelineBase,self).execute_pipeline()
         # self.report_summary.add_changed_resources(changed_resources=self.dependency_change_tracker.get_changed_resources())
 
-
-        if hasattr(self, 'experiment'):
-            self.report_summary.add_experiment_name(exp_name=self.experiment)
+        if hasattr(self,'experiment_label') and self.experiment_label is not None:
+            self.report_summary.set_experiment_name(exp_name=self.experiment_label)
+        elif hasattr(self, 'experiment'):
+            self.report_summary.set_experiment_name(exp_name=self.experiment)
         elif hasattr(self, 'task'):
-            self.report_summary.add_experiment_name(exp_name=self.task)
-
+            self.report_summary.set_experiment_name(exp_name=self.task)
         else:
-            self.report_summary.add_experiment_name(exp_name='Unknown_Experiment')
+            self.report_summary.set_experiment_name(exp_name='Unknown_Experiment')
 
         try:
             super(ReportPipelineBase, self).execute_pipeline()

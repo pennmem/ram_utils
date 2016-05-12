@@ -218,7 +218,7 @@ class ReportSummary(object):
 
             return ''
 
-    def add_experiment_name(self, exp_name):
+    def set_experiment_name(self, exp_name):
         self.experiment_name = exp_name
 
     def add_report_file(self, file):

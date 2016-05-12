@@ -102,9 +102,9 @@ subject_fail_list = []
 subject_missing_experiment_list = []
 subject_missing_data_list = []
 
-rsi = ReportSummaryInventory(label=args.experiment+'_PAL')
+rsi = ReportSummaryInventory(label=args.experiment)
 
-for subject in subjects:
+for subject in subjects[:2]:
     print subject
     if args.skip_subjects is not None and subject in args.skip_subjects:
         continue
@@ -113,6 +113,7 @@ for subject in subjects:
 
     report_pipeline = ReportPipeline(subject=subject,
                                      experiment=args.experiment,
+                                     experiment_label=args.experiment+'_PAL', # NOTE: I am adding experiment_label tso that json status outpu has proper experiment annotation that does not overlap with other repor experiments names
                                      workspace_dir=join(args.workspace_dir, subject),
                                      mount_point=args.mount_point,
                                      exit_on_no_change=args.exit_on_no_change,
