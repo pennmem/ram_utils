@@ -24,9 +24,9 @@ def atlas_location(bp_data):
             return wb_loc
 
     if 'ind' in atlases:
-        ind_loc = ('Left ' if atlases['ind']['x']<0.0 else 'Right ') + atlases['ind']['region']
+        ind_loc = atlases['ind']['region']
         if (ind_loc is not None) and (ind_loc!='') and (ind_loc!='None'):
-            return ind_loc
+            return ('Left ' if atlases['ind']['x']<0.0 else 'Right ') + ind_loc
 
     return '--'
 
