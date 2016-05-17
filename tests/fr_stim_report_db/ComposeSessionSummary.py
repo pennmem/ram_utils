@@ -48,8 +48,9 @@ class ComposeSessionSummary(ReportRamTask):
             session_date = time.strftime('%d-%b-%Y', time.localtime(last_time_stamp/1000))
             n_lists = len(fr_stim_session_table.list.unique())
             pc_correct_words = 100.0 * fr_stim_session_table.recalled.sum() / len(fr_stim_session_table)
+            amplitude = fr_stim_session_table['Amplitude'].values[-1]
 
-            session_data.append([session, session_date, session_length, n_lists, '$%.2f$\\%%' % pc_correct_words])
+            session_data.append([session, session_date, session_length, n_lists, '$%.2f$\\%%' % pc_correct_words, amplitude])
 
         self.pass_object('SESSION_DATA', session_data)
 
