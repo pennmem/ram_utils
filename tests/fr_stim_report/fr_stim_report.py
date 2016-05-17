@@ -5,11 +5,11 @@ from ReportUtils import CMLParser,ReportPipeline
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1163T')
+cml_parser.arg('--subject','R1170J_1')
 cml_parser.arg('--task','RAM_FR3')
 cml_parser.arg('--workspace-dir','/scratch/busygin/FR3_reports')
 cml_parser.arg('--mount-point','')
-cml_parser.arg('--recompute-on-no-status')
+#cml_parser.arg('--recompute-on-no-status')
 
 args = cml_parser.parse()
 
@@ -79,7 +79,7 @@ params = Params()
 
 # sets up processing pipeline
 report_pipeline = ReportPipeline(subject=args.subject, task=args.task,experiment=args.task,
-                                 workspace_dir=join(args.workspace_dir,args.task+'_'+args.subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change,
+                                 workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change,
                                  recompute_on_no_status=args.recompute_on_no_status)
 
 
