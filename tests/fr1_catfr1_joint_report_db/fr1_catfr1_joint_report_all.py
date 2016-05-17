@@ -5,7 +5,8 @@ import re
 from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/FR1_CatFr1_check_1')
+#cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/FR1_CatFr1_check_1')
+cml_parser.arg('--workspace-dir','/scratch/busygin/FR1_joint_reports_db')
 cml_parser.arg('--mount-point','')
 cml_parser.arg('--recompute-on-no-status')
 # cml_parser.arg('--exit-on-no-change')
@@ -21,9 +22,7 @@ from MathEventPreparation import MathEventPreparation
 
 from ComputeFR1Powers import ComputeFR1Powers
 
-from TalPreparation import TalPreparation
-
-from GetLocalization import GetLocalization
+from MontagePreparation import MontagePreparation
 
 from ComputeFR1HFPowers import ComputeFR1HFPowers
 
@@ -40,6 +39,9 @@ from GenerateReportTasks import *
 
 class Params(object):
     def __init__(self):
+        self.api_monopolar_url = 'https://stimstaging.psych.upenn.edu/api/rhino/1.0/configured-contacts-by-montage-codes.json'
+        self.api_bipolar_url = 'https://stimstaging.psych.upenn.edu/api/rhino/1.0/configured-pairs-by-montage-codes.json'
+
         self.width = 5
 
         self.fr1_start_time = 0.0
@@ -103,9 +105,7 @@ for subject in subjects:
 
     report_pipeline.add_task(MathEventPreparation(mark_as_completed=False))
 
-    report_pipeline.add_task(TalPreparation(mark_as_completed=False))
-
-    report_pipeline.add_task(GetLocalization(mark_as_completed=False))
+    report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
 
     report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=True))
 
@@ -123,7 +123,7 @@ for subject in subjects:
 
     report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
-    report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
+    # report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
 
     # starts processing pipeline
     report_pipeline.execute_pipeline()
