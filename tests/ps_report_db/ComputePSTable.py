@@ -58,6 +58,7 @@ class ComputePSTable(ReportRamTask):
 
         ps_events = self.get_passed_object(experiment+'_events')
         bp_tal_structs = self.get_passed_object('bp_tal_structs')
+        bp_tal_stim_only_structs = self.get_passed_object('bp_tal_stim_only_structs')
 
         lr_classifier = self.get_passed_object('lr_classifier')
         xval_output = self.get_passed_object('xval_output')
@@ -84,18 +85,20 @@ class ComputePSTable(ReportRamTask):
             perf_pre = prob2perf_norm(xval_output[-1], prob_pre[i])
             perf_diff[i] = 100.0*(prob2perf_norm(xval_output[-1], prob_pre[i]+prob_diff[i]) - perf_pre) / total_recall_performance
 
-
         region = [None] * n_events
         for i,ev in enumerate(ps_events):
             anode_tag = ev.stimAnodeTag.upper()
             cathode_tag = ev.stimCathodeTag.upper()
-            bp_label = anode_tag + '-' + cathode_tag
-            if bp_label in bp_tal_structs.index:
-                region[i] = bp_tal_structs['bp_atlas_loc'].ix[bp_label]
-            else:
-                bp_label = cathode_tag + '-' + anode_tag
-                if bp_label in bp_tal_structs.index:
-                    region[i] = bp_tal_structs['bp_atlas_loc'].ix[bp_label]
+            bp_label1 = anode_tag + '-' + cathode_tag
+            bp_label2 = cathode_tag + '-' + anode_tag
+            if bp_label1 in bp_tal_structs.index:
+                region[i] = bp_tal_structs['bp_atlas_loc'].ix[bp_label1]
+            elif bp_label2 in bp_tal_structs.index:
+                region[i] = bp_tal_structs['bp_atlas_loc'].ix[bp_label2]
+            elif bp_label1 in bp_tal_stim_only_structs.index:
+                region[i] = bp_tal_stim_only_structs[bp_label1]
+            elif bp_label2 in bp_tal_stim_only_structs.index:
+                region[i] = bp_tal_stim_only_structs[bp_label2]
 
         #define region
         # bipolar_label = pd.Series(zip([s.upper() for s in ps_events.stimAnodeTag], [s.upper() for s in ps_events.stimCathodeTag]))

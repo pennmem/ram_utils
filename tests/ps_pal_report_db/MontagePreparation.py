@@ -42,10 +42,12 @@ class MontagePreparation(ReportRamTask):
         monopolar_channels = joblib.load(self.get_path_to_resource_in_workspace(subject + '-monopolar_channels.pkl'))
         bipolar_pairs = joblib.load(self.get_path_to_resource_in_workspace(subject + '-bipolar_pairs.pkl'))
         bp_tal_structs = pd.read_pickle(self.get_path_to_resource_in_workspace(subject + '-bp_tal_structs.pkl'))
+        bp_tal_stim_only_structs = pd.read_pickle(self.get_path_to_resource_in_workspace(subject + '-bp_tal_stim_only_structs.pkl'))
 
         self.pass_object('monopolar_channels', monopolar_channels)
         self.pass_object('bipolar_pairs', bipolar_pairs)
         self.pass_object('bp_tal_structs', bp_tal_structs)
+        self.pass_object('bp_tal_stim_only_structs', bp_tal_stim_only_structs)
 
     def run(self):
         subject = self.pipeline.subject
@@ -70,13 +72,32 @@ class MontagePreparation(ReportRamTask):
             monopolar_channels = np.unique(np.hstack((bp_tal_structs.channel_1.values,bp_tal_structs.channel_2.values)))
             bipolar_pairs = zip(bp_tal_structs.channel_1.values,bp_tal_structs.channel_2.values)
 
+            #now collect stim-only pairs
+            url_params = urllib.urlencode({'codes':subject, 'result_atlases':'stein,wb,ind', 'is_stim_only':'true'})
+            req = urllib2.Request(self.params.api_bipolar_url+'?'+url_params)
+            f = urllib2.urlopen(req)
+            bipolar_data_stim_only = json.load(f)[subject]['pairs']
+            f.close()
+
+            bp_tal_stim_only_structs = pd.Series()
+            if bipolar_data_stim_only:
+                bp_tags_stim_only = []
+                bp_tal_stim_only_structs = []
+                for bp_tag,bp_data in bipolar_data_stim_only.iteritems():
+                    bp_tags_stim_only.append(bp_tag)
+                    bp_tal_stim_only_structs.append(atlas_location(bp_data))
+                bp_tal_stim_only_structs = pd.Series(bp_tal_stim_only_structs, index=bp_tags_stim_only)
+
+
             self.pass_object('monopolar_channels', monopolar_channels)
             self.pass_object('bipolar_pairs', bipolar_pairs)
             self.pass_object('bp_tal_structs', bp_tal_structs)
+            self.pass_object('bp_tal_stim_only_structs', bp_tal_stim_only_structs)
 
             joblib.dump(monopolar_channels, self.get_path_to_resource_in_workspace(subject + '-monopolar_channels.pkl'))
             joblib.dump(bipolar_pairs, self.get_path_to_resource_in_workspace(subject + '-bipolar_pairs.pkl'))
             bp_tal_structs.to_pickle(self.get_path_to_resource_in_workspace(subject + '-bp_tal_structs.pkl'))
+            bp_tal_stim_only_structs.to_pickle(self.get_path_to_resource_in_workspace(subject + '-bp_tal_stim_only_structs.pkl'))
 
         except:
             raise

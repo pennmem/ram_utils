@@ -51,7 +51,7 @@ class MontagePreparation(ReportRamTask):
         subject = self.pipeline.subject
 
         try:
-            url_params = urllib.urlencode({'codes':subject, 'result_atlases':'stein,wb,ind'})
+            url_params = urllib.urlencode({'codes':subject, 'result_atlases':'stein,wb,ind', 'is_stim_only':'false'})
             req = urllib2.Request(self.params.api_bipolar_url+'?'+url_params)
             f = urllib2.urlopen(req)
             bipolar_data = json.load(f)[subject]['pairs']
