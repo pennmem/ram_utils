@@ -24,6 +24,7 @@
 \pagestyle{fancy}
 \fancyhf{}
 \lhead{RAM FR1 report v 2.9}
+\chead{Subject: \textbf{<SUBJECT>}}
 \rhead{Date created: <DATE>}
 \begin{document}
 
