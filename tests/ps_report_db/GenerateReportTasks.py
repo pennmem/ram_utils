@@ -91,7 +91,7 @@ class GenerateTex(ReportRamTask):
 
             n_significantly_above_zero_params = len(session_summary.ttest_against_zero_table)
             #ttest_against_zero_title = '\n\\subsection*{\\hfil $t$-test against zero \\hfil}\n\n' if n_significantly_above_zero_params>0 else ''
-            ttest_against_zero_table = ''
+            ttest_against_zero_table = '\nNo significant parameters for $t$-test against zero.\n'
             if n_significantly_above_zero_params > 0:
                 ttest_replace_dict = {'<PARAMETER1>': param1_name,
                                       '<UNIT1>': param1_unit,
@@ -102,7 +102,7 @@ class GenerateTex(ReportRamTask):
                 ttest_against_zero_table = TextTemplateUtils.replace_template_to_string(tex_ttest_table2_template, ttest_replace_dict)
 
             n_significantly_above_sham_params = len(session_summary.ttest_against_sham_table) if session_summary.ttest_against_sham_table is not None else 0
-            ttest_against_sham_table = ''
+            ttest_against_sham_table = '' if self.pipeline.experiment!='PS2.1' else '\n{\em No significant parameters for $t$-test against sham for the lower half}.\n\\vspace{1pc}\n'
             if n_significantly_above_sham_params > 0:
                 ttest_replace_dict = {'<PARAMETER1>': param1_name,
                                       '<UNIT1>': param1_unit,
