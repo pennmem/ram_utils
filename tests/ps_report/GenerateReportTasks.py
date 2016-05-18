@@ -91,7 +91,7 @@ class GenerateTex(ReportRamTask):
 
             n_significantly_above_zero_params = len(session_summary.ttest_against_zero_table)
             #ttest_against_zero_title = '\n\\subsection*{\\hfil $t$-test against zero \\hfil}\n\n' if n_significantly_above_zero_params>0 else ''
-            ttest_against_zero_table = '\nNo significant parameters for $t$-test against zero.\n'
+            ttest_against_zero_table = '\n{\em No significant parameters for $t$-test against zero}.\n'
             if n_significantly_above_zero_params > 0:
                 ttest_replace_dict = {'<PARAMETER1>': param1_name,
                                       '<UNIT1>': param1_unit,
