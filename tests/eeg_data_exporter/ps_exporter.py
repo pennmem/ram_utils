@@ -1,6 +1,6 @@
 import sys
-sys.path.append('/Users/m/PTSA_NEW_GIT')
-sys.path.append('/Users/m/RAM_UTILS_GIT')
+# sys.path.append('/Users/m/PTSA_NEW_GIT')
+# sys.path.append('/Users/m/RAM_UTILS_GIT')
 
 import numpy as np
 from numpy.testing import *
@@ -22,7 +22,8 @@ from glob import glob
 import re
 
 
-mount_point  = '/Volumes/rhino_root'
+# mount_point  = '/Volumes/rhino_root'
+mount_point  = ''
 task = 'RAM_PS'
 experiment = 'PS2'
 
