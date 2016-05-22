@@ -6,6 +6,8 @@ import pandas as pd
 import time
 from operator import itemgetter
 
+from copy import deepcopy
+
 
 from ReportUtils import  ReportRamTask
 def make_atlas_loc(tag, atlas_loc, comments):
@@ -271,7 +273,13 @@ class ComposeSessionSummary(ReportRamTask):
         self.pass_object('cumulative_summary', cumulative_summary)
 
         # cumulative_ttest_data = [list(a) for a in zip(bp_tal_structs.eType, bp_tal_structs.tagName, ttest[-1][1], ttest[-1][0])]
-        cumulative_ttest_data = make_ttest_table(bp_tal_structs, loc_info, ttest[-1])
+        cumulative_ttest_data_raw = make_ttest_table(bp_tal_structs, loc_info, ttest[-1])
+
+
+        self.pass_object('cumulative_ttest_data_raw', cumulative_ttest_data_raw)
+
+        cumulative_ttest_data = deepcopy(cumulative_ttest_data_raw)
+
         cumulative_ttest_data.sort(key=itemgetter(-2))
         cumulative_ttest_data = format_ttest_table(cumulative_ttest_data)
 

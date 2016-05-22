@@ -36,11 +36,25 @@ class BrainPlotOffscreenWidget(object):
         self.renWin.SetSize(1000,1000)
 
 
+        self.image_format = 'png'
+        self.screenshot_fcn_dict = {
+            'png':self.take_screenshot_png,
+            'pdf':self.take_screenshot_pdf,
+        }
 
-
+        self.take_screenshot = self.screenshot_fcn_dict['png']
 
         self.camera_setting_dir = os.getcwd()
         self.anim_dir = os.getcwd()
+
+    def set_image_format(self,format='png'):
+
+        fmt = format.lower()
+        try:
+            self.take_screenshot = self.screenshot_fcn_dict[fmt]
+            self.image_format = fmt
+        except KeyError:
+            print 'unsupported image format: '+self.image_format
 
 
     def set_size(self,x,y):
@@ -62,7 +76,21 @@ class BrainPlotOffscreenWidget(object):
         self.actors_dict[actor_name] = actor
 
 
-    def take_screenshot(self, filename):
+    def take_screenshot_pdf(self, filename):
+        exp = vtk.vtkGL2PSExporter()
+        exp.SetFileFormatToPDF()
+        exp.SetRenderWindow(self.renWin)
+
+        core_file_name, ext = os.path.splitext(filename)
+
+        exp.SetFilePrefix(core_file_name)
+        # Turn off compression so PIL can read file.
+        exp.CompressOff()
+        exp.DrawBackgroundOn()
+        exp.Write()
+
+
+    def take_screenshot_png(self, filename):
 
 
         renderLarge = vtk.vtkRenderLargeImage()
@@ -163,6 +191,7 @@ if __name__=='__main__':
 
     w = BrainPlotOffscreenWidget()
     w.set_size(1000,1000)
+    # w.set_image_format('pdf')
 
     from ptsa.data.readers import TalReader
     subject = 'R1060M'

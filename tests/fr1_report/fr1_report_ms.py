@@ -49,6 +49,8 @@ from ComputeClassifier import ComputeClassifier
 
 from ComposeSessionSummary import ComposeSessionSummary
 
+from BrainPlotsPreparation import BrainPlotsPreparation
+
 from GenerateReportTasks import *
 
 
@@ -116,6 +118,8 @@ report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True
 report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
 
 report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
+
+report_pipeline.add_task(BrainPlotsPreparation(mark_as_completed=False))
 
 report_pipeline.add_task(GenerateTex(mark_as_completed=False))
 
