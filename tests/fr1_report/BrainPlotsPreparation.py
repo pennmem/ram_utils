@@ -151,7 +151,8 @@ class BrainPlotsPreparation(ReportRamTask):
         w_axial.set_size(1000, 1000)
 
         # axial_slice = AxialSlice(fname='/Users/m/RAM_PLOTS_GIT/datasets/axial-mni-7.0.vtk')
-        axial_slice = AxialSlice(fname='/Users/m/RAM_PLOTS_GIT/datasets/axial-tal-13.0.vtk')
+        axial_slice = AxialSlice(fname=locate_file(filename='axial-tal-13.0.vtk',local_dir='datasets'))
+
         w_axial.add_display_object('axial_slice', axial_slice)
 
         d_elecs_pos = project_multiple_electrodes_onto_plane(elecs_pos=d_pos_elec_locs, axial_slice=axial_slice,
