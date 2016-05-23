@@ -246,6 +246,19 @@ def project_electrode_onto_plane(elec_pos, plane_pts):
     return pr, norm(d)
 
 
+def project_multiple_electrodes_onto_plane(elecs_pos,axial_slice,max_distance):
+
+    plane_points = axial_slice.get_plane_points()
+
+    pr_elecs_list = []
+    for el in elecs_pos:
+        pr_el,pr_dist = project_electrode_onto_plane(el,plane_points)
+        print pr_dist
+        if pr_dist<=max_distance:
+            pr_elecs_list.append(pr_el)
+
+    return np.array(pr_elecs_list)
+
 def pull_electrodes_to_surface(elec_pos_array, max_distance=1.0):
     verts_np = get_brain_verts_as_numpy_array()
     print 'Found ', len(elec_pos_array), ' electrodes'
