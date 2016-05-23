@@ -12,27 +12,14 @@ cml_parser = CMLParser(arg_count_threshold=1)
 # cml_parser.arg('--recompute-on-no-status')
 # # cml_parser.arg('--exit-on-no-change')
 
-# cml_parser.arg('--subject','R1060M')
-# cml_parser.arg('--task','RAM_FR1')
-# cml_parser.arg('--workspace-dir','/Users/m/scratch/automated_reports/FR1_reports')
-# cml_parser.arg('--mount-point','/Users/m')
-# cml_parser.arg('--recompute-on-no-status')
-# cml_parser.arg('--python-path','/Users/m/PTSA_NEW_GIT')
-# cml_parser.arg('--python-path','/Users/m/RAM_UTILS_GIT')
-# cml_parser.arg('--python-path','/Users/m/src/morlet_git_clion_install')
-
-
-cml_parser.arg('--subject','R1060M')
+cml_parser.arg('--subject','R1065J')
 cml_parser.arg('--task','RAM_FR1')
-cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports_brain_plots/FR1_reports')
-cml_parser.arg('--mount-point','/')
+cml_parser.arg('--workspace-dir','/Users/m/scratch/automated_reports/FR1_reports')
+cml_parser.arg('--mount-point','/Users/m')
 cml_parser.arg('--recompute-on-no-status')
-# cml_parser.arg('--python-path','/Users/m/PTSA_NEW_GIT')
-# cml_parser.arg('--python-path','/Users/m/RAM_UTILS_GIT')
-# cml_parser.arg('--python-path','/Users/m/src/morlet_git_clion_install')
-
-
-
+cml_parser.arg('--python-path','/Users/m/PTSA_NEW_GIT')
+cml_parser.arg('--python-path','/Users/m/RAM_UTILS_GIT')
+cml_parser.arg('--python-path','/Users/m/src/morlet_git_clion_install')
 # cml_parser.arg('--exit-on-no-change')
 
 
@@ -61,10 +48,6 @@ from ComputeTTest import ComputeTTest
 from ComputeClassifier import ComputeClassifier
 
 from ComposeSessionSummary import ComposeSessionSummary
-
-from BrainPlotsPreparation import BrainPlotsPreparation
-
-from BrainPlotsPreparation_new import BrainPlotsPreparation_new
 
 from GenerateReportTasks import *
 
@@ -103,8 +86,6 @@ task = args.task
 subject = args.subject
 
 
-rsi = ReportSummaryInventory(label=task)
-
 print '--Generating', task, 'report for', subject
 
 
@@ -134,8 +115,6 @@ report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=
 
 report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
 
-report_pipeline.add_task(BrainPlotsPreparation_new(mark_as_completed=False))
-
 report_pipeline.add_task(GenerateTex(mark_as_completed=False))
 
 report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
@@ -145,13 +124,5 @@ report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
 report_pipeline.execute_pipeline()
 
 
-
-rsi.add_report_summary(report_summary=report_pipeline.get_report_summary())
-
-
-# print 'this is summary for all reports report ', rsi.compose_summary(detail_level=1)
-
-rsi.output_json_files(dir=args.status_output_dir)
-# rsi.send_email_digest()
 
 

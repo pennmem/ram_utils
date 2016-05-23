@@ -89,10 +89,6 @@ class GenerateTex(ReportRamTask):
         cumulative_ttest_tex_table = latex_table(self.get_passed_object('cumulative_ttest_data'))
 
         replace_dict = {'<PROB_RECALL_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-prob_recall_plot_combined.pdf',
-                        '<LH_PLOT_FILE>':'brain-left.png',
-                        '<RH_PLOT_FILE>':'brain-right.png',
-                        '<VENTRAL_PLOT_FILE>':'brain-bottom.png',
-                        '<AXIAL_PLOT_FILE>':'axial-bottom.png',
                         '<IRT_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-irt_plot_combined.pdf',
                         '<DATE>': datetime.date.today(),
                         '<SESSION_DATA>': cumulative_data_tex_table,
