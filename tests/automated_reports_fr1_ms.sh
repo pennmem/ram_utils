@@ -52,7 +52,7 @@ exit_on_no_change_flag=--exit-on-no-change
 exit_on_no_change_flag=
 
 # FR1
-report_code_dir=/home1/mswat/RAM_UTILS_GIT/tests/fr1_report
+report_code_dir=/home1/mswat/RAM_UTILS_GIT/tests/fr1_report_brain_plots
 cd ${report_code_dir}
 
 
@@ -76,7 +76,7 @@ python ${report_code_dir}/fr1_report_all.py  --task=RAM_FR1 \
 #exit_on_no_change_flag=
 #
 ## FR1
-#report_code_dir=/home1/mswat/RAM_UTILS_GIT/tests/fr1_report
+#report_code_dir=/home1/mswat/RAM_UTILS_GIT/tests/fr1_report_brain_plots
 #cd ${report_code_dir}
 #
 #
