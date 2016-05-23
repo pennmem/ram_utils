@@ -187,15 +187,18 @@ class BrainPlotOffscreenWidget(object):
 
 
 if __name__=='__main__':
-    sys.path.append('/Users/m/PTSA_NEW_GIT')
+    # sys.path.append('/Users/m/PTSA_NEW_GIT')
 
     w = BrainPlotOffscreenWidget()
     w.set_size(1000,1000)
     # w.set_image_format('pdf')
 
+    mount_point = '/Users/m'
+    mount_point = '/'
+
     from ptsa.data.readers import TalReader
     subject = 'R1060M'
-    tal_path = os.path.join('/Users/m','data/eeg',subject,'tal',subject+'_talLocs_database_monopol.mat')
+    tal_path = os.path.join(mount_point,'data/eeg',subject,'tal',subject+'_talLocs_database_monopol.mat')
     tal_reader = TalReader(filename=tal_path,struct_name='talStruct')
     tal_struct = tal_reader.read()
 
