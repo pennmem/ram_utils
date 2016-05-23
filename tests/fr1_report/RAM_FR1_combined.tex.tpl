@@ -1,6 +1,11 @@
 \documentclass[a4paper]{article} 
 \usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
-\usepackage{graphicx,multirow} 
+\usepackage{graphicx,multirow}
+
+
+
+
+
 \usepackage{epstopdf} 
 \usepackage{wrapfig} 
 \usepackage{longtable} 
@@ -11,6 +16,9 @@
 \usepackage{booktabs}
 \usepackage{sidecap} \usepackage{soul}
 \usepackage[small,bf,it]{caption}
+
+\usepackage{subcaption}
+
 \setlength\belowcaptionskip{2pt}
 
 \addtolength{\oddsidemargin}{-.875in} 
@@ -82,6 +90,108 @@ $<N_MATH>$ math problems & $<N_CORRECT_MATH>$ correct ($<PC_CORRECT_MATH>$\%) & 
 \caption{Subsequent memory effect HFA. High frequency activity (HFA, 70-200 Hz) was measured across the word presentation interval (0 to 1600ms). At each electrode, a t-test compared HFA for subsequently recalled vs subsequently forgotten items. \textbf{Surface Electrodes:} Red - significant positive effect (subsequently \textit{remembered} HFA $>$ subsequently \textit{forgotten} HFA). Blue - significant negative effect (subsequently \textit{remembered} HFA $<$ subsequently \textit{forgotten} HFA). Black - difference not significant. \textbf{Depth Electrodes:} All bipolar pairs shown in descending order of significance Bipolar pairs that exceed significance threshold ($p < .05$) are in boldface.}
 \end{longtable}
 \end{center}
+
+\iffalse
+
+\clearpage
+\begin{center}
+\textbf{\Large Electrode Localization Plots}
+\end{center}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.1]{<LH_PLOT_FILE>}
+\caption{Localization of strip and grid electrodes in the left hemisphere}
+\end{figure}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.1]{<RH_PLOT_FILE>}
+\caption{Localization of strip and grid electrodes in the right hemisphere}
+\end{figure}
+
+
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.1]{<VENTRAL_PLOT_FILE>}
+\caption{Localization of strip and grid electrodes - ventral view}
+\end{figure}
+
+
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.1]{<AXIAL_PLOT_FILE>}
+\caption{Projection of depth electrodes onto axial slice through hippocampus. Only electrodes within 30 mm of the axial slice are shown }
+\end{figure}
+
+\fi
+
+\iffalse
+\clearpage
+\begin{center}
+\textbf{\Large Electrode Localization Plots}
+\end{center}
+
+\begin{figure}[htb]
+    \includegraphics[width=0.45\textwidth]{<LH_PLOT_FILE>}%
+    \hspace*{\fill}% induce some horizontal separation between images 1 and 2
+    \includegraphics[width=0.45\textwidth]{<RH_PLOT_FILE>}
+
+    \includegraphics[width=0.45\textwidth]{<VENTRAL_PLOT_FILE>}%
+    \hspace*{\fill}% induce some horizontal separation between images 3 and 4
+    \includegraphics[width=0.45\textwidth]{<AXIAL_PLOT_FILE>}
+
+
+  \caption{Electrode localization}
+\end{figure}
+
+\fi
+
+
+
+
+
+\clearpage
+\begin{center}
+\textbf{\Large Electrode Localization Plots}
+\end{center}
+
+\begin{figure}[!h]
+    \centering
+    \begin{subfigure}[b]{0.40\textwidth}
+        \includegraphics[width=\textwidth]{<LH_PLOT_FILE>}
+        \caption{}
+        \label{fig:lh}
+    \end{subfigure}
+    ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+      %(or a blank line to force the subfigure onto a new line)
+    \begin{subfigure}[b]{0.40\textwidth}
+        \includegraphics[width=\textwidth]{<RH_PLOT_FILE>}
+        \caption{}
+        \label{fig:rh}
+    \end{subfigure}
+    ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+    %(or a blank line to force the subfigure onto a new line)
+    \begin{subfigure}[b]{0.40\textwidth}
+        \includegraphics[width=\textwidth]{<VENTRAL_PLOT_FILE>}
+        \caption{}
+        \label{fig:ventral}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.40\textwidth}
+        \includegraphics[width=\textwidth]{<AXIAL_PLOT_FILE>}
+        \caption{}
+        \label{fig:axial}
+    \end{subfigure}
+
+    \caption{%
+    \textit{(a)} Localization of strip and grid electrodes in the left hemisphere.%
+    \textit{(b)} Localization of strip and grid electrodes in the right hemisphere.%
+    \textit{(c)} Localization of strip and grid electrodes - ventral view.%
+    \textit{(d)} Projection of depth electrodes onto axial slice through hippocampus. Only electrodes within 30 mm of the axial slice are shown.%
+    }\label{fig:brain_plots}
+\end{figure}
+
+
 
 \clearpage
 \begin{center}
