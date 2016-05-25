@@ -3,8 +3,9 @@
 \usepackage[table]{xcolor}
 \usepackage{graphicx}
 \usepackage{grffile}
+\usepackage{caption}
 \usepackage[skip=0pt]{subcaption}
-%\setlength\belowcaptionskip{2pt}
+\usepackage{morefloats}
 
 \addtolength{\oddsidemargin}{-.875in} 
 \addtolength{\evensidemargin}{-.875in} 
@@ -43,7 +44,7 @@
 \textbf{\Large Classifier performance}
 \end{center}
 
-\begin{figure}[!h]
+\begin{figure}[ht!]
 \centering
 \includegraphics[scale=0.45]{<ROC_AND_TERC_PLOT_FILE>}
 \caption{\textbf{(a)} ROC curve for the subject;

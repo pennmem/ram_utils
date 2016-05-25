@@ -1,6 +1,6 @@
 
 \begin{samepage}
-\begin{table}[!h]
+\begin{table}[ht!]
 \centering
 \begin{tabular}{|c|c|c|c|}
 \multicolumn{4}{c}{\textbf{Significant stimulation parameters}} \\
@@ -10,6 +10,6 @@
 <TABLE>
 \hline
 \end{tabular}
+\caption*{The significance is determined by $t$-test for the null hypothesis that the expected recall change is zero.}
 \end{table}
-The significance is determined by $t$-test for the null hypothesis that the expected recall change is zero.
 \end{samepage}

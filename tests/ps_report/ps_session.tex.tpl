@@ -25,14 +25,10 @@
 \end{minipage}
 \end{tabular}
 
-\begin{figure}[!h]
+\begin{figure}[ht!]
 <PS_PLOTS>
 \caption{\textbf{(a)} Means and standard errors of difference in classifier output post- and pre-stim;
 \textbf{(b)} Means and standard errors of {\em Expected Recall Change}.}
 \end{figure}
-
-\vspace{1pc}
-
 <TTEST_AGAINST_SHAM_TABLE>
-
 <TTEST_AGAINST_ZERO_TABLE>
