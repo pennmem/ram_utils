@@ -27,9 +27,12 @@ class ComposeSessionSummary(ReportRamTask):
         monopolar_channels = self.get_passed_object('monopolar_channels')
         xval_output = self.get_passed_object('xval_output')
         thresh = xval_output[-1].jstat_thresh
+        print 'thresh =', thresh
 
         stim_params_to_sess = self.get_passed_object('stim_params_to_sess')
         fr_stim_table = self.get_passed_object('fr_stim_table')
+        fr_stim_table['prev_prob'] = fr_stim_table['prob'].shift(1)
+        fr_stim_table['prob_diff'] = fr_stim_table['prob'] - fr_stim_table['prev_prob']
 
         sessions = sorted(fr_stim_table.session.unique())
 
@@ -47,7 +50,7 @@ class ComposeSessionSummary(ReportRamTask):
             session_length = '%.2f' % ((last_time_stamp - first_time_stamp) / 60000.0)
             session_date = time.strftime('%d-%b-%Y', time.localtime(last_time_stamp/1000))
             n_lists = len(fr_stim_session_table.list.unique())
-            pc_correct_words = 100.0 * fr_stim_session_table.recalled.sum() / len(fr_stim_session_table)
+            pc_correct_words = 100.0 * fr_stim_session_table.recalled.mean()
             amplitude = fr_stim_session_table['Amplitude'].values[-1]
 
             session_data.append([session, session_date, session_length, n_lists, '$%.2f$\\%%' % pc_correct_words, amplitude])
@@ -142,6 +145,37 @@ class ComposeSessionSummary(ReportRamTask):
                     session_summary.n_nonstim_intr += 1
             session_summary.pc_from_stim_intr = 100*session_summary.n_stim_intr / float(session_summary.n_total_stim)
             session_summary.pc_from_nonstim_intr = 100*session_summary.n_nonstim_intr / float(session_summary.n_total_nonstim)
+
+            fr_stim_stim_list_stim_item_table = fr_stim_stim_list_table[fr_stim_stim_list_table['is_stim_item']]
+            fr_stim_stim_list_stim_item_low_table = fr_stim_stim_list_stim_item_table[fr_stim_stim_list_stim_item_table['prev_prob']<thresh]
+            fr_stim_stim_list_stim_item_high_table = fr_stim_stim_list_stim_item_table[fr_stim_stim_list_stim_item_table['prev_prob']>thresh]
+
+            session_summary.mean_prob_diff_all = fr_stim_stim_list_stim_item_table['prob_diff'].mean()
+            session_summary.sem_prob_diff_all = fr_stim_stim_list_stim_item_table['prob_diff'].sem()
+            session_summary.mean_prob_diff_low = fr_stim_stim_list_stim_item_low_table['prob_diff'].mean()
+            session_summary.sem_prob_diff_low = fr_stim_stim_list_stim_item_low_table['prob_diff'].sem()
+
+            fr_stim_non_stim_list_table = fr_stim_non_stim_list_table[(~fr_stim_non_stim_list_table['is_stim_list']) & (fr_stim_non_stim_list_table['serialpos']>1)]
+            fr_stim_non_stim_list_low_table = fr_stim_non_stim_list_table[fr_stim_non_stim_list_table['prev_prob']<thresh]
+            fr_stim_non_stim_list_high_table = fr_stim_non_stim_list_table[fr_stim_non_stim_list_table['prev_prob']>thresh]
+
+            session_summary.control_mean_prob_diff_all = fr_stim_non_stim_list_table['prob_diff'].mean()
+            session_summary.control_sem_prob_diff_all = fr_stim_non_stim_list_table['prob_diff'].sem()
+            session_summary.control_mean_prob_diff_low = fr_stim_non_stim_list_low_table['prob_diff'].mean()
+            session_summary.control_sem_prob_diff_low = fr_stim_non_stim_list_low_table['prob_diff'].sem()
+
+            stim_item_recall_rate_low = fr_stim_stim_list_stim_item_low_table['recalled'].mean()
+            stim_item_recall_rate_high = fr_stim_stim_list_stim_item_high_table['recalled'].mean()
+
+            non_stim_list_recall_rate_low = fr_stim_non_stim_list_low_table['recalled'].mean()
+            non_stim_list_recall_rate_high = fr_stim_non_stim_list_high_table['recalled'].mean()
+
+            recall_rate = session_summary.n_correct_words / float(session_summary.n_words)
+
+            low_pc_diff_from_mean = 100.0 * (stim_item_recall_rate_low-non_stim_list_recall_rate_low) / recall_rate
+            high_pc_diff_from_mean = 100.0 * (stim_item_recall_rate_high-non_stim_list_recall_rate_high) / recall_rate
+
+            session_summary.stim_vs_non_stim_pc_diff_from_mean = (low_pc_diff_from_mean, high_pc_diff_from_mean)
 
             session_summary_array.append(session_summary)
 

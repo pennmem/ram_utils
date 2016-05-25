@@ -18,7 +18,7 @@
 \addtolength{\evensidemargin}{-.875in} 
 \addtolength{\textwidth}{1.75in} 
 \addtolength{\topmargin}{-.75in} 
-\addtolength{\textheight}{1.75in} 
+\addtolength{\textheight}{1.75in}
 
 \newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}} 
 \usepackage{fancyhdr}
