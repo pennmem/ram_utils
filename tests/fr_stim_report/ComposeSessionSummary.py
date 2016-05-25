@@ -50,7 +50,7 @@ class ComposeSessionSummary(ReportRamTask):
             session_length = '%.2f' % ((last_time_stamp - first_time_stamp) / 60000.0)
             session_date = time.strftime('%d-%b-%Y', time.localtime(last_time_stamp/1000))
             n_lists = len(fr_stim_session_table.list.unique())
-            pc_correct_words = 100.0 * fr_stim_session_table.recalled.sum() / len(fr_stim_session_table)
+            pc_correct_words = 100.0 * fr_stim_session_table.recalled.mean()
             amplitude = fr_stim_session_table['Amplitude'].values[-1]
 
             session_data.append([session, session_date, session_length, n_lists, '$%.2f$\\%%' % pc_correct_words, amplitude])
@@ -164,11 +164,11 @@ class ComposeSessionSummary(ReportRamTask):
             session_summary.control_mean_prob_diff_low = fr_stim_non_stim_list_low_table['prob_diff'].mean()
             session_summary.control_sem_prob_diff_low = fr_stim_non_stim_list_low_table['prob_diff'].sem()
 
-            stim_item_recall_rate_low = fr_stim_stim_list_stim_item_low_table['recalled'].sum() / float(len(fr_stim_stim_list_stim_item_low_table))
-            stim_item_recall_rate_high = fr_stim_stim_list_stim_item_high_table['recalled'].sum() / float(len(fr_stim_stim_list_stim_item_high_table))
+            stim_item_recall_rate_low = fr_stim_stim_list_stim_item_low_table['recalled'].mean()
+            stim_item_recall_rate_high = fr_stim_stim_list_stim_item_high_table['recalled'].mean()
 
-            non_stim_list_recall_rate_low = fr_stim_non_stim_list_low_table['recalled'].sum() / float(len(fr_stim_non_stim_list_low_table))
-            non_stim_list_recall_rate_high = fr_stim_non_stim_list_high_table['recalled'].sum() / float(len(fr_stim_non_stim_list_high_table))
+            non_stim_list_recall_rate_low = fr_stim_non_stim_list_low_table['recalled'].mean()
+            non_stim_list_recall_rate_high = fr_stim_non_stim_list_high_table['recalled'].mean()
 
             recall_rate = session_summary.n_correct_words / float(session_summary.n_words)
 
