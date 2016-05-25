@@ -40,3 +40,14 @@ class SessionSummary(object):
         self.pc_from_nonstim_intr = None
         self.chisqr_intr = None
         self.pvalue_intr = None
+
+        self.stim_vs_non_stim_pc_diff_from_mean = None
+
+        self.mean_prob_diff_all = None
+        self.sem_prob_diff_all = None
+        self.mean_prob_diff_low = None
+        self.sem_prob_diff_low = None
+        self.control_mean_prob_diff_all = None
+        self.control_sem_prob_diff_all = None
+        self.control_mean_prob_diff_low = None
+        self.control_sem_prob_diff_low = None
