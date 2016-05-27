@@ -23,7 +23,7 @@ import re
 
 
 # mount_point  = '/Volumes/rhino_root'
-mount_point  = ''
+mount_point  = '/'
 task = 'RAM_PS'
 experiment = 'PS2'
 
@@ -51,9 +51,17 @@ subjects.sort()
 print subjects
 # subject = 'R1060M'
 
-for subject in subjects:
+print 'index=',subjects.index('R1138T_1')
 
 
+
+for subj_idx, subject in enumerate(subjects):
+
+
+
+    if subj_idx<=59:
+
+        continue
 
 
     #reading the events
@@ -61,6 +69,7 @@ for subject in subjects:
     e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
     events = e_reader.read()
 
+    print subject
     #picking events for e agive nexperiment
     ev_order = np.argsort(events, order=('session','mstime'))
     events = events[ev_order]
@@ -78,7 +87,7 @@ for subject in subjects:
     pre_end_time = ps_end_time - ps_offset
 
 
-    print events
+    # print events
 
 
     eeg_pre_reader = EEGReader(events=events, channels=np.array(monopolar_channels),
@@ -86,6 +95,9 @@ for subject in subjects:
                            end_time=pre_end_time, buffer_time=ps_buf)
 
 
+    if not events.shape[0]:
+        print 'Skipping subject ', subject,' - no '+experiment+' data'
+        continue
 
     eegs_pre = eeg_pre_reader.read()
 

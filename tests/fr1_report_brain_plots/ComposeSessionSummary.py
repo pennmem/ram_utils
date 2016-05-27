@@ -7,6 +7,7 @@ import time
 from operator import itemgetter
 
 from copy import deepcopy
+from sklearn.externals import joblib
 
 
 from ReportUtils import  ReportRamTask
@@ -277,6 +278,8 @@ class ComposeSessionSummary(ReportRamTask):
 
 
         self.pass_object('cumulative_ttest_data_raw', cumulative_ttest_data_raw)
+
+        joblib.dump(cumulative_ttest_data_raw, self.get_path_to_resource_in_workspace(subject + '-' + task + '-cumulative_ttest_data_raw.pkl'))
 
         cumulative_ttest_data = deepcopy(cumulative_ttest_data_raw)
 
