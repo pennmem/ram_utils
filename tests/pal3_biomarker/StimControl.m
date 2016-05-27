@@ -87,9 +87,9 @@ classdef StimControl < handle
         bpmat;   % matrix to convert monopolar to bipolar eeg
         freqs;   % frequencies used in wavelet transform
         fs;      % sampling rate = 1000 Hz for Sys 2.x
-        winsize; % 2300 for Sys 2.0.2
-        total_winsize; % 4300 for Sys 2.0.2
-        wait_after_word_on; % 2700 ms for PAL3
+        winsize; % 1700 for PAL3
+        total_winsize; % 3700 for PAL3
+        wait_after_word_on; % 2000 ms for PAL3
         bufsize; % 1000 for PAL3
         phase;   % experiment phase
         W_in;    % classifier weights
@@ -127,10 +127,10 @@ classdef StimControl < handle
            this.trainingProb = Bio.trainingProb;
            this.thresh = Bio.thresh;
            this.fs = Bio.fs;                  % sampling freq.
-           this.winsize = 2300;
-           this.total_winsize = 4300;
+           this.winsize = 1700;
+           this.total_winsize = 3700;
            this.bufsize = 1000;
-           this.wait_after_word_on = 2700;
+           this.wait_after_word_on = 2000;
            [B,A] = butter(4, [58.0 62.0]/(this.fs/2.0), 'stop');
            this.Filter.coeffs = [B;A];
 
@@ -138,7 +138,6 @@ classdef StimControl < handle
            % stopped and re-started) and load it. If not, initialize zscore
            % variables.
            control = RAMControl.getInstance();
-           this.debugFileName = fullfile(control.getDataFolder, 'DEBUG.mat');
            this.savedFileName = fullfile(control.getDataFolder,[Bio.Subject,'StateSave.mat']);
            if exist(this.savedFileName,'file')
                savedData = load(this.savedFileName);
@@ -228,8 +227,9 @@ classdef StimControl < handle
             end
 
             [state_is_word, time_since_change] = control.isStateActive('WORD');
+            state_is_retrieval = control.isStateActive('RETRIEVAL');
 
-            if ~this.current_word_analyzed && state_is_word && time_since_change>=this.wait_after_word_on
+            if ~this.current_word_analyzed && state_is_word && ~state_is_retrieval && time_since_change>=this.wait_after_word_on
                 this.current_word_analyzed = true;
                 is_stim_encoding = control.isStateActive('STIM ENCODING');
 
@@ -318,9 +318,6 @@ classdef StimControl < handle
             session_eeg = this.session_eeg;
             session_pows = this.session_pows;
             save(this.powFileName, 'session_eeg', 'session_pows');
-            
-            elapsed = this.elapsed_duration(2:end);
-            save(this.debugFileName, 'elapsed');
         end
 
     end % end public methods
