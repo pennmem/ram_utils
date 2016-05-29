@@ -21,8 +21,9 @@ class BrainPlotsPreparation_new(ReportRamTask):
         w.set_size(1000,1000)
         # w.set_image_format('pdf')
 
-        mount_point = '/Users/m'
-        mount_point = '/'
+        # mount_point = '/Users/m'
+        # mount_point = '/'
+        mount_point = self.pipeline.mount_point
 
         from ptsa.data.readers import TalReader
         subject = 'R1060M'

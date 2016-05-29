@@ -45,6 +45,43 @@ def make_ttest_table(bp_tal_structs, loc_info, ttest_results):
 
     return ttest_data
 
+def make_pandas_ttest_table(bp_tal_structs, loc_info, ttest_results):
+    ttest_data = None
+    has_depth = ('Das Volumetric Atlas Location' in loc_info)
+    has_surface_only = ('Freesurfer Desikan Killiany Surface Atlas Location' in loc_info)
+    if has_depth or has_surface_only:
+        atlas_loc = loc_info['Das Volumetric Atlas Location' if has_depth else 'Freesurfer Desikan Killiany Surface Atlas Location']
+        comments = loc_info['Comments'] if ('Comments' in loc_info) else None
+        n = len(bp_tal_structs)
+        # ttest_data = [list(a) for a in zip(bp_tal_structs.eType, bp_tal_structs.tagName, [None] * n, [None] * n, ttest_results[1], ttest_results[0])]
+        # for i, tag in enumerate(bp_tal_structs.tagName):
+        #     ttest_data[i][2], ttest_data[i][3] = make_atlas_loc(tag, atlas_loc, comments)
+
+        ttest_data ={
+            'eType':[a for a in bp_tal_structs.eType],
+            'tagName':[a for a in bp_tal_structs.tagName],
+            'col1':[None]*n,
+            'col2':[None]*n,
+            't':[a for a in ttest_results[1]],
+            'p':[a for a in ttest_results[0]],
+                     }
+            # for index, row in ttest_data.iterrows():
+            #     t
+            #     pass
+    else:
+        # ttest_data = [list(a) for a in zip(bp_tal_structs.eType, bp_tal_structs.tagName, ttest_results[1], ttest_results[0])]
+        ttest_data ={
+            'eType':[a for a in bp_tal_structs.eType],
+            'tagName':[a for a in bp_tal_structs.tagName],
+            'col1':[None]*n,
+            'col2':[None]*n,
+            't':[a for a in ttest_results[1]],
+            'p':[a for a in ttest_results[0]],
+                     }
+
+    return ttest_data
+
+
 def make_ttest_table_header(loc_info):
     table_format = table_header = None
     if ('Das Volumetric Atlas Location' in loc_info) or ('Freesurfer Desikan Killiany Surface Atlas Location' in loc_info):
@@ -275,6 +312,11 @@ class ComposeSessionSummary(ReportRamTask):
 
         # cumulative_ttest_data = [list(a) for a in zip(bp_tal_structs.eType, bp_tal_structs.tagName, ttest[-1][1], ttest[-1][0])]
         cumulative_ttest_data_raw = make_ttest_table(bp_tal_structs, loc_info, ttest[-1])
+
+        cumulative_ttest_data_raw_pandas = make_pandas_ttest_table(bp_tal_structs, loc_info, ttest[-1])
+
+        ttest_table_pandas_fname = self.get_path_to_resource_in_workspace(subject + '-' + task + '-cumulative_ttest_data_raw_pandas.csv')
+        cumulative_ttest_data_raw_pandas.to_csv(ttest_table_pandas_fname)
 
 
         self.pass_object('cumulative_ttest_data_raw', cumulative_ttest_data_raw)
