@@ -11,6 +11,8 @@ from sklearn.externals import joblib
 
 
 from ReportUtils import  ReportRamTask
+import pandas as pd
+
 def make_atlas_loc(tag, atlas_loc, comments):
 
     def colon_connect(s1, s2):
@@ -60,24 +62,29 @@ def make_pandas_ttest_table(bp_tal_structs, loc_info, ttest_results):
         ttest_data ={
             'eType':[a for a in bp_tal_structs.eType],
             'tagName':[a for a in bp_tal_structs.tagName],
-            'col1':[None]*n,
-            'col2':[None]*n,
-            't':[a for a in ttest_results[1]],
-            'p':[a for a in ttest_results[0]],
+            'locTag_1':[None]*n,
+            'locTag_2':[None]*n,
+            't':[a for a in ttest_results[0]],
+            'p':[a for a in ttest_results[1]],
                      }
-            # for index, row in ttest_data.iterrows():
-            #     t
-            #     pass
+
+        ttest_data = pd.DataFrame(ttest_data)
+
+        for idx, row in ttest_data.iterrows():
+            ttest_data.ix[idx,['locTag_1']],ttest_data.ix[idx,['locTag_2']] =\
+                make_atlas_loc(ttest_data.ix[idx,['tagName']][0], atlas_loc, comments)
+
     else:
         # ttest_data = [list(a) for a in zip(bp_tal_structs.eType, bp_tal_structs.tagName, ttest_results[1], ttest_results[0])]
         ttest_data ={
             'eType':[a for a in bp_tal_structs.eType],
             'tagName':[a for a in bp_tal_structs.tagName],
-            'col1':[None]*n,
-            'col2':[None]*n,
-            't':[a for a in ttest_results[1]],
-            'p':[a for a in ttest_results[0]],
+            'locTag_1':[None]*n,
+            'locTag_2':[None]*n,
+            't':[a for a in ttest_results[0]],
+            'p':[a for a in ttest_results[1]],
                      }
+        ttest_data = pd.DataFrame(ttest_data)
 
     return ttest_data
 
