@@ -100,10 +100,12 @@ subjects = find_subjects_by_task(task)
 # subjects.remove('R1093J_1')
 subjects.sort()
 
+
+
 rsi = ReportSummaryInventory(label=task)
 
 
-for subject in subjects:
+for subject in subjects[124:]:
     if args.skip_subjects is not None and subject in args.skip_subjects:
         continue
     print '--Generating', task, 'report for', subject
