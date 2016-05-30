@@ -51,10 +51,11 @@ def make_pandas_ttest_table(bp_tal_structs, loc_info, ttest_results):
     ttest_data = None
     has_depth = ('Das Volumetric Atlas Location' in loc_info)
     has_surface_only = ('Freesurfer Desikan Killiany Surface Atlas Location' in loc_info)
+    n = len(bp_tal_structs)
     if has_depth or has_surface_only:
         atlas_loc = loc_info['Das Volumetric Atlas Location' if has_depth else 'Freesurfer Desikan Killiany Surface Atlas Location']
         comments = loc_info['Comments'] if ('Comments' in loc_info) else None
-        n = len(bp_tal_structs)
+        #n = len(bp_tal_structs)
         # ttest_data = [list(a) for a in zip(bp_tal_structs.eType, bp_tal_structs.tagName, [None] * n, [None] * n, ttest_results[1], ttest_results[0])]
         # for i, tag in enumerate(bp_tal_structs.tagName):
         #     ttest_data[i][2], ttest_data[i][3] = make_atlas_loc(tag, atlas_loc, comments)
