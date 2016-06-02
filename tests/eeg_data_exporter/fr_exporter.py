@@ -1,6 +1,6 @@
 import sys
-sys.path.append('/Users/m/PTSA_NEW_GIT')
-sys.path.append('/Users/m/RAM_UTILS_GIT')
+#sys.path.append('/Users/m/PTSA_NEW_GIT')
+#sys.path.append('/Users/m/RAM_UTILS_GIT')
 
 import numpy as np
 from numpy.testing import *
@@ -59,19 +59,21 @@ subjects = find_subjects_by_task(task)
 subjects.sort()
 
 print subjects
-# subject = 'R1060M'
+subject = 'R1060M'
 
-# print 'index=',subjects.index('R1138T_1')
+print 'index=',subjects.index('R1176M')
 
+# avoid subjects R1085C R1090C R1176M
+# sys.exit()
 
 
 for subj_idx, subject in enumerate(subjects):
 
 
+    print 'subject=',subject
+    if subj_idx<=124:
 
-    # if subj_idx<=59:
-    #
-    #     continue
+        continue
 
 
     #reading the events
