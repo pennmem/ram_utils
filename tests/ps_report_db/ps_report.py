@@ -43,9 +43,6 @@ from GenerateReportTasks import *
 
 class Params(object):
     def __init__(self):
-        self.api_monopolar_url = 'https://stimstaging.psych.upenn.edu/api/rhino/1.0/configured-contacts-by-montage-codes.json'
-        self.api_bipolar_url = 'https://stimstaging.psych.upenn.edu/api/rhino/1.0/configured-pairs-by-montage-codes.json'
-
         self.width = 5
 
         self.fr1_start_time = 0.0

@@ -1,6 +1,6 @@
+import os.path
+
 import json
-import urllib
-import urllib2
 
 import numpy as np
 import pandas as pd
@@ -53,11 +53,12 @@ class MontagePreparation(ReportRamTask):
         subject = self.pipeline.subject
 
         try:
-            url_params = urllib.urlencode({'codes':subject, 'result_atlases':'stein,wb,ind', 'is_stim_only':'false'})
-            req = urllib2.Request(self.params.api_bipolar_url+'?'+url_params)
-            f = urllib2.urlopen(req)
-            bipolar_data = json.load(f)[subject]['pairs']
-            f.close()
+            bp_path = os.path.join(self.pipeline.mount_point, 'protocols/r1/codes', subject, 'pairs.json')
+            f_pairs = open(bp_path, 'r')
+            bipolar_data = json.load(f_pairs)[subject]['pairs']
+            f_pairs.close()
+            bipolar_data_stim_only = {bp_tag:bp_data for bp_tag,bp_data in bipolar_data.iteritems() if bp_data['is_stim_only']}
+            bipolar_data = {bp_tag:bp_data for bp_tag,bp_data in bipolar_data.iteritems() if not bp_data['is_stim_only']}
 
             bp_tags = []
             bp_tal_structs = []
@@ -72,13 +73,6 @@ class MontagePreparation(ReportRamTask):
             monopolar_channels = np.unique(np.hstack((bp_tal_structs.channel_1.values,bp_tal_structs.channel_2.values)))
             bipolar_pairs = zip(bp_tal_structs.channel_1.values,bp_tal_structs.channel_2.values)
 
-            #now collect stim-only pairs
-            url_params = urllib.urlencode({'codes':subject, 'result_atlases':'stein,wb,ind', 'is_stim_only':'true'})
-            req = urllib2.Request(self.params.api_bipolar_url+'?'+url_params)
-            f = urllib2.urlopen(req)
-            bipolar_data_stim_only = json.load(f)[subject]['pairs']
-            f.close()
-
             bp_tal_stim_only_structs = pd.Series()
             if bipolar_data_stim_only:
                 bp_tags_stim_only = []
@@ -87,7 +81,6 @@ class MontagePreparation(ReportRamTask):
                     bp_tags_stim_only.append(bp_tag)
                     bp_tal_stim_only_structs.append(atlas_location(bp_data))
                 bp_tal_stim_only_structs = pd.Series(bp_tal_stim_only_structs, index=bp_tags_stim_only)
-
 
             self.pass_object('monopolar_channels', monopolar_channels)
             self.pass_object('bipolar_pairs', bipolar_pairs)

@@ -34,6 +34,7 @@ class ControlEventPreparation(ReportRamTask):
         except Exception:
             # raise MissingDataError('Missing or Corrupt PS event file')
 
+            raise
             self.raise_and_log_report_exception(
                                                 exception_type='MissingDataError',
                                                 exception_message='Missing or Corrupt PS event file'

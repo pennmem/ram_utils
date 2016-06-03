@@ -12,7 +12,7 @@ from ReportUtils import CMLParser,ReportPipeline
 cml_parser = CMLParser(arg_count_threshold=1)
 
 
-cml_parser.arg('--subject','R1162N')
+cml_parser.arg('--subject','R1175N')
 cml_parser.arg('--task','RAM_PAL1')
 cml_parser.arg('--workspace-dir','/scratch/busygin/PAL1_reports_db')
 # cml_parser.arg('--workspace-dir','/Users/m/automated_reports/PAL1_reports')
@@ -58,9 +58,6 @@ from GenerateReportTasks import *
 
 class Params(object):
     def __init__(self):
-        self.api_monopolar_url = 'https://stimstaging.psych.upenn.edu/api/rhino/1.0/configured-contacts-by-montage-codes.json'
-        self.api_bipolar_url = 'https://stimstaging.psych.upenn.edu/api/rhino/1.0/configured-pairs-by-montage-codes.json'
-
         self.width = 5
 
         self.pal1_start_time = 0.3
