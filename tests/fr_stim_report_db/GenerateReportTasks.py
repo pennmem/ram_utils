@@ -20,8 +20,8 @@ class GenerateTex(ReportRamTask):
         super(GenerateTex,self).__init__(mark_as_completed)
 
     def run(self):
-        tex_template = 'pal_stim_report.tex.tpl'
-        tex_session_template = 'pal_stim_session.tex.tpl'
+        tex_template = 'fr_stim_report.tex.tpl'
+        tex_session_template = 'fr_stim_session.tex.tpl'
 
         tex_biomarker_plot_template = 'biomarker_plots.tex.tpl'
 
