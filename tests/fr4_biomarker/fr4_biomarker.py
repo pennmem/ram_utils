@@ -46,7 +46,6 @@ class FR4ParserBiomarker(object):
     def __init__(self, arg_count_threshold=1):
         self.parser = argparse.ArgumentParser(description='Report Generator')
         self.parser.add_argument('--subject', required=True, action='store', type=str)
-        self.parser.add_argument('--n_channels', required=True, action='store')
         self.parser.add_argument('--anode', required=True, action='store', type=str)
         self.parser.add_argument('--anode_num', required=True, action='store',type=int)
         self.parser.add_argument('--cathode', required=True, action='store', type=str)
