@@ -9,6 +9,8 @@ import sys
 
 VERSION=2.04
 
+FILENAME = '{subject}_{date}_FR4_{anode}_{cathode}_{pulse_frequency}Hz_{target_amplitude:.2f}mA.biomarker'
+
 def print_stim_config(order = (
         'subject', 'anode', 'anode_num', 'cathode', 'cathode_num',
         'pulse_frequency', 'pulse_duration', 'pulse_count', 'target_amplitude', 
@@ -34,7 +36,10 @@ def make_biomarker(stim_config, template_file='StimControlTemplate.m', out_dir='
         os.mkdir(out_dir)
     make_stim_control(out_dir=out_dir)
     shutil.copy(mat_file, os.path.join(out_dir, mat_file))
-    zip_file = '%s_%d-%d_%dHz_FR4_%s.biomarker' % (stim_config['subject'], stim_config['anode_num'], stim_config['cathode_num'], stim_config['pulse_frequency'], time.strftime('%m-%d-%y'))
+    stim_config['date'] = time.strftime('%Y-%m-%d')
+    output_config = stim_config.copy()
+    output_config['target_amplitude'] /= 1000.
+    zip_file = FILENAME.format(**output_config)
     zip_cmd = ['zip -9 -j  %s %s' % (zip_file,  os.path.join(out_dir, '*'))]
     subprocess.call(zip_cmd, shell=True)
     remove_files()
