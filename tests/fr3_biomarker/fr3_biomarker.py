@@ -86,7 +86,7 @@ class Params(object):
             cathode_num=args.cathode_num,
             cathode=args.cathode,
             pulse_frequency=args.pulse_frequency,
-            pulse_count=args.pulse_count,
+            pulse_count=args.pulse_frequency*args.pulse_duration/1000,
             target_amplitude=args.target_amplitude
         )
 
