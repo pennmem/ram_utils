@@ -7,6 +7,8 @@ import shutil
 import argparse
 import sys
 
+VERSION=2.04
+
 def print_stim_config(order = (
         'subject', 'anode', 'anode_num', 'cathode', 'cathode_num',
         'pulse_frequency', 'pulse_duration', 'pulse_count', 'target_amplitude', 
@@ -27,7 +29,7 @@ def remove_files(out_dir='./.biomarker_tmp', files=['StimControl.m', 'empty.mat'
     os.rmdir(out_dir)
 
 def make_biomarker(stim_config, template_file='StimControlTemplate.m', out_dir='./.biomarker_tmp', mat_file='empty.mat'):
-    stim_config['pulse_count'] = int(stim_config['pulse_frequency'] * (1000 / stim_config['pulse_duration']))
+    stim_config['pulse_count'] = int(stim_config['pulse_frequency'] * (stim_config['pulse_duration'] / 1000.))
     if not os.path.exists(out_dir):
         os.mkdir(out_dir)
     make_stim_control(out_dir=out_dir)
@@ -51,12 +53,12 @@ class FR4ParserBiomarker(object):
         self.parser.add_argument('--cathode_num', required=True, action='store',type=int)
         self.parser.add_argument('--pulse_frequency', required=True, action='store',type=int)
         self.parser.add_argument('--target_amplitude', required=True, action='store', type=int)
-        self.parser.add_argument('--pulse_duration', required=True, action='store', type=int)
-        self.parser.add_argument('--burst_frequency', required=True, action='store', type=int)
-        self.parser.add_argument('--burst_count', required=True, action='store',type=int)
-        self.parser.add_argument('--pulse_width', required=True, action='store',type=int)
-        self.parser.add_argument('--wait_after_word_on', required=True, action='store',type=int)
-        self.parser.add_argument('--version', required=True, action='store',type=float)
+        self.parser.add_argument('--pulse_duration', required=False, action='store', type=int, default=500)
+        self.parser.add_argument('--burst_frequency', required=False, action='store', type=int, default=1)
+        self.parser.add_argument('--burst_count', required=False, action='store',type=int, default=1)
+        self.parser.add_argument('--pulse_width', required=False, action='store',type=int, default=300)
+        self.parser.add_argument('--wait_after_word_on', required=False, action='store',type=int, default=1486)
+        self.parser.add_argument('--version', required=False, action='store',type=float, default=VERSION)
 
 
         self.arg_list=[]
