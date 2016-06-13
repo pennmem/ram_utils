@@ -123,11 +123,9 @@ class ComputeFR1PhaseDiff(ReportRamTask):
             cur_ev += n_sess_events
 
     def compute_phase_differences(self, bipolar_pair_pairs):
-        time_bin_len = int(round(self.samplerate * self.params.fr1_bin))
         n_bp_pairs = len(bipolar_pair_pairs)
-
         n_events,n_bps,n_freqs,tsize = self.wavelets.shape
-        n_bins = tsize // time_bin_len
+        n_bins = self.params.fr1_n_bins
 
         self.phase_diff_mat = np.empty(shape=(n_events,n_bp_pairs,n_freqs,n_bins), dtype=np.float)
         phase_diff = np.empty(tsize, dtype=np.complex)

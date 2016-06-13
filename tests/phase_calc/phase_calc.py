@@ -15,7 +15,7 @@ import numpy as np
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1111M')
+cml_parser.arg('--subject','R1001P')
 cml_parser.arg('--task','RAM_FR1')
 cml_parser.arg('--workspace-dir','/scratch/busygin/FR1_phases_cpp')
 cml_parser.arg('--mount-point','')
@@ -42,7 +42,7 @@ class Params(object):
         self.fr1_start_time = -1.0
         self.fr1_end_time = 2.8
         self.fr1_buf = 1.0
-        self.fr1_bin = 0.2
+        self.fr1_n_bins = 19
 
         self.filt_order = 4
 
