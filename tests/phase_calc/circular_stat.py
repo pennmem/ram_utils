@@ -95,8 +95,16 @@ def circ_diff(c1, c2, cdiff):
     return _circular_stat.circ_diff(c1, c2, cdiff)
 circ_diff = _circular_stat.circ_diff
 
-def circ_mean(cdiff):
-    return _circular_stat.circ_mean(cdiff)
+def resultant_vector(c, n):
+    return _circular_stat.resultant_vector(c, n)
+resultant_vector = _circular_stat.resultant_vector
+
+def resultant_vector_length(c, n):
+    return _circular_stat.resultant_vector_length(c, n)
+resultant_vector_length = _circular_stat.resultant_vector_length
+
+def circ_mean(c, n):
+    return _circular_stat.circ_mean(c, n)
 circ_mean = _circular_stat.circ_mean
 
 def circ_diff_time_bins(c1, c2, cdiff, cdiff_means):

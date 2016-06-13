@@ -127,7 +127,7 @@ class ComputeFR1PhaseDiff(ReportRamTask):
         n_events,n_bps,n_freqs,tsize = self.wavelets.shape
         n_bins = self.params.fr1_n_bins
 
-        self.phase_diff_mat = np.empty(shape=(n_events,n_bp_pairs,n_freqs,n_bins), dtype=np.float)
+        self.phase_diff_mat = np.empty(shape=(n_events,n_bp_pairs,n_freqs,n_bins), dtype=np.complex)
         phase_diff = np.empty(tsize, dtype=np.complex)
 
         for j,bpp in enumerate(bipolar_pair_pairs):
