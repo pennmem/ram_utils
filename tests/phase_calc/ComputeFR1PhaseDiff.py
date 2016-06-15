@@ -4,7 +4,7 @@ from RamPipeline import *
 
 import numpy as np
 from morlet import MorletWaveletTransform
-from circular_stat import *
+from circular_stat import circ_diff_time_bins
 from sklearn.externals import joblib
 
 from ptsa.data.readers import EEGReader
@@ -53,6 +53,9 @@ class ComputeFR1PhaseDiff(ReportRamTask):
 
         self.compute_wavelets(events, sessions, monopolar_channels, bipolar_pairs)
         self.compute_phase_differences(bipolar_pair_pairs)
+
+        del self.wavelets
+        self.wavelets = None
 
         self.pass_object('phase_diff_mat', self.phase_diff_mat)
         self.pass_object('samplerate', self.samplerate)

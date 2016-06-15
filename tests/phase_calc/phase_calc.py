@@ -32,6 +32,8 @@ from MontagePreparation import MontagePreparation
 
 from ComputeFR1PhaseDiff import ComputeFR1PhaseDiff
 
+from ComputePhaseDiffSignificance import ComputePhaseDiffSignificance
+
 
 # turn it into command line options
 
@@ -47,7 +49,8 @@ class Params(object):
         self.filt_order = 4
 
         self.freqs = np.linspace(45.0, 95.0, 11)
-        #self.freqs = np.array([45.0, 95.0])
+
+        self.n_perms = 500
 
 
 params = Params()
@@ -65,6 +68,8 @@ report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
 report_pipeline.add_task(MontagePreparation(params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeFR1PhaseDiff(params=params, mark_as_completed=True))
+
+report_pipeline.add_task(ComputePhaseDiffSignificance(params=params, mark_as_completed=True))
 
 
 # starts processing pipeline
