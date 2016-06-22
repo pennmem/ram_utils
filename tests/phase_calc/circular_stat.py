@@ -110,6 +110,14 @@ circ_mean = _circular_stat.circ_mean
 def circ_diff_time_bins(c1, c2, cdiff, cdiff_means):
     return _circular_stat.circ_diff_time_bins(c1, c2, cdiff, cdiff_means)
 circ_diff_time_bins = _circular_stat.circ_diff_time_bins
+
+def compute_f_stat(phase_diff_mat, recalls, f_stat_mat):
+    return _circular_stat.compute_f_stat(phase_diff_mat, recalls, f_stat_mat)
+compute_f_stat = _circular_stat.compute_f_stat
+
+def compute_zscores(mat, n_perms):
+    return _circular_stat.compute_zscores(mat, n_perms)
+compute_zscores = _circular_stat.compute_zscores
 # This file is compatible with both classic and new-style classes.
 
 
