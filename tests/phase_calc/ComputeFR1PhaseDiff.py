@@ -10,6 +10,9 @@ from sklearn.externals import joblib
 from ptsa.data.readers import EEGReader
 from ReportUtils import ReportRamTask
 
+# from ptsa.data.TimeSeriesX import TimeSeriesX
+# from scipy.signal import resample
+
 
 class ComputeFR1PhaseDiff(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
@@ -84,6 +87,8 @@ class ComputeFR1PhaseDiff(ReportRamTask):
                                    end_time=self.params.fr1_end_time, buffer_time=self.params.fr1_buf)
 
             eegs = eeg_reader.read()
+            #eegs = eegs.resampled(resampled_rate=256.0)
+            #print 'New samplerate =', eegs.samplerate
             if eeg_reader.removed_bad_data():
                 # NB: this is not supported yet in this pipeline
                 print 'REMOVED SOME BAD EVENTS !!!'
@@ -101,6 +106,7 @@ class ComputeFR1PhaseDiff(ReportRamTask):
 
             if self.samplerate is None:
                 self.samplerate = float(eegs.samplerate)
+                #self.samplerate = 256.0
                 winsize = int(round(self.samplerate*(self.params.fr1_end_time-self.params.fr1_start_time+2*self.params.fr1_buf)))
                 bufsize = int(round(self.samplerate*self.params.fr1_buf))
                 tsize = winsize - 2*bufsize
@@ -116,8 +122,11 @@ class ComputeFR1PhaseDiff(ReportRamTask):
                 elec1 = np.where(monopolar_channels == bp[0])[0][0]
                 elec2 = np.where(monopolar_channels == bp[1])[0][0]
 
+                #print 'Shape =', eegs[elec1].values.shape
+                # bp_data = TimeSeriesX(resample(eegs[elec1].values,winsize,axis=1) - resample(eegs[elec2].values,winsize,axis=1), dims=['events','time'])
+                # bp_data.attrs['samplerate'] = self.samplerate
+
                 bp_data = eegs[elec1] - eegs[elec2]
-                bp_data.attrs['samplerate'] = self.samplerate
 
                 for ev in xrange(n_sess_events):
                     self.wavelet_transform.multiphasevec_complex(bp_data[ev][0:winsize], wav_ev)

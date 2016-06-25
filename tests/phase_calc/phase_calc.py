@@ -17,7 +17,7 @@ import numpy as np
 cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--subject','R1111M')
 cml_parser.arg('--task','RAM_FR1')
-cml_parser.arg('--workspace-dir','/scratch/busygin/FR1_phases')
+cml_parser.arg('--workspace-dir','/scratch/busygin/FR1_phases_es')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
 # cml_parser.arg('--exit-on-no-change')
@@ -31,6 +31,8 @@ from FR1EventPreparation import FR1EventPreparation
 from MontagePreparation import MontagePreparation
 
 from ComputeFR1PhaseDiff import ComputeFR1PhaseDiff
+
+from LoadESPhaseDiff import LoadESPhaseDiff
 
 from ComputePhaseDiffSignificance import ComputePhaseDiffSignificance
 
@@ -68,6 +70,8 @@ report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
 report_pipeline.add_task(MontagePreparation(params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeFR1PhaseDiff(params=params, mark_as_completed=True))
+
+#report_pipeline.add_task(LoadESPhaseDiff(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputePhaseDiffSignificance(params=params, mark_as_completed=True))
 
