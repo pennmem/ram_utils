@@ -40,7 +40,7 @@ class ComputePhaseDiffSignificance(ReportRamTask):
 
         self.connectivity_strength = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-connectivity_strength.pkl'))
 
-        self.pass_object('f_stat_mat', self.connectivity_strength)
+        self.pass_object('connectivity_strength', self.connectivity_strength)
 
     def run(self):
         print "Computing f-stats"
@@ -89,7 +89,7 @@ class ComputePhaseDiffSignificance(ReportRamTask):
             shuffle_mat_bp[:,bp1] += shuffle_mat[:,i]
             shuffle_mat_bp[:,bp2] += shuffle_mat[:,i]
 
-        self.connectivity_strength = zmap(shuffle_mat_bp[0,:], shuffle_mat_bp[1:,:], axis=0, ddof=1)
+        self.connectivity_strength = -1.0 * zmap(shuffle_mat_bp[0,:], shuffle_mat_bp[1:,:], axis=0, ddof=1)
 
         self.pass_object('connectivity_strength', self.connectivity_strength)
 

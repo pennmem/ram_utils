@@ -17,7 +17,7 @@ import numpy as np
 cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--subject','R1111M')
 cml_parser.arg('--task','RAM_FR1')
-cml_parser.arg('--workspace-dir','/scratch/busygin/FR1_phases_es')
+cml_parser.arg('--workspace-dir','/scratch/busygin/FR1_phases')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
 # cml_parser.arg('--exit-on-no-change')
@@ -35,6 +35,10 @@ from ComputeFR1PhaseDiff import ComputeFR1PhaseDiff
 from LoadESPhaseDiff import LoadESPhaseDiff
 
 from ComputePhaseDiffSignificance import ComputePhaseDiffSignificance
+
+from ComposeSessionSummary import ComposeSessionSummary
+
+from GenerateReportTasks import GenerateTex, GenerateReportPDF
 
 
 # turn it into command line options
@@ -74,6 +78,12 @@ report_pipeline.add_task(ComputeFR1PhaseDiff(params=params, mark_as_completed=Tr
 #report_pipeline.add_task(LoadESPhaseDiff(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputePhaseDiffSignificance(params=params, mark_as_completed=True))
+
+report_pipeline.add_task(ComposeSessionSummary(mark_as_completed=False))
+
+report_pipeline.add_task(GenerateTex(mark_as_completed=False))
+
+report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
 
 # starts processing pipeline
