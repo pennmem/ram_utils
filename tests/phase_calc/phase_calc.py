@@ -17,7 +17,7 @@ import numpy as np
 cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--subject','R1111M')
 cml_parser.arg('--task','RAM_FR1')
-cml_parser.arg('--workspace-dir','/scratch/busygin/FR1_phases')
+cml_parser.arg('--workspace-dir','/scratch/busygin/FR1_phases_filtered2')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
 # cml_parser.arg('--exit-on-no-change')

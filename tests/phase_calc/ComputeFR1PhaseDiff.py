@@ -117,6 +117,8 @@ class ComputeFR1PhaseDiff(ReportRamTask):
 
             print 'Computing FR1 wavelets'
 
+            eegs = eegs.filtered([58,62], filt_type='stop', order=self.params.filt_order)
+
             for i,bp in enumerate(bipolar_pairs):
                 print 'Computing wavelets for bipolar pair', bp
                 elec1 = np.where(monopolar_channels == bp[0])[0][0]
@@ -127,6 +129,8 @@ class ComputeFR1PhaseDiff(ReportRamTask):
                 # bp_data.attrs['samplerate'] = self.samplerate
 
                 bp_data = eegs[elec1] - eegs[elec2]
+                #bp_data.attrs['samplerate'] = self.samplerate
+                #bp_data = bp_data.filtered([58,62], filt_type='stop', order=self.params.filt_order)
 
                 for ev in xrange(n_sess_events):
                     self.wavelet_transform.multiphasevec_complex(bp_data[ev][0:winsize], wav_ev)

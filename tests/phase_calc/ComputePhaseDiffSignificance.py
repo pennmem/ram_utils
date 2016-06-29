@@ -67,7 +67,7 @@ class ComputePhaseDiffSignificance(ReportRamTask):
         shuffle_mat = np.empty(shape=(n_perms+1,n_bp_pairs*n_freqs*n_bins), dtype=np.float)
         compute_f_stat(phase_diff_mat, recalls, shuffle_mat[0])
         for i in xrange(1,n_perms+1):
-            print "Permutation", i
+            print 'Permutation', i
             shuffle(recalls)
             compute_f_stat(phase_diff_mat, recalls, shuffle_mat[i])
 
