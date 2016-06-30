@@ -184,7 +184,9 @@ class ComputeClassifier(ReportRamTask):
         # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced',solver='liblinear',fit_intercept=False)
 
         event_sessions = events.session    
-        recalls = events.recalled
+        # recalls = events.recalled
+        recalls = events.distErr <= np.max([events[0].radius_size, np.median(events.distErr)])
+        recalls[events.confidence==0]=0
 
         sessions = np.unique(event_sessions)
         if len(sessions) > 1:

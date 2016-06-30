@@ -69,9 +69,9 @@ class Params(object):
     def __init__(self):
         self.width = 5
 
-        self.th1_start_time = -0.9
-        self.th1_end_time = 0.4
-        self.th1_buf = 1.3
+        self.th1_start_time = -1.2
+        self.th1_end_time = 0.5
+        self.th1_buf = 1.7
 
         # self.th1_start_time = 0.0
         # self.th1_end_time = 1.5
@@ -80,7 +80,7 @@ class Params(object):
         self.filt_order = 4
 
         self.log_powers = True
-        self.classifier_freqs = np.logspace(np.log10(1), np.log10(200), 16)
+        self.classifier_freqs = np.logspace(np.log10(1), np.log10(200), 8)
         self.freqs = np.logspace(np.log10(1), np.log10(200), 50)
         self.ttest_frange = np.array([[1.0,3.0],[3.0,9.0],[40.0,70.0],[70.0,200.0]])
 
