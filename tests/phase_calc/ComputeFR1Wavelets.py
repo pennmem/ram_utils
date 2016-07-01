@@ -80,6 +80,9 @@ class ComputeFR1Wavelets(ReportRamTask):
                                    end_time=self.params.fr1_end_time, buffer_time=self.params.fr1_buf)
 
             eegs = eeg_reader.read()
+            print 'here!'
+            eegs = eegs.resampled(resampled_rate=250.0)
+            print 'New sample rate =', eegs.samplerate
             if eeg_reader.removed_bad_data():
                 print 'REMOVED SOME BAD EVENTS !!!'
                 sess_events = eegs['events'].values.view(np.recarray)

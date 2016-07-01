@@ -10,6 +10,9 @@ from sklearn.externals import joblib
 from ptsa.data.readers import EEGReader
 from ReportUtils import ReportRamTask
 
+# from ptsa.data.TimeSeriesX import TimeSeriesX
+# from scipy.signal import resample
+
 
 class ComputeFR1PhaseDiff(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
@@ -84,6 +87,8 @@ class ComputeFR1PhaseDiff(ReportRamTask):
                                    end_time=self.params.fr1_end_time, buffer_time=self.params.fr1_buf)
 
             eegs = eeg_reader.read()
+            #eegs = eegs.resampled(resampled_rate=256.0)
+            #print 'New samplerate =', eegs.samplerate
             if eeg_reader.removed_bad_data():
                 # NB: this is not supported yet in this pipeline
                 print 'REMOVED SOME BAD EVENTS !!!'
@@ -101,6 +106,7 @@ class ComputeFR1PhaseDiff(ReportRamTask):
 
             if self.samplerate is None:
                 self.samplerate = float(eegs.samplerate)
+                #self.samplerate = 256.0
                 winsize = int(round(self.samplerate*(self.params.fr1_end_time-self.params.fr1_start_time+2*self.params.fr1_buf)))
                 bufsize = int(round(self.samplerate*self.params.fr1_buf))
                 tsize = winsize - 2*bufsize
@@ -111,13 +117,20 @@ class ComputeFR1PhaseDiff(ReportRamTask):
 
             print 'Computing FR1 wavelets'
 
+            eegs = eegs.filtered([58,62], filt_type='stop', order=self.params.filt_order)
+
             for i,bp in enumerate(bipolar_pairs):
                 print 'Computing wavelets for bipolar pair', bp
                 elec1 = np.where(monopolar_channels == bp[0])[0][0]
                 elec2 = np.where(monopolar_channels == bp[1])[0][0]
 
+                #print 'Shape =', eegs[elec1].values.shape
+                # bp_data = TimeSeriesX(resample(eegs[elec1].values,winsize,axis=1) - resample(eegs[elec2].values,winsize,axis=1), dims=['events','time'])
+                # bp_data.attrs['samplerate'] = self.samplerate
+
                 bp_data = eegs[elec1] - eegs[elec2]
-                bp_data.attrs['samplerate'] = self.samplerate
+                #bp_data.attrs['samplerate'] = self.samplerate
+                #bp_data = bp_data.filtered([58,62], filt_type='stop', order=self.params.filt_order)
 
                 for ev in xrange(n_sess_events):
                     self.wavelet_transform.multiphasevec_complex(bp_data[ev][0:winsize], wav_ev)
@@ -130,12 +143,14 @@ class ComputeFR1PhaseDiff(ReportRamTask):
         n_events,n_bps,n_freqs,tsize = self.wavelets.shape
         n_bins = self.params.fr1_n_bins
 
-        self.phase_diff_mat = np.empty(shape=(n_events,n_bp_pairs,n_freqs,n_bins), dtype=np.complex)
+        self.phase_diff_mat = np.empty(shape=(n_bp_pairs, n_freqs, n_bins, n_events), dtype=np.complex)
         phase_diff = np.empty(tsize, dtype=np.complex)
+        phase_diff_mat_tmp = np.empty(n_bins, dtype=np.complex)
 
         for j,bpp in enumerate(bipolar_pair_pairs):
             print "Computing phase differences for bp pair", bpp
             for i in xrange(n_events):
                 bp1,bp2 = bpp
                 for f in xrange(n_freqs):
-                    circ_diff_time_bins(self.wavelets[i,bp1,f,:], self.wavelets[i,bp2,f,:], phase_diff, self.phase_diff_mat[i,j,f,:])
+                    circ_diff_time_bins(self.wavelets[i,bp1,f,:], self.wavelets[i,bp2,f,:], phase_diff, phase_diff_mat_tmp)
+                    self.phase_diff_mat[j,f,:,i] = phase_diff_mat_tmp

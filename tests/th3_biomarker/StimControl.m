@@ -63,17 +63,24 @@ classdef StimControl < handle
         STIMCONTROL_VERSION = 2.00;
 
         % Tested at the start of a session, to ensure that states can be retrieved
-        POSSIBLE_STATES = {'PRACTICE',...
-                           'STIM ENCODING', ...
-                           'NON-STIM ENCODING', ...
-                           'RETRIEVAL', ...
-                           'DISTRACT', ...
-                           'INSTRUCT', ...
-                           'COUNTDOWN', ...
-                           'WAITING', ...
-                           'WORD', ...
-                           'ORIENT', ...
-                           'MIC TEST'};
+        POSSIBLE_STATES = {'TREASURE_OPEN_SPECIAL', ...
+                           'TREASURE_OPEN_EMPTY', ...
+                           'TREASURE_1', ...
+                           'TREASURE_2', ...
+                           'TREASURE_3', ...
+                           'TREASURE_4', ...
+                           'NAVIGATION', ...
+                           'RECALLCUE_1', ...
+                           'RECALLCUE_2', ...
+                           'RECALLCUE_3', ...
+                           'RECALLCHOOSE_1', ...
+                           'RECALLCHOOSE_2', ...
+                           'RECALLCHOOSE_3', ...
+                           'FEEDBACK', ...
+                           'SCORESCREEN', ...
+                           'BLOCKSCREEN', ...
+                           'DISTRACTOR', ...
+                           'PAUSED'};
 
     end
 
@@ -83,14 +90,14 @@ classdef StimControl < handle
         Subject;
         StimParams;
         zscorer; % StatAccum to accumulate data for zscoring
-        n_freqs; % Number of frequencies, 8 for PAL3 design
+        n_freqs; % Number of frequencies, 8 for FR3 1.0.2 design
         bpmat;   % matrix to convert monopolar to bipolar eeg
         freqs;   % frequencies used in wavelet transform
         fs;      % sampling rate = 1000 Hz for Sys 2.x
-        winsize; % 1700 for PAL3
-        total_winsize; % 3700 for PAL3
-        wait_after_word_on; % 2000 ms for PAL3
-        bufsize; % 1000 for PAL3
+        winsize; % 3400 for TH3
+        total_winsize; % 5098 for TH3
+        wait_after_chest_opened; % 500 ms for TH3
+        bufsize; % 1700 for TH3
         phase;   % experiment phase
         W_in;    % classifier weights
         thresh;  % prob threshold
@@ -99,10 +106,14 @@ classdef StimControl < handle
         session_pows;  % collected for KS test and postmortem
         powFileName;   % file with saved powers
         Filter;        % Butterworth filter [58 62] Hz
-        trainingProb;  % collection of classifier probabilities from PAL1 sessions
+        trainingProb;  % collection of classifier probabilities from FR1 sessions
         ks_test_done;  % flag that becomes true when KS test is performed and passed
-        current_word_analyzed;  % flag that says not to compute on the present word again if true
+        current_item_analyzed;  % flag that says not to compute on the present item again if true
         wavelet_transformer;
+        elapsed_duration; % DEBUG: CHECK THE ELAPSED TIME DURING STIM CHOICE
+        debugFileName;
+        elapsed_tic;
+        elapsed_i;
     end
 
     % ---- Public instance methods
@@ -112,6 +123,10 @@ classdef StimControl < handle
         function initialize(this)
            % This method will be called wherever an experiment starts.  Set all persistent variables here.
            % Remember to include 'this.' in front of all variables that you want to be persistent.
+           this.elapsed_tic = tic;
+           this.elapsed_duration = nan(20*3600,1);
+           this.elapsed_i = 1;
+           
            load FILL_IN  % loads Bio struct of biomarker information
 
            this.Subject = Bio.Subject;
@@ -120,17 +135,17 @@ classdef StimControl < handle
            this.zscorer = StatAccum();
            
            % Real-time analysis parameters
-           this.freqs = logspace(log10(3), log10(180), 8);
+           this.freqs = logspace(log10(1), log10(200), 8);
            this.n_freqs = 8;
            this.bpmat = Bio.bpmat;
            this.W_in = [Bio.W Bio.W0];      % weights, w/constant term to the end of the weight vector
            this.trainingProb = Bio.trainingProb;
            this.thresh = Bio.thresh;
            this.fs = Bio.fs;                  % sampling freq.
-           this.winsize = 1700;
-           this.total_winsize = 3700;
-           this.bufsize = 1000;
-           this.wait_after_word_on = 2000;
+           this.winsize = 3400;
+           this.total_winsize = 5098;
+           this.bufsize = 1699;
+           this.wait_after_chest_opened = 500;
            [B,A] = butter(4, [58.0 62.0]/(this.fs/2.0), 'stop');
            this.Filter.coeffs = [B;A];
 
@@ -138,6 +153,7 @@ classdef StimControl < handle
            % stopped and re-started) and load it. If not, initialize zscore
            % variables.
            control = RAMControl.getInstance();
+           this.debugFileName = fullfile(control.getDataFolder, 'DEBUG.mat');
            this.savedFileName = fullfile(control.getDataFolder,[Bio.Subject,'StateSave.mat']);
            if exist(this.savedFileName,'file')
                savedData = load(this.savedFileName);
@@ -156,7 +172,7 @@ classdef StimControl < handle
                this.session_eeg = [];
                this.session_pows = [];
            end
-           this.current_word_analyzed = false;
+           this.current_item_analyzed = false;
            this.wavelet_transformer = morlet_interface();
            this.wavelet_transformer.init();
         end
@@ -194,19 +210,25 @@ classdef StimControl < handle
             %       .sample         number indicating the number of samples collected from the start
             %                       of the experiment
             %
-            %   dataByChannel:      is number-of-samples x #channels matrix.  Each column contains a single channel.
-            %                       The first 128 channels come from the patient.  The next 16 channels
+            %   dataByChannel:      is number-of-samples x 144 matrix.  Each column contains a single channel.
+            %                       The first 128 channels come from the patient.  The remaining 16 channels
             %                       are analog input channels, which could include sync pulses or
-            %                       stim pulses (TBD). Repeated #neuroports times.
+            %                       stim pulses (TBD)
             % Outputs:
             %   decision (no-stim=0 or stim=1)
+            this.elapsed_duration(this.elapsed_i) = toc(this.elapsed_tic);
+            this.elapsed_tic = tic;
+            if this.elapsed_i < length(this.elapsed_duration)
+                this.elapsed_i = this.elapsed_i + 1;
+            end
+            
             decision = 0;
             stopSession = false;
             errMsg = [];
 
             control = RAMControl.getInstance();
 
-            if ~this.ks_test_done && control.isStateActive('WAITING') && (experimentState.list==4)
+            if ~this.ks_test_done && control.isStateActive('SCORESCREEN') && (experimentState.list==8)
                 n_samples = size(this.session_pows,2);
                 probs = zeros(1,n_samples);
                 for i=1:n_samples
@@ -226,11 +248,10 @@ classdef StimControl < handle
                 this.ks_test_done = true;
             end
 
-            [state_is_word, time_since_change] = control.isStateActive('WORD');
-            state_is_retrieval = control.isStateActive('RETRIEVAL');
+            [state_is_chest, time_since_change] = control.isStateActive('TREASURE_OPEN_SPECIAL');
 
-            if ~this.current_word_analyzed && state_is_word && ~state_is_retrieval && time_since_change>=this.wait_after_word_on
-                this.current_word_analyzed = true;
+            if ~this.current_item_analyzed && state_is_chest && time_since_change>=this.wait_after_chest_opened
+                this.current_item_analyzed = true;
                 is_stim_encoding = control.isStateActive('STIM ENCODING');
 
                 % decoding procedure
@@ -254,6 +275,7 @@ classdef StimControl < handle
                 % mirroring happens here
                 flipdata = flipud(dataByChannel);
                 dataByChannel = [flipdata(end-this.bufsize:end-1,:); dataByChannel; flipdata(2:this.bufsize+1,:)];
+                fprintf('time dim size = %d\n', size(dataByChannel,1));
 
                 n_bps = size(dataByChannel,2);
 
@@ -303,8 +325,8 @@ classdef StimControl < handle
                 end
             end
 
-            if ~state_is_word
-                this.current_word_analyzed = false;
+            if ~state_is_chest
+                this.current_item_analyzed = false;
             end;
         end
 
@@ -318,6 +340,9 @@ classdef StimControl < handle
             session_eeg = this.session_eeg;
             session_pows = this.session_pows;
             save(this.powFileName, 'session_eeg', 'session_pows');
+            
+            elapsed = this.elapsed_duration(2:end);
+            save(this.debugFileName, 'elapsed');
         end
 
     end % end public methods
