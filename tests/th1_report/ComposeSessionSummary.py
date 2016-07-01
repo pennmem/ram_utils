@@ -34,21 +34,21 @@ def make_ttest_table(bp_tal_structs, loc_info, ttest_results):
         atlas_loc = loc_info['Das Volumetric Atlas Location' if has_depth else 'Freesurfer Desikan Killiany Surface Atlas Location']
         comments = loc_info['Comments'] if ('Comments' in loc_info) else None
         n = len(bp_tal_structs)
-        ttest_data = [list(a) for a in zip(bp_tal_structs.eType, bp_tal_structs.tagName, [None] * n, [None] * n, ttest_results[1], ttest_results[0])]
+        ttest_data = [list(a) for a in zip(bp_tal_structs.eType, bp_tal_structs.eNames, bp_tal_structs.tagName, [None] * n, [None] * n, ttest_results[1], ttest_results[0])]
         for i, tag in enumerate(bp_tal_structs.tagName):
-            ttest_data[i][2], ttest_data[i][3] = make_atlas_loc(tag, atlas_loc, comments)
+            ttest_data[i][3], ttest_data[i][4] = make_atlas_loc(tag, atlas_loc, comments)
     else:
-        ttest_data = [list(a) for a in zip(bp_tal_structs.eType, bp_tal_structs.tagName, ttest_results[1], ttest_results[0])]
+        ttest_data = [list(a) for a in zip(bp_tal_structs.eType, bp_tal_structs.eNames, bp_tal_structs.tagName, ttest_results[1], ttest_results[0])]
     return ttest_data
 
 def make_ttest_table_header(loc_info):
     table_format = table_header = None
     if ('Das Volumetric Atlas Location' in loc_info) or ('Freesurfer Desikan Killiany Surface Atlas Location' in loc_info):
-        table_format = 'C{.75cm} C{2.5cm} C{4cm} C{4cm} C{1.25cm} C{1.25cm}'
-        table_header = r'Type & Electrode Pair & Atlas Loc1 & Atlas Loc2 & \textit{p} & \textit{t}-stat'
+        table_format = 'C{.75cm} C{2cm} C{2.5cm} C{3cm} C{3cm} C{1.25cm} C{1.25cm}'
+        table_header = r'Type & Channel \# & Electrode Pair & Atlas Loc1 & Atlas Loc2 & \textit{p} & \textit{t}-stat'
     else:
-        table_format = 'C{.75cm} C{2.5cm} C{1.25cm} C{1.25cm}'
-        table_header = r'Type & Electrode Pair & \textit{p} & \textit{t}-stat'
+        table_format = 'C{.75cm} C{2cm} C{2.5cm} C{1.25cm} C{1.25cm}'
+        table_header = r'Type & Channel \# & Electrode Pair & \textit{p} & \textit{t}-stat'
     return table_format, table_header
 
 def format_ttest_table(table_data):
