@@ -253,7 +253,7 @@ classdef StimControl < handle
 
                 % mirroring happens here
                 flipdata = flipud(dataByChannel);
-                dataByChannel = [flipdata(1:end-1,:); dataByChannel; flipdata(2:end,:)];
+                dataByChannel = [flipdata(end-this.bufsize:end-1,:); dataByChannel; flipdata(2:this.bufsize+1,:)];
 
                 n_bps = size(dataByChannel,2);
 
