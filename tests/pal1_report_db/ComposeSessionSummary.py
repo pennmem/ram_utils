@@ -12,7 +12,8 @@ from ReportUtils import ReportRamTask
 
 
 def make_ttest_table(bp_tal_structs, ttest_results):
-    ttest_data = [list(a) for a in zip(bp_tal_structs.etype.values, bp_tal_structs.index.values, bp_tal_structs.bp_atlas_loc, ttest_results[1], ttest_results[0])]
+    contact_nos = bp_tal_structs.channel_1.str.lstrip('0') + '-' + bp_tal_structs.channel_2.str.lstrip('0')
+    ttest_data = [list(a) for a in zip(bp_tal_structs.etype.values, contact_nos.values, bp_tal_structs.index.values, bp_tal_structs.bp_atlas_loc, ttest_results[1], ttest_results[0])]
     return ttest_data
 
 def format_ttest_table(table_data):
