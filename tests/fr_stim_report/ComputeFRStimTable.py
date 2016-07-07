@@ -90,11 +90,14 @@ class ComputeFRStimTable(ReportRamTask):
         fr_stim_prob = lr_classifier.predict_proba(fr_stim_pow_mat)[:,1]
 
         is_stim_item = np.zeros(n_events, dtype=np.bool)
+        is_post_stim_item = np.zeros(n_events, dtype=np.bool)
         j = 0
         for i,ev in enumerate(all_events):
             if ev.type=='WORD':
-                if (all_events[i-1].type=='STIM_OFF') or (all_events[i+1].type=='STIM_OFF'):
+                if all_events[i+1].type=='STIM':
                     is_stim_item[j] = True
+                if (all_events[i-1].type=='STIM_OFF') or (all_events[i+1].type=='STIM_OFF'):
+                    is_post_stim_item[j] = True
                 j += 1
 
         self.fr_stim_table = pd.DataFrame()
@@ -105,6 +108,7 @@ class ComputeFRStimTable(ReportRamTask):
         self.fr_stim_table['itemno'] = events.itemno
         self.fr_stim_table['is_stim_list'] = [(s==1) for s in events.stimList]
         self.fr_stim_table['is_stim_item'] = is_stim_item
+        self.fr_stim_table['is_post_stim_item'] = is_post_stim_item
         self.fr_stim_table['recalled'] = events.recalled
         self.fr_stim_table['prob'] = fr_stim_prob
 
