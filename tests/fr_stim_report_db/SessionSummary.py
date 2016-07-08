@@ -42,11 +42,18 @@ class SessionSummary(object):
         self.pvalue_intr = None
 
         self.stim_vs_non_stim_pc_diff_from_mean = None
+        self.post_stim_vs_non_stim_pc_diff_from_mean = None
 
-        self.mean_prob_diff_all = None
-        self.sem_prob_diff_all = None
-        self.mean_prob_diff_low = None
-        self.sem_prob_diff_low = None
+        self.mean_prob_diff_all_stim_item = None
+        self.sem_prob_diff_all_stim_item = None
+        self.mean_prob_diff_low_stim_item = None
+        self.sem_prob_diff_low_stim_item = None
+
+        self.mean_prob_diff_all_post_stim_item = None
+        self.sem_prob_diff_all_post_stim_item = None
+        self.mean_prob_diff_low_post_stim_item = None
+        self.sem_prob_diff_low_post_stim_item = None
+
         self.control_mean_prob_diff_all = None
         self.control_sem_prob_diff_all = None
         self.control_mean_prob_diff_low = None

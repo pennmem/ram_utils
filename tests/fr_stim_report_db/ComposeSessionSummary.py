@@ -115,7 +115,7 @@ class ComposeSessionSummary(ReportRamTask):
 
                 session_summary.list_number[list_idx] = lst
                 session_summary.n_recalls_per_list[list_idx] = fr_stim_sess_list_table.recalled.sum()
-                session_summary.n_stims_per_list[list_idx] = fr_stim_sess_list_table.is_stim_item.sum()
+                session_summary.n_stims_per_list[list_idx] = fr_stim_sess_list_table.is_post_stim_item.sum()
                 session_summary.is_stim_list[list_idx] = fr_stim_sess_list_table.is_stim_list.any()
 
             session_summary.prob_first_recall /= float(len(fr_stim_table_by_session_list))
@@ -150,10 +150,19 @@ class ComposeSessionSummary(ReportRamTask):
             fr_stim_stim_list_stim_item_low_table = fr_stim_stim_list_stim_item_table[fr_stim_stim_list_stim_item_table['prev_prob']<thresh]
             fr_stim_stim_list_stim_item_high_table = fr_stim_stim_list_stim_item_table[fr_stim_stim_list_stim_item_table['prev_prob']>thresh]
 
-            session_summary.mean_prob_diff_all = fr_stim_stim_list_stim_item_table['prob_diff'].mean()
-            session_summary.sem_prob_diff_all = fr_stim_stim_list_stim_item_table['prob_diff'].sem()
-            session_summary.mean_prob_diff_low = fr_stim_stim_list_stim_item_low_table['prob_diff'].mean()
-            session_summary.sem_prob_diff_low = fr_stim_stim_list_stim_item_low_table['prob_diff'].sem()
+            fr_stim_stim_list_post_stim_item_table = fr_stim_stim_list_table[fr_stim_stim_list_table['is_post_stim_item']]
+            fr_stim_stim_list_post_stim_item_low_table = fr_stim_stim_list_post_stim_item_table[fr_stim_stim_list_post_stim_item_table['prev_prob']<thresh]
+            fr_stim_stim_list_post_stim_item_high_table = fr_stim_stim_list_post_stim_item_table[fr_stim_stim_list_post_stim_item_table['prev_prob']>thresh]
+
+            session_summary.mean_prob_diff_all_stim_item = fr_stim_stim_list_stim_item_table['prob_diff'].mean()
+            session_summary.sem_prob_diff_all_stim_item = fr_stim_stim_list_stim_item_table['prob_diff'].sem()
+            session_summary.mean_prob_diff_low_stim_item = fr_stim_stim_list_stim_item_low_table['prob_diff'].mean()
+            session_summary.sem_prob_diff_low_stim_item = fr_stim_stim_list_stim_item_low_table['prob_diff'].sem()
+
+            session_summary.mean_prob_diff_all_post_stim_item = fr_stim_stim_list_post_stim_item_table['prob_diff'].mean()
+            session_summary.sem_prob_diff_all_post_stim_item = fr_stim_stim_list_post_stim_item_table['prob_diff'].sem()
+            session_summary.mean_prob_diff_low_post_stim_item = fr_stim_stim_list_post_stim_item_low_table['prob_diff'].mean()
+            session_summary.sem_prob_diff_low_post_stim_item = fr_stim_stim_list_post_stim_item_low_table['prob_diff'].sem()
 
             fr_stim_non_stim_list_table = fr_stim_non_stim_list_table[(~fr_stim_non_stim_list_table['is_stim_list']) & (fr_stim_non_stim_list_table['serialpos']>1)]
             fr_stim_non_stim_list_low_table = fr_stim_non_stim_list_table[fr_stim_non_stim_list_table['prev_prob']<thresh]
@@ -167,15 +176,23 @@ class ComposeSessionSummary(ReportRamTask):
             stim_item_recall_rate_low = fr_stim_stim_list_stim_item_low_table['recalled'].mean()
             stim_item_recall_rate_high = fr_stim_stim_list_stim_item_high_table['recalled'].mean()
 
+            post_stim_item_recall_rate_low = fr_stim_stim_list_post_stim_item_low_table['recalled'].mean()
+            post_stim_item_recall_rate_high = fr_stim_stim_list_post_stim_item_high_table['recalled'].mean()
+
             non_stim_list_recall_rate_low = fr_stim_non_stim_list_low_table['recalled'].mean()
             non_stim_list_recall_rate_high = fr_stim_non_stim_list_high_table['recalled'].mean()
 
             recall_rate = session_summary.n_correct_words / float(session_summary.n_words)
 
-            low_pc_diff_from_mean = 100.0 * (stim_item_recall_rate_low-non_stim_list_recall_rate_low) / recall_rate
-            high_pc_diff_from_mean = 100.0 * (stim_item_recall_rate_high-non_stim_list_recall_rate_high) / recall_rate
+            stim_low_pc_diff_from_mean = 100.0 * (stim_item_recall_rate_low-non_stim_list_recall_rate_low) / recall_rate
+            stim_high_pc_diff_from_mean = 100.0 * (stim_item_recall_rate_high-non_stim_list_recall_rate_high) / recall_rate
 
-            session_summary.stim_vs_non_stim_pc_diff_from_mean = (low_pc_diff_from_mean, high_pc_diff_from_mean)
+            post_stim_low_pc_diff_from_mean = 100.0 * (post_stim_item_recall_rate_low-non_stim_list_recall_rate_low) / recall_rate
+            post_stim_high_pc_diff_from_mean = 100.0 * (post_stim_item_recall_rate_high-non_stim_list_recall_rate_high) / recall_rate
+
+            session_summary.stim_vs_non_stim_pc_diff_from_mean = (stim_low_pc_diff_from_mean, stim_high_pc_diff_from_mean)
+
+            session_summary.post_stim_vs_non_stim_pc_diff_from_mean = (post_stim_low_pc_diff_from_mean, post_stim_high_pc_diff_from_mean)
 
             session_summary_array.append(session_summary)
 

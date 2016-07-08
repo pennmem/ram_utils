@@ -14,9 +14,9 @@
 \usepackage[small,bf,it]{caption}
 \setlength\belowcaptionskip{2pt}
 
-\addtolength{\oddsidemargin}{-.875in} 
-\addtolength{\evensidemargin}{-.875in} 
-\addtolength{\textwidth}{1.75in} 
+\addtolength{\oddsidemargin}{-1.0in}
+\addtolength{\evensidemargin}{-1.0in}
+\addtolength{\textwidth}{2.0in}
 \addtolength{\topmargin}{-.75in} 
 \addtolength{\textheight}{1.75in}
 
@@ -24,7 +24,7 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{RAM <EXPERIMENT> report v 2.1}
+\lhead{RAM <EXPERIMENT> report v 2.2}
 \chead{Subject: \textbf{<SUBJECT>}}
 \rhead{Date created: <DATE>}
 \begin{document}
