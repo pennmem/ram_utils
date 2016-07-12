@@ -94,7 +94,7 @@ classdef StimControl < handle
         bpmat;   % matrix to convert monopolar to bipolar eeg
         freqs;   % frequencies used in wavelet transform
         fs;      % sampling rate = 1000 Hz for Sys 2.x
-        winsize; % 3400 for TH3
+        winsize; % 1700 for TH3
         total_winsize; % 5098 for TH3
         wait_after_chest_opened; % 500 ms for TH3
         bufsize; % 1700 for TH3
@@ -142,7 +142,7 @@ classdef StimControl < handle
            this.trainingProb = Bio.trainingProb;
            this.thresh = Bio.thresh;
            this.fs = Bio.fs;                  % sampling freq.
-           this.winsize = 3400;
+           this.winsize = 1700;
            this.total_winsize = 5098;
            this.bufsize = 1699;
            this.wait_after_chest_opened = 500;
@@ -252,7 +252,7 @@ classdef StimControl < handle
 
             if ~this.current_item_analyzed && state_is_chest && time_since_change>=this.wait_after_chest_opened
                 this.current_item_analyzed = true;
-                is_stim_encoding = control.isStateActive('STIM ENCODING');
+                is_stim_encoding = control.isStateActive('STIM_NAVIGATION');
 
                 % decoding procedure
 
@@ -275,7 +275,6 @@ classdef StimControl < handle
                 % mirroring happens here
                 flipdata = flipud(dataByChannel);
                 dataByChannel = [flipdata(end-this.bufsize:end-1,:); dataByChannel; flipdata(2:this.bufsize+1,:)];
-                fprintf('time dim size = %d\n', size(dataByChannel,1));
 
                 n_bps = size(dataByChannel,2);
 
