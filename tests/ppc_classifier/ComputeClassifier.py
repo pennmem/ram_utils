@@ -1,7 +1,11 @@
 from RamPipeline import *
 
+from math import sqrt
 import numpy as np
+from numpy.linalg import norm
+from numpy.random import randn
 from scipy.stats.mstats import zscore
+from sklearn.preprocessing import normalize
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, roc_curve
 from random import shuffle
@@ -10,13 +14,29 @@ import warnings
 
 from ReportUtils import ReportRamTask
 
-def normalize_sessions(ppc_features, events):
-    # sessions = np.unique(events.session)
-    # for sess in sessions:
-    #     sess_event_mask = (events.session == sess)
-    #     ppc_features[sess_event_mask] = zscore(ppc_features[sess_event_mask], axis=0, ddof=1)
+def normalize_sessions(pow_mat, events):
+    sessions = np.unique(events.session)
+    for sess in sessions:
+        sess_event_mask = (events.session == sess)
+        pow_mat[sess_event_mask] = zscore(pow_mat[sess_event_mask], axis=0, ddof=1)
+    return pow_mat
+
+def norm2_sessions(ppc_features, events):
+    print norm(ppc_features.reshape(-1))
+    sessions = np.unique(events.session)
+    for sess in sessions:
+        sess_event_mask = (events.session == sess)
+        ppc_features[sess_event_mask] = normalize(ppc_features[sess_event_mask], norm='l2', axis=0)
+    print norm(ppc_features.reshape(-1))
     return ppc_features
 
+def feature_index_to_freq_and_elects(feature_idx, n_bps):
+    n_bp_pairs = n_bps * (n_bps-1) / 2
+    freq = feature_idx / n_bp_pairs
+    bp_pair_idx = feature_idx - freq*n_bp_pairs
+    i = int((1.0 + sqrt(1.00001+8.0*bp_pair_idx)) / 2.0)
+    j = bp_pair_idx - i*(i-1)/2
+    return freq, i, j
 
 class ModelOutput(object):
     def __init__(self, true_labels, probs):
@@ -68,6 +88,9 @@ class ComputeClassifier(ReportRamTask):
         super(ComputeClassifier,self).__init__(mark_as_completed)
         self.params = params
         self.ppc_features = None
+        self.selected_features = None
+        #self.pow_mat = None
+        self.matrices = None
         self.lr_classifier = None
         self.xval_output = dict()   # ModelOutput per session; xval_output[-1] is across all sessions
         self.perm_AUCs = None
@@ -82,6 +105,25 @@ class ComputeClassifier(ReportRamTask):
             self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
                                         access_path = ['electrodes','bipolar'])
 
+    def prepare_matrices(self, event_sessions):
+        sessions = np.unique(event_sessions)
+        self.matrices = dict()
+        for sess in sessions:
+            sess_sel_features = self.selected_features[sess]
+            insample_mask = (event_sessions != sess)
+            insample_ppc_features = self.ppc_features[insample_mask]
+            #insample_pows = self.pow_mat[insample_mask]
+            #noise = 2*zscore(randn(insample_pows.shape[0], insample_pows.shape[1]), axis=0, ddof=1)
+            insample_features = insample_ppc_features[:,sess_sel_features]
+            #insample_features = np.concatenate((insample_pows, noise), axis=1)
+            outsample_mask = ~insample_mask
+            outsample_ppc_features = self.ppc_features[outsample_mask]
+            #outsample_pows = self.pow_mat[outsample_mask]
+            #noise = 2*zscore(randn(outsample_pows.shape[0], outsample_pows.shape[1]), axis=0, ddof=1)
+            outsample_features = outsample_ppc_features[:,sess_sel_features]
+            #outsample_features = np.concatenate((outsample_pows, noise), axis=1)
+            self.matrices[sess] = (insample_features, outsample_features)
+
 
     def run_loso_xval(self, event_sessions, recalls, permuted=False):
         probs = np.empty_like(recalls, dtype=np.float)
@@ -89,19 +131,30 @@ class ComputeClassifier(ReportRamTask):
         sessions = np.unique(event_sessions)
 
         for sess in sessions:
+            sess_features = self.matrices[sess]
+
             insample_mask = (event_sessions != sess)
-            insample_ppc_features = self.ppc_features[insample_mask]
+            #insample_ppc_features = self.ppc_features[insample_mask]
+            #insample_ppc_features = insample_ppc_features[:,self.selected_features[sess]]
             insample_recalls = recalls[insample_mask]
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
 
-                self.lr_classifier.fit(insample_ppc_features, insample_recalls)
+                self.lr_classifier.fit(sess_features[0], insample_recalls)
+
+            # print 'Outsample session', sess, 'nonzero weights'
+            #
+            # bipolar_pairs = self.get_passed_object('bipolar_pairs')
+            # n_bps = len(bipolar_pairs)
+            # nonzero_feature_idx = np.where(self.lr_classifier.coef_[0])[0]
+            # print [feature_index_to_freq_and_elects(idx, n_bps) for idx in nonzero_feature_idx]
 
             outsample_mask = ~insample_mask
-            outsample_ppc_features = self.ppc_features[outsample_mask]
+            #outsample_ppc_features = self.ppc_features[outsample_mask]
+            #outsample_ppc_features = outsample_ppc_features[:,self.selected_features[sess]]
             outsample_recalls = recalls[outsample_mask]
 
-            outsample_probs = self.lr_classifier.predict_proba(outsample_ppc_features)[:,1]
+            outsample_probs = self.lr_classifier.predict_proba(sess_features[1])[:,1]
             if not permuted:
                 self.xval_output[sess] = ModelOutput(outsample_recalls, outsample_probs)
                 self.xval_output[sess].compute_roc()
@@ -138,16 +191,15 @@ class ComputeClassifier(ReportRamTask):
         for lst in lists:
             insample_mask = (event_lists != lst)
             insample_ppc_features = self.ppc_features[insample_mask]
+            insample_ppc_features = insample_ppc_features[:,self.selected_features[-1]]
             insample_recalls = recalls[insample_mask]
 
-            print 'point1'
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 self.lr_classifier.fit(insample_ppc_features, insample_recalls)
-            print 'point2'
 
             outsample_mask = ~insample_mask
-            outsample_ppc_features = self.ppc_features[outsample_mask]
+            outsample_ppc_features = self.ppc_features[outsample_mask, self.selected_features[-1]]
 
             probs[outsample_mask] = self.lr_classifier.predict_proba(outsample_ppc_features)[:,1]
 
@@ -178,8 +230,16 @@ class ComputeClassifier(ReportRamTask):
         subject = self.pipeline.subject
         task = self.pipeline.task
 
+        bipolar_pairs = self.get_passed_object('bipolar_pairs')
+        n_bps = len(bipolar_pairs)
+
         events = self.get_passed_object(task + '_events')
-        self.ppc_features = normalize_sessions(self.get_passed_object('ppc_features'), events)
+        self.ppc_features = norm2_sessions(self.get_passed_object('ppc_features'), events)
+        #self.ppc_features = self.get_passed_object('ppc_features')
+        self.selected_features = self.get_passed_object('selected_features')
+
+        #self.pow_mat = joblib.load('/scratch/mswat/automated_reports/FR1_reports/RAM_FR1_R1111M/R1111M-RAM_FR1-pow_mat.pkl')
+        #self.pow_mat = normalize_sessions(self.pow_mat, events)
 
         #n1 = np.sum(events.recalled)
         #n0 = len(events) - n1
@@ -191,6 +251,9 @@ class ComputeClassifier(ReportRamTask):
             self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto', solver='liblinear')
 
         event_sessions = events.session
+
+        self.prepare_matrices(event_sessions)
+
         recalls = events.recalled
 
         sessions = np.unique(event_sessions)
@@ -210,17 +273,28 @@ class ComputeClassifier(ReportRamTask):
             print 'Performing leave-one-list-out xval'
             self.run_lolo_xval(sess, event_lists, recalls, permuted=False)
 
-        print 'AUC =', self.xval_output[-1].auc
+
+        # C = np.logspace(np.log10(1e-8), np.log10(1e-3), 20)
+        # for i in xrange(20):
+        #     # print 'Performing leave-one-session-out xval'
+        #     self.lr_classifier = LogisticRegression(C=C[i], penalty=self.params.penalty_type, class_weight='auto', solver='liblinear')
+        #     self.run_loso_xval(event_sessions, recalls, permuted=False)
+        #     print 'C =', C[i], 'AUC =', self.xval_output[-1].auc
 
         self.pvalue = np.sum(self.perm_AUCs >= self.xval_output[-1].auc) / float(self.perm_AUCs.size)
         print 'Perm test p-value =', self.pvalue
 
         print 'thresh =', self.xval_output[-1].jstat_thresh, 'quantile =', self.xval_output[-1].jstat_quantile
 
+        print 'AUC =', self.xval_output[-1].auc
+
         # Finally, fitting classifier on all available data
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            self.lr_classifier.fit(self.ppc_features, recalls)
+            self.lr_classifier.fit(self.ppc_features[:,self.selected_features[-1]], recalls)
+
+        # nonzero_feature_idx = np.where(self.lr_classifier.coef_[0])[0]
+        # print [feature_index_to_freq_and_elects(idx, n_bps) for idx in nonzero_feature_idx]
 
         self.pass_object('lr_classifier', self.lr_classifier)
         self.pass_object('xval_output', self.xval_output)
