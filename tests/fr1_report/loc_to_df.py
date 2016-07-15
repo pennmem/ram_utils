@@ -49,7 +49,7 @@ def loc_to_df(excelFile):
             #    maxLen = rowLen
             #f.write('\t'*(maxLen-rowLen))
             loc.append(r)
-    return pd.DataFrame([r[1:4] for r in loc[1:]], index=[r[0] for r in loc[1:]], columns=loc[0][1:4])
+    return pd.DataFrame([r[1:4] for r in loc[1:]], index=[r[0].upper() for r in loc[1:]], columns=loc[0][1:4])
 
 def isStereo(workbook):
     stereoSheet = findInSheetName(workbook, 'STEREO')
