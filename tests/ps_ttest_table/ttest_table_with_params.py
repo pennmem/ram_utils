@@ -185,7 +185,13 @@ ps3_table = ps3_table[['Subject','Pulse_Frequency','Amplitude','Duration','Burst
 
 ps_table = pd.concat([ps_table, ps3_table], ignore_index=True)
 
+exclude_subjects = ['R1135E']
+for ex_subject in exclude_subjects:
+
+    ps_table = ps_table[ps_table.Subject != ex_subject]
+
 grouped = ps_table.groupby(['Subject','Pulse_Frequency', 'Amplitude', 'Duration', 'Burst_Frequency','stimAnodeTag','stimCathodeTag','locTag'])
+
 
 ttest_table = []
 

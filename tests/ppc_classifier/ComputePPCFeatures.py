@@ -30,19 +30,32 @@ class ComputePPCFeatures(ReportRamTask):
 
         print "Computing PPC features"
 
-        events = self.get_passed_object(task+'_events')
-        recalls = np.array(events.recalled, dtype=np.bool)
-
         wavelets = self.get_passed_object('wavelets')
+        events = self.get_passed_object(task+'_events')
+
         n_freqs, n_bps, n_events, t_size = wavelets.shape
-        wavelets = wavelets.reshape(-1)
+        n_features = n_freqs * n_bps * (n_bps-1) / 2
+        #self.ppc_features = np.empty(shape=(n_events,n_features), dtype=float)
 
-        n_features = n_freqs * n_bps * (n_bps-1)
-        self.ppc_features = np.empty(n_features*n_events, dtype=float)
+        sessions = np.unique([events.session])
 
-        circular_stat.single_trial_ppc_all_features(recalls, wavelets, self.ppc_features, n_freqs, n_bps)
+        for sess in sessions:
+            print 'Session', sess
 
-        self.ppc_features = self.ppc_features.reshape((n_features,n_events)).transpose()
+            sess_sel = (events.session==sess)
+            sess_events = events[sess_sel]
+            n_events = len(sess_events)
+
+            sess_wavelets = wavelets[:,:,sess_sel,:].ravel()
+
+            sess_recalls = np.array(sess_events.recalled, dtype=np.bool).ravel()
+            sess_ppc_features = np.empty(n_features*n_events, dtype=float)
+
+            circular_stat.single_trial_ppc_all_features(sess_recalls, sess_wavelets, sess_ppc_features, n_freqs, n_bps)
+
+            sess_ppc_features = sess_ppc_features.reshape((n_features,n_events)).transpose()
+
+            self.ppc_features = np.concatenate((self.ppc_features,sess_ppc_features), axis=0) if self.ppc_features is not None else sess_ppc_features
 
         self.pass_object('ppc_features', self.ppc_features)
 

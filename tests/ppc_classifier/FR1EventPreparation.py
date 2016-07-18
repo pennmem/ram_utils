@@ -21,8 +21,8 @@ class FR1EventPreparation(ReportRamTask):
 
         events = e_reader.read()
 
-        #let's work with session 2 only now
-        #events = events[events.session==2]
+        #let's work with one session only now
+        #events = events[events.session==3]
 
         ev_order = np.argsort(events, order=('session','list','mstime'))
         events = events[ev_order]

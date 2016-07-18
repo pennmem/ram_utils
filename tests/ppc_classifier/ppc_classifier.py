@@ -15,9 +15,9 @@ import numpy as np
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1111M')
+cml_parser.arg('--subject','R1145J_1')
 cml_parser.arg('--task','RAM_FR1')
-cml_parser.arg('--workspace-dir','/scratch/busygin/FR1_ppc_1freq')
+cml_parser.arg('--workspace-dir','/scratch/busygin/FR1_ppc_new')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
 # cml_parser.arg('--exit-on-no-change')
@@ -33,6 +33,8 @@ from MontagePreparation import MontagePreparation
 from ComputeFR1Wavelets import ComputeFR1Wavelets
 
 from ComputePPCFeatures import ComputePPCFeatures
+
+from ComputeTTest import ComputeTTest
 
 from ComputeClassifier import ComputeClassifier
 
@@ -53,11 +55,11 @@ class Params(object):
 
         self.filt_order = 4
 
-        #self.freqs = np.logspace(np.log10(3), np.log10(180), 8)
-        self.freqs = np.array([180.0])
+        self.freqs = np.logspace(np.log10(3), np.log10(180), 8)
+        #self.freqs = np.array([180.0])
 
         self.penalty_type = 'l2'
-        self.C = 7.2e-4
+        self.C = 8.69749e-05
 
         self.n_perm = 200
 
@@ -79,6 +81,8 @@ report_pipeline.add_task(MontagePreparation(params, mark_as_completed=True))
 report_pipeline.add_task(ComputeFR1Wavelets(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputePPCFeatures(params=params, mark_as_completed=True))
+
+report_pipeline.add_task(ComputeTTest(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 
