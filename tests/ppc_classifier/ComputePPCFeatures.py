@@ -51,7 +51,7 @@ class ComputePPCFeatures(ReportRamTask):
             sess_recalls = np.array(sess_events.recalled, dtype=np.bool).ravel()
             sess_ppc_features = np.empty(n_features*n_events, dtype=float)
 
-            circular_stat.single_trial_ppc_all_features(sess_recalls, sess_wavelets, sess_ppc_features, n_freqs, n_bps)
+            circular_stat.single_trial_ppc_all_features(sess_recalls, sess_wavelets, sess_ppc_features, n_freqs, n_bps, 50)
 
             sess_ppc_features = sess_ppc_features.reshape((n_features,n_events)).transpose()
 

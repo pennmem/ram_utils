@@ -47,10 +47,10 @@ class ComputeTTest(ReportRamTask):
             sess_selected_features = np.ones(n_features, dtype=np.bool)
             for sess1 in sessions:
                 if sess1!=sess:
-                    sess_selected_features = sess_selected_features & (np.abs(self.ttest[sess1][0]) > 0.0)
+                    sess_selected_features = sess_selected_features & (np.abs(self.ttest[sess1][0]) >= 0.0)
             print 'Session', sess, 'outsample test:', np.sum(sess_selected_features), 'out of', n_features, 'features selected'
             self.selected_features[sess] = sess_selected_features
-            selected_features_all_sessions = selected_features_all_sessions & (np.abs(self.ttest[sess][0]) > 0.0)
+            selected_features_all_sessions = selected_features_all_sessions & (np.abs(self.ttest[sess][0]) >= 0.0)
         print 'All sessions:', np.sum(selected_features_all_sessions), 'features selected'
         self.selected_features[-1] = selected_features_all_sessions
 

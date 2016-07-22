@@ -127,8 +127,8 @@ def single_trial_ppc_with_classes(recalls, wavelet1, wavelet2, ppcs):
     return _circular_stat.single_trial_ppc_with_classes(recalls, wavelet1, wavelet2, ppcs)
 single_trial_ppc_with_classes = _circular_stat.single_trial_ppc_with_classes
 
-def single_trial_ppc_all_features(recalls, wavelets, ppc_output, n_freqs, n_bps):
-    return _circular_stat.single_trial_ppc_all_features(recalls, wavelets, ppc_output, n_freqs, n_bps)
+def single_trial_ppc_all_features(recalls, wavelets, ppc_output, n_freqs, n_bps, n_threads):
+    return _circular_stat.single_trial_ppc_all_features(recalls, wavelets, ppc_output, n_freqs, n_bps, n_threads)
 single_trial_ppc_all_features = _circular_stat.single_trial_ppc_all_features
 # This file is compatible with both classic and new-style classes.
 

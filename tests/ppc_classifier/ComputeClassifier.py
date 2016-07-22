@@ -89,7 +89,8 @@ class ComputeClassifier(ReportRamTask):
         self.params = params
         self.ppc_features = None
         self.selected_features = None
-        #self.pow_mat = None
+        self.pow_mat = None
+        self.ppc_amplifier = None
         self.matrices = None
         self.lr_classifier = None
         self.xval_output = dict()   # ModelOutput per session; xval_output[-1] is across all sessions
@@ -112,16 +113,16 @@ class ComputeClassifier(ReportRamTask):
             sess_sel_features = self.selected_features[sess]
             insample_mask = (event_sessions != sess)
             insample_ppc_features = self.ppc_features[insample_mask]
-            #insample_pows = self.pow_mat[insample_mask]
+            insample_pows = self.pow_mat[insample_mask]
             #noise = 2*zscore(randn(insample_pows.shape[0], insample_pows.shape[1]), axis=0, ddof=1)
-            insample_features = insample_ppc_features[:,sess_sel_features]
-            #insample_features = np.concatenate((insample_pows, noise), axis=1)
+            #insample_features = insample_ppc_features[:,sess_sel_features]
+            insample_features = np.concatenate((self.ppc_amplifier*insample_ppc_features, insample_pows), axis=1)
             outsample_mask = ~insample_mask
             outsample_ppc_features = self.ppc_features[outsample_mask]
-            #outsample_pows = self.pow_mat[outsample_mask]
+            outsample_pows = self.pow_mat[outsample_mask]
             #noise = 2*zscore(randn(outsample_pows.shape[0], outsample_pows.shape[1]), axis=0, ddof=1)
-            outsample_features = outsample_ppc_features[:,sess_sel_features]
-            #outsample_features = np.concatenate((outsample_pows, noise), axis=1)
+            #outsample_features = outsample_ppc_features[:,sess_sel_features]
+            outsample_features = np.concatenate((self.ppc_amplifier*outsample_ppc_features, outsample_pows), axis=1)
             self.matrices[sess] = (insample_features, outsample_features)
 
 
@@ -161,6 +162,10 @@ class ComputeClassifier(ReportRamTask):
                 self.xval_output[sess].compute_tercile_stats()
             probs[outsample_mask] = outsample_probs
 
+        # if not permuted:
+        #     for i in xrange(len(recalls)):
+        #         print i, probs[i], recalls[i]
+
         if not permuted:
             self.xval_output[-1] = ModelOutput(recalls, probs)
             self.xval_output[-1].compute_roc()
@@ -183,48 +188,50 @@ class ComputeClassifier(ReportRamTask):
             print 'AUC =', AUCs[i]
         return AUCs
 
-    def run_lolo_xval(self, sess, event_lists, recalls, permuted=False):
+    def heldout_auc(self, event_sessions, recalls):
+        probs_opt = np.empty_like(recalls, dtype=np.float)
         probs = np.empty_like(recalls, dtype=np.float)
+        sessions = np.unique(event_sessions)
+        for heldout_sess in sessions:
+            print 'Heldout session', heldout_sess
+            heldout_mask = (event_sessions == heldout_sess)
+            used_data_mask = ~heldout_mask
+            amps = np.linspace(0.0, 30.0, 60)
+            max_auc = 0.0
+            best_amp = None
+            for i in xrange(60):
+                features = np.concatenate((amps[i]*self.ppc_features, self.pow_mat), axis=1)
+                probs.fill(np.nan)
+                for sess in sessions:
+                    if sess != heldout_sess:
+                        insample_mask = (event_sessions != sess) & (event_sessions != heldout_sess)
+                        insample_recalls = recalls[insample_mask]
+                        with warnings.catch_warnings():
+                            warnings.simplefilter("ignore")
+                            self.lr_classifier.fit(features[insample_mask,:], insample_recalls)
 
-        lists = np.unique(event_lists)
+                        outsample_mask = (event_sessions == sess)
+                        outsample_probs = self.lr_classifier.predict_proba(features[outsample_mask,:])[:,1]
+                        probs[outsample_mask] = outsample_probs
 
-        for lst in lists:
-            insample_mask = (event_lists != lst)
-            insample_ppc_features = self.ppc_features[insample_mask]
-            insample_ppc_features = insample_ppc_features[:,self.selected_features[-1]]
-            insample_recalls = recalls[insample_mask]
+                auc = roc_auc_score(recalls[used_data_mask], probs[used_data_mask])
+                if auc > max_auc:
+                    max_auc = auc
+                    best_amp = amps[i]
 
+            print 'Best amp =', best_amp, 'max AUC =', max_auc
+
+            features = np.concatenate((best_amp*self.ppc_features, self.pow_mat), axis=1)
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                self.lr_classifier.fit(insample_ppc_features, insample_recalls)
+                self.lr_classifier.fit(features[used_data_mask,:], recalls[used_data_mask])
+                heldout_probs = self.lr_classifier.predict_proba(features[heldout_mask,:])[:,1]
+                probs_opt[heldout_mask] = heldout_probs
 
-            outsample_mask = ~insample_mask
-            outsample_ppc_features = self.ppc_features[outsample_mask, self.selected_features[-1]]
+        auc = roc_auc_score(recalls, probs_opt)
+        print 'AUC =', auc
+        return auc
 
-            probs[outsample_mask] = self.lr_classifier.predict_proba(outsample_ppc_features)[:,1]
-
-        if not permuted:
-            xval_output = ModelOutput(recalls, probs)
-            xval_output.compute_roc()
-            xval_output.compute_tercile_stats()
-            self.xval_output[sess] = self.xval_output[-1] = xval_output
-
-        return probs
-
-    def permuted_lolo_AUCs(self, sess, event_lists, recalls):
-        n_perm = self.params.n_perm
-        permuted_recalls = np.array(recalls)
-        AUCs = np.empty(shape=n_perm, dtype=np.float)
-        for i in xrange(n_perm):
-            for lst in event_lists:
-                sel = (event_lists == lst)
-                list_permuted_recalls = permuted_recalls[sel]
-                shuffle(list_permuted_recalls)
-                permuted_recalls[sel] = list_permuted_recalls
-            probs = self.run_lolo_xval(sess, event_lists, permuted_recalls, permuted=True)
-            AUCs[i] = roc_auc_score(recalls, probs)
-            print 'AUC =', AUCs[i]
-        return AUCs
 
     def run(self):
         subject = self.pipeline.subject
@@ -234,12 +241,12 @@ class ComputeClassifier(ReportRamTask):
         n_bps = len(bipolar_pairs)
 
         events = self.get_passed_object(task + '_events')
-        self.ppc_features = norm2_sessions(self.get_passed_object('ppc_features'), events)
-        #self.ppc_features = self.get_passed_object('ppc_features')
+        #self.ppc_features = normalize_sessions(self.get_passed_object('ppc_features'), events)
+        self.ppc_features = self.get_passed_object('ppc_features')
         self.selected_features = self.get_passed_object('selected_features')
 
-        #self.pow_mat = joblib.load('/scratch/mswat/automated_reports/FR1_reports/RAM_FR1_R1111M/R1111M-RAM_FR1-pow_mat.pkl')
-        #self.pow_mat = normalize_sessions(self.pow_mat, events)
+        self.pow_mat = joblib.load('/scratch/mswat/automated_reports/FR1_reports/RAM_FR1_%s/%s-RAM_FR1-pow_mat.pkl' % (subject,subject))
+        self.pow_mat = normalize_sessions(self.pow_mat, events)
 
         #n1 = np.sum(events.recalled)
         #n0 = len(events) - n1
@@ -251,60 +258,9 @@ class ComputeClassifier(ReportRamTask):
             self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto', solver='liblinear')
 
         event_sessions = events.session
-
-        self.prepare_matrices(event_sessions)
-
         recalls = events.recalled
 
-        sessions = np.unique(event_sessions)
-        if len(sessions) > 1:
-            print 'Performing permutation test'
-            self.perm_AUCs = self.permuted_loso_AUCs(event_sessions, recalls)
-
-            print 'Performing leave-one-session-out xval'
-            self.run_loso_xval(event_sessions, recalls, permuted=False)
-        else:
-            sess = sessions[0]
-            event_lists = events.list
-
-            print 'Performing in-session permutation test'
-            self.perm_AUCs = self.permuted_lolo_AUCs(sess, event_lists, recalls)
-
-            print 'Performing leave-one-list-out xval'
-            self.run_lolo_xval(sess, event_lists, recalls, permuted=False)
-
-
-        # C = np.logspace(np.log10(1e-8), np.log10(1e-3), 20)
-        # for i in xrange(20):
-        #     # print 'Performing leave-one-session-out xval'
-        #     self.lr_classifier = LogisticRegression(C=C[i], penalty=self.params.penalty_type, class_weight='auto', solver='liblinear')
-        #     self.run_loso_xval(event_sessions, recalls, permuted=False)
-        #     print 'C =', C[i], 'AUC =', self.xval_output[-1].auc
-
-        self.pvalue = np.sum(self.perm_AUCs >= self.xval_output[-1].auc) / float(self.perm_AUCs.size)
-        print 'Perm test p-value =', self.pvalue
-
-        print 'thresh =', self.xval_output[-1].jstat_thresh, 'quantile =', self.xval_output[-1].jstat_quantile
-
-        print 'AUC =', self.xval_output[-1].auc
-
-        # Finally, fitting classifier on all available data
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            self.lr_classifier.fit(self.ppc_features[:,self.selected_features[-1]], recalls)
-
-        # nonzero_feature_idx = np.where(self.lr_classifier.coef_[0])[0]
-        # print [feature_index_to_freq_and_elects(idx, n_bps) for idx in nonzero_feature_idx]
-
-        self.pass_object('lr_classifier', self.lr_classifier)
-        self.pass_object('xval_output', self.xval_output)
-        self.pass_object('perm_AUCs', self.perm_AUCs)
-        self.pass_object('pvalue', self.pvalue)
-
-        joblib.dump(self.lr_classifier, self.get_path_to_resource_in_workspace(subject + '-' + task + '-lr_classifier.pkl'))
-        joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace(subject + '-' + task + '-xval_output.pkl'))
-        joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace(subject + '-' + task + '-perm_AUCs.pkl'))
-        joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject + '-' + task + '-pvalue.pkl'))
+        self.heldout_auc(event_sessions, recalls)
 
     def restore(self):
         subject = self.pipeline.subject
