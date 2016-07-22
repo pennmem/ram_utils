@@ -173,12 +173,12 @@ class GeneratePlots(ReportRamTask):
             ylim = np.max(np.abs(session_summary.stim_vs_non_stim_pc_diff_from_mean)) + 5.0
             if ylim > 100.0:
                 ylim = 100.0
-            pd2 = BarPlotData(x=(0,1), y=session_summary.stim_vs_non_stim_pc_diff_from_mean, ylim=[-ylim,ylim], xlabel='\n(b)', ylabel='% Recall Difference (Stim-NoStim)', x_tick_labels=['Low', 'High'], xhline_pos=0.0, barcolors=['grey', 'grey'], xlabel_fontsize=18, ylabel_fontsize=18, barwidth=0.5)
+            pd2 = BarPlotData(x=(0,1), y=session_summary.stim_vs_non_stim_pc_diff_from_mean, ylim=[-ylim,ylim], xlabel='\n(b) Stimulated Item', ylabel='% Recall Difference (Stim-NoStim)', x_tick_labels=['Low', 'High'], xhline_pos=0.0, barcolors=['grey', 'grey'], xlabel_fontsize=18, ylabel_fontsize=18, barwidth=0.5)
 
             ylim = np.max(np.abs(session_summary.post_stim_vs_non_stim_pc_diff_from_mean)) + 5.0
             if ylim > 100.0:
                 ylim = 100.0
-            pd3 = BarPlotData(x=(0,1), y=session_summary.post_stim_vs_non_stim_pc_diff_from_mean, ylim=[-ylim,ylim], xlabel='\n(c)', ylabel='% Recall Difference (Stim-NoStim)', x_tick_labels=['Low', 'High'], xhline_pos=0.0, barcolors=['grey', 'grey'], xlabel_fontsize=18, ylabel_fontsize=18, barwidth=0.5)
+            pd3 = BarPlotData(x=(0,1), y=session_summary.post_stim_vs_non_stim_pc_diff_from_mean, ylim=[-ylim,ylim], xlabel='\n(c) Post-Stimulated Item', ylabel='% Recall Difference (Stim-NoStim)', x_tick_labels=['Low', 'High'], xhline_pos=0.0, barcolors=['grey', 'grey'], xlabel_fontsize=18, ylabel_fontsize=18, barwidth=0.5)
 
             panel_plot.add_plot_data(0, 0, plot_data=pd1)
             panel_plot.add_plot_data(0, 1, plot_data=pd2)
