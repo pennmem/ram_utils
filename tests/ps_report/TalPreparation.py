@@ -50,11 +50,7 @@ class TalPreparation(ReportRamTask):
 
                 loc_tag.update(dict(zip(virtualTalStruct.tagName, virtualTalStruct.locTag)))
 
-            except IOError:
-                pass
-
-            except TypeError:
-                print 'WARNING: Junk in stimonly file!'
+            except Exception:
                 pass
 
             self.pass_object('loc_tag', loc_tag)

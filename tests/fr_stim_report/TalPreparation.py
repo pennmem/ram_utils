@@ -47,8 +47,8 @@ class TalPreparation(ReportRamTask):
                 #channel_to_label_map.update()
                 loc_tag.update(dict(zip(virtualTalStruct.tagName, virtualTalStruct.locTag)))
 
-            except IOError:
-                    pass
+            except Exception:
+                pass
 
             self.pass_object('channel_to_label_map', channel_to_label_map)
             self.pass_object('loc_tag', loc_tag)
