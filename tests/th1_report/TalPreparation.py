@@ -28,7 +28,7 @@ class TalPreparation(ReportRamTask):
             bipolar_pairs = tal_reader.get_bipolar_pairs()
 
             for i,bp in enumerate(bpTalStruct):
-                bpTalStruct.tagName[i] = bp.tagName.upper()
+                bpTalStruct.tagName[i] = bp.tagName.upper().replace('_','\\textunderscore')
 
 
 
