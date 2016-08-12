@@ -21,6 +21,12 @@ from TalPreparation import TalPreparation
 
 from AnalyzeAUC import AnalyzeAUC
 
+from Analyze_PCA_AUC import Analyze_PCA_AUC
+
+from Analyze_HFA_AUC import Analyze_HFA_AUC
+
+from Analyze_HFA_PCA_AUC import Analyze_HFA_PCA_AUC
+
 
 # turn it into command line options
 
@@ -82,7 +88,7 @@ for subject in subjects:
 
     # report_pipeline.add_task(ComputeTTest(params=params, mark_as_completed=False))
     #
-    report_pipeline.add_task(AnalyzeAUC(params=params, mark_as_completed=True))
+    report_pipeline.add_task(Analyze_HFA_PCA_AUC(params=params, mark_as_completed=True))
     #
     # report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
     #
