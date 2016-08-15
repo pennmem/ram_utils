@@ -15,9 +15,9 @@ import numpy as np
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1135E')
+cml_parser.arg('--subject','R1156D')
 cml_parser.arg('--task','RAM_FR1')
-cml_parser.arg('--workspace-dir','/scratch/busygin/FR1_ppc_same_class')
+cml_parser.arg('--workspace-dir','/scratch/busygin/FR1_ppc')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
 # cml_parser.arg('--exit-on-no-change')
@@ -33,6 +33,8 @@ from MontagePreparation import MontagePreparation
 from ComputeFR1Wavelets import ComputeFR1Wavelets
 
 from ComputePPCFeatures import ComputePPCFeatures
+
+from ComputeOutsamplePPCFeatures import ComputeOutsamplePPCFeatures
 
 from ComputeTTest import ComputeTTest
 
@@ -78,7 +80,9 @@ report_pipeline.add_task(ComputeFR1Wavelets(params=params, mark_as_completed=Tru
 
 report_pipeline.add_task(ComputePPCFeatures(params=params, mark_as_completed=True))
 
-report_pipeline.add_task(ComputeTTest(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputeOutsamplePPCFeatures(params=params, mark_as_completed=True))
+
+#report_pipeline.add_task(ComputeTTest(params=params, mark_as_completed=False))
 
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
 

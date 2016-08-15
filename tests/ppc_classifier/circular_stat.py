@@ -95,6 +95,10 @@ def circ_diff(c1, c2, cdiff):
     return _circular_stat.circ_diff(c1, c2, cdiff)
 circ_diff = _circular_stat.circ_diff
 
+def circ_diff_par(c1, c2, cdiff, n_threads):
+    return _circular_stat.circ_diff_par(c1, c2, cdiff, n_threads)
+circ_diff_par = _circular_stat.circ_diff_par
+
 def resultant_vector(c):
     return _circular_stat.resultant_vector(c)
 resultant_vector = _circular_stat.resultant_vector
@@ -119,17 +123,13 @@ def compute_zscores(mat, n_perms):
     return _circular_stat.compute_zscores(mat, n_perms)
 compute_zscores = _circular_stat.compute_zscores
 
-def single_trial_ppc(wavelet1, wavelet2, ppcs, n_events):
-    return _circular_stat.single_trial_ppc(wavelet1, wavelet2, ppcs, n_events)
-single_trial_ppc = _circular_stat.single_trial_ppc
-
-def single_trial_ppc_with_classes(recalls, wavelet1, wavelet2, ppcs):
-    return _circular_stat.single_trial_ppc_with_classes(recalls, wavelet1, wavelet2, ppcs)
-single_trial_ppc_with_classes = _circular_stat.single_trial_ppc_with_classes
-
-def single_trial_ppc_all_features(recalls, wavelets, ppc_output, n_freqs, n_bps, n_threads):
-    return _circular_stat.single_trial_ppc_all_features(recalls, wavelets, ppc_output, n_freqs, n_bps, n_threads)
+def single_trial_ppc_all_features(recalls, wavelets, ppc_output, theta_sum_recalls, theta_sum_non_recalls, n_freqs, n_bps, n_threads):
+    return _circular_stat.single_trial_ppc_all_features(recalls, wavelets, ppc_output, theta_sum_recalls, theta_sum_non_recalls, n_freqs, n_bps, n_threads)
 single_trial_ppc_all_features = _circular_stat.single_trial_ppc_all_features
+
+def single_trial_outsample_ppc_features(wavelets, theta_avg_recalls, theta_avg_non_recalls, outsample_ppc_features, n_freqs, n_bps, n_threads):
+    return _circular_stat.single_trial_outsample_ppc_features(wavelets, theta_avg_recalls, theta_avg_non_recalls, outsample_ppc_features, n_freqs, n_bps, n_threads)
+single_trial_outsample_ppc_features = _circular_stat.single_trial_outsample_ppc_features
 # This file is compatible with both classic and new-style classes.
 
 
