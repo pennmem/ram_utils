@@ -8,7 +8,7 @@
 \begin{table}[!h]
 \centering
 \begin{tabular}{c|c|c|c}
-\multicolumn{4}{c}{\textbf{Free Recall}} \\ 
+\multicolumn{4}{c}{\textbf{Behavioral Performance}} \\
 \hline
 $<N_WORDS>$ words & $<N_CORRECT_WORDS>$ correct ($<PC_CORRECT_WORDS>$\%) &$<N_PLI>$ PLI ($<PC_PLI>$\%) &$<N_ELI>$ ELI ($<PC_ELI>$\%) \\ \hline 
 \end{tabular}
