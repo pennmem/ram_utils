@@ -7,8 +7,9 @@ import numpy as np
 from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','/scratch/busygin/fr1_catfr1_joint_auc_analysis')
+cml_parser.arg('--workspace-dir','/scratch/busygin/fr1_catfr1_joint_auc_analysis_1800to2400ms')
 cml_parser.arg('--mount-point','')
+cml_parser.arg('--python-path','/home1/busygin/python/Python-Numerics/MachineLearningScikitLearn')
 
 args = cml_parser.parse()
 
@@ -21,11 +22,23 @@ from TalPreparation import TalPreparation
 
 from AnalyzeAUC import AnalyzeAUC
 
+from Analyze_LDA_AUC import Analyze_LDA_AUC
+
 from Analyze_PCA_AUC import Analyze_PCA_AUC
 
 from Analyze_HFA_AUC import Analyze_HFA_AUC
 
 from Analyze_HFA_PCA_AUC import Analyze_HFA_PCA_AUC
+
+from Analyze_LnP_AUC import Analyze_LnP_AUC
+
+from Analyze_LnP2_AUC import Analyze_LnP2_AUC
+
+from Analyze_LnP_HFA_AUC import Analyze_LnP_HFA_AUC
+
+from Analyze_LnP_PCA_AUC import Analyze_LnP_PCA_AUC
+
+from Analyze_LnP_HFA_PCA_AUC import Analyze_LnP_HFA_PCA_AUC
 
 
 # turn it into command line options
@@ -34,8 +47,8 @@ class Params(object):
     def __init__(self):
         self.width = 5
 
-        self.fr1_start_time = 0.0
-        self.fr1_end_time = 1.366
+        self.fr1_start_time = 1.8
+        self.fr1_end_time = 2.4
         self.fr1_buf = 1.365
 
         self.hfs_start_time = 0.0
@@ -66,7 +79,7 @@ def find_subjects_by_task(task):
 
 subjects = np.unique(find_subjects_by_task('RAM_FR1') + find_subjects_by_task('RAM_CatFR1'))
 subjects = subjects[:-2]
-subjects = subjects[(subjects!='R1070T') & (subjects!='R1092J_2') & (subjects!='R1093J_1') & (subjects!='R1108J') & (subjects!='R1135E_1')]
+subjects = subjects[(subjects!='R1061T') & (subjects!='R1070T') & (subjects!='R1092J_2') & (subjects!='R1093J_1') & (subjects!='R1108J') & (subjects!='R1135E_1')]
 
 
 for subject in subjects:
@@ -88,7 +101,7 @@ for subject in subjects:
 
     # report_pipeline.add_task(ComputeTTest(params=params, mark_as_completed=False))
     #
-    report_pipeline.add_task(Analyze_HFA_PCA_AUC(params=params, mark_as_completed=True))
+    report_pipeline.add_task(Analyze_LnP2_AUC(params=params, mark_as_completed=True))
     #
     # report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
     #

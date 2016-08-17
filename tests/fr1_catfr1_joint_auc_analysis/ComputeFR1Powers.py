@@ -91,10 +91,10 @@ class ComputeFR1Powers(ReportRamTask):
             #                        start_time=self.params.fr1_start_time,
             #                        end_time=self.params.fr1_end_time, buffer_time=self.params.fr1_buf)
 
-            # VERSION WITH MIRRORING
+            # VERSION WITH NO MIRRORING
             eeg_reader = EEGReader(events=sess_events, channels=monopolar_channels,
                                    start_time=self.params.fr1_start_time,
-                                   end_time=self.params.fr1_end_time, buffer_time=0.0)
+                                   end_time=self.params.fr1_end_time, buffer_time=self.params.fr1_buf)
 
 
             eegs = eeg_reader.read()
@@ -112,7 +112,7 @@ class ComputeFR1Powers(ReportRamTask):
             #eegs[...,:1365] = eegs[...,2730:1365:-1]
             #eegs[...,2731:4096] = eegs[...,2729:1364:-1]
 
-            eegs = eegs.add_mirror_buffer(duration=self.params.fr1_buf)
+            #eegs = eegs.add_mirror_buffer(duration=self.params.fr1_buf)
 
 
             if self.samplerate is None:
