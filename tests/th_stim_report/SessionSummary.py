@@ -10,19 +10,11 @@ class SessionSummary(object):
         self.n_words = None
         self.n_correct_words = None
         self.pc_correct_words = None
-        #self.n_pli = None
-        #self.pc_pli = None
-        #self.n_eli = None
-        #self.pc_eli = None
-        #self.prob_recall = None
-        self.prob_first_recall = None
-        #self.n_math = 0
-        #self.n_correct_math = 0
-        #self.pc_correct_math = 0.0
-        #self.math_per_list = 0.0
-        #self.irt_within_cat = None
-        #self.irt_between_cat = None
+        self.n_mid_high_conf = None
+        self.pc_mid_high_conf = None
+
         self.list_number = None
+        self.is_stim_list = None
         self.n_recalls_per_list = None
         self.n_stims_per_list = None
         self.is_stim_list = None
@@ -34,12 +26,50 @@ class SessionSummary(object):
         self.pc_from_nonstim = None
         self.chisqr = None
         self.pvalue = None
+
+        # item level stim
+        self.is_stim_item = None
+        self.n_correct_stim_item = None
+        self.dist_err_stim_item = None
+        self.n_total_stim_item = None
+        self.pc_from_stim_item = None
+        self.n_correct_nonstim_item = None
+        self.dist_err_nonstim_item = None
+        self.n_total_nonstim_item = None
+        self.pc_from_nonstim_item = None
+        self.chisqr_item = None
+        self.pvalue_item = None
+        self.all_dist_errs = None
+        self.correct_thresh = None
+
+        # item level post stim
+        self.is_post_stim_item = None
+        self.n_correct_post_stim_item = None
+        self.dist_err_post_stim_item = None
+        self.n_total_post_stim_item = None
+        self.pc_from_post_stim_item = None
+        self.n_correct_post_nonstim_item = None
+        self.dist_err_post_nonstim_item = None
+        self.n_total_post_nonstim_item = None
+        self.pc_from_post_nonstim_item = None
+        self.chisqr_post_item = None
+        self.pvalue_post_item = None
+
+        self.n_stim_mid_high_conf = None
+        self.pc_stim_mid_high_conf = None
+        self.n_nonstim_mid_high_conf = None
+        self.pc_nonstim_mid_high_conf = None
+        self.chisqr_conf = None
+        self.pvalue_conf = None
         #self.n_stim_intr = None
         #self.pc_from_stim_intr = None
         #self.n_nonstim_intr = None
         #self.pc_from_nonstim_intr = None
         #self.chisqr_intr = None
         #self.pvalue_intr = None
+
+        self.auc = None
+        self.auc_p = None
 
         self.stim_vs_non_stim_pc_diff_from_mean = None
         self.post_stim_vs_non_stim_pc_diff_from_mean = None

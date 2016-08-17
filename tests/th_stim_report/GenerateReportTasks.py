@@ -54,6 +54,8 @@ class GenerateTex(ReportRamTask):
                             '<N_WORDS>': session_summary.n_words,
                             '<N_CORRECT_WORDS>': session_summary.n_correct_words,
                             '<PC_CORRECT_WORDS>': '%.2f' % session_summary.pc_correct_words,
+                            '<AUC>': '%.2f' % session_summary.auc,
+                            '<AUC_P>': '%.2f' % session_summary.auc_p,
                             #'<N_PLI>': session_summary.n_pli,
                             #'<PC_PLI>': '%.2f' % session_summary.pc_pli,
                             #'<N_ELI>': session_summary.n_eli,
@@ -70,6 +72,28 @@ class GenerateTex(ReportRamTask):
                             '<PC_FROM_NONSTIM>': '%.2f' % session_summary.pc_from_nonstim,
                             '<CHISQR>': '%.2f' % session_summary.chisqr,
                             '<PVALUE>': '%.2f' % session_summary.pvalue,
+                            '<N_CORRECT_STIM_ITEM>': session_summary.n_correct_stim_item,
+                            '<N_TOTAL_STIM_ITEM>': session_summary.n_total_stim_item,
+                            '<PC_FROM_STIM_ITEM>': '%.2f' % session_summary.pc_from_stim_item,
+                            '<N_CORRECT_NONSTIM_ITEM>': session_summary.n_correct_nonstim_item,
+                            '<N_TOTAL_NONSTIM_ITEM>': session_summary.n_total_nonstim_item,
+                            '<PC_FROM_NONSTIM_ITEM>': '%.2f' % session_summary.pc_from_nonstim_item,
+                            '<CHISQR_ITEM>': '%.2f' % session_summary.chisqr_item,
+                            '<PVALUE_ITEM>': '%.2f' % session_summary.pvalue_item,
+                            '<N_CONF_STIM_ITEM>': session_summary.n_stim_mid_high_conf,
+                            '<PC_CONF_STIM_ITEM>': '%.2f' % session_summary.pc_stim_mid_high_conf,
+                            '<N_CONF_NONSTIM_ITEM>': session_summary.n_nonstim_mid_high_conf,
+                            '<PC_CONF_NONSTIM_ITEM>': '%.2f' % session_summary.pc_nonstim_mid_high_conf,
+                            '<CHISQR_CONF>': '%.2f' % session_summary.chisqr_conf,
+                            '<PVALUE_CONF>': '%.2f' % session_summary.pvalue_conf,
+                            '<N_CORRECT_POST_STIM_ITEM>': session_summary.n_correct_post_stim_item,
+                            '<N_TOTAL_POST_STIM_ITEM>': session_summary.n_total_post_stim_item,
+                            '<PC_FROM_POST_STIM_ITEM>': '%.2f' % session_summary.pc_from_post_stim_item,
+                            '<N_CORRECT_POST_NONSTIM_ITEM>': session_summary.n_correct_post_nonstim_item,
+                            '<N_TOTAL_POST_NONSTIM_ITEM>': session_summary.n_total_post_nonstim_item,
+                            '<PC_FROM_POST_NONSTIM_ITEM>': '%.2f' % session_summary.pc_from_post_nonstim_item,
+                            '<CHISQR_POST_ITEM>': '%.2f' % session_summary.chisqr_post_item,
+                            '<PVALUE_POST_ITEM>': '%.2f' % session_summary.pvalue_post_item,
                             #'<N_STIM_INTR>': session_summary.n_stim_intr,
                             #'<PC_FROM_STIM_INTR>': '%.2f' % session_summary.pc_from_stim_intr,
                             #'<N_NONSTIM_INTR>': session_summary.n_nonstim_intr,
@@ -90,6 +114,7 @@ class GenerateTex(ReportRamTask):
                         '<NUMBER_OF_SESSIONS>': n_sess,
                         '<NUMBER_OF_ELECTRODES>': n_elecs,
                         '<REPORT_PAGES>': tex_session_pages_str,
+                        '<NUMBER_TH1_SESSIONS>': len(xval_output)-1,
                         '<AUC>': '%.2f' % (100*xval_output[-1].auc),
                         '<PERM-P-VALUE>': pvalue_formatting(perm_test_pvalue),
                         '<ROC_AND_TERC_PLOT_FILE>': self.pipeline.subject + '-roc_and_terc_plot.pdf'
@@ -147,9 +172,21 @@ class GeneratePlots(ReportRamTask):
             #pd2.xlabel_fontsize = 20
             #pd2.ylabel_fontsize = 20
 
+            binMid = np.arange(2.5,100,5)
+            labels = ['Stim', 'non-Stim']
+            pd2 = PlotData(x=binMid, y=session_summary.dist_err_stim_item,label='Stim')
+            pd3 = PlotData(x=binMid, y=session_summary.dist_err_nonstim_item,label='non-Stim')
+            pdc = PlotDataCollection(legend_on=True,legend_loc=1)
+            pdc.xlabel = 'Distance Error'
+            pdc.ylabel = 'Prob.'
+            pdc.xlabel_fontsize = 20
+            pdc.ylabel_fontsize = 20
+            pdc.add_plot_data(pd2)
+            pdc.add_plot_data(pd3)
+
             panel_plot.add_plot_data(0, 0, plot_data=pd1)
 
-            #panel_plot.add_plot_data(0, 1, plot_data=pd2)
+            panel_plot.add_plot_data(0, 1, plot_data=pdc)
 
             plot = panel_plot.generate_plot()
 
@@ -200,38 +237,55 @@ class GeneratePlots(ReportRamTask):
                 xfigsize = 18.0
             panel_plot = PanelPlot(xfigsize=xfigsize, yfigsize=10.0, i_max=1, j_max=1, title='', xlabel='List', ylabel='# of items', labelsize=20)
 
+
+
             pdc = PlotDataCollection()
-            pdc.xlabel = 'List number'
+            pdc.xlabel = 'Item Number'
             pdc.xlabel_fontsize = 20
-            pdc.ylabel ='#items'
+            pdc.ylabel ='Distance Error'
             pdc.ylabel_fontsize = 20
 
-            x_tick_labels = np.array([str(k) for k in session_summary.list_number])
-            x_tick_labels[1::5] = ''
-            x_tick_labels[2::5] = ''
-            x_tick_labels[3::5] = ''
-            x_tick_labels[4::5] = ''
+            stim_items = np.where(session_summary.is_stim_item)
+            nonstim_items = np.where(~session_summary.is_stim_item)
+            stim_scatter = PlotData(x=stim_items[0], y=session_summary.all_dist_errs[stim_items], linestyle='', marker='.', markersize=20, color='r', label='Stim')
+            nonstim_scatter = PlotData(x=nonstim_items[0], y=session_summary.all_dist_errs[nonstim_items], linestyle='', marker='.', markersize=20, color='b', label='non-Stim')
+            stim_lists = np.where(session_summary.is_stim_list)
+            nonstim_lists = np.where(~session_summary.is_stim_list)
+            stim_list_indicator = PlotData(x=stim_lists[0], y=[-1]*len(stim_lists[0]), linestyle='', marker='.', markersize=20, color='r', label='Stim')
+            nonstim_list_indicator = PlotData(x=nonstim_lists[0], y=[-1]*len(nonstim_lists[0]), linestyle='', marker='.', markersize=20, color='b', label='non-Stim')
+            thresh_line = PlotData(x=[0, len(session_summary.is_stim_item)],y=[session_summary.correct_thresh]*2, linestyle='--', color='k', ylim=(-2,70))
+            pdc.add_plot_data(stim_scatter)
+            pdc.add_plot_data(nonstim_scatter)
+            pdc.add_plot_data(stim_list_indicator)
+            pdc.add_plot_data(nonstim_list_indicator)
+            pdc.add_plot_data(thresh_line)
 
-            bpd_1 = BarPlotData(x=np.arange(n_lists), y=session_summary.n_stims_per_list, x_tick_labels=x_tick_labels, title='', alpha=0.3)
-            stim_x = np.where(session_summary.is_stim_list)[0]
-            stim_y = session_summary.n_recalls_per_list[session_summary.is_stim_list]
-            pd_1 = PlotData(x=stim_x, y=stim_y, ylim=(0,4),
-                    title='', linestyle='', color='red', marker='o',markersize=12)
+            # x_tick_labels = np.array([str(k) for k in session_summary.list_number])
+            # x_tick_labels[1::5] = ''
+            # x_tick_labels[2::5] = ''
+            # x_tick_labels[3::5] = ''
+            # x_tick_labels[4::5] = ''
 
-            nostim_x = np.where(~session_summary.is_stim_list)[0]
-            nostim_y = session_summary.n_recalls_per_list[~session_summary.is_stim_list]
-            pd_2 = PlotData(x=nostim_x , y=nostim_y , ylim=(0,4),
-                    title='', linestyle='', color='blue', marker='o',markersize=12)
+            # bpd_1 = BarPlotData(x=np.arange(n_lists), y=session_summary.n_stims_per_list, x_tick_labels=x_tick_labels, title='', alpha=0.3)
+            # stim_x = np.where(session_summary.is_stim_list)[0]
+            # stim_y = session_summary.n_recalls_per_list[session_summary.is_stim_list]
+            # pd_1 = PlotData(x=stim_x, y=stim_y, ylim=(0,4),
+            #         title='', linestyle='', color='red', marker='o',markersize=12)
 
-            pdc.add_plot_data(pd_1)
-            pdc.add_plot_data(pd_2)
-            pdc.add_plot_data(bpd_1)
+            # nostim_x = np.where(~session_summary.is_stim_list)[0]
+            # nostim_y = session_summary.n_recalls_per_list[~session_summary.is_stim_list]
+            # pd_2 = PlotData(x=nostim_x , y=nostim_y , ylim=(0,4),
+            #         title='', linestyle='', color='blue', marker='o',markersize=12)
 
-            for i in xrange(len(session_summary.list_number)-1):
-                if session_summary.list_number[i] > session_summary.list_number[i+1]:
-                    sep_pos = i+0.5
-                    sep_plot_data = PlotData(x=[0],y=[0],levelline=[[sep_pos, sep_pos], [0, 12]], color='white', alpha=0.0)
-                    pdc.add_plot_data(sep_plot_data)
+            # pdc.add_plot_data(pd_1)
+            # pdc.add_plot_data(pd_2)
+            # pdc.add_plot_data(bpd_1)
+
+            # for i in xrange(len(session_summary.list_number)-1):
+            #     if session_summary.list_number[i] > session_summary.list_number[i+1]:
+            #         sep_pos = i+0.5
+            #         sep_plot_data = PlotData(x=[0],y=[0],levelline=[[sep_pos, sep_pos], [0, 12]], color='white', alpha=0.0)
+            #         pdc.add_plot_data(sep_plot_data)
 
             panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
 

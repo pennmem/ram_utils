@@ -2,7 +2,8 @@ import numpy as np
 import pandas as pd
 
 from sklearn.externals import joblib
-
+from sklearn.metrics import roc_auc_score
+from random import random
 from ReportUtils import ReportRamTask
 
 
@@ -71,10 +72,11 @@ class ComputeTHStimTable(ReportRamTask):
 
         all_events = self.get_passed_object(self.pipeline.task+'_all_events')
         events = self.get_passed_object(self.pipeline.task+'_events')
-        
+
         # need to th1 events to figure out the distance threshold or correct/incorrect
         th_events = self.get_passed_object('th_events')
-        recalls = events.distErr <= np.max([th_events[0].radius_size, np.median(th_events.distErr)])
+        correct_thresh = np.max([th_events[0].radius_size, np.median(th_events.distErr)])
+        recalls = events.distErr <= correct_thresh
         recalls[events.confidence==0]=0
 
         n_events = len(events)
@@ -91,7 +93,8 @@ class ComputeTHStimTable(ReportRamTask):
             if (ev.type=='CHEST') and (ev.confidence >=0):
                 if all_events[i+1].type=='STIM':
                     is_stim_item[j] = True
-                if (all_events[i-1].type=='STIM_OFF') or (all_events[i+1].type=='STIM_OFF'):
+                # >=8 so we don't include the pre-session stims
+                if (all_events[i-1].type=='STIM_OFF') and all_events[i-1].trial >= 8:# or (all_events[i+1].type=='STIM_OFF'):
                     is_post_stim_item[j] = True
                 j += 1
 
@@ -106,6 +109,8 @@ class ComputeTHStimTable(ReportRamTask):
         self.th_stim_table['is_post_stim_item'] = is_post_stim_item
         self.th_stim_table['recalled'] = recalls
         self.th_stim_table['prob'] = th_stim_prob
+        self.th_stim_table['distance_err'] = events.distErr
+        self.th_stim_table['confidence'] = events.confidence
 
         self.stim_params_to_sess = dict()
 
@@ -139,8 +144,13 @@ class ComputeTHStimTable(ReportRamTask):
         pulse_duration = np.empty(n_events, dtype=int)
         burst_frequency = np.empty(n_events, dtype=int)
 
+        # JFM: added in auc when predicting non-stim items based on TH1 classifier, 
+        # as well as permutation test (shuffling recalls)
+        auc = np.empty(n_events, dtype=float)
+        auc_p = np.empty(n_events, dtype=float)
+
         for stim_params,sessions in self.stim_params_to_sess.iteritems():
-            sessions_mask = np.array([(ev.session in sessions) for ev in events], dtype=np.bool)
+            sessions_mask = np.array([(ev.session in sessions) for ev in events], dtype=np.bool)            
             stim_anode_tag[sessions_mask] = stim_params.stimAnodeTag
             stim_cathode_tag[sessions_mask] = stim_params.stimCathodeTag
             region[sessions_mask] = bipolar_label_to_loc_tag((stim_params.stimAnodeTag,stim_params.stimCathodeTag), loc_tag)
@@ -149,6 +159,19 @@ class ComputeTHStimTable(ReportRamTask):
             pulse_duration[sessions_mask] = stim_params.pulse_duration
             burst_frequency[sessions_mask] = stim_params.burst_frequency
 
+            # classifying TH3 non-stim            
+            is_stim_list = np.array(events.stimList, dtype=np.bool)
+            stim_site_probs = lr_classifier.predict_proba(th_stim_pow_mat[sessions_mask & ~is_stim_list])[:,1]
+            stim_site_recalls = recalls[sessions_mask & ~is_stim_list]
+            stim_site_auc = roc_auc_score(stim_site_recalls, stim_site_probs)
+            auc[sessions_mask] = stim_site_auc
+            sess_auc_perm = np.empty(200, dtype=float)
+            for perm in xrange(200):
+                perm_recalls = sorted(stim_site_recalls, key=lambda *args: random())
+                sess_auc_perm[perm] = roc_auc_score(perm_recalls, stim_site_probs)
+            stim_site_auc_p = np.mean(stim_site_auc < sess_auc_perm)
+            auc_p[sessions_mask] = stim_site_auc_p
+
         self.th_stim_table['stimAnodeTag'] = stim_anode_tag
         self.th_stim_table['stimCathodeTag'] = stim_cathode_tag
         self.th_stim_table['Region'] = region
@@ -156,6 +179,8 @@ class ComputeTHStimTable(ReportRamTask):
         self.th_stim_table['Amplitude'] = amplitude
         self.th_stim_table['Duration'] = pulse_duration
         self.th_stim_table['Burst_Frequency'] = burst_frequency
+        self.th_stim_table['auc'] = auc
+        self.th_stim_table['auc_perm'] = auc_p
 
         self.pass_object('stim_params_to_sess', self.stim_params_to_sess)
         joblib.dump(self.stim_params_to_sess, self.get_path_to_resource_in_workspace(self.pipeline.subject+'-stim_params_to_sess.pkl'))

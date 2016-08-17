@@ -4,10 +4,11 @@ from os.path import *
 from ReportUtils import CMLParser,ReportPipeline
 
 
-#cml_parser = CMLParser(arg_count_threshold=1)
+cml_parser = CMLParser(arg_count_threshold=1)
+cml_parser.arg('--subject','R1201P_1')
 cml_parser.arg('--task','RAM_TH3')
 cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/TH3_reports')
-#cml_parser.arg('--workspace-dir','/scratch/jfm2/TH3')
+cml_parser.arg('--workspace-dir','/scratch/jfm2/TH3')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
 
@@ -44,7 +45,7 @@ class Params(object):
         self.width = 5
 
         self.th1_start_time = -1.2
-        self.th1_end_time = 0.5 
+        self.th1_end_time = 0.5
         self.th1_buf = 1.7
 
         self.filt_order = 4

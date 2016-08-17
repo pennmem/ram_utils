@@ -1,10 +1,10 @@
-\documentclass[a4paper]{article} 
+\documentclass[a4paper]{article}
 \usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
-\usepackage{graphicx,multirow} 
-\usepackage{epstopdf} 
-\usepackage{subfigure,amsmath} 
-\usepackage{wrapfig} 
-\usepackage{longtable} 
+\usepackage{graphicx,multirow}
+\usepackage{epstopdf}
+\usepackage{subfigure,amsmath}
+\usepackage{wrapfig}
+\usepackage{longtable}
 \usepackage{pdfpages}
 \usepackage{mathtools}
 \usepackage{array}
@@ -17,10 +17,10 @@
 \addtolength{\oddsidemargin}{-1.0in}
 \addtolength{\evensidemargin}{-1.0in}
 \addtolength{\textwidth}{2.0in}
-\addtolength{\topmargin}{-.75in} 
+\addtolength{\topmargin}{-.75in}
 \addtolength{\textheight}{1.75in}
 
-\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}} 
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
@@ -58,6 +58,8 @@ In the treasure hunt task, participants navigate a virtual environment and encou
 percentage devation from the (subject) mean, separated by tercile
 of the classifier encoding efficiency estimate for each encoded word.}
 \end{figure}
+
+$\bullet$ Number of TH1 sessions = $<NUMBER_TH1_SESSIONS>$
 
 $\bullet$ Area Under Curve = $<AUC>$\%
 
