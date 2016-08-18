@@ -56,8 +56,15 @@ class ReportDeployer(object):
             (subject+'_'+self.pipeline.experiment+'_'+classifier_experiment+'_report.pdf')
 
         standard_report_path = join(report_dir,standard_report_basename)
-        # shutil.copy(report_path,join(report_dir,report_basename))
-        shutil.copy(report_path,standard_report_path)
+
+
+        #  using copyfile is the right solution when copying files
+        #  see http://stackoverflow.com/questions/11835833/why-would-shutil-copy-raise-a-permission-exception-when-cp-doesnt
+        shutil.copyfile(report_path,standard_report_path)
+        # shutil.copy(report_path,standard_report_path)
+
+
+
 
         self.add_report_file(file=standard_report_path)
 
