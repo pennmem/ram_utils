@@ -1,5 +1,12 @@
 #!/bin/bash
 
+#$ -q RAM.q
+#$ -S /bin/bash
+#$ -cwd
+#$ -N REPORT
+#$ -j y
+#$ -o /scratch/mswat/automated_reports/automated_reports.log
+
 source /home1/mswat/.bashrc
 module load Tex/2014
 
@@ -46,6 +53,10 @@ echo ${datetime}
 status_output_dirs=()
 
 automated_reports_dir=/scratch/mswat/automated_reports
+
+if [ ! -d "$automated_reports_dir" ]; then
+  mkdir -p ${automated_reports_dir}
+fi
 
 exit_on_no_change_flag=--exit-on-no-change
 #exit_on_no_change_flag=
