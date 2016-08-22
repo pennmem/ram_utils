@@ -1,5 +1,11 @@
 import numpy as np
 import pandas as pd
+from glob import glob
+import os
+from zipfile import ZipFile
+from StringIO import StringIO
+from scipy.io import loadmat
+from math import exp
 
 from sklearn.externals import joblib
 
@@ -40,6 +46,7 @@ class ComputeFRStimTable(ReportRamTask):
         self.params = params
         self.stim_params_to_sess = None
         self.fr_stim_table = None
+        self.bio_classifiers = dict()
 
     def initialize(self):
         if self.dependency_inventory:
@@ -76,6 +83,9 @@ class ComputeFRStimTable(ReportRamTask):
         self.pass_object('fr_stim_table', self.fr_stim_table)
 
     def run(self):
+        subject = self.pipeline.subject
+        task = self.pipeline.task
+
         channel_to_label_map = self.get_passed_object('channel_to_label_map')
         loc_tag = self.get_passed_object('loc_tag')
 
@@ -85,9 +95,35 @@ class ComputeFRStimTable(ReportRamTask):
         n_events = len(events)
 
         lr_classifier = self.get_passed_object('lr_classifier')
-
         fr_stim_pow_mat = self.get_passed_object('fr_stim_pow_mat')
-        fr_stim_prob = lr_classifier.predict_proba(fr_stim_pow_mat)[:,1]
+
+        fr_stim_prob = np.empty(shape=n_events, dtype=float)
+        if task=='RAM_FR3':
+            sessions = np.unique(events.session)
+            for sess in sessions:
+                biomarker_files = glob(os.path.join(self.pipeline.mount_point,'data/eeg',subject,'raw/FR3_%d'%sess,'*.biomarker'))
+                if biomarker_files:
+                    biomarker_zip = ZipFile(biomarker_files[0])
+                    biomarker = None
+                    for name in biomarker_zip.namelist():
+                        if name[-4:]=='.mat':
+                            biomarker = loadmat(StringIO(biomarker_zip.read(name)), squeeze_me=True)
+                            break
+                    biomarker_data = biomarker['Bio'].item()
+                    biomarker_fields = biomarker['Bio'].dtype.names
+                    classifier_weights = None
+                    classifier_intercept = None
+                    for i,name in enumerate(biomarker_fields):
+                        if name=='W':
+                            classifier_weights = biomarker_data[i]
+                        elif name=='W0':
+                            classifier_intercept = biomarker_data[i]
+                    self.bio_classifiers[sess] = (classifier_intercept, classifier_weights)
+            for i,ev in enumerate(events):
+                sess = ev.session
+                fr_stim_prob[i] = 1.0 / (1.0 + exp(-self.bio_classifiers[sess][0]-np.dot(self.bio_classifiers[sess][1],fr_stim_pow_mat[i,:])))
+        else:
+            fr_stim_prob[:] = lr_classifier.predict_proba(fr_stim_pow_mat)[:,1]
 
         is_stim_item = np.zeros(n_events, dtype=np.bool)
         is_post_stim_item = np.zeros(n_events, dtype=np.bool)
