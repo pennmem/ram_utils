@@ -41,6 +41,7 @@ class SessionSummary(object):
         self.chisqr_intr = None
         self.pvalue_intr = None
 
+        self.pc_diff_from_mean = None
         self.stim_vs_non_stim_pc_diff_from_mean = None
         self.post_stim_vs_non_stim_pc_diff_from_mean = None
 
