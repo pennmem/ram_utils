@@ -23,7 +23,7 @@ class EventPreparation(ReportRamTask):
         events.dtype.names = ['item_name' if i=='item' else i for i in events.dtype.names]
         ev_order = np.argsort(events, order=('session','trial','mstime'))
         events = events[ev_order]
-        
+
         # add in error if object locations are transposed
         xCenter = 384.8549
         yCenter = 358.834
@@ -31,17 +31,17 @@ class EventPreparation(ReportRamTask):
         y = events.chosenLocationY-yCenter;
         xChest = events.locationX-xCenter;
         yChest = events.locationY-yCenter;
-        distErr_transpose = np.sqrt((-xChest - x)**2 + (-yChest - y)**2);  
+        distErr_transpose = np.sqrt((-xChest - x)**2 + (-yChest - y)**2);
         events = append_fields(events,'distErr_transpose',distErr_transpose,dtypes=float,usemask=False,asrecarray=True)
 
         # add field for correct if transposed
         recalled_ifFlipped = np.zeros(np.shape(distErr_transpose),dtype=bool)
         recalled_ifFlipped[events.isRecFromStartSide==0] = events.distErr_transpose[events.isRecFromStartSide==0]<=13
-        events = append_fields(events,'recalled_ifFlipped',recalled_ifFlipped,dtypes=float,usemask=False,asrecarray=True)        
-        
+        events = append_fields(events,'recalled_ifFlipped',recalled_ifFlipped,dtypes=float,usemask=False,asrecarray=True)
+
         # add field for error percentile (performance factor)
-        error_percentiles = self.calc_norm_dist_error(events.locationX,events.locationY,events.distErr)        
-        events = append_fields(events,'norm_err',error_percentiles,dtypes=float,usemask=False,asrecarray=True)        
+        error_percentiles = self.calc_norm_dist_error(events.locationX,events.locationY,events.distErr)
+        events = append_fields(events,'norm_err',error_percentiles,dtypes=float,usemask=False,asrecarray=True)
         self.pass_object(self.pipeline.task+'_all_events', events)
 
         chest_events = events[events.type == 'CHEST']
@@ -50,7 +50,7 @@ class EventPreparation(ReportRamTask):
 
         events = events[(events.type == 'CHEST') & (events.confidence >= 0)]
         print len(events), task, 'item presentation events'
-        
+
         self.pass_object(task+'_events', events)
         self.pass_object(self.pipeline.task+'_chest_events', chest_events)
         self.pass_object(self.pipeline.task+'_rec_events', rec_events)
@@ -61,11 +61,11 @@ class EventPreparation(ReportRamTask):
         score_events = spio.loadmat(score_path,squeeze_me=True,struct_as_record=True)
         self.pass_object(task+'_score_events', score_events)
 
-        
+
     def calc_norm_dist_error(self,x_pos,y_pos,act_errs):
         rand_x = np.random.uniform(359.9,409.9,100000)
         rand_y = np.random.uniform(318.0,399.3,100000)
-        
+
         error_percentiles = np.zeros(np.shape(act_errs),dtype=float)
         for i,this_item in enumerate(zip(x_pos,y_pos,act_errs)):
             if np.isnan(this_item[2]):
