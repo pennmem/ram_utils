@@ -231,7 +231,7 @@ class ComputeClassifier(ReportRamTask):
     def run(self):
         subject = self.pipeline.subject
 
-        events = self.get_passed_object('TH_events')
+        events = self.get_passed_object('th_events')
         self.pow_mat = normalize_sessions(self.get_passed_object('pow_mat'), events)
 
         #n1 = np.sum(events.recalled)

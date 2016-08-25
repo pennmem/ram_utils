@@ -43,7 +43,7 @@ class ComputeTHPowers(ReportRamTask):
     def run(self):
         subject = self.pipeline.subject
 
-        events = self.get_passed_object('TH_events')
+        events = self.get_passed_object('th_events')
 
         sessions = np.unique(events.session)
         print 'sessions:', sessions
