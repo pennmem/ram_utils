@@ -17,7 +17,7 @@ from ReportUtils import CMLParser,ReportPipeline
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1172E')
+cml_parser.arg('--subject','R1202M')
 cml_parser.arg('--task','RAM_FR1')
 cml_parser.arg('--workspace-dir','/scratch/busygin/FR1_reports_db')
 cml_parser.arg('--mount-point','')
