@@ -30,7 +30,7 @@
 \begin{document}
 
 
-\section*{<SUBJECT> RAM <EXPERIMENT> Free Recall Report}
+\section*{<SUBJECT> RAM <EXPERIMENT> Report}
 
 \begin{tabular}{ccc}
 \begin{minipage}[htbp]{170pt}

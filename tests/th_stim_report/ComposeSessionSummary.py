@@ -40,7 +40,7 @@ class ComposeSessionSummary(ReportRamTask):
         session_data = []
 
         th_stim_table_by_session = th_stim_table.groupby(['session'])
-        for session,th_stim_session_table in th_stim_table_by_session:
+        for session,th_stim_session_table in th_stim_table_by_session:            
             session_all_events = all_events[all_events.session == session]
             first_time_stamp = session_all_events[session_all_events.type=='SESS_START'][0].mstime
             timestamps = session_all_events.mstime
@@ -69,7 +69,7 @@ class ComposeSessionSummary(ReportRamTask):
             session_summary.auc_p = th_stim_session_table.auc_perm.values[0]
             session_summary.n_words = len(th_stim_session_table)
             session_summary.n_correct_words = th_stim_session_table.recalled.sum()
-            session_summary.pc_correct_words = 100*session_summary.n_correct_words / float(session_summary.n_words)            
+            session_summary.pc_correct_words = 100*session_summary.n_correct_words / float(session_summary.n_words)
             session_summary.correct_thresh = np.max([th_events[0].radius_size, np.median(th_events.distErr)])
 
             sess_sel = np.vectorize(lambda sess: sess in session_summary.sessions)

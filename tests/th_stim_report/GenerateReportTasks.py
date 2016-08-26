@@ -174,8 +174,9 @@ class GeneratePlots(ReportRamTask):
 
             binMid = np.arange(2.5,100,5)
             labels = ['Stim', 'non-Stim']
-            pd2 = PlotData(x=binMid, y=session_summary.dist_err_stim_item,label='Stim')
-            pd3 = PlotData(x=binMid, y=session_summary.dist_err_nonstim_item,label='non-Stim')
+            # no line width argument in plotutils?
+            pd2 = PlotData(x=binMid, y=session_summary.dist_err_stim_item, color='r', label='Stim')
+            pd3 = PlotData(x=binMid, y=session_summary.dist_err_nonstim_item, color='b', label='non-Stim')
             pdc = PlotDataCollection(legend_on=True,legend_loc=1)
             pdc.xlabel = 'Distance Error'
             pdc.ylabel = 'Prob.'
@@ -239,26 +240,41 @@ class GeneratePlots(ReportRamTask):
 
 
 
-            pdc = PlotDataCollection()
+            pdc = PlotDataCollection(legend_on=True,legend_loc=1)
             pdc.xlabel = 'Item Number'
             pdc.xlabel_fontsize = 20
             pdc.ylabel ='Distance Error'
             pdc.ylabel_fontsize = 20
 
-            stim_items = np.where(session_summary.is_stim_item)
-            nonstim_items = np.where(~session_summary.is_stim_item)
+            # stim items
+            stim_items = np.where(session_summary.is_stim_item)            
             stim_scatter = PlotData(x=stim_items[0], y=session_summary.all_dist_errs[stim_items], linestyle='', marker='.', markersize=20, color='r', label='Stim')
-            nonstim_scatter = PlotData(x=nonstim_items[0], y=session_summary.all_dist_errs[nonstim_items], linestyle='', marker='.', markersize=20, color='b', label='non-Stim')
+            
+            # non-stim items all
+            # nonstim_items = np.where(~session_summary.is_stim_item)
+            # nonstim_scatter = PlotData(x=nonstim_items[0], y=session_summary.all_dist_errs[nonstim_items], linestyle='', marker='.', markersize=20, color='b', label='non-Stim')
+
+            # non-stim items on stim lists
+            nonstim_stim_list_items = np.where(~session_summary.is_stim_item & session_summary.is_stim_list)
+            nonstim_stim_list_scatter = PlotData(x=nonstim_stim_list_items[0], y=session_summary.all_dist_errs[nonstim_stim_list_items], linestyle='', marker='.', markersize=20, color='b', label='non-Stim from stim list')            
+            
+            # non-stim items on non-stim lists
+            nonstim_nonstim_list_items = np.where(~session_summary.is_stim_item & ~session_summary.is_stim_list)
+            nonstim_nonstim_list_scatter = PlotData(x=nonstim_nonstim_list_items[0], y=session_summary.all_dist_errs[nonstim_nonstim_list_items], linestyle='', marker='.', markersize=20, color='k', label='non-stim list')            
+
             stim_lists = np.where(session_summary.is_stim_list)
             nonstim_lists = np.where(~session_summary.is_stim_list)
-            stim_list_indicator = PlotData(x=stim_lists[0], y=[-1]*len(stim_lists[0]), linestyle='', marker='.', markersize=20, color='r', label='Stim')
-            nonstim_list_indicator = PlotData(x=nonstim_lists[0], y=[-1]*len(nonstim_lists[0]), linestyle='', marker='.', markersize=20, color='b', label='non-Stim')
+            stim_list_indicator = PlotData(x=stim_lists[0], y=[-1]*len(stim_lists[0]), linestyle='', marker='.', markersize=20, color='r')
+            nonstim_list_indicator = PlotData(x=nonstim_lists[0], y=[-1]*len(nonstim_lists[0]), linestyle='', marker='.', markersize=20, color='k')
             thresh_line = PlotData(x=[0, len(session_summary.is_stim_item)],y=[session_summary.correct_thresh]*2, linestyle='--', color='k', ylim=(-2,70))
-            pdc.add_plot_data(stim_scatter)
-            pdc.add_plot_data(nonstim_scatter)
+            pdc.add_plot_data(stim_scatter)            
+            # pdc.add_plot_data(nonstim_scatter)
+            pdc.add_plot_data(nonstim_stim_list_scatter)
+            pdc.add_plot_data(nonstim_nonstim_list_scatter)
             pdc.add_plot_data(stim_list_indicator)
             pdc.add_plot_data(nonstim_list_indicator)
             pdc.add_plot_data(thresh_line)
+
 
             # x_tick_labels = np.array([str(k) for k in session_summary.list_number])
             # x_tick_labels[1::5] = ''
