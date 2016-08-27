@@ -12,7 +12,7 @@ from ReportUtils import CMLParser,ReportPipeline
 cml_parser = CMLParser(arg_count_threshold=1)
 
 
-cml_parser.arg('--subject','R1175N')
+cml_parser.arg('--subject','R1196N')
 cml_parser.arg('--task','RAM_PAL1')
 cml_parser.arg('--workspace-dir','/scratch/busygin/PAL1_reports_db')
 # cml_parser.arg('--workspace-dir','/Users/m/automated_reports/PAL1_reports')

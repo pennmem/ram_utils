@@ -139,6 +139,11 @@ class MontagePreparation(ReportRamTask):
                 self.pass_object('monopolar_channels', monopolar_channels)
                 self.pass_object('bipolar_pairs', bipolar_pairs)
                 self.pass_object('bp_tal_structs', bp_tal_structs)
+
+                joblib.dump(monopolar_channels, self.get_path_to_resource_in_workspace(subject + '-monopolar_channels.pkl'))
+                joblib.dump(bipolar_pairs, self.get_path_to_resource_in_workspace(subject + '-bipolar_pairs.pkl'))
+                bp_tal_structs.to_pickle(self.get_path_to_resource_in_workspace(subject + '-bp_tal_structs.pkl'))
+
             except:
                 self.raise_and_log_report_exception(
                                                     exception_type='MissingDataError',
