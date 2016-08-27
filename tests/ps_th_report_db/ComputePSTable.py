@@ -37,10 +37,8 @@ class ComputePSTable(ReportRamTask):
 
     def initialize(self):
         if self.dependency_inventory:
-            self.dependency_inventory.add_dependent_resource(resource_name='fr1_events',
-                                        access_path = ['experiments','fr1','events'])
-            self.dependency_inventory.add_dependent_resource(resource_name='catfr1_events',
-                                        access_path = ['experiments','catfr1','events'])
+            self.dependency_inventory.add_dependent_resource(resource_name='th1_events',
+                                        access_path = ['experiments','th1','events'])
             self.dependency_inventory.add_dependent_resource(resource_name='ps_events',
                                         access_path = ['experiments','ps','events'])
             self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
