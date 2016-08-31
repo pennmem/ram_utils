@@ -81,7 +81,7 @@ $<N_CONF_STIM_ITEM>/<N_TOTAL_STIM_ITEM>$ ($<PC_CONF_STIM_ITEM>$\%) from stim ite
 \begin{figure}[!h]
 \centering
 \subfigure{\includegraphics[scale=0.4]{<STIM_AND_RECALL_PLOT_FILE>}}
-\caption*{\textbf{Stim and recall:} Distance error as a function of item number in the session. Red dots indicate stimulated items, and blue dots indicate non-stimulated items. The bottom row indicates stim/non-stim list status. Dashed line indicates recall threshold.}
+\caption*{\textbf{Stim and recall:} Distance error as a function of item number in the session. Red dots indicate stimulated items, blue dots indicate non-stimulated items from stim lists, and black dots indicate non-stim lists. The bottom row indicates stim/non-stim list status. Dashed line indicates recall threshold.}
 \end{figure}
 
 <BIOMARKER_PLOTS>

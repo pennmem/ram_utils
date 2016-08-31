@@ -23,7 +23,7 @@ class GenerateTex(ReportRamTask):
         tex_template = 'fr_stim_report.tex.tpl'
         tex_session_template = 'fr_stim_session.tex.tpl'
 
-        tex_biomarker_plot_template = 'biomarker_plots.tex.tpl'
+        tex_biomarker_plot_template = 'biomarker_plots.tex.tpl' if self.pipeline.task=='RAM_FR4' else 'fr3_plots.tex.tpl'
 
         report_tex_file_name = self.pipeline.task + '-' + self.pipeline.subject + '-report.tex'
         self.pass_object('report_tex_file_name',report_tex_file_name)
@@ -38,11 +38,11 @@ class GenerateTex(ReportRamTask):
         tex_session_pages_str = ''
 
         for session_summary in session_summary_array:
-            biomarker_plots = ''
-            if self.pipeline.task == 'RAM_FR4':
-                biomarker_plot_replace_dict = {'<STIM_VS_NON_STIM_HALVES_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-stim_vs_non_stim_halves_plot_' + session_summary.stimtag + '-' + str(session_summary.frequency) + '.pdf',
-                                              }
-                biomarker_plots = TextTemplateUtils.replace_template_to_string(tex_biomarker_plot_template, biomarker_plot_replace_dict)
+            # biomarker_plots = ''
+            # if self.pipeline.task == 'RAM_FR4':
+            biomarker_plot_replace_dict = {'<STIM_VS_NON_STIM_HALVES_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-stim_vs_non_stim_halves_plot_' + session_summary.stimtag + '-' + str(session_summary.frequency) + '.pdf',
+                                          }
+            biomarker_plots = TextTemplateUtils.replace_template_to_string(tex_biomarker_plot_template, biomarker_plot_replace_dict)
 
             replace_dict = {'<STIMTAG>': session_summary.stimtag,
                             '<REGION>': session_summary.region_of_interest,
@@ -158,38 +158,52 @@ class GeneratePlots(ReportRamTask):
             plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
 
-            panel_plot = PanelPlot(xfigsize=17, yfigsize=7.5, i_max=1, j_max=3, title='', wspace=3.5, hspace=0.3, labelsize=18)
+            if task == 'RAM_FR4':
+                panel_plot = PanelPlot(xfigsize=17, yfigsize=7.5, i_max=1, j_max=3, title='', wspace=3.5, hspace=0.3, labelsize=18)
 
-            pd1 = BarPlotData(x=(0,1,2,3),
-                           y=(session_summary.control_mean_prob_diff_all, session_summary.mean_prob_diff_all_post_stim_item, session_summary.control_mean_prob_diff_low, session_summary.mean_prob_diff_low_post_stim_item),
-                           yerr=(session_summary.control_sem_prob_diff_all, session_summary.sem_prob_diff_all_post_stim_item, session_summary.control_sem_prob_diff_low, session_summary.sem_prob_diff_low_post_stim_item),
-                           x_tick_labels=('Control\nAll', 'Stim\nAll', 'Control\nLow', 'Stim\nLow'),
-                           xlabel='(a)', ylabel='$\Delta$ Post-Pre Classifier Output',
-                           xhline_pos=0.0, #levelline=[(1.5,0),(1.5,0.1)],
-                           barcolors=['grey', 'grey', 'grey', 'grey'], xlabel_fontsize=18, ylabel_fontsize=18, barwidth=0.5
-                          )
+                pd1 = BarPlotData(x=(0,1,2,3),
+                               y=(session_summary.control_mean_prob_diff_all, session_summary.mean_prob_diff_all_post_stim_item, session_summary.control_mean_prob_diff_low, session_summary.mean_prob_diff_low_post_stim_item),
+                               yerr=(session_summary.control_sem_prob_diff_all, session_summary.sem_prob_diff_all_post_stim_item, session_summary.control_sem_prob_diff_low, session_summary.sem_prob_diff_low_post_stim_item),
+                               x_tick_labels=('Control\nAll', 'Stim\nAll', 'Control\nLow', 'Stim\nLow'),
+                               xlabel='(a)', ylabel='$\Delta$ Post-Pre Classifier Output',
+                               xhline_pos=0.0, #levelline=[(1.5,0),(1.5,0.1)],
+                               barcolors=['grey', 'grey', 'grey', 'grey'], xlabel_fontsize=18, ylabel_fontsize=18, barwidth=0.5
+                              )
 
 
-            ylim = np.max(np.abs(session_summary.stim_vs_non_stim_pc_diff_from_mean)) + 5.0
-            if ylim > 100.0:
-                ylim = 100.0
-            pd2 = BarPlotData(x=(0,1), y=session_summary.stim_vs_non_stim_pc_diff_from_mean, ylim=[-ylim,ylim], xlabel='\n(b) Stimulated Item', ylabel='% Recall Difference (Stim-NoStim)', x_tick_labels=['Low', 'High'], xhline_pos=0.0, barcolors=['grey', 'grey'], xlabel_fontsize=18, ylabel_fontsize=18, barwidth=0.5)
+                ylim = np.max(np.abs(session_summary.stim_vs_non_stim_pc_diff_from_mean)) + 5.0
+                if ylim > 100.0:
+                    ylim = 100.0
+                pd2 = BarPlotData(x=(0,1), y=session_summary.stim_vs_non_stim_pc_diff_from_mean, ylim=[-ylim,ylim], xlabel='\n(b) Stimulated Item', ylabel='% Recall Difference (Stim-NoStim)', x_tick_labels=['Low', 'High'], xhline_pos=0.0, barcolors=['grey', 'grey'], xlabel_fontsize=18, ylabel_fontsize=18, barwidth=0.5)
 
-            ylim = np.max(np.abs(session_summary.post_stim_vs_non_stim_pc_diff_from_mean)) + 5.0
-            if ylim > 100.0:
-                ylim = 100.0
-            pd3 = BarPlotData(x=(0,1), y=session_summary.post_stim_vs_non_stim_pc_diff_from_mean, ylim=[-ylim,ylim], xlabel='\n(c) Post-Stimulated Item', ylabel='% Recall Difference (Stim-NoStim)', x_tick_labels=['Low', 'High'], xhline_pos=0.0, barcolors=['grey', 'grey'], xlabel_fontsize=18, ylabel_fontsize=18, barwidth=0.5)
+                ylim = np.max(np.abs(session_summary.post_stim_vs_non_stim_pc_diff_from_mean)) + 5.0
+                if ylim > 100.0:
+                    ylim = 100.0
+                pd3 = BarPlotData(x=(0,1), y=session_summary.post_stim_vs_non_stim_pc_diff_from_mean, ylim=[-ylim,ylim], xlabel='\n(c) Post-Stimulated Item', ylabel='% Recall Difference (Stim-NoStim)', x_tick_labels=['Low', 'High'], xhline_pos=0.0, barcolors=['grey', 'grey'], xlabel_fontsize=18, ylabel_fontsize=18, barwidth=0.5)
 
-            panel_plot.add_plot_data(0, 0, plot_data=pd1)
-            panel_plot.add_plot_data(0, 1, plot_data=pd2)
-            panel_plot.add_plot_data(0, 2, plot_data=pd3)
+                panel_plot.add_plot_data(0, 0, plot_data=pd1)
+                panel_plot.add_plot_data(0, 1, plot_data=pd2)
+                panel_plot.add_plot_data(0, 2, plot_data=pd3)
 
-            plot = panel_plot.generate_plot()
+                plot = panel_plot.generate_plot()
 
-            plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-stim_vs_non_stim_halves_plot_' + session_summary.stimtag + '-' + str(session_summary.frequency) + '.pdf')
+                plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-stim_vs_non_stim_halves_plot_' + session_summary.stimtag + '-' + str(session_summary.frequency) + '.pdf')
 
-            plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+                plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+            elif task == 'RAM_FR3':
+                panel_plot = PanelPlot(xfigsize=6, yfigsize=7.5, i_max=1, j_max=1, title='', labelsize=18)
 
+                ylim = np.max(np.abs(session_summary.pc_diff_from_mean)) + 5.0
+                if ylim > 100.0:
+                    ylim = 100.0
+                pd = BarPlotData(x=(0,1), y=session_summary.pc_diff_from_mean, ylim=[-ylim,ylim], xlabel='Items', ylabel='% Recall Difference (Stim-NoStim)', x_tick_labels=['Stim', 'PostStim'], xhline_pos=0.0, barcolors=['grey', 'grey'], xlabel_fontsize=18, ylabel_fontsize=18, barwidth=0.5)
+                panel_plot.add_plot_data(0, 0, plot_data=pd)
+
+                plot = panel_plot.generate_plot()
+
+                plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-stim_vs_non_stim_halves_plot_' + session_summary.stimtag + '-' + str(session_summary.frequency) + '.pdf')
+
+                plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
             n_lists = len(session_summary.n_stims_per_list)
 

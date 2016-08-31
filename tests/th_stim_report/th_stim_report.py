@@ -5,7 +5,7 @@ from ReportUtils import CMLParser,ReportPipeline
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1201P_1')
+cml_parser.arg('--subject','R1208C')
 cml_parser.arg('--task','RAM_TH3')
 cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/TH3_reports')
 cml_parser.arg('--workspace-dir','/scratch/jfm2/TH3')

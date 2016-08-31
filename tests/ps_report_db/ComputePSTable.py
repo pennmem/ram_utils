@@ -100,10 +100,6 @@ class ComputePSTable(ReportRamTask):
             elif bp_label2 in bp_tal_stim_only_structs.index:
                 region[i] = bp_tal_stim_only_structs[bp_label2]
 
-        #define region
-        # bipolar_label = pd.Series(zip([s.upper() for s in ps_events.stimAnodeTag], [s.upper() for s in ps_events.stimCathodeTag]))
-        # region = bipolar_label.apply(lambda bp: bipolar_label_to_loc_tag(bp, loc_tag))
-
         self.ps_table = pd.DataFrame()
         self.ps_table['session'] = ps_events.session
         self.ps_table['mstime'] = ps_events.mstime

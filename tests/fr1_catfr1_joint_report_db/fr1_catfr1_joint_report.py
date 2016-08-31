@@ -12,7 +12,7 @@ from ReportUtils import CMLParser, ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
 
-cml_parser.arg('--subject','R1111M')
+cml_parser.arg('--subject','R1201P_1')
 # cml_parser.arg('--task','RAM_FR1')
 # cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/FR1_reports')
 cml_parser.arg('--workspace-dir','/scratch/busygin/FR1_CatFR1_joint_reports')
