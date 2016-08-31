@@ -7,6 +7,11 @@
 #$ -j y
 #$ -o /scratch/mswat/automated_reports/automated_reports.log
 
+#$ -pe python-shared 10
+#$ -l h_rt=72:00:00
+#$ -l h_vmem=4G
+
+
 source /home1/mswat/.bashrc
 module load Tex/2014
 
@@ -19,6 +24,8 @@ export PYTHONPATH="/home1/mswat/RAM_UTILS_GIT":$PYTHONPATH
 export PYTHONPATH="/home1/mswat/PTSA_NEW_GIT":$PYTHONPATH
 
 export PYTHONPATH="/home1/mswat/extra_libs":$PYTHONPATH
+
+which python
 
 #source /home1/mswat/.bashrc
 #module load Tex/2014
