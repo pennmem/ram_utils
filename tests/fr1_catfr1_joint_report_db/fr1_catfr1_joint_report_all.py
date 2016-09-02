@@ -6,10 +6,10 @@ from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
 #cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/FR1_CatFr1_check_1')
-cml_parser.arg('--workspace-dir','/scratch/busygin/FR1_joint_reports_db')
+cml_parser.arg('--workspace-dir','/scratch/RAM_maint/automated_reports/FR1_joint_reports_db')
 cml_parser.arg('--mount-point','')
 cml_parser.arg('--recompute-on-no-status')
-# cml_parser.arg('--exit-on-no-change')
+cml_parser.arg('--exit-on-no-change')
 
 args = cml_parser.parse()
 
@@ -39,9 +39,6 @@ from GenerateReportTasks import *
 
 class Params(object):
     def __init__(self):
-        self.api_monopolar_url = 'https://stimstaging.psych.upenn.edu/api/rhino/1.0/configured-contacts-by-montage-codes.json'
-        self.api_bipolar_url = 'https://stimstaging.psych.upenn.edu/api/rhino/1.0/configured-pairs-by-montage-codes.json'
-
         self.width = 5
 
         self.fr1_start_time = 0.0
@@ -123,7 +120,7 @@ for subject in subjects:
 
     report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
-    # report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
+    report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
 
     # starts processing pipeline
     report_pipeline.execute_pipeline()

@@ -81,7 +81,7 @@ class GenerateTex(ReportRamTask):
 
 
 class GeneratePlots(ReportRamTask):
-    def __init__(self, params,mark_as_completed=True):
+    def __init__(self, params, mark_as_completed=True):
         super(ReportRamTask,self).__init__(mark_as_completed)
         self.params = params
                 

@@ -13,8 +13,7 @@ cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/TH3_reports')
 cml_parser.arg('--task','RAM_TH3')
 cml_parser.arg('--mount-point','')
 cml_parser.arg('--recompute-on-no-status')
-
-# cml_parser.arg('--exit-on-no-change')
+cml_parser.arg('--exit-on-no-change')
 
 args = cml_parser.parse()
 
@@ -30,7 +29,7 @@ from ComputeClassifier import ComputeClassifier
 
 from ComputeTHStimPowers import ComputeTHStimPowers
 
-from TalPreparation import TalPreparation
+from MontagePreparation import MontagePreparation
 
 from ComputeTHStimTable import ComputeTHStimTable
 
@@ -71,7 +70,7 @@ task = args.task
 
 def find_subjects_by_task(task):
     ev_files = glob(args.mount_point + '/data/events/%s/R*_events.mat' % task)
-    return [re.search(r'R1\d\d\d[A-Z](_\d+)?', f).group() for f in ev_files]
+    return [re.search(r'R\d\d\d\d[A-Z](_\d+)?', f).group() for f in ev_files]
 
 
 subjects = find_subjects_by_task(task)
@@ -103,7 +102,7 @@ for subject in subjects:
 
     report_pipeline.add_task(EventPreparation(mark_as_completed=False))
 
-    report_pipeline.add_task(TalPreparation(mark_as_completed=False))
+    report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
 
     report_pipeline.add_task(ComputeTHPowers(params=params, mark_as_completed=True))
 

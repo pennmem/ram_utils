@@ -7,10 +7,10 @@ from ReportUtils import CMLParser, ReportPipeline
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/PAL1_reports')
+cml_parser.arg('--workspace-dir','/scratch/RAM_maint/automated_reports/PAL1_reports')
 cml_parser.arg('--mount-point','')
 cml_parser.arg('--recompute-on-no-status')
-# cml_parser.arg('--exit-on-no-change')
+cml_parser.arg('--exit-on-no-change')
 
 args = cml_parser.parse()
 
@@ -25,9 +25,7 @@ from MathEventPreparation import MathEventPreparation
 
 from ComputePAL1Powers import ComputePAL1Powers
 
-from TalPreparation import TalPreparation
-
-from GetLocalization import GetLocalization
+from MontagePreparation import MontagePreparation
 
 from ComputePAL1HFPowers import ComputePAL1HFPowers
 
@@ -109,9 +107,7 @@ for subject in subjects:
 
     report_pipeline.add_task(MathEventPreparation(mark_as_completed=False))
 
-    report_pipeline.add_task(TalPreparation(mark_as_completed=False))
-
-    report_pipeline.add_task(GetLocalization(mark_as_completed=False))
+    report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
 
     report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=True))
 
@@ -129,7 +125,7 @@ for subject in subjects:
 
     report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
-    # report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
+    report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
 
     report_pipeline.execute_pipeline()
 
