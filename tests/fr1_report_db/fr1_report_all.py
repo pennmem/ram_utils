@@ -13,7 +13,7 @@ cml_parser = CMLParser(arg_count_threshold=1)
 # # cml_parser.arg('--exit-on-no-change')
 
 cml_parser.arg('--task','RAM_FR1')
-cml_parser.arg('--workspace-dir','/Users/m/scratch/automated_reports/FR1_reports')
+cml_parser.arg('--workspace-dir','/Users/busygin/scratch/FR1_reports')
 # cml_parser.arg('--mount-point','/Users/m')
 cml_parser.arg('--recompute-on-no-status')
 # cml_parser.arg('--python-path','/Users/m/PTSA_NEW_GIT')
@@ -34,9 +34,7 @@ from MathEventPreparation import MathEventPreparation
 
 from ComputeFR1Powers import ComputeFR1Powers
 
-from TalPreparation import TalPreparation
-
-from GetLocalization import GetLocalization
+from MontagePreparation import MontagePreparation
 
 from ComputeFR1HFPowers import ComputeFR1HFPowers
 
@@ -126,9 +124,7 @@ for subject in subjects:
 
     report_pipeline.add_task(MathEventPreparation(mark_as_completed=False))
 
-    report_pipeline.add_task(TalPreparation(mark_as_completed=False))
-
-    report_pipeline.add_task(GetLocalization(mark_as_completed=False))
+    report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
 
     report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=True))
 
