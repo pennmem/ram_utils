@@ -8,12 +8,11 @@ from os.path import join
 from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/PS2.1_TH')
+cml_parser.arg('--workspace-dir','/scratch/RAM_maint/automated_reports/PS2.1_TH')
 cml_parser.arg('--mount-point','')
 cml_parser.arg('--recompute-on-no-status')
 cml_parser.arg('--experiment','PS2.1')
-
-# cml_parser.arg('--exit-on-no-change')
+cml_parser.arg('--exit-on-no-change')
 
 args = cml_parser.parse()
 
@@ -29,7 +28,7 @@ from ComputeTHClassPowers import ComputeTHClassPowers
 from ComputeControlPowers import ComputeControlPowers
 from ComputePSPowers import ComputePSPowers
 
-from TalPreparation import TalPreparation
+from MontagePreparation import MontagePreparation
 
 from ComputeClassifier import ComputeClassifier
 
@@ -88,9 +87,9 @@ def find_subjects_by_task(task):
 
 
 subjects = find_subjects_by_task(task)
-subjects_pal = find_subjects_by_task('RAM_TH1')
+subjects_th1 = find_subjects_by_task('RAM_TH1')
 
-subjects = sorted(list(set(subjects) & set(subjects_pal)))
+subjects = sorted(list(set(subjects) & set(subjects_th1)))
 
 
 # subjects.append('TJ086')
@@ -127,7 +126,7 @@ for subject in subjects:
 
     report_pipeline.add_task(PSEventPreparation(mark_as_completed=True))
 
-    report_pipeline.add_task(TalPreparation(mark_as_completed=False))
+    report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
 
     report_pipeline.add_task(ComputeTHClassPowers(params=params, mark_as_completed=True))
 
