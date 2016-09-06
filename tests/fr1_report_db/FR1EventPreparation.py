@@ -20,6 +20,16 @@ class FR1EventPreparation(ReportRamTask):
         e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
         events = e_reader.read()
+
+        # removing stim fileds that shouldn't be in non-stim experiments
+        evs_field_list = ['session','list','serialpos','type','item','itemno',
+                          'recalled','mstime','msoffset','rectime','intrusion',
+                          'eegoffset','eegfile'
+                          ]
+        if task=='RAM_CatFR1':
+            evs_field_list += ['category','categoryNum']
+        events = events[evs_field_list]
+
         ev_order = np.argsort(events, order=('session','list','mstime'))
         events = events[ev_order]
 
