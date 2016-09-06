@@ -20,6 +20,14 @@ class FR1EventPreparation(ReportRamTask):
         e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
         events = e_reader.read()
+        # removing
+        evs_field_list = ['session','list','serialpos','type','item','itemno',
+                          'recalled','mstime','msoffset','rectime','intrusion',
+                          'eegoffset','eegfile'
+                          ]
+
+        events = events[evs_field_list]
+
         ev_order = np.argsort(events, order=('session','list','mstime'))
         events = events[ev_order]
 
