@@ -25,7 +25,7 @@ class EventPreparation(ReportRamTask):
                           'isRecFromNearSide','isRecFromStartSide','reactionTime','confidence','session','radius_size',
                           'listLength','distErr','recalled','eegoffset','eegfile'
                           ]
-        events = events[evs_field_list]
+        events = events[evs_field_list].copy()
 
         # change the item field name to item_name to not cause issues with item()
         events.dtype.names = ['item_name' if i=='item' else i for i in events.dtype.names]

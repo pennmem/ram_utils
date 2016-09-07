@@ -25,8 +25,7 @@ class FR1EventPreparation(ReportRamTask):
                           'recalled','mstime','msoffset','rectime','intrusion',
                           'eegoffset','eegfile'
                           ]
-
-        events = events[evs_field_list]
+        events = events[evs_field_list].copy()
 
         ev_order = np.argsort(events, order=('session','list','mstime'))
         events = events[ev_order]

@@ -27,7 +27,7 @@ class PAL1EventPreparation(ReportRamTask):
                               'resp_word','correct','intrusion','pass','vocalization',
                               'RT','mstime','msoffset','eegoffset','eegfile'
                              ]
-            events = events[evs_field_list]
+            events = events[evs_field_list].copy()
 
             self.pass_object('PAL1_all_events', events)
 

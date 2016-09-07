@@ -28,7 +28,7 @@ class PALEventPreparation(ReportRamTask):
                           'resp_word','correct','intrusion','pass','vocalization',
                           'RT','mstime','msoffset','eegoffset','eegfile'
                           ]
-        events = events[evs_field_list]
+        events = events[evs_field_list].copy()
 
         self.pass_object(self.pipeline.task+'_all_events', events)
 

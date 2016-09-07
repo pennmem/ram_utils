@@ -28,7 +28,7 @@ class FR1EventPreparation(ReportRamTask):
                           ]
         if task=='RAM_CatFR1':
             evs_field_list += ['category','categoryNum']
-        events = events[evs_field_list]
+        events = events[evs_field_list].copy()
 
         ev_order = np.argsort(events, order=('session','list','mstime'))
         events = events[ev_order]
