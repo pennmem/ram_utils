@@ -47,7 +47,7 @@ class DataMonitor(object):
 
 
             for (resource_name,resource_filename) in resource_name_list:
-                resource_path = join(subject_info_dir,'data',resource_filename)
+                resource_path = join(subject_info_dir,resource_filename)
                 print resource_path
                 if isfile(resource_path):
 

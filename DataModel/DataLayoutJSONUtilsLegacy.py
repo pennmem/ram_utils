@@ -35,20 +35,20 @@ class DataLayoutJSONUtilsLegacy(object):
         p = join(prefix,subject_code+'_events.mat')
         self.attach_single_file_JSON_stub(parent_node=node,
                                           json_stub_name='events',
-                                          full_path=join(self.mount_point,'data', p),
+                                          full_path=join(self.mount_point, p),
                                           partial_path=p)
 
         p = join(prefix,subject_code+'_math.mat')
         self.attach_single_file_JSON_stub(parent_node=node,
                                           json_stub_name='math',
-                                          full_path=join(self.mount_point,'data', p),
+                                          full_path=join(self.mount_point, p),
                                           partial_path=p)
 
 
         p = join(prefix,subject_code+'_expinfo.mat')
         self.attach_single_file_JSON_stub(parent_node=node,
                                           json_stub_name='info',
-                                          full_path=join(self.mount_point,'data', p),
+                                          full_path=join(self.mount_point, p),
                                           partial_path=p)
 
 
@@ -83,52 +83,58 @@ class DataLayoutJSONUtilsLegacy(object):
         # ------------------- electrodes ---------------------------------
         electrodes_info = root_node.add_child_node('electrodes')
 
-        p = join('eeg',subject_code,'tal',subject_code+'_talLocs_database_bipol.mat')
+        p = join('protocols/r1/codes', subject_code, 'pairs.json')
+        self.attach_single_file_JSON_stub(parent_node=electrodes_info,
+                                          json_stub_name='bipolar_json',
+                                          full_path=join(self.mount_point, p),
+                                          partial_path=p)
+
+        p = join('data/eeg',subject_code,'tal',subject_code+'_talLocs_database_bipol.mat')
         self.attach_single_file_JSON_stub(parent_node=electrodes_info,
                                           json_stub_name='bipolar',
-                                          full_path=join(self.mount_point,'data', p),
+                                          full_path=join(self.mount_point, p),
                                           partial_path=p)
 
 
-        p = join('eeg',subject_code,'tal',subject_code+'_talLocs_database_monopol.mat')
+        p = join('data/eeg',subject_code,'tal',subject_code+'_talLocs_database_monopol.mat')
         self.attach_single_file_JSON_stub(parent_node=electrodes_info,
                                           json_stub_name='monopolar',
-                                          full_path=join(self.mount_point,'data', p),
+                                          full_path=join(self.mount_point, p),
                                           partial_path=p)
 
-        p = join('eeg',subject_code,'tal',subject_code+'_talLocs_database_stimOnly.mat')
+        p = join('data/eeg',subject_code,'tal',subject_code+'_talLocs_database_stimOnly.mat')
         self.attach_single_file_JSON_stub(parent_node=electrodes_info,
                                           json_stub_name='stim_only',
-                                          full_path=join(self.mount_point,'data', p),
+                                          full_path=join(self.mount_point, p),
                                           partial_path=p)
 
 
-        p = join('eeg',subject_code,'docs','localization',subject_code+' Localization.xlsx')
+        p = join('data/eeg',subject_code,'docs','localization',subject_code+' Localization.xlsx')
         self.attach_single_file_JSON_stub(parent_node=electrodes_info,
                                           json_stub_name='localization',
-                                          full_path=join(self.mount_point,'data', p),
+                                          full_path=join(self.mount_point, p),
                                           partial_path=p)
 
 
         # --------------------- eeg ---------------------------------
         eeg_node = root_node.add_child_node('eeg')
         eeg_reref_node = eeg_node.add_child_node('reref_dir')
-        eeg_reref_node['path'] = join('eeg',subject_code,'eeg.reref')
+        eeg_reref_node['path'] = join('data/eeg',subject_code,'eeg.reref')
 
         eeg_noreref_node = eeg_node.add_child_node('noreref_dir')
-        eeg_noreref_node['path'] = join('eeg',subject_code,'eeg.noreref')
+        eeg_noreref_node['path'] = join('data/eeg',subject_code,'eeg.noreref')
 
 
-        p = join('eeg',subject_code,'eeg.reref','params.txt')
+        p = join('data/eeg',subject_code,'eeg.reref','params.txt')
         self.attach_single_file_JSON_stub(parent_node=eeg_node,
                                           json_stub_name='params_reref',
-                                          full_path=join(self.mount_point,'data', p),
+                                          full_path=join(self.mount_point, p),
                                           partial_path=p)
 
-        p = join('eeg',subject_code,'eeg.noreref','params.txt')
+        p = join('data/eeg',subject_code,'eeg.noreref','params.txt')
         self.attach_single_file_JSON_stub(parent_node=eeg_node,
                                           json_stub_name='params_noreref',
-                                          full_path=join(self.mount_point,'data', p),
+                                          full_path=join(self.mount_point, p),
                                           partial_path=p)
 
 
@@ -138,7 +144,7 @@ class DataLayoutJSONUtilsLegacy(object):
 
         fr1_node = self.create_experiment_JSON_stub(
             subject_code=subject_code,
-            prefix='events/RAM_FR1',
+            prefix='data/events/RAM_FR1',
             description='Free Recall - record-only experiment'
         )
 
@@ -146,7 +152,7 @@ class DataLayoutJSONUtilsLegacy(object):
 
         fr2_node = self.create_experiment_JSON_stub(
             subject_code=subject_code,
-            prefix='events/RAM_FR2',
+            prefix='data/events/RAM_FR2',
             description='Free Recall - open-loop stimulation  experiment'
         )
 
@@ -154,7 +160,7 @@ class DataLayoutJSONUtilsLegacy(object):
 
         fr3_node = self.create_experiment_JSON_stub(
             subject_code=subject_code,
-            prefix='events/RAM_FR3',
+            prefix='data/events/RAM_FR3',
             description='Free Recall - closed-loop stimulation  experiment'
         )
 
@@ -162,7 +168,7 @@ class DataLayoutJSONUtilsLegacy(object):
 
         fr4_node = self.create_experiment_JSON_stub(
             subject_code=subject_code,
-            prefix='events/RAM_FR4',
+            prefix='data/events/RAM_FR4',
             description='Free Recall - open-loop stimulation experiment with specs similar to FR3'
         )
 
@@ -171,7 +177,7 @@ class DataLayoutJSONUtilsLegacy(object):
 
         catfr1_node = self.create_experiment_JSON_stub(
             subject_code=subject_code,
-            prefix='events/RAM_CatFR1',
+            prefix='data/events/RAM_CatFR1',
             description='Categorized Free Recall - record-only experiment'
         )
 
@@ -179,7 +185,7 @@ class DataLayoutJSONUtilsLegacy(object):
 
         catfr2_node = self.create_experiment_JSON_stub(
             subject_code=subject_code,
-            prefix='events/RAM_CatFR2',
+            prefix='data/events/RAM_CatFR2',
             description='Categorized Free Recall - open-loop stimulation  experiment'
         )
 
@@ -187,7 +193,7 @@ class DataLayoutJSONUtilsLegacy(object):
 
         catfr3_node = self.create_experiment_JSON_stub(
             subject_code=subject_code,
-            prefix='events/RAM_CatFR3',
+            prefix='data/events/RAM_CatFR3',
             description='Categorized Free Recall - closed-loop stimulation  experiment'
         )
 
@@ -195,7 +201,7 @@ class DataLayoutJSONUtilsLegacy(object):
 
         catfr4_node = self.create_experiment_JSON_stub(
             subject_code=subject_code,
-            prefix='events/RAM_CatFR4',
+            prefix='data/events/RAM_CatFR4',
             description='Categorized Free Recall - open-loop stimulation experiment with specs similar to CatFR3'
         )
 
@@ -204,23 +210,15 @@ class DataLayoutJSONUtilsLegacy(object):
 
         pal1_node = self.create_experiment_JSON_stub(
             subject_code=subject_code,
-            prefix='events/RAM_PAL1',
+            prefix='data/events/RAM_PAL1',
             description='Paired-Associate Learning- record-only experiment'
         )
 
         experiments_node.add_child_node('pal1',pal1_node)
 
-        pal2_node = self.create_experiment_JSON_stub(
-            subject_code=subject_code,
-            prefix='events/RAM_PAL2',
-            description='Paired-Associate Learning- open-loop stimulation experiment'
-        )
-
-        experiments_node.add_child_node('pal2',pal2_node)
-
         pal3_node = self.create_experiment_JSON_stub(
             subject_code=subject_code,
-            prefix='events/RAM_PAL3',
+            prefix='data/events/RAM_PAL3',
             description='Paired-Associate Learning- closed-loop stimulation experiment'
         )
 
@@ -229,7 +227,7 @@ class DataLayoutJSONUtilsLegacy(object):
 
         pal4_node = self.create_experiment_JSON_stub(
             subject_code=subject_code,
-            prefix='events/RAM_PAL4',
+            prefix='data/events/RAM_PAL4',
             description='Paired-Associate Learning- open-loop stimulation experiment with specs similar to PAL3'
         )
 
@@ -238,23 +236,15 @@ class DataLayoutJSONUtilsLegacy(object):
 
         th1_node = self.create_experiment_JSON_stub(
             subject_code=subject_code,
-            prefix='events/RAM_TH1',
+            prefix='data/events/RAM_TH1',
             description='Spatial Navigation Task- record-only experiment'
         )
 
         experiments_node.add_child_node('th1',th1_node)
 
-        th2_node = self.create_experiment_JSON_stub(
-            subject_code=subject_code,
-            prefix='events/RAM_TH2',
-            description='Spatial Navigation Task- open-loop stimulation experiment'
-        )
-
-        experiments_node.add_child_node('th2',th2_node)
-
         th3_node = self.create_experiment_JSON_stub(
             subject_code=subject_code,
-            prefix='events/RAM_TH3',
+            prefix='data/events/RAM_TH3',
             description='Spatial Navigation Task- closed-loop stimulation experiment'
         )
 
@@ -263,7 +253,7 @@ class DataLayoutJSONUtilsLegacy(object):
 
         th4_node = self.create_experiment_JSON_stub(
             subject_code=subject_code,
-            prefix='events/RAM_TH4',
+            prefix='data/events/RAM_TH4',
             description='Spatial Navigation Task- open-loop stimulation experiment with specs similar to TH3'
         )
 
@@ -272,7 +262,7 @@ class DataLayoutJSONUtilsLegacy(object):
 
         ps_node = self.create_experiment_JSON_stub(
             subject_code=subject_code,
-            prefix='events/RAM_PS',
+            prefix='data/events/RAM_PS',
             description='Parameter Search - stimulation-only task - no recal tasks'
         )
         experiments_node.add_child_node('ps',ps_node)
