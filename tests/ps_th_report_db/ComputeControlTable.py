@@ -36,7 +36,8 @@ class ComputeControlTable(ReportRamTask):
                                         access_path = ['experiments','ps','events'])
             self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
                                         access_path = ['electrodes','bipolar'])
-
+            self.dependency_inventory.add_dependent_resource(resource_name='bipolar_json',
+                                        access_path = ['electrodes','bipolar_json'])
 
     def restore(self):
         subject = self.pipeline.subject
