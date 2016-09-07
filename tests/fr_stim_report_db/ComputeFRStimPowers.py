@@ -20,22 +20,18 @@ class ComputeFRStimPowers(ReportRamTask):
 
     def initialize(self):
         if self.dependency_inventory:
-
             self.dependency_inventory.add_dependent_resource(resource_name='fr3_events',
                                         access_path = ['experiments','fr3','events'])
-
             self.dependency_inventory.add_dependent_resource(resource_name='catfr3_events',
                                         access_path = ['experiments','catfr3','events'])
-
-
             self.dependency_inventory.add_dependent_resource(resource_name='fr4_events',
                                         access_path = ['experiments','fr4','events'])
-
             self.dependency_inventory.add_dependent_resource(resource_name='catfr4_events',
                                         access_path = ['experiments','catfr4','events'])
-
             self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
                                         access_path = ['electrodes','bipolar'])
+            self.dependency_inventory.add_dependent_resource(resource_name='bipolar_json',
+                                        access_path = ['electrodes','bipolar_json'])
 
     def restore(self):
         subject = self.pipeline.subject
