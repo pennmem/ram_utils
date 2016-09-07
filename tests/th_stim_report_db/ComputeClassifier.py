@@ -106,15 +106,13 @@ class ComputeClassifier(ReportRamTask):
         self.pvalue = None
 
     def initialize(self):
-
         if self.dependency_inventory:
-
             self.dependency_inventory.add_dependent_resource(resource_name='th1_events',
                                         access_path = ['experiments','th1','events'])
-
             self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
                                         access_path = ['electrodes','bipolar'])
-
+            self.dependency_inventory.add_dependent_resource(resource_name='bipolar_json',
+                                        access_path = ['electrodes','bipolar_json'])
 
     def run_loso_xval(self, event_sessions, recalls, permuted=False):
         probs = np.empty_like(recalls, dtype=np.float)
