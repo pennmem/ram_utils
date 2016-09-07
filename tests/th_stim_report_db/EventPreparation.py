@@ -19,6 +19,14 @@ class EventPreparation(ReportRamTask):
         e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=False)
         events = e_reader.read()
 
+        # removing stim fileds that shouldn't be in non-stim experiments
+        evs_field_list = ['mstime','type','item','trial','block','chestNum','locationX','locationY','chosenLocationX',
+                          'chosenLocationY','navStartLocationX','navStartLocationY','recStartLocationX','recStartLocationY',
+                          'isRecFromNearSide','isRecFromStartSide','reactionTime','confidence','session','radius_size',
+                          'listLength','distErr','recalled','eegoffset','eegfile'
+                          ]
+        events = events[evs_field_list]
+
         # change the item field name to item_name to not cause issues with item()
         events.dtype.names = ['item_name' if i=='item' else i for i in events.dtype.names]
         ev_order = np.argsort(events, order=('session','trial','mstime'))

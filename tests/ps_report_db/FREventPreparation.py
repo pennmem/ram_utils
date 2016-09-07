@@ -62,6 +62,14 @@ class FREventPreparation(ReportRamTask):
                                               self.pipeline.subject + '_events.mat')
                     e_reader = BaseEventReader(filename=fr1_e_path, eliminate_events_with_no_eeg=True)
                     events = e_reader.read()
+
+                    # removing stim fileds that shouldn't be in non-stim experiments
+                    evs_field_list = ['session','list','serialpos','type','item','itemno',
+                                      'recalled','mstime','msoffset','rectime','intrusion',
+                                      'eegoffset','eegfile'
+                                     ]
+                    events = events[evs_field_list]
+
                     ev_order = np.argsort(events, order=('session', 'list', 'mstime'))
                     events = events[ev_order]
                 except IOError:
@@ -73,6 +81,14 @@ class FREventPreparation(ReportRamTask):
                                                  self.pipeline.subject + '_events.mat')
                     e_reader = BaseEventReader(filename=catfr1_e_path, eliminate_events_with_no_eeg=True)
                     catfr1_events = e_reader.read()
+
+                    # removing stim fileds that shouldn't be in non-stim experiments
+                    evs_field_list = ['session','list','serialpos','type','item','itemno',
+                                      'recalled','mstime','msoffset','rectime','intrusion',
+                                      'eegoffset','eegfile'
+                                     ]
+                    catfr1_events = catfr1_events[evs_field_list]
+
                     ev_order = np.argsort(catfr1_events, order=('session', 'list', 'mstime'))
                     catfr1_events = catfr1_events[ev_order]
                     if events is None:

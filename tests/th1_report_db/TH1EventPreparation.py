@@ -20,12 +20,20 @@ class TH1EventPreparation(RamTask):
         e_path = os.path.join(self.pipeline.mount_point , 'data', 'events', task, self.pipeline.subject + '_events.mat')
         e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
         events = e_reader.read()
-        
+
+        # removing stim fileds that shouldn't be in non-stim experiments
+        evs_field_list = ['mstime','type','item','trial','block','chestNum','locationX','locationY','chosenLocationX',
+                          'chosenLocationY','navStartLocationX','navStartLocationY','recStartLocationX','recStartLocationY',
+                          'isRecFromNearSide','isRecFromStartSide','reactionTime','confidence','session','radius_size',
+                          'listLength','distErr','recalled','eegoffset','eegfile'
+                          ]
+        events = events[evs_field_list]
+
         # change the item field name to item_name to not cause issues with item()
         events.dtype.names = ['item_name' if i=='item' else i for i in events.dtype.names]
         ev_order = np.argsort(events, order=('session','trial','mstime'))
         events = events[ev_order]
-        
+
         # add in error if object locations are transposed
         xCenter = 384.8549
         yCenter = 358.834
@@ -40,7 +48,7 @@ class TH1EventPreparation(RamTask):
         recalled_ifFlipped = np.zeros(np.shape(distErr_transpose),dtype=bool)
         recalled_ifFlipped[events.isRecFromStartSide==0] = events.distErr_transpose[events.isRecFromStartSide==0]<=13
         events = append_fields(events,'recalled_ifFlipped',recalled_ifFlipped,dtypes=float,usemask=False,asrecarray=True)        
-        
+
         # add field for error percentile (performance factor)
         error_percentiles = self.calc_norm_dist_error(events.locationX,events.locationY,events.distErr)        
         events = append_fields(events,'norm_err',error_percentiles,dtypes=float,usemask=False,asrecarray=True)        
@@ -62,11 +70,11 @@ class TH1EventPreparation(RamTask):
         # score_events = self.loadmat(score_path)
         score_events = spio.loadmat(score_path,squeeze_me=True,struct_as_record=True)
         self.pass_object(task+'_score_events', score_events)
-        
+
         timing_path = os.path.join(self.pipeline.mount_point , 'data', 'events', task, self.pipeline.subject + '_timing.mat')
         timing_events = self.loadmat(timing_path)
         self.pass_object(task+'_time_events', timing_events)
-        
+
         # timing_info = dict()
         # if isinstance(timing_events['events'], spio.matlab.mio5_params.mat_struct):
         #     # timing_info = np.recarray((1,),dtype=[('session', int), ('trial_times', float)])

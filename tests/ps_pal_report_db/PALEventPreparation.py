@@ -22,6 +22,14 @@ class PALEventPreparation(ReportRamTask):
 
         events = e_reader.read()
 
+        # removing stim fileds that shouldn't be in non-stim experiments
+        evs_field_list = ['session','list','serialpos','type','probepos','study_1',
+                          'study_2','cue_direction','probe_word','expecting_word',
+                          'resp_word','correct','intrusion','pass','vocalization',
+                          'RT','mstime','msoffset','eegoffset','eegfile'
+                          ]
+        events = events[evs_field_list]
+
         self.pass_object(self.pipeline.task+'_all_events', events)
 
         intr_events = events[(events.intrusion!=-999) & (events.correct==0) & (events.vocalization!=1)]
