@@ -103,7 +103,7 @@ class DependencyChangeTrackerLegacy(DependencyChangeTrackerBase):
 
                     # raise KeyError('Could not locate node = ' + node_name)
 
-            full_resource_path = join(self.mount_point, 'data', resource_node['path'])
+            full_resource_path = join(self.mount_point, resource_node['path'])
             print 'full_resource_path=', full_resource_path
             md5 = compute_md5_key(full_resource_path)
 
