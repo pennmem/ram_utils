@@ -44,7 +44,7 @@ class FR1EventPreparation(ReportRamTask):
                                   'recalled','mstime','msoffset','rectime','intrusion',
                                   'eegoffset','eegfile'
                                   ]
-                catfr1_events = catfr1_events[evs_field_list]
+                catfr1_events = catfr1_events[evs_field_list].copy()
 
                 ev_order = np.argsort(catfr1_events, order=('session','list','mstime'))
                 catfr1_events = catfr1_events[ev_order]
