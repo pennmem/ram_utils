@@ -71,6 +71,12 @@ class Params(object):
         self.C = 7.2e-4
 
         self.n_perm = 200
+        self.doStratKFold = False
+        self.n_folds = 8
+
+        self.doConf_classification = True
+        self.doDist_classification = False
+        self.doClass_wTranspose    = False
 
 
 params = Params()
