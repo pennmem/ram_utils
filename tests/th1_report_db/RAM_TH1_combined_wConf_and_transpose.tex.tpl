@@ -1,15 +1,15 @@
 \documentclass[a4paper]{article} 
 \usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
 \usepackage{graphicx,multirow} 
-\usepackage{epstopdf} 
-\usepackage{wrapfig} 
+%\usepackage{epstopdf}
+%\usepackage{wrapfig} 
 \usepackage{longtable} 
 \usepackage{pdfpages}
 \usepackage{mathtools}
 \usepackage{array}
 \usepackage{enumitem}
 \usepackage{booktabs}
-\usepackage{sidecap} \usepackage{soul}
+%\usepackage{sidecap} \usepackage{soul}
 \usepackage[small,bf,it]{caption}
 \setlength\belowcaptionskip{2pt}
 
