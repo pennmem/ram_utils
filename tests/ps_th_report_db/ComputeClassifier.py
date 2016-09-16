@@ -182,6 +182,7 @@ class ComputeClassifier(ReportRamTask):
             xval_output = ModelOutput(recalls, probs)
             xval_output.compute_roc()
             xval_output.compute_tercile_stats()
+            xval_output.compute_normal_approx()
             self.xval_output[sess] = self.xval_output[-1] = xval_output
 
         return probs
