@@ -1,9 +1,13 @@
+import os.path
+
 import numpy as np
 import pandas as pd
 
 from sklearn.externals import joblib
 
 from ReportUtils import ReportRamTask
+
+from parse_biomarker_output import parse_biomarker_output
 
 
 class StimParams(object):
@@ -24,6 +28,7 @@ class ComputeFRStimTable(ReportRamTask):
         super(ComputeFRStimTable,self).__init__(mark_as_completed)
         self.params = params
         self.stim_params_to_sess = None
+        self.sess_to_thresh = None
         self.fr_stim_table = None
 
     def initialize(self):
@@ -62,6 +67,9 @@ class ComputeFRStimTable(ReportRamTask):
 
         lr_classifier = self.get_passed_object('lr_classifier')
 
+        xval_output = self.get_passed_object('xval_output')
+        class_thresh = xval_output[-1].jstat_thresh
+
         fr_stim_pow_mat = self.get_passed_object('fr_stim_pow_mat')
         fr_stim_prob = lr_classifier.predict_proba(fr_stim_pow_mat)[:,1]
 
@@ -86,12 +94,21 @@ class ComputeFRStimTable(ReportRamTask):
         self.fr_stim_table['is_stim_item'] = is_stim_item
         self.fr_stim_table['is_post_stim_item'] = is_post_stim_item
         self.fr_stim_table['recalled'] = events.recalled
-        self.fr_stim_table['prob'] = fr_stim_prob
+        self.fr_stim_table['thresh'] = class_thresh
 
         self.stim_params_to_sess = dict()
+        self.sess_to_thresh = dict()
 
         sessions = np.unique(events.session)
         for sess in sessions:
+            if self.pipeline.task=='RAM_FR3' and self.pipeline.subject!='R1124J_1':
+                sess_mask = (events.session==sess)
+                fr_stim_sess_prob = fr_stim_prob[sess_mask]
+                sess_prob, thresh = parse_biomarker_output(os.path.join(self.pipeline.mount_point, 'data/eeg', self.pipeline.subject, 'raw/FR3_%d'%sess, 'commandOutput.txt'))
+                n_probs = sess_prob.shape[0]
+                fr_stim_sess_prob[36:36+n_probs] = sess_prob  # plug biomarker output after 3rd list
+                self.fr_stim_table['thresh'][sess_mask] = thresh
+
             sess_stim_events = all_events[(all_events.session==sess) & (all_events.type=='STIM')]
             sess_stim_event = sess_stim_events[-1]
 
@@ -113,6 +130,8 @@ class ComputeFRStimTable(ReportRamTask):
                 self.stim_params_to_sess[sess_stim_params].append(sess)
             else:
                 self.stim_params_to_sess[sess_stim_params] = [sess]
+
+        self.fr_stim_table['prob'] = fr_stim_prob
 
         stim_anode_tag = np.empty(n_events, dtype='|S16')
         stim_cathode_tag = np.empty(n_events, dtype='|S16')

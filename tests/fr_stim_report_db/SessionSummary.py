@@ -59,3 +59,21 @@ class SessionSummary(object):
         self.control_sem_prob_diff_all = None
         self.control_mean_prob_diff_low = None
         self.control_sem_prob_diff_low = None
+
+        self.n_correct_stim_items = None
+        self.n_total_stim_items = None
+        self.pc_stim_items = None
+
+        self.n_correct_post_stim_items = None
+        self.n_total_post_stim_items = None
+        self.pc_post_stim_items = None
+
+        self.n_correct_nonstim_low_bio_items = None
+        self.n_total_nonstim_low_bio_items = None
+        self.pc_nonstim_low_bio_items = None
+
+        self.chisqr_stim_item = None
+        self.pvalue_stim_item = None
+
+        self.chisqr_post_stim_item = None
+        self.pvalue_post_stim_item = None

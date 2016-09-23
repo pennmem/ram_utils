@@ -37,7 +37,8 @@ $<N_MATH>$ math problems & $<N_CORRECT_MATH>$ correct ($<PC_CORRECT_MATH>$\%) & 
 \multicolumn{4}{c}{\textbf{Stim vs Non-Stim Recalls}} \\ 
 \hline
 $<N_CORRECT_STIM>/<N_TOTAL_STIM>$ ($<PC_FROM_STIM>$\%) from stim lists & $<N_CORRECT_NONSTIM>/<N_TOTAL_NONSTIM>$ ($<PC_FROM_NONSTIM>$\%) from non-stim lists & $\chi^2(1)=<CHISQR>$ & $p=<PVALUE>$ \\
-\hline 
+\hline
+ <ITEMLEVEL_COMPARISON>
 \end{tabular}
 \end{table}
 
@@ -47,7 +48,7 @@ $<N_CORRECT_STIM>/<N_TOTAL_STIM>$ ($<PC_FROM_STIM>$\%) from stim lists & $<N_COR
 \multicolumn{2}{c}{\textbf{Stim vs Non-Stim Intrusions}} \\ 
 \hline
 $<N_STIM_INTR>/<N_TOTAL_STIM>$ ($<PC_FROM_STIM_INTR>$\%) from stim lists & $<N_NONSTIM_INTR>/<N_TOTAL_NONSTIM>$ ($<PC_FROM_NONSTIM_INTR>$\%) from non-stim lists \\
-\hline 
+\hline
 \end{tabular}
 \end{table}
 \clearpage
