@@ -32,10 +32,6 @@ class GenerateTex(ReportRamTask):
 
         # session_summary_array = self.get_passed_object('session_summary_array')
         # session_ttest_data = self.get_passed_object('session_ttest_data')
-
-        ttable_format = self.get_passed_object('ttable_format')
-        ttable_header = self.get_passed_object('ttable_header')
-
         # report_tex_file_names = []
         # for i_sess in xrange(n_sess):
         #     session_summary = session_summary_array[i_sess]
@@ -106,8 +102,6 @@ class GenerateTex(ReportRamTask):
                         '<N_CORRECT_MATH>': cumulative_summary.n_correct_math,
                         '<PC_CORRECT_MATH>': '%.2f' % cumulative_summary.pc_correct_math,
                         '<MATH_PER_LIST>': '%.2f' % cumulative_summary.math_per_list,
-                        '<TABLE_FORMAT>': ttable_format,
-                        '<TABLE_HEADER>': ttable_header,
                         '<SIGNIFICANT_ELECTRODES>': cumulative_ttest_tex_table,
                         '<AUC>': cumulative_summary.auc,
                         '<PERM-P-VALUE>': cumulative_summary.perm_test_pvalue,

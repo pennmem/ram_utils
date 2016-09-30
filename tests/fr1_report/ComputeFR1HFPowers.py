@@ -5,6 +5,7 @@ from RamPipeline import *
 import numpy as np
 from scipy.stats.mstats import zscore
 from morlet import MorletWaveletTransform
+#from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from sklearn.externals import joblib
 
 from ptsa.data.readers import EEGReader
@@ -23,12 +24,12 @@ class ComputeFR1HFPowers(ReportRamTask):
     def initialize(self):
         task_prefix = 'cat' if self.pipeline.task == 'RAM_CatFR1' else ''
         if self.dependency_inventory:
-
             self.dependency_inventory.add_dependent_resource(resource_name=task_prefix+'fr1_events',
                                         access_path = ['experiments',task_prefix+'fr1','events'])
-
             self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
                                         access_path = ['electrodes','bipolar'])
+            self.dependency_inventory.add_dependent_resource(resource_name='bipolar_json',
+                                        access_path = ['electrodes','bipolar_json'])
 
 
     def restore(self):
@@ -83,6 +84,8 @@ class ComputeFR1HFPowers(ReportRamTask):
                 ev_order = np.argsort(events, order=('session','list','mstime'))
                 events = events[ev_order]
                 self.pass_object(self.pipeline.task+'_events', events)
+
+            eegs['events'] = np.arange(eegs.events.shape[0])
 
             #eegs = eegs.add_mirror_buffer(duration=self.params.hfs_buf)
 

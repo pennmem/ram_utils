@@ -3,6 +3,8 @@ __author__ = 'm'
 from RamPipeline import *
 
 import numpy as np
+
+#from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from morlet import MorletWaveletTransform
 from sklearn.externals import joblib
 
@@ -24,6 +26,8 @@ class ComputeFR1Powers(ReportRamTask):
                                         access_path = ['experiments',task_prefix+'fr1','events'])
             self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
                                         access_path = ['electrodes','bipolar'])
+            self.dependency_inventory.add_dependent_resource(resource_name='bipolar_json',
+                                        access_path = ['electrodes','bipolar_json'])
 
     def restore(self):
         subject = self.pipeline.subject
@@ -74,6 +78,8 @@ class ComputeFR1Powers(ReportRamTask):
                                    end_time=self.params.fr1_end_time, buffer_time=0.0)
 
             eegs = eeg_reader.read()
+
+
             if eeg_reader.removed_bad_data():
                 print 'REMOVED SOME BAD EVENTS !!!'
                 sess_events = eegs['events'].values.view(np.recarray)
@@ -83,6 +89,8 @@ class ComputeFR1Powers(ReportRamTask):
                 events = events[ev_order]
                 self.pass_object(self.pipeline.task+'_events', events)
 
+
+            eegs['events'] = np.arange(eegs.events.shape[0])
 
             eegs = eegs.add_mirror_buffer(duration=self.params.fr1_buf)
 
