@@ -53,6 +53,7 @@ class MontagePreparation(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
         super(MontagePreparation,self).__init__(mark_as_completed)
         self.params = params
+        self.bp_map = None
 
     def restore(self):
         subject = self.pipeline.subject
@@ -169,36 +170,41 @@ class MontagePreparation(ReportRamTask):
 
                 bad_bps = np.zeros(len(bipolar_pairs), dtype=np.bool)
                 if self.params.windex_cleanup:
-                    windex_files = glob(os.path.join(self.pipeline.mount_point,'home1/shennan.weiss/windex_out/%s-*_out.mat'%subject))
+                    windex_files = glob(os.path.join(self.pipeline.mount_point,'home1/shennan.weiss/stas_0922/%s-*_out_r.mat'%subject))
                     for wfile in windex_files:
-                        windex_out = loadmat(wfile, squeeze_me=True)['output_data'].item()
+                        windex_out = loadmat(wfile, squeeze_me=True, variable_names=['hf_exclude','lf_exclude'])
                         # lf_exclude
-                        if windex_out[3] is not 0:
-                            if isinstance(windex_out[3], (int,long)):
-                                bad_bps[windex_out[3]-1] = True
-                            else:
-                                lf_exclude = windex_out[3].astype(int) - 1
-                                bad_bps[lf_exclude] = True
+                        # if windex_out[3] is not 0:
+                        #     if isinstance(windex_out[3], (int,long)):
+                        #         bad_bps[windex_out[3]-1] = True
+                        #     else:
+                        #         lf_exclude = windex_out[3].astype(int) - 1
+                        #         bad_bps[lf_exclude] = True
 
                         # hf_exclude
-                        if windex_out[7] is not 0:
-                            if isinstance(windex_out[7], (int,long)):
-                                bad_bps[windex_out[7]-1] = True
+                        hf_exclude = windex_out['hf_exclude']
+                        if hf_exclude is not 0:
+                            if isinstance(hf_exclude, (int,long)):
+                                bad_bps[hf_exclude-1] = True
                             else:
-                                hf_exclude = windex_out[7].astype(int) - 1
+                                hf_exclude = hf_exclude.astype(int) - 1
                                 bad_bps[hf_exclude] = True
                     print np.sum(bad_bps), 'bipolar pairs excluded:'
                     print bipolar_pairs[bad_bps]
                     good_electrodes = ~bad_bps
+                    self.bp_map = np.arange(len(bipolar_pairs))[good_electrodes]
                     bp_tal_structs = bp_tal_structs[good_electrodes]
                     bipolar_pairs = bipolar_pairs[good_electrodes]
 
                 self.pass_object('monopolar_channels', monopolar_channels)
                 self.pass_object('bipolar_pairs', bipolar_pairs)
                 self.pass_object('bp_tal_structs', bp_tal_structs)
+                self.pass_object('bp_map', self.bp_map)
 
                 joblib.dump(monopolar_channels, self.get_path_to_resource_in_workspace(subject + '-monopolar_channels.pkl'))
                 joblib.dump(bipolar_pairs, self.get_path_to_resource_in_workspace(subject + '-bipolar_pairs.pkl'))
                 bp_tal_structs.to_pickle(self.get_path_to_resource_in_workspace(subject + '-bp_tal_structs.pkl'))
+
+                bp_tal_structs.to_csv(self.get_path_to_resource_in_workspace(subject + '-bp_tal_structs.csv'), sep='\t')
             except:
                 raise

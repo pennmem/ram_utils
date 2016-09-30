@@ -24,13 +24,14 @@ class ComputeFR1Powers(ReportRamTask):
         self.wavelet_transform = MorletWaveletTransform()
 
     def initialize(self):
-        if self.dependency_inventory:
-            self.dependency_inventory.add_dependent_resource(resource_name='fr1_events',
-                                        access_path = ['experiments','fr1','events'])
-            self.dependency_inventory.add_dependent_resource(resource_name='catfr1_events',
-                                        access_path = ['experiments','catfr1','events'])
-            self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
-                                        access_path = ['electrodes','bipolar'])
+        pass
+        # if self.dependency_inventory:
+        #     self.dependency_inventory.add_dependent_resource(resource_name='fr1_events',
+        #                                 access_path = ['experiments','fr1','events'])
+        #     self.dependency_inventory.add_dependent_resource(resource_name='catfr1_events',
+        #                                 access_path = ['experiments','catfr1','events'])
+        #     self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
+        #                                 access_path = ['electrodes','bipolar'])
 
     def restore(self):
         subject = self.pipeline.subject
@@ -59,8 +60,9 @@ class ComputeFR1Powers(ReportRamTask):
         # tal_info = self.get_passed_object('tal_info')
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
+        bp_map = self.get_passed_object('bp_map')
 
-        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
+        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs, bp_map)
 
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
@@ -68,7 +70,7 @@ class ComputeFR1Powers(ReportRamTask):
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-' + task + '-pow_mat.pkl'))
         joblib.dump(self.samplerate, self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
 
-    def compute_powers(self, events, sessions,monopolar_channels , bipolar_pairs ):
+    def compute_powers(self, events, sessions,monopolar_channels , bipolar_pairs, bp_map):
         n_freqs = len(self.params.freqs)
         n_bps = len(bipolar_pairs)
 
@@ -86,13 +88,19 @@ class ComputeFR1Powers(ReportRamTask):
             ied_count = None
             ied_start = None
             ied_finish = None
+            hfo_count = None
+            hfo_start = None
+            hfo_finish = None
             if self.params.windex_ied_cleanup:
-                wfile = os.path.join(self.pipeline.mount_point,'home1/shennan.weiss/windex_out/%s-sess%d_out.mat'%(self.pipeline.subject,sess))
+                wfile = os.path.join(self.pipeline.mount_point,'home1/shennan.weiss/stas_0922/%s-sess%d_out_r.mat'%(self.pipeline.subject,sess))
                 if os.path.isfile(wfile):
-                    windex_out = loadmat(wfile, squeeze_me=True)['output_data'].item()
-                    ied_count = windex_out[9]
-                    ied_start = windex_out[11]
-                    ied_finish = windex_out[12]
+                    windex_out = loadmat(wfile, squeeze_me=True, variable_names=['IED','IED_start','IED_finish','total_hfo','hfo_start','hfo_finish'])
+                    ied_count = windex_out['IED']
+                    ied_start = windex_out['IED_start']
+                    ied_finish = windex_out['IED_finish']
+                    hfo_count = windex_out['total_hfo']
+                    hfo_start = windex_out['hfo_start']
+                    hfo_finish = windex_out['hfo_finish']
 
             # eegs = Events(sess_events).get_data(channels=channels, start_time=self.params.fr1_start_time, end_time=self.params.fr1_end_time,
             #                             buffer_time=self.params.fr1_buf, eoffset='eegoffset', keep_buffer=True, eoffset_in_time=False)
@@ -174,15 +182,47 @@ class ComputeFR1Powers(ReportRamTask):
                     if self.params.log_powers:
                         np.log10(pow_ev_stripped, out=pow_ev_stripped)
 
-                    # if windex_out is not None:
-                    #     sess_pow_mask = np.ones(pow_ev_stripped.shape[1], dtype=np.bool)
-                    #     if len(ied_count[ev,i]) > 0:
-                    #         for j in xrange(ied_count[ev,i]):
-                    #             t1 = ied_start[ev,i][j]
-                    #             t2 = ied_finish[ev,i][j]
-                    #             # some manips with t1, t2 and self.samplerate to convert to array indices
-                    # else:
-                    sess_pow_mat[ev,i,:] = np.nanmean(pow_ev_stripped, axis=1)
+                    if windex_out is not None:
+                        sess_pow_mask = np.ones(pow_ev_stripped.shape[1], dtype=np.bool)
+                        bp_idx = bp_map[i]
+
+                        if ied_count[ev,bp_idx] > 0:
+                            start_points = ied_start[ev,bp_idx]-1
+                            end_points = ied_finish[ev,bp_idx]-1
+                            if isinstance(start_points, (int,long,float)):
+                                print 'IED: Excluding t =', start_points, 'to', end_points, 'for (%d,%d)'%(ev,bp_idx)
+                                sess_pow_mask[int(start_points):int(end_points)] = False
+                            else:
+                                for j in xrange(len(start_points)):
+                                    t1 = start_points[j]
+                                    t2 = end_points[j]
+                                    print 'IED: Excluding t =', t1, 'to', t2, 'for (%d,%d)'%(ev,bp_idx)
+                                    sess_pow_mask[t1:t2] = False
+
+                        if hfo_count[ev,bp_idx] > 0:
+                            start_points = hfo_start[ev,bp_idx]-1
+                            end_points = hfo_finish[ev,bp_idx]-1
+                            if isinstance(start_points, (int,long)):
+                                print 'HFO: Excluding t =', start_points, 'to', end_points, 'for (%d,%d)'%(ev,bp_idx)
+                                sess_pow_mask[start_points:end_points] = False
+                            else:
+                                for j in xrange(len(start_points)):
+                                    t1 = start_points[j]
+                                    t2 = end_points[j]
+                                    print 'HFO: Excluding t =', t1, 'to', t2, 'for (%d,%d)'%(ev,bp_idx)
+                                    sess_pow_mask[t1:t2] = False
+
+                        if not np.any(sess_pow_mask):
+                            sess_pow_mask[:] = True
+                        for f_idx in xrange(n_freqs):
+                            pow_ev_stripped_f = pow_ev_stripped[f_idx]
+                            if f_idx>=5:
+                                sess_pow_mat[ev,i,f_idx] = np.nanmean(pow_ev_stripped_f[sess_pow_mask])
+                            else:
+                                sess_pow_mat[ev,i,f_idx] = np.nanmean(pow_ev_stripped_f)
+
+                    else:
+                        sess_pow_mat[ev,i,:] = np.nanmean(pow_ev_stripped, axis=1)
 
             self.pow_mat = np.concatenate((self.pow_mat,sess_pow_mat), axis=0) if self.pow_mat is not None else sess_pow_mat
 

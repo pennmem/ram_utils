@@ -8,6 +8,10 @@ from random import shuffle
 from sklearn.externals import joblib
 import warnings
 from ReportUtils import ReportRamTask
+
+from scipy.io import savemat
+
+
 def normalize_sessions(pow_mat, events):
     sessions = np.unique(events.session)
     for sess in sessions:
@@ -131,6 +135,8 @@ class ComputeClassifier(ReportRamTask):
         event_sessions = events.session
         recalls = np.array(events.recalled, dtype=np.bool)
 
+
+
         print 'Performing leave-one-session-out xval'
 
         self.outsample_probs = np.empty(n_events, dtype=float)
@@ -161,6 +167,12 @@ class ComputeClassifier(ReportRamTask):
 
         joblib.dump(self.outsample_probs, self.get_path_to_resource_in_workspace('outsample_probs.pkl'))
         joblib.dump(self.AUC, self.get_path_to_resource_in_workspace('AUC.pkl'))
+
+        # computing and saving classifier weights in .mat format
+        self.lr_classifier.fit(self.pow_mat, recalls)
+        betas = np.array(self.lr_classifier.coef_[0])
+        betas = np.reshape(betas, newshape=(betas.shape[0]/8, 8))
+        savemat(self.get_path_to_resource_in_workspace(self.pipeline.subject+'-classifier_weights.mat'), {'classifier_weights':betas})
 
 
     def restore(self):

@@ -7,7 +7,7 @@ import numpy as np
 from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','/scratch/busygin/fr1_catfr1_joint_base')
+cml_parser.arg('--workspace-dir','/scratch/busygin/fr1_catfr1_joint_windex')
 cml_parser.arg('--mount-point','')
 
 args = cml_parser.parse()
@@ -49,21 +49,27 @@ class Params(object):
 
         self.n_perm = 200
 
-        self.windex_cleanup = False
+        self.windex_cleanup = True
         self.windex_ied_cleanup = False
 
 
 params = Params()
 
 
-def find_subjects_by_task(task):
-    ev_files = glob(args.mount_point + ('/data/events/%s/R*_events.mat' % task))
-    return [re.search(r'R\d\d\d\d[A-Z](_\d+)?', f).group() for f in ev_files]
+# def find_subjects_by_task(task):
+#     ev_files = glob(args.mount_point + ('/data/events/%s/R*_events.mat' % task))
+#     return [re.search(r'R\d\d\d\d[A-Z](_\d+)?', f).group() for f in ev_files]
+#
+#
+# subjects = np.unique(find_subjects_by_task('RAM_FR1') + find_subjects_by_task('RAM_CatFR1'))
+# subjects = subjects[:-2]
+# subjects = subjects[(subjects!='R1061T') & (subjects!='R1070T') & (subjects!='R1092J_2') & (subjects!='R1093J_1') & (subjects!='R1108J') & (subjects!='R1135E_1')]
 
-
-subjects = np.unique(find_subjects_by_task('RAM_FR1') + find_subjects_by_task('RAM_CatFR1'))
-subjects = subjects[:-2]
-subjects = subjects[(subjects!='R1061T') & (subjects!='R1070T') & (subjects!='R1092J_2') & (subjects!='R1093J_1') & (subjects!='R1108J') & (subjects!='R1135E_1')]
+#from glob import glob
+#
+#windex_out_files = glob('/home1/shennan.weiss/stas_0922/*.mat')
+#subjects = [f.split('-')[0].split('/')[-1] for f in windex_out_files]
+#subjects = np.unique(subjects)
 
 subjects = ['R1201P_1']
 
