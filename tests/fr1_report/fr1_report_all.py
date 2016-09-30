@@ -12,7 +12,7 @@ cml_parser = CMLParser(arg_count_threshold=1)
 # cml_parser.arg('--recompute-on-no-status')
 # # cml_parser.arg('--exit-on-no-change')
 
-cml_parser.arg('--task','RAM_FR1')
+cml_parser.arg('--task','FR1')
 cml_parser.arg('--workspace-dir','/scratch/RAM_maint/automated_reports/FR1_reports')
 # cml_parser.arg('--mount-point','/Users/m')
 cml_parser.arg('--recompute-on-no-status')
@@ -29,8 +29,6 @@ from ReportUtils import ReportPipelineBase
 
 
 from FR1EventPreparation import FR1EventPreparation
-
-from MathEventPreparation import MathEventPreparation
 
 from ComputeFR1Powers import ComputeFR1Powers
 
@@ -121,8 +119,6 @@ for subject in subjects:
                                      )
 
     report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
-
-    report_pipeline.add_task(MathEventPreparation(mark_as_completed=False))
 
     report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
 

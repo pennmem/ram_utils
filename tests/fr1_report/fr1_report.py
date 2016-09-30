@@ -27,8 +27,6 @@ args = cml_parser.parse()
 
 from FR1EventPreparation import FR1EventPreparation
 
-from MathEventPreparation import MathEventPreparation
-
 from ComputeFR1Powers import ComputeFR1Powers
 
 from MontagePreparation import MontagePreparation
