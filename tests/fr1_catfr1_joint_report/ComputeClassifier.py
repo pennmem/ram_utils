@@ -79,6 +79,8 @@ class ComputeClassifier(ReportRamTask):
                                         access_path = ['experiments','catfr1','events'])
             self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
                                         access_path = ['electrodes','bipolar'])
+            self.dependency_inventory.add_dependent_resource(resource_name='bipolar_json',
+                                        access_path = ['electrodes','bipolar_json'])
 
     def run_loso_xval(self, event_sessions, recalls, permuted=False):
         probs = np.empty_like(recalls, dtype=np.float)
@@ -175,7 +177,7 @@ class ComputeClassifier(ReportRamTask):
         subject = self.pipeline.subject
         task = self.pipeline.task
 
-        events = self.get_passed_object(task + '_events')
+        events = self.get_passed_object('events')
         self.pow_mat = normalize_sessions(self.get_passed_object('pow_mat'), events)
 
         #n1 = np.sum(events.recalled)

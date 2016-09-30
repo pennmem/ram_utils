@@ -2,54 +2,16 @@ from RamPipeline import *
 from SessionSummary import SessionSummary
 
 import numpy as np
-import pandas as pd
 import time
 from operator import itemgetter
 
 from ReportUtils import ReportRamTask
-def make_atlas_loc(tag, atlas_loc, comments):
-
-    def colon_connect(s1, s2):
-        if isinstance(s1, pd.Series):
-            s1 = s1.values[0]
-        if isinstance(s2, pd.Series):
-            s2 = s2.values[0]
-        return s1 if (s2 is None or s2=='' or s2 is np.nan) else s2 if (s1 is None or s1=='' or s1 is np.nan) else s1 + ': ' + s2
-
-    e1, e2 = tag.split('-')
-    if (e1 in atlas_loc.index) and (e2 in atlas_loc.index):
-        return colon_connect(atlas_loc.ix[e1], comments.ix[e1] if comments is not None else None), colon_connect(atlas_loc.ix[e2], comments.ix[e2] if comments is not None else None)
-    elif tag in atlas_loc.index:
-        return colon_connect(atlas_loc.ix[tag], comments.ix[tag] if comments is not None else None), colon_connect(atlas_loc.ix[tag], comments.ix[tag] if comments is not None else None)
-    else:
-        return '--', '--'
 
 
-def make_ttest_table(bp_tal_structs, loc_info, ttest_results):
-    ttest_data = None
-    has_depth = ('Das Volumetric Atlas Location' in loc_info)
-    has_surface_only = ('Freesurfer Desikan Killiany Surface Atlas Location' in loc_info)
-    if has_depth or has_surface_only:
-        atlas_loc = loc_info['Das Volumetric Atlas Location' if has_depth else 'Freesurfer Desikan Killiany Surface Atlas Location']
-        comments = loc_info['Comments'] if ('Comments' in loc_info) else None
-        n = len(bp_tal_structs)
-        ttest_data = [list(a) for a in zip(bp_tal_structs.eType, bp_tal_structs.eNames, bp_tal_structs.tagName, [None] * n, [None] * n, ttest_results[1], ttest_results[0])]
-        for i, tag in enumerate(bp_tal_structs.tagName):
-            ttest_data[i][3], ttest_data[i][4] = make_atlas_loc(tag, atlas_loc, comments)
-    else:
-        ttest_data = [list(a) for a in zip(bp_tal_structs.eType, bp_tal_structs.eNames, bp_tal_structs.tagName, ttest_results[1], ttest_results[0])]
-
+def make_ttest_table(bp_tal_structs, ttest_results):
+    contact_nos = bp_tal_structs.channel_1.str.lstrip('0') + '-' + bp_tal_structs.channel_2.str.lstrip('0')
+    ttest_data = [list(a) for a in zip(bp_tal_structs.etype.values, contact_nos.values, bp_tal_structs.index.values, bp_tal_structs.bp_atlas_loc, ttest_results[1], ttest_results[0])]
     return ttest_data
-
-def make_ttest_table_header(loc_info):
-    table_format = table_header = None
-    if ('Das Volumetric Atlas Location' in loc_info) or ('Freesurfer Desikan Killiany Surface Atlas Location' in loc_info):
-        table_format = 'C{.75cm} C{2cm} C{2.5cm} C{3cm} C{3cm} C{1.25cm} C{1.25cm}'
-        table_header = r'Type & Channel \# & Electrode Pair & Atlas Loc1 & Atlas Loc2 & \textit{p} & \textit{t}-stat'
-    else:
-        table_format = 'C{.75cm} C{2cm} C{2.5cm} C{1.25cm} C{1.25cm}'
-        table_header = r'Type & Channel \# & Electrode Pair & \textit{p} & \textit{t}-stat'
-    return table_format, table_header
 
 def format_ttest_table(table_data):
     for i,line in enumerate(table_data):
@@ -70,25 +32,21 @@ class ComposeSessionSummary(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
         super(ComposeSessionSummary,self).__init__(mark_as_completed)
         self.params = params
-
         if self.dependency_inventory:
-
             self.dependency_inventory.add_dependent_resource(resource_name='localization',
                                         access_path = ['electrodes','localization'])
-
 
     def run(self):
         subject = self.pipeline.subject
         task = self.pipeline.task
 
-        events = self.get_passed_object(task + '_events')
-        math_events = self.get_passed_object(task + '_math_events')
-        intr_events = self.get_passed_object(task + '_intr_events')
-        rec_events = self.get_passed_object(task + '_rec_events')
-        all_events = self.get_passed_object(task + '_all_events')
+        events = self.get_passed_object('events')
+        math_events = self.get_passed_object('math_events')
+        intr_events = self.get_passed_object('intr_events')
+        rec_events = self.get_passed_object('rec_events')
+        all_events = self.get_passed_object('all_events')
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bp_tal_structs = self.get_passed_object('bp_tal_structs')
-        loc_info = self.get_passed_object('loc_info')
 
         ttest = self.get_passed_object('ttest')
 
@@ -102,7 +60,6 @@ class ComposeSessionSummary(ReportRamTask):
 
         session_data = []
         session_summary_array = []
-        session_ttest_data = []
 
         positions = np.unique(events.serialpos)
         first_recall_counter = np.zeros(positions.size, dtype=int)
@@ -154,7 +111,7 @@ class ComposeSessionSummary(ReportRamTask):
                 list_rec_events = session_rec_events[(session_rec_events.list == lst) & (session_rec_events.intrusion == 0)]
                 if list_rec_events.size > 0:
                     list_events = session_events[session_events.list == lst]
-                    tmp = np.where(list_events.itemno == list_rec_events[0].itemno)[0]
+                    tmp = np.where(list_events.wordno == list_rec_events[0].wordno)[0]
                     if tmp.size > 0:
                         first_recall_idx = tmp[0]
                         prob_first_recall[first_recall_idx] += 1
@@ -188,22 +145,8 @@ class ComposeSessionSummary(ReportRamTask):
 
             session_summary_array.append(session_summary)
 
-            # ttest_data = [list(a) for a in zip(bp_tal_structs.eType,  bp_tal_structs.tagName, ttest[session][1], ttest[session][0])]
-            session_ttest = ttest[session]
-            if isinstance(session_ttest,tuple):
-                if ('Das Volumetric Atlas Location' in loc_info) or ('Freesurfer Desikan Killiany Surface Atlas Location' in loc_info):
-                    session_ttest_data.append([[None, None, None, None, np.nan, np.nan]])
-                else:
-                    session_ttest_data.append([[None, None, np.nan, np.nan]])
-            else:
-                ttest_data = make_ttest_table(bp_tal_structs, loc_info, session_ttest)
-                ttest_data.sort(key=itemgetter(-2))
-                ttest_data = format_ttest_table(ttest_data)
-                session_ttest_data.append(ttest_data)
-
         self.pass_object('SESSION_DATA', session_data)
         self.pass_object('session_summary_array', session_summary_array)
-        self.pass_object('session_ttest_data', session_ttest_data)
 
         cumulative_summary = SessionSummary()
         cumulative_summary.n_words = len(events)
@@ -246,12 +189,8 @@ class ComposeSessionSummary(ReportRamTask):
         self.pass_object('cumulative_summary', cumulative_summary)
 
         # cumulative_ttest_data = [list(a) for a in zip(bp_tal_structs.eType, bp_tal_structs.tagName, ttest[-1][1], ttest[-1][0])]
-        cumulative_ttest_data = make_ttest_table(bp_tal_structs, loc_info, ttest[-1])
+        cumulative_ttest_data = make_ttest_table(bp_tal_structs, ttest[-1])
         cumulative_ttest_data.sort(key=itemgetter(-2))
         cumulative_ttest_data = format_ttest_table(cumulative_ttest_data)
 
         self.pass_object('cumulative_ttest_data', cumulative_ttest_data)
-
-        ttable_format, ttable_header = make_ttest_table_header(loc_info)
-        self.pass_object('ttable_format', ttable_format)
-        self.pass_object('ttable_header', ttable_header)

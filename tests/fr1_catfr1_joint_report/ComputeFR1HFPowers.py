@@ -27,6 +27,8 @@ class ComputeFR1HFPowers(ReportRamTask):
                                         access_path = ['experiments','catfr1','events'])
             self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
                                         access_path = ['electrodes','bipolar'])
+            self.dependency_inventory.add_dependent_resource(resource_name='bipolar_json',
+                                        access_path = ['electrodes','bipolar_json'])
 
     def restore(self):
         subject = self.pipeline.subject
@@ -39,7 +41,7 @@ class ComputeFR1HFPowers(ReportRamTask):
         subject = self.pipeline.subject
         task = self.pipeline.task
 
-        events = self.get_passed_object(task+'_events')
+        events = self.get_passed_object('events')
 
         sessions = np.unique(events.session)
         print 'sessions:', sessions
