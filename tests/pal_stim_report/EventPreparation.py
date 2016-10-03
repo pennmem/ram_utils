@@ -1,7 +1,9 @@
 import os
 import os.path
+import numpy as np
 
 from ptsa.data.readers import BaseEventReader
+from ptsa.data.readers.IndexReader import JsonIndexReader
 
 from RamPipeline import *
 
@@ -12,23 +14,44 @@ class EventPreparation(ReportRamTask):
         super(EventPreparation, self).__init__(mark_as_completed)
 
     def run(self):
+        subject = self.pipeline.subject
         task = self.pipeline.task
 
-        e_path = os.path.join(self.pipeline.mount_point, 'data/events', task, self.pipeline.subject + '_events.mat')
-        e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=False)
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp)==1 else int(tmp[1])
 
-        events = e_reader.read()
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/protocols/r1.json'))
 
-        self.pass_object(self.pipeline.task+'_all_events', events)
+        event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment=task)))
 
-        intr_events = events[(events.intrusion!=-999) & (events.correct==0) & (events.vocalization!=1)]
+        events = None
+        for sess_file in event_files:
+            e_path = os.path.join(self.pipeline.mount_point, sess_file)
+            e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
+
+            sess_events = e_reader.read()
+
+            if events is None:
+                events = sess_events
+            else:
+                events = np.hstack((events,sess_events))
+
+        events = events.view(np.recarray)
+
+        self.pass_object(task+'_all_events', events)
+
+        math_events = events[events.type=='PROB']
 
         rec_events = events[(events.type == 'REC_EVENT') & (events.vocalization!=1)]
+
+        intr_events = rec_events[(rec_events.intrusion!=-999) & (rec_events.correct==0)]
 
         events = events[events.type == 'STUDY_PAIR']
 
         print len(events), task, 'STUDY_PAIR events'
 
+        self.pass_object(task+'_math_events', math_events)
         self.pass_object(task+'_events', events)
-        self.pass_object(self.pipeline.task+'_intr_events', intr_events)
-        self.pass_object(self.pipeline.task+'_rec_events', rec_events)
+        self.pass_object(task+'_intr_events', intr_events)
+        self.pass_object(task+'_rec_events', rec_events)

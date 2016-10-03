@@ -19,21 +19,6 @@ class StimParams(object):
         return hash(repr(self.stimAnodeTag)+repr(self.stimCathodeTag)+repr(self.pulse_frequency))
 
 
-def bipolar_label_to_loc_tag(bp, loc_tags):
-    if bp=='' or bp=='[]':
-        return 'Undetermined'
-    label = bp[0]+'-'+bp[1]
-    if label in loc_tags:
-        lt = loc_tags[label]
-        return lt if lt!='' and lt!='[]' else 'Undetermined'
-    label = bp[1]+'-'+bp[0]
-    if label in loc_tags:
-        lt = loc_tags[label]
-        return lt if lt!='' and lt!='[]' else 'Undetermined'
-    else:
-        return 'Undetermined'
-
-
 class ComputePALStimTable(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
         super(ComputePALStimTable,self).__init__(mark_as_completed)
@@ -43,15 +28,14 @@ class ComputePALStimTable(ReportRamTask):
 
     def initialize(self):
         if self.dependency_inventory:
-
             self.dependency_inventory.add_dependent_resource(resource_name='pal1_events',
                                         access_path = ['experiments','pal1','events'])
-
             self.dependency_inventory.add_dependent_resource(resource_name='pal3_events',
                                         access_path = ['experiments','pal3','events'])
-
             self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
                                         access_path = ['electrodes','bipolar'])
+            self.dependency_inventory.add_dependent_resource(resource_name='bipolar_json',
+                                        access_path = ['electrodes','bipolar_json'])
 
     def restore(self):
         subject = self.pipeline.subject
@@ -61,8 +45,7 @@ class ComputePALStimTable(ReportRamTask):
         self.pass_object('pal_stim_table', self.pal_stim_table)
 
     def run(self):
-        channel_to_label_map = self.get_passed_object('channel_to_label_map')
-        loc_tag = self.get_passed_object('loc_tag')
+        bp_tal_structs = self.get_passed_object('bp_tal_structs')
 
         all_events = self.get_passed_object(self.pipeline.task+'_all_events')
         events = self.get_passed_object(self.pipeline.task+'_events')
@@ -78,7 +61,7 @@ class ComputePALStimTable(ReportRamTask):
         j = 0
         for i,ev in enumerate(all_events):
             if ev.type=='STUDY_PAIR':
-                if all_events[i+1].type=='STIM':
+                if all_events[i+1].type=='STIM_ON':
                     is_stim_item[j] = True
                 j += 1
 
@@ -88,7 +71,7 @@ class ComputePALStimTable(ReportRamTask):
         self.pal_stim_table['session'] = events.session
         self.pal_stim_table['list'] = events.list
         self.pal_stim_table['serialpos'] = events.serialpos
-        self.pal_stim_table['is_stim_list'] = [(s==1) for s in events.stimList]
+        self.pal_stim_table['is_stim_list'] = [(s==1) for s in events.stim_list]
         self.pal_stim_table['is_stim_item'] = is_stim_item
         self.pal_stim_table['recalled'] = events.correct
         self.pal_stim_table['prob'] = pal_stim_prob
@@ -97,18 +80,20 @@ class ComputePALStimTable(ReportRamTask):
 
         sessions = np.unique(events.session)
         for sess in sessions:
-            sess_stim_events = all_events[(all_events.session==sess) & (all_events.type=='STIM')]
+            sess_stim_events = all_events[(all_events.session==sess) & (all_events.type=='STIM_ON')]
             sess_stim_event = sess_stim_events[-1]
 
-            stim_pair = (sess_stim_event.stimParams.elec1,sess_stim_event.stimParams.elec2)
-            stim_tag = channel_to_label_map[stim_pair if stim_pair in channel_to_label_map else (sess_stim_event.stimParams.elec1,sess_stim_event.stimParams.elec2)].upper()
+            ch1 = '%03d' % sess_stim_event.stim_params.anode_number
+            ch2 = '%03d' % sess_stim_event.stim_params.cathode_number
+
+            stim_tag = bp_tal_structs.index[((bp_tal_structs.channel_1==ch1) & (bp_tal_structs.channel_2==ch2)) | ((bp_tal_structs.channel_1==ch2) & (bp_tal_structs.channel_2==ch1))].values[0]
             stim_anode_tag, stim_cathode_tag = stim_tag.split('-')
 
             sess_stim_params = StimParams()
             sess_stim_params.stimAnodeTag = stim_anode_tag
             sess_stim_params.stimCathodeTag = stim_cathode_tag
-            sess_stim_params.pulse_frequency = sess_stim_event.stimParams.pulseFreq
-            sess_stim_params.amplitude = sess_stim_event.stimParams.amplitude / 1000.0
+            sess_stim_params.pulse_frequency = sess_stim_event.stim_params.pulse_freq
+            sess_stim_params.amplitude = sess_stim_event.stim_params.amplitude / 1000.0
             sess_stim_params.pulse_duration = 500
             sess_stim_params.burst_frequency = -999
 
@@ -129,7 +114,7 @@ class ComputePALStimTable(ReportRamTask):
             sessions_mask = np.array([(ev.session in sessions) for ev in events], dtype=np.bool)
             stim_anode_tag[sessions_mask] = stim_params.stimAnodeTag
             stim_cathode_tag[sessions_mask] = stim_params.stimCathodeTag
-            region[sessions_mask] = bipolar_label_to_loc_tag((stim_params.stimAnodeTag,stim_params.stimCathodeTag), loc_tag)
+            region[sessions_mask] = bp_tal_structs.bp_atlas_loc.ix[stim_params.stimAnodeTag+'-'+stim_params.stimCathodeTag]
             pulse_frequency[sessions_mask] = stim_params.pulse_frequency
             amplitude[sessions_mask] = stim_params.amplitude
             pulse_duration[sessions_mask] = stim_params.pulse_duration

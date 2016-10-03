@@ -1,15 +1,14 @@
-from glob import glob
-import re
-
 import sys
 from setup_utils import parse_command_line, configure_python_paths
 from os.path import join
 
+from ptsa.data.readers.IndexReader import JsonIndexReader
+
 from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/PAL3_reports')
-cml_parser.arg('--task','RAM_PAL3')
+cml_parser.arg('--workspace-dir','/scratch/busygin/PAL3_reports')
+cml_parser.arg('--task','PAL3')
 cml_parser.arg('--mount-point','')
 cml_parser.arg('--recompute-on-no-status')
 
@@ -23,15 +22,13 @@ from PAL1EventPreparation import PAL1EventPreparation
 
 from EventPreparation import EventPreparation
 
-from MathEventPreparation import MathEventPreparation
-
 from ComputePAL1Powers import ComputePAL1Powers
 
 from ComputeClassifier import ComputeClassifier
 
 from ComputePALStimPowers import ComputePALStimPowers
 
-from TalPreparation import TalPreparation
+from MontagePreparation import MontagePreparation
 
 from ComputePALStimTable import ComputePALStimTable
 
@@ -68,14 +65,18 @@ params = Params()
 
 task = args.task
 
-def find_subjects_by_task(task):
-    ev_files = glob(args.mount_point + '/data/events/%s/R*_events.mat' % task)
-    return [re.search(r'R1\d\d\d[A-Z](_\d+)?', f).group() for f in ev_files]
-
-
-subjects = find_subjects_by_task(task)
+json_reader = JsonIndexReader(os.path.join(args.mount_point,'data/eeg/protocols/r1.json'))
+subject_set = json_reader.aggregate_values('subjects', experiment=task)
+subjects = []
+for s in subject_set:
+    montages = json_reader.aggregate_values('montage', subject=s, experiment=task)
+    for m_ in montages:
+        m = str(m_)
+        subject = str(s)
+        if m!='0':
+            subject += '_' + m
+        subjects.append(subject)
 subjects.sort()
-
 
 subject_fail_list = []
 subject_missing_experiment_list = []
@@ -91,20 +92,18 @@ for subject in subjects:
     # sets up processing pipeline
 
     report_pipeline = ReportPipeline(subject=subject,
-                                     experiment=args.experiment,
+                                     #experiment=args.experiment,
                                      task=task,
                                      workspace_dir=join(args.workspace_dir, subject),
                                      mount_point=args.mount_point,
                                      exit_on_no_change=args.exit_on_no_change,
                                      recompute_on_no_status=args.recompute_on_no_status)
 
-    report_pipeline.add_task(PAL1EventPreparation(params=params, mark_as_completed=False))
+    report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
 
     report_pipeline.add_task(EventPreparation(mark_as_completed=False))
 
-    report_pipeline.add_task(MathEventPreparation(mark_as_completed=False))
-
-    report_pipeline.add_task(TalPreparation(mark_as_completed=False))
+    report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
 
     report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=True))
 
