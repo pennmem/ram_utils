@@ -1,12 +1,11 @@
 import sys
-from glob import glob
-import re
-
+import os
+from ptsa.data.readers.IndexReader import JsonIndexReader
 from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
-#cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/FR1_CatFr1_check_1')
-cml_parser.arg('--workspace-dir','/scratch/RAM_maint/automated_reports/FR1_joint_reports_db')
+cml_parser.arg('--workspace-dir','/scratch/busygin/FR1_joint_reports')
+#cml_parser.arg('--workspace-dir','/scratch/RAM_maint/automated_reports/FR1_joint_reports_db')
 cml_parser.arg('--mount-point','')
 cml_parser.arg('--recompute-on-no-status')
 cml_parser.arg('--exit-on-no-change')
@@ -17,8 +16,6 @@ args = cml_parser.parse()
 from ReportUtils import ReportSummaryInventory
 
 from FR1EventPreparation import FR1EventPreparation
-
-from MathEventPreparation import MathEventPreparation
 
 from ComputeFR1Powers import ComputeFR1Powers
 
@@ -66,14 +63,18 @@ class Params(object):
 params = Params()
 
 
-def find_subjects_by_task(task):
-    ev_files = glob(args.mount_point + ('/data/events/%s/R*_events.mat' % task))
-    return [re.search(r'R\d\d\d\d[A-Z](_\d+)?', f).group() for f in ev_files]
-
-
-subjects = list(set(find_subjects_by_task('RAM_FR1')).intersection(find_subjects_by_task('RAM_CatFR1')))
+json_reader = JsonIndexReader(os.path.join(args.mount_point,'data/eeg/protocols/r1.json'))
+subject_set = json_reader.aggregate_values('subjects', experiment='FR1') & json_reader.aggregate_values('subjects', experiment='catFR1')
+subjects = []
+for s in subject_set:
+    montages = json_reader.aggregate_values('montage', subject=s, experiment='FR1') & json_reader.aggregate_values('montage', subject=s, experiment='catFR1')
+    for m_ in montages:
+        m = str(m_)
+        subject = str(s)
+        if m!='0':
+            subject += '_' + m
+        subjects.append(subject)
 subjects.sort()
-
 
 rsi = ReportSummaryInventory(label='RAM_FR1_CatFR1_joint')
 
@@ -95,12 +96,12 @@ for subject in subjects:
     report_pipeline = ReportPipeline(
         args=args,
         subject=subject,
-        workspace_dir=join(args.workspace_dir,  subject)
+        task='FR1_catFR1_joint',
+        experiment='FR1_catFR1_joint',
+        workspace_dir=join(args.workspace_dir, subject)
     )
 
     report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
-
-    report_pipeline.add_task(MathEventPreparation(mark_as_completed=False))
 
     report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
 
@@ -120,7 +121,7 @@ for subject in subjects:
 
     report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
-    report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
+    # report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
 
     # starts processing pipeline
     report_pipeline.execute_pipeline()
