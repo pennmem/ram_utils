@@ -112,7 +112,7 @@ class ComposeSessionSummary(ReportRamTask):
 
                 session_summary.list_number[list_idx] = lst
                 session_summary.n_recalls_per_list[list_idx] = fr_stim_sess_list_table.recalled.sum()
-                session_summary.n_stims_per_list[list_idx] = fr_stim_sess_list_table.is_post_stim_item.sum()
+                session_summary.n_stims_per_list[list_idx] = fr_stim_sess_list_table.is_stim_item.sum()
                 session_summary.is_stim_list[list_idx] = fr_stim_sess_list_table.is_stim_list.any()
 
             session_summary.prob_first_recall /= float(len(fr_stim_table_by_session_list))
