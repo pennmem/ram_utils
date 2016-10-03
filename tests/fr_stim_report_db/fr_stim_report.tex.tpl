@@ -24,7 +24,7 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{RAM <EXPERIMENT> report v 2.4}
+\lhead{RAM <EXPERIMENT> report v 2.5}
 \chead{Subject: \textbf{<SUBJECT>}}
 \rhead{Date created: <DATE>}
 \begin{document}
