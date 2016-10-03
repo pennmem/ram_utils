@@ -20,10 +20,13 @@ class GenerateTex(ReportRamTask):
         super(GenerateTex,self).__init__(mark_as_completed)
 
     def run(self):
+        task = self.pipeline.task
+
         tex_template = 'fr_stim_report.tex.tpl'
         tex_session_template = 'fr_stim_session.tex.tpl'
 
-        tex_biomarker_plot_template = 'biomarker_plots.tex.tpl' if self.pipeline.task=='RAM_FR4' else 'fr3_plots.tex.tpl'
+        tex_biomarker_plot_template = 'biomarker_plots.tex.tpl' if task=='RAM_FR4' else 'fr3_plots.tex.tpl'
+        tex_itemlevel_comparison_template = 'itemlevel_comparison.tex.tpl'
 
         report_tex_file_name = self.pipeline.task + '-' + self.pipeline.subject + '-report.tex'
         self.pass_object('report_tex_file_name',report_tex_file_name)
@@ -38,8 +41,26 @@ class GenerateTex(ReportRamTask):
         tex_session_pages_str = ''
 
         for session_summary in session_summary_array:
-            # biomarker_plots = ''
-            # if self.pipeline.task == 'RAM_FR4':
+            itemlevel_comparison = ''
+            if task=='FR3':
+                itemlevel_comparison_replace_dict = {
+                    '<N_CORRECT_STIM_ITEMS>': session_summary.n_correct_stim_items,
+                    '<N_TOTAL_STIM_ITEMS>': session_summary.n_total_stim_items,
+                    '<PC_STIM_ITEMS>': '%.2f' % session_summary.pc_stim_items,
+                    '<N_CORRECT_POST_STIM_ITEMS>': session_summary.n_correct_post_stim_items,
+                    '<N_TOTAL_POST_STIM_ITEMS>': session_summary.n_total_post_stim_items,
+                    '<PC_POST_STIM_ITEMS>': '%.2f' % session_summary.pc_post_stim_items,
+                    '<N_CORRECT_NONSTIM_ITEMS>': session_summary.n_correct_nonstim_low_bio_items,
+                    '<N_TOTAL_NONSTIM_ITEMS>': session_summary.n_total_nonstim_low_bio_items,
+                    '<PC_NONSTIM_ITEMS>': '%.2f' % session_summary.pc_nonstim_low_bio_items,
+                    '<CHISQR_STIM_ITEMS>': '%.2f' % session_summary.chisqr_stim_item,
+                    '<PVALUE_STIM_ITEMS>': '%.2f' % session_summary.pvalue_stim_item,
+                    '<CHISQR_POST_STIM_ITEMS>': '%.2f' % session_summary.chisqr_post_stim_item,
+                    '<PVALUE_POST_STIM_ITEMS>': '%.2f' % session_summary.pvalue_post_stim_item
+                }
+
+                itemlevel_comparison = TextTemplateUtils.replace_template_to_string(tex_itemlevel_comparison_template, itemlevel_comparison_replace_dict)
+
             biomarker_plot_replace_dict = {'<STIM_VS_NON_STIM_HALVES_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-stim_vs_non_stim_halves_plot_' + session_summary.stimtag + '-' + str(session_summary.frequency) + '.pdf',
                                           }
             biomarker_plots = TextTemplateUtils.replace_template_to_string(tex_biomarker_plot_template, biomarker_plot_replace_dict)
@@ -50,6 +71,7 @@ class GenerateTex(ReportRamTask):
                             '<SESSIONS>': ','.join([str(s) for s in session_summary.sessions]),
                             '<PROB_RECALL_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-prob_recall_plot_' + session_summary.stimtag + '-' + str(session_summary.frequency) + '.pdf',
                             '<BIOMARKER_PLOTS>': biomarker_plots,
+                            '<ITEMLEVEL_COMPARISON>': itemlevel_comparison,
                             '<STIM_AND_RECALL_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-stim_and_recall_plot_' + session_summary.stimtag + '-' + str(session_summary.frequency) + '.pdf',
                             '<N_WORDS>': session_summary.n_words,
                             '<N_CORRECT_WORDS>': session_summary.n_correct_words,
@@ -190,7 +212,7 @@ class GeneratePlots(ReportRamTask):
                 plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-stim_vs_non_stim_halves_plot_' + session_summary.stimtag + '-' + str(session_summary.frequency) + '.pdf')
 
                 plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
-            elif task == 'RAM_FR3':
+            elif task == 'FR3':
                 panel_plot = PanelPlot(xfigsize=6, yfigsize=7.5, i_max=1, j_max=1, title='', labelsize=18)
 
                 ylim = np.max(np.abs(session_summary.pc_diff_from_mean)) + 5.0

@@ -3,61 +3,75 @@ __author__ = 'm'
 import os
 import os.path
 import numpy as np
+
 from ptsa.data.readers import BaseEventReader
+from ptsa.data.readers.IndexReader import JsonIndexReader
 
 from RamPipeline import *
 from ReportUtils import ReportRamTask
 
 
 class FREventPreparation(ReportRamTask):
-    def __init__(self, params, mark_as_completed=True):
-        super(FREventPreparation, self).__init__(mark_as_completed)
-        self.params = params
+    def __init__(self, mark_as_completed=True):
+        super(FREventPreparation,self).__init__(mark_as_completed)
 
     def run(self):
-        try:
+        subject = self.pipeline.subject
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp)==1 else int(tmp[1])
 
-            events = None
-            fr1_e_path = ''
-            catfr1_e_path = ''
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/protocols/r1.json'))
 
-            if self.params.include_fr1:
-                try:
-                    fr1_e_path = os.path.join(self.pipeline.mount_point, 'data/events/RAM_FR1',
-                                              self.pipeline.subject + '_events.mat')
-                    e_reader = BaseEventReader(filename=fr1_e_path, eliminate_events_with_no_eeg=True)
-                    events = e_reader.read()
-                    ev_order = np.argsort(events, order=('session', 'list', 'mstime'))
-                    events = events[ev_order]
-                except IOError:
-                    pass
+        event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='FR1')))
+        fr1_events = None
+        for sess_file in event_files:
+            e_path = os.path.join(self.pipeline.mount_point, str(sess_file))
+            print e_path
+            e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
-            if self.params.include_catfr1:
-                try:
-                    catfr1_e_path = os.path.join(self.pipeline.mount_point, 'data/events/RAM_CatFR1',
-                                                 self.pipeline.subject + '_events.mat')
-                    e_reader = BaseEventReader(filename=catfr1_e_path, eliminate_events_with_no_eeg=True)
-                    catfr1_events = e_reader.read()
-                    ev_order = np.argsort(catfr1_events, order=('session', 'list', 'mstime'))
-                    catfr1_events = catfr1_events[ev_order]
-                    if events is None:
-                        events = catfr1_events
-                    else:
-                        catfr1_events.session += 100
-                        fields = list(set(events.dtype.names).intersection(catfr1_events.dtype.names))
-                        events = np.hstack((events[fields], catfr1_events[fields])).view(np.recarray)
-                except IOError:
-                    pass
+            sess_events = e_reader.read()[['wordno', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'iscorrect', 'answer', 'recalled', 'word', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
 
-            events = events[events.type == 'WORD']
+            if fr1_events is None:
+                fr1_events = sess_events
+            else:
+                fr1_events = np.hstack((fr1_events,sess_events))
 
-            print len(events), 'WORD events'
+        event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='catFR1')))
+        catfr1_events = None
+        for sess_file in event_files:
+            e_path = os.path.join(self.pipeline.mount_point, str(sess_file))
+            print e_path
+            e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
-            self.pass_object('FR_events', events)
+            sess_events = e_reader.read()
+            sess_events.session += 100
+            sess_events = sess_events[['wordno', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'iscorrect', 'answer', 'recalled', 'word', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
 
+            if catfr1_events is None:
+                catfr1_events = sess_events
+            else:
+                catfr1_events = np.hstack((catfr1_events,sess_events))
 
-        except Exception:
-            self.raise_and_log_report_exception(
-                exception_type='MissingDataError',
-                exception_message='Missing FR1 or CatFR1 events data (%s,%s)' % (fr1_e_path, catfr1_e_path)
-            )
+        if fr1_events is not None:
+            events = np.hstack((fr1_events,catfr1_events)) if catfr1_events is not None else fr1_events
+        else:
+            events = catfr1_events
+        events = events.view(np.recarray)
+
+        self.pass_object('all_events', events)
+
+        math_events = events[events.type == 'PROB']
+
+        rec_events = events[events.type == 'REC_WORD']
+
+        intr_events = rec_events[(rec_events.intrusion!=-999) & (rec_events.intrusion!=0)]
+
+        events = events[events.type == 'WORD']
+
+        print len(events), 'WORD events'
+
+        self.pass_object('FR_events', events)
+        self.pass_object('FR_math_events', math_events)
+        self.pass_object('FR_intr_events', intr_events)
+        self.pass_object('FR_rec_events', rec_events)

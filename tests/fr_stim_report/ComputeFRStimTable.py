@@ -1,15 +1,13 @@
+import os.path
+
 import numpy as np
 import pandas as pd
-from glob import glob
-import os
-from zipfile import ZipFile
-from StringIO import StringIO
-from scipy.io import loadmat
-from math import exp
 
 from sklearn.externals import joblib
 
 from ReportUtils import ReportRamTask
+
+from parse_biomarker_output import parse_biomarker_output
 
 
 class StimParams(object):
@@ -25,55 +23,32 @@ class StimParams(object):
         return hash(repr(self.stimAnodeTag)+repr(self.stimCathodeTag)+repr(self.pulse_frequency))
 
 
-def bipolar_label_to_loc_tag(bp, loc_tags):
-    if bp=='' or bp=='[]':
-        return 'Undetermined'
-    label = bp[0]+'-'+bp[1]
-    if label in loc_tags:
-        lt = loc_tags[label]
-        return lt if lt!='' and lt!='[]' else 'Undetermined'
-    label = bp[1]+'-'+bp[0]
-    if label in loc_tags:
-        lt = loc_tags[label]
-        return lt if lt!='' and lt!='[]' else 'Undetermined'
-    else:
-        return 'Undetermined'
-
-
 class ComputeFRStimTable(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
         super(ComputeFRStimTable,self).__init__(mark_as_completed)
         self.params = params
         self.stim_params_to_sess = None
+        self.sess_to_thresh = None
         self.fr_stim_table = None
-        self.bio_classifiers = dict()
 
     def initialize(self):
         if self.dependency_inventory:
-
             self.dependency_inventory.add_dependent_resource(resource_name='fr1_events',
                                         access_path = ['experiments','fr1','events'])
-
             self.dependency_inventory.add_dependent_resource(resource_name='catfr1_events',
                                         access_path = ['experiments','catfr1','events'])
-
-
             self.dependency_inventory.add_dependent_resource(resource_name='fr3_events',
                                         access_path = ['experiments','fr3','events'])
-
             self.dependency_inventory.add_dependent_resource(resource_name='catfr3_events',
                                         access_path = ['experiments','catfr3','events'])
-
-
             self.dependency_inventory.add_dependent_resource(resource_name='fr4_events',
                                         access_path = ['experiments','fr4','events'])
-
             self.dependency_inventory.add_dependent_resource(resource_name='catfr4_events',
                                         access_path = ['experiments','catfr4','events'])
-
-
             self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
                                         access_path = ['electrodes','bipolar'])
+            self.dependency_inventory.add_dependent_resource(resource_name='bipolar_json',
+                                        access_path = ['electrodes','bipolar_json'])
 
     def restore(self):
         subject = self.pipeline.subject
@@ -83,11 +58,7 @@ class ComputeFRStimTable(ReportRamTask):
         self.pass_object('fr_stim_table', self.fr_stim_table)
 
     def run(self):
-        subject = self.pipeline.subject
-        task = self.pipeline.task
-
-        channel_to_label_map = self.get_passed_object('channel_to_label_map')
-        loc_tag = self.get_passed_object('loc_tag')
+        bp_tal_structs = self.get_passed_object('bp_tal_structs')
 
         all_events = self.get_passed_object(self.pipeline.task+'_all_events')
         events = self.get_passed_object(self.pipeline.task+'_events')
@@ -95,75 +66,63 @@ class ComputeFRStimTable(ReportRamTask):
         n_events = len(events)
 
         lr_classifier = self.get_passed_object('lr_classifier')
-        fr_stim_pow_mat = self.get_passed_object('fr_stim_pow_mat')
 
-        fr_stim_prob = np.empty(shape=n_events, dtype=float)
-        if task=='RAM_FR3':
-            sessions = np.unique(events.session)
-            for sess in sessions:
-                biomarker_files = glob(os.path.join(self.pipeline.mount_point,'data/eeg',subject,'raw/FR3_%d'%sess,'*.biomarker'))
-                if biomarker_files:
-                    biomarker_zip = ZipFile(biomarker_files[0])
-                    biomarker = None
-                    for name in biomarker_zip.namelist():
-                        if name[-4:]=='.mat':
-                            biomarker = loadmat(StringIO(biomarker_zip.read(name)), squeeze_me=True)
-                            break
-                    biomarker_data = biomarker['Bio'].item()
-                    biomarker_fields = biomarker['Bio'].dtype.names
-                    classifier_weights = None
-                    classifier_intercept = None
-                    for i,name in enumerate(biomarker_fields):
-                        if name=='W':
-                            classifier_weights = biomarker_data[i]
-                        elif name=='W0':
-                            classifier_intercept = biomarker_data[i]
-                    self.bio_classifiers[sess] = (classifier_intercept, classifier_weights)
-            for i,ev in enumerate(events):
-                sess = ev.session
-                fr_stim_prob[i] = 1.0 / (1.0 + exp(-self.bio_classifiers[sess][0]-np.dot(self.bio_classifiers[sess][1],fr_stim_pow_mat[i,:])))
-        else:
-            fr_stim_prob[:] = lr_classifier.predict_proba(fr_stim_pow_mat)[:,1]
+        xval_output = self.get_passed_object('xval_output')
+        class_thresh = xval_output[-1].jstat_thresh
+
+        fr_stim_pow_mat = self.get_passed_object('fr_stim_pow_mat')
+        fr_stim_prob = lr_classifier.predict_proba(fr_stim_pow_mat)[:,1]
 
         is_stim_item = np.zeros(n_events, dtype=np.bool)
         is_post_stim_item = np.zeros(n_events, dtype=np.bool)
         j = 0
         for i,ev in enumerate(all_events):
             if ev.type=='WORD':
-                if all_events[i+1].type=='STIM':
+                if (all_events[i+1].type=='STIM_ON') or (all_events[i+1].type=='WORD_OFF' and all_events[i+2].type=='STIM_ON'):
                     is_stim_item[j] = True
                 if (all_events[i-1].type=='STIM_OFF') or (all_events[i+1].type=='STIM_OFF'):
                     is_post_stim_item[j] = True
                 j += 1
 
         self.fr_stim_table = pd.DataFrame()
-        self.fr_stim_table['item'] = events['item']
+        self.fr_stim_table['item'] = events.word
         self.fr_stim_table['session'] = events.session
         self.fr_stim_table['list'] = events.list
         self.fr_stim_table['serialpos'] = events.serialpos
-        self.fr_stim_table['itemno'] = events.itemno
-        self.fr_stim_table['is_stim_list'] = [(s==1) for s in events.stimList]
+        self.fr_stim_table['itemno'] = events.wordno
+        self.fr_stim_table['is_stim_list'] = [(s==1) for s in events.stim_list]
         self.fr_stim_table['is_stim_item'] = is_stim_item
         self.fr_stim_table['is_post_stim_item'] = is_post_stim_item
         self.fr_stim_table['recalled'] = events.recalled
-        self.fr_stim_table['prob'] = fr_stim_prob
+        self.fr_stim_table['thresh'] = class_thresh
 
         self.stim_params_to_sess = dict()
+        self.sess_to_thresh = dict()
 
         sessions = np.unique(events.session)
         for sess in sessions:
-            sess_stim_events = all_events[(all_events.session==sess) & (all_events.type=='STIM')]
+            if self.pipeline.task=='FR3' and self.pipeline.subject!='R1124J_1':
+                sess_mask = (events.session==sess)
+                fr_stim_sess_prob = fr_stim_prob[sess_mask]
+                sess_prob, thresh = parse_biomarker_output(os.path.join(self.pipeline.mount_point, 'data/eeg', self.pipeline.subject, 'raw/FR3_%d'%sess, 'commandOutput.txt'))
+                n_probs = sess_prob.shape[0]
+                fr_stim_sess_prob[36:36+n_probs] = sess_prob  # plug biomarker output after 3rd list
+                self.fr_stim_table['thresh'][sess_mask] = thresh
+
+            sess_stim_events = all_events[(all_events.session==sess) & (all_events.type=='STIM_ON')]
             sess_stim_event = sess_stim_events[-1]
 
-            stim_pair = (sess_stim_event.stimParams.elec1,sess_stim_event.stimParams.elec2)
-            stim_tag = channel_to_label_map[stim_pair if stim_pair in channel_to_label_map else (sess_stim_event.stimParams.elec1,sess_stim_event.stimParams.elec2)].upper()
+            ch1 = '%03d' % sess_stim_event.stim_params.anode_number
+            ch2 = '%03d' % sess_stim_event.stim_params.cathode_number
+
+            stim_tag = bp_tal_structs.index[((bp_tal_structs.channel_1==ch1) & (bp_tal_structs.channel_2==ch2)) | ((bp_tal_structs.channel_1==ch2) & (bp_tal_structs.channel_2==ch1))].values[0]
             stim_anode_tag, stim_cathode_tag = stim_tag.split('-')
 
             sess_stim_params = StimParams()
             sess_stim_params.stimAnodeTag = stim_anode_tag
             sess_stim_params.stimCathodeTag = stim_cathode_tag
-            sess_stim_params.pulse_frequency = sess_stim_event.stimParams.pulseFreq
-            sess_stim_params.amplitude = sess_stim_event.stimParams.amplitude / 1000.0
+            sess_stim_params.pulse_frequency = sess_stim_event.stim_params.pulse_freq
+            sess_stim_params.amplitude = sess_stim_event.stim_params.amplitude / 1000.0
             sess_stim_params.pulse_duration = 500
             sess_stim_params.burst_frequency = -999
 
@@ -171,6 +130,8 @@ class ComputeFRStimTable(ReportRamTask):
                 self.stim_params_to_sess[sess_stim_params].append(sess)
             else:
                 self.stim_params_to_sess[sess_stim_params] = [sess]
+
+        self.fr_stim_table['prob'] = fr_stim_prob
 
         stim_anode_tag = np.empty(n_events, dtype='|S16')
         stim_cathode_tag = np.empty(n_events, dtype='|S16')
@@ -184,7 +145,7 @@ class ComputeFRStimTable(ReportRamTask):
             sessions_mask = np.array([(ev.session in sessions) for ev in events], dtype=np.bool)
             stim_anode_tag[sessions_mask] = stim_params.stimAnodeTag
             stim_cathode_tag[sessions_mask] = stim_params.stimCathodeTag
-            region[sessions_mask] = bipolar_label_to_loc_tag((stim_params.stimAnodeTag,stim_params.stimCathodeTag), loc_tag)
+            region[sessions_mask] = bp_tal_structs.bp_atlas_loc.ix[stim_params.stimAnodeTag+'-'+stim_params.stimCathodeTag]
             pulse_frequency[sessions_mask] = stim_params.pulse_frequency
             amplitude[sessions_mask] = stim_params.amplitude
             pulse_duration[sessions_mask] = stim_params.pulse_duration

@@ -5,8 +5,8 @@ from ReportUtils import CMLParser,ReportPipeline
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1145J_1')
-cml_parser.arg('--task','RAM_FR3')
+cml_parser.arg('--subject','R1124J_1')
+cml_parser.arg('--task','FR3')
 cml_parser.arg('--workspace-dir','/scratch/busygin/FR3_reports')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
@@ -22,15 +22,13 @@ from FREventPreparation import FREventPreparation
 
 from EventPreparation import EventPreparation
 
-from MathEventPreparation import MathEventPreparation
-
 from ComputeFRPowers import ComputeFRPowers
 
 from ComputeClassifier import ComputeClassifier
 
 from ComputeFRStimPowers import ComputeFRStimPowers
 
-from TalPreparation import TalPreparation
+from MontagePreparation import MontagePreparation
 
 from ComputeFRStimTable import ComputeFRStimTable
 
@@ -90,13 +88,11 @@ report_pipeline = ReportPipeline(subject=args.subject, task=args.task,experiment
 #                                        workspace_dir=join(args.workspace_dir,args.task+'_'+args.subject), mount_point=args.mount_point)
 #
 
-report_pipeline.add_task(FREventPreparation(params=params, mark_as_completed=False))
+report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
 
 report_pipeline.add_task(EventPreparation(mark_as_completed=False))
 
-report_pipeline.add_task(MathEventPreparation(mark_as_completed=False))
-
-report_pipeline.add_task(TalPreparation(mark_as_completed=False))
+report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
 
 report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 
