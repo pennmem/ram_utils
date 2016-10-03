@@ -83,6 +83,8 @@ class ComputeClassifier(ReportRamTask):
                                         access_path = ['experiments','pal1','events'])
             self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
                                         access_path = ['electrodes','bipolar'])
+            self.dependency_inventory.add_dependent_resource(resource_name='bipolar_json',
+                                        access_path = ['electrodes','bipolar_json'])
 
 
     def run_loso_xval(self, event_sessions, recalls, permuted=False):

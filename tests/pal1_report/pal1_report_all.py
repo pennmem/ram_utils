@@ -1,16 +1,17 @@
 import sys
-from glob import glob
-import re
+import os
 
+from ptsa.data.readers.IndexReader import JsonIndexReader
 
 from ReportUtils import CMLParser, ReportPipeline
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/PAL1_reports')
+cml_parser.arg('--task','PAL1')
+cml_parser.arg('--workspace-dir','/scratch/busygin/PAL1_reports')
 cml_parser.arg('--mount-point','')
 cml_parser.arg('--recompute-on-no-status')
-# cml_parser.arg('--exit-on-no-change')
+cml_parser.arg('--exit-on-no-change')
 
 args = cml_parser.parse()
 
@@ -21,13 +22,9 @@ from ReportUtils import ReportSummaryInventory
 
 from PAL1EventPreparation import PAL1EventPreparation
 
-from MathEventPreparation import MathEventPreparation
-
 from ComputePAL1Powers import ComputePAL1Powers
 
-from TalPreparation import TalPreparation
-
-from GetLocalization import GetLocalization
+from MontagePreparation import MontagePreparation
 
 from ComputePAL1HFPowers import ComputePAL1HFPowers
 
@@ -70,17 +67,19 @@ class Params(object):
 
 params = Params()
 
-task = 'RAM_PAL1'
+task = args.task
 
-
-def find_subjects_by_task(task):
-    ev_files = glob(args.mount_point + ('/data/events/%s/R*_events.mat' % task))
-    return [re.search(r'R\d\d\d\d[A-Z](_\d+)?', f).group() for f in ev_files]
-
-
-subjects = find_subjects_by_task(task)
-# subjects.remove('R1050M')
-# subjects.remove('R1136N')
+json_reader = JsonIndexReader(os.path.join(args.mount_point,'data/eeg/protocols/r1.json'))
+subject_set = json_reader.aggregate_values('subjects', experiment=task)
+subjects = []
+for s in subject_set:
+    montages = json_reader.aggregate_values('montage', subject=s, experiment=task)
+    for m_ in montages:
+        m = str(m_)
+        subject = str(s)
+        if m!='0':
+            subject += '_' + m
+        subjects.append(subject)
 subjects.sort()
 
 rsi = ReportSummaryInventory(label=task)
@@ -107,11 +106,7 @@ for subject in subjects:
 
     report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
 
-    report_pipeline.add_task(MathEventPreparation(mark_as_completed=False))
-
-    report_pipeline.add_task(TalPreparation(mark_as_completed=False))
-
-    report_pipeline.add_task(GetLocalization(mark_as_completed=False))
+    report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
 
     report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=True))
 
@@ -129,7 +124,7 @@ for subject in subjects:
 
     report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
-    # report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
+    #report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
 
     report_pipeline.execute_pipeline()
 

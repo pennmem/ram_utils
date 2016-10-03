@@ -1,15 +1,15 @@
 \documentclass[a4paper]{article} 
 \usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
 \usepackage{graphicx,multirow} 
-\usepackage{epstopdf} 
-\usepackage{wrapfig} 
+%\usepackage{epstopdf}
+%\usepackage{wrapfig}
 \usepackage{longtable} 
 \usepackage{pdfpages}
 \usepackage{mathtools}
 \usepackage{array}
 \usepackage{enumitem}
 \usepackage{booktabs}
-\usepackage{sidecap} \usepackage{soul}
+%\usepackage{sidecap} \usepackage{soul}
 \usepackage[small,bf,it]{caption}
 \setlength\belowcaptionskip{2pt}
 
@@ -86,9 +86,9 @@ $<N_MATH>$ math problems & $<N_CORRECT_MATH>$ correct ($<PC_CORRECT_MATH>$\%) & 
 
 \begin{center}
 \textbf{\large Significant Electrodes} \\
-\begin{longtable}{<TABLE_FORMAT>}
+\begin{longtable}{C{.75cm} C{2cm} C{2.5cm} C{5.5cm} C{1.25cm} C{1.25cm}}
 \hline
-<TABLE_HEADER> \\
+Type & Channel \# & Electrode Pair & Atlas Loc & \textit{p} & \textit{t}-stat \\
 <SIGNIFICANT_ELECTRODES>
 \hline
 \caption{Subsequent memory effect HFA. High frequency activity (HFA, 70-200 Hz) was measured from 400ms to 3700ms of pair presentation interval. At each electrode, a t-test compared HFA for subsequently recalled vs subsequently forgotten items. \textbf{Surface Electrodes:} Red - significant positive effect (subsequently \textit{remembered} HFA $>$ subsequently \textit{forgotten} HFA). Blue - significant negative effect (subsequently \textit{remembered} HFA $<$ subsequently \textit{forgotten} HFA). Black - difference not significant. \textbf{Depth Electrodes:} All bipolar pairs shown in descending order of significance Bipolar pairs that exceed significance threshold ($p < .05$) are in boldface.}
