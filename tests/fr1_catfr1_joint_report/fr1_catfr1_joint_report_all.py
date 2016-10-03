@@ -76,7 +76,7 @@ for s in subject_set:
         subjects.append(subject)
 subjects.sort()
 
-rsi = ReportSummaryInventory(label='RAM_FR1_CatFR1_joint')
+rsi = ReportSummaryInventory(label='FR1_catFR1_joint')
 
 for subject in subjects:
     print '--Generating FR1&CatFR1 joint report for', subject

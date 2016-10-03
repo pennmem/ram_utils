@@ -8,6 +8,7 @@ from sklearn.externals import joblib
 
 from ReportUtils import ReportRamTask
 from ptsa.data.readers import TalReader
+from ptsa.data.readers.IndexReader import JsonIndexReader
 
 from loc_to_df import loc_to_df
 
@@ -64,9 +65,15 @@ class MontagePreparation(ReportRamTask):
 
     def run(self):
         subject = self.pipeline.subject
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp)==1 else int(tmp[1])
+
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/protocols/r1.json'))
+        bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
 
         try:
-            bp_path = os.path.join(self.pipeline.mount_point, 'protocols/r1/codes', subject, 'pairs.json')
+            bp_path = os.path.join(self.pipeline.mount_point, next(iter(bp_paths)))
             f_pairs = open(bp_path, 'r')
             bipolar_data = json.load(f_pairs)[subject]['pairs']
             f_pairs.close()
@@ -94,58 +101,7 @@ class MontagePreparation(ReportRamTask):
             bp_tal_structs.to_pickle(self.get_path_to_resource_in_workspace(subject + '-bp_tal_structs.pkl'))
 
         except:
-            try:
-                tal_path = os.path.join(self.pipeline.mount_point,'data/eeg',self.pipeline.subject,'tal',self.pipeline.subject+'_talLocs_database_bipol.mat')
-
-                tal_reader = TalReader(filename=tal_path)
-
-                monopolar_channels = tal_reader.get_monopolar_channels()
-                bipolar_pairs = tal_reader.get_bipolar_pairs()
-
-                matlab_bp_tal_struct = tal_reader.read()
-
-                l_path = os.path.join(self.pipeline.mount_point, 'data/eeg', subject, 'docs/localization', subject+' Localization.xlsx')
-                loc_info = loc_to_df(l_path)
-
-                atlas_loc = None
-                comments = None
-                has_depth = ('Das Volumetric Atlas Location' in loc_info)
-                has_surface_only = ('Freesurfer Desikan Killiany Surface Atlas Location' in loc_info)
-                if has_depth or has_surface_only:
-                    atlas_loc = loc_info['Das Volumetric Atlas Location' if has_depth else 'Freesurfer Desikan Killiany Surface Atlas Location']
-                    comments = loc_info['Comments'] if ('Comments' in loc_info) else None
-
-                bp_tags = []
-                bp_tal_structs = []
-                for i,bp in enumerate(matlab_bp_tal_struct):
-                    tag = bp.tagName.upper().replace('_','\\textunderscore')
-                    bp_tags.append(tag)
-                    ch1 = bipolar_pairs[i][0]
-                    ch2 = bipolar_pairs[i][1]
-                    bp_atlas_loc = ''
-                    try:
-                        bp_atlas_loc = bp.locTag
-                    except:
-                        pass
-
-                    if len(bp_atlas_loc)<4:
-                        bp_atlas_loc = atlas_location_matlab(tag, atlas_loc, comments)
-
-                    bp_tal_structs.append([ch1, ch2, bp.eType, bp_atlas_loc])
-
-                bp_tal_structs = pd.DataFrame(bp_tal_structs, index=bp_tags, columns=['channel_1', 'channel_2', 'etype', 'bp_atlas_loc'])
-                bp_tal_structs.sort_values(by=['channel_1', 'channel_2'], inplace=True)
-
-                self.pass_object('monopolar_channels', monopolar_channels)
-                self.pass_object('bipolar_pairs', bipolar_pairs)
-                self.pass_object('bp_tal_structs', bp_tal_structs)
-
-                joblib.dump(monopolar_channels, self.get_path_to_resource_in_workspace(subject + '-monopolar_channels.pkl'))
-                joblib.dump(bipolar_pairs, self.get_path_to_resource_in_workspace(subject + '-bipolar_pairs.pkl'))
-                bp_tal_structs.to_pickle(self.get_path_to_resource_in_workspace(subject + '-bp_tal_structs.pkl'))
-
-            except:
-                self.raise_and_log_report_exception(
-                                                    exception_type='MissingDataError',
-                                                    exception_message='Missing or corrupt montage data for subject %s' % subject
-                                                   )
+            self.raise_and_log_report_exception(
+                                                exception_type='MissingDataError',
+                                                exception_message='Missing or corrupt montage data for subject %s' % subject
+                                               )

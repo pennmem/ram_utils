@@ -82,7 +82,7 @@ report_pipeline = ReportPipeline(subject=args.subject, task=args.task,experiment
 
 report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
 
-report_pipeline.add_task(MontagePreparation(params, mark_as_completed=True))
+report_pipeline.add_task(MontagePreparation(params, mark_as_completed=False))
 
 report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=True))
 
