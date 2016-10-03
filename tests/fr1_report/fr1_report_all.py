@@ -1,23 +1,24 @@
 import sys
-from glob import glob
-import re
+import os
+
+from ptsa.data.readers.IndexReader import JsonIndexReader
 
 from ReportUtils import CMLParser,ReportPipeline
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
-# cml_parser.arg('--task','RAM_FR1')
-# cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/FR1_reports')
-# cml_parser.arg('--mount-point','')
-# cml_parser.arg('--recompute-on-no-status')
-# # cml_parser.arg('--exit-on-no-change')
-
 cml_parser.arg('--task','FR1')
-cml_parser.arg('--workspace-dir','/scratch/RAM_maint/automated_reports/FR1_reports')
-# cml_parser.arg('--mount-point','/Users/m')
+cml_parser.arg('--workspace-dir','/scratch/busygin/FR1_reports')
+cml_parser.arg('--mount-point','')
 cml_parser.arg('--recompute-on-no-status')
+# cml_parser.arg('--exit-on-no-change')
+
+#cml_parser.arg('--task','FR1')
+#cml_parser.arg('--workspace-dir','/scratch/RAM_maint/automated_reports/FR1_reports')
+# cml_parser.arg('--mount-point','/Users/m')
+#cml_parser.arg('--recompute-on-no-status')
 # cml_parser.arg('--python-path','/Users/m/PTSA_NEW_GIT')
-cml_parser.arg('--exit-on-no-change')
+#cml_parser.arg('--exit-on-no-change')
 
 
 args = cml_parser.parse()
@@ -76,23 +77,20 @@ class Params(object):
 params = Params()
 
 task = args.task
-# task = 'RAM_CatFR1'
 
-def find_subjects_by_task(task):
-
-    ev_files = glob(args.mount_point + ('/data/events/%s/R*_events.mat' % task))
-    return [re.search(r'R\d\d\d\d[A-Z](_\d+)?', f).group() for f in ev_files]
-
-
-subjects = find_subjects_by_task(task)
-
-
-# subjects.remove('R1061T')
-# subjects.remove('R1085C')
-# subjects.remove('R1090C')
-# subjects.remove('R1092J_2')
-# subjects.remove('R1093J_1')
+json_reader = JsonIndexReader(os.path.join(args.mount_point,'data/eeg/protocols/r1.json'))
+subject_set = json_reader.aggregate_values('subjects', experiment=task)
+subjects = []
+for s in subject_set:
+    montages = json_reader.aggregate_values('montage', subject=s, experiment=task)
+    for m_ in montages:
+        m = str(m_)
+        subject = str(s)
+        if m!='0':
+            subject += '_' + m
+        subjects.append(subject)
 subjects.sort()
+
 
 rsi = ReportSummaryInventory(label=task)
 

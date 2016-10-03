@@ -90,7 +90,7 @@ class ComputeFR1Powers(ReportRamTask):
                 self.pass_object(self.pipeline.task+'_events', events)
 
 
-            eegs['events'] = np.arange(eegs.events.shape[0])
+            #eegs['events'] = np.arange(eegs.events.shape[0])
 
             eegs = eegs.add_mirror_buffer(duration=self.params.fr1_buf)
 

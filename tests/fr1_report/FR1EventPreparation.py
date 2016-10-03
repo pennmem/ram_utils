@@ -5,6 +5,7 @@ import os.path
 import numpy as np
 
 from ptsa.data.readers import BaseEventReader
+from ptsa.data.readers.IndexReader import JsonIndexReader
 
 from RamPipeline import *
 from ReportUtils import ReportRamTask
@@ -20,18 +21,19 @@ class FR1EventPreparation(ReportRamTask):
         subject = self.pipeline.subject
         task = self.pipeline.task
 
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp)==1 else int(tmp[1])
+
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/protocols/r1.json'))
+
+        event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment=task)))
         events = None
-        events_per_session_files = json.load(open(os.path.join(self.pipeline.mount_point, '/data/eeg/protocols/r1.json')))['protocols']['r1']['subjects'][subject]['experiments'][task]['sessions']
-        for sess in sorted(events_per_session_files.keys()):
-            print 'Session', sess, 'events found'
-            e_path = str(os.path.join(self.pipeline.mount_point, 'data/eeg', events_per_session_files[sess]['all_events']))
+        for sess_file in event_files:
+            e_path = os.path.join(self.pipeline.mount_point, str(sess_file))
             e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
-            sess_events = e_reader.read()
-            print sess_events.dtype
-
-            # ev_order = np.argsort(events, order=('list','mstime'))
-            # sess_events = sess_events[ev_order]
+            sess_events = e_reader.read()[['wordno', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'iscorrect', 'answer', 'recalled', 'word', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
 
             if events is None:
                 events = sess_events
@@ -40,7 +42,7 @@ class FR1EventPreparation(ReportRamTask):
 
         events = events.view(np.recarray)
 
-        self.pass_object(self.pipeline.task+'_all_events', events)
+        self.pass_object(task+'_all_events', events)
 
         math_events = events[events.type == 'PROB']
 
@@ -53,6 +55,6 @@ class FR1EventPreparation(ReportRamTask):
         print len(events), task, 'WORD events'
 
         self.pass_object(task+'_events', events)
-        self.pass_object(self.pipeline.task+'_math_events', math_events)
-        self.pass_object(self.pipeline.task+'_intr_events', intr_events)
-        self.pass_object(self.pipeline.task+'_rec_events', rec_events)
+        self.pass_object(task+'_math_events', math_events)
+        self.pass_object(task+'_intr_events', intr_events)
+        self.pass_object(task+'_rec_events', rec_events)
