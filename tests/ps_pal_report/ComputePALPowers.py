@@ -21,9 +21,8 @@ class ComputePALPowers(ReportRamTask):
         self.wavelet_transform = MorletWaveletTransform()
 
     def initialize(self):
-        task = self.pipeline.task
         if self.dependency_inventory:
-            self.dependency_inventory.add_dependent_resource(resource_name=task+'_events',
+            self.dependency_inventory.add_dependent_resource(resource_name='PAL_events',
                                         access_path = ['experiments','pal1','events'])
             self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
                                         access_path = ['electrodes','bipolar'])
@@ -82,7 +81,7 @@ class ComputePALPowers(ReportRamTask):
                 events = np.hstack((events[events.session!=sess],sess_events)).view(np.recarray)
                 ev_order = np.argsort(events, order=('session','list','mstime'))
                 events = events[ev_order]
-                self.pass_object(self.pipeline.task+'_events', events)
+                self.pass_object('PAL_events', events)
 
 
             eegs = eegs.add_mirror_buffer(duration=self.params.pal1_buf)

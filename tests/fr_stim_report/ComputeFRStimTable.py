@@ -6,8 +6,10 @@ import pandas as pd
 from sklearn.externals import joblib
 
 from ReportUtils import ReportRamTask
-
+from ptsa.data.readers.IndexReader import JsonIndexReader
 from parse_biomarker_output import parse_biomarker_output
+
+import hashlib
 
 
 class StimParams(object):
@@ -31,24 +33,34 @@ class ComputeFRStimTable(ReportRamTask):
         self.sess_to_thresh = None
         self.fr_stim_table = None
 
-    def initialize(self):
-        if self.dependency_inventory:
-            self.dependency_inventory.add_dependent_resource(resource_name='fr1_events',
-                                        access_path = ['experiments','fr1','events'])
-            self.dependency_inventory.add_dependent_resource(resource_name='catfr1_events',
-                                        access_path = ['experiments','catfr1','events'])
-            self.dependency_inventory.add_dependent_resource(resource_name='fr3_events',
-                                        access_path = ['experiments','fr3','events'])
-            self.dependency_inventory.add_dependent_resource(resource_name='catfr3_events',
-                                        access_path = ['experiments','catfr3','events'])
-            self.dependency_inventory.add_dependent_resource(resource_name='fr4_events',
-                                        access_path = ['experiments','fr4','events'])
-            self.dependency_inventory.add_dependent_resource(resource_name='catfr4_events',
-                                        access_path = ['experiments','catfr4','events'])
-            self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
-                                        access_path = ['electrodes','bipolar'])
-            self.dependency_inventory.add_dependent_resource(resource_name='bipolar_json',
-                                        access_path = ['electrodes','bipolar_json'])
+    def input_hashsum(self):
+        subject = self.pipeline.subject
+        task = self.pipeline.task
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp)==1 else int(tmp[1])
+
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/protocols/r1.json'))
+
+        hash_md5 = hashlib.md5()
+
+        bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
+        for fname in bp_paths:
+            hash_md5.update(open(fname,'rb').read())
+
+        fr1_event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='FR1')))
+        for fname in fr1_event_files:
+            hash_md5.update(open(fname,'rb').read())
+
+        catfr1_event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='catFR1')))
+        for fname in catfr1_event_files:
+            hash_md5.update(open(fname,'rb').read())
+
+        fr_stim_event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment=task)))
+        for fname in fr_stim_event_files:
+            hash_md5.update(open(fname,'rb').read())
+
+        return hash_md5.digest()
 
     def restore(self):
         subject = self.pipeline.subject

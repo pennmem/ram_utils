@@ -10,10 +10,32 @@ from ptsa.data.readers.IndexReader import JsonIndexReader
 from RamPipeline import *
 from ReportUtils import ReportRamTask
 
+import hashlib
+
 
 class FREventPreparation(ReportRamTask):
     def __init__(self, mark_as_completed=True):
         super(FREventPreparation,self).__init__(mark_as_completed)
+
+    def input_hashsum(self):
+        subject = self.pipeline.subject
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp)==1 else int(tmp[1])
+
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/protocols/r1.json'))
+
+        hash_md5 = hashlib.md5()
+
+        fr1_event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='FR1')))
+        for fname in fr1_event_files:
+            hash_md5.update(open(fname,'rb').read())
+
+        catfr1_event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='catFR1')))
+        for fname in catfr1_event_files:
+            hash_md5.update(open(fname,'rb').read())
+
+        return hash_md5.digest()
 
     def run(self):
         subject = self.pipeline.subject

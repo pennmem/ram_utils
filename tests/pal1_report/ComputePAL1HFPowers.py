@@ -6,8 +6,10 @@ import numpy as np
 from scipy.stats.mstats import zscore
 from morlet import MorletWaveletTransform
 from sklearn.externals import joblib
-
+from ptsa.data.readers.IndexReader import JsonIndexReader
 from ptsa.data.readers import EEGReader
+
+import hashlib
 
 
 from ReportUtils import ReportRamTask
@@ -21,15 +23,26 @@ class ComputePAL1HFPowers(ReportRamTask):
         self.samplerate = None
         self.wavelet_transform = MorletWaveletTransform()
 
-    def initialize(self):
+    def input_hashsum(self):
+        subject = self.pipeline.subject
         task = self.pipeline.task
-        if self.dependency_inventory:
-            self.dependency_inventory.add_dependent_resource(resource_name=task+'_events',
-                                        access_path = ['experiments','pal1','events'])
-            self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
-                                        access_path = ['electrodes','bipolar'])
-            self.dependency_inventory.add_dependent_resource(resource_name='bipolar_json',
-                                        access_path = ['electrodes','bipolar_json'])
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp)==1 else int(tmp[1])
+
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/protocols/r1.json'))
+
+        hash_md5 = hashlib.md5()
+
+        bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
+        for fname in bp_paths:
+            hash_md5.update(open(fname,'rb').read())
+
+        event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment=task)))
+        for fname in event_files:
+            hash_md5.update(open(fname,'rb').read())
+
+        return hash_md5.digest()
 
     def restore(self):
         subject = self.pipeline.subject

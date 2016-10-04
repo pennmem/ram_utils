@@ -11,7 +11,7 @@ from ReportUtils import ReportRamTask
 from ptsa.data.readers import TalReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
-from loc_to_df import loc_to_df
+import hashlib
 
 
 def atlas_location(bp_data):
@@ -52,6 +52,22 @@ class MontagePreparation(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
         super(MontagePreparation,self).__init__(mark_as_completed)
         self.params = params
+
+    def input_hashsum(self):
+        subject = self.pipeline.subject
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp)==1 else int(tmp[1])
+
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/protocols/r1.json'))
+
+        hash_md5 = hashlib.md5()
+
+        bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
+        for fname in bp_paths:
+            hash_md5.update(open(fname,'rb').read())
+
+        return hash_md5.digest()
 
     def restore(self):
         subject = self.pipeline.subject

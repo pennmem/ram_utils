@@ -7,8 +7,11 @@ from sklearn.metrics import roc_auc_score, roc_curve
 from random import shuffle
 from sklearn.externals import joblib
 import warnings
-
+from ptsa.data.readers.IndexReader import JsonIndexReader
 from ReportUtils import ReportRamTask
+
+import hashlib
+
 
 def normalize_sessions(pow_mat, events):
     sessions = np.unique(events.session)
@@ -73,17 +76,26 @@ class ComputeClassifier(ReportRamTask):
         self.perm_AUCs = None
         self.pvalue = None
 
+    def input_hashsum(self):
+        subject = self.pipeline.subject
+        task = self.pipeline.task
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp)==1 else int(tmp[1])
 
-    def initialize(self):
-        task_prefix = 'cat' if self.pipeline.task == 'RAM_CatFR1' else ''
-        if self.dependency_inventory:
-            self.dependency_inventory.add_dependent_resource(resource_name=task_prefix+'fr1_events',
-                                        access_path = ['experiments',task_prefix+'fr1','events'])
-            self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
-                                        access_path = ['electrodes','bipolar'])
-            self.dependency_inventory.add_dependent_resource(resource_name='bipolar_json',
-                                        access_path = ['electrodes','bipolar_json'])
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/protocols/r1.json'))
 
+        hash_md5 = hashlib.md5()
+
+        bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
+        for fname in bp_paths:
+            hash_md5.update(open(fname,'rb').read())
+
+        event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment=task)))
+        for fname in event_files:
+            hash_md5.update(open(fname,'rb').read())
+
+        return hash_md5.digest()
 
     def run_loso_xval(self, event_sessions, recalls, permuted=False):
         probs = np.empty_like(recalls, dtype=np.float)
