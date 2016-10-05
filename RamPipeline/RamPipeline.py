@@ -201,7 +201,14 @@ class RamPipeline(object):
                 task.move_file_resources_to_workspace()  # moves only those resources that user requested to be moved
 
                 if task.mark_as_completed:
-                    task.create_file_in_workspace_dir(task_completed_file_name, 'w')
+                    try:
+                        hs = task.input_hashsum()
+                        f = open(task_completed_file_name, 'wb')
+                        f.write(hs)
+                        f.close()
+                    except:
+                        print 'No .completed file found'
+                        task.create_file_in_workspace_dir(task_completed_file_name, 'w')
 
         if self.dependency_change_tracker:
             self.dependency_change_tracker.write_latest_data_status()
