@@ -19,16 +19,13 @@ class ComputePSPowers(ReportRamTask):
         self.wavelet_transform = MorletWaveletTransform()
 
     def initialize(self):
-
         if self.dependency_inventory:
-
             self.dependency_inventory.add_dependent_resource(resource_name='ps_events',
                                         access_path = ['experiments','ps','events'])
-
-
             self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
                                         access_path = ['electrodes','bipolar'])
-
+            self.dependency_inventory.add_dependent_resource(resource_name='bipolar_json',
+                                        access_path = ['electrodes','bipolar_json'])
 
     def restore(self):
         subject = self.pipeline.subject
@@ -137,15 +134,11 @@ class ComputePSPowers(ReportRamTask):
             post_start_time = self.params.ps_offset
             post_end_time = self.params.ps_offset + (self.params.ps_end_time - self.params.ps_start_time)
 
-
-
-
-
             post_start_offsets = np.copy(sess_events.eegoffset)
 
 
             for i_ev in xrange(n_events):
-                ev_offset = sess_events[i_ev].pulse_duration if experiment!='PS3' else sess_events[i_ev].train_duration
+                ev_offset = sess_events[i_ev].stim_duration if experiment!='PS3' else sess_events[i_ev].train_duration
                 if ev_offset > 0:
                     ev_offset *= 0.001
                 else:

@@ -29,37 +29,11 @@ def prob2perf_norm(xval_output, p):
     return r
 
 
-def bipolar_label_to_loc_tag(bp, loc_tags):
-    if bp=='' or bp=='[]':
-        return None
-    label = bp[0]+'-'+bp[1]
-    if label in loc_tags:
-        lt = loc_tags[label]
-        return lt if lt!='' and lt!='[]' else None
-    label = bp[1]+'-'+bp[0]
-    if label in loc_tags:
-        lt = loc_tags[label]
-        return lt if lt!='' and lt!='[]' else None
-    else:
-        return None
-
-
 class ComputePSTable(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
         super(ComputePSTable,self).__init__(mark_as_completed)
         self.params = params
         self.ps_table = None
-
-    def initialize(self):
-        if self.dependency_inventory:
-            self.dependency_inventory.add_dependent_resource(resource_name='fr1_events',
-                                        access_path = ['experiments','fr1','events'])
-            self.dependency_inventory.add_dependent_resource(resource_name='catfr1_events',
-                                        access_path = ['experiments','catfr1','events'])
-            self.dependency_inventory.add_dependent_resource(resource_name='ps_events',
-                                        access_path = ['experiments','ps','events'])
-            self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
-                                        access_path = ['electrodes','bipolar'])
 
     def restore(self):
         subject = self.pipeline.subject
@@ -72,7 +46,8 @@ class ComputePSTable(ReportRamTask):
         experiment = self.pipeline.experiment
 
         ps_events = self.get_passed_object(experiment+'_events')
-        loc_tag = self.get_passed_object('loc_tag')
+        bp_tal_structs = self.get_passed_object('bp_tal_structs')
+        bp_tal_stim_only_structs = self.get_passed_object('bp_tal_stim_only_structs')
 
         lr_classifier = self.get_passed_object('lr_classifier')
         xval_output = self.get_passed_object('xval_output')
@@ -99,19 +74,30 @@ class ComputePSTable(ReportRamTask):
             perf_pre = prob2perf_norm(xval_output[-1], prob_pre[i])
             perf_diff[i] = 100.0*(prob2perf_norm(xval_output[-1], prob_pre[i]+prob_diff[i]) - perf_pre) / total_recall_performance
 
-        #define region
-        bipolar_label = pd.Series(zip([s.upper() for s in ps_events.stimAnodeTag], [s.upper() for s in ps_events.stimCathodeTag]))
-        region = bipolar_label.apply(lambda bp: bipolar_label_to_loc_tag(bp, loc_tag))
+        region = [None] * n_events
+        for i,ev in enumerate(ps_events):
+            anode_tag = ev.anode_label.upper()
+            cathode_tag = ev.cathode_label.upper()
+            bp_label1 = anode_tag + '-' + cathode_tag
+            bp_label2 = cathode_tag + '-' + anode_tag
+            if bp_label1 in bp_tal_structs.index:
+                region[i] = bp_tal_structs['bp_atlas_loc'].ix[bp_label1]
+            elif bp_label2 in bp_tal_structs.index:
+                region[i] = bp_tal_structs['bp_atlas_loc'].ix[bp_label2]
+            elif bp_label1 in bp_tal_stim_only_structs.index:
+                region[i] = bp_tal_stim_only_structs[bp_label1]
+            elif bp_label2 in bp_tal_stim_only_structs.index:
+                region[i] = bp_tal_stim_only_structs[bp_label2]
 
         self.ps_table = pd.DataFrame()
         self.ps_table['session'] = ps_events.session
         self.ps_table['mstime'] = ps_events.mstime
-        self.ps_table['Pulse_Frequency'] = ps_events.pulse_frequency
+        self.ps_table['Pulse_Frequency'] = ps_events.pulse_freq
         self.ps_table['Amplitude'] = ps_events.amplitude
-        self.ps_table['Duration'] = ps_events.pulse_duration
-        self.ps_table['Burst_Frequency'] = ps_events.burst_frequency
-        self.ps_table['stimAnodeTag'] = ps_events.stimAnodeTag
-        self.ps_table['stimCathodeTag'] = ps_events.stimCathodeTag
+        self.ps_table['Duration'] = ps_events.stim_duration
+        self.ps_table['Burst_Frequency'] = ps_events.burst_freq
+        self.ps_table['stimAnodeTag'] = ps_events.anode_label
+        self.ps_table['stimCathodeTag'] = ps_events.cathode_label
         self.ps_table['Region'] = region
         self.ps_table['prob_pre'] = prob_pre
         self.ps_table['prob_diff'] = prob_diff

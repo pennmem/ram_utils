@@ -8,12 +8,11 @@ from os.path import join
 from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/PS2_reports_try')
+cml_parser.arg('--workspace-dir','/scratch/RAM_maint/automated_reports/PS2.1_reports')
 cml_parser.arg('--mount-point','')
 cml_parser.arg('--recompute-on-no-status')
-cml_parser.arg('--experiment','PS2')
-
-# cml_parser.arg('--exit-on-no-change')
+cml_parser.arg('--experiment','PS2.1')
+cml_parser.arg('--exit-on-no-change')
 
 args = cml_parser.parse()
 
@@ -29,7 +28,7 @@ from ComputeFRPowers import ComputeFRPowers
 from ComputeControlPowers import ComputeControlPowers
 from ComputePSPowers import ComputePSPowers
 
-from TalPreparation import TalPreparation
+from MontagePreparation import MontagePreparation
 
 from ComputeClassifier import ComputeClassifier
 
@@ -87,7 +86,7 @@ task = 'RAM_PS'
 def find_subjects_by_task(task):
     # ev_files = glob('/data/events/%s/R*_events.mat' % task)
     ev_files = glob(args.mount_point + '/data/events/%s/R*_events.mat' % task)
-    return [re.search(r'R1\d\d\d[A-Z](_\d+)?', f).group() for f in ev_files]
+    return [re.search(r'R\d\d\d\d[A-Z](_\d+)?', f).group() for f in ev_files]
 
 
 subjects = find_subjects_by_task(task)
@@ -118,13 +117,13 @@ for subject in subjects:
                                      exit_on_no_change=args.exit_on_no_change,
                                      recompute_on_no_status=args.recompute_on_no_status)
 
-    report_pipeline.add_task(FREventPreparation(params=params, mark_as_completed=False))
+    report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
 
     report_pipeline.add_task(ControlEventPreparation(params=params, mark_as_completed=False))
 
     report_pipeline.add_task(PSEventPreparation(mark_as_completed=True))
 
-    report_pipeline.add_task(TalPreparation(mark_as_completed=False))
+    report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
 
     report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 

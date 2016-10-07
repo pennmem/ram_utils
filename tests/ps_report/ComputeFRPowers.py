@@ -21,17 +21,15 @@ class ComputeFRPowers(ReportRamTask):
 
 
     def initialize(self):
-
         if self.dependency_inventory:
-
             self.dependency_inventory.add_dependent_resource(resource_name='fr1_events',
                                         access_path = ['experiments','fr1','events'])
-
             self.dependency_inventory.add_dependent_resource(resource_name='catfr1_events',
                                         access_path = ['experiments','catfr1','events'])
-
             self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
                                         access_path = ['electrodes','bipolar'])
+            self.dependency_inventory.add_dependent_resource(resource_name='bipolar_json',
+                                        access_path = ['electrodes','bipolar_json'])
 
     def restore(self):
         subject = self.pipeline.subject

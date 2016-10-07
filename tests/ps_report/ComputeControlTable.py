@@ -28,18 +28,6 @@ class ComputeControlTable(ReportRamTask):
         self.params = params
         self.control_table = None
 
-    def initialize(self):
-        if self.dependency_inventory:
-            self.dependency_inventory.add_dependent_resource(resource_name='fr1_events',
-                                        access_path = ['experiments','fr1','events'])
-            self.dependency_inventory.add_dependent_resource(resource_name='catfr1_events',
-                                        access_path = ['experiments','catfr1','events'])
-            self.dependency_inventory.add_dependent_resource(resource_name='ps_events',
-                                        access_path = ['experiments','ps','events'])
-            self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
-                                        access_path = ['electrodes','bipolar'])
-
-
     def restore(self):
         subject = self.pipeline.subject
         self.control_table = pd.read_pickle(self.get_path_to_resource_in_workspace(subject + '-control_table.pkl'))

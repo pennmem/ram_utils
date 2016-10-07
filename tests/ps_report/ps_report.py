@@ -8,11 +8,11 @@ from setup_utils import parse_command_line, configure_python_paths
 from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1158T')
-cml_parser.arg('--workspace-dir','/scratch/busygin/PS2.1.sham')
+cml_parser.arg('--subject','R1050M')
+cml_parser.arg('--workspace-dir','/scratch/busygin/PS2')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
-cml_parser.arg('--experiment','PS2.1')
+cml_parser.arg('--experiment','PS2')
 
 # cml_parser.arg('--exit-on-no-change')
 
@@ -20,14 +20,13 @@ args = cml_parser.parse()
 
 
 from FREventPreparation import FREventPreparation
-from ControlEventPreparation import ControlEventPreparation
 from PSEventPreparation import PSEventPreparation
 
 from ComputeFRPowers import ComputeFRPowers
 from ComputeControlPowers import ComputeControlPowers
 from ComputePSPowers import ComputePSPowers
 
-from TalPreparation import TalPreparation
+from MontagePreparation import MontagePreparation
 
 from ComputeClassifier import ComputeClassifier
 
@@ -88,13 +87,11 @@ report_pipeline = ReportPipeline(subject=args.subject,
                                  exit_on_no_change=args.exit_on_no_change,
                                  recompute_on_no_status=args.recompute_on_no_status)
 
-report_pipeline.add_task(FREventPreparation(params=params, mark_as_completed=False))
-
-report_pipeline.add_task(ControlEventPreparation(params=params, mark_as_completed=False))
+report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
 
 report_pipeline.add_task(PSEventPreparation(mark_as_completed=True))
 
-report_pipeline.add_task(TalPreparation(mark_as_completed=False))
+report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
 
 report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 
