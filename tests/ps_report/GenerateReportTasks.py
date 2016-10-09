@@ -35,7 +35,7 @@ class GenerateTex(ReportRamTask):
         tex_ttest_table2_template = 'ttest_table2.tex.tpl'
         tex_ttest_against_sham_template = 'ttest_against_sham.tex.tpl'
 
-        report_tex_file_name = self.pipeline.experiment + '-' + self.pipeline.subject + '-' + 'report.tex'
+        report_tex_file_name = self.pipeline.task + '-' + self.pipeline.subject + '-' + 'report.tex'
         self.pass_object('report_tex_file_name',report_tex_file_name)
 
         self.set_file_resources_to_move(report_tex_file_name, dst='reports')
@@ -102,7 +102,7 @@ class GenerateTex(ReportRamTask):
                 ttest_against_zero_table = TextTemplateUtils.replace_template_to_string(tex_ttest_table2_template, ttest_replace_dict)
 
             n_significantly_above_sham_params = len(session_summary.ttest_against_sham_table) if session_summary.ttest_against_sham_table is not None else 0
-            ttest_against_sham_table = '' if self.pipeline.experiment!='PS2.1' else '\n{\em No significant parameters for $t$-test against sham for the lower half}.\n\\vspace{1pc}\n'
+            ttest_against_sham_table = '' if self.pipeline.task!='PS2.1' else '\n{\em No significant parameters for $t$-test against sham for the lower half}.\n\\vspace{1pc}\n'
             if n_significantly_above_sham_params > 0:
                 ttest_replace_dict = {'<PARAMETER1>': param1_name,
                                       '<UNIT1>': param1_unit,
@@ -112,10 +112,10 @@ class GenerateTex(ReportRamTask):
                                       }
                 ttest_against_sham_table = TextTemplateUtils.replace_template_to_string(tex_ttest_against_sham_template, ttest_replace_dict)
 
-            plot_replace_dict = {'<LOW_PLOT_FILE>': self.pipeline.experiment + '-' + self.pipeline.subject + '-low_plot_' + session_summary.stimtag + '.pdf',
-                                '<ALL_PLOT_FILE>': self.pipeline.experiment + '-' + self.pipeline.subject + '-all_plot_' + session_summary.stimtag + '.pdf'}
+            plot_replace_dict = {'<LOW_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-low_plot_' + session_summary.stimtag + '.pdf',
+                                '<ALL_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-all_plot_' + session_summary.stimtag + '.pdf'}
 
-            ps_plots = TextTemplateUtils.replace_template_to_string(tex_sham_plots_template if self.pipeline.experiment=='PS2.1' else tex_nosham_plots_template, plot_replace_dict)
+            ps_plots = TextTemplateUtils.replace_template_to_string(tex_sham_plots_template if self.pipeline.task=='PS2.1' else tex_nosham_plots_template, plot_replace_dict)
 
             replace_dict = {'<PS_PLOTS>': ps_plots,
                             '<STIMTAG>': session_summary.stimtag,
@@ -153,7 +153,7 @@ class GenerateTex(ReportRamTask):
 
         replace_dict = {
             '<SUBJECT>': self.pipeline.subject.replace('_', '\\textunderscore'),
-            '<EXPERIMENT>': self.pipeline.experiment,
+            '<EXPERIMENT>': self.pipeline.task,
             '<DATE>': datetime.date.today(),
             '<SESSION_DATA>': session_data_tex_table,
             '<NUMBER_OF_SESSIONS>': self.get_passed_object('NUMBER_OF_SESSIONS'),
@@ -224,7 +224,7 @@ class GeneratePlots(ReportRamTask):
 
             plot = panel_plot.generate_plot()
 
-            plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + self.pipeline.experiment + '-' + self.pipeline.subject + '-low_plot_' + session_summary.stimtag + '.pdf')
+            plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + self.pipeline.task + '-' + self.pipeline.subject + '-low_plot_' + session_summary.stimtag + '.pdf')
 
             plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
@@ -247,7 +247,7 @@ class GeneratePlots(ReportRamTask):
 
             plot = panel_plot.generate_plot()
 
-            plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + self.pipeline.experiment + '-' + self.pipeline.subject + '-all_plot_' + session_summary.stimtag + '.pdf')
+            plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + self.pipeline.task + '-' + self.pipeline.subject + '-all_plot_' + session_summary.stimtag + '.pdf')
 
             plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
@@ -287,74 +287,3 @@ class DeployReportPDF(ReportRamTask):
     def run(self):
         report_file = self.get_passed_object('report_file')
         self.pipeline.deploy_report(report_path=report_file)
-
-# class DeployReportPDF(ReportRamTask):
-#     def __init__(self, mark_as_completed=True):
-#         super(DeployReportPDF,self).__init__(mark_as_completed)
-#
-#         self.protocol = 'R1'
-#         self.convert_subject_code_regex = re.compile('('+self.protocol+')'+'([0-9]*)([a-zA-Z]{1,1})([\S]*)')
-#
-#     def split_subject_code(self,subject_code):
-#         match = re.match(self.convert_subject_code_regex,subject_code)
-#         if match:
-#             groups = match.groups()
-#
-#             ssc = SplitSubjectCode(protocol=groups[0], id=groups[1],site=groups[2],montage=groups[3])
-#             return ssc
-#         return None
-#
-#
-#     def deploy_report(self,report_path):
-#         subject = self.pipeline.subject
-#
-#         ssc = self.split_subject_code(subject)
-#
-#         report_basename = basename(report_path)
-#         report_base_dir = join('protocols',ssc.protocol.lower(),'subjects',str(ssc.id),'reports')
-#
-#         report_dir = join(self.pipeline.mount_point,report_base_dir)
-#
-#         if not isdir(report_dir):
-#             try:
-#                 os.makedirs(report_dir)
-#             except OSError:
-#                 return
-#
-#         standard_report_basename = subject+'_RAM_'+self.pipeline.experiment+'_report.pdf'
-#         standard_report_path = join(report_dir,standard_report_basename)
-#         # shutil.copy(report_path,join(report_dir,report_basename))
-#         shutil.copy(report_path,standard_report_path)
-#
-#         self.add_report_file(file=standard_report_path)
-#
-#         standard_report_link = join(self.pipeline.report_site_URL, report_base_dir, standard_report_basename)
-#         self.add_report_link(link=standard_report_link)
-#
-#
-#
-#     # def deploy_report(self,report_path):
-#     #     subject = self.pipeline.subject
-#     #
-#     #     ssc = self.split_subject_code(subject)
-#     #
-#     #     report_basename = basename(report_path)
-#     #     report_dir = join('/protocols',ssc.protocol.lower(),'subjects',str(ssc.id)+ssc.montage,'reports',self.pipeline.experiment)
-#     #
-#     #     if not isdir(report_dir):
-#     #         try:
-#     #             os.makedirs(report_dir)
-#     #         except OSError:
-#     #             return
-#     #
-#     #     standard_report_basename = subject+'_RAM_'+self.pipeline.experiment+'_report.pdf'
-#     #     standard_report_path = join(report_dir,standard_report_basename)
-#     #     # shutil.copy(report_path,join(report_dir,report_basename))
-#     #     shutil.copy(report_path,standard_report_path)
-#     #
-#     #     self.add_report_file(file=standard_report_path)
-#
-#
-#     def run(self):
-#         report_file = self.get_passed_object('report_file')
-#         self.deploy_report(report_path=report_file)

@@ -9,6 +9,10 @@ from scipy.stats import norm
 import sys
 from scipy.stats import describe
 from ReportUtils import ReportRamTask
+from ptsa.data.readers.IndexReader import JsonIndexReader
+
+import hashlib
+
 
 # def prob2perf(probs, true_labels, p):
 #     idx = bisect_right(probs, p)
@@ -35,17 +39,46 @@ class ComputePSTable(ReportRamTask):
         self.params = params
         self.ps_table = None
 
+    def input_hashsum(self):
+        subject = self.pipeline.subject
+        task = self.pipeline.task
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp)==1 else int(tmp[1])
+
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/protocols/r1.json'))
+
+        hash_md5 = hashlib.md5()
+
+        bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
+        for fname in bp_paths:
+            hash_md5.update(open(fname,'rb').read())
+
+        fr1_event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='FR1')))
+        for fname in fr1_event_files:
+            hash_md5.update(open(fname,'rb').read())
+
+        catfr1_event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='catFR1')))
+        for fname in catfr1_event_files:
+            hash_md5.update(open(fname,'rb').read())
+
+        event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment=task)))
+        for fname in event_files:
+            hash_md5.update(open(fname,'rb').read())
+
+        return hash_md5.digest()
+
     def restore(self):
         subject = self.pipeline.subject
-        experiment = self.pipeline.experiment
-        self.ps_table = pd.read_pickle(self.get_path_to_resource_in_workspace(subject+'-'+experiment+'-ps_table.pkl'))
+        task = self.pipeline.task
+        self.ps_table = pd.read_pickle(self.get_path_to_resource_in_workspace(subject+'-'+task+'-ps_table.pkl'))
         self.pass_object('ps_table', self.ps_table)
 
     def run(self):
         subject = self.pipeline.subject
-        experiment = self.pipeline.experiment
+        task = self.pipeline.task
 
-        ps_events = self.get_passed_object(experiment+'_events')
+        ps_events = self.get_passed_object(task+'_events')
         bp_tal_structs = self.get_passed_object('bp_tal_structs')
         bp_tal_stim_only_structs = self.get_passed_object('bp_tal_stim_only_structs')
 
@@ -105,7 +138,7 @@ class ComputePSTable(ReportRamTask):
         self.ps_table['isi'] = ps_events.isi
         
         self.pass_object('ps_table', self.ps_table)
-        self.ps_table.to_pickle(self.get_path_to_resource_in_workspace(subject+'-'+experiment+'-ps_table.pkl'))
+        self.ps_table.to_pickle(self.get_path_to_resource_in_workspace(subject+'-'+task+'-ps_table.pkl'))
 
     def compute_prob_deltas(self, ps_pow_mat_pre, ps_pow_mat_post, lr_classifier):
         prob_pre = lr_classifier.predict_proba(ps_pow_mat_pre)[:,1]

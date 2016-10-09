@@ -6,6 +6,9 @@ import pandas as pd
 from scipy.stats import norm
 from sklearn.externals import joblib
 from ReportUtils import ReportRamTask
+from ptsa.data.readers.IndexReader import JsonIndexReader
+
+import hashlib
 
 
 def prob2perf_norm(xval_output, p):
@@ -28,6 +31,35 @@ class ComputeControlTable(ReportRamTask):
         self.params = params
         self.control_table = None
 
+    def input_hashsum(self):
+        subject = self.pipeline.subject
+        task = self.pipeline.task
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp)==1 else int(tmp[1])
+
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/protocols/r1.json'))
+
+        hash_md5 = hashlib.md5()
+
+        bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
+        for fname in bp_paths:
+            hash_md5.update(open(fname,'rb').read())
+
+        fr1_event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='FR1')))
+        for fname in fr1_event_files:
+            hash_md5.update(open(fname,'rb').read())
+
+        catfr1_event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='catFR1')))
+        for fname in catfr1_event_files:
+            hash_md5.update(open(fname,'rb').read())
+
+        event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment=task)))
+        for fname in event_files:
+            hash_md5.update(open(fname,'rb').read())
+
+        return hash_md5.digest()
+
     def restore(self):
         subject = self.pipeline.subject
         self.control_table = pd.read_pickle(self.get_path_to_resource_in_workspace(subject + '-control_table.pkl'))
@@ -45,8 +77,8 @@ class ComputeControlTable(ReportRamTask):
             return
 
         event_sess = np.tile(events.session, 2)
-        stimAnodeTag = np.tile(events.stimAnodeTag, 2)
-        stimCathodeTag = np.tile(events.stimCathodeTag, 2)
+        stimAnodeTag = np.tile(events.anode_label, 2)
+        stimCathodeTag = np.tile(events.cathode_label, 2)
 
         lr_classifier = self.get_passed_object('lr_classifier')
         xval_output = self.get_passed_object('xval_output')

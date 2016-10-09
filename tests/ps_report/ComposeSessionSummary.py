@@ -136,7 +136,7 @@ class ComposeSessionSummary(ReportRamTask):
 
     def run(self):
         subject = self.pipeline.subject
-        experiment = self.pipeline.experiment
+        task = self.pipeline.task
 
         monopolar_channels = self.get_passed_object('monopolar_channels')
         xval_output = self.get_passed_object('xval_output')
@@ -155,21 +155,21 @@ class ComposeSessionSummary(ReportRamTask):
         param1_name = param2_name = None
         param1_unit = param2_unit = None
         const_param_name = const_unit = None
-        if experiment == 'PS1':
+        if task == 'PS1':
             param1_name = 'Pulse_Frequency'
             param2_name = 'Duration'
             param1_unit = 'Hz'
             param2_unit = 'ms'
             const_param_name = 'Amplitude'
             const_unit = 'mA'
-        elif experiment in ['PS2', 'PS2.1']:
+        elif task in ['PS2', 'PS2.1']:
             param1_name = 'Pulse_Frequency'
             param2_name = 'Amplitude'
             param1_unit = 'Hz'
             param2_unit = 'mA'
             const_param_name = 'Duration'
             const_unit = 'ms'
-        elif experiment == 'PS3':
+        elif task == 'PS3':
             param1_name = 'Burst_Frequency'
             param2_name = 'Pulse_Frequency'
             param1_unit = 'Hz'
@@ -295,9 +295,9 @@ class ComposeSessionSummary(ReportRamTask):
         self.pass_object('SESSION_DATA', session_data)
         self.pass_object('session_summary_array', session_summary_array)
 
-        joblib.dump(anova_param1_sv, self.get_path_to_resource_in_workspace(subject + '-' + experiment + '-anova_%s_sv.pkl'%param1_name))
-        joblib.dump(anova_param2_sv, self.get_path_to_resource_in_workspace(subject + '-' + experiment + '-anova_%s_sv.pkl'%param2_name))
-        joblib.dump(anova_param12_sv, self.get_path_to_resource_in_workspace(subject + '-' + experiment + '-anova_%s-%s_sv.pkl'%(param1_name,param2_name)))
+        joblib.dump(anova_param1_sv, self.get_path_to_resource_in_workspace(subject + '-' + task + '-anova_%s_sv.pkl'%param1_name))
+        joblib.dump(anova_param2_sv, self.get_path_to_resource_in_workspace(subject + '-' + task + '-anova_%s_sv.pkl'%param2_name))
+        joblib.dump(anova_param12_sv, self.get_path_to_resource_in_workspace(subject + '-' + task + '-anova_%s-%s_sv.pkl'%(param1_name,param2_name)))
 
         if len(anova_significance) > 0:
-            joblib.dump(anova_significance, self.get_path_to_resource_in_workspace(subject + '-' + experiment + '-anova_significance.pkl'))
+            joblib.dump(anova_significance, self.get_path_to_resource_in_workspace(subject + '-' + task + '-anova_significance.pkl'))

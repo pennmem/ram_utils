@@ -10,11 +10,11 @@ def parse_command_line(command_line_emulation_argument_list=None):
 
     # COMMAND LINE PARSING
     # command line example:
-    # python ps_report.py --subject=R1056M --experiment=PS2 --workspace-dir=~/scratch/py_9 --matlab-path=~/eeg --matlab-path=~/matlab/beh_toolbox --matlab-path=~/RAM/RAM_reporting --matlab-path=~/RAM/RAM_sys2Biomarkers --python-path=~/RAM_UTILS_GIT
+    # python ps_report.py --subject=R1056M --task=PS2 --workspace-dir=~/scratch/py_9 --matlab-path=~/eeg --matlab-path=~/matlab/beh_toolbox --matlab-path=~/RAM/RAM_reporting --matlab-path=~/RAM/RAM_sys2Biomarkers --python-path=~/RAM_UTILS_GIT
 
     parser = argparse.ArgumentParser(description='Run Parameter Search Report Generator')
     parser.add_argument('--subject', required=False, action='store')
-    parser.add_argument('--experiment', required=True,  action='store')
+    parser.add_argument('--task', required=True,  action='store')
     parser.add_argument('--workspace-dir',required=False, action='store')
     parser.add_argument('--mount-point',required=False, action='store')
 
@@ -30,7 +30,7 @@ def parse_command_line(command_line_emulation_argument_list=None):
 
     # making sure that sensible workspace directory is set if user does not provide one
     if not args.workspace_dir:
-        args.workspace_dir = abspath(join(expanduser('~'),'scratch',args.experiment, args.subject))
+        args.workspace_dir = abspath(join(expanduser('~'),'scratch',args.task, args.subject))
 
     # Converting matlab search paths to proper format
     if not args.mount_point:

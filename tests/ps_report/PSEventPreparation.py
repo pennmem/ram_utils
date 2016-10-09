@@ -29,7 +29,7 @@ class PSEventPreparation(ReportRamTask):
 
         hash_md5 = hashlib.md5()
 
-        event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment=task)))
+        event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment=task)))
         for fname in event_files:
             hash_md5.update(open(fname,'rb').read())
 
@@ -37,10 +37,10 @@ class PSEventPreparation(ReportRamTask):
 
     def restore(self):
         subject = self.pipeline.subject
-        experiment = self.pipeline.experiment
+        task = self.pipeline.task
 
-        events = joblib.load(self.get_path_to_resource_in_workspace(subject+'-'+experiment+'-ps_events.pkl'))
-        self.pass_object(experiment+'_events', events)
+        events = joblib.load(self.get_path_to_resource_in_workspace(subject+'-'+task+'-ps_events.pkl'))
+        self.pass_object(task+'_events', events)
 
         control_events = joblib.load(self.get_path_to_resource_in_workspace('control_events.pkl'))
         self.pass_object('control_events', control_events)
@@ -54,7 +54,7 @@ class PSEventPreparation(ReportRamTask):
 
         json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/protocols/r1.json'))
 
-        event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment=task)))
+        event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, experiment=task)))
         events = None
         for sess_file in event_files:
             e_path = os.path.join(self.pipeline.mount_point, str(sess_file))

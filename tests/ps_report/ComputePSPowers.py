@@ -7,10 +7,13 @@ import numpy as np
 from scipy.stats.mstats import zscore
 from morlet import MorletWaveletTransform
 from sklearn.externals import joblib
-
+from ptsa.data.readers.IndexReader import JsonIndexReader
 from ptsa.data.events import Events
 from ptsa.data.readers import EEGReader,BaseRawReader
 from ReportUtils import ReportRamTask
+
+import hashlib
+
 
 class ComputePSPowers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
@@ -18,21 +21,33 @@ class ComputePSPowers(ReportRamTask):
         self.params = params
         self.wavelet_transform = MorletWaveletTransform()
 
-    def initialize(self):
-        if self.dependency_inventory:
-            self.dependency_inventory.add_dependent_resource(resource_name='ps_events',
-                                        access_path = ['experiments','ps','events'])
-            self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
-                                        access_path = ['electrodes','bipolar'])
-            self.dependency_inventory.add_dependent_resource(resource_name='bipolar_json',
-                                        access_path = ['electrodes','bipolar_json'])
+    def input_hashsum(self):
+        subject = self.pipeline.subject
+        task = self.pipeline.task
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp)==1 else int(tmp[1])
+
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/protocols/r1.json'))
+
+        hash_md5 = hashlib.md5()
+
+        bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
+        for fname in bp_paths:
+            hash_md5.update(open(fname,'rb').read())
+
+        event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment=task)))
+        for fname in event_files:
+            hash_md5.update(open(fname,'rb').read())
+
+        return hash_md5.digest()
 
     def restore(self):
         subject = self.pipeline.subject
-        experiment = self.pipeline.experiment
+        task = self.pipeline.task
 
-        ps_pow_mat_pre = joblib.load(self.get_path_to_resource_in_workspace(subject+'-'+experiment+'-ps_pow_mat_pre.pkl'))
-        ps_pow_mat_post = joblib.load(self.get_path_to_resource_in_workspace(subject+'-'+experiment+'-ps_pow_mat_post.pkl'))
+        ps_pow_mat_pre = joblib.load(self.get_path_to_resource_in_workspace(subject+'-'+task+'-ps_pow_mat_pre.pkl'))
+        ps_pow_mat_post = joblib.load(self.get_path_to_resource_in_workspace(subject+'-'+task+'-ps_pow_mat_post.pkl'))
 
         self.pass_object('ps_pow_mat_pre',ps_pow_mat_pre)
         self.pass_object('ps_pow_mat_post',ps_pow_mat_post)
@@ -40,10 +55,10 @@ class ComputePSPowers(ReportRamTask):
 
     def run(self):
         subject = self.pipeline.subject
-        experiment = self.pipeline.experiment
+        task = self.pipeline.task
 
         #fetching objects from other tasks
-        events = self.get_passed_object(self.pipeline.experiment+'_events')
+        events = self.get_passed_object(self.pipeline.task+'_events')
         # channels = self.get_passed_object('channels')
         # tal_info = self.get_passed_object('tal_info')
         monopolar_channels = self.get_passed_object('monopolar_channels')
@@ -51,17 +66,17 @@ class ComputePSPowers(ReportRamTask):
 
 
         sessions = np.unique(events.session)
-        print experiment, 'sessions:', sessions
+        print task, 'sessions:', sessions
 
-        ps_pow_mat_pre, ps_pow_mat_post = self.compute_ps_powers(events, sessions, monopolar_channels, bipolar_pairs, experiment)
+        ps_pow_mat_pre, ps_pow_mat_post = self.compute_ps_powers(events, sessions, monopolar_channels, bipolar_pairs, task)
 
-        joblib.dump(ps_pow_mat_pre, self.get_path_to_resource_in_workspace(subject+'-'+experiment+'-ps_pow_mat_pre.pkl'))
-        joblib.dump(ps_pow_mat_post, self.get_path_to_resource_in_workspace(subject+'-'+experiment+'-ps_pow_mat_post.pkl'))
+        joblib.dump(ps_pow_mat_pre, self.get_path_to_resource_in_workspace(subject+'-'+task+'-ps_pow_mat_pre.pkl'))
+        joblib.dump(ps_pow_mat_post, self.get_path_to_resource_in_workspace(subject+'-'+task+'-ps_pow_mat_post.pkl'))
 
         self.pass_object('ps_pow_mat_pre',ps_pow_mat_pre)
         self.pass_object('ps_pow_mat_post',ps_pow_mat_post)
 
-    def compute_ps_powers(self, events, sessions, monopolar_channels, bipolar_pairs, experiment):
+    def compute_ps_powers(self, events, sessions, monopolar_channels, bipolar_pairs, task):
         subject = self.pipeline.subject
 
         n_freqs = len(self.params.freqs)
@@ -102,9 +117,8 @@ class ComputePSPowers(ReportRamTask):
                 events = np.hstack((events[events.session!=sess],sess_events)).view(np.recarray)
                 ev_order = np.argsort(events, order=('session','mstime'))
                 events = events[ev_order]
-                joblib.dump(events, self.get_path_to_resource_in_workspace(subject+'-'+experiment+'-ps_events.pkl'))
-                self.pass_object(self.pipeline.experiment+'_events', events)
-
+                joblib.dump(events, self.get_path_to_resource_in_workspace(subject+'-'+task+'-ps_events.pkl'))
+                self.pass_object(self.pipeline.task+'_events', events)
 
             if samplerate is None:
                 # samplerate = round(eegs_pre.samplerate)
@@ -138,7 +152,7 @@ class ComputePSPowers(ReportRamTask):
 
 
             for i_ev in xrange(n_events):
-                ev_offset = sess_events[i_ev].stim_duration if experiment!='PS3' else sess_events[i_ev].train_duration
+                ev_offset = sess_events[i_ev].stim_duration if task!='PS3' else sess_events[i_ev].train_duration
                 if ev_offset > 0:
                     ev_offset *= 0.001
                 else:
@@ -167,25 +181,18 @@ class ComputePSPowers(ReportRamTask):
                 events = np.hstack((events[events.session!=sess],sess_events)).view(np.recarray)
                 ev_order = np.argsort(events, order=('session','mstime'))
                 events = events[ev_order]
-                joblib.dump(events, self.get_path_to_resource_in_workspace(subject+'-'+experiment+'-ps_events.pkl'))
-                self.pass_object(self.pipeline.experiment+'_events', events)
-
-
+                joblib.dump(events, self.get_path_to_resource_in_workspace(subject+'-'+task+'-ps_events.pkl'))
+                self.pass_object(self.pipeline.task+'_events', events)
 
             eegs_post = eegs_post.rename({'offsets':'time','start_offsets':'events'})
             eegs_post['events'] = sess_events
             eegs_post['time'] = eegs_pre['time'].data
             eegs_post = TimeSeriesX(eegs_post)
 
-
-
-
-
-
             # mirroring
             eegs_post[...,:nb_] = eegs_post[...,2*nb_:nb_:-1]
 
-            print 'Computing', experiment, 'powers'
+            print 'Computing', task, 'powers'
 
             sess_pow_mat_pre = np.empty(shape=(n_events, n_bps, n_freqs), dtype=np.float)
             sess_pow_mat_post = np.empty_like(sess_pow_mat_pre)

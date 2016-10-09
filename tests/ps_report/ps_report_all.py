@@ -1,18 +1,15 @@
-from glob import glob
-import re
-
 import sys
 from setup_utils import parse_command_line, configure_python_paths
 from os.path import join
-
+from ptsa.data.readers.IndexReader import JsonIndexReader
 from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','/scratch/RAM_maint/automated_reports/PS2.1_reports')
+cml_parser.arg('--task','PS2.1')
+cml_parser.arg('--workspace-dir','/scratch/busygin/PS2.1')
 cml_parser.arg('--mount-point','')
 cml_parser.arg('--recompute-on-no-status')
-cml_parser.arg('--experiment','PS2.1')
-cml_parser.arg('--exit-on-no-change')
+#cml_parser.arg('--exit-on-no-change')
 
 args = cml_parser.parse()
 
@@ -21,7 +18,6 @@ import numpy as np
 from ReportUtils import ReportSummaryInventory
 
 from FREventPreparation import FREventPreparation
-from ControlEventPreparation import ControlEventPreparation
 from PSEventPreparation import PSEventPreparation
 
 from ComputeFRPowers import ComputeFRPowers
@@ -79,29 +75,27 @@ class Params(object):
 
 params = Params()
 
+task = args.task
 
-task = 'RAM_PS'
+json_reader = JsonIndexReader(os.path.join(args.mount_point,'data/eeg/protocols/r1.json'))
+subject_set = json_reader.aggregate_values('subjects', experiment=task)
 
-
-def find_subjects_by_task(task):
-    # ev_files = glob('/data/events/%s/R*_events.mat' % task)
-    ev_files = glob(args.mount_point + '/data/events/%s/R*_events.mat' % task)
-    return [re.search(r'R\d\d\d\d[A-Z](_\d+)?', f).group() for f in ev_files]
-
-
-subjects = find_subjects_by_task(task)
-# subjects.append('TJ086')
+subjects = []
+for s in subject_set:
+    montages = json_reader.aggregate_values('montage', subject=s, experiment=task)
+    for m_ in montages:
+        m = str(m_)
+        subject = str(s)
+        if m!='0':
+            subject += '_' + m
+        subjects.append(subject)
 subjects.sort()
-
-
-# print "subjects=",subjects
-# sys.exit()
 
 subject_fail_list = []
 subject_missing_experiment_list = []
 subject_missing_data_list = []
 
-rsi = ReportSummaryInventory(label=args.experiment)
+rsi = ReportSummaryInventory(label=args.task)
 
 for subject in subjects:
     print subject
@@ -111,15 +105,13 @@ for subject in subjects:
     # sets up processing pipeline
 
     report_pipeline = ReportPipeline(subject=subject,
-                                     experiment=args.experiment,
+                                     task=args.task,
                                      workspace_dir=join(args.workspace_dir, subject),
                                      mount_point=args.mount_point,
                                      exit_on_no_change=args.exit_on_no_change,
                                      recompute_on_no_status=args.recompute_on_no_status)
 
     report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
-
-    report_pipeline.add_task(ControlEventPreparation(params=params, mark_as_completed=False))
 
     report_pipeline.add_task(PSEventPreparation(mark_as_completed=True))
 
@@ -145,7 +137,7 @@ for subject in subjects:
 
     report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
-    report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
+    #report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
 
     report_pipeline.execute_pipeline()
 
