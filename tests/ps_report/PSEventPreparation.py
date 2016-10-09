@@ -70,17 +70,15 @@ class PSEventPreparation(ReportRamTask):
 
         events = events.view(np.recarray)
 
-        control_events = events[events.type=='SHAM']
-        joblib.dump(control_events, self.get_path_to_resource_in_workspace('control_events.pkl'))
-        self.pass_object('control_events', control_events)
-
-        sessions = np.unique(events.session)
-        print task, 'sessions:', sessions
-
         stim_params = pd.DataFrame.from_records(events.stim_params)
         events = pd.DataFrame.from_records(events)
         del events['stim_params']
         events = pd.concat([events, stim_params], axis=1)
+
+        propagate_stim_params_to_all_events(events)
+
+        control_events = events[events.type=='SHAM']
+        control_events = control_events.to_records(index=False)
 
         events = compute_isi(events)
 
@@ -104,6 +102,9 @@ class PSEventPreparation(ReportRamTask):
         joblib.dump(events, self.get_path_to_resource_in_workspace(subject+'-'+task+'-ps_events.pkl'))
         self.pass_object(task+'_events', events)
 
+        joblib.dump(control_events, self.get_path_to_resource_in_workspace('control_events.pkl'))
+        self.pass_object('control_events', control_events)
+
 def is_stim_event_type(event_type):
     return event_type == 'STIM_ON'
 
@@ -126,3 +127,13 @@ def compute_isi(events):
                         events.isi.values[i] = dt
 
     return events
+
+def propagate_stim_params_to_all_events(events):
+    events_by_session = events.groupby(['session'])
+    for sess,session_events in events_by_session:
+        last_stim_event = session_events[session_events.type=='STIM_ON'].iloc[-1]
+        session_mask = (events.session==sess)
+        events.loc[session_mask,'anode_label'] = last_stim_event.anode_label
+        events.loc[session_mask,'cathode_label'] = last_stim_event.cathode_label
+        events.loc[session_mask,'anode_number'] = last_stim_event.anode_number
+        events.loc[session_mask,'cathode_number'] = last_stim_event.cathode_number
