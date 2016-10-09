@@ -1,14 +1,15 @@
 from RamPipeline import *
 
 import numpy as np
-from copy import deepcopy
 from scipy.stats.mstats import zscore
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, roc_curve
-from sklearn.cross_validation import StratifiedKFold
 from random import shuffle
 from sklearn.externals import joblib
-from ReportUtils import ReportRamTask
+from ptsa.data.readers.IndexReader import JsonIndexReader
+
+import hashlib
+
 
 def normalize_sessions(pow_mat, events):
     sessions = np.unique(events.session)
@@ -38,15 +39,15 @@ class ModelOutput(object):
         except ValueError:
             return
         self.fpr, self.tpr, self.thresholds = roc_curve(self.true_labels, self.probs)
-        self.jstat_quantile = 0.5
-        self.jstat_thresh = np.median(self.probs)
         # idx = np.argmax(self.tpr-self.fpr)
         # self.jstat_thresh = self.thresholds[idx]
         # self.jstat_quantile = np.sum(self.probs <= self.jstat_thresh) / float(self.probs.size)
+        self.jstat_quantile = 0.5
+        self.jstat_thresh = np.median(self.probs)
 
     def compute_tercile_stats(self):
-        thresh_low = np.percentile(self.probs, 100.0/3.0)
-        thresh_high = np.percentile(self.probs, 2.0*100.0/3.0)
+        thresh_low = np.percentile(self.probs, 100.0 / 3.0)
+        thresh_high = np.percentile(self.probs, 2.0 * 100.0 / 3.0)
 
         low_terc_sel = (self.probs <= thresh_low)
         high_terc_sel = (self.probs >= thresh_high)
@@ -58,30 +59,52 @@ class ModelOutput(object):
 
         recall_rate = np.sum(self.true_labels) / float(self.true_labels.size)
 
-        self.low_pc_diff_from_mean = 100.0 * (low_terc_recall_rate-recall_rate) / recall_rate
-        self.mid_pc_diff_from_mean = 100.0 * (mid_terc_recall_rate-recall_rate) / recall_rate
-        self.high_pc_diff_from_mean = 100.0 * (high_terc_recall_rate-recall_rate) / recall_rate
+        self.low_pc_diff_from_mean = 100.0 * (low_terc_recall_rate - recall_rate) / recall_rate
+        self.mid_pc_diff_from_mean = 100.0 * (mid_terc_recall_rate - recall_rate) / recall_rate
+        self.high_pc_diff_from_mean = 100.0 * (high_terc_recall_rate - recall_rate) / recall_rate
 
 
-class ComputeClassifier_withTranspose(ReportRamTask):
+class ComputeClassifier(RamTask):
     def __init__(self, params, mark_as_completed=True):
-        super(ComputeClassifier_withTranspose,self).__init__(mark_as_completed)
+        RamTask.__init__(self, mark_as_completed)
         self.params = params
         self.pow_mat = None
         self.lr_classifier = None
-        self.xval_output = dict()   # ModelOutput per session; xval_output[-1] is across all sessions
+        self.xval_output = dict()  # ModelOutput per session; xval_output[-1] is across all sessions
         self.perm_AUCs = None
         self.pvalue = None
 
+    def input_hashsum(self):
+        subject = self.pipeline.subject
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp)==1 else int(tmp[1])
 
-    def initialize(self):
-        task = self.pipeline.task
-        if self.dependency_inventory:
-            self.dependency_inventory.add_dependent_resource(resource_name=task+'_events',
-                                        access_path = ['experiments','th1','events'])
-            self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
-                                        access_path = ['electrodes','bipolar'])
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/protocols/r1.json'))
 
+        hash_md5 = hashlib.md5()
+
+        bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
+        for fname in bp_paths:
+            hash_md5.update(open(fname,'rb').read())
+
+        fr1_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR1')))
+        for fname in fr1_event_files:
+            hash_md5.update(open(fname,'rb').read())
+
+        catfr1_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='catFR1')))
+        for fname in catfr1_event_files:
+            hash_md5.update(open(fname,'rb').read())
+
+        fr3_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR3')))
+        for fname in fr3_event_files:
+            hash_md5.update(open(fname,'rb').read())
+
+        catfr3_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='catFR3')))
+        for fname in catfr3_event_files:
+            hash_md5.update(open(fname,'rb').read())
+
+        return hash_md5.digest()
 
     def run_loso_xval(self, event_sessions, recalls, permuted=False):
         probs = np.empty_like(recalls, dtype=np.float)
@@ -99,7 +122,7 @@ class ComputeClassifier_withTranspose(ReportRamTask):
             outsample_pow_mat = self.pow_mat[outsample_mask]
             outsample_recalls = recalls[outsample_mask]
 
-            outsample_probs = self.lr_classifier.predict_proba(outsample_pow_mat)[:,1]
+            outsample_probs = self.lr_classifier.predict_proba(outsample_pow_mat)[:, 1]
             if not permuted:
                 self.xval_output[sess] = ModelOutput(outsample_recalls, outsample_probs)
                 self.xval_output[sess].compute_roc()
@@ -143,7 +166,7 @@ class ComputeClassifier_withTranspose(ReportRamTask):
             outsample_mask = ~insample_mask
             outsample_pow_mat = self.pow_mat[outsample_mask]
 
-            probs[outsample_mask] = self.lr_classifier.predict_proba(outsample_pow_mat)[:,1]
+            probs[outsample_mask] = self.lr_classifier.predict_proba(outsample_pow_mat)[:, 1]
 
         if not permuted:
             xval_output = ModelOutput(recalls, probs)
@@ -158,33 +181,32 @@ class ComputeClassifier_withTranspose(ReportRamTask):
         permuted_recalls = np.array(recalls)
         AUCs = np.empty(shape=n_perm, dtype=np.float)
         for i in xrange(n_perm):
-            shuffle(permuted_recalls)
-            
-            # JFM Note: I'm not permuting within list bc there are only 2 or 3 items per list            
-            # for lst in event_lists:
-                # sel = (event_lists == lst)
-                # list_permuted_recalls = permuted_recalls[sel]
-                # shuffle(list_permuted_recalls)
-                # permuted_recalls[sel] = list_permuted_recalls
-                
+            for lst in event_lists:
+                sel = (event_lists == lst)
+                list_permuted_recalls = permuted_recalls[sel]
+                shuffle(list_permuted_recalls)
+                permuted_recalls[sel] = list_permuted_recalls
             probs = self.run_lolo_xval(sess, event_lists, permuted_recalls, permuted=True)
             AUCs[i] = roc_auc_score(recalls, probs)
-            print 'AUC = ', AUCs[i]
+            print 'AUC =', AUCs[i]
         return AUCs
 
     def run(self):
         subject = self.pipeline.subject
-        task = self.pipeline.task
 
-        events = self.get_passed_object(task + '_events')
-        self.pow_mat = normalize_sessions(self.get_passed_object('classify_pow_mat'), events)
-        
-        # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto', solver='liblinear')
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto', solver='liblinear')
-        # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced',solver='liblinear',fit_intercept=False)
 
-        event_sessions = events.session    
-        recalls = (events.recalled==True)|(events.recalled_ifFlipped==True)
+        events = self.get_passed_object('FR_events')
+        self.pow_mat = normalize_sessions(self.get_passed_object('pow_mat'), events)
+
+        # n1 = np.sum(events.recalled)
+        # n0 = len(events) - n1
+        # w0 = (2.0/n0) / ((1.0/n0)+(1.0/n1))
+        # w1 = (2.0/n1) / ((1.0/n0)+(1.0/n1))
+        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
+                                                solver='liblinear')
+
+        event_sessions = events.session
+        recalls = events.recalled
 
         sessions = np.unique(event_sessions)
         if len(sessions) > 1:
@@ -195,56 +217,44 @@ class ComputeClassifier_withTranspose(ReportRamTask):
             self.run_loso_xval(event_sessions, recalls, permuted=False)
         else:
             sess = sessions[0]
-            
-            # doing this because I'm changing the lists hen doing k-fold
-            event_lists = deepcopy(events.trial)
+            event_lists = events.list
 
-            # rand_order = np.random.permutation(len(events))
-            # event_lists = event_lists[rand_order]
-            if self. params.doStratKFold:
-                skf = StratifiedKFold(recalls, n_folds=self.params.n_folds,shuffle=True)
-                for i, (train_index, test_index) in enumerate(skf):
-                    event_lists[test_index] = i
-            
             print 'Performing in-session permutation test'
             self.perm_AUCs = self.permuted_lolo_AUCs(sess, event_lists, recalls)
 
-            if self. params.doStratKFold:
-                print 'Performing %d-fold stratified xval'%(self.params.n_folds)
-            else:
-                print 'Performing leave-one-list-out xval'
+            print 'Performing leave-one-list-out xval'
             self.run_lolo_xval(sess, event_lists, recalls, permuted=False)
 
         print 'AUC =', self.xval_output[-1].auc
 
         self.pvalue = np.sum(self.perm_AUCs >= self.xval_output[-1].auc) / float(self.perm_AUCs.size)
-        print 'Perm test p-value =', self.pvalue, ' mean null = ', np.mean(self.perm_AUCs)
+        print 'Perm test p-value =', self.pvalue
 
         print 'thresh =', self.xval_output[-1].jstat_thresh, 'quantile =', self.xval_output[-1].jstat_quantile
 
         # Finally, fitting classifier on all available data
         self.lr_classifier.fit(self.pow_mat, recalls)
 
-        self.pass_object('lr_classifier_transpose', self.lr_classifier)
-        self.pass_object('xval_output_transpose', self.xval_output)
-        self.pass_object('perm_AUCs_transpose', self.perm_AUCs)
-        self.pass_object('pvalue_transpose', self.pvalue)
+        self.pass_object('lr_classifier', self.lr_classifier)
+        self.pass_object('xval_output', self.xval_output)
+        self.pass_object('perm_AUCs', self.perm_AUCs)
+        self.pass_object('pvalue', self.pvalue)
 
-        joblib.dump(self.lr_classifier, self.get_path_to_resource_in_workspace(subject + '-' + task + '-lr_classifier_transpose.pkl'))
-        joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace(subject + '-' + task + '-xval_output_transpose.pkl'))
-        joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace(subject + '-' + task + '-perm_AUCs_transpose.pkl')) 
-        joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject + '-' + task + '-pvalue_transpose.pkl'))
+        joblib.dump(self.lr_classifier, self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl'))
+        joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace(subject + '-xval_output.pkl'))
+        joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace(subject + '-perm_AUCs.pkl'))
+        joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject + '-pvalue.pkl'))
 
     def restore(self):
         subject = self.pipeline.subject
-        task = self.pipeline.task
 
-        self.lr_classifier = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-lr_classifier_transpose.pkl'))
-        self.xval_output = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-xval_output_transpose.pkl'))
-        self.perm_AUCs = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-perm_AUCs_transpose.pkl'))
-        self.pvalue = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-pvalue_transpose.pkl'))
 
-        self.pass_object('lr_classifier_transpose', self.lr_classifier)
-        self.pass_object('xval_output_transpose', self.xval_output)
-        self.pass_object('perm_AUCs_transpose', self.perm_AUCs)
-        self.pass_object('pvalue_transpose', self.pvalue)
+        self.lr_classifier = joblib.load(self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl'))
+        self.xval_output = joblib.load(self.get_path_to_resource_in_workspace(subject + '-xval_output.pkl'))
+        self.perm_AUCs = joblib.load(self.get_path_to_resource_in_workspace(subject + '-perm_AUCs.pkl'))
+        self.pvalue = joblib.load(self.get_path_to_resource_in_workspace(subject + '-pvalue.pkl'))
+
+        self.pass_object('lr_classifier', self.lr_classifier)
+        self.pass_object('xval_output', self.xval_output)
+        self.pass_object('perm_AUCs', self.perm_AUCs)
+        self.pass_object('pvalue', self.pvalue)
