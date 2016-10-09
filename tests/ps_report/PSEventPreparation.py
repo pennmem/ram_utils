@@ -111,20 +111,8 @@ def is_stim_event_type(event_type):
 def compute_isi(events):
     print 'Computing ISI'
 
-    events['isi'] = np.nan
-
-    for i in xrange(1,len(events)):
-        curr_ev = events.ix[i]
-        if is_stim_event_type(curr_ev.type):
-            prev_ev = events.ix[i-1]
-            if curr_ev.session == prev_ev.session:
-                if is_stim_event_type(prev_ev.type) or prev_ev.type == 'BURST':
-                    prev_mstime = prev_ev.mstime
-                    if prev_ev.pulse_duration > 0:
-                        prev_mstime += prev_ev.pulse_duration
-                    dt = curr_ev.mstime - prev_mstime
-                    if dt < 7000.0:
-                        events.isi.values[i] = dt
+    events['isi'] = events['mstime'] - events['mstime'].shift(1)
+    events.loc[events['type'].shift(1)!='STIM_OFF', 'isi'] = np.nan
 
     return events
 
