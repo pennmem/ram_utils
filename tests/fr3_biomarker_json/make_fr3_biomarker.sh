@@ -1,12 +1,12 @@
 #!/bin/bash
 
 workspace=/scratch/busygin/FR3_biomarkers
-subject=R1191J
-n_channels=256
-anode=RX1
-anode_num=1
-cathode=RX2
-cathode_num=2
+subject=R1154D
+n_channels=128
+anode=LTCG29
+anode_num=29
+cathode=LTCG30
+cathode_num=30
 pulse_frequency=200
 pulse_duration=500
 target_amplitude=1000
