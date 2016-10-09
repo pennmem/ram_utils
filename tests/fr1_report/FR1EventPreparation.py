@@ -38,6 +38,10 @@ class FR1EventPreparation(ReportRamTask):
         subject = self.pipeline.subject
         task = self.pipeline.task
 
+        evs_field_list = ['wordno', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'iscorrect', 'answer', 'recalled', 'word', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']
+        if task=='catFR1':
+            evs_field_list += ['category', 'category_num']
+
         tmp = subject.split('_')
         subj_code = tmp[0]
         montage = 0 if len(tmp)==1 else int(tmp[1])
@@ -50,7 +54,7 @@ class FR1EventPreparation(ReportRamTask):
             e_path = os.path.join(self.pipeline.mount_point, str(sess_file))
             e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
-            sess_events = e_reader.read()[['wordno', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'iscorrect', 'answer', 'recalled', 'word', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
+            sess_events = e_reader.read()[evs_field_list]
 
             if events is None:
                 events = sess_events
