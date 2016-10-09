@@ -121,7 +121,7 @@ class ComposeSessionSummary(ReportRamTask):
                         first_recall_idx = tmp[0]
                         prob_first_recall[first_recall_idx] += 1
                         first_recall_counter[first_recall_idx] += 1
-                if task == 'RAM_CatFR1':
+                if task == 'catFR1':
                     # list_rec_events = session_rec_events[session_rec_events.list == lst]
                     for i in xrange(1,len(list_rec_events)):
                         cur_ev = list_rec_events[i]

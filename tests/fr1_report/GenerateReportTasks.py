@@ -144,7 +144,7 @@ class GeneratePlots(ReportRamTask):
         #
         #     plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
         #
-        #     if task == 'RAM_CatFR1':
+        #     if task == 'catFR1':
         #         panel_plot = PanelPlot(xfigsize=6.0, yfigsize=6.0, i_max=1, j_max=1, title='', xtitle='', labelsize=18)
         #         pd = BarPlotData(x=[0,1], y=[session_summary.irt_within_cat,  session_summary.irt_between_cat], ylabel='IRT (msec)',xlabel='', x_tick_labels=['Within Cat', 'Between Cat'], barcolors=['grey','grey'], barwidth=0.5, xlabel_fontsize=18, ylabel_fontsize=18)
         #         panel_plot.add_plot_data(0, 0, plot_data=pd)
@@ -186,7 +186,7 @@ class GeneratePlots(ReportRamTask):
 
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
-        if task == 'RAM_CatFR1':
+        if task == 'catFR1':
             panel_plot = PanelPlot(xfigsize=6.0, yfigsize=6.0, i_max=1, j_max=1, title='',xtitle='', labelsize=18)
             pd = BarPlotData(x=[0,1], y=[cumulative_summary.irt_within_cat, cumulative_summary.irt_between_cat], ylabel='IRT (msec)', xlabel='',x_tick_labels=['Within Cat', 'Between Cat'], barcolors=['grey','grey'], barwidth=0.5, xlabel_fontsize=18, ylabel_fontsize=18)
             panel_plot.add_plot_data(0, 0, plot_data=pd)
