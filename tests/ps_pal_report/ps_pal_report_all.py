@@ -2,6 +2,7 @@ import sys
 from setup_utils import parse_command_line, configure_python_paths
 from os.path import join
 
+from ptsa.data.readers.IndexReader import JsonIndexReader
 from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
@@ -96,7 +97,7 @@ subject_fail_list = []
 subject_missing_experiment_list = []
 subject_missing_data_list = []
 
-rsi = ReportSummaryInventory(label=args.experiment)
+rsi = ReportSummaryInventory(label=args.task+'_PAL')
 
 for subject in subjects:
     print subject
@@ -107,7 +108,7 @@ for subject in subjects:
 
     report_pipeline = ReportPipeline(subject=subject,
                                      task=args.task,
-                                     experiment_label=args.experiment+'_PAL', # NOTE: I am adding experiment_label tso that json status outpu has proper experiment annotation that does not overlap with other repor experiments names
+                                     experiment_label=args.task+'_PAL', # NOTE: I am adding experiment_label tso that json status outpu has proper experiment annotation that does not overlap with other repor experiments names
                                      workspace_dir=join(args.workspace_dir, subject),
                                      mount_point=args.mount_point,
                                      exit_on_no_change=args.exit_on_no_change,
@@ -117,7 +118,7 @@ for subject in subjects:
 
     report_pipeline.add_task(PSEventPreparation(mark_as_completed=True))
 
-    report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
+    report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
 
     report_pipeline.add_task(ComputePALPowers(params=params, mark_as_completed=True))
 
