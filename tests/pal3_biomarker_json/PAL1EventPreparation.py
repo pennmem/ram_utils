@@ -84,6 +84,6 @@ class PAL1EventPreparation(RamTask):
 
         events = events.view(np.recarray)
 
-        print len(events), 'WORD events'
+        print len(events), 'STUDY_PAIR events'
 
-        self.pass_object('PAL_events', events)
+        self.pass_object('PAL1_events', events)
