@@ -9,7 +9,7 @@ cml_parser.arg('--task','PS2.1')
 cml_parser.arg('--workspace-dir','/scratch/busygin/PS2.1')
 cml_parser.arg('--mount-point','')
 cml_parser.arg('--recompute-on-no-status')
-#cml_parser.arg('--exit-on-no-change')
+cml_parser.arg('--exit-on-no-change')
 
 args = cml_parser.parse()
 
@@ -78,17 +78,19 @@ params = Params()
 task = args.task
 
 json_reader = JsonIndexReader(os.path.join(args.mount_point,'data/eeg/protocols/r1.json'))
-subject_set = json_reader.aggregate_values('subjects', experiment=task)
+subject_set = json_reader.aggregate_values('subjects', experiment=task) & (json_reader.aggregate_values('subjects', experiment='FR1') | json_reader.aggregate_values('subjects', experiment='catFR1'))
 
 subjects = []
 for s in subject_set:
     montages = json_reader.aggregate_values('montage', subject=s, experiment=task)
+    subject = str(s)
     for m_ in montages:
         m = str(m_)
-        subject = str(s)
-        if m!='0':
-            subject += '_' + m
-        subjects.append(subject)
+        has_fr = bool(json_reader.aggregate_values('sessions', subject=subject, montage=m, experiment='FR1') | json_reader.aggregate_values('sessions', subject=subject, montage=m, experiment='catFR1'))
+        if has_fr:
+            if m!='0':
+                subject += '_' + m
+            subjects.append(subject)
 subjects.sort()
 
 subject_fail_list = []
