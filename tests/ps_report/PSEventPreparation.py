@@ -55,6 +55,7 @@ class PSEventPreparation(ReportRamTask):
         json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/protocols/r1.json'))
 
         event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, experiment=task)))
+        print event_files
         events = None
         for sess_file in event_files:
             e_path = os.path.join(self.pipeline.mount_point, str(sess_file))
