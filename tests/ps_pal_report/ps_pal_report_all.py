@@ -85,12 +85,14 @@ subject_set = json_reader.aggregate_values('subjects', experiment=task) & json_r
 subjects = []
 for s in subject_set:
     montages = json_reader.aggregate_values('montage', subject=s, experiment=task)
+    subject = str(s)
     for m_ in montages:
         m = str(m_)
-        subject = str(s)
-        if m!='0':
-            subject += '_' + m
-        subjects.append(subject)
+        has_pal1 = bool(json_reader.aggregate_values('sessions', subject=subject, montage=m, experiment='PAL1'))
+        if has_pal1:
+            if m!='0':
+                subject += '_' + m
+            subjects.append(subject)
 subjects.sort()
 
 subject_fail_list = []
