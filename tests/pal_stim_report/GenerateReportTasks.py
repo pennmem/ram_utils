@@ -84,7 +84,7 @@ class GenerateTex(ReportRamTask):
         perm_test_pvalue = self.get_passed_object('pvalue')
 
         replace_dict = {'<DATE>': datetime.date.today(),
-                        '<EXPERIMENT>': self.pipeline.task[4:],
+                        '<EXPERIMENT>': self.pipeline.task,
                         '<SESSION_DATA>': session_data_tex_table,
                         '<SUBJECT>': self.pipeline.subject.replace('_','\\textunderscore'),
                         '<NUMBER_OF_SESSIONS>': n_sess,
