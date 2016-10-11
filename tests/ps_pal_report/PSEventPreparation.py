@@ -54,7 +54,7 @@ class PSEventPreparation(ReportRamTask):
 
         json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/protocols/r1.json'))
 
-        event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, experiment=task)))
+        event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment=task)))
         events = None
         for sess_file in event_files:
             e_path = os.path.join(self.pipeline.mount_point, str(sess_file))
@@ -113,6 +113,7 @@ def compute_isi(events):
 
     events['isi'] = events['mstime'] - events['mstime'].shift(1)
     events.loc[events['type'].shift(1)!='STIM_OFF', 'isi'] = np.nan
+    events.loc[events['isi']>7000.0, 'isi'] = np.nan
 
     return events
 
