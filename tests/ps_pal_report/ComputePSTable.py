@@ -126,7 +126,7 @@ class ComputePSTable(ReportRamTask):
         self.ps_table['session'] = ps_events.session
         self.ps_table['mstime'] = ps_events.mstime
         self.ps_table['Pulse_Frequency'] = ps_events.pulse_freq
-        self.ps_table['Amplitude'] = ps_events.amplitude
+        self.ps_table['Amplitude'] = ps_events.amplitude / 1000.0
         self.ps_table['Duration'] = ps_events.stim_duration
         self.ps_table['Burst_Frequency'] = ps_events.burst_freq
         self.ps_table['stimAnodeTag'] = ps_events.anode_label
