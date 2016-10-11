@@ -102,8 +102,6 @@ class RamPipeline(object):
         self.dependency_change_tracker = dependency_tracker
 
     def resolve_dependencies(self):
-
-
         self.dependency_change_tracker.initialize()
 
         if self.recompute_on_no_status and not self.dependency_change_tracker.is_saved_status_present():
@@ -114,8 +112,25 @@ class RamPipeline(object):
                     print 'will rerun task ', task.name()
                 except OSError:
                     pass
-
             return 1
+
+        new_dependency_tracking_style = False
+        change_counter = 0
+        for task_name, task in self.task_registry.task_dict.items():
+            task_hs = task.input_hashsum()
+            if task_hs != '':
+                new_dependency_tracking_style = True
+                completed_file_name = task.get_task_completed_file_name()
+                if isfile(completed_file_name):
+                    f = open(completed_file_name, 'rb')
+                    hs = f.read()
+                    f.close()
+                    if hs != task_hs:
+                        print 'will rerun task ', task.name()
+                        change_counter += 1
+
+        if new_dependency_tracking_style:
+            return change_counter
 
         change_counter = 0
         if self.dependency_change_tracker:
