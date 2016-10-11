@@ -78,7 +78,7 @@ class ComputeFRStimTable(ReportRamTask):
         j = 0
         for i,ev in enumerate(all_events):
             if ev.type=='WORD':
-                if all_events[i+1].type=='STIM':
+                if (all_events[i+1].type=='STIM') or (all_events[i+1].type=='WORD_OFF' and all_events[i+2].type=='STIM'):
                     is_stim_item[j] = True
                 if (all_events[i-1].type=='STIM_OFF') or (all_events[i+1].type=='STIM_OFF'):
                     is_post_stim_item[j] = True
@@ -103,10 +103,10 @@ class ComputeFRStimTable(ReportRamTask):
         for sess in sessions:
             if self.pipeline.task=='RAM_FR3' and self.pipeline.subject!='R1124J_1':
                 sess_mask = (events.session==sess)
-                fr_stim_sess_prob = fr_stim_prob[sess_mask]
                 sess_prob, thresh = parse_biomarker_output(os.path.join(self.pipeline.mount_point, 'data/eeg', self.pipeline.subject, 'raw/FR3_%d'%sess, 'commandOutput.txt'))
-                n_probs = sess_prob.shape[0]
-                fr_stim_sess_prob[36:36+n_probs] = sess_prob  # plug biomarker output after 3rd list
+                sess_prob = sess_prob[12:]  # discard practice list
+                if len(sess_prob) == np.sum(sess_mask):
+                    fr_stim_prob[sess_mask] = sess_prob  # plug biomarker output
                 self.fr_stim_table['thresh'][sess_mask] = thresh
 
             sess_stim_events = all_events[(all_events.session==sess) & (all_events.type=='STIM')]
