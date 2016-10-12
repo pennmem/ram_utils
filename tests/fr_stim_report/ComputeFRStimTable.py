@@ -119,7 +119,7 @@ class ComputeFRStimTable(ReportRamTask):
                 sess_prob = sess_prob[12:]  # discard practice list
                 if len(sess_prob) == np.sum(sess_mask):
                     fr_stim_prob[sess_mask] = sess_prob  # plug biomarker output
-                self.fr_stim_table['thresh'][sess_mask] = thresh
+                self.fr_stim_table.loc[sess_mask,'thresh'] = thresh
 
             sess_stim_events = all_events[(all_events.session==sess) & (all_events.type=='STIM_ON')]
             sess_stim_event = sess_stim_events[-1]
