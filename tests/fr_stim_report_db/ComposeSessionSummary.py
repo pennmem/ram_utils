@@ -185,6 +185,7 @@ class ComposeSessionSummary(ReportRamTask):
             post_stim_item_recall_rate_high = fr_stim_stim_list_post_stim_item_high_table['recalled'].mean()
 
             non_stim_list_recall_rate_low = fr_stim_non_stim_list_low_table['recalled'].mean()
+            non_stim_list_recall_rate_post_low = fr_stim_non_stim_list_post_low_table['recalled'].mean()
             non_stim_list_recall_rate_high = fr_stim_non_stim_list_high_table['recalled'].mean()
 
             recall_rate = session_summary.n_correct_words / float(session_summary.n_words)
@@ -201,7 +202,7 @@ class ComposeSessionSummary(ReportRamTask):
                 session_summary.post_stim_vs_non_stim_pc_diff_from_mean = (post_stim_low_pc_diff_from_mean, post_stim_high_pc_diff_from_mean)
             elif task == 'RAM_FR3':
                 stim_pc_diff_from_mean = 100.0 * (stim_item_recall_rate-non_stim_list_recall_rate_low) / recall_rate
-                post_stim_pc_diff_from_mean = 100.0 * (post_stim_item_recall_rate-non_stim_list_recall_rate_low) / recall_rate
+                post_stim_pc_diff_from_mean = 100.0 * (post_stim_item_recall_rate-non_stim_list_recall_rate_post_low) / recall_rate
                 session_summary.pc_diff_from_mean = (stim_pc_diff_from_mean, post_stim_pc_diff_from_mean)
 
                 session_summary.n_correct_stim_items = fr_stim_stim_list_stim_item_table['recalled'].sum()
