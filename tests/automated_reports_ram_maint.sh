@@ -104,7 +104,7 @@ remove_old_status_dirs ${workspace_dir}
 
 python ${report_code_dir}/fr_stim_report_all.py  --task=RAM_FR3 \
  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
- --skip-subjects R1093J_1 R1124J_1
+ --skip-subjects R1093J_1
 
 # PAL3
 report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/pal_stim_report_db
