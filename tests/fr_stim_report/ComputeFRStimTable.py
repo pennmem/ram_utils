@@ -90,7 +90,7 @@ class ComputeFRStimTable(ReportRamTask):
         j = 0
         for i,ev in enumerate(all_events):
             if ev.type=='WORD':
-                if (all_events[i+1].type=='STIM_ON') or (all_events[i+1].type=='WORD_OFF' and all_events[i+2].type=='STIM_ON'):
+                if (all_events[i+1].type=='STIM_ON') or (all_events[i+1].type=='WORD_OFF' and (all_events[i+2].type=='STIM_ON' or (all_events[i+2].type=='DISTRACT_START' and all_events[i+3].type=='STIM_ON'))):
                     is_stim_item[j] = True
                 if (all_events[i-1].type=='STIM_OFF') or (all_events[i+1].type=='STIM_OFF'):
                     is_post_stim_item[j] = True

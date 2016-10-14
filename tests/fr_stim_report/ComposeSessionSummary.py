@@ -161,9 +161,15 @@ class ComposeSessionSummary(ReportRamTask):
             session_summary.mean_prob_diff_low_post_stim_item = fr_stim_stim_list_post_stim_item_low_table['prob_diff'].mean()
             session_summary.sem_prob_diff_low_post_stim_item = fr_stim_stim_list_post_stim_item_low_table['prob_diff'].sem()
 
-            fr_stim_non_stim_list_table = fr_stim_non_stim_list_table[(~fr_stim_non_stim_list_table['is_stim_list']) & (fr_stim_non_stim_list_table['serialpos']>1)]
-            fr_stim_non_stim_list_low_table = fr_stim_non_stim_list_table[fr_stim_non_stim_list_table['prev_prob']<fr_stim_non_stim_list_table['thresh']]
-            fr_stim_non_stim_list_high_table = fr_stim_non_stim_list_table[fr_stim_non_stim_list_table['prev_prob']>fr_stim_non_stim_list_table['thresh']]
+            #fr_stim_non_stim_list_table = fr_stim_non_stim_list_table[(~fr_stim_non_stim_list_table['is_stim_list']) & (fr_stim_non_stim_list_table['serialpos']>1)]
+
+            low_state_mask = (fr_stim_non_stim_list_table['prob']<fr_stim_non_stim_list_table['thresh'])
+            post_low_state_mask = low_state_mask.shift(1)
+            post_low_state_mask[fr_stim_non_stim_list_table['serialpos']==1] = False
+
+            fr_stim_non_stim_list_low_table = fr_stim_non_stim_list_table[low_state_mask]
+            fr_stim_non_stim_list_post_low_table = fr_stim_non_stim_list_table[post_low_state_mask]
+            fr_stim_non_stim_list_high_table = fr_stim_non_stim_list_table[fr_stim_non_stim_list_table['prob']>fr_stim_non_stim_list_table['thresh']]
 
             session_summary.control_mean_prob_diff_all = fr_stim_non_stim_list_table['prob_diff'].mean()
             session_summary.control_sem_prob_diff_all = fr_stim_non_stim_list_table['prob_diff'].sem()
@@ -179,6 +185,7 @@ class ComposeSessionSummary(ReportRamTask):
             post_stim_item_recall_rate_high = fr_stim_stim_list_post_stim_item_high_table['recalled'].mean()
 
             non_stim_list_recall_rate_low = fr_stim_non_stim_list_low_table['recalled'].mean()
+            non_stim_list_recall_rate_post_low = fr_stim_non_stim_list_post_low_table['recalled'].mean()
             non_stim_list_recall_rate_high = fr_stim_non_stim_list_high_table['recalled'].mean()
 
             recall_rate = session_summary.n_correct_words / float(session_summary.n_words)
@@ -195,7 +202,7 @@ class ComposeSessionSummary(ReportRamTask):
                 session_summary.post_stim_vs_non_stim_pc_diff_from_mean = (post_stim_low_pc_diff_from_mean, post_stim_high_pc_diff_from_mean)
             elif task == 'FR3':
                 stim_pc_diff_from_mean = 100.0 * (stim_item_recall_rate-non_stim_list_recall_rate_low) / recall_rate
-                post_stim_pc_diff_from_mean = 100.0 * (post_stim_item_recall_rate-non_stim_list_recall_rate_low) / recall_rate
+                post_stim_pc_diff_from_mean = 100.0 * (post_stim_item_recall_rate-non_stim_list_recall_rate_post_low) / recall_rate
                 session_summary.pc_diff_from_mean = (stim_pc_diff_from_mean, post_stim_pc_diff_from_mean)
 
                 session_summary.n_correct_stim_items = fr_stim_stim_list_stim_item_table['recalled'].sum()
@@ -210,8 +217,12 @@ class ComposeSessionSummary(ReportRamTask):
                 session_summary.n_total_nonstim_low_bio_items = len(fr_stim_non_stim_list_low_table)
                 session_summary.pc_nonstim_low_bio_items = 100*session_summary.n_correct_nonstim_low_bio_items / float(session_summary.n_total_nonstim_low_bio_items)
 
+                session_summary.n_correct_nonstim_post_low_bio_items = fr_stim_non_stim_list_post_low_table['recalled'].sum()
+                session_summary.n_total_nonstim_post_low_bio_items = len(fr_stim_non_stim_list_post_low_table)
+                session_summary.pc_nonstim_post_low_bio_items = 100*session_summary.n_correct_nonstim_post_low_bio_items / float(session_summary.n_total_nonstim_post_low_bio_items)
+
                 session_summary.chisqr_stim_item, session_summary.pvalue_stim_item, _ = proportions_chisquare([session_summary.n_correct_stim_items, session_summary.n_correct_nonstim_low_bio_items], [session_summary.n_total_stim_items, session_summary.n_total_nonstim_low_bio_items])
-                session_summary.chisqr_post_stim_item, session_summary.pvalue_post_stim_item, _ = proportions_chisquare([session_summary.n_correct_post_stim_items, session_summary.n_correct_nonstim_low_bio_items], [session_summary.n_total_post_stim_items, session_summary.n_total_nonstim_low_bio_items])
+                session_summary.chisqr_post_stim_item, session_summary.pvalue_post_stim_item, _ = proportions_chisquare([session_summary.n_correct_post_stim_items, session_summary.n_correct_nonstim_post_low_bio_items], [session_summary.n_total_post_stim_items, session_summary.n_total_nonstim_post_low_bio_items])
 
             session_summary_array.append(session_summary)
 

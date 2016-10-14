@@ -7,13 +7,11 @@ from ptsa.data.readers.IndexReader import JsonIndexReader
 from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
-#cml_parser.arg('--workspace-dir','/scratch/RAM_maint/automated_reports/FR3_reports')
 cml_parser.arg('--workspace-dir','/scratch/busygin/FR3_reports')
 cml_parser.arg('--task','FR3')
 cml_parser.arg('--mount-point','')
-#cml_parser.arg('--recompute-on-no-status')
-
-# cml_parser.arg('--exit-on-no-change')
+cml_parser.arg('--recompute-on-no-status')
+cml_parser.arg('--exit-on-no-change')
 
 args = cml_parser.parse()
 

@@ -72,6 +72,10 @@ class SessionSummary(object):
         self.n_total_nonstim_low_bio_items = None
         self.pc_nonstim_low_bio_items = None
 
+        self.n_correct_nonstim_post_low_bio_items = None
+        self.n_total_nonstim_post_low_bio_items = None
+        self.pc_nonstim_post_low_bio_items = None
+
         self.chisqr_stim_item = None
         self.pvalue_stim_item = None
 
