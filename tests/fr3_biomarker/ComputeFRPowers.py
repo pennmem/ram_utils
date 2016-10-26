@@ -61,21 +61,6 @@ class ComputeFRPowers(RamTask):
 
             print 'Loading EEG for', n_events, 'events of session', sess
 
-            # eegs = Events(sess_events).get_data(channels=channels, start_time=self.params.fr1_start_time, end_time=self.params.fr1_end_time,
-            #                             buffer_time=self.params.fr1_buf, eoffset='eegoffset', keep_buffer=True, eoffset_in_time=False)
-
-            # from ptsa.data.readers import TimeSeriesEEGReader
-            # time_series_reader = TimeSeriesEEGReader(events=sess_events, start_time=self.params.fr1_start_time,
-            #                                  end_time=self.params.fr1_end_time, buffer_time=self.params.fr1_buf, keep_buffer=True)
-            #
-            # eegs = time_series_reader.read(monopolar_channels)
-
-            # VERSION 2/22/2016
-            # eeg_reader = EEGReader(events=sess_events, channels=monopolar_channels,
-            #                        start_time=self.params.fr1_start_time,
-            #                        end_time=self.params.fr1_end_time, buffer_time=self.params.fr1_buf)
-
-            # VERSION WITH MIRRORING
             eeg_reader = EEGReader(events=sess_events, channels=monopolar_channels,
                                    start_time=self.params.fr1_start_time,
                                    end_time=self.params.fr1_end_time, buffer_time=0.0)
