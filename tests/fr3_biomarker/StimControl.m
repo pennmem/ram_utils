@@ -105,7 +105,10 @@ classdef StimControl < handle
         current_word_analyzed;  % flag that says not to compute on the present word again if true
         wavelet_transformer;
         elapsed_duration; % DEBUG: CHECK THE ELAPSED TIME DURING STIM CHOICE
+        probs;  % Holds probabilities and thresholds for later analysis
+        thresholds;
         debugFileName;
+        probFileName;
         elapsed_tic;
         elapsed_i;
     end
@@ -148,6 +151,16 @@ classdef StimControl < handle
            % variables.
            control = RAMControl.getInstance();
            this.debugFileName = fullfile(control.getDataFolder, 'DEBUG.mat');
+           this.probFileName = fullfile(control.getDataFolder, 'prob.mat');
+           if exist(this.probFileName, 'file')
+               savedProbs = load(this.probFileName);
+               this.probs = savedProbs.probs;
+               this.thresholds = savedProbs.thresholds;
+           else
+               this.probs = [];
+               this.thresholds = [];
+           end
+
            this.savedFileName = fullfile(control.getDataFolder,[Bio.Subject,'StateSave.mat']);
            if exist(this.savedFileName,'file')
                savedData = load(this.savedFileName);
@@ -229,6 +242,8 @@ classdef StimControl < handle
                     normalized_pow = (this.session_pows(:,i) - this.zscorer.mean) ./ this.zscorer.stdev;
                     probs(i) = 1.0 / (1.0+exp(-(this.W_in*[normalized_pow;1])));
                     fprintf('prob=%f, threshold=%f\n', probs(i), this.thresh);
+                    this.probs(end+1) = probs(i);
+                    this.thresholds(end+1) = this.thresh;
                 end
                 [~,p] = kstest2(this.trainingProb,probs);
                 if p>=0.05
@@ -301,6 +316,8 @@ classdef StimControl < handle
                     % apply classifier here
                     prob = 1.0 / (1.0+exp(-(this.W_in*[pow;1])));
                     fprintf('prob=%f, threshold=%f\n', prob, this.thresh);
+                    this.probs(end+1) = prob;
+                    this.thresholds(end+1) = this.thresh;
                     if prob<this.thresh
                         decision = 1;
                     end
@@ -314,6 +331,8 @@ classdef StimControl < handle
                         pow = (pow - this.zscorer.mean) ./ this.zscorer.stdev;
                         prob = 1.0 / (1.0+exp(-(this.W_in*[pow;1])));
                         fprintf('prob=%f, threshold=%f\n', prob, this.thresh);
+                        this.probs(end+1) = prob;
+                        this.thresholds(end+1) = this.thresh;
                     end
                 end
             end
@@ -336,6 +355,10 @@ classdef StimControl < handle
             
             elapsed = this.elapsed_duration(2:end);
             save(this.debugFileName, 'elapsed');
+
+            probs = this.probs;
+            thresholds = this.thresholds;
+            save(this.probFileName, 'probs', 'thresholds');
         end
 
     end % end public methods
