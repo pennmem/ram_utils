@@ -33,9 +33,9 @@
 
 \begin{center}
 \textbf{\large Significant Electrodes} \\
-\begin{longtable}{C{.75cm} C{4cm} C{8cm} C{1.25cm}}
+\begin{longtable}{C{.75cm} C{2cm} C{4cm} C{5.5cm} C{1.25cm}}
 \hline
-Type & Electrode Pair & Atlas Loc & $z$-score \\
+Type & Channel \# & Electrode Pair & Atlas Loc & $z$-score \\
 <CONNECTIVITY_STRENGTH_TABLE>
 \hline
 \caption{Connectivity Strength Table (gamma, 45-95 Hz) All bipolar pairs shown in descending order of significance.}
@@ -43,5 +43,17 @@ Type & Electrode Pair & Atlas Loc & $z$-score \\
 \end{center}
 
 \clearpage
+
+\section*{APPENDIX: Connectivity Strength Calculation}
+
+\begin{enumerate}
+\item Compute Morlet wavelets for $\[-1.0,2.8\]$ sec interval around each word encoding. This report uses $11$
+linspaced frequencies from $45$ to $95$ Hz.
+\item For each bipolar pair (without a common electrode) and each frequency, compute phase differences of the
+wavelets and average them across $19$ time bins, $200$ ms length each.
+\item For each bipolar pair, frequency, and time bin, compute the resultant vector strength for the recalled
+and non-recalled class and then compute the $f$-statistic using the formula:
+
+\end{enumerate}
 
 \end{document}

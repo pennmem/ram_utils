@@ -1,5 +1,4 @@
-import os.path
-
+import os
 import json
 
 import numpy as np
@@ -8,6 +7,10 @@ import pandas as pd
 from sklearn.externals import joblib
 
 from ReportUtils import ReportRamTask
+from ptsa.data.readers import TalReader
+from ptsa.data.readers.IndexReader import JsonIndexReader
+
+import hashlib
 
 
 def atlas_location(bp_data):
@@ -30,11 +33,40 @@ def atlas_location(bp_data):
 
     return '--'
 
+def atlas_location_matlab(tag, atlas_loc, comments):
+
+    def colon_connect(s1, s2):
+        if isinstance(s1, pd.Series):
+            s1 = s1.values[0]
+        if isinstance(s2, pd.Series):
+            s2 = s2.values[0]
+        return s1 if (s2 is None or s2=='' or s2 is np.nan) else s2 if (s1 is None or s1=='' or s1 is np.nan) else s1 + ': ' + s2
+
+    if tag in atlas_loc.index:
+        return colon_connect(atlas_loc.ix[tag], comments.ix[tag] if comments is not None else None)
+    else:
+        return '--'
 
 class MontagePreparation(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
         super(MontagePreparation,self).__init__(mark_as_completed)
         self.params = params
+
+    def input_hashsum(self):
+        subject = self.pipeline.subject
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp)==1 else int(tmp[1])
+
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/protocols/r1.json'))
+
+        hash_md5 = hashlib.md5()
+
+        bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
+        for fname in bp_paths:
+            hash_md5.update(open(fname,'rb').read())
+
+        return hash_md5.digest()
 
     def restore(self):
         subject = self.pipeline.subject
@@ -51,9 +83,15 @@ class MontagePreparation(ReportRamTask):
 
     def run(self):
         subject = self.pipeline.subject
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp)==1 else int(tmp[1])
+
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/protocols/r1.json'))
+        bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
 
         try:
-            bp_path = os.path.join(self.pipeline.mount_point, 'protocols/r1/codes', subject, 'pairs.json')
+            bp_path = os.path.join(self.pipeline.mount_point, next(iter(bp_paths)))
             f_pairs = open(bp_path, 'r')
             bipolar_data = json.load(f_pairs)[subject]['pairs']
             f_pairs.close()
@@ -90,8 +128,7 @@ class MontagePreparation(ReportRamTask):
             joblib.dump(bipolar_pair_pairs, self.get_path_to_resource_in_workspace(subject + '-bipolar_pair_pairs.pkl'))
 
         except:
-            raise
-            # self.raise_and_log_report_exception(
-            #                                     exception_type='MissingDataError',
-            #                                     exception_message='Missing or corrupt electrodes data for subject %s' % subject
-            #                                    )
+            self.raise_and_log_report_exception(
+                                                exception_type='MissingDataError',
+                                                exception_message='Missing or corrupt montage data for subject %s' % subject
+                                               )

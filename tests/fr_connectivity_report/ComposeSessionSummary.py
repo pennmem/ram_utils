@@ -2,7 +2,8 @@ from ReportUtils import ReportRamTask
 
 
 def make_connectivity_strength_table(bp_tal_structs, connectivity_strength):
-    ttest_data = [list(a) for a in zip(bp_tal_structs.etype.values, bp_tal_structs.index.values, bp_tal_structs.bp_atlas_loc, connectivity_strength)]
+    contact_nos = bp_tal_structs.channel_1.str.lstrip('0') + '-' + bp_tal_structs.channel_2.str.lstrip('0')
+    ttest_data = [list(a) for a in zip(bp_tal_structs.etype.values, contact_nos.values, bp_tal_structs.index.values, bp_tal_structs.bp_atlas_loc, connectivity_strength)]
     return ttest_data
 
 def format_connectivity_strength_table(table_data):
