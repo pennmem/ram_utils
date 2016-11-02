@@ -47,7 +47,7 @@ Type & Channel \# & Electrode Pair & Atlas Loc & $z$-score \\
 \section*{APPENDIX: Connectivity Strength Calculation}
 
 \begin{enumerate}
-\item Compute Morlet wavelets for $\[-1.0,2.8\]$ sec interval around each word encoding. This report uses $11$
+\item Compute Morlet wavelets for $[-1.0,2.8]$ sec interval around each word encoding. This report uses $11$
 linspaced frequencies from $45$ to $95$ Hz.
 \item For each bipolar pair (without a common electrode) and each frequency, compute phase differences of the
 wavelets and average them across $19$ time bins, $200$ ms length each.

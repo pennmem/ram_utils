@@ -14,14 +14,6 @@ class LoadESPhaseDiff(ReportRamTask):
         self.params = params
         self.phase_diff_mat = None
 
-    def initialize(self):
-        task_prefix = 'cat' if self.pipeline.task == 'RAM_CatFR1' else ''
-        if self.dependency_inventory:
-            self.dependency_inventory.add_dependent_resource(resource_name=task_prefix+'fr1_events',
-                                        access_path = ['experiments',task_prefix+'fr1','events'])
-            self.dependency_inventory.add_dependent_resource(resource_name='bipolar',
-                                        access_path = ['electrodes','bipolar'])
-
     def restore(self):
         subject = self.pipeline.subject
         task = self.pipeline.task

@@ -28,7 +28,7 @@ class GenerateTex(ReportRamTask):
         # n_sess = self.get_passed_object('NUMBER_OF_SESSIONS')
         # n_bps = self.get_passed_object('NUMBER_OF_ELECTRODES')
 
-        tex_template = 'fr_connetivity_report.tex.tpl'
+        tex_template = 'fr_connectivity_report.tex.tpl'
         tex_file_name = '%s_%s_fr_connectivity_report.tex' % (subject,task)
 
         self.set_file_resources_to_move(tex_file_name, dst='reports')

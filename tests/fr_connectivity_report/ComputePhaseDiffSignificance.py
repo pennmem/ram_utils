@@ -6,8 +6,10 @@ from scipy.stats import zmap
 from circular_stat import compute_f_stat, compute_zscores
 
 from sklearn.externals import joblib
-
+from ptsa.data.readers.IndexReader import JsonIndexReader
 from ReportUtils import ReportRamTask
+
+import hashlib
 
 
 #def compute_f_stat(phase_diff_mat, recalls, f_stat_mat):
@@ -34,21 +36,42 @@ class ComputePhaseDiffSignificance(ReportRamTask):
         self.zscore_mat = None
         self.connectivity_strength = None
 
+    def input_hashsum(self):
+        subject = self.pipeline.subject
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp)==1 else int(tmp[1])
+
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/protocols/r1.json'))
+
+        hash_md5 = hashlib.md5()
+
+        bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
+        for fname in bp_paths:
+            hash_md5.update(open(fname,'rb').read())
+
+        fr1_event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='FR1')))
+        for fname in fr1_event_files:
+            hash_md5.update(open(fname,'rb').read())
+
+        catfr1_event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='catFR1')))
+        for fname in catfr1_event_files:
+            hash_md5.update(open(fname,'rb').read())
+
+        return hash_md5.digest()
+
     def restore(self):
         subject = self.pipeline.subject
-        task = self.pipeline.task
 
-        self.connectivity_strength = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-connectivity_strength.pkl'))
-
+        self.connectivity_strength = joblib.load(self.get_path_to_resource_in_workspace(subject + '-connectivity_strength.pkl'))
         self.pass_object('connectivity_strength', self.connectivity_strength)
 
     def run(self):
         print "Computing f-stats"
 
         subject = self.pipeline.subject
-        task = self.pipeline.task
 
-        events = self.get_passed_object(task+'_events')
+        events = self.get_passed_object('events')
 
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
         bipolar_pair_pairs = self.get_passed_object('bipolar_pair_pairs')
@@ -61,7 +84,7 @@ class ComputePhaseDiffSignificance(ReportRamTask):
         phase_diff_mat = phase_diff_mat.reshape(-1)
         recalls = np.array(events.recalled, dtype=np.bool)
 
-        joblib.dump(recalls, self.get_path_to_resource_in_workspace(subject + '-' + task + '-recalls.pkl'))
+        joblib.dump(recalls, self.get_path_to_resource_in_workspace(subject + '-recalls.pkl'))
 
         n_perms = self.params.n_perms
         shuffle_mat = np.empty(shape=(n_perms+1,n_bp_pairs*n_freqs*n_bins), dtype=np.float)
@@ -71,14 +94,14 @@ class ComputePhaseDiffSignificance(ReportRamTask):
             shuffle(recalls)
             compute_f_stat(phase_diff_mat, recalls, shuffle_mat[i])
 
-        joblib.dump(shuffle_mat.reshape((n_perms+1,n_bp_pairs,n_freqs,n_bins)), self.get_path_to_resource_in_workspace(subject + '-' + task + '-fstat_mat.pkl'))
+        joblib.dump(shuffle_mat.reshape((n_perms+1,n_bp_pairs,n_freqs,n_bins)), self.get_path_to_resource_in_workspace(subject + '-fstat_mat.pkl'))
 
         shuffle_mat = shuffle_mat.reshape(-1)
         compute_zscores(shuffle_mat, n_perms+1)
 
         shuffle_mat = shuffle_mat.reshape((n_perms+1,n_bp_pairs,n_freqs,n_bins))
 
-        joblib.dump(shuffle_mat, self.get_path_to_resource_in_workspace(subject + '-' + task + '-zscore_mat.pkl'))
+        joblib.dump(shuffle_mat, self.get_path_to_resource_in_workspace(subject + '-zscore_mat.pkl'))
 
         shuffle_mat = shuffle_mat.sum(axis=(2,3))
 
@@ -93,4 +116,4 @@ class ComputePhaseDiffSignificance(ReportRamTask):
 
         self.pass_object('connectivity_strength', self.connectivity_strength)
 
-        joblib.dump(self.connectivity_strength, self.get_path_to_resource_in_workspace(subject + '-' + task + '-connectivity_strength.pkl'))
+        joblib.dump(self.connectivity_strength, self.get_path_to_resource_in_workspace(subject + '-connectivity_strength.pkl'))

@@ -16,7 +16,6 @@ import numpy as np
 
 cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--subject','R1050M')
-cml_parser.arg('--task','RAM_FR1')
 cml_parser.arg('--workspace-dir','/scratch/busygin/FR_connectivity_report')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
@@ -32,7 +31,7 @@ from MontagePreparation import MontagePreparation
 
 from ComputeFR1PhaseDiff import ComputeFR1PhaseDiff
 
-from LoadESPhaseDiff import LoadESPhaseDiff
+#from LoadESPhaseDiff import LoadESPhaseDiff
 
 from ComputePhaseDiffSignificance import ComputePhaseDiffSignificance
 
@@ -64,7 +63,7 @@ params = Params()
 
 
 # sets up processing pipeline
-report_pipeline = ReportPipeline(subject=args.subject, task=args.task,experiment=args.task,
+report_pipeline = ReportPipeline(subject=args.subject,
                                  workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change,
                                  recompute_on_no_status=args.recompute_on_no_status)
 
