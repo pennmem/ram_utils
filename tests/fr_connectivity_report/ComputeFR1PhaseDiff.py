@@ -3,7 +3,7 @@ __author__ = 'm'
 from RamPipeline import *
 
 import numpy as np
-from morlet import MorletWaveletTransform
+from ptsa.extensions.morlet import morlet
 from circular_stat import circ_diff_time_bins
 from sklearn.externals import joblib
 
@@ -21,7 +21,7 @@ class ComputeFR1PhaseDiff(ReportRamTask):
         self.wavelets = None
         self.phase_diff_mat = None
         self.samplerate = None
-        self.wavelet_transform = MorletWaveletTransform()
+        self.wavelet_transform = morlet.MorletWaveletTransform()
 
     def input_hashsum(self):
         subject = self.pipeline.subject
