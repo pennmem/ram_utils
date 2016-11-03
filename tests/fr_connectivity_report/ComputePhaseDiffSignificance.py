@@ -84,7 +84,8 @@ class ComputePhaseDiffSignificance(ReportRamTask):
         phase_diff_mat = phase_diff_mat.reshape(-1)
         recalls = np.array(events.recalled, dtype=np.bool)
 
-        joblib.dump(recalls, self.get_path_to_resource_in_workspace(subject + '-recalls.pkl'))
+        if self.params.save_fstat_and_zscore_mats:
+            joblib.dump(recalls, self.get_path_to_resource_in_workspace(subject + '-recalls.pkl'))
 
         n_perms = self.params.n_perms
         shuffle_mat = np.empty(shape=(n_perms+1,n_bp_pairs*n_freqs*n_bins), dtype=np.float)
@@ -94,14 +95,16 @@ class ComputePhaseDiffSignificance(ReportRamTask):
             shuffle(recalls)
             compute_f_stat(phase_diff_mat, recalls, shuffle_mat[i])
 
-        joblib.dump(shuffle_mat.reshape((n_perms+1,n_bp_pairs,n_freqs,n_bins)), self.get_path_to_resource_in_workspace(subject + '-fstat_mat.pkl'))
+        if self.params.save_fstat_and_zscore_mats:
+            joblib.dump(shuffle_mat.reshape((n_perms+1,n_bp_pairs,n_freqs,n_bins)), self.get_path_to_resource_in_workspace(subject + '-fstat_mat.pkl'))
 
         shuffle_mat = shuffle_mat.reshape(-1)
         compute_zscores(shuffle_mat, n_perms+1)
 
         shuffle_mat = shuffle_mat.reshape((n_perms+1,n_bp_pairs,n_freqs,n_bins))
 
-        joblib.dump(shuffle_mat, self.get_path_to_resource_in_workspace(subject + '-zscore_mat.pkl'))
+        if self.params.save_fstat_and_zscore_mats:
+            joblib.dump(shuffle_mat, self.get_path_to_resource_in_workspace(subject + '-zscore_mat.pkl'))
 
         shuffle_mat = shuffle_mat.sum(axis=(2,3))
 

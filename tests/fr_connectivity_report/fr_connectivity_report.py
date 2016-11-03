@@ -57,6 +57,8 @@ class Params(object):
 
         self.n_perms = 500
 
+        self.save_fstat_and_zscore_mats = False
+
 
 params = Params()
 
