@@ -1,15 +1,16 @@
 # command line example:
 
 import sys
-
+from os.path import *
 from setup_utils import parse_command_line, configure_python_paths
+sys.path.append(join(dirname(__file__),'..','..'))
 
 
 from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--subject','R1154D')
-cml_parser.arg('--workspace-dir','/scratch/busygin/PS2.1_TH_db')
+cml_parser.arg('--workspace-dir','/scratch/leond/PS2.1_TH_db')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
 cml_parser.arg('--experiment','PS2.1')
@@ -22,19 +23,19 @@ args = cml_parser.parse()
 from THEventPreparation import THEventPreparation
 from ControlEventPreparation import ControlEventPreparation
 from PSEventPreparation import PSEventPreparation
-
-from ComputeTHClassPowers import ComputeTHClassPowers
-from ComputeControlPowers import ComputeControlPowers
-from ComputePSPowers import ComputePSPowers
-
-from MontagePreparation import MontagePreparation
-
-from ComputeClassifier import ComputeClassifier
-
-from ComputeControlTable import ComputeControlTable
-from ComputePSTable import ComputePSTable
-
-from ComposeSessionSummary import ComposeSessionSummary
+#
+# from ComputeTHClassPowers import ComputeTHClassPowers
+# from ComputeControlPowers import ComputeControlPowers
+# from ComputePSPowers import ComputePSPowers
+#
+# from MontagePreparation import MontagePreparation
+#
+# from ComputeClassifier import ComputeClassifier
+#
+# from ComputeControlTable import ComputeControlTable
+# from ComputePSTable import ComputePSTable
+#
+# from ComposeSessionSummary import ComposeSessionSummary
 
 from GenerateReportTasks import *
 
@@ -97,27 +98,27 @@ report_pipeline.add_task(ControlEventPreparation(params=params, mark_as_complete
 
 report_pipeline.add_task(PSEventPreparation(mark_as_completed=True))
 
-report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=True))
-
-report_pipeline.add_task(ComputeTHClassPowers(params=params, mark_as_completed=True))
-
-report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
-
-report_pipeline.add_task(ComputeControlPowers(params=params, mark_as_completed=True))
-
-report_pipeline.add_task(ComputePSPowers(params=params, mark_as_completed=True))
-
-report_pipeline.add_task(ComputeControlTable(params=params, mark_as_completed=True))
-
-report_pipeline.add_task(ComputePSTable(params=params, mark_as_completed=True))
-
-report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
-
-report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
-
-report_pipeline.add_task(GenerateTex(mark_as_completed=False))
-
-report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
+# report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=True))
+#
+# report_pipeline.add_task(ComputeTHClassPowers(params=params, mark_as_completed=True))
+#
+# report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
+#
+# report_pipeline.add_task(ComputeControlPowers(params=params, mark_as_completed=True))
+#
+# report_pipeline.add_task(ComputePSPowers(params=params, mark_as_completed=True))
+#
+# report_pipeline.add_task(ComputeControlTable(params=params, mark_as_completed=True))
+#
+# report_pipeline.add_task(ComputePSTable(params=params, mark_as_completed=True))
+#
+# report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
+#
+# report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
+#
+# report_pipeline.add_task(GenerateTex(mark_as_completed=False))
+#
+# report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
 # starts processing pipeline
 report_pipeline.execute_pipeline()

@@ -1,7 +1,8 @@
 # command line example:
 
 import sys
-
+from os.path import *
+sys.path.append(join(dirname(__file__),'..','..'))
 from setup_utils import parse_command_line, configure_python_paths
 
 

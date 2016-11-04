@@ -7,7 +7,7 @@
 import sys
 from os.path import *
 
-# sys.path.append(join(dirname(__file__),'..','..'))
+sys.path.append(join(dirname(__file__),'..','..'))
 
 print sys.path
 
@@ -19,7 +19,7 @@ from ReportUtils import CMLParser,ReportPipeline
 cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--subject','R1202M')
 cml_parser.arg('--task','RAM_FR1')
-cml_parser.arg('--workspace-dir','/scratch/busygin/FR1_reports_db')
+cml_parser.arg('--workspace-dir','/scratch/leond/FR1_reports_db')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
 # cml_parser.arg('--exit-on-no-change')

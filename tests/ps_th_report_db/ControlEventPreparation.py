@@ -8,6 +8,7 @@ from ptsa.data.readers import BaseEventReader
 from RamPipeline import *
 from ReportUtils import ReportRamTask
 from ReportUtils import ReportRamTask
+from ptsa.data.readers.IndexReader import JsonIndexReader
 
 class ControlEventPreparation(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
@@ -15,19 +16,26 @@ class ControlEventPreparation(ReportRamTask):
         self.params = params
 
     def run(self):
-        e_path = os.path.join(self.pipeline.mount_point , 'data/events/RAM_PS', self.pipeline.subject + '_events.mat')
-        e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
+        subject = self.pipeline.subject
+        task = self.pipeline.task
+
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp) == 1 else int(tmp[1])
+
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/db/protocols/r1.json'))
+        event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage,
+                                                               experiment=task)))
+        events = None
 
         try:
-            events = e_reader.read()
+            for sess_file in event_files:
+                e_path = os.path.join(self.pipeline.mount_point, str(sess_file))
+                e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
+                sess_events = e_reader.read()
+                events = sess_events if events is None else np.hstack((events, sess_events))
             ev_order = np.argsort(events, order=('session','mstime'))
             events = events[ev_order]
-
-            # try:
-            #     events = Events(get_events(subject=subject, task='RAM_PS', path_prefix=self.pipeline.mount_point))
-            # except IOError:
-            #     raise Exception('No parameter search for subject %s' % subject)
-            #
 
             events = events[events.type == 'SHAM']
 

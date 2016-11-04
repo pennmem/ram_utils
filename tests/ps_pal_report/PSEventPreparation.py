@@ -119,6 +119,7 @@ def compute_isi(events):
 
 def propagate_stim_params_to_all_events(events):
     events_by_session = events.groupby(['session'])
+    print 'event fields: ',events.dtypes
     for sess,session_events in events_by_session:
         last_stim_event = session_events[session_events.type=='STIM_ON'].iloc[-1]
         session_mask = (events.session==sess)

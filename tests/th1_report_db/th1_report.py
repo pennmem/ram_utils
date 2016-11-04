@@ -4,16 +4,19 @@
 # python ps_report.py --subject=R1056M --task=FR1 --workspace-dir=/data10/scratch/mswat/py_run_9 --matlab-path=~/eeg --matlab-path=~/matlab/beh_toolbox --matlab-path=~/RAM/RAM_reporting --matlab-path=~/RAM/RAM_sys2Biomarkers --python-path=~/RAM_UTILS_GIT
 
 # python ps_report.py --subject=R1086M --task=FR1 --workspace-dir=/data10/scratch/mswat/R1086M_2 --matlab-path=~/eeg --matlab-path=~/matlab/beh_toolbox --matlab-path=~/RAM/RAM_reporting --matlab-path=~/RAM/RAM_sys2Biomarkers --matlab-path=~/RAM_UTILS_GIT/tests/ps2_report/AuxiliaryMatlab --python-path=~/RAM_UTILS_GIT
+
 import sys
 from os.path import *
+sys.path.append(join(dirname(__file__),'..','..'))
+
 from ReportUtils import CMLParser,ReportPipeline
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
 #cml_parser.arg('--subject','R1168T')
-cml_parser.arg('--subject','R1167M')
+cml_parser.arg('--subject','R1207J')
 cml_parser.arg('--task','RAM_TH1')
-cml_parser.arg('--workspace-dir','/scratch/busygin/TH1_reports_db')
+cml_parser.arg('--workspace-dir','/scratch/leond/TH1_reports_db')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
 #cml_parser.arg('--exit-on-no-change')
