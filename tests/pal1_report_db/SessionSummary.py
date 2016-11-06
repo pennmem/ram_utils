@@ -35,3 +35,5 @@ class SessionSummary(object):
         self.perm_test_pvalue = None
         self.jstat_thresh = None
         self.jstat_percentile = None
+
+        self.positions = None

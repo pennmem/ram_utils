@@ -179,6 +179,8 @@ class ComposeSessionSummary(ReportRamTask):
         for i,pos in enumerate(positions):
             pos_events = events[events.serialpos == pos]
             prob_recall[i] = np.sum(pos_events.correct) / float(len(pos_events))
+
+        cumulative_summary.positions = positions
         cumulative_summary.prob_recall = prob_recall
 
         cumulative_summary.study_lag_values = []
