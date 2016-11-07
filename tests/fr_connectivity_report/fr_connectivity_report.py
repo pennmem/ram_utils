@@ -15,7 +15,7 @@ import numpy as np
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1050M')
+cml_parser.arg('--subject','R1001P')
 cml_parser.arg('--workspace-dir','/scratch/busygin/FR_connectivity_report')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
@@ -56,6 +56,8 @@ class Params(object):
         self.freqs = np.linspace(45.0, 95.0, 11)
 
         self.n_perms = 500
+
+        self.save_fstat_and_zscore_mats = False
 
 
 params = Params()

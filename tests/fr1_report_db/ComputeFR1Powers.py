@@ -3,8 +3,13 @@ __author__ = 'm'
 from RamPipeline import *
 
 import numpy as np
+<<<<<<< HEAD
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 #from morlet import MorletWaveletTransform
+=======
+#from morlet import MorletWaveletTransform
+from ptsa.extensions.morlet.morlet import MorletWaveletTransform
+>>>>>>> 386e3023a8e238ff6faa6eb8e1a8023ad5869337
 from sklearn.externals import joblib
 
 from ptsa.data.readers import EEGReader
