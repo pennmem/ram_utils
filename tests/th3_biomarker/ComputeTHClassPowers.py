@@ -69,7 +69,7 @@ class ComputeTHClassPowers(RamTask):
                 sess_events = eegs['events'].values.view(np.recarray)
                 n_events = len(sess_events)
                 events = np.hstack((events[events.session!=sess],sess_events)).view(np.recarray)
-                ev_order = np.argsort(events, order=('session','list','mstime'))
+                ev_order = np.argsort(events, order=('session','trial','mstime'))
                 events = events[ev_order]
                 self.pass_object('events', events)
 

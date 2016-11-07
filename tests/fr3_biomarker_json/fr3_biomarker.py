@@ -1,6 +1,10 @@
 # command line example:
 # python fr3_biomarker.py --workspace-dir=/scratch/busygin/FR3_biomarkers --subject=R1145J_1 --n-channels=128 --anode=RD2 --anode-num=34 --cathode=RD3 --cathode-num=35 --pulse-frequency=200 --pulse-duration=500 --target-amplitude=1000
 
+print "ATTN: Wavelet params and interval length are hardcoded!! To change them, recompile"
+print "Windows binaries from https://github.com/busygin/morlet_for_sys2_biomarker"
+print "See https://github.com/busygin/morlet_for_sys2_biomarker/blob/master/README for detail."
+
 from os.path import *
 from BiomarkerUtils import CMLParserBiomarker
 
