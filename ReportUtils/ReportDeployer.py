@@ -30,14 +30,17 @@ class ReportDeployer(object):
         self.pipeline.report_summary.add_report_link(link=link)
 
 
-    def deploy_report(self, report_path, classifier_experiment=None):
+    def deploy_report(self, report_path, classifier_experiment=None,suffix=None):
         subject = self.pipeline.subject
 
         ssc = self.split_subject_code(subject)
 
         report_basename = basename(report_path)
         # report_base_dir = join('protocols',ssc.protocol.lower(),'subjects',str(ssc.id)+ssc.montage,'reports')
-        report_base_dir = join('protocols',ssc.protocol.lower(),'subjects',str(ssc.id),'reports')
+        if suffix is None:
+            report_base_dir = join('protocols',ssc.protocol.lower(),'subjects',str(ssc.id),'reports')
+        else:
+            report_base_dir = join('scratch','RAM_maint',suffix,'subjects',str(ssc.id),'reports')
 
         report_dir = join(self.pipeline.mount_point,report_base_dir)
 
