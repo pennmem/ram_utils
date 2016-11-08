@@ -286,4 +286,4 @@ class DeployReportPDF(ReportRamTask):
 
     def run(self):
         report_file = self.get_passed_object('report_file')
-        self.pipeline.deploy_report(report_path=report_file, classifier_experiment='PAL1')
+        self.pipeline.deploy_report(report_path=report_file, classifier_experiment='PAL1',suffix='json')
