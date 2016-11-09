@@ -38,7 +38,7 @@ class ReportDeployer(object):
         report_basename = basename(report_path)
         # report_base_dir = join('protocols',ssc.protocol.lower(),'subjects',str(ssc.id)+ssc.montage,'reports')
         if suffix is None:
-            report_base_dir = join('protocols',ssc.protocol.lower(),'subjects',str(ssc.id),'reports')
+            report_base_dir = join('reports',ssc.protocol.lower(),'subjects',str(ssc.id),'reports')
         else:
             report_base_dir = join('scratch','RAM_maint',suffix,'subjects',str(ssc.id),'reports')
 
