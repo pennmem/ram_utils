@@ -68,26 +68,24 @@ class ComposeSessionSummary(ReportRamTask):
             perm_test_pvalue_transpose = self.get_passed_object('pvalue_transpose') 
 
         sessions = np.unique(events.session)
-
         self.pass_object('NUMBER_OF_SESSIONS', len(sessions))
         self.pass_object('NUMBER_OF_ELECTRODES', len(monopolar_channels))
 
         session_data = []
 
         # create session table info
-        for session in sessions:
+        for session,i in zip(sessions,range(len(sessions))):
             # filter to just current session
             session_events = events[events.session == session]
             n_sess_events = len(session_events)
 
             session_rec_events = rec_events[rec_events.session == session]
             session_all_events = all_events[all_events.session == session]
-            print 'score_events:',score_events
-            print 'score_events.dtype: ',score_events.dtype
-            print 'type(score_events):',type(score_events)
-            print 'type(score_events.session[0]: ',type(score_events.session[0])
-            session_score = score_events['sessionScore'][score_events['session'] == session]
-            session_score = session_score if len(session_score)<1 else session_score[0,...]
+            session_score = score_events['sessionScore'][i]
+            try:
+                session_score = session_score[0,...]
+            except (TypeError,ValueError,IndexError):
+                pass
             # info about session
             timestamps = session_all_events.mstime
             first_time_stamp = np.min(timestamps)

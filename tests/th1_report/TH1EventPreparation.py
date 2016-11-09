@@ -55,7 +55,7 @@ class TH1EventPreparation(RamTask):
         evs_field_list = ['mstime','type','item_name','trial','block','chestNum','locationX','locationY','chosenLocationX',
                           'chosenLocationY','navStartLocationX','navStartLocationY','recStartLocationX','recStartLocationY',
                           'isRecFromNearSide','isRecFromStartSide','reactionTime','confidence','session','radius_size',
-                          'listLength','distErr','recalled','eegoffset','eegfile'
+                          'listLength','distErr','recalled','eegoffset','eegfile',
                           ]
         events=None
         for sess_file in event_files:
@@ -100,6 +100,12 @@ class TH1EventPreparation(RamTask):
         self.pass_object(self.pipeline.task+'_rec_events', rec_events)
 
         # TODO: Replace code with appropriate JSON read, once implemented
+        # old_sessions = json_reader.aggregate_values('original_session',subject=subj_code,montage=montage,
+        #                                             experiment=task)
+        # old_sessions = np.array([int(x) for x in old_sessions])
+        # print 'old_sessions: ',old_sessions
+        # print 'old_sessions.dtype: ',old_sessions.dtype
+        # self.pass_object('old_sessions',old_sessions)
         score_path = os.path.join(self.pipeline.mount_point , 'data', 'events', 'RAM_'+task, self.pipeline.subject + '_score.mat')
         # score_events = self.loadmat(score_path)
         score_events = spio.loadmat(score_path,squeeze_me=True,struct_as_record=True)
