@@ -20,7 +20,7 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{RAM FR1 \& CatFR1 connectivity report v 1.0}
+\lhead{RAM FR connectivity report v 1.0}
 \chead{Subject: \textbf{<SUBJECT>}}
 \rhead{Date created: <DATE>}
 \begin{document}
