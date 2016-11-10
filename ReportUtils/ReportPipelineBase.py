@@ -95,9 +95,9 @@ class ReportPipelineBase(RamPipeline):
     def get_report_summary(self):
         return self.report_summary
 
-    def deploy_report(self, report_path='',classifier_experiment=None):
+    def deploy_report(self, report_path='',classifier_experiment=None,suffix=None):
         rd = ReportDeployer.ReportDeployer(pipeline=self)
-        rd.deploy_report(report_path=report_path,classifier_experiment=classifier_experiment)
+        rd.deploy_report(report_path=report_path,classifier_experiment=classifier_experiment,suffix=suffix)
 
     def execute_pipeline(self):
         # super(ReportPipelineBase,self).execute_pipeline()
