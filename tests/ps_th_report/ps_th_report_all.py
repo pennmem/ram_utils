@@ -12,7 +12,7 @@ cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--workspace-dir','/scratch/leond/PS2.1_TH')
 cml_parser.arg('--mount-point','')
 cml_parser.arg('--recompute-on-no-status')
-cml_parser.arg('--experiment','PS2.1')
+cml_parser.arg('--task','PS2.1')
 cml_parser.arg('--exit-on-no-change')
 
 args = cml_parser.parse()
@@ -82,7 +82,7 @@ class Params(object):
 
 
 params = Params()
-task = args.experiment
+task = args.task
 
 json_reader = JsonIndexReader(os.path.join(args.mount_point,'data/eeg/db2/protocols/r1.json'))
 subject_set = json_reader.aggregate_values('subjects', experiment=task) & json_reader.aggregate_values('subjects', experiment='TH1')
