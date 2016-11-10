@@ -83,7 +83,7 @@ subjects.sort()
 rsi = ReportSummaryInventory(label='FR_connectivity')
 
 for subject in subjects:
-    print '--Generating FR1&CatFR1 joint report for', subject
+    print '--Generating FR1&CatFR1 connectivity report for', subject
     if args.skip_subjects is not None and subject in args.skip_subjects:
         continue
 

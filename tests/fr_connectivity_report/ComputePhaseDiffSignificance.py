@@ -3,7 +3,7 @@ from RamPipeline import *
 from random import shuffle
 import numpy as np
 from scipy.stats import zmap
-from circular_stat import compute_f_stat, compute_zscores
+from ptsa.extensions.circular_stat.circular_stat import compute_f_stat, compute_zscores
 
 from sklearn.externals import joblib
 from ptsa.data.readers.IndexReader import JsonIndexReader

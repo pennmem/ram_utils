@@ -23,13 +23,12 @@ class GenerateTex(ReportRamTask):
 
     def run(self):
         subject = self.pipeline.subject
-        task = self.pipeline.task
 
         # n_sess = self.get_passed_object('NUMBER_OF_SESSIONS')
         # n_bps = self.get_passed_object('NUMBER_OF_ELECTRODES')
 
         tex_template = 'fr_connectivity_report.tex.tpl'
-        tex_file_name = '%s_%s_fr_connectivity_report.tex' % (subject,task)
+        tex_file_name = '%s_fr_connectivity_report.tex' % subject
 
         self.set_file_resources_to_move(tex_file_name, dst='reports')
 

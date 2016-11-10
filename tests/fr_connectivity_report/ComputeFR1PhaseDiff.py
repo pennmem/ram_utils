@@ -4,7 +4,7 @@ from RamPipeline import *
 
 import numpy as np
 from ptsa.extensions.morlet import morlet
-from circular_stat import circ_diff_time_bins
+from ptsa.extensions.circular_stat.circular_stat import circ_diff_time_bins
 from sklearn.externals import joblib
 
 from ptsa.data.readers import EEGReader
