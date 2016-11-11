@@ -5,7 +5,7 @@ from copy import deepcopy
 from scipy.stats.mstats import zscore
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, roc_curve
-from sklearn.model_selection import StratifiedKFold
+from sklearn.cross_validation import StratifiedKFold
 from random import shuffle
 from sklearn.externals import joblib
 from ReportUtils import ReportRamTask
