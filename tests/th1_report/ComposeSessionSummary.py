@@ -81,7 +81,10 @@ class ComposeSessionSummary(ReportRamTask):
 
             session_rec_events = rec_events[rec_events.session == session]
             session_all_events = all_events[all_events.session == session]
-            session_score = score_events['sessionScore'][i]
+            try:
+                session_score = score_events['sessionScore'][i]
+            except IndexError:
+                session_score = score_events['sessionScore']
             try:
                 session_score = session_score[0,...]
             except (TypeError,ValueError,IndexError):

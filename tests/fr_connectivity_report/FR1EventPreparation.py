@@ -52,7 +52,7 @@ class FR1EventPreparation(ReportRamTask):
             print e_path
             e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
-            sess_events = e_reader.read()[['wordno', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'iscorrect', 'answer', 'recalled', 'word', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
+            sess_events = e_reader.read()[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'iscorrect', 'answer', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
 
             if fr1_events is None:
                 fr1_events = sess_events
@@ -68,7 +68,7 @@ class FR1EventPreparation(ReportRamTask):
 
             sess_events = e_reader.read()
             sess_events.session += 100
-            sess_events = sess_events[['wordno', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'iscorrect', 'answer', 'recalled', 'word', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
+            sess_events = sess_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'iscorrect', 'answer', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
 
             if catfr1_events is None:
                 catfr1_events = sess_events

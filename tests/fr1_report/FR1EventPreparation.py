@@ -38,7 +38,7 @@ class FR1EventPreparation(ReportRamTask):
         subject = self.pipeline.subject
         task = self.pipeline.task
 
-        evs_field_list = ['wordno', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'iscorrect', 'answer', 'recalled', 'word', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']
+        evs_field_list = ['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'iscorrect', 'answer', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']
         if task=='catFR1':
             evs_field_list += ['category', 'category_num']
 

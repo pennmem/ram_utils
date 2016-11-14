@@ -60,7 +60,7 @@ class FREventPreparation(RamTask):
             print e_path
             e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
-            sess_events = e_reader.read()[['wordno', 'serialpos', 'session', 'subject', 'rectime', 'mstime', 'type', 'eegoffset', 'recalled', 'word', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
+            sess_events = e_reader.read()[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'mstime', 'type', 'eegoffset', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
             sess_events = sess_events[sess_events.type=='WORD']
 
             if events is None:
@@ -76,7 +76,7 @@ class FREventPreparation(RamTask):
 
             sess_events = e_reader.read()
             sess_events.session += 100
-            sess_events = sess_events[['wordno', 'serialpos', 'session', 'subject', 'rectime', 'mstime', 'type', 'eegoffset', 'recalled', 'word', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
+            sess_events = sess_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'mstime', 'type', 'eegoffset', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
             sess_events = sess_events[sess_events.type=='WORD']
 
             if events is None:
@@ -93,7 +93,7 @@ class FREventPreparation(RamTask):
             sess_events = e_reader.read()
             sess_events = sess_events[(sess_events.stim_list==0) & (sess_events.type=='WORD')]
             sess_events.session += 200
-            sess_events = sess_events[['wordno', 'serialpos', 'session', 'subject', 'rectime', 'mstime', 'type', 'eegoffset', 'recalled', 'word', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
+            sess_events = sess_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'mstime', 'type', 'eegoffset', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
 
             if events is None:
                 events = sess_events
@@ -109,7 +109,7 @@ class FREventPreparation(RamTask):
             sess_events = e_reader.read()
             sess_events = sess_events[(sess_events.stim_list==0) & (sess_events.type=='WORD')]
             sess_events.session += 300
-            sess_events = sess_events[['wordno', 'serialpos', 'session', 'subject', 'rectime', 'mstime', 'type', 'eegoffset', 'recalled', 'word', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
+            sess_events = sess_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'mstime', 'type', 'eegoffset', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
 
             if events is None:
                 events = sess_events
