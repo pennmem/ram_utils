@@ -226,4 +226,4 @@ class RamPipeline(object):
                         task.create_file_in_workspace_dir(task_completed_file_name, 'w')
 
         if self.dependency_change_tracker:
-            self.dependency_change_tracker.write_latest_data_status()
+                    self.dependency_change_tracker.write_latest_data_status()

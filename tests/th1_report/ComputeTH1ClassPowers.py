@@ -30,17 +30,19 @@ class ComputeTH1ClassPowers(ReportRamTask):
         subj_code = tmp[0]
         montage = 0 if len(tmp) == 1 else int(tmp[1])
 
-        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/db2/protocols/r1.json'))
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
 
         hash_md5 = hashlib.md5()
 
         bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
         for fname in bp_paths:
             hash_md5.update(open(fname, 'rb').read())
+
         event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage,
                                                                experiment = task)))
         for fname in event_files:
             hash_md5.update(open(fname,'rb').read())
+
         return hash_md5.digest()
 
 
@@ -98,7 +100,7 @@ class ComputeTH1ClassPowers(ReportRamTask):
                 sess_events = eegs['events'].values.view(np.recarray)
                 n_events = len(sess_events)
                 events = np.hstack((events[events.session!=sess],sess_events)).view(np.recarray)
-                ev_order = np.argsort(events, order=('session','trial','mstime'))  # #TODO: FLAG
+                ev_order = np.argsort(events, order=('session','trial','mstime'))
                 events = events[ev_order]
                 self.pass_object(self.pipeline.task+'_events', events)
 

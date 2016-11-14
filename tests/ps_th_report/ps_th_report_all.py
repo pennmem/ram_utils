@@ -4,7 +4,6 @@ import re
 import sys
 from os.path import *
 from setup_utils import parse_command_line, configure_python_paths
-sys.path.append(join(dirname(__file__),'..','..'))
 from ptsa.data.readers.IndexReader import JsonIndexReader
 from ReportUtils import CMLParser,ReportPipeline
 
@@ -84,7 +83,7 @@ class Params(object):
 params = Params()
 task = args.task
 
-json_reader = JsonIndexReader(os.path.join(args.mount_point,'data/eeg/db2/protocols/r1.json'))
+json_reader = JsonIndexReader(os.path.join(args.mount_point,'protocols/r1.json'))
 subject_set = json_reader.aggregate_values('subjects', experiment=task) & json_reader.aggregate_values('subjects', experiment='TH1')
 print subject_set
 subjects = []
@@ -108,7 +107,7 @@ subject_fail_list = []
 subject_missing_experiment_list = []
 subject_missing_data_list = []
 
-rsi = ReportSummaryInventory(label=args.experiment)
+rsi = ReportSummaryInventory(label=args.task)
 
 for subject in subjects:
     print subject
@@ -118,8 +117,8 @@ for subject in subjects:
     # sets up processing pipeline
 
     report_pipeline = ReportPipeline(subject=subject,
-                                     experiment=args.experiment,
-                                     experiment_label=args.experiment+'_TH', # NOTE: I am adding experiment_label tso that json status outpu has proper experiment annotation that does not overlap with other repor experiments names
+                                     experiment=args.task,
+                                     experiment_label=args.task+'_TH', # NOTE: I am adding experiment_label tso that json status outpu has proper experiment annotation that does not overlap with other repor experiments names
                                      workspace_dir=join(args.workspace_dir, subject),
                                      mount_point=args.mount_point,
                                      exit_on_no_change=args.exit_on_no_change,

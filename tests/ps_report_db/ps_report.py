@@ -1,18 +1,19 @@
 # command line example:
 
 import sys
-
+from os.path import *
 from setup_utils import parse_command_line, configure_python_paths
+sys.path.append(join(dirname(__file__),'..','..'))
 
 
 from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1200T')
-cml_parser.arg('--workspace-dir','/scratch/busygin/PS2.1_db')
+cml_parser.arg('--subject','R1050')
+cml_parser.arg('--workspace-dir','/scratch/leond/PS2_db')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
-cml_parser.arg('--experiment','PS2.1')
+cml_parser.arg('--task','PS2')
 
 # cml_parser.arg('--exit-on-no-change')
 

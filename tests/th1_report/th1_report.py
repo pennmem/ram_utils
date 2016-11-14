@@ -5,11 +5,9 @@
 
 # python ps_report.py --subject=R1086M --task=FR1 --workspace-dir=/data10/scratch/mswat/R1086M_2 --matlab-path=~/eeg --matlab-path=~/matlab/beh_toolbox --matlab-path=~/RAM/RAM_reporting --matlab-path=~/RAM/RAM_sys2Biomarkers --matlab-path=~/RAM_UTILS_GIT/tests/ps2_report/AuxiliaryMatlab --python-path=~/RAM_UTILS_GIT
 
-#TODO: Find bug with R1132C
 
 import sys
 from os.path import *
-sys.path.append(join(dirname(__file__),'..','..'))
 
 
 from ReportUtils import CMLParser,ReportPipeline

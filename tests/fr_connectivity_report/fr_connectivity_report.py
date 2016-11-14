@@ -15,8 +15,8 @@ import numpy as np
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1001P')
-cml_parser.arg('--workspace-dir','/scratch/busygin/FR_connectivity_report')
+cml_parser.arg('--subject','R1236J')
+cml_parser.arg('--workspace-dir','/scratch/leond/FR_connectivity_report')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
 # cml_parser.arg('--exit-on-no-change')

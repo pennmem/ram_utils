@@ -44,7 +44,7 @@ class ComputePSTable(ReportRamTask):
         subj_code = tmp[0]
         montage = 0 if len(tmp) == 1 else int(tmp[1])
 
-        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/db2/protocols/r1.json'))
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
 
         hash_md5 = hashlib.md5()
 
@@ -102,7 +102,8 @@ class ComputePSTable(ReportRamTask):
             # perf_diff[i] = 100.0*(prob2perf(probs, true_labels, prob_pre[i]+prob_diff[i]+1e-7) - perf_pre) / total_recall_performance
             perf_pre = prob2perf_norm(xval_output[-1], prob_pre[i])
             perf_diff[i] = 100.0 * (
-            prob2perf_norm(xval_output[-1], prob_pre[i] + prob_diff[i]) - perf_pre) / total_recall_performance
+            prob2perf_norm(xval_output[-1], prob_pre[i] + prob_diff[i]) - perf_pre
+            ) / total_recall_performance
 
         region = [None] * n_events
         for i, ev in enumerate(ps_events):

@@ -1,5 +1,7 @@
 import sys
 from os.path import *
+sys.path.append(join(dirname(__file__),'..','..'))
+
 
 from ReportUtils import CMLParser,ReportPipeline
 
@@ -8,7 +10,7 @@ cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--subject','R1208C')
 cml_parser.arg('--task','RAM_TH3')
 #cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/TH3_reports')
-cml_parser.arg('--workspace-dir','/scratch/busygin/TH3_reports_db')
+cml_parser.arg('--workspace-dir','/scratch/leond/TH3_reports_db')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
 

@@ -25,7 +25,7 @@ class PSEventPreparation(ReportRamTask):
         subj_code = tmp[0]
         montage = 0 if len(tmp)==1 else int(tmp[1])
 
-        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/db2/protocols/r1.json'))
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
 
         hash_md5 = hashlib.md5()
 
@@ -52,7 +52,7 @@ class PSEventPreparation(ReportRamTask):
         subj_code = tmp[0]
         montage = 0 if len(tmp)==1 else int(tmp[1])
 
-        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/db2/protocols/r1.json'))
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
 
         event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment=task)))
         events = None
@@ -73,6 +73,7 @@ class PSEventPreparation(ReportRamTask):
         stim_params = pd.DataFrame.from_records(events.stim_params)
         events = pd.DataFrame.from_records(events)
         del events['stim_params']
+
         events = pd.concat([events, stim_params], axis=1)
 
         propagate_stim_params_to_all_events(events)
@@ -114,6 +115,8 @@ def compute_isi(events):
     events['isi'] = events['mstime'] - events['mstime'].shift(1)
     events.loc[events['type'].shift(1)!='STIM_OFF', 'isi'] = np.nan
     events.loc[events['isi']>7000.0, 'isi'] = np.nan
+
+    print 'first 20 isi vals: ',events['isi'][:20]
 
     return events
 

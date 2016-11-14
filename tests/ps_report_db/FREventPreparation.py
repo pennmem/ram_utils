@@ -109,7 +109,8 @@ class FREventPreparation(ReportRamTask):
             # raise Exception('sjhdjshdk') # debug code
 
 
-        except Exception:
+        except Exception as e:
+            print e
             self.raise_and_log_report_exception(
                 exception_type='MissingDataError',
                 exception_message='Missing FR1 or CatFR1 events data (%s,%s)' % (fr1_e_path, catfr1_e_path)

@@ -31,7 +31,7 @@ class THEventPreparation(ReportRamTask):
             events.dtype.names = ['item_name' if i=='item' else i for i in events.dtype.names]
             ev_order = np.argsort(events, order=('session','trial','mstime'))
             events = events[ev_order]
-            print events[0]
+            print 'sessions: ',np.unique(events['session'])
 
             # add in error if object locations are transposed
             xCenter = 384.8549

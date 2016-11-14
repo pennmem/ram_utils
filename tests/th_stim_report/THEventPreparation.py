@@ -30,7 +30,7 @@ class THEventPreparation(ReportRamTask):
             subj_code = tmp[0]
             montage = 0 if len(tmp) == 1 else int(tmp[1])
 
-            json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/db2/protocols/r1.json'))
+            json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
             event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage,
                                                                    experiment='TH1')))
             events=None

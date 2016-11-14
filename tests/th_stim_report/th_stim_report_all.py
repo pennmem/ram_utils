@@ -4,7 +4,6 @@ import re
 import sys
 from setup_utils import parse_command_line, configure_python_paths
 from os.path import *
-sys.path.append(join(dirname(__file__),'..','..'))
 
 from ReportUtils import CMLParser,ReportPipeline
 
@@ -73,7 +72,7 @@ task = args.task
 print 'task: ',task
 def find_subjects_by_task(task):
 
-    json_reader = JsonIndexReader(os.path.join(args.mount_point, 'data/eeg/db2/protocols/r1.json'))
+    json_reader = JsonIndexReader(os.path.join(args.mount_point, 'protocols/r1.json'))
     subject_set = json_reader.aggregate_values('subjects', experiment=task)
     print subject_set
     subjects = []
@@ -101,7 +100,6 @@ rsi = ReportSummaryInventory(label=args.experiment)
 
 for subject in subjects:
     print subject
-    continue
     if args.skip_subjects is not None and subject in args.skip_subjects:
         continue
 

@@ -26,7 +26,7 @@ class TH1EventPreparation(RamTask):
         subject = self.pipeline.subject
         task = self.pipeline.task
         [subj_code,montage] = split_subject(subject)
-        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/db2/protocols/r1.json'))
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
         hash_md5 = hashlib.md5()
 
         event_files = sorted(list(json_reader.aggregate_values('task_events',subject=subj_code,montage=montage,
@@ -43,7 +43,7 @@ class TH1EventPreparation(RamTask):
         subj_code = tmp[0]
         montage = 0 if len(tmp) == 1 else int(tmp[1])
 
-        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/db2/protocols/r1.json'))
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
         event_files = sorted(list(json_reader.aggregate_values('task_events',subject=subj_code,montage=montage,
                                                                experiment=task)))
         print 'subj_code: ',subj_code

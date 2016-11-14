@@ -6,7 +6,6 @@
 # python ps_report.py --subject=R1086M --task=FR1 --workspace-dir=/data10/scratch/mswat/R1086M_2 --matlab-path=~/eeg --matlab-path=~/matlab/beh_toolbox --matlab-path=~/RAM/RAM_reporting --matlab-path=~/RAM/RAM_sys2Biomarkers --matlab-path=~/RAM_UTILS_GIT/tests/ps2_report/AuxiliaryMatlab --python-path=~/RAM_UTILS_GIT
 import sys
 from os.path import *
-sys.path.append(join(dirname(__file__),'..','..'))
 from ReportUtils import CMLParser,ReportPipeline
 from ReportUtils import ReportSummaryInventory
 from ptsa.data.readers.IndexReader import JsonIndexReader
@@ -95,7 +94,7 @@ print task
 
 def find_subjects_by_task(task):
 
-    json_reader = JsonIndexReader(os.path.join(args.mount_point, 'data/eeg/db2/protocols/r1.json'))
+    json_reader = JsonIndexReader(os.path.join(args.mount_point, 'protocols/r1.json'))
     subject_set = json_reader.aggregate_values('subjects', experiment=task)
     subjects = []
     for s in subject_set:
@@ -119,55 +118,51 @@ subjects.sort()
 
 rsi = ReportSummaryInventory(label=task)
 
-with open('th1_errors.txt','w') as err_file:
-    for subject in subjects:
-        try:
-            print '--Generating', task, 'report for', subject
-            if args.skip_subjects is not None and subject in args.skip_subjects:
-                print 'Skipping subject ', subject
-                continue
+for subject in subjects:
 
-            # sets up processing pipeline
-            report_pipeline = ReportPipeline(subject=subject, task=args.task,
-                                                   workspace_dir=join(args.workspace_dir,args.task+'_'+subject), mount_point=args.mount_point,exit_on_no_change=args.exit_on_no_change,
-                                             recompute_on_no_status=args.recompute_on_no_status)
+    print '--Generating', task, 'report for', subject
+    if args.skip_subjects is not None and subject in args.skip_subjects:
+        print 'Skipping subject ', subject
+        continue
 
-            report_pipeline.add_task(TH1EventPreparation(mark_as_completed=False))
+    # sets up processing pipeline
+    report_pipeline = ReportPipeline(subject=subject, task=args.task,
+                                           workspace_dir=join(args.workspace_dir,args.task+'_'+subject), mount_point=args.mount_point,exit_on_no_change=args.exit_on_no_change,
+                                     recompute_on_no_status=args.recompute_on_no_status)
 
-            report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
+    report_pipeline.add_task(TH1EventPreparation(mark_as_completed=False))
 
-            report_pipeline.add_task(ComputeTH1Powers(params=params, mark_as_completed=True))
+    report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
 
-            report_pipeline.add_task(ComputeTH1ClassPowers(params=params, mark_as_completed=True))
+    report_pipeline.add_task(ComputeTH1Powers(params=params, mark_as_completed=True))
 
-            report_pipeline.add_task(ComputeTTest(params=params, mark_as_completed=False))
+    report_pipeline.add_task(ComputeTH1ClassPowers(params=params, mark_as_completed=True))
 
-            report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
+    report_pipeline.add_task(ComputeTTest(params=params, mark_as_completed=False))
 
-            if params.doConf_classification:
-                report_pipeline.add_task(ComputeClassifier_conf(params=params, mark_as_completed=True))
+    report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 
-            if params.doDist_classification:
-                report_pipeline.add_task(ComputeClassifier_distThresh(params=params, mark_as_completed=True))
+    if params.doConf_classification:
+        report_pipeline.add_task(ComputeClassifier_conf(params=params, mark_as_completed=True))
 
-            if params.doClass_wTranspose:
-                report_pipeline.add_task(ComputeClassifier_withTranspose(params=params, mark_as_completed=True))
+    if params.doDist_classification:
+        report_pipeline.add_task(ComputeClassifier_distThresh(params=params, mark_as_completed=True))
 
-            report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
+    if params.doClass_wTranspose:
+        report_pipeline.add_task(ComputeClassifier_withTranspose(params=params, mark_as_completed=True))
 
-            report_pipeline.add_task(GeneratePlots(params=params, mark_as_completed=False))
+    report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
 
-            report_pipeline.add_task(GenerateTex(params=params, mark_as_completed=False))
+    report_pipeline.add_task(GeneratePlots(params=params, mark_as_completed=False))
 
-            report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
+    report_pipeline.add_task(GenerateTex(params=params, mark_as_completed=False))
 
-            report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
+    report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
-            # starts processing pipeline
-            report_pipeline.execute_pipeline()
+    report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
 
-            rsi.add_report_summary(report_summary=report_pipeline.get_report_summary())
-        except Exception as e:
-            err_file.write(str(type(e))+' '+ str(e)+'\n')
-            print e
-    rsi.output_json_files(dir=args.status_output_dir)
+    # starts processing pipeline
+    report_pipeline.execute_pipeline()
+
+    rsi.add_report_summary(report_summary=report_pipeline.get_report_summary())
+rsi.output_json_files(dir=args.status_output_dir)

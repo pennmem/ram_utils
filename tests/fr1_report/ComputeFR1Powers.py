@@ -30,7 +30,7 @@ class ComputeFR1Powers(ReportRamTask):
         subj_code = tmp[0]
         montage = 0 if len(tmp)==1 else int(tmp[1])
 
-        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/protocols/r1.json'))
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
 
         hash_md5 = hashlib.md5()
 
@@ -144,7 +144,7 @@ class ComputeFR1Powers(ReportRamTask):
                     pow_ev_stripped = np.reshape(pow_ev, (n_freqs,winsize))[:,bufsize:winsize-bufsize]
                     pow_zeros = np.where(pow_ev_stripped==0.0)[0]
                     if len(pow_zeros)>0:
-                        print bp, ev
+                        print 'zero powers:',bp, ev
                         print sess_events[ev].eegfile, sess_events[ev].eegoffset
                         if len(pow_zeros)>0:
                             print bp, ev

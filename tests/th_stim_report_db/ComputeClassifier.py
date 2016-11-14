@@ -118,6 +118,7 @@ class ComputeClassifier(ReportRamTask):
         probs = np.empty_like(recalls, dtype=np.float)
 
         sessions = np.unique(event_sessions)
+        print 'leaving one session out \n\n'
 
         for sess in sessions:
             insample_mask = (event_sessions != sess)
@@ -176,6 +177,8 @@ class ComputeClassifier(ReportRamTask):
 
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
+                    with open('insample_recalls.txt','w+') as out:
+                        out.write('session: {}\nlist:{} \n insample_recalls: {}\n'.format(sess,lst,insample_recalls))
                     self.lr_classifier.fit(insample_pow_mat, insample_recalls)
 
                 outsample_mask = ~insample_mask

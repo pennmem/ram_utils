@@ -55,7 +55,7 @@ class MontagePreparation(ReportRamTask):
         subj_code = tmp[0]
         montage = 0 if len(tmp)==1 else int(tmp[1])
 
-        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/protocols/r1.json'))
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
 
         hash_md5 = hashlib.md5()
 
@@ -84,7 +84,7 @@ class MontagePreparation(ReportRamTask):
         subj_code = tmp[0]
         montage = 0 if len(tmp)==1 else int(tmp[1])
 
-        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'data/eeg/protocols/r1.json'))
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
         bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
 
         try:

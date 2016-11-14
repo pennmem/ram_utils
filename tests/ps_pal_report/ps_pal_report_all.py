@@ -79,7 +79,7 @@ params = Params()
 
 task = args.task
 
-json_reader = JsonIndexReader(os.path.join(args.mount_point,'data/eeg/protocols/r1.json'))
+json_reader = JsonIndexReader(os.path.join(args.mount_point,'protocols/r1.json'))
 subject_set = json_reader.aggregate_values('subjects', experiment=task) & json_reader.aggregate_values('subjects', experiment='PAL1')
 
 subjects = []
