@@ -88,7 +88,7 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python ${report_code_dir}/fr1_report_all.py  --task=RAM_FR1 \
+python ${report_code_dir}/fr1_report_all.py  ----task=FR1 \
  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
  --skip-subjects R1055J R1061T R1090C R1092J_2 R1093J_1 R2009P_1 R2012P_1 R2015P_1
 
@@ -102,7 +102,7 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python ${report_code_dir}/fr_stim_report_all.py  --task=RAM_FR3 \
+python ${report_code_dir}/fr_stim_report_all.py  ----task=FR3 \
  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
  --skip-subjects R1093J_1
 
@@ -116,7 +116,7 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python ${report_code_dir}/pal_stim_report_all.py  --task=RAM_PAL3 \
+python ${report_code_dir}/pal_stim_report_all.py  ----task=PAL3 \
  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 
 # TH3
@@ -129,7 +129,7 @@ python ${report_code_dir}/pal_stim_report_all.py  --task=RAM_PAL3 \
 
 #remove_old_status_dirs ${workspace_dir}
 
-#python ${report_code_dir}/th_stim_report_all.py  --task=RAM_TH3 \
+#python ${report_code_dir}/th_stim_report_all.py  ----task=TH3 \
 # --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 
 
@@ -143,7 +143,7 @@ python ${report_code_dir}/pal_stim_report_all.py  --task=RAM_PAL3 \
 #
 #remove_old_status_dirs ${workspace_dir}
 #
-#python ${report_code_dir}/fr_stim_report_all.py  --task=RAM_FR4 \
+#python ${report_code_dir}/fr_stim_report_all.py  ----task=FR4 \
 # --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 #
 
@@ -158,7 +158,7 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python ${report_code_dir}/fr1_report_all.py  --task=RAM_CatFR1 \
+python ${report_code_dir}/fr1_report_all.py  ----task=CatFR1 \
  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
  --skip-subjects R1029W
 
@@ -174,7 +174,7 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python ${report_code_dir}/fr1_catfr1_joint_report_all.py --task=RAM_FR1_CatFR1_joint\
+python ${report_code_dir}/fr1_catfr1_joint_report_all.py ----task=FR1_CatFR1_joint\
  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
  --skip-subjects R1061T
 
@@ -189,7 +189,7 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python ${report_code_dir}/pal1_report_all.py  --task=RAM_PAL1 \
+python ${report_code_dir}/pal1_report_all.py  ----task=PAL1 \
   --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
   --skip-subjects R1050M R1136N
 
