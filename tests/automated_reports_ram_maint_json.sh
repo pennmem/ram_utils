@@ -204,7 +204,7 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python ${report_code_dir}/ps_report_all.py  --experiment=PS1 \
+python ${report_code_dir}/ps_report_all.py  --task=PS1 \
   --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
   --skip-subjects R1061T
 
@@ -219,7 +219,7 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python ${report_code_dir}/ps_report_all.py  --experiment=PS2 \
+python ${report_code_dir}/ps_report_all.py  --task=PS2 \
   --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
   --skip-subjects R1100D
 
@@ -235,7 +235,7 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python ${report_code_dir}/ps_report_all.py  --experiment=PS2.1 \
+python ${report_code_dir}/ps_report_all.py  --task=PS2.1 \
   --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 
 # PS3
@@ -248,7 +248,7 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python ${report_code_dir}/ps_report_all.py  --experiment=PS3 \
+python ${report_code_dir}/ps_report_all.py  --task=PS3 \
   --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 
 
@@ -263,7 +263,7 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python ${report_code_dir}/ps_pal_report_all.py  --experiment=PS1 \
+python ${report_code_dir}/ps_pal_report_all.py  --task=PS1 \
   --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 
 
@@ -277,7 +277,7 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python ${report_code_dir}/ps_pal_report_all.py  --experiment=PS2 \
+python ${report_code_dir}/ps_pal_report_all.py  --task=PS2 \
   --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
   --skip-subjects R1100D
 
@@ -292,7 +292,7 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python ${report_code_dir}/ps_pal_report_all.py  --experiment=PS2.1 \
+python ${report_code_dir}/ps_pal_report_all.py  --task=PS2.1 \
   --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 
 
@@ -306,7 +306,7 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python ${report_code_dir}/ps_pal_report_all.py  --experiment=PS3 \
+python ${report_code_dir}/ps_pal_report_all.py  --task=PS3 \
   --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 
 
@@ -320,7 +320,7 @@ python ${report_code_dir}/ps_pal_report_all.py  --experiment=PS3 \
 #
 #remove_old_status_dirs ${workspace_dir}
 #
-#python ${report_code_dir}/ps_pal_report_all.py  --experiment=PS1 \
+#python ${report_code_dir}/ps_pal_report_all.py  --task=PS1 \
 #  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 
 # TH_PS2
@@ -333,7 +333,7 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python ${report_code_dir}/ps_th_report_all.py  --experiment=PS2 \
+python ${report_code_dir}/ps_th_report_all.py  --task=PS2 \
   --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 
 # TH_PS2.1
@@ -346,7 +346,7 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python ${report_code_dir}/ps_th_report_all.py  --experiment=PS2.1 \
+python ${report_code_dir}/ps_th_report_all.py  --task=PS2.1 \
   --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 
 # TH_PS3
@@ -359,7 +359,7 @@ python ${report_code_dir}/ps_th_report_all.py  --experiment=PS2.1 \
 #
 #remove_old_status_dirs ${workspace_dir}
 #
-#python ${report_code_dir}/ps_th_report_all.py  --experiment=PS3 \
+#python ${report_code_dir}/ps_th_report_all.py  --task=PS3 \
 #  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 
 
