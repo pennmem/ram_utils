@@ -111,7 +111,7 @@ class ComposeSessionSummary(ReportRamTask):
                 list_rec_events = session_rec_events[(session_rec_events.list == lst) & (session_rec_events.intrusion == 0)]
                 if list_rec_events.size > 0:
                     list_events = session_events[session_events.list == lst]
-                    tmp = np.where(list_events.wordno == list_rec_events[0].wordno)[0]
+                    tmp = np.where(list_events.item_num == list_rec_events[0].item_num)[0]
                     if tmp.size > 0:
                         first_recall_idx = tmp[0]
                         prob_first_recall[first_recall_idx] += 1
