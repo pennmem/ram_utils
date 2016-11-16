@@ -196,7 +196,7 @@ class ComposeSessionSummary(ReportRamTask):
 
         anova_significance = dict()
 
-        with open('/scratch/leond/PS2.1_TH/perf_prob_ratio.txt','w+') as ppr:
+        with open('/scratch/RAM_maint/automated_reports_json/PS2.1_TH/perf_prob_ratio.txt','w+') as ppr:
             ppr.write(str((ps_table['prob_pre']-ps_table['prob_post'])/ps_table['perf_diff']))
 
         ps_table_by_session = ps_table.groupby(['session'])

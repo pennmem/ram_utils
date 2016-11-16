@@ -11,7 +11,7 @@ from ptsa.data.readers.IndexReader import JsonIndexReader
 
 cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--subject','R1201P_1')
-cml_parser.arg('--workspace-dir','/scratch/leond/automated_reports/TH3_reports')
+cml_parser.arg('--workspace-dir','/scratch/RAM_maint/automated_reports_json/automated_reports/TH3_reports')
 cml_parser.arg('--task','TH3')
 cml_parser.arg('--mount-point','')
 cml_parser.arg('--recompute-on-no-status')
