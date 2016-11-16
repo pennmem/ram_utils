@@ -58,7 +58,6 @@ class PSEventPreparation(ReportRamTask):
         events = None
         for sess_file in event_files:
             e_path = os.path.join(self.pipeline.mount_point, str(sess_file))
-            print e_path
             e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
             sess_events = e_reader.read()
@@ -115,8 +114,6 @@ def compute_isi(events):
     events['isi'] = events['mstime'] - events['mstime'].shift(1)
     events.loc[events['type'].shift(1)!='STIM_OFF', 'isi'] = np.nan
     events.loc[events['isi']>7000.0, 'isi'] = np.nan
-
-    print 'first 20 isi vals: ',events['isi'][:20]
 
     return events
 
