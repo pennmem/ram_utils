@@ -119,18 +119,18 @@ remove_old_status_dirs ${workspace_dir}
 python ${report_code_dir}/pal_stim_report_all.py  --task=PAL3 \
  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 
-# TH3
-#report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/th_stim_report
-#cd ${report_code_dir}
+#TH3
+report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/th_stim_report
+cd ${report_code_dir}
 
-#workspace_dir=${automated_reports_dir}/TH3_reports
-#status_output_dir=${workspace_dir}/${datetime}
-#status_output_dirs+=(${status_output_dir})
+workspace_dir=${automated_reports_dir}/TH3_reports
+status_output_dir=${workspace_dir}/${datetime}
+status_output_dirs+=(${status_output_dir})
 
-#remove_old_status_dirs ${workspace_dir}
+remove_old_status_dirs ${workspace_dir}
 
-#python ${report_code_dir}/th_stim_report_all.py  --task=TH3 \
-# --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
+python ${report_code_dir}/th_stim_report_all.py  --task=TH3 \
+ --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 
 
 # FR4

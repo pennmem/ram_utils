@@ -138,7 +138,8 @@ class ComputePSPowers(ReportRamTask):
 
 
             for i_ev in xrange(n_events):
-                ev_offset = sess_events[i_ev].stim_duration if task!='PS3' else sess_events[i_ev].train_duration
+                # ev_offset = sess_events[i_ev].stim_duration if task!='PS3' else sess_events[i_ev].train_duration
+                ev_offset = sess_events[i_ev].stim_duration
                 if ev_offset > 0:
                     ev_offset *= 0.001
                 else:

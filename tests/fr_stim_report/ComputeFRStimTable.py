@@ -97,7 +97,7 @@ class ComputeFRStimTable(ReportRamTask):
                 j += 1
 
         self.fr_stim_table = pd.DataFrame()
-        self.fr_stim_table['item'] = events.word
+        self.fr_stim_table['item'] = events.item_name
         self.fr_stim_table['session'] = events.session
         self.fr_stim_table['list'] = events.list
         self.fr_stim_table['serialpos'] = events.serialpos

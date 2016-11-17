@@ -146,8 +146,6 @@ def compute_isi(events):
                     dt = curr_ev.mstime - prev_mstime
                     if dt < 7000.0:
                         events.isi.values[i] = dt
-    print 'first 10 ISI vals: ', events.isi.values[:10]
-
     return events
 #
 # def get_events(subject, task, path_prefix):
