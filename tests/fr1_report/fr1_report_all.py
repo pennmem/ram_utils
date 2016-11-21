@@ -143,8 +143,8 @@ for subject in subjects:
     rsi.add_report_summary(report_summary=report_pipeline.get_report_summary())
 
 
-# print 'this is summary for all reports report ', rsi.compose_summary(detail_level=1)
+#print 'this is summary for all reports report ', rsi.compose_summary(detail_level=1)
 
 rsi.output_json_files(dir=args.status_output_dir)
-# rsi.send_email_digest()
+#rsi.send_email_digest()
 

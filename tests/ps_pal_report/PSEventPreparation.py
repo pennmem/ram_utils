@@ -58,7 +58,6 @@ class PSEventPreparation(ReportRamTask):
         events = None
         for sess_file in event_files:
             e_path = os.path.join(self.pipeline.mount_point, str(sess_file))
-            print e_path
             e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
             sess_events = e_reader.read()
@@ -119,7 +118,6 @@ def compute_isi(events):
 
 def propagate_stim_params_to_all_events(events):
     events_by_session = events.groupby(['session'])
-    print 'event fields: ',events.dtypes
     for sess,session_events in events_by_session:
         last_stim_event = session_events[session_events.type=='STIM_ON'].iloc[-1]
         session_mask = (events.session==sess)

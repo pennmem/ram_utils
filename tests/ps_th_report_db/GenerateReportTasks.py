@@ -286,7 +286,7 @@ class DeployReportPDF(ReportRamTask):
 
     def run(self):
         report_file = self.get_passed_object('report_file')
-        self.pipeline.deploy_report(report_path=report_file, classifier_experiment='TH1')
+        self.pipeline.deploy_report(report_path=report_file, classifier_experiment='TH1',suffix='_db')
 
 # class DeployReportPDF(ReportRamTask):
 #     def __init__(self, mark_as_completed=True):
