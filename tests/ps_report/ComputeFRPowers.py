@@ -167,7 +167,7 @@ class ComputeFRPowers(ReportRamTask):
                 # eegs_elec1.reset_coords('channels')
                 # eegs_elec2.reset_coords('channels')
 
-                bp_data = eegs[elec1] - eegs[elec2]
+                bp_data = np.subtract(eegs[elec1],eegs[elec2])
                 bp_data.attrs['samplerate'] = self.samplerate
 
                 # bp_data = eegs[elec1] - eegs[elec2]

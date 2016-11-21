@@ -213,7 +213,7 @@ class ComputePSPowers(ReportRamTask):
             #     elec2 = np.where(channels == bp[1])[0][0]
 
 
-                bp_data_pre = eegs_pre[elec1] - eegs_pre[elec2]
+                bp_data_pre = np.subtract(eegs_pre[elec1],eegs_pre[elec2])
                 # bp_data_pre.attrs['samplerate'] = samplerate
 
                 bp_data_pre = bp_data_pre.filtered([58,62], filt_type='stop', order=self.params.filt_order)
@@ -236,7 +236,7 @@ class ComputePSPowers(ReportRamTask):
                         np.log10(pow_ev_stripped, out=pow_ev_stripped)
                     sess_pow_mat_pre[ev,i,:] = np.nanmean(pow_ev_stripped, axis=1)
 
-                bp_data_post = eegs_post[elec1] - eegs_post[elec2]
+                bp_data_post = np.subtract(eegs_post[elec1],eegs_post[elec2])
                 # bp_data_post.attrs['samplerate'] = samplerate
 
                 bp_data_post = bp_data_post.filtered([58,62], filt_type='stop', order=self.params.filt_order)

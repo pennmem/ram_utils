@@ -123,7 +123,7 @@ class ComputePAL1Powers(ReportRamTask):
                 elec1 = np.where(monopolar_channels == bp[0])[0][0]
                 elec2 = np.where(monopolar_channels == bp[1])[0][0]
 
-                bp_data = eegs[elec1] - eegs[elec2]
+                bp_data = np.subtract(eegs[elec1],eegs[elec2])
                 bp_data.attrs['samplerate'] = self.samplerate
 
                 bp_data = bp_data.filtered([58,62], filt_type='stop', order=self.params.filt_order)
