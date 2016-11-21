@@ -134,5 +134,5 @@ for subject in subjects:
 
 print 'this is summary for all reports report ', rsi.compose_summary(detail_level=1)
 
-rsi.output_json_files(dir=args.status_output_dir)
+# rsi.output_json_files(dir=args.status_output_dir)
 # rsi.send_email_digest()

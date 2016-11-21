@@ -151,4 +151,4 @@ for subject in subjects:
 
     rsi.add_report_summary(report_summary=report_pipeline.get_report_summary())
 
-rsi.output_json_files(dir=args.status_output_dir)
+# rsi.output_json_files(dir=args.status_output_dir)
