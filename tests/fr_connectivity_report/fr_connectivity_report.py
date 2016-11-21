@@ -15,8 +15,8 @@ import numpy as np
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1236J')
-cml_parser.arg('--workspace-dir','/scratch/RAM_maint/automated_reports_json/FR_connectivity_report')
+cml_parser.arg('--subject','R1230J')
+cml_parser.arg('--workspace-dir','/scratch/leond/FR_connectivity_reports')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
 # cml_parser.arg('--exit-on-no-change')
@@ -30,6 +30,7 @@ from FR1EventPreparation import FR1EventPreparation
 from MontagePreparation import MontagePreparation
 
 from ComputeFR1PhaseDiff import ComputeFR1PhaseDiff
+
 
 #from LoadESPhaseDiff import LoadESPhaseDiff
 
@@ -57,7 +58,7 @@ class Params(object):
 
         self.n_perms = 500
 
-        self.save_fstat_and_zscore_mats = False
+        self.save_fstat_and_zscore_mats = True
 
 
 params = Params()
