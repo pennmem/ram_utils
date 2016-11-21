@@ -391,8 +391,8 @@ python ${report_code_dir}/th1_report_all.py  --task=TH1\
 #python /home2/RAM_maint/RAM_UTILS_GIT/tests/ps_ttest_table/ttest_table_with_params.py --workspace-dir=${automated_reports_dir}
 
 
-#python /home2/RAM_maint/RAM_UTILS_GIT/ReportUtils/ReportMailer.py\
-# --status-output-dirs ${status_output_dirs[@]} --error-log-file=${automated_reports_dir}/error_logs/${datetime}.error.txt
+python /home2/RAM_maint/RAM_UTILS_GIT/ReportUtils/ReportMailer.py\
+ --status-output-dirs ${status_output_dirs[@]} --error-log-file=${automated_reports_dir}/error_logs/${datetime}.error.txt
 
 
 #removing old error logs
