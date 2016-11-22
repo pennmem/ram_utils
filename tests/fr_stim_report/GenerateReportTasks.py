@@ -183,7 +183,7 @@ class GeneratePlots(ReportRamTask):
             plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
 
-            if task == 'RAM_FR4':
+            if 'FR4' in task:
                 panel_plot = PanelPlot(xfigsize=17, yfigsize=7.5, i_max=1, j_max=3, title='', wspace=3.5, hspace=0.3, labelsize=18)
 
                 pd1 = BarPlotData(x=(0,1,2,3),
@@ -215,7 +215,7 @@ class GeneratePlots(ReportRamTask):
                 plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-stim_vs_non_stim_halves_plot_' + session_summary.stimtag + '-' + str(session_summary.frequency) + '.pdf')
 
                 plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
-            elif task == 'FR3':
+            elif 'FR3' in task:
                 panel_plot = PanelPlot(xfigsize=6, yfigsize=7.5, i_max=1, j_max=1, title='', labelsize=18)
 
                 ylim = np.max(np.abs(session_summary.pc_diff_from_mean)) + 5.0
