@@ -18,6 +18,7 @@ def format_connectivity_strength_table(table_data):
                 line[:] = ['\\textbf{\\textcolor{BrickRed}{%s}}' % s for s in line]
             elif color == 'blue':
                 line[:] = ['\\textbf{\\textcolor{blue}{%s}}' % s for s in line]
+    return table_data
 
 
 class ComposeSessionSummary(ReportRamTask):
@@ -27,9 +28,8 @@ class ComposeSessionSummary(ReportRamTask):
     def run(self):
         bp_tal_structs = self.get_passed_object('bp_tal_structs')
         connectivity_strength = self.get_passed_object('connectivity_strength')
-
         connectivity_strength_data = make_connectivity_strength_table(bp_tal_structs, connectivity_strength)
         connectivity_strength_data.sort(key=lambda row: abs(row[-1]), reverse=True)
         connectivity_strength_table = format_connectivity_strength_table(connectivity_strength_data)
-
+        print 'Strength table is None: ', connectivity_strength_table is None
         self.pass_object('connectivity_strength_table', connectivity_strength_table)
