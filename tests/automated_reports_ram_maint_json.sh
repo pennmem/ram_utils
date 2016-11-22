@@ -106,6 +106,21 @@ python ${report_code_dir}/fr_stim_report_all.py  --task=FR3 \
  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
  --skip-subjects R1093J_1
 
+ # catFR3
+report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/fr_stim_report
+cd ${report_code_dir}
+
+workspace_dir=${automated_reports_dir}/FR3_reports
+status_output_dir=${workspace_dir}/${datetime}
+status_output_dirs+=(${status_output_dir})
+
+remove_old_status_dirs ${workspace_dir}
+
+python ${report_code_dir}/fr_stim_report_all.py  --task=catFR3 \
+ --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
+ --skip-subjects R1093J_1
+
+
 # PAL3
 report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/pal_stim_report
 cd ${report_code_dir}

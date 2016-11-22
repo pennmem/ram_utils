@@ -3,9 +3,9 @@
 #$ -q RAM.q
 #$ -S /bin/bash
 #$ -cwd
-#$ -N REPORT_JSON
+#$ -N REPORT_CONNECTIVITY
 #$ -j y
-#$ -o /scratch/RAM_maint/automated_reports_json/automated_reports.log
+#$ -o /scratch/RAM_maint/automated_connectivity_reports_json/automated_connectivity_reports.log
 
 #$ -pe python-shared 10
 #$ -l h_rt=72:00:00
