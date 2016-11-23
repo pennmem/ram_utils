@@ -110,7 +110,7 @@ python ${report_code_dir}/fr_stim_report_all.py  --task=FR3 \
 report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/fr_stim_report
 cd ${report_code_dir}
 
-workspace_dir=${automated_reports_dir}/FR3_reports
+workspace_dir=${automated_reports_dir}/catFR3_reports
 status_output_dir=${workspace_dir}/${datetime}
 status_output_dirs+=(${status_output_dir})
 
