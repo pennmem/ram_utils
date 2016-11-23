@@ -5,11 +5,11 @@
 #$ -cwd
 #$ -N REPORT_CONNECTIVITY
 #$ -j y
-#$ -o /scratch/RAM_maint/automated_connectivity_reports_json/automated_connectivity_reports.log
+#$ -o /scratch/RAM_maint/automated_connectivity_reports/automated_connectivity_reports.log
 
-#$ -pe python-shared 10
+#$ -pe python-shared 1
 #$ -l h_rt=72:00:00
-#$ -l h_vmem=4G
+#$ -l h_vmem=64G
 
 source /home2/RAM_maint/.cron_init_script
 module load Tex/2014
