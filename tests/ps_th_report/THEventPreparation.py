@@ -29,7 +29,7 @@ class THEventPreparation(RamTask):
 
         pal1_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='TH1')))
         for fname in pal1_event_files:
-            hash_md5.update(open(fname,'rb').read())
+            with open(fname,'rb') as f: hash_md5.update(f.read())
 
         return hash_md5.digest()
 

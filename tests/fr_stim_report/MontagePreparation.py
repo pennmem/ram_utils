@@ -65,7 +65,7 @@ class MontagePreparation(ReportRamTask):
 
         bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
         for fname in bp_paths:
-            hash_md5.update(open(fname,'rb').read())
+            with open(fname,'rb') as f: hash_md5.update(f.read())
 
         return hash_md5.digest()
 

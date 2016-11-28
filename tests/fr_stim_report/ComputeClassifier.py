@@ -117,16 +117,15 @@ class ComputeClassifier(ReportRamTask):
 
         bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
         for fname in bp_paths:
-            hash_md5.update(open(fname,'rb').read())
+            with open(fname,'rb') as f: hash_md5.update(f.read())
 
-        fr1_event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='FR1')))
-        for fname in fr1_event_files:
-            hash_md5.update(open(fname,'rb').read())
+        experiments = ['FR1','catFR1','FR3','catFR3']
 
-        catfr1_event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='catFR1')))
-        for fname in catfr1_event_files:
-            hash_md5.update(open(fname,'rb').read())
-
+        for experiment in experiments:
+            event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment=experiment)))
+            for fname in event_files:
+                with open(fname,'rb') as f:
+                    hash_md5.update(f.read())
         return hash_md5.digest()
 
     def run_loso_xval(self, event_sessions, recalls, permuted=False):

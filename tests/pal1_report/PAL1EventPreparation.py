@@ -30,7 +30,7 @@ class PAL1EventPreparation(ReportRamTask):
 
         event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment=task)))
         for fname in event_files:
-            hash_md5.update(open(fname,'rb').read())
+            with open(fname,'rb') as f: hash_md5.update(f.read())
 
         return hash_md5.digest()
 
