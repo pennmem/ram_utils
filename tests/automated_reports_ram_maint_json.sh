@@ -131,7 +131,7 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python ${report_code_dir}/fr_stim_report_all.py  --task=FR3 \
+python ${report_code_dir}/fr_catfr_joint_stim_report_all.py  --task=FR3 \
  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
  --skip-subjects R1093J_1
 

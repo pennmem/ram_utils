@@ -91,6 +91,10 @@ remove_old_status_dirs ${workspace_dir}
 python ${report_code_dir}/fr_connectivity_report_all.py   \
  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
 
+
+python /home2/RAM_maint/RAM_UTILS_GIT/ReportUtils/ReportMailer.py\
+ --status-output-dirs ${status_output_dirs[@]} --error-log-file=${automated_reports_dir}/error_logs/${datetime}.error.txt
+
 #removing old error logs
 cd ${automated_reports_dir}/error_logs
 remove_old_error_logs
