@@ -82,7 +82,7 @@ fi
 report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/fr_connectivity_report
 cd ${report_code_dir}
 
-workspace_dir=${automated_reports_dir}/FR1_connectivity_reports
+workspace_dir=${automated_reports_dir}/fr_connectivity_reports
 status_output_dir=${workspace_dir}/${datetime}
 status_output_dirs+=(${status_output_dir})
 
