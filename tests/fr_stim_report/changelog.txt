@@ -1,3 +1,3 @@
 
 11/21/2016
-: Switched to JSON-based event reporting
+2.8: Switched to JSON-based event reporting
