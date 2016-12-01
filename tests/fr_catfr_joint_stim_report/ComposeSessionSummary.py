@@ -25,6 +25,7 @@ class ComposeSessionSummary(ReportRamTask):
         rec_events = self.get_passed_object(task + '_rec_events')
         all_events = self.get_passed_object(task + '_all_events')
         monopolar_channels = self.get_passed_object('monopolar_channels')
+        cat_events = self.get_passed_object('cat_events')
 
         stim_params_to_sess = self.get_passed_object('stim_params_to_sess')
         fr_stim_table = self.get_passed_object('fr_stim_table')
@@ -57,6 +58,22 @@ class ComposeSessionSummary(ReportRamTask):
         session_summary_array = []
 
         fr_stim_table_by_stim_param = fr_stim_table.groupby(['stimAnodeTag','stimCathodeTag','Pulse_Frequency'])
+
+        with open('irt_in_between.log','w') as irt_file:
+            cat_recalled_events = cat_events[cat_events.recalled==1]
+            irt_within_cat = []
+            irt_between_cat = []
+            for session in np.unique(cat_events.session):
+                cat_sess_recalls = cat_recalled_events[cat_recalled_events.session == session]
+                for list in np.unique(cat_sess_recalls.list):
+                    cat_sess_list_recalls = cat_sess_recalls[cat_sess_recalls.list==list]
+                    irts = np.diff(cat_sess_list_recalls.mstime)
+                    within = np.diff(cat_sess_list_recalls.category_num)==0
+                    irt_within_cat.extend(irts[within])
+                    irt_between_cat.extend(irts[within==False])
+            self.pass_object('irt_within_cat',irt_within_cat)
+            self.pass_object('irt_between_cat',irt_between_cat)
+
         for stim_param,fr_stim_session_table in fr_stim_table_by_stim_param:
             session_summary = SessionSummary()
 
@@ -98,6 +115,8 @@ class ComposeSessionSummary(ReportRamTask):
             session_summary.n_recalls_per_list = np.empty(len(fr_stim_table_by_session_list), dtype=int)
             session_summary.n_stims_per_list = np.zeros(len(fr_stim_table_by_session_list), dtype=int)
             session_summary.is_stim_list = np.zeros(len(fr_stim_table_by_session_list), dtype=np.bool)
+
+
             for list_idx, (sess_list,fr_stim_sess_list_table) in enumerate(fr_stim_table_by_session_list):
                 session = sess_list[0]
                 lst = sess_list[1]
@@ -114,6 +133,7 @@ class ComposeSessionSummary(ReportRamTask):
                 session_summary.n_recalls_per_list[list_idx] = fr_stim_sess_list_table.recalled.sum()
                 session_summary.n_stims_per_list[list_idx] = fr_stim_sess_list_table.is_stim_item.sum()
                 session_summary.is_stim_list[list_idx] = fr_stim_sess_list_table.is_stim_list.any()
+
 
             session_summary.prob_first_recall /= float(len(fr_stim_table_by_session_list))
 
@@ -225,5 +245,18 @@ class ComposeSessionSummary(ReportRamTask):
                 session_summary.chisqr_post_stim_item, session_summary.pvalue_post_stim_item, _ = proportions_chisquare([session_summary.n_correct_post_stim_items, session_summary.n_correct_nonstim_post_low_bio_items], [session_summary.n_total_post_stim_items, session_summary.n_total_nonstim_post_low_bio_items])
 
             session_summary_array.append(session_summary)
-
+        repetition_ratios = self.get_passed_object('repetition_ratios')
+        stim_rrs = []
+        nostim_rrs = []
+        self.pass_object('mean_rr',np.nanmean(repetition_ratios))
+        for s_num,session in enumerate(np.unique(cat_events.session)):
+            sess_events = cat_events[cat_events.session == session]
+            stim_lists = np.unique(sess_events[sess_events.stim_list==True].list)
+            print 'stim_lists:',stim_lists
+            nostim_lists = np.unique(sess_events[sess_events.stim_list==False].list)
+            print 'nonstim lists',nostim_lists
+            stim_rrs.append(repetition_ratios[s_num][stim_lists[stim_lists>0]-1])
+            nostim_rrs.append(repetition_ratios[s_num][nostim_lists[nostim_lists>0]-1])
+        self.pass_object('stim_mean_rr',np.nanmean(stim_rrs))
+        self.pass_object('nostim_mean_rr',np.nanmean(nostim_rrs))
         self.pass_object('session_summary_array', session_summary_array)

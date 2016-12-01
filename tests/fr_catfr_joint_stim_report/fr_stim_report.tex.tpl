@@ -24,7 +24,7 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{RAM <EXPERIMENT> report v 1.0}
+\lhead{RAM <EXPERIMENT> \& cat<EXPERIMENT> report v 1.1}
 \chead{Subject: \textbf{<SUBJECT>}}
 \rhead{Date created: <DATE>}
 \begin{document}
@@ -64,5 +64,22 @@ $\bullet$ Area Under Curve = $<AUC>$\%
 $\bullet$ Permutation test $p$-value $<PERM-P-VALUE>$
 
 <REPORT_PAGES>
+
+\clearpage
+\begin{center}
+\textbf{\Large Appendix: Categorical Statistics}
+\end{center}
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.4]{<IRT_PLOT_FILE>}
+\caption{\textbf{Categorical free recall:} Inter-response times for transitions within and between categories.}
+\end{figure}
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.4]{<REPETITION_PLOT_FILE>}
+\caption{\textbf{Categorical free recall:} Subject's repetition ratio and historical distribution. Dotted line
+indicates average repetition ratio for this subject across all lists.}
+\end{figure}
+
 
 \end{document}

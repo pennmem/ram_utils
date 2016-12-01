@@ -60,20 +60,23 @@ class EventPreparation(ReportRamTask):
         fr_event_fields=list(events.dtype.names)
 
         cat_event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='cat'+task)))
+        cat_events = None
         for sess_file in cat_event_files:
             e_path = os.path.join(self.pipeline.mount_point, sess_file)
             print e_path
             e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
-            sess_events = e_reader.read()[fr_event_fields].copy()
-            sess_events.session +=100
+            sess_events = e_reader.read()
 
-            if events is None:
-                events = sess_events
+            if cat_events is None:
+                cat_events = sess_events
             else:
-                events = np.hstack((events,sess_events))
+                cat_events = np.hstack((events,sess_events))
 
+        self.pass_object('cat_events',cat_events.view(np.recarray))
 
+        cat_events.session += 100
+        events = np.hstack((events, cat_events[fr_event_fields].copy()))
         events = events.view(np.recarray)
 
         self.pass_object(task+'_all_events', events)

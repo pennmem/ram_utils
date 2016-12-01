@@ -22,6 +22,8 @@ from FREventPreparation import FREventPreparation
 
 from EventPreparation import EventPreparation
 
+from RepetitionRatio import RepetitionRatio
+
 from ComputeFRPowers import ComputeFRPowers
 
 from ComputeClassifier import ComputeClassifier
@@ -91,6 +93,8 @@ report_pipeline = ReportPipeline(subject=args.subject, task=args.task,experiment
 report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
 
 report_pipeline.add_task(EventPreparation(mark_as_completed=False))
+
+report_pipeline.add_task(RepetitionRatio(mark_as_completed=True))
 
 report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
 
