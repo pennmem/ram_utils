@@ -235,7 +235,7 @@ class ComposeSessionSummary(ReportRamTask):
             session_summary.isi_half_range = isi_halfrange
             session_summary.const_param_value = ps_session_table[const_param_name].unique().max()
 
-                session_summary.low_classifier_delta_plot = plot_data(ps_session_table_low, 'prob_diff', ps_session_sham_table_low['prob_diff'], param1_name, param2_name, param2_unit)
+            session_summary.low_classifier_delta_plot = plot_data(ps_session_table_low, 'prob_diff', ps_session_sham_table_low['prob_diff'], param1_name, param2_name, param2_unit)
             session_summary.low_recall_delta_plot = plot_data(ps_session_table_low, 'perf_diff', ps_session_sham_table_low['perf_diff'], param1_name, param2_name, param2_unit)
 
             session_summary.all_classifier_delta_plot = plot_data(ps_session_table, 'prob_diff', ps_session_sham_table['prob_diff'], param1_name, param2_name, param2_unit)
