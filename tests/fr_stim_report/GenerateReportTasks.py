@@ -22,7 +22,7 @@ class GenerateTex(ReportRamTask):
     def run(self):
         task = self.pipeline.task
 
-        tex_template = 'fr_stim_report.tex.tpl'
+        tex_template = task+'_stim_report.tex.tpl'
         tex_session_template = 'fr_stim_session.tex.tpl'
 
         tex_biomarker_plot_template = 'biomarker_plots.tex.tpl' if task=='RAM_FR4' else 'fr3_plots.tex.tpl'
@@ -72,7 +72,7 @@ class GenerateTex(ReportRamTask):
                             '<REGION>': session_summary.region_of_interest,
                             '<FREQUENCY>': session_summary.frequency,
                             '<SESSIONS>': ','.join([str(s) for s in session_summary.sessions]),
-                            '<PROB_RECALL_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-prob_recall_plot_' + session_summary.stimtag + '-' + str(session_summary.frequency) + '.pdf',
+                            '<PROB_RECALL_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-split_prob_recall_plot_' + session_summary.stimtag + '-' + str(session_summary.frequency) + '.pdf',
                             '<BIOMARKER_PLOTS>': biomarker_plots,
                             '<ITEMLEVEL_COMPARISON>': itemlevel_comparison,
                             '<STIM_AND_RECALL_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-stim_and_recall_plot_' + session_summary.stimtag + '-' + str(session_summary.frequency) + '.pdf',
@@ -117,6 +117,7 @@ class GenerateTex(ReportRamTask):
                         '<REPORT_PAGES>': tex_session_pages_str,
                         '<AUC>': '%.2f' % (100*xval_output[-1].auc),
                         '<PERM-P-VALUE>': pvalue_formatting(perm_test_pvalue),
+                        '<IRT_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-irt_plot_combined.pdf',
                         '<ROC_AND_TERC_PLOT_FILE>': self.pipeline.subject + '-roc_and_terc_plot.pdf'
                         }
 
@@ -163,12 +164,14 @@ class GeneratePlots(ReportRamTask):
         serial_positions = np.arange(1,13)
 
         for session_summary in session_summary_array:
-            panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', wspace=0.3, hspace=0.3, labelsize=20)
+            panel_plot = PanelPlot(xfigsize=15., yfigsize=9, i_max=2, j_max=2, title='', wspace=0.3, hspace=0.3, labelsize=20)
 
-            pd1 = PlotData(x=serial_positions, y=session_summary.prob_recall, xlim=(0,12), ylim=(0.0, 1.0), xlabel='Serial position\n(a)', ylabel='Probability of recall')
+            pd1 = PlotData(x=serial_positions, y=session_summary.prob_recall, xlim=(0,12), ylim=(0.0, 1.0),
+                           xlabel = 'Serial Position',ylabel='All Items')
             pd1.xlabel_fontsize = 20
             pd1.ylabel_fontsize = 20
-            pd2 = PlotData(x=serial_positions, y=session_summary.prob_first_recall, xlim=(0,12), ylim=(0.0, 1.0), xlabel='Serial position\n(b)', ylabel='Probability of first recall')
+            pd2 = PlotData(x=serial_positions, y=session_summary.prob_first_recall, xlim=(0,12), ylim=(0.0, 1.0),
+                           ylabel='',xlabel='Serial Position')
             pd2.xlabel_fontsize = 20
             pd2.ylabel_fontsize = 20
 
@@ -176,10 +179,29 @@ class GeneratePlots(ReportRamTask):
 
             panel_plot.add_plot_data(0, 1, plot_data=pd2)
 
+            # plot = panel_plot.generate_plot()
+            #
+            # plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-prob_recall_plot_' + session_summary.stimtag + '-' + str(session_summary.frequency) + '.pdf')
+            #
+            # plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+            #
+            # panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', wspace=0.3, hspace=0.3)
+            pdca = PlotDataCollection(xlim=(0,12), ylim=(0.0, 1.0), xlabel='(a)', ylabel='Stim vs Non-Stim Items', xlabel_fontsize=20,ylabel_fontsize=20)
+            pd1a = PlotData(x=serial_positions, y=session_summary.prob_stim_recall,linestyle='-',label='Stim')
+            pdca.add_plot_data(pd1a)
+            pd2a = PlotData(x = serial_positions, y=session_summary.prob_nostim_recall,linestyle = '--',label='No Stim')
+            pdca.add_plot_data(pd2a)
+            panel_plot.add_plot_data_collection(1,0,plot_data_collection=pdca)
+
+            pdcb = PlotDataCollection(xlim=(0,12), ylim=(0.0, 1.0), xlabel='(b)', ylabel='', xlabel_fontsize=20,ylabel_fontsize=20)
+            pd1b = PlotData(x=serial_positions, y = session_summary.prob_first_stim_recall, linestyle = '-', label = 'Stim')
+            pd2b = PlotData(x=serial_positions, y=session_summary.prob_first_nostim_recall, linestyle = '--', label = 'No Stim')
+            pdcb.add_plot_data(pd1b)
+            pdcb.add_plot_data(pd2b)
+            panel_plot.add_plot_data_collection(1,1,plot_data_collection=pdcb)
             plot = panel_plot.generate_plot()
-
-            plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-prob_recall_plot_' + session_summary.stimtag + '-' + str(session_summary.frequency) + '.pdf')
-
+            plot.legend()
+            plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-split_prob_recall_plot_' + session_summary.stimtag + '-' + str(session_summary.frequency) + '.pdf')
             plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
 
@@ -279,6 +301,20 @@ class GeneratePlots(ReportRamTask):
             plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-stim_and_recall_plot_' + session_summary.stimtag + '-' + str(session_summary.frequency) + '.pdf')
 
             plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+
+            irt_within_cat = np.array([session_summary.irt_within_cat for session_summary in session_summary_array])
+            irt_between_cat = np.array([session_summary.irt_between_cat for session_summary in session_summary_array])
+
+            if 'cat' in task:
+                panel_plot = PanelPlot(xfigsize=6.0, yfigsize=6.0, i_max=1, j_max=1, title='', xtitle='', labelsize=18)
+                pd = BarPlotData(x=[0, 1], y=[np.mean(irt_within_cat), np.mean(irt_between_cat)],
+                                 ylabel='IRT (msec)', xlabel='', x_tick_labels=['Within Cat', 'Between Cat'],
+                                 barcolors=['grey', 'grey'], barwidth=0.5, xlabel_fontsize=18, ylabel_fontsize=18)
+                panel_plot.add_plot_data(0, 0, plot_data=pd)
+                plot = panel_plot.generate_plot()
+                plot_out_fname = self.get_path_to_resource_in_workspace(
+                    'reports/' + task + '-' + subject + '-irt_plot_combined.pdf')
+                plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
 
 class GenerateReportPDF(ReportRamTask):

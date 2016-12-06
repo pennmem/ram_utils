@@ -15,7 +15,11 @@ class SessionSummary(object):
         self.n_eli = None
         self.pc_eli = None
         self.prob_recall = None
+        self.prob_stim_recall=None
+        self.prob_nostim_recall=None
         self.prob_first_recall = None
+        self.prob_first_stim_recall=None
+        self.prob_first_nostim_recall=None
         self.n_math = 0
         self.n_correct_math = 0
         self.pc_correct_math = 0.0

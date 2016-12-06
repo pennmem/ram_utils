@@ -37,6 +37,8 @@ class ComposeSessionSummary(ReportRamTask):
         self.pass_object('NUMBER_OF_ELECTRODES', len(monopolar_channels))
 
         session_data = []
+        irt_within_cat = []
+        irt_between_cat = []
 
         fr_stim_table_by_session = fr_stim_table.groupby(['session'])
         for session,fr_stim_session_table in fr_stim_table_by_session:
@@ -58,6 +60,7 @@ class ComposeSessionSummary(ReportRamTask):
 
         fr_stim_table_by_stim_param = fr_stim_table.groupby(['stimAnodeTag','stimCathodeTag','Pulse_Frequency'])
         for stim_param,fr_stim_session_table in fr_stim_table_by_stim_param:
+            print 'Stim param: ',stim_param
             session_summary = SessionSummary()
 
             session_summary.sessions = sorted(fr_stim_session_table.session.unique())
@@ -75,6 +78,8 @@ class ComposeSessionSummary(ReportRamTask):
             sess_math_events = math_events[sess_sel(math_events.session)]
 
             fr_stim_table_by_session_list = fr_stim_session_table.groupby(['session','list'])
+            fr_stim_stim_item_table_by_session_list = fr_stim_session_table.loc[fr_stim_session_table.is_stim_item==True].groupby(['session','list'])
+            fr_stim_nostim_item_table_by_session_list = fr_stim_session_table.loc[fr_stim_session_table.is_stim_item==False].groupby(['session','list'])
             session_summary.n_lists = len(fr_stim_table_by_session_list)
 
             session_summary.n_pli = np.sum(sess_intr_events.intrusion > 0)
@@ -89,34 +94,80 @@ class ComposeSessionSummary(ReportRamTask):
 
             fr_stim_table_by_pos = fr_stim_session_table.groupby('serialpos')
             session_summary.prob_recall = np.empty(len(fr_stim_table_by_pos), dtype=float)
+            session_summary.prob_stim_recall = np.empty(len(fr_stim_table_by_pos), dtype=float)
+            session_summary.prob_nostim_recall = np.empty(len(fr_stim_table_by_pos), dtype=float)
             for i, (pos,fr_stim_pos_table) in enumerate(fr_stim_table_by_pos):
                 session_summary.prob_recall[i] = fr_stim_pos_table.recalled.sum() / float(len(fr_stim_pos_table))
+                fr_stim_item_pos_table =fr_stim_pos_table.loc[fr_stim_pos_table.is_stim_item==True]
+                session_summary.prob_stim_recall[i]=fr_stim_item_pos_table.recalled.sum()/float(len(fr_stim_item_pos_table))
+                fr_nostim_item_pos_table = fr_stim_pos_table.loc[fr_stim_pos_table.is_stim_item==False]
+                session_summary.prob_nostim_recall[i] = fr_nostim_item_pos_table.recalled.sum()/float(len(fr_nostim_item_pos_table))
 
             session_summary.prob_first_recall = np.zeros(len(fr_stim_table_by_pos), dtype=float)
+            session_summary.prob_first_stim_recall = np.zeros(len(fr_stim_table_by_pos), dtype=float)
+            session_summary.prob_first_nostim_recall = np.zeros(len(fr_stim_table_by_pos), dtype=float)
             first_recall_counter = np.zeros(len(fr_stim_table_by_pos), dtype=int)
             session_summary.list_number = np.empty(len(fr_stim_table_by_session_list), dtype=int)
             session_summary.n_recalls_per_list = np.empty(len(fr_stim_table_by_session_list), dtype=int)
             session_summary.n_stims_per_list = np.zeros(len(fr_stim_table_by_session_list), dtype=int)
             session_summary.is_stim_list = np.zeros(len(fr_stim_table_by_session_list), dtype=np.bool)
+
+            session_irt_within_cat = []
+            session_irt_between_cat = []
+
             for list_idx, (sess_list,fr_stim_sess_list_table) in enumerate(fr_stim_table_by_session_list):
                 session = sess_list[0]
                 lst = sess_list[1]
 
+
                 list_rec_events = rec_events[(rec_events.session==session) & (rec_events['list']==lst) & (rec_events['intrusion']==0)]
                 if list_rec_events.size > 0:
-                    tmp = np.where(fr_stim_sess_list_table.itemno.values == list_rec_events[0].item_num)[0]
+                    item_nums = fr_stim_sess_list_table.itemno.values == list_rec_events[0].item_num
+                    tmp = np.where(item_nums)[0]
                     if tmp.size > 0:
                         first_recall_idx = tmp[0]
+                        if fr_stim_sess_list_table.iloc[tmp[0]].is_stim_item:
+                            session_summary.prob_first_stim_recall[first_recall_idx]+=1
+                        else:
+                            session_summary.prob_first_nostim_recall[first_recall_idx]+=1
                         session_summary.prob_first_recall[first_recall_idx] += 1
                         first_recall_counter[first_recall_idx] += 1
+
+
+                if 'cat' in task:
+                    # list_rec_events = session_rec_events[session_rec_events.list == lst]
+                    for i in xrange(1, len(list_rec_events)):
+                        cur_ev = list_rec_events[i]
+                        prev_ev = list_rec_events[i - 1]
+                        # if (cur_ev.intrusion == 0) and (prev_ev.intrusion == 0):
+                        dt = cur_ev.mstime - prev_ev.mstime
+                        if cur_ev.category == prev_ev.category:
+                            session_irt_within_cat.append(dt)
+                        else:
+                            session_irt_between_cat.append(dt)
 
                 session_summary.list_number[list_idx] = lst
                 session_summary.n_recalls_per_list[list_idx] = fr_stim_sess_list_table.recalled.sum()
                 session_summary.n_stims_per_list[list_idx] = fr_stim_sess_list_table.is_stim_item.sum()
                 session_summary.is_stim_list[list_idx] = fr_stim_sess_list_table.is_stim_list.any()
 
-            session_summary.prob_first_recall /= float(len(fr_stim_table_by_session_list))
+            session_summary.irt_within_cat = sum(session_irt_within_cat) / len(
+                session_irt_within_cat) if session_irt_within_cat else 0.0
+            session_summary.irt_between_cat = sum(session_irt_between_cat) / len(
+                session_irt_between_cat) if session_irt_between_cat else 0.0
 
+            irt_within_cat += session_irt_within_cat
+            irt_between_cat += session_irt_between_cat
+            print '# stim first recalls: ',session_summary.prob_first_stim_recall
+            print '# nostim first recalls: ',session_summary.prob_first_nostim_recall
+            print '# first recalls:', session_summary.prob_first_recall
+            session_summary.prob_first_recall /= float(len(fr_stim_table_by_session_list))
+            session_summary.prob_first_stim_recall /= float(len(fr_stim_stim_item_table_by_session_list))
+            session_summary.prob_first_nostim_recall /= float(len(fr_stim_nostim_item_table_by_session_list))
+            print ''
+            print '# stims : ',float(len(fr_stim_stim_item_table_by_session_list))
+            print '# nostims :',float(len(fr_stim_nostim_item_table_by_session_list))
+            print 'total: ',float(len(fr_stim_table_by_session_list))
             fr_stim_stim_list_table = fr_stim_session_table[fr_stim_session_table.is_stim_list]
             fr_stim_non_stim_list_table = fr_stim_session_table[~fr_stim_session_table.is_stim_list & (fr_stim_session_table['list']>=4)]
 
@@ -223,7 +274,5 @@ class ComposeSessionSummary(ReportRamTask):
 
                 session_summary.chisqr_stim_item, session_summary.pvalue_stim_item, _ = proportions_chisquare([session_summary.n_correct_stim_items, session_summary.n_correct_nonstim_low_bio_items], [session_summary.n_total_stim_items, session_summary.n_total_nonstim_low_bio_items])
                 session_summary.chisqr_post_stim_item, session_summary.pvalue_post_stim_item, _ = proportions_chisquare([session_summary.n_correct_post_stim_items, session_summary.n_correct_nonstim_post_low_bio_items], [session_summary.n_total_post_stim_items, session_summary.n_total_nonstim_post_low_bio_items])
-
             session_summary_array.append(session_summary)
-
         self.pass_object('session_summary_array', session_summary_array)
