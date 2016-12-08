@@ -63,7 +63,6 @@ class ComputeFR1PhaseDiff(ReportRamTask):
         self.pass_object('samplerate', self.samplerate)
 
     def run(self):
-        t0 = time.clock()
         subject = self.pipeline.subject
 
         events = self.get_passed_object('events')
@@ -91,8 +90,6 @@ class ComputeFR1PhaseDiff(ReportRamTask):
 
         del self.wavelets
         self.wavelets = None
-        t_elapsed = time.clock()-t0
-        print 'time elapsed: ', time.ctime(t_elapsed)
 
         self.pass_object('phase_diff_mat', self.phase_diff_mat)
         self.pass_object('samplerate', self.samplerate)
@@ -181,7 +178,6 @@ class ComputeFR1PhaseDiff(ReportRamTask):
         phase_diff_mat_tmp = np.empty(n_bins, dtype=np.complex)
         print 'phase_diff_mat.shape:',self.phase_diff_mat.shape
         for j,bpp in enumerate(bipolar_pair_pairs):
-            print "Computing phase differences for bp pair", bpp
             if event_nums is None:
                 for i in xrange(n_events):
                     bp1,bp2 = bpp
@@ -191,7 +187,6 @@ class ComputeFR1PhaseDiff(ReportRamTask):
             else:
                 for i in event_nums:
                     bp1, bp2 = bpp
-                    print 'event ',i
                     for f in xrange(n_freqs):
                         circ_diff_time_bins(np.squeeze(self.wavelets[:, bp1, f, :]), np.squeeze(self.wavelets[:, bp2, f, :]),
                                                                                                 phase_diff,phase_diff_mat_tmp)
