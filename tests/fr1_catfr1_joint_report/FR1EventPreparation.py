@@ -68,16 +68,20 @@ class FR1EventPreparation(ReportRamTask):
 
             sess_events = e_reader.read()
             sess_events.session += 100
-            sess_events = sess_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'iscorrect', 'answer', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
-
+            sess_events = sess_events
             if catfr1_events is None:
                 catfr1_events = sess_events
             else:
                 catfr1_events = np.hstack((catfr1_events,sess_events))
 
+        self.pass_object('cat_events',catfr1_events.view(np.recarray))
+
+        catfr1_events = catfr1_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'iscorrect', 'answer', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
+
         events = np.hstack((fr1_events,catfr1_events)).view(np.recarray)
 
         self.pass_object('all_events', events)
+
 
         math_events = events[events.type == 'PROB']
 

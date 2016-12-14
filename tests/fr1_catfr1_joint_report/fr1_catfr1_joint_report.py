@@ -12,10 +12,10 @@ from ReportUtils import CMLParser, ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
 
-cml_parser.arg('--subject','R1050M')
+cml_parser.arg('--subject','R1228M')
 # cml_parser.arg('--task','RAM_FR1')
-# cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/FR1_reports')
-cml_parser.arg('--workspace-dir','/scratch/busygin/FR1_joint_reports')
+cml_parser.arg('--task','FR1')
+cml_parser.arg('--workspace-dir','/scratch/leond/FR1_joint_reports')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
 # cml_parser.arg('--exit-on-no-change')
@@ -33,6 +33,8 @@ args = cml_parser.parse()
 
 
 from FR1EventPreparation import FR1EventPreparation
+
+from RepetitionRatio import RepetitionRatio
 
 from ComputeFR1Powers import ComputeFR1Powers
 
@@ -92,6 +94,8 @@ report_pipeline = ReportPipeline(subject=args.subject,
 report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
 
 report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
+
+report_pipeline.add_task(RepetitionRatio(mark_as_completed=True))
 
 report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=True))
 

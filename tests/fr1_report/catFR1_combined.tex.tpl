@@ -70,9 +70,11 @@ $<N_WORDS>$ words & $<N_CORRECT_WORDS>$ correct ($<PC_CORRECT_WORDS>$\%) &$<N_PL
 \end{figure}
 \begin{figure}[!h]
 \centering
-\includegraphics[scale=0.4]{<IRT_PLOT_FILE>}
-\caption{\textbf{Free recall:} Inter-response times for transitions within and between categories.}
+\includegraphics[scale=0.4]{<CATEGORY_PLOT_FILE>}
+\caption{\textbf{Categorical free recall:} (a) Inter-response times for transitions within and between categories. (b) Distribution of repetition ratios; dotted line indicates
+average repetition ratio for this subject}
 \end{figure}
+
 
 \clearpage
 

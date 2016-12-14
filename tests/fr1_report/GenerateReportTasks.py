@@ -1,7 +1,7 @@
 from RamPipeline import *
 
 import TextTemplateUtils
-from PlotUtils import PlotData, BarPlotData, PanelPlot
+from PlotUtils import PlotData, BarPlotData, PanelPlot,PlotDataCollection
 from latex_table import latex_table
 import re
 import numpy as np
@@ -85,7 +85,9 @@ class GenerateTex(ReportRamTask):
         cumulative_ttest_tex_table = latex_table(self.get_passed_object('cumulative_ttest_data'))
 
         replace_dict = {'<PROB_RECALL_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-prob_recall_plot_combined.pdf',
-                        '<IRT_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-irt_plot_combined.pdf',
+                        # '<IRT_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-irt_plot_combined.pdf',
+                        # '<REPETITION_RATIO_PLOT_FILE>': self.pipeline.task + '-'+self.pipeline.subject + '-rr_plot.pdf',
+                        '<CATEGORY_PLOT_FILE>':self.pipeline.task+'-'+self.pipeline.subject+'-category-plots.pdf',
                         '<DATE>': datetime.date.today(),
                         '<SESSION_DATA>': cumulative_data_tex_table,
                         '<SUBJECT>': subject.replace('_','\\textunderscore'),
@@ -172,6 +174,7 @@ class GeneratePlots(ReportRamTask):
 
         cumulative_summary = self.get_passed_object('cumulative_summary')
 
+
         panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, labelsize=18, wspace=20.0)
 
         pd1 = PlotData(x=serial_positions, y=cumulative_summary.prob_recall, xlim=(0, 12), ylim=(0.0, 1.0), xlabel='Serial position\n(a)', ylabel='Probability of recall', xlabel_fontsize=18, ylabel_fontsize=18)
@@ -187,12 +190,29 @@ class GeneratePlots(ReportRamTask):
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
         if task == 'catFR1':
-            panel_plot = PanelPlot(xfigsize=6.0, yfigsize=6.0, i_max=1, j_max=1, title='',xtitle='', labelsize=18)
-            pd = BarPlotData(x=[0,1], y=[cumulative_summary.irt_within_cat, cumulative_summary.irt_between_cat], ylabel='IRT (msec)', xlabel='',x_tick_labels=['Within Cat', 'Between Cat'], barcolors=['grey','grey'], barwidth=0.5, xlabel_fontsize=18, ylabel_fontsize=18)
+            panel_plot = PanelPlot(yfigsize=6.0, i_max=1, j_max=2, labelsize=18,hspaces=1.0, wspace=20.0)
+            pd = BarPlotData(x=[0,1], y=[cumulative_summary.irt_within_cat, cumulative_summary.irt_between_cat], ylabel='IRT (msec)', xlabel='(a)',x_tick_labels=['Within Cat', 'Between Cat'], barcolors=['grey','grey'], barwidth=0.5, xlabel_fontsize=18, ylabel_fontsize=18)
             panel_plot.add_plot_data(0, 0, plot_data=pd)
+            # plot = panel_plot.generate_plot()
+            # plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-irt_plot_combined.pdf')
+            # plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+
+            repetition_ratio = cumulative_summary.repetition_ratio
+            all_repetition_ratios = self.get_passed_object('all_repetition_ratios')
+            all_repetition_ratios=all_repetition_ratios[np.isfinite(all_repetition_ratios)]
+            all_rr_hist = np.histogram(all_repetition_ratios,range=[0.,1],bins='auto')
+
+            mean_rr = np.nanmean(repetition_ratio)
+            hist = BarPlotData(y=all_rr_hist[0],x=all_rr_hist[1][1:],barcolors=['grey' for h in all_rr_hist[0]], xlim=[0,1],
+                    levelline=[[mean_rr,mean_rr],[0,max(all_rr_hist[0])]],barwidth=0.05, xlabel='(b)',
+                               ylabel='# of lists',xlabel_fontsize=18, ylabel_fontsize=24)
+            panel_plot.add_plot_data(0,1,plot_data=hist)
             plot = panel_plot.generate_plot()
-            plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-irt_plot_combined.pdf')
+            plot_out_fname = self.get_path_to_resource_in_workspace('reports/'+task + '-'+subject + '-category-plots.pdf')
             plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+
+
+
 
         panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', labelsize=18)
 

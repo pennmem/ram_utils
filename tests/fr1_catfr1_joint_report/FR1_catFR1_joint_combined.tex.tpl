@@ -68,7 +68,7 @@ $<N_MATH>$ math problems & $<N_CORRECT_MATH>$ correct ($<PC_CORRECT_MATH>$\%) & 
 \centering
 \includegraphics[scale=0.4]{<PROB_RECALL_PLOT_FILE>}
 \caption{\textbf{Free recall:} (a) Overall probability of recall as a function of serial position. (b) Probability of first recall as a function of serial position.}
-\end{figure}
+\end{figure}    
 
 \clearpage
 

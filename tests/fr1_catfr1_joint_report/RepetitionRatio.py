@@ -1,5 +1,6 @@
 from RamPipeline import RamTask
 from os import path
+import os
 import numpy as np
 import cPickle
 from sklearn.externals import joblib
@@ -35,62 +36,46 @@ class RepetitionRatio(RamTask):
     def restore(self):
         subject= self.pipeline.subject
         self.repetition_ratios = joblib.load(path.join(self.pipeline.mount_point,self.workspace_dir,subject+'-repetition-ratios.pkl'))
-        self.repetition_percentiles = joblib.load(path.join(self.pipeline.mount_point,self.workspace_dir,subject+'-repetition-percentiles.pkl'))
-        all_recall_ratios_dict = joblib.load(path.join(self.get_workspace_dir(),'all_recall_ratios_dict'))
-        all_recall_ratios = np.hstack([np.reshape(x,[1,-1]) for x in all_recall_ratios_dict.values()])
+        # self.repetition_percentiles = joblib.load(path.join(self.pipeline.mount_point,self.workspace_dir,subject+'-repetition-percentiles.pkl'))
+        all_recall_ratios_dict = joblib.load(path.join(path.dirname(self.get_workspace_dir()),'all_repetition_ratios_dict'))
+        all_recall_ratios = np.array([np.nanmean(x) for x in all_recall_ratios_dict.itervalues()])
+        np.save(path.join(path.dirname(self.get_workspace_dir()),'all_repetition_ratios'),all_recall_ratios)
 
         self.pass_object('all_repetition_ratios',all_recall_ratios)
         self.pass_object('repetition_ratios',self.repetition_ratios)
         self.pass_object('repetition_percentiles',self.repetition_percentiles)
 
     def run(self):
-        self.rr_path=path.join(self.pipeline.mount_point,self.pipeline.workspace_dir,'all_repetition_ratios.pkl')
-        print 'rr path,', self.rr_path
         subject = self.pipeline.subject
         task = self.pipeline.task
         events = self.get_passed_object('cat_events')
         recalls = events[events.recalled==1]
         sessions = np.unique(recalls.session)
         print '%d sessions'%len(sessions)
-        self.repetition_ratios = np.empty((len(sessions),25))
-        for session in sessions:
-            sess_events = recalls[recalls.session==session]
-            lists = np.unique(sess_events.list)
-            repetition_ratios = [repetition_ratio(sess_events[sess_events.list == lst]) for lst in lists]
-            self.repetition_ratios[session-100,:len(repetition_ratios)]=repetition_ratios
-            try:
-                self.repetition_ratios[session,len(repetition_ratios):] = np.nan
-            except IndexError:
-                continue
         if self.recompute_all_ratios:
             all_recall_ratios_dict = self.initialize_repetition_ratio()
         else:
             try:
-                all_recall_ratios_dict = joblib.load(path.join(path.dirname(self.get_workspace_dir()),'all_recall_ratios_dict'))
+                all_recall_ratios_dict = joblib.load(path.join(path.basename(self.workspace_dir),'all_repetition_ratios_dict'))
             except IOError:
-                all_recall_ratios_dict=self.initialize_repetition_ratio()
-        print [x.shape for x in all_recall_ratios_dict.values()]
-        all_recall_ratios = np.hstack([np.reshape(x,[1,-1]) for x in all_recall_ratios_dict.values()])
-        all_recall_ratios.sort()
-        self.get_percentiles(all_recall_ratios)
+                all_recall_ratios_dict = self.initialize_repetition_ratio()
+        self.repetition_ratios = all_recall_ratios_dict[subject]
+        all_recall_ratios = np.hstack([np.nanmean(x) for x in all_recall_ratios_dict.itervalues()])
+        # all_recall_ratios.sort()
+        # self.get_percentiles(all_recall_ratios)
 
-        joblib.dump(all_recall_ratios_dict,path.join(path.dirname(self.get_workspace_dir()),'all_recall_ratios_dict'))
+        joblib.dump(all_recall_ratios_dict,path.join(self.get_workspace_dir(),'all_recall_ratios_dict'))
         joblib.dump(self.repetition_ratios,path.join(self.pipeline.mount_point,self.workspace_dir,subject+'-repetition-ratios.pkl'))
-        joblib.dump(self.repetition_percentiles,path.join(self.pipeline.mount_point,self.workspace_dir,subject+'-repetition-percentiles.pkl'))
+        # joblib.dump(self.repetition_percentiles,path.join(self.pipeline.mount_point,self.workspace_dir,subject+'-repetition-percentiles.pkl'))
 
         self.pass_object('all_repetition_ratios',all_recall_ratios)
         self.pass_object('repetition_ratios', self.repetition_ratios)
-        self.pass_object('repetition_percentiles', self.repetition_percentiles)
+        # self.pass_object('repetition_percentiles', self.repetition_percentiles)
 
     def get_percentiles(self,all_recall_ratios):
         self.repetition_percentiles =self.repetition_ratios.copy()
         for i,ratio in enumerate(self.repetition_percentiles.flat):
               self.repetition_percentiles.flat[i] = len(np.where(all_recall_ratios < ratio)[0]) / float(len(all_recall_ratios.flat))
-
-    def add_recall_ratios(self,all_recall_ratios_dict):
-        all_recall_ratios_dict[self.pipeline.subject,self.pipeline.task]=self.repetition_ratios
-        with open(self.rr_path,'wb') as rr_file:
-            cPickle.dump(all_recall_ratios_dict,rr_file,1)
 
     def initialize_repetition_ratio(self):
         task = self.pipeline.task
@@ -141,13 +126,13 @@ class RepetitionRatio(RamTask):
                     lists = np.unique(sess_recalls.list)
                     repetition_rates[session][:len(lists)] = [repetition_ratio(sess_recalls[sess_recalls.list == l])
                                                  for l in lists]
-                all_repetition_rates[subject,task] = repetition_rates.copy()
+                all_repetition_rates[subject] = repetition_rates.copy()
             except Exception as e:
                 print 'Subject ',subject,'failed:'
                 print e
+        joblib.dump(all_repetition_rates,path.join(path.dirname(self.pipeline.workspace_dir),'all_repetition_ratios_dict'))
         return all_repetition_rates
 
 def repetition_ratio(recall_list):
-    n_cats = len(recall_list.category_num)
     is_repetition = np.diff(recall_list.category_num)==0
-    return np.sum(is_repetition)/float(len(recall_list)-n_cats)
+    return np.sum(is_repetition)/float(len(recall_list)-np.unique(recall_list.category_num).size)

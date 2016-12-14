@@ -59,6 +59,7 @@ class EventPreparation(ReportRamTask):
                 events = np.hstack((events,sess_events))
 
         events = events.view(np.recarray)
+        print 'event fields:',events.dtype.names
 
         self.pass_object(task+'_all_events', events)
 

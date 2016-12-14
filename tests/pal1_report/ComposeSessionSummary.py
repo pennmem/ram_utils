@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import time
 from operator import itemgetter
-
+from pandas import Series
 from statsmodels.stats.proportion import proportion_confint
 
 from ReportUtils import ReportRamTask
@@ -216,6 +216,10 @@ class ComposeSessionSummary(ReportRamTask):
 
         cumulative_ttest_data = make_ttest_table(bp_tal_structs, ttest[-1])
         cumulative_ttest_data.sort(key=itemgetter(-2))
+        ttest_table = Series(data=ttest[-1][0],index=[data[2] for data in cumulative_ttest_data])
+        self.pass_object('ttest_table',ttest_table)
+        ttest_table.to_csv(os.path.join(self.workspace_dir,'_'.join([self.pipeline.subject,task,'SME_ttest.csv'])))
+
         cumulative_ttest_data = format_ttest_table(cumulative_ttest_data)
 
         self.pass_object('cumulative_ttest_data', cumulative_ttest_data)

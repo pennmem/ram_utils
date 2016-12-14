@@ -13,7 +13,7 @@ class RepetitionRatio(RamTask):
         super(RepetitionRatio,self).__init__(mark_as_completed)
         self.repetition_ratios = None
         self.repetition_percentiles = None
-        self.recompute_all_ratios = recompute_all_ratios
+        self.recompute_all_ratios=recompute_all_ratios
 
     def input_hashsum(self):
         subject = self.pipeline.subject
@@ -48,39 +48,39 @@ class RepetitionRatio(RamTask):
         print 'rr path,', self.rr_path
         subject = self.pipeline.subject
         task = self.pipeline.task
-        events = self.get_passed_object('cat_events')
+        events = self.get_passed_object(task+'_events')
+        print 'event fields:',events.dtype.names
         recalls = events[events.recalled==1]
         sessions = np.unique(recalls.session)
         print '%d sessions'%len(sessions)
         self.repetition_ratios = np.empty((len(sessions),25))
-        for session in sessions:
-            sess_events = recalls[recalls.session==session]
-            lists = np.unique(sess_events.list)
-            repetition_ratios = [repetition_ratio(sess_events[sess_events.list == lst]) for lst in lists]
-            self.repetition_ratios[session-100,:len(repetition_ratios)]=repetition_ratios
-            try:
-                self.repetition_ratios[session,len(repetition_ratios):] = np.nan
-            except IndexError:
-                continue
+        self.repetition_ratios[...]=np.nan
         if self.recompute_all_ratios:
             all_recall_ratios_dict = self.initialize_repetition_ratio()
         else:
             try:
-                all_recall_ratios_dict = joblib.load(path.join(path.dirname(self.get_workspace_dir()),'all_recall_ratios_dict'))
+                all_recall_ratios_dict = joblib.load(path.join(path.dirname(self.workspace_dir),'all_repetition_ratios_dict'))
             except IOError:
-                all_recall_ratios_dict=self.initialize_repetition_ratio()
-        print [x.shape for x in all_recall_ratios_dict.values()]
+                all_recall_ratios_dict = self.initialize_repetition_ratio()
         all_recall_ratios = np.hstack([np.reshape(x,[1,-1]) for x in all_recall_ratios_dict.values()])
         all_recall_ratios.sort()
+
+        for session in sessions:
+            sess_events = recalls[recalls.session==session]
+            lists = np.unique(sess_events.list)
+            for lst in lists:
+                self.repetition_ratios[session,lst-1] = repetition_ratio(sess_events[sess_events.list == lst])
+                print 'list length: ',len(sess_events[sess_events.list==lst])
         self.get_percentiles(all_recall_ratios)
 
-        joblib.dump(all_recall_ratios_dict,path.join(path.dirname(self.get_workspace_dir()),'all_recall_ratios_dict'))
+        joblib.dump(all_recall_ratios_dict,path.join(path.dirname(self.get_workspace_dir()),'all_repetition_ratios_dict'))
         joblib.dump(self.repetition_ratios,path.join(self.pipeline.mount_point,self.workspace_dir,subject+'-repetition-ratios.pkl'))
         joblib.dump(self.repetition_percentiles,path.join(self.pipeline.mount_point,self.workspace_dir,subject+'-repetition-percentiles.pkl'))
 
         self.pass_object('all_repetition_ratios',all_recall_ratios)
         self.pass_object('repetition_ratios', self.repetition_ratios)
         self.pass_object('repetition_percentiles', self.repetition_percentiles)
+
 
     def get_percentiles(self,all_recall_ratios):
         self.repetition_percentiles =self.repetition_ratios.copy()
@@ -141,13 +141,13 @@ class RepetitionRatio(RamTask):
                     lists = np.unique(sess_recalls.list)
                     repetition_rates[session][:len(lists)] = [repetition_ratio(sess_recalls[sess_recalls.list == l])
                                                  for l in lists]
-                all_repetition_rates[subject,task] = repetition_rates.copy()
+                all_repetition_rates[subject] = np.nanmean(repetition_rates)
             except Exception as e:
                 print 'Subject ',subject,'failed:'
                 print e
         return all_repetition_rates
 
 def repetition_ratio(recall_list):
-    n_cats = len(recall_list.category_num)
+    n_categories = len(np.unique(recall_list.category_num))
     is_repetition = np.diff(recall_list.category_num)==0
-    return np.sum(is_repetition)/float(len(recall_list)-n_cats)
+    return np.sum(is_repetition)/float(len(recall_list)-n_categories)

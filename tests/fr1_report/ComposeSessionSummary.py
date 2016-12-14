@@ -1,5 +1,6 @@
 from RamPipeline import *
 from SessionSummary import SessionSummary
+from pandas import Series
 
 import numpy as np
 import time
@@ -47,6 +48,9 @@ class ComposeSessionSummary(ReportRamTask):
         all_events = self.get_passed_object(task + '_all_events')
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bp_tal_structs = self.get_passed_object('bp_tal_structs')
+
+        if 'cat' in task:
+            repetition_ratios = self.get_passed_object('repetition_ratios')
 
         ttest = self.get_passed_object('ttest')
 
@@ -201,6 +205,9 @@ class ComposeSessionSummary(ReportRamTask):
 
         cumulative_xval_output = xval_output[-1]
 
+        if 'cat' in task:
+            cumulative_summary.repetition_ratio = repetition_ratios
+
         cumulative_summary.auc = '%.2f' % (100*cumulative_xval_output.auc)
         cumulative_summary.fpr = cumulative_xval_output.fpr
         cumulative_summary.tpr = cumulative_xval_output.tpr
@@ -215,6 +222,11 @@ class ComposeSessionSummary(ReportRamTask):
         # cumulative_ttest_data = [list(a) for a in zip(bp_tal_structs.eType, bp_tal_structs.tagName, ttest[-1][1], ttest[-1][0])]
         cumulative_ttest_data = make_ttest_table(bp_tal_structs, ttest[-1])
         cumulative_ttest_data.sort(key=itemgetter(-2))
+        print 'cumulative_ttest_data.shape:',np.shape(cumulative_ttest_data)
+        ttest_table = Series(data=ttest[-1][0],index=[data[2] for data in cumulative_ttest_data])
+        self.pass_object('ttest_table',ttest_table)
+        ttest_table.to_csv(os.path.join(self.workspace_dir,'_'.join([self.pipeline.subject,task,'SME_ttest.csv'])))
         cumulative_ttest_data = format_ttest_table(cumulative_ttest_data)
+
 
         self.pass_object('cumulative_ttest_data', cumulative_ttest_data)

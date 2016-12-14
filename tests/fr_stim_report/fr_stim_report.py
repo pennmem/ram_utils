@@ -5,8 +5,8 @@ from ReportUtils import CMLParser,ReportPipeline
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1195E')
-cml_parser.arg('--task','FR3')
+cml_parser.arg('--subject','R1236J')
+cml_parser.arg('--task','catFR3')
 cml_parser.arg('--workspace-dir','/scratch/leond/catFR3_reports')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
@@ -21,6 +21,8 @@ from RamPipeline import RamTask
 from FREventPreparation import FREventPreparation
 
 from EventPreparation import EventPreparation
+
+from RepetitionRatio import RepetitionRatio
 
 from ComputeFRPowers import ComputeFRPowers
 
@@ -93,6 +95,9 @@ report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
 report_pipeline.add_task(EventPreparation(mark_as_completed=False))
 
 report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
+
+if 'cat' in args.task:
+    report_pipeline.add_task(RepetitionRatio(recompute_all_ratios=True,mark_as_completed=False))
 
 report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 

@@ -1,3 +1,5 @@
 
 11/21/2016
 2.8: Switched to JSON-based event reporting
+12/12/2016
+2.8.1: Added Repetition Ratio

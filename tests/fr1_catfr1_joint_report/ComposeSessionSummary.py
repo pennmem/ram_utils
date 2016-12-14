@@ -47,6 +47,7 @@ class ComposeSessionSummary(ReportRamTask):
         all_events = self.get_passed_object('all_events')
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bp_tal_structs = self.get_passed_object('bp_tal_structs')
+        cat_events = self.get_passed_object('cat_events')
 
         ttest = self.get_passed_object('ttest')
 
@@ -64,6 +65,18 @@ class ComposeSessionSummary(ReportRamTask):
         positions = np.unique(events.serialpos)
         first_recall_counter = np.zeros(positions.size, dtype=int)
         total_list_counter = 0
+
+        cat_recalled_events = cat_events[cat_events.recalled == 1]
+        irt_within_cat = []
+        irt_between_cat = []
+        for session in np.unique(cat_events.session):
+            cat_sess_recalls = cat_recalled_events[cat_recalled_events.session == session]
+            for list in np.unique(cat_sess_recalls.list):
+                cat_sess_list_recalls = cat_sess_recalls[cat_sess_recalls.list == list]
+                irts = np.diff(cat_sess_list_recalls.mstime)
+                within = np.diff(cat_sess_list_recalls.category_num) == 0
+                irt_within_cat.extend(irts[within])
+                irt_between_cat.extend(irts[within == False])
 
         for session in sessions:
             session_summary = SessionSummary()
@@ -152,6 +165,9 @@ class ComposeSessionSummary(ReportRamTask):
         cumulative_summary.n_words = len(events)
         cumulative_summary.n_correct_words = np.sum(events.recalled)
         cumulative_summary.pc_correct_words = 100*cumulative_summary.n_correct_words / float(cumulative_summary.n_words)
+
+        cumulative_summary.irt_between_cat = irt_between_cat
+        cumulative_summary.irt_within_cat = irt_within_cat
 
         positions = np.unique(events.serialpos)
         prob_recall = np.empty_like(positions, dtype=float)
