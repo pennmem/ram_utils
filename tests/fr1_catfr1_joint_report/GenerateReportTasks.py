@@ -218,6 +218,8 @@ class GeneratePlots(ReportRamTask):
         pd = BarPlotData(x=[0,1], y=[irt_within_cat, irt_between_cat], ylabel='IRT (msec)', xlabel='(a)',x_tick_labels=['Within Cat', 'Between Cat'], barcolors=['grey','grey'], barwidth=0.5, xlabel_fontsize=18, ylabel_fontsize=18)
         panel_plot.add_plot_data(0, 0, plot_data=pd)
         plot = panel_plot.generate_plot()
+        percentile = np.nanmean(all_repetition_ratios < mean_rr) * 100
+        plot.annotate(s='{:2}'.format(percentile), xy=(mean_rr, max(all_rr_hist[0])),axes=plot.gcf().get_axes()[0])
         plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-irt_plot_combined.pdf')
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 

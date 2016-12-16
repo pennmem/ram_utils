@@ -43,7 +43,7 @@ class RepetitionRatio(RamTask):
 
         self.pass_object('all_repetition_ratios',all_recall_ratios)
         self.pass_object('repetition_ratios',self.repetition_ratios)
-        self.pass_object('repetition_percentiles',self.repetition_percentiles)
+        # self.pass_object('repetition_percentiles',self.repetition_percentiles)
 
     def run(self):
         subject = self.pipeline.subject
@@ -135,4 +135,4 @@ class RepetitionRatio(RamTask):
 
 def repetition_ratio(recall_list):
     is_repetition = np.diff(recall_list.category_num)==0
-    return np.sum(is_repetition)/float(len(recall_list)-np.unique(recall_list.category_num).size)
+    return np.sum(is_repetition)/float(len(recall_list)-1)

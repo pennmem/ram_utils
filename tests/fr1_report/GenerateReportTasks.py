@@ -208,6 +208,8 @@ class GeneratePlots(ReportRamTask):
                                ylabel='# of lists',xlabel_fontsize=18, ylabel_fontsize=24)
             panel_plot.add_plot_data(0,1,plot_data=hist)
             plot = panel_plot.generate_plot()
+            percentile=np.nanmean(all_repetition_ratios<mean_rr)*100
+            plot.annotate(s='{:2}'.format(percentile),xy=(mean_rr,max(all_rr_hist[0])))
             plot_out_fname = self.get_path_to_resource_in_workspace('reports/'+task + '-'+subject + '-category-plots.pdf')
             plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 

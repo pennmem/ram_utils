@@ -148,6 +148,5 @@ class RepetitionRatio(RamTask):
         return all_repetition_rates
 
 def repetition_ratio(recall_list):
-    n_categories = len(np.unique(recall_list.category_num))
     is_repetition = np.diff(recall_list.category_num)==0
-    return np.sum(is_repetition)/float(len(recall_list)-n_categories)
+    return np.sum(is_repetition)/float(len(recall_list)-1)

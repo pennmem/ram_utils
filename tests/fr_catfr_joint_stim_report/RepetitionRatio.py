@@ -35,7 +35,7 @@ class RepetitionRatio(RamTask):
     def restore(self):
         subject= self.pipeline.subject
         self.repetition_ratios = joblib.load(path.join(self.pipeline.mount_point,self.workspace_dir,subject+'-repetition-ratios.pkl'))
-        self.repetition_percentiles = joblib.load(path.join(self.pipeline.mount_point,self.workspace_dir,subject+'-repetition-percentiles.pkl'))
+        # self.repetition_percentiles = joblib.load(path.join(self.pipeline.mount_point,self.workspace_dir,subject+'-repetition-percentiles.pkl'))
         all_recall_ratios_dict = joblib.load(path.join(self.get_workspace_dir(),'all_recall_ratios_dict'))
         all_recall_ratios = np.hstack([np.reshape(x,[1,-1]) for x in all_recall_ratios_dict.values()])
 
@@ -76,7 +76,7 @@ class RepetitionRatio(RamTask):
 
         joblib.dump(all_recall_ratios_dict,path.join(path.dirname(self.get_workspace_dir()),'all_recall_ratios_dict'))
         joblib.dump(self.repetition_ratios,path.join(self.pipeline.mount_point,self.workspace_dir,subject+'-repetition-ratios.pkl'))
-        joblib.dump(self.repetition_percentiles,path.join(self.pipeline.mount_point,self.workspace_dir,subject+'-repetition-percentiles.pkl'))
+        # joblib.dump(self.repetition_percentiles,path.join(self.pipeline.mount_point,self.workspace_dir,subject+'-repetition-percentiles.pkl'))
 
         self.pass_object('all_repetition_ratios',all_recall_ratios)
         self.pass_object('repetition_ratios', self.repetition_ratios)
@@ -148,6 +148,5 @@ class RepetitionRatio(RamTask):
         return all_repetition_rates
 
 def repetition_ratio(recall_list):
-    n_cats = len(recall_list.category_num)
     is_repetition = np.diff(recall_list.category_num)==0
-    return np.sum(is_repetition)/float(len(recall_list)-n_cats)
+    return np.sum(is_repetition)/float(len(recall_list)-1)

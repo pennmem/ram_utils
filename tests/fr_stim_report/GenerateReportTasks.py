@@ -341,6 +341,8 @@ class GeneratePlots(ReportRamTask):
                 pdc.add_plot_data(nostim_mean)
                 panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
                 plot = panel_plot.generate_plot()
+                percentile = np.nanmean(all_repetition_ratios < mean_rr) * 100
+                plot.annotate(s='{:2}'.format(percentile), xy=(mean_rr, max(all_rr_hist[0])))
                 plot.legend()
                 plot_out_fname = self.get_path_to_resource_in_workspace(
                     'reports/' + task + '-' + subject + '-repetion-ratio-plot.pdf')
