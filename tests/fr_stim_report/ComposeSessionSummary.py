@@ -97,9 +97,13 @@ class ComposeSessionSummary(ReportRamTask):
             session_summary.prob_stim_recall = np.empty(len(fr_stim_table_by_pos), dtype=float)
             session_summary.prob_nostim_recall = np.empty(len(fr_stim_table_by_pos), dtype=float)
             for i, (pos,fr_stim_pos_table) in enumerate(fr_stim_table_by_pos):
+                print 'i,len(fr_stim_pos_table):',i,len(fr_stim_pos_table)
                 session_summary.prob_recall[i] = fr_stim_pos_table.recalled.sum() / float(len(fr_stim_pos_table))
                 fr_stim_item_pos_table =fr_stim_pos_table.loc[fr_stim_pos_table.is_stim_item==True]
-                session_summary.prob_stim_recall[i]=fr_stim_item_pos_table.recalled.sum()/float(len(fr_stim_item_pos_table))
+                try:
+                    session_summary.prob_stim_recall[i]=fr_stim_item_pos_table.recalled.sum()/float(len(fr_stim_item_pos_table))
+                except ZeroDivisionError:
+                    session_summary.prob_stim_recall[i] = np.nan
                 fr_nostim_item_pos_table = fr_stim_pos_table.loc[fr_stim_pos_table.is_stim_item==False]
                 session_summary.prob_nostim_recall[i] = fr_nostim_item_pos_table.recalled.sum()/float(len(fr_nostim_item_pos_table))
 
