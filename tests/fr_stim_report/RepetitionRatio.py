@@ -36,7 +36,7 @@ class RepetitionRatio(RamTask):
         subject= self.pipeline.subject
         self.repetition_ratios = joblib.load(path.join(self.pipeline.mount_point,self.workspace_dir,subject+'-repetition-ratios.pkl'))
         self.repetition_percentiles = joblib.load(path.join(self.pipeline.mount_point,self.workspace_dir,subject+'-repetition-percentiles.pkl'))
-        all_recall_ratios_dict = joblib.load(path.join(self.get_workspace_dir(),'all_recall_ratios_dict'))
+        all_recall_ratios_dict = joblib.load(path.join(path.dirname(self.get_workspace_dir()),'all_repetition_ratios_dict'))
         all_recall_ratios = np.hstack([np.reshape(x,[1,-1]) for x in all_recall_ratios_dict.values()])
 
         self.pass_object('all_repetition_ratios',all_recall_ratios)
@@ -45,11 +45,9 @@ class RepetitionRatio(RamTask):
 
     def run(self):
         self.rr_path=path.join(self.pipeline.mount_point,self.pipeline.workspace_dir,'all_repetition_ratios.pkl')
-        print 'rr path,', self.rr_path
         subject = self.pipeline.subject
         task = self.pipeline.task
         events = self.get_passed_object(task+'_events')
-        print 'event fields:',events.dtype.names
         recalls = events[events.recalled==1]
         sessions = np.unique(recalls.session)
         print '%d sessions'%len(sessions)
@@ -128,7 +126,6 @@ class RepetitionRatio(RamTask):
                         events = np.hstack((events, sess_events))
     
                 events = events.view(np.recarray)
-                print len(events),' events found'
                 recalls = events[events.recalled==1]
                 sessions = np.unique(recalls.session)
                 lists=np.unique(recalls.list)

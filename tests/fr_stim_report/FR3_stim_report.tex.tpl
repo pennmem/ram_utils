@@ -50,6 +50,14 @@ In the free recall task, participants are presented with a list of words, one af
 \textbf{\Large Classifier performance}
 \end{center}
 
+$\bullet$ FR1 Area Under Curve = $<AUC>$\%
+
+$\bullet$ FR1 Permutation test $p$-value $<PERM-P-VALUE>$
+
+\begin{center}
+\textbf{\large Classifier generalization to FR3}
+\end{center}
+
 \begin{figure}[!h]
 \centering
 \includegraphics[scale=0.45]{<ROC_AND_TERC_PLOT_FILE>}
@@ -59,9 +67,10 @@ percentage devation from the (subject) mean, separated by tercile
 of the classifier encoding efficiency estimate for each encoded word.}
 \end{figure}
 
-$\bullet$ Area Under Curve = $<AUC>$\%
+$\bullet$ Area Under Curve = $<FR3-AUC>$\%
 
-$\bullet$ Permutation test $p$-value $<PERM-P-VALUE>$
+$\bullet$ Permutation test $p$-value $<FR3-PERM-P-VALUE>$
+
 
 <REPORT_PAGES>
 
