@@ -92,9 +92,11 @@ class ComputeFRStimTable(ReportRamTask):
             if ev.type=='WORD':
                 if (all_events[i+1].type=='STIM_ON') or (all_events[i+1].type=='WORD_OFF' and (all_events[i+2].type=='STIM_ON' or (all_events[i+2].type=='DISTRACT_START' and all_events[i+3].type=='STIM_ON'))):
                     is_stim_item[j] = True
-                if (all_events[i-1].type=='STIM_OFF') or (all_events[i+1].type=='STIM_OFF'):
+                if ( (all_events[i-1].type=='STIM_OFF') or (all_events[i+1].type=='STIM_OFF')
+                     or (all_events[i-2].type=='STIM_OFF' and all_events[i-1].type=='WORD_OFF')):
                     is_post_stim_item[j] = True
                 j += 1
+        print is_post_stim_item.astype(float).sum()
 
         self.fr_stim_table = pd.DataFrame()
         self.fr_stim_table['item'] = events.item_name

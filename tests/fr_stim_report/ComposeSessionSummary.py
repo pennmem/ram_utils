@@ -1,3 +1,4 @@
+import numpy as np
 from RamPipeline import *
 from SessionSummary import SessionSummary
 
@@ -9,6 +10,9 @@ from statsmodels.stats.proportion import proportions_chisquare
 
 
 from ReportUtils import ReportRamTask
+import operator
+
+operator.div = np.true_divide
 
 class ComposeSessionSummary(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
@@ -295,6 +299,7 @@ class ComposeSessionSummary(ReportRamTask):
                 print 'nonstim lists',nostim_lists
                 stim_rrs.append(repetition_ratios[s_num][stim_lists[stim_lists>0]-1])
                 nostim_rrs.append(repetition_ratios[s_num][nostim_lists[nostim_lists>0]-1])
-            self.pass_object('stim_mean_rr',np.nanmean(stim_rrs))
-            self.pass_object('nostim_mean_rr',np.nanmean(nostim_rrs))
+            print [x.shape for x in stim_rrs]
+            self.pass_object('stim_mean_rr',np.nanmean(np.hstack(stim_rrs)))
+            self.pass_object('nostim_mean_rr',np.nanmean(np.hstack(nostim_rrs)))
 

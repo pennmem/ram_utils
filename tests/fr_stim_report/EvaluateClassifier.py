@@ -38,13 +38,14 @@ class EvaluateClassifier(ComputeClassifier.ComputeClassifier):
         events = self.get_passed_object(task+'_events')
         recalls = events.recalled
         self.pow_mat = self.get_passed_object('fr_stim_pow_mat')
+        print 'self.pow_mat.shape:',self.pow_mat.shape
 
         if self.xval_test_type(events) == 'loso':
             print 'Performing permutation test'
-            self.perm_AUCs = self.permuted_loso_AUCs(self.pow_mat, recalls)
+            self.perm_AUCs = self.permuted_loso_AUCs(events.session, recalls)
 
             print 'Performing leave-one-session-out xval'
-            self.run_loso_xval(self.pow_mat, recalls, permuted=False)
+            self.run_loso_xval(events.session, recalls, permuted=False)
         else:
             print 'Performing in-session permutation test'
             self.perm_AUCs = self.permuted_lolo_AUCs(events)
@@ -63,6 +64,7 @@ class EvaluateClassifier(ComputeClassifier.ComputeClassifier):
         self.pass_object(task+'_pvalue', self.pvalue)
 
     def restore(self):
+
         subject = self.pipeline.subject
         task = self.pipeline.task
         self.xval_output = joblib.load(

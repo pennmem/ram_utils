@@ -35,7 +35,12 @@
 \begin{tabular}{ccc}
 \begin{minipage}[htbp]{170pt}
 In the free recall task, participants are presented with a list of words, one after the other, and later asked to recall as many words as possible in any order.
-\begin{itemize}\item\textbf{Number of sessions: }$<NUMBER_OF_SESSIONS>$\item\textbf{Number of electrodes: }$<NUMBER_OF_ELECTRODES>$\end{itemize}
+\begin{itemize}
+    \item\textbf{Number of sessions: }$<NUMBER_OF_SESSIONS>$
+    \item\textbf{Number of electrodes: }$<NUMBER_OF_ELECTRODES>$
+    \item\textbf{FR1 Area Under Curve: }$<AUC>$\%
+    \item\textbf{FR1 Permutation test $p$-value:} $<PERM-P-VALUE>$
+    \end{itemize}
 \end{minipage}
 &
 \begin{tabular}{|c|c|c|c|c|c|}
@@ -47,15 +52,7 @@ In the free recall task, participants are presented with a list of words, one af
 \vspace{3pc}
 
 \begin{center}
-\textbf{\Large Classifier performance}
-\end{center}
-
-$\bullet$ FR1 Area Under Curve = $<AUC>$\%
-
-$\bullet$ FR1 Permutation test $p$-value $<PERM-P-VALUE>$
-
-\begin{center}
-\textbf{\large Classifier generalization to FR3}
+\textbf{\Large Classifier generalization to FR3}
 \end{center}
 
 \begin{figure}[!h]

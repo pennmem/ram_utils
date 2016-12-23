@@ -5,7 +5,7 @@ from ReportUtils import CMLParser,ReportPipeline
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1226D')
+cml_parser.arg('--subject','R1243T')
 cml_parser.arg('--task','catFR3')
 cml_parser.arg('--workspace-dir','/scratch/leond/catFR3_reports')
 cml_parser.arg('--mount-point','')
@@ -107,9 +107,9 @@ report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True
 
 report_pipeline.add_task(ComputeFRStimPowers(params=params, mark_as_completed=True))
 
-report_pipeline.add_task(ComputeFRStimTable(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputeFRStimTable(params=params, mark_as_completed=False))
 
-# report_pipeline.add_task(EvaluateClassifier(params=params,mark_as_completed=True)) #Note: this IS included in the pdf!
+report_pipeline.add_task(EvaluateClassifier(params=params,mark_as_completed=True)) #Note: this IS included in the pdf!
 
 report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
 #

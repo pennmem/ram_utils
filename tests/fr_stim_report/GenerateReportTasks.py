@@ -73,6 +73,7 @@ class GenerateTex(ReportRamTask):
                             '<FREQUENCY>': session_summary.frequency,
                             '<SESSIONS>': ','.join([str(s) for s in session_summary.sessions]),
                             '<PROB_RECALL_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-split_prob_recall_plot_' + session_summary.stimtag + '-' + str(session_summary.frequency) + '.pdf',
+                            '<PROB_STIM_PLOT_FILE>': self.pipeline.subject+'p_stim_plot_'+session_summary.stimtag+'-'+str(session_summary.frequency)+'.pdf',
                             '<BIOMARKER_PLOTS>': biomarker_plots,
                             '<ITEMLEVEL_COMPARISON>': itemlevel_comparison,
                             '<STIM_AND_RECALL_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-stim_and_recall_plot_' + session_summary.stimtag + '-' + str(session_summary.frequency) + '.pdf',
@@ -107,8 +108,8 @@ class GenerateTex(ReportRamTask):
         session_data_tex_table = latex_table(self.get_passed_object('SESSION_DATA'))
         fr1_xval_output = self.get_passed_object('xval_output')
         fr1_perm_test_pvalue = self.get_passed_object('pvalue')
-        # fr3_xval_output = self.get_passed_object(task+'_xval_output')
-        # fr3_perm_test_pvalue = self.get_passed_object(task+'_pvalue')
+        fr3_xval_output = self.get_passed_object(task+'_xval_output')
+        fr3_perm_test_pvalue = self.get_passed_object(task+'_pvalue')
 
         replace_dict = {'<DATE>': datetime.date.today(),
                         '<EXPERIMENT>': self.pipeline.task,
@@ -119,8 +120,8 @@ class GenerateTex(ReportRamTask):
                         '<REPORT_PAGES>': tex_session_pages_str,
                         '<AUC>': '%.2f' % (100*fr1_xval_output[-1].auc),
                         '<PERM-P-VALUE>': pvalue_formatting(fr1_perm_test_pvalue),
-                        # '<FR3-AUC>': '%.2f' % (100*fr3_xval_output[-1].auc),
-                        # '<FR3-PERM-P-VALUE>': pvalue_formatting(fr3_perm_test_pvalue),
+                        '<FR3-AUC>': '%.2f' % (100*fr3_xval_output[-1].auc),
+                        '<FR3-PERM-P-VALUE>': pvalue_formatting(fr3_perm_test_pvalue),
                         '<IRT_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-irt_plot_combined.pdf',
                         '<REPETITION_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-repetition-ratio-plot.pdf',
                         '<ROC_AND_TERC_PLOT_FILE>': self.pipeline.subject + '-roc_and_terc_plot.pdf'
@@ -141,7 +142,7 @@ class GeneratePlots(ReportRamTask):
 
         self.create_dir_in_workspace('reports')
 
-        xval_output = self.get_passed_object('xval_output')
+        xval_output = self.get_passed_object(task+'_xval_output')
         fr1_summary = xval_output[-1]
 
         panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, labelsize=16, wspace=5.0)
@@ -395,8 +396,6 @@ class GenerateReportPDF(ReportRamTask):
         report_core_file_name, ext = splitext(report_tex_file_name)
         report_file = join(output_directory,report_core_file_name+'.pdf')
         self.pass_object('report_file',report_file)
-
-
 
 
 class DeployReportPDF(ReportRamTask):

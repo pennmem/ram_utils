@@ -168,6 +168,7 @@ class ComputeClassifier(ReportRamTask):
         for i in xrange(n_perm):
             for sess in event_sessions:
                 sel = (event_sessions == sess)
+
                 sess_permuted_recalls = permuted_recalls[sel]
                 shuffle(sess_permuted_recalls)
                 permuted_recalls[sel] = sess_permuted_recalls
