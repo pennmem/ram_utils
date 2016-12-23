@@ -42,7 +42,7 @@ class GenerateTex(ReportRamTask):
 
         for session_summary in session_summary_array:
             itemlevel_comparison = ''
-            if task=='FR3':
+            if 'FR3' in task:
                 itemlevel_comparison_replace_dict = {
                     '<N_CORRECT_STIM_ITEMS>': session_summary.n_correct_stim_items,
                     '<N_TOTAL_STIM_ITEMS>': session_summary.n_total_stim_items,
