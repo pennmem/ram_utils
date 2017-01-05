@@ -16,7 +16,7 @@ import numpy as np
 
 cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--subject','R1026D')
-cml_parser.arg('--workspace-dir','/scratch/leond/FR_connectivity_reports')
+cml_parser.arg('--workspace-dir','/scratch/RAM_maint/automated_connectivity_reports/FR_connectivity_reports')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
 # cml_parser.arg('--exit-on-no-change')
