@@ -74,13 +74,14 @@ class RepetitionRatio(RamTask):
         all_recall_ratios.sort()
         self.get_percentiles(all_recall_ratios)
 
+        self.pass_object('all_repetition_ratios',all_recall_ratios)
+        self.pass_object('repetition_ratios', self.repetition_ratios)
+        self.pass_object('repetition_percentiles', self.repetition_percentiles)
+
         joblib.dump(all_recall_ratios_dict,path.join(path.dirname(self.get_workspace_dir()),'all_recall_ratios_dict'))
         joblib.dump(self.repetition_ratios,path.join(self.pipeline.mount_point,self.workspace_dir,subject+'-repetition-ratios.pkl'))
         # joblib.dump(self.repetition_percentiles,path.join(self.pipeline.mount_point,self.workspace_dir,subject+'-repetition-percentiles.pkl'))
 
-        self.pass_object('all_repetition_ratios',all_recall_ratios)
-        self.pass_object('repetition_ratios', self.repetition_ratios)
-        self.pass_object('repetition_percentiles', self.repetition_percentiles)
 
     def get_percentiles(self,all_recall_ratios):
         self.repetition_percentiles =self.repetition_ratios.copy()

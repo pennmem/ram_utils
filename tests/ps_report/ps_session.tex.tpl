@@ -32,3 +32,4 @@
 \end{figure}
 <TTEST_AGAINST_SHAM_TABLE>
 <TTEST_AGAINST_ZERO_TABLE>
+\textit{\small T-tests are computed regardless of significance as measured by 2-way ANOVA.}

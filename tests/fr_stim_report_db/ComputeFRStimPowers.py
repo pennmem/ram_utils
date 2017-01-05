@@ -92,7 +92,6 @@ class ComputeFRStimPowers(ReportRamTask):
                 events = events[ev_order]
                 self.pass_object(self.pipeline.task+'_events', events)
 
-
             eegs = eegs.add_mirror_buffer(duration=self.params.fr1_buf)
 
             if self.samplerate is None:
@@ -112,7 +111,7 @@ class ComputeFRStimPowers(ReportRamTask):
                 elec1 = np.where(monopolar_channels == bp[0])[0][0]
                 elec2 = np.where(monopolar_channels == bp[1])[0][0]
 
-                bp_data = eegs[elec1] - eegs[elec2]
+                bp_data = np.subtract(eegs[elec1],eegs[elec2])
                 bp_data.attrs['samplerate'] = self.samplerate
 
                 bp_data = bp_data.filtered([58,62], filt_type='stop', order=self.params.filt_order)

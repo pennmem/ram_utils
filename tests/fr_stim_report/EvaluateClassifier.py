@@ -4,6 +4,7 @@ from os import path
 import hashlib
 from sklearn.externals import joblib
 
+
 class EvaluateClassifier(ComputeClassifier.ComputeClassifier):
     def __init__(self,params,mark_as_completed=False):
         super(EvaluateClassifier,self).__init__(params=params,mark_as_completed=mark_as_completed)
@@ -53,15 +54,13 @@ class EvaluateClassifier(ComputeClassifier.ComputeClassifier):
             print 'Performing leave-one-list-out xval'
             self.run_lolo_xval(events, recalls, permuted=False)
 
-
-        joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace('-'.join((subject,task, 'xval_output.pkl'))))
-        joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace('-'.join((subject,task,'perm_AUCs.pkl'))))
-        joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace('-'.join((subject,task,'pvalue.pkl'))))
-
-
         self.pass_object(task+'_xval_output', self.xval_output)
         self.pass_object(task+'_perm_AUCs', self.perm_AUCs)
         self.pass_object(task+'_pvalue', self.pvalue)
+
+        joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace('-'.join((subject, task, 'xval_output.pkl'))))
+        joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace('-'.join((subject, task, 'perm_AUCs.pkl'))))
+        joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace('-'.join((subject, task, 'pvalue.pkl'))))
 
     def restore(self):
 

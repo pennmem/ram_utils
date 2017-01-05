@@ -10,7 +10,7 @@ def standardize_pow_mat(stripped_pow_mat, events, sessions, outsample_session=No
     for session in sessions:
         sess_event_mask = (events.session == session)
         if session == outsample_session:
-            outsample_mask = (events.list == outsample_list) & sess_event_mask
+            outsample_mask = (events.trial == outsample_list) & sess_event_mask
             insample_mask = ~outsample_mask & sess_event_mask
             zpow_mat[outsample_mask] = zmap(zpow_mat[outsample_mask], zpow_mat[insample_mask], axis=0, ddof=1)
             zpow_mat[insample_mask] = zscore(zpow_mat[insample_mask], axis=0, ddof=1)
@@ -25,7 +25,7 @@ def normalize_pow_mat(stripped_pow_mat, events, sessions, outsample_session=None
     for session in sessions:
         sess_event_mask = (events.session == session)
         if session == outsample_session:
-            outsample_mask = (events.list == outsample_list) & sess_event_mask
+            outsample_mask = (events.trial == outsample_list) & sess_event_mask
             insample_mask = ~outsample_mask & sess_event_mask
             insample_median = np.median(normal_mat[insample_mask], axis=0)
             normal_mat[insample_mask] -= insample_median

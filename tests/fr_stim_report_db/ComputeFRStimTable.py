@@ -93,6 +93,7 @@ class ComputeFRStimTable(ReportRamTask):
         self.fr_stim_table['is_stim_list'] = [(s==1) for s in events.stimList]
         self.fr_stim_table['is_stim_item'] = is_stim_item
         self.fr_stim_table['is_post_stim_item'] = is_post_stim_item
+        print 'is_post_stim_item:',is_post_stim_item
         self.fr_stim_table['recalled'] = events.recalled
         self.fr_stim_table['thresh'] = class_thresh
 

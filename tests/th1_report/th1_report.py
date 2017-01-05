@@ -3,7 +3,7 @@
 
 # python ps_report.py --subject=R1056M --task=FR1 --workspace-dir=/data10/scratch/mswat/py_run_9 --matlab-path=~/eeg --matlab-path=~/matlab/beh_toolbox --matlab-path=~/RAM/RAM_reporting --matlab-path=~/RAM/RAM_sys2Biomarkers --python-path=~/RAM_UTILS_GIT
 
-# python ps_report.py --subject=R1086M --task=FR1 --workspace-dir=/data10/scratch/mswat/R1086M_2 --matlab-path=~/eeg --matlab-path=~/matlab/beh_toolbox --matlab-path=~/RAM/RAM_reporting --matlab-path=~/RAM/RAM_sys2Biomarkers --matlab-path=~/RAM_UTILS_GIT/tests/ps2_report/AuxiliaryMatlab --python-path=~/RAM_UTILS_GIT
+# python ps_report.py --subject=R1086M --task=FR    1 --workspace-dir=/data10/scratch/mswat/R1086M_2 --matlab-path=~/eeg --matlab-path=~/matlab/beh_toolbox --matlab-path=~/RAM/RAM_reporting --matlab-path=~/RAM/RAM_sys2Biomarkers --matlab-path=~/RAM_UTILS_GIT/tests/ps2_report/AuxiliaryMatlab --python-path=~/RAM_UTILS_GIT
 
 
 import sys
@@ -14,7 +14,7 @@ from ReportUtils import CMLParser,ReportPipeline
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1241J')
+cml_parser.arg('--subject','R1237C')
 cml_parser.arg('--task','TH1')
 cml_parser.arg('--workspace-dir','/scratch/leond/TH1_reports')
 cml_parser.arg('--mount-point','')
