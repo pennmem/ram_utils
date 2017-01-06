@@ -25,6 +25,8 @@ from ComputeFRPowers import ComputeFRPowers
 
 from ComputeClassifier import ComputeClassifier
 
+from RepetitionRatio import  RepetitionRatio
+
 from ComputeFRStimPowers import ComputeFRStimPowers
 
 from MontagePreparation import MontagePreparation
@@ -105,6 +107,8 @@ for subject in subjects:
 
     report_pipeline.add_task(EventPreparation(mark_as_completed=False))
 
+    report_pipeline.add_task(RepetitionRatio(mark_as_completed=True))
+
     report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
 
     report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
@@ -113,14 +117,14 @@ for subject in subjects:
 
     report_pipeline.add_task(ComputeFRStimPowers(params=params, mark_as_completed=True))
 
-    report_pipeline.add_task(ComputeFRStimTable(params=params, mark_as_completed=True))
+    report_pipeline.add_task(ComputeFRStimTable(params=params, mark_as_completed=False))
 
     report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
-
+    #
     report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
-
+    #
     report_pipeline.add_task(GenerateTex(mark_as_completed=False))
-
+    #
     report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
     report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
