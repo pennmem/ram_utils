@@ -74,12 +74,12 @@ $\bullet$ Permutation test $p$-value $<PERM-P-VALUE>$
 \includegraphics[scale=0.4]{<IRT_PLOT_FILE>}
 \caption{\textbf{Categorical free recall:} Inter-response times for transitions within and between categories.}
 \end{figure}
-\begin{figure}[!h]
-\centering
-\includegraphics[scale=0.4]{<REPETITION_PLOT_FILE>}
-\caption{\textbf{Categorical free recall:} Subject's repetition ratio and historical distribution. Dotted line
-indicates average repetition ratio for this subject across all lists.}
-\end{figure}
+%\begin{figure}[!h]
+%\centering
+%\includegraphics[scale=0.4]{<REPETITION_PLOT_FILE>}
+%\caption{\textbf{Categorical free recall:} Subject's repetition ratio and historical distribution. Dotted line
+%indicates average repetition ratio for this subject across all lists.}
+%\end{figure}
 
 
 \end{document}

@@ -245,18 +245,19 @@ class ComposeSessionSummary(ReportRamTask):
                 session_summary.chisqr_post_stim_item, session_summary.pvalue_post_stim_item, _ = proportions_chisquare([session_summary.n_correct_post_stim_items, session_summary.n_correct_nonstim_post_low_bio_items], [session_summary.n_total_post_stim_items, session_summary.n_total_nonstim_post_low_bio_items])
 
             session_summary_array.append(session_summary)
-        repetition_ratios = self.get_passed_object('repetition_ratios')
-        stim_rrs = []
-        nostim_rrs = []
-        self.pass_object('mean_rr',np.nanmean(repetition_ratios))
-        for s_num,session in enumerate(np.unique(cat_events.session)):
-            sess_events = cat_events[cat_events.session == session]
-            stim_lists = np.unique(sess_events[sess_events.stim_list==True].list)
-            print 'stim_lists:',stim_lists
-            nostim_lists = np.unique(sess_events[sess_events.stim_list==False].list)
-            print 'nonstim lists',nostim_lists
-            stim_rrs.append(repetition_ratios[s_num][stim_lists[stim_lists>0]-1])
-            nostim_rrs.append(repetition_ratios[s_num][nostim_lists[nostim_lists>0]-1])
-        self.pass_object('stim_mean_rr',np.nanmean(stim_rrs))
-        self.pass_object('nostim_mean_rr',np.nanmean(nostim_rrs))
+
+        # repetition_ratios = self.get_passed_object('repetition_ratios')
+        # stim_rrs = []
+        # nostim_rrs = []
+        # self.pass_object('mean_rr',np.nanmean(repetition_ratios))
+        # for s_num,session in enumerate(np.unique(cat_events.session)):
+        #     sess_events = cat_events[cat_events.session == session]
+        #     stim_lists = np.unique(sess_events[sess_events.stim_list==True].list)
+        #     print 'stim_lists:',stim_lists
+        #     nostim_lists = np.unique(sess_events[sess_events.stim_list==False].list)
+        #     print 'nonstim lists',nostim_lists
+        #     stim_rrs.append(repetition_ratios[s_num][stim_lists[stim_lists>0]-1])
+        #     nostim_rrs.append(repetition_ratios[s_num][nostim_lists[nostim_lists>0]-1])
+        # self.pass_object('stim_mean_rr',np.nanmean(stim_rrs))
+        # self.pass_object('nostim_mean_rr',np.nanmean(nostim_rrs))
         self.pass_object('session_summary_array', session_summary_array)

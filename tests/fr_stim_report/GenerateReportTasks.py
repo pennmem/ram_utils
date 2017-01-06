@@ -343,35 +343,35 @@ class GeneratePlots(ReportRamTask):
 
                 panel_plot = PanelPlot(xfigsize=12.0, yfigsize=6.0, i_max=1, j_max=1, title='', xtitle='', labelsize=18)
 
-                all_repetition_ratios = self.get_passed_object('all_repetition_ratios')
-                all_repetition_ratios = all_repetition_ratios[np.isfinite(all_repetition_ratios)]
-                all_rr_hist = np.histogram(all_repetition_ratios,  bins='auto')
-
-                mean_rr = self.get_passed_object('mean_rr')
-                stim_mean_rr = self.get_passed_object('stim_mean_rr')
-                nostim_mean_rr = self.get_passed_object('nostim_mean_rr')
-                pdc = PlotDataCollection(xlim=[0, 1], xlabel='Mean Repetition Ratio',
-                                   ylabel='# of subjects', xlabel_fontsize=18, ylabel_fontsize=24)
-                mean = PlotData(x=[mean_rr, mean_rr], y=[0, max(all_rr_hist[0])],
-                                color='black', label='All', linestyle='--')
-                stim_mean = PlotData(x=[stim_mean_rr, stim_mean_rr], y=[0, max(all_rr_hist[0])],
-                                     color='red', label='Stim', linestyle='--')
-                nostim_mean = PlotData(x=[nostim_mean_rr, nostim_mean_rr], y=[0, max(all_rr_hist[0])],
-                                       color='blue', label='No Stim', linestyle='--')
-                pdc.add_plot_data(mean)
-                pdc.add_plot_data(stim_mean)
-                pdc.add_plot_data(nostim_mean)
-                panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
-
-                plot = panel_plot.generate_plot()
-                plot.hist(all_repetition_ratios,bins='auto',color='grey')
-                percentile = np.nanmean(all_repetition_ratios < mean_rr) * 100
-                plot.annotate(s='%.2gth percentile'%percentile, xy=(mean_rr, max(all_rr_hist[0])),
-                              xytext=(mean_rr, max(all_rr_hist[0])+1),arrowprops={'arrowstyle':'->'})
-                plot.legend()
-                plot_out_fname = self.get_path_to_resource_in_workspace(
-                    'reports/' + task + '-' + subject + '-repetition-ratio-plot.pdf')
-                plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+                # all_repetition_ratios = self.get_passed_object('all_repetition_ratios')
+                # all_repetition_ratios = all_repetition_ratios[np.isfinite(all_repetition_ratios)]
+                # all_rr_hist = np.histogram(all_repetition_ratios,  bins='auto')
+                #
+                # mean_rr = self.get_passed_object('mean_rr')
+                # stim_mean_rr = self.get_passed_object('stim_mean_rr')
+                # nostim_mean_rr = self.get_passed_object('nostim_mean_rr')
+                # pdc = PlotDataCollection(xlim=[0, 1], xlabel='Mean Repetition Ratio',
+                #                    ylabel='# of subjects', xlabel_fontsize=18, ylabel_fontsize=24)
+                # mean = PlotData(x=[mean_rr, mean_rr], y=[0, max(all_rr_hist[0])],
+                #                 color='black', label='All', linestyle='--')
+                # stim_mean = PlotData(x=[stim_mean_rr, stim_mean_rr], y=[0, max(all_rr_hist[0])],
+                #                      color='red', label='Stim', linestyle='--')
+                # nostim_mean = PlotData(x=[nostim_mean_rr, nostim_mean_rr], y=[0, max(all_rr_hist[0])],
+                #                        color='blue', label='No Stim', linestyle='--')
+                # pdc.add_plot_data(mean)
+                # pdc.add_plot_data(stim_mean)
+                # pdc.add_plot_data(nostim_mean)
+                # panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
+                #
+                # plot = panel_plot.generate_plot()
+                # plot.hist(all_repetition_ratios,bins='auto',color='grey')
+                # percentile = np.nanmean(all_repetition_ratios < mean_rr) * 100
+                # plot.annotate(s='%.2gth percentile'%percentile, xy=(mean_rr, max(all_rr_hist[0])),
+                #               xytext=(mean_rr, max(all_rr_hist[0])+1),arrowprops={'arrowstyle':'->'})
+                # plot.legend()
+                # plot_out_fname = self.get_path_to_resource_in_workspace(
+                #     'reports/' + task + '-' + subject + '-repetition-ratio-plot.pdf')
+                # plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
 
 class GenerateReportPDF(ReportRamTask):
