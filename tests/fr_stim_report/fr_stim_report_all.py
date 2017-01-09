@@ -21,6 +21,8 @@ from FREventPreparation import FREventPreparation
 
 from EventPreparation import EventPreparation
 
+from EvaluateClassifier import EvaluateClassifier
+
 from ComputeFRPowers import ComputeFRPowers
 
 from ComputeClassifier import ComputeClassifier
@@ -110,6 +112,8 @@ for subject in subjects:
     report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 
     report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
+
+    report_pipeline.add_task(EvaluateClassifier(params=params,mark_as_completed=True))
 
     report_pipeline.add_task(ComputeFRStimPowers(params=params, mark_as_completed=True))
 

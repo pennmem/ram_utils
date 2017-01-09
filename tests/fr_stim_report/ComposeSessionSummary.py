@@ -286,20 +286,20 @@ class ComposeSessionSummary(ReportRamTask):
             session_summary_array.append(session_summary)
         self.pass_object('session_summary_array', session_summary_array)
 
-        # if 'cat' in task:
-        #     repetition_ratios = self.get_passed_object('repetition_ratios')
-        #     stim_rrs = []
-        #     nostim_rrs = []
-        #     self.pass_object('mean_rr',np.nanmean(repetition_ratios))
-        #     for s_num,session in enumerate(np.unique(rec_events.session)):
-        #         sess_events = rec_events[rec_events.session == session]
-        #         stim_lists = np.unique(sess_events[sess_events.stim_list==True].list)
-        #         print 'stim_lists:',stim_lists
-        #         nostim_lists = np.unique(sess_events[sess_events.stim_list==False].list)
-        #         print 'nonstim lists',nostim_lists
-        #         stim_rrs.append(repetition_ratios[s_num][stim_lists[stim_lists>0]-1])
-        #         nostim_rrs.append(repetition_ratios[s_num][nostim_lists[nostim_lists>0]-1])
-        #     print [x.shape for x in stim_rrs]
-        #     self.pass_object('stim_mean_rr',np.nanmean(np.hstack(stim_rrs)))
-        #     self.pass_object('nostim_mean_rr',np.nanmean(np.hstack(nostim_rrs)))
+        if 'cat' in task:
+            repetition_ratios = self.get_passed_object('repetition_ratios')
+            stim_rrs = []
+            nostim_rrs = []
+            self.pass_object('mean_rr',np.nanmean(repetition_ratios))
+            for s_num,session in enumerate(np.unique(rec_events.session)):
+                sess_events = rec_events[rec_events.session == session]
+                stim_lists = np.unique(sess_events[sess_events.stim_list==True].list)
+                print 'stim_lists:',stim_lists
+                nostim_lists = np.unique(sess_events[sess_events.stim_list==False].list)
+                print 'nonstim lists',nostim_lists
+                stim_rrs.append(repetition_ratios[s_num][stim_lists[stim_lists>0]-1])
+                nostim_rrs.append(repetition_ratios[s_num][nostim_lists[nostim_lists>0]-1])
+            print [x.shape for x in stim_rrs]
+            self.pass_object('stim_mean_rr',np.nanmean(np.hstack(stim_rrs)))
+            self.pass_object('nostim_mean_rr',np.nanmean(np.hstack(nostim_rrs)))
 
