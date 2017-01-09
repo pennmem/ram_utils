@@ -67,8 +67,8 @@ class ModelOutput(object):
 
 
 class ComputeClassifier(ReportRamTask):
-    def __init__(self, params, mark_as_completed=True):
-        super(ComputeClassifier,self).__init__(mark_as_completed)
+    def __init__(self, params, mark_as_completed=True,name=None):
+        super(ComputeClassifier,self).__init__(mark_as_completed,name=name)
         self.params = params
         self.pow_mat = None
         self.lr_classifier = None

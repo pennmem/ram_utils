@@ -7,10 +7,13 @@ from ReportUtils import CMLParser,ReportPipeline
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--task','FR1')
+cml_parser.arg('--task','FR2')
 cml_parser.arg('--workspace-dir','/scratch/RAM_maint/automated_reports_json/FR1_reports')
 cml_parser.arg('--mount-point','')
 cml_parser.arg('--recompute-on-no-status')
+cml_parser.arg('--hf_num')
+cml_parser.arg('--stim')
+
 # cml_parser.arg('--exit-on-no-change')
 
 #cml_parser.arg('--task','FR1')
@@ -29,13 +32,13 @@ from ReportUtils import ReportSummaryInventory, ReportSummary
 from ReportUtils import ReportPipelineBase
 
 
-from FR1EventPreparation import FR1EventPreparation
+from FR2EventPreparation import FR2EventPreparation
 
-from ComputeFR1Powers import ComputeFR1Powers
+from ComputeFR2Powers import ComputeFR2Powers
 
 from MontagePreparation import MontagePreparation
 
-from ComputeFR1HFPowers import ComputeFR1HFPowers
+from ComputeFR2HFPowers import ComputeFR2HFPowers
 
 from ComputeTTest import ComputeTTest
 
@@ -61,10 +64,15 @@ class Params(object):
         self.hfs_buf = 1.0
 
         self.filt_order = 4
-
         self.freqs = np.logspace(np.log10(3), np.log10(180), 8)
-        self.hfs = np.logspace(np.log10(2), np.log10(200), 50)
-        self.hfs = self.hfs[self.hfs>=70.0]
+
+        if not args.hf_num:
+            self.hfs = np.logspace(np.log10(2), np.log10(200), 50)
+            self.hfs = self.hfs[self.hfs>=70.0]
+        else:
+            self.hfs = np.logspace(np.log10(float(args.hf_min)),np.log10(float(args.hf_max)),int(args.hf_num))
+
+        self.stim = True if args.stim.capitalize()=='True' else (False if args.stim.capitalize()=='False' else None)
 
         self.log_powers = True
 
@@ -76,7 +84,12 @@ class Params(object):
 
 params = Params()
 
-task = args.task
+task = args.task.upper()
+
+if 'CAT' in task:
+    task='cat'+task.split('CAT')[1]
+
+
 
 json_reader = JsonIndexReader(os.path.join(args.mount_point,'protocols/r1.json'))
 subject_set = json_reader.aggregate_values('subjects', experiment=task)
@@ -116,17 +129,22 @@ for subject in subjects:
                                      workspace_dir=join(args.workspace_dir, task + '_' + subject)
                                      )
 
-    report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
+    report_pipeline.add_task(FR2EventPreparation(params=params, mark_as_completed=False))
 
     report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
 
-    report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=True))
+    name = '' if params.stim is None else('Stim' if params.stim is True else 'NoStim')
 
-    report_pipeline.add_task(ComputeFR1HFPowers(params=params, mark_as_completed=True))
+    report_pipeline.add_task(
+        ComputeFR2Powers(params=params, mark_as_completed=True, name='ComputeFR1' + name + 'Powers'))
 
-    report_pipeline.add_task(ComputeTTest(params=params, mark_as_completed=False))
+    report_pipeline.add_task(
+        ComputeFR2HFPowers(params=params, mark_as_completed=True, name='ComputeFR1HF' + name + 'Powers'))
 
-    report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
+    report_pipeline.add_task(ComputeTTest(params=params, mark_as_completed=False, name='Compute' + name + 'TTest'))
+
+    report_pipeline.add_task(
+        ComputeClassifier(params=params, mark_as_completed=True, name='Compute' + name + 'Classifier'))
 
     report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
 
@@ -136,7 +154,7 @@ for subject in subjects:
 
     report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
-    report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
+    # report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
 
     report_pipeline.execute_pipeline()
 
@@ -145,6 +163,6 @@ for subject in subjects:
 
 print 'this is summary for all reports report ', rsi.compose_summary(detail_level=1)
 
-rsi.output_json_files(dir=args.status_output_dir)
+# rsi.output_json_files(dir=args.status_output_dir)
 #rsi.send_email_digest()
 

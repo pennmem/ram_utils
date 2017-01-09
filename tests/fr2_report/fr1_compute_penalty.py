@@ -28,9 +28,9 @@ configure_python_paths(args.python_path)
 import numpy as np
 from RamPipeline import RamPipeline
 
-from FR1EventPreparation import FR1EventPreparation
+from FR2EventPreparation import FR2EventPreparation
 
-from ComputeFR1Powers import ComputeFR1Powers
+from ComputeFR2Powers import ComputeFR2Powers
 
 from TalPreparation import TalPreparation
 
@@ -92,11 +92,11 @@ for subject in subjects:
     report_pipeline = ReportPipeline(subject=subject, task=task,
                                            workspace_dir=join(args.workspace_dir,task+'_'+subject), mount_point=args.mount_point)
 
-    report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
+    report_pipeline.add_task(FR2EventPreparation(mark_as_completed=False))
 
     report_pipeline.add_task(TalPreparation(mark_as_completed=False))
 
-    report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=True))
+    report_pipeline.add_task(ComputeFR2Powers(params=params, mark_as_completed=True))
 
     report_pipeline.add_task(ComputeAUCs(params=params, mark_as_completed=False))
 

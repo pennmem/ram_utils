@@ -38,18 +38,17 @@ class FR2EventPreparation(ReportRamTask):
     def run(self):
         subject = self.pipeline.subject
         task = self.pipeline.task
+        ram_task = task
 
-        evs_field_list = ['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'iscorrect', 'answer', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset','is_stim', 'stim_list']
+        evs_field_list = ['itemno', 'serialpos', 'session', 'subject', 'rectime', 'expVersion', 'mstime', 'type', 'eegoffset', 'recalled', 'item', 'intrusion', 'list', 'eegfile', 'msoffset','isStim', 'stimList']
+        new_field_list = ['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment','mstime', 'type', 'eegoffset', 'recalled', 'item_name', 'intrusion', 'list', 'eegfile', 'msoffset','is_stim', 'stim_list']
+
         if 'cat' in task:
             evs_field_list += ['category', 'category_num']
+            new_field_list += ['category', 'category_num']
+            ram_task = 'Cat'+ram_task.split('cat')[1]
 
-        tmp = subject.split('_')
-        subj_code = tmp[0]
-        montage = 0 if len(tmp)==1 else int(tmp[1])
-
-        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
-
-        event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment=task)))
+        event_files = ['/data/events/RAM_%s/%s_events.mat'%(ram_task,subject)]
         events = None
         for sess_file in event_files:
             e_path = os.path.join(self.pipeline.mount_point, str(sess_file))
@@ -62,8 +61,11 @@ class FR2EventPreparation(ReportRamTask):
             else:
                 events = np.hstack((events,sess_events))
 
-
         events = events.view(np.recarray)
+
+        print events.dtype.names
+        events.dtype.names  = tuple(new_field_list)
+        print 'new names: ',events.dtype.names
 
         if self.params.stim is True:
             events = events[events.stim_list!=0]
@@ -71,10 +73,9 @@ class FR2EventPreparation(ReportRamTask):
             events = events[events.stim_list!=1]
 
 
-
         self.pass_object(task+'_all_events', events)
 
-        math_events = events[events.type == 'PROB']
+        math_events = BaseEventReader(filename='/data/events/RAM_%s/%s_math.mat'%(ram_task,subject)).read()
 
         rec_events = events[events.type == 'REC_WORD']
 

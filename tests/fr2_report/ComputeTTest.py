@@ -7,8 +7,8 @@ from sklearn.externals import joblib
 from ReportUtils import ReportRamTask
 
 class ComputeTTest(ReportRamTask):
-    def __init__(self, params, mark_as_completed=True):
-        super(ComputeTTest,self).__init__(mark_as_completed)
+    def __init__(self, params, mark_as_completed=True,name=None):
+        super(ComputeTTest,self).__init__(mark_as_completed,name=name)
         self.params = params
 
     def run(self):
@@ -20,7 +20,7 @@ class ComputeTTest(ReportRamTask):
         #freq_sel = np.tile((self.params.freqs>=self.params.ttest_frange[0]) & (self.params.freqs<=self.params.ttest_frange[1]), pow_mat.shape[1] / self.params.freqs.size)
         #pow_mat = pow_mat[:,freq_sel]
 
-        events = self.get_passed_object(self.pipeline.task+'_events')
+        events = self.get_passed_object(task+'_events')
         sessions = np.unique(events.session)
 
         # norm_func = normalize.standardize_pow_mat if self.params.norm_method=='zscore' else normalize.normalize_pow_mat
@@ -49,11 +49,14 @@ class ComputeTTest(ReportRamTask):
         t,p = ttest_ind(recalled_pow_mat, nonrecalled_pow_mat, axis=0)
         self.ttest[-1] = (t,p)
 
+        stim_label='stim' if self.params.stim is True else('no-stim' if self.params.stim is False else '')
         self.pass_object('ttest', self.ttest)
-        joblib.dump(self.ttest, self.get_path_to_resource_in_workspace(subject + '-' + task + '-ttest.pkl'))
+        joblib.dump(self.ttest, self.get_path_to_resource_in_workspace(subject + '-' + task + '-%s-ttest.pkl'%stim_label))
 
     def restore(self):
         subject = self.pipeline.subject
         task = self.pipeline.task
-        self.ttest = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-ttest.pkl'))
+
+        stim_label='stim' if self.params.stim is True else('no-stim' if self.params.stim is False else '')
+        self.ttest = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-%s-ttest.pkl'%stim_label))
         self.pass_object('ttest', self.ttest)

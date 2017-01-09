@@ -20,6 +20,10 @@ class CMLParser(object):
         self.parser.add_argument('--recompute-on-no-status', dest='recompute_on_no_status', action='store_true')
         self.parser.add_argument('--status-output-dir', required=False, dest='status_output_dir', action='store')
         self.parser.add_argument('--skip-subjects',dest='skip_subjects', nargs='+')
+        self.parser.add_argument('--hf-min',required=False,dest='hf_min',action='store')
+        self.parser.add_argument('--hf-max',required=False,dest='hf_max',action='store')
+        self.parser.add_argument('--hf-num',required=False,dest='hf_num',action = 'store')
+        self.parser.add_argument('--stim',required=False,dest='stim',action='store')
 
         self.arg_list=[]
         self.arg_count_threshold = arg_count_threshold
@@ -88,6 +92,7 @@ def parse_command_line(command_line_emulation_argument_list=None):
     parser.add_argument('--python-path',required=False, action='append')
     parser.add_argument('--exit-on-no-change', dest='exit_on_no_change', action='store_true')
     parser.add_argument('--status-output-dir',required=False, dest='status_output_dir', action='store')
+    parser.add_argument('--stim-lists', required=False,dest='stim_lists',action='store')
 
     if command_line_emulation_argument_list:
         args = parser.parse_args(command_line_emulation_argument_list)

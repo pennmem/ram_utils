@@ -13,9 +13,9 @@ from ReportUtils import ReportRamTask
 import hashlib
 
 
-class FR1EventPreparation(ReportRamTask):
+class FR2EventPreparation(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
-        super(FR1EventPreparation,self).__init__(mark_as_completed)
+        super(FR2EventPreparation, self).__init__(mark_as_completed)
         self.params = params
 
     def input_hashsum(self):

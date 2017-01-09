@@ -222,7 +222,6 @@ class ComposeSessionSummary(ReportRamTask):
         # cumulative_ttest_data = [list(a) for a in zip(bp_tal_structs.eType, bp_tal_structs.tagName, ttest[-1][1], ttest[-1][0])]
         cumulative_ttest_data = make_ttest_table(bp_tal_structs, ttest[-1])
         cumulative_ttest_data.sort(key=itemgetter(-2))
-        print 'cumulative_ttest_data.shape:',np.shape(cumulative_ttest_data)
         ttest_table = Series(data=ttest[-1][0],index=[data[2] for data in cumulative_ttest_data])
         self.pass_object('ttest_table',ttest_table)
         ttest_table.to_csv(os.path.join(self.workspace_dir,'_'.join([self.pipeline.subject,task,'SME_ttest.csv'])))

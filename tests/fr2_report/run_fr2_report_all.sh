@@ -13,7 +13,7 @@ export PYTHONPATH="/home1/mswat/extra_libs":$PYTHONPATH
 current_directory=$(pwd)
 
 # FR1
-cd /home1/mswat/RAM_UTILS_GIT/tests/fr1_report
+cd /home1/mswat/RAM_UTILS_GIT/tests/fr1_reportz
 python /home1/mswat/RAM_UTILS_GIT/tests/fr1_report/fr1_report_all.py  --task=RAM_FR1 --workspace-dir=/scratch/mswat/automated_reports/FR1_reports
 
 

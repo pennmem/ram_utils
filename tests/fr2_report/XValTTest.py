@@ -91,4 +91,6 @@ class XValTTest(RamTask):
                 xval_results.auc_results[i].num_features = num_features
                 i+=1
 
+        xval_results.auc_results
+
         self.pass_object(name='xval_results',obj=xval_results)
