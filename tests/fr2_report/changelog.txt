@@ -1,0 +1,5 @@
+
+11/21/2016
+2.11 : Switched to JSON-based event reporting
+12/12/2016
+2.11.1: Added repetition ratio
