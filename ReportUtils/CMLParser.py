@@ -24,6 +24,7 @@ class CMLParser(object):
         self.parser.add_argument('--hf-max',required=False,dest='hf_max',action='store')
         self.parser.add_argument('--hf-num',required=False,dest='hf_num',action = 'store')
         self.parser.add_argument('--stim',required=False,dest='stim',action='store')
+        self.parser.add_argument('--use-matlab-events', dest='use_matlab_events', action='store_true')
 
         self.arg_list=[]
         self.arg_count_threshold = arg_count_threshold

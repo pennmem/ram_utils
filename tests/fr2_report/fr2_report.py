@@ -11,7 +11,6 @@ from os.path import *
 from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.parser.add_argument('--use-matlab-events',dest='use_matlab_events',action='store_true')
 cml_parser.arg('--subject','R1235E')
 cml_parser.arg('--task','FR2')
 cml_parser.arg('--workspace-dir','/scratch/leond/FR2_reports')

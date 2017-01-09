@@ -32,7 +32,10 @@ from ReportUtils import ReportSummaryInventory, ReportSummary
 from ReportUtils import ReportPipelineBase
 
 
-from FR2EventPreparation import FR2EventPreparation
+if args.use_matlab_events:
+    from FR2MatEventPreparation import FR2EventPreparation
+else:
+    from FR2EventPreparation import FR2EventPreparation
 
 from ComputeFR2Powers import ComputeFR2Powers
 
@@ -84,18 +87,18 @@ class Params(object):
 
 params = Params()
 
-task = args.task.upper()
+args.task = args.task.upper()
 
-if 'CAT' in task:
-    task='cat'+task.split('CAT')[1]
+if 'CAT' in args.task:
+    args.task='cat'+args.task.split('CAT')[1]
 
 
 
 json_reader = JsonIndexReader(os.path.join(args.mount_point,'protocols/r1.json'))
-subject_set = json_reader.aggregate_values('subjects', experiment=task)
+subject_set = json_reader.aggregate_values('subjects', experiment=args.task)
 subjects = []
 for s in subject_set:
-    montages = json_reader.aggregate_values('montage', subject=s, experiment=task)
+    montages = json_reader.aggregate_values('montage', subject=s, experiment=args.task)
     for m_ in montages:
         m = str(m_)
         subject = str(s)
@@ -104,14 +107,16 @@ for s in subject_set:
         subjects.append(subject)
 subjects.sort()
 
+print 'task:',args.task
+print 'stim:',params.stim
 
-rsi = ReportSummaryInventory(label=task)
+rsi = ReportSummaryInventory(label=args.task)
 
 
 for subject in subjects:
     if args.skip_subjects is not None and subject in args.skip_subjects:
         continue
-    print '--Generating', task, 'report for', subject
+    print '--Generating', args.task, 'report for', subject
 
     # sets up processing pipeline
     # report_pipeline = ReportPipeline(subject=subject, task=task, experiment=task,
@@ -126,7 +131,7 @@ for subject in subjects:
     report_pipeline = ReportPipeline(
                                      args=args,
                                      subject=subject,
-                                     workspace_dir=join(args.workspace_dir, task + '_' + subject)
+                                     workspace_dir=join(args.workspace_dir, args.task + '_' + subject)
                                      )
 
     report_pipeline.add_task(FR2EventPreparation(params=params, mark_as_completed=False))
