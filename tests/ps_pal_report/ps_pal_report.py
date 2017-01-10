@@ -10,8 +10,8 @@ from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--task','PS2.1')
-cml_parser.arg('--subject','R1202M')
-cml_parser.arg('--workspace-dir','/scratch/RAM_maint/automated_reports_json/PS2.1_PAL')
+cml_parser.arg('--subject','R1196N')
+cml_parser.arg('--workspace-dir','/scratch/leond/PAL_reports')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
 
@@ -23,7 +23,7 @@ args = cml_parser.parse()
 from PALEventPreparation import PALEventPreparation
 from PSEventPreparation import PSEventPreparation
 
-from ComputePALPowers import ComputePALPowers
+from ComputePAL1Powers import ComputePAL1Powers
 from ComputeControlPowers import ComputeControlPowers
 from ComputePSPowers import ComputePSPowers
 
@@ -91,7 +91,7 @@ report_pipeline.add_task(PSEventPreparation(mark_as_completed=True))
 
 report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
 
-report_pipeline.add_task(ComputePALPowers(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 

@@ -79,6 +79,7 @@ class FREventPreparation(ReportRamTask):
             events = np.hstack((fr1_events,catfr1_events)) if catfr1_events is not None else fr1_events
         else:
             events = catfr1_events
+
         events = events.view(np.recarray)
 
         self.pass_object('all_events', events)

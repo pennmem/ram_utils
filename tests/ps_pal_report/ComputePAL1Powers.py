@@ -14,9 +14,9 @@ from ReportUtils import ReportRamTask
 import hashlib
 
 
-class ComputePALPowers(ReportRamTask):
+class ComputePAL1Powers(ReportRamTask):
     def __init__(self, params,mark_as_completed=True):
-        super(ComputePALPowers,self).__init__(mark_as_completed)
+        super(ComputePAL1Powers, self).__init__(mark_as_completed)
         self.params = params
         self.pow_mat = None
         self.samplerate = None
@@ -45,7 +45,7 @@ class ComputePALPowers(ReportRamTask):
     def restore(self):
         subject = self.pipeline.subject
 
-        self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-PAL-pow_mat.pkl'))
+        self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-PAL1-pow_mat.pkl'))
         self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
 
         self.pass_object('pow_mat', self.pow_mat)
@@ -67,7 +67,7 @@ class ComputePALPowers(ReportRamTask):
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
 
-        joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-PAL-pow_mat.pkl'))
+        joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-PAL1-pow_mat.pkl'))
         joblib.dump(self.samplerate, self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
 
     def compute_powers(self, events, sessions, monopolar_channels, bipolar_pairs):
