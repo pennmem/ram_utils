@@ -8,7 +8,7 @@ from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from sklearn.externals import joblib
 
 from ptsa.data.readers import EEGReader
-
+from ptsa.data.TimeSeriesX import TimeSeriesX
 
 class ComputeFRPowers(RamTask):
     def __init__(self, params, mark_as_completed=True):
@@ -47,6 +47,8 @@ class ComputeFRPowers(RamTask):
 
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
         joblib.dump(self.samplerate, self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
+
+        exit()
 
     def compute_powers(self, events, sessions,monopolar_channels , bipolar_pairs ):
         n_freqs = len(self.params.freqs)
@@ -98,17 +100,20 @@ class ComputeFRPowers(RamTask):
             sess_pow_mat = np.empty(shape=(n_events, n_bps, n_freqs), dtype=np.float)
 
             #monopolar_channels_np = np.array(monopolar_channels)
-            for i,bp in enumerate(bipolar_pairs):
+            for i,bp in enumerate(bipolar_pairs[:-1]):
 
                 print 'Computing powers for bipolar pair', bp
                 elec1 = np.where(monopolar_channels == bp[0])[0][0]
                 elec2 = np.where(monopolar_channels == bp[1])[0][0]
 
-                bp_data = eegs[elec1] - eegs[elec2]
+                bp_data = np.subtract(eegs[elec1],eegs[elec2])
                 bp_data.attrs['samplerate'] = self.samplerate
 
 
                 bp_data = bp_data.filtered([58,62], filt_type='stop', order=self.params.filt_order)
+                if not i%10:
+                    joblib.dump(bp_data,self.get_path_to_resource_in_workspace('mat_bp_filtered_%d_%d.pkl'%(i,sess)))
+
                 for ev in xrange(n_events):
                     self.wavelet_transform.multiphasevec(bp_data[ev][0:winsize], pow_ev)
 

@@ -46,7 +46,7 @@ class ComposeSessionSummary(ReportRamTask):
         intr_events = self.get_passed_object(task + '_intr_events')
         rec_events = self.get_passed_object(task + '_rec_events')
         all_events = self.get_passed_object(task + '_all_events')
-        monopolar_channels = self.get_passed_object('monopolar_channels')
+        bipolar_pairs = self.get_passed_object('bipolar_pairs')
         bp_tal_structs = self.get_passed_object('bp_tal_structs')
 
         if 'cat' in task:
@@ -60,7 +60,7 @@ class ComposeSessionSummary(ReportRamTask):
         sessions = np.unique(events.session)
 
         self.pass_object('NUMBER_OF_SESSIONS', len(sessions))
-        self.pass_object('NUMBER_OF_ELECTRODES', len(monopolar_channels))
+        self.pass_object('NUMBER_OF_ELECTRODES', len(bipolar_pairs))
 
         session_data = []
         session_summary_array = []
@@ -224,7 +224,7 @@ class ComposeSessionSummary(ReportRamTask):
         cumulative_ttest_data.sort(key=itemgetter(-2))
         ttest_table = Series(data=ttest[-1][0],index=[data[2] for data in cumulative_ttest_data])
         self.pass_object('ttest_table',ttest_table)
-        ttest_table.to_csv(os.path.join(self.workspace_dir,'_'.join([self.pipeline.subject,task,'SME_ttest.csv'])))
+        ttest_table.to_csv(self.get_path_to_resource_in_workspace('_'.join([self.pipeline.subject,task,'SME_ttest.csv'])))
         cumulative_ttest_data = format_ttest_table(cumulative_ttest_data)
 
 

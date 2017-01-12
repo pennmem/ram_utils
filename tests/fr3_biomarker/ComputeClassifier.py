@@ -6,6 +6,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, roc_curve
 from random import shuffle
 from sklearn.externals import joblib
+import warnings
 
 
 def normalize_sessions(pow_mat, events):
@@ -167,6 +168,9 @@ class ComputeClassifier(RamTask):
         # n0 = len(events) - n1
         # w0 = (2.0/n0) / ((1.0/n0)+(1.0/n1))
         # w1 = (2.0/n1) / ((1.0/n0)+(1.0/n1))
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+
         self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
                                                 solver='liblinear')
 

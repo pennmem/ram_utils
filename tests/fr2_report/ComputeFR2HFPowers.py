@@ -56,6 +56,7 @@ class ComputeFR2HFPowers(ReportRamTask):
         task = self.pipeline.task
 
         events = self.get_passed_object(task+'_events')
+        self.pass_object(task+'_events',events)
 
         sessions = np.unique(events.session)
         print 'sessions:', sessions

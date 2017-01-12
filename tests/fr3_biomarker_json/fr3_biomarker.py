@@ -10,14 +10,16 @@ from BiomarkerUtils import CMLParserBiomarker
 
 
 cml_parser = CMLParserBiomarker(arg_count_threshold=1)
-# cml_parser.arg('--workspace-dir','/scratch/busygin/FR3_biomarkers')
-# cml_parser.arg('--subject','R1145J_1')
-# cml_parser.arg('--n-channels','128')
-# cml_parser.arg('--anode-num','3')
-# cml_parser.arg('--cathode-num','4')
-# cml_parser.arg('--pulse-frequency','200')
-# cml_parser.arg('--pulse-count','100')
-# cml_parser.arg('--target-amplitude','1000')
+cml_parser.arg('--workspace-dir','/scratch/leond/FR3_biomarkers_json')
+cml_parser.arg('--subject','R1124J_1')
+cml_parser.arg('--n-channels','109')
+cml_parser.arg('--anode-num','65')
+cml_parser.arg('--anode','LC1')
+cml_parser.arg('--cathode-num','66')
+cml_parser.arg('--cathode','LC2')
+cml_parser.arg('--pulse-frequency','25')
+cml_parser.arg('--pulse-duration','480')
+cml_parser.arg('--target-amplitude','500')
 
 
 args = cml_parser.parse()
@@ -28,6 +30,8 @@ args = cml_parser.parse()
 from RamPipeline import RamPipeline
 
 from FREventPreparation import FREventPreparation
+
+from MatFREventPreparation import MatFREventPreparation
 
 from ComputeFRPowers import ComputeFRPowers
 

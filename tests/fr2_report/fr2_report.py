@@ -71,7 +71,7 @@ class Params(object):
 
         if not args.hf_num:
             self.hfs = np.logspace(np.log10(2), np.log10(200), 50)
-            self.hfs = self.hfs[self.hfs>=70.0]
+            self.hfs = self.hfs[self.hfs>=70]
         else:
             self.hfs = np.logspace(np.log10(float(args.hf_min)),np.log10(float(args.hf_max)),int(args.hf_num))
 

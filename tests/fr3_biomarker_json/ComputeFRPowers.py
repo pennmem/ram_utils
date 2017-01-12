@@ -67,7 +67,6 @@ class ComputeFRPowers(RamTask):
 
 
         events = self.get_passed_object('FR_events')
-
         sessions = np.unique(events.session)
         print 'sessions:', sessions
 
@@ -78,12 +77,14 @@ class ComputeFRPowers(RamTask):
 
         self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
 
+
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
 
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
         joblib.dump(self.samplerate, self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
 
+        exit()
     def compute_powers(self, events, sessions, monopolar_channels , bipolar_pairs):
         n_freqs = len(self.params.freqs)
         n_bps = len(bipolar_pairs)
@@ -109,13 +110,16 @@ class ComputeFRPowers(RamTask):
 
             eeg_reader = EEGReader(events=sess_events, channels=monopolar_channels,
                                    start_time=self.params.fr1_start_time,
-                                   end_time=self.params.fr1_end_time, buffer_time=self.params.fr1_buf)
+                                   end_time=self.params.fr1_end_time, buffer_time=0.0   )
 
             eegs = eeg_reader.read()
+            #
+            #
+            # # mirroring
+            # eegs[...,:1365] = eegs[...,2730:1365:-1]
+            # eegs[...,2731:4096] = eegs[...,2729:1364:-1]
 
-            # mirroring
-            eegs[...,:1365] = eegs[...,2730:1365:-1]
-            eegs[...,2731:4096] = eegs[...,2729:1364:-1]
+            eegs = eegs.add_mirror_buffer(duration=self.params.fr1_buf)
 
             if self.samplerate is None:
                 self.samplerate = float(eegs.samplerate)
@@ -130,7 +134,7 @@ class ComputeFRPowers(RamTask):
             sess_pow_mat = np.empty(shape=(n_events, n_bps, n_freqs), dtype=np.float)
 
             #monopolar_channels_np = np.array(monopolar_channels)
-            for i,bp in enumerate(bipolar_pairs):
+            for i,bp in enumerate(bipolar_pairs[:-1]):
 
                 print 'Computing powers for bipolar pair', bp
                 elec1 = np.where(monopolar_channels == bp[0])[0][0]
@@ -144,6 +148,10 @@ class ComputeFRPowers(RamTask):
                 # bp_data = eegs.values[elec1] - eegs.values[elec2]
 
                 bp_data = bp_data.filtered([58,62], filt_type='stop', order=self.params.filt_order)
+
+                if not i%10:
+                    joblib.dump(bp_data,self.get_path_to_resource_in_workspace('json_bp_filtered_%d_%d.pkl'%(i,sess)))
+
                 for ev in xrange(n_events):
                     self.wavelet_transform.multiphasevec(bp_data[ev][0:winsize], pow_ev)
                     #if np.min(pow_ev) < 0.0:
@@ -160,5 +168,6 @@ class ComputeFRPowers(RamTask):
                     sess_pow_mat[ev,i,:] = np.nanmean(pow_ev_stripped, axis=1)
 
             self.pow_mat = np.concatenate((self.pow_mat,sess_pow_mat), axis=0) if self.pow_mat is not None else sess_pow_mat
+
 
         self.pow_mat = np.reshape(self.pow_mat, (len(events), n_bps*n_freqs))
