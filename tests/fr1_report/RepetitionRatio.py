@@ -49,7 +49,7 @@ class RepetitionRatio(RamTask):
         self.pass_object('repetition_percentiles', self.repetition_percentiles)
 
     def run(self):
-        subject = self.pipeline.subject
+        subject = self.pipeline.subject.split('_')[0]
         task = self.pipeline.task
         events = self.get_passed_object(task+'_all_events')
         recalls = events[events.recalled == 1]

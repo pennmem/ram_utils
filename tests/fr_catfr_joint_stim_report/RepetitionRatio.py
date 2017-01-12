@@ -46,7 +46,7 @@ class RepetitionRatio(RamTask):
     def run(self):
         self.rr_path=path.join(self.pipeline.mount_point,self.pipeline.workspace_dir,'all_repetition_ratios.pkl')
         print 'rr path,', self.rr_path
-        subject = self.pipeline.subject
+        subject = self.pipeline.subject.split('_')[0]
         task = self.pipeline.task
         events = self.get_passed_object('cat_events')
         recalls = events[events.recalled==1]
