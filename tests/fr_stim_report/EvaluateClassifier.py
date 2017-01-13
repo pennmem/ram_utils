@@ -3,6 +3,9 @@ from ptsa.data.readers.IndexReader import JsonIndexReader
 from os import path
 import hashlib
 from sklearn.externals import joblib
+from random import shuffle
+import numpy as np
+from sklearn.metrics import roc_auc_score
 
 
 class EvaluateClassifier(ComputeClassifier.ComputeClassifier):
@@ -32,6 +35,42 @@ class EvaluateClassifier(ComputeClassifier.ComputeClassifier):
                     hash_md5.update(f.read())
         return hash_md5.digest()
 
+
+    def permuted_loso_AUCs(self, event_sessions, recalls):
+        n_perm = self.params.n_perm
+        permuted_recalls = np.array(recalls)
+        AUCs = np.empty(shape=n_perm, dtype=np.float)
+        for i in xrange(n_perm):
+            for sess in event_sessions:
+                sel = (event_sessions == sess)
+
+                sess_permuted_recalls = permuted_recalls[sel]
+                shuffle(sess_permuted_recalls)
+                permuted_recalls[sel] = sess_permuted_recalls
+            probs = self.lr_classifier.predict_proba(event_sessions, permuted_recalls)
+            AUCs[i] = roc_auc_score(recalls, probs)
+            print 'AUC =', AUCs[i]
+        return AUCs
+
+    def permuted_lolo_AUCs(self, events):
+        n_perm = self.params.n_perm
+        recalls = events.recalled
+        permuted_recalls = np.array(recalls)
+        AUCs = np.empty(shape=n_perm, dtype=np.float)
+        sessions = np.unique(events.session)
+        for i in xrange(n_perm):
+            for sess in sessions:
+                sess_lists = np.unique(events[events.session==sess].list)
+                for lst in sess_lists:
+                    sel = (events.session==sess) & (events.list==lst)
+                    list_permuted_recalls = permuted_recalls[sel]
+                    shuffle(list_permuted_recalls)
+                    permuted_recalls[sel] = list_permuted_recalls
+            probs = self.lr_classifier.predict_proba(events, permuted_recalls)
+            AUCs[i] = roc_auc_score(recalls, probs)
+            print 'AUC =', AUCs[i]
+        return AUCs
+
     def run(self):
         subject = self.pipeline.subject
         task = self.pipeline.task
@@ -47,6 +86,7 @@ class EvaluateClassifier(ComputeClassifier.ComputeClassifier):
 
             print 'Performing leave-one-session-out xval'
             self.run_loso_xval(events.session, recalls, permuted=False)
+
         else:
             print 'Performing in-session permutation test'
             self.perm_AUCs = self.permuted_lolo_AUCs(events)
