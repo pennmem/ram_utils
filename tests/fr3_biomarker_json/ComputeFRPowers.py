@@ -110,7 +110,7 @@ class ComputeFRPowers(RamTask):
 
             eeg_reader = EEGReader(events=sess_events, channels=monopolar_channels,
                                    start_time=self.params.fr1_start_time,
-                                   end_time=self.params.fr1_end_time, buffer_time=0.0   )
+                                   end_time=self.params.fr1_end_time, buffer_time=0.0)
 
             eegs = eeg_reader.read()
             #
@@ -149,7 +149,7 @@ class ComputeFRPowers(RamTask):
 
                 bp_data = bp_data.filtered([58,62], filt_type='stop', order=self.params.filt_order)
 
-                if not i%10:
+                if i==74 or i==60:
                     joblib.dump(bp_data,self.get_path_to_resource_in_workspace('json_bp_filtered_%d_%d.pkl'%(i,sess)))
 
                 for ev in xrange(n_events):

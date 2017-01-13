@@ -111,7 +111,7 @@ class ComputeFRPowers(RamTask):
 
 
                 bp_data = bp_data.filtered([58,62], filt_type='stop', order=self.params.filt_order)
-                if not i%10:
+                if i==74 or i==60:
                     joblib.dump(bp_data,self.get_path_to_resource_in_workspace('mat_bp_filtered_%d_%d.pkl'%(i,sess)))
 
                 for ev in xrange(n_events):
