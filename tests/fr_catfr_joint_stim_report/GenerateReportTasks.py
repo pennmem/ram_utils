@@ -107,6 +107,8 @@ class GenerateTex(ReportRamTask):
         session_data_tex_table = latex_table(self.get_passed_object('SESSION_DATA'))
         xval_output = self.get_passed_object('xval_output')
         perm_test_pvalue = self.get_passed_object('pvalue')
+        fr3_xval_output = self.get_passed_object(task+'_xval_output')
+        fr3_perm_test_pvalue = self.get_passed_object(task+'_pvalue')
 
         replace_dict = {'<DATE>': datetime.date.today(),
                         '<EXPERIMENT>': self.pipeline.task,
@@ -117,6 +119,8 @@ class GenerateTex(ReportRamTask):
                         '<REPORT_PAGES>': tex_session_pages_str,
                         '<AUC>': '%.2f' % (100*xval_output[-1].auc),
                         '<PERM-P-VALUE>': pvalue_formatting(perm_test_pvalue),
+                        '<FR3-AUC>': '%.2f' % (100 * fr3_xval_output[-1].auc),
+                        '<FR3-PERM-P-VALUE>': pvalue_formatting(fr3_perm_test_pvalue),
                         '<ROC_AND_TERC_PLOT_FILE>': self.pipeline.subject + '-roc_and_terc_plot.pdf',
                         '<IRT_PLOT_FILE>': task + '-cat' + task + '-' + self.pipeline.subject + '-irt_plot_combined.pdf',
                         '<REPETITION_PLOT_FILE>': task + '-cat' + task + '-' + self.pipeline.subject + '-repetion-ratio-plot.pdf'
@@ -136,14 +140,14 @@ class GeneratePlots(ReportRamTask):
 
         self.create_dir_in_workspace('reports')
 
-        xval_output = self.get_passed_object('xval_output')
-        fr1_summary = xval_output[-1]
+        xval_output = self.get_passed_object(task + '_xval_output')
+        fr3_summary = xval_output[-1]
 
         panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, labelsize=16, wspace=5.0)
 
-        pd1 = PlotData(x=fr1_summary.fpr, y=fr1_summary.tpr, xlim=[0.0,1.0], ylim=[0.0,1.0], xlabel='False Alarm Rate\n(a)', ylabel='Hit Rate', xlabel_fontsize=20, ylabel_fontsize=20, levelline=((0.0,1.0),(0.0,1.0)), color='k', markersize=1.0)
+        pd1 = PlotData(x=fr3_summary.fpr, y=fr3_summary.tpr, xlim=[0.0,1.0], ylim=[0.0,1.0], xlabel='False Alarm Rate\n(a)', ylabel='Hit Rate', xlabel_fontsize=20, ylabel_fontsize=20, levelline=((0.0,1.0),(0.0,1.0)), color='k', markersize=1.0)
 
-        pc_diff_from_mean = (fr1_summary.low_pc_diff_from_mean, fr1_summary.mid_pc_diff_from_mean, fr1_summary.high_pc_diff_from_mean)
+        pc_diff_from_mean = (fr3_summary.low_pc_diff_from_mean, fr3_summary.mid_pc_diff_from_mean, fr3_summary.high_pc_diff_from_mean)
 
         ylim = np.max(np.abs(pc_diff_from_mean)) + 5.0
         if ylim > 100.0:
