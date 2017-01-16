@@ -24,7 +24,7 @@ from EventPreparation import EventPreparation
 
 from RepetitionRatio import RepetitionRatio
 
-from ComputeFR1Powers import ComputeFR1Powers
+from ComputeFRPowers import ComputeFRPowers
 
 from ComputeClassifier import ComputeClassifier
 
@@ -101,7 +101,7 @@ report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=Fal
 if 'cat' in args.task:
     report_pipeline.add_task(RepetitionRatio(recompute_all_ratios=True,mark_as_completed=True))
 
-report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 

@@ -18,7 +18,7 @@ import hashlib
 
 class ComputeFRPowers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
-        super(ComputeFRPowers,self).__init__(mark_as_completed)
+        super(ComputeFRPowers, self).__init__(mark_as_completed)
         self.params = params
         self.pow_mat = None
         self.samplerate = None

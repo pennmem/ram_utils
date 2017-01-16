@@ -25,7 +25,7 @@ from RepetitionRatio import RepetitionRatio
 
 from EvaluateClassifier import EvaluateClassifier
 
-from ComputeFR1Powers import ComputeFR1Powers
+from ComputeFRPowers import ComputeFRPowers
 
 from ComputeClassifier import ComputeClassifier
 
@@ -114,7 +114,7 @@ for subject in subjects:
     if 'cat' in args.task:
         report_pipeline.add_task(RepetitionRatio(recompute_all_ratios=True, mark_as_completed=True))
 
-    report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=True))
+    report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 
     report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 

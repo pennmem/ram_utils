@@ -11,9 +11,9 @@ from os.path import *
 from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1161E')
+cml_parser.arg('--subject','R1150J')
 cml_parser.arg('--task','FR1')
-cml_parser.arg('--workspace-dir','/scratch/leond/FR_reports')
+cml_parser.arg('--workspace-dir','/scratch/leond/FR1_reports')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
 # cml_parser.arg('--exit-on-no-change')
@@ -85,7 +85,7 @@ report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
 report_pipeline.add_task(MontagePreparation(params, mark_as_completed=False))
 
 if 'cat' in args.task:
-    report_pipeline.add_task(RepetitionRatio(mark_as_completed=True))
+    report_pipeline.add_task(RepetitionRatio(mark_as_completed=False))
 
 report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=True))
 
