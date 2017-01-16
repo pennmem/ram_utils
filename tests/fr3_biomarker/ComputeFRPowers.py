@@ -48,7 +48,6 @@ class ComputeFRPowers(RamTask):
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
         joblib.dump(self.samplerate, self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
 
-        exit()
 
     def compute_powers(self, events, sessions,monopolar_channels , bipolar_pairs ):
         n_freqs = len(self.params.freqs)
@@ -100,7 +99,7 @@ class ComputeFRPowers(RamTask):
             sess_pow_mat = np.empty(shape=(n_events, n_bps, n_freqs), dtype=np.float)
 
             #monopolar_channels_np = np.array(monopolar_channels)
-            for i,bp in enumerate(bipolar_pairs[:-1]):
+            for i,bp in enumerate(bipolar_pairs):
 
                 print 'Computing powers for bipolar pair', bp
                 elec1 = np.where(monopolar_channels == bp[0])[0][0]
@@ -111,8 +110,6 @@ class ComputeFRPowers(RamTask):
 
 
                 bp_data = bp_data.filtered([58,62], filt_type='stop', order=self.params.filt_order)
-                if i==74 or i==60:
-                    joblib.dump(bp_data,self.get_path_to_resource_in_workspace('mat_bp_filtered_%d_%d.pkl'%(i,sess)))
 
                 for ev in xrange(n_events):
                     self.wavelet_transform.multiphasevec(bp_data[ev][0:winsize], pow_ev)
