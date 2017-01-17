@@ -5,7 +5,7 @@ from ReportUtils import CMLParser,ReportPipeline
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1247P_1')
+cml_parser.arg('--subject','R1236J')
 cml_parser.arg('--task','FR3')
 cml_parser.arg('--workspace-dir','/scratch/leond/FR3_catFR3_joint_reports')
 cml_parser.arg('--mount-point','')
@@ -22,6 +22,8 @@ from FREventPreparation import FREventPreparation
 
 from EventPreparation import EventPreparation
 
+from MontagePreparation import MontagePreparation
+
 from RepetitionRatio import RepetitionRatio
 
 from ComputeFRPowers import ComputeFRPowers
@@ -30,9 +32,9 @@ from ComputeClassifier import ComputeClassifier
 
 from ComputeFRStimPowers import ComputeFRStimPowers
 
-from MontagePreparation import MontagePreparation
-
 from ComputeFRStimTable import ComputeFRStimTable
+
+from EvaluateClassifier import EvaluateClassifier
 
 from ComposeSessionSummary import ComposeSessionSummary
 
@@ -105,6 +107,8 @@ report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True
 report_pipeline.add_task(ComputeFRStimPowers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeFRStimTable(params=params, mark_as_completed=False))
+
+report_pipeline.add_task(EvaluateClassifier(params=params,mark_as_completed=True))
 
 report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
 #

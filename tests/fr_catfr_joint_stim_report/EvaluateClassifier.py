@@ -47,8 +47,8 @@ class EvaluateClassifier(ComputeClassifier.ComputeClassifier):
                 sess_permuted_recalls = permuted_recalls[sel]
                 shuffle(sess_permuted_recalls)
                 permuted_recalls[sel] = sess_permuted_recalls
-            probs = self.lr_classifier.predict_proba(event_sessions, permuted_recalls)
-            AUCs[i] = roc_auc_score(recalls, probs)
+            probs = self.lr_classifier.predict_proba(self.pow_mat)
+            AUCs[i] = roc_auc_score(permuted_recalls, probs[:,0])
             print 'AUC =', AUCs[i]
         return AUCs
 
@@ -66,8 +66,8 @@ class EvaluateClassifier(ComputeClassifier.ComputeClassifier):
                     list_permuted_recalls = permuted_recalls[sel]
                     shuffle(list_permuted_recalls)
                     permuted_recalls[sel] = list_permuted_recalls
-            probs = self.lr_classifier.predict_proba(events, permuted_recalls)
-            AUCs[i] = roc_auc_score(recalls, probs)
+            probs = self.lr_classifier.predict_proba(self.pow_mat)
+            AUCs[i] = roc_auc_score(permuted_recalls, probs[:,0])
             print 'AUC =', AUCs[i]
         return AUCs
 
