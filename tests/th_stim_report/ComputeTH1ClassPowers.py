@@ -13,9 +13,9 @@ import hashlib
 from ReportUtils import MissingDataError
 from ReportUtils import ReportRamTask
 
-class ComputeTHPowers(ReportRamTask):
+class ComputeTH1ClassPowers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
-        super(ComputeTHPowers,self).__init__(mark_as_completed)
+        super(ComputeTH1ClassPowers, self).__init__(mark_as_completed)
         self.params = params
         self.pow_mat = None
         self.samplerate = None
@@ -36,8 +36,9 @@ class ComputeTHPowers(ReportRamTask):
         bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
         for fname in bp_paths:
             hash_md5.update(open(fname, 'rb').read())
+
         event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage,
-                                                               experiment = task)))
+                                                               experiment = 'TH1')))
         for fname in event_files:
             with open(fname,'rb') as f: hash_md5.update(f.read())
         return hash_md5.digest()
@@ -45,7 +46,7 @@ class ComputeTHPowers(ReportRamTask):
     def restore(self):
         subject = self.pipeline.subject
 
-        self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
+        self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-TH1-classify_pow_mat.pkl'))
         self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
 
         self.pass_object('pow_mat', self.pow_mat)
@@ -67,7 +68,7 @@ class ComputeTHPowers(ReportRamTask):
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
 
-        joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
+        joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-TH1-classify_pow_mat.pkl'))
         joblib.dump(self.samplerate, self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
 
     def compute_powers(self, events, sessions,monopolar_channels , bipolar_pairs ):

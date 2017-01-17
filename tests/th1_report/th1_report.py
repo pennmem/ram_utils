@@ -14,9 +14,9 @@ from ReportUtils import CMLParser,ReportPipeline
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1237C')
+cml_parser.arg('--subject','R1201P_1')
 cml_parser.arg('--task','TH1')
-cml_parser.arg('--workspace-dir','/scratch/leond/TH1_reports')
+cml_parser.arg('--workspace-dir','/scratch/leond/TH_reports')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
 #cml_parser.arg('--exit-on-no-change')
@@ -104,7 +104,8 @@ params = Params()
 
 # sets up processing pipeline
 report_pipeline = ReportPipeline(subject=args.subject, task=args.task,
-                                       workspace_dir=join(args.workspace_dir,args.task+'_'+args.subject), mount_point=args.mount_point,exit_on_no_change=args.exit_on_no_change,
+                                 workspace_dir=join(args.workspace_dir,args.subject),
+                                 mount_point=args.mount_point,exit_on_no_change=args.exit_on_no_change,
                                  recompute_on_no_status=args.recompute_on_no_status)
 
 report_pipeline.add_task(TH1EventPreparation(mark_as_completed=False))

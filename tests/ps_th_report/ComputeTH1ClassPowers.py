@@ -13,9 +13,9 @@ from ReportUtils import ReportRamTask
 
 import hashlib
 
-class ComputeTHClassPowers(ReportRamTask):
+class ComputeTH1ClassPowers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
-        super(ComputeTHClassPowers,self).__init__(mark_as_completed)
+        super(ComputeTH1ClassPowers, self).__init__(mark_as_completed)
         self.params = params
         self.classify_pow_mat = None
         self.samplerate = None
@@ -35,7 +35,7 @@ class ComputeTHClassPowers(ReportRamTask):
         for fname in bp_paths:
             with open(fname,'rb') as f: hash_md5.update(f.read())
 
-        event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='TH1')))
+        event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='TH1')))
         for fname in event_files:
             with open(fname,'rb') as f: hash_md5.update(f.read())
 
@@ -44,7 +44,7 @@ class ComputeTHClassPowers(ReportRamTask):
     def restore(self):
         subject = self.pipeline.subject
 
-        self.classify_pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-TH-classify_pow_mat.pkl'))
+        self.classify_pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-TH1-classify_pow_mat.pkl'))
         self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
 
         self.pass_object('classify_pow_mat', self.classify_pow_mat)
@@ -64,7 +64,7 @@ class ComputeTHClassPowers(ReportRamTask):
         self.pass_object('classify_pow_mat', self.classify_pow_mat)
         self.pass_object('samplerate', self.samplerate)
 
-        joblib.dump(self.classify_pow_mat, self.get_path_to_resource_in_workspace(subject + '-TH-classify_pow_mat.pkl'))
+        joblib.dump(self.classify_pow_mat, self.get_path_to_resource_in_workspace(subject + '-TH1-classify_pow_mat.pkl'))
         joblib.dump(self.samplerate, self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
 
     def compute_powers(self, events, sessions,monopolar_channels , bipolar_pairs ):
