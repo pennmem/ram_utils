@@ -66,7 +66,24 @@ class ComputeFRPowers(ReportRamTask):
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
 
-        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
+        has_fr1 = (sessions<100).any()
+        has_catfr1 = (sessions>=100).any()
+
+        try:
+            fr1_powers = joblib.load(self.get_path_to_resource_in_workspace(subject + '-FR1-pow_mat.pkl'))
+        except IOError:
+            fr1_powers = None
+        try:
+            catfr1_powers = joblib.load(self.get_path_to_resource_in_workspace(subject + '-catFR1-pow_mat.pkl'))
+        except IOError:
+            catfr1_powers = None
+
+        if (has_fr1 and fr1_powers is None)(has_catfr1 and catfr1_powers is None):
+            self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
+        elif fr1_powers is not None and catfr1_powers is not None:
+            self.pow_mat = np.vstack((fr1_powers,catfr1_powers))
+        else:
+            self.pow_mat = fr1_powers if catfr1_powers is None else catfr1_powers
 
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
