@@ -78,7 +78,7 @@ class ComputeFRPowers(ReportRamTask):
         except IOError:
             catfr1_powers = None
 
-        if (has_fr1 and fr1_powers is None)(has_catfr1 and catfr1_powers is None):
+        if (has_fr1 and fr1_powers is None) or (has_catfr1 and catfr1_powers is None):
             self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
         elif fr1_powers is not None and catfr1_powers is not None:
             self.pow_mat = np.vstack((fr1_powers,catfr1_powers))
