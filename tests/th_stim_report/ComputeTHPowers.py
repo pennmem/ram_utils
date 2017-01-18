@@ -104,7 +104,7 @@ class ComputeTHPowers(ReportRamTask):
                 events = np.hstack((events[events.session!=sess],sess_events)).view(np.recarray)
                 ev_order = np.argsort(events, order=('session','trial','mstime'))
                 events = events[ev_order]
-                self.pass_object('FR_events', events)
+                self.pass_object('th_events', events)
 
             eegs = eegs.add_mirror_buffer(duration=self.params.th1_buf)
 
