@@ -86,23 +86,19 @@ class RepetitionRatio(RamTask):
         subjects = j_reader.subjects(experiment='catFR1')
         all_repetition_rates = {}
     
-        for subject in subjects:
-            try:
+        for subject in sorted(subjects):
                 print 'Repetition ratios for subject: ',subject
     
                 evs_field_list = ['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type',
-                                  'eegoffset', 'iscorrect', 'answer', 'recalled', 'item_name', 'intrusion', 'montage', 'list',
+                                  'eegoffset',  'recalled', 'item_name', 'intrusion', 'montage', 'list',
                                   'eegfile', 'msoffset']
                 evs_field_list += ['category', 'category_num']
     
-                tmp = subject.split('_')
-                subj_code = tmp[0]
-                montage = 0 if len(tmp) == 1 else int(tmp[1])
-    
+
                 json_reader = JsonIndexReader(path.join('/','protocols/r1.json'))
     
                 event_files = sorted(
-                    list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='catFR1')))
+                    list(json_reader.aggregate_values('task_events', subject=subject, experiment='catFR1')))
                 events = None
                 for sess_file in event_files:
                     e_path = path.join(str(sess_file))
@@ -124,15 +120,15 @@ class RepetitionRatio(RamTask):
     
                 for i,r in enumerate(repetition_rates.flat):
                     repetition_rates.flat[i] = np.nan
-                for session in sessions:
+                for i,session in enumerate(sessions):
                     sess_recalls = recalls[recalls.session == session]
                     lists = np.unique(sess_recalls.list)
-                    repetition_rates[session][:len(lists)] = [repetition_ratio(sess_recalls[sess_recalls.list == l])
-                                                 for l in lists]
+                    repetition_rates[i][:len(lists)] = [repetition_ratio(sess_recalls[sess_recalls.list == l]) for l in lists]
                 all_repetition_rates[subject] = repetition_rates.copy()
-            except Exception as e:
-                print 'Subject ',subject,'failed:'
-                print e
+            # except Exception as e:
+            #     print 'Subject ',subject,'failed:'
+            #     print 'events.shape: ', events.shape
+            #     print e
         joblib.dump(all_repetition_rates,path.join(path.dirname(self.pipeline.workspace_dir),'all_repetition_ratios_dict'))
         return all_repetition_rates
 
