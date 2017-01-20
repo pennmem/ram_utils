@@ -94,23 +94,26 @@ class EvaluateClassifier(ComputeClassifier.ComputeClassifier):
             print 'Performing leave-one-list-out xval'
             self.run_lolo_xval(events, recalls, permuted=False)
 
+        self.pvalue = np.sum(self.perm_AUCs >= self.xval_output[-1].auc) / float(self.perm_AUCs.size)
+
+        print 'Perm test p-value = ', self.pvalue
         self.pass_object(task+'_xval_output', self.xval_output)
         self.pass_object(task+'_perm_AUCs', self.perm_AUCs)
         self.pass_object(task+'_pvalue', self.pvalue)
 
-        joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace('-'.join((subject, task, 'xval_output.pkl'))))
-        joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace('-'.join((subject, task, 'perm_AUCs.pkl'))))
-        joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace('-'.join((subject, task, 'pvalue.pkl'))))
-
-    def restore(self):
-
-        subject = self.pipeline.subject
-        task = self.pipeline.task
-        self.xval_output = joblib.load(
-                    self.get_path_to_resource_in_workspace('-'.join((subject, task, 'xval_output.pkl'))))
-        self.perm_AUCs = joblib.load(self.get_path_to_resource_in_workspace('-'.join((subject, task, 'perm_AUCs.pkl'))))
-        self.pvalue = joblib.load(self.get_path_to_resource_in_workspace('-'.join((subject, task, 'pvalue.pkl'))))
-
-        self.pass_object(task + '_xval_output', self.xval_output)
-        self.pass_object(task + '_perm_AUCs', self.perm_AUCs)
-        self.pass_object(task + '_pvalue', self.pvalue)
+    #     joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace('-'.join((subject, task, 'xval_output.pkl'))))
+    #     joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace('-'.join((subject, task, 'perm_AUCs.pkl'))))
+    #     joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace('-'.join((subject, task, 'pvalue.pkl'))))
+    #
+    # def restore(self):
+    #
+    #     subject = self.pipeline.subject
+    #     task = self.pipeline.task
+    #     self.xval_output = joblib.load(
+    #                 self.get_path_to_resource_in_workspace('-'.join((subject, task, 'xval_output.pkl'))))
+    #     self.perm_AUCs = joblib.load(self.get_path_to_resource_in_workspace('-'.join((subject, task, 'perm_AUCs.pkl'))))
+    #     self.pvalue = joblib.load(self.get_path_to_resource_in_workspace('-'.join((subject, task, 'pvalue.pkl'))))
+    #
+    #     self.pass_object(task + '_xval_output', self.xval_output)
+    #     self.pass_object(task + '_perm_AUCs', self.perm_AUCs)
+    #     self.pass_object(task + '_pvalue', self.pvalue)

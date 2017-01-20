@@ -109,7 +109,7 @@ report_pipeline.add_task(ComputeFRStimPowers(params=params, mark_as_completed=Tr
 
 report_pipeline.add_task(ComputeFRStimTable(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(EvaluateClassifier(params=params,mark_as_completed=True)) #Note: this IS included in the pdf!
+report_pipeline.add_task(EvaluateClassifier(params=params,mark_as_completed=False)) #Note: this IS included in the pdf!
 
 report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
 #
