@@ -59,8 +59,11 @@ $<N_STIM_INTR>/<N_TOTAL_STIM>$ ($<PC_FROM_STIM_INTR>$\%) from stim lists & $<N_N
 
 \begin{figure}[!h]
 \centering
-\subfigure{\includegraphics[scale=0.4]{<STIM_AND_RECALL_PLOT_FILE>}}
+\subfigure{\includegraphics[height=0.25\textheight]{<STIM_AND_RECALL_PLOT_FILE>}}
 \caption*{\textbf{Stim and recall:} Number of stims and recalled items per list. Red circles represent the number of recalled items from stim lists. Blue circles represent the number of recalled items from non-stim lists. Bars represent the number of stims per list.}
+
+\subfigure{\includegraphics[scale=0.3]{<PROB_STIM_PLOT_FILE>}}
+\caption*{Probability of stimulation as a function of serial position.}
 \end{figure}
 
 <BIOMARKER_PLOTS>
