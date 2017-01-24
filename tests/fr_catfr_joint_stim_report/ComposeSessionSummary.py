@@ -92,6 +92,8 @@ class ComposeSessionSummary(ReportRamTask):
             sess_math_events = math_events[sess_sel(math_events.session)]
 
             fr_stim_table_by_session_list = fr_stim_session_table.groupby(['session','list'])
+            fr_stim_stim_item_table_by_session_list = fr_stim_session_table.loc[fr_stim_session_table.is_stim_item==True].groupby(['session','list'])
+            fr_stim_nostim_item_table_by_session_list = fr_stim_session_table.loc[fr_stim_session_table.is_stim_item==False].groupby(['session','list'])
             session_summary.n_lists = len(fr_stim_table_by_session_list)
 
             session_summary.n_pli = np.sum(sess_intr_events.intrusion > 0)
@@ -106,10 +108,28 @@ class ComposeSessionSummary(ReportRamTask):
 
             fr_stim_table_by_pos = fr_stim_session_table.groupby('serialpos')
             session_summary.prob_recall = np.empty(len(fr_stim_table_by_pos), dtype=float)
+            session_summary.prob_stim_recall = np.empty(len(fr_stim_table_by_pos), dtype=float)
+            session_summary.prob_nostim_recall = np.empty(len(fr_stim_table_by_pos), dtype=float)
+            session_summary.prob_stim = np.empty(len(fr_stim_table_by_pos), dtype=float)
             for i, (pos,fr_stim_pos_table) in enumerate(fr_stim_table_by_pos):
                 session_summary.prob_recall[i] = fr_stim_pos_table.recalled.sum() / float(len(fr_stim_pos_table))
+                fr_stim_item_pos_table = fr_stim_pos_table.loc[fr_stim_pos_table.is_stim_item == True]
+                try:
+                    session_summary.prob_stim_recall[i] = fr_stim_item_pos_table.recalled.sum() / float(
+                        len(fr_stim_item_pos_table))
+                except ZeroDivisionError:
+                    session_summary.prob_stim_recall[i] = np.nan
+                session_summary.prob_stim[i] = (fr_stim_pos_table.is_stim_item.astype(np.float).sum()
+                                                / fr_stim_pos_table.is_stim_list.astype(np.float).sum())
 
+            print '# stim items: ', fr_stim_pos_table.is_stim_item.astype(np.float).sum()
+            print '# stim list items: ', fr_stim_pos_table.is_stim_list.astype(np.float).sum()
+            fr_nostim_item_pos_table = fr_stim_pos_table.loc[fr_stim_pos_table.is_stim_item == False]
+            session_summary.prob_nostim_recall[i] = fr_nostim_item_pos_table.recalled.sum() / float(
+                len(fr_nostim_item_pos_table))
             session_summary.prob_first_recall = np.zeros(len(fr_stim_table_by_pos), dtype=float)
+            session_summary.prob_first_stim_recall = np.zeros(len(fr_stim_table_by_pos), dtype=float)
+            session_summary.prob_first_nostim_recall = np.zeros(len(fr_stim_table_by_pos), dtype=float)
             first_recall_counter = np.zeros(len(fr_stim_table_by_pos), dtype=int)
             session_summary.list_number = np.empty(len(fr_stim_table_by_session_list), dtype=int)
             session_summary.n_recalls_per_list = np.empty(len(fr_stim_table_by_session_list), dtype=int)
@@ -126,6 +146,10 @@ class ComposeSessionSummary(ReportRamTask):
                     tmp = np.where(fr_stim_sess_list_table.itemno.values == list_rec_events[0].item_num)[0]
                     if tmp.size > 0:
                         first_recall_idx = tmp[0]
+                        if fr_stim_sess_list_table.iloc[tmp[0]].is_stim_item:
+                            session_summary.prob_first_stim_recall[first_recall_idx]+=1
+                        else:
+                            session_summary.prob_first_nostim_recall[first_recall_idx]+=1
                         session_summary.prob_first_recall[first_recall_idx] += 1
                         first_recall_counter[first_recall_idx] += 1
 
@@ -136,6 +160,8 @@ class ComposeSessionSummary(ReportRamTask):
 
 
             session_summary.prob_first_recall /= float(len(fr_stim_table_by_session_list))
+            session_summary.prob_first_stim_recall /= float(len(fr_stim_stim_item_table_by_session_list))
+            session_summary.prob_first_nostim_recall /= float(len(fr_stim_nostim_item_table_by_session_list))
 
             fr_stim_stim_list_table = fr_stim_session_table[fr_stim_session_table.is_stim_list]
             fr_stim_non_stim_list_table = fr_stim_session_table[~fr_stim_session_table.is_stim_list & (fr_stim_session_table['list']>=4)]
