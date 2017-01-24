@@ -10,8 +10,8 @@ from os.path import *
 from CMLParserSystem3 import CMLParserSystem3
 
 cml_parser = CMLParserSystem3(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','D:/scratch/FR3_utils_system_3')
-cml_parser.arg('--experiment','FR3')
+cml_parser.arg('--workspace-dir','D:/scratch/R1247P_1')
+cml_parser.arg('--experiment','CatFR3')
 cml_parser.arg('--mount-point','D:/')
 cml_parser.arg('--subject','R1247P_1')
 # cml_parser.arg('--electrode-config-file',r'd:\experiment_configs2\R1234M\FR3\config_files\R1170J_ALLCHANNELSSTIM.bin')

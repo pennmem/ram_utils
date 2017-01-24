@@ -86,7 +86,7 @@ class ExperimentConfigGenerator(RamTask):
         classifier_path = self.get_passed_object('classifier_path')
         stim_chan_label = self.get_passed_object('stim_chan_label')
 
-        project_dir_corename = 'experiment_config_dir/%s'%subject
+        project_dir_corename = 'experiment_config_dir/%s/%s'%(subject,experiment)
         project_dir = self.create_dir_in_workspace(project_dir_corename)
 
         # making sure we get the path even if the actual directory is not created
@@ -126,7 +126,7 @@ class ExperimentConfigGenerator(RamTask):
                                          target_dir=config_files_dir)
 
         # zipping project_dir
-        zip_filename = join(dirname(project_dir),subject)+'.zip'
+        zip_filename = join(dirname(project_dir),experiment)+'.zip'
         zipf = zipfile.ZipFile(zip_filename, 'w', zipfile.ZIP_DEFLATED)
         self.zipdir(project_dir, zipf)
         zipf.close()
