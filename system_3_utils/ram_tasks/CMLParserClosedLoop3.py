@@ -7,7 +7,7 @@ import os
 from os.path import *
 
 
-class CMLParserSystem3(object):
+class CMLParserCloseLoop3(object):
     def __init__(self, arg_count_threshold=1):
         self.parser = argparse.ArgumentParser(description='Report Generator')
         self.parser.add_argument('--subject', required=True, action='store')

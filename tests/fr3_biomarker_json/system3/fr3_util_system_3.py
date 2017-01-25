@@ -7,9 +7,9 @@ print "See https://github.com/busygin/morlet_for_sys2_biomarker/blob/master/READ
 
 from os.path import *
 
-from CMLParserSystem3 import CMLParserSystem3
+from system_3_utils.ram_tasks.CMLParserClosedLoop3 import CMLParserCloseLoop3
 
-cml_parser = CMLParserSystem3(arg_count_threshold=1)
+cml_parser = CMLParserCloseLoop3(arg_count_threshold=1)
 cml_parser.arg('--workspace-dir','D:/scratch/R1247P_1')
 cml_parser.arg('--experiment','CatFR3')
 cml_parser.arg('--mount-point','D:/')
@@ -50,7 +50,7 @@ from system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import Chec
 
 from tests.fr3_biomarker_json.ComputeClassifier import ComputeClassifier
 
-from ExperimentConfigGenerator import ExperimentConfigGenerator
+from tests.fr3_biomarker_json.system3.ExperimentConfigGeneratorClosedLoop3 import ExperimentConfigGeneratorClosedLoop3
 
 
 import numpy as np
@@ -147,7 +147,7 @@ report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 
-report_pipeline.add_task(ExperimentConfigGenerator(params=params, mark_as_completed=False))
+report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop3(params=params, mark_as_completed=False))
 
 
 #

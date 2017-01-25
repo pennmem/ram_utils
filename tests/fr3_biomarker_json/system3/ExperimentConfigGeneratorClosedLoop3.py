@@ -13,7 +13,7 @@ from glob import glob
 import shutil
 import pathlib
 
-class ExperimentConfigGenerator(RamTask):
+class ExperimentConfigGeneratorClosedLoop3(RamTask):
     def __init__(self, params, mark_as_completed=False):
         RamTask.__init__(self, mark_as_completed)
 
