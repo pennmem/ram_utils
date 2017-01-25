@@ -91,6 +91,8 @@ class MontagePreparation(RamTask):
 
         try:
             bp_path = os.path.join(self.pipeline.mount_point, next(iter(bp_paths)))
+            self.pass_object('bipolar_pairs_path', bp_path)
+
             f_pairs = open(bp_path, 'r')
             bipolar_data = json.load(f_pairs)[subject]['pairs']
             f_pairs.close()
