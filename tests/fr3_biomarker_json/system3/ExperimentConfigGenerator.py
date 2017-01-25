@@ -82,6 +82,8 @@ class ExperimentConfigGenerator(RamTask):
         experiment = self.pipeline.args.experiment if self.pipeline.args.experiment else 'FR3'
         electrode_config_file = self.pipeline.args.electrode_config_file
         subject = self.pipeline.subject
+        stim_frequency = self.pipeline.args.pulse_frequency
+        stim_amplitude = self.pipeline.args.target_amplitude
         bipolar_pairs_path = self.get_passed_object('bipolar_pairs_path')
         classifier_path = self.get_passed_object('classifier_path')
         stim_chan_label = self.get_passed_object('stim_chan_label')
@@ -103,6 +105,8 @@ class ExperimentConfigGenerator(RamTask):
         experiment_config_content = experiment_config_template.generate(
             experiment=experiment,
             classifier_file='config_files/%s'%basename(classifier_path),
+            stim_frequency=stim_frequency,
+            stim_amplitude=stim_amplitude,
             stim_electrode_pair=stim_chan_label,
             electrode_config_file='config_files/%s'%basename(electrode_config_file),
             montage_file='config_files/%s'%basename(bipolar_pairs_path)

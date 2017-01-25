@@ -24,9 +24,9 @@ class CMLParserSystem3(object):
         self.parser.add_argument('--cathode-num', required=True, action='store',type=int)
         self.parser.add_argument('--cathode', required=False, action='store',default='')
 
-        # self.parser.add_argument('--pulse-frequency', required=True, action='store',type=int)
+        self.parser.add_argument('--pulse-frequency', required=True, action='store',type=int)
         # self.parser.add_argument('--pulse-duration', required=True, action='store',type=int)
-        # self.parser.add_argument('--target-amplitude', required=True, action='store',type=int)
+        self.parser.add_argument('--target-amplitude', required=True, action='store',type=int)
 
 
         self.arg_list=[]

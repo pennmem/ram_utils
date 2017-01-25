@@ -5,8 +5,8 @@
         "experiment_specific_data": {
             "classifier_file": "{{classifier_file}}",
             "stim_electrode_pair": "{{stim_electrode_pair}}",
-            "stim_amplitude": 0.5,
-            "stim_frequency": 50,
+            "stim_amplitude": {{stim_amplitude}},
+            "stim_frequency": {{stim_frequency}},
             "stim_duration": 500,
             "random_stim_prob": false,
             "save_debug_output": true
