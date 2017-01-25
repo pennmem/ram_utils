@@ -279,9 +279,7 @@ class ComposeSessionSummary(ReportRamTask):
         for s_num,session in enumerate(np.unique(cat_events.session)):
             sess_events = cat_events[cat_events.session == session]
             stim_lists = np.unique(sess_events[sess_events.stim_list==True].list)
-            print 'stim_lists:',stim_lists
             nostim_lists = np.unique(sess_events[sess_events.stim_list==False].list)
-            print 'nonstim lists',nostim_lists
             stim_rrs.append(repetition_ratios[s_num][stim_lists[stim_lists>0]-1])
             nostim_rrs.append(repetition_ratios[s_num][nostim_lists[nostim_lists>0]-1])
         self.pass_object('stim_mean_rr',np.nanmean(stim_rrs))

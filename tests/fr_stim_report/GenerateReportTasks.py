@@ -335,7 +335,8 @@ class GeneratePlots(ReportRamTask):
 
                 all_repetition_ratios = self.get_passed_object('all_repetition_ratios')
                 all_repetition_ratios = all_repetition_ratios[np.isfinite(all_repetition_ratios)]
-                all_rr_hist = np.histogram(all_repetition_ratios,  bins= int(np.log2(all_repetition_ratios.size)+1))
+                nbins = int(np.log2(all_repetition_ratios.size)+1)
+                all_rr_hist = np.histogram(all_repetition_ratios,bins=nbins)
 
                 mean_rr = self.get_passed_object('mean_rr')
                 stim_mean_rr = self.get_passed_object('stim_mean_rr')
@@ -354,7 +355,7 @@ class GeneratePlots(ReportRamTask):
                 panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
 
                 plot = panel_plot.generate_plot()
-                plot.hist(all_repetition_ratios,bins='auto',color='grey')
+                plot.hist(all_repetition_ratios,bins=nbins,color='grey')
                 percentile = np.nanmean(all_repetition_ratios < mean_rr) * 100
                 plot.annotate(s='%.2gth percentile'%percentile, xy=(mean_rr, max(all_rr_hist[0])),
                               xytext=(mean_rr, max(all_rr_hist[0])+1),arrowprops={'arrowstyle':'->'})

@@ -299,7 +299,11 @@ class ComposeSessionSummary(ReportRamTask):
                 print 'nonstim lists',nostim_lists
                 stim_rrs.append(repetition_ratios[s_num][stim_lists[stim_lists>0]-1])
                 nostim_rrs.append(repetition_ratios[s_num][nostim_lists[nostim_lists>0]-1])
-            print [x.shape for x in stim_rrs]
+            with open('rrs.txt', 'w') as rrs:
+                print>> rrs, 'rrs:', repetition_ratios
+                print>> rrs, 'stim_rrs:', stim_rrs
+                print>> rrs, 'nostim_rrs:', nostim_rrs
+            exit()
             self.pass_object('stim_mean_rr',np.nanmean(np.hstack(stim_rrs)))
             self.pass_object('nostim_mean_rr',np.nanmean(np.hstack(nostim_rrs)))
 
