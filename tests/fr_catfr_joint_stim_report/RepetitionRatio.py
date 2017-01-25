@@ -85,8 +85,6 @@ class RepetitionRatio(RamTask):
         joblib.dump(all_recall_ratios_dict, path.join(self.get_workspace_dir(), 'all_recall_ratios_dict'))
         joblib.dump(self.repetition_ratios,
                     path.join(self.pipeline.mount_point, self.workspace_dir, subject + '-repetition-ratios.pkl'))
-        print 'mean rr:',np.nanmean(self.repetition_ratios)
-        exit()
 
 
         # joblib.dump(self.repetition_percentiles,path.join(self.pipeline.mount_point,self.workspace_dir,subject+'-repetition-percentiles.pkl'))
