@@ -51,9 +51,12 @@ class RepetitionRatio(RamTask):
     def run(self):
         subject = self.pipeline.subject.split('_')[0]
         task = self.pipeline.task
-        events = self.get_passed_object(task+'_all_events')
+        events = self.get_passed_object('cat_events').copy()
         recalls = events[events.recalled == 1]
         sessions = np.unique(recalls.session)
+        self.repetition_ratios = np.empty((len(sessions),25))
+        self.repetition_ratios[...]=np.nan
+
         print '%d sessions' % len(sessions)
         if self.recompute_all_ratios:
             all_recall_ratios_dict = self.initialize_repetition_ratio()
@@ -63,10 +66,17 @@ class RepetitionRatio(RamTask):
                     path.join(path.basename(self.workspace_dir), 'all_repetition_ratios_dict'))
             except IOError:
                 all_recall_ratios_dict = self.initialize_repetition_ratio()
-        self.repetition_ratios = all_recall_ratios_dict[subject]
         all_recall_ratios = np.hstack([np.nanmean(x) for x in all_recall_ratios_dict.itervalues()])
         # all_recall_ratios.sort()
         # self.get_percentiles(all_recall_ratios)
+
+        for session in sessions:
+            sess_events = recalls[recalls.session==session]
+            lists = np.unique(sess_events.list)
+            for lst in lists:
+                self.repetition_ratios[session,lst-1] = repetition_ratio(sess_events[sess_events.list == lst])
+                print 'list length: ',len(sess_events[sess_events.list==lst])
+
 
         self.pass_object('all_repetition_ratios', all_recall_ratios)
         self.pass_object('repetition_ratios', self.repetition_ratios)
@@ -75,6 +85,7 @@ class RepetitionRatio(RamTask):
         joblib.dump(all_recall_ratios_dict, path.join(self.get_workspace_dir(), 'all_recall_ratios_dict'))
         joblib.dump(self.repetition_ratios,
                     path.join(self.pipeline.mount_point, self.workspace_dir, subject + '-repetition-ratios.pkl'))
+
 
         # joblib.dump(self.repetition_percentiles,path.join(self.pipeline.mount_point,self.workspace_dir,subject+'-repetition-percentiles.pkl'))
 

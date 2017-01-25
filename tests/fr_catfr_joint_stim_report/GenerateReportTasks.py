@@ -9,6 +9,7 @@ import datetime
 from subprocess import call
 
 from ReportUtils import ReportRamTask
+import sys
 
 
 def pvalue_formatting(p):
@@ -338,29 +339,30 @@ class GeneratePlots(ReportRamTask):
 
         all_repetition_ratios = self.get_passed_object('all_repetition_ratios')
         all_repetition_ratios = all_repetition_ratios[np.isfinite(all_repetition_ratios)]
-        all_rr_hist = np.histogram(all_repetition_ratios, range=[0., 1], bins=int(np.log2(all_repetition_ratios.size)+1))
-
+        nbins = int(np.log2(all_repetition_ratios.size)+1)
+        all_rr_hist = np.histogram(all_repetition_ratios, range=[0., 1], bins=nbins)
+        print all_rr_hist
         mean_rr = self.get_passed_object('mean_rr')
         stim_mean_rr = self.get_passed_object('stim_mean_rr')
         nostim_mean_rr = self.get_passed_object('nostim_mean_rr')
-        pdc = PlotDataCollection()
-        hist = BarPlotData(y=all_rr_hist[0], x=all_rr_hist[1][1:], barcolors=['grey' for h in all_rr_hist[0]],
-                           xlim=[0, 1],barwidth=0.05, xlabel='Repetition Ratio',
-                           ylabel='# of lists', xlabel_fontsize=18, ylabel_fontsize=24)
-        mean = PlotData(x=[mean_rr,mean_rr], y=[0, max(all_rr_hist[0])],
-                             linecolor = 'black',label = 'All',linestyle='--')
-        stim_mean = PlotData(x=[stim_mean_rr,stim_mean_rr], y=[0, max(all_rr_hist[0])],
-                             linecolor = 'red',label = 'Stim',linestyle='--')
-        nostim_mean = PlotData(x=[nostim_mean_rr,nostim_mean_rr], y=[0, max(all_rr_hist[0])],
-                             linecolor = 'blue',label = 'No Stim',linestyle='--')
-        pdc.add_plot_data(hist)
+        pdc = PlotDataCollection(xlim=[0, 1], xlabel='Mean Repetition Ratio',
+                                 ylabel='# of subjects', xlabel_fontsize=18, ylabel_fontsize=24)
+        mean = PlotData(x=[mean_rr, mean_rr], y=[0, max(all_rr_hist[0])],
+                        color='black', label='All', linestyle='--')
+        stim_mean = PlotData(x=[stim_mean_rr, stim_mean_rr], y=[0, max(all_rr_hist[0])],
+                             color='red', label='Stim', linestyle='--')
+        nostim_mean = PlotData(x=[nostim_mean_rr, nostim_mean_rr], y=[0, max(all_rr_hist[0])],
+                               color='blue', label='No Stim', linestyle='--')
         pdc.add_plot_data(mean)
         pdc.add_plot_data(stim_mean)
         pdc.add_plot_data(nostim_mean)
-        panel_plot.add_plot_data_collection(0,0,plot_data_collection=pdc)
+        panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
+
         plot = panel_plot.generate_plot()
+        plot.hist(all_repetition_ratios, bins=nbins, color='grey')
         percentile=np.nanmean(all_repetition_ratios<mean_rr)*100
-        plot.annotate(s='{:2}'.format(percentile),xy=(mean_rr,max(all_rr_hist[0])))
+        plot.annotate(s='%.3gth percentile' % percentile, xy=(mean_rr, max(all_rr_hist[0])),
+                      xytext=(mean_rr, max(all_rr_hist[0]) + 1), arrowprops={'arrowstyle': '->'})
         plot.legend()
         plot_out_fname = self.get_path_to_resource_in_workspace(
             'reports/' + task + '-cat' + task + '-' + subject + '-repetion-ratio-plot.pdf')

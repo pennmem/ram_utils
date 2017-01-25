@@ -10,14 +10,16 @@ from BiomarkerUtils import CMLParserBiomarker
 
 
 cml_parser = CMLParserBiomarker(arg_count_threshold=1)
-# cml_parser.arg('--workspace-dir','/scratch/busygin/PAL3_biomarkers')
-# cml_parser.arg('--subject','R1145J_1')
-# cml_parser.arg('--n-channels','128')
-# cml_parser.arg('--anode-num','3')
-# cml_parser.arg('--cathode-num','4')
-# cml_parser.arg('--pulse-frequency','200')
-# cml_parser.arg('--pulse-count','100')
-# cml_parser.arg('--target-amplitude','1000')
+cml_parser.arg('--workspace-dir','/scratch/leond/PAL3_biomarkers')
+cml_parser.arg('--subject','R1050M')
+cml_parser.arg('--n-channels','65')
+cml_parser.arg('--anode-num','19')
+cml_parser.arg('--anode','LPG18')
+cml_parser.arg('--cathode-num','20')
+cml_parser.arg('--cathode','LPG19')
+cml_parser.arg('--pulse-frequency','100')
+cml_parser.arg('--pulse-duration','300')
+cml_parser.arg('--target-amplitude','1250')
 
 
 args = cml_parser.parse()
