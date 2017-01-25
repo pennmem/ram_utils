@@ -18,8 +18,9 @@ cml_parser.arg('--subject','R1247P_1')
 cml_parser.arg('--electrode-config-file',r'd:\experiment_configs\R1247P_FR3.bin')
 # cml_parser.arg('--stim-electrode-pair',r'LST1_LST2')
 cml_parser.arg('--anode-num','95')
+cml_parser.arg('--anode','Rd7')
 cml_parser.arg('--cathode-num','97')
-
+cml_parser.arg('--cathode','RE1')
 
 
 

@@ -75,8 +75,30 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
                 break
 
         if not stim_channel_present:
+            print '\n\nELECTRODE CONFIG ERROR:'
             print 'Could not find requested stim pair electrode numbers in .csv/.bin electrode configuration file'
             sys.exit(1)
+
+        # finally will check labels if user provided the labels
+        anode_label = self.pipeline.args.anode.strip().upper()
+        cathode_label = self.pipeline.args.cathode.strip().upper()
+
+        if anode_label and cathode_label:
+
+            anode_idx_array = np.where(sense_channels_array.jack_box_num == anode_num)
+            cathode_idx_array = np.where(sense_channels_array.jack_box_num == cathode_num)
+
+            anode_label_from_contacts = None if not len(anode_idx_array) else sense_channels_array.contact_name[anode_idx_array[0]][0]
+            cathode_label_from_contacts = None if not len(cathode_idx_array) else sense_channels_array.contact_name[cathode_idx_array[0]][0]
+            anode_label_from_contacts = anode_label_from_contacts.strip().upper()
+            cathode_label_from_contacts = cathode_label_from_contacts.strip().upper()
+
+
+            if str(anode_label_from_contacts) != anode_label or cathode_label_from_contacts != cathode_label:
+                print '\n\nELECTRODE CONFIG ERROR:'
+                print 'specified electrode labels for anode and cathode (%s, %s) do no match electrodes' \
+                      ' found in contacts.json (%s,%s)'%(anode_label,cathode_label,anode_label_from_contacts,cathode_label_from_contacts)
+                sys.exit(1)
 
         self.pass_object('stim_chan_label',stim_chan_label)
         print
