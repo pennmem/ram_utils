@@ -367,7 +367,6 @@ class GeneratePlots(ReportRamTask):
         plot_out_fname = self.get_path_to_resource_in_workspace(
             'reports/' + task + '-cat' + task + '-' + subject + '-repetion-ratio-plot.pdf')
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
-        exit()
 
 
 class GenerateReportPDF(ReportRamTask):
