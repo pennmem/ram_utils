@@ -1,7 +1,7 @@
 {
     "subject": "{{subject}}",
     "experiment": {
-        "type": "{{experiment}}",
+    "type": "{{experiment}}",
         "experiment_specific_data": {
             "classifier_file": "{{classifier_file}}",
             "stim_electrode_pair": "{{stim_electrode_pair}}",
@@ -13,9 +13,9 @@
         },
         "experiment_specs": {
             "version": "3.0.0",
-            "experiment_type": "FR3",
-            "biomarker_sample_start_time_offset": "0",
-            "biomarker_sample_time_length": "1366",
+            "experiment_type": "PAL3",
+            "biomarker_sample_start_time_offset": "300",
+            "biomarker_sample_time_length": "1700",
             "buffer_time": "1000",
             "stim_duration": "500",
             "freq_min": "3",

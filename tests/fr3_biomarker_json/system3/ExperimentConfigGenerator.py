@@ -103,6 +103,7 @@ class ExperimentConfigGenerator(RamTask):
         experiment_config_template = Template(open(experiment_config_template_filename ,'r').read())
 
         experiment_config_content = experiment_config_template.generate(
+            subject=subject,
             experiment=experiment,
             classifier_file='config_files/%s'%basename(classifier_path),
             stim_frequency=stim_frequency,
