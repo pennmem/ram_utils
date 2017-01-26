@@ -330,7 +330,7 @@ def mkdir_p(path):
             raise
 
 
-def contacts_json_2_csv(contacts_json_path, output_dir, configuration_label='_ODIN'):
+def contacts_json_2_configuration_csv(contacts_json_path, output_dir, configuration_label='_ODIN'):
     import json
     ec = ElectrodeConfig()
     contacts_dict = json.load(open(contacts_json_path))
