@@ -7,7 +7,7 @@ import os
 from os.path import *
 
 
-class CMLParserSystem3(object):
+class CMLParserCloseLoop3(object):
     def __init__(self, arg_count_threshold=1):
         self.parser = argparse.ArgumentParser(description='Report Generator')
         self.parser.add_argument('--subject', required=True, action='store')
@@ -24,9 +24,9 @@ class CMLParserSystem3(object):
         self.parser.add_argument('--cathode-num', required=True, action='store',type=int)
         self.parser.add_argument('--cathode', required=False, action='store',default='')
 
-        # self.parser.add_argument('--pulse-frequency', required=True, action='store',type=int)
+        self.parser.add_argument('--pulse-frequency', required=True, action='store',type=int)
         # self.parser.add_argument('--pulse-duration', required=True, action='store',type=int)
-        # self.parser.add_argument('--target-amplitude', required=True, action='store',type=int)
+        self.parser.add_argument('--target-amplitude', required=True, action='store',type=int)
 
 
         self.arg_list=[]

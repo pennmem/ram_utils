@@ -3,7 +3,7 @@
 
 
 from OdinConfigToolGeneratorParser import OdinConfigToolGeneratorParser
-from system_3_utils.ElectrodeConfigSystem3 import contacts_json_2_csv
+from system_3_utils.ElectrodeConfigSystem3 import contacts_json_2_configuration_csv
 
 
 cml_parser = OdinConfigToolGeneratorParser(arg_count_threshold=1)
@@ -19,7 +19,7 @@ args = cml_parser.parse()
 # generating .csv file for Odin Config Tool based on contacts.json
 if args.contacts_json is not None:
 
-    success_flag = contacts_json_2_csv(
+    success_flag = contacts_json_2_configuration_csv(
         contacts_json_path=args.contacts_json,
         output_dir=args.contacts_json_output_dir,configuration_label=args.subject
     )

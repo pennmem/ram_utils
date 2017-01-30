@@ -7,19 +7,20 @@ print "See https://github.com/busygin/morlet_for_sys2_biomarker/blob/master/READ
 
 from os.path import *
 
-from CMLParserSystem3 import CMLParserSystem3
+from system_3_utils.ram_tasks.CMLParserClosedLoop3 import CMLParserCloseLoop3
 
-cml_parser = CMLParserSystem3(arg_count_threshold=1)
+cml_parser = CMLParserCloseLoop3(arg_count_threshold=1)
 cml_parser.arg('--workspace-dir','D:/scratch/R1247P_1')
 cml_parser.arg('--experiment','CatFR3')
 cml_parser.arg('--mount-point','D:/')
 cml_parser.arg('--subject','R1247P_1')
-# cml_parser.arg('--electrode-config-file',r'd:\experiment_configs2\R1234M\FR3\config_files\R1170J_ALLCHANNELSSTIM.bin')
 cml_parser.arg('--electrode-config-file',r'd:\experiment_configs\R1247P_FR3.bin')
-# cml_parser.arg('--stim-electrode-pair',r'LST1_LST2')
+cml_parser.arg('--pulse-frequency','100')
+cml_parser.arg('--target-amplitude','1000')
 cml_parser.arg('--anode-num','95')
+cml_parser.arg('--anode','Rd7')
 cml_parser.arg('--cathode-num','97')
-
+cml_parser.arg('--cathode','RE1')
 
 
 
@@ -49,7 +50,7 @@ from system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import Chec
 
 from tests.fr3_biomarker_json.ComputeClassifier import ComputeClassifier
 
-from ExperimentConfigGenerator import ExperimentConfigGenerator
+from tests.fr3_biomarker_json.system3.ExperimentConfigGeneratorClosedLoop3 import ExperimentConfigGeneratorClosedLoop3
 
 
 import numpy as np
@@ -146,7 +147,7 @@ report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 
-report_pipeline.add_task(ExperimentConfigGenerator(params=params, mark_as_completed=False))
+report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop3(params=params, mark_as_completed=False))
 
 
 #
