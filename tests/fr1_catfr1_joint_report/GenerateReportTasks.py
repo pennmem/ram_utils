@@ -85,6 +85,7 @@ class GenerateTex(ReportRamTask):
 
         replace_dict = {'<PROB_RECALL_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-prob_recall_plot_combined.pdf',
                         '<IRT_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-irt_plot_combined.pdf',
+                        '<REPETITION_PLOT_FILE>':self.get_path_to_resource_in_workspace('reports/'+task + '-'+subject + '-repetition-ratio.pdf'),
                         '<DATE>': datetime.date.today(),
                         '<SESSION_DATA>': cumulative_data_tex_table,
                         '<SUBJECT>': subject.replace('_','\\textunderscore'),
@@ -186,7 +187,7 @@ class GeneratePlots(ReportRamTask):
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
 
-        panel_plot = PanelPlot(xfigsize=12.0, yfigsize=6.0, i_max=1, j_max=2, title='',xtitle='', labelsize=18)
+        panel_plot = PanelPlot(xfigsize=6.0, yfigsize=6.0, i_max=1, j_max=1, title='',xtitle='', labelsize=18)
 
         # pdc = PlotDataCollection(xfigsize = 6.0, yfigsize = 6.0,xlim=[0,1],
         #                          xlabel='(b)',ylabel='# of subjects',xlabel_fontsize=18, ylabel_fontsize=18,
@@ -203,23 +204,21 @@ class GeneratePlots(ReportRamTask):
                 barwidth=0.05, xlabel_fontsize=18, ylabel_fontsize=24,levelline=[[mean_rr, mean_rr], [0, max(all_rr_hist[0])]],
                            xlabel='(b)', ylabel='# of subjects', legend_on='True', legend_loc='upper left'
                            )
-
-        # mean = PlotData(x=[mean_rr,mean_rr], y=[0, max(all_rr_hist[0])],
-        #                      label = subject,linestyle='--')
-        # pdc.add_plot_data(hist)
-
-        panel_plot.add_plot_data_collection(0,1,plot_data=hist)
-        # plot = panel_plot.generate_plot()
+        panel_plot.add_plot_data(0,0,plot_data=hist)
+        plot = panel_plot.generate_plot()
         # plot.legend()
-        # plot_out_fname = self.get_path_to_resource_in_workspace('reports/'+task + '-'+subject + '-repetition-ratio.pdf')
-        # plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+        percentile = np.nanmean(all_repetition_ratios < mean_rr) * 100
+        plot.annotate(s='{:2}'.format(percentile), xy=(mean_rr, max(all_rr_hist[0])),axes=plot.gcf().get_axes()[0])
+        plot.hist(all_repetition_ratios,bins=int(np.log2(all_repetition_ratios.size)+1),range=[0,1],color='grey')
+        plot_out_fname = self.get_path_to_resource_in_workspace('reports/'+task + '-'+subject + '-repetition-ratio.pdf')
+        plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+
+        panel_plot = PanelPlot(xfigsize=6.0, yfigsize=6.0, i_max=1, j_max=1, title='',xtitle='', labelsize=18)
         irt_within_cat = np.nanmean(cumulative_summary.irt_within_cat)
         irt_between_cat = np.nanmean(cumulative_summary.irt_between_cat)
         pd = BarPlotData(x=[0,1], y=[irt_within_cat, irt_between_cat], ylabel='IRT (msec)', xlabel='(a)',x_tick_labels=['Within Cat', 'Between Cat'], barcolors=['grey','grey'], barwidth=0.5, xlabel_fontsize=18, ylabel_fontsize=18)
         panel_plot.add_plot_data(0, 0, plot_data=pd)
         plot = panel_plot.generate_plot()
-        percentile = np.nanmean(all_repetition_ratios < mean_rr) * 100
-        plot.annotate(s='{:2}'.format(percentile), xy=(mean_rr, max(all_rr_hist[0])),axes=plot.gcf().get_axes()[0])
         plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-irt_plot_combined.pdf')
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
