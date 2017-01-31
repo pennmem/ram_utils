@@ -10,16 +10,16 @@ from BiomarkerUtils import CMLParserBiomarker
 
 
 cml_parser = CMLParserBiomarker(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','/scratch/leond/FR3_biomarkers')
-cml_parser.arg('--subject','R1145J_1')
+cml_parser.arg('--workspace-dir','/scratch/leond/FR3_biomarkers_json')
+cml_parser.arg('--subject','R1124J_1')
 cml_parser.arg('--n-channels','128')
-cml_parser.arg('--anode-num','5')
-cml_parser.arg('--anode','RK5')
-cml_parser.arg('--cathode-num','6')
-cml_parser.arg('--cathode','RK6')
+cml_parser.arg('--anode-num','65')
+cml_parser.arg('--anode','LC1')
+cml_parser.arg('--cathode-num','66')
+cml_parser.arg('--cathode','LC2')
 cml_parser.arg('--pulse-frequency','200')
-cml_parser.arg('--pulse-duration','100')
-cml_parser.arg('--target-amplitude','1000')
+cml_parser.arg('--pulse-duration','500')
+cml_parser.arg('--target-amplitude','250')
 
 
 args = cml_parser.parse()
