@@ -21,6 +21,7 @@ class ComputeTTest(ReportRamTask):
         #pow_mat = pow_mat[:,freq_sel]
 
         events = self.get_passed_object(self.pipeline.task+'_events')
+        print 'len(events):',len(events)
         sessions = np.unique(events.session)
 
         # norm_func = normalize.standardize_pow_mat if self.params.norm_method=='zscore' else normalize.normalize_pow_mat

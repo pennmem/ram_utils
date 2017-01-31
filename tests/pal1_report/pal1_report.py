@@ -14,7 +14,7 @@ cml_parser = CMLParser(arg_count_threshold=1)
 
 cml_parser.arg('--subject','R1196N')
 cml_parser.arg('--task','PAL1')
-cml_parser.arg('--workspace-dir','/scratch/busygin/PAL1_reports')
+cml_parser.arg('--workspace-dir','/scratch/leond/PAL_reports')
 # cml_parser.arg('--workspace-dir','/Users/m/automated_reports/PAL1_reports')
 cml_parser.arg('--mount-point','')
 # cml_parser.arg('--recompute-on-no-status')
@@ -83,7 +83,7 @@ params = Params()
 
 # # sets up processing pipeline
 report_pipeline = ReportPipeline(subject=args.subject, task=args.task,experiment=args.task,
-                                 workspace_dir=join(args.workspace_dir, args.task + '_' + args.subject),
+                                 workspace_dir=join(args.workspace_dir, args.subject),
                                  mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change,
                                  recompute_on_no_status=args.recompute_on_no_status)
 

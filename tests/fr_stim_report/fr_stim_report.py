@@ -6,8 +6,8 @@ from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--subject','R1236J')
-cml_parser.arg('--task','catFR3')
-cml_parser.arg('--workspace-dir','/scratch/leond/catFR3_reports')
+cml_parser.arg('--task','FR3')
+cml_parser.arg('--workspace-dir','/scratch/leond/FR_reports')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
 
@@ -46,7 +46,7 @@ from GenerateReportTasks import *
 class Params(object):
     def __init__(self):
         self.width = 5
-    
+
         self.fr1_start_time = 0.0
         self.fr1_end_time = 1.366
         self.fr1_buf = 1.365

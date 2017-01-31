@@ -276,18 +276,18 @@ class ComputeClassifier(ReportRamTask):
         self.pass_object('perm_AUCs', self.perm_AUCs)
         self.pass_object('pvalue', self.pvalue)
 
-        joblib.dump(self.lr_classifier, self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl'))
-        joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace(subject + '-xval_output.pkl'))
-        joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace(subject + '-perm_AUCs.pkl'))
-        joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject + '-pvalue.pkl'))
+        joblib.dump(self.lr_classifier, self.get_path_to_resource_in_workspace(subject + '-PAL1-lr_classifier.pkl'))
+        joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace(subject + '-PAL1-xval_output.pkl'))
+        joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace(subject + '-PAL1-perm_AUCs.pkl'))
+        joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject + '-PAL1-pvalue.pkl'))
 
     def restore(self):
         subject = self.pipeline.subject
 
-        self.lr_classifier = joblib.load(self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl'))
-        self.xval_output = joblib.load(self.get_path_to_resource_in_workspace(subject + '-xval_output.pkl'))
-        self.perm_AUCs = joblib.load(self.get_path_to_resource_in_workspace(subject + '-perm_AUCs.pkl'))
-        self.pvalue = joblib.load(self.get_path_to_resource_in_workspace(subject + '-pvalue.pkl'))
+        self.lr_classifier = joblib.load(self.get_path_to_resource_in_workspace(subject + '-PAL1-lr_classifier.pkl'))
+        self.xval_output = joblib.load(self.get_path_to_resource_in_workspace(subject + '-PAL1-xval_output.pkl'))
+        self.perm_AUCs = joblib.load(self.get_path_to_resource_in_workspace(subject + '-PAL1-perm_AUCs.pkl'))
+        self.pvalue = joblib.load(self.get_path_to_resource_in_workspace(subject + '-PAL1-pvalue.pkl'))
 
         self.pass_object('lr_classifier', self.lr_classifier)
         self.pass_object('xval_output', self.xval_output)

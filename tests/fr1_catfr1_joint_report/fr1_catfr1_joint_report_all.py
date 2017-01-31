@@ -19,7 +19,7 @@ from FR1EventPreparation import FR1EventPreparation
 
 from RepetitionRatio import RepetitionRatio
 
-from ComputeFR1Powers import ComputeFR1Powers
+from ComputeFRPowers import ComputeFRPowers
 
 from MontagePreparation import MontagePreparation
 
@@ -89,7 +89,7 @@ for subject in subjects:
     # sets up processing pipeline
     # report_pipeline = ReportPipeline(subject=subject,
     #                                  task='RAM_FR1_CatFR1_joint',
-    #                                  experiment='RAM_FR1_CatFR1_joint',
+    #                                  experiment='RAM_FR1_CatF R1_joint',
     #                                  workspace_dir=join(args.workspace_dir, subject),
     #                                  mount_point=args.mount_point,
     #                                  exit_on_no_change=args.exit_on_no_change,
@@ -107,7 +107,7 @@ for subject in subjects:
 
     report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
 
-    report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=True))
+    report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 
     report_pipeline.add_task(ComputeFR1HFPowers(params=params, mark_as_completed=True))
 
