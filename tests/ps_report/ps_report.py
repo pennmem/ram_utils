@@ -8,7 +8,7 @@ from setup_utils import parse_command_line, configure_python_paths
 from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--task','PS2.1')
+cml_parser.arg('--experiment','PS2.1')
 cml_parser.arg('--subject','R1202M')
 cml_parser.arg('--workspace-dir','/scratch/leond/FR_reports')
 cml_parser.arg('--mount-point','')
@@ -81,7 +81,7 @@ params = Params()
 # sets up processing pipeline
 
 report_pipeline = ReportPipeline(subject=args.subject,
-                                 task=args.task,
+                                 task=args.experiment,
                                  workspace_dir=join(args.workspace_dir, args.subject),
                                  mount_point=args.mount_point,
                                  exit_on_no_change=args.exit_on_no_change,

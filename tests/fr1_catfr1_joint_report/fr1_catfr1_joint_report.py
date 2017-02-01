@@ -36,7 +36,7 @@ from FR1EventPreparation import FR1EventPreparation
 
 from RepetitionRatio import RepetitionRatio
 
-from ComputeFR1Powers import ComputeFR1Powers
+from ComputeFRPowers import ComputeFRPowers
 
 from MontagePreparation import MontagePreparation
 
