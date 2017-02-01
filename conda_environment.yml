@@ -36,9 +36,8 @@ dependencies:
 - statsmodels=0.6.1=np111py27_1
 - tk=8.5.18=0
 - wheel=0.29.0=py27_0
-- xarray=0.8.2=py27_0
 - xlrd=1.0.0=py27_0
 - zlib=1.2.8=3
 - pip:
   - pywavelets==0.4.0
-
+  - xarray==0.8.2
