@@ -109,13 +109,15 @@ class ComputeFRPowers(RamTask):
 
             eeg_reader = EEGReader(events=sess_events, channels=monopolar_channels,
                                    start_time=self.params.fr1_start_time,
-                                   end_time=self.params.fr1_end_time, buffer_time=self.params.fr1_buf)
+                                   end_time=self.params.fr1_end_time, buffer_time=0.0)
 
-            eegs = eeg_reader.read()
+            eegs = eeg_reader.read().add_mirror_buffer(duration=self.params.fr1_buf)
 
             # mirroring
-            eegs[...,:1365] = eegs[...,2730:1365:-1]
-            eegs[...,2731:4096] = eegs[...,2729:1364:-1]
+            # eegs[...,:1365] = eegs[...,2730:1365:-1]
+            # eegs[...,2731:4096] = eegs[...,2729:1364:-1]
+
+
 
             if self.samplerate is None:
                 self.samplerate = float(eegs.samplerate)
