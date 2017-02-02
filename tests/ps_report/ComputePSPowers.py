@@ -14,6 +14,7 @@ from ptsa.data.readers import EEGReader,BaseRawReader
 from ReportUtils import ReportRamTask
 
 import hashlib
+from ReportTasks.RamTaskMethods import compute_powers
 
 
 class ComputePSPowers(ReportRamTask):
@@ -69,7 +70,27 @@ class ComputePSPowers(ReportRamTask):
         sessions = np.unique(events.session)
         print task, 'sessions:', sessions
 
-        ps_pow_mat_pre, ps_pow_mat_post = self.compute_ps_powers(events, sessions, monopolar_channels, bipolar_pairs, task)
+        params = self.params
+        pre_start_time = self.params.ps_start_time - self.params.ps_offset
+        pre_end_time = self.params.ps_end_time - self.params.ps_offset
+        post_start_time = self.params.ps_offset
+        post_end_time = self.params.ps_offset + (self.params.ps_end_time - self.params.ps_start_time)
+
+        ps_pow_mat_pre, pre_events = compute_powers(events, monopolar_channels, bipolar_pairs,
+                                              pre_start_time, pre_end_time, params.ps_buff,
+                                              params.freqs, params.log_powers)
+        ps_pow_mat_post, post_events = compute_powers(events, monopolar_channels, bipolar_pairs,
+                                              post_start_time, post_end_time, params.ps_buff,
+                                              params.freqs, params.log_powers)
+
+        pre_events = pre_events.tolist()
+        post_events = post_events.tolist()
+
+        all_events = np.rec.array([event for event in pre_events if event in post_events],dtype=events.dtype)
+
+        self.pass_object(task+'_events', all_events)
+
+        # ps_pow_mat_pre, ps_pow_mat_post = self.compute_ps_powers(events, sessions, monopolar_channels, bipolar_pairs, task)
 
         joblib.dump(ps_pow_mat_pre, self.get_path_to_resource_in_workspace(subject+'-'+task+'-ps_pow_mat_pre.pkl'))
         joblib.dump(ps_pow_mat_post, self.get_path_to_resource_in_workspace(subject+'-'+task+'-ps_pow_mat_post.pkl'))

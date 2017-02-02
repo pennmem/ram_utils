@@ -1,6 +1,7 @@
 __author__ = 'm'
 
 from RamPipeline import *
+from ReportTasks.RamTaskMethods import compute_powers
 
 import numpy as np
 from scipy.stats.mstats import zscore
@@ -67,7 +68,12 @@ class ComputeFR1HFPowers(ReportRamTask):
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
 
-        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
+        params=self.params
+
+        self.pow_mat,events=compute_powers(events,monopolar_channels, bipolar_pairs,
+                                               params.fr1_start_time,params.fr1_end_time,params.fr1_buf,
+                                               params.freqs,params.log_powers)
+        self.pow_mat = np.nanmean(self.pow_mat.reshape((len(events),len(bipolar_pairs),-1),),-1)
 
         self.pass_object('hf_pow_mat', self.pow_mat)
 

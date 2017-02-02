@@ -7,6 +7,7 @@ from scipy.stats.mstats import zscore
 #from morlet import MorletWaveletTransform
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from sklearn.externals import joblib
+from ReportTasks.RamTaskMethods import compute_powers
 
 from ptsa.data.readers import EEGReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
@@ -62,8 +63,12 @@ class ComputeFR1HFPowers(ReportRamTask):
 
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
+        params=self.params
 
-        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
+        self.pow_mat,events=compute_powers(events,monopolar_channels, bipolar_pairs,
+                                               params.fr1_start_time,params.fr1_end_time,params.fr1_buf,
+                                               params.freqs,params.log_powers)
+        self.pow_mat = np.nanmean(self.pow_mat.reshape((len(events),len(bipolar_pairs),-1),),-1)
 
         self.pass_object('hf_pow_mat', self.pow_mat)
 
@@ -85,7 +90,7 @@ class ComputeFR1HFPowers(ReportRamTask):
 
             eeg_reader = EEGReader(events=sess_events, channels=monopolar_channels,
                                    start_time=self.params.hfs_start_time,
-                                   end_time=self.params.hfs_end_time, buffer_time=self.params.hfs_buf)
+                                   end_time=self.params.hfs_end_time, buffer_time=0.)
 
             eegs = eeg_reader.read()
             if eeg_reader.removed_bad_data():
@@ -99,7 +104,7 @@ class ComputeFR1HFPowers(ReportRamTask):
 
             #eegs['events'] = np.arange(eegs.events.shape[0])
 
-            #eegs = eegs.add_mirror_buffer(duration=self.params.hfs_buf)
+            eegs = eegs.add_mirror_buffer(duration=self.params.hfs_buf)
 
             if self.samplerate is None:
                 self.samplerate = float(eegs.samplerate)
