@@ -229,6 +229,8 @@ class ElectrodeConfig(object):
             description = contact_entry['description']
 
             # getting rid of commas from description - this fools csv parser
+            if description is None:
+                description = ''
             description = description.replace(',','-')
 
             self.contacts[code] = Contact(code, channel, channel, area, '#{}#'.format(description))

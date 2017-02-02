@@ -74,7 +74,7 @@ class StimParams(object):
 
 class Params(object):
     def __init__(self):
-        self.version = '2.00'
+        self.version = '3.00'
 
         self.include_fr1 = True
         self.include_catfr1 = True

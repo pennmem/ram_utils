@@ -4,12 +4,18 @@
 
 from OdinConfigToolGeneratorParser import OdinConfigToolGeneratorParser
 from system_3_utils.ElectrodeConfigSystem3 import contacts_json_2_configuration_csv
-
+# from ElectrodeConfigSystem3 import contacts_json_2_configuration_csv
 
 cml_parser = OdinConfigToolGeneratorParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1247P_1')
+subject = 'R1250N'
+localization='0'
 
-cml_parser.arg('--contacts-json',r"d:\protocols\r1\subjects\R1247P\localizations\1\montages\1\neuroradiology\current_processed\contacts.json")
+cml_parser.arg('--subject',subject)
+cml_parser.arg('--contacts-json',r"d:\protocols\r1\subjects\%s\localizations\%s\montages\%s\neuroradiology\current_processed\contacts.json"%(subject, localization, localization))
+
+
+# cml_parser.arg('--subject','R1247P_1')
+# cml_parser.arg('--contacts-json',r"d:\protocols\r1\subjects\R1247P\localizations\1\montages\1\neuroradiology\current_processed\contacts.json")
 cml_parser.arg('--contacts-json-output-dir',r"d:\experiment_configs")
 
 
