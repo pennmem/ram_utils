@@ -77,10 +77,10 @@ class ComputePSPowers(ReportRamTask):
         post_end_time = self.params.ps_offset + (self.params.ps_end_time - self.params.ps_start_time)
 
         ps_pow_mat_pre, pre_events = compute_powers(events, monopolar_channels, bipolar_pairs,
-                                              pre_start_time, pre_end_time, params.ps_buff,
+                                              pre_start_time, pre_end_time, params.ps_buf,
                                               params.freqs, params.log_powers)
         ps_pow_mat_post, post_events = compute_powers(events, monopolar_channels, bipolar_pairs,
-                                              post_start_time, post_end_time, params.ps_buff,
+                                              post_start_time, post_end_time, params.ps_buf,
                                               params.freqs, params.log_powers)
 
         pre_events = pre_events.tolist()
