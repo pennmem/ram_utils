@@ -10,17 +10,17 @@ from os.path import *
 from system_3_utils.ram_tasks.CMLParserClosedLoop3 import CMLParserCloseLoop3
 
 cml_parser = CMLParserCloseLoop3(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','D:/scratch/R1247P_1')
-cml_parser.arg('--experiment','CatFR3')
+cml_parser.arg('--workspace-dir','D:/scratch/R1250N')
+cml_parser.arg('--experiment','PAL3')
 cml_parser.arg('--mount-point','D:/')
-cml_parser.arg('--subject','R1247P_1')
-cml_parser.arg('--electrode-config-file',r'd:\experiment_configs\R1247P_FR3.bin')
+cml_parser.arg('--subject','R1250N')
+cml_parser.arg('--electrode-config-file',r'd:\experiment_configs\R1250N_PAL3.bin')
 cml_parser.arg('--pulse-frequency','100')
 cml_parser.arg('--target-amplitude','1000')
-cml_parser.arg('--anode-num','95')
-cml_parser.arg('--anode','Rd7')
-cml_parser.arg('--cathode-num','97')
-cml_parser.arg('--cathode','RE1')
+cml_parser.arg('--anode-num','10')
+cml_parser.arg('--anode','PG10')
+cml_parser.arg('--cathode-num','11')
+cml_parser.arg('--cathode','PG11')
 
 
 
@@ -40,17 +40,18 @@ args = cml_parser.parse()
 
 from RamPipeline import RamPipeline
 
-from tests.fr3_biomarker_json.FREventPreparation import FREventPreparation
+from tests.pal3_biomarker_json.PAL1EventPreparation import PAL1EventPreparation
 
-from tests.fr3_biomarker_json.ComputeFRPowers import ComputeFRPowers
 
-from tests.fr3_biomarker_json.MontagePreparation import MontagePreparation
+from tests.pal3_biomarker_json.ComputePAL1Powers import ComputePAL1Powers
+
+from tests.pal3_biomarker_json.MontagePreparation import MontagePreparation
 
 from system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
 
-from tests.fr3_biomarker_json.ComputeClassifier import ComputeClassifier
+from tests.pal3_biomarker_json.ComputeClassifier import ComputeClassifier
 
-from tests.fr3_biomarker_json.system3.ExperimentConfigGeneratorClosedLoop3 import ExperimentConfigGeneratorClosedLoop3
+from tests.pal3_biomarker_json.system3.ExperimentConfigGeneratorClosedLoop3 import ExperimentConfigGeneratorClosedLoop3
 
 
 import numpy as np
@@ -59,33 +60,16 @@ import numpy as np
 class StimParams(object):
     def __init__(self,**kwds):
         pass
-        # self.n_channels = kwds['n_channels']
-        # self.elec1 = kwds['anode_num']
-        # self.anode = kwds.get('anode', '')
-        # self.elec2 = kwds['cathode_num']
-        # self.cathode = kwds.get('cathode', '')
-        # self.pulseFrequency = kwds['pulse_frequency']
-        # self.pulseCount = kwds['pulse_count']
-        # self.amplitude = kwds['target_amplitude']
-        #
-        # self.duration = 300
-        # self.trainFrequency = 1
-        # self.trainCount = 1
 
 class Params(object):
     def __init__(self):
         self.version = '3.00'
 
-        self.include_fr1 = True
-        self.include_catfr1 = True
-        self.include_fr3 = True
-        self.include_catfr3 = True
-
         self.width = 5
 
-        self.fr1_start_time = 0.0
-        self.fr1_end_time = 1.366
-        self.fr1_buf = 1.365
+        self.pal1_start_time = 0.3
+        self.pal1_end_time = 2.0
+        self.pal1_buf = 1.0
 
         self.filt_order = 4
 
@@ -97,6 +81,7 @@ class Params(object):
         self.C = 7.2e-4
 
         self.n_perm = 200
+
 
         self.stim_params = StimParams(
             # n_channels=args.n_channels,
@@ -137,13 +122,13 @@ class ReportPipeline(RamPipeline):
 report_pipeline = ReportPipeline(subject=args.subject,
                                        workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point, args=args)
 
-report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
+report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
 
 report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
 
 report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 
