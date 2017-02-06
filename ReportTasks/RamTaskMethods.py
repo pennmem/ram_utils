@@ -11,7 +11,7 @@ from ptsa.data.readers import EEGReader
 from ptsa.data.filters import MonopolarToBipolarMapper,MorletWaveletFilterCpp,MorletWaveletFilter,ButterworthFilter
 import numpy as np
 from scipy.stats.mstats import zscore
-
+import time
 
 def compute_powers(events,monopolar_channels,bipolar_pairs,
                    start_time,end_time,buffer_time,
@@ -21,7 +21,9 @@ def compute_powers(events,monopolar_channels,bipolar_pairs,
         bipolar_pairs = np.array(bipolar_pairs,dtype=[('ch0','S3'),('ch1','S3')]).view(np.recarray)
     sessions = np.unique(events.session)
     pow_mat = None
+    tic = time.time()
     for sess in sessions:
+        print 'Loading for session {}'.format(sess)
         sess_events = events[events.session==sess]
         # Load EEG
         eeg_reader = EEGReader(events=sess_events,channels=monopolar_channels,start_time=start_time,end_time=end_time)
@@ -36,21 +38,22 @@ def compute_powers(events,monopolar_channels,bipolar_pairs,
         # Use bipolar pairs
         eeg= MonopolarToBipolarMapper(time_series=eeg,bipolar_pairs=bipolar_pairs).filter()
         #Butterworth filter to remove line noise
-        eeg=ButterworthFilter(time_series=eeg,freq_range=[58.,62.],filt_type='stop').filter()
+        eeg=eeg.filtered(freq_range=[58.,62.],filt_type='stop')
+        print 'Computing power'
+        sess_pow_mat,phase_mat=MorletWaveletFilterCpp(time_series=eeg,freqs = freqs,output='power').filter()
 
-        try:
-            sess_pow_mat=MorletWaveletFilterCpp(time_series=eeg,freqs = freqs,output='power').filter()
-        except TypeError:
-            print 'CPP Failed. Trying again.'
-            sess_pow_mat,phase_mat = MorletWaveletFilter(time_series=eeg,freqs=freqs,output='power').filter()
+        sess_pow_mat=sess_pow_mat.remove_buffer(buffer_time).data
+
         if log_powers:
-            sess_pow_mat =  np.log10(sess_pow_mat)
-        sess_pow_mat = np.nanmean(sess_pow_mat.transpose('events', 'bipolar_pairs', 'frequency', 'time'),-1)
+            np.log10(sess_pow_mat,sess_pow_mat)
+        sess_pow_mat = np.nanmean(sess_pow_mat.transpose(2,1,0,3),-1)
         sess_pow_mat = zscore(sess_pow_mat)
 
         pow_mat = sess_pow_mat if pow_mat is None else np.concatenate((pow_mat,sess_pow_mat))
 
     pow_mat = pow_mat.reshape((len(events),len(bipolar_pairs)*len(freqs)))
+    toc = time.time()
+    print 'Total time elapsed: {}'.format(toc-tic)
     return pow_mat,events
 
 
