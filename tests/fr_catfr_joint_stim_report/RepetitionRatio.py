@@ -70,11 +70,11 @@ class RepetitionRatio(RamTask):
         # all_recall_ratios.sort()
         # self.get_percentiles(all_recall_ratios)
 
-        for session in sessions:
+        for i,session in enumerate(sessions):
             sess_events = recalls[recalls.session==session]
             lists = np.unique(sess_events.list)
             for lst in lists:
-                self.repetition_ratios[session,lst-1] = repetition_ratio(sess_events[sess_events.list == lst])
+                self.repetition_ratios[i,lst-1] = repetition_ratio(sess_events[sess_events.list == lst])
                 print 'list length: ',len(sess_events[sess_events.list==lst])
 
 
