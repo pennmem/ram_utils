@@ -5,10 +5,10 @@ from ReportUtils import CMLParser,ReportPipeline
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1154D')
-cml_parser.arg('--task','FR3')
-cml_parser.arg('--workspace-dir','/scratch/leond/FR3_reports')
-cml_parser.arg('--mount-point','')
+cml_parser.arg('--subject','R1264P')
+cml_parser.arg('--task','catFR3')
+cml_parser.arg('--workspace-dir','/Users/leond/FR3_reports')
+cml_parser.arg('--mount-point','/Volumes/rhino_root/')
 #cml_parser.arg('--recompute-on-no-status')
 
 args = cml_parser.parse()

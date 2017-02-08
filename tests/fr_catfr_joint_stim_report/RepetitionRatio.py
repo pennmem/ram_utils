@@ -67,8 +67,6 @@ class RepetitionRatio(RamTask):
             except IOError:
                 all_recall_ratios_dict = self.initialize_repetition_ratio()
         all_recall_ratios = np.hstack([np.nanmean(x) for x in all_recall_ratios_dict.itervalues()])
-        # all_recall_ratios.sort()
-        # self.get_percentiles(all_recall_ratios)
 
         for i,session in enumerate(sessions):
             sess_events = recalls[recalls.session==session]
@@ -97,8 +95,8 @@ class RepetitionRatio(RamTask):
 
     def initialize_repetition_ratio(self):
         task = self.pipeline.task
-        j_reader = JsonIndexReader('/protocols/r1.json')
-        subjects = j_reader.subjects(experiment='catFR1')
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point,'/protocols/r1.json'))
+        subjects = json_reader.subjects(experiment='catFR1')
         all_repetition_rates = {}
 
         for subject in subjects:
@@ -109,8 +107,6 @@ class RepetitionRatio(RamTask):
                                   'type','eegoffset', 'recalled', 'item_name', 'intrusion', 'montage','list',
                                   'eegfile', 'msoffset']
                 evs_field_list += ['category', 'category_num']
-
-                json_reader = JsonIndexReader(path.join('/', 'protocols/r1.json'))
 
                 event_files = sorted(
                     list(json_reader.aggregate_values('all_events', subject=subject,experiment='catFR1')))

@@ -93,8 +93,8 @@ class RepetitionRatio(RamTask):
 
     def initialize_repetition_ratio(self):
         task = self.pipeline.task
-        j_reader = JsonIndexReader(self.pipeline.mount_point+'/protocols/r1.json')
-        subjects = j_reader.subjects(experiment='catFR1')
+        json_reader = JsonIndexReader(self.pipeline.mount_point+'/protocols/r1.json')
+        subjects = json_reader.subjects(experiment='catFR1')
         all_repetition_rates = {}
     
         for subject in subjects:
@@ -110,8 +110,6 @@ class RepetitionRatio(RamTask):
                 subj_code = tmp[0]
                 montage = 0 if len(tmp) == 1 else int(tmp[1])
 
-                json_reader = JsonIndexReader(path.join('/','protocols/r1.json'))
-    
                 event_files = sorted(
                     list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='catFR1')))
                 events = None
