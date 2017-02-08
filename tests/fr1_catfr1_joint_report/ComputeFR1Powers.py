@@ -53,9 +53,11 @@ class ComputeFR1Powers(ReportRamTask):
 
         try:
             self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
-            self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
         except IOError:
             self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace('-'.join([subject,task,'pow_mat.pkl'])))
+        try:
+            self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
+        except IOError:
             self.samplerate = joblib.load(self.get_path_to_resource_in_workspace('-'.join([subject,task,'samplerate.pkl'])))
 
         self.pass_object('pow_mat', self.pow_mat)
