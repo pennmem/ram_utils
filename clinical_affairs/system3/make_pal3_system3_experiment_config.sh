@@ -1,7 +1,7 @@
 #!/bin/bash
 
 subject=R1250N
-experiment=PAL33
+experiment=PAL3
 workspace=/scratch/pwanda/system3/$exeperiment
 electrode_config_file=/scratch/electrode_configs/R1250N_PAL3.bin
 anode=PG10
