@@ -14,16 +14,16 @@ target_amplitude=1000
 #cd ../../tests/fr3_biomarker_json/system3
 cd ../../
 
-python tests/fr3_biomarker_json/system3/fr3_util_system_3.py\
---workspace-dir=$workspace\
---experiment=$experiment\
---electrode-config-file=$electrode_config_file\
---subject=$subject\
---anode=$anode\
---anode-num=$anode_num\
---cathode=$cathode\
---cathode-num=$cathode_num\
---pulse-frequency=$pulse_frequency\
+python tests/fr3_biomarker_json/system3/fr3_util_system_3.py \
+--workspace-dir=$workspace \
+--experiment=$experiment \
+--electrode-config-file=$electrode_config_file \
+--subject=$subject \
+--anode=$anode \
+--anode-num=$anode_num \
+--cathode=$cathode \
+--cathode-num=$cathode_num \
+--pulse-frequency=$pulse_frequency \
 --target-amplitude=$target_amplitude
 
 cd -
