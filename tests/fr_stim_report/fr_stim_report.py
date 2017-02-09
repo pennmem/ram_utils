@@ -5,10 +5,10 @@ from ReportUtils import CMLParser,ReportPipeline
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1236J')
+cml_parser.arg('--subject','R1264P')
 cml_parser.arg('--task','catFR3')
-cml_parser.arg('--workspace-dir','/scratch/leond/catFR3_reports')
-cml_parser.arg('--mount-point','')
+cml_parser.arg('--workspace-dir','/Users/leond/FR3_reports')
+cml_parser.arg('--mount-point','/Volumes/rhino_root/')
 #cml_parser.arg('--recompute-on-no-status')
 
 args = cml_parser.parse()
@@ -109,7 +109,7 @@ report_pipeline.add_task(ComputeFRStimPowers(params=params, mark_as_completed=Tr
 
 report_pipeline.add_task(ComputeFRStimTable(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(EvaluateClassifier(params=params,mark_as_completed=False)) #Note: this IS included in the pdf!
+report_pipeline.add_task(EvaluateClassifier(params=params,mark_as_completed=True))
 
 report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
 #
