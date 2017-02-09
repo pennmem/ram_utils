@@ -4,10 +4,10 @@ subject=R1250N
 experiment=PAL33
 workspace=/scratch/pwanda/system3/$exeperiment
 electrode_config_file=/scratch/electrode_configs/R1250N_PAL3.bin
-anode=RD7
-anode_num=95
-cathode=RE1
-cathode_num=97
+anode=PG10
+anode_num=10
+cathode=PG11
+cathode_num=11
 pulse_frequency=100
 target_amplitude=1000
 
