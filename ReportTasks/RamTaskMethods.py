@@ -22,6 +22,7 @@ def compute_powers(events,monopolar_channels,bipolar_pairs,
     sessions = np.unique(events.session)
     pow_mat = None
     tic = time.time()
+    filter_time=0.
     for sess in sessions:
         print 'Loading for session {}'.format(sess)
         sess_events = events[events.session==sess]
@@ -40,20 +41,21 @@ def compute_powers(events,monopolar_channels,bipolar_pairs,
         #Butterworth filter to remove line noise
         eeg=eeg.filtered(freq_range=[58.,62.],filt_type='stop')
         print 'Computing power'
-        sess_pow_mat,phase_mat=MorletWaveletFilterCpp(time_series=eeg,freqs = freqs,output='power').filter()
-
+        filter_tic=time.time()
+        sess_pow_mat,phase_mat=MorletWaveletFilterCpp(time_series=eeg,freqs = freqs,output='power',cpus=25).filter()
+        filter_time +=  time.time()-filter_tic
         sess_pow_mat=sess_pow_mat.remove_buffer(buffer_time).data
 
         if log_powers:
             np.log10(sess_pow_mat,sess_pow_mat)
         sess_pow_mat = np.nanmean(sess_pow_mat.transpose(2,1,0,3),-1)
-        sess_pow_mat = zscore(sess_pow_mat)
 
         pow_mat = sess_pow_mat if pow_mat is None else np.concatenate((pow_mat,sess_pow_mat))
 
     pow_mat = pow_mat.reshape((len(events),len(bipolar_pairs)*len(freqs)))
     toc = time.time()
-    print 'Total time elapsed: {}'.format(toc-tic)
+    # print 'Total time elapsed: {}'.format(toc-tic)
+    # print 'Time spent on wavelet filter: {}'.format(filter_time)
     return pow_mat,events
 
 

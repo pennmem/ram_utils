@@ -12,7 +12,7 @@ from ReportUtils import CMLParser, ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
 
-cml_parser.arg('--subject','R1158T')
+cml_parser.arg('--subject','R1111M')
 # cml_parser.arg('--task','RAM_FR1')
 cml_parser.arg('--task','FR1')
 cml_parser.arg('--workspace-dir','/scratch/leond/FR_reports')
