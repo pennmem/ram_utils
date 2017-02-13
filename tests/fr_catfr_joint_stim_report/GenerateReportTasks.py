@@ -9,6 +9,7 @@ import datetime
 from subprocess import call
 
 from ReportUtils import ReportRamTask
+import sys
 
 
 def pvalue_formatting(p):
@@ -73,6 +74,7 @@ class GenerateTex(ReportRamTask):
                             '<FREQUENCY>': session_summary.frequency,
                             '<SESSIONS>': ','.join([str(s) for s in session_summary.sessions]),
                             '<PROB_RECALL_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-prob_recall_plot_' + session_summary.stimtag + '-' + str(session_summary.frequency) + '.pdf',
+                            '<PROB_STIM_PLOT_FILE>': self.pipeline.subject + 'p_stim_plot_' + session_summary.stimtag + '-' + str(session_summary.frequency) + '.pdf',
                             '<BIOMARKER_PLOTS>': biomarker_plots,
                             '<ITEMLEVEL_COMPARISON>': itemlevel_comparison,
                             '<STIM_AND_RECALL_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-stim_and_recall_plot_' + session_summary.stimtag + '-' + str(session_summary.frequency) + '.pdf',
@@ -107,6 +109,8 @@ class GenerateTex(ReportRamTask):
         session_data_tex_table = latex_table(self.get_passed_object('SESSION_DATA'))
         xval_output = self.get_passed_object('xval_output')
         perm_test_pvalue = self.get_passed_object('pvalue')
+        fr3_xval_output = self.get_passed_object(task+'_xval_output')
+        fr3_perm_test_pvalue = self.get_passed_object(task+'_pvalue')
 
         replace_dict = {'<DATE>': datetime.date.today(),
                         '<EXPERIMENT>': self.pipeline.task,
@@ -117,6 +121,8 @@ class GenerateTex(ReportRamTask):
                         '<REPORT_PAGES>': tex_session_pages_str,
                         '<AUC>': '%.2f' % (100*xval_output[-1].auc),
                         '<PERM-P-VALUE>': pvalue_formatting(perm_test_pvalue),
+                        '<FR3-AUC>': '%.2f' % (100 * fr3_xval_output[-1].auc),
+                        '<FR3-PERM-P-VALUE>': pvalue_formatting(fr3_perm_test_pvalue),
                         '<ROC_AND_TERC_PLOT_FILE>': self.pipeline.subject + '-roc_and_terc_plot.pdf',
                         '<IRT_PLOT_FILE>': task + '-cat' + task + '-' + self.pipeline.subject + '-irt_plot_combined.pdf',
                         '<REPETITION_PLOT_FILE>': task + '-cat' + task + '-' + self.pipeline.subject + '-repetion-ratio-plot.pdf'
@@ -136,14 +142,14 @@ class GeneratePlots(ReportRamTask):
 
         self.create_dir_in_workspace('reports')
 
-        xval_output = self.get_passed_object('xval_output')
-        fr1_summary = xval_output[-1]
+        xval_output = self.get_passed_object(task + '_xval_output')
+        fr3_summary = xval_output[-1]
 
         panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, labelsize=16, wspace=5.0)
 
-        pd1 = PlotData(x=fr1_summary.fpr, y=fr1_summary.tpr, xlim=[0.0,1.0], ylim=[0.0,1.0], xlabel='False Alarm Rate\n(a)', ylabel='Hit Rate', xlabel_fontsize=20, ylabel_fontsize=20, levelline=((0.0,1.0),(0.0,1.0)), color='k', markersize=1.0)
+        pd1 = PlotData(x=fr3_summary.fpr, y=fr3_summary.tpr, xlim=[0.0,1.0], ylim=[0.0,1.0], xlabel='False Alarm Rate\n(a)', ylabel='Hit Rate', xlabel_fontsize=20, ylabel_fontsize=20, levelline=((0.0,1.0),(0.0,1.0)), color='k', markersize=1.0)
 
-        pc_diff_from_mean = (fr1_summary.low_pc_diff_from_mean, fr1_summary.mid_pc_diff_from_mean, fr1_summary.high_pc_diff_from_mean)
+        pc_diff_from_mean = (fr3_summary.low_pc_diff_from_mean, fr3_summary.mid_pc_diff_from_mean, fr3_summary.high_pc_diff_from_mean)
 
         ylim = np.max(np.abs(pc_diff_from_mean)) + 5.0
         if ylim > 100.0:
@@ -164,12 +170,14 @@ class GeneratePlots(ReportRamTask):
         serial_positions = np.arange(1,13)
 
         for session_summary in session_summary_array:
-            panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', wspace=0.3, hspace=0.3, labelsize=20)
+            panel_plot = PanelPlot(xfigsize=15., yfigsize=9, i_max=2, j_max=2, title='', wspace=0.3, hspace=0.3, labelsize=20)
 
-            pd1 = PlotData(x=serial_positions, y=session_summary.prob_recall, xlim=(0,12), ylim=(0.0, 1.0), xlabel='Serial position\n(a)', ylabel='Probability of recall')
+            pd1 = PlotData(x=serial_positions, y=session_summary.prob_recall, xlim=(0,12), ylim=(0.0, 1.0),
+                           xlabel = 'Serial Position',ylabel='All Items')
             pd1.xlabel_fontsize = 20
             pd1.ylabel_fontsize = 20
-            pd2 = PlotData(x=serial_positions, y=session_summary.prob_first_recall, xlim=(0,12), ylim=(0.0, 1.0), xlabel='Serial position\n(b)', ylabel='Probability of first recall')
+            pd2 = PlotData(x=serial_positions, y=session_summary.prob_first_recall, xlim=(0,12), ylim=(0.0, 1.0),
+                           ylabel='',xlabel='Serial Position')
             pd2.xlabel_fontsize = 20
             pd2.ylabel_fontsize = 20
 
@@ -177,7 +185,28 @@ class GeneratePlots(ReportRamTask):
 
             panel_plot.add_plot_data(0, 1, plot_data=pd2)
 
+            # plot = panel_plot.generate_plot()
+            #
+            # plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-prob_recall_plot_' + session_summary.stimtag + '-' + str(session_summary.frequency) + '.pdf')
+            #
+            # plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+            #
+            # panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', wspace=0.3, hspace=0.3)
+            pdca = PlotDataCollection(xlim=(0,12), ylim=(0.0, 1.0), xlabel='(a)', ylabel='Stim vs Non-Stim Items', xlabel_fontsize=20,ylabel_fontsize=20)
+            pd1a = PlotData(x=serial_positions, y=session_summary.prob_stim_recall,linestyle='-',label='Stim')
+            pdca.add_plot_data(pd1a)
+            pd2a = PlotData(x = serial_positions, y=session_summary.prob_nostim_recall,linestyle = '--',label='No Stim')
+            pdca.add_plot_data(pd2a)
+            panel_plot.add_plot_data_collection(1,0,plot_data_collection=pdca)
+
+            pdcb = PlotDataCollection(xlim=(0,12), ylim=(0.0, 1.0), xlabel='(b)', ylabel='', xlabel_fontsize=20,ylabel_fontsize=20)
+            pd1b = PlotData(x=serial_positions, y = session_summary.prob_first_stim_recall, linestyle = '-', label = 'Stim')
+            pd2b = PlotData(x=serial_positions, y=session_summary.prob_first_nostim_recall, linestyle = '--', label = 'No Stim')
+            pdcb.add_plot_data(pd1b)
+            pdcb.add_plot_data(pd2b)
+            panel_plot.add_plot_data_collection(1,1,plot_data_collection=pdcb)
             plot = panel_plot.generate_plot()
+            plot.legend()
 
             plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-prob_recall_plot_' + session_summary.stimtag + '-' + str(session_summary.frequency) + '.pdf')
 
@@ -281,6 +310,18 @@ class GeneratePlots(ReportRamTask):
 
             plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
+
+            panel_plot = PanelPlot(xfigsize=8,yfigsize=5,i_max=1,j_max=1)
+            pd = PlotData(x=range(1,len(session_summary.prob_stim)+1),y=session_summary.prob_stim,ylim=[0,1],label_size=18,
+                          xlabel='Serial Position',ylabel='Probability of stim',color='black')
+            panel_plot.add_plot_data(0,0,plot_data=pd)
+            plot = panel_plot.generate_plot()
+            plot_out_fname = self.get_path_to_resource_in_workspace('reports/'+subject+'p_stim_plot_'+session_summary.stimtag+'-'+str(session_summary.frequency)+'.pdf')
+            plot.savefig(plot_out_fname,dpi=300,bboxinches='tight')
+
+
+
+
         irt_within_cat = self.get_passed_object('irt_within_cat')
         irt_between_cat = self.get_passed_object('irt_between_cat')
 
@@ -298,29 +339,30 @@ class GeneratePlots(ReportRamTask):
 
         all_repetition_ratios = self.get_passed_object('all_repetition_ratios')
         all_repetition_ratios = all_repetition_ratios[np.isfinite(all_repetition_ratios)]
-        all_rr_hist = np.histogram(all_repetition_ratios, range=[0., 1], bins='auto')
-
+        nbins = int(np.log2(all_repetition_ratios.size)+1)
+        all_rr_hist = np.histogram(all_repetition_ratios, range=[0., 1], bins=nbins)
+        print all_rr_hist
         mean_rr = self.get_passed_object('mean_rr')
         stim_mean_rr = self.get_passed_object('stim_mean_rr')
         nostim_mean_rr = self.get_passed_object('nostim_mean_rr')
-        pdc = PlotDataCollection()
-        hist = BarPlotData(y=all_rr_hist[0], x=all_rr_hist[1][1:], barcolors=['grey' for h in all_rr_hist[0]],
-                           xlim=[0, 1],barwidth=0.05, xlabel='Repetition Ratio',
-                           ylabel='# of lists', xlabel_fontsize=18, ylabel_fontsize=24)
-        mean = PlotData(x=[mean_rr,mean_rr], y=[0, max(all_rr_hist[0])],
-                             linecolor = 'black',label = 'All',linestyle='--')
-        stim_mean = PlotData(x=[stim_mean_rr,stim_mean_rr], y=[0, max(all_rr_hist[0])],
-                             linecolor = 'red',label = 'Stim',linestyle='--')
-        nostim_mean = PlotData(x=[nostim_mean_rr,nostim_mean_rr], y=[0, max(all_rr_hist[0])],
-                             linecolor = 'blue',label = 'No Stim',linestyle='--')
-        pdc.add_plot_data(hist)
+        pdc = PlotDataCollection(xlim=[0, 1], xlabel='Mean Repetition Ratio',
+                                 ylabel='# of subjects', xlabel_fontsize=18, ylabel_fontsize=24)
+        mean = PlotData(x=[mean_rr, mean_rr], y=[0, max(all_rr_hist[0])],
+                        color='black', label='All', linestyle='--')
+        stim_mean = PlotData(x=[stim_mean_rr, stim_mean_rr], y=[0, max(all_rr_hist[0])],
+                             color='red', label='Stim', linestyle='--')
+        nostim_mean = PlotData(x=[nostim_mean_rr, nostim_mean_rr], y=[0, max(all_rr_hist[0])],
+                               color='blue', label='No Stim', linestyle='--')
         pdc.add_plot_data(mean)
         pdc.add_plot_data(stim_mean)
         pdc.add_plot_data(nostim_mean)
-        panel_plot.add_plot_data_collection(0,0,plot_data_collection=pdc)
+        panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
+
         plot = panel_plot.generate_plot()
+        plot.hist(all_repetition_ratios, bins=nbins, color='grey')
         percentile=np.nanmean(all_repetition_ratios<mean_rr)*100
-        plot.annotate(s='{:2}'.format(percentile),xy=(mean_rr,max(all_rr_hist[0])))
+        plot.annotate(s='%.3gth percentile' % percentile, xy=(mean_rr, max(all_rr_hist[0])),
+                      xytext=(mean_rr, max(all_rr_hist[0]) + 1), arrowprops={'arrowstyle': '->'})
         plot.legend()
         plot_out_fname = self.get_path_to_resource_in_workspace(
             'reports/' + task + '-cat' + task + '-' + subject + '-repetion-ratio-plot.pdf')

@@ -8,18 +8,17 @@ print "See https://github.com/busygin/morlet_for_sys2_biomarker/blob/master/READ
 from os.path import *
 from BiomarkerUtils import CMLParserBiomarker
 
-
 cml_parser = CMLParserBiomarker(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','/scratch/busygin/TH3_biomarkers')
-cml_parser.arg('--subject','R1154D')
-cml_parser.arg('--n-channels','128')
-cml_parser.arg('--anode','LTCG3')
-cml_parser.arg('--cathode','LTCG4')
-cml_parser.arg('--anode-num','3')
-cml_parser.arg('--cathode-num','4')
-cml_parser.arg('--pulse-frequency','200')
-cml_parser.arg('--pulse-duration','500')
-cml_parser.arg('--target-amplitude','1000')
+cml_parser.arg('--workspace-dir','/scratch/leond/TH3_biomarkers')
+cml_parser.arg('--subject','1201P_1')
+cml_parser.arg('--n-channels','126')
+cml_parser.arg('--anode','LOTD7')
+cml_parser.arg('--cathode','LOTD8')
+cml_parser.arg('--anode-num','71')
+cml_parser.arg('--cathode-num','72')
+cml_parser.arg('--pulse-frequency','10')
+cml_parser.arg('--pulse-duration','300')
+cml_parser.arg('--target-amplitude','1725')
 
 
 args = cml_parser.parse()

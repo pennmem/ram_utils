@@ -45,7 +45,7 @@ class RepetitionRatio(RamTask):
 
     def run(self):
         self.rr_path=path.join(self.pipeline.mount_point,self.pipeline.workspace_dir,'all_repetition_ratios.pkl')
-        subject = self.pipeline.subject
+        subject = self.pipeline.subject.split('_')[0]
         task = self.pipeline.task
         events = self.get_passed_object(task+'_events')
         recalls = events[events.recalled==1]
@@ -105,11 +105,11 @@ class RepetitionRatio(RamTask):
                                   'eegoffset', 'iscorrect', 'answer', 'recalled', 'item_name', 'intrusion', 'montage', 'list',
                                   'eegfile', 'msoffset']
                 evs_field_list += ['category', 'category_num']
-    
+
                 tmp = subject.split('_')
                 subj_code = tmp[0]
                 montage = 0 if len(tmp) == 1 else int(tmp[1])
-    
+
                 json_reader = JsonIndexReader(path.join('/','protocols/r1.json'))
     
                 event_files = sorted(
@@ -134,10 +134,10 @@ class RepetitionRatio(RamTask):
     
                 for i,r in enumerate(repetition_rates.flat):
                     repetition_rates.flat[i] = np.nan
-                for session in sessions:
+                for i,session in enumerate(sessions):
                     sess_recalls = recalls[recalls.session == session]
                     lists = np.unique(sess_recalls.list)
-                    repetition_rates[session][:len(lists)] = [repetition_ratio(sess_recalls[sess_recalls.list == l])
+                    repetition_rates[i][:len(lists)] = [repetition_ratio(sess_recalls[sess_recalls.list == l])
                                                  for l in lists]
                 all_repetition_rates[subject] = np.nanmean(repetition_rates)
             except Exception as e:

@@ -16,9 +16,9 @@ from ReportUtils import ReportRamTask
 import hashlib
 
 
-class ComputeFRPowers(ReportRamTask):
+class ComputeFR1Powers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
-        super(ComputeFRPowers, self).__init__(mark_as_completed)
+        super(ComputeFR1Powers, self).__init__(mark_as_completed)
         self.params = params
         self.pow_mat = None
         self.samplerate = None
@@ -52,8 +52,14 @@ class ComputeFRPowers(ReportRamTask):
         subject = self.pipeline.subject
         task = self.pipeline.task
 
-        self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
-        self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
+        try:
+            self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
+        except IOError:
+            self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace('-'.join([subject,task,'pow_mat.pkl'])))
+        try:
+            self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
+        except IOError:
+            self.samplerate = joblib.load(self.get_path_to_resource_in_workspace('-'.join([subject,task,'samplerate.pkl'])))
 
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)

@@ -73,7 +73,7 @@ class EventPreparation(ReportRamTask):
             else:
                 cat_events = np.hstack((events,sess_events))
 
-        self.pass_object('cat_events',cat_events.view(np.recarray))
+        self.pass_object('cat_events',cat_events[cat_events.type=='WORD'].view(np.recarray))
 
         cat_events.session += 100
         events = np.hstack((events, cat_events[fr_event_fields].copy()))

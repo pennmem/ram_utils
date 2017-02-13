@@ -11,6 +11,7 @@
 \usepackage{booktabs}
 %\usepackage{sidecap} \usepackage{soul}
 \usepackage[small,bf,it]{caption}
+\usepackage{subcaption}
 \setlength\belowcaptionskip{2pt}
 
 \addtolength{\oddsidemargin}{-.875in} 
@@ -66,9 +67,21 @@ $<N_MATH>$ math problems & $<N_CORRECT_MATH>$ correct ($<PC_CORRECT_MATH>$\%) & 
 
 \begin{figure}[!h]
 \centering
-\includegraphics[scale=0.4]{<PROB_RECALL_PLOT_FILE>}
+\includegraphics[scale=0.3]{<PROB_RECALL_PLOT_FILE>}
 \caption{\textbf{Free recall:} (a) Overall probability of recall as a function of serial position. (b) Probability of first recall as a function of serial position.}
-\end{figure}    
+\end{figure}
+\begin{figure}[!h]
+\centering
+\begin{subfigure}{0.3\textwidth}
+\includegraphics[width=\textwidth]{<IRT_PLOT_FILE>}
+\end{subfigure}
+\begin{subfigure}{0.3\textwidth}
+\includegraphics[width=\textwidth]{<REPETITION_PLOT_FILE>}
+\end{subfigure}
+\caption{\textbf{Categorical free recall:} (a) Inter-response times for transitions within and between categories. (b) Distribution of repetition ratios; dotted line indicates
+average repetition ratio for this subject}
+\end{figure}
+
 
 \clearpage
 
@@ -102,6 +115,7 @@ $\bullet$ Area Under Curve = $<AUC>$\%
 $\bullet$ Permutation test $p$-value $<PERM-P-VALUE>$
 
 $\bullet$ Median of classifier output = $<J-THRESH>$
+
 
 %\begin{figure}[!h]
 %\centering

@@ -35,7 +35,12 @@
 \begin{tabular}{ccc}
 \begin{minipage}[htbp]{170pt}
 In the free recall task, participants are presented with a list of words, one after the other, and later asked to recall as many words as possible in any order.
-\begin{itemize}\item\textbf{Number of sessions: }$<NUMBER_OF_SESSIONS>$\item\textbf{Number of electrodes: }$<NUMBER_OF_ELECTRODES>$\end{itemize}
+\begin{itemize}
+    \item\textbf{Number of sessions: }$<NUMBER_OF_SESSIONS>$
+    \item\textbf{Number of electrodes: }$<NUMBER_OF_ELECTRODES>$
+    \item\textbf{FR1 Area Under Curve: }$<AUC>$\%
+    \item\textbf{FR1 Permutation test $p$-value:} $<PERM-P-VALUE>$
+    \end{itemize}
 \end{minipage}
 &
 \begin{tabular}{|c|c|c|c|c|c|}
@@ -47,7 +52,7 @@ In the free recall task, participants are presented with a list of words, one af
 \vspace{3pc}
 
 \begin{center}
-\textbf{\Large Classifier performance}
+\textbf{\Large Classifier generalization to FR3}
 \end{center}
 
 \begin{figure}[!h]
@@ -59,9 +64,10 @@ percentage devation from the (subject) mean, separated by tercile
 of the classifier encoding efficiency estimate for each encoded word.}
 \end{figure}
 
-$\bullet$ Area Under Curve = $<AUC>$\%
+$\bullet$ Area Under Curve = $<FR3-AUC>$\%
 
-$\bullet$ Permutation test $p$-value $<PERM-P-VALUE>$
+$\bullet$ Permutation test $p$-value $<FR3-PERM-P-VALUE>$
+
 
 <REPORT_PAGES>
 

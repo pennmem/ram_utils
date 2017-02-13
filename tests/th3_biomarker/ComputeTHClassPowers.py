@@ -3,7 +3,7 @@ __author__ = 'm'
 from RamPipeline import *
 
 import numpy as np
-from morlet import MorletWaveletTransform
+from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from sklearn.externals import joblib
 
 from ptsa.data.readers import EEGReader
@@ -93,7 +93,7 @@ class ComputeTHClassPowers(RamTask):
                 elec1 = np.where(monopolar_channels == bp[0])[0][0]
                 elec2 = np.where(monopolar_channels == bp[1])[0][0]
 
-                bp_data = eegs[elec1] - eegs[elec2]
+                bp_data = np.subtract(eegs[elec1],eegs[elec2])
                 bp_data.attrs['samplerate'] = self.samplerate
 
 

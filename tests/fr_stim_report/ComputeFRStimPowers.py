@@ -48,8 +48,16 @@ class ComputeFRStimPowers(ReportRamTask):
         subject = self.pipeline.subject
         task = self.pipeline.task
 
+
+        try:
+            events = joblib.load(self.get_path_to_resource_in_workspace(subject+'-events.pkl'))
+            self.pass_object(task+'_events',events)
+        except IOError:
+            pass
+
         self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-fr_stim_pow_mat.pkl'))
         self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
+
 
         self.pass_object('fr_stim_pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
@@ -76,6 +84,8 @@ class ComputeFRStimPowers(ReportRamTask):
         self.pass_object('fr_stim_pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
 
+        events = self.get_passed_object(task+'_events')
+        joblib.dump(events,self.get_path_to_resource_in_workspace(subject+'-events.pkl'))
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-' + task + '-fr_stim_pow_mat.pkl'))
         joblib.dump(self.samplerate, self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
 

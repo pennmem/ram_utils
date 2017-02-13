@@ -53,7 +53,11 @@ class ComputeFR1HFPowers(ReportRamTask):
         subject = self.pipeline.subject
         task = self.pipeline.task
 
-        self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-hf_pow_mat.pkl'))
+        try:
+            self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-hf_pow_mat.pkl'))
+        except IOError:
+            self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace('-'.join([subject,task,'hf_pow_mat.pkl'])))
+
         self.pass_object('hf_pow_mat', self.pow_mat)
 
     def run(self):

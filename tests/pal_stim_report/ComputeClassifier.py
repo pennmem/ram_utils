@@ -286,10 +286,11 @@ class ComputeClassifier(ReportRamTask):
     def restore(self):
         subject = self.pipeline.subject
 
-        self.lr_classifier = joblib.load(self.get_path_to_resource_in_workspace(subject + '-PAL1-lr_classifier.pkl'))
-        self.xval_output = joblib.load(self.get_path_to_resource_in_workspace(subject + '-PAL1-xval_output.pkl'))
-        self.perm_AUCs = joblib.load(self.get_path_to_resource_in_workspace(subject + '-PAL1-perm_AUCs.pkl'))
-        self.pvalue = joblib.load(self.get_path_to_resource_in_workspace(subject + '-PAL1-pvalue.pkl'))
+        for attr in ['lr_classifier','xval_output','perm_AUCs','pvalue']:
+            try:
+                self.__setattr__(attr,joblib.load(self.get_path_to_resource_in_workspace(subject + '-%s.pkl'%attr)))
+            except IOError:
+                self.__setattr__(attr,joblib.load(self.get_path_to_resource_in_workspace(subject + '-PAL1-%s.pkl'%attr)))
 
         self.pass_object('lr_classifier', self.lr_classifier)
         self.pass_object('xval_output', self.xval_output)

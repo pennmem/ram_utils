@@ -29,6 +29,8 @@ from RepetitionRatio import  RepetitionRatio
 
 from ComputeFRStimPowers import ComputeFRStimPowers
 
+from EvaluateClassifier import EvaluateClassifier
+
 from MontagePreparation import MontagePreparation
 
 from ComputeFRStimTable import ComputeFRStimTable
@@ -70,7 +72,7 @@ params = Params()
 task = args.task
 
 json_reader = JsonIndexReader(os.path.join(args.mount_point,'protocols/r1.json'))
-subject_set = json_reader.subjects(experiment=task) & json_reader.subjects(experiment='cat'+task)
+subject_set = set(json_reader.subjects(experiment=task))& set(json_reader.subjects(experiment='cat'+task))
 subjects = []
 for s in subject_set:
     montages = json_reader.aggregate_values('montage', subject=s, experiment=task)
@@ -118,6 +120,8 @@ for subject in subjects:
     report_pipeline.add_task(ComputeFRStimPowers(params=params, mark_as_completed=True))
 
     report_pipeline.add_task(ComputeFRStimTable(params=params, mark_as_completed=False))
+
+    report_pipeline.add_task(EvaluateClassifier(params=params,mark_as_completed=False))
 
     report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
     #

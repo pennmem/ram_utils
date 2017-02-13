@@ -200,7 +200,7 @@ class GeneratePlots(ReportRamTask):
             repetition_ratio = cumulative_summary.repetition_ratio
             all_repetition_ratios = self.get_passed_object('all_repetition_ratios')
             all_repetition_ratios=all_repetition_ratios[np.isfinite(all_repetition_ratios)]
-            all_rr_hist = np.histogram(all_repetition_ratios,range=[0.,1],bins='auto')
+            all_rr_hist = np.histogram(all_repetition_ratios,range=[0.,1],bins=int(np.log2(all_repetition_ratios.size)+1))
 
             mean_rr = np.nanmean(repetition_ratio)
             hist = BarPlotData(y=all_rr_hist[0],x=all_rr_hist[1][1:],barcolors=['grey' for h in all_rr_hist[0]], xlim=[0,1],

@@ -8,8 +8,8 @@ from ReportUtils import CMLParser,ReportPipeline
 cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--subject','R1201P_1')
 cml_parser.arg('--task','TH3')
-#cml_parser.arg('--workspace-dir','/scratch/mswat/automated_reports/TH3_reports')
-cml_parser.arg('--workspace-dir','/scratch/leond/TH_reports')
+cml_parser.arg('--workspace-dir','/scratch/leond/TH3_reports')
+# cml_parser.arg('--workspace-dir','/scratch/RAM_maint/automated_reports_json/TH3_reports')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
 
@@ -24,7 +24,7 @@ from THEventPreparation import THEventPreparation
 
 from EventPreparation import EventPreparation
 
-from ComputeTH1ClassPowers import ComputeTH1ClassPowers
+from ComputeTHPowers import ComputeTHPowers
 
 from ComputeClassifier import ComputeClassifier
 
@@ -95,7 +95,7 @@ report_pipeline.add_task(EventPreparation(mark_as_completed=False))
 
 report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(ComputeTH1ClassPowers(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputeTHPowers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 
