@@ -127,7 +127,7 @@ for subject in subjects:
 
     # sets up processing pipeline
     report_pipeline = ReportPipeline(subject=subject, task=args.task,
-                                           workspace_dir=join(args.workspace_dir,args.task+'_'+subject), mount_point=args.mount_point,exit_on_no_change=args.exit_on_no_change,
+                                           workspace_dir=join(args.workspace_dir,subject), mount_point=args.mount_point,exit_on_no_change=args.exit_on_no_change,
                                      recompute_on_no_status=args.recompute_on_no_status)
 
     report_pipeline.add_task(TH1EventPreparation(mark_as_completed=False))
