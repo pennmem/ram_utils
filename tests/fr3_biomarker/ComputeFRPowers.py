@@ -8,6 +8,7 @@ from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from sklearn.externals import joblib
 
 from ptsa.data.readers import EEGReader
+from ReportTasks.RamTaskMethods import compute_powers
 
 
 class ComputeFRPowers(RamTask):
@@ -23,6 +24,11 @@ class ComputeFRPowers(RamTask):
 
         self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
         self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
+        try:
+            events=joblib.load(self.get_path_to_resource_in_workspace(subject+'-FR_events.pkl'))
+            self.pass_object('FR_events',events)
+        except IOError:
+            pass
 
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
@@ -40,13 +46,17 @@ class ComputeFRPowers(RamTask):
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
 
-        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
-
+        # self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
+        self.pow_mat,events = compute_powers(events,monopolar_channels,bipolar_pairs,
+                                             self.params.fr1_start_time,self.params.fr1_end_time,self.params.fr1_buf,
+                                             self.params.freqs,self.params.log_powers)
+        self.pass_object('FR_events',events)
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
 
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
         joblib.dump(self.samplerate, self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
+        joblib.dump(events,self.get_path_to_resource_in_workspace(subject+'-FR_events.pkl'))
 
     def compute_powers(self, events, sessions,monopolar_channels , bipolar_pairs ):
         n_freqs = len(self.params.freqs)

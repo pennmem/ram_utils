@@ -11,7 +11,7 @@ from ptsa.data.readers import EEGReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
 import hashlib
-
+from ReportTasks.RamTaskMethods import compute_powers
 
 class ComputePAL1Powers(RamTask):
     def __init__(self, params,mark_as_completed=True):
@@ -66,8 +66,12 @@ class ComputePAL1Powers(RamTask):
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
 
-        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
+        # self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
+        self.pow_mat,events=compute_powers(events, monopolar_channels, bipolar_pairs,
+                                           self.params.pal1_start_time,self.params.pal1_end_time,self.params.pal1_buf,
+                                           self.params.freqs,self.params.log_powers)
 
+        self.pass_object('PAL1_events',events)
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
 

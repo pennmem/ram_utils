@@ -15,7 +15,7 @@ import time
 
 def compute_powers(events,monopolar_channels,bipolar_pairs,
                    start_time,end_time,buffer_time,
-                   freqs,log_powers):
+                   freqs,log_powers,filt_order=4,width=5):
 
     if not isinstance(bipolar_pairs,np.recarray):
         bipolar_pairs = np.array(bipolar_pairs,dtype=[('ch0','S3'),('ch1','S3')]).view(np.recarray)
@@ -39,10 +39,11 @@ def compute_powers(events,monopolar_channels,bipolar_pairs,
         # Use bipolar pairs
         eeg= MonopolarToBipolarMapper(time_series=eeg,bipolar_pairs=bipolar_pairs).filter()
         #Butterworth filter to remove line noise
-        eeg=eeg.filtered(freq_range=[58.,62.],filt_type='stop')
+        eeg=eeg.filtered(freq_range=[58.,62.],filt_type='stop',order=filt_order)
         print 'Computing power'
         filter_tic=time.time()
-        sess_pow_mat,phase_mat=MorletWaveletFilterCpp(time_series=eeg,freqs = freqs,output='power',cpus=25).filter()
+        sess_pow_mat,phase_mat=MorletWaveletFilterCpp(time_series=eeg,freqs = freqs,output='power', width=width,
+                                                      cpus=25).filter()
         filter_time +=  time.time()-filter_tic
         sess_pow_mat=sess_pow_mat.remove_buffer(buffer_time).data
 

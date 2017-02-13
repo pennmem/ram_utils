@@ -78,6 +78,8 @@ class ComputeFRStimPowers(ReportRamTask):
         self.pow_mat,events=compute_powers(events,monopolar_channels, bipolar_pairs,
                                                params.fr1_start_time,params.fr1_end_time,params.fr1_buf,
                                                params.freqs,params.log_powers)
+        for session in sessions:
+            self.pow_mat[events.session==session] = zscore(self.pow_mat[events.session==session],axis=0,ddof=1)
 
         self.pass_object(task+'_events',events)
 

@@ -83,6 +83,14 @@ class ComputePSPowers(ReportRamTask):
                                               post_start_time, post_end_time, params.ps_buf,
                                               params.freqs, params.log_powers)
 
+        for session in sessions:
+            joint_powers = zscore(np.concatenate((ps_pow_mat_pre[events.session==session],ps_pow_mat_post[events.session==session])),
+                                  axis=0,ddof=1)
+            n_events = (events.session==session).astype(np.int).sum()
+            ps_pow_mat_pre[events.session==session] = joint_powers[:n_events,...]
+            ps_pow_mat_post[events.session==session] = joint_powers[n_events:,...]
+
+
         pre_events = pre_events.tolist()
         post_events = post_events.tolist()
 

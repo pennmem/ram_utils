@@ -71,6 +71,8 @@ class ComputePALStimPowers(ReportRamTask):
         self.pow_mat, events = compute_powers(events, monopolar_channels, bipolar_pairs,
                                               params.pal1_start_time, params.pal1_end_time, params.pal1_buf,
                                               params.freqs, params.log_powers)
+        for session in sessions:
+            self.pow_mat[events.session==session] = zscore(self.pow_mat[events.session==session],axis=0,ddof=1)
 
         self.pass_object(task+'_events',events)
         self.pass_object('pal_stim_pow_mat', self.pow_mat)

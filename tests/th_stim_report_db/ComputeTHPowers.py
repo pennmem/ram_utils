@@ -11,6 +11,7 @@ from ptsa.data.events import Events
 from ptsa.data.readers import EEGReader
 from ReportUtils import MissingDataError
 from ReportUtils import ReportRamTask
+from ReportTasks.RamTaskMethods import compute_powers
 
 class ComputeTHPowers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
@@ -50,8 +51,11 @@ class ComputeTHPowers(ReportRamTask):
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
 
-        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
-
+        self.pow_mat, events = compute_powers(events, monopolar_channels, bipolar_pairs,
+                                                       self.params.th1_start_time, self.params.th1_end_time,
+                                                       self.params.th1_buf,
+                                                       self.params.classifier_freqs, self.params.log_powers)
+        self.pass_object('th_events',events)
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
 

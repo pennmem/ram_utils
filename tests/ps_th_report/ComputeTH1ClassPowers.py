@@ -12,7 +12,7 @@ from ptsa.data.readers.IndexReader import JsonIndexReader
 from ReportUtils import ReportRamTask
 
 import hashlib
-
+from ReportTasks.RamTaskMethods import compute_powers
 class ComputeTH1ClassPowers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
         super(ComputeTH1ClassPowers, self).__init__(mark_as_completed)
@@ -59,8 +59,12 @@ class ComputeTH1ClassPowers(ReportRamTask):
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
 
-        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
+        self.classify_pow_mat, events = compute_powers(events, monopolar_channels, bipolar_pairs,
+                                                       self.params.th1_start_time, self.params.th1_end_time,
+                                                       self.params.th1_buf,
+                                                       self.params.classifier_freqs, self.params.log_powers)
 
+        self.pass_object('TH_events',events)
         self.pass_object('classify_pow_mat', self.classify_pow_mat)
         self.pass_object('samplerate', self.samplerate)
 
