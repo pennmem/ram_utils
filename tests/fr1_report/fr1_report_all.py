@@ -113,7 +113,7 @@ for subject in subjects:
     report_pipeline = ReportPipeline(
                                      args=args,
                                      subject=subject,
-                                     workspace_dir=join(args.workspace_dir, task + '_' + subject)
+                                     workspace_dir=join(args.workspace_dir, subject)
                                      )
 
     report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
