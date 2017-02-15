@@ -87,7 +87,7 @@ report_pipeline.add_task(MontagePreparation(params, mark_as_completed=False))
 if 'cat' in args.task:
     report_pipeline.add_task(RepetitionRatio(mark_as_completed=False))
 
-report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=False))
+report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeFR1HFPowers(params=params, mark_as_completed=True))
 
@@ -105,4 +105,5 @@ report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
 
 # starts processing pipeline
-report_pipeline.execute_pipeline()
+import cProfile
+cProfile.run('report_pipeline.execute_pipeline()')

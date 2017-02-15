@@ -11,7 +11,7 @@ from ptsa.data.readers import EEGReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
 import hashlib
-
+from ReportTasks.RamTaskMethods import compute_powers
 
 class ComputeFRPowers(RamTask):
     def __init__(self, params, mark_as_completed=True):

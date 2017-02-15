@@ -79,8 +79,6 @@ class ComputeFR1Powers(ReportRamTask):
 
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-' + task + '-pow_mat.pkl'))
         joblib.dump(self.samplerate, self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
-        exit(0)
-
 
 
     def compute_powers(self, events, sessions,monopolar_channels, bipolar_pairs):

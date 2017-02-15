@@ -98,6 +98,7 @@ class ComputeClassifier(ReportRamTask):
         return hash_md5.digest()
 
     def run_loso_xval(self, event_sessions, recalls, permuted=False):
+
         probs = np.empty_like(recalls, dtype=np.float)
 
         sessions = np.unique(event_sessions)
