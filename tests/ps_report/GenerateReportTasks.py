@@ -150,10 +150,12 @@ class GenerateTex(ReportRamTask):
 
         xval_output = self.get_passed_object('xval_output')
         perm_test_pvalue = self.get_passed_object('pvalue')
+        version_info = self.get_passed_object('version_info')
 
         replace_dict = {
             '<SUBJECT>': self.pipeline.subject.replace('_', '\\textunderscore'),
             '<EXPERIMENT>': self.pipeline.task,
+            '<SYSTEM_VERSION>':version_info['Ramulator'],
             '<DATE>': datetime.date.today(),
             '<SESSION_DATA>': session_data_tex_table,
             '<NUMBER_OF_SESSIONS>': self.get_passed_object('NUMBER_OF_SESSIONS'),

@@ -17,6 +17,8 @@ from sklearn.externals import joblib
 
 from collections import OrderedDict
 from ReportUtils import ReportRamTask
+from os import path
+import json
 
 def plot_data(ps_table, delta_column_name, ps_sham, param1_name, param2_name, param2_unit):
     x_start_pos = 2 if len(ps_sham)>0 else 1
@@ -126,10 +128,26 @@ def ttest_against_sham(ps_table, ps_sham_table, param1_name, param2_name):
     return ttest_table
 
 
+
+
 class ComposeSessionSummary(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
         super(ComposeSessionSummary,self).__init__(mark_as_completed)
         self.params = params
+
+    def get_versions(self):
+        event_loc = path.join(self.pipeline.mount_point,'protocols','r1',
+                                 'subjects',self.pipeline.subject,'experiments',self.pipeline.task,'sessions','0',
+                                 'behavioral','current_source','host_pc','event_log.json')
+        try:
+            with open(event_loc) as log:
+                return json.load(log)['versions']
+        except IOError:
+            return {
+                'Ramulator':'',
+                'Experiment':''
+            }
+
 
     def restore(self):
         pass
@@ -291,6 +309,9 @@ class ComposeSessionSummary(ReportRamTask):
                 session_summary.ttest_against_sham_table = format_ttest_table(ttest_against_sham_table)
 
             session_summary_array.append(session_summary)
+
+        version_info = self.get_versions()
+        self.pass_object('version_info',version_info)
 
         self.pass_object('SESSION_DATA', session_data)
         self.pass_object('session_summary_array', session_summary_array)
