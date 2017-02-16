@@ -127,8 +127,8 @@ class ComputeFRPowers(ReportRamTask):
                                    start_time=self.params.fr1_start_time,
                                    end_time=self.params.fr1_end_time, buffer_time=self.params.fr1_buf)
             try:
-
                 eegs = eeg_reader.read()
+
             except IOError as err:
                 self.raise_and_log_report_exception(
                                                     exception_type='MissingDataError',
@@ -180,6 +180,7 @@ class ComputeFRPowers(ReportRamTask):
                 print 'Computing powers for bipolar pair', bp
                 elec1 = np.where(monopolar_channels == bp[0])[0][0]
                 elec2 = np.where(monopolar_channels == bp[1])[0][0]
+
                 # print 'elec1=',elec1
                 # print 'elec2=',elec2
                 # eegs_elec1 = eegs[elec1]

@@ -90,7 +90,7 @@ class MontagePreparation(ReportRamTask):
 
         json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
         bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
-
+        subject = 'R1111M'
         try:
             bp_path = os.path.join(self.pipeline.mount_point, next(iter(bp_paths)))
             f_pairs = open(bp_path, 'r')
@@ -110,7 +110,9 @@ class MontagePreparation(ReportRamTask):
             bp_tal_structs = pd.DataFrame(bp_tal_structs, index=bp_tags, columns=['channel_1', 'channel_2', 'etype', 'bp_atlas_loc'])
             bp_tal_structs.sort_values(by=['channel_1', 'channel_2'], inplace=True)
             monopolar_channels = np.unique(np.hstack((bp_tal_structs.channel_1.values,bp_tal_structs.channel_2.values)))
+            monopolar_channels = np.concatenate((monopolar_channels[:59],monopolar_channels[65:]))
             bipolar_pairs = zip(bp_tal_structs.channel_1.values,bp_tal_structs.channel_2.values)
+            bipolar_pairs = [x for x in bipolar_pairs if x[0] in monopolar_channels or x[1] in monopolar_channels]
 
             bp_tal_stim_only_structs = pd.Series()
             if bipolar_data_stim_only:
@@ -131,7 +133,9 @@ class MontagePreparation(ReportRamTask):
             bp_tal_structs.to_pickle(self.get_path_to_resource_in_workspace(subject + '-bp_tal_structs.pkl'))
             bp_tal_stim_only_structs.to_pickle(self.get_path_to_resource_in_workspace(subject + '-bp_tal_stim_only_structs.pkl'))
 
-        except:
+        except Exception as e:
+            print 'Problem found!'
+            print e
             self.raise_and_log_report_exception(
                                                 exception_type='MissingDataError',
                                                 exception_message='Missing or corrupt montage data for subject %s' % subject

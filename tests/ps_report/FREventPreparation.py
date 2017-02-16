@@ -38,7 +38,7 @@ class FREventPreparation(ReportRamTask):
         return hash_md5.digest()
 
     def run(self):
-        subject = self.pipeline.subject
+        subject = 'R1111M'
         tmp = subject.split('_')
         subj_code = tmp[0]
         montage = 0 if len(tmp)==1 else int(tmp[1])

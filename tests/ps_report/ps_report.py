@@ -81,7 +81,7 @@ params = Params()
 # sets up processing pipeline
 
 report_pipeline = ReportPipeline(subject=args.subject,
-                                 task=args.experiment,
+                                 task=args.task,
                                  workspace_dir=join(args.workspace_dir, args.subject),
                                  mount_point=args.mount_point,
                                  exit_on_no_change=args.exit_on_no_change,
