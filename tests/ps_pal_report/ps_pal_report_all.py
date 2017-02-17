@@ -21,7 +21,7 @@ from ReportUtils import ReportSummaryInventory
 from PALEventPreparation import PALEventPreparation
 from PSEventPreparation import PSEventPreparation
 
-from ComputePALPowers import ComputePALPowers
+from ComputePAL1Powers import ComputePAL1Powers
 from ComputeControlPowers import ComputeControlPowers
 from ComputePSPowers import ComputePSPowers
 
@@ -122,7 +122,7 @@ for subject in subjects:
 
     report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
 
-    report_pipeline.add_task(ComputePALPowers(params=params, mark_as_completed=True))
+    report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=True))
 
     report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 

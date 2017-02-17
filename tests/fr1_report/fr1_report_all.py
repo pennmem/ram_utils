@@ -115,7 +115,7 @@ for subject in subjects:
     report_pipeline = ReportPipeline(
                                      args=args,
                                      subject=subject,
-                                     workspace_dir=join(args.workspace_dir, subject)
+                                     workspace_dir=join(args.workspace_dir,subject)
                                      )
 
     report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
@@ -151,5 +151,5 @@ for subject in subjects:
 print 'this is summary for all reports report ', rsi.compose_summary(detail_level=1)
 
 rsi.output_json_files(dir=args.status_output_dir)
-rsi.send_email_digest()
+#rsi.send_email_digest()
 

@@ -4,6 +4,7 @@ from ptsa.data.readers.IndexReader import JsonIndexReader
 import hashlib
 
 import numpy as np
+import warnings
 from copy import deepcopy
 from scipy.stats.mstats import zscore
 from sklearn.linear_model import LogisticRegression
@@ -108,7 +109,9 @@ class ComputeClassifier(ReportRamTask):
             insample_pow_mat = self.pow_mat[insample_mask]
             insample_recalls = recalls[insample_mask]
 
-            self.lr_classifier.fit(insample_pow_mat, insample_recalls)
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore')
+                self.lr_classifier.fit(insample_pow_mat, insample_recalls)
 
             outsample_mask = ~insample_mask
             outsample_pow_mat = self.pow_mat[outsample_mask]
@@ -154,7 +157,10 @@ class ComputeClassifier(ReportRamTask):
             insample_recalls = recalls[insample_mask]
             if len(np.unique(insample_recalls))<2:
                 print np.unique(insample_recalls)
-            self.lr_classifier.fit(insample_pow_mat, insample_recalls)
+
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore')
+                self.lr_classifier.fit(insample_pow_mat, insample_recalls)
 
             outsample_mask = ~insample_mask
             outsample_pow_mat = self.pow_mat[outsample_mask]
