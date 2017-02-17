@@ -14,7 +14,7 @@ from ReportUtils import CMLParser,ReportPipeline
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1237C')
+cml_parser.arg('--subject','R1267J')
 cml_parser.arg('--task','TH1')
 cml_parser.arg('--workspace-dir','/scratch/leond/TH1_reports')
 cml_parser.arg('--mount-point','')
