@@ -84,6 +84,7 @@ params = Params()
 
 # sets up processing pipeline
 report_pipeline = ReportPipeline(subject=args.subject,
+                                 sessions=args.session,
                                  workspace_dir=join(args.workspace_dir, args.subject),
                                  task='FR1_catFR1_joint',
                                  experiment='FR1_catFR1_joint',

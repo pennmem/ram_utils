@@ -20,6 +20,7 @@ class CMLParser(object):
         self.parser.add_argument('--recompute-on-no-status', dest='recompute_on_no_status', action='store_true')
         self.parser.add_argument('--status-output-dir', required=False, dest='status_output_dir', action='store')
         self.parser.add_argument('--skip-subjects',dest='skip_subjects', nargs='+')
+        self.parser.add_argument('--sessions',dest='sessions',nargs='*',action='store')
 
         self.arg_list=[]
         self.arg_count_threshold = arg_count_threshold

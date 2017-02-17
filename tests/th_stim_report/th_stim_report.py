@@ -24,7 +24,7 @@ from THEventPreparation import THEventPreparation
 
 from EventPreparation import EventPreparation
 
-from ComputeTHPowers import ComputeTHPowers
+from ComputeTH1Powers import ComputeTH1Powers
 
 from ComputeClassifier import ComputeClassifier
 
@@ -95,7 +95,7 @@ report_pipeline.add_task(EventPreparation(mark_as_completed=False))
 
 report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(ComputeTHPowers(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputeTH1Powers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 

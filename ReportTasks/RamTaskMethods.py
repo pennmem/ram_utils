@@ -14,6 +14,29 @@ from scipy.stats.mstats import zscore
 import time,datetime
 import TextTemplateUtils
 import os, collections
+from ptsa.data.readers import BaseEventReader
+from ptsa.data.readers.IndexReader import JsonIndexReader
+
+
+def load_events(subject,experiment,montage=0, mount_point='/',*sessions):
+    jr=JsonIndexReader(os.path.join(mount_point,'protocols/r1.json'))
+    subject=subject.split('_')
+    if len(subject)>1:
+        montage=subject[1]
+    subject=subject[0]
+    if len(sessions)>0:
+        try:
+            event_paths = [jr.get_value('all_events',subject=subject,experiment=experiment,session=sess,montage=
+                                        montage) for sess in sessions]
+        except ValueError:
+            event_paths = [jr.get_value('task_events',subject=subject,experiment=experiment,session=sess,montage=
+                                        montage) for sess in sessions]
+    else:
+        event_paths = jr.aggregate_values('all_events',subject=subject,experiment=experiment,montage=montage)
+        if not event_paths:
+            event_paths = jr.aggregate_values('task_events',subject=subject,experiment=experiment,montage=montage)
+    events = np.concatenate([BaseEventReader(filename=path).read() for path in sorted(event_paths)])
+    return events.view(np.recarray)
 
 
 def compute_powers(events,monopolar_channels,bipolar_pairs,
@@ -84,17 +107,10 @@ def print_tex(task,output_file):
 
 
 if __name__  == '__main__':
-    class FakePipeline(object):
-        def __init__(self):
-            self.subject= 'subject1'
-            self.task='task0'
-    class FakeTask(object):
-        def __init__(self):
-            self.pipeline = FakePipeline()
-            self.system_version='versionXYZ'
-            self.__version__ = '5.4.3.2.1'
+    mp = '/Volumes/rhino_root'
+    load_events('R1111M','FR1', 0, mp, 0)
+    load_events('R1111M','PS2', mount_point=mp, *[0])
+    load_events('R1111M','PS2', mount_point=mp)
+    load_events('R1124J_1','FR1', mount_point=mp)
 
-        def generate_tex(self):
-            return 'HELLO WORLD'
-
-    print_tex(FakeTask(),'test.tex')
+    print 'Tests Passed'

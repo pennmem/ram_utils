@@ -11,6 +11,7 @@ from RamPipeline import *
 from ReportUtils import ReportRamTask
 
 import hashlib
+from ReportTasks.RamTaskMethods import load_events
 
 
 class FR1EventPreparation(ReportRamTask):
@@ -42,26 +43,7 @@ class FR1EventPreparation(ReportRamTask):
         if task=='catFR1':
             evs_field_list += ['category', 'category_num']
 
-        tmp = subject.split('_')
-        subj_code = tmp[0]
-        montage = 0 if len(tmp)==1 else int(tmp[1])
-
-        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
-
-        event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment=task)))
-        events = None
-        for sess_file in event_files:
-            e_path = os.path.join(self.pipeline.mount_point, str(sess_file))
-            e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
-
-            sess_events = e_reader.read()[evs_field_list]
-
-            if events is None:
-                events = sess_events
-            else:
-                events = np.hstack((events,sess_events))
-
-        events = events.view(np.recarray)
+        events = load_events(subject,experiment=task,mount_point=self.pipeline.mount_point,*self.pipeline.sessions)[evs_field_list]
 
         self.pass_object(task+'_all_events', events)
 

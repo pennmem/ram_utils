@@ -104,7 +104,7 @@ class ReportPipeline(RamPipeline):
         self.set_workspace_dir(workspace_dir)
 
 
-report_pipeline = ReportPipeline(subject=args.subject,
+report_pipeline = ReportPipeline(subject=args.subject,sessions=args.sessions,
                                        workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point)
 
 report_pipeline.add_task(THEventPreparation(mark_as_completed=False))
