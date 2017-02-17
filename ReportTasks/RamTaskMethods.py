@@ -11,7 +11,10 @@ from ptsa.data.readers import EEGReader
 from ptsa.data.filters import MonopolarToBipolarMapper,MorletWaveletFilterCpp,MorletWaveletFilter,ButterworthFilter
 import numpy as np
 from scipy.stats.mstats import zscore
-import time
+import time,datetime
+import TextTemplateUtils
+import os, collections
+
 
 def compute_powers(events,monopolar_channels,bipolar_pairs,
                    start_time,end_time,buffer_time,
@@ -60,5 +63,38 @@ def compute_powers(events,monopolar_channels,bipolar_pairs,
     return pow_mat,events
 
 
+def find_template(template_name):
+    template_dir = os.path.dirname(TextTemplateUtils.__file__)
+    return os.path.join(template_dir,'templates',template_name)
+
+def print_tex(task,output_file):
+    template_file = find_template('report.tex.tpl')
+    task_name = task.pipeline.task or task.pipeline.experiment
+    replace_dict = {
+                       '<SUBJECT>':task.pipeline.subject,
+                       '<TASK>': task_name,
+                       '<DATE>': datetime.date.today(),
+                       '<TITLE>': task.title,
+                       '<SYSTEM_VERSION>': task.system_version,
+                       '<REPORT_VERSION>': task.__version__,
+                       '<REPORT_CONTENTS>': task.generate_tex()
+
+                   }
+    TextTemplateUtils.replace_template(template_file_name=template_file,replace_dict=replace_dict,out_file_name=output_file)
 
 
+if __name__  == '__main__':
+    class FakePipeline(object):
+        def __init__(self):
+            self.subject= 'subject1'
+            self.task='task0'
+    class FakeTask(object):
+        def __init__(self):
+            self.pipeline = FakePipeline()
+            self.system_version='versionXYZ'
+            self.__version__ = '5.4.3.2.1'
+
+        def generate_tex(self):
+            return 'HELLO WORLD'
+
+    print_tex(FakeTask(),'test.tex')

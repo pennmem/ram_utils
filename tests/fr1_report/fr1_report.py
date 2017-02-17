@@ -13,8 +13,8 @@ from ReportUtils import CMLParser,ReportPipeline
 cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--subject','R1111M')
 cml_parser.arg('--task','FR1')
-cml_parser.arg('--workspace-dir','/scratch/leond/FR1_reports')
-cml_parser.arg('--mount-point','')
+cml_parser.arg('--workspace-dir','/Users/leond/FR1_reports/')
+cml_parser.arg('--mount-point','/Volumes/rhino_root/')
 #cml_parser.arg('--recompute-on-no-status')
 # cml_parser.arg('--exit-on-no-change')
 
@@ -105,5 +105,4 @@ report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
 
 # starts processing pipeline
-import cProfile
-cProfile.run('report_pipeline.execute_pipeline()')
+report_pipeline.execute_pipeline()

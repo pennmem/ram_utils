@@ -9,7 +9,7 @@ import datetime
 from subprocess import call
 
 from ReportUtils import ReportRamTask
-
+from ReportTasks.RamTaskMethods import find_template,print_tex
 # import re
 # from collections import namedtuple
 # SplitSubjectCode = namedtuple(typename='SplitSubjectCode',field_names=['protocol','id','site','montage'])
@@ -20,63 +20,19 @@ from ReportUtils import ReportRamTask
 class GenerateTex(ReportRamTask):
     def __init__(self, mark_as_completed=True):
         super(GenerateTex,self).__init__(mark_as_completed)
+        self.title = ''
+        self.system_version = ''
+        self.__version__ = 3.9
 
-    def run(self):
+    def generate_tex(self):
         subject = self.pipeline.subject
         task = self.pipeline.task
+        task_template = find_template('{task}.tex.tpl'.format(task=task))
 
         # tex_session_template = task + '_session.tex.tpl'
 
         n_sess = self.get_passed_object('NUMBER_OF_SESSIONS')
         n_bps = self.get_passed_object('NUMBER_OF_ELECTRODES')
-
-        # session_summary_array = self.get_passed_object('session_summary_array')
-        # session_ttest_data = self.get_passed_object('session_ttest_data')
-        # report_tex_file_names = []
-        # for i_sess in xrange(n_sess):
-        #     session_summary = session_summary_array[i_sess]
-        #     sess = session_summary.number
-        #     report_tex_file_name = '%s-%s-s%02d-report.tex' % (task,subject,sess)
-        #     report_tex_file_names.append(report_tex_file_name)
-        #
-        #     self.set_file_resources_to_move(report_tex_file_name, dst='reports')
-        #
-        #     session_ttest_tex_table = latex_table(session_ttest_data[i_sess])
-        #
-        #     replace_dict = {'<PROB_RECALL_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-prob_recall_plot_' + session_summary.name + '.pdf',
-        #                     '<IRT_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-irt_plot_' + session_summary.name + '.pdf',
-        #                     '<DATE>': datetime.date.today(),
-        #                     '<SUBJECT>': subject.replace('_','\\textunderscore'),
-        #                     '<NUMBER_OF_ELECTRODES>': n_bps,
-        #                     '<SESSION_NUMBER>': sess,
-        #                     '<SESSION_DATE>': session_summary.date,
-        #                     '<SESSION_LENGTH>': session_summary.length,
-        #                     '<N_WORDS>': session_summary.n_words,
-        #                     '<N_CORRECT_WORDS>': session_summary.n_correct_words,
-        #                     '<PC_CORRECT_WORDS>': '%.2f' % session_summary.pc_correct_words,
-        #                     '<N_PLI>': session_summary.n_pli,
-        #                     '<PC_PLI>': '%.2f' % session_summary.pc_pli,
-        #                     '<N_ELI>': session_summary.n_eli,
-        #                     '<PC_ELI>': '%.2f' % session_summary.pc_eli,
-        #                     '<N_MATH>': session_summary.n_math,
-        #                     '<N_CORRECT_MATH>': session_summary.n_correct_math,
-        #                     '<PC_CORRECT_MATH>': '%.2f' % session_summary.pc_correct_math,
-        #                     '<MATH_PER_LIST>': '%.2f' % session_summary.math_per_list,
-        #                     '<TABLE_FORMAT>': ttable_format,
-        #                     '<TABLE_HEADER>': ttable_header,
-        #                     '<SIGNIFICANT_ELECTRODES>': session_ttest_tex_table,
-        #                     '<AUC>': session_summary.auc,
-        #                     '<ROC_AND_TERC_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-roc_and_terc_plot_' + session_summary.name + '.pdf'
-        #                     }
-        #
-        #     TextTemplateUtils.replace_template(template_file_name=tex_session_template, out_file_name=report_tex_file_name, replace_dict=replace_dict)
-        #
-        # self.pass_object('report_tex_file_names', report_tex_file_names)
-
-        tex_combined_template = task + '_combined.tex.tpl'
-        combined_report_tex_file_name = '%s_%s_report.tex' % (subject,task)
-
-        self.set_file_resources_to_move(combined_report_tex_file_name, dst='reports')
 
         cumulative_summary = self.get_passed_object('cumulative_summary')
 
@@ -84,11 +40,15 @@ class GenerateTex(ReportRamTask):
 
         cumulative_ttest_tex_table = latex_table(self.get_passed_object('cumulative_ttest_data'))
 
+        cat_template = find_template('category_plots.tex.tpl')
+        cat_tex = ( TextTemplateUtils.replace_template_to_string(cat_template,
+                    {'<CATEGORY_PLOT_FILE>':self.pipeline.task+'-'+self.pipeline.subject+'-category-plots.pdf'})
+                    if 'cat' in task else '')
+
         replace_dict = {'<PROB_RECALL_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-prob_recall_plot_combined.pdf',
                         # '<IRT_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-irt_plot_combined.pdf',
                         # '<REPETITION_RATIO_PLOT_FILE>': self.pipeline.task + '-'+self.pipeline.subject + '-rr_plot.pdf',
-                        '<CATEGORY_PLOT_FILE>':self.pipeline.task+'-'+self.pipeline.subject+'-category-plots.pdf',
-                        '<DATE>': datetime.date.today(),
+                        '<CATEGORY_PLOTS>': cat_tex,
                         '<SESSION_DATA>': cumulative_data_tex_table,
                         '<SUBJECT>': subject.replace('_','\\textunderscore'),
                         '<NUMBER_OF_SESSIONS>': n_sess,
@@ -112,7 +72,25 @@ class GenerateTex(ReportRamTask):
                         '<ROC_AND_TERC_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-roc_and_terc_plot_combined.pdf'
                         }
 
-        TextTemplateUtils.replace_template(template_file_name=tex_combined_template, out_file_name=combined_report_tex_file_name, replace_dict=replace_dict)
+        return TextTemplateUtils.replace_template_to_string(task_template,replace_dict)
+
+    def get_system_version(self):
+        return None
+
+    def run(self):
+        subject = self.pipeline.subject
+        task = self.pipeline.task
+        self.title=task
+        self.system_version = self.get_system_version()
+
+        # tex_session_template = task + '_session.tex.tpl'
+
+
+        combined_report_tex_file_name = '%s_%s_report.tex' % (subject,task)
+
+        self.set_file_resources_to_move(combined_report_tex_file_name, dst='reports')
+
+        print_tex(self, output_file=combined_report_tex_file_name)
 
         self.pass_object('combined_report_tex_file_name', combined_report_tex_file_name)
 
@@ -124,7 +102,6 @@ class GeneratePlots(ReportRamTask):
     def run(self):
         subject = self.pipeline.subject
         task = self.pipeline.task
-
         self.create_dir_in_workspace('reports')
 
         # session_summary_array = self.get_passed_object('session_summary_array')
