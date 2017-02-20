@@ -43,6 +43,8 @@ from ComputeClassifier import ComputeClassifier
 
 from ComposeSessionSummary import ComposeSessionSummary
 
+from RepetitionRatio import RepetitionRatio
+
 from GenerateReportTasks import *
 
 
@@ -113,12 +115,15 @@ for subject in subjects:
     report_pipeline = ReportPipeline(
                                      args=args,
                                      subject=subject,
-                                     workspace_dir=join(args.workspace_dir, task + '_' + subject)
+                                     workspace_dir=join(args.workspace_dir,subject)
                                      )
 
     report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
 
     report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
+
+    if 'cat' in args.task:
+        report_pipeline.add_task(RepetitionRatio(mark_as_completed=False))
 
     report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=True))
 

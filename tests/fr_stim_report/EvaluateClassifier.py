@@ -26,7 +26,9 @@ class EvaluateClassifier(ComputeClassifier.ComputeClassifier):
         for fname in bp_paths:
             with open(fname,'rb') as f: hash_md5.update(f.read())
 
-        experiments = ['FR1','catFR1','FR3','catFR3']
+        task = self.pipeline.task
+
+        experiments = ['FR1','catFR1']+[task]
 
         for experiment in experiments:
             event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment=experiment)))

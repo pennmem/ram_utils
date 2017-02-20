@@ -38,7 +38,8 @@ class ComputeFRStimPowers(ReportRamTask):
         for fname in bp_paths:
             with open(fname,'rb') as f: hash_md5.update(f.read())
 
-        event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment=task)))
+        event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='FR3')))
+        event_files += sorted(list(json_reader.aggregate_values('all_events',subject=subj_code,montage=montage,experiment='catFR3')))
         for fname in event_files:
             with open(fname,'rb') as f: hash_md5.update(f.read())
 

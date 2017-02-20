@@ -39,7 +39,6 @@ class RepetitionRatio(RamTask):
         # self.repetition_percentiles = joblib.load(path.join(self.pipeline.mount_point,self.workspace_dir,subject+'-repetition-percentiles.pkl'))
         all_recall_ratios_dict = joblib.load(path.join(path.dirname(self.get_workspace_dir()),'all_repetition_ratios_dict'))
         all_recall_ratios = np.array([np.nanmean(x) for x in all_recall_ratios_dict.itervalues()])
-        np.save(path.join(path.dirname(self.get_workspace_dir()),'all_repetition_ratios'),all_recall_ratios)
 
         self.pass_object('all_repetition_ratios',all_recall_ratios)
         self.pass_object('repetition_ratios',self.repetition_ratios)
@@ -129,7 +128,6 @@ class RepetitionRatio(RamTask):
             #     print 'Subject ',subject,'failed:'
             #     print 'events.shape: ', events.shape
             #     print e
-        joblib.dump(all_repetition_rates,path.join(path.dirname(self.pipeline.workspace_dir),'all_repetition_ratios_dict'))
         return all_repetition_rates
 
 def repetition_ratio(recall_list):
