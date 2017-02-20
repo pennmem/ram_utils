@@ -121,7 +121,7 @@ report_pipeline.add_task(ComputeTTest(params=params, mark_as_completed=False))
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 
 if params.doConf_classification:
-    report_pipeline.add_task(ComputeClassifier_conf(params=params, mark_as_completed=True))
+    report_pipeline.add_task(ComputeClassifier_conf(params=params, mark_as_completed=False))
 
 if params.doDist_classification:
     report_pipeline.add_task(ComputeClassifier_distThresh(params=params, mark_as_completed=True))
