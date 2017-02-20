@@ -44,11 +44,11 @@ class FR1EventPreparation(ReportRamTask):
 
         fr1_events = load_events(subject,experiment='FR1',mount_point=self.pipeline.mount_point,*[s for s in sessions if s <100])
         assert len(fr1_events)>0
-        catfr1_events = load_events(subject,experiment='catFR1',mount_point=self.pipeline.mount_point,*[s for s in sessions if s>100])
+        catfr1_events = load_events(subject,experiment='catFR1',mount_point=self.pipeline.mount_point,*[s-100 for s in sessions if s>=100])
         assert len(catfr1_events)>0
         self.pass_object('cat_events',catfr1_events)
         catfr1_events = catfr1_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'iscorrect', 'answer', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
-
+        catfr1_events.session += 100
         events = np.hstack((fr1_events,catfr1_events)).view(np.recarray)
         self.pass_object('all_events', events)
 

@@ -10,6 +10,7 @@ from RamPipeline import *
 from ReportUtils import ReportRamTask
 
 import hashlib
+from ReportTasks.RamTaskMethods import load_events
 
 
 class EventPreparation(ReportRamTask):
@@ -35,43 +36,12 @@ class EventPreparation(ReportRamTask):
     def run(self):
         subject = self.pipeline.subject
         task = self.pipeline.task
-        tmp = subject.split('_')
-        subj_code = tmp[0]
-        montage = 0 if len(tmp)==1 else int(tmp[1])
-
-        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
-
-        events = None
-
-
-        event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment=task)))
-
-        for sess_file in event_files:
-            e_path = os.path.join(self.pipeline.mount_point, sess_file)
-            print e_path
-            e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
-
-            sess_events = e_reader.read()
-
-            if events is None:
-                events = sess_events
-            else:
-                events = np.hstack((events,sess_events))
+        fr_sessions=[s for s in self.pipeline.sessions if s<100]
+        catfr_sessions=[s-100 for s in self.pipeline.sessions if s>=100]
+        events = load_events(subject,experiment=task,mount_point=self.pipeline.mount_point,*fr_sessions)
         fr_event_fields=list(events.dtype.names)
 
-        cat_event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='cat'+task)))
-        cat_events = None
-        for sess_file in cat_event_files:
-            e_path = os.path.join(self.pipeline.mount_point, sess_file)
-            print e_path
-            e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
-
-            sess_events = e_reader.read()
-
-            if cat_events is None:
-                cat_events = sess_events
-            else:
-                cat_events = np.hstack((events,sess_events))
+        cat_events=load_events(subject=subject, experiment='cat'+task,mount_point=self.pipeline.mount_point,*catfr_sessions)
 
         self.pass_object('cat_events',cat_events[cat_events.type=='WORD'].view(np.recarray))
 
