@@ -42,7 +42,7 @@ class RepetitionRatio(RamTask):
         all_recall_ratios_dict = joblib.load(
             path.join(path.dirname(self.get_workspace_dir()), 'all_repetition_ratios_dict'))
         all_recall_ratios = np.array([np.nanmean(x) for x in all_recall_ratios_dict.itervalues()])
-        np.save(path.join(path.dirname(self.get_workspace_dir()), 'all_repetition_ratios'), all_recall_ratios)
+
 
         self.pass_object('all_repetition_ratios', all_recall_ratios)
         self.pass_object('repetition_ratios', self.repetition_ratios)
@@ -85,9 +85,12 @@ class RepetitionRatio(RamTask):
                 len(all_recall_ratios.flat))
 
     def initialize_repetition_ratio(self):
+        print self.pipeline.mount_point
+        r1 = path.join(self.pipeline.mount_point,'protocols/r1.json')
+        print 'r1 location: ',r1
         task = self.pipeline.task
-        j_reader = JsonIndexReader('/protocols/r1.json')
-        subjects = j_reader.subjects(experiment='catFR1')
+        json_reader = JsonIndexReader(path.join(self.pipeline.mount_point,'protocols/r1.json'))
+        subjects = json_reader.subjects(experiment='catFR1')
         all_repetition_rates = {}
 
         for subject in subjects:
@@ -98,8 +101,6 @@ class RepetitionRatio(RamTask):
                                   'type','eegoffset', 'recalled', 'item_name', 'intrusion', 'montage','list',
                                   'eegfile', 'msoffset']
                 evs_field_list += ['category', 'category_num']
-
-                json_reader = JsonIndexReader(path.join('/', 'protocols/r1.json'))
 
                 event_files = sorted(
                     list(json_reader.aggregate_values('all_events', subject=subject,experiment='catFR1')))
@@ -133,8 +134,6 @@ class RepetitionRatio(RamTask):
             except Exception as e:
                 print 'Subject ', subject, 'failed:'
                 print e
-        joblib.dump(all_repetition_rates,
-                    path.join(path.dirname(self.pipeline.workspace_dir), 'all_repetition_ratios_dict'))
         return all_repetition_rates
 
 

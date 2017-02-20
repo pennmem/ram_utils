@@ -9,10 +9,10 @@ from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--subject','R1157C')
-cml_parser.arg('--workspace-dir','/scratch/RAM_maint/automated_reports_json/PS2.1_TH')
+cml_parser.arg('--workspace-dir','/scratch/leond/PS2_TH')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
-cml_parser.arg('--task','PS2.1')
+cml_parser.arg('--task','PS2')
 
 # cml_parser.arg('--exit-on-no-change')
 

@@ -140,8 +140,6 @@ class RepetitionRatio(RamTask):
             except Exception as e:
                 print 'Subject ', subject, 'failed:'
                 print e
-        joblib.dump(all_repetition_rates,
-                    path.join(path.dirname(self.pipeline.workspace_dir), 'all_repetition_ratios_dict'))
         return all_repetition_rates
 
 

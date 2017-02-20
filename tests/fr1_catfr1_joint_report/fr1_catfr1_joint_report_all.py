@@ -89,7 +89,7 @@ for subject in subjects:
     # sets up processing pipeline
     # report_pipeline = ReportPipeline(subject=subject,
     #                                  task='RAM_FR1_CatFR1_joint',
-    #                                  experiment='RAM_FR1_CatFR1_joint',
+    #                                  experiment='RAM_FR1_CatF R1_joint',
     #                                  workspace_dir=join(args.workspace_dir, subject),
     #                                  mount_point=args.mount_point,
     #                                  exit_on_no_change=args.exit_on_no_change,

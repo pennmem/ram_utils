@@ -10,6 +10,7 @@ from numpy.lib.recfunctions import append_fields
 import hashlib
 
 from RamPipeline import *
+import os
 
 def split_subject(subject):
     tmp = subject.split('_')
@@ -106,15 +107,21 @@ class TH1EventPreparation(RamTask):
         # print 'old_sessions: ',old_sessions
         # print 'old_sessions.dtype: ',old_sessions.dtype
         # self.pass_object('old_sessions',old_sessions)
-        score_path = os.path.join(self.pipeline.mount_point , 'data', 'events', 'RAM_'+task, self.pipeline.subject + '_score.mat')
-        # score_events = self.loadmat(score_path)
-        score_events = spio.loadmat(score_path,squeeze_me=True,struct_as_record=True)
-        score_events = score_events['events'].view(np.recarray)
-        self.pass_object(task+'_score_events', score_events)
+        # score_path = os.path.join(self.pipeline.mount_point , 'data', 'events', 'RAM_'+task, self.pipeline.subject + '_score.mat')
+        # # score_events = self.loadmat(score_path)
 
-        timing_path = os.path.join(self.pipeline.mount_point , 'data', 'events', 'RAM_'+task, self.pipeline.subject + '_timing.mat')
-        timing_events = self.loadmat(timing_path)
-        self.pass_object(task+'_time_events', timing_events)
+        sessions = np.unique(events.session)
+        scores  = []
+        for session in sessions:
+            with open(os.path.join(self.pipeline.mount_point,'protocols','r1','subjects',subj_code,'experiments','TH1',
+                'sessions',str(session),'behavioral','current_source','logs','totalScore.txt')) as session_score:
+                scores.append(int(session_score.read().strip()))
+
+        self.pass_object('scores', scores)
+        #
+        # timing_path = os.path.join(self.pipeline.mount_point , 'data', 'events', 'RAM_'+task, self.pipeline.subject + '_timing.mat')
+        # timing_events = self.loadmat(timing_path)
+        # self.pass_object(task+'_time_events', timing_events)
 
         # timing_info = dict()
         # if isinstance(timing_events['events'], spio.matlab.mio5_params.mat_struct):

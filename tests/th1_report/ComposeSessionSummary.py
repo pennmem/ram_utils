@@ -46,8 +46,8 @@ class ComposeSessionSummary(ReportRamTask):
         chest_events = self.get_passed_object(task + '_chest_events')
         rec_events = self.get_passed_object(task + '_rec_events')
         all_events = self.get_passed_object(task + '_all_events')
-        score_events = self.get_passed_object(task + '_score_events')
-        time_events = self.get_passed_object(task + '_time_events')
+        scores = self.get_passed_object('scores')
+        # time_events = self.get_passed_object(task + '_time_events')
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bp_tal_structs = self.get_passed_object('bp_tal_structs')
 
@@ -74,21 +74,22 @@ class ComposeSessionSummary(ReportRamTask):
         session_data = []
 
         # create session table info
-        for session,i in zip(sessions,range(len(sessions))):
+        for i,session in enumerate(sessions):
             # filter to just current session
             session_events = events[events.session == session]
             n_sess_events = len(session_events)
 
             session_rec_events = rec_events[rec_events.session == session]
             session_all_events = all_events[all_events.session == session]
-            try:
-                session_score = score_events['sessionScore'][i]
-            except IndexError:
-                session_score = score_events['sessionScore']
-            try:
-                session_score = session_score[0,...]
-            except (TypeError,ValueError,IndexError):
-                pass
+            # try:
+            #     session_score = score_events['sessionScore'][i]
+            # except IndexError:
+            #     session_score = score_events['sessionScore']
+            # try:
+            #     session_score = session_score[0,...]
+            # except (TypeError,ValueError,IndexError):
+            #     pass
+            session_score=scores[i]
             # info about session
             timestamps = session_all_events.mstime
             first_time_stamp = np.min(timestamps)
