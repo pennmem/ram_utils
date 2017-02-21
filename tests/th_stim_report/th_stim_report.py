@@ -24,7 +24,7 @@ from THEventPreparation import THEventPreparation
 
 from EventPreparation import EventPreparation
 
-from ComputeTHPowers import ComputeTHPowers
+from ComputeTH1ClassPowers import ComputeTH1ClassPowers
 
 from ComputeClassifier import ComputeClassifier
 
@@ -77,7 +77,7 @@ params = Params()
 #         self.set_workspace_dir(workspace_dir)
 
 # sets up processing pipeline
-report_pipeline = ReportPipeline(subject=args.subject, task=args.task,experiment=args.task,
+report_pipeline = ReportPipeline(subject=args.subject, task=args.task,experiment=args.task, sessions=args.sessions,
                                  workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change,
                                  recompute_on_no_status=args.recompute_on_no_status)
 
@@ -95,7 +95,7 @@ report_pipeline.add_task(EventPreparation(mark_as_completed=False))
 
 report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(ComputeTHPowers(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputeTH1ClassPowers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 

@@ -50,7 +50,12 @@ class PAL1EventPreparation(ReportRamTask):
 
         json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
 
-        event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment=task)))
+        if self.pipeline.sessions is None:
+            event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment=task)))
+        else:
+            event_files =[json_reader.get_value('all_events',subject=subj_code,montage=montage,experiment=task,session=s)
+                          for s in self.pipeline.sessions]
+
         events = None
         for sess_file in event_files:
             e_path = os.path.join(self.pipeline.mount_point, str(sess_file))
