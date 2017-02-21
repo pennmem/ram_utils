@@ -1,6 +1,7 @@
 from RamPipeline import *
 
 import TextTemplateUtils
+from ReportTasks.RamTaskMethods import find_template,print_tex
 from PlotUtils import PlotData, BarPlotData, PanelPlot,PlotDataCollection
 from latex_table import latex_table
 
@@ -19,15 +20,59 @@ import shutil
 class GenerateTex(ReportRamTask):
     def __init__(self, mark_as_completed=True):
         super(GenerateTex,self).__init__(mark_as_completed)
+        self.title = ''
+        self.system_version = ''
+        self.__version__ = 3.9
 
-    def run(self):
+
+    def generate_tex(self):
         subject = self.pipeline.subject
         task = self.pipeline.task
 
-        # tex_session_template = task + '_session.tex.tpl'
-
         n_sess = self.get_passed_object('NUMBER_OF_SESSIONS')
         n_bps = self.get_passed_object('NUMBER_OF_ELECTRODES')
+        cumulative_summary = self.get_passed_object('cumulative_summary')
+
+        cumulative_data_tex_table = latex_table(self.get_passed_object('SESSION_DATA'))
+
+        cumulative_ttest_tex_table = latex_table(self.get_passed_object('cumulative_ttest_data'))
+
+
+        cat_template = find_template('category_plots.tex.tpl')
+        cat_tex = TextTemplateUtils.replace_template_to_string(cat_template,
+                   {'<CATEGORY_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-irt_plot_combined.pdf'}
+                   )
+
+        replace_dict = {
+            '<PROB_RECALL_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-prob_recall_plot_combined.pdf',
+            '<CATEGORY_PLOTS>':cat_tex,
+            '<REPETITION_PLOT_FILE>': self.get_path_to_resource_in_workspace(
+                'reports/' + task + '-' + subject + '-repetition-ratio.pdf'),
+            '<DATE>': datetime.date.today(),
+            '<SESSION_DATA>': cumulative_data_tex_table,
+            '<SUBJECT>': subject.replace('_', '\\textunderscore'),
+            '<NUMBER_OF_SESSIONS>': n_sess,
+            '<NUMBER_OF_ELECTRODES>': n_bps,
+            '<N_WORDS>': cumulative_summary.n_words,
+            '<N_CORRECT_WORDS>': cumulative_summary.n_correct_words,
+            '<PC_CORRECT_WORDS>': '%.2f' % cumulative_summary.pc_correct_words,
+            '<N_PLI>': cumulative_summary.n_pli,
+            '<PC_PLI>': '%.2f' % cumulative_summary.pc_pli,
+            '<N_ELI>': cumulative_summary.n_eli,
+            '<PC_ELI>': '%.2f' % cumulative_summary.pc_eli,
+            '<N_MATH>': cumulative_summary.n_math,
+            '<N_CORRECT_MATH>': cumulative_summary.n_correct_math,
+            '<PC_CORRECT_MATH>': '%.2f' % cumulative_summary.pc_correct_math,
+            '<MATH_PER_LIST>': '%.2f' % cumulative_summary.math_per_list,
+            '<SIGNIFICANT_ELECTRODES>': cumulative_ttest_tex_table,
+            '<AUC>': cumulative_summary.auc,
+            '<PERM-P-VALUE>': cumulative_summary.perm_test_pvalue,
+            '<J-THRESH>': cumulative_summary.jstat_thresh,
+            '<J-PERC>': cumulative_summary.jstat_percentile,
+            '<ROC_AND_TERC_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-roc_and_terc_plot_combined.pdf'
+            }
+        fr1_template =find_template('FR1.tex.tpl')
+        return TextTemplateUtils.replace_template_to_string(fr1_template, replace_dict)
 
         # session_summary_array = self.get_passed_object('session_summary_array')
         # session_ttest_data = self.get_passed_object('session_ttest_data')
@@ -71,46 +116,14 @@ class GenerateTex(ReportRamTask):
         #     TextTemplateUtils.replace_template(template_file_name=tex_session_template, out_file_name=report_tex_file_name, replace_dict=replace_dict)
         #
         # self.pass_object('report_tex_file_names', report_tex_file_names)
+    def run(self):
+        subject=self.pipeline.subject
 
-        tex_combined_template = task + '_combined.tex.tpl'
         combined_report_tex_file_name = '%s_FR1_catFR1_joined_report.tex' % subject
 
         self.set_file_resources_to_move(combined_report_tex_file_name, dst='reports')
 
-        cumulative_summary = self.get_passed_object('cumulative_summary')
-
-        cumulative_data_tex_table = latex_table(self.get_passed_object('SESSION_DATA'))
-
-        cumulative_ttest_tex_table = latex_table(self.get_passed_object('cumulative_ttest_data'))
-
-        replace_dict = {'<PROB_RECALL_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-prob_recall_plot_combined.pdf',
-                        '<IRT_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-irt_plot_combined.pdf',
-                        '<REPETITION_PLOT_FILE>':self.get_path_to_resource_in_workspace('reports/'+task + '-'+subject + '-repetition-ratio.pdf'),
-                        '<DATE>': datetime.date.today(),
-                        '<SESSION_DATA>': cumulative_data_tex_table,
-                        '<SUBJECT>': subject.replace('_','\\textunderscore'),
-                        '<NUMBER_OF_SESSIONS>': n_sess,
-                        '<NUMBER_OF_ELECTRODES>': n_bps,
-                        '<N_WORDS>': cumulative_summary.n_words,
-                        '<N_CORRECT_WORDS>': cumulative_summary.n_correct_words,
-                        '<PC_CORRECT_WORDS>': '%.2f' % cumulative_summary.pc_correct_words,
-                        '<N_PLI>': cumulative_summary.n_pli,
-                        '<PC_PLI>': '%.2f' % cumulative_summary.pc_pli,
-                        '<N_ELI>': cumulative_summary.n_eli,
-                        '<PC_ELI>': '%.2f' % cumulative_summary.pc_eli,
-                        '<N_MATH>': cumulative_summary.n_math,
-                        '<N_CORRECT_MATH>': cumulative_summary.n_correct_math,
-                        '<PC_CORRECT_MATH>': '%.2f' % cumulative_summary.pc_correct_math,
-                        '<MATH_PER_LIST>': '%.2f' % cumulative_summary.math_per_list,
-                        '<SIGNIFICANT_ELECTRODES>': cumulative_ttest_tex_table,
-                        '<AUC>': cumulative_summary.auc,
-                        '<PERM-P-VALUE>': cumulative_summary.perm_test_pvalue,
-                        '<J-THRESH>': cumulative_summary.jstat_thresh,
-                        '<J-PERC>': cumulative_summary.jstat_percentile,
-                        '<ROC_AND_TERC_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-roc_and_terc_plot_combined.pdf'
-                        }
-
-        TextTemplateUtils.replace_template(template_file_name=tex_combined_template, out_file_name=combined_report_tex_file_name, replace_dict=replace_dict)
+        print_tex(self,combined_report_tex_file_name)
 
         self.pass_object('combined_report_tex_file_name', combined_report_tex_file_name)
 

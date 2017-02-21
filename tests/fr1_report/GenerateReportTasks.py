@@ -27,7 +27,7 @@ class GenerateTex(ReportRamTask):
     def generate_tex(self):
         subject = self.pipeline.subject
         task = self.pipeline.task
-        task_template = find_template('{task}.tex.tpl'.format(task=task))
+        task_template = find_template('FR1.tex.tpl')
 
         # tex_session_template = task + '_session.tex.tpl'
 
