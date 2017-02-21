@@ -45,12 +45,12 @@ class TH1EventPreparation(RamTask):
         montage = 0 if len(tmp) == 1 else int(tmp[1])
 
         json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
-        event_files = sorted(list(json_reader.aggregate_values('task_events',subject=subj_code,montage=montage,
+        if self.pipeline.sessions is None:
+            event_files = sorted(list(json_reader.aggregate_values('task_events',subject=subj_code,montage=montage,
                                                                experiment=task)))
-        print 'subj_code: ',subj_code
-        print 'montage: ',montage
-        print 'task: ',task
-        print 'event_files: ',event_files
+        else:
+            event_files = [json_reader.get_value('task_events',subject=subj_code,montage=montage,experiment=task,
+                                                        session=s) for s in self.pipeline.sessions]
 
         # removing stim fileds that shouldn't be in non-stim experiments
         evs_field_list = ['mstime','type','item_name','trial','block','chestNum','locationX','locationY','chosenLocationX',
@@ -60,11 +60,11 @@ class TH1EventPreparation(RamTask):
                           ]
         events=None
         for sess_file in event_files:
-            e_path=os.path.join(self.pipeline.mount_point, str(sess_file))
+            e_path=os.path.join(self.pipeline.mount_point,sess_file )
             e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
             sess_events = e_reader.read()[evs_field_list]
             events = sess_events if events is None else np.hstack((events,sess_events))
-
+        events=events.view(np.recarray)
         # change the item field name to item_name to not cause issues with item()
         ev_order = np.argsort(events, order=('session','trial','mstime'))
         events = events[ev_order]

@@ -24,8 +24,14 @@ class EventPreparation(ReportRamTask):
 
 
         json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
-        event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage,
+
+
+        if self.pipeline.sessions is None:
+            event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage,
                                                                experiment=task)))
+        else:
+            event_files = [json_reader.get_value('task_events',subject=subj_code,montage=montage,
+                                                 experiment=task,session=s) for s in self.pipeline.sessions]
 
         evs_field_list = ['mstime', 'type','item_name','stim_list', 'trial', 'block', 'chestNum', 'locationX', 'locationY',
                           'chosenLocationX',
