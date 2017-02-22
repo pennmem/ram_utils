@@ -7,7 +7,8 @@ from system_3_utils.ElectrodeConfigSystem3 import contacts_json_2_configuration_
 # from ElectrodeConfigSystem3 import contacts_json_2_configuration_csv
 
 cml_parser = OdinConfigToolGeneratorParser(arg_count_threshold=1)
-subject = 'R1250N'
+# subject = 'R1250N'
+subject = 'R1111M'
 localization='0'
 
 cml_parser.arg('--subject',subject)
