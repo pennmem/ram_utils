@@ -104,7 +104,8 @@ class Params(object):
         self.fr1_retrieval_end_time = 0.0
         self.fr1_retrieval_buf = 0.524
 
-        self.retrieval_samples_weight = 2.4
+        self.retrieval_samples_weight = 2.5
+        # self.encoding_samples_weight = 2.5
 
 
         self.filt_order = 4
