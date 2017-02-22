@@ -18,7 +18,7 @@
             "biomarker_sample_time_length": "1366",
             "buffer_time": "1000",
             "stim_duration": "500",
-            "freq_min": "3",
+            "freq_min": "6",
             "freq_max": "180",
             "num_freqs": "8",
             "num_items": "300"

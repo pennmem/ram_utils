@@ -10,17 +10,30 @@ from os.path import *
 from system_3_utils.ram_tasks.CMLParserClosedLoop3 import CMLParserCloseLoop3
 
 cml_parser = CMLParserCloseLoop3(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','D:/scratch/R1247P_1')
-cml_parser.arg('--experiment','CatFR3')
+# cml_parser.arg('--workspace-dir','D:/scratch/FR5/R1247P')
+# cml_parser.arg('--experiment','FR5')
+# cml_parser.arg('--mount-point','D:/')
+# cml_parser.arg('--subject','R1247P')
+# cml_parser.arg('--electrode-config-file',r'd:\experiment_configs\R1247P_FR5.bin')
+# cml_parser.arg('--pulse-frequency','100')
+# cml_parser.arg('--target-amplitude','1000')
+# cml_parser.arg('--anode-num','95')
+# cml_parser.arg('--anode','Rd7')
+# cml_parser.arg('--cathode-num','97')
+# cml_parser.arg('--cathode','RE1')
+
+cml_parser.arg('--workspace-dir','D:/scratch/FR5/R1111M')
+cml_parser.arg('--experiment','FR5')
 cml_parser.arg('--mount-point','D:/')
-cml_parser.arg('--subject','R1247P_1')
-cml_parser.arg('--electrode-config-file',r'd:\experiment_configs\R1247P_FR3.bin')
+cml_parser.arg('--subject','R1111M')
+cml_parser.arg('--electrode-config-file',r'd:\experiment_configs\R1111M_FR5.bin')
 cml_parser.arg('--pulse-frequency','100')
 cml_parser.arg('--target-amplitude','1000')
-cml_parser.arg('--anode-num','95')
-cml_parser.arg('--anode','Rd7')
-cml_parser.arg('--cathode-num','97')
-cml_parser.arg('--cathode','RE1')
+cml_parser.arg('--anode-num','10')
+cml_parser.arg('--anode','LPOG10')
+cml_parser.arg('--cathode-num','11')
+cml_parser.arg('--cathode','LPOG11')
+
 
 
 
@@ -40,17 +53,17 @@ args = cml_parser.parse()
 
 from RamPipeline import RamPipeline
 
-from tests.fr3_biomarker_json.FREventPreparation import FREventPreparation
+from tests.fr5_biomarker_json.FREventPreparation import FREventPreparation
 
-from tests.fr3_biomarker_json.ComputeFRPowers import ComputeFRPowers
+from tests.fr5_biomarker_json.ComputeFRPowers import ComputeFRPowers
 
-from tests.fr3_biomarker_json.MontagePreparation import MontagePreparation
+from tests.fr5_biomarker_json.MontagePreparation import MontagePreparation
 
 from system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
 
-from tests.fr3_biomarker_json.ComputeClassifier import ComputeClassifier
+from tests.fr5_biomarker_json.ComputeClassifier import ComputeClassifier
 
-from tests.fr3_biomarker_json.system3.ExperimentConfigGeneratorClosedLoop3 import ExperimentConfigGeneratorClosedLoop3
+from tests.fr5_biomarker_json.system3.ExperimentConfigGeneratorClosedLoop3 import ExperimentConfigGeneratorClosedLoop3
 
 
 import numpy as np
@@ -87,9 +100,16 @@ class Params(object):
         self.fr1_end_time = 1.366
         self.fr1_buf = 1.365
 
+        self.fr1_retrieval_start_time = -0.525
+        self.fr1_retrieval_end_time = 0.0
+        self.fr1_retrieval_buf = 0.524
+
+        self.retrieval_samples_weight = 2.4
+
+
         self.filt_order = 4
 
-        self.freqs = np.logspace(np.log10(3), np.log10(180), 8)
+        self.freqs = np.logspace(np.log10(6), np.log10(180), 8)
 
         self.log_powers = True
 

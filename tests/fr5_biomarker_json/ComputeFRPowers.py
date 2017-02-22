@@ -20,6 +20,7 @@ class ComputeFRPowers(RamTask):
         self.pow_mat = None
         self.samplerate = None
         self.wavelet_transform = MorletWaveletTransform()
+        self.wavelet_transform_retrieval = MorletWaveletTransform()
 
     def input_hashsum(self):
         subject = self.pipeline.subject
@@ -35,21 +36,21 @@ class ComputeFRPowers(RamTask):
         for fname in bp_paths:
             with open(fname,'rb') as f: hash_md5.update(f.read())
 
-        fr1_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR1')))
-        for fname in fr1_event_files:
-            with open(fname,'rb') as f: hash_md5.update(f.read())
-
-        catfr1_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='catFR1')))
-        for fname in catfr1_event_files:
-            with open(fname,'rb') as f: hash_md5.update(f.read())
-
-        fr3_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR3')))
-        for fname in fr3_event_files:
-            with open(fname,'rb') as f: hash_md5.update(f.read())
-
-        catfr3_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='catFR3')))
-        for fname in catfr3_event_files:
-            with open(fname,'rb') as f: hash_md5.update(f.read())
+        # fr1_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR1')))
+        # for fname in fr1_event_files:
+        #     with open(fname,'rb') as f: hash_md5.update(f.read())
+        #
+        # catfr1_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='catFR1')))
+        # for fname in catfr1_event_files:
+        #     with open(fname,'rb') as f: hash_md5.update(f.read())
+        #
+        # fr3_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR3')))
+        # for fname in fr3_event_files:
+        #     with open(fname,'rb') as f: hash_md5.update(f.read())
+        #
+        # catfr3_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='catFR3')))
+        # for fname in catfr3_event_files:
+        #     with open(fname,'rb') as f: hash_md5.update(f.read())
 
         return hash_md5.digest()
 
@@ -76,15 +77,24 @@ class ComputeFRPowers(RamTask):
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
 
+
+
         self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
 
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
 
+
+
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
         joblib.dump(self.samplerate, self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
 
     def compute_powers(self, events, sessions, monopolar_channels , bipolar_pairs):
+
+        retrieval_events_mask = (events.type == 'REC_WORD') | (events.type == 'REC_BASE')
+        encoding_events_mask = (events.type == 'WORD')
+
+
         n_freqs = len(self.params.freqs)
         n_bps = len(bipolar_pairs)
 
@@ -113,6 +123,16 @@ class ComputeFRPowers(RamTask):
 
             eegs = eeg_reader.read().add_mirror_buffer(duration=self.params.fr1_buf)
 
+
+            eeg_retrieval_reader = EEGReader(events=sess_events, channels=monopolar_channels,
+                                   start_time=self.params.fr1_retrieval_start_time,
+                                   end_time=self.params.fr1_retrieval_end_time, buffer_time=0.0)
+
+            eegs_retrieval = eeg_retrieval_reader.read().add_mirror_buffer(duration=self.params.fr1_retrieval_buf)
+
+
+
+
             # mirroring
             # eegs[...,:1365] = eegs[...,2730:1365:-1]
             # eegs[...,2731:4096] = eegs[...,2729:1364:-1]
@@ -121,11 +141,23 @@ class ComputeFRPowers(RamTask):
 
             if self.samplerate is None:
                 self.samplerate = float(eegs.samplerate)
+
+                # encoding
                 winsize = int(round(self.samplerate*(self.params.fr1_end_time-self.params.fr1_start_time+2*self.params.fr1_buf)))
                 bufsize = int(round(self.samplerate*self.params.fr1_buf))
                 print 'samplerate =', self.samplerate, 'winsize =', winsize, 'bufsize =', bufsize
                 pow_ev = np.empty(shape=n_freqs*winsize, dtype=float)
                 self.wavelet_transform.init(self.params.width, self.params.freqs[0], self.params.freqs[-1], n_freqs, self.samplerate, winsize)
+
+                # retrieval
+                winsize_retrieval = int(round(self.samplerate*(self.params.fr1_retrieval_end_time-self.params.fr1_retrieval_start_time+2*self.params.fr1_retrieval_buf)))
+                bufsize_retrieval = int(round(self.samplerate*self.params.fr1_retrieval_buf))
+                print 'samplerate =', self.samplerate, 'winsize_retrieval =', winsize_retrieval, 'bufsize_retrieval =', bufsize_retrieval
+                pow_ev_retrieval = np.empty(shape=n_freqs*winsize_retrieval, dtype=float)
+                self.wavelet_transform_retrieval.init(self.params.width, self.params.freqs[0], self.params.freqs[-1], n_freqs, self.samplerate, winsize_retrieval)
+
+
+
 
             print 'Computing FR1/catFR1 powers'
 
@@ -141,22 +173,28 @@ class ComputeFRPowers(RamTask):
                 bp_data = np.subtract(eegs[elec1],eegs[elec2])
                 bp_data.attrs['samplerate'] = self.samplerate
 
+
+                bp_data_retrieval = np.subtract(eegs_retrieval[elec1],eegs_retrieval[elec2])
+                bp_data_retrieval.attrs['samplerate'] = self.samplerate
+
+
+
                 # bp_data = eegs[elec1] - eegs[elec2]
                 # bp_data = eegs[elec1] - eegs[elec2]
                 # bp_data = eegs.values[elec1] - eegs.values[elec2]
 
                 bp_data = bp_data.filtered([58,62], filt_type='stop', order=self.params.filt_order)
+                bp_data_retrieval = bp_data_retrieval.filtered([58,62], filt_type='stop', order=self.params.filt_order)
+
                 for ev in xrange(n_events):
-                    self.wavelet_transform.multiphasevec(bp_data[ev][0:winsize], pow_ev)
-                    #if np.min(pow_ev) < 0.0:
-                    #    print ev, events[ev]
-                    #    joblib.dump(bp_data[ev], 'bad_bp_ev%d'%ev)
-                    #    joblib.dump(eegs[elec1][ev], 'bad_elec1_ev%d'%ev)
-                    #    joblib.dump(eegs[elec2][ev], 'bad_elec2_ev%d'%ev)
-                    #    print 'Negative powers detected'
-                    #    import sys
-                    #    sys.exit(1)
-                    pow_ev_stripped = np.reshape(pow_ev, (n_freqs,winsize))[:,bufsize:winsize-bufsize]
+                    if encoding_events_mask[ev]:
+                        self.wavelet_transform.multiphasevec(bp_data[ev][0:winsize], pow_ev)
+                        pow_ev_stripped = np.reshape(pow_ev, (n_freqs,winsize))[:,bufsize:winsize-bufsize]
+                    else:
+                        self.wavelet_transform_retrieval.multiphasevec(bp_data_retrieval[ev][0:winsize_retrieval], pow_ev_retrieval)
+                        pow_ev_stripped = np.reshape(pow_ev_retrieval, (n_freqs,winsize_retrieval))[:,bufsize_retrieval:winsize_retrieval-bufsize_retrieval]
+
+
                     if self.params.log_powers:
                         np.log10(pow_ev_stripped, out=pow_ev_stripped)
                     sess_pow_mat[ev,i,:] = np.nanmean(pow_ev_stripped, axis=1)
