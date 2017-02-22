@@ -23,7 +23,7 @@ from THEventPreparation import THEventPreparation
 from ControlEventPreparation import ControlEventPreparation
 from PSEventPreparation import PSEventPreparation
 
-from ComputeTHClassPowers import ComputeTHClassPowers
+from ComputeTH1ClassPowers import ComputeTH1ClassPowers
 from ComputeControlPowers import ComputeControlPowers
 from ComputePSPowers import ComputePSPowers
 
@@ -86,6 +86,7 @@ params = Params()
 
 report_pipeline = ReportPipeline(subject=args.subject,
                                  experiment=args.task,
+                                 sessions = args.sessions,
                                  workspace_dir=join(args.workspace_dir, args.subject),
                                  mount_point=args.mount_point,
                                  exit_on_no_change=args.exit_on_no_change,
@@ -99,7 +100,7 @@ report_pipeline.add_task(PSEventPreparation(mark_as_completed=False))
 
 report_pipeline.add_task(MontagePreparation(mark_as_completed=True))
 
-report_pipeline.add_task(ComputeTHClassPowers(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputeTH1ClassPowers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 

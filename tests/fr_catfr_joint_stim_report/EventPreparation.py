@@ -43,8 +43,13 @@ class EventPreparation(ReportRamTask):
 
         events = None
 
-
-        event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment=task)))
+        if self.pipeline.sessions is None:
+            event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment=task)))
+        else:
+            fr_sessions = [s for s in self.pipeline.sessions if s <100]
+            print 'fr sessions: ',fr_sessions
+            event_files = [json_reader.get_value('all_events',subject=subj_code,montage=montage,experiment=task,session=s)
+                           for s in fr_sessions]
 
         for sess_file in event_files:
             e_path = os.path.join(self.pipeline.mount_point, sess_file)
@@ -59,7 +64,14 @@ class EventPreparation(ReportRamTask):
                 events = np.hstack((events,sess_events))
         fr_event_fields=list(events.dtype.names)
 
-        cat_event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='cat'+task)))
+        if self.pipeline.sessions is None:
+            cat_event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='cat'+task)))
+        else:
+            catfr_sessions = [s-100 for s in self.pipeline.sessions if s>=100]
+            print 'catFR3 sessions: ', catfr_sessions
+            cat_event_files = [json_reader.get_value('all_events',subject=subj_code,montage=montage,experiment='cat'+task,session=s)
+                               for s in catfr_sessions]
+
         cat_events = None
         for sess_file in cat_event_files:
             e_path = os.path.join(self.pipeline.mount_point, sess_file)

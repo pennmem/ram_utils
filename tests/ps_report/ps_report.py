@@ -82,6 +82,7 @@ params = Params()
 
 report_pipeline = ReportPipeline(subject=args.subject,
                                  task=args.experiment,
+                                 sessions = args.sessions,
                                  workspace_dir=join(args.workspace_dir, args.subject),
                                  mount_point=args.mount_point,
                                  exit_on_no_change=args.exit_on_no_change,
@@ -89,7 +90,7 @@ report_pipeline = ReportPipeline(subject=args.subject,
 
 report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
 
-report_pipeline.add_task(PSEventPreparation(mark_as_completed=True))
+report_pipeline.add_task(PSEventPreparation(mark_as_completed=False))
 
 report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
 
