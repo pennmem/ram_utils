@@ -45,8 +45,6 @@ class FR1EventPreparation(ReportRamTask):
 
         json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
 
-        assert self.pipeline.sessions is not None
-
         if self.pipeline.sessions is None:
             event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='FR1')))
         else:
