@@ -12,10 +12,10 @@ from ReportUtils import CMLParser, ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
 
-cml_parser.arg('--subject','R1158T')
+cml_parser.arg('--subject','R1228M')
 # cml_parser.arg('--task','RAM_FR1')
 cml_parser.arg('--task','FR1')
-cml_parser.arg('--workspace-dir','/scratch/leond/FR_reports')
+cml_parser.arg('--workspace-dir','/scratch/leond/FR1_joint_reports')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
 # cml_parser.arg('--exit-on-no-change')
@@ -85,6 +85,7 @@ params = Params()
 # sets up processing pipeline
 report_pipeline = ReportPipeline(subject=args.subject,
                                  workspace_dir=join(args.workspace_dir, args.subject),
+                                 sessions = args.sessions,
                                  task='FR1_catFR1_joint',
                                  experiment='FR1_catFR1_joint',
                                  mount_point=args.mount_point,

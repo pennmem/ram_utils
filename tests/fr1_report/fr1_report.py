@@ -11,9 +11,9 @@ from os.path import *
 from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1111M')
-cml_parser.arg('--task','FR1')
-cml_parser.arg('--workspace-dir','/scratch/leond/FR1_reports')
+cml_parser.arg('--subject','R1202M')
+cml_parser.arg('--task','catFR1')
+cml_parser.arg('--workspace-dir','/scratch/leond/FR_reports')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
 # cml_parser.arg('--exit-on-no-change')
@@ -75,7 +75,7 @@ params = Params()
 
 
 # sets up processing pipeline
-report_pipeline = ReportPipeline(subject=args.subject, task=args.task,experiment=args.task,
+report_pipeline = ReportPipeline(subject=args.subject, task=args.task,experiment=args.task,sessions =args.sessions,
                                  workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change,
                                  recompute_on_no_status=args.recompute_on_no_status)
 
@@ -87,7 +87,7 @@ report_pipeline.add_task(MontagePreparation(params, mark_as_completed=False))
 if 'cat' in args.task:
     report_pipeline.add_task(RepetitionRatio(mark_as_completed=False))
 
-report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=False))
+report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeFR1HFPowers(params=params, mark_as_completed=True))
 

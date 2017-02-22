@@ -1,20 +1,20 @@
 #!/bin/bash
 
-subject=R1247P_1
-experiment=FR3
+subject=R1250N
+experiment=PAL3
 workspace=/scratch/pwanda/system3/$exeperiment
-electrode_config_file=/scratch/electrode_configs/R1247P_FR3.bin
-anode=RD7
-anode_num=95
-cathode=RE1
-cathode_num=97
+electrode_config_file=/scratch/electrode_configs/R1250N_PAL3.bin
+anode=PG10
+anode_num=10
+cathode=PG11
+cathode_num=11
 pulse_frequency=100
 target_amplitude=1000
 
 #cd ../../tests/fr3_biomarker_json/system3
 cd ../../
 
-python tests/fr3_biomarker_json/system3/fr3_util_system_3.py \
+python tests/pal3_biomarker_json/system3/pal3_util_system_3.py \
 --workspace-dir=$workspace \
 --experiment=$experiment \
 --electrode-config-file=$electrode_config_file \

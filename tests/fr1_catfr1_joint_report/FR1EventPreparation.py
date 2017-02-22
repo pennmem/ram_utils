@@ -45,7 +45,14 @@ class FR1EventPreparation(ReportRamTask):
 
         json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
 
-        event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='FR1')))
+        assert self.pipeline.sessions is not None
+
+        if self.pipeline.sessions is None:
+            event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='FR1')))
+        else:
+            fr1_sessions = [s for s in self.pipeline.sessions if s<100]
+            event_files = [json_reader.get_value('all_events',subject=subj_code,montage=montage,experiment='FR1', session=s)
+                           for s in fr1_sessions]
         fr1_events = None
         for sess_file in event_files:
             e_path = os.path.join(self.pipeline.mount_point, str(sess_file))
@@ -59,8 +66,13 @@ class FR1EventPreparation(ReportRamTask):
             else:
                 fr1_events = np.hstack((fr1_events,sess_events))
 
-        event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='catFR1')))
-        assert len(event_files)>0
+        if self.pipeline.sessions is None:
+            event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='catFR1')))
+        else:
+            catfr1_sessions =[s-100 for s in self.pipeline.sessions if s>=100]
+            event_files = [json_reader.get_value('all_events',subject=subj_code,montage=montage,experiment='catFR1',session=s)
+                           for s in catfr1_sessions]
+
         catfr1_events = None
         for sess_file in event_files:
             e_path = os.path.join(self.pipeline.mount_point, str(sess_file))

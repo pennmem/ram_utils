@@ -20,9 +20,9 @@ class CMLParserCloseLoop3(object):
         # self.parser.add_argument('--python-path', required=False, action='append')
         # self.parser.add_argument('--n-channels', required=True, action='store',type=int)
         self.parser.add_argument('--anode-num', required=True, action='store',type=int)
-        self.parser.add_argument('--anode', required=False, action='store',default='')
+        self.parser.add_argument('--anode', required=True, action='store',default='')
         self.parser.add_argument('--cathode-num', required=True, action='store',type=int)
-        self.parser.add_argument('--cathode', required=False, action='store',default='')
+        self.parser.add_argument('--cathode', required=True, action='store',default='')
 
         self.parser.add_argument('--pulse-frequency', required=True, action='store',type=int)
         # self.parser.add_argument('--pulse-duration', required=True, action='store',type=int)

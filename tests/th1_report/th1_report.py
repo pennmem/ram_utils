@@ -14,7 +14,7 @@ from ReportUtils import CMLParser,ReportPipeline
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1237C')
+cml_parser.arg('--subject','R1267J')
 cml_parser.arg('--task','TH1')
 cml_parser.arg('--workspace-dir','/scratch/leond/TH1_reports')
 cml_parser.arg('--mount-point','')
@@ -103,7 +103,7 @@ params = Params()
 
 
 # sets up processing pipeline
-report_pipeline = ReportPipeline(subject=args.subject, task=args.task,
+report_pipeline = ReportPipeline(subject=args.subject, task=args.task, sessions= args.sessions,
                                  workspace_dir=join(args.workspace_dir,args.subject),
                                  mount_point=args.mount_point,exit_on_no_change=args.exit_on_no_change,
                                  recompute_on_no_status=args.recompute_on_no_status)
@@ -121,7 +121,7 @@ report_pipeline.add_task(ComputeTTest(params=params, mark_as_completed=False))
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 
 if params.doConf_classification:
-    report_pipeline.add_task(ComputeClassifier_conf(params=params, mark_as_completed=True))
+    report_pipeline.add_task(ComputeClassifier_conf(params=params, mark_as_completed=False))
 
 if params.doDist_classification:
     report_pipeline.add_task(ComputeClassifier_distThresh(params=params, mark_as_completed=True))

@@ -82,7 +82,7 @@ params = Params()
 
 
 # # sets up processing pipeline
-report_pipeline = ReportPipeline(subject=args.subject, task=args.task,experiment=args.task,
+report_pipeline = ReportPipeline(subject=args.subject, task=args.task,experiment=args.task,sessions=args.sessions,
                                  workspace_dir=join(args.workspace_dir, args.subject),
                                  mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change,
                                  recompute_on_no_status=args.recompute_on_no_status)

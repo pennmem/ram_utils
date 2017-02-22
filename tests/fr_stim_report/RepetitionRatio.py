@@ -63,11 +63,11 @@ class RepetitionRatio(RamTask):
         all_recall_ratios = np.hstack([np.reshape(x,[1,-1]) for x in all_recall_ratios_dict.values()])
         all_recall_ratios.sort()
 
-        for session in sessions:
+        for i,session in enumerate(sessions):
             sess_events = recalls[recalls.session==session]
             lists = np.unique(sess_events.list)
             for lst in lists:
-                self.repetition_ratios[session,lst-1] = repetition_ratio(sess_events[sess_events.list == lst])
+                self.repetition_ratios[i,lst-1] = repetition_ratio(sess_events[sess_events.list == lst])
                 print 'list length: ',len(sess_events[sess_events.list==lst])
         self.get_percentiles(all_recall_ratios)
 
@@ -93,8 +93,8 @@ class RepetitionRatio(RamTask):
 
     def initialize_repetition_ratio(self):
         task = self.pipeline.task
-        j_reader = JsonIndexReader('/protocols/r1.json')
-        subjects = j_reader.subjects(experiment='catFR1')
+        json_reader = JsonIndexReader(self.pipeline.mount_point+'/protocols/r1.json')
+        subjects = json_reader.subjects(experiment='catFR1')
         all_repetition_rates = {}
     
         for subject in subjects:
@@ -110,8 +110,6 @@ class RepetitionRatio(RamTask):
                 subj_code = tmp[0]
                 montage = 0 if len(tmp) == 1 else int(tmp[1])
 
-                json_reader = JsonIndexReader(path.join('/','protocols/r1.json'))
-    
                 event_files = sorted(
                     list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='catFR1')))
                 events = None

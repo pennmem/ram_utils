@@ -26,7 +26,9 @@ class EvaluateClassifier(ComputeClassifier.ComputeClassifier):
         for fname in bp_paths:
             with open(fname,'rb') as f: hash_md5.update(f.read())
 
-        experiments = ['FR1','catFR1','FR3','catFR3']
+        task = self.pipeline.task
+
+        experiments = ['FR1','catFR1']+[task]
 
         for experiment in experiments:
             event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment=experiment)))
@@ -101,19 +103,19 @@ class EvaluateClassifier(ComputeClassifier.ComputeClassifier):
         self.pass_object(task+'_perm_AUCs', self.perm_AUCs)
         self.pass_object(task+'_pvalue', self.pvalue)
 
-    #     joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace('-'.join((subject, task, 'xval_output.pkl'))))
-    #     joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace('-'.join((subject, task, 'perm_AUCs.pkl'))))
-    #     joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace('-'.join((subject, task, 'pvalue.pkl'))))
-    #
-    # def restore(self):
-    #
-    #     subject = self.pipeline.subject
-    #     task = self.pipeline.task
-    #     self.xval_output = joblib.load(
-    #                 self.get_path_to_resource_in_workspace('-'.join((subject, task, 'xval_output.pkl'))))
-    #     self.perm_AUCs = joblib.load(self.get_path_to_resource_in_workspace('-'.join((subject, task, 'perm_AUCs.pkl'))))
-    #     self.pvalue = joblib.load(self.get_path_to_resource_in_workspace('-'.join((subject, task, 'pvalue.pkl'))))
-    #
-    #     self.pass_object(task + '_xval_output', self.xval_output)
-    #     self.pass_object(task + '_perm_AUCs', self.perm_AUCs)
-    #     self.pass_object(task + '_pvalue', self.pvalue)
+        joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace('-'.join((subject, task, 'xval_output.pkl'))))
+        joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace('-'.join((subject, task, 'perm_AUCs.pkl'))))
+        joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace('-'.join((subject, task, 'pvalue.pkl'))))
+
+    def restore(self):
+
+        subject = self.pipeline.subject
+        task = self.pipeline.task
+        self.xval_output = joblib.load(
+                    self.get_path_to_resource_in_workspace('-'.join((subject, task, 'xval_output.pkl'))))
+        self.perm_AUCs = joblib.load(self.get_path_to_resource_in_workspace('-'.join((subject, task, 'perm_AUCs.pkl'))))
+        self.pvalue = joblib.load(self.get_path_to_resource_in_workspace('-'.join((subject, task, 'pvalue.pkl'))))
+
+        self.pass_object(task + '_xval_output', self.xval_output)
+        self.pass_object(task + '_perm_AUCs', self.perm_AUCs)
+        self.pass_object(task + '_pvalue', self.pvalue)

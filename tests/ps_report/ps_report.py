@@ -9,7 +9,7 @@ from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--experiment','PS2.1')
-cml_parser.arg('--subject','R1202M')
+cml_parser.arg('--subject','R1236J')
 cml_parser.arg('--workspace-dir','/scratch/leond/FR_reports')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
@@ -82,6 +82,7 @@ params = Params()
 
 report_pipeline = ReportPipeline(subject=args.subject,
                                  task=args.experiment,
+                                 sessions = args.sessions,
                                  workspace_dir=join(args.workspace_dir, args.subject),
                                  mount_point=args.mount_point,
                                  exit_on_no_change=args.exit_on_no_change,
@@ -89,7 +90,7 @@ report_pipeline = ReportPipeline(subject=args.subject,
 
 report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
 
-report_pipeline.add_task(PSEventPreparation(mark_as_completed=True))
+report_pipeline.add_task(PSEventPreparation(mark_as_completed=False))
 
 report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
 

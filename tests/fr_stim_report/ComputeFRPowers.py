@@ -80,10 +80,13 @@ class ComputeFRPowers(ReportRamTask):
             catfr1_powers = None
 
         if (has_fr1 and fr1_powers is None) or (has_catfr1 and catfr1_powers is None):
-            params = self.params
-            self.pow_mat, events = compute_powers(events, monopolar_channels, bipolar_pairs,
-                                                  params.fr1_start_time, params.fr1_end_time, params.fr1_buf,
-                                                  params.freqs, params.log_powers)
+            try:
+                self.pow_mat=joblib.load(self.get_path_to_resource_in_workspace(subject+'-pow_mat.pkl'))
+            except IOError:
+                params = self.params
+                self.pow_mat, events = compute_powers(events, monopolar_channels, bipolar_pairs,
+                                                      params.fr1_start_time, params.fr1_end_time, params.fr1_buf,
+                                                      params.freqs, params.log_powers)
 
             self.pass_object('FR_events', events)
         elif fr1_powers is not None and catfr1_powers is not None:
