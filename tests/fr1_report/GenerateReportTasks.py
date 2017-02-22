@@ -200,16 +200,23 @@ class GeneratePlots(ReportRamTask):
             repetition_ratio = cumulative_summary.repetition_ratio
             all_repetition_ratios = self.get_passed_object('all_repetition_ratios')
             all_repetition_ratios=all_repetition_ratios[np.isfinite(all_repetition_ratios)]
-            all_rr_hist = np.histogram(all_repetition_ratios,range=[0.,1],bins=int(np.log2(all_repetition_ratios.size)+1))
+            nbins = max(10,int(np.log2(all_repetition_ratios.size)+1))
+            all_rr_hist = np.histogram(all_repetition_ratios,range=[0.,1],bins=nbins)
 
             mean_rr = np.nanmean(repetition_ratio)
-            hist = BarPlotData(y=all_rr_hist[0],x=all_rr_hist[1][1:],barcolors=['grey' for h in all_rr_hist[0]], xlim=[0,1],
-                    levelline=[[mean_rr,mean_rr],[0,max(all_rr_hist[0])]],barwidth=0.05, xlabel='(b)',
-                               ylabel='# of lists',xlabel_fontsize=18, ylabel_fontsize=24)
-            panel_plot.add_plot_data(0,1,plot_data=hist)
+            pd2 = PlotData(x=[],y=[],xlim=[0,1],ylim=[0,max(all_rr_hist[0])+0.1],
+            levelline=[[mean_rr,mean_rr],[0,max(all_rr_hist[0])]], xlabel='(b)',
+                           ylabel='# of lists', xlabel_fontsize=18, ylabel_fontsize=24)
+            # hist = BarPlotData(y=all_rr_hist[0],x=all_rr_hist[1][1:],barcolors=['grey' for h in all_rr_hist[0]], xlim=[0,1],
+            #         levelline=[[mean_rr,mean_rr],[0,max(all_rr_hist[0])]],barwidth=0.05, xlabel='(b)',
+            #                    ylabel='# of lists',xlabel_fontsize=18, ylabel_fontsize=24)
+            panel_plot.add_plot_data(0,1,plot_data=pd2)
             plot = panel_plot.generate_plot()
             percentile=np.nanmean(all_repetition_ratios<mean_rr)*100
-            plot.annotate(s='{:2}'.format(percentile),xy=(mean_rr,max(all_rr_hist[0])))
+            plot.annotate(s='{:2}th \n percentile'.format(percentile),xy=(mean_rr,max(all_rr_hist[0])),
+                          xytext=(mean_rr+0.1,max(all_rr_hist[0])*0.9),arrowprops={'arrowstyle':'->'})
+            plot.hist(all_repetition_ratios,bins = nbins,range=[0.,1.],
+                      color='grey',alpha=0.5)
             plot_out_fname = self.get_path_to_resource_in_workspace('reports/'+task + '-'+subject + '-category-plots.pdf')
             plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
