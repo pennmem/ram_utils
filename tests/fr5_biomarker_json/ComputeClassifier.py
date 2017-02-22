@@ -106,13 +106,25 @@ class ComputeClassifier(RamTask):
 
         return hash_md5.digest()
 
+    def get_auc(self, classifier, features, recalls, mask):
+
+        masked_recalls = recalls[mask]
+        probs = classifier.predict_proba(features[mask])[:, 1]
+        auc = roc_auc_score(masked_recalls, probs)
+        return auc
+
+
     def run_loso_xval(self, event_sessions, recalls, permuted=False,samples_weights=None, events=None):
         probs = np.empty_like(recalls, dtype=np.float)
 
         sessions = np.unique(event_sessions)
 
+        auc_encoding = np.empty(sessions.shape[0], dtype=np.float)
+        auc_retrieval = np.empty(sessions.shape[0], dtype=np.float)
+        auc_both = np.empty(sessions.shape[0], dtype=np.float)
 
-        for sess in sessions:
+
+        for sess_idx, sess in enumerate(sessions):
             insample_mask = (event_sessions != sess)
             insample_pow_mat = self.pow_mat[insample_mask]
             insample_recalls = recalls[insample_mask]
@@ -138,25 +150,57 @@ class ComputeClassifier(RamTask):
 
                 outsample_encoding_mask = (events.session == sess) & (events.type == 'WORD')
                 outsample_retrieval_mask = (events.session == sess) & ((events.type == 'REC_BASE') | (events.type == 'REC_WORD'))
+                outsample_both_mask = (events.session == sess)
 
-                outsample_encoding_recalls = recalls[outsample_encoding_mask]
-                outsample_retrieval_recalls = recalls[outsample_retrieval_mask]
+                auc_encoding[sess_idx] = self.get_auc(
+                    classifier=self.lr_classifier, features=self.pow_mat, recalls=recalls, mask=outsample_encoding_mask)
 
-                outsample_probs_encoding = self.lr_classifier.predict_proba(self.pow_mat[outsample_encoding_mask])[:, 1]
-                outsample_probs_retrieval = self.lr_classifier.predict_proba(self.pow_mat[outsample_retrieval_mask])[:, 1]
+                auc_retrieval[sess_idx] = self.get_auc(
+                    classifier=self.lr_classifier, features=self.pow_mat, recalls=recalls, mask=outsample_retrieval_mask)
 
-                outsample_encoding_auc = roc_auc_score(outsample_encoding_recalls, outsample_probs_encoding)
-                outsample_retrieval_auc = roc_auc_score(outsample_retrieval_recalls, outsample_probs_retrieval)
+                auc_both[sess_idx] = self.get_auc(
+                    classifier=self.lr_classifier, features=self.pow_mat, recalls=recalls, mask=outsample_both_mask)
 
 
-                print 'outsample_encoding_auc =', outsample_encoding_auc
-                print 'outsample_retrieval_auc= ', outsample_retrieval_auc
+                # outsample_encoding_recalls = recalls[outsample_encoding_mask]
+                # outsample_retrieval_recalls = recalls[outsample_retrieval_mask]
+                #
+                # outsample_probs_encoding = self.lr_classifier.predict_proba(self.pow_mat[outsample_encoding_mask])[:, 1]
+                # outsample_probs_retrieval = self.lr_classifier.predict_proba(self.pow_mat[outsample_retrieval_mask])[:, 1]
+                #
+                # outsample_encoding_auc = roc_auc_score(outsample_encoding_recalls, outsample_probs_encoding)
+                # outsample_retrieval_auc = roc_auc_score(outsample_retrieval_recalls, outsample_probs_retrieval)
+                #
+                #
+                # , outsample_encoding_auc
+                # print 'outsample_retrieval_auc= ', outsample_retrieval_auc
 
 
         if not permuted:
             self.xval_output[-1] = ModelOutput(recalls, probs)
             self.xval_output[-1].compute_roc()
             self.xval_output[-1].compute_tercile_stats()
+
+            # outsample_encoding_mask = (events.type == 'WORD')
+            # outsample_retrieval_mask =((events.type == 'REC_BASE') | (events.type == 'REC_WORD'))
+            #
+            # outsample_encoding_recalls = recalls[outsample_encoding_mask]
+            # outsample_retrieval_recalls = recalls[outsample_retrieval_mask]
+            #
+            # outsample_probs_encoding = self.lr_classifier.predict_proba(self.pow_mat[outsample_encoding_mask])[:, 1]
+            # outsample_probs_retrieval = self.lr_classifier.predict_proba(self.pow_mat[outsample_retrieval_mask])[:, 1]
+            #
+            # outsample_encoding_auc = roc_auc_score(outsample_encoding_recalls, outsample_probs_encoding)
+            # outsample_retrieval_auc = roc_auc_score(outsample_retrieval_recalls, outsample_probs_retrieval)
+            #
+            # print 'TOTAL outsample_encoding_auc =', outsample_encoding_auc
+            # print 'TOTAL outsample_retrieval_auc= ', outsample_retrieval_auc
+
+            print 'auc_encoding=',auc_encoding, np.mean(auc_encoding)
+            print 'auc_retrieval=',auc_retrieval, np.mean(auc_retrieval)
+            print 'auc_both=',auc_both, np.mean(auc_both)
+
+
 
         return probs
 
@@ -245,15 +289,17 @@ class ComputeClassifier(RamTask):
         recalls[events.type=='REC_WORD'] = 1
         recalls[events.type=='REC_BASE'] = 0
 
-        samples_weights = np.ones(events.shape[0])
+        samples_weights = np.ones(events.shape[0], dtype=np.float)
+
         samples_weights[~(events.type=='WORD')] = self.params.retrieval_samples_weight
+        # samples_weights[(events.type=='WORD')] = self.params.encoding_samples_weight
 
 
 
         sessions = np.unique(event_sessions)
         if len(sessions) > 1:
-            print 'Performing permutation test'
-            self.perm_AUCs = self.permuted_loso_AUCs(event_sessions, recalls, samples_weights)
+            # print 'Performing permutation test'
+            # self.perm_AUCs = self.permuted_loso_AUCs(event_sessions, recalls, samples_weights)
 
             print 'Performing leave-one-session-out xval'
             self.run_loso_xval(event_sessions, recalls, permuted=False,samples_weights=samples_weights, events=events)
