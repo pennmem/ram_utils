@@ -59,6 +59,10 @@ class ComputeFRPowers(ReportRamTask):
         subject = self.pipeline.subject
 
         events = self.get_passed_object('FR_events')
+        rec_events = self.get_passed_object('FR_rec_events')
+        rec_events = rec_events[rec_events.intrusion==0]
+        baseline_events=  self.get_passed_object('FR_baseline_events')
+        events=np.concatenate([events,rec_events,baseline_events]).view(np.recarray).sort('eegoffset')
 
         sessions = np.unique(events.session)
         print 'sessions:', sessions
