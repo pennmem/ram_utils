@@ -85,7 +85,7 @@ report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
 report_pipeline.add_task(MontagePreparation(params, mark_as_completed=False))
 
 if 'cat' in args.task:
-    report_pipeline.add_task(RepetitionRatio(mark_as_completed=False))
+    report_pipeline.add_task(RepetitionRatio(mark_as_completed=True))
 
 report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=True))
 
