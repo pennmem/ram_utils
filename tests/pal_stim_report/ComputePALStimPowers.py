@@ -13,7 +13,7 @@ from ptsa.data.readers.IndexReader import JsonIndexReader
 from ReportUtils import ReportRamTask
 
 import hashlib
-
+from ReportTasks.RamTaskMethods import compute_powers
 
 class ComputePALStimPowers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
@@ -66,8 +66,15 @@ class ComputePALStimPowers(ReportRamTask):
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
 
-        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
+        params = self.params
 
+        self.pow_mat, events = compute_powers(events, monopolar_channels, bipolar_pairs,
+                                              params.pal1_start_time, params.pal1_end_time, params.pal1_buf,
+                                              params.freqs, params.log_powers)
+        for session in sessions:
+            self.pow_mat[events.session==session] = zscore(self.pow_mat[events.session==session],axis=0,ddof=1)
+
+        self.pass_object(task+'_events',events)
         self.pass_object('pal_stim_pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
 

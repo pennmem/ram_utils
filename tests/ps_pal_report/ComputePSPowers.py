@@ -284,4 +284,3 @@ class ComputePSPowers(ReportRamTask):
             pow_mat_post = np.vstack((pow_mat_post,sess_pow_mat_post)) if pow_mat_post is not None else sess_pow_mat_post
 
         return pow_mat_pre,pow_mat_post
-

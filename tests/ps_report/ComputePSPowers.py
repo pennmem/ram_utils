@@ -14,6 +14,7 @@ from ptsa.data.readers import EEGReader,BaseRawReader
 from ReportUtils import ReportRamTask
 from ptsa.data.filters import MonopolarToBipolarMapper,MorletWaveletFilterCpp
 import hashlib
+from ReportTasks.RamTaskMethods import compute_powers
 
 
 class ComputePSPowers(ReportRamTask):
@@ -71,7 +72,39 @@ class ComputePSPowers(ReportRamTask):
         sessions = np.unique(events.session)
         print task, 'sessions:', sessions
 
-        ps_pow_mat_pre, ps_pow_mat_post = self.compute_ps_powers(events, sessions, monopolar_channels, bipolar_pairs, task)
+        params = self.params
+        pre_start_time = self.params.ps_start_time - self.params.ps_offset
+        pre_end_time = self.params.ps_end_time - self.params.ps_offset
+        post_start_time = self.params.ps_offset
+        post_end_time = self.params.ps_offset + (self.params.ps_end_time - self.params.ps_start_time)
+
+        ps_pow_mat_pre, pre_events = compute_powers(events, monopolar_channels, bipolar_pairs,
+                                              pre_start_time, pre_end_time, params.ps_buf,
+                                              params.freqs, params.log_powers)
+        ps_pow_mat_post, post_events = compute_powers(events, monopolar_channels, bipolar_pairs,
+                                              post_start_time, post_end_time, params.ps_buf,
+                                              params.freqs, params.log_powers)
+        events = np.intersect1d(pre_events,post_events).view(np.recarray)
+
+        ps_pow_mat_pre = ps_pow_mat_pre[np.in1d(pre_events,events)]
+        ps_pow_mat_post = ps_pow_mat_post[np.in1d(post_events,events)]
+
+        print 'ps_pow_mat_pre.shape: ',ps_pow_mat_pre.shape
+        print 'ps_pow_mat_post.shape: ',ps_pow_mat_post.shape
+        print 'events.shape: ',events.shape
+
+        for session in sessions:
+            joint_powers = zscore(np.concatenate((ps_pow_mat_pre[events.session==session],
+                                                  ps_pow_mat_post[events.session==session])),
+                                  axis=0,ddof=1)
+            n_events = (events.session==session).astype(np.int).sum()
+            ps_pow_mat_pre[events.session==session] = joint_powers[:n_events,...]
+            ps_pow_mat_post[events.session==session] = joint_powers[n_events:,...]
+
+
+        self.pass_object(task+'_events', events)
+
+        # ps_pow_mat_pre, ps_pow_mat_post = self.compute_ps_powers(events, sessions, monopolar_channels, bipolar_pairs, task)
 
         joblib.dump(ps_pow_mat_pre, self.get_path_to_resource_in_workspace(subject+'-'+task+'-ps_pow_mat_pre.pkl'))
         joblib.dump(ps_pow_mat_post, self.get_path_to_resource_in_workspace(subject+'-'+task+'-ps_pow_mat_post.pkl'))

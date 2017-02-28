@@ -14,6 +14,7 @@ import hashlib
 
 
 from ReportUtils import ReportRamTask
+from ReportTasks.RamTaskMethods import compute_powers
 
 class ComputePAL1HFPowers(ReportRamTask):
     def __init__(self, params,mark_as_completed=True):
@@ -64,8 +65,17 @@ class ComputePAL1HFPowers(ReportRamTask):
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
 
-        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
+        params=self.params
 
+        self.pow_mat,events=compute_powers(events,monopolar_channels, bipolar_pairs,
+                                               params.hfs_start_time,params.hfs_end_time,params.hfs_buf,
+                                               params.hfs,params.log_powers)
+        self.pow_mat = self.pow_mat.reshape((len(events),len(bipolar_pairs),-1))
+        for session in sessions:
+            self.pow_mat[events.session==session] = zscore(self.pow_mat[events.session==session],axis=0,ddof=1)
+        self.pow_mat = np.nanmean(self.pow_mat,axis=-1)
+
+        self.pass_object(task+'_events',events)
         self.pass_object('hf_pow_mat', self.pow_mat)
 
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-' + task + '-hf_pow_mat.pkl'))

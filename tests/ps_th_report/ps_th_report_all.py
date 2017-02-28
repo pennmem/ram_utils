@@ -64,7 +64,7 @@ class Params(object):
 
         self.filt_order = 4
 
-        self.freqs = np.logspace(np.log10(1.0), np.log10(200.0), 8)
+        self.classifier_freqs = np.logspace(np.log10(1.0), np.log10(200.0), 8)
 
         self.log_powers = True
 

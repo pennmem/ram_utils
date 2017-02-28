@@ -12,6 +12,7 @@ from sklearn.externals import joblib
 from ptsa.data.events import Events
 from ptsa.data.readers import EEGReader,BaseRawReader
 from ReportUtils import ReportRamTask
+from ReportTasks.RamTaskMethods import compute_powers
 
 class ComputePSPowers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
@@ -54,11 +55,34 @@ class ComputePSPowers(ReportRamTask):
         sessions = np.unique(events.session)
         print experiment, 'sessions:', sessions
 
-        ps_pow_mat_pre, ps_pow_mat_post = self.compute_ps_powers(events, sessions, monopolar_channels, bipolar_pairs, experiment)
+        params = self.params
+        pre_start_time = self.params.ps_start_time - self.params.ps_offset
+        pre_end_time = self.params.ps_end_time - self.params.ps_offset
+        post_start_time = self.params.ps_offset
+        post_end_time = self.params.ps_offset + (self.params.ps_end_time - self.params.ps_start_time)
+
+        ps_pow_mat_pre, pre_events = compute_powers(events, monopolar_channels, bipolar_pairs,
+                                              pre_start_time, pre_end_time, params.ps_buf,
+                                              params.freqs, params.log_powers)
+        ps_pow_mat_post, post_events = compute_powers(events, monopolar_channels, bipolar_pairs,
+                                              post_start_time, post_end_time, params.ps_buf,
+                                              params.freqs, params.log_powers)
+        for session in sessions:
+            joint_powers = zscore(np.concatenate((ps_pow_mat_pre[events.session==session],ps_pow_mat_post[events.session==session])),
+                                  axis=0,ddof=1)
+            n_events = (events.session==session).astype(np.int).sum()
+            ps_pow_mat_pre[events.session==session] = joint_powers[:n_events,...]
+            ps_pow_mat_post[events.session==session] = joint_powers[n_events:,...]
+
+        pre_events = pre_events.tolist()
+        post_events = post_events.tolist()
+
+        all_events = np.rec.array([event for event in pre_events if event in post_events],dtype=events.dtype)
 
         joblib.dump(ps_pow_mat_pre, self.get_path_to_resource_in_workspace(subject+'-'+experiment+'-ps_pow_mat_pre.pkl'))
         joblib.dump(ps_pow_mat_post, self.get_path_to_resource_in_workspace(subject+'-'+experiment+'-ps_pow_mat_post.pkl'))
 
+        self.pass_object(experiment+'_events',all_events)
         self.pass_object('ps_pow_mat_pre',ps_pow_mat_pre)
         self.pass_object('ps_pow_mat_post',ps_pow_mat_post)
 

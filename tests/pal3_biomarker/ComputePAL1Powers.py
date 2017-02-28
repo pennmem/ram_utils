@@ -8,7 +8,7 @@ from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from sklearn.externals import joblib
 
 from ptsa.data.readers import EEGReader
-
+from ReportTasks.RamTaskMethods import compute_powers
 
 class ComputePAL1Powers(RamTask):
     def __init__(self, params,mark_as_completed=True):
@@ -24,6 +24,11 @@ class ComputePAL1Powers(RamTask):
 
         self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
         self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
+        try:
+            events= joblib.load(self.get_path_to_resource_in_workspace(subject+'-pal1_events.pkl'))
+            self.pass_object('PAL1_events',events)
+        except IOError:
+            pass
 
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
@@ -39,13 +44,18 @@ class ComputePAL1Powers(RamTask):
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
 
-        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
+        # self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
+        self.pow_mat,events = compute_powers(events,monopolar_channels,bipolar_pairs,
+                                             self.params.pal1_start_time,self.params.pal1_end_time,self.params.pal1_buf,
+                                             self.params.freqs,self.params.log_powers)
 
+        self.pass_object('PAL1_events',events)
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
 
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
         joblib.dump(self.samplerate, self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
+        joblib.dump(events,self.get_path_to_resource_in_workspace(subject+'-pal1_events.pkl'))
 
     def compute_powers(self, events, sessions, monopolar_channels, bipolar_pairs):
         n_freqs = len(self.params.freqs)
