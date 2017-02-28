@@ -83,6 +83,8 @@ class ComputePSPowers(ReportRamTask):
                                               post_start_time, post_end_time, params.ps_buf,
                                               params.freqs, params.log_powers)
 
+        events=  pre_events if len(pre_events)<len(post_events) else post_events
+
         for session in sessions:
             joint_powers = zscore(np.concatenate((ps_pow_mat_pre[events.session==session],ps_pow_mat_post[events.session==session])),
                                   axis=0,ddof=1)
@@ -90,12 +92,12 @@ class ComputePSPowers(ReportRamTask):
             ps_pow_mat_pre[events.session==session] = joint_powers[:n_events,...]
             ps_pow_mat_post[events.session==session] = joint_powers[n_events:,...]
 
-        pre_events = pre_events.tolist()
-        post_events = post_events.tolist()
+        # pre_events = pre_events.tolist()
+        # post_events = post_events.tolist()
+        #
+        # all_events = np.rec.array([event for event in pre_events if event in post_events],dtype=events.dtype)
 
-        all_events = np.rec.array([event for event in pre_events if event in post_events],dtype=events.dtype)
-
-        self.pass_object(task+'_events', all_events)
+        self.pass_object(task+'_events', events)
 
         joblib.dump(ps_pow_mat_pre, self.get_path_to_resource_in_workspace(subject+'-'+task+'-ps_pow_mat_pre.pkl'))
         joblib.dump(ps_pow_mat_post, self.get_path_to_resource_in_workspace(subject+'-'+task+'-ps_pow_mat_post.pkl'))

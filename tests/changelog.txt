@@ -1,3 +1,7 @@
 
 11/21/2016
-: Switched to JSON-based reporting
+Switched to JSON-based reporting
+
+2:26/2017
+Began using a single function for all power decompositions
+Powers computed via multi-threading

@@ -82,21 +82,25 @@ class ComputePSPowers(ReportRamTask):
         ps_pow_mat_post, post_events = compute_powers(events, monopolar_channels, bipolar_pairs,
                                               post_start_time, post_end_time, params.ps_buf,
                                               params.freqs, params.log_powers)
+        events = np.intersect1d(pre_events,post_events).view(np.recarray)
+
+        ps_pow_mat_pre = ps_pow_mat_pre[np.in1d(pre_events,events)]
+        ps_pow_mat_post = ps_pow_mat_post[np.in1d(post_events,events)]
+
+        print 'ps_pow_mat_pre.shape: ',ps_pow_mat_pre.shape
+        print 'ps_pow_mat_post.shape: ',ps_pow_mat_post.shape
+        print 'events.shape: ',events.shape
 
         for session in sessions:
-            joint_powers = zscore(np.concatenate((ps_pow_mat_pre[events.session==session],ps_pow_mat_post[events.session==session])),
+            joint_powers = zscore(np.concatenate((ps_pow_mat_pre[events.session==session],
+                                                  ps_pow_mat_post[events.session==session])),
                                   axis=0,ddof=1)
             n_events = (events.session==session).astype(np.int).sum()
             ps_pow_mat_pre[events.session==session] = joint_powers[:n_events,...]
             ps_pow_mat_post[events.session==session] = joint_powers[n_events:,...]
 
 
-        pre_events = pre_events.tolist()
-        post_events = post_events.tolist()
-
-        all_events = np.rec.array([event for event in pre_events if event in post_events],dtype=events.dtype)
-
-        self.pass_object(task+'_events', all_events)
+        self.pass_object(task+'_events', events)
 
         # ps_pow_mat_pre, ps_pow_mat_post = self.compute_ps_powers(events, sessions, monopolar_channels, bipolar_pairs, task)
 

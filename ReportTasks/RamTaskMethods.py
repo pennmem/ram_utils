@@ -24,15 +24,17 @@ def compute_powers(events,monopolar_channels,bipolar_pairs,
     tic = time.time()
     filter_time=0.
     for sess in sessions:
-        print 'Loading for session {}'.format(sess)
+        print 'Loading EEG for session {}'.format(sess)
         sess_events = events[events.session==sess]
         # Load EEG
         eeg_reader = EEGReader(events=sess_events,channels=monopolar_channels,start_time=start_time,end_time=end_time)
         eeg = eeg_reader.read()
         if eeg_reader.removed_bad_data():
             print 'REMOVED SOME BAD EVENTS !!!'
-            events = np.concatenate(events[events.session !=sess],eeg['events'].data.view(np.recarray))
-            ev_order = np.argsort(events, order=('session', 'list', 'mstime'))
+            events = np.concatenate((events[events.session !=sess],eeg['events'].data.view(np.recarray))).view(np.recarray)
+            event_fields = events.dtype.names
+            order = tuple(f for f in ['session','list','mstime'] if f in event_fields)
+            ev_order = np.argsort(events, order=order)
             events = events[ev_order]
             #The task will have to actually handle passing the new events
         eeg=eeg.add_mirror_buffer(duration=buffer_time)
@@ -40,11 +42,11 @@ def compute_powers(events,monopolar_channels,bipolar_pairs,
         eeg= MonopolarToBipolarMapper(time_series=eeg,bipolar_pairs=bipolar_pairs).filter()
         #Butterworth filter to remove line noise
         eeg=eeg.filtered(freq_range=[58.,62.],filt_type='stop',order=filt_order)
-        print 'Computing power'
+        print 'Computing powers'
         filter_tic=time.time()
         sess_pow_mat,phase_mat=MorletWaveletFilterCpp(time_series=eeg,freqs = freqs,output='power', width=width,
                                                       cpus=25).filter()
-        filter_time +=  time.time()-filter_tic
+        print 'Total time for wavelet decomposition: %.5f s'%(time.time()-filter_tic)
         sess_pow_mat=sess_pow_mat.remove_buffer(buffer_time).data
 
         if log_powers:
@@ -54,8 +56,7 @@ def compute_powers(events,monopolar_channels,bipolar_pairs,
         pow_mat = sess_pow_mat if pow_mat is None else np.concatenate((pow_mat,sess_pow_mat))
 
     pow_mat = pow_mat.reshape((len(events),len(bipolar_pairs)*len(freqs)))
-    toc = time.time()
-    # print 'Total time elapsed: {}'.format(toc-tic)
+    print 'Total time elapsed: {}'.format(time.time()-tic)
     # print 'Time spent on wavelet filter: {}'.format(filter_time)
     return pow_mat,events
 

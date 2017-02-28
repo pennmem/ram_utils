@@ -12,6 +12,7 @@ from ptsa.data.readers.IndexReader import JsonIndexReader
 from ReportUtils import ReportRamTask
 
 import hashlib
+from ReportTasks.RamTaskMethods import compute_powers
 
 
 class ComputePAL1Powers(ReportRamTask):

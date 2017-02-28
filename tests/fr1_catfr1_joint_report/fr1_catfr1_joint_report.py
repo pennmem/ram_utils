@@ -15,8 +15,8 @@ cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--subject','R1228M')
 # cml_parser.arg('--task','RAM_FR1')
 cml_parser.arg('--task','FR1')
-cml_parser.arg('--workspace-dir','/scratch/leond/FR1_joint_reports')
-cml_parser.arg('--mount-point','')
+cml_parser.arg('--workspace-dir','/Volumes/rhino_root/scratch/leond/FR1_joint_reports')
+cml_parser.arg('--mount-point','/Volumes/rhino_root/')
 #cml_parser.arg('--recompute-on-no-status')
 # cml_parser.arg('--exit-on-no-change')
 
@@ -36,7 +36,7 @@ from FR1EventPreparation import FR1EventPreparation
 
 from RepetitionRatio import RepetitionRatio
 
-from ComputeFRPowers import ComputeFRPowers
+from ComputeFR1Powers import ComputeFR1Powers
 
 from MontagePreparation import MontagePreparation
 
@@ -98,7 +98,7 @@ report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=Fal
 
 report_pipeline.add_task(RepetitionRatio(mark_as_completed=True))
 
-report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeFR1HFPowers(params=params, mark_as_completed=True))
 
