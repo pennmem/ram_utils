@@ -13,7 +13,14 @@ from ptsa.data.readers.IndexReader import JsonIndexReader
 from ReportUtils import ReportRamTask
 
 import hashlib
-from ReportTasks.RamTaskMethods import compute_powers
+try:
+    from ReportTasks.RamTaskMethods import compute_powers
+except ImportError as ie:
+    if 'MorletWaveletFilterCpp' in ie.message:
+        print 'Update PTSA for better perfomance'
+        compute_powers = None
+    else:
+        raise ie
 
 class ComputeFRStimPowers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
@@ -75,13 +82,16 @@ class ComputeFRStimPowers(ReportRamTask):
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
 
         params = self.params
-        self.pow_mat,events=compute_powers(events,monopolar_channels, bipolar_pairs,
-                                               params.fr1_start_time,params.fr1_end_time,params.fr1_buf,
-                                               params.freqs,params.log_powers)
-        for session in sessions:
-            self.pow_mat[events.session==session] = zscore(self.pow_mat[events.session==session],axis=0,ddof=1)
+        if compute_powers is None:
+            self.compute_powers(events,sessions,monopolar_channels,bipolar_pairs)
+        else:
+            self.pow_mat,events=compute_powers(events,monopolar_channels, bipolar_pairs,
+                                                   params.fr1_start_time,params.fr1_end_time,params.fr1_buf,
+                                                   params.freqs,params.log_powers)
+            for session in sessions:
+                self.pow_mat[events.session==session] = zscore(self.pow_mat[events.session==session],axis=0,ddof=1)
 
-        self.pass_object(task+'_events',events)
+            self.pass_object(task+'_events',events)
 
         self.pass_object('fr_stim_pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)

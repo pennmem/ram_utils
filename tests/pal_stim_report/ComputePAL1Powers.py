@@ -11,7 +11,14 @@ from ptsa.data.readers import EEGReader
 from ReportUtils import ReportRamTask
 
 import hashlib
-from ReportTasks.RamTaskMethods import compute_powers
+try:
+    from ReportTasks.RamTaskMethods import compute_powers
+except ImportError as ie:
+    if 'MorletWaveletFilterCpp' in ie.message:
+        print 'Update PTSA for better perfomance'
+        compute_powers = None
+    else:
+        raise ie
 
 
 class ComputePAL1Powers(ReportRamTask):
@@ -67,11 +74,13 @@ class ComputePAL1Powers(ReportRamTask):
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
 
         params = self.params
-
-        self.pow_mat, events = compute_powers(events, monopolar_channels, bipolar_pairs,
-                                              params.pal1_start_time, params.pal1_end_time, params.pal1_buf,
-                                              params.freqs, params.log_powers)
-        self.pass_object('PAL1_events',events)
+        if compute_powers is None:
+            self.compute_powers(events,sessions,monopolar_channels,bipolar_pairs)
+        else:
+            self.pow_mat, events = compute_powers(events, monopolar_channels, bipolar_pairs,
+                                                  params.pal1_start_time, params.pal1_end_time, params.pal1_buf,
+                                                  params.freqs, params.log_powers)
+            self.pass_object('PAL1_events',events)
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
 

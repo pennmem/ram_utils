@@ -12,7 +12,14 @@ from sklearn.externals import joblib
 from ptsa.data.events import Events
 from ptsa.data.readers import EEGReader,BaseRawReader
 from ReportUtils import ReportRamTask
-from ReportTasks.RamTaskMethods import compute_powers
+try:
+    from ptsa.data.filters import MorletWaveletFilterCpp
+except ImportError as ie:
+    if 'MorletWaveletFilterCpp' in ie.message:
+        print('Please upgrade PTSA for improved performance')
+        MorletWaveletFilterCpp = None
+    else:
+        raise ie
 
 class ComputePSPowers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
@@ -61,28 +68,11 @@ class ComputePSPowers(ReportRamTask):
         post_start_time = self.params.ps_offset
         post_end_time = self.params.ps_offset + (self.params.ps_end_time - self.params.ps_start_time)
 
-        ps_pow_mat_pre, pre_events = compute_powers(events, monopolar_channels, bipolar_pairs,
-                                              pre_start_time, pre_end_time, params.ps_buf,
-                                              params.freqs, params.log_powers)
-        ps_pow_mat_post, post_events = compute_powers(events, monopolar_channels, bipolar_pairs,
-                                              post_start_time, post_end_time, params.ps_buf,
-                                              params.freqs, params.log_powers)
-        for session in sessions:
-            joint_powers = zscore(np.concatenate((ps_pow_mat_pre[events.session==session],ps_pow_mat_post[events.session==session])),
-                                  axis=0,ddof=1)
-            n_events = (events.session==session).astype(np.int).sum()
-            ps_pow_mat_pre[events.session==session] = joint_powers[:n_events,...]
-            ps_pow_mat_post[events.session==session] = joint_powers[n_events:,...]
-
-        pre_events = pre_events.tolist()
-        post_events = post_events.tolist()
-
-        all_events = np.rec.array([event for event in pre_events if event in post_events],dtype=events.dtype)
+        ps_pow_mat_pre, ps_pow_mat_post = self.compute_ps_powers(events, sessions, monopolar_channels, bipolar_pairs, experiment)
 
         joblib.dump(ps_pow_mat_pre, self.get_path_to_resource_in_workspace(subject+'-'+experiment+'-ps_pow_mat_pre.pkl'))
         joblib.dump(ps_pow_mat_post, self.get_path_to_resource_in_workspace(subject+'-'+experiment+'-ps_pow_mat_post.pkl'))
 
-        self.pass_object(experiment+'_events',all_events)
         self.pass_object('ps_pow_mat_pre',ps_pow_mat_pre)
         self.pass_object('ps_pow_mat_post',ps_pow_mat_post)
 
@@ -208,66 +198,101 @@ class ComputePSPowers(ReportRamTask):
             sess_pow_mat_pre = np.empty(shape=(n_events, n_bps, n_freqs), dtype=np.float)
             sess_pow_mat_post = np.empty_like(sess_pow_mat_pre)
 
-            for i,bp in enumerate(bipolar_pairs):
-                # bp = ti['channel_str']
-                print 'Computing powers for bipolar pair', bp
-                elec1 = np.where(monopolar_channels == bp[0])[0][0]
-                elec2 = np.where(monopolar_channels == bp[1])[0][0]
+            if MorletWaveletFilterCpp is None:
+                sess_pow_mat_pre = np.empty(shape=(n_events, n_bps, n_freqs), dtype=np.float)
+                sess_pow_mat_post = np.empty_like(sess_pow_mat_pre)
 
-            #
-            # for i,ti in enumerate(tal_info):
-            #     bp = ti['channel_str']
-            #     print 'Computing powers for bipolar pair', bp
-            #     elec1 = np.where(channels == bp[0])[0][0]
-            #     elec2 = np.where(channels == bp[1])[0][0]
+                for i, bp in enumerate(bipolar_pairs):
+                    # bp = ti['channel_str']
+                    print 'Computing powers for bipolar pair', bp
+                    elec1 = np.where(monopolar_channels == bp[0])[0][0]
+                    elec2 = np.where(monopolar_channels == bp[1])[0][0]
 
+                    bp_data_pre = np.subtract(eegs_pre[elec1], eegs_pre[elec2])
+                    # bp_data_pre.attrs['samplerate'] = samplerate
 
-                bp_data_pre = np.subtract(eegs_pre[elec1],eegs_pre[elec2])
-                # bp_data_pre.attrs['samplerate'] = samplerate
+                    bp_data_pre = bp_data_pre.filtered([58, 62], filt_type='stop', order=self.params.filt_order)
 
-                bp_data_pre = bp_data_pre.filtered([58,62], filt_type='stop', order=self.params.filt_order)
+                    for ev in xrange(n_events):
+                        # pow_pre_ev = phase_pow_multi(self.params.freqs, bp_data_pre[ev], to_return='power')
+                        self.wavelet_transform.multiphasevec(bp_data_pre[ev][0:winsize], pow_ev)
+                        # sess_pow_mat_pre[ev,i,:] = np.mean(pow_pre_ev[:,nb_:-nb_], axis=1)
+                        pow_ev_stripped = np.reshape(pow_ev, (n_freqs, winsize))[:, bufsize:winsize - bufsize]
+                        pow_zeros = np.where(pow_ev_stripped == 0.0)[0]
 
-                for ev in xrange(n_events):
-                    #pow_pre_ev = phase_pow_multi(self.params.freqs, bp_data_pre[ev], to_return='power')
-                    self.wavelet_transform.multiphasevec(bp_data_pre[ev][0:winsize], pow_ev)
-                    #sess_pow_mat_pre[ev,i,:] = np.mean(pow_pre_ev[:,nb_:-nb_], axis=1)
-                    pow_ev_stripped = np.reshape(pow_ev, (n_freqs,winsize))[:,bufsize:winsize-bufsize]
-                    pow_zeros = np.where(pow_ev_stripped==0.0)[0]
+                        if len(pow_zeros) > 0:
+                            print 'pre', bp, ev
+                            print sess_events[ev].eegfile, sess_events[ev].eegoffset
+                            self.raise_and_log_report_exception(
+                                exception_type='NumericalError',
+                                exception_message='Corrupt EEG File'
+                            )
 
-                    if len(pow_zeros)>0:
-                        print 'pre', bp, ev
-                        print sess_events[ev].eegfile, sess_events[ev].eegoffset
-                        self.raise_and_log_report_exception(
-                                                exception_type='NumericalError',
-                                                exception_message='Corrupt EEG File'
-                                                )
+                        if self.params.log_powers:
+                            np.log10(pow_ev_stripped, out=pow_ev_stripped)
+                        sess_pow_mat_pre[ev, i, :] = np.nanmean(pow_ev_stripped, axis=1)
 
-                    if self.params.log_powers:
-                        np.log10(pow_ev_stripped, out=pow_ev_stripped)
-                    sess_pow_mat_pre[ev,i,:] = np.nanmean(pow_ev_stripped, axis=1)
+                    bp_data_post = np.subtract(eegs_post[elec1], eegs_post[elec2])
+                    # bp_data_post.attrs['samplerate'] = samplerate
 
-                bp_data_post = np.subtract(eegs_post[elec1],eegs_post[elec2])
-                # bp_data_post.attrs['samplerate'] = samplerate
+                    bp_data_post = bp_data_post.filtered([58, 62], filt_type='stop', order=self.params.filt_order)
+                    for ev in xrange(n_events):
+                        # pow_post_ev = phase_pow_multi(self.params.freqs, bp_data_post[ev], to_return='power')
+                        self.wavelet_transform.multiphasevec(bp_data_post[ev][0:winsize], pow_ev)
+                        # sess_pow_mat_post[ev,i,:] = np.mean(pow_post_ev[:,nb_:-nb_], axis=1)
+                        pow_ev_stripped = np.reshape(pow_ev, (n_freqs, winsize))[:, bufsize:winsize - bufsize]
+                        pow_zeros = np.where(pow_ev_stripped == 0.0)[0]
 
-                bp_data_post = bp_data_post.filtered([58,62], filt_type='stop', order=self.params.filt_order)
-                for ev in xrange(n_events):
-                    #pow_post_ev = phase_pow_multi(self.params.freqs, bp_data_post[ev], to_return='power')
-                    self.wavelet_transform.multiphasevec(bp_data_post[ev][0:winsize], pow_ev)
-                    #sess_pow_mat_post[ev,i,:] = np.mean(pow_post_ev[:,nb_:-nb_], axis=1)
-                    pow_ev_stripped = np.reshape(pow_ev, (n_freqs,winsize))[:,bufsize:winsize-bufsize]
-                    pow_zeros = np.where(pow_ev_stripped==0.0)[0]
+                        if len(pow_zeros) > 0:
+                            print 'pre', bp, ev
+                            print sess_events[ev].eegfile, sess_events[ev].eegoffset
+                            self.raise_and_log_report_exception(
+                                exception_type='NumericalError',
+                                exception_message='Corrupt EEG File'
+                            )
 
-                    if len(pow_zeros)>0:
-                        print 'pre', bp, ev
-                        print sess_events[ev].eegfile, sess_events[ev].eegoffset
-                        self.raise_and_log_report_exception(
-                                                exception_type='NumericalError',
-                                                exception_message='Corrupt EEG File'
-                                                )
+                        if self.params.log_powers:
+                            np.log10(pow_ev_stripped, out=pow_ev_stripped)
+                        sess_pow_mat_post[ev, i, :] = np.nanmean(pow_ev_stripped, axis=1)
+            else:
 
-                    if self.params.log_powers:
-                        np.log10(pow_ev_stripped, out=pow_ev_stripped)
-                    sess_pow_mat_post[ev,i,:] = np.nanmean(pow_ev_stripped, axis=1)
+                bp_data_pre = eegs_pre.filtered([58, 62], filt_type='stop', order=self.params.filt_order)
+                pow_ev, _ = MorletWaveletFilterCpp(time_series=bp_data_pre, freqs=self.params.freqs,
+                                                   output='power', cpus=20, verbose=False).filter()
+                print pow_ev.dims
+                pow_ev_stripped = pow_ev.transpose('events', 'bipolar_pairs', 'frequency', 'time')[...,
+                                  bufsize:winsize - bufsize].data
+                print 'pow_ev_stripped.shape: ', pow_ev_stripped.shape
+
+                pow_zeros = np.where(pow_ev_stripped == 0.0)[0]
+
+                if len(pow_zeros) > 0:
+                    self.raise_and_log_report_exception(
+                        exception_type='NumericalError',
+                        exception_message='Corrupt EEG File'
+                    )
+
+                if self.params.log_powers:
+                    np.log10(pow_ev_stripped, out=pow_ev_stripped)
+                sess_pow_mat_pre[...] = np.nanmean(pow_ev_stripped, axis=-1)
+
+                bp_data_post = eegs_post.filtered([58, 62], filt_type='stop', order=self.params.filt_order)
+                pow_ev, _ = MorletWaveletFilterCpp(time_series=bp_data_post, freqs=self.params.freqs,
+                                                   output='power', cpus=20, verbose=False).filter()
+                pow_ev_stripped = pow_ev.transpose('events', 'bipolar_pairs', 'frequency', 'time')[...,
+                                  bufsize:winsize - bufsize].data
+                print 'pow_ev_stripped.shape: ', pow_ev_stripped.shape
+                pow_zeros = np.where(pow_ev_stripped == 0.0)[0]
+
+                if len(pow_zeros) > 0:
+                    self.raise_and_log_report_exception(
+                        exception_type='NumericalError',
+                        exception_message='Corrupt EEG File'
+                    )
+
+                if self.params.log_powers:
+                    np.log10(pow_ev_stripped, out=pow_ev_stripped)
+                sess_pow_mat_post[...] = np.nanmean(pow_ev_stripped, axis=-1)
 
             sess_pow_mat_pre = sess_pow_mat_pre.reshape((n_events, n_bps*n_freqs))
             #sess_pow_mat_pre = zscore(sess_pow_mat_pre, axis=0, ddof=1)

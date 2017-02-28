@@ -12,7 +12,14 @@ from ptsa.data.readers.IndexReader import JsonIndexReader
 from ReportUtils import ReportRamTask
 
 import hashlib
-from ReportTasks.RamTaskMethods import compute_powers
+try:
+    from ReportTasks.RamTaskMethods import compute_powers
+except ImportError as ie:
+    if 'MorletWaveletFilterCpp' in ie.message:
+        print 'Update PTSA for better perfomance'
+        compute_powers = None
+    else:
+        raise ie
 
 
 class ComputeFRPowers(ReportRamTask):
@@ -80,15 +87,15 @@ class ComputeFRPowers(ReportRamTask):
             catfr1_powers = None
 
         if (has_fr1 and fr1_powers is None) or (has_catfr1 and catfr1_powers is None):
-            try:
-                self.pow_mat=joblib.load(self.get_path_to_resource_in_workspace(subject+'-pow_mat.pkl'))
-            except IOError:
-                params = self.params
+            params = self.params
+            if compute_powers is None:
+                self.compute_powers(events,sessions,monopolar_channels,bipolar_pairs)
+            else:
                 self.pow_mat, events = compute_powers(events, monopolar_channels, bipolar_pairs,
                                                       params.fr1_start_time, params.fr1_end_time, params.fr1_buf,
                                                       params.freqs, params.log_powers)
 
-            self.pass_object('FR_events', events)
+                self.pass_object('FR_events', events)
         elif fr1_powers is not None and catfr1_powers is not None:
             self.pow_mat = np.vstack((fr1_powers,catfr1_powers))
         else:

@@ -8,7 +8,14 @@ from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from sklearn.externals import joblib
 
 from ptsa.data.readers import EEGReader
-from ReportTasks.RamTaskMethods import compute_powers
+try:
+    from ReportTasks.RamTaskMethods import compute_powers
+except ImportError as ie:
+    if 'MorletWaveletFilterCpp' in ie.message:
+        print 'Update PTSA for better perfomance'
+        compute_powers = None
+    else:
+        raise ie
 
 
 class ComputeFRPowers(RamTask):
@@ -46,11 +53,13 @@ class ComputeFRPowers(RamTask):
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
 
-        # self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
-        self.pow_mat,events = compute_powers(events,monopolar_channels,bipolar_pairs,
-                                             self.params.fr1_start_time,self.params.fr1_end_time,self.params.fr1_buf,
-                                             self.params.freqs,self.params.log_powers)
-        self.pass_object('FR_events',events)
+        if compute_powers is None:
+            self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
+        else:
+            self.pow_mat,events = compute_powers(events,monopolar_channels,bipolar_pairs,
+                                                 self.params.fr1_start_time,self.params.fr1_end_time,self.params.fr1_buf,
+                                                 self.params.freqs,self.params.log_powers)
+            self.pass_object('FR_events',events)
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
 
