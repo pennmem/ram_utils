@@ -46,10 +46,6 @@ class TH1EventPreparation(RamTask):
         json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
         event_files = sorted(list(json_reader.aggregate_values('task_events',subject=subj_code,montage=montage,
                                                                experiment=task)))
-        print 'subj_code: ',subj_code
-        print 'montage: ',montage
-        print 'task: ',task
-        print 'event_files: ',event_files
 
         # removing stim fileds that shouldn't be in non-stim experiments
         evs_field_list = ['mstime','type','item_name','trial','block','chestNum','locationX','locationY','chosenLocationX',
