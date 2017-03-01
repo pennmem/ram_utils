@@ -93,7 +93,7 @@ class ComputeFR1HFPowers(ReportRamTask):
             self.pow_mat = np.nanmean(self.pow_mat,axis=-1)
 
         self.pass_object('hf_pow_mat', self.pow_mat)
-
+        self.pass_object('hf_events',events)
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-hf_pow_mat.pkl'))
 
     def compute_powers(self, events, sessions,monopolar_channels , bipolar_pairs ):

@@ -81,6 +81,7 @@ class ComputeFR1HFPowers(ReportRamTask):
             for session in sessions:
                 self.pow_mat[events.session==session] = zscore(self.pow_mat[events.session==session],axis=0,ddof=1)
             self.pow_mat = np.nanmean(self.pow_mat,axis=-1)
+            self.pass_object('hf_events',events)
 
         self.pass_object('hf_pow_mat', self.pow_mat)
 

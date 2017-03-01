@@ -12,11 +12,11 @@ from ReportUtils import CMLParser, ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
 
-cml_parser.arg('--subject','R1228M')
+cml_parser.arg('--subject','R1277J_1')
 # cml_parser.arg('--task','RAM_FR1')
 cml_parser.arg('--task','FR1')
-cml_parser.arg('--workspace-dir','/Volumes/rhino_root/scratch/leond/FR1_joint_reports')
-cml_parser.arg('--mount-point','/Volumes/rhino_root/')
+cml_parser.arg('--workspace-dir','/scratch/leond/FR1_joint_reports')
+cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
 # cml_parser.arg('--exit-on-no-change')
 
@@ -76,7 +76,7 @@ class Params(object):
         self.penalty_type = 'l2'
         self.C = 7.2e-4
 
-        self.n_perm = 200
+        self.n_perm = 1000
 
 
 params = Params()
@@ -98,13 +98,13 @@ report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=Fal
 
 report_pipeline.add_task(RepetitionRatio(mark_as_completed=True))
 
-report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=False))
 
 report_pipeline.add_task(ComputeFR1HFPowers(params=params, mark_as_completed=True))
 
-report_pipeline.add_task(ComputeTTest(params=params, mark_as_completed=False))
+report_pipeline.add_task(ComputeTTest(params=params, mark_as_completed=True))
 
-report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
 
 report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
 

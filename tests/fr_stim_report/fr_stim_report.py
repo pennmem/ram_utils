@@ -5,9 +5,9 @@ from ReportUtils import CMLParser,ReportPipeline
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1264P')
+cml_parser.arg('--subject','R1277J_1')
 cml_parser.arg('--task','catFR3')
-cml_parser.arg('--workspace-dir','/scratch/leond/FR3_reports')
+cml_parser.arg('--workspace-dir','/scratch/leond/catFR3_reports')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
 
@@ -62,7 +62,7 @@ class Params(object):
         self.penalty_type = 'l2'
         self.C = 7.2e-4
 
-        self.n_perm = 200
+        self.n_perm = 500
 
         self.include_fr1 = True
         self.include_catfr1 = True

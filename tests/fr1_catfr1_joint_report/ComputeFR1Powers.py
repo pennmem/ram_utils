@@ -92,7 +92,7 @@ class ComputeFR1Powers(ReportRamTask):
             self.pow_mat,events=compute_powers(events,monopolar_channels, bipolar_pairs,
                                                    params.fr1_start_time,params.fr1_end_time,params.fr1_buf,
                                                    params.freqs,params.log_powers)
-            self.pass_object(task+'_events',events)
+            self.pass_object('events',events)
 
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
@@ -142,7 +142,7 @@ class ComputeFR1Powers(ReportRamTask):
                 events = np.hstack((events[events.session!=sess],sess_events)).view(np.recarray)
                 ev_order = np.argsort(events, order=('session','list','mstime'))
                 events = events[ev_order]
-                self.pass_object(self.pipeline.task+'_events', events)
+                self.pass_object('events', events)
 
 
             # mirroring
