@@ -68,6 +68,12 @@ class ComputeFR1Powers(ReportRamTask):
         except IOError:
             self.samplerate = joblib.load(self.get_path_to_resource_in_workspace('-'.join([subject,task,'samplerate.pkl'])))
 
+        try:
+            events=joblib.load(self.get_path_to_resource_in_workspace(subject + '-fr1_events.pkl'))
+            self.pass_object('events',events)
+        except IOError:
+            pass
+
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
 
@@ -92,6 +98,7 @@ class ComputeFR1Powers(ReportRamTask):
             self.pow_mat,events=compute_powers(events,monopolar_channels, bipolar_pairs,
                                                    params.fr1_start_time,params.fr1_end_time,params.fr1_buf,
                                                    params.freqs,params.log_powers)
+            joblib.dump(events,self.get_path_to_resource_in_workspace(subject + '-fr1_events.pkl'))
             self.pass_object('events',events)
 
         self.pass_object('pow_mat', self.pow_mat)

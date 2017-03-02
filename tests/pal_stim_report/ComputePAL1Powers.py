@@ -81,6 +81,8 @@ class ComputePAL1Powers(ReportRamTask):
                                                   params.pal1_start_time, params.pal1_end_time, params.pal1_buf,
                                                   params.freqs, params.log_powers)
             self.pass_object('PAL1_events',events)
+        print
+
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
 

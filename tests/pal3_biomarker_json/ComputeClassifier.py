@@ -3,15 +3,13 @@ from RamPipeline import *
 import numpy as np
 from scipy.stats.mstats import zscore
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import roc_auc_score, roc_curve
-from random import shuffle
+from ReportTasks.RamTaskMethods import run_lolo_xval,run_loso_xval,permuted_lolo_AUCs,permuted_loso_AUCs, ModelOutput
 from sklearn.externals import joblib
 import warnings
 
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
 import hashlib
-
 
 def normalize_sessions(pow_mat, events):
     sessions = np.unique(events.session)
@@ -20,50 +18,6 @@ def normalize_sessions(pow_mat, events):
         pow_mat[sess_event_mask] = zscore(pow_mat[sess_event_mask], axis=0, ddof=1)
     return pow_mat
 
-
-class ModelOutput(object):
-    def __init__(self, true_labels, probs):
-        self.true_labels = np.array(true_labels)
-        self.probs = np.array(probs)
-        self.auc = np.nan
-        self.fpr = np.nan
-        self.tpr = np.nan
-        self.thresholds = np.nan
-        self.jstat_thresh = np.nan
-        self.jstat_quantile = np.nan
-        self.low_pc_diff_from_mean = np.nan
-        self.mid_pc_diff_from_mean = np.nan
-        self.high_pc_diff_from_mean = np.nan
-
-    def compute_roc(self):
-        try:
-            self.auc = roc_auc_score(self.true_labels, self.probs)
-        except ValueError:
-            return
-        self.fpr, self.tpr, self.thresholds = roc_curve(self.true_labels, self.probs)
-        self.jstat_quantile = 0.5
-        self.jstat_thresh = np.median(self.probs)
-        # idx = np.argmax(self.tpr-self.fpr)
-        # self.jstat_thresh = self.thresholds[idx]
-        # self.jstat_quantile = np.sum(self.probs <= self.jstat_thresh) / float(self.probs.size)
-
-    def compute_tercile_stats(self):
-        thresh_low = np.percentile(self.probs, 100.0/3.0)
-        thresh_high = np.percentile(self.probs, 2.0*100.0/3.0)
-
-        low_terc_sel = (self.probs <= thresh_low)
-        high_terc_sel = (self.probs >= thresh_high)
-        mid_terc_sel = ~(low_terc_sel | high_terc_sel)
-
-        low_terc_recall_rate = np.sum(self.true_labels[low_terc_sel]) / float(np.sum(low_terc_sel))
-        mid_terc_recall_rate = np.sum(self.true_labels[mid_terc_sel]) / float(np.sum(mid_terc_sel))
-        high_terc_recall_rate = np.sum(self.true_labels[high_terc_sel]) / float(np.sum(high_terc_sel))
-
-        recall_rate = np.sum(self.true_labels) / float(self.true_labels.size)
-
-        self.low_pc_diff_from_mean = 100.0 * (low_terc_recall_rate-recall_rate) / recall_rate
-        self.mid_pc_diff_from_mean = 100.0 * (mid_terc_recall_rate-recall_rate) / recall_rate
-        self.high_pc_diff_from_mean = 100.0 * (high_terc_recall_rate-recall_rate) / recall_rate
 
 
 class ComputeClassifier(RamTask):
@@ -100,94 +54,6 @@ class ComputeClassifier(RamTask):
 
         return hash_md5.digest()
 
-    def run_loso_xval(self, event_sessions, recalls, permuted=False):
-        probs = np.empty_like(recalls, dtype=np.float)
-
-        sessions = np.unique(event_sessions)
-
-        for sess in sessions:
-            insample_mask = (event_sessions != sess)
-            insample_pow_mat = self.pow_mat[insample_mask]
-            insample_recalls = recalls[insample_mask]
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore")
-
-                self.lr_classifier.fit(insample_pow_mat, insample_recalls)
-
-            outsample_mask = ~insample_mask
-            outsample_pow_mat = self.pow_mat[outsample_mask]
-            outsample_recalls = recalls[outsample_mask]
-
-            outsample_probs = self.lr_classifier.predict_proba(outsample_pow_mat)[:,1]
-            if not permuted:
-                self.xval_output[sess] = ModelOutput(outsample_recalls, outsample_probs)
-                self.xval_output[sess].compute_roc()
-                self.xval_output[sess].compute_tercile_stats()
-            probs[outsample_mask] = outsample_probs
-
-        if not permuted:
-            self.xval_output[-1] = ModelOutput(recalls, probs)
-            self.xval_output[-1].compute_roc()
-            self.xval_output[-1].compute_tercile_stats()
-
-        return probs
-
-    def permuted_loso_AUCs(self, event_sessions, recalls):
-        n_perm = self.params.n_perm
-        permuted_recalls = np.array(recalls)
-        AUCs = np.empty(shape=n_perm, dtype=np.float)
-        for i in xrange(n_perm):
-            for sess in event_sessions:
-                sel = (event_sessions == sess)
-                sess_permuted_recalls = permuted_recalls[sel]
-                shuffle(sess_permuted_recalls)
-                permuted_recalls[sel] = sess_permuted_recalls
-            probs = self.run_loso_xval(event_sessions, permuted_recalls, permuted=True)
-            AUCs[i] = roc_auc_score(recalls, probs)
-            print 'AUC =', AUCs[i]
-        return AUCs
-
-    def run_lolo_xval(self, sess, event_lists, recalls, permuted=False):
-        probs = np.empty_like(recalls, dtype=np.float)
-
-        lists = np.unique(event_lists)
-
-        for lst in lists:
-            insample_mask = (event_lists != lst)
-            insample_pow_mat = self.pow_mat[insample_mask]
-            insample_recalls = recalls[insample_mask]
-
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore")
-                self.lr_classifier.fit(insample_pow_mat, insample_recalls)
-
-            outsample_mask = ~insample_mask
-            outsample_pow_mat = self.pow_mat[outsample_mask]
-
-            probs[outsample_mask] = self.lr_classifier.predict_proba(outsample_pow_mat)[:,1]
-
-        if not permuted:
-            xval_output = ModelOutput(recalls, probs)
-            xval_output.compute_roc()
-            xval_output.compute_tercile_stats()
-            self.xval_output[sess] = self.xval_output[-1] = xval_output
-
-        return probs
-
-    def permuted_lolo_AUCs(self, sess, event_lists, recalls):
-        n_perm = self.params.n_perm
-        permuted_recalls = np.array(recalls)
-        AUCs = np.empty(shape=n_perm, dtype=np.float)
-        for i in xrange(n_perm):
-            for lst in event_lists:
-                sel = (event_lists == lst)
-                list_permuted_recalls = permuted_recalls[sel]
-                shuffle(list_permuted_recalls)
-                permuted_recalls[sel] = list_permuted_recalls
-            probs = self.run_lolo_xval(sess, event_lists, permuted_recalls, permuted=True)
-            AUCs[i] = roc_auc_score(recalls, probs)
-            print 'AUC =', AUCs[i]
-        return AUCs
 
     def run(self):
         subject = self.pipeline.subject
@@ -209,19 +75,19 @@ class ComputeClassifier(RamTask):
         sessions = np.unique(event_sessions)
         if len(sessions) > 1:
             print 'Performing permutation test'
-            self.perm_AUCs = self.permuted_loso_AUCs(event_sessions, recalls)
+            self.perm_AUCs = permuted_loso_AUCs(self,events.session,recalls)
 
             print 'Performing leave-one-session-out xval'
-            self.run_loso_xval(event_sessions, recalls, permuted=False)
+            run_loso_xval(event_sessions, recalls,
+                          self.pow_mat, self.lr_classifier, self.xval_output)
         else:
-            sess = sessions[0]
-            event_lists = events.list
 
             print 'Performing in-session permutation test'
-            self.perm_AUCs = self.permuted_lolo_AUCs(sess, event_lists, recalls)
-
+            print 'event fields:'
+            self.perm_AUCs = permuted_lolo_AUCs(self,events)
             print 'Performing leave-one-list-out xval'
-            self.run_lolo_xval(sess, event_lists, recalls, permuted=False)
+            run_lolo_xval(events, recalls, self.pow_mat,self.lr_classifier,self.xval_output, permuted=False)
+
 
         print 'AUC =', self.xval_output[-1].auc
 

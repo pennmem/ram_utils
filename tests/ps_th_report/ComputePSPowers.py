@@ -12,6 +12,8 @@ from sklearn.externals import joblib
 from ptsa.data.events import Events
 from ptsa.data.readers import EEGReader,BaseRawReader
 from ReportUtils import ReportRamTask
+from ptsa.data.filters import MonopolarToBipolarMapper
+
 try:
     from ptsa.data.filters import MorletWaveletFilterCpp
 except ImportError as ie:
@@ -78,8 +80,9 @@ class ComputePSPowers(ReportRamTask):
 
     def compute_ps_powers(self, events, sessions, monopolar_channels, bipolar_pairs, task):
         subject = self.pipeline.subject
+        self.params.freqs = self.params.classifier_freqs
 
-        n_freqs = len(self.params.freqs)
+        n_freqs = len(self.params.classifier_freqs)
         n_bps = len(bipolar_pairs)
 
         pow_mat_pre = pow_mat_post = None
@@ -257,6 +260,8 @@ class ComputePSPowers(ReportRamTask):
             else:
 
                 bp_data_pre = eegs_pre.filtered([58, 62], filt_type='stop', order=self.params.filt_order)
+                bp_data_pre = MonopolarToBipolarMapper(time_series=bp_data_pre,
+                                                       bipolar_pairs=np.array(bipolar_pairs,dtype=[('ch0','S3'),('ch1','S3')]).view(np.recarray)).filter()
                 pow_ev, _ = MorletWaveletFilterCpp(time_series=bp_data_pre, freqs=self.params.freqs,
                                                    output='power', cpus=20, verbose=False).filter()
                 print pow_ev.dims
@@ -277,6 +282,9 @@ class ComputePSPowers(ReportRamTask):
                 sess_pow_mat_pre[...] = np.nanmean(pow_ev_stripped, axis=-1)
 
                 bp_data_post = eegs_post.filtered([58, 62], filt_type='stop', order=self.params.filt_order)
+                bp_data_post = MonopolarToBipolarMapper(time_series=bp_data_post,
+                                                       bipolar_pairs=np.array(bipolar_pairs,dtype=[('ch0','S3'),('ch1','S3')]).view(np.recarray)).filter()
+
                 pow_ev, _ = MorletWaveletFilterCpp(time_series=bp_data_post, freqs=self.params.freqs,
                                                    output='power', cpus=20, verbose=False).filter()
                 pow_ev_stripped = pow_ev.transpose('events', 'bipolar_pairs', 'frequency', 'time')[...,

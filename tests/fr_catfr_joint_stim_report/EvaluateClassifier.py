@@ -3,6 +3,7 @@ from ptsa.data.readers.IndexReader import JsonIndexReader
 from os import path
 import hashlib
 from sklearn.externals import joblib
+from ReportTasks.RamTaskMethods import run_loso_xval,run_lolo_xval
 from random import shuffle
 import numpy as np
 from sklearn.metrics import roc_auc_score
@@ -85,14 +86,14 @@ class EvaluateClassifier(ComputeClassifier):
             self.perm_AUCs = self.permuted_loso_AUCs(events.session, recalls)
 
             print 'Performing leave-one-session-out xval'
-            self.run_loso_xval(events.session, recalls, permuted=False)
+            run_loso_xval(events.session, recalls, self.pow_mat,self.lr_classifier,self.xval_output,permuted=False)
 
         else:
             print 'Performing in-session permutation test'
             self.perm_AUCs = self.permuted_lolo_AUCs(events)
 
             print 'Performing leave-one-list-out xval'
-            self.run_lolo_xval(events, recalls, permuted=False)
+            run_lolo_xval(events, recalls, self.pow_mat,self.lr_classifier,self.xval_output, permuted=False)
 
         self.pvalue = np.sum(self.perm_AUCs >= self.xval_output[-1].auc) / float(self.perm_AUCs.size)
         print 'Perm test p-value =', self.pvalue

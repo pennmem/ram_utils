@@ -22,7 +22,7 @@ class ComputeTTest(ReportRamTask):
         #pow_mat = pow_mat[:,freq_sel]
         try:
             events=self.get_passed_object('hf_events')
-        except IndexError:
+        except KeyError:
             events = self.get_passed_object(self.pipeline.task+'_events')
         print 'len(events):',len(events)
         sessions = np.unique(events.session)

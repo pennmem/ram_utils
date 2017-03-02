@@ -117,7 +117,7 @@ class ComputeFRStimTable(ReportRamTask):
         for sess in sessions:
             if 'FR3' in self.pipeline.task and self.pipeline.subject!='R1124J_1':
                 sess_mask = (events.session==sess)
-                sess_prob, thresh = parse_biomarker_output(os.path.join(self.pipeline.mount_point, 'data/eeg', self.pipeline.subject, 'raw/FR3_%d'%sess, 'commandOutput.txt'))
+                sess_prob, thresh = parse_biomarker_output(os.path.join(self.pipeline.mount_point, 'data/eeg', self.pipeline.subject, 'raw/%s_%d'%(self.pipeline.task,sess), 'commandOutput.txt'))
                 sess_prob = sess_prob[12:]  # discard practice list
                 if len(sess_prob) == np.sum(sess_mask):
                     fr_stim_prob[sess_mask] = sess_prob  # plug biomarker output
