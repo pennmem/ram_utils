@@ -27,6 +27,13 @@ class SessionSummary(object):
         self.chisqr = None
         self.pvalue = None
 
+        # low biomarker non-stim items
+        self.n_correct_nonstim_low = None
+        self.n_total_nonstim_low = None
+        self.pc_from_nonstim_low = None
+        self.chisqr_low = None
+        self.pvalue_low = None
+
         # item level stim
         self.is_stim_item = None
         self.n_correct_stim_item = None
