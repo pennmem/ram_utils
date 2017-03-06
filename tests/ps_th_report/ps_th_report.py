@@ -8,11 +8,11 @@ from setup_utils import parse_command_line, configure_python_paths
 from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1157C')
+cml_parser.arg('--subject','R1204T')
 cml_parser.arg('--workspace-dir','/scratch/leond/PS2_TH')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
-cml_parser.arg('--task','PS2')
+cml_parser.arg('--task','PS2.1')
 
 # cml_parser.arg('--exit-on-no-change')
 
@@ -63,7 +63,7 @@ class Params(object):
 
         self.filt_order = 4
 
-        self.classifier_freqs = np.logspace(np.log10(1.0), np.log10(200.0), 8)
+        self.freqs = np.logspace(np.log10(1.0), np.log10(200.0), 8)
 
         self.log_powers = True
 

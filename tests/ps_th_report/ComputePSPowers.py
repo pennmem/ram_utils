@@ -80,9 +80,8 @@ class ComputePSPowers(ReportRamTask):
 
     def compute_ps_powers(self, events, sessions, monopolar_channels, bipolar_pairs, task):
         subject = self.pipeline.subject
-        self.params.freqs = self.params.classifier_freqs
 
-        n_freqs = len(self.params.classifier_freqs)
+        n_freqs = len(self.params.freqs)
         n_bps = len(bipolar_pairs)
 
         pow_mat_pre = pow_mat_post = None
@@ -264,10 +263,8 @@ class ComputePSPowers(ReportRamTask):
                                                        bipolar_pairs=np.array(bipolar_pairs,dtype=[('ch0','S3'),('ch1','S3')]).view(np.recarray)).filter()
                 pow_ev, _ = MorletWaveletFilterCpp(time_series=bp_data_pre, freqs=self.params.freqs,
                                                    output='power', cpus=20, verbose=False).filter()
-                print pow_ev.dims
                 pow_ev_stripped = pow_ev.transpose('events', 'bipolar_pairs', 'frequency', 'time')[...,
                                   bufsize:winsize - bufsize].data
-                print 'pow_ev_stripped.shape: ', pow_ev_stripped.shape
 
                 pow_zeros = np.where(pow_ev_stripped == 0.0)[0]
 
