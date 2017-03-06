@@ -44,11 +44,8 @@ class ComputeTHStimPowers(ReportRamTask):
         for fname in bp_paths:
             hash_md5.update(open(fname, 'rb').read())
 
-        event_files = sorted(list( json_reader.aggregate_values('all_events', subject=subj_code, montage=montage,
-                                                               experiment = 'TH3')
-                                   | json_reader.aggregate_values('all_events', subject=subj_code, montage=montage,
-                                                               experiment = 'TH4')
-                                   ))
+        event_files = sorted(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage,
+                                                               experiment = task))
         for fname in event_files:
             with open(fname,'rb') as f: hash_md5.update(f.read())
         return hash_md5.digest()
