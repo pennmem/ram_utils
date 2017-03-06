@@ -11,7 +11,7 @@ cathode_num=97
 pulse_frequency=100
 target_amplitude=1000
 
-#cd ../../tests/fr3_biomarker_json/system3
+#cd ../../tests/fr3_biomarker/system3
 cd ../../
 
 python tests/fr3_biomarker_json/system3/fr3_util_system_3.py \

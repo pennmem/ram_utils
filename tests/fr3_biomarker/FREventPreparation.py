@@ -5,73 +5,119 @@ import os.path
 import numpy as np
 
 from ptsa.data.readers import BaseEventReader
+from ptsa.data.readers.IndexReader import JsonIndexReader
 
 from RamPipeline import *
+from ReportUtils import RamTask
+
+import hashlib
 
 
 class FREventPreparation(RamTask):
-    def __init__(self, params, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
-        self.params = params
+    def __init__(self, mark_as_completed=True):
+        super(FREventPreparation,self).__init__(mark_as_completed)
+
+    def input_hashsum(self):
+        subject = self.pipeline.subject
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp)==1 else int(tmp[1])
+
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
+
+        hash_md5 = hashlib.md5()
+
+        fr1_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR1')))
+        for fname in fr1_event_files:
+            with open(fname,'rb') as f: hash_md5.update(f.read())
+
+        catfr1_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='catFR1')))
+        for fname in catfr1_event_files:
+            with open(fname,'rb') as f: hash_md5.update(f.read())
+
+        fr3_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR3')))
+        for fname in fr3_event_files:
+            with open(fname,'rb') as f: hash_md5.update(f.read())
+
+        catfr3_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='catFR3')))
+        for fname in catfr3_event_files:
+            with open(fname,'rb') as f: hash_md5.update(f.read())
+
+        return hash_md5.digest()
 
     def run(self):
+        subject = self.pipeline.subject
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp)==1 else int(tmp[1])
+
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
+
+        event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR1')))
         events = None
-        if self.params.include_fr1:
-            try:
-                e_path = os.path.join(self.pipeline.mount_point , 'data/events/RAM_FR1', self.pipeline.subject + '_events.mat')
-                e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
-                events = e_reader.read()
-                ev_order = np.argsort(events, order=('session','list','mstime'))
-                events = events[ev_order]
-                events = events[events.type == 'WORD']
-            except IOError:
-                print 'No FR1 events found'
+        for sess_file in event_files:
+            e_path = os.path.join(self.pipeline.mount_point, str(sess_file))
+            print e_path
+            e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
-        if self.params.include_catfr1:
-            try:
-                e_path = os.path.join(self.pipeline.mount_point , 'data/events/RAM_CatFR1', self.pipeline.subject + '_events.mat')
-                e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
-                catfr1_events = e_reader.read()
-                ev_order = np.argsort(catfr1_events, order=('session','list','mstime'))
-                catfr1_events = catfr1_events[ev_order]
-                catfr1_events = catfr1_events[catfr1_events.type == 'WORD']
-                if events is None:
-                    events = catfr1_events
-                else:
-                    catfr1_events.session += 100
-                    fields = list(set(events.dtype.names).intersection(catfr1_events.dtype.names))
-                    events = np.hstack((events[fields],catfr1_events[fields])).view(np.recarray)
-            except IOError:
-                print 'No CatFR1 events found'
+            sess_events = e_reader.read()[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'mstime', 'type', 'eegoffset', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
+            sess_events = sess_events[sess_events.type=='WORD']
 
-        if self.params.include_fr3:
-            try:
-                e_path = os.path.join(self.pipeline.mount_point , 'data/events/RAM_FR3', self.pipeline.subject + '_events.mat')
-                e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
-                fr3_events = e_reader.read()
-                ev_order = np.argsort(fr3_events, order=('session','list','mstime'))
-                fr3_events = fr3_events[ev_order]
-                fr3_events = fr3_events[(fr3_events.type == 'WORD') & (fr3_events.stimList == 0)]
-                fr3_events.session += 200
-                fields = list(set(events.dtype.names).intersection(fr3_events.dtype.names))
-                events = np.hstack((events[fields],fr3_events[fields])).view(np.recarray)
-            except IOError:
-                print 'No FR3 events found'
+            if events is None:
+                events = sess_events
+            else:
+                events = np.hstack((events,sess_events))
 
-        if self.params.include_catfr3:
-            try:
-                e_path = os.path.join(self.pipeline.mount_point , 'data/events/RAM_CatFR3', self.pipeline.subject + '_events.mat')
-                e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
-                catfr3_events = e_reader.read()
-                ev_order = np.argsort(catfr3_events, order=('session','list','mstime'))
-                catfr3_events = catfr3_events[ev_order]
-                catfr3_events = catfr3_events[(catfr3_events.type == 'WORD') & (catfr3_events.stimList == 0)]
-                catfr3_events.session += 300
-                fields = list(set(events.dtype.names).intersection(catfr3_events.dtype.names))
-                events = np.hstack((events[fields],catfr3_events[fields])).view(np.recarray)
-            except IOError:
-                print 'No CatFR3 events found'
+        event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='catFR1')))
+        for sess_file in event_files:
+            e_path = os.path.join(self.pipeline.mount_point, str(sess_file))
+            print e_path
+            e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
-        print len(events), 'WORD events in total'
+            sess_events = e_reader.read()
+            sess_events.session += 100
+            sess_events = sess_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'mstime', 'type', 'eegoffset', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
+            sess_events = sess_events[sess_events.type=='WORD']
+
+            if events is None:
+                events = sess_events
+            else:
+                events = np.hstack((events,sess_events))
+
+        event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR3')))
+        for sess_file in event_files:
+            e_path = os.path.join(self.pipeline.mount_point, str(sess_file))
+            print e_path
+            e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
+
+            sess_events = e_reader.read()
+            sess_events = sess_events[(sess_events.stim_list==0) & (sess_events.type=='WORD')]
+            sess_events.session += 200
+            sess_events = sess_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'mstime', 'type', 'eegoffset', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
+
+            if events is None:
+                events = sess_events
+            else:
+                events = np.hstack((events,sess_events))
+
+        event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='catFR3')))
+        for sess_file in event_files:
+            e_path = os.path.join(self.pipeline.mount_point, str(sess_file))
+            print e_path
+            e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
+
+            sess_events = e_reader.read()
+            sess_events = sess_events[(sess_events.stim_list==0) & (sess_events.type=='WORD')]
+            sess_events.session += 300
+            sess_events = sess_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'mstime', 'type', 'eegoffset', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
+
+            if events is None:
+                events = sess_events
+            else:
+                events = np.hstack((events,sess_events))
+
+        events = events.view(np.recarray)
+
+        print len(events), 'WORD events'
 
         self.pass_object('FR_events', events)

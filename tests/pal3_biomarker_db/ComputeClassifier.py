@@ -1,11 +1,9 @@
 from RamPipeline import *
 
 import numpy as np
-from copy import deepcopy
 from scipy.stats.mstats import zscore
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, roc_curve
-from sklearn.cross_validation import StratifiedKFold
 from random import shuffle
 from sklearn.externals import joblib
 import warnings
@@ -65,7 +63,7 @@ class ModelOutput(object):
 
 class ComputeClassifier(RamTask):
     def __init__(self, params, mark_as_completed=True):
-        super(ComputeClassifier,self).__init__(mark_as_completed)
+        RamTask.__init__(self, mark_as_completed)
         self.params = params
         self.pow_mat = None
         self.lr_classifier = None
@@ -82,9 +80,9 @@ class ComputeClassifier(RamTask):
             insample_mask = (event_sessions != sess)
             insample_pow_mat = self.pow_mat[insample_mask]
             insample_recalls = recalls[insample_mask]
-
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
+
                 self.lr_classifier.fit(insample_pow_mat, insample_recalls)
 
             outsample_mask = ~insample_mask
@@ -152,34 +150,32 @@ class ComputeClassifier(RamTask):
         permuted_recalls = np.array(recalls)
         AUCs = np.empty(shape=n_perm, dtype=np.float)
         for i in xrange(n_perm):
-            shuffle(permuted_recalls)
-            
-            # JFM Note: I'm not permuting within list bc there are only 2 or 3 items per list            
-            # for lst in event_lists:
-                # sel = (event_lists == lst)
-                # list_permuted_recalls = permuted_recalls[sel]
-                # shuffle(list_permuted_recalls)
-                # permuted_recalls[sel] = list_permuted_recalls
-                
+            for lst in event_lists:
+                sel = (event_lists == lst)
+                list_permuted_recalls = permuted_recalls[sel]
+                shuffle(list_permuted_recalls)
+                permuted_recalls[sel] = list_permuted_recalls
             probs = self.run_lolo_xval(sess, event_lists, permuted_recalls, permuted=True)
             AUCs[i] = roc_auc_score(recalls, probs)
-            print 'AUC = ', AUCs[i]
+            print 'AUC =', AUCs[i]
         return AUCs
 
     def run(self):
         subject = self.pipeline.subject
+        events = self.get_passed_object('PAL1_events')
+        self.pow_mat = normalize_sessions(self.get_passed_object('pow_mat'), events)
 
-        events = self.get_passed_object('events')
-        self.pow_mat = normalize_sessions(self.get_passed_object('classify_pow_mat'), events)
-        
-        # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto', solver='liblinear')
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto', solver='liblinear')
-        # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced',solver='liblinear',fit_intercept=False)
+        #n1 = np.sum(events.recalled)
+        #n0 = len(events) - n1
+        #w0 = (2.0/n0) / ((1.0/n0)+(1.0/n1))
+        #w1 = (2.0/n1) / ((1.0/n0)+(1.0/n1))
 
-        event_sessions = events.session    
-        # recalls = events.recalled
-        recalls = events.distErr <= np.max([events[0].radius_size, np.median(events.distErr)])
-        recalls[events.confidence==0]=0
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto', solver='liblinear')
+
+        event_sessions = events.session
+        recalls = events.correct
 
         sessions = np.unique(event_sessions)
         if len(sessions) > 1:
@@ -190,35 +186,25 @@ class ComputeClassifier(RamTask):
             self.run_loso_xval(event_sessions, recalls, permuted=False)
         else:
             sess = sessions[0]
-            
-            # doing this because I'm changing the lists hen doing k-fold
-            event_lists = deepcopy(events.trial)
+            event_lists = events.list
 
-            # rand_order = np.random.permutation(len(events))
-            # event_lists = event_lists[rand_order]
-            if self. params.doStratKFold:
-                skf = StratifiedKFold(recalls, n_folds=self.params.n_folds,shuffle=True)
-                for i, (train_index, test_index) in enumerate(skf):
-                    event_lists[test_index] = i
-            
             print 'Performing in-session permutation test'
             self.perm_AUCs = self.permuted_lolo_AUCs(sess, event_lists, recalls)
 
-            if self. params.doStratKFold:
-                print 'Performing %d-fold stratified xval'%(self.params.n_folds)
-            else:
-                print 'Performing leave-one-list-out xval'
+            print 'Performing leave-one-list-out xval'
             self.run_lolo_xval(sess, event_lists, recalls, permuted=False)
 
         print 'AUC =', self.xval_output[-1].auc
 
         self.pvalue = np.sum(self.perm_AUCs >= self.xval_output[-1].auc) / float(self.perm_AUCs.size)
-        print 'Perm test p-value =', self.pvalue, ' mean null = ', np.mean(self.perm_AUCs)
+        print 'Perm test p-value =', self.pvalue
 
         print 'thresh =', self.xval_output[-1].jstat_thresh, 'quantile =', self.xval_output[-1].jstat_quantile
 
         # Finally, fitting classifier on all available data
-        self.lr_classifier.fit(self.pow_mat, recalls)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self.lr_classifier.fit(self.pow_mat, recalls)
 
         self.pass_object('lr_classifier', self.lr_classifier)
         self.pass_object('xval_output', self.xval_output)

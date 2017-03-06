@@ -1,5 +1,5 @@
 # command line example:
-# python pal3_biomarker.py --workspace-dir=/scratch/busygin/PAL3_biomarkers --subject=R1162N --n-channels=128 --anode=AD2 --anode-num=56 --cathode=AD3 --cathode-num=57 --pulse-frequency=200 --pulse-duration=500 --target-amplitude=1000
+# python pal3_biomarker_db.py --workspace-dir=/scratch/busygin/PAL3_biomarkers --subject=R1162N --n-channels=128 --anode=AD2 --anode-num=56 --cathode=AD3 --cathode-num=57 --pulse-frequency=200 --pulse-duration=500 --target-amplitude=1000
 
 print "ATTN: Wavelet params and interval length are hardcoded!! To change them, recompile"
 print "Windows binaries from https://github.com/busygin/morlet_for_sys2_biomarker"
@@ -33,7 +33,7 @@ from PAL1EventPreparation import PAL1EventPreparation
 
 from ComputePAL1Powers import ComputePAL1Powers
 
-from TalPreparation import TalPreparation
+from MontagePreparation import MontagePreparation
 
 from CheckElectrodeLabels import CheckElectrodeLabels
 
@@ -109,7 +109,7 @@ report_pipeline = ReportPipeline(subject=args.subject,
 
 report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
 
-report_pipeline.add_task(TalPreparation(mark_as_completed=False))
+report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
 
 report_pipeline.add_task(CheckElectrodeLabels(params=params, mark_as_completed=False))
 

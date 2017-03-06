@@ -16,7 +16,7 @@ class SaveMatlabFile(RamTask):
 
     def run(self):
         subject = self.pipeline.subject
-        events = self.get_passed_object('FR_events')
+        events = self.get_passed_object('PAL1_events')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
 
         n_bps = len(bipolar_pairs)
@@ -33,7 +33,12 @@ class SaveMatlabFile(RamTask):
         probs = xval_output.probs
         thresh = xval_output.jstat_thresh
 
-        mat_filename = '%s_%s_FR3_%s_%s_%dHz_%gmA.biomarker.mat' % (subject, datetime.date.today(), self.params.stim_params.anode, self.params.stim_params.cathode, self.params.stim_params.pulseFrequency, self.params.stim_params.amplitude/1000.0)
+        mat_filename = '%s_%s_PAL3_%s_%s_%dHz_%gmA.biomarker.mat' % (subject, datetime.date.today(), self.params.stim_params.anode, self.params.stim_params.cathode, self.params.stim_params.pulseFrequency, self.params.stim_params.amplitude/1000.0)
+
+        # hack for NINDS subject R1175N
+        if subject == 'R1175N':
+            self.params.stim_params.elec1 += 32
+            self.params.stim_params.elec2 += 32
 
         mdict = {'Bio': {'Subject': subject,
                          'Version': self.params.version,

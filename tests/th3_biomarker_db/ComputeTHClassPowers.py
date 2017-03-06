@@ -47,8 +47,8 @@ class ComputeTHClassPowers(RamTask):
             self.classify_pow_mat, events = compute_powers(events, monopolar_channels, bipolar_pairs,
                                                            self.params.th1_start_time, self.params.th1_end_time,
                                                            self.params.th1_buf,
-                                                           self.params.classifier_freqs, self.params.log_powers,
-                                                           ComputePowers=self)
+                                                           self.params.classifier_freqs, self.params.log_powers)
+
             self.pass_object('events',events)
         self.pass_object('classify_pow_mat', self.classify_pow_mat)
         self.pass_object('samplerate', self.samplerate)

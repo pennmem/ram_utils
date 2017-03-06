@@ -1,5 +1,5 @@
 # command line example:
-# python th3_biomarker_db.py --workspace-dir=/scratch/busygin/TH3_biomarkers --subject=R1145J_1 --n-channels=128 --anode=RD2 --anode-num=34 --cathode=RD3 --cathode-num=35 --pulse-frequency=200 --pulse-duration=500 --target-amplitude=1000
+# python pal3_biomarker_db.py --workspace-dir=/scratch/busygin/PAL3_biomarkers --subject=R1162N --n-channels=128 --anode=AD2 --anode-num=56 --cathode=AD3 --cathode-num=57 --pulse-frequency=200 --pulse-duration=500 --target-amplitude=1000
 
 print "ATTN: Wavelet params and interval length are hardcoded!! To change them, recompile"
 print "Windows binaries from https://github.com/busygin/morlet_for_sys2_biomarker"
@@ -10,16 +10,16 @@ from BiomarkerUtils import CMLParserBiomarker
 
 
 cml_parser = CMLParserBiomarker(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','/scratch/leond/TH3_biomarkers')
-cml_parser.arg('--subject','R1201P_1')
-cml_parser.arg('--n-channels','126')
-cml_parser.arg('--anode','AT3')
-cml_parser.arg('--cathode','AT4')
-cml_parser.arg('--anode-num','71')
-cml_parser.arg('--cathode-num','72')
-cml_parser.arg('--pulse-frequency','10')
+cml_parser.arg('--workspace-dir','/scratch/leond/PAL3_biomarkers')
+cml_parser.arg('--subject','R1050M')
+cml_parser.arg('--n-channels','65')
+cml_parser.arg('--anode-num','19')
+cml_parser.arg('--anode','LPG18')
+cml_parser.arg('--cathode-num','20')
+cml_parser.arg('--cathode','LPG19')
+cml_parser.arg('--pulse-frequency','100')
 cml_parser.arg('--pulse-duration','300')
-cml_parser.arg('--target-amplitude','1725')
+cml_parser.arg('--target-amplitude','1250')
 
 
 args = cml_parser.parse()
@@ -29,11 +29,11 @@ args = cml_parser.parse()
 
 from RamPipeline import RamPipeline
 
-from THEventPreparation import THEventPreparation
+from PAL1EventPreparation import PAL1EventPreparation
 
-from ComputeTHClassPowers import ComputeTHClassPowers
+from ComputePAL1Powers import ComputePAL1Powers
 
-from MontagePreparation import MontagePreparation
+from TalPreparation import TalPreparation
 
 from CheckElectrodeLabels import CheckElectrodeLabels
 
@@ -65,14 +65,13 @@ class Params(object):
 
         self.width = 5
 
-        self.th1_start_time = -1.2
-        self.th1_end_time = 0.5
-        self.th1_buf = 1.7
+        self.pal1_start_time = 0.3
+        self.pal1_end_time = 2.0
+        self.pal1_buf = 1.0
 
         self.filt_order = 4
 
-        self.freqs = np.logspace(np.log10(1.0), np.log10(200.0), 8)
-        self.classifier_freqs = self.freqs
+        self.freqs = np.logspace(np.log10(3), np.log10(180), 8)
 
         self.log_powers = True
 
@@ -108,13 +107,13 @@ class ReportPipeline(RamPipeline):
 report_pipeline = ReportPipeline(subject=args.subject,
                                        workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point)
 
-report_pipeline.add_task(THEventPreparation(mark_as_completed=False))
+report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
 
-report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
+report_pipeline.add_task(TalPreparation(mark_as_completed=False))
 
 report_pipeline.add_task(CheckElectrodeLabels(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(ComputeTHClassPowers(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 

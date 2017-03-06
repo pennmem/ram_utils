@@ -5,34 +5,85 @@ import os.path
 import numpy as np
 
 from ptsa.data.readers import BaseEventReader
+from ptsa.data.readers.IndexReader import JsonIndexReader
 
 from RamPipeline import *
+from ReportUtils import RamTask
+
+import hashlib
+
 
 class PAL1EventPreparation(RamTask):
     def __init__(self, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(PAL1EventPreparation,self).__init__(mark_as_completed)
+
+    def input_hashsum(self):
+        subject = self.pipeline.subject
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp)==1 else int(tmp[1])
+
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
+
+        hash_md5 = hashlib.md5()
+
+        pal1_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='PAL1')))
+        for fname in pal1_event_files:
+            with open(fname,'rb') as f: hash_md5.update(f.read())
+
+        pal3_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='PAL3')))
+        for fname in pal3_event_files:
+            with open(fname,'rb') as f: hash_md5.update(f.read())
+
+        return hash_md5.digest()
 
     def run(self):
-        e_path = os.path.join(self.pipeline.mount_point , 'data/events/RAM_PAL1', self.pipeline.subject + '_events.mat')
-        e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
+        evs_field_list = ['session','list','serialpos','type','probepos','study_1',
+                          'study_2','cue_direction','probe_word','expecting_word',
+                          'resp_word','correct','intrusion','resp_pass','vocalization',
+                          'RT','mstime','msoffset','eegoffset','eegfile'
+                          ]
 
-        events = e_reader.read()
+        subject = self.pipeline.subject
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp)==1 else int(tmp[1])
 
-        self.pass_object('PAL1_all_events', events)
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
 
-        intr_events = events[(events.intrusion!=-999) & (events.correct==0) & (events.vocalization!=1)]
+        event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='PAL1')))
+        events = None
+        for sess_file in event_files:
+            e_path = os.path.join(self.pipeline.mount_point, str(sess_file))
+            print e_path
+            e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
-        rec_events = events[(events.type == 'REC_EVENT') & (events.vocalization!=1)]
+            sess_events = e_reader.read()[evs_field_list]
+            sess_events = sess_events[(sess_events.type == 'STUDY_PAIR') & (sess_events.correct!=-999)]
 
-        test_probe_events = events[events.type == 'TEST_PROBE']
+            if events is None:
+                events = sess_events
+            else:
+                events = np.hstack((events,sess_events))
 
-        events = events[(events.type == 'STUDY_PAIR') & (events.correct!=-999)]
-        ev_order = np.argsort(events, order=('session','list','mstime'))
-        events = events[ev_order]
+        event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='PAL3')))
+        for sess_file in event_files:
+            e_path = os.path.join(self.pipeline.mount_point, str(sess_file))
+            print e_path
+            e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
+
+            sess_events = e_reader.read()
+            sess_events = sess_events[(sess_events.stim_list==0) & (sess_events.type == 'STUDY_PAIR') & (sess_events.correct!=-999)]
+            sess_events.session += 200
+            sess_events = sess_events[evs_field_list]
+
+            if events is None:
+                events = sess_events
+            else:
+                events = np.hstack((events,sess_events))
+
+        events = events.view(np.recarray)
 
         print len(events), 'STUDY_PAIR events'
 
         self.pass_object('PAL1_events', events)
-        self.pass_object('PAL1_intr_events', intr_events)
-        self.pass_object('PAL1_rec_events', rec_events)
-        self.pass_object('PAL1_test_probe_events', test_probe_events)
