@@ -82,7 +82,7 @@ class ComputeClassifier(ReportRamTask):
         self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto', solver='liblinear')
 
         event_sessions = events.session
-        recalls = events.recalled
+        recalls = events.correct
 
         if self.xval_test_type(events) == 'loso':
             print 'Performing permutation test'

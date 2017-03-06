@@ -38,7 +38,7 @@ class PAL1EventPreparation(ReportRamTask):
         evs_field_list = ['session','list','serialpos','type','probepos','study_1',
                           'study_2','cue_direction','probe_word','expecting_word',
                           'resp_word','correct','intrusion','resp_pass','vocalization',
-                          'RT','mstime','msoffset','eegoffset','eegfile','iscorrect'
+                          'RT','mstime','msoffset','eegoffset','eegfile','correct'
                           ]
 
         subject = self.pipeline.subject
