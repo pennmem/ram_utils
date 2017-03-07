@@ -91,6 +91,11 @@ class Params(object):
         self.fr1_end_time = 1.366
         self.fr1_buf = 1.365
 
+        self.fr1_retrieval_start_time = -0.525
+        self.fr1_retrieval_end_time = 0.0
+        self.fr1_retrieval_buf = 0.524
+
+
         self.filt_order = 4
 
         self.freqs = np.logspace(np.log10(3), np.log10(180), 8)
