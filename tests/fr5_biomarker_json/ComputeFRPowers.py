@@ -76,11 +76,13 @@ class ComputeFRPowers(RamTask):
         # tal_info = self.get_passed_object('tal_info')
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
-        if self.params.anode_nums:
-            stim_pairs = self.params.anode_nums + self.params.cathode_nums
+        if self.params.stim_params.anode_nums:
+            stim_pairs = self.params.stim_params.anode_nums + self.params.stim_params.cathode_nums
         else:
-            stim_pairs = [self.params.elec1,self.params.elec2]
-        bipolar_pairs = np.array(bipolar_pairs,dtype=[ ('ch1','S3'),('ch2','S3')])
+            stim_pairs = [self.params.stim_params.elec1,self.params.stim_params.elec2]
+        bipolar_pairs = np.array(bipolar_pairs,dtype=[ ('ch1','S3'),('ch2','S3')]).view(np.recarray)
+        print bipolar_pairs.dtype
+        print bipolar_pairs.shape
         include = [int(bp.ch1) not in stim_pairs and int(bp.ch2) not in stim_pairs for bp in bipolar_pairs]
         bipolar_pairs = bipolar_pairs[np.array(include)]
         self.pass_object('reduced_pairs',bipolar_pairs)
