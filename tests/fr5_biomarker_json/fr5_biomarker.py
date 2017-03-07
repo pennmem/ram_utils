@@ -10,7 +10,7 @@ from BiomarkerUtils import CMLParserBiomarker
 
 
 cml_parser = CMLParserBiomarker(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','/scratch/leond/FR3_biomarkers_json')
+cml_parser.arg('--workspace-dir','/scratch/leond/FR5_biomarkers_json')
 cml_parser.arg('--subject','R1124J_1')
 cml_parser.arg('--n-channels','128')
 cml_parser.arg('--anode-num','65')
@@ -43,14 +43,31 @@ from SaveMatlabFile import SaveMatlabFile
 
 import numpy as np
 
+class ArgumentError(Exception):
+    pass
+
+if args.anode and args.anodes:
+    raise ArgumentError('Cannot be called with both --anode and --anodes')
+if args.cathode and args.cathodes:
+    raise ArgumentError('Cannot be called with both --cathode and --cathodes')
+if args.cathode_num is not None and args.cathode_nums is not None:
+    raise ArgumentError('Cannot be called with both --cathode-num and --cathode-nums')
+if args.anode_num and args.anode_nums:
+    raise ArgumentError('Cannot be called with both --anode-num and --anode-nums')
+
+
 
 class StimParams(object):
     def __init__(self,**kwds):
         self.n_channels = kwds['n_channels']
         self.elec1 = kwds['anode_num']
         self.anode = kwds.get('anode', '')
+        self.anodes = kwds.get('anodes')
+        self.anode_nums = kwds.get('anode_nums')
         self.elec2 = kwds['cathode_num']
         self.cathode = kwds.get('cathode', '')
+        self.cathodes = kwds.get('cathodes')
+        self.cathode_nums=  kwds.get('cathode_nums')
         self.pulseFrequency = kwds['pulse_frequency']
         self.pulseCount = kwds['pulse_count']
         self.amplitude = kwds['target_amplitude']

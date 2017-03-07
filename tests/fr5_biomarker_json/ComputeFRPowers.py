@@ -76,8 +76,14 @@ class ComputeFRPowers(RamTask):
         # tal_info = self.get_passed_object('tal_info')
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
-
-
+        if self.params.anode_nums:
+            stim_pairs = self.params.anode_nums + self.params.cathode_nums
+        else:
+            stim_pairs = [self.params.elec1,self.params.elec2]
+        bipolar_pairs = np.array(bipolar_pairs,dtype=[ ('ch1','S3'),('ch2','S3')])
+        include = [int(bp.ch1) not in stim_pairs and int(bp.ch2) not in stim_pairs for bp in bipolar_pairs]
+        bipolar_pairs = bipolar_pairs[np.array(include)]
+        self.pass_object('reduced_pairs',bipolar_pairs)
 
         self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
 
@@ -93,7 +99,6 @@ class ComputeFRPowers(RamTask):
 
         retrieval_events_mask = (events.type == 'REC_WORD') | (events.type == 'REC_BASE')
         encoding_events_mask = (events.type == 'WORD')
-
 
         n_freqs = len(self.params.freqs)
         n_bps = len(bipolar_pairs)
@@ -169,35 +174,38 @@ class ComputeFRPowers(RamTask):
                 print 'Computing powers for bipolar pair', bp
                 elec1 = np.where(monopolar_channels == bp[0])[0][0]
                 elec2 = np.where(monopolar_channels == bp[1])[0][0]
-
-                bp_data = np.subtract(eegs[elec1],eegs[elec2])
-                bp_data.attrs['samplerate'] = self.samplerate
-
-
-                bp_data_retrieval = np.subtract(eegs_retrieval[elec1],eegs_retrieval[elec2])
-                bp_data_retrieval.attrs['samplerate'] = self.samplerate
-
+                exclude = (elec1 in [self.params.elec1,self.params.elec2]) or (elec2 in [self.params.elec1,self.params.elec2])
+                if exclude:
+                    sess_pow_mat[:,i,:] = 0
+                else:
+                    bp_data = np.subtract(eegs[elec1],eegs[elec2])
+                    bp_data.attrs['samplerate'] = self.samplerate
 
 
-                # bp_data = eegs[elec1] - eegs[elec2]
-                # bp_data = eegs[elec1] - eegs[elec2]
-                # bp_data = eegs.values[elec1] - eegs.values[elec2]
-
-                bp_data = bp_data.filtered([58,62], filt_type='stop', order=self.params.filt_order)
-                bp_data_retrieval = bp_data_retrieval.filtered([58,62], filt_type='stop', order=self.params.filt_order)
-
-                for ev in xrange(n_events):
-                    if encoding_events_mask[ev]:
-                        self.wavelet_transform.multiphasevec(bp_data[ev][0:winsize], pow_ev)
-                        pow_ev_stripped = np.reshape(pow_ev, (n_freqs,winsize))[:,bufsize:winsize-bufsize]
-                    else:
-                        self.wavelet_transform_retrieval.multiphasevec(bp_data_retrieval[ev][0:winsize_retrieval], pow_ev_retrieval)
-                        pow_ev_stripped = np.reshape(pow_ev_retrieval, (n_freqs,winsize_retrieval))[:,bufsize_retrieval:winsize_retrieval-bufsize_retrieval]
+                    bp_data_retrieval = np.subtract(eegs_retrieval[elec1],eegs_retrieval[elec2])
+                    bp_data_retrieval.attrs['samplerate'] = self.samplerate
 
 
-                    if self.params.log_powers:
-                        np.log10(pow_ev_stripped, out=pow_ev_stripped)
-                    sess_pow_mat[ev,i,:] = np.nanmean(pow_ev_stripped, axis=1)
+
+                    # bp_data = eegs[elec1] - eegs[elec2]
+                    # bp_data = eegs[elec1] - eegs[elec2]
+                    # bp_data = eegs.values[elec1] - eegs.values[elec2]
+
+                    bp_data = bp_data.filtered([58,62], filt_type='stop', order=self.params.filt_order)
+                    bp_data_retrieval = bp_data_retrieval.filtered([58,62], filt_type='stop', order=self.params.filt_order)
+
+                    for ev in xrange(n_events):
+                        if encoding_events_mask[ev]:
+                            self.wavelet_transform.multiphasevec(bp_data[ev][0:winsize], pow_ev)
+                            pow_ev_stripped = np.reshape(pow_ev, (n_freqs,winsize))[:,bufsize:winsize-bufsize]
+                        else:
+                            self.wavelet_transform_retrieval.multiphasevec(bp_data_retrieval[ev][0:winsize_retrieval], pow_ev_retrieval)
+                            pow_ev_stripped = np.reshape(pow_ev_retrieval, (n_freqs,winsize_retrieval))[:,bufsize_retrieval:winsize_retrieval-bufsize_retrieval]
+
+
+                        if self.params.log_powers:
+                            np.log10(pow_ev_stripped, out=pow_ev_stripped)
+                        sess_pow_mat[ev,i,:] = np.nanmean(pow_ev_stripped, axis=1)
 
             self.pow_mat = np.concatenate((self.pow_mat,sess_pow_mat), axis=0) if self.pow_mat is not None else sess_pow_mat
 

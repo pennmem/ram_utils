@@ -18,12 +18,13 @@ class SaveMatlabFile(RamTask):
         subject = self.pipeline.subject
         events = self.get_passed_object('FR_events')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
+        reduced_pairs = self.get_passed_object('reduced_pairs')
 
-        n_bps = len(bipolar_pairs)
+        n_bps = len(reduced_pairs)
         n_chs = self.params.stim_params.n_channels
 
         bpmat = np.zeros(shape=(n_chs, n_bps), dtype=np.float)
-        for i,bp in enumerate(bipolar_pairs):
+        for i,bp in enumerate(reduced_pairs):
             e1, e2 = bp[0],bp[1]
             bpmat[int(e1)-1, i] = 1
             bpmat[int(e2)-1, i] = -1
