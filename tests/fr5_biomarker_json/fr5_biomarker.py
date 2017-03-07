@@ -13,13 +13,15 @@ cml_parser = CMLParserBiomarker(arg_count_threshold=1)
 cml_parser.arg('--workspace-dir','/scratch/leond/FR5_biomarkers_json')
 cml_parser.arg('--subject','R1001P')
 cml_parser.arg('--n-channels','128')
-cml_parser.arg('--anode-num','34')
-cml_parser.arg('--anode','LDA1')
-cml_parser.arg('--cathode-num','35')
-cml_parser.arg('--cathode','LDA2')
+cml_parser.arg('--anode-nums','34','86')
+cml_parser.arg('--anodes','LDA1','RDA3')
+cml_parser.arg('--cathode-nums','35','87')
+cml_parser.arg('--cathodes','LDA2','RDA4')
 cml_parser.arg('--pulse-frequency','200')
 cml_parser.arg('--pulse-duration','500')
 cml_parser.arg('--target-amplitude','250')
+cml_parser.arg('--anode-num','34')
+cml_parser.arg('--cathode-num','35')
 
 
 args = cml_parser.parse()
@@ -46,14 +48,6 @@ import numpy as np
 class ArgumentError(Exception):
     pass
 
-if args.anode and args.anodes:
-    raise ArgumentError('Cannot be called with both --anode and --anodes')
-if args.cathode and args.cathodes:
-    raise ArgumentError('Cannot be called with both --cathode and --cathodes')
-if args.cathode_num is not None and args.cathode_nums is not None:
-    raise ArgumentError('Cannot be called with both --cathode-num and --cathode-nums')
-if args.anode_num and args.anode_nums:
-    raise ArgumentError('Cannot be called with both --anode-num and --anode-nums')
 
 
 
@@ -62,12 +56,12 @@ class StimParams(object):
         self.n_channels = kwds['n_channels']
         self.elec1 = kwds['anode_num']
         self.anode = kwds.get('anode', '')
-        self.anodes = kwds.get('anodes')
-        self.anode_nums = kwds.get('anode_nums')
+        self.anodes = kwds.get('anodes',[self.anode])
+        self.anode_nums = kwds.get('anode_nums',[self.elec1])
         self.elec2 = kwds['cathode_num']
         self.cathode = kwds.get('cathode', '')
-        self.cathodes = kwds.get('cathodes')
-        self.cathode_nums=  kwds.get('cathode_nums')
+        self.cathodes = kwds.get('cathodes',[self.cathode])
+        self.cathode_nums=  kwds.get('cathode_nums',[self.elec2])
         self.pulseFrequency = kwds['pulse_frequency']
         self.pulseCount = kwds['pulse_count']
         self.amplitude = kwds['target_amplitude']
@@ -75,6 +69,8 @@ class StimParams(object):
         self.duration = 300
         self.trainFrequency = 1
         self.trainCount = 1
+
+        print 'type(anodes)', type(self.anodes)
 
 class Params(object):
     def __init__(self):
@@ -95,6 +91,8 @@ class Params(object):
         self.fr1_retrieval_end_time = 0.0
         self.fr1_retrieval_buf = 0.524
 
+        self.retrieval_samples_weight = 0.5
+
 
         self.filt_order = 4
 
@@ -110,9 +108,13 @@ class Params(object):
         self.stim_params = StimParams(
             n_channels=args.n_channels,
             anode_num=args.anode_num,
+            anode_nums=args.anode_nums,
             anode=args.anode,
+            anodes= args.anodes,
             cathode_num=args.cathode_num,
+            cathode_nums=args.cathode_nums,
             cathode=args.cathode,
+            cathodes=args.cathodes,
             pulse_frequency=args.pulse_frequency,
             pulse_count=args.pulse_frequency*args.pulse_duration/1000,
             target_amplitude=args.target_amplitude
@@ -136,13 +138,13 @@ report_pipeline = ReportPipeline(subject=args.subject,
 
 report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
 
-report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
+report_pipeline.add_task(MontagePreparation(params=params,mark_as_completed=False))
 
 report_pipeline.add_task(CheckElectrodeLabels(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
 
 report_pipeline.add_task(SaveMatlabFile(params=params, mark_as_completed=False))
 

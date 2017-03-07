@@ -33,6 +33,7 @@ class ComputeFRPowers(RamTask):
         hash_md5 = hashlib.md5()
 
         bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
+
         for fname in bp_paths:
             with open(fname,'rb') as f: hash_md5.update(f.read())
 
@@ -60,6 +61,7 @@ class ComputeFRPowers(RamTask):
         self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
         self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
 
+
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
 
@@ -75,17 +77,7 @@ class ComputeFRPowers(RamTask):
         # channels = self.get_passed_object('channels')
         # tal_info = self.get_passed_object('tal_info')
         monopolar_channels = self.get_passed_object('monopolar_channels')
-        bipolar_pairs = self.get_passed_object('bipolar_pairs')
-        if self.params.stim_params.anode_nums:
-            stim_pairs = self.params.stim_params.anode_nums + self.params.stim_params.cathode_nums
-        else:
-            stim_pairs = [self.params.stim_params.elec1,self.params.stim_params.elec2]
-        bipolar_pairs = np.array(bipolar_pairs,dtype=[ ('ch1','S3'),('ch2','S3')]).view(np.recarray)
-        print bipolar_pairs.dtype
-        print bipolar_pairs.shape
-        include = [int(bp.ch1) not in stim_pairs and int(bp.ch2) not in stim_pairs for bp in bipolar_pairs]
-        bipolar_pairs = bipolar_pairs[np.array(include)]
-        self.pass_object('reduced_pairs',bipolar_pairs)
+        bipolar_pairs = self.get_passed_object('reduced_pairs')
 
         self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
 
@@ -93,7 +85,7 @@ class ComputeFRPowers(RamTask):
         self.pass_object('samplerate', self.samplerate)
 
 
-
+        joblib.dump(bipolar_pairs, self.get_path_to_resource_in_workspace(subject+'-reduced_pairs.pkl'))
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
         joblib.dump(self.samplerate, self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
 

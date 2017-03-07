@@ -9,7 +9,7 @@ from sklearn.externals import joblib
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
 import hashlib
-
+import warnings
 
 def normalize_sessions(pow_mat, events):
     sessions = np.unique(events.session)
@@ -118,10 +118,13 @@ class ComputeClassifier(RamTask):
             insample_recalls = recalls[insample_mask]
             insample_samples_weights = samples_weights[insample_mask]
 
-            if samples_weights is not None:
-                self.lr_classifier.fit(insample_pow_mat, insample_recalls,insample_samples_weights)
-            else:
-                self.lr_classifier.fit(insample_pow_mat, insample_recalls)
+
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                if samples_weights is not None:
+                    self.lr_classifier.fit(insample_pow_mat, insample_recalls,insample_samples_weights)
+                else:
+                    self.lr_classifier.fit(insample_pow_mat, insample_recalls)
 
             outsample_mask = ~insample_mask
             outsample_pow_mat = self.pow_mat[outsample_mask]
@@ -186,10 +189,13 @@ class ComputeClassifier(RamTask):
             insample_recalls = recalls[insample_mask]
             insample_samples_weights = samples_weights[insample_mask]
 
-            if samples_weights is not None:
-                self.lr_classifier.fit(insample_pow_mat, insample_recalls,insample_samples_weights)
-            else:
-                self.lr_classifier.fit(insample_pow_mat, insample_recalls)
+
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                if samples_weights is not None:
+                    self.lr_classifier.fit(insample_pow_mat, insample_recalls,insample_samples_weights)
+                else:
+                    self.lr_classifier.fit(insample_pow_mat, insample_recalls)
 
 
             outsample_mask = ~insample_mask

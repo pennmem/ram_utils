@@ -48,8 +48,9 @@ def atlas_location_matlab(tag, atlas_loc, comments):
         return '--'
 
 class MontagePreparation(RamTask):
-    def __init__(self, mark_as_completed=True):
+    def __init__(self, params,mark_as_completed=True):
         super(MontagePreparation,self).__init__(mark_as_completed)
+        self.params=params
 
     def input_hashsum(self):
         subject = self.pipeline.subject
@@ -74,7 +75,9 @@ class MontagePreparation(RamTask):
         bipolar_pairs = joblib.load(self.get_path_to_resource_in_workspace(subject + '-bipolar_pairs.pkl'))
         bp_tal_structs = pd.read_pickle(self.get_path_to_resource_in_workspace(subject + '-bp_tal_structs.pkl'))
         bp_tal_stim_only_structs = pd.read_pickle(self.get_path_to_resource_in_workspace(subject + '-bp_tal_stim_only_structs.pkl'))
+        reduced_pairs = joblib.load(self.get_path_to_resource_in_workspace(subject+'-reduced_pairs.pkl'))
 
+        self.pass_object('reduced_pairs',reduced_pairs)
         self.pass_object('monopolar_channels', monopolar_channels)
         self.pass_object('bipolar_pairs', bipolar_pairs)
         self.pass_object('bp_tal_structs', bp_tal_structs)
@@ -107,8 +110,11 @@ class MontagePreparation(RamTask):
                 ch2 = bp_data['channel_2']
                 bp_tal_structs.append(['%03d'%ch1, '%03d'%ch2, bp_data['type_1'], atlas_location(bp_data)])
 
+
             bp_tal_structs = pd.DataFrame(bp_tal_structs, index=bp_tags, columns=['channel_1', 'channel_2', 'etype', 'bp_atlas_loc'])
             bp_tal_structs.sort_values(by=['channel_1', 'channel_2'], inplace=True)
+            # print bp_tal_structs
+
             monopolar_channels = np.unique(np.hstack((bp_tal_structs.channel_1.values,bp_tal_structs.channel_2.values)))
             bipolar_pairs = zip(bp_tal_structs.channel_1.values,bp_tal_structs.channel_2.values)
 
@@ -121,13 +127,22 @@ class MontagePreparation(RamTask):
                     bp_tal_stim_only_structs.append(atlas_location(bp_data))
                 bp_tal_stim_only_structs = pd.Series(bp_tal_stim_only_structs, index=bp_tags_stim_only)
 
+            if self.params.stim_params.anode_nums:
+                stim_pairs = self.params.stim_params.anode_nums + self.params.stim_params.cathode_nums
+            else:
+                stim_pairs = [self.params.stim_params.elec1, self.params.stim_params.elec2]
+            bipolar_pairs = np.array(bipolar_pairs, dtype=[('ch1', 'S3'), ('ch2', 'S3')]).view(np.recarray)
+            include = [int(bp.ch1) not in stim_pairs and int(bp.ch2) not in stim_pairs for bp in bipolar_pairs]
+
+            reduced_pairs = bipolar_pairs[np.array(include)]
+            self.pass_object('reduced_pairs', reduced_pairs)
+
             self.pass_object('monopolar_channels', monopolar_channels)
             self.pass_object('bipolar_pairs', bipolar_pairs)
             self.pass_object('bp_tal_structs', bp_tal_structs)
             self.pass_object('bp_tal_stim_only_structs', bp_tal_stim_only_structs)
 
-            print bp_tal_structs
-
+            joblib.dump(reduced_pairs,self.get_path_to_resource_in_workspace(subject+'-reduced_pairs.pkl'))
             joblib.dump(monopolar_channels, self.get_path_to_resource_in_workspace(subject + '-monopolar_channels.pkl'))
             joblib.dump(bipolar_pairs, self.get_path_to_resource_in_workspace(subject + '-bipolar_pairs.pkl'))
             bp_tal_structs.to_pickle(self.get_path_to_resource_in_workspace(subject + '-bp_tal_structs.pkl'))
