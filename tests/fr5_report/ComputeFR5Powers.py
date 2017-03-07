@@ -72,7 +72,7 @@ class ComputeFR5Powers(ReportRamTask):
         print 'sessions:', sessions
 
         monopolar_channels = self.get_passed_object('monopolar_channels')
-        bipolar_pairs = self.get_passed_object('bipolar_pairs')
+        bipolar_pairs = self.get_passed_object('reduced_pairs')
 
         self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
 
