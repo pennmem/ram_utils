@@ -27,7 +27,7 @@ args = cml_parser.parse()
 
 # ------------------------------- end of processing command line
 
-from RamPipeline import RamPipeline
+from ReportUtils import ReportPipeline
 
 from FREventPreparation import FREventPreparation
 
@@ -98,15 +98,6 @@ class Params(object):
 
 
 params = Params()
-
-
-class ReportPipeline(RamPipeline):
-
-    def __init__(self, subject, workspace_dir, mount_point=None):
-        RamPipeline.__init__(self)
-        self.subject = subject
-        self.mount_point = mount_point
-        self.set_workspace_dir(workspace_dir)
 
 
 report_pipeline = ReportPipeline(subject=args.subject,

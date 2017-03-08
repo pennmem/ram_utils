@@ -9,6 +9,10 @@ from sklearn.externals import joblib
 
 from ptsa.data.readers import EEGReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
+try:
+    from ReportTasks.RamTaskMethods import compute_powers
+except ImportError:
+    compute_powers=None
 
 import hashlib
 
@@ -76,10 +80,13 @@ class ComputeFRPowers(RamTask):
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
 
-        self.classify_pow_mat, events = compute_powers(events, monopolar_channels, bipolar_pairs,
+        if compute_powers:
+                self.pow_mat, events = compute_powers(events, monopolar_channels, bipolar_pairs,
                                                        self.params.fr1_start_time, self.params.fr1_end_time,
                                                        self.params.fr1_buf,
-                                                       self.params.fr, self.params.log_powers)
+                                                       self.params.freqs, self.params.log_powers,ComputePowers=self)
+        else:
+            self.compute_powers(events,sessions,monopolar_channels,bipolar_pairs)
 
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
