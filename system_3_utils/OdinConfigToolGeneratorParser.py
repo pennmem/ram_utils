@@ -12,15 +12,16 @@ class OdinConfigToolGeneratorParser(object):
         self.parser = argparse.ArgumentParser(description='Report Generator')
         self.parser.add_argument('--subject', required=True, action='store')
         self.parser.add_argument('--contacts-json', required=True, action='store',default='')
-        self.parser.add_argument('--contacts-json-output-dir', required=True, action='store',default='')
+        self.parser.add_argument('--stim-channels',nargs='+',action='store')
+        self.parser.add_argument('--contacts-json-output-dir',required=True,action='store',default='')
 
 
         self.arg_list=[]
         self.arg_count_threshold = arg_count_threshold
 
-    def arg(self, name, val=None):
+    def arg(self, name, *vals):
         self.arg_list.append(name)
-        if val is not None:
+        for val in vals:
             self.arg_list.append(val)
 
     def configure_python_paths(self,paths):

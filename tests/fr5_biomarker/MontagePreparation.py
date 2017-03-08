@@ -7,7 +7,7 @@ import pandas as pd
 
 from sklearn.externals import joblib
 
-from ReportUtils import RamTask
+from RamPipeline import RamTask
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
 import hashlib
@@ -74,7 +74,10 @@ class MontagePreparation(RamTask):
         bipolar_pairs = joblib.load(self.get_path_to_resource_in_workspace(subject + '-bipolar_pairs.pkl'))
         bp_tal_structs = pd.read_pickle(self.get_path_to_resource_in_workspace(subject + '-bp_tal_structs.pkl'))
         bp_tal_stim_only_structs = pd.read_pickle(self.get_path_to_resource_in_workspace(subject + '-bp_tal_stim_only_structs.pkl'))
+        reduced_pairs = joblib.load(self.get_path_to_resource_in_workspace(subject+'-reduced_pairs.pkl'))
 
+
+        self.pass_object('reduced_pairs',reduced_pairs)
         self.pass_object('monopolar_channels', monopolar_channels)
         self.pass_object('bipolar_pairs', bipolar_pairs)
         self.pass_object('bp_tal_structs', bp_tal_structs)
@@ -112,6 +115,16 @@ class MontagePreparation(RamTask):
             monopolar_channels = np.unique(np.hstack((bp_tal_structs.channel_1.values,bp_tal_structs.channel_2.values)))
             bipolar_pairs = zip(bp_tal_structs.channel_1.values,bp_tal_structs.channel_2.values)
 
+            # print bp_tal_structs
+            # exit()
+
+            if self.pipeline.args.anode_nums:
+                stim_pairs = self.pipeline.args.anode_nums + self.pipeline.args.cathode_nums
+            else:
+                stim_pairs = [self.pipeline.args.anode_num, self.pipeline.args.cathode_num]
+            reduced_pairs = [bp for bp in bipolar_pairs if (bp[0]) not in stim_pairs and int(bp[1]) not in stim_pairs]
+
+
             bp_tal_stim_only_structs = pd.Series()
             if bipolar_data_stim_only:
                 bp_tags_stim_only = []
@@ -121,18 +134,24 @@ class MontagePreparation(RamTask):
                     bp_tal_stim_only_structs.append(atlas_location(bp_data))
                 bp_tal_stim_only_structs = pd.Series(bp_tal_stim_only_structs, index=bp_tags_stim_only)
 
+            self.pass_object('reduced_pairs',reduced_pairs)
+
             self.pass_object('monopolar_channels', monopolar_channels)
             self.pass_object('bipolar_pairs', bipolar_pairs)
             self.pass_object('bp_tal_structs', bp_tal_structs)
             self.pass_object('bp_tal_stim_only_structs', bp_tal_stim_only_structs)
 
+            joblib.dump(reduced_pairs,self.get_path_to_resource_in_workspace(subject+'-reduced_pairs.pkl'))
             joblib.dump(monopolar_channels, self.get_path_to_resource_in_workspace(subject + '-monopolar_channels.pkl'))
             joblib.dump(bipolar_pairs, self.get_path_to_resource_in_workspace(subject + '-bipolar_pairs.pkl'))
             bp_tal_structs.to_pickle(self.get_path_to_resource_in_workspace(subject + '-bp_tal_structs.pkl'))
             bp_tal_stim_only_structs.to_pickle(self.get_path_to_resource_in_workspace(subject + '-bp_tal_stim_only_structs.pkl'))
 
-        except:
-            self.raise_and_log_report_exception(
+        except Exception as e:
+            try:
+                self.raise_and_log_report_exception(
                                                 exception_type='MissingDataError',
                                                 exception_message='Missing or corrupt montage data for subject %s' % subject
                                                )
+            except (TypeError,AttributeError):
+                raise e

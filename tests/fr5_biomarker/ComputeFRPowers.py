@@ -75,7 +75,7 @@ class ComputeFRPowers(RamTask):
         # channels = self.get_passed_object('channels')
         # tal_info = self.get_passed_object('tal_info')
         monopolar_channels = self.get_passed_object('monopolar_channels')
-        bipolar_pairs = self.get_passed_object('bipolar_pairs')
+        bipolar_pairs = self.get_passed_object('reduced_pairs')
 
 
 

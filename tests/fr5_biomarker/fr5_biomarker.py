@@ -109,15 +109,17 @@ params = Params()
 
 class ReportPipeline(RamPipeline):
 
-    def __init__(self, subject, workspace_dir, mount_point=None):
+    def __init__(self, subject, workspace_dir, mount_point=None,args=None):
         RamPipeline.__init__(self)
         self.subject = subject
         self.mount_point = mount_point
-        self.set_workspace_dir(workspace_dir)
+        self.set_workspace_dir(workspace_dir),
+        self.args = args
 
 
 report_pipeline = ReportPipeline(subject=args.subject,
-                                       workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point)
+                                       workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point,
+                                 args=args)
 
 report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
 

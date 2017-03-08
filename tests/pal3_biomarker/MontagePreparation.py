@@ -111,6 +111,8 @@ class MontagePreparation(RamTask):
             monopolar_channels = np.unique(np.hstack((bp_tal_structs.channel_1.values,bp_tal_structs.channel_2.values)))
             bipolar_pairs = zip(bp_tal_structs.channel_1.values,bp_tal_structs.channel_2.values)
 
+            print bp_tal_structs
+
             bp_tal_stim_only_structs = pd.Series()
             if bipolar_data_stim_only:
                 bp_tags_stim_only = []

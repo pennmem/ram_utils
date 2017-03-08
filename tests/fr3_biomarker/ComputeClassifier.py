@@ -184,11 +184,13 @@ class ComputeClassifier(ReportRamTask):
         self.pass_object('xval_output', self.xval_output)
         self.pass_object('perm_AUCs', self.perm_AUCs)
         self.pass_object('pvalue', self.pvalue)
+        self.pass_object('classifier_path',self.get_path_to_resource_in_workspace(subject+'-lr_classifier.pkl'))
 
         joblib.dump(self.lr_classifier, self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl'))
         joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace(subject + '-xval_output.pkl'))
         joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace(subject + '-perm_AUCs.pkl'))
         joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject + '-pvalue.pkl'))
+
 
     def restore(self):
         subject = self.pipeline.subject
@@ -200,6 +202,7 @@ class ComputeClassifier(ReportRamTask):
             except IOError:
                 self.__setattr__(attr,joblib.load(self.get_path_to_resource_in_workspace(subject + '-'+task+'-%s.pkl'%attr)))
 
+        self.pass_object('classifier_path',self.get_path_to_resource_in_workspace(subject+'-lr_classifier.pkl'))
         self.pass_object('lr_classifier', self.lr_classifier)
         self.pass_object('xval_output', self.xval_output)
         self.pass_object('perm_AUCs', self.perm_AUCs)

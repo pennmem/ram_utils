@@ -332,13 +332,16 @@ def mkdir_p(path):
             raise
 
 
-def contacts_json_2_configuration_csv(contacts_json_path, output_dir, configuration_label='_ODIN'):
+def contacts_json_2_configuration_csv(contacts_json_path, output_dir, configuration_label='_ODIN',anodes=(),cathodes=()):
     import json
     ec = ElectrodeConfig()
     contacts_dict = json.load(open(contacts_json_path))
     ec.intitialize_from_dict(contacts_dict, "FromJson")
+    for anode,cathode in zip(anodes,cathodes):
+        name = '-'.join([anode,cathode])
+        ec.stim_channels[name]=StimChannel(name=name,anodes=[ec.contacts[anode].jack_num],
+                                               cathodes=[ec.contacts[cathode].jack_num],comments='')
     csv_out = ec.as_csv()
-
     try:
         mkdir_p(output_dir)
     except AttributeError:

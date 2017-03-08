@@ -10,11 +10,11 @@ from os.path import *
 from system_3_utils.ram_tasks.CMLParserClosedLoop3 import CMLParserCloseLoop3
 
 cml_parser = CMLParserCloseLoop3(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','D:/scratch/R1250N')
+cml_parser.arg('--workspace-dir','/scratch/leond/R1250N')
 cml_parser.arg('--experiment','PAL3')
-cml_parser.arg('--mount-point','D:/')
+cml_parser.arg('--mount-point','/')
 cml_parser.arg('--subject','R1250N')
-cml_parser.arg('--electrode-config-file',r'd:\experiment_configs\R1250N_PAL3.bin')
+cml_parser.arg('--electrode-config-file','/home1/leond/fr3_config/contactsR1250N.csv')
 cml_parser.arg('--pulse-frequency','100')
 cml_parser.arg('--target-amplitude','1000')
 cml_parser.arg('--anode-num','10')

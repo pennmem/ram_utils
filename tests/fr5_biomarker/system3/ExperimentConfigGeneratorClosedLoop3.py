@@ -12,6 +12,7 @@ from tornado.template import Template
 from glob import glob
 import shutil
 import pathlib
+from itertools import cycle
 
 class ExperimentConfigGeneratorClosedLoop3(RamTask):
     def __init__(self, params, mark_as_completed=False):
@@ -77,7 +78,8 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
                 ziph.write(os.path.join(root, file), relative_path )
 
     def run(self):
-
+        anodes = self.pipeline.args.anodes if self.pipeline.args.anodes else [self.pipeline.args.anode]
+        cathodes = self.pipeline.args.cathodes if self.pipeline.args.cathodes else [self.pipeline.args.cathode]
         # stim_electrode_pair = self.pipeline.args.stim_electrode_pair
         experiment = self.pipeline.args.experiment if self.pipeline.args.experiment else 'FR3'
         electrode_config_file = self.pipeline.args.electrode_config_file
@@ -87,6 +89,20 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
         bipolar_pairs_path = self.get_passed_object('bipolar_pairs_path')
         classifier_path = self.get_passed_object('classifier_path')
         stim_chan_label = self.get_passed_object('stim_chan_label')
+
+        stim_params_dict = {}
+        stim_params_list = zip(anodes,cathodes,cycle(self.pipeline.args.min_amplitudes),
+                               cycle(self.pipeline.args.max_amplitudes))
+        for anode,cathode,min_amplitude,max_amplitude in stim_params_list:
+            chan_label = '_'.join([anode,cathode])
+            stim_params_dict[chan_label]={
+                "min_stim_amplitude":min_amplitude,
+                "max_stim_amplitude":max_amplitude,
+                "stim_frequency":200,
+                "stim_duration":500
+            }
+
+
 
         project_dir_corename = 'experiment_config_dir/%s/%s'%(subject,experiment)
         project_dir = self.create_dir_in_workspace(project_dir_corename)
@@ -102,13 +118,13 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
         experiment_config_template_filename = join(dirname(__file__),'templates','experiment_config.json.tpl')
         experiment_config_template = Template(open(experiment_config_template_filename ,'r').read())
 
+
+
         experiment_config_content = experiment_config_template.generate(
             subject=subject,
             experiment=experiment,
             classifier_file='config_files/%s'%basename(classifier_path),
-            stim_frequency=stim_frequency,
-            stim_amplitude=stim_amplitude,
-            stim_electrode_pair=stim_chan_label,
+            stim_params_dict=stim_params_dict,
             electrode_config_file='config_files/%s'%basename(electrode_config_file),
             montage_file='config_files/%s'%basename(bipolar_pairs_path)
         )

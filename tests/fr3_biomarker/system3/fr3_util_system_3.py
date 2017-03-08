@@ -10,11 +10,11 @@ from os.path import *
 from system_3_utils.ram_tasks.CMLParserClosedLoop3 import CMLParserCloseLoop3
 
 cml_parser = CMLParserCloseLoop3(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','D:/scratch/R1247P_1')
-cml_parser.arg('--experiment','CatFR3')
-cml_parser.arg('--mount-point','D:/')
+cml_parser.arg('--workspace-dir','/scratch/leond/FR3_biomarkers/R1247P_1')
+cml_parser.arg('--experiment','catFR3')
+cml_parser.arg('--mount-point','/')
 cml_parser.arg('--subject','R1247P_1')
-cml_parser.arg('--electrode-config-file',r'd:\experiment_configs\R1247P_FR3.bin')
+cml_parser.arg('--electrode-config-file',r'/home1/leond/fr3_config/contactsR1247P.csv')
 cml_parser.arg('--pulse-frequency','100')
 cml_parser.arg('--target-amplitude','1000')
 cml_parser.arg('--anode-num','95')
@@ -38,7 +38,7 @@ args = cml_parser.parse()
 
 # ------------------------------- end of processing command line
 
-from RamPipeline import RamPipeline
+from ReportUtils import ReportPipeline
 
 from tests.fr3_biomarker.FREventPreparation import FREventPreparation
 
@@ -123,15 +123,6 @@ class Params(object):
 
 params = Params()
 
-
-class ReportPipeline(RamPipeline):
-
-    def __init__(self, subject, workspace_dir, mount_point=None, args=None):
-        RamPipeline.__init__(self)
-        self.subject = subject
-        self.mount_point = mount_point
-        self.set_workspace_dir(workspace_dir)
-        self.args = args
 
 
 report_pipeline = ReportPipeline(subject=args.subject,

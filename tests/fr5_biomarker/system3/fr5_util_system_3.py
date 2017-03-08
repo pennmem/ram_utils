@@ -21,30 +21,21 @@ cml_parser = CMLParserCloseLoop3(arg_count_threshold=1)
 # cml_parser.arg('--anode','Rd7')
 # cml_parser.arg('--cathode-num','97')
 # cml_parser.arg('--cathode','RE1')
+
 subject= 'R1096E'
-cml_parser.arg('--workspace-dir','/Users/leond/fr5_config')
+cml_parser.arg('--workspace-dir','/home1/leond/fr5_config')
 cml_parser.arg('--experiment','FR5')
-cml_parser.arg('--mount-point','/Volumes/rhino_root/')
+cml_parser.arg('--mount-point','/')
 cml_parser.arg('--subject',subject)
-cml_parser.arg('--electrode-config-file','/Users/leond/fr5_config_files/contacts%s.csv'%subject)
+cml_parser.arg('--electrode-config-file','/home1/leond/fr5_config/contacts%s.csv'%subject)
 cml_parser.arg('--pulse-frequency','100')
 cml_parser.arg('--target-amplitude','1000')
-cml_parser.arg('--anode-num','82')
-cml_parser.arg('--anode','12RGRD1')
-cml_parser.arg('--cathode-num','83')
-cml_parser.arg('--cathode','12RGRD2')
-
-
-
-
-# cml_parser.arg('--workspace-dir','/scratch/busygin/FR3_biomarkers')
-# cml_parser.arg('--subject','R1145J_1')
-# cml_parser.arg('--n-channels','128')
-# cml_parser.arg('--anode-num','3')
-# cml_parser.arg('--cathode-num','4')
-# cml_parser.arg('--pulse-frequency','200')
-# cml_parser.arg('--pulse-count','100')
-# cml_parser.arg('--target-amplitude','1000')
+cml_parser.arg('--anode-nums','13','82')
+cml_parser.arg('--anodes','3LAHD2','12RGRD1')
+cml_parser.arg('--cathode-nums','14','83')
+cml_parser.arg('--cathodes', '3LAHD3','12RGRD2')
+cml_parser.arg('--min-amplitudes','0.25')
+cml_parser.arg('--max-amplitudes','1.0')
 
 
 args = cml_parser.parse()
