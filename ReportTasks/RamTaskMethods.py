@@ -41,7 +41,7 @@ def load_events(subject,experiment,montage=0, mount_point='/',*sessions):
 
 def compute_powers(events,monopolar_channels,bipolar_pairs,
                    start_time,end_time,buffer_time,
-                   freqs,log_powers,filt_order=4,width=5):
+                   freqs,log_powers,filt_order=4,width=5,ComputePowers=None):
 
     if not isinstance(bipolar_pairs,np.recarray):
         bipolar_pairs = np.array(bipolar_pairs,dtype=[('ch0','S3'),('ch1','S3')]).view(np.recarray)
@@ -81,6 +81,8 @@ def compute_powers(events,monopolar_channels,bipolar_pairs,
 
     pow_mat = pow_mat.reshape((len(events),len(bipolar_pairs)*len(freqs)))
     toc = time.time()
+    if ComputePowers:
+        ComputePowers.samplerate = eeg['samplerate'].data
     # print 'Total time elapsed: {}'.format(toc-tic)
     # print 'Time spent on wavelet filter: {}'.format(filter_time)
     return pow_mat,events
