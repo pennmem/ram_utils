@@ -65,7 +65,7 @@ def compute_powers(events,monopolar_channels,bipolar_pairs,
     print 'Total time elapsed: {}'.format(time.time()-tic)
     # print 'Time spent on wavelet filter: {}'.format(filter_time)
     if ComputePowers is not None:
-        ComputePowers.samplerate = eeg['samplerate']
+        ComputePowers.samplerate = eeg['samplerate'].data
     return pow_mat,events
 
 """======================================== Classifier Functions =================================================== """
