@@ -5,7 +5,7 @@
 \begin{tabular}{ccc}
 \begin{minipage}[htbp]{200pt}
 In the free recall task, participants are presented with a list of words, one after the other, and later asked to recall as many words as possible in any order.
-\begin{itemize}\item\textbf{Number of sessions: }$<NUMBER_OF_SESSIONS>$\item\textbf{Number of electrodes: }$<NUMBER_OF_ELECTRODES>$\end{itemize}\end{minipage}
+\begin{itemize}\item\textbf{Number of sessions: }${{NUMBER_OF_SESSIONS}}$\item\textbf{Number of electrodes: }${{NUMBER_OF_ELECTRODES}}$\end{itemize}\end{minipage}
 &
 \begin{tabular}{|c|c|c|c|c|}
 \hline Session \# & Date & Length (min) & \#lists & Perf \\
@@ -55,7 +55,7 @@ average repetition ratio for this subject}
 \begin{longtable}{C{.75cm} C{2cm} C{2.5cm} C{5.5cm} C{1.25cm} C{1.25cm}}
 \hline
 Type & Channel \# & Electrode Pair & Atlas Loc & \textit{p} & \textit{t}-stat \\
-<SIGNIFICANT_ELECTRODES>
+{{SIGNIFICANT_ELECTRODES}}
 \hline
 \caption{Subsequent memory effect HFA. High frequency activity (HFA, 70-200 Hz) was measured across the word presentation interval (0 to 1600ms). At each electrode, a t-test compared HFA for subsequently recalled vs subsequently forgotten items. \textbf{Surface Electrodes:} Red - significant positive effect (subsequently \textit{remembered} HFA $>$ subsequently \textit{forgotten} HFA). Blue - significant negative effect (subsequently \textit{remembered} HFA $<$ subsequently \textit{forgotten} HFA). Black - difference not significant. \textbf{Depth Electrodes:} All bipolar pairs shown in descending order of significance Bipolar pairs that exceed significance threshold ($p < .05$) are in boldface.}
 \end{longtable}
