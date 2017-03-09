@@ -1,3 +1,7 @@
+{% extends report.tex.tpl %}
+
+{% block REPORT_CONTENTS %}
+
 \begin{tabular}{ccc}
 \begin{minipage}[htbp]{200pt}
 In the free recall task, participants are presented with a list of words, one after the other, and later asked to recall as many words as possible in any order.
@@ -5,7 +9,7 @@ In the free recall task, participants are presented with a list of words, one af
 &
 \begin{tabular}{|c|c|c|c|c|}
 \hline Session \# & Date & Length (min) & \#lists & Perf \\
-<SESSION_DATA>
+{{SESSION_DATA}}
 \end{tabular}
 \end{tabular}
 \vspace{0.3 in}
@@ -15,7 +19,7 @@ In the free recall task, participants are presented with a list of words, one af
 \begin{tabular}{c|c|c|c}
 \multicolumn{4}{c}{\textbf{Free Recall}} \\
 \hline
-$<N_WORDS>$ words & $<N_CORRECT_WORDS>$ correct ($<PC_CORRECT_WORDS>$\%) &$<N_PLI>$ PLI ($<PC_PLI>$\%) &$<N_ELI>$ ELI ($<PC_ELI>$\%) \\ \hline
+${{N_WORDS}}$ words & ${{N_CORRECT_WORDS}}$ correct (${{PC_CORRECT_WORDS}}$\%) &${{N_PLI}}$ PLI (${{PC_PLI}}$\%) &${{N_ELI}}$ ELI (${{PC_ELI}}$\%) \\ \hline
 \end{tabular}
 \caption{An intrusion was a word that was vocalized during the retrieval period that was not studied on the most recent list. Intrusions were either words from a previous list (\textbf{PLI}: prior-list intrusions) or words that were not studied at all (\textbf{ELI}: extra-list intrusions).}
 \end{table}
@@ -25,17 +29,24 @@ $<N_WORDS>$ words & $<N_CORRECT_WORDS>$ correct ($<PC_CORRECT_WORDS>$\%) &$<N_PL
 %\begin{tabular}{c|c|c}
 %\multicolumn{3}{c}{\textbf{Math distractor}} \\
 %\hline
-%$<N_MATH>$ math problems & $<N_CORRECT_MATH>$ correct ($<PC_CORRECT_MATH>$\%) & $<MATH_PER_LIST>$ problems per list  \\ \hline
+%${{N_MATH}}$ math problems & ${{N_CORRECT_MATH}}$ correct (${{PC_CORRECT_MATH}}$\%) & ${{MATH_PER_LIST}}$ problems per list  \\ \hline
 %\end{tabular}
 %\caption{After each list, the patient was given 20 seconds to perform as many arithmetic problems as possible, which served as a distractor before the beginning of recall.}
 %\end{table}
 
 \begin{figure}[!h]
 \centering
-\includegraphics[scale=0.4]{<PROB_RECALL_PLOT_FILE>}
+\includegraphics[scale=0.4]{ {{PROB_RECALL_PLOT_FILE}} }
 \caption{\textbf{Free recall:} (a) Overall probability of recall as a function of serial position. (b) Probability of first recall as a function of serial position.}
 \end{figure}
-<CATEGORY_PLOTS>
+{% if 'cat' in TASK %}
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.4]{ {{CATEGORY_PLOT_FILE}} }
+\caption{\textbf{Categorical free recall:} (a) Inter-response times for transitions within and between categories. (b) Distribution of repetition ratios; dotted line indicates
+average repetition ratio for this subject}
+\end{figure}
+{%end}
 
 \clearpage
 
@@ -57,18 +68,18 @@ Type & Channel \# & Electrode Pair & Atlas Loc & \textit{p} & \textit{t}-stat \\
 
 \begin{figure}[!h]
 \centering
-\includegraphics[scale=0.45]{<ROC_AND_TERC_PLOT_FILE>}
+\includegraphics[scale=0.45]{ {{ROC_AND_TERC_PLOT_FILE}} }
 \caption{\textbf{(a)} ROC curve for the subject;
 \textbf{(b)} Subject recall performance represented as
 percentage devation from the (subject) mean, separated by tercile
 of the classifier encoding efficiency estimate for each encoded word.}
 \end{figure}
 
-$\bullet$ Area Under Curve = $<AUC>$\%
+$\bullet$ Area Under Curve = ${{AUC}}$\%
 
-$\bullet$ Permutation test $p$-value $<PERM-P-VALUE>$
+$\bullet$ Permutation test $p$-value ${{PERM-P-VALUE}}$
 
-$\bullet$ Median of classifier output = $<J-THRESH>$
+$\bullet$ Median of classifier output = ${{J-THRESH}}$
 
 %\begin{figure}[!h]
 %\centering
@@ -78,4 +89,4 @@ $\bullet$ Median of classifier output = $<J-THRESH>$
 %TC=temporal cortex; MTL=medial temporal lobe (including hippocampus,
 %amygdala and cortex); HC=hippocampus; OC=occipital cortex; PC=parietal cortex.}
 %\end{figure}
-
+{% end %}

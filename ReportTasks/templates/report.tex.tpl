@@ -24,13 +24,13 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{<TASK> \, <SYSTEM_VERSION> \, Report v<REPORT_VERSION>}
-\chead{Subject: \textbf{<SUBJECT>}}
+\lhead{ {{TASK}} \, {{SYSTEM_VERSION}} \, Report v{{REPORT_VERSION}} }
+\chead{Subject: \textbf{ {{SUBJECT}} !}}
 \rhead{Date created: <DATE>}
 \begin{document}
 
-\section*{<TITLE> Report}
+\section*{ {{ TITLE }} Report}
 
-<REPORT_CONTENTS>
+{% block REPORT_CONTENTS %}{% end %}
 
 \end{document}
