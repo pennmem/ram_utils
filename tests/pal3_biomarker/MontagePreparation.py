@@ -6,9 +6,9 @@ from ptsa.data.readers import TalReader
 
 from ReportUtils import RamTask
 
-class TalPreparation(RamTask):
+class MontagePreparation(RamTask):
     def __init__(self, mark_as_completed=True):
-        super(TalPreparation,self).__init__(mark_as_completed)
+        super(MontagePreparation, self).__init__(mark_as_completed)
 
     def run(self):
         tal_path = os.path.join(self.pipeline.mount_point,'data/eeg',self.pipeline.subject,'tal',self.pipeline.subject+'_talLocs_database_bipol.mat')

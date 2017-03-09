@@ -47,7 +47,7 @@ class ComputePAL1Powers(RamTask):
         # self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
         self.pow_mat,events = compute_powers(events,monopolar_channels,bipolar_pairs,
                                              self.params.pal1_start_time,self.params.pal1_end_time,self.params.pal1_buf,
-                                             self.params.freqs,self.params.log_powers)
+                                             self.params.freqs,self.params.log_powers,ComputePowers=self)
 
         self.pass_object('PAL1_events',events)
         self.pass_object('pow_mat', self.pow_mat)

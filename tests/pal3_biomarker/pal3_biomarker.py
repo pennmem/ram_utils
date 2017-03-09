@@ -1,5 +1,5 @@
 # command line example:
-# python pal3_biomarker.py --workspace-dir=/scratch/busygin/PAL3_biomarkers --subject=R1162N --n-channels=128 --anode=AD2 --anode-num=56 --cathode=AD3 --cathode-num=57 --pulse-frequency=200 --pulse-duration=500 --target-amplitude=1000
+# python pal3_biomarker_db.py --workspace-dir=/scratch/busygin/PAL3_biomarkers --subject=R1162N --n-channels=128 --anode=AD2 --anode-num=56 --cathode=AD3 --cathode-num=57 --pulse-frequency=200 --pulse-duration=500 --target-amplitude=1000
 
 print "ATTN: Wavelet params and interval length are hardcoded!! To change them, recompile"
 print "Windows binaries from https://github.com/busygin/morlet_for_sys2_biomarker"
@@ -10,16 +10,16 @@ from BiomarkerUtils import CMLParserBiomarker
 
 
 cml_parser = CMLParserBiomarker(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','/scratch/leond/PAL3_biomarkers')
-cml_parser.arg('--subject','R1050M')
-cml_parser.arg('--n-channels','65')
-cml_parser.arg('--anode-num','19')
-cml_parser.arg('--anode','LPG18')
-cml_parser.arg('--cathode-num','20')
-cml_parser.arg('--cathode','LPG19')
-cml_parser.arg('--pulse-frequency','100')
-cml_parser.arg('--pulse-duration','300')
-cml_parser.arg('--target-amplitude','1250')
+cml_parser.arg('--workspace-dir','/scratch/leond/PAL3_biomarkers_db')
+cml_parser.arg('--subject','R1278E_2')
+cml_parser.arg('--n-channels','128')
+cml_parser.arg('--anode-num','12')
+cml_parser.arg('--anode','9LD2')
+cml_parser.arg('--cathode-num','13')
+cml_parser.arg('--cathode','9LD3')
+cml_parser.arg('--pulse-frequency','200')
+cml_parser.arg('--pulse-duration','500')
+cml_parser.arg('--target-amplitude','1000')
 
 
 args = cml_parser.parse()
@@ -33,7 +33,7 @@ from PAL1EventPreparation import PAL1EventPreparation
 
 from ComputePAL1Powers import ComputePAL1Powers
 
-from TalPreparation import TalPreparation
+from MontagePreparation import MontagePreparation
 
 from CheckElectrodeLabels import CheckElectrodeLabels
 
@@ -109,7 +109,7 @@ report_pipeline = ReportPipeline(subject=args.subject,
 
 report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
 
-report_pipeline.add_task(TalPreparation(mark_as_completed=False))
+report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
 
 report_pipeline.add_task(CheckElectrodeLabels(params=params, mark_as_completed=False))
 
