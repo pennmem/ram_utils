@@ -29,7 +29,7 @@ class FR1SessionSummary(SessionSummary):
         self.n_correct_math = 0
         self.pc_correct_math = 0.0
         self.math_per_list = 0.0
-        self.ltt = None
+        # self.ltt = None
         self.pc_diff_from_mean = None
 
 class catFR1SessionSummary(FR1SessionSummary):
@@ -60,7 +60,7 @@ class PAL1SessionSummary(SessionSummary):
         self.n_correct_math = 0
         self.pc_correct_math = 0.0
         self.math_per_list = 0.0
-        self.ltt = None
+        # self.ltt = None
         self.pc_diff_from_mean = None
         self.positions = None
 
@@ -78,7 +78,7 @@ class TH1SessionSummary(SessionSummary):
         self.dist_hist = None
         self.err_by_block = None
         self.err_by_block_sem = None
-        self.ltt = None
+        # self.ltt = None
 
         self.pc_diff_from_mean = None
         self.aucs_by_thresh = None
