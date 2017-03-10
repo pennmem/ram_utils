@@ -1,5 +1,5 @@
 # command line example:
-# python fr3_biomarker.py --workspace-dir=/scratch/busygin/FR3_biomarkers --subject=R1145J_1 --n-channels=128 --anode=RD2 --anode-num=34 --cathode=RD3 --cathode-num=35 --pulse-frequency=200 --pulse-duration=500 --target-amplitude=1000
+# python fr3_biomarker_db.py --workspace-dir=/scratch/busygin/FR3_biomarkers --subject=R1145J_1 --n-channels=128 --anode=RD2 --anode-num=34 --cathode=RD3 --cathode-num=35 --pulse-frequency=200 --pulse-duration=500 --target-amplitude=1000
 
 print "ATTN: Wavelet params and interval length are hardcoded!! To change them, recompile"
 print "Windows binaries from https://github.com/busygin/morlet_for_sys2_biomarker"
@@ -10,14 +10,16 @@ from BiomarkerUtils import CMLParserBiomarker
 
 
 cml_parser = CMLParserBiomarker(arg_count_threshold=1)
-# cml_parser.arg('--workspace-dir','/scratch/busygin/FR3_biomarkers')
-# cml_parser.arg('--subject','R1145J_1')
-# cml_parser.arg('--n-channels','128')
-# cml_parser.arg('--anode-num','3')
-# cml_parser.arg('--cathode-num','4')
-# cml_parser.arg('--pulse-frequency','200')
-# cml_parser.arg('--pulse-count','100')
-# cml_parser.arg('--target-amplitude','1000')
+cml_parser.arg('--workspace-dir','/scratch/leond/FR3_biomarkers')
+cml_parser.arg('--subject','R1124J_1')
+cml_parser.arg('--n-channels','128')
+cml_parser.arg('--anode-num','65')
+cml_parser.arg('--anode','LC1')
+cml_parser.arg('--cathode-num','66')
+cml_parser.arg('--cathode','LC2')
+cml_parser.arg('--pulse-frequency','200')
+cml_parser.arg('--pulse-duration','500')
+cml_parser.arg('--target-amplitude','250')
 
 
 args = cml_parser.parse()
@@ -25,13 +27,13 @@ args = cml_parser.parse()
 
 # ------------------------------- end of processing command line
 
-from RamPipeline import RamPipeline
+from ReportUtils import ReportPipeline
 
 from FREventPreparation import FREventPreparation
 
 from ComputeFRPowers import ComputeFRPowers
 
-from TalPreparation import TalPreparation
+from MontagePreparation import MontagePreparation
 
 from CheckElectrodeLabels import CheckElectrodeLabels
 
@@ -98,21 +100,12 @@ class Params(object):
 params = Params()
 
 
-class ReportPipeline(RamPipeline):
-
-    def __init__(self, subject, workspace_dir, mount_point=None):
-        RamPipeline.__init__(self)
-        self.subject = subject
-        self.mount_point = mount_point
-        self.set_workspace_dir(workspace_dir)
-
-
 report_pipeline = ReportPipeline(subject=args.subject,
                                        workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point)
 
-report_pipeline.add_task(FREventPreparation(params=params, mark_as_completed=False))
+report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
 
-report_pipeline.add_task(TalPreparation(mark_as_completed=False))
+report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
 
 report_pipeline.add_task(CheckElectrodeLabels(params=params, mark_as_completed=False))
 
