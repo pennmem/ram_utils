@@ -18,7 +18,7 @@
         },
         "experiment_specs": {
             "version": "3.0.0",
-            "experiment_type": "FR3",
+            "experiment_type": "FR5",
             "biomarker_sample_start_time_offset": "0",
             "biomarker_sample_time_length": "1366",
             "buffer_time": "1000",
@@ -26,7 +26,7 @@
             "retrieval_biomarker_sample_start_time_offset": "0",
             "retrieval_biomarker_sample_time_length": "525",
             "retrieval_buffer_time": "524",
-            "post_stim_bimarker_sample_time_length": "500",
+            "post_stim_biomarker_sample_time_length": "500",
             "post_stim_buffer_time": "499",
             "post_stim_wait_time":"100",
             "freq_min": "6",
