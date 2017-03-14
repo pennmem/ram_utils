@@ -141,6 +141,10 @@ class MontagePreparation(RamTask):
             self.pass_object('bp_tal_structs', bp_tal_structs)
             self.pass_object('bp_tal_stim_only_structs', bp_tal_stim_only_structs)
 
+            # print '%d bipolar pairs'%len(bipolar_pairs)
+            # print '%d non-stim-adjacent pairs'%len(reduced_pairs)
+            # raw_input('continue')
+
             joblib.dump(reduced_pairs,self.get_path_to_resource_in_workspace(subject+'-reduced_pairs.pkl'))
             joblib.dump(monopolar_channels, self.get_path_to_resource_in_workspace(subject + '-monopolar_channels.pkl'))
             joblib.dump(bipolar_pairs, self.get_path_to_resource_in_workspace(subject + '-bipolar_pairs.pkl'))

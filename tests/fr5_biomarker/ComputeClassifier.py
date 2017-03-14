@@ -268,12 +268,36 @@ class ComputeClassifier(RamTask):
             print 'AUC =', AUCs[i]
         return AUCs
 
-    def run(self):
-        subject = self.pipeline.subject
+    def get_pow_mat(self):
+        bipolar_pairs = self.get_passed_object('bipolar_pairs')
+        reduced_pairs = self.get_passed_object('reduced_pairs')
+        to_include = np.array([bp in reduced_pairs for bp in bipolar_pairs])
+        pow_mat =  self.get_passed_object('pow_mat')
+        pow_mat = pow_mat.reshape((len(pow_mat),len(bipolar_pairs),-1))[:,to_include,:]
+        return pow_mat.reshape((len(pow_mat),-1))
 
+    def pass_objects(self):
+        subject=self.pipeline.subject
+        self.pass_object('lr_classifier', self.lr_classifier)
+        self.pass_object('xval_output', self.xval_output)
+        self.pass_object('perm_AUCs', self.perm_AUCs)
+        self.pass_object('pvalue', self.pvalue)
+
+        classifier_path = self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl')
+        joblib.dump(self.lr_classifier, classifier_path)
+        # joblib.dump(self.lr_classifier, self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl'))
+        joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace(subject + '-xval_output.pkl'))
+        joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace(subject + '-perm_AUCs.pkl'))
+        joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject + '-pvalue.pkl'))
+
+        self.pass_object('classifier_path', classifier_path)
+
+
+
+    def run(self):
 
         events = self.get_passed_object('FR_events')
-        self.pow_mat = normalize_sessions(self.get_passed_object('pow_mat'), events)
+        self.pow_mat = normalize_sessions(self.get_pow_mat(), events)
 
         # n1 = np.sum(events.recalled)
         # n0 = len(events) - n1
@@ -334,19 +358,7 @@ class ComputeClassifier(RamTask):
         insample_auc = roc_auc_score(recalls, recall_prob_array)
         print 'in-sample AUC=', insample_auc
 
-        self.pass_object('lr_classifier', self.lr_classifier)
-        self.pass_object('xval_output', self.xval_output)
-        self.pass_object('perm_AUCs', self.perm_AUCs)
-        self.pass_object('pvalue', self.pvalue)
-
-        classifier_path = self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl')
-        joblib.dump(self.lr_classifier, classifier_path)
-        # joblib.dump(self.lr_classifier, self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl'))
-        joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace(subject + '-xval_output.pkl'))
-        joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace(subject + '-perm_AUCs.pkl'))
-        joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject + '-pvalue.pkl'))
-
-        self.pass_object('classifier_path', classifier_path)
+        self.pass_objects()
 
 
 
@@ -365,3 +377,30 @@ class ComputeClassifier(RamTask):
         self.pass_object('xval_output', self.xval_output)
         self.pass_object('perm_AUCs', self.perm_AUCs)
         self.pass_object('pvalue', self.pvalue)
+
+
+
+class ComputeFullClassifier(ComputeClassifier):
+    def get_pow_mat(self):
+        return self.get_passed_object('pow_mat')
+
+    def restore(self):
+        subject=self.pipeline.subject
+        self.xval_output = joblib.load(self.get_path_to_resource_in_workspace(subject+'-xval_output_all_electrodes.pkl'))
+        self.compare_AUCs()
+
+    def pass_objects(self):
+        subject=self.pipeline.subject
+        joblib.dump(self.xval_output,self.get_path_to_resource_in_workspace(subject+'-xval_output_all_electrodes.pkl'))
+
+    def compare_AUCs(self):
+        reduced_xval_output = self.get_passed_object('xval_output')
+        print '\n\n'
+        print 'AUC WITH ALL ELECTRODES: ', self.xval_output[-1].auc
+        print 'AUC EXCLUDING STIM-ADJACENT ELECTRODES: ', reduced_xval_output[-1].auc
+
+    def run(self):
+        super(ComputeFullClassifier,self).run()
+        self.compare_AUCs()
+
+
