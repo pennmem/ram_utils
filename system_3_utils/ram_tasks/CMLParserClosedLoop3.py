@@ -16,7 +16,7 @@ class CMLParserCloseLoop3(object):
         self.parser.add_argument('--mount-point', required=False, action='store')
         self.parser.add_argument('--electrode-config-file', required=True, action='store')
         self.parser.add_argument('--pulse-frequency', required=True, action='store',type=int)
-        self.parser.add_argument('--target-amplitude', required=True, action='store',type=int)
+        self.parser.add_argument('--target-amplitude', required=True, action='store',type=float)
         # self.parser.add_argument('--stim-electrode-pair', required=True, action='store')
 
         # self.parser.add_argument('--python-path', required=False, action='append')
@@ -73,6 +73,12 @@ class CMLParserCloseLoop3(object):
 
 
         # self.configure_python_paths(args.python_path)
+
+        #check that target amplitude is in milliamps
+        try:
+            assert args.target_amplitude<2 and args.target_amplitude>0
+        except AssertionError:
+            raise ValueError('Target amplitude should be between 0 and 2 milliamps')
 
         return args
 
