@@ -28,8 +28,8 @@ cml_parser.arg('--experiment','FR5')
 cml_parser.arg('--mount-point','/')
 cml_parser.arg('--subject',subject)
 cml_parser.arg('--electrode-config-file','/home1/leond/fr5_config/contacts%s.csv'%subject)
-cml_parser.arg('--pulse-frequency','100')
-cml_parser.arg('--target-amplitude','1000')
+cml_parser.arg('--pulse-frequency','200')
+cml_parser.arg('--target-amplitude','1.0')
 cml_parser.arg('--anode-nums','13','82')
 cml_parser.arg('--anodes','3LAHD2','12RGRD1')
 cml_parser.arg('--cathode-nums','14','83')
@@ -159,9 +159,9 @@ report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, m
 
 report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 
-report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
+report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 
-report_pipeline.add_task(ComputeFullClassifier(params=params,mark_as_completed=False))
+report_pipeline.add_task(ComputeFullClassifier(params=params,mark_as_completed=True))
 
 report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop3(params=params, mark_as_completed=False))
 

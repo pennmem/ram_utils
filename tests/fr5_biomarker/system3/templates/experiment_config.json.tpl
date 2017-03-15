@@ -37,6 +37,7 @@
     },
     "electrode_config_file": "{{electrode_config_file}}",
     "montage_file": "{{montage_file}}",
+    "excluded_montage_file": "{{excluded_montage_file}}"
     "global_settings": {
         "data_dir": "SET_AUTOMATICALLY_AT_A_RUNTIME",
         "experiment_config_filename": "SET_AUTOMATICALLY_AT_A_RUNTIME",

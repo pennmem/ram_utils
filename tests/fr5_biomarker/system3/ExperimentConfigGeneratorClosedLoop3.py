@@ -89,6 +89,7 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
         bipolar_pairs_path = self.get_passed_object('bipolar_pairs_path')
         classifier_path = self.get_passed_object('classifier_path')
         stim_chan_label = self.get_passed_object('stim_chan_label')
+        excluded_pairs_path = self.get_passed_object('excluded_pairs_path')
 
         stim_params_dict = {}
         stim_params_list = zip(anodes,cathodes,cycle(self.pipeline.args.min_amplitudes),
@@ -126,7 +127,8 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
             classifier_file='config_files/%s'%basename(classifier_path),
             stim_params_dict=stim_params_dict,
             electrode_config_file='config_files/%s'%basename(electrode_config_file),
-            montage_file='config_files/%s'%basename(bipolar_pairs_path)
+            montage_file='config_files/%s'%basename(bipolar_pairs_path),
+            excluded_montage_file='config_files/%s'%basename(excluded_pairs_path)
         )
 
         experiment_config_file,experiment_config_full_filename = self.create_file_in_workspace_dir(project_dir_corename+'/experiment_config.json')
@@ -138,6 +140,9 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
 
         # copy pairs.json
         self.copy_resource_to_target_dir(bipolar_pairs_path,config_files_dir)
+
+        # copy reduced_pairs.json
+        self.copy_resource_to_target_dir(excluded_pairs_path,config_files_dir)
 
 
         electrode_config_file_core, ext = splitext(electrode_config_file)

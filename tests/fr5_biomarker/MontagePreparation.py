@@ -97,10 +97,10 @@ class MontagePreparation(RamTask):
             self.pass_object('bipolar_pairs_path', bp_path)
 
             f_pairs = open(bp_path, 'r')
-            bipolar_data = json.load(f_pairs)[subject]['pairs']
+            bipolar_dict = json.load(f_pairs)[subject]['pairs']
             f_pairs.close()
-            bipolar_data_stim_only = {bp_tag:bp_data for bp_tag,bp_data in bipolar_data.iteritems() if bp_data['is_stim_only']}
-            bipolar_data = {bp_tag:bp_data for bp_tag,bp_data in bipolar_data.iteritems() if not bp_data['is_stim_only']}
+            bipolar_data_stim_only = {bp_tag:bp_data for bp_tag,bp_data in bipolar_dict.iteritems() if bp_data['is_stim_only']}
+            bipolar_data = {bp_tag:bp_data for bp_tag,bp_data in bipolar_dict.iteritems() if not bp_data['is_stim_only']}
 
             bp_tags = []
             bp_tal_structs = []
@@ -124,6 +124,12 @@ class MontagePreparation(RamTask):
                 stim_pairs = [self.pipeline.args.anode_num, self.pipeline.args.cathode_num]
             reduced_pairs = [bp for bp in bipolar_pairs if (bp[0]) not in stim_pairs and int(bp[1]) not in stim_pairs]
 
+            reduced_dict = {bp_tag:bipolar_dict[bp_tag] for bp_tag in bipolar_dict
+                            if ('%03d'%bipolar_dict[bp_tag]['channel_1'],'%03d'%bipolar_dict[bp_tag]['channel_2'])  not in reduced_pairs}
+
+
+            with open(self.get_path_to_resource_in_workspace('excluded_pairs.json'),'w') as rjfile:
+                json.dump({subject: {'pairs': reduced_dict}},rjfile)
 
             bp_tal_stim_only_structs = pd.Series()
             if bipolar_data_stim_only:
@@ -140,6 +146,7 @@ class MontagePreparation(RamTask):
             self.pass_object('bipolar_pairs', bipolar_pairs)
             self.pass_object('bp_tal_structs', bp_tal_structs)
             self.pass_object('bp_tal_stim_only_structs', bp_tal_stim_only_structs)
+            self.pass_object('excluded_pairs_path',self.get_path_to_resource_in_workspace('excluded_pairs.json'))
 
             # print '%d bipolar pairs'%len(bipolar_pairs)
             # print '%d non-stim-adjacent pairs'%len(reduced_pairs)
