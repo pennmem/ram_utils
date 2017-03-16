@@ -106,6 +106,9 @@ class ComputeFRPowers(RamTask):
             sess_events = events[events.session == sess]
             n_events = len(sess_events)
 
+            sess_encoding_events_mask = (sess_events.type == 'WORD')
+
+
             print 'Loading EEG for', n_events, 'events of session', sess
 
             # eegs = Events(sess_events).get_data(channels=channels, start_time=self.params.fr1_start_time, end_time=self.params.fr1_end_time,
@@ -187,7 +190,8 @@ class ComputeFRPowers(RamTask):
                 bp_data_retrieval = bp_data_retrieval.filtered([58,62], filt_type='stop', order=self.params.filt_order)
 
                 for ev in xrange(n_events):
-                    if encoding_events_mask[ev]:
+                    # if encoding_events_mask[ev]:
+                    if sess_encoding_events_mask[ev]:
                         self.wavelet_transform.multiphasevec(bp_data[ev][0:winsize], pow_ev)
                         pow_ev_stripped = np.reshape(pow_ev, (n_freqs,winsize))[:,bufsize:winsize-bufsize]
                     else:

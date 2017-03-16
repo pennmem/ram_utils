@@ -33,7 +33,21 @@ cml_parser.arg('--anode-num','10')
 cml_parser.arg('--anode','LPOG10')
 cml_parser.arg('--cathode-num','11')
 cml_parser.arg('--cathode','LPOG11')
+#
 
+
+# cml_parser.arg('--workspace-dir','D:/scratch/FR5/R1065J')
+# cml_parser.arg('--experiment','FR5')
+# cml_parser.arg('--mount-point','D:/')
+# cml_parser.arg('--subject','R1065J')
+# cml_parser.arg('--electrode-config-file',r'd:\experiment_configs\R1065J_FR5.bin')
+# cml_parser.arg('--pulse-frequency','100')
+# cml_parser.arg('--target-amplitude','1000')
+# cml_parser.arg('--anode-num','10')
+# cml_parser.arg('--anode','LS10')
+# cml_parser.arg('--cathode-num','11')
+# cml_parser.arg('--cathode','LS11')
+#
 
 
 
@@ -104,8 +118,9 @@ class Params(object):
         self.fr1_retrieval_end_time = 0.0
         self.fr1_retrieval_buf = 0.524
 
-        self.retrieval_samples_weight = 2.5
-        # self.encoding_samples_weight = 2.5
+        # self.retrieval_samples_weight = 2.5
+        self.encoding_samples_weight = 2.5
+        # self.encoding_samples_weight = 1.0
 
 
         self.filt_order = 4
