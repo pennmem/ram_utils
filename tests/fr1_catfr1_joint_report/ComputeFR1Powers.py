@@ -9,6 +9,14 @@ from sklearn.externals import joblib
 
 from ptsa.data.readers import EEGReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
+try:
+    from ReportTasks.RamTaskMethods import compute_powers
+except ImportError as ie:
+    if 'MorletWaveletFilterCpp' in ie.message:
+        print 'Update PTSA for better perfomance'
+        compute_powers = None
+    else:
+        raise ie
 
 from ReportUtils import ReportRamTask
 
@@ -60,6 +68,12 @@ class ComputeFR1Powers(ReportRamTask):
         except IOError:
             self.samplerate = joblib.load(self.get_path_to_resource_in_workspace('-'.join([subject,task,'samplerate.pkl'])))
 
+        try:
+            events=joblib.load(self.get_path_to_resource_in_workspace(subject + '-fr1_events.pkl'))
+            self.pass_object('events',events)
+        except IOError:
+            pass
+
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
 
@@ -77,7 +91,15 @@ class ComputeFR1Powers(ReportRamTask):
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
 
-        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
+        params = self.params
+        if compute_powers is None:
+            self.compute_powers(events,sessions,monopolar_channels,bipolar_pairs)
+        else:
+            self.pow_mat,events=compute_powers(events,monopolar_channels, bipolar_pairs,
+                                                   params.fr1_start_time,params.fr1_end_time,params.fr1_buf,
+                                                   params.freqs,params.log_powers)
+            joblib.dump(events,self.get_path_to_resource_in_workspace(subject + '-fr1_events.pkl'))
+            self.pass_object('events',events)
 
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
@@ -127,7 +149,7 @@ class ComputeFR1Powers(ReportRamTask):
                 events = np.hstack((events[events.session!=sess],sess_events)).view(np.recarray)
                 ev_order = np.argsort(events, order=('session','list','mstime'))
                 events = events[ev_order]
-                self.pass_object(self.pipeline.task+'_events', events)
+                self.pass_object('events', events)
 
 
             # mirroring

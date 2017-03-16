@@ -40,7 +40,7 @@ class ComposeSessionSummary(ReportRamTask):
         session_data = []
 
         th_stim_table_by_session = th_stim_table.groupby(['session'])
-        for session,th_stim_session_table in th_stim_table_by_session:            
+        for session,th_stim_session_table in th_stim_table_by_session:
             session_all_events = all_events[all_events.session == session]
             first_time_stamp = session_all_events[session_all_events.type=='SESS_START'][0].mstime
             timestamps = session_all_events.mstime
@@ -75,29 +75,15 @@ class ComposeSessionSummary(ReportRamTask):
             sess_sel = np.vectorize(lambda sess: sess in session_summary.sessions)
             sess_rec_events = rec_events[sess_sel(rec_events.session)]
             n_sess_rec_events = len(sess_rec_events)
-            #sess_intr_events = intr_events[sess_sel(intr_events.session)]
-            #sess_math_events = math_events[sess_sel(math_events.session)]
 
             th_stim_table_by_session_list = th_stim_session_table.groupby(['session','list'])
             session_summary.n_lists = len(th_stim_table_by_session_list)
-
-            #session_summary.n_pli = np.sum(sess_intr_events.intrusion > 0)
-            #session_summary.pc_pli = 100*session_summary.n_pli / float(n_sess_rec_events)
-            #session_summary.n_eli = np.sum(sess_intr_events.intrusion == -1)
-            #session_summary.pc_eli = 100*session_summary.n_eli / float(n_sess_rec_events)
-
-            #session_summary.n_math = len(sess_math_events)
-            #session_summary.n_correct_math = np.sum(sess_math_events.iscorrect)
-            #session_summary.pc_correct_math = 100*session_summary.n_correct_math / float(session_summary.n_math)
-            #session_summary.math_per_list = session_summary.n_math / float(session_summary.n_lists)
 
             th_stim_table_by_pos = th_stim_session_table.groupby('serialpos')
             session_summary.prob_recall = np.empty(len(th_stim_table_by_pos), dtype=float)
             for i, (pos,th_stim_pos_table) in enumerate(th_stim_table_by_pos):
                 session_summary.prob_recall[i] = th_stim_pos_table.recalled.sum() / float(len(th_stim_pos_table))
 
-            #session_summary.prob_first_recall = np.zeros(len(th_stim_table_by_pos), dtype=float)
-            #first_recall_counter = np.zeros(len(th_stim_table_by_pos), dtype=int)
             session_summary.list_number = np.empty(len(th_stim_table_by_session_list), dtype=int)
             session_summary.n_recalls_per_list = np.empty(len(th_stim_table_by_session_list), dtype=int)
             session_summary.n_stims_per_list = np.zeros(len(th_stim_table_by_session_list), dtype=int)
@@ -105,14 +91,6 @@ class ComposeSessionSummary(ReportRamTask):
             for list_idx, (sess_list,th_stim_sess_list_table) in enumerate(th_stim_table_by_session_list):
                 session = sess_list[0]
                 lst = sess_list[1]
-
-                #list_rec_events = rec_events[(rec_events.session==session) & (rec_events['list']==lst) & (rec_events['intrusion']==0)]
-                #if list_rec_events.size > 0:
-                #    tmp = np.where(th_stim_sess_list_table.itemno.values == list_rec_events[0].itemno)[0]
-                #    if tmp.size > 0:
-                #        first_recall_idx = tmp[0]
-                #        session_summary.prob_first_recall[first_recall_idx] += 1
-                #        first_recall_counter[first_recall_idx] += 1
 
                 session_summary.list_number[list_idx] = lst
                 session_summary.n_recalls_per_list[list_idx] = th_stim_sess_list_table.recalled.sum()
@@ -153,18 +131,30 @@ class ComposeSessionSummary(ReportRamTask):
             session_summary.pc_from_nonstim_item = 100 * session_summary.n_correct_nonstim_item / float(session_summary.n_total_nonstim_item)
             session_summary.chisqr_item, session_summary.pvalue_item, _ = proportions_chisquare([session_summary.n_correct_stim_item, session_summary.n_correct_nonstim_item], [session_summary.n_total_stim_item, session_summary.n_total_nonstim_item])
 
-            # post stim vs non stim ITEM analysis
+            # stim vs non stim ITEM analysis, only low biomarker non-stim
+            low_state_mask = (th_stim_non_stim_list_table['prob']<th_stim_non_stim_list_table['thresh'])
+            session_summary.n_correct_nonstim_low = th_stim_non_stim_list_table[low_state_mask].recalled.sum()
+            session_summary.n_total_nonstim_low = len(th_stim_non_stim_list_table[low_state_mask])
+            session_summary.pc_from_nonstim_low = 100 * session_summary.n_correct_nonstim_low / float(session_summary.n_total_nonstim_low)
+            session_summary.chisqr_low, session_summary.pvalue_low, _ = proportions_chisquare([session_summary.n_correct_stim_item, session_summary.n_correct_nonstim_low], [session_summary.n_total_stim_item, session_summary.n_total_nonstim_low])
+
+            # post stim vs non stim ITEM analysis low biomarker
+            post_low_state_mask = low_state_mask.shift(1)
+            post_low_state_mask[th_stim_non_stim_list_table['serialpos']==1] = False
+            post_low_state_mask[post_low_state_mask.isnull()] = False
+
             th_stim_post_stim_item_table = th_stim_session_table[th_stim_session_table.is_post_stim_item]
-            th_stim_post_non_stim_item_table = th_stim_session_table[~th_stim_session_table.is_post_stim_item & ~th_stim_session_table.is_stim_item & (th_stim_session_table['list']>=8)]
+            session_summary.n_correct_post_nonstim_item = th_stim_non_stim_list_table[post_low_state_mask].recalled.sum()
+            # th_stim_post_non_stim_item_table = th_stim_session_table[~th_stim_session_table.is_post_stim_item & ~th_stim_session_table.is_stim_item & (th_stim_session_table['list']>=8)]
             session_summary.n_correct_post_stim_item = th_stim_post_stim_item_table.recalled.sum()
             #dist_err_stim_item, _ = np.histogram(th_stim_stim_item_table.distance_err,bins=20,range=(0,100))
             #session_summary.dist_err_stim_item = dist_err_stim_item / float(np.sum(dist_err_stim_item))
             session_summary.n_total_post_stim_item = len(th_stim_post_stim_item_table)
             session_summary.pc_from_post_stim_item = 100 * session_summary.n_correct_post_stim_item / float(session_summary.n_total_post_stim_item)
-            session_summary.n_correct_post_nonstim_item = th_stim_post_non_stim_item_table.recalled.sum()
+            # session_summary.n_correct_post_nonstim_item = th_stim_post_non_stim_item_table.recalled.sum()
             #dist_err_nonstim_item, _ = np.histogram(th_stim_non_stim_item_table.distance_err,bins=20,range=(0,100))
             #session_summary.dist_err_nonstim_item = dist_err_nonstim_item / float(np.sum(dist_err_nonstim_item))
-            session_summary.n_total_post_nonstim_item = len(th_stim_post_non_stim_item_table)
+            session_summary.n_total_post_nonstim_item = len(th_stim_non_stim_list_table[post_low_state_mask])
             session_summary.pc_from_post_nonstim_item = 100 * session_summary.n_correct_post_nonstim_item / float(session_summary.n_total_post_nonstim_item)
             session_summary.chisqr_post_item, session_summary.pvalue_post_item, _ = proportions_chisquare([session_summary.n_correct_post_stim_item, session_summary.n_correct_post_nonstim_item], [session_summary.n_total_post_stim_item, session_summary.n_total_post_nonstim_item])
 
@@ -172,9 +162,10 @@ class ComposeSessionSummary(ReportRamTask):
             # stim vs non stim CONFIDENCE ITEM analysis
             session_summary.n_stim_mid_high_conf = np.sum(th_stim_stim_item_table.confidence > 0)
             session_summary.pc_stim_mid_high_conf = 100 * session_summary.n_stim_mid_high_conf / float(session_summary.n_total_stim_item)
-            session_summary.n_nonstim_mid_high_conf = np.sum(th_stim_non_stim_item_table.confidence > 0)
-            session_summary.pc_nonstim_mid_high_conf = 100 * session_summary.n_nonstim_mid_high_conf / float(session_summary.n_total_nonstim_item)
-            session_summary.chisqr_conf, session_summary.pvalue_conf, _ = proportions_chisquare([session_summary.n_stim_mid_high_conf, session_summary.n_nonstim_mid_high_conf], [session_summary.n_total_stim_item, session_summary.n_total_nonstim_item])
+
+            session_summary.n_nonstim_mid_high_conf = (th_stim_non_stim_list_table[low_state_mask].confidence > 0).sum()
+            session_summary.pc_nonstim_mid_high_conf = 100 * session_summary.n_nonstim_mid_high_conf / float(len(th_stim_non_stim_list_table[low_state_mask]))
+            session_summary.chisqr_conf, session_summary.pvalue_conf, _ = proportions_chisquare([session_summary.n_stim_mid_high_conf, session_summary.n_nonstim_mid_high_conf], [session_summary.n_total_stim_item, session_summary.n_total_nonstim_low])
 
             th_stim_stim_list_stim_item_table = th_stim_stim_list_table[th_stim_stim_list_table['is_stim_item']]
             th_stim_stim_list_stim_item_low_table = th_stim_stim_list_stim_item_table[th_stim_stim_list_stim_item_table['prev_prob']<thresh]

@@ -8,7 +8,17 @@ from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from sklearn.externals import joblib
 
 from ptsa.data.readers import EEGReader
+from ptsa.data.readers.IndexReader import JsonIndexReader
 
+import hashlib
+try:
+    from ReportTasks.RamTaskMethods import compute_powers
+except ImportError as ie:
+    if 'MorletWaveletFilterCpp' in ie.message:
+        print 'Update PTSA for better perfomance'
+        compute_powers = None
+    else:
+        raise ie
 
 class ComputePAL1Powers(RamTask):
     def __init__(self, params,mark_as_completed=True):
@@ -18,6 +28,30 @@ class ComputePAL1Powers(RamTask):
         self.pow_mat = None
         self.samplerate = None
         self.wavelet_transform = MorletWaveletTransform()
+
+    def input_hashsum(self):
+        subject = self.pipeline.subject
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp)==1 else int(tmp[1])
+
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
+
+        hash_md5 = hashlib.md5()
+
+        bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
+        for fname in bp_paths:
+            with open(fname,'rb') as f: hash_md5.update(f.read())
+
+        pal1_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='PAL1')))
+        for fname in pal1_event_files:
+            with open(fname,'rb') as f: hash_md5.update(f.read())
+
+        pal3_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='PAL3')))
+        for fname in pal3_event_files:
+            with open(fname,'rb') as f: hash_md5.update(f.read())
+
+        return hash_md5.digest()
 
     def restore(self):
         subject = self.pipeline.subject
@@ -39,7 +73,16 @@ class ComputePAL1Powers(RamTask):
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
 
-        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
+        if compute_powers is None:
+            self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
+        else:
+            self.pow_mat,events=compute_powers(events, monopolar_channels, bipolar_pairs,
+                                               self.params.pal1_start_time,self.params.pal1_end_time,self.params.pal1_buf,
+                                               self.params.freqs,self.params.log_powers,ComputePowers=self)
+
+            self.pass_object('PAL1_events',events)
+
+        assert self.samplerate is not None
 
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)

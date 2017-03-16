@@ -23,8 +23,10 @@ class ComputeTTest(ReportRamTask):
 
         #freq_sel = np.tile((self.params.freqs>=self.params.ttest_frange[0]) & (self.params.freqs<=self.params.ttest_frange[1]), pow_mat.shape[1] / self.params.freqs.size)
         #pow_mat = pow_mat[:,freq_sel]
-
-        events = self.get_passed_object('events')
+        try:
+            events=self.get_passed_object('hf_events')
+        except KeyError:
+            events = self.get_passed_object('events')
         sessions = np.unique(events.session)
 
         # norm_func = normalize.standardize_pow_mat if self.params.norm_method=='zscore' else normalize.normalize_pow_mat

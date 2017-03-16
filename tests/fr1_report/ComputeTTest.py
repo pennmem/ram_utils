@@ -16,11 +16,14 @@ class ComputeTTest(ReportRamTask):
         task = self.pipeline.task
 
         pow_mat = self.get_passed_object('hf_pow_mat')
+        print 'pow_mat.shape:',pow_mat.shape
 
         #freq_sel = np.tile((self.params.freqs>=self.params.ttest_frange[0]) & (self.params.freqs<=self.params.ttest_frange[1]), pow_mat.shape[1] / self.params.freqs.size)
         #pow_mat = pow_mat[:,freq_sel]
-
-        events = self.get_passed_object(self.pipeline.task+'_events')
+        try:
+            events=self.get_passed_object('hf_events')
+        except KeyError:
+            events = self.get_passed_object(self.pipeline.task+'_events')
         print 'len(events):',len(events)
         sessions = np.unique(events.session)
 
@@ -40,6 +43,7 @@ class ComputeTTest(ReportRamTask):
             nonrecalled_sess_pow_mat = sess_pow_mat[~sess_recalls,:]
 
             t,p = ttest_ind(recalled_sess_pow_mat, nonrecalled_sess_pow_mat, axis=0)
+            print 'ttest.shape:',t.shape
             self.ttest[sess] = (t,p)
 
         recalls = np.array(events.recalled, dtype=np.bool)

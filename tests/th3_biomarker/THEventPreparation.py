@@ -6,6 +6,8 @@ import numpy as np
 import scipy.io as spio
 from ptsa.data.readers import BaseEventReader
 from numpy.lib.recfunctions import append_fields
+from ptsa.data.readers.IndexReader import JsonIndexReader
+import hashlib
 
 from RamPipeline import *
 
@@ -14,16 +16,62 @@ class THEventPreparation(RamTask):
     def __init__(self, mark_as_completed=True):
         RamTask.__init__(self, mark_as_completed)
 
+    def input_hashsum(self):
+        subject = self.pipeline.subject
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp) == 1 else int(tmp[1])
+
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
+
+        hash_md5 = hashlib.md5()
+
+        th1_event_files = sorted(list(
+            json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='TH1')))
+        for fname in th1_event_files:
+            with open(fname, 'rb') as f: hash_md5.update(f.read())
+
+        th3_event_files = sorted(list(
+            json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='TH3')))
+        for fname in th3_event_files:
+            with open(fname, 'rb') as f: hash_md5.update(f.read())
+
+        return hash_md5.digest()
+
     def run(self):
-        e_path = os.path.join(self.pipeline.mount_point , 'data/events/RAM_TH1', self.pipeline.subject + '_events.mat')
-        e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
-        events = e_reader.read()
-        
-        # change the item field name to item_name to not cause issues with item()
-        events.dtype.names = ['item_name' if i=='item' else i for i in events.dtype.names]
+        tasks = ['TH1','TH3']
+        subject = self.pipeline.subject
+
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp) == 1 else int(tmp[1])
+
+        events = None
+
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
+        for task in tasks:
+            event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage,
+                                                                   experiment=task)))
+
+            evs_field_list = ['mstime','type','item_name','trial','block','chestNum','locationX','locationY','chosenLocationX',
+                              'chosenLocationY','navStartLocationX','navStartLocationY','recStartLocationX','recStartLocationY',
+                              'isRecFromNearSide','isRecFromStartSide','reactionTime','confidence','session','radius_size',
+                              'listLength','distErr','recalled','eegoffset','eegfile',
+                              ]
+
+
+            for sess_file in event_files:
+                e_path = os.path.join(self.pipeline.mount_point, str(sess_file))
+                e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
+                sess_events = e_reader.read()[evs_field_list].view(np.recarray)
+                if task == 'TH3':
+                    sess_events.session += 100
+                events = sess_events if events is None else np.hstack((events, sess_events))
+
+        events = events.view(np.recarray)
         ev_order = np.argsort(events, order=('session','trial','mstime'))
         events = events[ev_order]
-        
+
         # add in error if object locations are transposed
         xCenter = 384.8549
         yCenter = 358.834
@@ -64,7 +112,8 @@ class THEventPreparation(RamTask):
         timing_path = os.path.join(self.pipeline.mount_point , 'data/events/RAM_TH1', self.pipeline.subject + '_timing.mat')
         timing_events = self.loadmat(timing_path)
         self.pass_object('time_events', timing_events)
-        
+
+
         # timing_info = dict()
         # if isinstance(timing_events['events'], spio.matlab.mio5_params.mat_struct):
         #     # timing_info = np.recarray((1,),dtype=[('session', int), ('trial_times', float)])

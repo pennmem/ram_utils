@@ -13,6 +13,14 @@ from ReportUtils import ReportRamTask
 
 from ptsa.data.readers.IndexReader import JsonIndexReader
 import hashlib
+try:
+    from ReportTasks.RamTaskMethods import compute_powers
+except ImportError as ie:
+    if 'MorletWaveletFilterCpp' in ie.message:
+        print 'Update PTSA for better perfomance'
+        compute_powers = None
+    else:
+        raise ie
 
 class ComputeTH1ClassPowers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
@@ -52,6 +60,11 @@ class ComputeTH1ClassPowers(ReportRamTask):
 
         self.classify_pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-classify_pow_mat.pkl'))
         self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
+        try:
+            events=joblib.load(self.get_path_to_resource_in_workspace(subject+'-'+task+'_events.pkl'))
+            self.pass_object(task + '_events', events)
+        except IOError:
+            pass
 
         self.pass_object('classify_pow_mat', self.classify_pow_mat)
         self.pass_object('samplerate', self.samplerate)
@@ -66,13 +79,21 @@ class ComputeTH1ClassPowers(ReportRamTask):
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
 
-        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
+        if compute_powers is None:
+            self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
+        else:
+            self.classify_pow_mat,events=compute_powers(events, monopolar_channels, bipolar_pairs,
+                           self.params.th1_start_time,self.params.th1_end_time,self.params.th1_buf,
+                           self.params.classifier_freqs,self.params.log_powers)
+
+            self.pass_object(task+'_events',events)
 
         self.pass_object('classify_pow_mat', self.classify_pow_mat)
         self.pass_object('samplerate', self.samplerate)
 
         joblib.dump(self.classify_pow_mat, self.get_path_to_resource_in_workspace(subject + '-' + task + '-classify_pow_mat.pkl'))
         joblib.dump(self.samplerate, self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
+        joblib.dump(events,self.get_path_to_resource_in_workspace(subject+'-'+task+'_events.pkl'))
 
     def compute_powers(self, events, sessions,monopolar_channels , bipolar_pairs ):
         n_freqs = len(self.params.classifier_freqs)

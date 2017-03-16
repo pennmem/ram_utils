@@ -15,10 +15,12 @@ class CheckElectrodeLabels(RamTask):
         stim_pair = self.params.stim_params.anode + '-' + self.params.stim_params.cathode
 
         stim_pair_found = False
-        for bp in bp_tal_structs:
-            if (int(bp.channel[0]) == anode_num) and (int(bp.channel[1]) == cathode_num):
-                if bp.tagName != stim_pair:
-                    print 'Wrong stim pair for %d-%d: expected %s, found %s' % (anode_num,cathode_num,stim_pair,bp.tagName)
+        print 'type(bp_tal_structs):',type(bp_tal_structs)
+        print 'dtypes: ',bp_tal_structs.dtypes
+        for tagName,row in bp_tal_structs.iterrows():
+            if (int(row['channel_1']) == anode_num) and (int(row['channel_2']) == cathode_num):
+                if tagName != stim_pair:
+                    print 'Wrong stim pair for %d-%d: expected %s, found %s' % (anode_num,cathode_num,stim_pair,tagName)
                     sys.exit(1)
                 stim_pair_found = True
 

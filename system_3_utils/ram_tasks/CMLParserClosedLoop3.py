@@ -15,26 +15,32 @@ class CMLParserCloseLoop3(object):
         self.parser.add_argument('--workspace-dir', required=False, action='store')
         self.parser.add_argument('--mount-point', required=False, action='store')
         self.parser.add_argument('--electrode-config-file', required=True, action='store')
+        self.parser.add_argument('--pulse-frequency', required=True, action='store',type=int)
+        self.parser.add_argument('--target-amplitude', required=True, action='store',type=int)
         # self.parser.add_argument('--stim-electrode-pair', required=True, action='store')
 
         # self.parser.add_argument('--python-path', required=False, action='append')
         # self.parser.add_argument('--n-channels', required=True, action='store',type=int)
-        self.parser.add_argument('--anode-num', required=True, action='store',type=int)
-        self.parser.add_argument('--anode', required=True, action='store',default='')
-        self.parser.add_argument('--cathode-num', required=True, action='store',type=int)
-        self.parser.add_argument('--cathode', required=True, action='store',default='')
+        self.parser.add_argument('--anode-num',   required= False,action='store',type=int)
+        self.parser.add_argument('--anode',       required= False,action='store',default='')
+        self.parser.add_argument('--cathode-num', required= False,action='store',type=int)
+        self.parser.add_argument('--cathode',     required= False,action='store',default='')
 
-        self.parser.add_argument('--pulse-frequency', required=True, action='store',type=int)
         # self.parser.add_argument('--pulse-duration', required=True, action='store',type=int)
-        self.parser.add_argument('--target-amplitude', required=True, action='store',type=int)
+        self.parser.add_argument('--anode-nums',nargs='+',type=int,metavar='ANODE_NUM')
+        self.parser.add_argument('--anodes',nargs='+', metavar='ANODE')
+        self.parser.add_argument('--cathode-nums',nargs='+',type=int, metavar='CATHODE_NUM')
+        self.parser.add_argument('--cathodes',nargs='+',metavar='CATHODE')
+        self.parser.add_argument('--min-amplitudes',nargs='+',type=float)
+        self.parser.add_argument('--max-amplitudes',nargs='+',type=float)
 
 
         self.arg_list=[]
         self.arg_count_threshold = arg_count_threshold
 
-    def arg(self, name, val=None):
+    def arg(self, name, *vals):
         self.arg_list.append(name)
-        if val is not None:
+        for val in vals:
             self.arg_list.append(val)
 
     def configure_python_paths(self,paths):

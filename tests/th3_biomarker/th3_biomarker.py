@@ -1,5 +1,5 @@
 # command line example:
-# python th3_biomarker.py --workspace-dir=/scratch/busygin/TH3_biomarkers --subject=R1145J_1 --n-channels=128 --anode=RD2 --anode-num=34 --cathode=RD3 --cathode-num=35 --pulse-frequency=200 --pulse-duration=500 --target-amplitude=1000
+# python th3_biomarker_db.py --workspace-dir=/scratch/busygin/TH3_biomarkers --subject=R1145J_1 --n-channels=128 --anode=RD2 --anode-num=34 --cathode=RD3 --cathode-num=35 --pulse-frequency=200 --pulse-duration=500 --target-amplitude=1000
 
 print "ATTN: Wavelet params and interval length are hardcoded!! To change them, recompile"
 print "Windows binaries from https://github.com/busygin/morlet_for_sys2_biomarker"
@@ -8,12 +8,13 @@ print "See https://github.com/busygin/morlet_for_sys2_biomarker/blob/master/READ
 from os.path import *
 from BiomarkerUtils import CMLParserBiomarker
 
+
 cml_parser = CMLParserBiomarker(arg_count_threshold=1)
 cml_parser.arg('--workspace-dir','/scratch/leond/TH3_biomarkers')
-cml_parser.arg('--subject','1201P_1')
+cml_parser.arg('--subject','R1201P_1')
 cml_parser.arg('--n-channels','126')
-cml_parser.arg('--anode','LOTD7')
-cml_parser.arg('--cathode','LOTD8')
+cml_parser.arg('--anode','AT3')
+cml_parser.arg('--cathode','AT4')
 cml_parser.arg('--anode-num','71')
 cml_parser.arg('--cathode-num','72')
 cml_parser.arg('--pulse-frequency','10')
@@ -32,7 +33,7 @@ from THEventPreparation import THEventPreparation
 
 from ComputeTHClassPowers import ComputeTHClassPowers
 
-from TalPreparation import TalPreparation
+from MontagePreparation import MontagePreparation
 
 from CheckElectrodeLabels import CheckElectrodeLabels
 
@@ -71,6 +72,7 @@ class Params(object):
         self.filt_order = 4
 
         self.freqs = np.logspace(np.log10(1.0), np.log10(200.0), 8)
+        self.classifier_freqs = self.freqs
 
         self.log_powers = True
 
@@ -108,7 +110,7 @@ report_pipeline = ReportPipeline(subject=args.subject,
 
 report_pipeline.add_task(THEventPreparation(mark_as_completed=False))
 
-report_pipeline.add_task(TalPreparation(mark_as_completed=False))
+report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
 
 report_pipeline.add_task(CheckElectrodeLabels(params=params, mark_as_completed=False))
 

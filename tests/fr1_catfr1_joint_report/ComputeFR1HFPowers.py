@@ -1,6 +1,14 @@
 __author__ = 'm'
 
 from RamPipeline import *
+try:
+    from ReportTasks.RamTaskMethods import compute_powers
+except ImportError as ie:
+    if 'MorletWaveletFilterCpp' in ie.message:
+        print 'Update PTSA for better perfomance'
+        compute_powers = None
+    else:
+        raise ie
 
 import numpy as np
 from scipy.stats.mstats import zscore
@@ -71,10 +79,21 @@ class ComputeFR1HFPowers(ReportRamTask):
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
 
-        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
+        params=self.params
+        if compute_powers is None:
+            self.compute_powers(events,sessions,monopolar_channels,bipolar_pairs)
+        else:
+
+            self.pow_mat,events=compute_powers(events,monopolar_channels, bipolar_pairs,
+                                                   params.fr1_start_time,params.fr1_end_time,params.fr1_buf,
+                                                   params.freqs,params.log_powers)
+            self.pow_mat = self.pow_mat.reshape((len(events),len(bipolar_pairs),-1))
+            for session in sessions:
+                self.pow_mat[events.session==session] = zscore(self.pow_mat[events.session==session],axis=0,ddof=1)
+            self.pow_mat = np.nanmean(self.pow_mat,axis=-1)
 
         self.pass_object('hf_pow_mat', self.pow_mat)
-
+        self.pass_object('hf_events',events)
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-hf_pow_mat.pkl'))
 
     def compute_powers(self, events, sessions,monopolar_channels , bipolar_pairs ):

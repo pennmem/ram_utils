@@ -34,7 +34,7 @@ class RepetitionRatio(RamTask):
         return hash_md5.digest()
 
     def restore(self):
-        subject= self.pipeline.subject
+        subject= self.pipeline.subject.split('_')[0]
         self.repetition_ratios = joblib.load(path.join(self.pipeline.mount_point,self.workspace_dir,subject+'-repetition-ratios.pkl'))
         # self.repetition_percentiles = joblib.load(path.join(self.pipeline.mount_point,self.workspace_dir,subject+'-repetition-percentiles.pkl'))
         all_recall_ratios_dict = joblib.load(path.join(path.dirname(self.get_workspace_dir()),'all_repetition_ratios_dict'))

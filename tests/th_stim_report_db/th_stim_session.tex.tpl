@@ -34,39 +34,24 @@ $<N_WORDS>$ items & $<N_CORRECT_WORDS>$ correct ($<PC_CORRECT_WORDS>$\%) & Gener
 \begin{table}[!h]
 \centering
 \begin{tabular}{c|c|c|c}
-\multicolumn{4}{c}{\textbf{Stim vs Non-Stim Recalls (list level)}} \\
+\multicolumn{4}{c}{\textbf{Stim vs Non-Stim Recalls}} \\
 \hline
 $<N_CORRECT_STIM>/<N_TOTAL_STIM>$ ($<PC_FROM_STIM>$\%) from stim lists & $<N_CORRECT_NONSTIM>/<N_TOTAL_NONSTIM>$ ($<PC_FROM_NONSTIM>$\%) from non-stim lists & $\chi^2(1)=<CHISQR>$ & $p=<PVALUE>$ \\
 \hline
-\end{tabular}
-\end{table}
-
-\begin{table}[!h]
-\centering
-\begin{tabular}{c|c|c|c}
-\multicolumn{4}{c}{\textbf{Stim vs Non-Stim Recalls (item level)}} \\
+$<N_CORRECT_STIM_ITEM>/<N_TOTAL_STIM_ITEM>$ ($<PC_FROM_STIM_ITEM>$\%) stim items & $<N_CORRECT_NONSTIM_LOW>/<N_TOTAL_NONSTIM_LOW>$ ($<PC_FROM_NONSTIM_LOW>$\%) low biomarker non-stim items & $\chi^2(1)=<CHISQR_LOW>$ & $p=<PVALUE_LOW>$ \\
 \hline
-$<N_CORRECT_STIM_ITEM>/<N_TOTAL_STIM_ITEM>$ ($<PC_FROM_STIM_ITEM>$\%) from stim items & $<N_CORRECT_NONSTIM_ITEM>/<N_TOTAL_NONSTIM_ITEM>$ ($<PC_FROM_NONSTIM_ITEM>$\%) from non-stim items & $\chi^2(1)=<CHISQR_ITEM>$ & $p=<PVALUE_ITEM>$ \\
+$<N_CORRECT_POST_STIM_ITEM>/<N_TOTAL_POST_STIM_ITEM>$ ($<PC_FROM_POST_STIM_ITEM>$\%) post stim items & $<N_CORRECT_POST_NONSTIM_ITEM>/<N_TOTAL_POST_NONSTIM_ITEM>$ ($<PC_FROM_POST_NONSTIM_ITEM>$\%) post low biomarker non-stim items & $\chi^2(1)=<CHISQR_POST_ITEM>$ & $p=<PVALUE_POST_ITEM>$ \\
 \hline
 \end{tabular}
 \end{table}
 
-\begin{table}[!h]
-\centering
-\begin{tabular}{c|c|c|c}
-\multicolumn{4}{c}{\textbf{Post Stim vs Non-Stim Recalls (item level)}} \\
-\hline
-$<N_CORRECT_POST_STIM_ITEM>/<N_TOTAL_POST_STIM_ITEM>$ ($<PC_FROM_POST_STIM_ITEM>$\%) from stim items & $<N_CORRECT_POST_NONSTIM_ITEM>/<N_TOTAL_POST_NONSTIM_ITEM>$ ($<PC_FROM_POST_NONSTIM_ITEM>$\%) from non-stim items & $\chi^2(1)=<CHISQR_POST_ITEM>$ & $p=<PVALUE_POST_ITEM>$ \\
-\hline
-\end{tabular}
-\end{table}
 
 \begin{table}[!h]
 \centering
 \begin{tabular}{c|c|c|c}
-\multicolumn{4}{c}{\textbf{Mid/High Stim vs Mid/High Non-Stim Confidence (item level)}} \\
+\multicolumn{4}{c}{\textbf{Mid/High Stim vs Mid/High Non-Stim Confidence}} \\
 \hline
-$<N_CONF_STIM_ITEM>/<N_TOTAL_STIM_ITEM>$ ($<PC_CONF_STIM_ITEM>$\%) from stim items & $<N_CONF_NONSTIM_ITEM>/<N_TOTAL_NONSTIM_ITEM>$ ($<PC_CONF_NONSTIM_ITEM>$\%) from non-stim items & $\chi^2(1)=<CHISQR_CONF>$ & $p=<PVALUE_CONF>$ \\
+$<N_CONF_STIM_ITEM>/<N_TOTAL_STIM_ITEM>$ ($<PC_CONF_STIM_ITEM>$\%) stim items & $<N_CONF_NONSTIM_ITEM>/<N_TOTAL_NONSTIM_LOW>$ ($<PC_CONF_NONSTIM_ITEM>$\%) low biomarker non-stim items & $\chi^2(1)=<CHISQR_CONF>$ & $p=<PVALUE_CONF>$ \\
 \hline
 \end{tabular}
 \end{table}
