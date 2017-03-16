@@ -80,12 +80,12 @@ $\bullet$ Permutation test $p$-value $<FR3-PERM-P-VALUE>$
 \includegraphics[scale=0.4]{<IRT_PLOT_FILE>}
 \caption{\textbf{Categorical free recall:} Inter-response times for transitions within and between categories.}
 \end{figure}
-%\begin{figure}[!h]
-%\centering
-%\includegraphics[scale=0.4]{<REPETITION_PLOT_FILE>}
-%\caption{\textbf{Categorical free recall:} Ratio of repetition. Histogram is distribution over catFR1 subjects;
-%dotted lines indicate average for this subject.}
-%\end{figure}
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.4]{<REPETITION_PLOT_FILE>}
+\caption{\textbf{Categorical free recall:} Ratio of repetition. Histogram is distribution over catFR1 subjects;
+dotted lines indicate average for this subject.}
+\end{figure}
 
 
 

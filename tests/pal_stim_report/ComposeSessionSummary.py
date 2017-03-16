@@ -44,7 +44,7 @@ class ComposeSessionSummary(ReportRamTask):
         pal_stim_table_by_session = pal_stim_table.groupby(['session'])
         for session,pal_stim_session_table in pal_stim_table_by_session:
             session_all_events = all_events[all_events.session == session]
-            first_time_stamp = session_all_events[session_all_events.type=='INSTRUCT_VIDEO_ON'][0].mstime
+            first_time_stamp = session_all_events[(session_all_events.type=='INSTRUCT_VIDEO_ON') | (session_all_events.type=='ORIENT')][0].mstime
             timestamps = session_all_events.mstime
             last_time_stamp = np.max(timestamps)
             session_length = '%.2f' % ((last_time_stamp - first_time_stamp) / 60000.0)
