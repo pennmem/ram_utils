@@ -18,6 +18,19 @@ def normalize_sessions(pow_mat, events):
         pow_mat[sess_event_mask] = zscore(pow_mat[sess_event_mask], axis=0, ddof=1)
     return pow_mat
 
+# def normalize_sessions(pow_mat, events):
+#     sessions = np.unique(events.session)
+#     for sess in sessions:
+#         # sess_event_mask = (events.session == sess)
+#         encoding_mask = (events.session == sess) & (events.type == 'WORD')
+#         retrieval_mask = (events.session == sess) & ((events.type == 'REC_BASE') | (events.type == 'REC_WORD'))
+#
+#         pow_mat[encoding_mask] = zscore(pow_mat[encoding_mask], axis=0, ddof=1)
+#         pow_mat[retrieval_mask] = zscore(pow_mat[retrieval_mask], axis=0, ddof=1)
+#
+#     return pow_mat
+
+
 
 class ModelOutput(object):
     def __init__(self, true_labels, probs):
@@ -130,12 +143,59 @@ class ComputeClassifier(RamTask):
             insample_recalls = recalls[insample_mask]
             insample_samples_weights = samples_weights[insample_mask]
 
+
+            insample_enc_mask = insample_mask & (events.type == 'WORD')
+            insample_retrieval_mask = insample_mask & ((events.type == 'REC_BASE') | (events.type == 'REC_WORD'))
+
+            n_enc_0 = events[insample_enc_mask & (events.recalled == 0)].shape[0]
+            n_enc_1 = events[insample_enc_mask & (events.recalled == 1)].shape[0]
+
+            n_ret_0 = events[insample_retrieval_mask & (events.type == 'REC_BASE')].shape[0]
+            n_ret_1 = events[insample_retrieval_mask & (events.type == 'REC_WORD')].shape[0]
+
+            n_vec = np.array([1.0/n_enc_0, 1.0/n_enc_1, 1.0/n_ret_0, 1.0/n_ret_1 ], dtype=np.float)
+            n_vec /= np.mean(n_vec)
+
+            n_vec[:2] *= self.params.encoding_samples_weight
+
+            n_vec /= np.mean(n_vec)
+
+            # insample_samples_weights = np.ones(n_enc_0 + n_enc_1 + n_ret_0 + n_ret_1, dtype=np.float)
+            insample_samples_weights = np.ones(events.shape[0], dtype=np.float)
+
+            insample_samples_weights [insample_enc_mask & (events.recalled == 0)] = n_vec[0]
+            insample_samples_weights [insample_enc_mask & (events.recalled == 1)] = n_vec[1]
+            insample_samples_weights [insample_retrieval_mask & (events.type == 'REC_BASE')] = n_vec[2]
+            insample_samples_weights [insample_retrieval_mask & (events.type == 'REC_WORD')] = n_vec[3]
+
+            insample_samples_weights = insample_samples_weights[insample_mask]
+
+
+            outsample_both_mask = (events.session == sess)
+
+
+
+
+
+    # % even weights by class balance
+    # n_vec = [1/n_enc_pos 1/n_enc_neg 1/n_rec_pos 1/n_rec_neg];
+    # mean_tmp = mean(n_vec);
+    # n_vec = n_vec/mean_tmp;
+    #
+    # % add scalign by E
+    # n_vec(1:2) = n_vec(1:2)*E;
+    # mean_tmp = mean(n_vec);
+    # n_vec = n_vec/mean_tmp;
+
+
+
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 if samples_weights is not None:
                     self.lr_classifier.fit(insample_pow_mat, insample_recalls,insample_samples_weights)
                 else:
                     self.lr_classifier.fit(insample_pow_mat, insample_recalls)
+
 
             outsample_mask = ~insample_mask
             outsample_pow_mat = self.pow_mat[outsample_mask]
@@ -147,6 +207,24 @@ class ComputeClassifier(RamTask):
                 self.xval_output[sess].compute_roc()
                 self.xval_output[sess].compute_tercile_stats()
             probs[outsample_mask] = outsample_probs
+
+
+            import tables
+
+            h5file = tables.open_file('%s_fold_%d.h5'%(self.pipeline.subject, sess), mode='w', title="Test Array")
+            root = h5file.root
+            h5file.create_array(root, "insample_recalls", insample_recalls)
+            h5file.create_array(root, "insample_pow_mat", insample_pow_mat)
+            h5file.create_array(root, "insample_samples_weights", insample_samples_weights)
+            h5file.create_array(root, "outsample_recalls", outsample_recalls)
+            h5file.create_array(root, "outsample_pow_mat", outsample_pow_mat)
+            h5file.create_array(root, "outsample_probs", outsample_probs)
+            h5file.create_array(root, "lr_classifier_coef", self.lr_classifier.coef_)
+            h5file.create_array(root, "lr_classifier_intercept", self.lr_classifier.intercept_)
+
+            h5file.close()
+
+
 
             if events is not None:
 
@@ -306,8 +384,12 @@ class ComputeClassifier(RamTask):
 
         # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
         #                                         solver='liblinear')
+        #
+        # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
+        #                                         solver='newton-cg')
 
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
+
+        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
                                                 solver='newton-cg')
 
 
@@ -319,8 +401,8 @@ class ComputeClassifier(RamTask):
 
         samples_weights = np.ones(events.shape[0], dtype=np.float)
 
-        samples_weights[~(events.type=='WORD')] = self.params.retrieval_samples_weight
-        # samples_weights[(events.type=='WORD')] = self.params.encoding_samples_weight
+        # samples_weights[~(events.type=='WORD')] = self.params.retrieval_samples_weight
+        samples_weights[(events.type=='WORD')] = self.params.encoding_samples_weight
 
 
 
