@@ -1,8 +1,9 @@
 
 subject=R1250N
 localization=0
+montage=0
 
-contacts_json="/D/protocols/r1/subjects/${subject}/localizations/${localization}/montages/${localization}/neuroradiology/current_processed/contacts.json"
+contacts_json="/D/protocols/r1/subjects/${subject}/localizations/${localization}/montages/${montage}/neuroradiology/current_processed/contacts.json"
 contacts_json_output_dir="/D/experiment_configs"
 
 cd ../../

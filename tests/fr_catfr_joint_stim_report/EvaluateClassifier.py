@@ -78,7 +78,8 @@ class EvaluateClassifier(ComputeClassifier):
         self.lr_classifier = self.get_passed_object('lr_classifier')
         events = self.get_passed_object(task+'_events')
         recalls = events.recalled
-        self.pow_mat = self.get_passed_object('fr_stim_pow_mat')
+        self.pow_mat = self.get_passed_object('fr_stim_pow_mat')[events.stim_list==False]
+        events = events[events.stim_list==False]
         print 'self.pow_mat.shape:',self.pow_mat.shape
 
         if self.xval_test_type(events) == 'loso':

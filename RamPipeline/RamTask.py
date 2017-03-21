@@ -293,6 +293,9 @@ class RamTask(object):
                 shutil.move(file_resource, target_path)
             except IOError:
                 print 'Could not move file: ', file_resource, ' to ', target_path
+            except OSError:
+                shutil.copyfile(file_resource, target_path)
+
 
     def get_path_to_resource_in_workspace(self, *rel_path_components):
         """

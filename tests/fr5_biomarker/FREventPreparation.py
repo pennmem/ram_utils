@@ -87,3 +87,84 @@ class FREventPreparation(RamTask):
         # self.pass_object('retrieval_events_mask_0s',retrieval_events_mask_0s)
         # self.pass_object('retrieval_events_mask_1s',retrieval_events_mask_1s)
 
+
+def free_epochs(times, duration, pre, post):
+    # (list(vector(int))*int*int*int) -> list(vector(int))
+    """
+    Given a list of event times, find epochs between them when nothing is happening
+
+    Parameters:
+    -----------
+
+    times:
+        An iterable of 1-d numpy arrays, each of which indicates event times
+
+    duration: int
+        The length of the desired empty epochs
+
+    pre: int
+        the time before each event to exclude
+
+    post: int
+        The time after each event to exclude
+
+    """
+    n_trials = len(times)
+    epoch_times = []
+    for i in range(n_trials):
+        pre_times = times[i] - pre
+        post_times = times[i] + post
+        interval_durations = pre_times[1:] - post_times[:-1]
+        free_intervals = np.where(interval_durations > duration)[0]
+        trial_epoch_times = []
+        for interval in free_intervals:
+            start = post_times[interval]
+            finish = pre_times[interval + 1] - duration
+            interval_epoch_times = range(start, finish, duration)
+            trial_epoch_times.extend(interval_epoch_times)
+        epoch_times.append(np.array(trial_epoch_times))
+    epoch_array = np.empty((n_trials, max([len(x) for x in epoch_times])))
+    epoch_array[...] = -np.inf
+    for i, epoch in enumerate(epoch_times):
+        epoch_array[i, :len(epoch)] = epoch
+    return epoch_array
+
+
+def create_baseline_events(events,filter):
+    sess_events=filter(events)
+    times = [sess_events[sess_events.list == lst].mstime for lst in np.unique(sess_events.list)]
+    epochs = free_epochs(times, 500, 1000, 1000)
+    starts = events[(events.type == 'REC_START') & (events.session == 1)]
+    start_times = starts[np.in1d(starts.list, sess_events.list)].mstime
+    rel_times = [t - i for (t, i) in zip(times, start_times)]
+    rel_epochs = epochs - start_times[:, None]
+    full_match_accum = np.empty(epochs.shape, dtype=np.bool)
+    full_match_accum[...] = False
+    for (i, rec_times_list) in enumerate(rel_times):
+        is_match = np.empty(epochs.shape, dtype=np.bool)
+        is_match[...] = False
+        for t in rec_times_list:
+            is_match_tmp = np.abs((rel_epochs - t)) < 3000
+            is_match_tmp[i, ...] = False
+            is_match |= is_match_tmp
+        full_match_accum |= is_match
+    print full_match_accum.shape
+    print epochs.shape
+    matching_epochs = epochs[full_match_accum]
+    matching_epochs = np.random.choice(matching_epochs,sess_events.size)
+    new_events = np.zeros(sess_events.shape,dtype=sess_events.dtype).view(np.recarray)
+    for i,_ in enumerate(new_events):
+        new_events[i].mstime=matching_epochs[i]
+        new_events[i].type='REC_BASE'
+    new_events.recalled=0
+    merged_events=np.concatenate((events,new_events)).view(np.recarray)
+    merged_events.sort(order='mstime')
+    for (i,event) in enumerate(merged_events):
+        if event.type=='REC_BASE':
+            merged_events[i].session=merged_events[i-1].session
+            merged_events[i].list=merged_events[i-1].list
+            merged_events[i].eegfile=merged_events[i-1].eegfile
+            merged_events[i].eegoffset=merged_events[i-1].eegoffset + (merged_events[i].mstime-merged_events[i-1].mstime)
+    return new_events
+
+

@@ -209,21 +209,21 @@ class ComputeClassifier(RamTask):
             probs[outsample_mask] = outsample_probs
 
 
-            import tables
-
-            h5file = tables.open_file('%s_fold_%d.h5'%(self.pipeline.subject, sess), mode='w', title="Test Array")
-            root = h5file.root
-            h5file.create_array(root, "insample_recalls", insample_recalls)
-            h5file.create_array(root, "insample_pow_mat", insample_pow_mat)
-            h5file.create_array(root, "insample_samples_weights", insample_samples_weights)
-            h5file.create_array(root, "outsample_recalls", outsample_recalls)
-            h5file.create_array(root, "outsample_pow_mat", outsample_pow_mat)
-            h5file.create_array(root, "outsample_probs", outsample_probs)
-            h5file.create_array(root, "lr_classifier_coef", self.lr_classifier.coef_)
-            h5file.create_array(root, "lr_classifier_intercept", self.lr_classifier.intercept_)
-
-            h5file.close()
-
+            # import tables
+            #
+            # h5file = tables.open_file('%s_fold_%d.h5'%(self.pipeline.subject, sess), mode='w', title="Test Array")
+            # root = h5file.root
+            # h5file.create_array(root, "insample_recalls", insample_recalls)
+            # h5file.create_array(root, "insample_pow_mat", insample_pow_mat)
+            # h5file.create_array(root, "insample_samples_weights", insample_samples_weights)
+            # h5file.create_array(root, "outsample_recalls", outsample_recalls)
+            # h5file.create_array(root, "outsample_pow_mat", outsample_pow_mat)
+            # h5file.create_array(root, "outsample_probs", outsample_probs)
+            # h5file.create_array(root, "lr_classifier_coef", self.lr_classifier.coef_)
+            # h5file.create_array(root, "lr_classifier_intercept", self.lr_classifier.intercept_)
+            #
+            # h5file.close()
+            #
 
 
             if events is not None:
@@ -284,7 +284,7 @@ class ComputeClassifier(RamTask):
 
         return probs
 
-    def permuted_loso_AUCs(self, event_sessions, recalls, samples_weights=None):
+    def permuted_loso_AUCs(self, event_sessions, recalls, samples_weights=None,events=None):
         n_perm = self.params.n_perm
         permuted_recalls = np.array(recalls)
         AUCs = np.empty(shape=n_perm, dtype=np.float)
@@ -294,7 +294,7 @@ class ComputeClassifier(RamTask):
                 sess_permuted_recalls = permuted_recalls[sel]
                 shuffle(sess_permuted_recalls)
                 permuted_recalls[sel] = sess_permuted_recalls
-            probs = self.run_loso_xval(event_sessions, permuted_recalls, permuted=True,samples_weights=samples_weights)
+            probs = self.run_loso_xval(event_sessions, permuted_recalls, permuted=True,samples_weights=samples_weights,events=events)
             AUCs[i] = roc_auc_score(recalls, probs)
             print 'AUC =', AUCs[i]
         return AUCs
@@ -409,7 +409,7 @@ class ComputeClassifier(RamTask):
         sessions = np.unique(event_sessions)
         if len(sessions) > 1:
             print 'Performing permutation test'
-            self.perm_AUCs = self.permuted_loso_AUCs(event_sessions, recalls, samples_weights)
+            self.perm_AUCs = self.permuted_loso_AUCs(event_sessions, recalls, samples_weights,events=events)
 
             print 'Performing leave-one-session-out xval'
             self.run_loso_xval(event_sessions, recalls, permuted=False,samples_weights=samples_weights, events=events)

@@ -25,13 +25,32 @@ cml_parser.arg('--contacts-json',jr.get_value('contacts',subject=subject,montage
 cml_parser.arg('--contacts-json-output-dir','/home1/leond/fr3_config')
 cml_parser.arg('--stim-channels','PG10-PG11')
 
+
+
 args = cml_parser.parse()
+
+print args.subject
+
+
+subject_code=args.subject.split('_')[0]
+montage = args.subject.split('_')[1] if len(args.subject.split('_'))>1 else 0
+print subject_code,montage
+
+if not args.contacts_json :
+    print 'finding contacts:'
+    contacts_json = jr.get_value('contacts',subject=subject_code,montage=montage)
+else:
+    contacts_json = args.contacts_json
+
+print contacts_json
+
+
 (anodes,cathodes) = zip(*[pair.split('-') for pair in args.stim_channels])
 # generating .csv file for Odin Config Tool based on contacts.json
 if args.contacts_json is not None:
 
     success_flag = contacts_json_2_configuration_csv(
-        contacts_json_path=args.contacts_json,
+        contacts_json_path=contacts_json,
         output_dir=args.contacts_json_output_dir,configuration_label=args.subject,anodes=anodes,cathodes=cathodes
     )
     if success_flag:

@@ -102,6 +102,11 @@ class MontagePreparation(RamTask):
             bipolar_data_stim_only = {bp_tag:bp_data for bp_tag,bp_data in bipolar_dict.iteritems() if bp_data['is_stim_only']}
             bipolar_data = {bp_tag:bp_data for bp_tag,bp_data in bipolar_dict.iteritems() if not bp_data['is_stim_only']}
 
+            if self.pipeline.args.anodes:
+                (self.pipeline.args.anode_nums,self.pipeline.args.cathode_nums) = zip(
+                    *[(bipolar_data['-'.join((anode,cathode))]['channel_1'],bipolar_data['-'.join((anode,cathode))]['channel_2'])
+                                     for (anode,cathode) in zip(self.pipeline.args.anodes,self.pipeline.args.cathodes)])
+
             bp_tags = []
             bp_tal_structs = []
             for bp_tag,bp_data in bipolar_data.iteritems():
