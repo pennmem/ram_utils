@@ -16,6 +16,7 @@
             "random_stim_prob": false,
             "save_debug_output": true
         },
+        "biomarker_threshold:"{{biomarker_threshold}},
         "experiment_specs": {
             "version": "3.0.0",
             "experiment_type": "FR5",

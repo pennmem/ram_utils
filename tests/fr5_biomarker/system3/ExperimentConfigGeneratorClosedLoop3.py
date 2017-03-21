@@ -128,7 +128,8 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
             stim_params_dict=stim_params_dict,
             electrode_config_file='config_files/%s'%basename(electrode_config_file),
             montage_file='config_files/%s'%basename(bipolar_pairs_path),
-            excluded_montage_file='config_files/%s'%basename(excluded_pairs_path)
+            excluded_montage_file='config_files/%s'%basename(excluded_pairs_path),
+            biomarker_threshold=0.5
         )
 
         experiment_config_file,experiment_config_full_filename = self.create_file_in_workspace_dir(project_dir_corename+'/experiment_config.json')
