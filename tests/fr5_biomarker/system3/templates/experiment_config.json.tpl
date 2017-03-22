@@ -5,24 +5,25 @@
         "experiment_specific_data": {
             "classifier_file": "{{classifier_file}}",
             "stim_channels": {
-                {% for stim_channel,stim_params in stim_params_dict.iteritems() %}"{{stim_channel}}":
+                {% for (i,stim_channel) in enumerate(stim_params_dict) %}"{{stim_channel}}":
                 {
-                    "min_stim_amplitude": {{ stim_params['min_stim_amplitude'] }},
-                    "max_stim_amplitude": {{ stim_params['max_stim_amplitude'] }},
-                    "stim_frequency": {{ stim_params['stim_frequency'] }},
-                    "stim_duration": {{ stim_params['stim_duration'] }}
-                },
-                {% end %}
+                    "min_stim_amplitude": {{ stim_params_dict[stim_channel]['min_stim_amplitude'] }},
+                    "max_stim_amplitude": {{ stim_params_dict[stim_channel]['max_stim_amplitude'] }},
+                    "stim_frequency": {{ stim_params_dict[stim_channel]['stim_frequency'] }},
+                    "stim_duration": {{ stim_params_dict[stim_channel]['stim_duration'] }}
+                }{% if (i+1) <len(stim_params_dict) %},
+                {% end %}{% end %}
+             },
             "random_stim_prob": false,
             "save_debug_output": true
         },
-        "biomarker_threshold:"{{biomarker_threshold}},
+        "biomarker_threshold":{{biomarker_threshold}},
         "experiment_specs": {
             "version": "3.0.0",
             "experiment_type": "FR5",
             "biomarker_sample_start_time_offset": "0",
             "biomarker_sample_time_length": "1366",
-            "buffer_time": "1000",
+            "buffer_time": "1365",
             "stim_duration": "500",
             "retrieval_biomarker_sample_start_time_offset": "0",
             "retrieval_biomarker_sample_time_length": "525",
@@ -38,7 +39,7 @@
     },
     "electrode_config_file": "{{electrode_config_file}}",
     "montage_file": "{{montage_file}}",
-    "excluded_montage_file": "{{excluded_montage_file}}"
+    "excluded_montage_file": "{{excluded_montage_file}}",
     "global_settings": {
         "data_dir": "SET_AUTOMATICALLY_AT_A_RUNTIME",
         "experiment_config_filename": "SET_AUTOMATICALLY_AT_A_RUNTIME",
@@ -49,6 +50,5 @@
         "sampling_rate": 1000,
         "odin_lib_debug_level": 0,
         "connect_to_task_laptop": true
-        }
     }
 }

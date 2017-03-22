@@ -13,6 +13,7 @@ from glob import glob
 import shutil
 import pathlib
 from itertools import cycle
+from system_3_utils import ElectrodeConfigSystem3
 
 class ExperimentConfigGeneratorClosedLoop3(RamTask):
     def __init__(self, params, mark_as_completed=False):
@@ -80,9 +81,10 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
     def run(self):
         anodes = self.pipeline.args.anodes if self.pipeline.args.anodes else [self.pipeline.args.anode]
         cathodes = self.pipeline.args.cathodes if self.pipeline.args.cathodes else [self.pipeline.args.cathode]
-        # stim_electrode_pair = self.pipeline.args.stim_electrode_pair
+
         experiment = self.pipeline.args.experiment if self.pipeline.args.experiment else 'FR5'
         electrode_config_file = self.pipeline.args.electrode_config_file
+        config_name = self.get_passed_object('config_name')
         subject = self.pipeline.subject
         stim_frequency = self.pipeline.args.pulse_frequency
         stim_amplitude = self.pipeline.args.target_amplitude
@@ -126,7 +128,7 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
             experiment=experiment,
             classifier_file='config_files/%s'%basename(classifier_path),
             stim_params_dict=stim_params_dict,
-            electrode_config_file='config_files/%s'%basename(electrode_config_file),
+            electrode_config_file='config_files/{subject}_{config_name}.bin'.format(subject=subject,config_name=config_name),
             montage_file='config_files/%s'%basename(bipolar_pairs_path),
             excluded_montage_file='config_files/%s'%basename(excluded_pairs_path),
             biomarker_threshold=0.5

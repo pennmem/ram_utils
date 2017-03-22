@@ -129,6 +129,7 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
         ec.initialize(electrode_csv)
 
         self.validate_montage(electrode_config=ec)
+        self.pass_object('config_name',ec.config_name)
 
         print
 

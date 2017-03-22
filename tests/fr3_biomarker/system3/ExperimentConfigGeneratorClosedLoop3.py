@@ -93,6 +93,7 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
 
         # making sure we get the path even if the actual directory is not created
         project_dir = self.get_path_to_resource_in_workspace(project_dir_corename)
+        config_name = self.get_passed_object('config_name')
 
 
         config_files_dir = self.create_dir_in_workspace(abspath(join(project_dir,'config_files')))
@@ -109,7 +110,7 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
             stim_frequency=stim_frequency,
             stim_amplitude=stim_amplitude,
             stim_electrode_pair=stim_chan_label,
-            electrode_config_file='config_files/%s'%basename(electrode_config_file),
+            electrode_config_file='config_files/{subject}_{config_name}.bin'.format(subject=subject,config_name=config_name),
             montage_file='config_files/%s'%basename(bipolar_pairs_path)
         )
 
