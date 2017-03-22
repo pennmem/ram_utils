@@ -81,7 +81,7 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
         anodes = self.pipeline.args.anodes if self.pipeline.args.anodes else [self.pipeline.args.anode]
         cathodes = self.pipeline.args.cathodes if self.pipeline.args.cathodes else [self.pipeline.args.cathode]
         # stim_electrode_pair = self.pipeline.args.stim_electrode_pair
-        experiment = self.pipeline.args.experiment if self.pipeline.args.experiment else 'FR3'
+        experiment = self.pipeline.args.experiment if self.pipeline.args.experiment else 'FR5'
         electrode_config_file = self.pipeline.args.electrode_config_file
         subject = self.pipeline.subject
         stim_frequency = self.pipeline.args.pulse_frequency
