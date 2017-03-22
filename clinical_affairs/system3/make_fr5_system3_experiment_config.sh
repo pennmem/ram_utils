@@ -10,7 +10,7 @@ experiment=PS4
 anode1=LB6
 cathode1=LB7
 anode2=LB7
-cathode2=LB8
+cathode2=
 target_amplitude=1.0
 config_dir='/scratch/pwanda/FR5_biomarkers/electrode_configs'
 
@@ -23,14 +23,14 @@ max_amplitude=2.0
 
 stim_pair_1=${anode1}-${cathode1}
 stim_pair_2=${anode2}-${cathode2}
-if [ -z anode1 ];
+if [ -z $anode1 ];
 then stim_pair_1='';
-elif [ -z cathode1 ];
+elif [ -z $cathode1 ];
 then stim_pair_1='';
 fi
-if [ -z anode2 ];
+if [ -z $anode2 ];
 then stim_pair_2='';
-elif [ -z cathode2 ];
+elif [ -z $cathode2 ];
 then stim_pair_2='';
 fi
 
