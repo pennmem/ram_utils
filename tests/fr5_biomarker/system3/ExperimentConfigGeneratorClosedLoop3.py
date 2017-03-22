@@ -102,11 +102,11 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
                 "min_stim_amplitude":min_amplitude,
                 "max_stim_amplitude":max_amplitude,
                 "stim_frequency":200,
-                "stim_duration":500
+                "stim_duration":500,
+                "stim_amplitude":stim_amplitude
             }
 
-
-
+        fr5_stim_channel = '%s_%s'%(anodes[0],cathodes[0])
         project_dir_corename = 'experiment_config_dir/%s/%s'%(subject,experiment)
         project_dir = self.create_dir_in_workspace(project_dir_corename)
 
@@ -131,7 +131,8 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
             electrode_config_file='config_files/{subject}_{config_name}.bin'.format(subject=subject,config_name=config_name),
             montage_file='config_files/%s'%basename(bipolar_pairs_path),
             excluded_montage_file='config_files/%s'%basename(excluded_pairs_path),
-            biomarker_threshold=0.5
+            biomarker_threshold=0.5,
+            fr5_stim_channel=fr5_stim_channel
         )
 
         experiment_config_file,experiment_config_full_filename = self.create_file_in_workspace_dir(project_dir_corename+'/experiment_config.json')
