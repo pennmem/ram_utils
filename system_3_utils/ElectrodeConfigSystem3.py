@@ -70,7 +70,7 @@ class SenseChannel():
 
 class StimChannel():
     # TODO: What is x?
-    CSV_FORMAT = 'StimChannel:,{name},x,{comments}\nAnodes:,{anode_csv},#\nCathodes:,{cathode_csv},#'
+    CSV_FORMAT = 'StimChannel:,{name},x,#{comments}#\nAnodes:,{anode_csv},#\nCathodes:,{cathode_csv},#'
 
     def __init__(self, name, anodes, cathodes, comments):
         self.name = name
@@ -338,7 +338,7 @@ def contacts_json_2_configuration_csv(contacts_json_path, output_dir, configurat
     contacts_dict = json.load(open(contacts_json_path))
     ec.intitialize_from_dict(contacts_dict, "FromJson")
     for anode,cathode in zip(anodes,cathodes):
-        name = '-'.join([anode,cathode])
+        name = '_'.join([anode,cathode])
         ec.stim_channels[name]=StimChannel(name=name,anodes=[ec.contacts[anode].jack_num],
                                                cathodes=[ec.contacts[cathode].jack_num],comments='')
     csv_out = ec.as_csv()
