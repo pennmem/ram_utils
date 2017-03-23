@@ -289,14 +289,17 @@ class ComputeClassifier(RamTask):
         permuted_recalls = np.array(recalls)
         AUCs = np.empty(shape=n_perm, dtype=np.float)
         for i in xrange(n_perm):
-            for sess in event_sessions:
-                sel = (event_sessions == sess)
-                sess_permuted_recalls = permuted_recalls[sel]
-                shuffle(sess_permuted_recalls)
-                permuted_recalls[sel] = sess_permuted_recalls
-            probs = self.run_loso_xval(event_sessions, permuted_recalls, permuted=True,samples_weights=samples_weights,events=events)
-            AUCs[i] = roc_auc_score(recalls, probs)
-            print 'AUC =', AUCs[i]
+            try:
+                for sess in event_sessions:
+                    sel = (event_sessions == sess)
+                    sess_permuted_recalls = permuted_recalls[sel]
+                    shuffle(sess_permuted_recalls)
+                    permuted_recalls[sel] = sess_permuted_recalls
+                probs = self.run_loso_xval(event_sessions, permuted_recalls, permuted=True,samples_weights=samples_weights,events=events)
+                AUCs[i] = roc_auc_score(recalls, probs)
+                print 'AUC =', AUCs[i]
+            except ValueError:
+                AUCs[i] = np.nan
         return AUCs
 
     def run_lolo_xval(self, sess, event_lists, recalls, permuted=False, samples_weights=None):
@@ -425,7 +428,7 @@ class ComputeClassifier(RamTask):
 
         print 'CROSS VALIDATION AUC =', self.xval_output[-1].auc
 
-        self.pvalue = np.sum(self.perm_AUCs >= self.xval_output[-1].auc) / float(self.perm_AUCs.size)
+        self.pvalue = np.nansum(self.perm_AUCs >= self.xval_output[-1].auc) / float(self.perm_AUCs[~np.isnan(self.perm_AUCs)].size)
         print 'Perm test p-value =', self.pvalue
 
         print 'thresh =', self.xval_output[-1].jstat_thresh, 'quantile =', self.xval_output[-1].jstat_quantile
