@@ -8,7 +8,7 @@ In the free recall task, participants are presented with a list of words, one af
     \item\textbf{Number of sessions: }${{NUMBER_OF_FR5_SESSIONS}}$
     \item\textbf{Number of electrodes: }${{NUMBER_OF_ELECTRODES}}$
     \item\textbf{FR1 Area Under Curve: }${{AUC}}$\%
-    \item\textbf{FR1 Permutation test $p$-value:} ${{PERM-P-VALUE}}$
+    \item\textbf{FR1 Permutation test $p$-value:} ${{PERM_P_VALUE}}$
     \end{itemize}
 \end{minipage}
 &
@@ -21,7 +21,7 @@ In the free recall task, participants are presented with a list of words, one af
 \vspace{3pc}
 
 \begin{center}
-\textbf{\Large Classifier generalization to FR3}
+\textbf{\Large Classifier generalization to FR5}
 \end{center}
 
 \begin{figure}[!h]
@@ -33,9 +33,9 @@ percentage devation from the (subject) mean, separated by tercile
 of the classifier encoding efficiency estimate for each encoded word.}
 \end{figure}
 
-$\bullet$ Area Under Curve = ${{FR5-AUC}}$\%
+$\bullet$ Area Under Curve = ${{FR5_AUC}}$\%
 
-$\bullet$ Permutation test $p$-value ${{FR5-PERM-P-VALUE}}$
+$\bullet$ Permutation test $p$-value ${{FR5_PERM_P_VALUE}}$
 
 
 {% for session in FR5_SESSION_SUMMARIES %}

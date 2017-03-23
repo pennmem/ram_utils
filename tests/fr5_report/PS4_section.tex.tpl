@@ -21,17 +21,7 @@
 \section*{Session {{sess}} }
 
 \begin{figure}[ht!]
-\renewcommand{\thesubfigure}{i}
-\begin{subfigure}[!h]{\linewidth}
-\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{ {{SESSION_SUMMARIES[sess].LOC_1_PLOT_FILE}} }
-\subcaption{{{SESSION_SUMMARIES[sess].LOC_1}}}
-\end{subfigure}
-\renewcommand{\thesubfigure}{ii}
-\begin{subfigure}[!h]{\linewidth}
-\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{ {{SESSION_SUMMARIES[sess].LOC_2_PLOT_FILE}} }
-\subcaption{{{SESSION_SUMMARIES[sess].LOC_2}}}
-\end{subfigure}
-
+\includegraphics[trim={0.0cm 0.45cm 0.0cm 0.0cm},clip,scale=0.4]{ {{SESSION_SUMMARIES[sess].PS_PLOT_FILE}} }
 \caption{Classifier response as a function of amplitude}
 \end{figure}
     {% end %}

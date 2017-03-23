@@ -9,7 +9,7 @@ class SessionSummary(object):
 
 class ComposeSessionSummary(ReportRamTask):
 
-    THRESH = 0.444 # need the actual threshold value
+    THRESH = 0.5
 
     @staticmethod
     def spc(events):
