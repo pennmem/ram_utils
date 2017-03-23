@@ -3,7 +3,7 @@
     "experiment": {
         "type": "{{experiment}}",
         "experiment_specific_data": {
-            "classifier_file": "{{classifier_file}}", {% if experiment=='PS4' %}
+            "classifier_file": "{{classifier_file}}",
             "stim_channels": {
                 {% for (i,stim_channel) in enumerate(stim_params_dict) %}"{{stim_channel}}":
                 {
@@ -13,34 +13,30 @@
                     "stim_duration": {{ stim_params_dict[stim_channel]['stim_duration'] }}
                 }{% if (i+1) <len(stim_params_dict) %},
                 {% end %}{% end %}
-             }, {% else %}
-            "stim_electrode_pair":{{fr5_stim_channel}}
-            "stim_amplitude" : {{stim_params_dict[fr5_stim_channel]['stim_amplitude']}}
-            "stim_frequency" : 200,
-            "stim_duration"  : 500,{% end %}
+             },
             "random_stim_prob": false,
             "save_debug_output": true
         },
-        "biomarker_threshold":{{biomarker_threshold}},
         "experiment_specs": {
             "version": "3.0.0",
-            "experiment_type": "FR5",
+            "experiment_type": "{{experiment}}",
             "biomarker_sample_start_time_offset": "0",
             "biomarker_sample_time_length": "1366",
             "buffer_time": "1365",
-            "stim_duration": "500", {% if experiment=='PS4' %}
+            "stim_duration": "500",
             "retrieval_biomarker_sample_start_time_offset": "0",
             "retrieval_biomarker_sample_time_length": "525",
             "retrieval_buffer_time": "524",
             "post_stim_biomarker_sample_time_length": "500",
             "post_stim_buffer_time": "499",
-            "post_stim_wait_time":"100", {%end if %}
+            "post_stim_wait_time":"100",
             "freq_min": "6",
             "freq_max": "180",
             "num_freqs": "8",
             "num_items": "300"
         }
     },
+    "biomarker_threshold":{{biomarker_threshold}},
     "electrode_config_file": "{{electrode_config_file}}",
     "montage_file": "{{montage_file}}",
     "excluded_montage_file": "{{excluded_montage_file}}",

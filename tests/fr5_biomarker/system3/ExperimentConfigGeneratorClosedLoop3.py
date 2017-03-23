@@ -118,7 +118,7 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
         config_files_dir = self.get_path_to_resource_in_workspace(project_dir_corename+'/config_files')
 
 
-        experiment_config_template_filename = join(dirname(__file__),'templates','experiment_config.json.tpl')
+        experiment_config_template_filename = join(dirname(__file__),'templates','{}_experiment_config.json.tpl'.format(experiment))
         experiment_config_template = Template(open(experiment_config_template_filename ,'r').read())
 
 
