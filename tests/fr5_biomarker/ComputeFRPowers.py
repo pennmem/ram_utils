@@ -11,6 +11,7 @@ from ptsa.data.readers import EEGReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
 import hashlib
+from ReportTasks.RamTaskMethods import compute_powers
 
 
 class ComputeFRPowers(RamTask):
@@ -68,6 +69,7 @@ class ComputeFRPowers(RamTask):
 
 
         events = self.get_passed_object('FR_events')
+        is_encoding_event = events.type=='WORD'
 
         sessions = np.unique(events.session)
         print 'sessions:', sessions
@@ -76,10 +78,23 @@ class ComputeFRPowers(RamTask):
         # tal_info = self.get_passed_object('tal_info')
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
+        params=self.params
 
+        print 'Computing powers during encoding'
+        encoding_pow_mat, encoding_events = compute_powers(events[is_encoding_event], monopolar_channels, bipolar_pairs,
+                                              params.fr1_start_time, params.fr1_end_time, params.fr1_buf,
+                                              params.freqs, params.log_powers)
 
+        print 'Computing powers during retrieval'
+        retrieval_pow_mat, retrieval_events = compute_powers(events[~is_encoding_event], monopolar_channels, bipolar_pairs,
+                                              params.fr1_retrieval_start_time, params.fr1_retrieval_end_time, params.fr1_retrieval_buf,
+                                              params.freqs, params.log_powers)
 
-        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
+        self.pow_mat = np.zeros((len(events),len(bipolar_pairs)*len(params.freqs)))
+        self.pow_mat[is_encoding_event,...] = encoding_pow_mat
+        self.pow_mat[~is_encoding_event,...] = retrieval_pow_mat
+
+        # self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
 
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)

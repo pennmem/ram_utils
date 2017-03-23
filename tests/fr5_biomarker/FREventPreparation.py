@@ -11,6 +11,7 @@ from RamPipeline import *
 from ReportUtils import RamTask
 
 import hashlib
+from sklearn.externals import joblib
 
 
 class FREventPreparation(RamTask):
@@ -62,12 +63,12 @@ class FREventPreparation(RamTask):
 
         event_files = sorted(
             list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR1')))
+        fr1_events = np.concatenate([BaseEventReader(filename=event_path).read() for event_path in event_files]).view(np.recarray)
+        fr1_events = create_baseline_events(fr1_events)
 
         # e_reader = BaseEventReader(filename=fr1_events_fname, eliminate_events_with_no_eeg=True,common_root='scratch')
         # fr1_events = e_reader.read()
 
-        fr1_events = np.concatenate([BaseEventReader(filename=event_path).read() for event_path in event_files]).view(np.recarray)
-        fr1_events = create_baseline_events(fr1_events)
         print
 
         encoding_events_mask = fr1_events.type == 'WORD'
@@ -85,10 +86,16 @@ class FREventPreparation(RamTask):
 
         print len(events), 'WORD events'
 
+        joblib.dump(events,self.get_path_to_resource_in_workspace(subject+'-FR_events.pkl'))
         self.pass_object('FR_events', events)
         # self.pass_object('encoding_events_mask',encoding_events_mask)
         # self.pass_object('retrieval_events_mask_0s',retrieval_events_mask_0s)
         # self.pass_object('retrieval_events_mask_1s',retrieval_events_mask_1s)
+
+    def restore(self):
+        subject=self.pipeline.subject
+        events = joblib.load(self.get_path_to_resource_in_workspace(subject+'-FR_events.pkl'))
+        self.pass_object('FR_events',events)
 
 
 def free_epochs(times, duration, pre, post, start=None, end=None):
@@ -175,7 +182,7 @@ def create_baseline_events(events):
                 is_match_tmp[i, ...] = False
                 good_locs = np.where(is_match_tmp & (~full_match_accum))
                 if len(good_locs[0]):
-                    choice_position = np.random.choice(len(good_locs[0]))
+                    choice_position = np.argmin(np.mod(good_locs[0]-i,len(good_locs[0])))
                     choice_inds = (good_locs[0][choice_position], good_locs[1][choice_position])
                     full_match_accum[choice_inds] = True
         matching_epochs = epochs[full_match_accum]
