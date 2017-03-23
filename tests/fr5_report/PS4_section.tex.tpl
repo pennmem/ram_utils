@@ -3,7 +3,7 @@
 
 \begin{minipage}{0.5\textwidth}
 \begin{itemize}
-  \item \textbf{Number of sessions:} {{NUMBER_OF_SESSIONS}}
+  \item \textbf{Number of sessions:} {{NUMBER_OF_PS4_SESSIONS}}
   \item \textbf{Number of electrodes:} {{NUMBER_OF_ELECTRODES}}
 \end{itemize}
 \end{minipage}
@@ -45,8 +45,6 @@
 \end{itemize}
 {% endblock %}
 
-{% block FR5_SECTION %}
-{% endblock %}
 
 
 

@@ -5,7 +5,7 @@
 \begin{minipage}[htbp]{170pt}
 In the free recall task, participants are presented with a list of words, one after the other, and later asked to recall as many words as possible in any order.
 \begin{itemize}
-    \item\textbf{Number of sessions: }${{NUMBER_OF_SESSIONS}}$
+    \item\textbf{Number of sessions: }${{NUMBER_OF_FR5_SESSIONS}}$
     \item\textbf{Number of electrodes: }${{NUMBER_OF_ELECTRODES}}$
     \item\textbf{FR1 Area Under Curve: }${{AUC}}$\%
     \item\textbf{FR1 Permutation test $p$-value:} ${{PERM-P-VALUE}}$
@@ -33,18 +33,19 @@ percentage devation from the (subject) mean, separated by tercile
 of the classifier encoding efficiency estimate for each encoded word.}
 \end{figure}
 
-$\bullet$ Area Under Curve = ${{FR3-AUC}}$\%
+$\bullet$ Area Under Curve = ${{FR5-AUC}}$\%
 
-$\bullet$ Permutation test $p$-value ${{FR3-PERM-P-VALUE}}$
+$\bullet$ Permutation test $p$-value ${{FR5-PERM-P-VALUE}}$
 
 
 {% for session in FR5_SESSION_SUMMARIES %}
 {% if session != -1 %}
+{% set SESSION_SUMMARY = FR5_SESSION_SUMMARIES[session] %}
 
 \clearpage
 
 \begin{center}
-\textbf{\Large {{FR5_SESSION_SUMMARIES[session].STIMTAG}} ({{FR5_SESSION_SUMMARIES[session].REGION}} ), 200 Hz, Session: {{session}} }
+\textbf{\Large {{SESSION_SUMMARY.STIMTAG}} ({{SESSION_SUMMARIES.REGION}} ), 200 Hz, Session: {{session}} }
 \end{center}
 
 \begin{table}[!h]
@@ -52,7 +53,7 @@ $\bullet$ Permutation test $p$-value ${{FR3-PERM-P-VALUE}}$
 \begin{tabular}{c|c|c|c}
 \multicolumn{4}{c}{\textbf{Free Recall}} \\
 \hline
-${{N_WORDS[session]}}$ words & ${{N_CORRECT_WORDS[session]}}$ correct (${{PC_CORRECT_WORDS[session}}$\%) &${{N_PLI[session]$ PLI (${{PC_PLI[session]}}$\%) &${{N_ELI[session]}}$ ELI (${{PC_ELI[session]}}$\%) \\ \hline
+${{SESSION_SUMMARY.N_WORDS}}$ words & ${{SESSION_SUMMARY.N_CORRECT_WORDS}}$ correct (${{SESSION_SUMMARY.PC_CORRECT_WORDS[session}}$\%) &${{SESSION_SUMMARY.N_PLI$ PLI (${{SESSION_SUMMARY.PC_PLI}}$\%) &${{SESSION_SUMMARY.N_ELI}}$ ELI (${{SESSION_SUMMARY.PC_ELI}}$\%) \\ \hline
 \end{tabular}
 \caption{An intrusion was a word that was vocalized during the retrieval period that was not studied on the most recent list. Intrusions were either words from a previous list (\textbf{PLI}: prior-list intrusions) or words that were not studied at all (\textbf{ELI}: extra-list intrusions).}
 \end{table}
@@ -62,7 +63,7 @@ ${{N_WORDS[session]}}$ words & ${{N_CORRECT_WORDS[session]}}$ correct (${{PC_COR
 \begin{tabular}{c|c|c}
 \multicolumn{3}{c}{\textbf{Math distractor}} \\
 \hline
-${{N_MATH[session]}}$ math problems & ${{N_CORRECT_MATH[session]}}$ correct (${{PC_CORRECT_MATH[session]}}$\%) & ${{MATH_PER_LIST[session]}}$ problems per list  \\ \hline
+${{SESSION_SUMMARY.N_MATH}}$ math problems & ${{SESSION_SUMMARY.N_CORRECT_MATH}}$ correct (${{SESSION_SUMMARY.PC_CORRECT_MATH}}$\%) & ${{SESSION_SUMMARY.MATH_PER_LIST}}$ problems per list  \\ \hline
 \end{tabular}
 \caption{After each list, the patient was given 20 seconds to perform as many arithmetic problems as possible, which served as a distractor before the beginning of recall.}
 \end{table}
@@ -71,7 +72,7 @@ ${{N_MATH[session]}}$ math problems & ${{N_CORRECT_MATH[session]}}$ correct (${{
 \centering
 \textbf{Probability of Recall}
 
-\subfigure{\includegraphics[scale=0.4]{{{PROB_RECALL_PLOT_FILE[session]}}}}
+\subfigure{\includegraphics[scale=0.4]{{{SESSION_SUMMARY.PROB_RECALL_PLOT_FILE}}}}
 \caption{\textbf{Free recall:}
 (a) Overall probability of recall as a function of serial position.
 (b) Probability of first recall as a function of serial position.}
@@ -82,9 +83,10 @@ ${{N_MATH[session]}}$ math problems & ${{N_CORRECT_MATH[session]}}$ correct (${{
 \begin{tabular}{c|c|c|c}
 \multicolumn{4}{c}{\textbf{Stim vs Non-Stim Recalls}} \\
 \hline
-${{N_CORRECT_STIM[session]}}/{{N_TOTAL_STIM[session]}}$ (${{PC_FROM_STIM[session]}}$\%) from stim lists & ${{N_CORRECT_NONSTIM[session]}}/{{N_TOTAL_NONSTIM[session]}}$ (${{PC_FROM_NONSTIM[session]}}$\%) from non-stim lists & $\chi^2(1)={{CHISQR[session]}}$ & $p={{PVALUE[session]}}$ \\
+${{SESSION_SUMMARY.N_CORRECT_STIM}}/{{SESSION_SUMMARY.N_TOTAL_STIM}}$ (${{SESSION_SUMMARY.PC_FROM_STIM}}$\%) from stim lists
+ & ${{SESSION_SUMMARY.N_CORRECT_NONSTIM}}/{{SESSION_SUMMARY.N_TOTAL_NONSTIM}}$ (${{SESSION_SUMMARY.PC_FROM_NONSTIM}}$\%) from non-stim lists & $\chi^2(1)={{SESSION_SUMMARY.CHISQR}}$ & $p={{SESSION_SUMMARY.PVALUE}}$ \\
 \hline
- {{ITEMLEVEL_COMPARISON[session]}}
+ {{SESSION_SUMMARY.ITEMLEVEL_COMPARISON}}
 \end{tabular}
 \end{table}
 
@@ -93,7 +95,8 @@ ${{N_CORRECT_STIM[session]}}/{{N_TOTAL_STIM[session]}}$ (${{PC_FROM_STIM[session
 \begin{tabular}{c|c}
 \multicolumn{2}{c}{\textbf{Stim vs Non-Stim Intrusions}} \\
 \hline
-${{N_STIM_INTR[session]}}/{{N_TOTAL_STIM[session]}}$ (${{PC_FROM_STIM_INTR[session]}}$\%) from stim lists & ${{N_NONSTIM_INTR[session]}}/{{N_TOTAL_NONSTIM[session]}}$ (${{PC_FROM_NONSTIM_INTR[session]}}$\%) from non-stim lists \\
+${{SESSION_SUMMARY.N_STIM_INTR}}/{{N_TOTAL_STIM}}$ (${{SESSION_SUMMARY.PC_FROM_STIM_INTR}}$\%) from stim lists &
+${{SESSION_SUMMARY.N_NONSTIM_INTR}}/{{SESSION_SUMMARY.N_TOTAL_NONSTIM}}$ (${{SESSION_SUMMARY.PC_FROM_NONSTIM_INTR}}$\%) from non-stim lists \\
 \hline
 \end{tabular}
 \end{table}
@@ -105,20 +108,20 @@ ${{N_STIM_INTR[session]}}/{{N_TOTAL_STIM[session]}}$ (${{PC_FROM_STIM_INTR[sessi
 
 \begin{figure}[!h]
 \centering
-\subfigure{\includegraphics[height=0.25\textheight]{{{STIM_AND_RECALL_PLOT_FILE[session]}}}}
+\subfigure{\includegraphics[height=0.25\textheight]{{{SESSION_SUMMARY.STIM_AND_RECALL_PLOT_FILE}}}}
 \caption*{\textbf{Stim and recall:} Number of stims and recalled items per list. Red circles represent the number of recalled items from stim lists. Blue circles represent the number of recalled items from non-stim lists. Bars represent the number of stims per list.}
 \textbf{Probability of Stimulation}
 
-\subfigure{\includegraphics[scale=0.3]{{{PROB_STIM_PLOT_FILE[session]}} !}}
+\subfigure{\includegraphics[scale=0.3]{{{SESSION_SUMMARY.PROB_STIM_PLOT_FILE}} !}}
 \caption*{Probability of stimulation as a function of serial position.}
 \end{figure}
 
-{% if STIM_VS_NON_STIM_HALVES_PLOT_FILE[session] %}
+{% if SESSION_SUMMARY.STIM_VS_NON_STIM_HALVES_PLOT_FILE %}
 % \vspace{1pc}
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[height=0.25\textheight]{{{STIM_VS_NON_STIM_HALVES_PLOT_FILE[session]}}}
+\includegraphics[height=0.25\textheight]{{{SESSION_SUMMARY.STIM_VS_NON_STIM_HALVES_PLOT_FILE}}}
 \caption*{\textbf{(a)} Change in classifier output from the stimulated item (0-1366 ms) to the post-stimulated item (0-1366 ms) plotted for all items and for low-classifier output items. The control group comprises all items from non-stim lists.
 \textbf{(b)} Change in recall performance for stimulated items contingent upon whether the stimulated item was presented during a low classifier state or a high classifier state (0-1366 ms).
 \textbf{(c)} Change in recall performance for post-stimulated items contingent upon whether the stimulated item was presented during a low classifier state or a high classifier state (0-1366 ms).}
