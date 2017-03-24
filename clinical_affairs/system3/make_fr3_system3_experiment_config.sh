@@ -1,20 +1,21 @@
 #!/bin/bash
 
-subject=R1247P_1
+subject=R1111M
 experiment=FR3
 workspace=/scratch/pwanda/system3/$exeperiment
-electrode_config_file=/scratch/electrode_configs/R1247P_FR3.bin
-anode=RD7
-anode_num=95
-cathode=RE1
-cathode_num=97
-pulse_frequency=100
-target_amplitude=1000
+#workspace=/scratch/leond/FR3_biomarkers
+electrode_config_file=${workspace}/electrode_config/contactsR1111M.csv
+anode=LPOG10
+anode_num=10
+cathode=LPOG11
+cathode_num=11
+pulse_frequency=200
+target_amplitude=1.0
 
 #cd ../../tests/fr3_biomarker/system3
 cd ../../
 
-python tests/fr3_biomarker_json/system3/fr3_util_system_3.py \
+python tests/fr3_biomarker/system3/fr3_util_system_3.py \
 --workspace-dir=$workspace \
 --experiment=$experiment \
 --electrode-config-file=$electrode_config_file \

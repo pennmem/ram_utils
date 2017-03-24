@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # NOTE:
-# THIS IS THE CONFIG FILE GENERATOR FOR PS4 AND FOR FR5.
+# THIS IS THE CONFIG FILE GENERATOR FOR PS4_FR5 AND FOR FR5.
 # PS4 HAS 2 STIM PAIRS, WHILE FR5 HAS ONLY 1 STIM PAIR.
 # BY DEFAULT, FR5 CONFIG USES anode1 IF BOTH anode1 AND anode2 ARE PRESENT,
 # AND SIMILARLY FOR CATHODES.
@@ -8,20 +8,23 @@
 # PLEASE SET anode1 OR cathode1 TO ''
 # THANK YOU.
 
-subject=R1200T
-experiment=PS4
-anode1=LB6
-cathode1=LB7
-anode2=
-cathode2=LB8
+subject=R1111M
+experiment=FR5
+anode1=LPOG10
+cathode1=LPOG11
+anode2=LPOG11
+cathode2=LPOG12
 target_amplitude=1.0
+min_amplitude=0.25
+max_amplitude=2.0
+
+
+
 config_dir='/scratch/pwanda/FR5_biomarkers/electrode_configs'
 
 workspace_dir='/scratch/pwanda/FR5_biomarkers/'
 
 pulse_frequency=200
-min_amplitude=0.25
-max_amplitude=2.0
 
 
 stim_pair_1=${anode1}-${cathode1}

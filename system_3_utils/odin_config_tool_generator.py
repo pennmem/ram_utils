@@ -45,7 +45,7 @@ else:
 print contacts_json
 
 
-(anodes,cathodes) = zip(*[pair.split('-') for pair in args.stim_channels])
+(anodes,cathodes) = zip(*[pair.split('-') for pair in args.stim_channels]) if args.stim_channels else ([],[])
 # generating .csv file for Odin Config Tool based on contacts.json
 if args.contacts_json is not None:
 

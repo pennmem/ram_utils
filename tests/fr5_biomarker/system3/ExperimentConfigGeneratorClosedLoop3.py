@@ -85,11 +85,12 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
         experiment = self.pipeline.args.experiment if self.pipeline.args.experiment else 'FR5'
         electrode_config_file = self.pipeline.args.electrode_config_file
         config_name = self.get_passed_object('config_name')
-        subject = self.pipeline.subject
+        subject = self.pipeline.subject.split('_')[0]
         stim_frequency = self.pipeline.args.pulse_frequency
         stim_amplitude = self.pipeline.args.target_amplitude
         bipolar_pairs_path = self.get_passed_object('bipolar_pairs_path')
-        classifier_path = self.get_passed_object('classifier_path')
+        # classifier_path = self.get_passed_object('classifier_path')
+        classifier_path = self.get_passed_object('full_classifier_path')
         stim_chan_label = self.get_passed_object('stim_chan_label')
         excluded_pairs_path = self.get_passed_object('excluded_pairs_path')
 

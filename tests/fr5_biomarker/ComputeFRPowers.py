@@ -65,6 +65,7 @@ class ComputeFRPowers(RamTask):
         self.pass_object('samplerate', self.samplerate)
 
     def run(self):
+        self.pipeline.subject = self.pipeline.subject.split('_')[0]
         subject = self.pipeline.subject
 
 

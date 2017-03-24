@@ -47,6 +47,7 @@ class FREventPreparation(RamTask):
 
     def run(self):
         subject = self.pipeline.subject
+        print 'subject=',subject
         tmp = subject.split('_')
         subj_code = tmp[0]
         montage = 0 if len(tmp)==1 else int(tmp[1])
