@@ -43,7 +43,6 @@ class ComputeTTest(ReportRamTask):
             nonrecalled_sess_pow_mat = sess_pow_mat[~sess_recalls,:]
 
             t,p = ttest_ind(recalled_sess_pow_mat, nonrecalled_sess_pow_mat, axis=0)
-            print 'ttest.shape:',t.shape
             self.ttest[sess] = (t,p)
 
         recalls = np.array(events.recalled, dtype=np.bool)
