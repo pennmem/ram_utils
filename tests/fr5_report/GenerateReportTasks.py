@@ -217,7 +217,7 @@ class GenerateTex(ReportRamTask):
             template_dict[name.capitalize()] = self.get_passed_object(name)
 
         jinja_env = jinja2.Environment()
-        template = jinja_env.get_template('session_base.tex.tpl')
+        template = jinja_env.get_template('ps4_fr5_report_base.tex.tpl')
         tex_output = template.render(
             SUBJECT= subject,
             EXPERIMENT=experiment,

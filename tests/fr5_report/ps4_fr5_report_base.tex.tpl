@@ -13,20 +13,16 @@
 \addtolength{\topmargin}{-.75in}
 \addtolength{\textheight}{1.75in}
 
-\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#! 1}}
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{ {{EXPERIMENT}} report v 1.0}
-\chead{Subject: \textbf{ {{SUBJECT}} !}}
-\rhead{Date created: {DATE}}
+\lhead{ <EXPERIMENT> report v 1.0}
+\chead{Subject: \textbf{ <SUBJECT> }}
+\rhead{Date created: <DATE>}
 \begin{document}
 
-{% if HAS_PS4 %}
-{% include PS4_section.tex.tpl %}
-{% end %}
+<PS4_SECTION>
+<FR5_SECTION>
 
-{% if HAS_FR5 %}
-{% include FR5_section.tex.tpl %}
-{% end %}
 \end{document}

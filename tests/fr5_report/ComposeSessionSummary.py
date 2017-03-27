@@ -1,189 +1,304 @@
-from ReportUtils import *
 import numpy as np
-import pandas as pd
-from scipy.stats import norm,chisquare
+from RamPipeline import *
+from SessionSummary import SessionSummary
 
-class SessionSummary(object):
-    pass
+import numpy as np
+import time
 
+from statsmodels.stats.proportion import proportions_chisquare
+
+
+
+from ReportUtils import ReportRamTask
+import operator
+
+operator.div = np.true_divide
 
 class ComposeSessionSummary(ReportRamTask):
-
-    THRESH = 0.5
-
-    @staticmethod
-    def spc(events):
-        return np.array(
-            [np.mean((events[events.serialpos == p].recalled==True).astype(np.int))
-             for p in sorted(np.unique(events.serialpos))]
-        )
-
-    @staticmethod
-    def pfr(events, stim=True):
-        first_recalls = np.zeros(np.unique(events.serialpos[events.serialpos>=0]).shape,dtype=np.float)
-        words = events[events.type=='WORD']
-        rec_words = events[events.type=='REC_WORD']
-        sessions = np.unique(events.session)
-        for sess in sessions:
-            lists = np.unique(events[events.session==sess].list)
-            for lst in lists:
-                sess_list_recalls=np.sort(rec_words[(rec_words.session==sess) & (rec_words.list==lst)],order='mstime')
-                if len(sess_list_recalls) == 0:
-                    continue
-                else:
-                    name=sess_list_recalls[0].item_name
-                    recalled_position = words[(words.session==sess) & (words.list==lst) & (words.item_name==name)].serialpos
-                    first_recalls[recalled_position]+=1.0
-        return first_recalls/first_recalls.sum()
-
-
-
-    @staticmethod
-    def make_recog_table(targets, lures):
-        def n_hits(targets, stim):
-            return targets[targets.stim_list == stim].recognized.sum()
-
-        def n_fa(lures, stim):
-            return (lures[lures.stim_list == stim].rejected == False).sum()
-
-        def d_prime(targets, lures, stim):
-            return norm.ppf(n_hits(targets, stim) / len(targets[targets.stim_list == stim])) - norm.ppf(
-                n_fa(lures, stim) / len(lures[lures.stim_list == stim]))
-
-        statistics = np.array([n_hits(targets, stim=True), n_hits(targets, stim=False),
-                               n_fa(lures, stim=True), n_fa(lures, stim=False),
-                               d_prime(targets, lures, stim=True), d_prime(targets, lures, stim=False)]).reshape(2, 3)
-        return pd.DataFrame(data=statistics, index=['hits', 'false alarms', 'd_prime'],
-                            columns=['Stim List', 'Non-Stim List'])
-
-
-    @staticmethod
-    def make_recall_table(events, encoding_biomarkers, retrieval_biomarkers, thresh):
-        def n_recalls(events):
-            return events.recalled.astype(np.float).sum()
-        e_stim = events.is_stim
-        r_stim = events.rec_stim
-        e_low = encoding_biomarkers<thresh
-        r_low = retrieval_biomarkers < thresh
-        stim_conditions,nostim_conditions = [ [(a & b),(a & ~b), ((~a) & (b)), ~(a | b)]
-                                              for (a,b) in [(e_stim,r_stim),(e_low,r_low)]]
-        recall_array = np.array([[n_recalls(events[mask]) for mask in stim_conditions],
-                                 [n_recalls(events[mask]) for mask in nostim_conditions]])
-        chi,p = chisquare(recall_array,axis=0)
-        table = np.concatenate((recall_array,chi,p),axis=0)
-        return pd.DataFrame(data=table,index=['Stim items','low items',r'\CHI^2','p'],columns=['Both','Encoding only','Retrieval only','Neither'])
-
-    @staticmethod
-    def is_stim_item(events):
-        """
-        Index words that were stimulated at encoding
-        :param events:
-        :return:
-        """
-        return np.array([(event.type=='WORD') & (events[i+1].type=='STIM_ON') or (events[i+1].type=='WORD_OFF' and (events[i+2].type=='STIM_ON' or (events[i+2].type=='DISTRACT_START' and events[i+3].type=='STIM_ON')))
-                for (i,event) in enumerate(events[:-3])])
-
-    def is_post_stim_item(self,events):
-        stim_words = list(events[self.is_stim_item(events)])
-        all_words = events[events.type=='WORD']
-        post_stim_words= [all_words[i-1] in stim_words for i,_ in enumerate(all_words)]
-        return np.array([event in post_stim_words for event in events])
-
-    @staticmethod
-    def is_rec_stim_item(events):
-            return np.array([ (event.type=='REC_WORD') & ((events[i-1].type=='STIM_ON') | events[i-2].type=='STIM_ON') for i,event in enumerate(events)])
-
-    def is_post_rec_stim_item(self,events):
-        stim_words = list(events(self.is_rec_stim_item(events)))
-        rec_words = events[events.type=='REC_WORD']
-        post_stim_words = [rec_words[i-1] in stim_words for i,_ in enumerate(rec_words)]
-        return np.array([event in post_stim_words for event in events])
-
-
-
-    def make_performance_table(self,events):
-        stim_list_events = events[events.stim_list==True]
-
-        encoding_stim_events = stim_list_events[self.is_stim_item(stim_list_events)]
-        post_encoding_stim_events = stim_list_events[self.is_post_stim_item(stim_list_events)]
-
-        retrieval_stim_events = stim_list_events[self.is_rec_stim_item(stim_list_events)]
-        post_retrieval_stim_events = stim_list_events[self.is_post_rec_stim_item(stim_list_events)]
-
-        nostim_list_events = events[events.stim_list==False]
-
-        baseline = np.nanmean(nostim_list_events.recalled)
-        recall_change = [(x.recalled.nanmean()-baseline)/baseline for x in encoding_stim_events,post_encoding_stim_events,
-                         retrieval_stim_events,post_retrieval_stim_events]
-
-        return pd.DataFrame(data=np.array(recall_change),index=['% recall change'],
-                            columns=['Encoding stim','Encoding post-stim','Retrieval stim','Retrieval post-stim'])
-
-    @staticmethod
-    def make_stim_recall_table(events):
-        n_recalls_by_list = [events[events.list==lst].recalled.sum() for lst in np.unique(events.list)]
-        n_stims_by_list = [(events[events.list==lst].type=='STIM_ON').sum() for lst in np.unique(events.list)]
-        is_stim_list = [events[events.list==lst][0].stim_list for lst in np.unique(events.list)]
-        table=np.concatenate([n_recalls_by_list,n_stims_by_list,is_stim_list])
-        return pd.DataFrame(data=table,index=['n_recalls','n_stims','is_stim_list'],columns=np.unique(events.list))
-
-
-
-
-
-
+    def __init__(self, params, mark_as_completed=True):
+        super(ComposeSessionSummary, self).__init__(mark_as_completed)
+        self.params = params
 
     def run(self):
-        all_events =self.get_passed_object('all_events')
-        sessions = np.unique(all_events.session)
-        encoding_events=self.get_passed_object('encoding_events')
-        retrieval_events= self.get_passed_object('retrieval_events')
-        session_summaries = {}
-        encoding_probs  = self.get_passed_object('encoding_probs')
-        retrieval_probs = self.get_passed_object('retrieval_probs')
+        subject = self.pipeline.subject
+        task = self.pipeline.task
 
-        recog_events = self.get_passed_object('recog_events')
+        #events = self.get_passed_object(task + '_events')
+        math_events = self.get_passed_object(task + '_math_events')
+        intr_events = self.get_passed_object(task + '_intr_events')
+        rec_events = self.get_passed_object(task + '_rec_events')
+        all_events = self.get_passed_object(task + '_all_events')
+        monopolar_channels = self.get_passed_object('monopolar_channels')
 
-        for session in sessions:
+        stim_params_to_sess = self.get_passed_object('stim_params_to_sess')
+        fr_stim_table = self.get_passed_object('fr_stim_table')
+        fr_stim_table['prev_prob'] = fr_stim_table['prob'].shift(1)
+        fr_stim_table['prob_diff'] = fr_stim_table['prob'] - fr_stim_table['prev_prob']
+
+        sessions = sorted(fr_stim_table.session.unique())
+
+        self.pass_object('NUMBER_OF_SESSIONS', len(sessions))
+        self.pass_object('NUMBER_OF_ELECTRODES', len(monopolar_channels))
+
+        session_data = []
+        irt_within_cat = []
+        irt_between_cat = []
+
+        fr_stim_table_by_session = fr_stim_table.groupby(['session'])
+        for session,fr_stim_session_table in fr_stim_table_by_session:
+            session_all_events = all_events[all_events.session == session]
+            first_time_stamp = session_all_events[session_all_events.type=='INSTRUCT_START'][0].mstime
+            timestamps = session_all_events.mstime
+            last_time_stamp = np.max(timestamps)
+            session_length = '%.2f' % ((last_time_stamp - first_time_stamp) / 60000.0)
+            session_date = time.strftime('%d-%b-%Y', time.localtime(last_time_stamp/1000))
+            n_lists = len(fr_stim_session_table.list.unique())
+            pc_correct_words = 100.0 * fr_stim_session_table.recalled.mean()
+            amplitude = fr_stim_session_table['Amplitude'].values[-1]
+
+            session_data.append([session, session_date, session_length, n_lists, '$%.2f$\\%%' % pc_correct_words, amplitude])
+
+        self.pass_object('SESSION_DATA', session_data)
+
+        session_summary_array = []
+
+        fr_stim_table_by_stim_param = fr_stim_table.groupby(['stimAnodeTag','stimCathodeTag','Pulse_Frequency'])
+        for stim_param,fr_stim_session_table in fr_stim_table_by_stim_param:
+            print 'Stim param: ',stim_param
             session_summary = SessionSummary()
-            events = all_events[all_events.session==session]
-            words = events[events.type=='WORD']
-            stim_words = words[words.stim_list==True]
-            nostim_words = words[words.stim_list==False]
-            sess_encode_probs = encoding_probs[words.session==session]
-            sess_retr_probs = retrieval_probs[retrieval_events.session==session]
-            lures= events[events.type=='RECOG_LURE']
+
+            session_summary.sessions = sorted(fr_stim_session_table.session.unique())
+            session_summary.stimtag = fr_stim_session_table.stimAnodeTag.values[0] + '-' + fr_stim_session_table.stimCathodeTag.values[0]
+            session_summary.region_of_interest = fr_stim_session_table.Region.values[0]
+            session_summary.frequency = fr_stim_session_table.Pulse_Frequency.values[0]
+            session_summary.n_words = len(fr_stim_session_table)
+            session_summary.n_correct_words = fr_stim_session_table.recalled.sum()
+            session_summary.pc_correct_words = 100*session_summary.n_correct_words / float(session_summary.n_words)
+
+            sess_sel = np.vectorize(lambda sess: sess in session_summary.sessions)
+            sess_rec_events = rec_events[sess_sel(rec_events.session)]
+            n_sess_rec_events = len(sess_rec_events)
+            sess_intr_events = intr_events[sess_sel(intr_events.session)]
+            sess_math_events = math_events[sess_sel(math_events.session)]
+
+            fr_stim_table_by_session_list = fr_stim_session_table.groupby(['session','list'])
+            fr_stim_stim_item_table_by_session_list = fr_stim_session_table.loc[fr_stim_session_table.is_stim_item==True].groupby(['session','list'])
+            fr_stim_nostim_item_table_by_session_list = fr_stim_session_table.loc[fr_stim_session_table.is_stim_item==False].groupby(['session','list'])
+            session_summary.n_lists = len(fr_stim_table_by_session_list)
+
+            session_summary.n_pli = np.sum(sess_intr_events.intrusion > 0)
+            session_summary.pc_pli = 100*session_summary.n_pli / float(n_sess_rec_events)
+            session_summary.n_eli = np.sum(sess_intr_events.intrusion == -1)
+            session_summary.pc_eli = 100*session_summary.n_eli / float(n_sess_rec_events)
+
+            session_summary.n_math = len(sess_math_events)
+            session_summary.n_correct_math = np.sum(sess_math_events.iscorrect)
+            session_summary.pc_correct_math = 100*session_summary.n_correct_math / float(session_summary.n_math)
+            session_summary.math_per_list = session_summary.n_math / float(session_summary.n_lists)
+
+            fr_stim_table_by_pos = fr_stim_session_table.groupby('serialpos')
+            session_summary.prob_recall = np.empty(len(fr_stim_table_by_pos), dtype=float)
+            session_summary.prob_stim_recall = np.empty(len(fr_stim_table_by_pos), dtype=float)
+            session_summary.prob_nostim_recall = np.empty(len(fr_stim_table_by_pos), dtype=float)
+            session_summary.prob_stim = np.empty(len(fr_stim_table_by_pos), dtype=float)
+            for i, (pos,fr_stim_pos_table) in enumerate(fr_stim_table_by_pos):
+                session_summary.prob_recall[i] = fr_stim_pos_table.recalled.sum() / float(len(fr_stim_pos_table))
+                fr_stim_item_pos_table =fr_stim_pos_table.loc[fr_stim_pos_table.is_stim_item==True]
+                try:
+                    session_summary.prob_stim_recall[i]=fr_stim_item_pos_table.recalled.sum()/float(len(fr_stim_item_pos_table))
+                except ZeroDivisionError:
+                    session_summary.prob_stim_recall[i] = np.nan
+                session_summary.prob_stim[i] = (fr_stim_pos_table.is_stim_item.astype(np.float).sum()
+                                                /fr_stim_pos_table.is_stim_list.astype(np.float).sum())
+                print '# stim items: ',fr_stim_pos_table.is_stim_item.astype(np.float).sum()
+                print '# stim list items: ', fr_stim_pos_table.is_stim_list.astype(np.float).sum()
+                fr_nostim_item_pos_table = fr_stim_pos_table.loc[fr_stim_pos_table.is_stim_item==False]
+                session_summary.prob_nostim_recall[i] = fr_nostim_item_pos_table.recalled.sum()/float(len(fr_nostim_item_pos_table))
+            print 'session_summary.prob_stim:',session_summary.prob_stim
 
 
-            session_summary.stim_spc ,session_summary.nostim_spc = [self.spc(wrds) for wrds in (stim_words,nostim_words)]
+            session_summary.prob_first_recall = np.zeros(len(fr_stim_table_by_pos), dtype=float)
+            session_summary.prob_first_stim_recall = np.zeros(len(fr_stim_table_by_pos), dtype=float)
+            session_summary.prob_first_nostim_recall = np.zeros(len(fr_stim_table_by_pos), dtype=float)
+            first_recall_counter = np.zeros(len(fr_stim_table_by_pos), dtype=int)
+            session_summary.list_number = np.empty(len(fr_stim_table_by_session_list), dtype=int)
+            session_summary.n_recalls_per_list = np.empty(len(fr_stim_table_by_session_list), dtype=int)
+            session_summary.n_stims_per_list = np.zeros(len(fr_stim_table_by_session_list), dtype=int)
+            session_summary.is_stim_list = np.zeros(len(fr_stim_table_by_session_list), dtype=np.bool)
 
-            session_summary.stim_pfc, session_summary.nostim_pfc = [self.pfr(events, stim=True), self.pfr(events, stim=False)]
+            session_irt_within_cat = []
+            session_irt_between_cat = []
 
-
-            session_summary.recall_table = self.make_recall_table(events,sess_encode_probs,sess_retr_probs,self.THRESH)
-
-            session_summary.recog_table = self.make_recog_table(recog_events[recog_events.session==session],lures)
-
-            session_summary.stim_rate_tables = {}
-
-            for (name,group) in [('Encoding',encoding_events), ('Retrieval',retrieval_events),('All',events)]:
-                session_summary.stim_rate_tables[name] = self.make_stim_recall_table(group[group.session==session])
-
-            session_summaries[session]=session_summary
-
-
-
-        self.pass_object('session_summaries',session_summaries)
+            for list_idx, (sess_list,fr_stim_sess_list_table) in enumerate(fr_stim_table_by_session_list):
+                session = sess_list[0]
+                lst = sess_list[1]
 
 
+                list_rec_events = rec_events[(rec_events.session==session) & (rec_events['list']==lst) & (rec_events['intrusion']==0)]
+                if list_rec_events.size > 0:
+                    item_nums = fr_stim_sess_list_table.itemno.values == list_rec_events[0].item_num
+                    tmp = np.where(item_nums)[0]
+                    if tmp.size > 0:
+                        first_recall_idx = tmp[0]
+                        if fr_stim_sess_list_table.iloc[tmp[0]].is_stim_item:
+                            session_summary.prob_first_stim_recall[first_recall_idx]+=1
+                        else:
+                            session_summary.prob_first_nostim_recall[first_recall_idx]+=1
+                        session_summary.prob_first_recall[first_recall_idx] += 1
+                        first_recall_counter[first_recall_idx] += 1
 
 
+                if 'cat' in task:
+                    # list_rec_events = session_rec_events[session_rec_events.list == lst]
+                    for i in xrange(1, len(list_rec_events)):
+                        cur_ev = list_rec_events[i]
+                        prev_ev = list_rec_events[i - 1]
+                        # if (cur_ev.intrusion == 0) and (prev_ev.intrusion == 0):
+                        dt = cur_ev.mstime - prev_ev.mstime
+                        if cur_ev.category == prev_ev.category:
+                            session_irt_within_cat.append(dt)
+                        else:
+                            session_irt_between_cat.append(dt)
+
+                session_summary.list_number[list_idx] = lst
+                session_summary.n_recalls_per_list[list_idx] = fr_stim_sess_list_table.recalled.sum()
+                session_summary.n_stims_per_list[list_idx] = fr_stim_sess_list_table.is_stim_item.sum()
+                session_summary.is_stim_list[list_idx] = fr_stim_sess_list_table.is_stim_list.any()
+
+            session_summary.irt_within_cat = sum(session_irt_within_cat) / len(
+                session_irt_within_cat) if session_irt_within_cat else 0.0
+            session_summary.irt_between_cat = sum(session_irt_between_cat) / len(
+                session_irt_between_cat) if session_irt_between_cat else 0.0
+
+            irt_within_cat += session_irt_within_cat
+            irt_between_cat += session_irt_between_cat
+
+            session_summary.prob_first_recall /= float(len(fr_stim_table_by_session_list))
+            session_summary.prob_first_stim_recall /= float(len(fr_stim_stim_item_table_by_session_list))
+            session_summary.prob_first_nostim_recall /= float(len(fr_stim_nostim_item_table_by_session_list))
+            fr_stim_stim_list_table = fr_stim_session_table[fr_stim_session_table.is_stim_list]
+            fr_stim_non_stim_list_table = fr_stim_session_table[~fr_stim_session_table.is_stim_list & (fr_stim_session_table['list']>=4)]
 
 
+            session_summary.n_correct_stim = fr_stim_stim_list_table.recalled.sum()
+            session_summary.n_total_stim = len(fr_stim_stim_list_table)
+            session_summary.pc_from_stim = 100 * session_summary.n_correct_stim / float(session_summary.n_total_stim)
 
+            session_summary.n_correct_nonstim = fr_stim_non_stim_list_table.recalled.sum()
+            session_summary.n_total_nonstim = len(fr_stim_non_stim_list_table)
+            session_summary.pc_from_nonstim = 100 * session_summary.n_correct_nonstim / float(session_summary.n_total_nonstim)
 
+            session_summary.chisqr, session_summary.pvalue, _ = proportions_chisquare([session_summary.n_correct_stim, session_summary.n_correct_nonstim], [session_summary.n_total_stim, session_summary.n_total_nonstim])
 
+            stim_lists = fr_stim_stim_list_table['list'].unique()
+            non_stim_lists = fr_stim_non_stim_list_table['list'].unique()
 
+            session_summary.n_stim_intr = 0
+            session_summary.n_nonstim_intr = 0
+            for ev in sess_intr_events:
+                if ev.intrusion in stim_lists:
+                    session_summary.n_stim_intr += 1
+                if ev.intrusion in non_stim_lists:
+                    session_summary.n_nonstim_intr += 1
+            session_summary.pc_from_stim_intr = 100*session_summary.n_stim_intr / float(session_summary.n_total_stim)
+            session_summary.pc_from_nonstim_intr = 100*session_summary.n_nonstim_intr / float(session_summary.n_total_nonstim)
 
+            fr_stim_stim_list_stim_item_table = fr_stim_stim_list_table[fr_stim_stim_list_table['is_stim_item']]
+            fr_stim_stim_list_stim_item_low_table = fr_stim_stim_list_stim_item_table[fr_stim_stim_list_stim_item_table['prev_prob']<fr_stim_stim_list_stim_item_table['thresh']]
+            fr_stim_stim_list_stim_item_high_table = fr_stim_stim_list_stim_item_table[fr_stim_stim_list_stim_item_table['prev_prob']>fr_stim_stim_list_stim_item_table['thresh']]
 
+            fr_stim_stim_list_post_stim_item_table = fr_stim_stim_list_table[fr_stim_stim_list_table['is_post_stim_item']]
+            fr_stim_stim_list_post_stim_item_low_table = fr_stim_stim_list_post_stim_item_table[fr_stim_stim_list_post_stim_item_table['prev_prob']<fr_stim_stim_list_post_stim_item_table['thresh']]
+            fr_stim_stim_list_post_stim_item_high_table = fr_stim_stim_list_post_stim_item_table[fr_stim_stim_list_post_stim_item_table['prev_prob']>fr_stim_stim_list_post_stim_item_table['thresh']]
+
+            session_summary.mean_prob_diff_all_stim_item = fr_stim_stim_list_stim_item_table['prob_diff'].mean()
+            session_summary.sem_prob_diff_all_stim_item = fr_stim_stim_list_stim_item_table['prob_diff'].sem()
+            session_summary.mean_prob_diff_low_stim_item = fr_stim_stim_list_stim_item_low_table['prob_diff'].mean()
+            session_summary.sem_prob_diff_low_stim_item = fr_stim_stim_list_stim_item_low_table['prob_diff'].sem()
+
+            session_summary.mean_prob_diff_all_post_stim_item = fr_stim_stim_list_post_stim_item_table['prob_diff'].mean()
+            session_summary.sem_prob_diff_all_post_stim_item = fr_stim_stim_list_post_stim_item_table['prob_diff'].sem()
+            session_summary.mean_prob_diff_low_post_stim_item = fr_stim_stim_list_post_stim_item_low_table['prob_diff'].mean()
+            session_summary.sem_prob_diff_low_post_stim_item = fr_stim_stim_list_post_stim_item_low_table['prob_diff'].sem()
+
+            #fr_stim_non_stim_list_table = fr_stim_non_stim_list_table[(~fr_stim_non_stim_list_table['is_stim_list']) & (fr_stim_non_stim_list_table['serialpos']>1)]
+
+            low_state_mask = (fr_stim_non_stim_list_table['prob']<fr_stim_non_stim_list_table['thresh'])
+            post_low_state_mask = low_state_mask.shift(1)
+            post_low_state_mask[fr_stim_non_stim_list_table['serialpos']==1] = False
+
+            fr_stim_non_stim_list_low_table = fr_stim_non_stim_list_table[low_state_mask]
+            fr_stim_non_stim_list_post_low_table = fr_stim_non_stim_list_table[post_low_state_mask]
+            fr_stim_non_stim_list_high_table = fr_stim_non_stim_list_table[fr_stim_non_stim_list_table['prob']>fr_stim_non_stim_list_table['thresh']]
+
+            session_summary.control_mean_prob_diff_all = fr_stim_non_stim_list_table['prob_diff'].mean()
+            session_summary.control_sem_prob_diff_all = fr_stim_non_stim_list_table['prob_diff'].sem()
+            session_summary.control_mean_prob_diff_low = fr_stim_non_stim_list_low_table['prob_diff'].mean()
+            session_summary.control_sem_prob_diff_low = fr_stim_non_stim_list_low_table['prob_diff'].sem()
+
+            stim_item_recall_rate = fr_stim_stim_list_stim_item_table['recalled'].mean()
+            stim_item_recall_rate_low = fr_stim_stim_list_stim_item_low_table['recalled'].mean()
+            stim_item_recall_rate_high = fr_stim_stim_list_stim_item_high_table['recalled'].mean()
+
+            post_stim_item_recall_rate = fr_stim_stim_list_post_stim_item_table['recalled'].mean()
+            post_stim_item_recall_rate_low = fr_stim_stim_list_post_stim_item_low_table['recalled'].mean()
+            post_stim_item_recall_rate_high = fr_stim_stim_list_post_stim_item_high_table['recalled'].mean()
+
+            non_stim_list_recall_rate_low = fr_stim_non_stim_list_low_table['recalled'].mean()
+            non_stim_list_recall_rate_post_low = fr_stim_non_stim_list_post_low_table['recalled'].mean()
+            non_stim_list_recall_rate_high = fr_stim_non_stim_list_high_table['recalled'].mean()
+
+            recall_rate = session_summary.n_correct_words / float(session_summary.n_words)
+
+            if 'FR4' in task:
+                stim_low_pc_diff_from_mean = 100.0 * (stim_item_recall_rate_low-non_stim_list_recall_rate_low) / recall_rate
+                stim_high_pc_diff_from_mean = 100.0 * (stim_item_recall_rate_high-non_stim_list_recall_rate_high) / recall_rate
+
+                post_stim_low_pc_diff_from_mean = 100.0 * (post_stim_item_recall_rate_low-non_stim_list_recall_rate_low) / recall_rate
+                post_stim_high_pc_diff_from_mean = 100.0 * (post_stim_item_recall_rate_high-non_stim_list_recall_rate_high) / recall_rate
+
+                session_summary.stim_vs_non_stim_pc_diff_from_mean = (stim_low_pc_diff_from_mean, stim_high_pc_diff_from_mean)
+
+                session_summary.post_stim_vs_non_stim_pc_diff_from_mean = (post_stim_low_pc_diff_from_mean, post_stim_high_pc_diff_from_mean)
+            elif 'FR3' in task:
+                stim_pc_diff_from_mean = 100.0 * (stim_item_recall_rate-non_stim_list_recall_rate_low) / recall_rate
+                post_stim_pc_diff_from_mean = 100.0 * (post_stim_item_recall_rate-non_stim_list_recall_rate_post_low) / recall_rate
+                session_summary.pc_diff_from_mean = (stim_pc_diff_from_mean, post_stim_pc_diff_from_mean)
+
+                session_summary.n_correct_stim_items = fr_stim_stim_list_stim_item_table['recalled'].sum()
+                session_summary.n_total_stim_items = len(fr_stim_stim_list_stim_item_table)
+                session_summary.pc_stim_items = 100*session_summary.n_correct_stim_items / float(session_summary.n_total_stim_items)
+
+                session_summary.n_correct_post_stim_items = fr_stim_stim_list_post_stim_item_table['recalled'].sum()
+                session_summary.n_total_post_stim_items = len(fr_stim_stim_list_post_stim_item_table)
+                session_summary.pc_post_stim_items = 100*session_summary.n_correct_post_stim_items / float(session_summary.n_total_post_stim_items)
+
+                session_summary.n_correct_nonstim_low_bio_items = fr_stim_non_stim_list_low_table['recalled'].sum()
+                session_summary.n_total_nonstim_low_bio_items = len(fr_stim_non_stim_list_low_table)
+                session_summary.pc_nonstim_low_bio_items = 100*session_summary.n_correct_nonstim_low_bio_items / float(session_summary.n_total_nonstim_low_bio_items)
+
+                session_summary.n_correct_nonstim_post_low_bio_items = fr_stim_non_stim_list_post_low_table['recalled'].sum()
+                session_summary.n_total_nonstim_post_low_bio_items = len(fr_stim_non_stim_list_post_low_table)
+                session_summary.pc_nonstim_post_low_bio_items = 100*session_summary.n_correct_nonstim_post_low_bio_items / float(session_summary.n_total_nonstim_post_low_bio_items)
+
+                session_summary.chisqr_stim_item, session_summary.pvalue_stim_item, _ = proportions_chisquare([session_summary.n_correct_stim_items, session_summary.n_correct_nonstim_low_bio_items], [session_summary.n_total_stim_items, session_summary.n_total_nonstim_low_bio_items])
+                session_summary.chisqr_post_stim_item, session_summary.pvalue_post_stim_item, _ = proportions_chisquare([session_summary.n_correct_post_stim_items, session_summary.n_correct_nonstim_post_low_bio_items], [session_summary.n_total_post_stim_items, session_summary.n_total_nonstim_post_low_bio_items])
+            session_summary_array.append(session_summary)
+        self.pass_object('session_summary_array', session_summary_array)
+
+        if 'cat' in task:
+            repetition_ratios = self.get_passed_object('repetition_ratios')
+            stim_rrs = []
+            nostim_rrs = []
+            self.pass_object('mean_rr',np.nanmean(repetition_ratios))
+            for s_num,session in enumerate(np.unique(rec_events.session)):
+                sess_events = rec_events[rec_events.session == session]
+                stim_lists = np.unique(sess_events[sess_events.stim_list==True].list)
+                print 'stim_lists:',stim_lists
+                nostim_lists = np.unique(sess_events[sess_events.stim_list==False].list)
+                print 'nonstim lists',nostim_lists
+                stim_rrs.append(repetition_ratios[s_num][stim_lists[stim_lists>0]-1])
+                nostim_rrs.append(repetition_ratios[s_num][nostim_lists[nostim_lists>0]-1])
+            self.pass_object('stim_mean_rr',np.nanmean(np.hstack(stim_rrs)))
+            self.pass_object('nostim_mean_rr',np.nanmean(np.hstack(nostim_rrs)))
 
