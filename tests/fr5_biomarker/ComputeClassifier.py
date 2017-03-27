@@ -471,8 +471,12 @@ class ComputeFullClassifier(ComputeClassifier):
 
     def restore(self):
         subject=self.pipeline.subject
-        self.xval_output = joblib.load(self.get_path_to_resource_in_workspace(subject+'-xval_output_all_electrodes.pkl'))
+        full_classifier_path = self.get_path_to_resource_in_workspace(subject+'-xval_output_all_electrodes.pkl')
+        self.xval_output = joblib.load(full_classifier_path)
         self.compare_AUCs()
+        self.pass_object()
+        self.pass_object('full_classifier_path',full_classifier_path)
+        self.pass_object('xval_output_all_electrodes',self.xval_output)
 
     def pass_objects(self):
         subject=self.pipeline.subject
@@ -480,6 +484,7 @@ class ComputeFullClassifier(ComputeClassifier):
         joblib.dump(self.lr_classifier,classifier_path)
         joblib.dump(self.xval_output,self.get_path_to_resource_in_workspace(subject+'-xval_output_all_electrodes.pkl'))
         self.pass_object('full_classifier_path',classifier_path)
+        self.pass_object('xval_output_all_electrodes',self.xval_output)
 
     def compare_AUCs(self):
         reduced_xval_output = self.get_passed_object('xval_output')

@@ -93,6 +93,8 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
         classifier_path = self.get_passed_object('full_classifier_path')
         stim_chan_label = self.get_passed_object('stim_chan_label')
         excluded_pairs_path = self.get_passed_object('excluded_pairs_path')
+        xval_full = self.get_passed_object('xval_output_all_electrodes')
+        xval_output = self.get_passed_object('xval_output')
 
         stim_params_dict = {}
         stim_params_list = zip(anodes,cathodes,cycle(self.pipeline.args.min_amplitudes),
@@ -133,7 +135,9 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
             montage_file='config_files/%s'%basename(bipolar_pairs_path),
             excluded_montage_file='config_files/%s'%basename(excluded_pairs_path),
             biomarker_threshold=0.5,
-            fr5_stim_channel=fr5_stim_channel
+            fr5_stim_channel=fr5_stim_channel,
+            auc_all_electrodes = xval_full[-1].auc,
+            auc_no_stim_adjacent_electrodes = xval_output[-1].auc,
         )
 
         experiment_config_file,experiment_config_full_filename = self.create_file_in_workspace_dir(project_dir_corename+'/experiment_config.json')
