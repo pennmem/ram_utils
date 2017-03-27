@@ -48,10 +48,7 @@ class FR5SessionSummary(object):
 
 class PS4SessionSummary(object):
     def __init__(self):
-        self.LOC1 = ''
-        self.LOC2 = ''
-        self.loc_1_amplitudes = []
-        self.loc_2_amplitudes = []
-        self.loc1_delta_classifiers = []
-        self.loc2_delta_classifiers = []
+        self.locations = []
+        self.amplitudes = []
+        self.delta_classifiers = []
         self.PS_PLOT_FILE = ''

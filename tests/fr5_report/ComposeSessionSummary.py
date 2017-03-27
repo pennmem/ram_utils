@@ -11,7 +11,7 @@ from statsmodels.stats.proportion import proportions_chisquare
 
 from ReportUtils import ReportRamTask
 import operator
-
+import pandas as pd
 operator.div = np.true_divide
 
 class ComposeSessionSummary(ReportRamTask):
@@ -19,11 +19,44 @@ class ComposeSessionSummary(ReportRamTask):
         super(ComposeSessionSummary, self).__init__(mark_as_completed)
         self.params = params
 
-    def run(self):
-        subject = self.pipeline.subject
-        task = self.pipeline.task
 
-        #events = self.get_passed_object(task + '_events')
+    def run(self):
+        self.compose_fr_session_summary()
+        self.compose_ps_session_summary()
+
+    def compose_ps_session_summary(self):
+        events = self.get_passed_object('PS_events')
+        events = pd.DataFrame.from_records(events)
+
+        ps_session_summaries = []
+        session_data = []
+        for session, sess_events in events.groupby('session'):
+
+            first_time_stamp = sess_events[sess_events.type=='INSTRUCT_START'][0].mstime
+            timestamps = sess_events.mstime
+            last_time_stamp = np.max(timestamps)
+            session_length = '%.2f' % ((last_time_stamp - first_time_stamp) / 60000.0)
+            session_date = time.strftime('%d-%b-%Y', time.localtime(last_time_stamp/1000))
+            n_lists = len(fr_stim_session_table.list.unique())
+            pc_correct_words = 100.0 * sess_events[sess_events.recalled != -999].recalled.mean()
+
+            session_data.append([session, session_date, session_length, n_lists, '$%.2f$\\%%' % pc_correct_words])
+
+            session_summary = PSSessionSummary()
+            for (i,(location,loc_events)) in enumerate(sess_events[.group_by(['anode_num','cathode_num'])):
+                    session_summary.locations.append('%s-%s'.format(loc_events[0].anode_name,loc_events[0].cathode_name))
+                    session_summary.amplitudes = [param.amplitude for param in loc_events.stim_params]
+                    session_summary.delta_classifiers = delta_classifier(loc_events)
+            ps_session_summaries.append(session_summary)
+
+        self.pass_object('ps_session_data',session_data)
+        self.pass_object('ps_session_summary',ps_session_summary)
+
+
+
+    def compose_fr_session_summary(self):
+        task = 'FR'
+        events = self.get_passed_object(task + '_events')
         math_events = self.get_passed_object(task + '_math_events')
         intr_events = self.get_passed_object(task + '_intr_events')
         rec_events = self.get_passed_object(task + '_rec_events')
@@ -37,12 +70,11 @@ class ComposeSessionSummary(ReportRamTask):
 
         sessions = sorted(fr_stim_table.session.unique())
 
-        self.pass_object('NUMBER_OF_SESSIONS', len(sessions))
+        self.pass_object('NUMBER_OF_FR_SESSIONS', len(sessions))
         self.pass_object('NUMBER_OF_ELECTRODES', len(monopolar_channels))
 
         session_data = []
-        irt_within_cat = []
-        irt_between_cat = []
+
 
         fr_stim_table_by_session = fr_stim_table.groupby(['session'])
         for session,fr_stim_session_table in fr_stim_table_by_session:
@@ -58,7 +90,7 @@ class ComposeSessionSummary(ReportRamTask):
 
             session_data.append([session, session_date, session_length, n_lists, '$%.2f$\\%%' % pc_correct_words, amplitude])
 
-        self.pass_object('SESSION_DATA', session_data)
+        self.pass_object('FR_SESSION_DATA', session_data)
 
         session_summary_array = []
 
@@ -148,30 +180,30 @@ class ComposeSessionSummary(ReportRamTask):
                         first_recall_counter[first_recall_idx] += 1
 
 
-                if 'cat' in task:
-                    # list_rec_events = session_rec_events[session_rec_events.list == lst]
-                    for i in xrange(1, len(list_rec_events)):
-                        cur_ev = list_rec_events[i]
-                        prev_ev = list_rec_events[i - 1]
-                        # if (cur_ev.intrusion == 0) and (prev_ev.intrusion == 0):
-                        dt = cur_ev.mstime - prev_ev.mstime
-                        if cur_ev.category == prev_ev.category:
-                            session_irt_within_cat.append(dt)
-                        else:
-                            session_irt_between_cat.append(dt)
+                # if 'cat' in task:
+                #     # list_rec_events = session_rec_events[session_rec_events.list == lst]
+                #     for i in xrange(1, len(list_rec_events)):
+                #         cur_ev = list_rec_events[i]
+                #         prev_ev = list_rec_events[i - 1]
+                #         # if (cur_ev.intrusion == 0) and (prev_ev.intrusion == 0):
+                #         dt = cur_ev.mstime - prev_ev.mstime
+                #         if cur_ev.category == prev_ev.category:
+                #             session_irt_within_cat.append(dt)
+                #         else:
+                #             session_irt_between_cat.append(dt)
 
                 session_summary.list_number[list_idx] = lst
                 session_summary.n_recalls_per_list[list_idx] = fr_stim_sess_list_table.recalled.sum()
                 session_summary.n_stims_per_list[list_idx] = fr_stim_sess_list_table.is_stim_item.sum()
                 session_summary.is_stim_list[list_idx] = fr_stim_sess_list_table.is_stim_list.any()
-
-            session_summary.irt_within_cat = sum(session_irt_within_cat) / len(
-                session_irt_within_cat) if session_irt_within_cat else 0.0
-            session_summary.irt_between_cat = sum(session_irt_between_cat) / len(
-                session_irt_between_cat) if session_irt_between_cat else 0.0
-
-            irt_within_cat += session_irt_within_cat
-            irt_between_cat += session_irt_between_cat
+            #
+            # session_summary.irt_within_cat = sum(session_irt_within_cat) / len(
+            #     session_irt_within_cat) if session_irt_within_cat else 0.0
+            # session_summary.irt_between_cat = sum(session_irt_between_cat) / len(
+            #     session_irt_between_cat) if session_irt_between_cat else 0.0
+            #
+            # irt_within_cat += session_irt_within_cat
+            # irt_between_cat += session_irt_between_cat
 
             session_summary.prob_first_recall /= float(len(fr_stim_table_by_session_list))
             session_summary.prob_first_stim_recall /= float(len(fr_stim_stim_item_table_by_session_list))
@@ -250,55 +282,45 @@ class ComposeSessionSummary(ReportRamTask):
 
             recall_rate = session_summary.n_correct_words / float(session_summary.n_words)
 
-            if 'FR4' in task:
-                stim_low_pc_diff_from_mean = 100.0 * (stim_item_recall_rate_low-non_stim_list_recall_rate_low) / recall_rate
-                stim_high_pc_diff_from_mean = 100.0 * (stim_item_recall_rate_high-non_stim_list_recall_rate_high) / recall_rate
+            stim_pc_diff_from_mean = 100.0 * (stim_item_recall_rate-non_stim_list_recall_rate_low) / recall_rate
+            post_stim_pc_diff_from_mean = 100.0 * (post_stim_item_recall_rate-non_stim_list_recall_rate_post_low) / recall_rate
+            session_summary.pc_diff_from_mean = (stim_pc_diff_from_mean, post_stim_pc_diff_from_mean)
 
-                post_stim_low_pc_diff_from_mean = 100.0 * (post_stim_item_recall_rate_low-non_stim_list_recall_rate_low) / recall_rate
-                post_stim_high_pc_diff_from_mean = 100.0 * (post_stim_item_recall_rate_high-non_stim_list_recall_rate_high) / recall_rate
+            session_summary.n_correct_stim_items = fr_stim_stim_list_stim_item_table['recalled'].sum()
+            session_summary.n_total_stim_items = len(fr_stim_stim_list_stim_item_table)
+            session_summary.pc_stim_items = 100*session_summary.n_correct_stim_items / float(session_summary.n_total_stim_items)
 
-                session_summary.stim_vs_non_stim_pc_diff_from_mean = (stim_low_pc_diff_from_mean, stim_high_pc_diff_from_mean)
+            session_summary.n_correct_post_stim_items = fr_stim_stim_list_post_stim_item_table['recalled'].sum()
+            session_summary.n_total_post_stim_items = len(fr_stim_stim_list_post_stim_item_table)
+            session_summary.pc_post_stim_items = 100*session_summary.n_correct_post_stim_items / float(session_summary.n_total_post_stim_items)
 
-                session_summary.post_stim_vs_non_stim_pc_diff_from_mean = (post_stim_low_pc_diff_from_mean, post_stim_high_pc_diff_from_mean)
-            elif 'FR3' in task:
-                stim_pc_diff_from_mean = 100.0 * (stim_item_recall_rate-non_stim_list_recall_rate_low) / recall_rate
-                post_stim_pc_diff_from_mean = 100.0 * (post_stim_item_recall_rate-non_stim_list_recall_rate_post_low) / recall_rate
-                session_summary.pc_diff_from_mean = (stim_pc_diff_from_mean, post_stim_pc_diff_from_mean)
+            session_summary.n_correct_nonstim_low_bio_items = fr_stim_non_stim_list_low_table['recalled'].sum()
+            session_summary.n_total_nonstim_low_bio_items = len(fr_stim_non_stim_list_low_table)
+            session_summary.pc_nonstim_low_bio_items = 100*session_summary.n_correct_nonstim_low_bio_items / float(session_summary.n_total_nonstim_low_bio_items)
 
-                session_summary.n_correct_stim_items = fr_stim_stim_list_stim_item_table['recalled'].sum()
-                session_summary.n_total_stim_items = len(fr_stim_stim_list_stim_item_table)
-                session_summary.pc_stim_items = 100*session_summary.n_correct_stim_items / float(session_summary.n_total_stim_items)
+            session_summary.n_correct_nonstim_post_low_bio_items = fr_stim_non_stim_list_post_low_table['recalled'].sum()
+            session_summary.n_total_nonstim_post_low_bio_items = len(fr_stim_non_stim_list_post_low_table)
+            session_summary.pc_nonstim_post_low_bio_items = 100*session_summary.n_correct_nonstim_post_low_bio_items / float(session_summary.n_total_nonstim_post_low_bio_items)
 
-                session_summary.n_correct_post_stim_items = fr_stim_stim_list_post_stim_item_table['recalled'].sum()
-                session_summary.n_total_post_stim_items = len(fr_stim_stim_list_post_stim_item_table)
-                session_summary.pc_post_stim_items = 100*session_summary.n_correct_post_stim_items / float(session_summary.n_total_post_stim_items)
+            session_summary.chisqr_stim_item, session_summary.pvalue_stim_item, _ = proportions_chisquare([session_summary.n_correct_stim_items, session_summary.n_correct_nonstim_low_bio_items], [session_summary.n_total_stim_items, session_summary.n_total_nonstim_low_bio_items])
+            session_summary.chisqr_post_stim_item, session_summary.pvalue_post_stim_item, _ = proportions_chisquare([session_summary.n_correct_post_stim_items, session_summary.n_correct_nonstim_post_low_bio_items], [session_summary.n_total_post_stim_items, session_summary.n_total_nonstim_post_low_bio_items])
 
-                session_summary.n_correct_nonstim_low_bio_items = fr_stim_non_stim_list_low_table['recalled'].sum()
-                session_summary.n_total_nonstim_low_bio_items = len(fr_stim_non_stim_list_low_table)
-                session_summary.pc_nonstim_low_bio_items = 100*session_summary.n_correct_nonstim_low_bio_items / float(session_summary.n_total_nonstim_low_bio_items)
-
-                session_summary.n_correct_nonstim_post_low_bio_items = fr_stim_non_stim_list_post_low_table['recalled'].sum()
-                session_summary.n_total_nonstim_post_low_bio_items = len(fr_stim_non_stim_list_post_low_table)
-                session_summary.pc_nonstim_post_low_bio_items = 100*session_summary.n_correct_nonstim_post_low_bio_items / float(session_summary.n_total_nonstim_post_low_bio_items)
-
-                session_summary.chisqr_stim_item, session_summary.pvalue_stim_item, _ = proportions_chisquare([session_summary.n_correct_stim_items, session_summary.n_correct_nonstim_low_bio_items], [session_summary.n_total_stim_items, session_summary.n_total_nonstim_low_bio_items])
-                session_summary.chisqr_post_stim_item, session_summary.pvalue_post_stim_item, _ = proportions_chisquare([session_summary.n_correct_post_stim_items, session_summary.n_correct_nonstim_post_low_bio_items], [session_summary.n_total_post_stim_items, session_summary.n_total_nonstim_post_low_bio_items])
             session_summary_array.append(session_summary)
-        self.pass_object('session_summary_array', session_summary_array)
+        self.pass_object('fr_session_summary', session_summary_array)
 
-        if 'cat' in task:
-            repetition_ratios = self.get_passed_object('repetition_ratios')
-            stim_rrs = []
-            nostim_rrs = []
-            self.pass_object('mean_rr',np.nanmean(repetition_ratios))
-            for s_num,session in enumerate(np.unique(rec_events.session)):
-                sess_events = rec_events[rec_events.session == session]
-                stim_lists = np.unique(sess_events[sess_events.stim_list==True].list)
-                print 'stim_lists:',stim_lists
-                nostim_lists = np.unique(sess_events[sess_events.stim_list==False].list)
-                print 'nonstim lists',nostim_lists
-                stim_rrs.append(repetition_ratios[s_num][stim_lists[stim_lists>0]-1])
-                nostim_rrs.append(repetition_ratios[s_num][nostim_lists[nostim_lists>0]-1])
-            self.pass_object('stim_mean_rr',np.nanmean(np.hstack(stim_rrs)))
-            self.pass_object('nostim_mean_rr',np.nanmean(np.hstack(nostim_rrs)))
+        # if 'cat' in task:
+        #     repetition_ratios = self.get_passed_object('repetition_ratios')
+        #     stim_rrs = []
+        #     nostim_rrs = []
+        #     self.pass_object('mean_rr',np.nanmean(repetition_ratios))
+        #     for s_num,session in enumerate(np.unique(rec_events.session)):
+        #         sess_events = rec_events[rec_events.session == session]
+        #         stim_lists = np.unique(sess_events[sess_events.stim_list==True].list)
+        #         print 'stim_lists:',stim_lists
+        #         nostim_lists = np.unique(sess_events[sess_events.stim_list==False].list)
+        #         print 'nonstim lists',nostim_lists
+        #         stim_rrs.append(repetition_ratios[s_num][stim_lists[stim_lists>0]-1])
+        #         nostim_rrs.append(repetition_ratios[s_num][nostim_lists[nostim_lists>0]-1])
+        #     self.pass_object('stim_mean_rr',np.nanmean(np.hstack(stim_rrs)))
+        #     self.pass_object('nostim_mean_rr',np.nanmean(np.hstack(nostim_rrs)))
 

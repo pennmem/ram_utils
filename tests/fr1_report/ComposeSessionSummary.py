@@ -63,7 +63,6 @@ class ComposeSessionSummary(ReportRamTask):
         self.pass_object('NUMBER_OF_ELECTRODES', len(monopolar_channels))
 
         session_data = []
-        session_summary_array = []
 
         positions = np.unique(events.serialpos)
         first_recall_counter = np.zeros(positions.size, dtype=int)
@@ -71,6 +70,7 @@ class ComposeSessionSummary(ReportRamTask):
 
         irt_within_cat = []
         irt_between_cat = []
+        session_summary_array = []
 
         for session in sessions:
             session_summary = SessionSummary()
