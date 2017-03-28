@@ -474,7 +474,6 @@ class ComputeFullClassifier(ComputeClassifier):
         full_classifier_path = self.get_path_to_resource_in_workspace(subject+'-xval_output_all_electrodes.pkl')
         self.xval_output = joblib.load(full_classifier_path)
         self.compare_AUCs()
-        self.pass_object()
         self.pass_object('full_classifier_path',full_classifier_path)
         self.pass_object('xval_output_all_electrodes',self.xval_output)
 
