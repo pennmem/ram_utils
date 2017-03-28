@@ -61,13 +61,13 @@ class FREventPreparation(RamTask):
 
         json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
 
-        event_files = sorted(
-            list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR1')))
-        fr1_events = np.concatenate([BaseEventReader(filename=event_path).read() for event_path in event_files]).view(np.recarray)
-        fr1_events = create_baseline_events(fr1_events)
+        # event_files = sorted(
+        #     list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR1')))
+        # fr1_events = np.concatenate([BaseEventReader(filename=event_path).read() for event_path in event_files]).view(np.recarray)
+        # fr1_events = create_baseline_events(fr1_events)
 
-        # e_reader = BaseEventReader(filename=fr1_events_fname, eliminate_events_with_no_eeg=True,common_root='scratch')
-        # fr1_events = e_reader.read()
+        e_reader = BaseEventReader(filename=fr1_events_fname, eliminate_events_with_no_eeg=True,common_root='scratch')
+        fr1_events = e_reader.read()
 
         print
 
@@ -75,8 +75,7 @@ class FREventPreparation(RamTask):
         retrieval_events_mask = (fr1_events.type == 'REC_WORD') | (fr1_events.type == 'REC_BASE')
 
         retrieval_events_mask_0s = retrieval_events_mask & (fr1_events.type == 'REC_BASE')
-        retrieval_events_mask_1s = retrieval_events_mask & (fr1_events.type == 'REC_WORD') & (fr1_events.intrusion == 0)
-                                   # (fr1_events['repeat'] == 0) & (fr1_events.pirt > 1000)
+        retrieval_events_mask_1s = retrieval_events_mask & (fr1_events.type == 'REC_WORD') & (fr1_events.intrusion == 0) & (fr1_events['repeat'] == 0) & (fr1_events.pirt > 1000)
 
         filtered_events = fr1_events[encoding_events_mask | retrieval_events_mask_0s | retrieval_events_mask_1s]
 
@@ -161,7 +160,7 @@ def create_baseline_events(events):
     all_events =[]
     for session in np.unique(events.session):
         sess_events = events[(events.session == session)]
-        rec_events = sess_events[(sess_events.type == 'REC_WORD') & (sess_events.intrusion==0)]
+        rec_events = sess_events[(sess_events.type == 'REC_WORD') & (sess_events.intrusion == 0) & (sess_events['repeat'] == 0) & (sess_events.pirt > 1000)]
         voc_events = sess_events[((sess_events.type == 'REC_WORD') | (sess_events.type == 'REC_WORD_VV'))]
         starts = sess_events[(sess_events.type == 'REC_START')]
         ends = sess_events[(sess_events.type == 'REC_END')]
