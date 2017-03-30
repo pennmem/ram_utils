@@ -1,7 +1,7 @@
 \clearpage
 
 \begin{center}
-\textbf{\Large <STIMTAG> (<REGION>), <FREQUENCY> Hz, Session(s): <SESSIONS>}
+\textbf{\Large <STIMTAG> (<REGION>), 200 Hz, <AMPLITUDE> \mu A , Session(s): <SESSIONS>}
 \end{center}
 
 \begin{table}[!h]
@@ -39,7 +39,7 @@ $<N_MATH>$ math problems & $<N_CORRECT_MATH>$ correct ($<PC_CORRECT_MATH>$\%) & 
 \begin{tabular}{c|c|c|c}
 \multicolumn{4}{c}{\textbf{Stim vs Non-Stim Recalls}} \\
 \hline
-$<N_CORRECT_STIM>/<N_TOTAL_STIM>$ ($<PC_FROM_STIM>$\%) from stim lists & $<N_CORRECT_NONSTIM>/<N_TOTAL_NONSTIM>$ ($<PC_FROM_NONSTIM>$\%) from non-stim lists & $\chi^2(1)=<CHISQR>$ & $p=<PVALUE>$ \\
+$<N_CORRECT_STIM>/<N_TOTAL_STIM>$ ($<PC_FROM_STIM>$\%) from stim lists & $<N_CORRECT_NONSTIM>/<N_TOTAL_NONSTIM>$ ($<PC_FROM_NONSTIM>$\%) from <COMPARISON_LIST_TYPE> lists & $\chi^2(1)=<CHISQR>$ & $p=<PVALUE>$ \\
 \hline
  <ITEMLEVEL_COMPARISON>
 \end{tabular}
@@ -50,7 +50,7 @@ $<N_CORRECT_STIM>/<N_TOTAL_STIM>$ ($<PC_FROM_STIM>$\%) from stim lists & $<N_COR
 \begin{tabular}{c|c}
 \multicolumn{2}{c}{\textbf{Stim vs Non-Stim Intrusions}} \\
 \hline
-$<N_STIM_INTR>/<N_TOTAL_STIM>$ ($<PC_FROM_STIM_INTR>$\%) from stim lists & $<N_NONSTIM_INTR>/<N_TOTAL_NONSTIM>$ ($<PC_FROM_NONSTIM_INTR>$\%) from non-stim lists \\
+$<N_STIM_INTR>/<N_TOTAL_STIM>$ ($<PC_FROM_STIM_INTR>$\%) from stim lists & $<N_NONSTIM_INTR>/<N_TOTAL_NONSTIM>$ ($<PC_FROM_NONSTIM_INTR>$\%) from <COMPARISON_LIST_TYPE> lists \\
 \hline
 \end{tabular}
 \end{table}

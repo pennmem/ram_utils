@@ -12,6 +12,7 @@ from statsmodels.stats.proportion import proportions_chisquare
 from ReportUtils import ReportRamTask
 import operator
 import pandas as pd
+from SessionSummary import PS4SessionSummary
 operator.div = np.true_divide
 
 class ComposeSessionSummary(ReportRamTask):
@@ -37,20 +38,20 @@ class ComposeSessionSummary(ReportRamTask):
             last_time_stamp = np.max(timestamps)
             session_length = '%.2f' % ((last_time_stamp - first_time_stamp) / 60000.0)
             session_date = time.strftime('%d-%b-%Y', time.localtime(last_time_stamp/1000))
-            n_lists = len(fr_stim_session_table.list.unique())
+            n_lists = len(sess_events.list.unique())
             pc_correct_words = 100.0 * sess_events[sess_events.recalled != -999].recalled.mean()
 
             session_data.append([session, session_date, session_length, n_lists, '$%.2f$\\%%' % pc_correct_words])
 
-            session_summary = PSSessionSummary()
-            for (i,(location,loc_events)) in enumerate(sess_events[.group_by(['anode_num','cathode_num'])):
+            session_summary = PS4SessionSummary()
+            for (i,(location,loc_events)) in enumerate(sess_events.group_by(['anode_num','cathode_num'])):
                     session_summary.locations.append('%s-%s'.format(loc_events[0].anode_name,loc_events[0].cathode_name))
                     session_summary.amplitudes = [param.amplitude for param in loc_events.stim_params]
-                    session_summary.delta_classifiers = delta_classifier(loc_events)
+                    session_summary.delta_classifiers = self.delta_classifier(loc_events)
             ps_session_summaries.append(session_summary)
 
         self.pass_object('ps_session_data',session_data)
-        self.pass_object('ps_session_summary',ps_session_summary)
+        self.pass_object('ps_session_summary',ps_session_summaries)
 
 
 
@@ -216,9 +217,14 @@ class ComposeSessionSummary(ReportRamTask):
             session_summary.n_total_stim = len(fr_stim_stim_list_table)
             session_summary.pc_from_stim = 100 * session_summary.n_correct_stim / float(session_summary.n_total_stim)
 
-            session_summary.n_correct_nonstim = fr_stim_non_stim_list_table.recalled.sum()
-            session_summary.n_total_nonstim = len(fr_stim_non_stim_list_table)
-            session_summary.pc_from_nonstim = 100 * session_summary.n_correct_nonstim / float(session_summary.n_total_nonstim)
+            if fr_stim_non_stim_list_table.any():
+                session_summary.n_correct_nonstim = fr_stim_non_stim_list_table.recalled.sum()
+                session_summary.n_total_nonstim = len(fr_stim_non_stim_list_table)
+            else:
+                session_summary.n_correct_nonstim = fr1_events.recalled.sum()
+                session_summary.n_total_nonstim = len(fr1_events)
+            session_summary.pc_from_nonstim = 100 * session_summary.n_correct_nonstim / float(
+                session_summary.n_total_nonstim)
 
             session_summary.chisqr, session_summary.pvalue, _ = proportions_chisquare([session_summary.n_correct_stim, session_summary.n_correct_nonstim], [session_summary.n_total_stim, session_summary.n_total_nonstim])
 

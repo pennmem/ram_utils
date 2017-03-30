@@ -1,4 +1,4 @@
-\section*{<SUBJECT> RAM <EXPERIMENT> Free Recall Report}
+\section*{<SUBJECT> RAM FR5 Free Recall Report}
 
 \begin{tabular}{ccc}
 \begin{minipage}[htbp]{170pt}
@@ -32,10 +32,9 @@ percentage devation from the (subject) mean, separated by tercile
 of the classifier encoding efficiency estimate for each encoded word.}
 \end{figure}
 
-$\bullet$ Area Under Curve = $<FR3-AUC>$\%
+$\bullet$ Area Under Curve = $<FR5-AUC>$\%
 
-$\bullet$ Permutation test $p$-value $<FR3-PERM-P-VALUE>$
-
+$\bullet$ Permutation test $p$-value $<FR5-PERM-P-VALUE>$
 
 <REPORT_PAGES>
 

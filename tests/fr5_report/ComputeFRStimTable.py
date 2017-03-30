@@ -72,10 +72,8 @@ class ComputeFRStimTable(ReportRamTask):
     def run(self):
         bp_tal_structs = self.get_passed_object('bp_tal_structs')
 
-        fr_all_events = self.get_passed_object('FR_all_events')
-        fr_events = self.get_passed_object('FR_events')
-        ps_all_events = self.get_passed_object('PS_all_events')
-        ps_events = self.get_passed_object('PS_events')
+        all_events = self.get_passed_object('FR_all_events')
+        events = self.get_passed_object('FR_events')
 
         n_events = len(events)
 
@@ -117,13 +115,12 @@ class ComputeFRStimTable(ReportRamTask):
 
         sessions = np.unique(events.session)
         for sess in sessions:
-            if self.pipeline.task=='FR3' and self.pipeline.subject!='R1124J_1':
-                sess_mask = (events.session==sess)
-                sess_prob, thresh = parse_biomarker_output(os.path.join(self.pipeline.mount_point, 'data/eeg', self.pipeline.subject, 'raw/FR3_%d'%sess, 'commandOutput.txt'))
-                sess_prob = sess_prob[12:]  # discard practice list
-                if len(sess_prob) == np.sum(sess_mask):
-                    fr_stim_prob[sess_mask] = sess_prob  # plug biomarker output
-                self.fr_stim_table.loc[sess_mask,'thresh'] = thresh
+            # sess_mask = (events.session==sess)
+            # sess_prob, thresh = get_biomarker_outputs(events[sess_mask])
+            # sess_prob = sess_prob[12:]  # discard practice list
+            # if len(sess_prob) == np.sum(sess_mask):
+            #     fr_stim_prob[sess_mask] = sess_prob  # plug biomarker output
+            # self.fr_stim_table.loc[sess_mask,'thresh'] = thresh
 
             sess_stim_events = all_events[(all_events.session==sess) & (all_events.type=='STIM_ON')]
             sess_stim_event = sess_stim_events[-1]
@@ -180,3 +177,6 @@ class ComputeFRStimTable(ReportRamTask):
 
         self.pass_object('fr_stim_table', self.fr_stim_table)
         self.fr_stim_table.to_pickle(self.get_path_to_resource_in_workspace(self.pipeline.subject+'-fr_stim_table.pkl'))
+
+def get_biomarker_outputs(session):
+    pass
