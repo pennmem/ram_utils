@@ -65,7 +65,7 @@ class Params(object):
         self.penalty_type = 'l2'
         self.C = 7.2e-4
 
-        self.n_perm = 1000
+        self.n_perm = 250
 
 
 params = Params()
