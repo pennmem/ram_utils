@@ -1,3 +1,5 @@
+import os.path
+
 import numpy as np
 import pandas as pd
 
@@ -6,6 +8,7 @@ from sklearn.metrics import roc_auc_score
 from random import random
 from ReportUtils import ReportRamTask
 
+from parse_biomarker_output import parse_biomarker_output
 
 class StimParams(object):
     def __init__(self):
@@ -25,6 +28,7 @@ class ComputeTHStimTable(ReportRamTask):
         super(ComputeTHStimTable,self).__init__(mark_as_completed)
         self.params = params
         self.stim_params_to_sess = None
+        self.sess_to_thresh = None
         self.th_stim_table = None
 
     def initialize(self):
@@ -63,6 +67,9 @@ class ComputeTHStimTable(ReportRamTask):
 
         lr_classifier = self.get_passed_object('lr_classifier')
 
+        xval_output = self.get_passed_object('xval_output')
+        class_thresh = xval_output[-1].jstat_thresh
+
         th_stim_pow_mat = self.get_passed_object('th_stim_pow_mat')
         th_stim_prob = lr_classifier.predict_proba(th_stim_pow_mat)[:,1]
 
@@ -88,14 +95,23 @@ class ComputeTHStimTable(ReportRamTask):
         self.th_stim_table['is_stim_item'] = is_stim_item
         self.th_stim_table['is_post_stim_item'] = is_post_stim_item
         self.th_stim_table['recalled'] = recalls
-        self.th_stim_table['prob'] = th_stim_prob
+        # self.th_stim_table['prob'] = th_stim_prob
         self.th_stim_table['distance_err'] = events.distErr
         self.th_stim_table['confidence'] = events.confidence
+        self.th_stim_table['thresh'] = class_thresh
 
         self.stim_params_to_sess = dict()
+        self.sess_to_thresh = dict()
 
         sessions = np.unique(events.session)
         for sess in sessions:
+            if self.pipeline.task=='RAM_TH3':
+                sess_mask = (events.session==sess)
+                sess_prob, thresh = parse_biomarker_output(os.path.join(self.pipeline.mount_point, 'data/eeg', self.pipeline.subject, 'raw/TH3_%d'%sess, 'commandOutput.txt'))                
+                if len(sess_prob) == np.sum(sess_mask):                    
+                    th_stim_prob[sess_mask] = sess_prob  # plug biomarker output
+                self.th_stim_table.loc[sess_mask,'thresh'] = thresh
+
             sess_stim_events = all_events[(all_events.session==sess) & (all_events.type=='STIM')]
             sess_stim_event = sess_stim_events[-1]
 
@@ -118,6 +134,8 @@ class ComputeTHStimTable(ReportRamTask):
             else:
                 self.stim_params_to_sess[sess_stim_params] = [sess]
 
+        self.th_stim_table['prob'] = th_stim_prob
+
         stim_anode_tag = np.empty(n_events, dtype='|S16')
         stim_cathode_tag = np.empty(n_events, dtype='|S16')
         region = np.empty(n_events, dtype='|S64')
@@ -126,13 +144,13 @@ class ComputeTHStimTable(ReportRamTask):
         pulse_duration = np.empty(n_events, dtype=int)
         burst_frequency = np.empty(n_events, dtype=int)
 
-        # JFM: added in auc when predicting non-stim items based on TH1 classifier, 
+        # JFM: added in auc when predicting non-stim items based on TH1 classifier,
         # as well as permutation test (shuffling recalls)
         auc = np.empty(n_events, dtype=float)
         auc_p = np.empty(n_events, dtype=float)
 
         for stim_params,sessions in self.stim_params_to_sess.iteritems():
-            sessions_mask = np.array([(ev.session in sessions) for ev in events], dtype=np.bool)            
+            sessions_mask = np.array([(ev.session in sessions) for ev in events], dtype=np.bool)
             stim_anode_tag[sessions_mask] = stim_params.stimAnodeTag
             stim_cathode_tag[sessions_mask] = stim_params.stimCathodeTag
             region[sessions_mask] = bp_tal_structs.bp_atlas_loc.ix[stim_params.stimAnodeTag+'-'+stim_params.stimCathodeTag]
@@ -141,7 +159,7 @@ class ComputeTHStimTable(ReportRamTask):
             pulse_duration[sessions_mask] = stim_params.pulse_duration
             burst_frequency[sessions_mask] = stim_params.burst_frequency
 
-            # classifying TH3 non-stim            
+            # classifying TH3 non-stim
             is_stim_list = np.array(events.stimList, dtype=np.bool)
             stim_site_probs = lr_classifier.predict_proba(th_stim_pow_mat[sessions_mask & ~is_stim_list])[:,1]
             stim_site_recalls = recalls[sessions_mask & ~is_stim_list]

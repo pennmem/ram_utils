@@ -113,7 +113,7 @@ class ComputeFRStimTable(ReportRamTask):
 
         sessions = np.unique(events.session)
         for sess in sessions:
-            if self.pipeline.task=='FR3' and self.pipeline.subject!='R1124J_1':
+            if 'FR3' in self.pipeline.task and self.pipeline.subject!='R1124J_1':
                 sess_mask = (events.session==sess)
                 sess_prob, thresh = parse_biomarker_output(os.path.join(
                     self.pipeline.mount_point, 'data/eeg', self.pipeline.subject, 'raw',

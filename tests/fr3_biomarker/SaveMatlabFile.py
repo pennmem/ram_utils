@@ -35,25 +35,6 @@ class SaveMatlabFile(RamTask):
 
         mat_filename = '%s_%s_FR3_%s_%s_%dHz_%gmA.biomarker.mat' % (subject, datetime.date.today(), self.params.stim_params.anode, self.params.stim_params.cathode, self.params.stim_params.pulseFrequency, self.params.stim_params.amplitude/1000.0)
 
-        # hack for Jeff subject R1230J
-        # this hack works specifically when replugging the "Bank C" Cerestim
-        # cable to a different bank on the custom splitter boxes
-        if subject == 'R1230J':
-            # decrement amount is based on the bank of 32
-            if self.params.stim_params.elec1 >= 161 and self.params.stim_params.elec1 <= 192:  # bank F replug
-                self.params.stim_params.elec1 -=96
-            elif self.params.stim_params.elec1 >=129 and self.params.stim_params.elec1 <= 160: # bank E replug
-                self.params.stim_params.elec1 -=64
-            elif self.params.stim_params.elec1 >= 97 and self.params.stim_params.elec1 <= 128: # bank D replug
-                self.params.stim_params.elec1 -=32
-            # decrement amount is based on the bank of 32
-            if self.params.stim_params.elec2 >= 161 and self.params.stim_params.elec2 <= 192:  # bank F replug
-                self.params.stim_params.elec2 -=96
-            elif self.params.stim_params.elec2 >=129 and self.params.stim_params.elec2 <= 160: # bank E replug
-                self.params.stim_params.elec2 -=64
-            elif self.params.stim_params.elec2 >= 97 and self.params.stim_params.elec2 <= 128: # bank D replug
-                self.params.stim_params.elec2 -=32
-
         mdict = {'Bio': {'Subject': subject,
                          'Version': self.params.version,
                          'Sessions': np.unique(events.session),
@@ -73,6 +54,10 @@ class SaveMatlabFile(RamTask):
                                         'pulseFrequency': self.params.stim_params.pulseFrequency,
                                         'pulseCount': self.params.stim_params.pulseCount},
                          'filename': mat_filename}}
+
+        for key in mdict['Bio']:
+            print key
+            assert mdict['Bio'][key] is not None
 
         mat_filename_in_workspace = self.get_path_to_resource_in_workspace(mat_filename)
         savemat(mat_filename_in_workspace, mdict)

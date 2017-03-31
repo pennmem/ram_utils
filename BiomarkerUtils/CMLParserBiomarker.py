@@ -10,28 +10,32 @@ from os.path import *
 class CMLParserBiomarker(object):
     def __init__(self, arg_count_threshold=1):
         self.parser = argparse.ArgumentParser(description='Report Generator')
-        self.parser.add_argument('--subject', required=False, action='store')
-        self.parser.add_argument('--experiment', required=False, action='store')
+        self.parser.add_argument('--subject',       required=False, action='store')
+        self.parser.add_argument('--experiment',    required=False, action='store')
         self.parser.add_argument('--workspace-dir', required=False, action='store')
-        self.parser.add_argument('--mount-point', required=False, action='store')
-        self.parser.add_argument('--python-path', required=False, action='append')
-        self.parser.add_argument('--n-channels', required=True, action='store',type=int)
-        self.parser.add_argument('--anode-num', required=True, action='store',type=int)
-        self.parser.add_argument('--anode', required=False, action='store',default='')
-        self.parser.add_argument('--cathode-num', required=True, action='store',type=int)
-        self.parser.add_argument('--cathode', required=False, action='store',default='')
-        self.parser.add_argument('--pulse-frequency', required=True, action='store',type=int)
-        self.parser.add_argument('--pulse-duration', required=True, action='store',type=int)
-        self.parser.add_argument('--target-amplitude', required=True, action='store',type=int)
+        self.parser.add_argument('--mount-point',   required=False, action='store')
+        self.parser.add_argument('--python-path',   required=False, action='append')
+        self.parser.add_argument('--n-channels',    required=False, action='store',type=int)
+        self.parser.add_argument('--anode-num',     required=False, action='store',type=int)
+        self.parser.add_argument('--anode',         required=False, action='store',default='')
+        self.parser.add_argument('--cathode-num',   required=False, action='store',type=int)
+        self.parser.add_argument('--cathode',       required=False, action='store',default='')
+        self.parser.add_argument('--pulse-frequency', required=False, action='store',type=int)
+        self.parser.add_argument('--pulse-duration',  required=False, action='store',type=int)
+        self.parser.add_argument('--target-amplitude',required=False, action='store',type=int)
+        self.parser.add_argument('--anode-nums',nargs='+',action='store',type=int)
+        self.parser.add_argument('--cathode-nums',nargs='+',action='store',type=int)
+        self.parser.add_argument('--anodes',nargs='+',action='store',default='')
+        self.parser.add_argument('--cathodes',nargs='+',action='store',default='')
 
 
         self.arg_list=[]
         self.arg_count_threshold = arg_count_threshold
 
-    def arg(self, name, val=None):
+    def arg(self, name, *vals):
         self.arg_list.append(name)
-        if val is not None:
-            self.arg_list.append(val)
+        for val in vals:
+                self.arg_list.append(val)
 
     def configure_python_paths(self,paths):
         for path in paths:

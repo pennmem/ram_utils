@@ -14,13 +14,13 @@ class CheckElectrodeLabels(RamTask):
 
         stim_pair = self.params.stim_params.anode + '-' + self.params.stim_params.cathode
 
-        stim_pair_found = False
-        for bp in bp_tal_structs:
-            if (int(bp.channel[0]) == anode_num) and (int(bp.channel[1]) == cathode_num):
-                if bp.tagName != stim_pair:
-                    print 'Wrong stim pair for %d-%d: expected %s, found %s' % (anode_num,cathode_num,stim_pair,bp.tagName)
-                    sys.exit(1)
-                stim_pair_found = True
+        if not stim_pair in bp_tal_structs.index:
+            print 'Unknown bipolar pair:', stim_pair
+            sys.exit(1)
 
-        if not stim_pair_found:
-            print 'WARNING: Stim pair was not found in bpTalStruct, assuming stim-only'
+        found_anode_num = int(bp_tal_structs.channel_1[stim_pair])
+        found_cathode_num = int(bp_tal_structs.channel_2[stim_pair])
+
+        if (anode_num != found_anode_num) or (cathode_num != found_cathode_num):
+            print 'Wrong stim pair for %s: expected %d-%d, found %d-%d' % (stim_pair,anode_num,cathode_num,found_anode_num,found_cathode_num)
+            sys.exit(1)

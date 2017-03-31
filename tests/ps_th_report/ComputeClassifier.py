@@ -10,6 +10,7 @@ from sklearn.cross_validation import StratifiedKFold
 from random import shuffle
 from sklearn.externals import joblib
 from ReportUtils import ReportRamTask
+import warnings
 
 def normalize_sessions(pow_mat, events):
     sessions = np.unique(events.session)
@@ -18,6 +19,90 @@ def normalize_sessions(pow_mat, events):
         pow_mat[sess_event_mask] = zscore(pow_mat[sess_event_mask], axis=0, ddof=1)
     return pow_mat
 
+def run_loso_xval(event_sessions, recalls, pow_mat,lr_classifier,xval_output,permuted=False,**kwargs):
+    permuted_recalls = None
+    if permuted:
+        permuted_recalls = np.array(recalls)
+        for sess in event_sessions:
+            sel = (event_sessions == sess)
+            sess_permuted_recalls = permuted_recalls[sel]
+            shuffle(sess_permuted_recalls)
+            permuted_recalls[sel]=sess_permuted_recalls
+
+    recalls = permuted_recalls if permuted else recalls
+
+    probs = np.empty_like(recalls, dtype=np.float)
+
+    sessions = np.unique(event_sessions)
+
+    for sess in sessions:
+        insample_mask = (event_sessions != sess)
+        insample_pow_mat = pow_mat[insample_mask]
+        insample_recalls = recalls[insample_mask]
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            lr_classifier.fit(insample_pow_mat, insample_recalls)
+
+        outsample_mask = ~insample_mask
+        outsample_pow_mat = pow_mat[outsample_mask]
+        outsample_recalls = recalls[outsample_mask]
+
+        outsample_probs = lr_classifier.predict_proba(outsample_pow_mat)[:,1]
+        if not permuted:
+            xval_output[sess] = ModelOutput(outsample_recalls, outsample_probs)
+            xval_output[sess].compute_roc()
+            xval_output[sess].compute_tercile_stats()
+        probs[outsample_mask] = outsample_probs
+
+    if not permuted:
+        xval_output[-1] = ModelOutput(recalls, probs)
+        xval_output[-1].compute_roc()
+        xval_output[-1].compute_tercile_stats()
+        xval_output[-1].compute_normal_approx()
+
+    return probs
+
+def run_lolo_xval(sess, event_lists, recalls,pow_mat,lr_classifier,xval_output, permuted=False,**kwargs):
+    probs = np.empty_like(recalls, dtype=np.float)
+
+    permuted_recalls=None
+    if permuted:
+        permuted_recalls = np.array(recalls)
+        shuffle(permuted_recalls)
+        # JFM Note: I'm not permuting within list bc there are only 2 or 3 items per list
+        # for lst in event_lists:
+        # sel = (event_lists == lst)
+        # list_permuted_recalls = permuted_recalls[sel]
+        # shuffle(list_permuted_recalls)
+        # permuted_recalls[sel] = list_permuted_recalls
+
+    recalls = permuted_recalls if permuted else recalls
+
+    lists = np.unique(event_lists)
+
+    for lst in lists:
+        insample_mask = (event_lists != lst)
+        insample_pow_mat = pow_mat[insample_mask]
+        insample_recalls = recalls[insample_mask]
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            lr_classifier.fit(insample_pow_mat, insample_recalls)
+
+        outsample_mask = ~insample_mask
+        outsample_pow_mat = pow_mat[outsample_mask]
+
+        probs[outsample_mask] = lr_classifier.predict_proba(outsample_pow_mat)[:,1]
+
+    if not permuted:
+        xval_output = ModelOutput(recalls, probs)
+        xval_output.compute_roc()
+        xval_output.compute_tercile_stats()
+        xval_output.compute_normal_approx()
+        xval_output[sess] = xval_output[-1] = xval_output
+
+    return probs
 
 class ModelOutput(object):
     def __init__(self, true_labels, probs):
@@ -115,95 +200,29 @@ class ComputeClassifier(ReportRamTask):
             self.dependency_inventory.add_dependent_resource(resource_name='bipolar_json',
                                         access_path = ['electrodes','bipolar_json'])
 
-    def run_loso_xval(self, event_sessions, recalls, permuted=False):
-        probs = np.empty_like(recalls, dtype=np.float)
-
-        sessions = np.unique(event_sessions)
-
-        for sess in sessions:
-            insample_mask = (event_sessions != sess)
-            insample_pow_mat = self.pow_mat[insample_mask]
-            insample_recalls = recalls[insample_mask]
-
-            self.lr_classifier.fit(insample_pow_mat, insample_recalls)
-
-            outsample_mask = ~insample_mask
-            outsample_pow_mat = self.pow_mat[outsample_mask]
-            outsample_recalls = recalls[outsample_mask]
-
-            outsample_probs = self.lr_classifier.predict_proba(outsample_pow_mat)[:,1]
-            if not permuted:
-                self.xval_output[sess] = ModelOutput(outsample_recalls, outsample_probs)
-                self.xval_output[sess].compute_roc()
-                self.xval_output[sess].compute_tercile_stats()
-            probs[outsample_mask] = outsample_probs
-
-        if not permuted:
-            self.xval_output[-1] = ModelOutput(recalls, probs)
-            self.xval_output[-1].compute_roc()
-            self.xval_output[-1].compute_tercile_stats()
-            self.xval_output[-1].compute_normal_approx()
-
-        return probs
 
     def permuted_loso_AUCs(self, event_sessions, recalls):
         n_perm = self.params.n_perm
         permuted_recalls = np.array(recalls)
         AUCs = np.empty(shape=n_perm, dtype=np.float)
-        for i in xrange(n_perm):
-            for sess in event_sessions:
-                sel = (event_sessions == sess)
-                sess_permuted_recalls = permuted_recalls[sel]
-                shuffle(sess_permuted_recalls)
-                permuted_recalls[sel] = sess_permuted_recalls
-            probs = self.run_loso_xval(event_sessions, permuted_recalls, permuted=True)
-            AUCs[i] = roc_auc_score(recalls, probs)
-            print 'AUC =', AUCs[i]
+
+        with joblib.Parallel(n_jobs=-1,verbose=20) as parallel:
+            probs = parallel(joblib.delayed(run_loso_xval)(event_sessions, permuted_recalls,self.pow_mat,self.lr_classifier,
+                                                           self.xval_output, permuted=True,i=i)
+                             for i in xrange(n_perm))
+            AUCs[:] = [roc_auc_score(recalls, prob) for prob in probs]
         return AUCs
 
-    def run_lolo_xval(self, sess, event_lists, recalls, permuted=False):
-        probs = np.empty_like(recalls, dtype=np.float)
-
-        lists = np.unique(event_lists)
-
-        for lst in lists:
-            insample_mask = (event_lists != lst)
-            insample_pow_mat = self.pow_mat[insample_mask]
-            insample_recalls = recalls[insample_mask]
-
-            self.lr_classifier.fit(insample_pow_mat, insample_recalls)
-
-            outsample_mask = ~insample_mask
-            outsample_pow_mat = self.pow_mat[outsample_mask]
-
-            probs[outsample_mask] = self.lr_classifier.predict_proba(outsample_pow_mat)[:,1]
-
-        if not permuted:
-            xval_output = ModelOutput(recalls, probs)
-            xval_output.compute_roc()
-            xval_output.compute_tercile_stats()
-            xval_output.compute_normal_approx()
-            self.xval_output[sess] = self.xval_output[-1] = xval_output
-
-        return probs
 
     def permuted_lolo_AUCs(self, sess, event_lists, recalls):
         n_perm = self.params.n_perm
-        permuted_recalls = np.array(recalls)
         AUCs = np.empty(shape=n_perm, dtype=np.float)
-        for i in xrange(n_perm):
-            shuffle(permuted_recalls)
-            
-            # JFM Note: I'm not permuting within list bc there are only 2 or 3 items per list            
-            # for lst in event_lists:
-                # sel = (event_lists == lst)
-                # list_permuted_recalls = permuted_recalls[sel]
-                # shuffle(list_permuted_recalls)
-                # permuted_recalls[sel] = list_permuted_recalls
-                
-            probs = self.run_lolo_xval(sess, event_lists, permuted_recalls, permuted=True)
-            AUCs[i] = roc_auc_score(recalls, probs)
-            print 'AUC = ', AUCs[i]
+        with joblib.Parallel(n_jobs=-1,verbose=20) as parallel:
+            probs = parallel(joblib.delayed(run_lolo_xval)(sess, event_lists, recalls,self.pow_mat,self.lr_classifier,
+                                                           self.xval_output, permuted=True,i=i)
+                             for i in xrange(n_perm))
+            AUCs[:] = [roc_auc_score(recalls, prob) for prob in probs]
+
         return AUCs
 
     def run(self):
@@ -227,7 +246,7 @@ class ComputeClassifier(ReportRamTask):
             self.perm_AUCs = self.permuted_loso_AUCs(event_sessions, recalls)
 
             print 'Performing leave-one-session-out xval'
-            self.run_loso_xval(event_sessions, recalls, permuted=False)
+            run_loso_xval(event_sessions, recalls, self.pow_mat,self.lr_classifier,self.xval_output,permuted=False)
         else:
             sess = sessions[0]
             
@@ -248,7 +267,7 @@ class ComputeClassifier(ReportRamTask):
                 print 'Performing %d-fold stratified xval'%(self.params.n_folds)
             else:
                 print 'Performing leave-one-list-out xval'
-            self.run_lolo_xval(sess, event_lists, recalls, permuted=False)
+            run_lolo_xval(sess, event_lists, recalls, self.pow_mat,self.lr_classifier,self.xval_output, permuted=False)
 
         print 'AUC =', self.xval_output[-1].auc
 

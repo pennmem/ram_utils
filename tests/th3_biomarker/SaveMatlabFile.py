@@ -54,7 +54,9 @@ class SaveMatlabFile(RamTask):
                                         'pulseFrequency': self.params.stim_params.pulseFrequency,
                                         'pulseCount': self.params.stim_params.pulseCount},
                          'filename': mat_filename}}
-
+        for entry in mdict['Bio']:
+            print entry
+            assert mdict['Bio'][entry] is not None
         mat_filename_in_workspace = self.get_path_to_resource_in_workspace(mat_filename)
         savemat(mat_filename_in_workspace, mdict)
 

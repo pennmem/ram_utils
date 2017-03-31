@@ -24,7 +24,7 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{RAM FR1 \& CatFR1 report v 2.11}
+\lhead{RAM FR1 \& CatFR1 report v 2.12}
 \chead{Subject: \textbf{<SUBJECT>}}
 \rhead{Date created: <DATE>}
 \begin{document}

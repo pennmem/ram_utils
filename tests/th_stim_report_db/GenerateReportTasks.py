@@ -72,6 +72,11 @@ class GenerateTex(ReportRamTask):
                             '<PC_FROM_NONSTIM>': '%.2f' % session_summary.pc_from_nonstim,
                             '<CHISQR>': '%.2f' % session_summary.chisqr,
                             '<PVALUE>': '%.2f' % session_summary.pvalue,
+                            '<N_CORRECT_NONSTIM_LOW>': session_summary.n_correct_nonstim_low,
+                            '<N_TOTAL_NONSTIM_LOW>': session_summary.n_total_nonstim_low,
+                            '<PC_FROM_NONSTIM_LOW>': '%.2f' % session_summary.pc_from_nonstim_low,
+                            '<CHISQR_LOW>': '%.2f' % session_summary.chisqr_low,
+                            '<PVALUE_LOW>': '%.2f' % session_summary.pvalue_low,
                             '<N_CORRECT_STIM_ITEM>': session_summary.n_correct_stim_item,
                             '<N_TOTAL_STIM_ITEM>': session_summary.n_total_stim_item,
                             '<PC_FROM_STIM_ITEM>': '%.2f' % session_summary.pc_from_stim_item,
@@ -247,27 +252,27 @@ class GeneratePlots(ReportRamTask):
             pdc.ylabel_fontsize = 20
 
             # stim items
-            stim_items = np.where(session_summary.is_stim_item)            
+            stim_items = np.where(session_summary.is_stim_item)
             stim_scatter = PlotData(x=stim_items[0], y=session_summary.all_dist_errs[stim_items], linestyle='', marker='.', markersize=20, color='r', label='Stim')
-            
+
             # non-stim items all
             # nonstim_items = np.where(~session_summary.is_stim_item)
             # nonstim_scatter = PlotData(x=nonstim_items[0], y=session_summary.all_dist_errs[nonstim_items], linestyle='', marker='.', markersize=20, color='b', label='non-Stim')
 
             # non-stim items on stim lists
             nonstim_stim_list_items = np.where(~session_summary.is_stim_item & session_summary.is_stim_list)
-            nonstim_stim_list_scatter = PlotData(x=nonstim_stim_list_items[0], y=session_summary.all_dist_errs[nonstim_stim_list_items], linestyle='', marker='.', markersize=20, color='b', label='non-Stim from stim list')            
-            
+            nonstim_stim_list_scatter = PlotData(x=nonstim_stim_list_items[0], y=session_summary.all_dist_errs[nonstim_stim_list_items], linestyle='', marker='.', markersize=20, color='b', label='non-Stim from stim list')
+
             # non-stim items on non-stim lists
             nonstim_nonstim_list_items = np.where(~session_summary.is_stim_item & ~session_summary.is_stim_list)
-            nonstim_nonstim_list_scatter = PlotData(x=nonstim_nonstim_list_items[0], y=session_summary.all_dist_errs[nonstim_nonstim_list_items], linestyle='', marker='.', markersize=20, color='k', label='non-stim list')            
+            nonstim_nonstim_list_scatter = PlotData(x=nonstim_nonstim_list_items[0], y=session_summary.all_dist_errs[nonstim_nonstim_list_items], linestyle='', marker='.', markersize=20, color='k', label='non-stim list')
 
             stim_lists = np.where(session_summary.is_stim_list)
             nonstim_lists = np.where(~session_summary.is_stim_list)
             stim_list_indicator = PlotData(x=stim_lists[0], y=[-1]*len(stim_lists[0]), linestyle='', marker='.', markersize=20, color='r')
             nonstim_list_indicator = PlotData(x=nonstim_lists[0], y=[-1]*len(nonstim_lists[0]), linestyle='', marker='.', markersize=20, color='k')
             thresh_line = PlotData(x=[0, len(session_summary.is_stim_item)],y=[session_summary.correct_thresh]*2, linestyle='--', color='k', ylim=(-2,70))
-            pdc.add_plot_data(stim_scatter)            
+            pdc.add_plot_data(stim_scatter)
             # pdc.add_plot_data(nonstim_scatter)
             pdc.add_plot_data(nonstim_stim_list_scatter)
             pdc.add_plot_data(nonstim_nonstim_list_scatter)
@@ -344,4 +349,4 @@ class DeployReportPDF(ReportRamTask):
 
     def run(self):
         report_file = self.get_passed_object('report_file')
-        self.pipeline.deploy_report(report_path=report_file,suffix='_db')
+        self.pipeline.deploy_report(report_path=report_file)

@@ -2,7 +2,7 @@
 
 subject=R1250N
 experiment=PAL3
-workspace=/scratch/pwanda/system3/$exeperiment
+workspace=/scratch/pwanda/system3/$experiment
 electrode_config_file=/scratch/electrode_configs/R1250N_PAL3.bin
 anode=PG10
 anode_num=10
@@ -11,7 +11,7 @@ cathode_num=11
 pulse_frequency=100
 target_amplitude=1000
 
-#cd ../../tests/fr3_biomarker_json/system3
+#cd ../../tests/fr3_biomarker/system3
 cd ../../
 
 python tests/pal3_biomarker_json/system3/pal3_util_system_3.py \

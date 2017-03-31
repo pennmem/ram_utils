@@ -5,15 +5,22 @@ from RamPipeline import *
 import numpy as np
 
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
-#from morlet import MorletWaveletTransform
 from sklearn.externals import joblib
 
 from ptsa.data.readers import EEGReader
+try:
+    from ReportTasks.RamTaskMethods import compute_powers
+except ImportError as ie:
+    if 'MorletWaveletFilterCpp' in ie.message:
+        print 'Update PTSA for better perfomance'
+        compute_powers = None
+    else:
+        raise ie
 from ptsa.data.readers.IndexReader import JsonIndexReader
 from ReportUtils import ReportRamTask
 
 import hashlib
-
+import time
 
 class ComputeFR1Powers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
@@ -58,6 +65,7 @@ class ComputeFR1Powers(ReportRamTask):
         subject = self.pipeline.subject
         task = self.pipeline.task
 
+
         events = self.get_passed_object(task+'_events')
 
         sessions = np.unique(events.session)
@@ -65,14 +73,21 @@ class ComputeFR1Powers(ReportRamTask):
 
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
-
-        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
+        params = self.params
+        if compute_powers is None:
+            self.compute_powers(events,sessions,monopolar_channels,bipolar_pairs)
+        else:
+            self.pow_mat,events=compute_powers(events,monopolar_channels, bipolar_pairs,
+                                               params.fr1_start_time,params.fr1_end_time,params.fr1_buf,
+                                               params.freqs,params.log_powers)
+            self.pass_object(task+'_events',events)
 
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
 
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-' + task + '-pow_mat.pkl'))
         joblib.dump(self.samplerate, self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
+
 
     def compute_powers(self, events, sessions,monopolar_channels, bipolar_pairs):
         n_freqs = len(self.params.freqs)
@@ -82,6 +97,7 @@ class ComputeFR1Powers(ReportRamTask):
 
         pow_ev = None
         winsize = bufsize = None
+        filter_time=0.
         for sess in sessions:
             sess_events = events[events.session == sess]
             n_events = len(sess_events)
@@ -140,7 +156,9 @@ class ComputeFR1Powers(ReportRamTask):
 
                 bp_data = bp_data.filtered([58,62], filt_type='stop', order=self.params.filt_order)
                 for ev in xrange(n_events):
+                    filter_tic=time.time()
                     self.wavelet_transform.multiphasevec(bp_data[ev][0:winsize], pow_ev)
+                    filter_time += time.time() - filter_tic
                     pow_ev_stripped = np.reshape(pow_ev, (n_freqs,winsize))[:,bufsize:winsize-bufsize]
                     pow_zeros = np.where(pow_ev_stripped==0.0)[0]
                     if len(pow_zeros)>0:
@@ -160,3 +178,4 @@ class ComputeFR1Powers(ReportRamTask):
             self.pow_mat = np.concatenate((self.pow_mat,sess_pow_mat), axis=0) if self.pow_mat is not None else sess_pow_mat
 
         self.pow_mat = np.reshape(self.pow_mat, (len(events), n_bps*n_freqs))
+        # print 'Time spent on wavelet filter: %f s'%filter_time

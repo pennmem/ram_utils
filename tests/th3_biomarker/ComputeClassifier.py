@@ -8,6 +8,7 @@ from sklearn.metrics import roc_auc_score, roc_curve
 from sklearn.cross_validation import StratifiedKFold
 from random import shuffle
 from sklearn.externals import joblib
+import warnings
 
 def normalize_sessions(pow_mat, events):
     sessions = np.unique(events.session)
@@ -82,7 +83,9 @@ class ComputeClassifier(RamTask):
             insample_pow_mat = self.pow_mat[insample_mask]
             insample_recalls = recalls[insample_mask]
 
-            self.lr_classifier.fit(insample_pow_mat, insample_recalls)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                self.lr_classifier.fit(insample_pow_mat, insample_recalls)
 
             outsample_mask = ~insample_mask
             outsample_pow_mat = self.pow_mat[outsample_mask]
@@ -127,7 +130,9 @@ class ComputeClassifier(RamTask):
             insample_pow_mat = self.pow_mat[insample_mask]
             insample_recalls = recalls[insample_mask]
 
-            self.lr_classifier.fit(insample_pow_mat, insample_recalls)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                self.lr_classifier.fit(insample_pow_mat, insample_recalls)
 
             outsample_mask = ~insample_mask
             outsample_pow_mat = self.pow_mat[outsample_mask]

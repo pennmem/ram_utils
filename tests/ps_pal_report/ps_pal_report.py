@@ -74,12 +74,12 @@ class Params(object):
 
 
 params = Params()
-
+task = args.experiment or args.task
 
 # sets up processing pipeline
 
 report_pipeline = ReportPipeline(subject=args.subject,
-                                 task=args.task,
+                                 task=task,
                                  sessions = args.sessions,
                                  workspace_dir=join(args.workspace_dir, args.subject),
                                  mount_point=args.mount_point,

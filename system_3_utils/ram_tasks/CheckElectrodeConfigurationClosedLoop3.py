@@ -13,11 +13,14 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
         self.params = params
 
     def validate_montage(self, electrode_config):
+        args = self.pipeline.args
+
         bp_tal_structs = self.get_passed_object('bp_tal_structs')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
         monopolar_channels = self.get_passed_object('monopolar_channels')
 
         monopolar_channels_int_array = monopolar_channels.astype(np.int)
+        # print 'monopolar_channels: ', monopolar_channels_int_array
 
         sense_channels_array = electrode_config.sense_channels_as_recarray()
 
@@ -40,68 +43,69 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
         # check if specified stim pair is present in the bipolar pairs and .bin/.csv file
         stim_index_pair_present = False
 
+        anode_nums = args.anode_nums if args.anode_nums else [args.anode_num]
+        cathode_nums = args.cathode_nums if args.cathode_nums else [args.cathode_num]
+        for (anode_num,cathode_num) in zip(anode_nums,cathode_nums):
+            print 'anode: ',anode_num
+            print 'cathode: ',cathode_num
 
-
-        anode_num = self.pipeline.args.anode_num
-        cathode_num = self.pipeline.args.cathode_num
-
-        if anode_num == cathode_num:
-            print '\n\nELECTRODE CONFIG ERROR:'
-            print 'Anode jackbox number must be different from cathode number'
-            sys.exit(1)
-
-        stim_index_pair_present = np.all(np.in1d([anode_num, cathode_num],monopolar_channels_int_array))
-
-        if not stim_index_pair_present:
-            print '\n\nELECTRODE CONFIG ERROR:'
-            print 'Could not find requested stim pair electrode numbers in contacts.json'
-            sys.exit(1)
-
-        # for bp_idx, bp in enumerate(bipolar_pairs_int_2D):
-        #     if bp[0] == anode_num and bp[1] == cathode_num:
-        #         stim_index_pair_present = True
-        #         break
-        #
-        # if not stim_index_pair_present:
-        #     print 'Could not find requested stim pair electrode numbers in pairs.json'
-        #     sys.exit(1)
-
-        # looping over stim channels to check if there exist a channel for which anode and cathode jackbox numbers
-        # match those specified by the user
-        stim_channel_present = False
-        for stim_chan_label, stim_chan_data in electrode_config.stim_channels.items():
-            if stim_chan_data.anodes[0] == anode_num and stim_chan_data.cathodes[0] == cathode_num:
-                stim_channel_present = True
-                break
-
-        if not stim_channel_present:
-            print '\n\nELECTRODE CONFIG ERROR:'
-            print 'Could not find requested stim pair electrode numbers in .csv/.bin electrode configuration file'
-            sys.exit(1)
-
-        # finally will check labels if user provided the labels
-        anode_label = self.pipeline.args.anode.strip().upper()
-        cathode_label = self.pipeline.args.cathode.strip().upper()
-
-        if anode_label and cathode_label:
-
-            anode_idx_array = np.where(sense_channels_array.jack_box_num == anode_num)
-            cathode_idx_array = np.where(sense_channels_array.jack_box_num == cathode_num)
-
-            anode_label_from_contacts = None if not len(anode_idx_array) else sense_channels_array.contact_name[anode_idx_array[0]][0]
-            cathode_label_from_contacts = None if not len(cathode_idx_array) else sense_channels_array.contact_name[cathode_idx_array[0]][0]
-            anode_label_from_contacts = anode_label_from_contacts.strip().upper()
-            cathode_label_from_contacts = cathode_label_from_contacts.strip().upper()
-
-
-            if str(anode_label_from_contacts) != anode_label or cathode_label_from_contacts != cathode_label:
+            if anode_num == cathode_num:
                 print '\n\nELECTRODE CONFIG ERROR:'
-                print 'specified electrode labels for anode and cathode (%s, %s) do no match electrodes' \
-                      ' found in contacts.json (%s,%s)'%(anode_label,cathode_label,anode_label_from_contacts,cathode_label_from_contacts)
+                print 'Anode jackbox number must be different from cathode number'
                 sys.exit(1)
 
-        self.pass_object('stim_chan_label',stim_chan_label)
-        print
+            stim_index_pair_present = np.all(np.in1d([anode_num, cathode_num],monopolar_channels_int_array))
+
+            if not stim_index_pair_present:
+                print '\n\nELECTRODE CONFIG ERROR:'
+                print 'Could not find requested stim pair electrode numbers in contacts.json'
+                sys.exit(1)
+
+            # for bp_idx, bp in enumerate(bipolar_pairs_int_2D):
+            #     if bp[0] == anode_num and bp[1] == cathode_num:
+            #         stim_index_pair_present = True
+            #         break
+            #
+            # if not stim_index_pair_present:
+            #     print 'Could not find requested stim pair electrode numbers in pairs.json'
+            #     sys.exit(1)
+
+            # looping over stim channels to check if there exist a channel for which anode and cathode jackbox numbers
+            # match those specified by the user
+            stim_channel_present = False
+            for stim_chan_label, stim_chan_data in electrode_config.stim_channels.items():
+                if stim_chan_data.anodes[0] == anode_num and stim_chan_data.cathodes[0] == cathode_num:
+                    stim_channel_present = True
+                    break
+
+            if not stim_channel_present:
+                print '\n\nELECTRODE CONFIG ERROR:'
+                print 'Could not find requested stim pair electrode numbers in .csv/.bin electrode configuration file'
+                sys.exit(1)
+
+            # finally will check labels if user provided the labels
+            anode_label = self.pipeline.args.anode.strip().upper()
+            cathode_label = self.pipeline.args.cathode.strip().upper()
+
+            if anode_label and cathode_label:
+
+                anode_idx_array = np.where(sense_channels_array.jack_box_num == anode_num)
+                cathode_idx_array = np.where(sense_channels_array.jack_box_num == cathode_num)
+
+                anode_label_from_contacts = None if not len(anode_idx_array) else sense_channels_array.contact_name[anode_idx_array[0]][0]
+                cathode_label_from_contacts = None if not len(cathode_idx_array) else sense_channels_array.contact_name[cathode_idx_array[0]][0]
+                anode_label_from_contacts = anode_label_from_contacts.strip().upper()
+                cathode_label_from_contacts = cathode_label_from_contacts.strip().upper()
+
+
+                if str(anode_label_from_contacts) != anode_label or cathode_label_from_contacts != cathode_label:
+                    print '\n\nELECTRODE CONFIG ERROR:'
+                    print 'specified electrode labels for anode and cathode (%s, %s) do no match electrodes' \
+                          ' found in contacts.json (%s,%s)'%(anode_label,cathode_label,anode_label_from_contacts,cathode_label_from_contacts)
+                    sys.exit(1)
+
+            self.pass_object('stim_chan_label',stim_chan_label)
+            print
 
     def run(self):
         bp_tal_structs = self.get_passed_object('bp_tal_structs')
@@ -125,6 +129,7 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
         ec.initialize(electrode_csv)
 
         self.validate_montage(electrode_config=ec)
+        self.pass_object('config_name',ec.config_name)
 
         print
 

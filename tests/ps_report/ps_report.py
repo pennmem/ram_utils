@@ -10,7 +10,7 @@ from ReportUtils import CMLParser,ReportPipeline
 cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--experiment','PS2.1')
 cml_parser.arg('--subject','R1236J')
-cml_parser.arg('--workspace-dir','/scratch/leond/FR_reports')
+cml_parser.arg('--workspace-dir','/scratch/leond/PS2.1_reports')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
 

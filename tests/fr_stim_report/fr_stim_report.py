@@ -5,9 +5,9 @@ from ReportUtils import CMLParser,ReportPipeline
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1236J')
+cml_parser.arg('--subject','R1286J')
 cml_parser.arg('--task','catFR3')
-cml_parser.arg('--workspace-dir','/scratch/leond/FR_reports')
+cml_parser.arg('--workspace-dir','/scratch/leond/catFR3_reports')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
 
@@ -62,7 +62,7 @@ class Params(object):
         self.penalty_type = 'l2'
         self.C = 7.2e-4
 
-        self.n_perm = 200
+        self.n_perm = 500
 
         self.include_fr1 = True
         self.include_catfr1 = True
@@ -99,7 +99,7 @@ report_pipeline.add_task(EventPreparation(mark_as_completed=False))
 report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
 
 if 'cat' in args.task:
-    report_pipeline.add_task(RepetitionRatio(recompute_all_ratios=True,mark_as_completed=False))
+    report_pipeline.add_task(RepetitionRatio(recompute_all_ratios=True,mark_as_completed=True))
 
 report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 
@@ -109,7 +109,7 @@ report_pipeline.add_task(ComputeFRStimPowers(params=params, mark_as_completed=Tr
 
 report_pipeline.add_task(ComputeFRStimTable(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(EvaluateClassifier(params=params,mark_as_completed=True))
+report_pipeline.add_task(EvaluateClassifier(params=params,mark_as_completed=True)) #Note: this IS included in the pdf!
 
 report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
 #

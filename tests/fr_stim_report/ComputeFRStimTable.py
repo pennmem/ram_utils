@@ -114,14 +114,18 @@ class ComputeFRStimTable(ReportRamTask):
         self.sess_to_thresh = dict()
 
         sessions = np.unique(events.session)
+
         for sess in sessions:
-            if self.pipeline.task=='FR3' and self.pipeline.subject!='R1124J_1':
-                sess_mask = (events.session==sess)
-                sess_prob, thresh = parse_biomarker_output(os.path.join(self.pipeline.mount_point, 'data/eeg', self.pipeline.subject, 'raw/FR3_%d'%sess, 'commandOutput.txt'))
-                sess_prob = sess_prob[12:]  # discard practice list
-                if len(sess_prob) == np.sum(sess_mask):
-                    fr_stim_prob[sess_mask] = sess_prob  # plug biomarker output
-                self.fr_stim_table.loc[sess_mask,'thresh'] = thresh
+            try:
+                if 'FR3' in self.pipeline.task and self.pipeline.subject!='R1124J_1':
+                    sess_mask = (events.session==sess)
+                    sess_prob, thresh = parse_biomarker_output(os.path.join(self.pipeline.mount_point, 'data/eeg', self.pipeline.subject, 'raw/%s_%d'%(self.pipeline.task,sess), 'commandOutput.txt'))
+                    sess_prob = sess_prob[12:]  # discard practice list
+                    if len(sess_prob) == np.sum(sess_mask):
+                        fr_stim_prob[sess_mask] = sess_prob  # plug biomarker output
+                    self.fr_stim_table.loc[sess_mask,'thresh'] = thresh
+            except IOError:
+                pass
 
             sess_stim_events = all_events[(all_events.session==sess) & (all_events.type=='STIM_ON')]
             sess_stim_event = sess_stim_events[-1]
