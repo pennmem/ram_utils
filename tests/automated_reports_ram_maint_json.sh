@@ -9,7 +9,7 @@
 
 #$ -pe python-shared 10
 #$ -l h_rt=72:00:00
-#$ -l h_vmem=4G
+#$ -l h_vmem=64G
 
 source /home2/RAM_maint/.cron_init_script
 module load Tex/2014
