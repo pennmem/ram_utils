@@ -90,9 +90,12 @@ class MontagePreparation(RamTask):
         montage = 0 if len(tmp)==1 else int(tmp[1])
         task = self.pipeline.task
 
-        events = self.get_passed_object('events')
+        events = self.get_passed_object('ps_events')
         stim_events = events[events.type=='STIM_ON']
-        stim_params = np.unique(stim_events.stim_params)[0]
+        stim_params = np.unique(stim_events.stim_params).view(np.recarray)
+        anode_nums = filter(None,stim_params.anode_nums)
+        cathode_nums = filter(None,stim_params.cathode_nums)
+
 
 
         json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))

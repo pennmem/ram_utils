@@ -1,6 +1,5 @@
 __author__ = 'm'
 
-import os
 import os.path
 import numpy as np
 
@@ -45,13 +44,15 @@ class FREventPreparation(ReportRamTask):
         fr1_events = np.concatenate([BaseEventReader(filename=f,eliminate_events_with_no_eeg=True) for f in event_files])
         events=fr1_events.view(np.recarray)
 
+        events = self.make_base_events(events)
+
         self.pass_object('all_events', events)
 
         math_events = events[events.type == 'PROB']
 
         rec_events = events[events.type == 'REC_WORD']
 
-        base_events= self.make_base_events(events)
+        base_events= events[events.type=='REC_BASE']
 
         intr_events = rec_events[(rec_events.intrusion!=-999) & (rec_events.intrusion!=0)]
 
@@ -68,27 +69,108 @@ class FREventPreparation(ReportRamTask):
 
 
     def make_base_events(self,events):
-        time_gaps = np.append([0], np.diff(events.mstime))
-        vocalizations = (events.type == 'REC_WORD') | (events.type == 'REC_WORD_VV')
-        is_rec_break_type = vocalizations | (events.type == 'REC_END')
-        n_periods = ((time_gaps-2000)/525)
-        break_starts = events[n_periods.astype(np.bool) & is_rec_break_type].mstime
-        break_durations = time_gaps[n_periods.astype(np.bool) & is_rec_break_type]
-        baseline_durations = break_durations -1000 # The second before recall is invalid
-        baseline_mstimes = [ range(start+1000,start+duration,525)[:-1] for start,duration in zip(break_starts,baseline_durations)]
-        baseline_mstimes = np.concatenate(baseline_mstimes)
-        closest_times = []
-        baseline_events = []
-        for event in events[events.type=='REC_WORD']:
-            valid_times= baseline_mstimes[np.array([time not in closest_times for time in baseline_mstimes])
-                                         & (np.abs(baseline_mstimes-event.mstime)>=1000)]
-            closest_times.append(valid_times[np.abs(valid_times-event.mstime).argmin()])
-            new_event=deepcopy(event)
-            new_event.mstime=closest_times[-1]
-            new_event.eegoffset = event.eegoffset + (event.mstime-new_event.mstime)
-            new_event.recalled=0
-            baseline_events.append(new_event)
-        return np.array(baseline_events).view(np.recarray)
+        all_events = []
+        for session in np.unique(events.session):
+            sess_events = events[events.session==session]
+            rec_events = sess_events[(sess_events.type == 'REC_WORD') & (sess_events.intrusion == 0)]
+            voc_events = sess_events[((sess_events.type == 'REC_WORD') | (sess_events.type == 'REC_WORD_VV'))]
+            starts = sess_events[(sess_events.type == 'REC_START')]
+            ends = sess_events[(sess_events.type == 'REC_END')]
+            rec_lists = tuple(np.unique(starts.list))
+            times = [voc_events[(voc_events.list == lst)].mstime for lst in rec_lists]
+            start_times = starts.mstime
+            end_times = ends.mstime
+            epochs = free_epochs(times, 500, 1000, 1000, start=start_times, end=end_times)
+            rel_times = [t - i for (t, i) in
+                         zip([rec_events[rec_events.list == lst].mstime for lst in rec_lists], start_times)]
+            rel_epochs = epochs - start_times[:, None]
+            full_match_accum = np.zeros(epochs.shape, dtype=np.bool)
+            for (i, rec_times_list) in enumerate(rel_times):
+                is_match = np.empty(epochs.shape, dtype=np.bool)
+                is_match[...] = False
+                for t in rec_times_list:
+                    is_match_tmp = np.abs((rel_epochs - t)) < 3000
+                    is_match_tmp[i, ...] = False
+                    good_locs = np.where(is_match_tmp & (~full_match_accum))
+                    if len(good_locs[0]):
+                        choice_position = np.argmin(np.mod(good_locs[0] - i, len(good_locs[0])))
+                        choice_inds = (good_locs[0][choice_position], good_locs[1][choice_position])
+                        full_match_accum[choice_inds] = True
+            matching_epochs = epochs[full_match_accum]
+            new_events = np.zeros(len(matching_epochs), dtype=sess_events.dtype).view(np.recarray)
+            for i, _ in enumerate(new_events):
+                new_events[i].mstime = matching_epochs[i]
+                new_events[i].type = 'REC_BASE'
+            new_events.recalled = 0
+            merged_events = np.concatenate((sess_events, new_events)).view(np.recarray)
+            merged_events.sort(order='mstime')
+            for (i, event) in enumerate(merged_events):
+                if event.type == 'REC_BASE':
+                    merged_events[i].session = merged_events[i - 1].session
+                    merged_events[i].list = merged_events[i - 1].list
+                    merged_events[i].eegfile = merged_events[i - 1].eegfile
+                    merged_events[i].eegoffset = merged_events[i - 1].eegoffset + (
+                    merged_events[i].mstime - merged_events[i - 1].mstime)
+            all_events.append(merged_events)
+        return np.concatenate(all_events).view(np.recarray)
 
+def free_epochs(times, duration, pre, post, start=None, end=None):
+    # (list(vector(int))*int*int*int) -> list(vector(int))
+    """
+    Given a list of event times, find epochs between them when nothing is happening
+
+    Parameters:
+    -----------
+
+    times:
+        An iterable of 1-d numpy arrays, each of which indicates event times
+
+    duration: int
+        The length of the desired empty epochs
+
+    pre: int
+        the time before each event to exclude
+
+    post: int
+        The time after each event to exclude
+
+    """
+    n_trials = len(times)
+    epoch_times = []
+    for i in range(n_trials):
+        ext_times = times[i]
+        if start is not None:
+            ext_times = np.append([start[i]], ext_times)
+        if end is not None:
+            ext_times = np.append(ext_times, [end[i]])
+        pre_times = ext_times - pre
+        post_times = ext_times + post
+        interval_durations = pre_times[1:] - post_times[:-1]
+        free_intervals = np.where(interval_durations > duration)[0]
+        trial_epoch_times = []
+        for interval in free_intervals:
+            begin = post_times[interval]
+            finish = pre_times[interval + 1] - duration
+            interval_epoch_times = range(begin, finish, duration)
+            trial_epoch_times.extend(interval_epoch_times)
+        epoch_times.append(np.array(trial_epoch_times))
+    epoch_array = np.empty((n_trials, max([len(x) for x in epoch_times])))
+    epoch_array[...] = -np.inf
+    for i, epoch in enumerate(epoch_times):
+        epoch_array[i, :len(epoch)] = epoch
+    return epoch_array
+
+class PSEventPreparation(ReportRamTask):
+
+    def run(self):
+        jr = JsonIndexReader(os.path.join(self.pipeline.mount_point,'protocols','r1.json'))
+        temp=self.pipeline.subject.split('_')
+        subject= temp[0]
+        montage = 0 if len(temp)==1 else temp[1]
+
+        events = np.concatenate([ BaseEventReader(filename=event_path).read() for event_path in
+                                jr.aggregate_values('task_events',subject=subject,montage=montage,experiment='PS4')])
+        events = events.view(np.recarray)
+        self.pass_object('ps_events',events)
 
 
