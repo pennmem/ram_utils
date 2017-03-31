@@ -358,10 +358,13 @@ class ComputeClassifier(RamTask):
         joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace(subject + '-perm_AUCs.pkl'))
         joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject + '-pvalue.pkl'))
 
+    def get_events(self):
+        return self.get_passed_object('FR_events')
+
 
     def run(self):
 
-        events = self.get_passed_object('FR_events')
+        events = self.get_events()
         self.pow_mat = normalize_sessions(self.get_pow_mat(), events)
 
         # n1 = np.sum(events.recalled)

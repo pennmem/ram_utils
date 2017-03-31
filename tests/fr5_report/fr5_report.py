@@ -79,7 +79,7 @@ class Params(object):
 
 params=Params()
 
-from EventPreparation import FREventPreparation, PSEventPreparation
+from EventPreparation import FR1EventPreparation, PSEventPreparation,FR5EventPreparation
 
 from MontagePreparation import MontagePreparation
 
@@ -103,11 +103,13 @@ report_pipeline = ReportPipeline(subject=args.subject, task=args.task,experiment
                                  workspace_dir=os.path.join(args.workspace_dir,args.subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change,
                                  recompute_on_no_status=args.recompute_on_no_status)
 
-report_pipeline.add_task(FREventPreparation())
+report_pipeline.add_task(FR1EventPreparation())
 
-report_pipeline.add_task(PSEventPreparation(mark_as_completed=False))
+report_pipeline.add_task(FR5EventPreparation())
 
-report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
+report_pipeline.add_task(PSEventPreparation())
+
+report_pipeline.add_task(MontagePreparation(params=params,mark_as_completed=False))
 
 report_pipeline.add_task(ComputeFRPowers(params=params,mark_as_completed=True))
 

@@ -12,9 +12,9 @@ from ReportUtils import ReportRamTask
 import hashlib
 from copy import deepcopy
 
-class FREventPreparation(ReportRamTask):
+class FR1EventPreparation(ReportRamTask):
     def __init__(self, mark_as_completed=True):
-        super(FREventPreparation,self).__init__(mark_as_completed)
+        super(FR1EventPreparation,self).__init__(mark_as_completed)
 
     def input_hashsum(self):
         subject = self.pipeline.subject
@@ -114,6 +114,25 @@ class FREventPreparation(ReportRamTask):
             all_events.append(merged_events)
         return np.concatenate(all_events).view(np.recarray)
 
+class FR5EventPreparation(ReportRamTask):
+    def __init__(self):
+        super(FR5EventPreparation,self).__init__(mark_as_completed=False)
+    def run(self):
+        jr = JsonIndexReader(os.path.join(self.pipeline.mount_point,'protocols','r1.json'))
+        temp=self.pipeline.subject.split('_')
+        subject= temp[0]
+        montage = 0 if len(temp)==1 else temp[1]
+        task = self.pipeline.task
+
+        events = [ BaseEventReader(filename=event_path).read() for event_path in
+                                jr.aggregate_values('task_events',subject=subject,montage=montage,experiment=task)]
+        if events:
+            events = np.concatenate(events).view(np.recarray)
+        self.pass_object('fr5_events',events)
+
+
+
+
 def free_epochs(times, duration, pre, post, start=None, end=None):
     # (list(vector(int))*int*int*int) -> list(vector(int))
     """
@@ -161,6 +180,8 @@ def free_epochs(times, duration, pre, post, start=None, end=None):
     return epoch_array
 
 class PSEventPreparation(ReportRamTask):
+    def __init__(self):
+        super(PSEventPreparation,self).__init__(mark_as_completed=False)
 
     def run(self):
         jr = JsonIndexReader(os.path.join(self.pipeline.mount_point,'protocols','r1.json'))
