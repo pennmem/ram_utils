@@ -12,7 +12,7 @@ from ReportUtils import CMLParser,ReportPipeline
 cml_parser = CMLParser(arg_count_threshold=1)
 
 
-cml_parser.arg('--subject','R1196N')
+cml_parser.arg('--subject','R1250N')
 cml_parser.arg('--task','PAL1')
 cml_parser.arg('--workspace-dir','/scratch/leond/PAL_reports')
 # cml_parser.arg('--workspace-dir','/Users/m/automated_reports/PAL1_reports')

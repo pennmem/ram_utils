@@ -203,6 +203,10 @@ def run_lolo_xval(events, recalls, pow_mat,lr_classifier,xval_output, permuted=F
             outsample_pow_mat = pow_mat[outsample_mask]
 
             probs[outsample_mask] = lr_classifier.predict_proba(outsample_pow_mat)[:,1]
+            if not permuted:
+                xval_output[sess] = ModelOutput(recalls[outsample_mask], probs[outsample_mask])
+                xval_output[sess].compute_roc()
+                xval_output[sess].compute_tercile_stats()
 
     if not permuted:
         xval_output[-1] = ModelOutput(recalls, probs)
