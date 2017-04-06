@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
 # NOTE:
 # THIS IS THE CONFIG FILE GENERATOR FOR PS4_FR5 AND FOR FR5.
-# PS4 HAS 2 STIM PAIRS, WHILE FR5 HAS ONLY 1 STIM PAIR.
-# BY DEFAULT, FR5 CONFIG USES anode1 IF BOTH anode1 AND anode2 ARE PRESENT,
-# AND SIMILARLY FOR CATHODES.
-# IF YOU DESIRE TO USE anode2 AND cathode2 FOR FR5 CONFIG,
-# PLEASE SET anode1 OR cathode1 TO ''
-# THANK YOU.
 
 subject=R1111M
 experiment=FR5
@@ -27,16 +21,7 @@ workspace_dir='/scratch/pwanda/FR5_biomarkers/'
 pulse_frequency=200
 
 
-stim_pair_1=${anode1}-${cathode1}
-stim_pair_2=${anode2}-${cathode2}
-if [ -z $anode1 ] || [ -z $cathode1 ];
-then stim_pair_1='';
-fi
-if [ -z $anode2 ] || [ -z $cathode2 ]
-then stim_pair_2='';
-fi
-
-if ([ -z $stim_pair_1 ] || [ -z $stim_pair_2 ]) && [ $experiment == 'PS4' ];
+if [ -z $stim_pair_1 ] || [ -z $stim_pair_2 ];
 then echo "Insufficient number of stim pairs for PS4 config"; exit 0
 fi
 

@@ -1,7 +1,7 @@
 \clearpage
 
 \begin{center}
-\textbf{\Large <STIMTAG> (<REGION>), 200 Hz, <AMPLITUDE> \mu A , Session(s): <SESSIONS>}
+\textbf{\Large <STIMTAG> (<REGION>), 200 Hz, <AMPLITUDE> $\mu$A , Session(s): <SESSIONS>}
 \end{center}
 
 \begin{table}[!h]
@@ -28,7 +28,9 @@ $<N_MATH>$ math problems & $<N_CORRECT_MATH>$ correct ($<PC_CORRECT_MATH>$\%) & 
 \centering
 \textbf{Probability of Recall}
 
-\subfigure{\includegraphics[scale=0.4]{<PROB_RECALL_PLOT_FILE>}}
+\subfigure{
+    \includegraphics[scale=0.4]{<PROB_RECALL_PLOT_FILE>}
+    }
 \caption{\textbf{Free recall:}
 (a) Overall probability of recall as a function of serial position.
 (b) Probability of first recall as a function of serial position.}
@@ -71,3 +73,15 @@ $<N_STIM_INTR>/<N_TOTAL_STIM>$ ($<PC_FROM_STIM_INTR>$\%) from stim lists & $<N_N
 \end{figure}
 
 <BIOMARKER_PLOTS>
+
+
+\begin{table}[!h]
+\centering
+\begin{tabular}{c|c|c}
+\multicolumn{3}{c}{\textbf{Recognition performance}} \\
+\hline
+$<PHITS_STIM>$\% hit rate from stim lists & $<PHITS_NO_STIM>$ hit rate from non-stim lists & $<PFALSE_ALARMS>$ false alarm rate & $<DPRIME>$ d'  \\ \hline
+\end{tabular}
+\caption{After each session, the subject was given a recognition task with all words shown in the middle 18 lists as targets and 54 novel words as lures.}
+\end{table}
+

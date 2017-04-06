@@ -70,7 +70,7 @@ class ComputeFRPowers(RamTask):
         subject = self.pipeline.subject
 
 
-        events = self.get_passed_object('FR_events')
+        events = self.get_passed_object('FR1_events')
         is_encoding_event = events.type=='WORD'
 
         sessions = np.unique(events.session)

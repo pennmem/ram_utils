@@ -1,3 +1,4 @@
+import numpy as np
 class FR5SessionSummary(object):
     def __init__(self):
         self.STIM_AND_RECALL_PLOT_FILE = ''
@@ -44,6 +45,10 @@ class FR5SessionSummary(object):
         self.is_ps_list = []
         self.is_baseline_list = []
         self.prob_stim = []
+        self.pc_hits_stim = 0.0
+        self.pc_hits_nostim = 0.0
+        self.pc_false_alarms = 0.0
+        self.dprime = -999.
 
 
 class PS4SessionSummary(object):

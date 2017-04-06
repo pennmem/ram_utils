@@ -11,6 +11,7 @@ from subprocess import call
 from ReportUtils import ReportRamTask
 import jinja2
 from TextTemplateUtils import replace_template,replace_template_to_string
+from TexUtils.latex_table import latex_table
 
 class GeneratePlots(ReportRamTask):
     def __init__(self):
@@ -26,7 +27,7 @@ class GeneratePlots(ReportRamTask):
 
         ps_events = self.get_passed_object('ps_events')
         ps_sessions = np.unique(ps_events.session)
-        ps4_session_summaries = self.get_passed_object('ps4_session_summaries')
+        ps4_session_summaries = self.get_passed_object('ps_session_summary')
         if ps4_session_summaries:
             for session in ps_sessions:
 
@@ -44,7 +45,7 @@ class GeneratePlots(ReportRamTask):
 
 
         fr5_events = self.get_passed_object('FR5_events')
-        fr5_session_summaries = self.get_passed_object('fr5_session_summaries')
+        fr5_session_summaries = self.get_passed_object('fr_session_summary')
         if fr5_session_summaries:
 
             xval_output = self.get_passed_object('xval_output')
@@ -87,23 +88,24 @@ class GeneratePlots(ReportRamTask):
                 session_summary = fr5_session_summaries[session]
 
                 # P_REC and PFR
+                panel_plot = PanelPlot(i_max=1,j_max=2,xfigsize=6, yfigsize=7.5, title='', labelsize=18)
 
                 pdca = PlotDataCollection(xlim=(0,12), ylim=(0.0, 1.0), xlabel='(a)', ylabel='Stim vs Non-Stim Items', xlabel_fontsize=20,ylabel_fontsize=20)
                 pd1a = PlotData(x=serial_positions, y=session_summary.prob_stim_recall,linestyle='-',label='Stim')
                 pdca.add_plot_data(pd1a)
                 pd2a = PlotData(x = serial_positions, y=session_summary.prob_nostim_recall,linestyle = '--',label='No Stim')
                 pdca.add_plot_data(pd2a)
-                panel_plot.add_plot_data_collection(1,0,plot_data_collection=pdca)
+                panel_plot.add_plot_data_collection(0,0,plot_data_collection=pdca)
 
                 pdcb = PlotDataCollection(xlim=(0,12), ylim=(0.0, 1.0), xlabel='(b)', ylabel='', xlabel_fontsize=20,ylabel_fontsize=20)
                 pd1b = PlotData(x=serial_positions, y = session_summary.prob_first_stim_recall, linestyle = '-', label = 'Stim')
                 pd2b = PlotData(x=serial_positions, y=session_summary.prob_first_nostim_recall, linestyle = '--', label = 'No Stim')
                 pdcb.add_plot_data(pd1b)
                 pdcb.add_plot_data(pd2b)
-                panel_plot.add_plot_data_collection(1,1,plot_data_collection=pdcb)
+                panel_plot.add_plot_data_collection(0,1,plot_data_collection=pdcb)
                 plot = panel_plot.generate_plot()
                 plot.legend()
-                plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-split_prob_recall_plot_' + session_summary.STIMTAG + '-' + str(session_summary.frequency) + '.pdf')
+                plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-split_prob_recall_plot_' + session_summary.STIMTAG + '_' + str(session_summary.frequency) + '.pdf')
                 plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
                 session_summary.PROB_RECALL_PLOT_FILE = plot_out_fname
 
@@ -120,7 +122,7 @@ class GeneratePlots(ReportRamTask):
 
                 plot = panel_plot.generate_plot()
 
-                session_summary.STIM_VS_NON_STIM_HALVES_PLOT_FILE = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-stim_vs_non_stim_halves_plot_' + session_summary.STIMTAG + '-' + str(session_summary.frequency) + '.pdf')
+                session_summary.STIM_VS_NON_STIM_HALVES_PLOT_FILE = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-stim_vs_non_stim_halves_plot_' + session_summary.STIMTAG + '_' + str(session_summary.frequency) + '.pdf')
 
                 plot.savefig(session_summary.STIM_VS_NON_STIM_HALVES_PLOT_FILE, dpi=300, bboxinches='tight')
 
@@ -162,21 +164,22 @@ class GeneratePlots(ReportRamTask):
                                 title='', linestyle='', color='grey', marker='o', markersize=12)
 
                 baseline_x = np.where(session_summary.is_baseline_list)[0]
-                baseline_y = session_summary.n_recalls_per_list[session_summary.is_baseline_list]
+                baseline_y = session_summary.n_recalls_per_list[np.array(session_summary.is_baseline_list)]
                 pd_3 = PlotData(x=baseline_x, y=baseline_y, ylim=(0, 12),
                                 title='', linestyle='', color='blue', marker='o', markersize=12)
 
-                pdc.add_plot_data(pd_1)
-                pdc.add_plot_data(pd_2)
-                pdc.add_plot_data(pd_3)
-                pdc.add_plot_data(bpd_1)
+                for pd in [pd_1,pd_2,pd_3,bpd_1]:
+                    if (pd.x.shape and pd.y.shape) and all(pd.x.shape) and all(pd.y.shape):
+                        print pd.x.shape
+                        print pd.y.shape
+                        pdc.add_plot_data(pd)
 
-                for i in xrange(len(session_summary.list_number) - 1):
-                    if session_summary.list_number[i] > session_summary.list_number[i + 1]:
-                        sep_pos = i + 0.5
-                        sep_plot_data = PlotData(x=[0], y=[0], levelline=[[sep_pos, sep_pos], [0, 12]], color='white',
-                                                 alpha=0.0)
-                        pdc.add_plot_data(sep_plot_data)
+                # for i in xrange(len(session_summary.list_number) - 1):
+                #     if session_summary.list_number[i] > session_summary.list_number[i + 1]:
+                #         sep_pos = i + 0.5
+                #         sep_plot_data = PlotData(x=[0], y=[0], levelline=[[sep_pos, sep_pos], [0, 12]], color='white',
+                #                                  alpha=0.0)
+                #         pdc.add_plot_data(sep_plot_data)
 
                 panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
 
@@ -209,62 +212,63 @@ class GenerateTex(ReportRamTask):
 
         replace_template('ps4_fr5_report_base.tex.tpl',self.get_path_to_resource_in_workspace('reports','ps4_fr5_report.tex'),
                          {
-                             'SUBJECT':subject,
-                             'EXPERIMENT':experiment,
-                             'DATE':date,
-                             'PS4_SECTION':ps_latex,
-                             'FR5_SECTION':fr5_latex
-                         })
+                             '<SUBJECT>':subject,
+                             '<EXPERIMENT>':experiment,
+                             '<DATE>':date,
+                             '<PS4_SECTION>':ps_latex,
+                             '<FR5_SECTION>':fr5_latex})
+        self.pass_object('report_tex_file_name','ps4_fr5_report.tex')
 
 
     def generate_ps_latex(self):
         ps_events = self.get_passed_object('ps_events')
         ps_session_summary = self.get_passed_object('ps_session_summary')
         ps_latex = ''
-        if ps_events is not None and ps_events.any():
+        if ps_events is not None and ps_events.shape:
             for session in np.unique(ps_events.session):
                 if ps_session_summary[session].preferred_location:
                     session_decision = replace_template_to_string('ps_decision.tex.tpl',
                                                                   {
-                                                                      'PREFERRED_LOCATION': ps_session_summary[
+                                                                      '<PREFERRED_LOCATION>': ps_session_summary[
                                                                           session].preferred_location,
-                                                                      'PREFERRED_AMPLITUDE': ps_session_summary[
+                                                                      '<PREFERRED_AMPLITUDE>': ps_session_summary[
                                                                           session].preferred_amplitude,
-                                                                      'TSTAT': ps_session_summary[session].tstat,
-                                                                      'PVALUE': ps_session_summary[session].pvalue
+                                                                      '<TSTAT>': ps_session_summary[session].tstat,
+                                                                      '<PVALUE>': ps_session_summary[session].pvalue
                                                                   })
                 else:
                     session_decision = ''
                 ps_session_latex = replace_template_to_string('ps4_session.tex.tpl',
                                                               {
-                                                                  'LOC1': ps_session_summary[session].location[0],
-                                                                  'LOC2': ps_session_summary[session].location[1],
-                                                                  'PS_PLOT_FILE': ps_session_summary.PS_PLOT_FILE,
-                                                                  'DECISION': session_decision
+                                                                  '<LOC1>': ps_session_summary[session].location[0],
+                                                                  '<LOC2>': ps_session_summary[session].location[1],
+                                                                  '<PS_PLOT_FILE>': ps_session_summary.PS_PLOT_FILE,
+                                                                  '<DECISION>': session_decision
                                                               })
                 ps_latex += ps_session_latex
         return ps_latex
 
     def generate_fr5_latex(self):
         subject =self.pipeline.subject
+        task = self.pipeline.task
         monopolar_channels = self.get_passed_object('monopolar_channels')
-        xval_output = self.get_passed_object('xval_output')
-        fr1_xval_output = self.get_passed_object('fr1_xval_output')
+        xval_output = self.get_passed_object(task+'_xval_output')
+        fr1_xval_output = self.get_passed_object('xval_output')
         fr5_auc = xval_output[-1].auc
-        fr5_perm_pvalue = xval_output[-1].pvalue
+        fr5_perm_pvalue = self.get_passed_object(task+'_pvalue')
         fr1_auc = fr1_xval_output[-1].auc
-        fr1_pvalue = fr1_xval_output[-1].pvalue
+        fr1_pvalue = self.get_passed_object('pvalue')
         session_data =self.get_passed_object('fr5_session_table')
 
 
-        fr5_events  = self.get_passed_object('fr5_events')
+        fr5_events  = self.get_passed_object(task+'_events')
 
 
         n_sessions = len(np.unique(fr5_events.session))
 
         fr5_session_summary = self.get_passed_object('fr_session_summary')
         all_session_tex = ''
-        if fr5_events is not None and fr5_events.any():
+        if fr5_events is not None and all(fr5_events.shape):
 
             for session in np.unique(fr5_events.session):
                 session_summary = fr5_session_summary[session]
@@ -272,54 +276,58 @@ class GenerateTex(ReportRamTask):
                                                            {'STIM_VS_NON_STIM_HALVES_PLOT_FILE':session_summary.STIM_VS_NON_STIM_HALVES_PLOT_FILE})
                 session_tex = replace_template_to_string('fr5_session.tex.tpl',
                              {
-                                 'SESSIONS':session,
-                                 'STIMTAG':session_summary.location,
-                                 'REGION': session_summary.region,
-                                 'AMPLITUDE':session_summary.amplitude,
-                                 'N_WORDS':session_summary.n_words,
-                                 'N_CORRECT_WORDS':session_summary.n_correct_words,
-                                 'PC_CORRECT_WORDS':session_summary.pc_correct_words,
-                                 'N_PLI':session_summary.n_pli,
-                                 'PC_PLI':session_summary.pc_pli,
-                                 'N_ELI':session_summary.n_eli,
-                                 'PC_ELI':session_summary.pc_eli,
-                                 'N_MATH':session_summary.n_math,
-                                 'N_CORRECT_MATH':session_summary.n_correct_math,
-                                 'PC_CORRECT_MATH':session_summary.pc_correct_math,
-                                 'MATH_PER_LIST':session_summary.n_math_per_list,
-                                 'PROB_RECALL_PLOT_FILE':session_summary.PROB_RECALL_PLOT_FILE,
-                                 'N_CORRECT_STIM':session_summary.n_correct_stim,
-                                 'N_TOTAL_STIM':session_summary.n_total_stim,
-                                 'N_CORRECT_NONSTIM':session_summary.n_correct_nonstim,
-                                 'N_TOTAL_NONSTIM':session_summary.n_total_nonstim,
-                                 'PC_FROM_STIM':session_summary.pc_from_stim,
-                                 'PC_FROM_NONSTIM':session_summary.pc_from_nonstim,
-                                 'COMPARISON_LIST_TYPE': 'non-stim' if ((fr5_events.session==session) & (fr5_events.stim_list)).any() else 'open-loop',
-                                 'CHISQR':session_summary.chisqr,
-                                 'PVALUE':session_summary.pvalue,
-                                 'N_STIM_INTR': session_summary.n_stim_intr,
-                                 'PC_FROM_STIM_INTR':session_summary.pc_from_stim_intr,
-                                 'N_NONSTIM_INTR':session_summary.n_nonstim_intr,
-                                 'PC_FROM_NONSTIM_INTR':session_summary.pc_from_nonstim_intr,
-                                 'STIM_AND_RECALL_PLOT_FILE':session_summary.STIM_AND_RECALL_PLOT_FILE,
-                                 'PROB_STIM_PLOT_FILE':session_summary.PROB_STIM_PLOT_FILE,
-                                 'BIOMARKER_PLOTS':biomarker_tex
+                                 '<SESSIONS>':session,
+                                 '<STIMTAG>':session_summary.stimtag,
+                                 '<REGION>': session_summary.region_of_interest,
+                                 #< 'AMPLITUDE>':session_summary.amplitude,
+                                 '<N_WORDS>':session_summary.n_words,
+                                 '<N_CORRECT_WORDS>':session_summary.n_correct_words,
+                                 '<PC_CORRECT_WORDS>':session_summary.pc_correct_words,
+                                 '<N_PLI>':session_summary.n_pli,
+                                 '<PC_PLI>':session_summary.pc_pli,
+                                 '<N_ELI>':session_summary.n_eli,
+                                 '<PC_ELI>':session_summary.pc_eli,
+                                 '<N_MATH>':session_summary.n_math,
+                                 '<N_CORRECT_MATH>':session_summary.n_correct_math,
+                                 '<PC_CORRECT_MATH>':session_summary.pc_correct_math,
+                                 '<MATH_PER_LIST>':session_summary.math_per_list,
+                                 '<PROB_RECALL_PLOT_FILE>':session_summary.PROB_RECALL_PLOT_FILE,
+                                 '<N_CORRECT_STIM>':session_summary.n_correct_stim,
+                                 '<N_TOTAL_STIM>':session_summary.n_total_stim,
+                                 '<N_CORRECT_NONSTIM>':session_summary.n_correct_nonstim,
+                                 '<N_TOTAL_NONSTIM>':session_summary.n_total_nonstim,
+                                 '<PC_FROM_STIM>':session_summary.pc_from_stim,
+                                 '<PC_FROM_NONSTIM>':session_summary.pc_from_nonstim,
+                                 '<COMPARISON_LIST_TYPE>': 'non-stim' if ((fr5_events.session==session) & ~(fr5_events.stim_list)).any() else 'open-loop',
+                                 '<CHISQR>':session_summary.chisqr,
+                                 '<PVALUE>':session_summary.pvalue,
+                                 '<N_STIM_INTR>': session_summary.n_stim_intr,
+                                 '<PC_FROM_STIM_INTR>':session_summary.pc_from_stim_intr,
+                                 '<N_NONSTIM_INTR>':session_summary.n_nonstim_intr,
+                                 '<PC_FROM_NONSTIM_INTR>':session_summary.pc_from_nonstim_intr,
+                                 '<STIM_AND_RECALL_PLOT_FILE>':session_summary.STIM_AND_RECALL_PLOT_FILE,
+                                 '<PROB_STIM_PLOT_FILE>':session_summary.PROB_STIM_PLOT_FILE,
+                                 '<BIOMARKER_PLOTS>':biomarker_tex,
+                                 '<PHITS_STIM>': '%2.2d'%session_summary.pc_hits_stim,
+                                 '<PHITS_NOSTIM>': '%2.2d'%session_summary.pc_hits_nostim,
+                                 '<PFALSE_ALARMS>': '%2.2d'%session_summary.pc_false_alarms,
+                                 '<DPRIME>': '%2.2d'%session_summary.dprime,
                              }
                 )
                 all_session_tex += session_tex
         fr5_tex = replace_template_to_string(
             'FR5_section.tex.tpl',
             {
-                'SUBJECT':subject,
-                'NUMBER_OF_ELECTRODES':len(monopolar_channels),
-                'NUMBER_OF_SESSIONS':n_sessions,
-                'AUC':fr1_auc,
-                'PERM-P-VALUE':fr1_pvalue,
-                'SESSION_DATA':session_data,
-                'FR5-AUC':fr5_auc,
-                'FR5-PERM-P-VALUE':fr5_perm_pvalue,
-                'ROC_AND_TERC_PLOT_FILE':self.get_passed_object('ROC_AND_TERC_PLOT_FILE'),
-                'REPORT_PAGES':all_session_tex
+                '<SUBJECT>':subject,
+                '<NUMBER_OF_ELECTRODES>':len(monopolar_channels),
+                '<NUMBER_OF_SESSIONS>':n_sessions,
+                '<AUC>':fr1_auc,
+                '<PERM-P-VALUE>':fr1_pvalue,
+                '<SESSION_DATA>':latex_table(session_data),
+                '<FR5-AUC>':fr5_auc,
+                '<FR5-PERM-P-VALUE>':fr5_perm_pvalue,
+                '<ROC_AND_TERC_PLOT_FILE>':self.get_passed_object('ROC_AND_TERC_PLOT_FILE'),
+                '<REPORT_PAGES>':all_session_tex
             }
         )
         return fr5_tex
@@ -336,11 +344,12 @@ class GenerateReportPDF(ReportRamTask):
 
         report_tex_file_name = self.get_passed_object('report_tex_file_name')
 
-        pdflatex_command_str = texinputs_set_str \
-                               + 'module load Tex; pdflatex '\
+        pdflatex_command_str = texinputs_set_str + 'pdflatex' \
                                + ' -output-directory '+output_directory\
                                + ' -shell-escape ' \
                                + self.get_path_to_resource_in_workspace('reports/'+report_tex_file_name)
+
+    # + 'module load Tex; pdflatex '\
 
         call([pdflatex_command_str], shell=True)
 

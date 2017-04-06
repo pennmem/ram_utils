@@ -359,7 +359,7 @@ class ComputeClassifier(RamTask):
         joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject + '-pvalue.pkl'))
 
     def get_events(self):
-        return self.get_passed_object('FR_events')
+        return self.get_passed_object('FR1_events')
 
 
     def run(self):
@@ -416,6 +416,7 @@ class ComputeClassifier(RamTask):
 
         self.pvalue = np.nansum(self.perm_AUCs >= self.xval_output[-1].auc) / float(self.perm_AUCs[~np.isnan(self.perm_AUCs)].size)
         print 'Perm test p-value =', self.pvalue
+
 
         print 'thresh =', self.xval_output[-1].jstat_thresh, 'quantile =', self.xval_output[-1].jstat_quantile
 

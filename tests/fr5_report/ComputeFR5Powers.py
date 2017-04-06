@@ -75,6 +75,7 @@ class ComputeFR5Powers(ReportRamTask):
         bipolar_pairs = self.get_passed_object('reduced_pairs')
 
         self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
+        print 'self.pow_mat.shape:',self.pow_mat.shape
 
         self.pass_object('fr_stim_pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
@@ -111,6 +112,9 @@ class ComputeFR5Powers(ReportRamTask):
                 ev_order = np.argsort(events, order=('session','list','mstime'))
                 events = events[ev_order]
                 self.pass_object(self.pipeline.task+'_events', events)
+            print '%d events remaining'%len(sess_events)
+            print 'eeg.shape:',eegs.shape
+            assert len(sess_events) == eegs.shape[1]
 
 
             eegs = eegs.add_mirror_buffer(duration=self.params.fr1_buf)
@@ -157,5 +161,7 @@ class ComputeFR5Powers(ReportRamTask):
             sess_pow_mat = zscore(sess_pow_mat, axis=0, ddof=1)
 
             self.pow_mat = np.concatenate((self.pow_mat,sess_pow_mat), axis=0) if self.pow_mat is not None else sess_pow_mat
+            print 'self.pow_mat.shape:',self.pow_mat.shape
+            assert len(sess_pow_mat)==len(sess_events)
 
         self.pow_mat = np.reshape(self.pow_mat, (len(events), n_bps*n_freqs))

@@ -7,7 +7,7 @@ import time
 from operator import itemgetter
 
 from ReportUtils import ReportRamTask
-
+from scipy import stats
 
 def make_ttest_table(bp_tal_structs, ttest_results):
     contact_nos = bp_tal_structs.channel_1.str.lstrip('0') + '-' + bp_tal_structs.channel_2.str.lstrip('0')
@@ -30,6 +30,8 @@ def format_ttest_table(table_data):
 
 
 class ComposeSessionSummary(ReportRamTask):
+
+
     def __init__(self, params, mark_as_completed=True):
         super(ComposeSessionSummary,self).__init__(mark_as_completed)
         self.params = params
@@ -62,6 +64,8 @@ class ComposeSessionSummary(ReportRamTask):
         self.pass_object('NUMBER_OF_SESSIONS', len(sessions))
         self.pass_object('NUMBER_OF_ELECTRODES', len(monopolar_channels))
 
+        fr_stim_table = self.get_passed_object('fr_stim_table')
+
         session_data = []
 
         positions = np.unique(events.serialpos)
@@ -73,6 +77,7 @@ class ComposeSessionSummary(ReportRamTask):
         session_summary_array = []
 
         for session in sessions:
+            fr_stim_sess_table = fr_stim_table[events.session==session]
             session_summary = SessionSummary()
 
             session_events = events[events.session == session]

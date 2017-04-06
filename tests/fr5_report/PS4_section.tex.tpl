@@ -8,7 +8,7 @@
 \end{minipage}
 \begin{minipage}{0.5\textwidth}
 \begin{tabular}{|c|c|c|}
-\hline Session \# & Date & Length (min) \\
+\hline Session \# & Date & Length (min) & \# Lists \\
 <SESSION_DATA>
 \end{tabular}
 

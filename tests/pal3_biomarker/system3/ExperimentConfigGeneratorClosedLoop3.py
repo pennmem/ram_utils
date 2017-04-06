@@ -11,7 +11,7 @@ from subprocess import call
 from tornado.template import Template
 from glob import glob
 import shutil
-import pathlib
+import not_pathlib
 
 class ExperimentConfigGeneratorClosedLoop3(RamTask):
     def __init__(self, params, mark_as_completed=False):
@@ -58,7 +58,7 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
 
     def zipdir(self, path, ziph):
 
-        root_paths_parts = pathlib.Path(str(path)).parts
+        root_paths_parts = not_pathlib.Path(str(path)).parts
         root_path_len = len(root_paths_parts)
 
 
@@ -66,7 +66,7 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
         for root, dirs, files in os.walk(path):
             for file in files:
                 file_abspath= os.path.join(root, file)
-                file_abspath_segments = [x for x in pathlib.Path(str(file_abspath)).parts]
+                file_abspath_segments = [x for x in not_pathlib.Path(str(file_abspath)).parts]
 
                 # relative_path_segments = [x for x in  pathlib.Path(file_abspath).parts[root_path_len:]]
                 # relative_path_segments.append(basename(file_abspath))

@@ -6,6 +6,7 @@
 \usepackage{caption}
 \usepackage[skip=0pt]{subcaption}
 \usepackage{morefloats}
+\errorcontextlines 1000
 
 \addtolength{\oddsidemargin}{-.875in}
 \addtolength{\evensidemargin}{-.875in}
@@ -13,11 +14,11 @@
 \addtolength{\topmargin}{-.75in}
 \addtolength{\textheight}{1.75in}
 
-\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#! 1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{ <EXPERIMENT> report v 1.0}
+\lhead{ RAM <EXPERIMENT> report v 1.0}
 \chead{Subject: \textbf{ <SUBJECT> }}
 \rhead{Date created: <DATE>}
 \begin{document}

@@ -89,11 +89,11 @@ class EventReader(BaseEventReader):
 
         evs = evs.add_fields(esrc=np.dtype(RawBinWrapper))
 
-        import pathlib
+        import not_pathlib
 
         for ev in evs:
             try:
-                eeg_file_path = join(self.data_dir_prefix, str(pathlib.Path(str(ev.eegfile)).parts[1:]))
+                eeg_file_path = join(self.data_dir_prefix, str(not_pathlib.Path(str(ev.eegfile)).parts[1:]))
                 ev.esrc = RawBinWrapper(eeg_file_path)
                 self.raw_data_root=str(eeg_file_path)
             except TypeError:

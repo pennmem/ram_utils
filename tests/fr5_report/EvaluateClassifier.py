@@ -1,4 +1,4 @@
-import ComputeClassifier
+from ReportUtils import  ReportRamTask
 from ptsa.data.readers.IndexReader import JsonIndexReader
 from os import path
 import hashlib
@@ -9,9 +9,16 @@ import numpy as np
 from sklearn.metrics import roc_auc_score
 
 
-class EvaluateClassifier(ComputeClassifier):
+class EvaluateClassifier(ReportRamTask):
     def __init__(self,params,mark_as_completed=False):
-        super(EvaluateClassifier,self).__init__(params=params,mark_as_completed=mark_as_completed)
+        super(EvaluateClassifier,self).__init__(mark_as_completed=mark_as_completed)
+        self.params = params
+        self.pow_mat = None
+        self.lr_classifier = None
+        self.xval_output = dict()  # ModelOutput per session; xval_output[-1] is across all sessions
+        self.perm_AUCs = None
+        self.pvalue = None
+
 
     def input_hashsum(self):
         subject = self.pipeline.subject
@@ -58,6 +65,7 @@ class EvaluateClassifier(ComputeClassifier):
     def permuted_lolo_AUCs(self, events):
         n_perm = self.params.n_perm
         recalls = events.recalled
+        permuted_recalls = np.random.randint(2,size=recalls.shape)
         permuted_recalls = np.array(recalls)
         AUCs = np.empty(shape=n_perm, dtype=np.float)
         sessions = np.unique(events.session)
@@ -80,21 +88,22 @@ class EvaluateClassifier(ComputeClassifier):
         self.lr_classifier = self.get_passed_object('lr_classifier')
         events = self.get_passed_object(task+'_events')
         recalls = events.recalled
-        self.pow_mat = self.get_passed_object('fr_stim_pow_mat')[events.stim_list==False]
+        self.pow_mat = self.get_passed_object('fr_stim_pow_mat')
         print 'self.pow_mat.shape:',self.pow_mat.shape
-        events = events[events.stim_list==False]
-
-        if self.xval_test_type(events) == 'loso':
+        print 'len fr5_events:',len(events)
+        sessions = np.unique(events.session)
+        if len(sessions)>1:
             print 'Performing permutation test'
+            events = events[events.stim_list==False]
+
             self.perm_AUCs = self.permuted_loso_AUCs(events.session, recalls)
 
-            print 'Performing leave-one-session-out xval'
         else:
             print 'Performing in-session permutation test'
             self.perm_AUCs = self.permuted_lolo_AUCs(events)
 
 
-        probs = self.lr_classifier.predict_proba(events.recalled,self.pow_mat)
+        probs = self.lr_classifier.predict_proba(self.pow_mat)[:,1]
         self.xval_output[-1] = ModelOutput(recalls, probs)
         self.xval_output[-1].compute_roc()
         self.xval_output[-1].compute_tercile_stats()

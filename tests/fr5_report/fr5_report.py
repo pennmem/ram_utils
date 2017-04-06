@@ -1,10 +1,15 @@
 from ReportUtils import ReportPipeline,CMLParser
 
 import os
-
+import numpy as np
 
 parser = CMLParser()
 # Default-ish args here
+parser.arg('--subject','R1111M')
+parser.arg('--task','FR5')
+parser.arg('--workspace-dir','/Users/leond/fr5_reports')
+parser.arg('--mount-point','/Volumes/rhino_root')
+
 
 #
 args = parser.parse()
@@ -48,7 +53,8 @@ class Params(object):
         self.fr1_retrieval_end_time = 0.0
         self.fr1_retrieval_buf = 0.524
 
-        self.retrieval_samples_weight = 0.5
+        # self.retrieval_samples_weight = 0.5
+        self.encoding_samples_weight =2.5
 
 
         self.filt_order = 4
@@ -62,20 +68,6 @@ class Params(object):
 
         self.n_perm = 200
 
-        self.stim_params = StimParams(
-            n_channels=args.n_channels,
-            anode_num=args.anode_num,
-            anode_nums=args.anode_nums,
-            anode=args.anode,
-            anodes= args.anodes,
-            cathode_num=args.cathode_num,
-            cathode_nums=args.cathode_nums,
-            cathode=args.cathode,
-            cathodes=args.cathodes,
-            pulse_frequency=args.pulse_frequency,
-            pulse_count=args.pulse_frequency*args.pulse_duration/1000,
-            target_amplitude=args.target_amplitude
-        )
 
 params=Params()
 
@@ -84,6 +76,8 @@ from EventPreparation import FR1EventPreparation, PSEventPreparation,FR5EventPre
 from MontagePreparation import MontagePreparation
 
 from ComputeFR5Powers import ComputeFR5Powers
+
+from EvaluateClassifier import EvaluateClassifier
 
 # from ComputePSPowers import ComputePSPowers
 
@@ -117,11 +111,11 @@ report_pipeline.add_task(ComputeFR5Powers(params=params,mark_as_completed=True))
 
 report_pipeline.add_task(ComputeClassifier(params=params,mark_as_completed=True))
 
-# report_pipeline.add_task(EvaluateClassifier)
+report_pipeline.add_task(EvaluateClassifier(params=params,mark_as_completed=True))
 
-report_pipeline.add_task(ComputeFRStimTable(mark_as_completed=True))
+report_pipeline.add_task(ComputeFRStimTable(params=params,mark_as_completed=False))
 
-report_pipeline.add_task(ComposeSessionSummary(params=params,mark_as_completed=True))
+report_pipeline.add_task(ComposeSessionSummary(params=params,mark_as_completed=False))
 
 report_pipeline.add_task(GeneratePlots())
 

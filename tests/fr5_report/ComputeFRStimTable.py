@@ -7,7 +7,6 @@ from sklearn.externals import joblib
 
 from ReportUtils import ReportRamTask
 from ptsa.data.readers.IndexReader import JsonIndexReader
-from parse_biomarker_output import parse_biomarker_output
 
 import hashlib
 
@@ -72,8 +71,8 @@ class ComputeFRStimTable(ReportRamTask):
     def run(self):
         bp_tal_structs = self.get_passed_object('bp_tal_structs')
 
-        all_events = self.get_passed_object('FR_all_events')
-        events = self.get_passed_object('FR_events')
+        all_events = self.get_passed_object('all_events')
+        events = self.get_passed_object('FR5_events')
 
         n_events = len(events)
 
@@ -89,16 +88,17 @@ class ComputeFRStimTable(ReportRamTask):
         is_post_stim_item = np.zeros(n_events, dtype=np.bool)
         j = 0
         for i,ev in enumerate(all_events):
-            if ev.type=='WORD':
-                if (all_events[i+1].type=='STIM_ON') or (all_events[i+1].type=='WORD_OFF' and (all_events[i+2].type=='STIM_ON' or (all_events[i+2].type=='DISTRACT_START' and all_events[i+3].type=='STIM_ON'))):
-                    is_stim_item[j] = True
-                if ( (all_events[i-1].type=='STIM_OFF') or (all_events[i+1].type=='STIM_OFF')
-                     or (all_events[i-2].type=='STIM_OFF' and all_events[i-1].type=='WORD_OFF')):
-                    is_post_stim_item[j] = True
-                j += 1
+            if (events==ev).any():
+                if ev.type=='WORD':
+                    if (all_events[i+1].type=='STIM_ON') or (all_events[i+1].type=='WORD_OFF' and (all_events[i+2].type=='STIM_ON' or (all_events[i+2].type=='DISTRACT_START' and all_events[i+3].type=='STIM_ON'))):
+                        is_stim_item[j] = True
+                    if ( (all_events[i-1].type=='STIM_OFF') or (all_events[i+1].type=='STIM_OFF')
+                         or (all_events[i-2].type=='STIM_OFF' and all_events[i-1].type=='WORD_OFF')):
+                        is_post_stim_item[j] = True
+                    j += 1
         print is_post_stim_item.astype(float).sum()
 
-        self.fr_stim_table = pd.DataFrame()
+        self.fr_stim_table = pd.DataFrame.from_records([e for e in events],columns=events.dtype.names)
         self.fr_stim_table['item'] = events.item_name
         self.fr_stim_table['session'] = events.session
         self.fr_stim_table['list'] = events.list
@@ -113,6 +113,8 @@ class ComputeFRStimTable(ReportRamTask):
         self.stim_params_to_sess = dict()
         self.sess_to_thresh = dict()
 
+
+        is_ps4 = np.empty(n_events,dtype='bool')
         sessions = np.unique(events.session)
         for sess in sessions:
             # sess_mask = (events.session==sess)
@@ -121,6 +123,9 @@ class ComputeFRStimTable(ReportRamTask):
             # if len(sess_prob) == np.sum(sess_mask):
             #     fr_stim_prob[sess_mask] = sess_prob  # plug biomarker output
             # self.fr_stim_table.loc[sess_mask,'thresh'] = thresh
+            sess_events = events[events.session==sess]
+            self.fr_stim_table.loc[events.session==sess,'is_ps4'] = (sess_events.phase=='PS').any()
+
 
             sess_stim_events = all_events[(all_events.session==sess) & (all_events.type=='STIM_ON')]
             sess_stim_event = sess_stim_events[-1]
@@ -153,6 +158,8 @@ class ComputeFRStimTable(ReportRamTask):
         amplitude = np.empty(n_events, dtype=float)
         pulse_duration = np.empty(n_events, dtype=int)
         burst_frequency = np.empty(n_events, dtype=int)
+        is_ps4 = np.empty_like(pulse_duration)
+
 
         for stim_params,sessions in self.stim_params_to_sess.iteritems():
             sessions_mask = np.array([(ev.session in sessions) for ev in events], dtype=np.bool)

@@ -211,8 +211,8 @@ class DataLayoutJSONUtils(object):
 
     def walk_subject_directory(self,subject_dir):
 
-        import pathlib
-        pathlib_path_parts = pathlib.Path(subject_dir).parts
+        import not_pathlib
+        pathlib_path_parts = not_pathlib.Path(subject_dir).parts
         print pathlib_path_parts
 
         partial_path_cutoff_index=0
@@ -234,7 +234,7 @@ class DataLayoutJSONUtils(object):
             # print (len(path) - 1) *'---' , os.path.basename(root)
             print 'root=',root
             for file in files:
-                root_path_parts = pathlib.Path(subject_dir).parts
+                root_path_parts = not_pathlib.Path(subject_dir).parts
                 full_file_path = join(root,file)
                 relative_file_path = join(root_path_parts[partial_path_cutoff_index:])
                 print 'relative_file_path=',relative_file_path
@@ -244,7 +244,7 @@ class DataLayoutJSONUtils(object):
                 print root_path_parts[partial_path_cutoff_index:]
                 print
 
-                for elem_name in pathlib.Path(root_path_parts[partial_path_cutoff_index:]).parts:
+                for elem_name in not_pathlib.Path(root_path_parts[partial_path_cutoff_index:]).parts:
                     print elem_name
 
                     try:
