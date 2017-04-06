@@ -34,6 +34,7 @@ def compute_powers(events,monopolar_channels,bipolar_pairs,
         # Load EEG
         eeg_reader = EEGReader(events=sess_events,channels=monopolar_channels,start_time=start_time,end_time=end_time)
         eeg = eeg_reader.read()
+        samplerate = eeg['samplerate']
         if eeg_reader.removed_bad_data():
             print 'REMOVED SOME BAD EVENTS !!!'
             events = np.concatenate((events[events.session !=sess],eeg['events'].data.view(np.recarray))).view(np.recarray)
@@ -48,6 +49,7 @@ def compute_powers(events,monopolar_channels,bipolar_pairs,
         eeg= MonopolarToBipolarMapper(time_series=eeg,bipolar_pairs=bipolar_pairs).filter()
         #Butterworth filter to remove line noise
         eeg=eeg.filtered(freq_range=[58.,62.],filt_type='stop',order=filt_order)
+        eeg['samplerate'] = samplerate
         print 'Computing powers'
         filter_tic=time.time()
         sess_pow_mat,phase_mat=MorletWaveletFilterCpp(time_series=eeg,freqs = freqs,output='power', width=width,
