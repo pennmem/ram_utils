@@ -67,8 +67,6 @@ class ComposeSessionSummary(ReportRamTask):
         self.pass_object('NUMBER_OF_SESSIONS', len(sessions))
         self.pass_object('NUMBER_OF_ELECTRODES', len(monopolar_channels))
 
-        fr_stim_table = self.get_passed_object('fr_stim_table')
-
         session_data = []
 
         positions = np.unique(events.serialpos)
@@ -80,7 +78,6 @@ class ComposeSessionSummary(ReportRamTask):
         session_summary_array = []
 
         for session in sessions:
-            fr_stim_sess_table = fr_stim_table[events.session==session]
             session_summary = SessionSummary()
 
             session_events = events[events.session == session]

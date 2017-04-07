@@ -112,10 +112,11 @@ class MontagePreparation(RamTask):
         bp_tags = []
         bp_tal_structs = []
         for bp_tag,bp_data in bipolar_data.iteritems():
-            bp_tags.append(bp_tag)
             ch1 = bp_data['channel_1']
             ch2 = bp_data['channel_2']
-            bp_tal_structs.append(['%03d'%ch1, '%03d'%ch2, bp_data['type_1'], atlas_location(bp_data)])
+            if not( ch1>60 and ch1<65) and not (ch2>60 and ch2<65):
+                bp_tags.append(bp_tag)
+                bp_tal_structs.append(['%03d'%ch1, '%03d'%ch2, bp_data['type_1'], atlas_location(bp_data)])
 
 
         bp_tal_structs = pd.DataFrame(bp_tal_structs, index=bp_tags, columns=['channel_1', 'channel_2', 'etype', 'bp_atlas_loc'])
@@ -137,6 +138,8 @@ class MontagePreparation(RamTask):
         stim_pairs = anode_nums+cathode_nums
         bipolar_pairs = np.array(bipolar_pairs, dtype=[('ch0', 'S3'), ('ch1', 'S3')]).view(np.recarray)
         include = [int(bp.ch0) not in stim_pairs and int(bp.ch1) not in stim_pairs for bp in bipolar_pairs]
+
+
 
         reduced_pairs = bipolar_pairs[np.array(include)]
         self.pass_object('reduced_pairs', reduced_pairs)

@@ -42,7 +42,7 @@ $<N_MATH>$ math problems & $<N_CORRECT_MATH>$ correct ($<PC_CORRECT_MATH>$\%) & 
 \hline
 $<N_CORRECT_STIM>/<N_TOTAL_STIM>$ ($<PC_FROM_STIM>$\%) from stim lists & $<N_CORRECT_NONSTIM>/<N_TOTAL_NONSTIM>$ ($<PC_FROM_NONSTIM>$\%) from <COMPARISON_LIST_TYPE> lists & $\chi^2(1)=<CHISQR>$ & $p=<PVALUE>$ \\
 \hline
- % <ITEMLEVEL_COMPARISON>
+<ITEMLEVEL_COMPARISON>
 \end{tabular}
 \end{table}
 
@@ -63,7 +63,11 @@ $<N_STIM_INTR>/<N_TOTAL_STIM>$ ($<PC_FROM_STIM_INTR>$\%) from stim lists & $<N_N
 \begin{figure}[!h]
 \centering
 \includegraphics[height=0.25\textheight]{<STIM_AND_RECALL_PLOT_FILE>}
-\caption*{\textbf{Stim and recall:} Number of stims and recalled items per list. Red circles represent the number of recalled items from stim lists. Blue circles represent the number of recalled items from non-stim lists. Bars represent the number of stims per list.}
+\caption*{\textbf{Stim and recall:} Number of stims and recalled items per list.
+Red circles represent the number of recalled items from stim lists.
+Blue circles represent the number of recalled items from non-stim lists.
+Grey circles represent the number of recalled items from parameter search lists.
+Bars represent the number of stims per list.}
 \textbf{Probability of Stimulation}
 \end{figure}
 \begin{figure}[!h]

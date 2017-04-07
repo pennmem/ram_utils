@@ -1,7 +1,7 @@
 __author__ = 'm'
 
 from os.path import *
-import not_pathlib
+import pathlib
 from ptsa.data.rawbinwrapper import RawBinWrapper
 from ptsa.data.events import Events
 import numpy as np
@@ -29,7 +29,7 @@ class TimeSeriesEEGReader(object):
         raw_bin_wrappers = np.empty([len(evs),], dtype=np.dtype(RawBinWrapper))
         for i, ev in enumerate(evs):
             try:
-                eeg_file_path = join(self.data_dir_prefix, str(not_pathlib.Path(str(ev.eegfile)).parts[1:]))
+                eeg_file_path = join(self.data_dir_prefix, str(pathlib.Path(str(ev.eegfile)).parts[1:]))
                 raw_bin_wrappers[i] = RawBinWrapper(eeg_file_path)
                 #setting samplerate
                 if self.samplerate is None:

@@ -33,6 +33,7 @@ class FR5SessionSummary(object):
         self.N_NONSTIM_INTR = ''
         self.N_TOTAL_NONSTIM = ''
         self.PC_FROM_NONSTIM_INTR = ''
+        self.chisqr_last = -999
         self.prob_stim_recall = []
         self.prob_nostim_recall = []
         self.prob_first_stim_recall = []

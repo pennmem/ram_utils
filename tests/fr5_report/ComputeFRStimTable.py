@@ -69,10 +69,11 @@ class ComputeFRStimTable(ReportRamTask):
         self.pass_object('fr_stim_table', self.fr_stim_table)
 
     def run(self):
+        task = self.pipeline.task
         bp_tal_structs = self.get_passed_object('bp_tal_structs')
 
         all_events = self.get_passed_object('all_events')
-        events = self.get_passed_object('FR5_events')
+        events = self.get_passed_object(task+'_events')
 
         n_events = len(events)
 
@@ -104,7 +105,7 @@ class ComputeFRStimTable(ReportRamTask):
         self.fr_stim_table['list'] = events.list
         self.fr_stim_table['serialpos'] = events.serialpos
         self.fr_stim_table['itemno'] = events.item_num
-        self.fr_stim_table['is_stim_list'] = [(s==1) for s in events.stim_list]
+        self.fr_stim_table['is_stim_list'] = [(e.phase=='STIM' or e.phase=='PS') for e in events]
         self.fr_stim_table['is_stim_item'] = is_stim_item
         self.fr_stim_table['is_post_stim_item'] = is_post_stim_item
         self.fr_stim_table['recalled'] = events.recalled

@@ -116,7 +116,8 @@ class FR5EventPreparation(ReportRamTask):
     def __init__(self):
         super(FR5EventPreparation,self).__init__(mark_as_completed=False)
     def run(self):
-        jr = JsonIndexReader(os.path.join('/Users/leond','protocols','r1.json'))
+        # jr = JsonIndexReader(os.path.join('/Users/leond','protocols','r1.json')) #
+        jr  = JsonIndexReader(os.path.join(self.pipeline.mount_point,'protocols','r1.json'))
         temp=self.pipeline.subject.split('_')
         subject= temp[0]
         montage = 0 if len(temp)==1 else temp[1]
@@ -124,6 +125,7 @@ class FR5EventPreparation(ReportRamTask):
 
         events = [ BaseEventReader(filename=event_path).read() for event_path in
                                 jr.aggregate_values('task_events',subject=subject,montage=montage,experiment=task)]
+
 
         if events:
             events = np.concatenate(events).view(np.recarray)
@@ -135,8 +137,15 @@ class FR5EventPreparation(ReportRamTask):
         self.pass_object('all_events', events)
 
         math_events = BaseEventReader(
-            filename=JsonIndexReader('/Users/leond/protocols/r1.json').get_value('math_events',subject='R1234D',experiment='FR5')
-        ).read()
+            filename=jr.get_value('math_events',subject=subject,experiment=task,
+                                                                                 montage=montage)
+        ).read()#
+        math_events = math_events[math_events.type=='PROB']
+
+        ps_events = [BaseEventReader(filename=event_path,eliminate_events_with_no_eeg=False).read()
+                     for event_path in jr.aggregate_values('ps4_events',subject=subject,experiment=task,montage=montage)]
+        if ps_events:
+            ps_events = np.concatenate(ps_events).view(np.recarray)
 
         rec_events = events[events.type == 'REC_WORD']
 
@@ -165,6 +174,7 @@ class FR5EventPreparation(ReportRamTask):
         self.pass_object('FR_math_events', math_events)
         self.pass_object('FR_intr_events', intr_events)
         self.pass_object('FR_rec_events', rec_events)
+        self.pass_object('ps_events',ps_events)
 
         self.pass_object(task+'_events',filtered_events)
 
@@ -224,14 +234,15 @@ class PSEventPreparation(ReportRamTask):
         super(PSEventPreparation,self).__init__(mark_as_completed=False)
 
     def run(self):
-        jr = JsonIndexReader(os.path.join('/Users','leond','protocols','r1.json'))
+        # jr = JsonIndexReader(os.path.join('/Users','leond','protocols','r1.json'))
+        jr = JsonIndexReader(os.path.join(self.pipeline.mount_point,'protocols','r1.json'))
         temp=self.pipeline.subject.split('_')
         subject= temp[0]
         montage = 0 if len(temp)==1 else temp[1]
 
-        events = np.concatenate([ BaseEventReader(filename=event_path,eliminate_events_with_no_eeg=False).read() for event_path in
-                                jr.aggregate_values('task_events',subject=subject,experiment='PS4')])
-        events = events.view(np.recarray)
+        events = [ BaseEventReader(filename=event_path,eliminate_events_with_no_eeg=False).read() for event_path in
+                                jr.aggregate_values('task_events',subject=subject,montage=montage,experiment='PS4')]
+        if len(events):
+            events = np.concatenate(events).view(np.recarray)
         self.pass_object('ps_events',events)
-
 

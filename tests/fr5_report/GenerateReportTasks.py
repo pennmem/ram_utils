@@ -28,6 +28,7 @@ class GeneratePlots(ReportRamTask):
         ps_events = self.get_passed_object('ps_events')
         ps_sessions = np.unique(ps_events.session)
         ps4_session_summaries = self.get_passed_object('ps_session_summary')
+        # ps4_session_summaries = False
         if ps4_session_summaries:
             for session in ps_sessions:
 
@@ -41,7 +42,7 @@ class GeneratePlots(ReportRamTask):
                 panel_plot.add_plot_data(0,0,x=session_summary.amplitudes[0],y=session_summary.delta_classifiers[0],
                                          xlim=(xmin-50,xmax+50),ylim = (ymin-0.05,ymax+0.05),
                                          linestyle='',marker='x',color='blue', xlabel=session_summary.locations[0],
-                                         xlabel_fontsize = 18, ylabel = 'Classifier Response',ylabel_fontsize = 24)
+                                         xlabel_fontsize = 18, ylabel = 'Change in classifier output (post - pre)',ylabel_fontsize = 24)
                 panel_plot.add_plot_data(0,1,x=session_summary.amplitudes[1], y=session_summary.delta_classifiers[1],
                                          xlim=(xmin-50, xmax+50), ylim=(ymin - 0.05, ymax + 0.05),
                                          linestyle = '',marker='x',color='blue',xlabel=session_summary.locations[1],
@@ -51,7 +52,7 @@ class GeneratePlots(ReportRamTask):
                 plt.savefig(session_summary.PS_PLOT_FILE,dpi=300)
 
 
-        fr5_events = self.get_passed_object('FR5_events')
+        fr5_events = self.get_passed_object(task+'_events')
         fr5_session_summaries = self.get_passed_object('fr_session_summary')
         if fr5_session_summaries:
 
@@ -164,18 +165,25 @@ class GeneratePlots(ReportRamTask):
                 stim_y = session_summary.n_recalls_per_list[session_summary.is_stim_list]
                 pd_1 = PlotData(x=stim_x, y=stim_y, ylim=(0, 12),
                                 title='', linestyle='', color='red', marker='o', markersize=12)
+                plot_data_list = [bpd_1,pd_1]
+                if session_summary.is_stim_list.all():
+                    nostim_x = np.where(session_summary.is_ps_list)[0]
+                    nostim_y = session_summary.n_recalls_per_list[session_summary.is_ps_list]
+                    pd_2 = PlotData(x=nostim_x, y=nostim_y, ylim=(0, 12),
+                                    title='', linestyle='', color='grey', marker='o', markersize=12)
+                    baseline_x = np.where(session_summary.is_baseline_list)[0]
+                    baseline_y = session_summary.n_recalls_per_list[np.array(session_summary.is_baseline_list)]
+                    pd_3 = PlotData(x=baseline_x, y=baseline_y, ylim=(0, 12),
+                                    title='', linestyle='', color='blue', marker='o', markersize=12)
+                    plot_data_list.extend([pd_2,pd_3])
+                else:
+                    nostim_x = np.where(session_summary.is_nonstim_list)[0]
+                    nostim_y = session_summary.n_recalls_per_list[session_summary.is_nonstim_list]
+                    pd_2 = PlotData(x=nostim_x, y=nostim_y, ylim=(0, 12),
+                                    title='', linestyle='', color='blue', marker='o', markersize=12)
+                    plot_data_list.append(pd_2)
 
-                nostim_x = np.where(session_summary.is_ps_list)[0]
-                nostim_y = session_summary.n_recalls_per_list[session_summary.is_ps_list]
-                pd_2 = PlotData(x=nostim_x, y=nostim_y, ylim=(0, 12),
-                                title='', linestyle='', color='grey', marker='o', markersize=12)
-
-                baseline_x = np.where(session_summary.is_baseline_list)[0]
-                baseline_y = session_summary.n_recalls_per_list[np.array(session_summary.is_baseline_list)]
-                pd_3 = PlotData(x=baseline_x, y=baseline_y, ylim=(0, 12),
-                                title='', linestyle='', color='blue', marker='o', markersize=12)
-
-                for pd in [pd_1,pd_2,pd_3,bpd_1]:
+                for pd in plot_data_list:
                     if (pd.x.shape and pd.y.shape) and all(pd.x.shape) and all(pd.y.shape):
                         print pd.x.shape
                         print pd.y.shape
@@ -215,7 +223,6 @@ class GenerateTex(ReportRamTask):
         date = datetime.date.today()
 
         ps_latex = self.generate_ps_latex()
-
         fr5_latex = self.generate_fr5_latex()
 
         replace_template('ps4_fr5_report_base.tex.tpl',self.get_path_to_resource_in_workspace('reports','ps4_fr5_report.tex'),
@@ -288,6 +295,7 @@ class GenerateTex(ReportRamTask):
 
         fr5_session_summary = self.get_passed_object('fr_session_summary')
         all_session_tex = ''
+
         if fr5_events is not None and all(fr5_events.shape):
 
             for session in np.unique(fr5_events.session):
@@ -304,6 +312,7 @@ class GenerateTex(ReportRamTask):
 
                                                              })
                                    if session_summary.dprime != -999 else '')
+                item_level_comparison = '' #if session_summary.chisqr_last == -999 else latex_table(session_summary.last_recall_table)
                 session_tex = replace_template_to_string('fr5_session.tex.tpl',
                              {
                                  '<SESSIONS>':          session,
@@ -328,9 +337,10 @@ class GenerateTex(ReportRamTask):
                                  '<N_TOTAL_NONSTIM>':session_summary.n_total_nonstim,
                                  '<PC_FROM_STIM>':'%2.2f'%session_summary.pc_from_stim,
                                  '<PC_FROM_NONSTIM>':'%2.2f'%session_summary.pc_from_nonstim,
-                                 '<COMPARISON_LIST_TYPE>': 'non-stim' if ((fr5_events.session==session) & ~(fr5_events.stim_list)).any() else 'open-loop',
-                                 '<CHISQR>':'%.4d'%session_summary.chisqr,
-                                 '<PVALUE>':'%.4d'%session_summary.pvalue,
+                                 '<COMPARISON_LIST_TYPE>': 'non-stim' if ((fr5_events.session==session) & (fr5_events.phase=='NON-STIM')).any() else 'FR1',
+                                 '<ITEMLEVEL_COMPARISON>': item_level_comparison,
+                                 '<CHISQR>':'%.4f'%session_summary.chisqr,
+                                 '<PVALUE>':'%.4f'%session_summary.pvalue,
                                  '<N_STIM_INTR>': session_summary.n_stim_intr,
                                  '<PC_FROM_STIM_INTR>':'%2.2f'%session_summary.pc_from_stim_intr,
                                  '<N_NONSTIM_INTR>':session_summary.n_nonstim_intr,
@@ -349,10 +359,10 @@ class GenerateTex(ReportRamTask):
                 '<NUMBER_OF_ELECTRODES>':len(monopolar_channels),
                 '<NUMBER_OF_SESSIONS>':n_sessions,
                 '<AUC>':'%2.2f'%fr1_auc,
-                '<PERM-P-VALUE>':fr1_pvalue,
+                '<PERM-P-VALUE>':fr1_pvalue if fr1_pvalue>0 else '<0.01',
                 '<SESSION_DATA>':latex_table(session_data),
                 '<FR5-AUC>':'%2.2f'%fr5_auc,
-                '<FR5-PERM-P-VALUE>':fr5_perm_pvalue,
+                '<FR5-PERM-P-VALUE>':fr5_perm_pvalue if fr5_perm_pvalue>0 else '<0.01',
                 '<ROC_AND_TERC_PLOT_FILE>':self.get_passed_object('ROC_AND_TERC_PLOT_FILE'),
                 '<REPORT_PAGES>':all_session_tex
             }
