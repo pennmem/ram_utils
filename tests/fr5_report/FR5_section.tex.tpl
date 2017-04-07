@@ -6,7 +6,7 @@ In the free recall task, participants are presented with a list of words, one af
 \begin{itemize}
     \item\textbf{Number of sessions: }$<NUMBER_OF_SESSIONS>$
     \item\textbf{Number of electrodes: }$<NUMBER_OF_ELECTRODES>$
-    \item\textbf{FR1 Area Under Curve: }$<AUC>$\%
+    \item\textbf{FR1 Area Under Curve: }$<AUC>$
     \item\textbf{FR1 Permutation test $p$-value:} $<PERM-P-VALUE>$
     \end{itemize}
 \end{minipage}
@@ -32,7 +32,7 @@ percentage devation from the (subject) mean, separated by tercile
 of the classifier encoding efficiency estimate for each encoded word.}
 \end{figure}
 
-$\bullet$ Area Under Curve = $<FR5-AUC>$\%
+$\bullet$ Area Under Curve = $<FR5-AUC>$
 
 $\bullet$ Permutation test $p$-value $<FR5-PERM-P-VALUE>$
 

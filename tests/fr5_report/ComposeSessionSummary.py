@@ -30,8 +30,8 @@ class ComposeSessionSummary(ReportRamTask):
 
 
     def run(self):
-        self.compose_fr_session_summary()
         self.compose_ps_session_summary()
+        self.compose_fr_session_summary()
 
     def compose_ps_session_summary(self):
         events = self.get_passed_object('ps_events')
@@ -53,9 +53,16 @@ class ComposeSessionSummary(ReportRamTask):
 
             session_summary = PS4SessionSummary()
             for (i,(location,loc_events)) in enumerate(sess_events.groupby(['anode_label','cathode_label'])):
-                    session_summary.locations.append('%s-%s'.format(*location))
-                    session_summary.amplitudes = [event.amplitude for event in loc_events.loc[loc_events.type=='OPTIMIZATION']]
-                    session_summary.delta_classifiers = [event.delta_classifier for event in loc_events.loc[loc_events.type=='OPTIMIZATION']]
+                session_summary.locations.append('%s-%s'%(location[0],location[1]))
+                opts = loc_events.loc[loc_events['type']=='OPTIMIZATION']
+                session_summary.amplitudes.append(opts['amplitude'].values)
+                session_summary.delta_classifiers.append(opts['delta_classifier'].values)
+                if (loc_events['type']=='OPTIMIZATION_DECISION').any():
+                    decision_event = loc_events.loc[loc_events['type']=='OPTIMIZATION_DECISION']
+                    session_summary.preferred_location = decision_event['location']
+                    session_summary.preferred_amplitude = decision_event['amplitude']
+                    session_summary.tstat = decision_event['tstat']
+                    session_summary.pvalue = decision_event['pvalue']
             ps_session_summaries.append(session_summary)
 
         self.pass_object('ps_session_data',session_data)
@@ -114,6 +121,7 @@ class ComposeSessionSummary(ReportRamTask):
                 print 'Stim param: ',stim_param
                 session_summary = FR5SessionSummary()
 
+
                 session_summary.sessions = sorted(fr_stim_session_table.session.unique())
                 session_summary.stimtag = fr_stim_session_table.stimAnodeTag.values[0] + '-' + fr_stim_session_table.stimCathodeTag.values[0]
                 session_summary.region_of_interest = fr_stim_session_table.Region.values[0]
@@ -121,7 +129,7 @@ class ComposeSessionSummary(ReportRamTask):
                 session_summary.n_words = len(fr_stim_session_table)
                 session_summary.n_correct_words = fr_stim_session_table.recalled.sum()
                 session_summary.pc_correct_words = 100*session_summary.n_correct_words / float(session_summary.n_words)
-
+                session_summary.amplitude = fr_stim_session_table['Amplitude'].values[-1]
 
                 sess_sel = lambda x: np.in1d(x,session_summary.sessions)
                 sess_rec_events = rec_events[sess_sel(rec_events.session)]

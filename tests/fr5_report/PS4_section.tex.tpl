@@ -7,10 +7,11 @@
 \end{itemize}
 \end{minipage}
 \begin{minipage}{0.5\textwidth}
-\begin{tabular}{|c|c|c|}
+\begin{tabular}{|l|c|c|c|}
 \hline Session \# & Date & Length (min) & \# Lists \\
 <SESSION_DATA>
 \end{tabular}
+\end{minipage}
 
 <PS4_SESSION_PAGES>
 

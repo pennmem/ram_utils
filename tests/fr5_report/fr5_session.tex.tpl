@@ -1,7 +1,7 @@
 \clearpage
 
 \begin{center}
-\textbf{\Large <STIMTAG> (<REGION>), 200 Hz, <AMPLITUDE> $\mu$A , Session(s): <SESSIONS>}
+\textbf{\Large <STIMTAG> (<REGION>), 200 Hz, <AMPLITUDE> mA , Session(s): <SESSIONS>}
 \end{center}
 
 \begin{table}[!h]
@@ -24,13 +24,12 @@ $<N_MATH>$ math problems & $<N_CORRECT_MATH>$ correct ($<PC_CORRECT_MATH>$\%) & 
 \caption{After each list, the patient was given 20 seconds to perform as many arithmetic problems as possible, which served as a distractor before the beginning of recall.}
 \end{table}
 
+<RECOGNITION>
+
 \begin{figure}[!h]
 \centering
 \textbf{Probability of Recall}
-
-\subfigure{
-    \includegraphics[scale=0.4]{<PROB_RECALL_PLOT_FILE>}
-    }
+\includegraphics[scale=0.4]{<PROB_RECALL_PLOT_FILE>}
 \caption{\textbf{Free recall:}
 (a) Overall probability of recall as a function of serial position.
 (b) Probability of first recall as a function of serial position.}
@@ -43,7 +42,7 @@ $<N_MATH>$ math problems & $<N_CORRECT_MATH>$ correct ($<PC_CORRECT_MATH>$\%) & 
 \hline
 $<N_CORRECT_STIM>/<N_TOTAL_STIM>$ ($<PC_FROM_STIM>$\%) from stim lists & $<N_CORRECT_NONSTIM>/<N_TOTAL_NONSTIM>$ ($<PC_FROM_NONSTIM>$\%) from <COMPARISON_LIST_TYPE> lists & $\chi^2(1)=<CHISQR>$ & $p=<PVALUE>$ \\
 \hline
- <ITEMLEVEL_COMPARISON>
+ % <ITEMLEVEL_COMPARISON>
 \end{tabular}
 \end{table}
 
@@ -61,27 +60,18 @@ $<N_STIM_INTR>/<N_TOTAL_STIM>$ ($<PC_FROM_STIM_INTR>$\%) from stim lists & $<N_N
 \begin{center}
 \textbf{\Large Stim and recall analysis}
 \end{center}
-
 \begin{figure}[!h]
 \centering
-\subfigure{\includegraphics[height=0.25\textheight]{<STIM_AND_RECALL_PLOT_FILE>}}
+\includegraphics[height=0.25\textheight]{<STIM_AND_RECALL_PLOT_FILE>}
 \caption*{\textbf{Stim and recall:} Number of stims and recalled items per list. Red circles represent the number of recalled items from stim lists. Blue circles represent the number of recalled items from non-stim lists. Bars represent the number of stims per list.}
 \textbf{Probability of Stimulation}
-
-\subfigure{\includegraphics[scale=0.3]{<PROB_STIM_PLOT_FILE>}}
+\end{figure}
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.3]{<PROB_STIM_PLOT_FILE>}
 \caption*{Probability of stimulation as a function of serial position.}
 \end{figure}
-
 <BIOMARKER_PLOTS>
 
 
-\begin{table}[!h]
-\centering
-\begin{tabular}{c|c|c}
-\multicolumn{3}{c}{\textbf{Recognition performance}} \\
-\hline
-$<PHITS_STIM>$\% hit rate from stim lists & $<PHITS_NO_STIM>$ hit rate from non-stim lists & $<PFALSE_ALARMS>$ false alarm rate & $<DPRIME>$ d'  \\ \hline
-\end{tabular}
-\caption{After each session, the subject was given a recognition task with all words shown in the middle 18 lists as targets and 54 novel words as lures.}
-\end{table}
 

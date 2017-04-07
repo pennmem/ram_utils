@@ -123,7 +123,7 @@ class FR5EventPreparation(ReportRamTask):
         task = self.pipeline.task
 
         events = [ BaseEventReader(filename=event_path).read() for event_path in
-                                jr.aggregate_values('all_events',subject=subject,montage=montage,experiment=task)]
+                                jr.aggregate_values('task_events',subject=subject,montage=montage,experiment=task)]
 
         if events:
             events = np.concatenate(events).view(np.recarray)

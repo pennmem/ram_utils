@@ -86,16 +86,16 @@ class ComputeFRStimTable(ReportRamTask):
 
         is_stim_item = np.zeros(n_events, dtype=np.bool)
         is_post_stim_item = np.zeros(n_events, dtype=np.bool)
+
         j = 0
         for i,ev in enumerate(all_events):
-            if (events==ev).any():
-                if ev.type=='WORD':
-                    if (all_events[i+1].type=='STIM_ON') or (all_events[i+1].type=='WORD_OFF' and (all_events[i+2].type=='STIM_ON' or (all_events[i+2].type=='DISTRACT_START' and all_events[i+3].type=='STIM_ON'))):
-                        is_stim_item[j] = True
-                    if ( (all_events[i-1].type=='STIM_OFF') or (all_events[i+1].type=='STIM_OFF')
-                         or (all_events[i-2].type=='STIM_OFF' and all_events[i-1].type=='WORD_OFF')):
-                        is_post_stim_item[j] = True
-                    j += 1
+            if ev.type=='WORD':
+                if (all_events[i+1].type=='STIM_ON') or (all_events[i+1].type=='WORD_OFF' and (all_events[i+2].type=='STIM_ON' or (all_events[i+2].type=='DISTRACT_START' and all_events[i+3].type=='STIM_ON'))):
+                    is_stim_item[j] = True
+                if ( (all_events[i-1].type=='STIM_OFF') or (all_events[i+1].type=='STIM_OFF')
+                     or (all_events[i-2].type=='STIM_OFF' and all_events[i-1].type=='WORD_OFF')):
+                    is_post_stim_item[j] = True
+                j += 1
         print is_post_stim_item.astype(float).sum()
 
         self.fr_stim_table = pd.DataFrame.from_records([e for e in events],columns=events.dtype.names)

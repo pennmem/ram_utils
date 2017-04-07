@@ -57,3 +57,7 @@ class PS4SessionSummary(object):
         self.amplitudes = []
         self.delta_classifiers = []
         self.PS_PLOT_FILE = ''
+        self.preferred_location = ''
+        self.preferred_amplitude = 0.
+        self.pvalue = 0.
+        self.tstat = 0.

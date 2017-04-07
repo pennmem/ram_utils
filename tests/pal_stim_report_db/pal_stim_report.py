@@ -5,9 +5,9 @@ from ReportUtils import CMLParser,ReportPipeline
 
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1175N')
+cml_parser.arg('--subject','R1263C')
 cml_parser.arg('--task','RAM_PAL3')
-cml_parser.arg('--workspace-dir','/scratch/busygin/PAL3_reports_db')
+cml_parser.arg('--workspace-dir','/scratch/leond/PAL3_reports_db')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
 
