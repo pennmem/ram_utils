@@ -3,13 +3,13 @@ from ptsa.data.readers.IndexReader import JsonIndexReader
 from os import path
 import hashlib
 from sklearn.externals import joblib
-from ReportTasks.RamTaskMethods import run_lolo_xval,run_loso_xval
+from ReportTasks.RamTaskMethods import ModelOutput
 from random import shuffle
 import numpy as np
 from sklearn.metrics import roc_auc_score
 
 
-class EvaluateClassifier(ComputeClassifier.ComputeClassifier):
+class EvaluateClassifier(ComputeClassifier):
     def __init__(self,params,mark_as_completed=False):
         super(EvaluateClassifier,self).__init__(params=params,mark_as_completed=mark_as_completed)
 
@@ -89,14 +89,16 @@ class EvaluateClassifier(ComputeClassifier.ComputeClassifier):
             self.perm_AUCs = self.permuted_loso_AUCs(events.session, recalls)
 
             print 'Performing leave-one-session-out xval'
-            run_loso_xval(events.session,recalls,self.pow_mat,self.lr_classifier,self.xval_output)
-
         else:
             print 'Performing in-session permutation test'
             self.perm_AUCs = self.permuted_lolo_AUCs(events)
 
-            print 'Performing leave-one-list-out xval'
-            run_lolo_xval(events,recalls,self.pow_mat,self.lr_classifier,self.xval_output)
+
+        probs = self.lr_classifier.predict_proba(events.recalled,self.pow_mat)
+        self.xval_output[-1] = ModelOutput(recalls, probs)
+        self.xval_output[-1].compute_roc()
+        self.xval_output[-1].compute_tercile_stats()
+        self.xval_output[-1].compute_normal_approx()
 
         self.pvalue = np.sum(self.perm_AUCs >= self.xval_output[-1].auc) / float(self.perm_AUCs.size)
 

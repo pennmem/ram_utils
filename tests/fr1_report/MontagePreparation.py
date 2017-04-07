@@ -88,36 +88,36 @@ class MontagePreparation(ReportRamTask):
         json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
         bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
 
-        try:
-            bp_path = os.path.join(self.pipeline.mount_point, next(iter(bp_paths)))
-            f_pairs = open(bp_path, 'r')
-            bipolar_data = json.load(f_pairs)[subject]['pairs']
-            f_pairs.close()
-            bipolar_data = {bp_tag:bp_data for bp_tag,bp_data in bipolar_data.iteritems() if not bp_data['is_stim_only']}
+        # try:
+        bp_path = os.path.join(self.pipeline.mount_point, next(iter(bp_paths)))
+        f_pairs = open(bp_path, 'r')
+        bipolar_data = json.load(f_pairs)[subject]['pairs']
+        f_pairs.close()
+        bipolar_data = {bp_tag:bp_data for bp_tag,bp_data in bipolar_data.iteritems() if not bp_data['is_stim_only']}
 
-            bp_tags = []
-            bp_tal_structs = []
-            for bp_tag,bp_data in bipolar_data.iteritems():
-                bp_tags.append(bp_tag)
-                ch1 = bp_data['channel_1']
-                ch2 = bp_data['channel_2']
-                bp_tal_structs.append(['%03d'%ch1, '%03d'%ch2, bp_data['type_1'], atlas_location(bp_data)])
+        bp_tags = []
+        bp_tal_structs = []
+        for bp_tag,bp_data in bipolar_data.iteritems():
+            bp_tags.append(bp_tag)
+            ch1 = bp_data['channel_1']
+            ch2 = bp_data['channel_2']
+            bp_tal_structs.append(['%03d'%ch1, '%03d'%ch2, bp_data['type_1'], atlas_location(bp_data)])
 
-            bp_tal_structs = pd.DataFrame(bp_tal_structs, index=bp_tags, columns=['channel_1', 'channel_2', 'etype', 'bp_atlas_loc'])
-            bp_tal_structs.sort_values(by=['channel_1', 'channel_2'], inplace=True)
-            monopolar_channels = np.unique(np.hstack((bp_tal_structs.channel_1.values,bp_tal_structs.channel_2.values)))
-            bipolar_pairs = zip(bp_tal_structs.channel_1.values,bp_tal_structs.channel_2.values)
+        bp_tal_structs = pd.DataFrame(bp_tal_structs, index=bp_tags, columns=['channel_1', 'channel_2', 'etype', 'bp_atlas_loc'])
+        bp_tal_structs.sort_values(by=['channel_1', 'channel_2'], inplace=True)
+        monopolar_channels = np.unique(np.hstack((bp_tal_structs.channel_1.values,bp_tal_structs.channel_2.values)))
+        bipolar_pairs = zip(bp_tal_structs.channel_1.values,bp_tal_structs.channel_2.values)
 
-            self.pass_object('monopolar_channels', monopolar_channels)
-            self.pass_object('bipolar_pairs', bipolar_pairs)
-            self.pass_object('bp_tal_structs', bp_tal_structs)
+        self.pass_object('monopolar_channels', monopolar_channels)
+        self.pass_object('bipolar_pairs', bipolar_pairs)
+        self.pass_object('bp_tal_structs', bp_tal_structs)
 
-            joblib.dump(monopolar_channels, self.get_path_to_resource_in_workspace(subject + '-monopolar_channels.pkl'))
-            joblib.dump(bipolar_pairs, self.get_path_to_resource_in_workspace(subject + '-bipolar_pairs.pkl'))
-            bp_tal_structs.to_pickle(self.get_path_to_resource_in_workspace(subject + '-bp_tal_structs.pkl'))
+        joblib.dump(monopolar_channels, self.get_path_to_resource_in_workspace(subject + '-monopolar_channels.pkl'))
+        joblib.dump(bipolar_pairs, self.get_path_to_resource_in_workspace(subject + '-bipolar_pairs.pkl'))
+        bp_tal_structs.to_pickle(self.get_path_to_resource_in_workspace(subject + '-bp_tal_structs.pkl'))
 
-        except:
-            self.raise_and_log_report_exception(
-                                                exception_type='MissingDataError',
-                                                exception_message='Missing or corrupt montage data for subject %s' % subject
-                                               )
+        # except:
+        #     self.raise_and_log_report_exception(
+        #                                         exception_type='MissingDataError',
+        #                                         exception_message='Missing or corrupt montage data for subject %s' % subject
+        #                                        )

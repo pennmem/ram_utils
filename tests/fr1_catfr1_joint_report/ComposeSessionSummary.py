@@ -1,6 +1,8 @@
 from RamPipeline import *
 from SessionSummary import SessionSummary
-
+import pandas as pd
+from matplotlib import cm
+from matplotlib.colors import Normalize
 import numpy as np
 import time
 from operator import itemgetter
@@ -207,6 +209,19 @@ class ComposeSessionSummary(ReportRamTask):
         # cumulative_ttest_data = [list(a) for a in zip(bp_tal_structs.eType, bp_tal_structs.tagName, ttest[-1][1], ttest[-1][0])]
         cumulative_ttest_data = make_ttest_table(bp_tal_structs, ttest[-1])
         cumulative_ttest_data.sort(key=itemgetter(-2))
+        ttest_table = pd.DataFrame(data=cumulative_ttest_data,columns=
+        ['Etype','contactno','TagName','atlas_loc','pvalue','t-stat'])
+        ttest_table['Group'] = 'Subsequent memory effect (t-stat)'
+        norm = Normalize(vmin=-3,vmax=3)
+        cmapper = cm.ScalarMappable(norm=norm, cmap=cm.bwr)
+        colors = cmapper.to_rgba(ttest_table['t-stat'])[:,:3]
+        colors = pd.DataFrame(data=colors,columns = ['R','G','B'])
+        ttest_table = pd.concat([ttest_table,colors],axis=1)
+        ttest_table[['Group', 'TagName', 't-stat', 'R', 'G', 'B']].to_csv(
+            os.path.join(self.workspace_dir, '_'.join([self.pipeline.subject, task, 'SME_ttest.csv'])), )
+        self.pass_object('ttest_table',ttest_table)
+
+
         cumulative_ttest_data = format_ttest_table(cumulative_ttest_data)
 
         self.pass_object('cumulative_ttest_data', cumulative_ttest_data)
