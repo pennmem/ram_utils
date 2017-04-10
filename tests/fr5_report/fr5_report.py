@@ -71,7 +71,7 @@ class Params(object):
 
 params=Params()
 
-from EventPreparation import FR1EventPreparation, PSEventPreparation,FR5EventPreparation
+from EventPreparation import FR1EventPreparation,FR5EventPreparation
 
 from MontagePreparation import MontagePreparation
 

@@ -12,6 +12,7 @@ class ReportDeployer(object):
 
         self.protocol = 'R1'
         self.convert_subject_code_regex = re.compile('('+self.protocol+')'+'([0-9]*)([a-zA-Z]{1,1})([\S]*)')
+        self._suffix = None
 
     def split_subject_code(self,subject_code):
         match = re.match(self.convert_subject_code_regex,subject_code)
@@ -30,6 +31,13 @@ class ReportDeployer(object):
         self.pipeline.report_summary.add_report_link(link=link)
 
 
+    def report_base_dir(self,split_subject_code,suffix=''):
+        if suffix:
+            return join('scratch','RAM_maint',suffix,'subjects',str(split_subject_code.id),'reports')
+        else:
+            return join('reports',split_subject_code.protocol.lower(),'subjects',str(split_subject_code.id),'reports')
+
+
     def deploy_report(self, report_path, classifier_experiment=None,suffix=None):
         subject = self.pipeline.subject
 
@@ -37,10 +45,8 @@ class ReportDeployer(object):
 
         report_basename = basename(report_path)
         # report_base_dir = join('protocols',ssc.protocol.lower(),'subjects',str(ssc.id)+ssc.montage,'reports')
-        if suffix is None:
-            report_base_dir = join('reports',ssc.protocol.lower(),'subjects',str(ssc.id),'reports')
-        else:
-            report_base_dir = join('scratch','RAM_maint',suffix,'subjects',str(ssc.id),'reports')
+
+        report_base_dir = self.report_base_dir(ssc,suffix)
 
         report_dir = join(self.pipeline.mount_point,report_base_dir)
 

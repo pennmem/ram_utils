@@ -227,7 +227,7 @@ class ComposeSessionSummary(ReportRamTask):
         ttest_table = pd.concat([ttest_table,colors],axis=1)
         ttest_table[['Group', 'TagName', 't-stat', 'R', 'G', 'B']].to_csv(
             os.path.join(self.workspace_dir, '_'.join([self.pipeline.subject, task, 'SME_ttest.csv'])),index=False )
-        self.pass_object('ttest_table',ttest_table)
+        self.pass_object('SME_file',os.path.join(self.workspace_dir, '_'.join([self.pipeline.subject, task, 'SME_ttest.csv'])))
 
         cumulative_ttest_data = format_ttest_table(cumulative_ttest_data)
 
