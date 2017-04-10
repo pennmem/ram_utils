@@ -34,8 +34,7 @@ class ComposeSessionSummary(ReportRamTask):
         self.pass_object('fr_session_summary',[])
         self.compose_ps_session_summary()
         self.compose_ps_fr_session_summary()
-        if (fr_stim_table['phase']=='NON-STIM').any():
-            self.compose_fr_session_summary()
+        self.compose_fr_session_summary()
 
     def compose_ps_fr_session_summary(self):
 
@@ -60,7 +59,7 @@ class ComposeSessionSummary(ReportRamTask):
 
         session_data = []
 
-
+        fr_stim_table = fr_stim_table.loc[fr_stim_table['is_ps4_session']]
         fr_stim_table_by_session = fr_stim_table.groupby(['session'])
         for session,fr_stim_session_table in fr_stim_table_by_session:
             session_all_events = all_events[all_events.session == session]
@@ -393,6 +392,7 @@ class ComposeSessionSummary(ReportRamTask):
         fr_stim_table = self.get_passed_object('fr_stim_table')
         fr_stim_table['prev_prob'] = fr_stim_table['prob'].shift(1)
         fr_stim_table['prob_diff'] = fr_stim_table['prob'] - fr_stim_table['prev_prob']
+        fr_stim_table = fr_stim_table.loc[~fr_stim_table['is_ps4_session']]
 
         sessions = sorted(fr_stim_table.session.unique())
 

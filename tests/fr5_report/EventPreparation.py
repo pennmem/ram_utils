@@ -160,10 +160,10 @@ class FR5EventPreparation(ReportRamTask):
         irts = np.append([0], np.diff(events.mstime))
         retrieval_events_mask_0s = retrieval_events_mask & (events.type == 'REC_BASE')
         retrieval_events_mask_1s = retrieval_events_mask & (events.type == 'REC_WORD') & (events.intrusion == 0) & (irts > 1000)
-        encoding_events = events[encoding_events_mask]
-        encoding_recalls = np.random.randint(2,size=encoding_events.shape)
-        encoding_events.recalled = encoding_recalls
-        events[encoding_events_mask] = encoding_events
+        # encoding_events = events[encoding_events_mask]
+        # # encoding_recalls = np.random.randint(2,size=encoding_events.shape)
+        # encoding_events.recalled = encoding_recalls
+        # events[encoding_events_mask] = encoding_events
 
         filtered_events = events[encoding_events_mask | retrieval_events_mask_0s | retrieval_events_mask_1s].view(np.recarray)
 

@@ -74,6 +74,9 @@ class ComputeFRStimTable(ReportRamTask):
 
         all_events = self.get_passed_object('all_events')
         events = self.get_passed_object(task+'_events')
+        ps_events = self.get_passed_object('ps_events')
+        ps_sessions = np.unique(ps_events.session)
+        is_ps4_session = np.in1d(events.session,ps_sessions)
 
         n_events = len(events)
 
@@ -110,12 +113,12 @@ class ComputeFRStimTable(ReportRamTask):
         self.fr_stim_table['is_post_stim_item'] = is_post_stim_item
         self.fr_stim_table['recalled'] = events.recalled
         self.fr_stim_table['thresh'] = class_thresh
+        self.fr_stim_table['is_ps4_session'] = is_ps4_session
 
         self.stim_params_to_sess = dict()
         self.sess_to_thresh = dict()
 
 
-        is_ps4 = np.empty(n_events,dtype='bool')
         sessions = np.unique(events.session)
         for sess in sessions:
             # sess_mask = (events.session==sess)
