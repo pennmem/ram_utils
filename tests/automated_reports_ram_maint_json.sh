@@ -251,9 +251,9 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python ${report_code_dir}/ps_report_all.py  --task=PS2 \
-  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
-  --skip-subjects R1100D
+#python ${report_code_dir}/ps_report_all.py  --task=PS2 \
+#  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
+#  --skip-subjects R1100D
 
 # PS2.1
 report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/ps_report
@@ -267,8 +267,8 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python ${report_code_dir}/ps_report_all.py  --task=PS2.1 \
-  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
+#python ${report_code_dir}/ps_report_all.py  --task=PS2.1 \
+#  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 
 # PS3
 report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/ps_report
