@@ -17,7 +17,7 @@ except ImportError:
 import hashlib
 
 
-class ComputeFRPowers(RamTask):
+class ComputeTHRPowers(RamTask):
     def __init__(self, params, mark_as_completed=True):
         RamTask.__init__(self, mark_as_completed)
         self.params = params
@@ -83,7 +83,7 @@ class ComputeFRPowers(RamTask):
             self.compute_powers(events,sessions,monopolar_channels,bipolar_pairs)
 
         self.pass_object('pow_mat', self.pow_mat)
-        self.pass_object('samplerate', self.samplerate)
+        self.pass_object('samplerate', float(self.samplerate))
 
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
         joblib.dump(self.samplerate, self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))

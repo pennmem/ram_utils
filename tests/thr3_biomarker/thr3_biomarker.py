@@ -13,10 +13,10 @@ cml_parser = CMLParserBiomarker(arg_count_threshold=1)
 cml_parser.arg('--workspace-dir','/scratch/jfm2/THR3_biomarkers')
 cml_parser.arg('--subject','R1294C')
 cml_parser.arg('--n-channels','128')
-cml_parser.arg('--anode-num','75')
-cml_parser.arg('--anode','RPC1')
-cml_parser.arg('--cathode-num','76')
-cml_parser.arg('--cathode','RPC2')
+cml_parser.arg('--anode-num','23')
+cml_parser.arg('--anode','RHH11')
+cml_parser.arg('--cathode-num','24')
+cml_parser.arg('--cathode','RHH12')
 cml_parser.arg('--pulse-frequency','200')
 cml_parser.arg('--pulse-duration','500')
 cml_parser.arg('--target-amplitude','1000')
@@ -31,7 +31,7 @@ from ReportUtils import ReportPipeline
 
 from THREventPreparation import THREventPreparation
 
-from ComputeTHRPowers import ComputeFRPowers
+from ComputeTHRPowers import ComputeTHRPowers
 
 from MontagePreparation import MontagePreparation
 
@@ -108,7 +108,7 @@ report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
 
 report_pipeline.add_task(CheckElectrodeLabels(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputeTHRPowers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 

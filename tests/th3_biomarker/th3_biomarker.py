@@ -10,16 +10,16 @@ from BiomarkerUtils import CMLParserBiomarker
 
 
 cml_parser = CMLParserBiomarker(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','/scratch/leond/TH3_biomarkers')
-cml_parser.arg('--subject','R1201P_1')
-cml_parser.arg('--n-channels','126')
-cml_parser.arg('--anode','AT3')
-cml_parser.arg('--cathode','AT4')
-cml_parser.arg('--anode-num','71')
-cml_parser.arg('--cathode-num','72')
-cml_parser.arg('--pulse-frequency','10')
-cml_parser.arg('--pulse-duration','300')
-cml_parser.arg('--target-amplitude','1725')
+cml_parser.arg('--workspace-dir','/scratch/jfm2/TH3_biomarkers')
+cml_parser.arg('--subject','R1276D')
+cml_parser.arg('--n-channels','128')
+cml_parser.arg('--anode','LAHD9')
+cml_parser.arg('--cathode','LAHD10')
+cml_parser.arg('--anode-num','19')
+cml_parser.arg('--cathode-num','20')
+cml_parser.arg('--pulse-frequency','200')
+cml_parser.arg('--pulse-duration','500')
+cml_parser.arg('--target-amplitude','1000')
 
 
 args = cml_parser.parse()
