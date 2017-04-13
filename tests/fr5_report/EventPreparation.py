@@ -66,58 +66,13 @@ class FR1EventPreparation(ReportRamTask):
 
 
 
-    def make_base_events(self,events):
-        all_events = []
-        for session in np.unique(events.session):
-            sess_events = events[events.session==session]
-            rec_events = sess_events[(sess_events.type == 'REC_WORD') & (sess_events.intrusion == 0)]
-            voc_events = sess_events[((sess_events.type == 'REC_WORD') | (sess_events.type == 'REC_WORD_VV'))]
-            starts = sess_events[(sess_events.type == 'REC_START')]
-            ends = sess_events[(sess_events.type == 'REC_END')]
-            rec_lists = tuple(np.unique(starts.list))
-            times = [voc_events[(voc_events.list == lst)].mstime for lst in rec_lists]
-            start_times = starts.mstime
-            end_times = ends.mstime
-            epochs = free_epochs(times, 500, 1000, 1000, start=start_times, end=end_times)
-            rel_times = [t - i for (t, i) in
-                         zip([rec_events[rec_events.list == lst].mstime for lst in rec_lists], start_times)]
-            rel_epochs = epochs - start_times[:, None]
-            full_match_accum = np.zeros(epochs.shape, dtype=np.bool)
-            for (i, rec_times_list) in enumerate(rel_times):
-                is_match = np.empty(epochs.shape, dtype=np.bool)
-                is_match[...] = False
-                for t in rec_times_list:
-                    is_match_tmp = np.abs((rel_epochs - t)) < 3000
-                    is_match_tmp[i, ...] = False
-                    good_locs = np.where(is_match_tmp & (~full_match_accum))
-                    if len(good_locs[0]):
-                        choice_position = np.argmin(np.mod(good_locs[0] - i, len(good_locs[0])))
-                        choice_inds = (good_locs[0][choice_position], good_locs[1][choice_position])
-                        full_match_accum[choice_inds] = True
-            matching_epochs = epochs[full_match_accum]
-            new_events = np.zeros(len(matching_epochs), dtype=sess_events.dtype).view(np.recarray)
-            for i, _ in enumerate(new_events):
-                new_events[i].mstime = matching_epochs[i]
-                new_events[i].type = 'REC_BASE'
-            new_events.recalled = 0
-            merged_events = np.concatenate((sess_events, new_events)).view(np.recarray)
-            merged_events.sort(order='mstime')
-            for (i, event) in enumerate(merged_events):
-                if event.type == 'REC_BASE':
-                    merged_events[i].session = merged_events[i - 1].session
-                    merged_events[i].list = merged_events[i - 1].list
-                    merged_events[i].eegfile = merged_events[i - 1].eegfile
-                    merged_events[i].eegoffset = merged_events[i - 1].eegoffset + (
-                    merged_events[i].mstime - merged_events[i - 1].mstime)
-            all_events.append(merged_events)
-        return np.concatenate(all_events).view(np.recarray)
 
 class FR5EventPreparation(ReportRamTask):
     def __init__(self):
         super(FR5EventPreparation,self).__init__(mark_as_completed=False)
     def run(self):
-        # jr = JsonIndexReader(os.path.join('/Users/leond','protocols','r1.json')) #
-        jr  = JsonIndexReader(os.path.join(self.pipeline.mount_point,'protocols','r1.json'))
+        jr = JsonIndexReader(os.path.join('/Users/leond','protocols','r1.json')) # TODO: REMOVE BEFORE COMMITTING
+        # jr  = JsonIndexReader(os.path.join(self.pipeline.mount_point,'protocols','r1.json'))
         temp=self.pipeline.subject.split('_')
         subject= temp[0]
         montage = 0 if len(temp)==1 else temp[1]
@@ -129,6 +84,8 @@ class FR5EventPreparation(ReportRamTask):
 
         if events:
             events = np.concatenate(events).view(np.recarray)
+
+        events = modify_recalls(events) #TODO: remove before committing
 
         if not (events.type=='REC_BASE').any():
             events = create_baseline_events(events)
@@ -160,10 +117,7 @@ class FR5EventPreparation(ReportRamTask):
         irts = np.append([0], np.diff(events.mstime))
         retrieval_events_mask_0s = retrieval_events_mask & (events.type == 'REC_BASE')
         retrieval_events_mask_1s = retrieval_events_mask & (events.type == 'REC_WORD') & (events.intrusion == 0) & (irts > 1000)
-        # encoding_events = events[encoding_events_mask]
-        # # encoding_recalls = np.random.randint(2,size=encoding_events.shape)
-        # encoding_events.recalled = encoding_recalls
-        # events[encoding_events_mask] = encoding_events
+
 
         filtered_events = events[encoding_events_mask | retrieval_events_mask_0s | retrieval_events_mask_1s].view(np.recarray)
 
@@ -179,7 +133,28 @@ class FR5EventPreparation(ReportRamTask):
 
         self.pass_object(task+'_events',filtered_events)
 
+def modify_recalls(events):
+    """ assigns recalls at random, and inserts rec_word events to match
+    For testing purposes only"""
 
+    encoding_mask = events.type=='WORD'
+    word_events = events[encoding_mask]
+    word_events.recalled = np.random.randint(2,size=word_events.shape)
+    rec_words = []
+    for word in word_events:
+        if word.recalled:
+            rec_start = events[(events.list==word.list) & (events.type=='REC_START')].mstime
+            rec_end = events[(events.list==word.list)& (events.type=='REC_END')].mstime
+            rec_eeg_start = events[(events.list==word.list) & (events.type=='REC_START')].eegoffset
+            rec_word = word.copy().view(np.recarray)
+            rec_word.type='REC_WORD'
+            rec_word.mstime = np.random.randint(rec_start,rec_end)
+            rec_word.eegoffset = rec_eeg_start + (rec_word.mstime-rec_start)
+            rec_words.append(rec_word)
+    events[encoding_mask] = word_events
+    events = np.concatenate([events,rec_words]).view(np.recarray)
+    events.sort(order='mstime')
+    return events
 
 
 def free_epochs(times, duration, pre, post, start=None, end=None):

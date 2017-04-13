@@ -29,7 +29,7 @@ dependencies:
 - pytz=2016.6.1=py27_0
 - qt=4.8.7=4
 - readline=6.2=2
-- scikit-learn=0.17.1=np111py27_2
+- scikit-learn=0.18.1
 - scipy=0.18.0=np111py27_0
 - setuptools=27.2.0=py27_0
 - singledispatch=3.4.0.3=py27_0
@@ -46,7 +46,7 @@ dependencies:
 - pip:
   - backports-abc==0.5
   - backports.ssl-match-hostname==3.4.0.2
-  - ptsa==1.0.3
   - pywavelets==0.4.0
   - xarray==0.8.2
+#  - ptsa==1.0.3
 

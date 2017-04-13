@@ -20,7 +20,7 @@ In the free recall task, participants are presented with a list of words, one af
 \vspace{3pc}
 
 \begin{center}
-\textbf{\Large Classifier generalization to FR3}
+\textbf{\Large Classifier generalization to FR5}
 \end{center}
 
 \begin{figure}[!h]

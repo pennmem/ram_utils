@@ -158,7 +158,7 @@ class ComposeSessionSummary(ReportRamTask):
                 lst = sess_list[1]
 
 
-                list_rec_events = rec_events[(rec_events.session==session) & (rec_events['list']==lst) & (rec_events['intrusion']==0)]
+                list_rec_events = rec_events[(rec_events.session==session) & (rec_events['list']==lst) & ~(rec_events['intrusion']>0)]
                 if list_rec_events.size > 0:
                     item_nums = fr_stim_sess_list_table.itemno.values == list_rec_events[0].item_num
                     tmp = np.where(item_nums)[0]

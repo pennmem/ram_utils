@@ -5,8 +5,8 @@ import numpy as np
 
 parser = CMLParser()
 # Default-ish args here
-parser.arg('--subject','R1264P')
-parser.arg('--task','catFR5')
+parser.arg('--subject','R1111M')
+parser.arg('--task','FR5')
 parser.arg('--workspace-dir','/Users/leond/fr5_reports')
 parser.arg('--mount-point','/Volumes/rhino_root')
 

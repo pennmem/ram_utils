@@ -1,12 +1,12 @@
 #!/bin/bash
 
-workspace=/scratch/busygin/TH3_biomarkers
-subject=R1145D
+workspace=/scratch/leond/TH3_biomarkers
+subject=R1294C
 n_channels=128
-anode=LTG3
-anode_num=3
-cathode=LTG4
-cathode_num=4
+anode=RHH11
+anode_num=19
+cathode=RHH12
+cathode_num=20
 pulse_frequency=200
 pulse_duration=500
 target_amplitude=1000
