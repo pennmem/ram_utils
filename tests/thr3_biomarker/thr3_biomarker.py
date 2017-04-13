@@ -1,5 +1,5 @@
 # command line example:
-# python th3_biomarker_db.py --workspace-dir=/scratch/busygin/TH3_biomarkers --subject=R1145J_1 --n-channels=128 --anode=RD2 --anode-num=34 --cathode=RD3 --cathode-num=35 --pulse-frequency=200 --pulse-duration=500 --target-amplitude=1000
+# python fr3_biomarker_db.py --workspace-dir=/scratch/busygin/FR3_biomarkers --subject=R1145J_1 --n-channels=128 --anode=RD2 --anode-num=34 --cathode=RD3 --cathode-num=35 --pulse-frequency=200 --pulse-duration=500 --target-amplitude=1000
 
 print "ATTN: Wavelet params and interval length are hardcoded!! To change them, recompile"
 print "Windows binaries from https://github.com/busygin/morlet_for_sys2_biomarker"
@@ -10,13 +10,13 @@ from BiomarkerUtils import CMLParserBiomarker
 
 
 cml_parser = CMLParserBiomarker(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','/scratch/jfm2/TH3_biomarkers')
-cml_parser.arg('--subject','R1276D')
+cml_parser.arg('--workspace-dir','/scratch/jfm2/THR3_biomarkers')
+cml_parser.arg('--subject','R1294C')
 cml_parser.arg('--n-channels','128')
-cml_parser.arg('--anode','LAHD9')
-cml_parser.arg('--cathode','LAHD10')
-cml_parser.arg('--anode-num','19')
-cml_parser.arg('--cathode-num','20')
+cml_parser.arg('--anode-num','23')
+cml_parser.arg('--anode','RHH11')
+cml_parser.arg('--cathode-num','24')
+cml_parser.arg('--cathode','RHH12')
 cml_parser.arg('--pulse-frequency','200')
 cml_parser.arg('--pulse-duration','500')
 cml_parser.arg('--target-amplitude','1000')
@@ -27,11 +27,11 @@ args = cml_parser.parse()
 
 # ------------------------------- end of processing command line
 
-from RamPipeline import RamPipeline
+from ReportUtils import ReportPipeline
 
-from THEventPreparation import THEventPreparation
+from THREventPreparation import THREventPreparation
 
-from ComputeTHClassPowers import ComputeTHClassPowers
+from ComputeTHRPowers import ComputeTHRPowers
 
 from MontagePreparation import MontagePreparation
 
@@ -63,16 +63,19 @@ class Params(object):
     def __init__(self):
         self.version = '2.00'
 
+        # These don't do anything? Left in anyway
+        self.include_thr = True
+        self.include_thr3 = True
+
         self.width = 5
 
-        self.th1_start_time = -1.2
-        self.th1_end_time = 0.5
-        self.th1_buf = 1.7
+        self.thr_start_time = 0.0
+        self.thr_end_time = 1.3
+        self.thr_buf = 1.299
 
         self.filt_order = 4
 
-        self.freqs = np.logspace(np.log10(1.0), np.log10(200.0), 8)
-        self.classifier_freqs = self.freqs
+        self.freqs = np.logspace(np.log10(1), np.log10(200), 8)
 
         self.log_powers = True
 
@@ -96,25 +99,16 @@ class Params(object):
 params = Params()
 
 
-class ReportPipeline(RamPipeline):
-
-    def __init__(self, subject, workspace_dir, mount_point=None):
-        RamPipeline.__init__(self)
-        self.subject = subject
-        self.mount_point = mount_point
-        self.set_workspace_dir(workspace_dir)
-
-
 report_pipeline = ReportPipeline(subject=args.subject,
                                        workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point)
 
-report_pipeline.add_task(THEventPreparation(mark_as_completed=False))
+report_pipeline.add_task(THREventPreparation(mark_as_completed=False))
 
 report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
 
 report_pipeline.add_task(CheckElectrodeLabels(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(ComputeTHClassPowers(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputeTHRPowers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 
