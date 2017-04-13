@@ -64,7 +64,6 @@ classdef StimControl < handle
 
         % Tested at the start of a session, to ensure that states can be retrieved
         POSSIBLE_STATES = {'TREASURE_OPEN_SPECIAL', ...
-                           'TREASURE_OPEN_EMPTY', ...
                            'TREASURE_1', ...
                            'TREASURE_2', ...
                            'TREASURE_3', ...
@@ -99,10 +98,10 @@ classdef StimControl < handle
         bpmat;   % matrix to convert monopolar to bipolar eeg
         freqs;   % frequencies used in wavelet transform
         fs;      % sampling rate = 1000 Hz for Sys 2.x
-        winsize; % 1500 for TH3
-        total_winsize; % 4498 for TH3
+        winsize; % 1300 for TH3
+        total_winsize; % 3898 for TH3
         wait_after_chest_opened; % 1500 ms for TH3
-        bufsize; % 1499 for TH3
+        bufsize; % 1299 for TH3
         phase;   % experiment phase
         W_in;    % classifier weights
         thresh;  % prob threshold
@@ -147,10 +146,10 @@ classdef StimControl < handle
            this.trainingProb = Bio.trainingProb;
            this.thresh = Bio.thresh;
            this.fs = Bio.fs;                  % sampling freq.
-           this.winsize = 1500;
-           this.total_winsize = 4498;
-           this.bufsize = 1499;
-           this.wait_after_chest_opened = 1500;
+           this.winsize = 1300;
+           this.total_winsize = 3898;
+           this.bufsize = 1299;
+           this.wait_after_chest_opened = 1300;
            [B,A] = butter(4, [58.0 62.0]/(this.fs/2.0), 'stop');
            this.Filter.coeffs = [B;A];
 
