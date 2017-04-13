@@ -1,0 +1,1 @@
+python thr1_report.py --subject=$1 --task=RAM_THR --workspace-dir=/scratch/jfm2/THR_reports --mount-point='' --python-path=/home2/losu/ram_utils --python-path=/home2/losu/python/ptsa_latest --python-path=/home1/mswat/extra_libs
