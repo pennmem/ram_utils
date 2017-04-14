@@ -19,7 +19,8 @@ config_dir='/scratch/pwanda/FR5_biomarkers/electrode_configs'
 workspace_dir='/scratch/pwanda/FR5_biomarkers/'
 
 pulse_frequency=200
-
+stim_pair_1=${anode1}-${cathode1}
+stim_pair_2=${anode2}-${cathode2}
 
 if [ -z $stim_pair_1 ] || [ -z $stim_pair_2 ];
 then echo "Insufficient number of stim pairs for PS4 config"; exit 0
