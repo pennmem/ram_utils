@@ -3,7 +3,7 @@ from ReportUtils import  ReportRamTask
 import numpy as np
 import datetime,time
 from sklearn.metrics import roc_curve
-
+import pandas as pd
 
 SESSION_SUMMARY={
     'catFR1':SessionSummary.catFR1SessionSummary,
@@ -16,12 +16,13 @@ class ComposeSessionSummary(ReportRamTask):
     def __init__(self):
         super(ComposeSessionSummary,self).__init__(mark_as_completed=False)
         self.summaries = {}
+        self.event_table = pd.DataFrame.from_records([e for e in self.events],columns = self.events.dtype.names)
 
     @property
     def events(self):
         return self.get_passed_object('events')
-    
-    
+
+
     @property
     def xval_results(self):
         return self.get_passed_object('xval_results')
@@ -29,7 +30,8 @@ class ComposeSessionSummary(ReportRamTask):
     
     @staticmethod
     def prob_recall(events):
-        return np.array([np.mean(events[events.serialpos==pos].recalled) for pos in np.unique(events.serialpos)])
+        events_by_serialpos = events.loc[events['type']=='WORD'].groupby('serialpos')
+        return events_by_serialpos.aggregate(lambda x: np.mean(ComposeSessionSummary.recalls(x)))
     
     @staticmethod
     def rec_events(events):

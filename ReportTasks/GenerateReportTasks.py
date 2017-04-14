@@ -5,8 +5,12 @@ from tornado import template
 
 
 class GeneratePlots(ReportRamTask):
+    def get_session_summary(self):
+        return self.get_passed_object('session_summary')
+
     def run(self):
         raise NotImplementedError
+
 
     @staticmethod
     def roc_plot(fpr,tpr):
@@ -40,11 +44,6 @@ class GenerateTex(ReportRamTask):
         tex_string = tpl.generate(**self.params)
 
         self.pass_object('tex_string',tex_string)
-
-
-
-
-
 
 
 class DeployReportPDF(ReportRamTask):
