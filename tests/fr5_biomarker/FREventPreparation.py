@@ -63,7 +63,7 @@ class FREventPreparation(RamTask):
         
         if self.pipeline.args.sessions:
               event_files = [json_reader.get_value('task_events',subject=subj_code,montage=montage,experiment='FR1',session=s)
-                             for s in sorted(self.pipelines.args.sessions)]
+                             for s in sorted(self.pipeline.args.sessions)]
         else:
             event_files = sorted(
                list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR1')))
