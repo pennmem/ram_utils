@@ -25,7 +25,7 @@ if __name__ =='__main__':
             subj_code = tmp[0]
             montage = 0 if len(tmp) == 1 else int(tmp[1])
 
-            json_reader = JsonIndexReader(os.path.join('/','protocols/r1.json'))
+            json_reader = JsonIndexReader(os.path.join('/','protocols','r1.json'))
 
             event_files = sorted(
                 list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment=task)))

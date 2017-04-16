@@ -27,7 +27,7 @@ class CMLParserBiomarker(object):
         self.parser.add_argument('--cathode-nums',nargs='+',action='store',type=int)
         self.parser.add_argument('--anodes',nargs='+',action='store',default='')
         self.parser.add_argument('--cathodes',nargs='+',action='store',default='')
-
+        self.parser.add_argument('--sessions',nargs='+',action='store')
 
         self.arg_list=[]
         self.arg_count_threshold = arg_count_threshold

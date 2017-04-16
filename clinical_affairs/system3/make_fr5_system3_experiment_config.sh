@@ -42,4 +42,4 @@ python ../../tests/fr5_biomarker/system3/fr5_util_system_3.py\
  --pulse-frequency=${pulse_frequency}\
  --target-amplitude=${target_amplitude}\
  --min-amplitude=${min_amplitude}\
- --max-amplitude=${max_amplitude}
+ --max-amplitude=${max_amplitude} "${@:1}"

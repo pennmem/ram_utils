@@ -23,7 +23,7 @@ class RepetitionRatio(RamTask):
         subj_code = tmp[0]
         montage = 0 if len(tmp) == 1 else int(tmp[1])
 
-        json_reader = JsonIndexReader(path.join(self.pipeline.mount_point, 'protocols/r1.json'))
+        json_reader = JsonIndexReader(path.join(self.pipeline.mount_point, 'protocols','r1.json'))
 
         hash_md5 = hashlib.md5()
 
@@ -86,10 +86,10 @@ class RepetitionRatio(RamTask):
 
     def initialize_repetition_ratio(self):
         print self.pipeline.mount_point
-        r1 = path.join(self.pipeline.mount_point,'protocols/r1.json')
+        r1 = path.join(self.pipeline.mount_point,'protocols','r1.json')
         print 'r1 location: ',r1
         task = self.pipeline.task
-        json_reader = JsonIndexReader(path.join(self.pipeline.mount_point,'protocols/r1.json'))
+        json_reader = JsonIndexReader(path.join(self.pipeline.mount_point,'protocols','r1.json'))
         subjects = json_reader.subjects(experiment='catFR1')
         all_repetition_rates = {}
 

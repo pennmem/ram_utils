@@ -58,9 +58,13 @@ class ComputePAL1Powers(RamTask):
 
         self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
         self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
-
-        self.pass_object('pow_mat', self.pow_mat)
-        self.pass_object('samplerate', self.samplerate)
+        events = self.get_passed_object('PAL1_events')
+        if not len(events)==len(self.pow_mat):
+            print 'Restored matrix of different length than events. Recomputing powers.'
+            self.run()
+        else:
+            self.pass_object('pow_mat', self.pow_mat)
+            self.pass_object('samplerate', self.samplerate)
 
     def run(self):
         subject = self.pipeline.subject

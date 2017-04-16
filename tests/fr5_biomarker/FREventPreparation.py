@@ -60,9 +60,13 @@ class FREventPreparation(RamTask):
             os.path.join(self.pipeline.mount_point, 'scratch','jkragel','events_FR5','RAM_FR1', subj_code + '_events.mat'))
 
         json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
-
-        event_files = sorted(
-            list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR1')))
+        
+        if self.pipeline.args.sessions:
+              event_files = [json_reader.aggregate_values('task_events',subject=subj_code,montage=montage,experiment='FR1',session=s
+                             for s in sorted(self.pipelines.args.sessions)]
+        else:
+            event_files = sorted(
+               list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR1')))
         fr1_events = np.concatenate([BaseEventReader(filename=event_path).read() for event_path in event_files]).view(np.recarray)
         fr1_events = create_baseline_events(fr1_events)
 
