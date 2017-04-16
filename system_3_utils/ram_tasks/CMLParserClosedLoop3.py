@@ -33,6 +33,7 @@ class CMLParserCloseLoop3(object):
         self.parser.add_argument('--cathodes',nargs='+',metavar='CATHODE')
         self.parser.add_argument('--min-amplitudes',nargs='+',type=float)
         self.parser.add_argument('--max-amplitudes',nargs='+',type=float)
+        self.parser.add_argument('--sessions',nargs='+',type=int)
 
 
         self.arg_list=[]
