@@ -62,7 +62,7 @@ class FREventPreparation(RamTask):
         json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
         
         if self.pipeline.args.sessions:
-              event_files = [json_reader.aggregate_values('task_events',subject=subj_code,montage=montage,experiment='FR1',session=s
+              event_files = [json_reader.get_value('task_events',subject=subj_code,montage=montage,experiment='FR1',session=s)
                              for s in sorted(self.pipelines.args.sessions)]
         else:
             event_files = sorted(
