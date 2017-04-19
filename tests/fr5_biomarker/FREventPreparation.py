@@ -68,7 +68,15 @@ class FREventPreparation(RamTask):
             event_files = sorted(
                list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR1')))
         fr1_events = np.concatenate([BaseEventReader(filename=event_path).read() for event_path in event_files]).view(np.recarray)
+
+        catfr1_events = np.concatenate( [BaseEventReader(filename=event_path).read() for event_path in
+                                         json_reader.aggregate_values('task_events',subject=subj_code,experiment='catFR1',
+                                                                      montage = montage)]).view(np.recarray)
+        catfr1_events=catfr1_events[list(fr1_events.dtype.names)]
+        catfr1_events.session += 100
+        fr1_events = np.append(fr1_events,catfr1_events).view(np.recarray)
         fr1_events = create_baseline_events(fr1_events)
+
 
         # e_reader = BaseEventReader(filename=fr1_events_fname, eliminate_events_with_no_eeg=True,common_root='scratch')
         # fr1_events = e_reader.read()
