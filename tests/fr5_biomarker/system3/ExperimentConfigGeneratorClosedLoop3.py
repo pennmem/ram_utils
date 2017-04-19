@@ -89,8 +89,7 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
         stim_frequency = self.pipeline.args.pulse_frequency
         stim_amplitude = self.pipeline.args.target_amplitude
         bipolar_pairs_path = self.get_passed_object('bipolar_pairs_path')
-        # classifier_path = self.get_passed_object('classifier_path')
-        classifier_path = self.get_passed_object('full_classifier_path')
+        classifier_path = self.get_passed_object('classifier_path')
         stim_chan_label = self.get_passed_object('stim_chan_label')
         excluded_pairs_path = self.get_passed_object('excluded_pairs_path')
         xval_full = self.get_passed_object('xval_output_all_electrodes')
