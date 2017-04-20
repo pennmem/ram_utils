@@ -1,4 +1,4 @@
-import ComputeClassifier
+from ComputeClassifier import ComputeClassifier
 from ptsa.data.readers.IndexReader import JsonIndexReader
 from os import path
 import hashlib
