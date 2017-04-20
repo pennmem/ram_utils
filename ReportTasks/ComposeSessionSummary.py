@@ -13,10 +13,18 @@ SESSION_SUMMARY={
 }
 
 class ComposeSessionSummary(ReportRamTask):
+    '''
+    There are 3 ways that data goes into a report: Plots, tables, and literals.
+    The first two can be handled by DataFrames; the last needs no handling.
+    '''
     def __init__(self):
         super(ComposeSessionSummary,self).__init__(mark_as_completed=False)
         self.summaries = {}
         self.event_table = pd.DataFrame.from_records([e for e in self.events],columns = self.events.dtype.names)
+        # Entries should be in the form 'TITLE':DataFrame() for tables and plots
+        # and 'NAME':value for raw numbers or strings
+        self.tables = {}
+
 
     @property
     def events(self):
@@ -97,12 +105,15 @@ class ComposeSessionSummary(ReportRamTask):
     def run(self):
         events = self.events
         sessions  = np.unique(events.session)
-        for session in sessions:
-            sess_events = events[events.session==session]
-            self.summaries[session] = SESSION_SUMMARY[self.pipeline.task]()
-            self.fill_summary(sess_events,session)
-        self.summaries[-1] =  SESSION_SUMMARY[self.pipeline.task]()
-        self.fill_summary(events)
+        sess_info_table = pd.DataFrame(index=sessions)
+        sess_info_table.index.name='Session'
+        sess_info_table['Date'] = [date.fromtimestamp(events[events.session==sess].mstime[0]).strftime('%m-%d-%Y')
+                                   for sess in sessions]
+        sess_info_table['Length (min)'] = [time.ctime(events[events.session==sess].mstime[-1] - events[events.session==sess].mstime[0])
+            for sess in sessions]
+        sess_info_table['# lists'] = [events[events.session==sess].list.max() for sess in sessions]
+        sess_info_table['Perf'] = ['{:2.2}%}'.format(recalls(events[events.session==sess]).mean()) for sess in sessions]
+        self.summaries['sess_info_table'] = sess_info_table
 
         
 class ComposeFR1Summary(ComposeSessionSummary):
