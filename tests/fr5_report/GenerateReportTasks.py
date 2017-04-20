@@ -9,7 +9,6 @@ import datetime
 from subprocess import call
 
 from ReportUtils import ReportRamTask
-import jinja2
 from TextTemplateUtils import replace_template,replace_template_to_string
 from TexUtils.latex_table import latex_table
 
