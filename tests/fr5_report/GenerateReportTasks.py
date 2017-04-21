@@ -90,9 +90,7 @@ class GeneratePlots(ReportRamTask):
             sessions = np.unique(fr5_events.session)
 
             serial_positions = np.arange(1, 13)
-            for session in sessions:
-
-                session_summary = fr5_session_summaries[session]
+            for session_summary in fr5_session_summaries:
 
                 # P_REC and PFR
                 panel_plot = PanelPlot(i_max=1,j_max=2,xfigsize=15, yfigsize=7.5, title='', labelsize=18)
@@ -297,8 +295,13 @@ class GenerateTex(ReportRamTask):
 
         if fr5_events is not None and all(fr5_events.shape):
 
-            for session in np.unique(fr5_events.session):
-                session_summary = fr5_session_summary[session]
+            for session_summary in fr5_session_summary:
+                sessions = session_summary.sessions
+                if len(sessions)>1:
+                    sessions = ','.join(sessions)
+                else:
+                    sessions = str(sessions)
+
                 biomarker_tex = replace_template_to_string('biomarker_plots.tex.tpl',
                                                            {'<STIM_VS_NON_STIM_HALVES_PLOT_FILE>':session_summary.STIM_VS_NON_STIM_HALVES_PLOT_FILE})
 
@@ -314,7 +317,7 @@ class GenerateTex(ReportRamTask):
                 item_level_comparison = '' #if session_summary.chisqr_last == -999 else latex_table(session_summary.last_recall_table)
                 session_tex = replace_template_to_string('fr5_session.tex.tpl',
                              {
-                                 '<SESSIONS>':          session,
+                                 '<SESSIONS>':          sessions,
                                  '<STIMTAG>':           session_summary.stimtag,
                                  '<REGION>':            session_summary.region_of_interest,
                                  '<AMPLITUDE>':         session_summary.amplitude,
@@ -336,7 +339,7 @@ class GenerateTex(ReportRamTask):
                                  '<N_TOTAL_NONSTIM>':session_summary.n_total_nonstim,
                                  '<PC_FROM_STIM>':'%2.2f'%session_summary.pc_from_stim,
                                  '<PC_FROM_NONSTIM>':'%2.2f'%session_summary.pc_from_nonstim,
-                                 '<COMPARISON_LIST_TYPE>': 'non-stim' if ((fr5_events.session==session) & (fr5_events.phase=='NON-STIM')).any() else 'FR1',
+                                 '<COMPARISON_LIST_TYPE>': 'non-stim' if ((fr5_events[np.in1d(fr5_events.session,session_summary.sessions)].phase=='NON-STIM')).any() else 'FR1',
                                  '<ITEMLEVEL_COMPARISON>': item_level_comparison,
                                  '<CHISQR>':'%.4f'%session_summary.chisqr,
                                  '<PVALUE>':'%.4f'%session_summary.pvalue,

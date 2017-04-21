@@ -85,7 +85,7 @@ class ComposeSessionSummary(ReportRamTask):
             session_summary = FR5SessionSummary()
 
 
-            session_summary.sessions = sorted(fr_stim_session_table.session.unique())
+            session_summary.sessions = sorted(np.unique(fr_stim_session_table.session))
             session_summary.stimtag = fr_stim_session_table.stimAnodeTag.values[0] + '-' + fr_stim_session_table.stimCathodeTag.values[0]
             session_summary.region_of_interest = fr_stim_session_table.Region.values[0]
             session_summary.frequency = fr_stim_session_table.Pulse_Frequency.values[0]
@@ -345,7 +345,7 @@ class ComposeSessionSummary(ReportRamTask):
 
             events = pd.DataFrame.from_records([e for e in events],columns=events.dtype.names)
 
-            ps_session_summaries = []
+            ps_session_summaries = {}
             session_data = []
             for session, sess_events in events.groupby('session'):
 
@@ -361,17 +361,18 @@ class ComposeSessionSummary(ReportRamTask):
 
                 session_summary = PS4SessionSummary()
                 for (i,(location,loc_events)) in enumerate(sess_events.groupby(['anode_label','cathode_label'])):
-                    session_summary.locations.append('%s-%s'%(location[0],location[1]))
-                    opts = loc_events.loc[loc_events['type']=='OPTIMIZATION']
-                    session_summary.amplitudes.append(opts['amplitude'].values)
-                    session_summary.delta_classifiers.append(opts['delta_classifier'].values)
-                    if (loc_events['type']=='OPTIMIZATION_DECISION').any():
-                        decision_event = loc_events.loc[loc_events['type']=='OPTIMIZATION_DECISION']
-                        session_summary.preferred_location = decision_event['location']
-                        session_summary.preferred_amplitude = decision_event['amplitude']
-                        session_summary.tstat = decision_event['tstat']
-                        session_summary.pvalue = decision_event['pvalue']
-                ps_session_summaries.append(session_summary)
+                    if location[0] and location[1]:
+                        session_summary.locations.append('%s-%s'%(location[0],location[1]))
+                        opts = loc_events.loc[loc_events['type']=='OPTIMIZATION']
+                        session_summary.amplitudes.append(opts['amplitude'].values)
+                        session_summary.delta_classifiers.append(opts['delta_classifier'].values)
+                        if (loc_events['type']=='OPTIMIZATION_DECISION').any():
+                            decision_event = loc_events.loc[loc_events['type']=='OPTIMIZATION_DECISION']
+                            session_summary.preferred_location = decision_event['location']
+                            session_summary.preferred_amplitude = decision_event['amplitude']
+                            session_summary.tstat = decision_event['tstat']
+                            session_summary.pvalue = decision_event['pvalue']
+                ps_session_summaries[session] = session_summary
 
             self.pass_object('ps_session_data',session_data)
             self.pass_object('ps_session_summary',ps_session_summaries)

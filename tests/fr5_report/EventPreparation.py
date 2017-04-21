@@ -71,8 +71,7 @@ class FR5EventPreparation(ReportRamTask):
     def __init__(self):
         super(FR5EventPreparation,self).__init__(mark_as_completed=False)
     def run(self):
-        jr = JsonIndexReader(os.path.join('/Users/leond','protocols','r1.json')) # TODO: REMOVE BEFORE COMMITTING
-        # jr  = JsonIndexReader(os.path.join(self.pipeline.mount_point,'protocols','r1.json'))
+        jr  = JsonIndexReader(os.path.join(self.pipeline.mount_point,'protocols','r1.json'))
         temp=self.pipeline.subject.split('_')
         subject= temp[0]
         montage = 0 if len(temp)==1 else temp[1]
@@ -85,7 +84,6 @@ class FR5EventPreparation(ReportRamTask):
         if events:
             events = np.concatenate(events).view(np.recarray)
 
-        events = modify_recalls(events) #TODO: remove before committing
 
         if not (events.type=='REC_BASE').any():
             events = create_baseline_events(events)
