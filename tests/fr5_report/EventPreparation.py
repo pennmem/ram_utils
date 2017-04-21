@@ -45,7 +45,13 @@ class FR1EventPreparation(ReportRamTask):
         event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR1')))
         fr1_events = [BaseEventReader(filename=f,eliminate_events_with_no_eeg=True).read() for f in event_files]
 
+
+        catfr1_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR1')))
+        catfr1_events = [BaseEventReader(filename=f,eliminate_events_with_no_eeg=True).read() for f in catfr1_event_files]
+
+
         fr1_events=np.concatenate(fr1_events).view(np.recarray)
+        catfr1_events = np.concatenate(catfr1_events).view(np.recarray)[list(fr1_events.dtype.names)]
         if not (fr1_events.type == 'REC_BASE').any():
             fr1_events = create_baseline_events(fr1_events)
 
