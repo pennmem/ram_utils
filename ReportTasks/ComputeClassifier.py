@@ -3,11 +3,87 @@ import numpy as np
 from random import shuffle
 import warnings
 from sklearn.externals import  joblib
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score,roc_curve
 from sklearn.linear_model import LogisticRegression
 from ptsa.data.readers.IndexReader import JsonIndexReader
 import os.path
 import itertools
+from math import sqrt
+
+
+
+class ModelOutput(object):
+    def __init__(self, true_labels, probs):
+        self.true_labels = np.array(true_labels)
+        self.probs = np.array(probs)
+        self.auc = np.nan
+        self.fpr = np.nan
+        self.tpr = np.nan
+        self.thresholds = np.nan
+        self.jstat_thresh = np.nan
+        self.jstat_quantile = np.nan
+        self.low_pc_diff_from_mean = np.nan
+        self.mid_pc_diff_from_mean = np.nan
+        self.high_pc_diff_from_mean = np.nan
+        self.n1 = np.nan
+        self.mean1 = np.nan
+        #self.std1 = np.nan
+        self.n0 = np.nan
+        self.mean0 = np.nan
+        #self.std0 = np.nan
+        self.pooled_std = np.nan
+
+    def compute_normal_approx(self):
+        class1_mask = (self.true_labels==1)
+        class1_probs = self.probs[class1_mask]
+        self.n1 = len(class1_probs)
+        class1_normal = np.log(class1_probs/(1.0-class1_probs))
+        self.mean1 = np.mean(class1_normal)
+        #self.std1 = np.std(class1_normal, ddof=1)
+        var1 = np.var(class1_normal, ddof=1)
+        print 'Positive class: mean =', self.mean1, 'variance =', var1, 'n =', self.n1
+
+        class0_probs = self.probs[~class1_mask]
+        self.n0 = len(class0_probs)
+        class0_normal = np.log(class0_probs/(1.0-class0_probs))
+        self.mean0 = np.mean(class0_normal)
+        #self.std0 = np.std(class0_normal, ddof=1)
+        var0 = np.var(class0_normal, ddof=1)
+        print 'Negative class: mean =', self.mean0, 'variance =', var0, 'n =', self.n0
+
+        self.pooled_std = sqrt((var1*(self.n1-1) + var0*(self.n0-1)) / (self.n1+self.n0-2))
+
+        #if self.mean1 < self.mean0:
+        #    print 'BAD CLASSIFIER: recall class mean is less than non-recall class mean!!'
+        #    sys.exit(0)
+
+    def compute_roc(self):
+        try:
+            self.auc = roc_auc_score(self.true_labels, self.probs)
+        except ValueError:
+            return
+        self.fpr, self.tpr, self.thresholds = roc_curve(self.true_labels, self.probs)
+        self.jstat_quantile = 0.5
+        self.jstat_thresh = np.median(self.probs)
+
+    def compute_tercile_stats(self):
+        thresh_low = np.percentile(self.probs, 100.0/3.0)
+        thresh_high = np.percentile(self.probs, 2.0*100.0/3.0)
+
+        low_terc_sel = (self.probs <= thresh_low)
+        high_terc_sel = (self.probs >= thresh_high)
+        mid_terc_sel = ~(low_terc_sel | high_terc_sel)
+
+        low_terc_recall_rate = np.sum(self.true_labels[low_terc_sel]) / float(np.sum(low_terc_sel))
+        mid_terc_recall_rate = np.sum(self.true_labels[mid_terc_sel]) / float(np.sum(mid_terc_sel))
+        high_terc_recall_rate = np.sum(self.true_labels[high_terc_sel]) / float(np.sum(high_terc_sel))
+
+        recall_rate = np.sum(self.true_labels) / float(self.true_labels.size)
+
+        self.low_pc_diff_from_mean = 100.0 * (low_terc_recall_rate-recall_rate) / recall_rate
+        self.mid_pc_diff_from_mean = 100.0 * (mid_terc_recall_rate-recall_rate) / recall_rate
+        self.high_pc_diff_from_mean = 100.0 * (high_terc_recall_rate-recall_rate) / recall_rate
+
 
 class ComputeClassifier(ReportRamTask):
     def __init__(self,params,mark_as_completed):
@@ -151,9 +227,11 @@ def run_lolo_xval(events,recalls,classifier,pow_mat,xval_output,permuted=False):
                 probs[outsample_mask] = classifier.predict_proba(outsample_pow_mat)[:, 1]
 
     if not permuted:
-        xval_output[-1].compute_roc()
-        xval_output[-1].compute_tercile_stats()
-        xval_output[-1].compute_normal_approx()
+        mo = ModelOutput(recalls,probs)
+        mo.compute_roc()
+        mo.compute_tercile_stats()
+        mo.compute_normal_approx()
+        xval_output[-1] = mo
 
     return probs
 

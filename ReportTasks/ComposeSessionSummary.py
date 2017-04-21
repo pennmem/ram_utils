@@ -4,6 +4,7 @@ import numpy as np
 import datetime,time
 from sklearn.metrics import roc_curve
 import pandas as pd
+from sklearn.externals import joblib
 
 SESSION_SUMMARY={
     'catFR1':SessionSummary.catFR1SessionSummary,
@@ -19,7 +20,6 @@ class ComposeSessionSummary(ReportRamTask):
     '''
     def __init__(self):
         super(ComposeSessionSummary,self).__init__(mark_as_completed=False)
-        self.summaries = {}
         self.event_table = pd.DataFrame.from_records([e for e in self.events],columns = self.events.dtype.names)
         # Entries should be in the form 'TITLE':DataFrame() for tables and plots
         # and 'NAME':value for raw numbers or strings
@@ -113,7 +113,9 @@ class ComposeSessionSummary(ReportRamTask):
             for sess in sessions]
         sess_info_table['# lists'] = [events[events.session==sess].list.max() for sess in sessions]
         sess_info_table['Perf'] = ['{:2.2}%}'.format(self.recalls(events[events.session==sess]).mean()) for sess in sessions]
-        self.summaries['sess_info_table'] = sess_info_table
+        self.tables['sess_info_table'] = sess_info_table
+
+        self.tables['n_electrodes'] = len(self.get_passed_object('monopolar_channels'))
 
         
 class ComposeFR1Summary(ComposeSessionSummary):
@@ -122,8 +124,65 @@ class ComposeFR1Summary(ComposeSessionSummary):
 
     def run(self):
         super(ComposeFR1Summary, self).run()
-        n_words = '%d words'%(int((self.events['type']=='WORD').sum()))
-        n_correct  = '%d correct (%2.2f correct)'%()
+
+        # PERFORMANCE TABLE
+        words = self.events.loc[self.events.type == 'WORD']
+        n_words = '%d words'%(len(words))
+        n_correct  = '{} correct ({:2.2}%)'.format(int(words.recalled.sum()),words.recalled.mean())
+        n_pli = '{} PLI ({:2.2}%)'.format(int((words.intrusion>0).sum()),(words.intrusion>0).mean())
+        n_eli = '{} ELI ({:2.2}%)'.format(int((words.intrusion==-1).sum()),(words.intrusion==-1).mean())
+        self.tables['perf_table'] = pd.DataFrame(data=[n_words,n_correct,n_pli,n_eli],)
+
+        # MATH DISTRACTOR TABLE
+        math = self.events.loc[self.events.type=='PROB']
+        n_math = '%d math problems'%len(math)
+        n_correct = '{} correct ({:2.2}%'.format(int(math.iscorrect.sum()),math.iscorrect.mean())
+        n_correct_per_list = '{:.2} per list'.format(math.groupby('list').iscorrect.mean())
+        self.tables['math_table'] = pd.DataFrame(data=[n_math,n_correct,n_correct_per_list])
+
+        #PREC
+        self.tables['p_rec'] = words.groupby('serialpos').recalled.mean()
+        self.tables['p_rec'].columns = ['Probability of recall'] # TODO: CONFIRM THIS WORKS
+
+        #PFR
+        recalls = self.events.loc[self.events.type=='REC_WORD']
+        pfr = np.zeros((len(self.events.list.unique()),len(self.events.serialpos.unique())))
+        for lst,list_recalls in recalls.groupby('list'):
+            first_rec_pos = list_recalls[0].serialpos
+            lst_loc = 0 if lst==-1 else lst
+            pfr[lst_loc,first_rec_pos] = 1
+        self.tables['pfr'] = pd.DataFrame(data=pfr.mean(0),index=self.events.serialpos.unique())
+
+        #t-test results
+        self.tables['ttest'] = self.get_passed_object('ttest_table')
+
+
+        # ROC CURVE AND TERCILE PLOT
+        full_output= self.get_passed_object('xval_output')[-1]
+
+        # ROC CURVE
+        self.tables['roc'] = pd.DataFrame(data=full_output.tpr,index=pd.Index(data=full_output.fpr,name='False Alarm Rate'),
+                                          columns= ['Hit Rate'])
+
+        # TERCILE PLOT
+        self.tables['terc'] = pd.DataFrame(data=[full_output.low_pc_diff_from_mean,full_output.mid_pc_diff_from_mean,
+                                                 full_output.high_pc_diff_from_mean],
+                                           index=pd.Index(['Low','Mid','High'],name='Tercile of Classifier Estimate'),
+                                           columns=['Recall Change from Mean (%)'])
+
+        # AUC NUMBERS
+        self.tables['auc'] = full_output.auc
+        self.tables['auc_pval'] = full_output.pvalue
+        self.tables['classifier_median'] = full_output.jstat_thresh
+
+        self.pass_object('tables',self.tables)
+        joblib.dump(self.tables,self.get_path_to_resource_in_workspace('session_tables_dict.pkl'))
+
+
+
+
+
+
 
 
 
