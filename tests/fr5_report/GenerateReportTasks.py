@@ -383,7 +383,7 @@ class GenerateReportPDF(ReportRamTask):
 
         report_tex_file_name = self.get_passed_object('report_tex_file_name')
 
-        pdflatex_command_str = texinputs_set_str + 'pdflatex' \
+        pdflatex_command_str = texinputs_set_str + 'module load Tex; pdflatex' \
                                + ' -output-directory '+output_directory\
                                + ' -shell-escape ' \
                                + self.get_path_to_resource_in_workspace('reports/'+report_tex_file_name)
