@@ -51,7 +51,7 @@ class FR1EventPreparation(ReportRamTask):
 
 
         fr1_events=np.concatenate(fr1_events).view(np.recarray)
-        catfr1_events = np.concatenate(catfr1_events).view(np.recarray)[list(fr1_events.dtype.names)]
+        # catfr1_events = np.concatenate(catfr1_events).view(np.recarray)[list(fr1_events.dtype.names)]
         if not (fr1_events.type == 'REC_BASE').any():
             fr1_events = create_baseline_events(fr1_events)
 
