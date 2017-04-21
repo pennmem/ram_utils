@@ -107,39 +107,23 @@ class ComposeSessionSummary(ReportRamTask):
         sessions  = np.unique(events.session)
         sess_info_table = pd.DataFrame(index=sessions)
         sess_info_table.index.name='Session'
-        sess_info_table['Date'] = [date.fromtimestamp(events[events.session==sess].mstime[0]).strftime('%m-%d-%Y')
+        sess_info_table['Date'] = [datetime.date.fromtimestamp(events[events.session==sess].mstime[0]).strftime('%m-%d-%Y')
                                    for sess in sessions]
         sess_info_table['Length (min)'] = [time.ctime(events[events.session==sess].mstime[-1] - events[events.session==sess].mstime[0])
             for sess in sessions]
         sess_info_table['# lists'] = [events[events.session==sess].list.max() for sess in sessions]
-        sess_info_table['Perf'] = ['{:2.2}%}'.format(recalls(events[events.session==sess]).mean()) for sess in sessions]
+        sess_info_table['Perf'] = ['{:2.2}%}'.format(self.recalls(events[events.session==sess]).mean()) for sess in sessions]
         self.summaries['sess_info_table'] = sess_info_table
 
         
 class ComposeFR1Summary(ComposeSessionSummary):
-    @staticmethod
-    def intr_events(events):
-        return events[(events.type=='REC_WORD') & (events.intrusion !=0)]
+    def __init__(self):
+        super(ComposeFR1Summary, self).__init__()
 
-    def trials(self,events):
-        return events[events.type=='WORD']
-
-
-    @property
-    def events(self):
-        return self.get_passed_object('all_events')
-
-    def fill_summary(self,events,session=-1):
-        super(ComposeFR1Summary,self).fill_summary(events,session)
-        summary = self.summaries[session]
-        n_rec_events = len(self.rec_events(events))
-        intr_events = self.intr_events(events)
-
-        summary.n_pli = np.sum(intr_events.intrusion > 0)
-        summary.pc_pli = 100 * summary.n_pli / float(n_rec_events)
-        summary.n_eli = np.sum(intr_events.intrusion == -1)
-        summary.pc_eli = 100 * summary.n_eli / float(n_rec_events)
-
+    def run(self):
+        super(ComposeFR1Summary, self).run()
+        n_words = '%d words'%(int((self.events['type']=='WORD').sum()))
+        n_correct  = '%d correct (%2.2f correct)'%()
 
 
 
