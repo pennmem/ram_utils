@@ -225,6 +225,7 @@ class ComposeSessionSummary(ReportRamTask):
 
             low_state_mask = (fr_stim_non_stim_list_table['prob']<fr_stim_non_stim_list_table['thresh'])
             post_low_state_mask = low_state_mask.shift(1)
+            post_low_state_mask = post_low_state_mask.fillna(False)
             post_low_state_mask[fr_stim_non_stim_list_table['serialpos']==1] = False
 
             fr_stim_non_stim_list_low_table = fr_stim_non_stim_list_table[low_state_mask]

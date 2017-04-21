@@ -84,7 +84,11 @@ class EvaluateClassifier(ComputeClassifier):
         events = events[events.stim_list==False]
         recalls = events.recalled
 
-        probs = self.lr_classifier.predict_proba(self.pow_mat)
+        probs = self.lr_classifier.predict_proba(self.pow_mat)[:,1]
+        self.xval_output[-1] = ModelOutput(recalls, probs)
+        self.xval_output[-1].compute_roc()
+        self.xval_output[-1].compute_tercile_stats()
+        self.xval_output[-1].compute_normal_approx()
 
         if self.xval_test_type(events) == 'loso':
             print 'Performing permutation test'
@@ -94,12 +98,6 @@ class EvaluateClassifier(ComputeClassifier):
         else:
             print 'Performing in-session permutation test'
             self.perm_AUCs = self.permuted_lolo_AUCs(events)
-
-
-        self.xval_output[-1] = ModelOutput(recalls, probs)
-        self.xval_output[-1].compute_roc()
-        self.xval_output[-1].compute_tercile_stats()
-        self.xval_output[-1].compute_normal_approx()
 
         self.pvalue = np.sum(self.perm_AUCs >= self.xval_output[-1].auc) / float(self.perm_AUCs.size)
 

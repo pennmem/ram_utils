@@ -104,7 +104,7 @@ class ComputeFRStimTable(ReportRamTask):
         self.fr_stim_table['list'] = events.list
         self.fr_stim_table['serialpos'] = events.serialpos
         self.fr_stim_table['itemno'] = events.item_num
-        self.fr_stim_table['is_stim_list'] = [(s==1) for s in events.stim_list]
+        self.fr_stim_table['is_stim_list'] = [(s==1) for s in events.stim_list] if events.stim_list.any() else np.in1d(events.phase,['PS','STIM'])
         self.fr_stim_table['is_stim_item'] = is_stim_item
         self.fr_stim_table['is_post_stim_item'] = is_post_stim_item
         self.fr_stim_table['recalled'] = events.recalled
