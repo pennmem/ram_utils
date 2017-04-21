@@ -114,9 +114,8 @@ class MontagePreparation(RamTask):
         for bp_tag,bp_data in bipolar_data.iteritems():
             ch1 = bp_data['channel_1']
             ch2 = bp_data['channel_2']
-            if not( ch1>60 and ch1<65) and not (ch2>60 and ch2<65) and not 81<ch1<96 and not 81<ch2<96:
-                bp_tags.append(bp_tag)
-                bp_tal_structs.append(['%03d'%ch1, '%03d'%ch2, bp_data['type_1'], atlas_location(bp_data)])
+            bp_tags.append(bp_tag)
+            bp_tal_structs.append(['%03d'%ch1, '%03d'%ch2, bp_data['type_1'], atlas_location(bp_data)])
 
 
         bp_tal_structs = pd.DataFrame(bp_tal_structs, index=bp_tags, columns=['channel_1', 'channel_2', 'etype', 'bp_atlas_loc'])
