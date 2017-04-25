@@ -102,12 +102,16 @@ class ComputeFRStimTable(ReportRamTask):
                     is_post_stim_item[j] = True
                 j += 1
         print is_post_stim_item.astype(float).sum()
-        self.fr_stim_table = pd.DataFrame.from_records([e for e in events],columns=events.dtype.names)
+        # self.fr_stim_table = pd.DataFrame.from_records([e for e in events],columns=events.dtype.names)
+        self.fr_stim_table = pd.DataFrame()
         self.fr_stim_table['item'] = events.item_name
         self.fr_stim_table['session'] = events.session
         self.fr_stim_table['list'] = events.list
         self.fr_stim_table['serialpos'] = events.serialpos
-        self.fr_stim_table['itemno'] = events.item_num
+        self.fr_stim_table['phase']=events.phase
+        self.fr_stim_table['recognized'] = events.recognized
+        self.fr_stim_table['rejected'] = events.rejected
+        self.fr_stim_table['item_name'] = events.item_name
         self.fr_stim_table['is_stim_list'] = [(e.phase=='STIM' or e.phase=='PS') for e in events]
         self.fr_stim_table['is_stim_item'] = is_stim_item
         self.fr_stim_table['is_post_stim_item'] = is_post_stim_item

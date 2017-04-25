@@ -76,6 +76,7 @@ class FR1EventPreparation(ReportRamTask):
 class FR5EventPreparation(ReportRamTask):
     def __init__(self):
         super(FR5EventPreparation,self).__init__(mark_as_completed=False)
+
     def run(self):
         jr  = JsonIndexReader(os.path.join(self.pipeline.mount_point,'protocols','r1.json'))
         temp=self.pipeline.subject.split('_')
@@ -86,10 +87,12 @@ class FR5EventPreparation(ReportRamTask):
         events = [ BaseEventReader(filename=event_path).read() for event_path in
                                 jr.aggregate_values('task_events',subject=subject,montage=montage,experiment=task)]
 
+        ps_events = [BaseEventReader(filename=event_path,eliminate_events_with_no_eeg=False).read()
+                     for event_path in jr.aggregate_values('ps4_events',subject=subject,experiment=task,montage=montage)]
 
         if events:
             events = np.concatenate(events).view(np.recarray)
-
+        events = events[(events.phase=='STIM') | (events.phase=='NON-STIM')]
 
         if not (events.type=='REC_BASE').any():
             events = create_baseline_events(events)
@@ -100,11 +103,10 @@ class FR5EventPreparation(ReportRamTask):
         math_events = BaseEventReader(
             filename=jr.get_value('math_events',subject=subject,experiment=task,
                                                                                  montage=montage)
-        ).read()#
+        ).read()
+
         math_events = math_events[math_events.type=='PROB']
 
-        ps_events = [BaseEventReader(filename=event_path,eliminate_events_with_no_eeg=False).read()
-                     for event_path in jr.aggregate_values('ps4_events',subject=subject,experiment=task,montage=montage)]
 
         if ps_events:
             ps_events = np.concatenate(ps_events).view(np.recarray)

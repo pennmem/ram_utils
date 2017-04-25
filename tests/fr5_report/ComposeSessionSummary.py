@@ -32,7 +32,6 @@ class ComposeSessionSummary(ReportRamTask):
     def run(self):
         fr_stim_table = self.get_passed_object('fr_stim_table')
         self.pass_object('fr_session_summary',[])
-        self.compose_ps_session_summary()
         self.compose_ps_fr_session_summary()
         self.compose_fr_session_summary()
 
@@ -74,7 +73,7 @@ class ComposeSessionSummary(ReportRamTask):
 
             session_data.append([session, session_date, session_length, n_lists, '$%.2f$\\%%' % pc_correct_words, amplitude])
 
-        self.pass_object('fr5_session_table', session_data)
+        self.pass_object('session_table', session_data)
 
         session_summary_array = self.get_passed_object('fr_session_summary')
         fr_stim_group_table = fr_stim_table.loc[fr_stim_table['is_ps4']]
@@ -160,7 +159,7 @@ class ComposeSessionSummary(ReportRamTask):
 
                 list_rec_events = rec_events[(rec_events.session==session) & (rec_events['list']==lst) & ~(rec_events['intrusion']>0)]
                 if list_rec_events.size > 0:
-                    item_nums = fr_stim_sess_list_table.itemno.values == list_rec_events[0].item_num
+                    item_nums = fr_stim_sess_list_table.item_name == list_rec_events[0].item_name
                     tmp = np.where(item_nums)[0]
                     if tmp.size > 0:
                         first_recall_idx = tmp[0]
@@ -170,6 +169,7 @@ class ComposeSessionSummary(ReportRamTask):
                             session_summary.prob_first_nostim_recall[first_recall_idx]+=1
                         session_summary.prob_first_recall[first_recall_idx] += 1
                         first_recall_counter[first_recall_idx] += 1
+
 
 
                 # if 'cat' in task:
@@ -215,7 +215,7 @@ class ComposeSessionSummary(ReportRamTask):
             # session_summary.pc_from_stim = 100 * session_summary.n_correct_stim / (float(session_summary.n_total_stim) if session_summary.n_total_stim else 4)
             session_summary.n_correct_nonstim = fr1_events.recalled.sum()
             session_summary.n_total_nonstim = len(fr1_events)
-            session_summary.pc_from_nonstim = session_summary.n_correct_nonstim/float(session_summary.n_total_nonstim)
+            session_summary.pc_from_nonstim = 100*session_summary.n_correct_nonstim/float(session_summary.n_total_nonstim)
             last_fr1_session = np.unique(fr1_events.session)[-1]
             fr1_last_sess_events = fr1_events[fr1_events.session == last_fr1_session]
             session_summary.n_correct_nonstim_last = fr1_last_sess_events.recalled.sum()
@@ -502,7 +502,7 @@ class ComposeSessionSummary(ReportRamTask):
 
                 list_rec_events = rec_events[(rec_events.session==session) & (rec_events['list']==lst) & (rec_events['intrusion']==0)]
                 if list_rec_events.size > 0:
-                    item_nums = fr_stim_sess_list_table.itemno.values == list_rec_events[0].item_num
+                    item_nums = fr_stim_sess_list_table.item_name.values == list_rec_events[0].item_name
                     tmp = np.where(item_nums)[0]
                     if tmp.size > 0:
                         first_recall_idx = tmp[0]

@@ -24,33 +24,6 @@ class GeneratePlots(ReportRamTask):
         subject= self.pipeline.subject
 
 
-        ps_events = self.get_passed_object('ps_events')
-        ps_sessions = np.unique(ps_events.session)
-        ps4_session_summaries = self.get_passed_object('ps_session_summary')
-        # ps4_session_summaries = False
-        if ps4_session_summaries:
-            for session in ps_sessions:
-
-                session_summary = ps4_session_summaries[session]
-                xmin = min([amps.min() for amps in session_summary.amplitudes])
-                xmax = max([amps.max() for amps in session_summary.amplitudes])
-                ymin = min([dels.min() for dels in session_summary.delta_classifiers])
-                ymax = max([dels.max() for dels in session_summary.delta_classifiers])
-
-                panel_plot  = PanelPlot(i_max = 1, j_max = 2, xfigsize = 18.0, yfigsize = 14.0,labelsize=15)
-                panel_plot.add_plot_data(0,0,x=session_summary.amplitudes[0],y=session_summary.delta_classifiers[0],
-                                         xlim=(xmin-50,xmax+50),ylim = (ymin-0.05,ymax+0.05),
-                                         linestyle='',marker='x',color='blue', xlabel=session_summary.locations[0],
-                                         xlabel_fontsize = 18, ylabel = 'Change in classifier output (post - pre)',ylabel_fontsize = 24)
-                panel_plot.add_plot_data(0,1,x=session_summary.amplitudes[1], y=session_summary.delta_classifiers[1],
-                                         xlim=(xmin-50, xmax+50), ylim=(ymin - 0.05, ymax + 0.05),
-                                         linestyle = '',marker='x',color='blue',xlabel=session_summary.locations[1],
-                                         xlabel_fontsize=18,)
-                plt = panel_plot.generate_plot()
-                session_summary.PS_PLOT_FILE = self.get_path_to_resource_in_workspace('reports','PS4_%d_dc_plot.pdf'%session)
-                plt.savefig(session_summary.PS_PLOT_FILE,dpi=300)
-
-
         fr5_events = self.get_passed_object(task+'_events')
         fr5_session_summaries = self.get_passed_object('fr_session_summary')
         if fr5_session_summaries:
@@ -219,17 +192,17 @@ class GenerateTex(ReportRamTask):
         experiment = self.pipeline.task
         date = datetime.date.today()
 
-        ps_latex = self.generate_ps_latex()
+        # ps_latex = self.generate_ps_latex()
         fr5_latex = self.generate_fr5_latex()
 
-        replace_template('ps4_fr5_report_base.tex.tpl',self.get_path_to_resource_in_workspace('reports','ps4_fr5_report.tex'),
+        replace_template('ps4_fr5_report_base.tex.tpl',self.get_path_to_resource_in_workspace('reports','FR5_report.tex'),
                          {
                              '<SUBJECT>':subject,
                              '<EXPERIMENT>':experiment,
                              '<DATE>':date,
-                             '<PS4_SECTION>':ps_latex,
+                             # '<PS4_SECTION>':ps_latex,
                              '<FR5_SECTION>':fr5_latex})
-        self.pass_object('report_tex_file_name','ps4_fr5_report.tex')
+        self.pass_object('report_tex_file_name','FR5_report.tex')
 
 
     def generate_ps_latex(self):
@@ -282,7 +255,7 @@ class GenerateTex(ReportRamTask):
         fr5_perm_pvalue = self.get_passed_object(task+'_pvalue')
         fr1_auc = fr1_xval_output[-1].auc
         fr1_pvalue = self.get_passed_object('pvalue')
-        session_data =self.get_passed_object('fr5_session_table')
+        session_data =self.get_passed_object('session_table')
 
 
         fr5_events  = self.get_passed_object(task+'_events')
