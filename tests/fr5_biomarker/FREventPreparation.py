@@ -72,7 +72,21 @@ class FREventPreparation(RamTask):
         catfr1_events = np.concatenate( [BaseEventReader(filename=event_path).read() for event_path in
                                          json_reader.aggregate_values('task_events',subject=subj_code,experiment='catFR1',
                                                                       montage = montage)]).view(np.recarray)
-        catfr1_events=catfr1_events[list(fr1_events.dtype.names)]
+
+        # making sure that events have the same columens and do not include stim_params column (which is a composite type
+        # that is not used here at all)
+
+        common_column_set = set(list(fr1_events.dtype.names)).intersection(list(catfr1_events.dtype.names))
+        common_column_set.remove('stim_params')
+        common_column_list = list(common_column_set)
+
+        # col_name_list = list(fr1_events.dtype.names)
+        # col_name_list = col_name_list.remove('stim_params')
+
+        catfr1_events = catfr1_events[common_column_list ]
+        fr1_events = fr1_events[common_column_list ]
+
+        # catfr1_events=catfr1_events[list(fr1_events.dtype.names)]
         catfr1_events.session += 100
         fr1_events = np.append(fr1_events,catfr1_events).view(np.recarray)
         fr1_events = create_baseline_events(fr1_events)

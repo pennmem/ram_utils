@@ -22,10 +22,10 @@ cml_parser = CMLParserCloseLoop3(arg_count_threshold=1)
 # cml_parser.arg('--cathode-num','97')
 # cml_parser.arg('--cathode','RE1')
 
-subject= 'R1230J'
-cml_parser.arg('--workspace-dir','/home1/leond/fr5_config')
+subject= 'R1247P'
+cml_parser.arg('--workspace-dir','D:/scratch/FR5/R1247P_new')
 cml_parser.arg('--experiment','FR5')
-cml_parser.arg('--mount-point','/')
+cml_parser.arg('--mount-point','D:/')
 cml_parser.arg('--subject',subject)
 cml_parser.arg('--electrode-config-file','/home1/leond/fr5_config/contacts%s.csv'%subject)
 cml_parser.arg('--pulse-frequency','200')
@@ -34,6 +34,19 @@ cml_parser.arg('--anodes','3LAHD2','12RGRD1')
 cml_parser.arg('--cathodes', '3LAHD3','12RGRD2')
 cml_parser.arg('--min-amplitudes','0.25')
 cml_parser.arg('--max-amplitudes','1.0')
+
+# subject= 'R1230J'
+# cml_parser.arg('--workspace-dir','/home1/leond/fr5_config')
+# cml_parser.arg('--experiment','FR5')
+# cml_parser.arg('--mount-point','/')
+# cml_parser.arg('--subject',subject)
+# cml_parser.arg('--electrode-config-file','/home1/leond/fr5_config/contacts%s.csv'%subject)
+# cml_parser.arg('--pulse-frequency','200')
+# cml_parser.arg('--target-amplitude','1.0')
+# cml_parser.arg('--anodes','3LAHD2','12RGRD1')
+# cml_parser.arg('--cathodes', '3LAHD3','12RGRD2')
+# cml_parser.arg('--min-amplitudes','0.25')
+# cml_parser.arg('--max-amplitudes','1.0')
 
 
 args = cml_parser.parse()
