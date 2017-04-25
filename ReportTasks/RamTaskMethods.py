@@ -52,8 +52,17 @@ def compute_powers(events,monopolar_channels,bipolar_pairs,
         eeg['samplerate'] = samplerate
         print 'Computing powers'
         filter_tic=time.time()
-        sess_pow_mat,phase_mat=MorletWaveletFilterCpp(time_series=eeg,freqs = freqs,output='power', width=width,
-                                                      cpus=25).filter()
+
+        # making underlying array contiguous
+        eeg.data = np.ascontiguousarray(eeg.data)
+
+
+
+        wavelet_filter = MorletWaveletFilterCpp(time_series=eeg,freqs = freqs,output='power', width=width,
+                                                      cpus=25)
+
+        sess_pow_mat,phase_mat = wavelet_filter.filter()
+
         print 'Total time for wavelet decomposition: %.5f s'%(time.time()-filter_tic)
         sess_pow_mat=sess_pow_mat.remove_buffer(buffer_time).data
 
