@@ -12,6 +12,9 @@ from ReportUtils import RamTask
 
 import hashlib
 import warnings
+from ReportTasks.RamTaskMethods import create_baseline_events_pal
+
+
 
 class PAL1EventPreparation(RamTask):
     def __init__(self, mark_as_completed=True):
@@ -65,31 +68,29 @@ class PAL1EventPreparation(RamTask):
                 continue
 
 
-            sess_events = sess_events[(sess_events.type == 'STUDY_PAIR') & (sess_events.correct!=-999)]
-
             if events is None:
                 events = sess_events
             else:
                 events = np.hstack((events,sess_events))
 
-        # event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='PAL3')))
-        # for sess_file in event_files:
-        #     e_path = os.path.join(self.pipeline.mount_point, str(sess_file))
-        #     print e_path
-        #     e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
-        #
-        #     sess_events = e_reader.read()
-        #     sess_events = sess_events[(sess_events.stim_list==0) & (sess_events.type == 'STUDY_PAIR') & (sess_events.correct!=-999)]
-        #     sess_events.session += 200
-        #     sess_events = sess_events[evs_field_list]
-        #
-        #     if events is None:
-        #         events = sess_events
-        #     else:
-        #         events = np.hstack((events,sess_events))
-
         events = events.view(np.recarray)
 
-        print len(events), 'STUDY_PAIR events'
+        processed_events = create_baseline_events_pal(events)
 
-        self.pass_object('PAL1_events', events)
+
+        encoding_events_mask = processed_events.type == 'STUDY_PAIR'
+        retrieval_events_mask = (processed_events.type == 'REC_EVENT') | (processed_events.type == 'REC_BASE')
+        irts = np.append([0], np.diff(processed_events.mstime))
+        retrieval_events_mask_0s = retrieval_events_mask & (processed_events.type == 'REC_BASE')
+        retrieval_events_mask_1s = retrieval_events_mask & (processed_events.type == 'REC_EVENT') & (
+        processed_events.intrusion == 0) & (irts > 1000)
+
+        # final filtering
+        processed_events = processed_events[encoding_events_mask | retrieval_events_mask_0s | retrieval_events_mask_1s]
+
+
+        processed_events = processed_events.view(np.recarray)
+
+        print len(processed_events), 'STUDY_PAIR events'
+
+        self.pass_object('PAL1_events', processed_events)

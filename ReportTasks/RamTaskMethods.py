@@ -372,3 +372,62 @@ def create_baseline_events(events):
                 merged_events[i].eegoffset = merged_events[i - 1].eegoffset + (merged_events[i].mstime - merged_events[i - 1].mstime)
         all_events.append(merged_events)
     return np.concatenate(all_events).view(np.recarray)
+
+
+def create_baseline_events_pal(events):
+    '''
+    Match recall events to matching baseline periods of failure to recall.
+    Baseline events all begin at least 1000 ms after a vocalization, and end at least 1000 ms before a vocalization.
+    Each recall event is matched, wherever possible, to a valid baseline period from a different list within 3 seconds
+     relative to the onset of the recall period.
+
+    Parameters:
+    -----------
+    events: The event structure in which to incorporate these baseline periods
+
+    '''
+
+    all_events =[]
+    for session in np.unique(events.session):
+        sess_events = events[(events.session == session)]
+        irts = np.append([0],np.diff(sess_events.mstime))
+        rec_events = sess_events[(sess_events.type == 'REC_EVENT') & (sess_events.intrusion == 0) & (irts > 1000)]
+        voc_events = sess_events[((sess_events.type == 'REC_EVENT') | (sess_events.type == 'REC_EVENT_VV'))]
+        starts = sess_events[(sess_events.type == 'RECALL_START')]
+        ends = sess_events[(sess_events.type == 'RECALL_END')]
+        rec_lists = tuple(np.unique(starts.list))
+        times = [voc_events[(voc_events.list == lst)].mstime for lst in rec_lists]
+        start_times = starts.mstime
+        end_times = ends.mstime
+        epochs = free_epochs(times, 500, 1000, 1000, start=start_times, end=end_times)
+        rel_times = [t - i for (t, i) in
+                     zip([rec_events[rec_events.list == lst].mstime for lst in rec_lists], start_times)]
+        rel_epochs = epochs - start_times[:, None]
+        full_match_accum = np.zeros(epochs.shape, dtype=np.bool)
+        for (i, rec_times_list) in enumerate(rel_times):
+            is_match = np.empty(epochs.shape, dtype=np.bool)
+            is_match[...] = False
+            for t in rec_times_list:
+                is_match_tmp = np.abs((rel_epochs - t)) < 3000
+                is_match_tmp[i, ...] = False
+                good_locs = np.where(is_match_tmp & (~full_match_accum))
+                if len(good_locs[0]):
+                    choice_position = np.argmin(np.mod(good_locs[0]-i,len(good_locs[0])))
+                    choice_inds = (good_locs[0][choice_position], good_locs[1][choice_position])
+                    full_match_accum[choice_inds] = True
+        matching_epochs = epochs[full_match_accum]
+        new_events = np.zeros(len(matching_epochs), dtype=sess_events.dtype).view(np.recarray)
+        for i, _ in enumerate(new_events):
+            new_events[i].mstime = matching_epochs[i]
+            new_events[i].type = 'REC_BASE'
+        new_events.recalled = 0
+        merged_events = np.concatenate((sess_events, new_events)).view(np.recarray)
+        merged_events.sort(order='mstime')
+        for (i, event) in enumerate(merged_events):
+            if event.type == 'REC_BASE':
+                merged_events[i].session = merged_events[i - 1].session
+                merged_events[i].list = merged_events[i - 1].list
+                merged_events[i].eegfile = merged_events[i - 1].eegfile
+                merged_events[i].eegoffset = merged_events[i - 1].eegoffset + (merged_events[i].mstime - merged_events[i - 1].mstime)
+        all_events.append(merged_events)
+    return np.concatenate(all_events).view(np.recarray)
