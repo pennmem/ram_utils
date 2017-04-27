@@ -98,10 +98,10 @@ classdef StimControl < handle
         bpmat;   % matrix to convert monopolar to bipolar eeg
         freqs;   % frequencies used in wavelet transform
         fs;      % sampling rate = 1000 Hz for Sys 2.x
-        winsize; % 1300 for TH3
-        total_winsize; % 3898 for TH3
-        wait_after_chest_opened; % 1500 ms for TH3
-        bufsize; % 1299 for TH3
+        winsize; % 1366 for TH3
+        total_winsize; % 4096 for TH3
+        wait_after_chest_opened; % 1365 ms for TH3
+        bufsize; % 1365 for TH3
         phase;   % experiment phase
         W_in;    % classifier weights
         thresh;  % prob threshold
@@ -139,24 +139,24 @@ classdef StimControl < handle
            this.zscorer = StatAccum();
            
            % Real-time analysis parameters
-           this.freqs = logspace(log10(1), log10(200), 8);
+           this.freqs = logspace(log10(3), log10(180), 8);
            this.n_freqs = 8;
            this.bpmat = Bio.bpmat;
            this.W_in = [Bio.W Bio.W0];      % weights, w/constant term to the end of the weight vector
            this.trainingProb = Bio.trainingProb;
            this.thresh = Bio.thresh;
            this.fs = Bio.fs;                  % sampling freq.
-           this.winsize = 1300;
-           this.total_winsize = 3898;
-           this.bufsize = 1299;
-           this.wait_after_chest_opened = 1300;
+           this.winsize = 1366;
+           this.total_winsize = 4096;
+           this.bufsize = 1365;
+           this.wait_after_chest_opened = 1366;
            [B,A] = butter(4, [58.0 62.0]/(this.fs/2.0), 'stop');
            this.Filter.coeffs = [B;A];
 
            % check for existing zscore data (which happens if the session is
            % stopped and re-started) and load it. If not, initialize zscore
            % variables.
-           control = RAMControl.getInstance();
+           control = RAMControl.getInstance();           
            this.debugFileName = fullfile(control.getDataFolder, 'DEBUG.mat');
            this.savedFileName = fullfile(control.getDataFolder,[Bio.Subject,'StateSave.mat']);
            if exist(this.savedFileName,'file')
@@ -254,12 +254,12 @@ classdef StimControl < handle
 
             [state_is_chest, time_since_change] = control.isStateActive('TREASURE_OPEN_SPECIAL');
 
-            if ~this.current_item_analyzed && state_is_chest && time_since_change>=this.wait_after_chest_opened
+            if ~this.current_item_analyzed && state_is_chest && time_since_change>=this.wait_after_chest_opened                
                 this.current_item_analyzed = true;
                 is_stim_encoding = control.isStateActive('STIM_NAVIGATION');
 
-                % decoding procedure
-
+                % decoding procedure    
+                
                 n_channels = size(dataByChannel,2);
                 if n_channels==144
                     dataByChannel = dataByChannel(end-this.winsize+1:end,1:128);
@@ -271,12 +271,12 @@ classdef StimControl < handle
                     fprintf(errMsg);
                     return;
                 end
-
-                this.session_eeg = cat(3, this.session_eeg, dataByChannel);
-
+                
+                this.session_eeg = cat(3, this.session_eeg, dataByChannel);                                
+                
                 dataByChannel = dataByChannel*this.bpmat;
 
-                % mirroring happens here
+                % mirroring happens here                
                 flipdata = flipud(dataByChannel);                
                 dataByChannel = [flipdata(end-this.bufsize:end-1,:); dataByChannel; flipdata(2:this.bufsize+1,:)];
 
@@ -285,10 +285,10 @@ classdef StimControl < handle
                 b = this.Filter.coeffs(1,:);
                 a = this.Filter.coeffs(2,:);
 
-                % apply Butterworth filter
+                % apply Butterworth filter                
                 dataByChannel = filtfilt2(b,a,dataByChannel);
 
-                % compute powers
+                % compute powers                
                 pow = zeros(this.n_freqs, n_bps);
                 pow_j = zeros(this.total_winsize, this.n_freqs);
                 for j=1:n_bps
@@ -301,10 +301,10 @@ classdef StimControl < handle
                 end
                 pow = pow(:);
 
-                % saving for KS test or post-mortem
+                % saving for KS test or post-mortem                
                 this.session_pows = [this.session_pows pow];
 
-                if is_stim_encoding
+                if is_stim_encoding                    
                     % zscore powers
                     pow = (pow - this.zscorer.mean) ./ this.zscorer.stdev;
 
@@ -315,11 +315,11 @@ classdef StimControl < handle
                         decision = 1;
                     end
                 else
-                    % update zscorer
+                    % update zscorer                    
                     this.zscorer.receive(pow);
                     fprintf('#samples for zscoring = %d\n', this.zscorer.n);
 
-                    if this.ks_test_done
+                    if this.ks_test_done                        
                         % enough samples for zscoring; output probability in the regular way
                         pow = (pow - this.zscorer.mean) ./ this.zscorer.stdev;
                         prob = 1.0 / (1.0+exp(-(this.W_in*[pow;1])));

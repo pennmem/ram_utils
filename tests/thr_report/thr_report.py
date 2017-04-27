@@ -54,7 +54,7 @@ class Params(object):
 
         self.filt_order = 4
 
-        self.freqs = np.logspace(np.log10(1), np.log10(200), 8)
+        self.freqs = np.logspace(np.log10(3), np.log10(180), 8)
 
         self.ttest_names = ['Low Theta', 'High Theta', 'Gamma', 'HFA']
         self.ttest_freqs = np.logspace(np.log10(1), np.log10(200), 30)

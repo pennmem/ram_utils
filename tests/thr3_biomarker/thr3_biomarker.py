@@ -13,10 +13,10 @@ cml_parser = CMLParserBiomarker(arg_count_threshold=1)
 cml_parser.arg('--workspace-dir','/scratch/jfm2/THR3_biomarkers')
 cml_parser.arg('--subject','R1294C')
 cml_parser.arg('--n-channels','128')
-cml_parser.arg('--anode-num','23')
-cml_parser.arg('--anode','RHH11')
-cml_parser.arg('--cathode-num','24')
-cml_parser.arg('--cathode','RHH12')
+cml_parser.arg('--anode-num','75')
+cml_parser.arg('--anode','RPC1')
+cml_parser.arg('--cathode-num','76')
+cml_parser.arg('--cathode','RPC2')
 cml_parser.arg('--pulse-frequency','200')
 cml_parser.arg('--pulse-duration','500')
 cml_parser.arg('--target-amplitude','1000')
@@ -70,12 +70,12 @@ class Params(object):
         self.width = 5
 
         self.thr_start_time = 0.0
-        self.thr_end_time = 1.3
-        self.thr_buf = 1.299
+        self.thr_end_time = 1.366
+        self.thr_buf = 1.365
 
         self.filt_order = 4
 
-        self.freqs = np.logspace(np.log10(1), np.log10(200), 8)
+        self.freqs = np.logspace(np.log10(3), np.log10(180), 8)
 
         self.log_powers = True
 
