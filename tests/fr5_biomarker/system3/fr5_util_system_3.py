@@ -67,7 +67,7 @@ from tests.fr5_biomarker.ComputeClassifier import ComputeClassifier
 
 from tests.fr5_biomarker.ComputeClassifier import ComputeFullClassifier
 
-from tests.fr5_biomarker.system3.ExperimentConfigGeneratorClosedLoop3 import ExperimentConfigGeneratorClosedLoop3
+from tests.fr5_biomarker.system3.ExperimentConfigGeneratorClosedLoop5 import ExperimentConfigGeneratorClosedLoop3
 
 
 import numpy as np
