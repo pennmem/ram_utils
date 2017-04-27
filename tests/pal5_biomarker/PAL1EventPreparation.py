@@ -67,7 +67,6 @@ class PAL1EventPreparation(RamTask):
                 warnings.warn('Could not process %s. Please make sure that the event file exist'%e_path, RuntimeWarning)
                 continue
 
-
             if events is None:
                 events = sess_events
             else:

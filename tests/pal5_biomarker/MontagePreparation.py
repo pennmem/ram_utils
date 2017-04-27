@@ -101,6 +101,12 @@ class MontagePreparation(RamTask):
             bipolar_data_stim_only = {bp_tag:bp_data for bp_tag,bp_data in bipolar_data.iteritems() if bp_data['is_stim_only']}
             bipolar_data = {bp_tag:bp_data for bp_tag,bp_data in bipolar_data.iteritems() if not bp_data['is_stim_only']}
 
+            if self.pipeline.args.anodes:
+                (self.pipeline.args.anode_nums,self.pipeline.args.cathode_nums) = zip(
+                    *[(bipolar_data['-'.join((anode,cathode))]['channel_1'],bipolar_data['-'.join((anode,cathode))]['channel_2'])
+                                     for (anode,cathode) in zip(self.pipeline.args.anodes,self.pipeline.args.cathodes)])
+
+
             bp_tags = []
             bp_tal_structs = []
             for bp_tag,bp_data in bipolar_data.iteritems():
@@ -128,10 +134,12 @@ class MontagePreparation(RamTask):
                     bp_tal_stim_only_structs.append(atlas_location(bp_data))
                 bp_tal_stim_only_structs = pd.Series(bp_tal_stim_only_structs, index=bp_tags_stim_only)
 
-            if self.params.stim_params.anode_nums:
-                stim_pairs = self.params.stim_params.anode_nums + self.params.stim_params.cathode_nums
+            args = self.pipeline.args
+
+            if args.anode_nums:
+                stim_pairs = args.anode_nums + args.cathode_nums
             else:
-                stim_pairs = [self.params.stim_params.elec1, self.params.stim_params.elec2]
+                stim_pairs = [args.elec1, args.elec2]
             bipolar_pairs = np.array(bipolar_pairs, dtype=[('ch1', 'S3'), ('ch2', 'S3')]).view(np.recarray)
             include = [int(bp.ch1) not in stim_pairs and int(bp.ch2) not in stim_pairs for bp in bipolar_pairs]
 
