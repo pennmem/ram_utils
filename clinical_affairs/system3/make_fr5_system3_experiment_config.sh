@@ -2,12 +2,12 @@
 # NOTE:
 # THIS IS THE CONFIG FILE GENERATOR FOR PS4_FR5 AND FOR FR5.
 
-subject=R1111M
-experiment=FR5
-anode1=LPOG10
-cathode1=LPOG11
-anode2=LPOG11
-cathode2=LPOG12
+subject=R1293P
+experiment=PS4_FR5
+anode1=LA7
+cathode1=LA8
+anode2=LC7
+cathode2=LC8
 target_amplitude=1.0
 min_amplitude=0.25
 max_amplitude=2.0

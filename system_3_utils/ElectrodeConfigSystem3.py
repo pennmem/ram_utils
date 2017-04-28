@@ -105,7 +105,7 @@ class ElectrodeConfig(object):
         'SenseChannels:\n' \
         '{sense_channels_csv}\n' \
         'StimulationChannelSubclasses:\n' \
-        'StimulationChannels:\n' \
+        'StimulationChannels:' \
         '{stim_channels_csv}\n' \
         '{ref}\n' \
         'EOF\n'
@@ -122,8 +122,11 @@ class ElectrodeConfig(object):
 
     @property
     def stim_channels_csv(self):
-        return '\n'.join([stim_channel.as_csv() for stim_channel in
+        stim_channels_as_csv = '\n'.join([stim_channel.as_csv() for stim_channel in
                           sorted(self.stim_channels.values(), key=lambda s: s.anodes[0])])
+        if stim_channels_as_csv:
+            stim_channels_as_csv = '\n'+stim_channels_as_csv
+        return stim_channels_as_csv
 
     def as_csv(self):
         if not self.initialized:
