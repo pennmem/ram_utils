@@ -191,15 +191,15 @@ class ReportPipeline(RamPipeline):
 report_pipeline = ReportPipeline(subject=args.subject,
                                        workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point, args=args)
 
-# report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
+report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
 
 report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
 #
-# report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
+report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
 #
-# report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=True))
-#
-# report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=True))
+
+report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 #
 # report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
 #

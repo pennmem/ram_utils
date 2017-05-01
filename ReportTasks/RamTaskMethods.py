@@ -6,9 +6,8 @@
     Instead, I'm just going to define a number of methods and make every class call them, because I don't actually believe
     in OOP"""
 
-
 from ptsa.data.readers import EEGReader
-from ptsa.data.filters import MonopolarToBipolarMapper,MorletWaveletFilterCpp,MorletWaveletFilter,ButterworthFilter
+from ptsa.data.filters import MonopolarToBipolarMapper, MorletWaveletFilterCpp, MorletWaveletFilter, ButterworthFilter
 import numpy as np
 from scipy.stats.mstats import zscore
 import time
@@ -18,68 +17,76 @@ from random import shuffle
 from sklearn.metrics import roc_auc_score, roc_curve
 from sklearn.externals import joblib
 
-def compute_powers(events,monopolar_channels,bipolar_pairs,
-                   start_time,end_time,buffer_time,
-                   freqs,log_powers,ComputePowers=None,filt_order=4,width=5):
 
-    if not isinstance(bipolar_pairs,np.recarray):
-        bipolar_pairs = np.array(bipolar_pairs,dtype=[('ch0','S3'),('ch1','S3')]).view(np.recarray)
+def compute_powers(events, monopolar_channels, bipolar_pairs,
+                   start_time, end_time, buffer_time,
+                   freqs, log_powers, ComputePowers=None, filt_order=4, width=5):
+    if not isinstance(bipolar_pairs, np.recarray):
+        # it expects to receive a list
+        bipolar_pairs = np.array(bipolar_pairs, dtype=[('ch0', 'S3'), ('ch1', 'S3')]).view(np.recarray)
+    else:
+        # to get the same treatment if we get recarray , we will convert it to a list and then bask to
+        # recarray with correct dtype
+        bipolar_pairs = np.array(list(bipolar_pairs), dtype=[('ch0', 'S3'), ('ch1', 'S3')]).view(np.recarray)
+
     sessions = np.unique(events.session)
     pow_mat = None
     tic = time.time()
-    filter_time=0.
+    filter_time = 0.
     for sess in sessions:
         print 'Loading EEG for session {}'.format(sess)
-        sess_events = events[events.session==sess]
+        sess_events = events[events.session == sess]
         # Load EEG
-        eeg_reader = EEGReader(events=sess_events,channels=monopolar_channels,start_time=start_time,end_time=end_time)
+        eeg_reader = EEGReader(events=sess_events, channels=monopolar_channels, start_time=start_time,
+                               end_time=end_time)
         eeg = eeg_reader.read()
         samplerate = eeg['samplerate']
         if eeg_reader.removed_bad_data():
             print 'REMOVED SOME BAD EVENTS !!!'
-            events = np.concatenate((events[events.session !=sess],eeg['events'].data.view(np.recarray))).view(np.recarray)
+            events = np.concatenate((events[events.session != sess], eeg['events'].data.view(np.recarray))).view(
+                np.recarray)
             event_fields = events.dtype.names
-            order = tuple(f for f in ['session','list','mstime'] if f in event_fields)
+            order = tuple(f for f in ['session', 'list', 'mstime'] if f in event_fields)
             ev_order = np.argsort(events, order=order)
             events = events[ev_order]
-            #The task will have to actually handle passing the new events
-        eeg=eeg.add_mirror_buffer(duration=buffer_time)
+            # The task will have to actually handle passing the new events
+        eeg = eeg.add_mirror_buffer(duration=buffer_time)
 
         # Use bipolar pairs
-        eeg= MonopolarToBipolarMapper(time_series=eeg,bipolar_pairs=bipolar_pairs).filter()
-        #Butterworth filter to remove line noise
-        eeg=eeg.filtered(freq_range=[58.,62.],filt_type='stop',order=filt_order)
+        eeg = MonopolarToBipolarMapper(time_series=eeg, bipolar_pairs=bipolar_pairs).filter()
+        # Butterworth filter to remove line noise
+        eeg = eeg.filtered(freq_range=[58., 62.], filt_type='stop', order=filt_order)
         eeg['samplerate'] = samplerate
         print 'Computing powers'
-        filter_tic=time.time()
+        filter_tic = time.time()
 
         # making underlying array contiguous
         eeg.data = np.ascontiguousarray(eeg.data)
 
+        wavelet_filter = MorletWaveletFilterCpp(time_series=eeg, freqs=freqs, output='power', width=width,
+                                                cpus=25)
 
+        sess_pow_mat, phase_mat = wavelet_filter.filter()
 
-        wavelet_filter = MorletWaveletFilterCpp(time_series=eeg,freqs = freqs,output='power', width=width,
-                                                      cpus=25)
-
-        sess_pow_mat,phase_mat = wavelet_filter.filter()
-
-        print 'Total time for wavelet decomposition: %.5f s'%(time.time()-filter_tic)
-        sess_pow_mat=sess_pow_mat.remove_buffer(buffer_time).data
+        print 'Total time for wavelet decomposition: %.5f s' % (time.time() - filter_tic)
+        sess_pow_mat = sess_pow_mat.remove_buffer(buffer_time).data
 
         if log_powers:
-            np.log10(sess_pow_mat,sess_pow_mat)
-        sess_pow_mat = np.nanmean(sess_pow_mat.transpose(2,1,0,3),-1)
+            np.log10(sess_pow_mat, sess_pow_mat)
+        sess_pow_mat = np.nanmean(sess_pow_mat.transpose(2, 1, 0, 3), -1)
 
-        pow_mat = sess_pow_mat if pow_mat is None else np.concatenate((pow_mat,sess_pow_mat))
+        pow_mat = sess_pow_mat if pow_mat is None else np.concatenate((pow_mat, sess_pow_mat))
 
-    pow_mat = pow_mat.reshape((len(events),len(bipolar_pairs)*len(freqs)))
-    print 'Total time elapsed: {}'.format(time.time()-tic)
+    pow_mat = pow_mat.reshape((len(events), len(bipolar_pairs) * len(freqs)))
+    print 'Total time elapsed: {}'.format(time.time() - tic)
     # print 'Time spent on wavelet filter: {}'.format(filter_time)
     if ComputePowers is not None:
         ComputePowers.samplerate = eeg['samplerate'].data.astype(np.float)
-    return pow_mat,events
+    return pow_mat, events
+
 
 """======================================== Classifier Functions =================================================== """
+
 
 class ModelOutput(object):
     def __init__(self, true_labels, probs):
@@ -96,33 +103,33 @@ class ModelOutput(object):
         self.high_pc_diff_from_mean = np.nan
         self.n1 = np.nan
         self.mean1 = np.nan
-        #self.std1 = np.nan
+        # self.std1 = np.nan
         self.n0 = np.nan
         self.mean0 = np.nan
-        #self.std0 = np.nan
+        # self.std0 = np.nan
         self.pooled_std = np.nan
 
     def compute_normal_approx(self):
-        class1_mask = (self.true_labels==1)
+        class1_mask = (self.true_labels == 1)
         class1_probs = self.probs[class1_mask]
         self.n1 = len(class1_probs)
-        class1_normal = np.log(class1_probs/(1.0-class1_probs))
+        class1_normal = np.log(class1_probs / (1.0 - class1_probs))
         self.mean1 = np.mean(class1_normal)
-        #self.std1 = np.std(class1_normal, ddof=1)
+        # self.std1 = np.std(class1_normal, ddof=1)
         var1 = np.var(class1_normal, ddof=1)
         print 'Positive class: mean =', self.mean1, 'variance =', var1, 'n =', self.n1
 
         class0_probs = self.probs[~class1_mask]
         self.n0 = len(class0_probs)
-        class0_normal = np.log(class0_probs/(1.0-class0_probs))
+        class0_normal = np.log(class0_probs / (1.0 - class0_probs))
         self.mean0 = np.mean(class0_normal)
-        #self.std0 = np.std(class0_normal, ddof=1)
+        # self.std0 = np.std(class0_normal, ddof=1)
         var0 = np.var(class0_normal, ddof=1)
         print 'Negative class: mean =', self.mean0, 'variance =', var0, 'n =', self.n0
 
-        self.pooled_std = sqrt((var1*(self.n1-1) + var0*(self.n0-1)) / (self.n1+self.n0-2))
+        self.pooled_std = sqrt((var1 * (self.n1 - 1) + var0 * (self.n0 - 1)) / (self.n1 + self.n0 - 2))
 
-        #if self.mean1 < self.mean0:
+        # if self.mean1 < self.mean0:
         #    print 'BAD CLASSIFIER: recall class mean is less than non-recall class mean!!'
         #    sys.exit(0)
 
@@ -136,8 +143,8 @@ class ModelOutput(object):
         self.jstat_thresh = np.median(self.probs)
 
     def compute_tercile_stats(self):
-        thresh_low = np.percentile(self.probs, 100.0/3.0)
-        thresh_high = np.percentile(self.probs, 2.0*100.0/3.0)
+        thresh_low = np.percentile(self.probs, 100.0 / 3.0)
+        thresh_high = np.percentile(self.probs, 2.0 * 100.0 / 3.0)
 
         low_terc_sel = (self.probs <= thresh_low)
         high_terc_sel = (self.probs >= thresh_high)
@@ -149,19 +156,19 @@ class ModelOutput(object):
 
         recall_rate = np.sum(self.true_labels) / float(self.true_labels.size)
 
-        self.low_pc_diff_from_mean = 100.0 * (low_terc_recall_rate-recall_rate) / recall_rate
-        self.mid_pc_diff_from_mean = 100.0 * (mid_terc_recall_rate-recall_rate) / recall_rate
-        self.high_pc_diff_from_mean = 100.0 * (high_terc_recall_rate-recall_rate) / recall_rate
+        self.low_pc_diff_from_mean = 100.0 * (low_terc_recall_rate - recall_rate) / recall_rate
+        self.mid_pc_diff_from_mean = 100.0 * (mid_terc_recall_rate - recall_rate) / recall_rate
+        self.high_pc_diff_from_mean = 100.0 * (high_terc_recall_rate - recall_rate) / recall_rate
 
 
 def permuted_loso_AUCs(self, event_sessions, recalls):
     n_perm = self.params.n_perm
     permuted_recalls = np.array(recalls)
     AUCs = np.empty(shape=n_perm, dtype=np.float)
-    with joblib.Parallel(n_jobs=-1,verbose=20,) as parallel:
+    with joblib.Parallel(n_jobs=-1, verbose=20, ) as parallel:
         probs = parallel(joblib.delayed(run_loso_xval)(event_sessions, permuted_recalls,
-                                   self.pow_mat, self.lr_classifier,self.xval_output,
-                                    permuted=True,iter=i) for i in xrange(n_perm))
+                                                       self.pow_mat, self.lr_classifier, self.xval_output,
+                                                       permuted=True, iter=i) for i in xrange(n_perm))
         AUCs[:] = [roc_auc_score(recalls, prob) for prob in probs]
     return AUCs
 
@@ -175,32 +182,32 @@ def permuted_lolo_AUCs(self, events):
     permuted_recalls = np.array(recalls)
     AUCs = np.empty(shape=n_perm, dtype=np.float)
     sessions = np.unique(events.session)
-    with joblib.Parallel(n_jobs=-1,verbose=20,max_nbytes=1e4) as parallel:
-        probs = parallel(joblib.delayed(run_lolo_xval)(events, permuted_recalls,self.pow_mat,self.lr_classifier,
-                                                       self.xval_output, permuted=True,iter=i)
-                         for i in xrange(n_perm) )
+    with joblib.Parallel(n_jobs=-1, verbose=20, max_nbytes=1e4) as parallel:
+        probs = parallel(joblib.delayed(run_lolo_xval)(events, permuted_recalls, self.pow_mat, self.lr_classifier,
+                                                       self.xval_output, permuted=True, iter=i)
+                         for i in xrange(n_perm))
         AUCs[:] = [roc_auc_score(recalls, p) for p in probs]
     return AUCs
 
 
-def run_lolo_xval(events, recalls, pow_mat,lr_classifier,xval_output, permuted=False,**kwargs):
+def run_lolo_xval(events, recalls, pow_mat, lr_classifier, xval_output, permuted=False, **kwargs):
     probs = np.empty_like(recalls, dtype=np.float)
 
     sessions = np.unique(events.session)
 
     if permuted:
         for sess in sessions:
-            sess_lists = np.unique(events[events.session==sess].list)
+            sess_lists = np.unique(events[events.session == sess].list)
             for lst in sess_lists:
-                sel = (events.session==sess) & (events.list==lst)
+                sel = (events.session == sess) & (events.list == lst)
                 list_permuted_recalls = recalls[sel]
                 shuffle(list_permuted_recalls)
                 recalls[sel] = list_permuted_recalls
 
     for sess in sessions:
-        sess_lists = np.unique(events[events.session==sess].list)
+        sess_lists = np.unique(events[events.session == sess].list)
         for lst in sess_lists:
-            insample_mask = (events.session!=sess) | (events.list!=lst)
+            insample_mask = (events.session != sess) | (events.list != lst)
             insample_pow_mat = pow_mat[insample_mask]
             insample_recalls = recalls[insample_mask]
 
@@ -211,7 +218,7 @@ def run_lolo_xval(events, recalls, pow_mat,lr_classifier,xval_output, permuted=F
             outsample_mask = ~insample_mask
             outsample_pow_mat = pow_mat[outsample_mask]
 
-            probs[outsample_mask] = lr_classifier.predict_proba(outsample_pow_mat)[:,1]
+            probs[outsample_mask] = lr_classifier.predict_proba(outsample_pow_mat)[:, 1]
             if not permuted:
                 xval_output[sess] = ModelOutput(recalls[outsample_mask], probs[outsample_mask])
                 xval_output[sess].compute_roc()
@@ -226,8 +233,7 @@ def run_lolo_xval(events, recalls, pow_mat,lr_classifier,xval_output, permuted=F
     return probs
 
 
-
-def run_loso_xval(event_sessions, recalls,pow_mat,classifier,xval_output,permuted=False,**kwargs):
+def run_loso_xval(event_sessions, recalls, pow_mat, classifier, xval_output, permuted=False, **kwargs):
     if permuted:
         for sess in event_sessions:
             sel = (event_sessions == sess)
@@ -252,7 +258,7 @@ def run_loso_xval(event_sessions, recalls,pow_mat,classifier,xval_output,permute
         outsample_pow_mat = pow_mat[outsample_mask]
         outsample_recalls = recalls[outsample_mask]
 
-        outsample_probs = classifier.predict_proba(outsample_pow_mat)[:,1]
+        outsample_probs = classifier.predict_proba(outsample_pow_mat)[:, 1]
         if not permuted:
             xval_output[sess] = ModelOutput(outsample_recalls, outsample_probs)
             xval_output[sess].compute_roc()
@@ -267,7 +273,10 @@ def run_loso_xval(event_sessions, recalls,pow_mat,classifier,xval_output,permute
 
     return probs
 
+
 "============================================================"
+
+
 def free_epochs(times, duration, pre, post, start=None, end=None):
     # (list(vector(int))*int*int*int) -> list(vector(int))
     """
@@ -328,10 +337,10 @@ def create_baseline_events(events):
 
     '''
 
-    all_events =[]
+    all_events = []
     for session in np.unique(events.session):
         sess_events = events[(events.session == session)]
-        irts = np.append([0],np.diff(sess_events.mstime))
+        irts = np.append([0], np.diff(sess_events.mstime))
         rec_events = sess_events[(sess_events.type == 'REC_WORD') & (sess_events.intrusion == 0) & (irts > 1000)]
         voc_events = sess_events[((sess_events.type == 'REC_WORD') | (sess_events.type == 'REC_WORD_VV'))]
         starts = sess_events[(sess_events.type == 'REC_START')]
@@ -353,7 +362,7 @@ def create_baseline_events(events):
                 is_match_tmp[i, ...] = False
                 good_locs = np.where(is_match_tmp & (~full_match_accum))
                 if len(good_locs[0]):
-                    choice_position = np.argmin(np.mod(good_locs[0]-i,len(good_locs[0])))
+                    choice_position = np.argmin(np.mod(good_locs[0] - i, len(good_locs[0])))
                     choice_inds = (good_locs[0][choice_position], good_locs[1][choice_position])
                     full_match_accum[choice_inds] = True
         matching_epochs = epochs[full_match_accum]
@@ -369,7 +378,8 @@ def create_baseline_events(events):
                 merged_events[i].session = merged_events[i - 1].session
                 merged_events[i].list = merged_events[i - 1].list
                 merged_events[i].eegfile = merged_events[i - 1].eegfile
-                merged_events[i].eegoffset = merged_events[i - 1].eegoffset + (merged_events[i].mstime - merged_events[i - 1].mstime)
+                merged_events[i].eegoffset = merged_events[i - 1].eegoffset + (
+                merged_events[i].mstime - merged_events[i - 1].mstime)
         all_events.append(merged_events)
     return np.concatenate(all_events).view(np.recarray)
 
@@ -387,10 +397,10 @@ def create_baseline_events_pal(events):
 
     '''
 
-    all_events =[]
+    all_events = []
     for session in np.unique(events.session):
         sess_events = events[(events.session == session)]
-        irts = np.append([0],np.diff(sess_events.mstime))
+        irts = np.append([0], np.diff(sess_events.mstime))
         rec_events = sess_events[(sess_events.type == 'REC_EVENT') & (sess_events.intrusion == 0) & (irts > 1000)]
         voc_events = sess_events[((sess_events.type == 'REC_EVENT') | (sess_events.type == 'REC_EVENT_VV'))]
         starts = sess_events[(sess_events.type == 'RECALL_START')]
@@ -412,7 +422,7 @@ def create_baseline_events_pal(events):
                 is_match_tmp[i, ...] = False
                 good_locs = np.where(is_match_tmp & (~full_match_accum))
                 if len(good_locs[0]):
-                    choice_position = np.argmin(np.mod(good_locs[0]-i,len(good_locs[0])))
+                    choice_position = np.argmin(np.mod(good_locs[0] - i, len(good_locs[0])))
                     choice_inds = (good_locs[0][choice_position], good_locs[1][choice_position])
                     full_match_accum[choice_inds] = True
         matching_epochs = epochs[full_match_accum]
@@ -428,6 +438,7 @@ def create_baseline_events_pal(events):
                 merged_events[i].session = merged_events[i - 1].session
                 merged_events[i].list = merged_events[i - 1].list
                 merged_events[i].eegfile = merged_events[i - 1].eegfile
-                merged_events[i].eegoffset = merged_events[i - 1].eegoffset + (merged_events[i].mstime - merged_events[i - 1].mstime)
+                merged_events[i].eegoffset = merged_events[i - 1].eegoffset + (
+                merged_events[i].mstime - merged_events[i - 1].mstime)
         all_events.append(merged_events)
     return np.concatenate(all_events).view(np.recarray)

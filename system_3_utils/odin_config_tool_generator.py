@@ -11,8 +11,8 @@ from ptsa.data.readers.IndexReader import JsonIndexReader
 # from ElectrodeConfigSystem3 import contacts_json_2_configuration_csv
 
 cml_parser = OdinConfigToolGeneratorParser(arg_count_threshold=1)
-# subject = 'R1250N'
-subject = 'R1247P'
+subject = 'R1250N'
+# subject = 'R1247P'
 localization=0
 montage=0
 
@@ -26,7 +26,6 @@ montage=0
 # cml_parser.arg('--contacts-json-output-dir','/home1/leond/fr3_config')
 # cml_parser.arg('--stim-channels','PG10-PG11')
 
-
 cml_parser.arg('--subject',subject)
 # cml_parser.arg('--contacts-json',r"d:\protocols\r1\subjects\%s\localizations\%s\montages\%s\neuroradiology\current_processed\contacts.json"%(subject, localization, localization))
 jr=JsonIndexReader('D:/protocols/r1.json')
@@ -35,13 +34,11 @@ cml_parser.arg('--contacts-json',jr.get_value('contacts',subject=subject,montage
 # cml_parser.arg('--subject','R1247P_1')
 # cml_parser.arg('--contacts-json',r"d:\protocols\r1\subjects\R1247P\localizations\1\montages\1\neuroradiology\current_processed\contacts.json")
 cml_parser.arg('--contacts-json-output-dir','D:/experiment_configs')
-cml_parser.arg('--stim-channels','LA3-LA4','LA4-LA5', )
-
+cml_parser.arg('--stim-channels','PG10-PG11','PG11-PG12', )
 
 args = cml_parser.parse()
 
 print args.subject
-
 
 subject_code=args.subject.split('_')[0]
 montage = args.subject.split('_')[1] if len(args.subject.split('_'))>1 else 0
@@ -54,7 +51,6 @@ else:
     contacts_json = args.contacts_json
 
 print contacts_json
-
 
 (anodes,cathodes) = zip(*[pair.split('-') for pair in args.stim_channels]) if args.stim_channels else ([],[])
 # generating .csv file for Odin Config Tool based on contacts.json
