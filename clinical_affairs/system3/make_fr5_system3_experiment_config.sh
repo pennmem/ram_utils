@@ -2,15 +2,15 @@
 # NOTE:
 # THIS IS THE CONFIG FILE GENERATOR FOR PS4_FR5 AND FOR FR5.
 
-subject=R1293P
+subject=R1299T
 experiment=PS4_FR5
 anode1=LA7
 cathode1=LA8
 anode2=LC7
 cathode2=LC8
 target_amplitude=1.0
-min_amplitude=0.25
-max_amplitude=2.0
+min_amplitude=0.1
+max_amplitude=1.0
 
 
 
