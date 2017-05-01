@@ -25,7 +25,7 @@ from ReportTasks.DeployReportPDF import DeployReportPDF
 
 from ReportUtils import ReportSummaryInventory
 
-rsi = ReportSummaryInventory(label='PS4')
+rsi = ReportSummaryInventory(label='PS4_%s'%args.task)
 
 jr = JsonIndexReader(join(args.mount_point,'protocols','r1.json'))
 subjects = jr.subjects()
