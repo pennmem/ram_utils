@@ -179,19 +179,26 @@ def run_lolo_xval(events, recalls, pow_mat,lr_classifier,xval_output, permuted=F
 
     sessions = np.unique(events.session)
 
+    if 'list' in events.dtype.names:
+        trial_type='list'
+    elif 'trial' in events.dtype.names:
+        trial_type='trial'
+    else:
+        raise RuntimeError('Unknown trial type')
+
     if permuted:
         for sess in sessions:
-            sess_lists = np.unique(events[events.session==sess].list)
+            sess_lists = np.unique(events[events.session==sess][trial_type])
             for lst in sess_lists:
-                sel = (events.session==sess) & (events.list==lst)
+                sel = (events.session==sess) & (events[trial_type]==lst)
                 list_permuted_recalls = recalls[sel]
                 shuffle(list_permuted_recalls)
                 recalls[sel] = list_permuted_recalls
 
     for sess in sessions:
-        sess_lists = np.unique(events[events.session==sess].list)
+        sess_lists = np.unique(events[events.session==sess][trial_type])
         for lst in sess_lists:
-            insample_mask = (events.session!=sess) | (events.list!=lst)
+            insample_mask = (events.session!=sess) | (events[trial_type]!=lst)
             insample_pow_mat = pow_mat[insample_mask]
             insample_recalls = recalls[insample_mask]
 
