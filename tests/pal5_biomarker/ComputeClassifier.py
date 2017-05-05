@@ -127,18 +127,21 @@ class ComputeClassifier(RamTask):
 
         for sess_idx, sess in enumerate(sessions):
             insample_mask = (event_sessions != sess)
+
+
+
             insample_pow_mat = self.pow_mat[insample_mask]
             insample_recalls = recalls[insample_mask]
             insample_samples_weights = samples_weights[insample_mask]
 
-            insample_enc_mask = insample_mask & (events.type == 'WORD')
-            insample_retrieval_mask = insample_mask & ((events.type == 'REC_BASE') | (events.type == 'REC_WORD'))
+            insample_enc_mask = insample_mask & ((events.type == 'STUDY_PAIR') |(events.type == 'PRACTICE_PAIR'))
+            insample_retrieval_mask = insample_mask & (events.type == 'REC_EVENT')
 
-            n_enc_0 = events[insample_enc_mask & (events.recalled == 0)].shape[0]
-            n_enc_1 = events[insample_enc_mask & (events.recalled == 1)].shape[0]
+            n_enc_0 = events[insample_enc_mask & (events.correct == 0)].shape[0]
+            n_enc_1 = events[insample_enc_mask & (events.correct == 1)].shape[0]
 
-            n_ret_0 = events[insample_retrieval_mask & (events.type == 'REC_BASE')].shape[0]
-            n_ret_1 = events[insample_retrieval_mask & (events.type == 'REC_WORD')].shape[0]
+            n_ret_0 = events[insample_retrieval_mask & (events.correct == 0)].shape[0]
+            n_ret_1 = events[insample_retrieval_mask & (events.correct == 1)].shape[0]
 
             n_vec = np.array([1.0 / n_enc_0, 1.0 / n_enc_1, 1.0 / n_ret_0, 1.0 / n_ret_1], dtype=np.float)
             n_vec /= np.mean(n_vec)
@@ -150,10 +153,10 @@ class ComputeClassifier(RamTask):
             # insample_samples_weights = np.ones(n_enc_0 + n_enc_1 + n_ret_0 + n_ret_1, dtype=np.float)
             insample_samples_weights = np.ones(events.shape[0], dtype=np.float)
 
-            insample_samples_weights[insample_enc_mask & (events.recalled == 0)] = n_vec[0]
-            insample_samples_weights[insample_enc_mask & (events.recalled == 1)] = n_vec[1]
-            insample_samples_weights[insample_retrieval_mask & (events.type == 'REC_BASE')] = n_vec[2]
-            insample_samples_weights[insample_retrieval_mask & (events.type == 'REC_WORD')] = n_vec[3]
+            insample_samples_weights[insample_enc_mask & (events.correct == 0)] = n_vec[0]
+            insample_samples_weights[insample_enc_mask & (events.correct == 1)] = n_vec[1]
+            insample_samples_weights[insample_retrieval_mask & (events.correct == 0)] = n_vec[2]
+            insample_samples_weights[insample_retrieval_mask & (events.correct == 1)] = n_vec[3]
 
             insample_samples_weights = insample_samples_weights[insample_mask]
 
@@ -207,9 +210,8 @@ class ComputeClassifier(RamTask):
 
 
             if events is not None:
-                outsample_encoding_mask = (events.session == sess) & (events.type == 'WORD')
-                outsample_retrieval_mask = (events.session == sess) & (
-                (events.type == 'REC_BASE') | (events.type == 'REC_WORD'))
+                outsample_encoding_mask = (events.session == sess) & ((events.type == 'STUDY_PAIR')|(events.type == 'PRACTICE_PAIR'))
+                outsample_retrieval_mask = (events.session == sess) & ((events.type == 'REC_EVENT'))
                 outsample_both_mask = (events.session == sess)
 
                 auc_encoding[sess_idx] = self.get_auc(
@@ -328,7 +330,12 @@ class ComputeClassifier(RamTask):
             print 'AUC =', AUCs[i]
         return AUCs
 
-    def get_pow_mat(self):
+    def filter_pow_mat(self):
+        """
+        This function filters power matrix to exclude certain bipolar pairs - here the ones that "touch" stimulated
+        electrodes
+        :return: None
+        """
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
         reduced_pairs = self.get_passed_object('reduced_pairs')
         to_include = np.array([bp in reduced_pairs for bp in bipolar_pairs])
@@ -355,7 +362,8 @@ class ComputeClassifier(RamTask):
     def run(self):
 
         events = self.get_passed_object('PAL1_events')
-        self.pow_mat = normalize_sessions(self.get_pow_mat(), events)
+        # self.get_pow_mat() is essential - it does the filtering on the
+        self.pow_mat = normalize_sessions(self.filter_pow_mat(), events)
 
         # n1 = np.sum(events.recalled)
         # n0 = len(events) - n1
@@ -374,13 +382,15 @@ class ComputeClassifier(RamTask):
         event_sessions = events.session
 
         recalls = events.correct
-        recalls[events.type == 'REC_WORD'] = 1
-        recalls[events.type == 'REC_BASE'] = 0
+        # recalls[events.type == 'REC_WORD'] = 1
+        # recalls[events.type == 'REC_BASE'] = 0
 
         samples_weights = np.ones(events.shape[0], dtype=np.float)
 
         # samples_weights[~(events.type=='WORD')] = self.params.retrieval_samples_weight
-        samples_weights[(events.type == 'WORD')] = self.params.encoding_samples_weight
+
+        samples_weights[
+            (events.type == 'STUDY_PAIR') | (events.type == 'PRACTICE_PAIR')] = self.params.encoding_samples_weight
 
         sessions = np.unique(event_sessions)
         if len(sessions) > 1:
@@ -435,7 +445,14 @@ class ComputeClassifier(RamTask):
 
 
 class ComputeFullClassifier(ComputeClassifier):
-    def get_pow_mat(self):
+    def filter_pow_mat(self):
+        """
+        This function filters power matrix to exclude certain bipolar pairs.However,
+        this implementation does not do any filtering
+
+        :return: None
+        """
+
         return self.get_passed_object('pow_mat')
 
     def restore(self):

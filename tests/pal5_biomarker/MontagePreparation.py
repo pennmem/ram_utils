@@ -141,11 +141,23 @@ class MontagePreparation(RamTask):
             else:
                 stim_pairs = [args.elec1, args.elec2]
             bipolar_pairs = np.array(bipolar_pairs, dtype=[('ch1', 'S3'), ('ch2', 'S3')]).view(np.recarray)
+
             include = [int(bp.ch1) not in stim_pairs and int(bp.ch2) not in stim_pairs for bp in bipolar_pairs]
-
             reduced_pairs = bipolar_pairs[np.array(include)]
-            self.pass_object('reduced_pairs', reduced_pairs)
 
+
+            reduced_pairs_tuple_list = map(lambda x: tuple(x),reduced_pairs)
+
+            excluded_pairs_dict = {bp_tag:bipolar_data[bp_tag] for bp_tag in bipolar_data
+                            if ('%03d'%bipolar_data[bp_tag]['channel_1'],'%03d'%bipolar_data[bp_tag]['channel_2'])  not in reduced_pairs_tuple_list}
+
+
+            with open(self.get_path_to_resource_in_workspace('excluded_pairs.json'),'w') as rjfile:
+                json.dump({subject: {'pairs': excluded_pairs_dict}},rjfile)
+
+
+            self.pass_object('reduced_pairs', reduced_pairs)
+            self.pass_object('excluded_pairs_path',self.get_path_to_resource_in_workspace('excluded_pairs.json'))
             self.pass_object('monopolar_channels', monopolar_channels)
             self.pass_object('bipolar_pairs', bipolar_pairs)
             self.pass_object('bp_tal_structs', bp_tal_structs)

@@ -80,6 +80,8 @@ from system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import Chec
 
 from tests.pal5_biomarker.ComputeClassifier import ComputeClassifier
 
+from tests.pal5_biomarker.ComputeClassifier import ComputeFullClassifier
+
 from tests.pal5_biomarker.system3.ExperimentConfigGeneratorClosedLoop5 import ExperimentConfigGeneratorClosedLoop5
 
 
@@ -106,13 +108,13 @@ class Params(object):
         self.pal1_end_time = 2.00
         self.pal1_buf = 1.2
 
-        self.pal1_retrieval_start_time = -0.525
-        self.pal1_retrieval_end_time = 0.0
+        self.pal1_retrieval_start_time = -0.625
+        self.pal1_retrieval_end_time = -0.1
         self.pal1_retrieval_buf = 0.524
 
         # self.retrieval_samples_weight = 2.5
-        self.encoding_samples_weight = 2.5
-        # self.encoding_samples_weight = 1.0
+        # self.encoding_samples_weight = 2.5
+        self.encoding_samples_weight = 1.0
 
 
         self.filt_order = 4
@@ -201,9 +203,11 @@ if __name__=='__main__':
     #
     report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=True))
 
-    report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
+    report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
+
+    report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=True))
     #
-    # report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
+    report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
     #
 
     #
