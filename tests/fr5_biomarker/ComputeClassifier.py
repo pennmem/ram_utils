@@ -365,7 +365,10 @@ class ComputeClassifier(RamTask):
     def run(self):
 
         events = self.get_passed_object('FR_events')
-        self.pow_mat = normalize_sessions(self.get_pow_mat(), events)
+        self.pow_mat = self.get_pow_mat()
+        encoding_mask = events.type=='WORD'
+        self.pow_mat[encoding_mask] = normalize_sessions(self.pow_mat[encoding_mask],events[encoding_mask])
+        self.pow_mat[~encoding_mask] = normalize_sessions(self.pow_mat[~encoding_mask],events[~encoding_mask])
 
         # n1 = np.sum(events.recalled)
         # n0 = len(events) - n1
