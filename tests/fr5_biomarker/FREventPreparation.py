@@ -56,22 +56,33 @@ class FREventPreparation(RamTask):
         subj_code = tmp[0]
         montage = 0 if len(tmp) == 1 else int(tmp[1])
 
-        fr1_events_fname = os.path.abspath(
-            os.path.join(self.pipeline.mount_point, 'scratch','jkragel','events_FR5','RAM_FR1', subj_code + '_events.mat'))
+        # fr1_events_fname = os.path.abspath(
+        #     os.path.join(self.pipeline.mount_point, 'scratch','jkragel','events_FR5','RAM_FR1', subj_code + '_events.mat'))
 
         json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
+
+        fr1_sessions = [s for s in self.pipeline.args.sessions if s<100]
+        catfr1_sessions = [s-100 for s in self.pipeline.args.sessions if s>=100]
         
         if self.pipeline.args.sessions:
               event_files = [json_reader.get_value('task_events',subject=subj_code,montage=montage,experiment='FR1',session=s)
-                             for s in sorted(self.pipeline.args.sessions)]
+                             for s in sorted(fr1_sessions)]
+              fr1_events = np.concatenate(
+                  [BaseEventReader(filename=event_path).read() for event_path in event_files]).view(np.recarray)
+
+              event_files = [json_reader.get_value('task_events',subject=subj_code,montage=montage,experiment='catFR1',session=s)
+                             for s in sorted(catfr1_sessions)]
+              catfr1_events = [BaseEventReader(filename=event_path).read() for event_path in event_files]
+
         else:
             event_files = sorted(
                list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR1')))
-        fr1_events = np.concatenate([BaseEventReader(filename=event_path).read() for event_path in event_files]).view(np.recarray)
+            fr1_events = np.concatenate(
+                [BaseEventReader(filename=event_path).read() for event_path in event_files]).view(np.recarray)
 
-        catfr1_events = [BaseEventReader(filename=event_path).read() for event_path in
-                                         json_reader.aggregate_values('task_events',subject=subj_code,experiment='catFR1',
-                                                                      montage = montage)]
+            catfr1_events = [BaseEventReader(filename=event_path).read() for event_path in
+                                             json_reader.aggregate_values('task_events',subject=subj_code,experiment='catFR1',
+                                                                          montage = montage)]
         if len(catfr1_events):
             catfr1_events = np.concatenate(catfr1_events).view(np.recarray)
             catfr1_events=catfr1_events[list(fr1_events.dtype.names)]
