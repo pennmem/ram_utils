@@ -2,21 +2,23 @@
 # NOTE:
 # THIS IS THE CONFIG FILE GENERATOR FOR PS4_FR5 AND FOR FR5.
 
-subject=R1299T
+subject=R1302M
 experiment=PS4_FR5
-anode1=LA7
-cathode1=LA8
-anode2=LC7
-cathode2=LC8
-target_amplitude=1.0
+anode1=LTG29
+cathode1=LTG30
+anode2=LTG30
+cathode2=LTG31
+target_amplitude=1.9
 min_amplitude=0.1
-max_amplitude=1.0
+max_amplitude=1.9
 
+today=$(date +%m_%d_%y)
 
+config_dir="/scratch/pwanda/${experiment}_biomarkers/${subject}_${task}_\
+    ${anode1}_${cathode1}_${anode2}_${cathode2}_${max_amplitude}mA_${today}/electrode_configs"
 
-config_dir='/scratch/pwanda/FR5_biomarkers/electrode_configs'
-
-workspace_dir='/scratch/pwanda/FR5_biomarkers/'
+workspace_dir="/scratch/pwanda/${experiment}_biomarkers/${subject}_${task}_\
+    ${anode1}_${cathode1}_${anode2}_${cathode2}_${max_amplitude}mA_${today}"
 
 pulse_frequency=200
 stim_pair_1=${anode1}-${cathode1}
