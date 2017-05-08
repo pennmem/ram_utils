@@ -109,6 +109,21 @@ $\bullet$ Permutation test $p$-value $<PERM-P-VALUE>$
 
 $\bullet$ Median of classifier output = $<J-THRESH>$
 
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.45]{<JOINT_ROC_AND_TERC_PLOT_FILE>}
+\caption{\textbf{(a)} ROC curve for the subject;
+\textbf{(b)} Subject recall performance represented as
+percentage devation from the (subject) mean, separated by tercile
+of the classifier encoding efficiency estimate for each encoded word.}
+\end{figure}
+
+$\bullet$ Area Under Curve = $<JOINT-AUC>$\%
+
+$\bullet$ Permutation test $p$-value $<JOINT-PERM-P-VALUE>$
+
+$\bullet$ Median of classifier output = $<JOINT-J-THRESH>$
+
 %\begin{figure}[!h]
 %\centering
 %\includegraphics[width=0.45\textwidth]{/home1/busygin/scratch/reports/RAM_FR1/R1092J_2/analyses/RAM_FR1_SME_HFA_fft/012/ABSW_RAM_FR1_R1092J_2.eps}

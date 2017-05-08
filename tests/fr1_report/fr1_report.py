@@ -11,8 +11,8 @@ from os.path import *
 from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1281E')
-cml_parser.arg('--task','FR1')
+cml_parser.arg('--subject','R1302M')
+cml_parser.arg('--task','catFR1')
 cml_parser.arg('--workspace-dir','scratch/leond/FR1_reports')
 cml_parser.arg('--mount-point','/Volumes/rhino_root/')
 #cml_parser.arg('--recompute-on-no-status')
@@ -33,7 +33,7 @@ from ComputeFR1HFPowers import ComputeFR1HFPowers
 
 from ComputeTTest import ComputeTTest
 
-from ComputeClassifier import ComputeClassifier
+from ComputeClassifier import ComputeClassifier,ComputeJointClassifier
 
 from ComposeSessionSummary import ComposeSessionSummary
 
@@ -92,6 +92,8 @@ report_pipeline.add_task(ComputeFR1HFPowers(params=params, mark_as_completed=Fal
 report_pipeline.add_task(ComputeTTest(params=params, mark_as_completed=False))
 
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
+
+report_pipeline.add_task(ComputeJointClassifier(params=params,mark_as_completed=False))
 
 report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
 

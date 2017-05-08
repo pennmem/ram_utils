@@ -62,6 +62,10 @@ class ComposeSessionSummary(ReportRamTask):
         xval_output = self.get_passed_object('xval_output')
         perm_test_pvalue = self.get_passed_object('pvalue')
 
+        joint_xval_output = self.get_passed_object('joint_xval_output')
+        joint_perm_test_pvalue = self.get_passed_object('joint_pvalue')
+
+
         sessions = np.unique(events.session)
 
         self.pass_object('NUMBER_OF_SESSIONS', len(sessions))
@@ -69,7 +73,7 @@ class ComposeSessionSummary(ReportRamTask):
 
         session_data = []
 
-        positions = np.unique(events.serialpos)
+        positions = np.unique(events[events.serialpos != -999].serialpos)
         first_recall_counter = np.zeros(positions.size, dtype=int)
         total_list_counter = 0
 
@@ -105,7 +109,7 @@ class ComposeSessionSummary(ReportRamTask):
             session_summary.n_correct_words = np.sum(session_events.recalled)
             session_summary.pc_correct_words = 100*session_summary.n_correct_words / float(session_summary.n_words)
 
-            positions = np.unique(session_events.serialpos)
+            positions = np.unique(session_events[session_events.serialpos != -999].serialpos)
             prob_recall = np.empty_like(positions, dtype=float)
             for i,pos in enumerate(positions):
                 pos_events = session_events[session_events.serialpos == pos]
@@ -122,7 +126,7 @@ class ComposeSessionSummary(ReportRamTask):
             session_irt_within_cat = []
             session_irt_between_cat = []
             for lst in lists:
-                list_rec_events = session_rec_events[(session_rec_events.list == lst) & (session_rec_events.intrusion == 0)]
+                list_rec_events = session_rec_events[(session_rec_events.list == lst) & (session_rec_events.intrusion == 0) ]
                 if list_rec_events.size > 0:
                     list_events = session_events[session_events.list == lst]
                     tmp = np.where(list_events.item_num == list_rec_events[0].item_num)[0]
@@ -186,7 +190,7 @@ class ComposeSessionSummary(ReportRamTask):
         cumulative_summary.irt_within_cat = sum(irt_within_cat) / len(irt_within_cat) if irt_within_cat else 0.0
         cumulative_summary.irt_between_cat = sum(irt_between_cat) / len(irt_between_cat) if irt_between_cat else 0.0
 
-        positions = np.unique(events.serialpos)
+        positions = np.unique(events[events.serialpos!=-999].serialpos)
         prob_recall = np.empty_like(positions, dtype=float)
         for i,pos in enumerate(positions):
             pos_events = events[events.serialpos == pos]
@@ -221,6 +225,17 @@ class ComposeSessionSummary(ReportRamTask):
         cumulative_summary.perm_test_pvalue = ('= %.3f' % perm_test_pvalue) if perm_test_pvalue>=0.001 else '\leq 0.001'
         cumulative_summary.jstat_thresh = '%.3f' % cumulative_xval_output.jstat_thresh
         cumulative_summary.jstat_percentile = '%.2f' % (100.0*cumulative_xval_output.jstat_quantile)
+
+        cumulative_xval_output = joint_xval_output[-1]
+
+        cumulative_summary.joint_auc = '%.2f' % (100*cumulative_xval_output.auc)
+        cumulative_summary.joint_fpr = cumulative_xval_output.fpr
+        cumulative_summary.joint_tpr = cumulative_xval_output.tpr
+        cumulative_summary.joint_pc_diff_from_mean = (cumulative_xval_output.low_pc_diff_from_mean, cumulative_xval_output.mid_pc_diff_from_mean, cumulative_xval_output.high_pc_diff_from_mean)
+        cumulative_summary.joint_perm_AUCs = self.get_passed_object('perm_AUCs')
+        cumulative_summary.joint_perm_test_pvalue = ('= %.3f' % perm_test_pvalue) if perm_test_pvalue>=0.001 else '\leq 0.001'
+        cumulative_summary.joint_jstat_thresh = '%.3f' % cumulative_xval_output.jstat_thresh
+        cumulative_summary.joint_jstat_percentile = '%.2f' % (100.0*cumulative_xval_output.jstat_quantile)
 
         self.pass_object('cumulative_summary', cumulative_summary)
 

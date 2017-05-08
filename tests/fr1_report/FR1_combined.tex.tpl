@@ -91,7 +91,7 @@ Type & Channel \# & Electrode Pair & Atlas Loc & \textit{p} & \textit{t}-stat \\
 \begin{figure}[!h]
 \centering
 \includegraphics[scale=0.45]{<ROC_AND_TERC_PLOT_FILE>}
-\caption{\textbf{(a)} ROC curve for the subject;
+\caption{\textbf{(a)} ROC curve for the subject, classifier trained and tested on encoding period only
 \textbf{(b)} Subject recall performance represented as
 percentage devation from the (subject) mean, separated by tercile
 of the classifier encoding efficiency estimate for each encoded word.}
@@ -102,6 +102,21 @@ $\bullet$ Area Under Curve = $<AUC>$\%
 $\bullet$ Permutation test $p$-value $<PERM-P-VALUE>$
 
 $\bullet$ Median of classifier output = $<J-THRESH>$
+
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.45]{<JOINT_ROC_AND_TERC_PLOT_FILE>}
+\caption{\textbf{(a)} ROC curve for the subject, classifier trained and tested on both encoding and retrieval;
+\textbf{(b)} Subject recall performance represented as
+percentage devation from the (subject) mean, separated by tercile
+of the classifier encoding efficiency estimate for each encoded word.}
+\end{figure}
+
+$\bullet$ Area Under Curve = $<JOINT-AUC>$\%
+
+$\bullet$ Permutation test $p$-value $<JOINT-PERM-P-VALUE>$
+
+$\bullet$ Median of classifier output = $<JOINT-J-THRESH>$
 
 %\begin{figure}[!h]
 %\centering

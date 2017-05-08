@@ -68,11 +68,24 @@ class ComputeClassifier(ReportRamTask):
                 return 'lolo'
         return 'loso'
 
+    @property
+    def events(self):
+        self._events = self.get_passed_object(self.pipeline.task+'_events')
+        return self._events[self._events.type=='WORD']
+
+    def _normalize_sessions(self,events):
+        self.pow_mat = normalize_sessions(self.pow_mat,events)
+
+    def get_pow_mat(self):
+        events = self.events
+        return self.get_passed_object('pow_mat')[self._events.type=='WORD',...]
+
     def run(self):
         subject = self.pipeline.subject
 
-        events = self.get_passed_object(self.pipeline.task+'_events')
-        self.pow_mat = normalize_sessions(self.get_passed_object('pow_mat'), events)
+        events = self.events
+        self.pow_mat = self.get_pow_mat()
+        self._normalize_sessions(events)
 
         #n1 = np.sum(events.recalled)
         #n0 = len(events) - n1
@@ -107,6 +120,11 @@ class ComputeClassifier(ReportRamTask):
             warnings.simplefilter("ignore")
             self.lr_classifier.fit(self.pow_mat, recalls)
 
+        self.pass_objects()
+
+    def pass_objects(self):
+
+        subject=self.pipeline.subject
         self.pass_object('lr_classifier', self.lr_classifier)
         self.pass_object('xval_output', self.xval_output)
         self.pass_object('perm_AUCs', self.perm_AUCs)
@@ -131,6 +149,45 @@ class ComputeClassifier(ReportRamTask):
         self.pass_object('xval_output', self.xval_output)
         self.pass_object('perm_AUCs', self.perm_AUCs)
         self.pass_object('pvalue', self.pvalue)
+
+
+class ComputeJointClassifier(ComputeClassifier):
+    @property
+    def events(self):
+        self._events = self.get_passed_object(self.pipeline.task+'_events')
+        return self._events
+
+    def get_pow_mat(self):
+        return self.get_passed_object('pow_mat')
+
+    def _normalize_sessions(self,events):
+        encoding_mask = events.type=='WORD'
+        self.pow_mat[encoding_mask]= normalize_sessions(self.pow_mat[encoding_mask],events[encoding_mask])
+        self.pow_mat[~encoding_mask] = normalize_sessions(self.pow_mat[~encoding_mask],events[~encoding_mask])
+
+    def pass_objects(self):
+        subject = self.pipeline.subject
+        self.pass_object('joint_lr_classifier', self.lr_classifier)
+        self.pass_object('joint_xval_output', self.xval_output)
+        self.pass_object('joint_perm_AUCs', self.perm_AUCs)
+        self.pass_object('joint_pvalue', self.pvalue)
+
+        joblib.dump(self.lr_classifier, self.get_path_to_resource_in_workspace(subject +    '-joint_lr_classifier.pkl'))
+        joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace(subject +      '-joint_xval_output.pkl'))
+        joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace(subject +        '-joint_perm_AUCs.pkl'))
+        joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject +           '-joint_pvalue.pkl'))
+
+    def restore(self):
+        subject = self.pipeline.subject
+
+        for attr in ['lr_classifier','xval_output','perm_AUCs','pvalue']:
+            self.__setattr__(attr,joblib.load(self.get_path_to_resource_in_workspace(subject + '-joint_%s.pkl'%attr)))
+
+        self.pass_object('joint_lr_classifier', self.lr_classifier)
+        self.pass_object('joint_xval_output', self.xval_output)
+        self.pass_object('joint_perm_AUCs', self.perm_AUCs)
+        self.pass_object('joint_pvalue', self.pvalue)
+
 
 
 
