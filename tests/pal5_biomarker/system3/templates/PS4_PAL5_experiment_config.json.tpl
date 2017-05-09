@@ -37,6 +37,7 @@
         }
     },
     "biomarker_threshold":{{biomarker_threshold}},
+    "retrieval_biomarker_threshold":{{retrieval_biomarker_threshold}},
     "electrode_config_file": "{{electrode_config_file}}",
     "montage_file": "{{montage_file}}",
     "excluded_montage_file": "{{excluded_montage_file}}",

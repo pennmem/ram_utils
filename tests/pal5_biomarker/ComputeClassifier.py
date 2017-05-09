@@ -21,6 +21,28 @@ def normalize_sessions(pow_mat, events):
         pow_mat[sess_event_mask] = zscore(pow_mat[sess_event_mask], axis=0, ddof=1)
     return pow_mat
 
+def compute_z_scoring_vecs(pow_mat, events):
+
+    mean_dict = {}
+    std_dict = {}
+    sessions = np.unique(events.session)
+    for sess in sessions:
+        sess_event_mask = (events.session == sess)
+
+        m = np.mean(pow_mat[sess_event_mask], axis=0)
+        s = np.std(pow_mat[sess_event_mask], axis=0, ddof=1)
+
+        mean_dict[sess] = m
+        std_dict[sess] = s
+
+
+    return mean_dict, std_dict
+        # pow_mat[sess_event_mask] = zscore(pow_mat[sess_event_mask], axis=0, ddof=1)
+
+    # self.m = np.mean(mp_rs, axis=0)
+    # self.s = np.std(mp_rs, axis=0, ddof=1)
+
+
 
 class ModelOutput(object):
     def __init__(self, true_labels, probs):
@@ -359,11 +381,40 @@ class ComputeClassifier(RamTask):
 
         self.pass_object('classifier_path', classifier_path)
 
+
+
+
+
     def run(self):
 
         events = self.get_passed_object('PAL1_events')
         # self.get_pow_mat() is essential - it does the filtering on the
-        self.pow_mat = normalize_sessions(self.filter_pow_mat(), events)
+
+        encoding_mask = (events.type == 'STUDY_PAIR') | (events.type == 'PRACTICE_PAIR')
+
+        # pow_mat = self.filter_pow_mat()
+        pow_mat_copy = np.copy(self.filter_pow_mat())
+
+        self.pow_mat = self.filter_pow_mat()
+        self.pow_mat[encoding_mask] = normalize_sessions(self.pow_mat[encoding_mask], events[encoding_mask])
+        self.pow_mat[~encoding_mask] = normalize_sessions(self.pow_mat[~encoding_mask], events[~encoding_mask])
+
+        # computing z-scoring vectors
+
+        mean_dict, std_dict = compute_z_scoring_vecs(pow_mat_copy[~encoding_mask], events[~encoding_mask])
+
+        # for sess in np.unique(events.session):
+        #     z_scored_pow = (pow_mat_copy[~encoding_mask & (events.session == sess)] - mean_dict[sess])/std_dict[sess]
+        #     orig_z_scored = self.pow_mat[~encoding_mask & (events.session == sess)]
+        #     print
+
+        self.pass_object('features_mean_dict', mean_dict)
+        self.pass_object('features_std_dict', std_dict)
+
+        print
+
+        # ORIGINAL CODE
+        # self.pow_mat = normalize_sessions(self.filter_pow_mat(), events)
 
         # n1 = np.sum(events.recalled)
         # n0 = len(events) - n1

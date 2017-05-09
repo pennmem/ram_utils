@@ -69,7 +69,6 @@ class PAL1EventPreparation(RamTask):
             voc_evs = rec_evs[mask]
             num_voc_events = len(voc_evs)
             if num_voc_events > 0:
-
                 rec_evs.keep_event[np.nonzero(mask)[0][:]] = 0
 
                 # if outside_event_offsets is None:
@@ -98,10 +97,14 @@ class PAL1EventPreparation(RamTask):
             # if num_voc_events == 1:
             #     first_response_time.append(voc_evs[0].eegoffset - start)
 
+
             if num_voc_events > 1:
                 # getting rid of all but first rec event
 
                 rec_evs.keep_event[np.nonzero(mask)[0][1:]] = 0
+
+            if num_voc_events >= 1:
+                rec_evs.rec_start[np.nonzero(mask)[0][0]] = start
 
                 # print 'GOT MULTI REC'
                 # print voc_evs
@@ -134,6 +137,7 @@ class PAL1EventPreparation(RamTask):
                 # print 'NO REC_EVENT'
                 new_row = row_temmplate.copy()
                 new_row.type = 'REC_EVENT'
+                new_row.rec_start = start
                 new_row.eegoffset = start + random.choice(first_response_time)
                 new_row.correct = 0
                 new_row.study_1 = 'FAKE'
@@ -162,49 +166,54 @@ class PAL1EventPreparation(RamTask):
         #     counter_outside_voc_evs += num_outside_voc_evs
         # print 'counter_outside_voc_evs=', counter_outside_voc_evs
 
-    def process_trivial_session_rec_events(self, evs):
-
-        ends = evs[evs.type == 'REC_END'].eegoffset
-        starts = evs[evs.type == 'REC_START'].eegoffset
-        rec_evs = evs[(evs.type == 'REC_EVENT')]
-
-        first_response_time = []
-        counter = 0
-        for start, end in zip(starts, ends):
-
-            mask = (rec_evs.eegoffset >= start) & (rec_evs.eegoffset <= end)
-            voc_evs = rec_evs[mask]
-
-            print 'number of rec_events so far=', len(rec_evs[rec_evs.eegoffset <= end])
-
-            num_voc_events = len(voc_evs)
-            # print 'num_voc_events=', num_voc_events
-            # if num_voc_events == 1:
-            #     first_response_time.append(voc_evs[0].eegoffset - start)
-
-            if num_voc_events > 1:
-                # getting rid of all but first rec event
-
-                rec_evs.keep_event[np.nonzero(mask)[0][1:]] = 0
-
-                # print 'GOT MULTI REC'
-                # print voc_evs
-
-            if num_voc_events != 0:
-                first_response_time.append(voc_evs[0].eegoffset - start)
-
-            if num_voc_events == 0:
-                print 'NO REC_EVENT'
-
-            counter += num_voc_events
-            print 'counter=', counter
-            print
-
-        print 'counter=', counter
-
-        rec_evs = rec_evs[rec_evs.keep_event == 1]
-
-        return rec_evs
+    # def process_trivial_session_rec_events(self, evs):
+    #     """
+    #
+    #     :param evs:
+    #     :return:
+    #     """
+    #
+    #     ends = evs[evs.type == 'REC_END'].eegoffset
+    #     starts = evs[evs.type == 'REC_START'].eegoffset
+    #     rec_evs = evs[(evs.type == 'REC_EVENT')]
+    #
+    #     first_response_time = []
+    #     counter = 0
+    #     for start, end in zip(starts, ends):
+    #
+    #         mask = (rec_evs.eegoffset >= start) & (rec_evs.eegoffset <= end)
+    #         voc_evs = rec_evs[mask]
+    #
+    #         # print 'number of rec_events so far=', len(rec_evs[rec_evs.eegoffset <= end])
+    #
+    #         num_voc_events = len(voc_evs)
+    #         # print 'num_voc_events=', num_voc_events
+    #         # if num_voc_events == 1:
+    #         #     first_response_time.append(voc_evs[0].eegoffset - start)
+    #
+    #         if num_voc_events > 1:
+    #             # getting rid of all but first rec event
+    #
+    #             rec_evs.keep_event[np.nonzero(mask)[0][1:]] = 0
+    #
+    #             # print 'GOT MULTI REC'
+    #             # print voc_evs
+    #
+    #         if num_voc_events != 0:
+    #             first_response_time.append(voc_evs[0].eegoffset - start)
+    #
+    #         # if num_voc_events == 0:
+    #         #     print 'NO REC_EVENT'
+    #
+    #         counter += num_voc_events
+    #         # print 'counter=', counter
+    #         # print
+    #
+    #     # print 'counter=', counter
+    #
+    #     rec_evs = rec_evs[rec_evs.keep_event == 1]
+    #
+    #     return rec_evs
 
 
     def run(self):
@@ -245,21 +254,26 @@ class PAL1EventPreparation(RamTask):
 
             sess_events.keep_event = 1
 
+            sess_events = append_fields(sess_events, 'rec_start', sess_events.eegoffset,
+                                        dtypes=sess_events.eegoffset.dtype, usemask=False,
+                                        asrecarray=True)
+
+            sess_events.rec_start = -1
+
             rec_events = self.process_session_rec_events(evs=sess_events)
 
             study_pair_events = sess_events[(sess_events.type == 'STUDY_PAIR') | (sess_events.type == 'PRACTICE_PAIR')]
 
+            # rec_rvs_trivial_sess = self.process_trivial_session_rec_events(sess_events)
 
-            rec_rvs_trivial_sess = self.process_trivial_session_rec_events(sess_events)
 
-
-            if trivial_rec_events is None:
-                trivial_rec_events = rec_rvs_trivial_sess
-
-            else:
-                trivial_rec_events = np.hstack((trivial_rec_events, rec_rvs_trivial_sess))
-
-            trivial_rec_events = trivial_rec_events.view(np.recarray)
+            # if trivial_rec_events is None:
+            #     trivial_rec_events = rec_rvs_trivial_sess
+            #
+            # else:
+            #     trivial_rec_events = np.hstack((trivial_rec_events, rec_rvs_trivial_sess))
+            #
+            # trivial_rec_events = trivial_rec_events.view(np.recarray)
 
             if events is None:
                 events = np.hstack((study_pair_events, rec_events))
@@ -267,53 +281,11 @@ class PAL1EventPreparation(RamTask):
                 events = np.hstack((events, np.hstack((study_pair_events, rec_events)).view(np.recarray)))
             events = events.view(np.recarray)
 
-        print
-        # # events = events.view(np.recarray)
-        #
-        # ######################################################################################
-        #
-        #
-        # evs = events[events.session == 0]
-        #
-        # ######################################################################################
-        #
-        # print
-        #
-        # # processed_events = create_baseline_events_pal(events)
-        #
-        # encoding_events_mask = processed_events.type == 'STUDY_PAIR'
-        # retrieval_events_mask = (processed_events.type == 'REC_EVENT') | (processed_events.type == 'REC_BASE')
-        # irts = np.append([0], np.diff(processed_events.mstime))
-        # retrieval_events_mask_0s = retrieval_events_mask & (processed_events.type == 'REC_BASE')
-        # retrieval_events_mask_1s = retrieval_events_mask & (processed_events.type == 'REC_EVENT') & (
-        #     processed_events.intrusion == 0) & (irts > 1000)
-        #
-        # # final filtering
-        # processed_events = processed_events[encoding_events_mask | retrieval_events_mask_0s | retrieval_events_mask_1s]
-        #
-        # processed_events = processed_events.view(np.recarray)
-        #
-        # print len(processed_events), 'STUDY_PAIR events'
-
         self.pass_object('PAL1_events', events)
 
+        rec_start_events = events.copy()
 
+        rec_start_events = rec_start_events[rec_start_events.type == 'REC_EVENT']
+        rec_start_events.eegoffset = rec_start_events.rec_start
 
-        # old code - based on FR5
-        # processed_events = create_baseline_events_pal(events)
-        #
-        # encoding_events_mask = processed_events.type == 'STUDY_PAIR'
-        # retrieval_events_mask = (processed_events.type == 'REC_EVENT') | (processed_events.type == 'REC_BASE')
-        # irts = np.append([0], np.diff(processed_events.mstime))
-        # retrieval_events_mask_0s = retrieval_events_mask & (processed_events.type == 'REC_BASE')
-        # retrieval_events_mask_1s = retrieval_events_mask & (processed_events.type == 'REC_EVENT') & (
-        #     processed_events.intrusion == 0) & (irts > 1000)
-        #
-        # # final filtering
-        # processed_events = processed_events[encoding_events_mask | retrieval_events_mask_0s | retrieval_events_mask_1s]
-        #
-        # processed_events = processed_events.view(np.recarray)
-        #
-        # print len(processed_events), 'STUDY_PAIR events'
-        #
-        # self.pass_object('PAL1_events', processed_events)
+        self.pass_object('rec_start_events', rec_start_events)

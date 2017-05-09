@@ -20,7 +20,7 @@ else:
 
 
 subject = 'R1250N'
-experiment = 'PAL5'
+experiment = 'PS4_PAL5'
 
 cml_parser = CMLParserCloseLoop5(arg_count_threshold=1)
 cml_parser.arg('--workspace-dir', join(prefix, 'scratch', subject))
@@ -82,6 +82,8 @@ from tests.pal5_biomarker.ComputeClassifier import ComputeClassifier
 
 from tests.pal5_biomarker.ComputeClassifier import ComputeFullClassifier
 
+from tests.pal5_biomarker.ComputeBiomarkerThreshold import ComputeBiomarkerThreshold
+
 from tests.pal5_biomarker.system3.ExperimentConfigGeneratorClosedLoop5 import ExperimentConfigGeneratorClosedLoop5
 
 
@@ -116,6 +118,10 @@ class Params(object):
         # self.encoding_samples_weight = 2.5
         self.encoding_samples_weight = 1.0
 
+        self.recall_period = 5.0
+
+        self.sliding_window_interval = 0.1
+        self.sliding_window_start_offset = 0.3
 
         self.filt_order = 4
 
@@ -128,6 +134,7 @@ class Params(object):
         self.C = 0.048
 
         self.n_perm = 200
+        self.n_perm = 10 # TODO - remove it from production code
 
         self.stim_params = StimParams(
         )
@@ -204,6 +211,8 @@ if __name__=='__main__':
     report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=True))
 
     report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
+
+    report_pipeline.add_task(ComputeBiomarkerThreshold(params=params, mark_as_completed=False))
 
     report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=True))
     #
