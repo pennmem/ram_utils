@@ -37,9 +37,9 @@ fi
 
 today=$(date +%m_%d_%y)
 
-config_dir="/scratch/leond/${experiment}_biomarkers/${subject}_${experiment}_${anode1}_${cathode1}_${anode2}_${cathode2}_${max_amplitude}mA_${today}/electrode_configs"
+config_dir="/scratch/pwanda/${experiment}_biomarkers/${subject}_${experiment}_${anode1}_${cathode1}_${anode2}_${cathode2}_${max_amplitude}mA_${today}/electrode_configs"
 
-workspace_dir="/scratch/leond/${experiment}_biomarkers/${subject}_${experiment}_${anode1}_${cathode1}_${anode2}_${cathode2}_${max_amplitude}mA_${today}"
+workspace_dir="/scratch/pwanda/${experiment}_biomarkers/${subject}_${experiment}_${anode1}_${cathode1}_${anode2}_${cathode2}_${max_amplitude}mA_${today}"
 
 pulse_frequency=200
 stim_pair_1=${anode1}-${cathode1}
