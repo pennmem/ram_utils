@@ -38,29 +38,6 @@ cml_parser.arg('--max-amplitudes','1.0')
 
 
 
-# cml_parser = CMLParserCloseLoop3(arg_count_threshold=1)
-# cml_parser.arg('--workspace-dir','/scratch/leond/R1250N')
-# cml_parser.arg('--experiment','PAL3')
-# cml_parser.arg('--mount-point','/')
-# cml_parser.arg('--subject','R1250N')
-# cml_parser.arg('--electrode-config-file','/home1/leond/fr3_config/contactsR1250N.csv')
-# cml_parser.arg('--pulse-frequency','100')
-# cml_parser.arg('--target-amplitude','1000')
-# cml_parser.arg('--anode-num','10')
-# cml_parser.arg('--anode','PG10')
-# cml_parser.arg('--cathode-num','11')
-# cml_parser.arg('--cathode','PG11')
-
-
-
-# cml_parser.arg('--workspace-dir','/scratch/busygin/FR3_biomarkers')
-# cml_parser.arg('--subject','R1145J_1')
-# cml_parser.arg('--n-channels','128')
-# cml_parser.arg('--anode-num','3')
-# cml_parser.arg('--cathode-num','4')
-# cml_parser.arg('--pulse-frequency','200')
-# cml_parser.arg('--pulse-count','100')
-# cml_parser.arg('--target-amplitude','1000')
 
 
 args = cml_parser.parse()
@@ -134,55 +111,12 @@ class Params(object):
         self.C = 0.048
 
         self.n_perm = 200
-        self.n_perm = 10 # TODO - remove it from production code
+        # self.n_perm = 10 # TODO - remove it from production code
 
         self.stim_params = StimParams(
         )
 
 
-# class Params(object):
-#     def __init__(self):
-#         self.version = '3.00'
-#
-#         self.width = 5
-#
-#         self.pal1_start_time = 0.3
-#         self.pal1_end_time = 2.0
-#         self.pal1_buf = 1.0
-#
-#         self.filt_order = 4
-#
-#         self.freqs = np.logspace(np.log10(3), np.log10(180), 8)
-#
-#         self.log_powers = True
-#
-#         self.penalty_type = 'l2'
-#         self.C = 7.2e-4
-#
-#         self.n_perm = 200
-#
-#
-#         self.stim_params = StimParams(
-#             # n_channels=args.n_channels,
-#             # anode_num=args.anode_num,
-#             # anode=args.anode,
-#             # cathode_num=args.cathode_num,
-#             # cathode=args.cathode,
-#             # pulse_frequency=args.pulse_frequency,
-#             # pulse_count=args.pulse_frequency*args.pulse_duration/1000,
-#             # target_amplitude=args.target_amplitude
-#         )
-#
-#         # self.stim_params = StimParams(
-#         #     n_channels=args.n_channels,
-#         #     anode_num=args.anode_num,
-#         #     anode=args.anode,
-#         #     cathode_num=args.cathode_num,
-#         #     cathode=args.cathode,
-#         #     pulse_frequency=args.pulse_frequency,
-#         #     pulse_count=args.pulse_frequency*args.pulse_duration/1000,
-#         #     target_amplitude=args.target_amplitude
-#         # )
 
 
 params = Params()
@@ -218,9 +152,5 @@ if __name__=='__main__':
     #
     report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
     #
-
-    #
-    # # report_pipeline.add_task(SaveMatlabFile(params=params, mark_as_completed=False))
-
     # starts processing pipeline
     report_pipeline.execute_pipeline()

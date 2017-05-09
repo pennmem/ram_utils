@@ -146,7 +146,7 @@ class ComputeBiomarkerThreshold(RamTask):
             # sess_events = events[events.session == sess]
 
             for ev_num, (rec_start_ev, ev) in enumerate(zip(sess_rec_start_events, sess_events)):
-                print 'processing event=', ev_num
+                # print 'processing event=', ev_num
                 before_rec_event_window_length = ev.eegoffset - rec_start_ev.eegoffset
 
                 number_of_classifier_evals = int(((
@@ -164,7 +164,7 @@ class ComputeBiomarkerThreshold(RamTask):
                 #     print
 
                 for start_offset in start_offsets:
-                    print 'start_offset=',start_offset
+                    # print 'start_offset=',start_offset
                     ev_wavelet_pow = retrieval_wavelet_pow_mat[ev_num, :, :,
                                      start_offset:start_offset + sliding_window_length]
 
@@ -188,5 +188,7 @@ class ComputeBiomarkerThreshold(RamTask):
 
 
         retrieval_biomarker_threshold = np.median(min_biomarker_pool)
+
+        print "retrieval_biomarker_threshold=",retrieval_biomarker_threshold
 
         self.pass_object('retrieval_biomarker_threshold', retrieval_biomarker_threshold)
