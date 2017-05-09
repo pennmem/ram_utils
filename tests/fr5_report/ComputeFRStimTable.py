@@ -74,6 +74,7 @@ class ComputeFRStimTable(ReportRamTask):
 
         all_events = self.get_passed_object('all_events')
         events = self.get_passed_object(task+'_events')
+        events = events[(events.type=='STIM') | (events.type=='NON-STIM')]
         ps_events = self.get_passed_object('ps_events')
         ps_sessions = np.unique(ps_events.session)
 
@@ -101,8 +102,7 @@ class ComputeFRStimTable(ReportRamTask):
                      or (all_events[i-2].type=='STIM_OFF' and all_events[i-1].type=='WORD_OFF')):
                     is_post_stim_item[j] = True
                 j += 1
-        print is_post_stim_item.astype(float).sum()
-        # self.fr_stim_table = pd.DataFrame.from_records([e for e in events],columns=events.dtype.names)
+
         self.fr_stim_table = pd.DataFrame()
         self.fr_stim_table['item'] = events.item_name
         self.fr_stim_table['session'] = events.session
@@ -112,7 +112,7 @@ class ComputeFRStimTable(ReportRamTask):
         self.fr_stim_table['recognized'] = events.recognized
         self.fr_stim_table['rejected'] = events.rejected
         self.fr_stim_table['item_name'] = events.item_name
-        self.fr_stim_table['is_stim_list'] = [(e.phase=='STIM' or e.phase=='PS') for e in events]
+        self.fr_stim_table['is_stim_list'] = [e.phase=='STIM' for e in events]
         self.fr_stim_table['is_stim_item'] = is_stim_item
         self.fr_stim_table['is_post_stim_item'] = is_post_stim_item
         self.fr_stim_table['recalled'] = events.recalled
@@ -166,7 +166,6 @@ class ComputeFRStimTable(ReportRamTask):
         amplitude = np.empty(n_events, dtype=float)
         pulse_duration = np.empty(n_events, dtype=int)
         burst_frequency = np.empty(n_events, dtype=int)
-        is_ps4 = np.empty_like(pulse_duration)
 
 
         for stim_params,sessions in self.stim_params_to_sess.iteritems():

@@ -92,11 +92,6 @@ class FR5EventPreparation(ReportRamTask):
 
 
 
-
-        if not (events.type=='REC_BASE').any():
-            events = create_baseline_events(events,1000,29000)
-
-
         self.pass_object('all_events', events)
 
 
@@ -115,30 +110,24 @@ class FR5EventPreparation(ReportRamTask):
 
         rec_events = events[events.type == 'REC_WORD']
 
-        base_events= events[events.type=='REC_BASE']
+        ps_events = np.concatenate([BaseEventReader(filename=event_path).read() for event_path in
+                                    jr.aggregate_values('ps_events',subject=subject,experiment=task,montage=montage)]
+                                   ).view(np.recarray)
+
 
         intr_events = rec_events[(rec_events.intrusion!=-999) & (rec_events.intrusion!=0)]
 
 
-        encoding_events_mask = events.type == 'WORD'
-        retrieval_events_mask = (events.type == 'REC_WORD') | (events.type == 'REC_BASE')
-        irts = np.append([0], np.diff(events.mstime))
-        retrieval_events_mask_0s = retrieval_events_mask & (events.type == 'REC_BASE')
-        retrieval_events_mask_1s = retrieval_events_mask & (events.type == 'REC_WORD') & (events.intrusion == 0) & (irts > 1000)
-
-
-        filtered_events = events[encoding_events_mask | retrieval_events_mask_0s | retrieval_events_mask_1s].view(np.recarray)
 
         print len(events), 'sample events'
 
 
-        self.pass_object('FR_baseline_events',base_events)
-        self.pass_object('FR_events', events)
         self.pass_object('FR_math_events', math_events)
         self.pass_object('FR_intr_events', intr_events)
         self.pass_object('FR_rec_events', rec_events)
+        self.pass_object('ps_events',ps_events)
 
-        self.pass_object(task+'_events',filtered_events)
+        self.pass_object(task+'_events',events)
 
 def free_epochs(times, duration, pre, post, start=None, end=None):
     # (list(vector(int))*int*int*int) -> list(vector(int))

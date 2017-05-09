@@ -87,8 +87,10 @@ class EvaluateClassifier(ReportRamTask):
         task = self.pipeline.task
         self.lr_classifier = self.get_passed_object('lr_classifier')
         events = self.get_passed_object(task+'_events')
+        non_stim = events.type=='NON-STIM'
         recalls = events.recalled
-        self.pow_mat = self.get_passed_object('fr_stim_pow_mat')
+        self.pow_mat = self.get_passed_object('fr_stim_pow_mat')[non_stim]
+        events = events[non_stim]
         # print 'self.pow_mat.shape:',self.pow_mat.shape
         # print 'len fr5_events:',len(events)
         probs = self.lr_classifier.predict_proba(self.pow_mat)[:,1]
@@ -108,8 +110,6 @@ class EvaluateClassifier(ReportRamTask):
         else:
             print 'Performing in-session permutation test'
             self.perm_AUCs = self.permuted_lolo_AUCs(events)
-
-
 
         self.pvalue = np.sum(self.perm_AUCs >= self.xval_output[-1].auc) / float(self.perm_AUCs.size)
 
