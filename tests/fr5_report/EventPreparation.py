@@ -53,7 +53,7 @@ class FR1EventPreparation(ReportRamTask):
         fr1_events=np.concatenate(fr1_events).view(np.recarray)
         # catfr1_events = np.concatenate(catfr1_events).view(np.recarray)[list(fr1_events.dtype.names)]
         if not (fr1_events.type == 'REC_BASE').any():
-            fr1_events = create_baseline_events(fr1_events)
+            fr1_events = create_baseline_events(fr1_events,1000,29000)
 
         encoding_events_mask = fr1_events.type == 'WORD'
         retrieval_events_mask = (fr1_events.type == 'REC_WORD') | (fr1_events.type == 'REC_BASE')
@@ -71,6 +71,8 @@ class FR1EventPreparation(ReportRamTask):
         self.pass_object('FR1_events', fr1_events)
 
 
+class MissingEventError(Exception):
+    pass
 
 
 class FR5EventPreparation(ReportRamTask):
@@ -84,21 +86,24 @@ class FR5EventPreparation(ReportRamTask):
         montage = 0 if len(temp)==1 else temp[1]
         task = self.pipeline.task
 
-        events = [ BaseEventReader(filename=event_path).read() for event_path in
+        events = np.concatenate([ BaseEventReader(filename=event_path).read() for event_path in
                                 jr.aggregate_values('task_events',subject=subject,montage=montage,experiment=task)]
+                                ).view(np.recarray)
 
-        ps_events = [BaseEventReader(filename=event_path,eliminate_events_with_no_eeg=False).read()
-                     for event_path in jr.aggregate_values('ps4_events',subject=subject,experiment=task,montage=montage)]
 
-        if events:
-            events = np.concatenate(events).view(np.recarray)
-        events = events[(events.phase=='STIM') | (events.phase=='NON-STIM')]
+
 
         if not (events.type=='REC_BASE').any():
-            events = create_baseline_events(events)
+            events = create_baseline_events(events,1000,29000)
 
 
         self.pass_object('all_events', events)
+
+
+        events = events[(events.phase=='STIM') | (events.phase=='NON-STIM')]
+
+        if not (events.type=='WORD').any():
+            raise MissingEventError('No events found that are valid for analysis')
 
         math_events = BaseEventReader(
             filename=jr.get_value('math_events',subject=subject,experiment=task,
@@ -107,9 +112,6 @@ class FR5EventPreparation(ReportRamTask):
 
         math_events = math_events[math_events.type=='PROB']
 
-
-        if ps_events:
-            ps_events = np.concatenate(ps_events).view(np.recarray)
 
         rec_events = events[events.type == 'REC_WORD']
 
@@ -135,33 +137,8 @@ class FR5EventPreparation(ReportRamTask):
         self.pass_object('FR_math_events', math_events)
         self.pass_object('FR_intr_events', intr_events)
         self.pass_object('FR_rec_events', rec_events)
-        self.pass_object('ps_events',ps_events)
 
         self.pass_object(task+'_events',filtered_events)
-
-def modify_recalls(events):
-    """ assigns recalls at random, and inserts rec_word events to match
-    For testing purposes only"""
-
-    encoding_mask = events.type=='WORD'
-    word_events = events[encoding_mask]
-    word_events.recalled = np.random.randint(2,size=word_events.shape)
-    rec_words = []
-    for word in word_events:
-        if word.recalled:
-            rec_start = events[(events.list==word.list) & (events.type=='REC_START')].mstime
-            rec_end = events[(events.list==word.list)& (events.type=='REC_END')].mstime
-            rec_eeg_start = events[(events.list==word.list) & (events.type=='REC_START')].eegoffset
-            rec_word = word.copy().view(np.recarray)
-            rec_word.type='REC_WORD'
-            rec_word.mstime = np.random.randint(rec_start,rec_end)
-            rec_word.eegoffset = rec_eeg_start + (rec_word.mstime-rec_start)
-            rec_words.append(rec_word)
-    events[encoding_mask] = word_events
-    events = np.concatenate([events,rec_words]).view(np.recarray)
-    events.sort(order='mstime')
-    return events
-
 
 def free_epochs(times, duration, pre, post, start=None, end=None):
     # (list(vector(int))*int*int*int) -> list(vector(int))

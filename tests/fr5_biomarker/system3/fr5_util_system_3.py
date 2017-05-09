@@ -135,6 +135,22 @@ class Params(object):
 
 
 params = Params()
+# class ConfigError(Exception):
+#     pass
+#
+#
+# config_file = args.electrode_config_file
+#
+# if config_file.endswith('csv'):
+#     if not isfile(config_file.replace('csv','bin')):
+#         raise ConfigError('Needs binary config file along with csv config file')
+# elif config_file.endswith('bin'):
+#     if not isfile(config_file.replace('bin','csv')):
+#         raise ConfigError('Needs csv config file along with binary file')
+#
+# else:
+#     raise ConfigError('Unknown config file type')
+
 
 
 class ReportPipeline(RamPipeline):

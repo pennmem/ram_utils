@@ -88,7 +88,7 @@ class FREventPreparation(RamTask):
             catfr1_events=catfr1_events[list(fr1_events.dtype.names)]
             catfr1_events.session += 100
         fr1_events = np.append(fr1_events,catfr1_events).view(np.recarray) if len(catfr1_events) else fr1_events
-        fr1_events = create_baseline_events(fr1_events)
+        fr1_events = create_baseline_events(fr1_events,1000,29000)
 
 
         # e_reader = BaseEventReader(filename=fr1_events_fname, eliminate_events_with_no_eeg=True,common_root='scratch')

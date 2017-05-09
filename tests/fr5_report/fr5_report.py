@@ -59,7 +59,7 @@ class Params(object):
 
         self.filt_order = 4
 
-        self.freqs = np.logspace(np.log10(3), np.log10(180), 8)
+        self.freqs = np.logspace(np.log10(6), np.log10(180), 8)
 
         self.log_powers = True
 
@@ -100,8 +100,6 @@ report_pipeline = ReportPipeline(subject=args.subject, task=args.task,experiment
 report_pipeline.add_task(FR1EventPreparation())
 
 report_pipeline.add_task(FR5EventPreparation())
-
-# report_pipeline.add_task(PSEventPreparation())
 
 report_pipeline.add_task(MontagePreparation(params=params,mark_as_completed=False))
 

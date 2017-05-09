@@ -128,7 +128,6 @@ class ComputeClassifier(RamTask):
             insample_mask = (event_sessions != sess)
             insample_pow_mat = self.pow_mat[insample_mask]
             insample_recalls = recalls[insample_mask]
-            insample_samples_weights = samples_weights[insample_mask]
 
 
             insample_enc_mask = insample_mask & (events.type == 'WORD')
@@ -404,7 +403,8 @@ class ComputeClassifier(RamTask):
             self.perm_AUCs = self.permuted_loso_AUCs(event_sessions, recalls, samples_weights,events=events)
 
             print 'Performing leave-one-session-out xval'
-            self.run_loso_xval(event_sessions, recalls, permuted=False,samples_weights=samples_weights, events=events)
+            # self.run_loso_xval(event_sessions, recalls, permuted=False,samples_weights=samples_weights, events=events)
+            self.run_loso_xval(event_sessions, recalls, permuted=False, events=events)
         else:
             sess = sessions[0]
             event_lists = events.list
