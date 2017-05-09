@@ -95,10 +95,7 @@ class Params(object):
         self.fr1_retrieval_end_time = 0.0
         self.fr1_retrieval_buf = 0.524
 
-        # self.retrieval_samples_weight = 2.5
         self.encoding_samples_weight = 2.5
-        # self.encoding_samples_weight = 1.0
-
 
         self.filt_order = 4
 
@@ -172,7 +169,7 @@ report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
 
 report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=False))
+report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
 

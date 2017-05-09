@@ -108,6 +108,16 @@ class ComputeFRPowers(RamTask):
         self.pow_mat[is_encoding_event,...] = encoding_pow_mat
         self.pow_mat[~is_encoding_event,...] = retrieval_pow_mat
 
+        # if subject == 'R1302M':
+        #     # Exclude some known bad events for this subject
+        #     try:
+        #         short_events = np.concatenate(events[:499],events[621:]).view(np.recarray)
+        #         self.pow_mat = self.pow_mat[np.in1d(events,short_events)]
+        #         self.pass_object('FR_events',events)
+        #     except Exception:
+        #         print('Using all events as specified')
+        #         pass
+
         # self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
 
         self.pass_object('pow_mat', self.pow_mat)

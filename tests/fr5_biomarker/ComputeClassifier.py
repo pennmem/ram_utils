@@ -128,6 +128,7 @@ class ComputeClassifier(RamTask):
             insample_mask = (event_sessions != sess)
             insample_pow_mat = self.pow_mat[insample_mask]
             insample_recalls = recalls[insample_mask]
+            insample_samples_weights = samples_weights[insample_mask]
 
 
             insample_enc_mask = insample_mask & (events.type == 'WORD')
@@ -140,11 +141,14 @@ class ComputeClassifier(RamTask):
             n_ret_1 = events[insample_retrieval_mask & (events.type == 'REC_WORD')].shape[0]
 
             n_vec = np.array([1.0/n_enc_0, 1.0/n_enc_1, 1.0/n_ret_0, 1.0/n_ret_1 ], dtype=np.float)
-            n_vec /= np.mean(n_vec)
+            # n_vec /= np.mean(n_vec)
 
             n_vec[:2] *= self.params.encoding_samples_weight
 
-            n_vec /= np.mean(n_vec)
+            # n_vec /= np.mean(n_vec)
+
+            if not permuted:
+                print(n_vec.sum())
 
             # insample_samples_weights = np.ones(n_enc_0 + n_enc_1 + n_ret_0 + n_ret_1, dtype=np.float)
             insample_samples_weights = np.ones(events.shape[0], dtype=np.float)
@@ -155,6 +159,7 @@ class ComputeClassifier(RamTask):
             insample_samples_weights [insample_retrieval_mask & (events.type == 'REC_WORD')] = n_vec[3]
 
             insample_samples_weights = insample_samples_weights[insample_mask]
+            insample_samples_weights /= insample_samples_weights.mean()
 
 
             outsample_both_mask = (events.session == sess)
@@ -340,8 +345,8 @@ class ComputeClassifier(RamTask):
         reduced_pairs = self.get_passed_object('reduced_pairs')
         to_include = np.array([bp in reduced_pairs for bp in bipolar_pairs])
         pow_mat =  self.get_passed_object('pow_mat')
-        pow_mat = pow_mat.reshape((len(pow_mat),len(bipolar_pairs),-1))[:,to_include,:]
-        return pow_mat.reshape((len(pow_mat),-1))
+        pow_mat = pow_mat.reshape((len(pow_mat),len(bipolar_pairs),-1))[:,to_include,:].reshape((len(pow_mat),-1))
+        return pow_mat
 
     def pass_objects(self):
         subject=self.pipeline.subject
@@ -364,15 +369,14 @@ class ComputeClassifier(RamTask):
     def run(self):
 
         events = self.get_passed_object('FR_events')
+
         self.pow_mat = self.get_pow_mat()
         encoding_mask = events.type=='WORD'
         self.pow_mat[encoding_mask] = normalize_sessions(self.pow_mat[encoding_mask],events[encoding_mask])
         self.pow_mat[~encoding_mask] = normalize_sessions(self.pow_mat[~encoding_mask],events[~encoding_mask])
+        # Add bias term
+        self.pow_mat = np.append(np.ones((len(self.pow_mat),1)),self.pow_mat,axis=1)
 
-        # n1 = np.sum(events.recalled)
-        # n0 = len(events) - n1
-        # w0 = (2.0/n0) / ((1.0/n0)+(1.0/n1))
-        # w1 = (2.0/n1) / ((1.0/n0)+(1.0/n1))
 
         # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
         #                                         solver='liblinear')
@@ -380,8 +384,8 @@ class ComputeClassifier(RamTask):
         # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
         #                                         solver='newton-cg')
 
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
-                                                solver='newton-cg')
+        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
+                                                solver='newton-cg',fit_intercept=False)
 
 
         event_sessions = events.session
@@ -403,8 +407,7 @@ class ComputeClassifier(RamTask):
             self.perm_AUCs = self.permuted_loso_AUCs(event_sessions, recalls, samples_weights,events=events)
 
             print 'Performing leave-one-session-out xval'
-            # self.run_loso_xval(event_sessions, recalls, permuted=False,samples_weights=samples_weights, events=events)
-            self.run_loso_xval(event_sessions, recalls, permuted=False, events=events)
+            self.run_loso_xval(event_sessions, recalls, permuted=False,samples_weights=samples_weights, events=events)
         else:
             sess = sessions[0]
             event_lists = events.list
