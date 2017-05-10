@@ -1,5 +1,7 @@
 __author__ = 'm'
 
+
+
 import random
 import os
 import os.path
@@ -151,6 +153,43 @@ class PAL1EventPreparation(RamTask):
             rec_evs = np.append(rec_evs, new_rows).view(np.recarray)
 
         return rec_evs
+
+    def process_session_rec_events_nih(self, evs):
+        """
+        Filters out events based on PAL5 design doc
+
+        :param evs: session events
+        :return: filtered event recarray
+        """
+
+        rec_evs = evs[evs.type == 'TEST_PROBE']
+
+        incorrect_has_response_mask = (rec_evs.RT != -999) & (rec_evs.correct == 0)
+        incorrect_no_response_mask = rec_evs.RT == -999
+
+        incorrect_has_response = rec_evs[incorrect_has_response_mask]
+        incorrect_no_response = rec_evs[incorrect_no_response_mask]
+        correct_mask = rec_evs.correct == 1
+
+        # test
+        tot_events = sum(incorrect_no_response_mask)+sum(incorrect_has_response_mask) + sum(rec_evs.correct==1)
+        np.testing.assert_equal(tot_events,len(rec_evs))
+
+
+
+        correct_response_times = rec_evs[incorrect_has_response_mask | correct_mask].RT
+
+        response_time_rand_indices = np.random.randint(0, len(correct_response_times), sum(incorrect_no_response_mask))
+
+        rec_evs.RT[incorrect_no_response_mask] = correct_response_times[response_time_rand_indices]
+
+        rec_evs.type = 'REC_EVENT'
+
+        rec_evs.eegoffset = rec_evs.eegoffset + rec_evs.RT
+
+        return rec_evs
+
+
         #         new_rows.append(new_row)
         #
         # rec_evs
@@ -248,6 +287,8 @@ class PAL1EventPreparation(RamTask):
                               RuntimeWarning)
                 continue
 
+
+
             sess_events = append_fields(sess_events, 'keep_event', sess_events.correct,
                                         dtypes=sess_events.correct.dtype, usemask=False,
                                         asrecarray=True)
@@ -260,9 +301,25 @@ class PAL1EventPreparation(RamTask):
 
             sess_events.rec_start = -1
 
-            rec_events = self.process_session_rec_events(evs=sess_events)
+            # rec_events = self.process_session_rec_events(evs=sess_events)
 
-            study_pair_events = sess_events[(sess_events.type == 'STUDY_PAIR') | (sess_events.type == 'PRACTICE_PAIR')]
+            rec_events = self.process_session_rec_events_nih(evs=sess_events)
+
+            # rec_events_orig = self.process_session_rec_events(evs=sess_events)
+
+            # # ----------------------------------------------------------------------------------------
+            # nih_path = 'd:/data/events/RAM_PAL1/R1250N_sess_0.mat'
+            # nih_e_reader = BaseEventReader(filename=nih_path, eliminate_events_with_no_eeg=False)
+            # nih_sess_events = nih_e_reader.read()
+            #
+            #
+            # rec_evs_test = self.process_session_rec_events_nih(evs=sess_events)
+            #
+            # # ----------------------------------------------------------------------------------------
+
+
+            # study_pair_events = sess_events[(sess_events.type == 'STUDY_PAIR') | (sess_events.type == 'PRACTICE_PAIR')]
+            study_pair_events = sess_events[(sess_events.type == 'STUDY_PAIR')]
 
             # rec_rvs_trivial_sess = self.process_trivial_session_rec_events(sess_events)
 
@@ -274,11 +331,17 @@ class PAL1EventPreparation(RamTask):
             #     trivial_rec_events = np.hstack((trivial_rec_events, rec_rvs_trivial_sess))
             #
             # trivial_rec_events = trivial_rec_events.view(np.recarray)
+            merged_events = np.hstack((study_pair_events, rec_events)).view(np.recarray)
+
+            # sorting according to eegoffset
+            merged_events = merged_events[np.argsort(merged_events.eegoffset)]
 
             if events is None:
-                events = np.hstack((study_pair_events, rec_events))
+                events = merged_events
             else:
-                events = np.hstack((events, np.hstack((study_pair_events, rec_events)).view(np.recarray)))
+                # events = np.hstack((events, np.hstack((study_pair_events, rec_events)).view(np.recarray)))
+                events = np.hstack((events, merged_events))
+
             events = events.view(np.recarray)
 
         self.pass_object('PAL1_events', events)
@@ -286,6 +349,9 @@ class PAL1EventPreparation(RamTask):
         rec_start_events = events.copy()
 
         rec_start_events = rec_start_events[rec_start_events.type == 'REC_EVENT']
-        rec_start_events.eegoffset = rec_start_events.rec_start
+
+        rec_start_events.eegoffset  = rec_start_events.eegoffset - rec_start_events.RT
+
+        # rec_start_events.eegoffset = rec_start_events.rec_start # todo - original code
 
         self.pass_object('rec_start_events', rec_start_events)

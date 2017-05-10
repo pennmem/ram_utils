@@ -18,7 +18,6 @@ else:
 
     prefix = '/'
 
-
 subject = 'R1250N'
 experiment = 'PS4_PAL5'
 
@@ -26,7 +25,7 @@ cml_parser = CMLParserCloseLoop5(arg_count_threshold=1)
 cml_parser.arg('--workspace-dir', join(prefix, 'scratch', subject))
 cml_parser.arg('--experiment', experiment)
 cml_parser.arg('--mount-point',prefix)
-cml_parser.arg('--subject','R1250N')
+cml_parser.arg('--subject',subject)
 cml_parser.arg('--electrode-config-file',join(prefix, 'experiment_configs', 'contacts%s.csv'%subject))
 cml_parser.arg('--pulse-frequency','200')
 cml_parser.arg('--target-amplitude','1.0')
@@ -35,10 +34,38 @@ cml_parser.arg('--cathodes','PG11','PG12')
 cml_parser.arg('--min-amplitudes','0.25')
 cml_parser.arg('--max-amplitudes','1.0')
 
+# subject = 'R1284N'
+# experiment = 'PS4_PAL5'
+#
+# cml_parser = CMLParserCloseLoop5(arg_count_threshold=1)
+# cml_parser.arg('--workspace-dir', join(prefix, 'scratch', subject))
+# cml_parser.arg('--experiment', experiment)
+# cml_parser.arg('--mount-point',prefix)
+# cml_parser.arg('--subject', subject)
+# cml_parser.arg('--electrode-config-file',join(prefix, 'experiment_configs', 'contacts%s.csv'%subject))
+# cml_parser.arg('--pulse-frequency','200')
+# cml_parser.arg('--target-amplitude','1.0')
+# cml_parser.arg('--anodes','LMD1', 'LMD3')
+# cml_parser.arg('--cathodes','LMD2','LMD4')
+# cml_parser.arg('--min-amplitudes','0.25')
+# cml_parser.arg('--max-amplitudes','1.0')
 
 
-
-
+# subject = 'R1095N'
+# experiment = 'PS4_PAL5'
+#
+# cml_parser = CMLParserCloseLoop5(arg_count_threshold=1)
+# cml_parser.arg('--workspace-dir', join(prefix, 'scratch', subject))
+# cml_parser.arg('--experiment', experiment)
+# cml_parser.arg('--mount-point', prefix)
+# cml_parser.arg('--subject', subject)
+# cml_parser.arg('--electrode-config-file', join(prefix, 'experiment_configs', 'contacts%s.csv' % subject))
+# cml_parser.arg('--pulse-frequency', '200')
+# cml_parser.arg('--target-amplitude', '1.0')
+# cml_parser.arg('--anodes', 'RTT1', 'RTT3')
+# cml_parser.arg('--cathodes', 'RTT2', 'RTT4')
+# cml_parser.arg('--min-amplitudes', '0.25')
+# cml_parser.arg('--max-amplitudes', '1.0')
 
 args = cml_parser.parse()
 
@@ -47,7 +74,6 @@ args = cml_parser.parse()
 from RamPipeline import RamPipeline
 
 from tests.pal5_biomarker.PAL1EventPreparation import PAL1EventPreparation
-
 
 from tests.pal5_biomarker.ComputePAL1Powers import ComputePAL1Powers
 
@@ -59,16 +85,17 @@ from tests.pal5_biomarker.ComputeClassifier import ComputeClassifier
 
 from tests.pal5_biomarker.ComputeClassifier import ComputeFullClassifier
 
+from tests.pal5_biomarker.ComputeEncodingClassifier import ComputeEncodingClassifier
+
 from tests.pal5_biomarker.ComputeBiomarkerThreshold import ComputeBiomarkerThreshold
 
 from tests.pal5_biomarker.system3.ExperimentConfigGeneratorClosedLoop5 import ExperimentConfigGeneratorClosedLoop5
-
 
 import numpy as np
 
 
 class StimParams(object):
-    def __init__(self,**kwds):
+    def __init__(self, **kwds):
         pass
 
 
@@ -103,27 +130,25 @@ class Params(object):
         self.filt_order = 4
 
         self.freqs = np.logspace(np.log10(6), np.log10(180), 8)
+        # self.freqs = np.logspace(np.log10(3), np.log10(180), 8)  # TODO - remove it from production code
 
         self.log_powers = True
 
         self.penalty_type = 'l2'
-        # self.C = 7.2e-4
+        # self.C = 7.2e-4  # TODO - remove it from production code
         self.C = 0.048
 
-        self.n_perm = 200
-        # self.n_perm = 10 # TODO - remove it from production code
+        # self.n_perm = 200
+        self.n_perm = 10  # TODO - remove it from production code
 
         self.stim_params = StimParams(
         )
-
-
 
 
 params = Params()
 
 
 class ReportPipeline(RamPipeline):
-
     def __init__(self, subject, workspace_dir, mount_point=None, args=None):
         RamPipeline.__init__(self)
         self.subject = subject
@@ -131,10 +156,11 @@ class ReportPipeline(RamPipeline):
         self.set_workspace_dir(workspace_dir)
         self.args = args
 
-if __name__=='__main__':
 
+if __name__ == '__main__':
     report_pipeline = ReportPipeline(subject=args.subject,
-                                           workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point, args=args)
+                                     workspace_dir=join(args.workspace_dir, args.subject), mount_point=args.mount_point,
+                                     args=args)
 
     report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
 
@@ -144,11 +170,14 @@ if __name__=='__main__':
     #
     report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=True))
 
+    report_pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=False))
+
     report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
 
     report_pipeline.add_task(ComputeBiomarkerThreshold(params=params, mark_as_completed=False))
 
     report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=True))
+
     #
     report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
     #

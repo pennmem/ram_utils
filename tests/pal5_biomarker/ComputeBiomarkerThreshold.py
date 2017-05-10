@@ -81,7 +81,7 @@ class ComputeBiomarkerThreshold(RamTask):
 
         rec_start_events = self.get_passed_object('rec_start_events')
         rec_start_events = rec_start_events[rec_start_events.type=='REC_EVENT']
-        rec_start_events.eegoffset = rec_start_events.rec_start
+        # rec_start_events.eegoffset = rec_start_events.rec_start # todo orig code
 
 
         mean_dict = self.get_passed_object('features_mean_dict')

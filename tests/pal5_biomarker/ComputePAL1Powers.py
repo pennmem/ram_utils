@@ -88,7 +88,7 @@ class ComputePAL1Powers(RamTask):
         rec_start_events = self.get_passed_object('rec_start_events')
 
         rec_start_events = rec_start_events[rec_start_events.type=='REC_EVENT']
-        rec_start_events.eegoffset = rec_start_events.rec_start
+        # rec_start_events.eegoffset = rec_start_events.rec_start # todo - original code
 
 
 
