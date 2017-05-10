@@ -51,7 +51,7 @@ class ComposeSessionSummary(ReportRamTask):
             decision  =events[(events.session==session) & (events.type=='OPTIMIZATION_DECISION')]
             session_summary =PS4SessionSummary()
 
-            for location,loc_events in event_frame.groupby(('anode_label','cathode_label')):
+            for location,loc_events in sess_events.groupby(('anode_label','cathode_label')):
                 if location[0] and location[1]:
                     loc_tag= '%s_%s'%(location[0],location[1])
                     location_summary = PS4LocationSummary(loc_tag=loc_tag)
