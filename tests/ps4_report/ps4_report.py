@@ -3,7 +3,7 @@ from ReportUtils import ReportPipeline,CMLParser
 from os.path import join
 
 parser=CMLParser()
-parser.arg('--subject','R1293P')
+parser.arg('--subject','R1302M')
 parser.arg('--task','FR5')
 parser.arg('--workspace-dir','/Users/leond/ps4_reports')
 parser.arg('--mount-point','/Volumes/rhino_root/')

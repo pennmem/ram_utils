@@ -23,7 +23,7 @@ class GeneratePlots(ReportRamTask):
         for session in session_summaries:
             session_summary = session_summaries[session]
 
-            panel_plot = PlotUtils.PanelPlot(i_max = 1, j_max=2,labelsize=16,)
+            panel_plot = PlotUtils.PanelPlot(i_max = 1, j_max=len(session_summary.info_by_location),labelsize=16,)
 
             for i,location in enumerate(sorted(session_summary.info_by_location)):
 
@@ -91,7 +91,7 @@ class GenerateTex(ReportRamTask):
                 '<SHAM_PVAL>':'{:.3}'.format(session_summary.pval_vs_sham),
             })
 
-        report_filename = '%s_%s_ps4_report.pdf'%(subject,task)
+        report_filename = '%s_%s_ps4_report.tex'%(subject,task)
         replace_template('ps4_report.tex.tpl',self.get_path_to_resource_in_workspace('reports',report_filename),{
             '<SUBJECT>':subject,
             '<TASK>':task,

@@ -40,7 +40,7 @@ class ComposeSessionSummary(ReportRamTask):
         session_data = []
         for session, sess_events in event_frame.groupby('session'):
 
-            first_time_stamp = sess_events.ix[0].mstime
+            first_time_stamp = sess_events.iloc[0].mstime
             timestamps = sess_events.mstime
             last_time_stamp = np.max(timestamps)
             session_length = '%.2f' % ((last_time_stamp - first_time_stamp) / 60000.0)
