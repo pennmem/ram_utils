@@ -1,11 +1,9 @@
-# command line example:
-# python fr3_util_system_3.py --workspace-dir=/scratch/busygin/FR3_biomarkers --subject=R1145J_1 --n-channels=128 --anode=RD2 --anode-num=34 --cathode=RD3 --cathode-num=35 --pulse-frequency=200 --pulse-duration=500 --target-amplitude=1000
 
-print "ATTN: Wavelet params and interval length are hardcoded!! To change them, recompile"
-print "Windows binaries from https://github.com/busygin/morlet_for_sys2_biomarker"
-print "See https://github.com/busygin/morlet_for_sys2_biomarker/blob/master/README for detail."
+DEBUG = True
 
 from os.path import *
+
+from pal5_prompt import parse_command_line, Args
 
 from system_3_utils.ram_tasks.CMLParserClosedLoop5 import CMLParserCloseLoop5
 import sys
@@ -18,59 +16,53 @@ else:
 
     prefix = '/'
 
-# subject = 'R1250N'
-# experiment = 'PS4_PAL5'
-#
-# cml_parser = CMLParserCloseLoop5(arg_count_threshold=1)
-# cml_parser.arg('--workspace-dir', join(prefix, 'scratch', subject))
-# cml_parser.arg('--experiment', experiment)
-# cml_parser.arg('--mount-point',prefix)
-# cml_parser.arg('--subject',subject)
-# cml_parser.arg('--electrode-config-file',join(prefix, 'experiment_configs', 'contacts%s.csv'%subject))
-# cml_parser.arg('--pulse-frequency','200')
-# cml_parser.arg('--target-amplitude','1.0')
-# cml_parser.arg('--anodes','PG10', 'PG11')
-# cml_parser.arg('--cathodes','PG11','PG12')
-# cml_parser.arg('--min-amplitudes','0.25')
-# cml_parser.arg('--max-amplitudes','1.0')
+
+try:
+    args_obj = parse_command_line()
+except:
 
 
-# subject = 'R1095N'
-# experiment = 'PS4_PAL5'
-#
-# cml_parser = CMLParserCloseLoop5(arg_count_threshold=1)
-# cml_parser.arg('--workspace-dir', join(prefix, 'scratch', subject))
-# cml_parser.arg('--experiment', experiment)
-# cml_parser.arg('--mount-point', prefix)
-# cml_parser.arg('--subject', subject)
-# cml_parser.arg('--electrode-config-file', join(prefix, 'experiment_configs', 'contacts%s.csv' % subject))
-# cml_parser.arg('--pulse-frequency', '200')
-# cml_parser.arg('--target-amplitude', '1.0')
-# cml_parser.arg('--anodes', 'RTT1', 'RTT3')
-# cml_parser.arg('--cathodes', 'RTT2', 'RTT4')
-# cml_parser.arg('--min-amplitudes', '0.25')
-# cml_parser.arg('--max-amplitudes', '1.0')
+    args_obj = Args()
+
+    args_obj.subject = 'R1250N'
+    args_obj.anodes = ['PG10', 'PG11']
+    args_obj.cathodes = ['PG11','PG12']
+    args_obj.electrode_config_file = join(prefix, 'experiment_configs', 'contacts%s.csv'%args_obj.subject)
+    args_obj.experiment = 'PS4_PAL5'
+    args_obj.min_amplitudes = [0.25,0.25]
+    args_obj.max_amplitudes = [1.0,1.0]
+    args_obj.mount_point = prefix
+    args_obj.pulse_frequency = 200
+    args_obj.workspace_dir = join(prefix, 'scratch', args_obj.subject)
 
 
-subject = 'R1284N'
-experiment = 'PS4_PAL5'
-
-cml_parser = CMLParserCloseLoop5(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir', join(prefix, 'scratch', subject))
-cml_parser.arg('--experiment', experiment)
-cml_parser.arg('--mount-point',prefix)
-cml_parser.arg('--subject', subject)
-cml_parser.arg('--electrode-config-file',join(prefix, 'experiment_configs', 'contacts%s.csv'%subject))
-cml_parser.arg('--pulse-frequency','200')
-cml_parser.arg('--target-amplitude','1.0')
-cml_parser.arg('--anodes','LMD1', 'LMD3')
-cml_parser.arg('--cathodes','LMD2','LMD4')
-cml_parser.arg('--min-amplitudes','0.25')
-cml_parser.arg('--max-amplitudes','1.0')
+    # args_obj = Args()
+    #
+    # args_obj.subject = 'R1095N'
+    # args_obj.anodes = ['RTT1', 'RTT3']
+    # args_obj.cathodes = ['RTT2', 'RTT4']
+    # args_obj.electrode_config_file = join(prefix, 'experiment_configs', 'contacts%s.csv'%args_obj.subject)
+    # args_obj.experiment = 'PS4_PAL5'
+    # args_obj.min_amplitudes = [0.25,0.25]
+    # args_obj.max_amplitudes = [1.0,1.0]
+    # args_obj.mount_point = prefix
+    # args_obj.pulse_frequency = 200
+    # args_obj.workspace_dir = join(prefix, 'scratch', args_obj.subject)
 
 
+    # args_obj = Args()
+    #
+    # args_obj.subject = 'R1284N'
+    # args_obj.anodes = ['LMD1', 'LMD3']
+    # args_obj.cathodes = ['LMD2','LMD4']
+    # args_obj.electrode_config_file = join(prefix, 'experiment_configs', 'contacts%s.csv'%args_obj.subject)
+    # args_obj.experiment = 'PS4_PAL5'
+    # args_obj.min_amplitudes = [0.25,0.25]
+    # args_obj.max_amplitudes = [1.0,1.0]
+    # args_obj.mount_point = prefix
+    # args_obj.pulse_frequency = 200
+    # args_obj.workspace_dir = join(prefix, 'scratch', args_obj.subject)
 
-args = cml_parser.parse()
 
 # ------------------------------- end of processing command line
 
@@ -157,13 +149,19 @@ class ReportPipeline(RamPipeline):
         self.subject = subject
         self.mount_point = mount_point
         self.set_workspace_dir(workspace_dir)
-        self.args = args
+        # self.args = args # todo original code
+        self.args = args_obj
 
 
 if __name__ == '__main__':
-    report_pipeline = ReportPipeline(subject=args.subject,
-                                     workspace_dir=join(args.workspace_dir, args.subject), mount_point=args.mount_point,
-                                     args=args)
+    # report_pipeline = ReportPipeline(subject=args.subject,
+    #                                  workspace_dir=join(args.workspace_dir, args.subject), mount_point=args.mount_point,
+    #                                  args=args)
+
+    report_pipeline = ReportPipeline(subject=args_obj.subject,
+                                     workspace_dir=join(args_obj.workspace_dir, args_obj.subject), mount_point=args_obj.mount_point,
+                                     args=args_obj)
+
 
     report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
 

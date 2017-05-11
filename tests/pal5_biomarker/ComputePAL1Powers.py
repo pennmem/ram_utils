@@ -85,13 +85,6 @@ class ComputePAL1Powers(RamTask):
 
         events = self.get_passed_object('PAL1_events')
 
-        rec_start_events = self.get_passed_object('rec_start_events')
-
-        rec_start_events = rec_start_events[rec_start_events.type=='REC_EVENT']
-        # rec_start_events.eegoffset = rec_start_events.rec_start # todo - original code
-
-
-
         is_encoding_event = (events.type == 'PRACTICE_PAIR') | (events.type == 'STUDY_PAIR')
 
         sessions = np.unique(events.session)
@@ -129,24 +122,6 @@ class ComputePAL1Powers(RamTask):
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
         joblib.dump(self.samplerate, self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
 
-
-
-        # sessions = np.sort(np.unique(rec_start_events.session))
-        #
-        # for sess in sessions:
-        #
-        #     sess_rec_start_events = rec_start_events [rec_start_events.session == sess]
-        #
-        #     retrieval_wavelet_pow_mat = compute_wavelets_powers(sess_rec_start_events, monopolar_channels,
-        #                                                           bipolar_pairs,
-        #                                                           0.0,
-        #                                                           params.recall_period, params.pal1_buf,
-        #                                                           params.freqs)
-        #
-        #     joblib.dump(retrieval_wavelet_pow_mat,
-        #                 self.get_path_to_resource_in_workspace(subject + '-retrieval_wavelet_pow_mat_sess_%d.pkl'%sess))
-        #
-        #     # self.pass_object('retrieval_wavelet_pow_mat', self.retrieval_wavelet_pow_mat)
 
 
 
