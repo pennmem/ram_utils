@@ -57,6 +57,7 @@ class ModelOutput(object):
         self.low_pc_diff_from_mean = np.nan
         self.mid_pc_diff_from_mean = np.nan
         self.high_pc_diff_from_mean = np.nan
+        self.classifier = None
 
     def compute_roc(self):
         try:
@@ -98,6 +99,7 @@ class ComputeClassifier(RamTask):
         self.xval_output = dict()  # ModelOutput per session; xval_output[-1] is across all sessions
         self.perm_AUCs = None
         self.pvalue = None
+        self.suffix = ''
 
     def input_hashsum(self):
         subject = self.pipeline.subject
@@ -139,6 +141,9 @@ class ComputeClassifier(RamTask):
         return auc
 
     def run_loso_xval(self, event_sessions, recalls, permuted=False, samples_weights=None, events=None):
+
+        outsample_classifier = self.create_classifier_obj()
+
         probs = np.empty_like(recalls, dtype=np.float)
 
         sessions = np.unique(event_sessions)
@@ -157,7 +162,8 @@ class ComputeClassifier(RamTask):
             insample_samples_weights = samples_weights[insample_mask]
 
             insample_enc_mask = insample_mask & ((events.type == 'STUDY_PAIR') |(events.type == 'PRACTICE_PAIR'))
-            insample_retrieval_mask = insample_mask & (events.type == 'REC_EVENT')
+            insample_retrieval_mask = insample_mask & (events.type == 'REC_EVENT') # todo restore it
+            # insample_retrieval_mask = insample_mask & ((events.type == 'STUDY_PAIR') |(events.type == 'PRACTICE_PAIR'))
 
             n_enc_0 = events[insample_enc_mask & (events.correct == 0)].shape[0]
             n_enc_1 = events[insample_enc_mask & (events.correct == 1)].shape[0]
@@ -199,90 +205,58 @@ class ComputeClassifier(RamTask):
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 if samples_weights is not None:
-                    self.lr_classifier.fit(insample_pow_mat, insample_recalls, insample_samples_weights)
+                    outsample_classifier.fit(insample_pow_mat, insample_recalls, insample_samples_weights)
                 else:
-                    self.lr_classifier.fit(insample_pow_mat, insample_recalls)
+                    outsample_classifier.fit(insample_pow_mat, insample_recalls)
 
             outsample_mask = ~insample_mask
             outsample_pow_mat = self.pow_mat[outsample_mask]
             outsample_recalls = recalls[outsample_mask]
 
-            outsample_probs = self.lr_classifier.predict_proba(outsample_pow_mat)[:, 1]
+            outsample_probs = outsample_classifier.predict_proba(outsample_pow_mat)[:, 1]
             if not permuted:
                 self.xval_output[sess] = ModelOutput(outsample_recalls, outsample_probs)
                 self.xval_output[sess].compute_roc()
                 self.xval_output[sess].compute_tercile_stats()
-            probs[outsample_mask] = outsample_probs
+                self.xval_output[sess].classifier = outsample_classifier
 
-            # import tables
-            #
-            # h5file = tables.open_file('%s_fold_%d.h5'%(self.pipeline.subject, sess), mode='w', title="Test Array")
-            # root = h5file.root
-            # h5file.create_array(root, "insample_recalls", insample_recalls)
-            # h5file.create_array(root, "insample_pow_mat", insample_pow_mat)
-            # h5file.create_array(root, "insample_samples_weights", insample_samples_weights)
-            # h5file.create_array(root, "outsample_recalls", outsample_recalls)
-            # h5file.create_array(root, "outsample_pow_mat", outsample_pow_mat)
-            # h5file.create_array(root, "outsample_probs", outsample_probs)
-            # h5file.create_array(root, "lr_classifier_coef", self.lr_classifier.coef_)
-            # h5file.create_array(root, "lr_classifier_intercept", self.lr_classifier.intercept_)
-            #
-            # h5file.close()
-            #
+            probs[outsample_mask] = outsample_probs
 
 
             if events is not None:
                 outsample_encoding_mask = (events.session == sess) & ((events.type == 'STUDY_PAIR')|(events.type == 'PRACTICE_PAIR'))
-                outsample_retrieval_mask = (events.session == sess) & ((events.type == 'REC_EVENT'))
+                outsample_retrieval_mask = (events.session == sess) & ((events.type == 'REC_EVENT')) # todo restore it
+                # outsample_retrieval_mask = (events.session == sess) & ((events.type == 'STUDY_PAIR')|(events.type == 'PRACTICE_PAIR'))
+
+
                 outsample_both_mask = (events.session == sess)
 
                 auc_encoding[sess_idx] = self.get_auc(
-                    classifier=self.lr_classifier, features=self.pow_mat, recalls=recalls, mask=outsample_encoding_mask)
+                    classifier=outsample_classifier, features=self.pow_mat, recalls=recalls, mask=outsample_encoding_mask)
 
                 auc_retrieval[sess_idx] = self.get_auc(
-                    classifier=self.lr_classifier, features=self.pow_mat, recalls=recalls,
+                    classifier=outsample_classifier, features=self.pow_mat, recalls=recalls,
                     mask=outsample_retrieval_mask)
 
                 auc_both[sess_idx] = self.get_auc(
-                    classifier=self.lr_classifier, features=self.pow_mat, recalls=recalls, mask=outsample_both_mask)
+                    classifier=outsample_classifier, features=self.pow_mat, recalls=recalls, mask=outsample_both_mask)
 
 
-                # outsample_encoding_recalls = recalls[outsample_encoding_mask]
-                # outsample_retrieval_recalls = recalls[outsample_retrieval_mask]
-                #
-                # outsample_probs_encoding = self.lr_classifier.predict_proba(self.pow_mat[outsample_encoding_mask])[:, 1]
-                # outsample_probs_retrieval = self.lr_classifier.predict_proba(self.pow_mat[outsample_retrieval_mask])[:, 1]
-                #
-                # outsample_encoding_auc = roc_auc_score(outsample_encoding_recalls, outsample_probs_encoding)
-                # outsample_retrieval_auc = roc_auc_score(outsample_retrieval_recalls, outsample_probs_retrieval)
-                #
-                #
-                # , outsample_encoding_auc
-                # print 'outsample_retrieval_auc= ', outsample_retrieval_auc
 
         if not permuted:
             self.xval_output[-1] = ModelOutput(recalls, probs)
             self.xval_output[-1].compute_roc()
             self.xval_output[-1].compute_tercile_stats()
 
-            # outsample_encoding_mask = (events.type == 'WORD')
-            # outsample_retrieval_mask =((events.type == 'REC_BASE') | (events.type == 'REC_WORD'))
-            #
-            # outsample_encoding_recalls = recalls[outsample_encoding_mask]
-            # outsample_retrieval_recalls = recalls[outsample_retrieval_mask]
-            #
-            # outsample_probs_encoding = self.lr_classifier.predict_proba(self.pow_mat[outsample_encoding_mask])[:, 1]
-            # outsample_probs_retrieval = self.lr_classifier.predict_proba(self.pow_mat[outsample_retrieval_mask])[:, 1]
-            #
-            # outsample_encoding_auc = roc_auc_score(outsample_encoding_recalls, outsample_probs_encoding)
-            # outsample_retrieval_auc = roc_auc_score(outsample_retrieval_recalls, outsample_probs_retrieval)
-            #
-            # print 'TOTAL outsample_encoding_auc =', outsample_encoding_auc
-            # print 'TOTAL outsample_retrieval_auc= ', outsample_retrieval_auc
 
             print 'auc_encoding=', auc_encoding, np.mean(auc_encoding)
             print 'auc_retrieval=', auc_retrieval, np.mean(auc_retrieval)
             print 'auc_both=', auc_both, np.mean(auc_both)
+
+        self.pass_object('auc_encoding'+self.suffix, auc_encoding)
+        self.pass_object('auc_retrieval'+self.suffix, auc_retrieval)
+        self.pass_object('auc_both'+self.suffix, auc_both)
+
 
         return probs
 
@@ -382,7 +356,9 @@ class ComputeClassifier(RamTask):
         self.pass_object('classifier_path', classifier_path)
 
 
-
+    def create_classifier_obj(self):
+        return LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
+                                                        solver='newton-cg')
 
 
     def run(self):
@@ -476,6 +452,9 @@ class ComputeClassifier(RamTask):
         insample_auc = roc_auc_score(recalls, recall_prob_array)
         print 'in-sample AUC=', insample_auc
 
+        print 'training retrieval_clasifiers = ', recall_prob_array[events.type=='REC_EVENT']
+        self.pass_object('rec_pow_mat',self.pow_mat[events.type=='REC_EVENT'])
+
         self.pass_objects()
 
     def restore(self):
@@ -530,6 +509,7 @@ class ComputeFullClassifier(ComputeClassifier):
         print 'AUC EXCLUDING STIM-ADJACENT ELECTRODES: ', reduced_xval_output[-1].auc
 
     def run(self):
+        self.suffix = '_full'
         super(ComputeFullClassifier, self).run()
         self.compare_AUCs()
 

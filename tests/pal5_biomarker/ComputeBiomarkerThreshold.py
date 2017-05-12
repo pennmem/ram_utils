@@ -87,7 +87,10 @@ class ComputeBiomarkerThreshold(RamTask):
         mean_dict = self.get_passed_object('features_mean_dict')
         std_dict = self.get_passed_object('features_std_dict')
 
-        lr_classifier = self.get_passed_object('lr_classifier')
+        lr_classifier = self.get_passed_object('lr_classifier') # this si classifier trained on ALL sessions
+
+        # but we need to evaluate outsample classifiers:
+        xval_output = self.get_passed_object('xval_output')
 
 
         sessions = np.sort(np.unique(rec_start_events.session))
@@ -114,6 +117,8 @@ class ComputeBiomarkerThreshold(RamTask):
         min_biomarker_pool = []
 
         for sess in sessions:
+
+            outsample_classifier = xval_output[sess].classifier
 
             m = mean_dict[sess]
             s = std_dict[sess]
@@ -145,12 +150,33 @@ class ComputeBiomarkerThreshold(RamTask):
             sess_rec_start_events = rec_start_events[rec_start_events.session == sess]
             # sess_events = events[events.session == sess]
 
+            retrieval_classifiers = []
+            for ev_num, (rec_start_ev, ev) in enumerate(zip(sess_rec_start_events, sess_events)):
+                rec_ev_offset = ev.eegoffset - rec_start_ev.eegoffset
+                rec_ev_epoch_start = rec_ev_offset-625
+                rec_ev_epoch_end =  rec_ev_offset-100
+
+                if rec_ev_epoch_start<0:
+                    retrieval_classifiers.append(-1.0)
+                    continue
+
+                ev_wavelet_pow = retrieval_wavelet_pow_mat[ev_num, :, :,
+                                 rec_ev_epoch_start:rec_ev_epoch_end]
+
+                mean_powers = np.nanmean(ev_wavelet_pow, -1)
+                mean_powers = mean_powers.reshape(1,-1)
+                features = (mean_powers - m)/s
+                biomarker = outsample_classifier.predict_proba(features)[:, 1][0]
+                retrieval_classifiers.append(biomarker)
+
+            print retrieval_classifiers
+
             for ev_num, (rec_start_ev, ev) in enumerate(zip(sess_rec_start_events, sess_events)):
                 # print 'processing event=', ev_num
                 before_rec_event_window_length = ev.eegoffset - rec_start_ev.eegoffset
 
                 number_of_classifier_evals = int(((
-                                                  ev.eegoffset - rec_start_ev.eegoffset) + pal1_retrieval_start_offset - sliding_window_start_offset)) / 100
+                                                  ev.eegoffset - rec_start_ev.eegoffset) + pal1_retrieval_start_offset - sliding_window_start_offset)) / int(sliding_window_interval_delta)
 
                 if number_of_classifier_evals < 1:
                     continue
@@ -177,7 +203,7 @@ class ComputeBiomarkerThreshold(RamTask):
                     # features = (mean_powers_flat - m)/s
 
 
-                    biomarker = lr_classifier.predict_proba(features)[:, 1][0]
+                    biomarker = outsample_classifier.predict_proba(features)[:, 1][0]
 
                     event_biomarkers.append(biomarker)
 
