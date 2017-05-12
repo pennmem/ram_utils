@@ -106,7 +106,7 @@ $\bullet$ Median of classifier output = $<J-THRESH>$
 \begin{figure}[!h]
 \centering
 \includegraphics[scale=0.45]{<JOINT_ROC_AND_TERC_PLOT_FILE>}
-\caption{\textbf{(a)} ROC curve for the subject, classifier trained and tested on both encoding and retrieval;
+\caption{\textbf{(a)} ROC curve for the subject, classifier trained ON both encoding and retrieval and tested on encoding;
 \textbf{(b)} Subject recall performance represented as
 percentage devation from the (subject) mean, separated by tercile
 of the classifier encoding efficiency estimate for each encoded word.}

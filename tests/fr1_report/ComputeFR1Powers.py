@@ -54,12 +54,16 @@ class ComputeFR1Powers(ReportRamTask):
     def restore(self):
         subject = self.pipeline.subject
         task = self.pipeline.task
+        events = self.get_passed_object(task+'_events')
 
         self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-pow_mat.pkl'))
         self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
 
-        self.pass_object('pow_mat', self.pow_mat)
-        self.pass_object('samplerate', self.samplerate)
+        if len(events) != len(self.pow_mat):
+            self.run()
+        else:
+            self.pass_object('pow_mat', self.pow_mat)
+            self.pass_object('samplerate', self.samplerate)
 
     def run(self):
         subject = self.pipeline.subject

@@ -118,6 +118,8 @@ class ComputeClassifier(ReportRamTask):
 
         print 'thresh =', self.xval_output[-1].jstat_thresh, 'quantile =', self.xval_output[-1].jstat_quantile
 
+        print 'AUC = ',self.xval_output[-1].auc
+
         # Finally, fitting classifier on all available data
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
@@ -236,7 +238,7 @@ class ComputeJointClassifier(ReportRamTask):
             print 'Performing leave-one-list-out xval'
             self.run_lolo_xval(sess, event_lists, recalls, permuted=False,samples_weights=samples_weights)
 
-        print 'CROSS VALIDATION AUC =', self.xval_output[-1].auc
+        print 'CROSS VALIDATION ENCODING AUC =', self.xval_output[-1].auc
 
         self.pvalue = np.nansum(self.perm_AUCs >= self.xval_output[-1].auc) / float(self.perm_AUCs[~np.isnan(self.perm_AUCs)].size)
         print 'Perm test p-value =', self.pvalue
@@ -279,7 +281,7 @@ class ComputeJointClassifier(ReportRamTask):
 
 
     def run_loso_xval(self, event_sessions, recalls, permuted=False,samples_weights=None, events=None):
-        probs = np.empty_like(recalls, dtype=np.float)
+        probs = np.empty_like(events[events.type=='WORD'], dtype=np.float)
 
         sessions = np.unique(event_sessions)
 
@@ -332,7 +334,7 @@ class ComputeJointClassifier(ReportRamTask):
                     self.lr_classifier.fit(insample_pow_mat, insample_recalls)
 
 
-            outsample_mask = ~insample_mask
+            outsample_mask = (~insample_mask) & (events.type=='WORD')
             outsample_pow_mat = self.pow_mat[outsample_mask]
             outsample_recalls = recalls[outsample_mask]
 
@@ -341,7 +343,7 @@ class ComputeJointClassifier(ReportRamTask):
                 self.xval_output[sess] = ModelOutput(outsample_recalls, outsample_probs)
                 self.xval_output[sess].compute_roc()
                 self.xval_output[sess].compute_tercile_stats()
-            probs[outsample_mask] = outsample_probs
+            probs[events[events.type=='WORD'].session==sess] = outsample_probs
 
 
             # import tables
@@ -380,7 +382,7 @@ class ComputeJointClassifier(ReportRamTask):
 
 
         if not permuted:
-            self.xval_output[-1] = ModelOutput(recalls, probs)
+            self.xval_output[-1] = ModelOutput(recalls[events.type=='WORD'], probs)
             self.xval_output[-1].compute_roc()
             self.xval_output[-1].compute_tercile_stats()
 
@@ -411,7 +413,7 @@ class ComputeJointClassifier(ReportRamTask):
                     shuffle(sess_permuted_recalls)
                     permuted_recalls[sel] = sess_permuted_recalls
                 probs = self.run_loso_xval(event_sessions, permuted_recalls, permuted=True,samples_weights=samples_weights,events=events)
-                AUCs[i] = roc_auc_score(recalls, probs)
+                AUCs[i] = roc_auc_score(recalls[events.type=='WORD'], probs)
                 print 'AUC =', AUCs[i]
             except ValueError:
                 AUCs[i] = np.nan
