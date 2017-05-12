@@ -135,6 +135,7 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
         experiment_config_template_filename = join(dirname(__file__),'templates','{}_experiment_config.json.tpl'.format(experiment))
         experiment_config_template = Template(open(experiment_config_template_filename ,'r').read())
 
+        electrode_config_file_core, ext = splitext(electrode_config_file)
 
 
         experiment_config_content = experiment_config_template.generate(
@@ -142,7 +143,7 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
             experiment=experiment,
             classifier_file='config_files/%s'%basename(classifier_path),
             stim_params_dict=stim_params_dict,
-            electrode_config_file='config_files/%s'%basename(electrode_config_file),
+            electrode_config_file='config_files/%s'%basename(electrode_config_file_core+'.bin'),
             montage_file='config_files/%s'%basename(bipolar_pairs_path),
             excluded_montage_file='config_files/%s'%basename(excluded_pairs_path),
             biomarker_threshold=0.5,
@@ -165,9 +166,8 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
         self.copy_resource_to_target_dir(excluded_pairs_path,config_files_dir)
 
 
-        electrode_config_file_core, ext = splitext(electrode_config_file)
 
-        self.copy_resource_to_target_dir(resource_filename=electrode_config_file, target_dir=config_files_dir)
+        self.copy_resource_to_target_dir(resource_filename=electrode_config_file_core+'.bin', target_dir=config_files_dir)
         self.copy_resource_to_target_dir(resource_filename=electrode_config_file_core + '.csv',
                                          target_dir=config_files_dir)
 
