@@ -84,7 +84,7 @@ class ComputeFR1Powers(ReportRamTask):
                                                params.fr1_start_time,params.fr1_end_time,params.fr1_buf,
                                                params.freqs,params.log_powers)
             retrieval_pow_mat, retrieval_events = compute_powers(events[~encoding_mask],monopolar_channels, bipolar_pairs,
-                                               params.fr1_start_time,params.fr1_end_time,params.fr1_buf,
+                                               params.fr1_retrieval_start_time,params.fr1_retrieval_end_time,params.fr1_retrieval_buf,
                                                params.freqs,params.log_powers)
 
             events = np.concatenate([encoding_events,retrieval_events]).view(np.recarray)
