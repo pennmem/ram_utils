@@ -90,10 +90,6 @@ class MontagePreparation(RamTask):
         montage = 0 if len(tmp)==1 else int(tmp[1])
         task = self.pipeline.task
 
-        events = self.get_passed_object('ps_events')
-        stim_events = events[events.type=='STIM_ON']
-        anode_nums = filter(None,np.unique(stim_events.anode_num))
-        cathode_nums = filter(None,np.unique(stim_events.cathode_num))
 
 
 
@@ -133,22 +129,29 @@ class MontagePreparation(RamTask):
                 bp_tags_stim_only.append(bp_tag)
                 bp_tal_stim_only_structs.append(atlas_location(bp_data))
             bp_tal_stim_only_structs = pd.Series(bp_tal_stim_only_structs, index=bp_tags_stim_only)
+        try:
+            events = self.get_passed_object('ps_events')
+            stim_events = events[events.type=='STIM_ON']
+            anode_nums = filter(None,np.unique(stim_events.anode_num))
+            cathode_nums = filter(None,np.unique(stim_events.cathode_num))
 
-        stim_pairs = anode_nums+cathode_nums
-        bipolar_pairs = np.array(bipolar_pairs, dtype=[('ch0', 'S3'), ('ch1', 'S3')]).view(np.recarray)
-        include = [int(bp.ch0) not in stim_pairs and int(bp.ch1) not in stim_pairs for bp in bipolar_pairs]
+            stim_pairs = anode_nums+cathode_nums
+            bipolar_pairs = np.array(bipolar_pairs, dtype=[('ch0', 'S3'), ('ch1', 'S3')]).view(np.recarray)
+            include = [int(bp.ch0) not in stim_pairs and int(bp.ch1) not in stim_pairs for bp in bipolar_pairs]
 
 
 
-        reduced_pairs = bipolar_pairs[np.array(include)]
-        self.pass_object('reduced_pairs', reduced_pairs)
+            reduced_pairs = bipolar_pairs[np.array(include)]
+            self.pass_object('reduced_pairs', reduced_pairs)
+            joblib.dump(reduced_pairs, self.get_path_to_resource_in_workspace(subject + '-reduced_pairs.pkl'))
+        except KeyError:
+            pass
 
         self.pass_object('monopolar_channels', monopolar_channels)
         self.pass_object('bipolar_pairs', bipolar_pairs)
         self.pass_object('bp_tal_structs', bp_tal_structs)
         self.pass_object('bp_tal_stim_only_structs', bp_tal_stim_only_structs)
 
-        joblib.dump(reduced_pairs,self.get_path_to_resource_in_workspace(subject+'-reduced_pairs.pkl'))
         joblib.dump(monopolar_channels, self.get_path_to_resource_in_workspace(subject + '-monopolar_channels.pkl'))
         joblib.dump(bipolar_pairs, self.get_path_to_resource_in_workspace(subject + '-bipolar_pairs.pkl'))
         bp_tal_structs.to_pickle(self.get_path_to_resource_in_workspace(subject + '-bp_tal_structs.pkl'))

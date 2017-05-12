@@ -221,6 +221,21 @@ class ComposeSessionSummary(ReportRamTask):
             fr_stim_stim_list_table = fr_stim_session_table
             fr_stim_non_stim_list_table = pd.DataFrame.from_records([e for e in fr1_events[fr1_events.type=='WORD']],columns=fr1_events.dtype.names)
 
+            all_events_table = pd.DataFrame.from_records([e for e in all_events],columns = all_events.dtype.names)
+            lists = np.unique(all_events[all_events.type=='WORD'].list)
+            lists = lists[lists>0]
+            session_summary.n_recalls_per_list = all_events_table.loc[all_events_table.type=='WORD'].groupby('list').recalled.sum()[lists].values
+            session_summary.n_stims_per_list = all_events_table.loc[all_events_table.type=='STIM_ON'].groupby('list').recalled.sum()[lists].values
+            session_summary.is_stim_list = all_events_table.loc[all_events_table.type=='WORD'].groupby('list').apply(
+                lambda x: (x.phase=='STIM').any())
+            session_summary.is_stim_list = session_summary.is_stim_list[lists].values
+            session_summary.is_nonstim_list = all_events_table.loc[all_events_table.type == 'WORD'].groupby('list').apply(
+                lambda x: (x.phase == 'NON-STIM').any())[lists].values
+            session_summary.is_ps_list = all_events_table.loc[all_events_table.type == 'WORD'].groupby('list').apply(
+                lambda x: (x.phase == 'PS').any())[lists].values
+            session_summary.is_baseline_list = all_events_table.loc[all_events_table.type == 'WORD'].groupby('list').apply(
+                lambda x: (x.phase == 'BASELINE').any())[lists].values
+
 
             session_summary.n_correct_stim = fr_stim_stim_list_table.recalled.sum()
             session_summary.n_total_stim = len(fr_stim_stim_list_table)

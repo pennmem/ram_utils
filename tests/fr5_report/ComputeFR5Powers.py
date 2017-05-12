@@ -49,11 +49,8 @@ class ComputeFR5Powers(ReportRamTask):
         task = self.pipeline.task
 
 
-        try:
-            events = joblib.load(self.get_path_to_resource_in_workspace(subject+'-events.pkl'))
-            self.pass_object(task+'_events',events)
-        except IOError:
-            pass
+        events = joblib.load(self.get_path_to_resource_in_workspace(subject+'-events.pkl'))
+        self.pass_object(task+'_events',events)
 
         self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-fr_stim_pow_mat.pkl'))
         self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
@@ -127,7 +124,7 @@ class ComputeFR5Powers(ReportRamTask):
                 pow_ev = np.empty(shape=n_freqs*winsize, dtype=float)
                 self.wavelet_transform.init(self.params.width, self.params.freqs[0], self.params.freqs[-1], n_freqs, self.samplerate, winsize)
 
-            print 'Computing FR3/FR4 powers'
+            print 'Computing FR5 powers'
 
             sess_pow_mat = np.empty(shape=(n_events, n_bps, n_freqs), dtype=np.float)
 

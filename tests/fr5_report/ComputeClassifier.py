@@ -116,6 +116,8 @@ class ComputeClassifier(RamTask):
 
     def run_loso_xval(self, event_sessions, recalls, permuted=False,samples_weights=None, events=None):
         probs = np.empty_like(recalls, dtype=np.float)
+        if events is not None:
+            encoding_probs = np.empty_like(events[events.type=='WORD'],dtype=np.float)
 
         sessions = np.unique(event_sessions)
 
@@ -221,6 +223,7 @@ class ComputeClassifier(RamTask):
 
                 auc_encoding[sess_idx] = self.get_auc(
                     classifier=self.lr_classifier, features=self.pow_mat, recalls=recalls, mask=outsample_encoding_mask)
+                encoding_probs[events[events.type=='WORD'].session==sess] = self.lr_classifier.predict_proba(self.pow_mat[outsample_encoding_mask])[:,1]
 
                 auc_retrieval[sess_idx] = self.get_auc(
                     classifier=self.lr_classifier, features=self.pow_mat, recalls=recalls, mask=outsample_retrieval_mask)
@@ -267,6 +270,7 @@ class ComputeClassifier(RamTask):
             print 'auc_retrieval=',auc_retrieval, np.mean(auc_retrieval)
             print 'auc_both=',auc_both, np.mean(auc_both)
 
+            print 'Cross-Validated Encoding AUC = ', roc_auc_score(events[events.type=='WORD'].recalled==1,y_score=encoding_probs)
 
 
         return probs
@@ -378,7 +382,7 @@ class ComputeClassifier(RamTask):
         # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
         #                                         solver='newton-cg')
 
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
+        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, #class_weight='auto',
                                                 solver='newton-cg')
 
 
@@ -444,10 +448,15 @@ class ComputeClassifier(RamTask):
         self.perm_AUCs = joblib.load(self.get_path_to_resource_in_workspace(subject + '-perm_AUCs.pkl'))
         self.pvalue = joblib.load(self.get_path_to_resource_in_workspace(subject + '-pvalue.pkl'))
 
-        self.pass_object('lr_classifier', self.lr_classifier)
-        self.pass_object('xval_output', self.xval_output)
-        self.pass_object('perm_AUCs', self.perm_AUCs)
-        self.pass_object('pvalue', self.pvalue)
+        events = self.get_passed_object('FR1_events')
+        probs = self.xval_output[-1].probs
+        if len(probs) != len(events):
+            self.run()
+        else:
+            self.pass_object('lr_classifier', self.lr_classifier)
+            self.pass_object('xval_output', self.xval_output)
+            self.pass_object('perm_AUCs', self.perm_AUCs)
+            self.pass_object('pvalue', self.pvalue)
 
 
 
@@ -479,6 +488,6 @@ class ComputeFullClassifier(ComputeClassifier):
 
     def run(self):
         super(ComputeFullClassifier,self).run()
-        self.compare_AUCs()
+        # self.compare_AUCs()
 
 

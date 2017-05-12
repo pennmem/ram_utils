@@ -18,7 +18,7 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{ RAM PS4/FR5 report v 1.0}
+\lhead{ RAM PS4/FR5 report v 1.01}
 \chead{Subject: \textbf{ <SUBJECT> }}
 \rhead{Date created: <DATE>}
 \begin{document}

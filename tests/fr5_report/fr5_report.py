@@ -5,10 +5,11 @@ import numpy as np
 
 parser = CMLParser()
 # Default-ish args here
-parser.arg('--subject','R1293P')
+parser.arg('--subject','R1299T')
 parser.arg('--task','FR5')
-parser.arg('--workspace-dir','/Users/leond/fr5_reports')
-parser.arg('--mount-point','/Volumes/rhino_root')
+parser.arg('--workspace-dir','fr5_reports')
+parser.arg('--mount-point','')
+# parser.arg('--sessions',['1','2','101'])
 
 
 #
@@ -83,7 +84,7 @@ from EvaluateClassifier import EvaluateClassifier
 
 from ComputeFRPowers import ComputeFRPowers
 
-from ComputeClassifier import ComputeClassifier
+from ComputeClassifier import ComputeClassifier,ComputeFullClassifier
 
 from ComputeFRStimTable import ComputeFRStimTable
 
@@ -99,15 +100,17 @@ report_pipeline = ReportPipeline(subject=args.subject, task=args.task,experiment
 
 report_pipeline.add_task(FR1EventPreparation())
 
-report_pipeline.add_task(FR5EventPreparation())
 
 report_pipeline.add_task(MontagePreparation(params=params,mark_as_completed=False))
 
 report_pipeline.add_task(ComputeFRPowers(params=params,mark_as_completed=True))
 
+
+report_pipeline.add_task(ComputeFullClassifier(params=params,mark_as_completed=True))
+
 report_pipeline.add_task(ComputeFR5Powers(params=params,mark_as_completed=True))
 
-report_pipeline.add_task(ComputeClassifier(params=params,mark_as_completed=True))
+report_pipeline.add_task(FR5EventPreparation())
 
 report_pipeline.add_task(EvaluateClassifier(params=params,mark_as_completed=True))
 

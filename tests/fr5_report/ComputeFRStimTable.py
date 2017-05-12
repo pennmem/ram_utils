@@ -74,7 +74,7 @@ class ComputeFRStimTable(ReportRamTask):
 
         all_events = self.get_passed_object('all_events')
         events = self.get_passed_object(task+'_events')
-        events = events[(events.type=='STIM') | (events.type=='NON-STIM')]
+        events = events[(events.phase=='STIM') | (events.phase=='NON-STIM')]
         ps_events = self.get_passed_object('ps_events')
         ps_sessions = np.unique(ps_events.session)
 
@@ -82,10 +82,12 @@ class ComputeFRStimTable(ReportRamTask):
         lr_classifier = self.get_passed_object('lr_classifier')
 
         xval_output = self.get_passed_object('xval_output')
+        eval_output = self.get_passed_object(task+'_xval_output')
         class_thresh = xval_output[-1].jstat_thresh
 
         fr_stim_pow_mat = self.get_passed_object('fr_stim_pow_mat')
-        fr_stim_prob = lr_classifier.predict_proba(fr_stim_pow_mat[events.type=='WORD'])[:,1]
+        if eval_output:
+            fr_stim_prob = lr_classifier.predict_proba(fr_stim_pow_mat[events.type=='WORD'])[:,1]
         events = events[events.type=='WORD']
         n_events = len(events)
 
@@ -93,8 +95,14 @@ class ComputeFRStimTable(ReportRamTask):
         is_post_stim_item = np.zeros(n_events, dtype=np.bool)
         is_ps4_session = np.in1d(events.session,ps_sessions)
 
+
         j = 0
-        for i,ev in enumerate(all_events):
+        sessions = np.unique(events.session)
+        all_sess_events = all_events[np.in1d(all_events.session,sessions) & ((all_events.phase=='STIM') | (all_events.phase=='NON-STIM'))]
+        n_stims = (all_sess_events.type=='STIM_ON').sum()
+        n_stim_off = (all_sess_events.type=='STIM_OFF').sum()
+        n_words = (all_sess_events.type=='WORD').sum()
+        for i,ev in enumerate(all_sess_events):
             if ev.type=='WORD':
                 if (all_events[i+1].type=='STIM_ON') or (all_events[i+1].type=='WORD_OFF' and (all_events[i+2].type=='STIM_ON' or (all_events[i+2].type=='DISTRACT_START' and all_events[i+3].type=='STIM_ON'))):
                     is_stim_item[j] = True
@@ -157,7 +165,10 @@ class ComputeFRStimTable(ReportRamTask):
             else:
                 self.stim_params_to_sess[sess_stim_params] = [sess]
 
-        self.fr_stim_table['prob'] = fr_stim_prob
+        if eval_output:
+            self.fr_stim_table['prob'] = fr_stim_prob
+        else:
+            self.fr_stim_table['prob'] = -999
 
         stim_anode_tag = np.empty(n_events, dtype='|S16')
         stim_cathode_tag = np.empty(n_events, dtype='|S16')
