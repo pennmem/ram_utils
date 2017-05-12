@@ -82,8 +82,8 @@ class Params(object):
 
         self.include_fr1 = True
         self.include_catfr1 = True
-        self.include_fr3 = True
-        self.include_catfr3 = True
+        self.include_fr3 = False
+        self.include_catfr3 = False
 
         self.width = 5
 

@@ -107,7 +107,7 @@ class ComputeFRPowers(RamTask):
 
         self.pow_mat[is_encoding_event,...] = encoding_pow_mat
         self.pow_mat[~is_encoding_event,...] = retrieval_pow_mat
-
+        # self.compute_powers(events,events.session,monopolar_channels,bipolar_pairs)
         # if subject == 'R1302M':
         #     # Exclude some known bad events for this subject
         #     try:
@@ -141,7 +141,7 @@ class ComputeFRPowers(RamTask):
 
         pow_ev = None
         winsize = bufsize = None
-        for sess in sessions:
+        for sess in np.unique(sessions):
             sess_events = events[events.session == sess]
             n_events = len(sess_events)
 
@@ -228,14 +228,19 @@ class ComputeFRPowers(RamTask):
                 bp_data = bp_data.filtered([58,62], filt_type='stop', order=self.params.filt_order)
                 bp_data_retrieval = bp_data_retrieval.filtered([58,62], filt_type='stop', order=self.params.filt_order)
 
+                n_enc=0
+                n_retr=0
                 for ev in xrange(n_events):
                     # if encoding_events_mask[ev]:
+
                     if sess_encoding_events_mask[ev]:
-                        self.wavelet_transform.multiphasevec(bp_data[ev][0:winsize], pow_ev)
+                        self.wavelet_transform.multiphasevec(bp_data[n_enc][0:winsize], pow_ev)
                         pow_ev_stripped = np.reshape(pow_ev, (n_freqs,winsize))[:,bufsize:winsize-bufsize]
+                        n_enc +=1
                     else:
-                        self.wavelet_transform_retrieval.multiphasevec(bp_data_retrieval[ev][0:winsize_retrieval], pow_ev_retrieval)
+                        self.wavelet_transform_retrieval.multiphasevec(bp_data_retrieval[n_retr][0:winsize_retrieval], pow_ev_retrieval)
                         pow_ev_stripped = np.reshape(pow_ev_retrieval, (n_freqs,winsize_retrieval))[:,bufsize_retrieval:winsize_retrieval-bufsize_retrieval]
+                        n_retr+=1
 
 
                     if self.params.log_powers:
