@@ -40,6 +40,8 @@ class ComposeSessionSummary(ReportRamTask):
         task = 'FR'
         math_events = self.get_passed_object(task + '_math_events')
         intr_events = self.get_passed_object(task + '_intr_events')
+
+        fr1_intr_events = self.get_passed_object('FR1_intr_events')
         rec_events = self.get_passed_object(task + '_rec_events')
         all_events = self.get_passed_object('all_events')
         monopolar_channels = self.get_passed_object('monopolar_channels')
@@ -76,7 +78,7 @@ class ComposeSessionSummary(ReportRamTask):
         self.pass_object('session_table', session_data)
 
         session_summary_array = self.get_passed_object('fr_session_summary')
-        fr_stim_group_table = fr_stim_table.loc[fr_stim_table['is_ps4']]
+        fr_stim_group_table = fr_stim_table.loc[fr_stim_table['is_ps4_session']]
 
         fr_stim_group_table_group = fr_stim_group_table.groupby(['stimAnodeTag','stimCathodeTag'])
         for stim_param,fr_stim_session_table in fr_stim_group_table_group:
@@ -116,24 +118,36 @@ class ComposeSessionSummary(ReportRamTask):
             session_summary.pc_correct_math = 100*session_summary.n_correct_math / float(session_summary.n_math)
             session_summary.math_per_list = session_summary.n_math / float(session_summary.n_lists)
 
+
             fr_stim_table_by_pos = fr_stim_session_table.groupby('serialpos')
-            session_summary.prob_recall = np.empty(len(fr_stim_table_by_pos), dtype=float)
-            session_summary.prob_stim_recall = np.empty(len(fr_stim_table_by_pos), dtype=float)
-            session_summary.prob_nostim_recall = np.empty(len(fr_stim_table_by_pos), dtype=float)
-            session_summary.prob_stim = np.empty(len(fr_stim_table_by_pos), dtype=float)
-            for i, (pos,fr_stim_pos_table) in enumerate(fr_stim_table_by_pos):
-                session_summary.prob_recall[i] = fr_stim_pos_table.recalled.sum() / float(len(fr_stim_pos_table))
-                fr_stim_item_pos_table =fr_stim_pos_table.loc[fr_stim_pos_table.is_stim_item==True]
-                try:
-                    session_summary.prob_stim_recall[i]=fr_stim_item_pos_table.recalled.sum()/float(len(fr_stim_item_pos_table))
-                except ZeroDivisionError:
-                    session_summary.prob_stim_recall[i] = np.nan
-                session_summary.prob_stim[i] = (fr_stim_pos_table.is_stim_item.astype(np.float).sum()
-                                                /fr_stim_pos_table.is_stim_list.astype(np.float).sum())
-                print '# stim items: ',fr_stim_pos_table.is_stim_item.astype(np.float).sum()
-                print '# stim list items: ', fr_stim_pos_table.is_stim_list.astype(np.float).sum()
-                fr_nostim_item_pos_table = fr_stim_pos_table.loc[fr_stim_pos_table.is_stim_item==False]
-                session_summary.prob_nostim_recall[i] = fr_nostim_item_pos_table.recalled.sum()/float(len(fr_nostim_item_pos_table))
+            session_summary.prob_recall = fr_stim_session_table.groupby('serialpos').recalled.mean()
+            session_summary.prob_stim_recall = fr_stim_session_table.loc[fr_stim_session_table.is_stim_item==1].groupby('serialpos').recalled.sum().values.astype(np.float)
+            session_summary.prob_nostim_recall = fr_stim_session_table.loc[fr_stim_session_table.is_stim_item==0].groupby('serialpos').recalled.sum().values.astype(np.float)
+            session_summary.prob_stim = fr_stim_table_by_pos.is_stim_item.mean().values
+
+            session_summary.prob_stim_recall /= (fr_stim_session_table.is_stim_item==1).sum().astype(np.float)
+            session_summary.prob_nostim_recall /= (fr_stim_session_table.is_stim_item==0).sum().astype(np.float)
+
+
+
+            # fr_stim_table_by_pos = fr_stim_session_table.groupby('serialpos')
+            # session_summary.prob_recall = np.empty(len(fr_stim_table_by_pos), dtype=float)
+            # session_summary.prob_stim_recall = np.empty(len(fr_stim_table_by_pos), dtype=float)
+            # session_summary.prob_nostim_recall = np.empty(len(fr_stim_table_by_pos), dtype=float)
+            # session_summary.prob_stim = np.empty(len(fr_stim_table_by_pos), dtype=float)
+            # for i, (pos,fr_stim_pos_table) in enumerate(fr_stim_table_by_pos):
+            #     session_summary.prob_recall[i] = fr_stim_pos_table.recalled.sum() / float(len(fr_stim_pos_table))
+            #     fr_stim_item_pos_table =fr_stim_pos_table.loc[fr_stim_pos_table.is_stim_item==True]
+            #     try:
+            #         session_summary.prob_stim_recall[i]=fr_stim_item_pos_table.recalled.sum()/float(len(fr_stim_item_pos_table))
+            #     except ZeroDivisionError:
+            #         session_summary.prob_stim_recall[i] = np.nan
+            #     session_summary.prob_stim[i] = (fr_stim_pos_table.is_stim_item.astype(np.float).sum()
+            #                                     /fr_stim_pos_table.is_stim_list.astype(np.float).sum())
+            #     print '# stim items: ',fr_stim_pos_table.is_stim_item.astype(np.float).sum()
+            #     print '# stim list items: ', fr_stim_pos_table.is_stim_list.astype(np.float).sum()
+            #     fr_nostim_item_pos_table = fr_stim_pos_table.loc[fr_stim_pos_table.is_stim_item==False]
+            #     session_summary.prob_nostim_recall[i] = fr_nostim_item_pos_table.recalled.sum()/float(len(fr_nostim_item_pos_table))
             print 'session_summary.prob_stim:',session_summary.prob_stim
 
 
@@ -201,11 +215,11 @@ class ComposeSessionSummary(ReportRamTask):
             # irt_within_cat += session_irt_within_cat
             # irt_between_cat += session_irt_between_cat
 
-            session_summary.prob_first_recall /= float(len(fr_stim_table_by_session_list))
-            session_summary.prob_first_stim_recall /= float(len(fr_stim_stim_item_table_by_session_list))
-            session_summary.prob_first_nostim_recall /= float(len(fr_stim_nostim_item_table_by_session_list))
-            fr_stim_stim_list_table = fr_stim_session_table[fr_stim_session_table.is_stim_list]
-            fr_stim_non_stim_list_table = fr_stim_session_table[~fr_stim_session_table.is_stim_list & (fr_stim_session_table['list']>=4)]
+            session_summary.prob_first_recall /= float(len(fr_stim_session_table))
+            session_summary.prob_first_stim_recall /= (fr_stim_session_table.is_stim_item==1).sum()
+            session_summary.prob_first_nostim_recall /= (fr_stim_session_table.is_stim_item==0).sum()
+            fr_stim_stim_list_table = fr_stim_session_table
+            fr_stim_non_stim_list_table = pd.DataFrame.from_records([e for e in fr1_events[fr1_events.type=='WORD']],columns=fr1_events.dtype.names)
 
 
             session_summary.n_correct_stim = fr_stim_stim_list_table.recalled.sum()
@@ -234,15 +248,18 @@ class ComposeSessionSummary(ReportRamTask):
             stim_lists = fr_stim_stim_list_table['list'].unique()
             non_stim_lists = fr_stim_non_stim_list_table['list'].unique()
 
-            session_summary.n_stim_intr = 0
-            session_summary.n_nonstim_intr = 0
-            for ev in sess_intr_events:
-                if ev.intrusion in stim_lists:
-                    session_summary.n_stim_intr += 1
-                if ev.intrusion in non_stim_lists:
-                    session_summary.n_nonstim_intr += 1
-            if not len(fr_stim_non_stim_list_table):
-                session_summary.n_nonstim_intr = (fr1_events.intrusion==1).sum()
+            # session_summary.n_stim_intr = 0
+            # session_summary.n_nonstim_intr = 0
+            # for ev in sess_intr_events:
+            #     if ev.intrusion in stim_lists:
+            #         session_summary.n_stim_intr += 1
+            #     if ev.intrusion in non_stim_lists:
+            #         session_summary.n_nonstim_intr += 1
+            # if not len(fr_stim_non_stim_list_table):
+            #     session_summary.n_nonstim_intr = (fr1_events.intrusion==1).sum()
+            #
+            session_summary.n_stim_intr = len(sess_intr_events)
+            session_summary.n_nonstim_intr = len(fr1_intr_events)
             session_summary.pc_from_stim_intr = 100*session_summary.n_stim_intr / float(session_summary.n_total_stim)
             session_summary.pc_from_nonstim_intr = 100*session_summary.n_nonstim_intr / float(session_summary.n_total_nonstim)
 
@@ -265,19 +282,19 @@ class ComposeSessionSummary(ReportRamTask):
             session_summary.sem_prob_diff_low_post_stim_item = fr_stim_stim_list_post_stim_item_low_table['prob_diff'].sem()
 
             #fr_stim_non_stim_list_table = fr_stim_non_stim_list_table[(~fr_stim_non_stim_list_table['is_stim_list']) & (fr_stim_non_stim_list_table['serialpos']>1)]
-
-            low_state_mask = (fr_stim_non_stim_list_table['prob']<fr_stim_non_stim_list_table['thresh'])
-            post_low_state_mask = low_state_mask.shift(1).fillna(False)
-            post_low_state_mask[fr_stim_non_stim_list_table['serialpos']==1] = False
-
-            fr_stim_non_stim_list_low_table = fr_stim_non_stim_list_table[low_state_mask]
-            fr_stim_non_stim_list_post_low_table = fr_stim_non_stim_list_table[post_low_state_mask]
-            fr_stim_non_stim_list_high_table = fr_stim_non_stim_list_table[fr_stim_non_stim_list_table['prob']>fr_stim_non_stim_list_table['thresh']]
-
-            session_summary.control_mean_prob_diff_all = fr_stim_non_stim_list_table['prob_diff'].mean()
-            session_summary.control_sem_prob_diff_all = fr_stim_non_stim_list_table['prob_diff'].sem()
-            session_summary.control_mean_prob_diff_low = fr_stim_non_stim_list_low_table['prob_diff'].mean()
-            session_summary.control_sem_prob_diff_low = fr_stim_non_stim_list_low_table['prob_diff'].sem()
+            #
+            # low_state_mask = (fr_stim_non_stim_list_table['probs']<fr_stim_non_stim_list_table['thresh'])
+            # post_low_state_mask = low_state_mask.shift(1).fillna(False)
+            # post_low_state_mask[fr_stim_non_stim_list_table['serialpos']==1] = False
+            #
+            # fr_stim_non_stim_list_low_table = fr_stim_non_stim_list_table[low_state_mask]
+            # fr_stim_non_stim_list_post_low_table = fr_stim_non_stim_list_table[post_low_state_mask]
+            # fr_stim_non_stim_list_high_table = fr_stim_non_stim_list_table[fr_stim_non_stim_list_table['prob']>fr_stim_non_stim_list_table['thresh']]
+            #
+            # session_summary.control_mean_prob_diff_all = fr_stim_non_stim_list_table['prob_diff'].mean()
+            # session_summary.control_sem_prob_diff_all = fr_stim_non_stim_list_table['prob_diff'].sem()
+            # session_summary.control_mean_prob_diff_low = fr_stim_non_stim_list_low_table['prob_diff'].mean()
+            # session_summary.control_sem_prob_diff_low = fr_stim_non_stim_list_low_table['prob_diff'].sem()
 
             stim_item_recall_rate = fr_stim_stim_list_stim_item_table['recalled'].mean()
             stim_item_recall_rate_low = fr_stim_stim_list_stim_item_low_table['recalled'].mean()
@@ -289,10 +306,12 @@ class ComposeSessionSummary(ReportRamTask):
 
             probs = self.get_passed_object('xval_output')[-1].probs
             threshold = self.get_passed_object('xval_output')[-1].jstat_thresh
+            is_low_item = probs<threshold
+            is_post_low_item = np.append([0],is_low_item[1:])
 
-            non_stim_list_recall_rate_low = fr1_events.recalled.mean()
-            non_stim_list_recall_rate_post_low = fr1_events[probs<threshold].recalled.mean()
-            non_stim_list_recall_rate_high = fr1_events[probs>threshold].recalled.mean()
+            non_stim_list_recall_rate_low = fr1_events[is_low_item].recalled.mean()
+            non_stim_list_recall_rate_post_low = fr1_events[is_post_low_item].recalled.mean()
+            non_stim_list_recall_rate_high = fr1_events[~is_low_item].recalled.mean()
 
             recall_rate = session_summary.n_correct_words / float(session_summary.n_words)
 
@@ -320,7 +339,7 @@ class ComposeSessionSummary(ReportRamTask):
             session_summary.chisqr_stim_item, session_summary.pvalue_stim_item, _ = proportions_chisquare([session_summary.n_correct_stim_items, session_summary.n_correct_nonstim_low_bio_items], [session_summary.n_total_stim_items, session_summary.n_total_nonstim_low_bio_items])
             session_summary.chisqr_post_stim_item, session_summary.pvalue_post_stim_item, _ = proportions_chisquare([session_summary.n_correct_post_stim_items, session_summary.n_correct_nonstim_post_low_bio_items], [session_summary.n_total_post_stim_items, session_summary.n_total_nonstim_post_low_bio_items])
 
-            if (fr_stim_session_table['recognized'].any()):
+            if (fr_stim_session_table['recognized'] != -999).any():
                 session_summary.n_stim_hits = (fr_stim_session_table[fr_stim_session_table['is_stim_item']].recognized>0).sum()
                 session_summary.n_nonstim_hits = (fr_stim_session_table[~fr_stim_session_table['is_stim_item']].recognized>0).sum()
                 session_summary.n_false_alarms = (fr_stim_session_table.rejected==0).sum()
@@ -398,7 +417,7 @@ class ComposeSessionSummary(ReportRamTask):
         sessions = sorted(fr_stim_table.session.unique())
 
         self.pass_object('NUMBER_OF_FR_SESSIONS', len(sessions))
-        self.pass_object('NUMBER_OF_ELECTRODES', len(monopolar_channels))
+        self.pass_object('NUMBER_OF_ELrec_eventsECTRODES', len(monopolar_channels))
 
         session_data = []
 
@@ -461,23 +480,28 @@ class ComposeSessionSummary(ReportRamTask):
             session_summary.math_per_list = session_summary.n_math / float(session_summary.n_lists)
 
             fr_stim_table_by_pos = fr_stim_session_table.groupby('serialpos')
-            session_summary.prob_recall = np.empty(len(fr_stim_table_by_pos), dtype=float)
-            session_summary.prob_stim_recall = np.empty(len(fr_stim_table_by_pos), dtype=float)
-            session_summary.prob_nostim_recall = np.empty(len(fr_stim_table_by_pos), dtype=float)
-            session_summary.prob_stim = np.empty(len(fr_stim_table_by_pos), dtype=float)
-            for i, (pos,fr_stim_pos_table) in enumerate(fr_stim_table_by_pos):
-                session_summary.prob_recall[i] = fr_stim_pos_table.recalled.sum() / float(len(fr_stim_pos_table))
-                fr_stim_item_pos_table =fr_stim_pos_table.loc[fr_stim_pos_table.is_stim_item==True]
-                try:
-                    session_summary.prob_stim_recall[i]=fr_stim_item_pos_table.recalled.sum()/float(len(fr_stim_item_pos_table))
-                except ZeroDivisionError:
-                    session_summary.prob_stim_recall[i] = np.nan
-                session_summary.prob_stim[i] = (fr_stim_pos_table.is_stim_item.astype(np.float).sum()
-                                                /fr_stim_pos_table.is_stim_list.astype(np.float).sum())
-                print '# stim items: ',fr_stim_pos_table.is_stim_item.astype(np.float).sum()
-                print '# stim list items: ', fr_stim_pos_table.is_stim_list.astype(np.float).sum()
-                fr_nostim_item_pos_table = fr_stim_pos_table.loc[fr_stim_pos_table.is_stim_item==False]
-                session_summary.prob_nostim_recall[i] = fr_nostim_item_pos_table.recalled.sum()/float(len(fr_nostim_item_pos_table))
+            session_summary.prob_recall = fr_stim_session_table.groupby('serialpos').recalled.mean()
+            session_summary.prob_stim_recall = fr_stim_session_table.loc[fr_stim_session_table.is_stim_item==True].groupby('serialpos').recalled.mean().values
+            session_summary.prob_nostim_recall = fr_stim_session_table.loc[fr_stim_session_table.is_stim_item==False].groupby('serialpos').recalled.mean().values
+            session_summary.prob_stim = fr_stim_table_by_pos.is_stim_item.mean().values
+
+            # session_summary.prob_recall = np.empty(len(fr_stim_table_by_pos), dtype=float)
+            # session_summary.prob_stim_recall = fr_stim_table
+            # session_summary.prob_nostim_recall = np.empty(len(fr_stim_table_by_pos), dtype=float)
+            # session_summary.prob_stim = np.empty(len(fr_stim_table_by_pos), dtype=float)
+            # for i, (pos,fr_stim_pos_table) in enumerate(fr_stim_table_by_pos):
+            #     # session_summary.prob_recall[i] = fr_stim_pos_table.recalled.sum() / float(len(fr_stim_pos_table))
+            #     fr_stim_item_pos_table =fr_stim_pos_table.loc[fr_stim_pos_table.is_stim_item==True]
+            #     try:
+            #         session_summary.prob_stim_recall[i]=fr_stim_item_pos_table.recalled.sum()/float(len(fr_stim_item_pos_table))
+            #     except ZeroDivisionError:
+            #         session_summary.prob_stim_recall[i] = np.nan
+            #     session_summary.prob_stim[i] = (fr_stim_pos_table.is_stim_item.astype(np.float).sum()
+            #                                     /fr_stim_pos_table.is_stim_list.astype(np.float).sum())
+            #     print '# stim items: ',fr_stim_pos_table.is_stim_item.astype(np.float).sum()
+            #     print '# stim list items: ', fr_stim_pos_table.is_stim_list.astype(np.float).sum()
+            #     fr_nostim_item_pos_table = fr_stim_pos_table.loc[fr_stim_pos_table.is_stim_item==False]
+            #     session_summary.prob_nostim_recall[i] = fr_nostim_item_pos_table.recalled.sum()/float(len(fr_nostim_item_pos_table))
             print 'session_summary.prob_stim:',session_summary.prob_stim
 
 
@@ -500,7 +524,7 @@ class ComposeSessionSummary(ReportRamTask):
                 lst = sess_list[1]
 
 
-                list_rec_events = rec_events[(rec_events.session==session) & (rec_events['list']==lst) & (rec_events['intrusion']==0)]
+                list_rec_events = [(rec_events.session==session) & (rec_events['list']==lst) & (rec_events['intrusion']==0)]
                 if list_rec_events.size > 0:
                     item_nums = fr_stim_sess_list_table.item_name.values == list_rec_events[0].item_name
                     tmp = np.where(item_nums)[0]
@@ -545,7 +569,7 @@ class ComposeSessionSummary(ReportRamTask):
             session_summary.prob_first_recall /= float(len(fr_stim_table_by_session_list))
             session_summary.prob_first_stim_recall /= float(len(fr_stim_stim_item_table_by_session_list))
             session_summary.prob_first_nostim_recall /= float(len(fr_stim_nostim_item_table_by_session_list))
-            fr_stim_stim_list_table = fr_stim_session_table[fr_stim_session_table.is_stim_list]
+            fr_stim_stim_list_table = fr_stim_session_table.loc[fr_stim_session_table.is_stim_list==True]
             fr_stim_non_stim_list_table = fr_stim_session_table[~fr_stim_session_table.is_stim_list & (fr_stim_session_table['list']>=4)]
 
 
