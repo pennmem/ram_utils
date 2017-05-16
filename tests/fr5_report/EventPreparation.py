@@ -12,6 +12,7 @@ from ReportUtils import ReportRamTask
 import hashlib
 from copy import deepcopy
 from ReportTasks.RamTaskMethods import create_baseline_events
+import pandas as pd
 
 
 class FR1EventPreparation(ReportRamTask):
@@ -43,6 +44,7 @@ class FR1EventPreparation(ReportRamTask):
         json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
 
         if self.pipeline.sessions:
+            print "Sessions: ", self.pipeline.sessions
             fr1_sessions = [s for s in self.pipeline.sessions if s<100]
             event_files = [json_reader.get_value('task_events', subject=subj_code,
                                                                    montage=montage, experiment='FR1',session=s)
@@ -55,6 +57,7 @@ class FR1EventPreparation(ReportRamTask):
                                   for s in catfr1_sessions]
 
         else:
+            print 'All sessions'
             event_files = json_reader.aggregate_values('task_events',subject=subj_code,montage=montage,experiment='FR1')
             catfr1_event_files = json_reader.aggregate_values('task_events',subject=subj_code,montage=montage,experiment='catFR1')
 
@@ -67,9 +70,9 @@ class FR1EventPreparation(ReportRamTask):
             catfr1_events = np.concatenate([BaseEventReader(filename=f,eliminate_events_with_no_eeg=True).read()
                                             for f in catfr1_event_files]
                                            ).view(np.recarray)
-
-            catfr1_events.session = catfr1_events.session+100
-            catfr1_events = catfr1_events[list(fr1_events.dtype.names)]
+            catfr1_events =catfr1_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
+            catfr1_events.session+=100
+            fr1_events = fr1_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
 
             fr1_events=np.concatenate([fr1_events,catfr1_events]).view(np.recarray)
 
