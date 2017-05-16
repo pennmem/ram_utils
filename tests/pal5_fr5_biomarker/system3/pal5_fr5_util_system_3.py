@@ -72,7 +72,7 @@ except:
     args_obj.anodes = ['LPF1', 'LPF3']
     args_obj.cathodes = ['LPF2','LPF4']
     args_obj.electrode_config_file = join(prefix, 'experiment_configs', 'contacts%s.csv'%args_obj.subject)
-    args_obj.experiment = 'PS4_PAL5'
+    args_obj.experiment = 'PS4_FR5'
     args_obj.min_amplitudes = [0.25,0.25]
     args_obj.max_amplitudes = [1.0,1.0]
     args_obj.mount_point = prefix
@@ -193,22 +193,25 @@ except:
 
 from RamPipeline import RamPipeline
 
-from tests.pal5_biomarker.PAL1EventPreparation import PAL1EventPreparation
+from tests.pal5_fr5_biomarker.PAL1EventPreparation import PAL1EventPreparation
 
-from tests.pal5_biomarker.ComputePAL1Powers import ComputePAL1Powers
+from tests.pal5_fr5_biomarker.FREventPreparation import FREventPreparation
 
-from tests.pal5_biomarker.MontagePreparation import MontagePreparation
+from tests.pal5_fr5_biomarker.CombinedEventPreparation import CombinedEventPreparation
+
+from tests.pal5_fr5_biomarker.ComputePowers import ComputePowers
+
+from tests.pal5_fr5_biomarker.MontagePreparation import MontagePreparation
 
 from system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
 
-from tests.pal5_biomarker.ComputeClassifier import ComputeClassifier
+from tests.pal5_fr5_biomarker.ComputeClassifier import ComputeClassifier
 
-from tests.pal5_biomarker.ComputeClassifier import ComputeFullClassifier
+from tests.pal5_fr5_biomarker.ComputeClassifier import ComputeFullClassifier
 
-from tests.pal5_biomarker.ComputeEncodingClassifier import ComputeEncodingClassifier
-from tests.pal5_biomarker.LogResults import LogResults
+from tests.pal5_fr5_biomarker.ComputeEncodingClassifier import ComputeEncodingClassifier
 
-from tests.pal5_biomarker.ComputeBiomarkerThreshold import ComputeBiomarkerThreshold
+from tests.pal5_fr5_biomarker.LogResults import LogResults
 
 from tests.pal5_biomarker.system3.ExperimentConfigGeneratorClosedLoop5 import ExperimentConfigGeneratorClosedLoop5
 
@@ -230,6 +233,15 @@ class Params(object):
         self.include_catfr3 = True
 
         self.width = 5
+
+        self.fr1_start_time = 0.0
+        self.fr1_end_time = 1.366
+        self.fr1_buf = 1.365
+
+        self.fr1_retrieval_start_time = -0.525
+        self.fr1_retrieval_end_time = 0.0
+        self.fr1_retrieval_buf = 0.524
+
 
         self.pal1_start_time = 0.3
         self.pal1_end_time = 2.00
@@ -305,27 +317,21 @@ if __name__ == '__main__':
 
         report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
 
-        #
+        report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
+
+        report_pipeline.add_task(CombinedEventPreparation(mark_as_completed=False))
+
         report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
         #
-        report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=True))
+        report_pipeline.add_task(ComputePowers(params=params, mark_as_completed=True))
 
-        report_pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=False))
-
-        report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
-
-
-        report_pipeline.add_task(ComputeBiomarkerThreshold(params=params, mark_as_completed=False))
+        # report_pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=False))
         #
+        # report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
         #
+        # report_pipeline.add_task(LogResults(params=params, mark_as_completed=False, log_filename=log_filename))
         #
-        # #
-        # report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
-        #
-
-        report_pipeline.add_task(LogResults(params=params, mark_as_completed=False, log_filename=log_filename))
-
-        report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=True))
+        # report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=True))
 
         # starts processing pipeline
         report_pipeline.execute_pipeline()

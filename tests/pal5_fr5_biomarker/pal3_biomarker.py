@@ -31,7 +31,7 @@ from RamPipeline import RamPipeline
 
 from PAL1EventPreparation import PAL1EventPreparation
 
-from ComputePAL1Powers import ComputePAL1Powers
+from ComputePowers import ComputePowers
 
 from MontagePreparation import MontagePreparation
 
@@ -113,7 +113,7 @@ report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
 
 report_pipeline.add_task(CheckElectrodeLabels(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputePowers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 

@@ -318,18 +318,23 @@ class PAL1EventPreparation(RamTask):
                 self.samplerate = self.get_sample_rate(sess_events[:2])
                 self.pass_object('samplerate', self.samplerate)
 
+            #REMOVED
 
-            sess_events = append_fields(sess_events, 'keep_event', sess_events.correct,
-                                        dtypes=sess_events.correct.dtype, usemask=False,
-                                        asrecarray=True)
+            # sess_events = append_fields(sess_events, 'keep_event', sess_events.correct,
+            #                             dtypes=sess_events.correct.dtype, usemask=False,
+            #                             asrecarray=True)
+            #
+            # sess_events.keep_event = 1
 
-            sess_events.keep_event = 1
 
-            sess_events = append_fields(sess_events, 'rec_start', sess_events.eegoffset,
-                                        dtypes=sess_events.eegoffset.dtype, usemask=False,
-                                        asrecarray=True)
 
-            sess_events.rec_start = -1
+            # sess_events = append_fields(sess_events, 'rec_start', sess_events.eegoffset,
+            #                             dtypes=sess_events.eegoffset.dtype, usemask=False,
+            #                             asrecarray=True)
+            #
+            # sess_events.rec_start = -1
+
+
 
             # rec_events = self.process_session_rec_events(evs=sess_events)
 
