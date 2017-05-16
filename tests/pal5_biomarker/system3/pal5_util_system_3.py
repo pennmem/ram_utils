@@ -36,20 +36,20 @@ except:
     #
     # args_list.append(args_obj)
 
-    args_obj = Args()
-
-    args_obj.subject = 'R1095N'
-    args_obj.anodes = ['RTT1', 'RTT3']
-    args_obj.cathodes = ['RTT2', 'RTT4']
-    args_obj.electrode_config_file = join(prefix, 'experiment_configs', 'contacts%s.csv'%args_obj.subject)
-    args_obj.experiment = 'PS4_PAL5'
-    args_obj.min_amplitudes = [0.25,0.25]
-    args_obj.max_amplitudes = [1.0,1.0]
-    args_obj.mount_point = prefix
-    args_obj.pulse_frequency = 200
-    args_obj.workspace_dir = join(prefix, 'scratch', args_obj.subject)
-
-    args_list.append(args_obj)
+    # args_obj = Args()
+    #
+    # args_obj.subject = 'R1095N'
+    # args_obj.anodes = ['RTT1', 'RTT3']
+    # args_obj.cathodes = ['RTT2', 'RTT4']
+    # args_obj.electrode_config_file = join(prefix, 'experiment_configs', 'contacts%s.csv'%args_obj.subject)
+    # args_obj.experiment = 'PS4_PAL5'
+    # args_obj.min_amplitudes = [0.25,0.25]
+    # args_obj.max_amplitudes = [1.0,1.0]
+    # args_obj.mount_point = prefix
+    # args_obj.pulse_frequency = 200
+    # args_obj.workspace_dir = join(prefix, 'scratch', args_obj.subject)
+    #
+    # args_list.append(args_obj)
     #
     # args_obj = Args()
     #
@@ -65,19 +65,21 @@ except:
     # args_obj.workspace_dir = join(prefix, 'scratch', args_obj.subject)
     #
     # args_list.append(args_obj)
-    #
-    # args_obj.subject = 'R1002P'
-    # args_obj.anodes = ['LPF1', 'LPF3']
-    # args_obj.cathodes = ['LPF2','LPF4']
-    # args_obj.electrode_config_file = join(prefix, 'experiment_configs', 'contacts%s.csv'%args_obj.subject)
-    # args_obj.experiment = 'PS4_PAL5'
-    # args_obj.min_amplitudes = [0.25,0.25]
-    # args_obj.max_amplitudes = [1.0,1.0]
-    # args_obj.mount_point = prefix
-    # args_obj.pulse_frequency = 200
-    # args_obj.workspace_dir = join(prefix, 'scratch', args_obj.subject)
-    #
-    # args_list.append(args_obj)
+
+    args_obj = Args()
+
+    args_obj.subject = 'R1002P'
+    args_obj.anodes = ['LPF1', 'LPF3']
+    args_obj.cathodes = ['LPF2','LPF4']
+    args_obj.electrode_config_file = join(prefix, 'experiment_configs', 'contacts%s.csv'%args_obj.subject)
+    args_obj.experiment = 'PS4_PAL5'
+    args_obj.min_amplitudes = [0.25,0.25]
+    args_obj.max_amplitudes = [1.0,1.0]
+    args_obj.mount_point = prefix
+    args_obj.pulse_frequency = 200
+    args_obj.workspace_dir = join(prefix, 'scratch', args_obj.subject)
+
+    args_list.append(args_obj)
     #
     # args_obj = Args()
     #
@@ -233,9 +235,17 @@ class Params(object):
         self.pal1_end_time = 2.00
         self.pal1_buf = 1.2
 
+        # original code
         self.pal1_retrieval_start_time = -0.625
         self.pal1_retrieval_end_time = -0.1
         self.pal1_retrieval_buf = 0.524
+
+
+        # # todo remove in the production code
+        # self.pal1_retrieval_start_time = -0.600
+        # self.pal1_retrieval_end_time = -0.1
+        # self.pal1_retrieval_buf = 0.499
+
 
         # self.retrieval_samples_weight = 2.5
         # self.encoding_samples_weight = 2.5
@@ -257,6 +267,7 @@ class Params(object):
         # self.C = 7.2e-4  # TODO - remove it from production code
         self.C = 0.048
 
+
         # self.n_perm = 200
         self.n_perm = 10  # TODO - remove it from production code
 
@@ -273,7 +284,6 @@ class ReportPipeline(RamPipeline):
         self.subject = subject
         self.mount_point = mount_point
         self.set_workspace_dir(workspace_dir)
-        # self.args = args # todo original code
         self.args = args_obj
 
 

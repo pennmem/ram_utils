@@ -81,7 +81,6 @@ class ComputeBiomarkerThreshold(RamTask):
 
         rec_start_events = self.get_passed_object('rec_start_events')
         rec_start_events = rec_start_events[rec_start_events.type=='REC_EVENT']
-        # rec_start_events.eegoffset = rec_start_events.rec_start # todo orig code
 
 
         mean_dict = self.get_passed_object('features_mean_dict')
@@ -115,6 +114,8 @@ class ComputeBiomarkerThreshold(RamTask):
         pal1_retrieval_start_offset = int(params.pal1_retrieval_start_time * samplerate)
 
         min_biomarker_pool = []
+
+        total_window_evals = 0
 
         for sess in sessions:
 
@@ -171,6 +172,8 @@ class ComputeBiomarkerThreshold(RamTask):
 
             print retrieval_classifiers
 
+
+
             for ev_num, (rec_start_ev, ev) in enumerate(zip(sess_rec_start_events, sess_events)):
                 # print 'processing event=', ev_num
                 before_rec_event_window_length = ev.eegoffset - rec_start_ev.eegoffset
@@ -180,6 +183,8 @@ class ComputeBiomarkerThreshold(RamTask):
 
                 if number_of_classifier_evals < 1:
                     continue
+
+                total_window_evals += number_of_classifier_evals
 
                 start_offsets = sliding_window_start_offset + np.arange(
                     number_of_classifier_evals) * sliding_window_interval_delta
@@ -212,6 +217,7 @@ class ComputeBiomarkerThreshold(RamTask):
 
             print 'session complete - median min biomarker = ', np.median(min_biomarker_pool)
 
+        print 'total_window_evals=',total_window_evals
 
         retrieval_biomarker_threshold = np.median(min_biomarker_pool)
 

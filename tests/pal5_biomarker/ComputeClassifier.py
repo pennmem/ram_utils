@@ -142,7 +142,7 @@ class ComputeClassifier(RamTask):
 
     def run_loso_xval(self, event_sessions, recalls, permuted=False, samples_weights=None, events=None):
 
-        outsample_classifier = self.create_classifier_obj()
+        # outsample_classifier = self.create_classifier_obj()
 
         probs = np.empty_like(recalls, dtype=np.float)
 
@@ -153,6 +153,7 @@ class ComputeClassifier(RamTask):
         auc_both = np.empty(sessions.shape[0], dtype=np.float)
 
         for sess_idx, sess in enumerate(sessions):
+            outsample_classifier = self.create_classifier_obj()
             insample_mask = (event_sessions != sess)
 
 
@@ -161,9 +162,9 @@ class ComputeClassifier(RamTask):
             insample_recalls = recalls[insample_mask]
             insample_samples_weights = samples_weights[insample_mask]
 
-            insample_enc_mask = insample_mask & ((events.type == 'STUDY_PAIR') |(events.type == 'PRACTICE_PAIR'))
-            insample_retrieval_mask = insample_mask & (events.type == 'REC_EVENT') # todo restore it
-            # insample_retrieval_mask = insample_mask & ((events.type == 'STUDY_PAIR') |(events.type == 'PRACTICE_PAIR'))
+            insample_enc_mask = insample_mask & ((events.type == 'STUDY_PAIR'))
+            insample_retrieval_mask = insample_mask & (events.type == 'REC_EVENT')
+
 
             n_enc_0 = events[insample_enc_mask & (events.correct == 0)].shape[0]
             n_enc_1 = events[insample_enc_mask & (events.correct == 1)].shape[0]
@@ -201,13 +202,18 @@ class ComputeClassifier(RamTask):
             # n_vec = n_vec/mean_tmp;
 
 
-
+            # TODO ORIGINAL CODE
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 if samples_weights is not None:
                     outsample_classifier.fit(insample_pow_mat, insample_recalls, insample_samples_weights)
                 else:
                     outsample_classifier.fit(insample_pow_mat, insample_recalls)
+
+            # # todo - code with no weighting
+            # with warnings.catch_warnings():
+            #     warnings.simplefilter("ignore")
+            #     outsample_classifier.fit(insample_pow_mat, insample_recalls)
 
             outsample_mask = ~insample_mask
             outsample_pow_mat = self.pow_mat[outsample_mask]
@@ -225,8 +231,8 @@ class ComputeClassifier(RamTask):
 
             if events is not None:
                 outsample_encoding_mask = (events.session == sess) & ((events.type == 'STUDY_PAIR')|(events.type == 'PRACTICE_PAIR'))
-                outsample_retrieval_mask = (events.session == sess) & ((events.type == 'REC_EVENT')) # todo restore it
-                # outsample_retrieval_mask = (events.session == sess) & ((events.type == 'STUDY_PAIR')|(events.type == 'PRACTICE_PAIR'))
+                outsample_retrieval_mask = (events.session == sess) & ((events.type == 'REC_EVENT'))
+
 
 
                 outsample_both_mask = (events.session == sess)
@@ -252,6 +258,7 @@ class ComputeClassifier(RamTask):
             print 'auc_encoding=', auc_encoding, np.mean(auc_encoding)
             print 'auc_retrieval=', auc_retrieval, np.mean(auc_retrieval)
             print 'auc_both=', auc_both, np.mean(auc_both)
+
 
         self.pass_object('auc_encoding'+self.suffix, auc_encoding)
         self.pass_object('auc_retrieval'+self.suffix, auc_retrieval)
