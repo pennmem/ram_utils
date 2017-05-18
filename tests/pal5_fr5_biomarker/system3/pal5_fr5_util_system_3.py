@@ -21,20 +21,21 @@ try:
 except:
     args_list = []
 
-    # args_obj = Args()
-    #
-    # args_obj.subject = 'R1250N'
-    # args_obj.anodes = ['PG10', 'PG11']
-    # args_obj.cathodes = ['PG11', 'PG12']
-    # args_obj.electrode_config_file = join(prefix, 'experiment_configs', 'contacts%s.csv' % args_obj.subject)
-    # args_obj.experiment = 'PS4_PAL5'
-    # args_obj.min_amplitudes = [0.25, 0.25]
-    # args_obj.max_amplitudes = [1.0, 1.0]
-    # args_obj.mount_point = prefix
-    # args_obj.pulse_frequency = 200
-    # args_obj.workspace_dir = join(prefix, 'scratch', args_obj.subject)
-    #
-    # args_list.append(args_obj)
+    args_obj = Args()
+
+    args_obj.subject = 'R1250N'
+    args_obj.anodes = ['PG10', 'PG11']
+    args_obj.cathodes = ['PG11', 'PG12']
+    args_obj.electrode_config_file = join(prefix, 'experiment_configs', 'contacts%s.csv' % args_obj.subject)
+    args_obj.experiment = 'PS4_CatFR5'
+    args_obj.min_amplitudes = [0.25, 0.25]
+    args_obj.max_amplitudes = [1.0, 1.0]
+    args_obj.mount_point = prefix
+    args_obj.pulse_frequency = 200
+    args_obj.workspace_dir = join(prefix, 'scratch', args_obj.subject)
+    args_obj.allow_fast_rerun = True
+
+    args_list.append(args_obj)
 
     # args_obj = Args()
     #
@@ -66,20 +67,20 @@ except:
     #
     # args_list.append(args_obj)
 
-    args_obj = Args()
-
-    args_obj.subject = 'R1002P'
-    args_obj.anodes = ['LPF1', 'LPF3']
-    args_obj.cathodes = ['LPF2','LPF4']
-    args_obj.electrode_config_file = join(prefix, 'experiment_configs', 'contacts%s.csv'%args_obj.subject)
-    args_obj.experiment = 'PS4_CatFR5'
-    args_obj.min_amplitudes = [0.25,0.25]
-    args_obj.max_amplitudes = [1.0,1.0]
-    args_obj.mount_point = prefix
-    args_obj.pulse_frequency = 200
-    args_obj.workspace_dir = join(prefix, 'scratch', args_obj.subject)
-
-    args_list.append(args_obj)
+    # args_obj = Args()
+    #
+    # args_obj.subject = 'R1002P'
+    # args_obj.anodes = ['LPF1', 'LPF3']
+    # args_obj.cathodes = ['LPF2','LPF4']
+    # args_obj.electrode_config_file = join(prefix, 'experiment_configs', 'contacts%s.csv'%args_obj.subject)
+    # args_obj.experiment = 'PS4_CatFR5'
+    # args_obj.min_amplitudes = [0.25,0.25]
+    # args_obj.max_amplitudes = [1.0,1.0]
+    # args_obj.mount_point = prefix
+    # args_obj.pulse_frequency = 200
+    # args_obj.workspace_dir = join(prefix, 'scratch', args_obj.subject)
+    #
+    # args_list.append(args_obj)
     #
     # args_obj = Args()
     #
@@ -324,7 +325,7 @@ if __name__ == '__main__':
 
         report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
         #
-        report_pipeline.add_task(ComputePowers(params=params, mark_as_completed=True))
+        report_pipeline.add_task(ComputePowers(params=params, mark_as_completed=(True & args_obj.allow_fast_rerun)))
 
         # report_pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=False))
         #
@@ -335,7 +336,7 @@ if __name__ == '__main__':
         #
         # report_pipeline.add_task(LogResults(params=params, mark_as_completed=False, log_filename=log_filename))
         #
-        report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=True))
+        report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=(True & args_obj.allow_fast_rerun)))
 
         # starts processing pipeline
         report_pipeline.execute_pipeline()

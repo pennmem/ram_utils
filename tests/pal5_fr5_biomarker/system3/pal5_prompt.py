@@ -34,6 +34,7 @@ class Args(object):
         self.subject = ''
         self.workspace_dir = ''
         self.target_amplitude = 0.5
+        self.allow_fast_rerun = False
 
 
 example_style = style_from_dict({

@@ -150,6 +150,11 @@ class ComputeClassifier(RamTask):
         auc_retrieval = np.empty(sessions.shape[0], dtype=np.float)
         auc_both = np.empty(sessions.shape[0], dtype=np.float)
 
+        auc_encoding_pal = np.zeros(sessions.shape[0], dtype=np.float)
+        auc_retrieval_pal = np.zeros(sessions.shape[0], dtype=np.float)
+        auc_both_pal = np.zeros(sessions.shape[0], dtype=np.float)
+
+
         for sess_idx, sess in enumerate(sessions):
             outsample_classifier = self.create_classifier_obj()
             insample_mask = (event_sessions != sess)
@@ -224,11 +229,22 @@ class ComputeClassifier(RamTask):
 
             probs[outsample_mask] = outsample_probs
 
-            if events is not None:
+            if events is not None and not permuted:
                 outsample_encoding_mask = (events.session == sess) & (events.type == 'WORD')
                 outsample_retrieval_mask = (events.session == sess) & (events.type == 'REC_EVENT')
-
                 outsample_both_mask = (events.session == sess)
+
+
+                outsample_encoding_pal_mask = (events.session == sess) & (events.type == 'WORD') & (events.exp_name=='PAL1')
+                outsample_retrieval_pal_mask = (events.session == sess) & (events.type == 'REC_EVENT') & (events.exp_name=='PAL1')
+                outsample_both_pal_mask = (events.session == sess) & (events.exp_name=='PAL1')
+
+
+
+                # print 'num outsample_encoding_pal = ', np.sum(outsample_encoding_pal_mask.astype(np.int))
+                # print 'num outsample_retrieval_pal_mask = ', np.sum(outsample_retrieval_pal_mask.astype(np.int))
+                # print 'num outsample_both_pal_mask = ', np.sum(outsample_both_pal_mask.astype(np.int))
+                #
 
                 auc_encoding[sess_idx] = self.get_auc(
                     classifier=outsample_classifier, features=self.pow_mat, recalls=recalls,
@@ -241,14 +257,48 @@ class ComputeClassifier(RamTask):
                 auc_both[sess_idx] = self.get_auc(
                     classifier=outsample_classifier, features=self.pow_mat, recalls=recalls, mask=outsample_both_mask)
 
+                # testing PAL1 only here
+                if np.sum(outsample_encoding_pal_mask.astype(np.int)) != 0:
+                    auc_encoding_pal[sess_idx] = self.get_auc(
+                        classifier=outsample_classifier, features=self.pow_mat, recalls=recalls,
+                        mask=outsample_encoding_pal_mask)
+
+                    auc_retrieval_pal[sess_idx] = self.get_auc(
+                        classifier=outsample_classifier, features=self.pow_mat, recalls=recalls,
+                        mask=outsample_retrieval_pal_mask)
+
+                    auc_both_pal[sess_idx] = self.get_auc(
+                        classifier=outsample_classifier, features=self.pow_mat, recalls=recalls, mask=outsample_both_pal_mask)
+
+
+
+
         if not permuted:
             self.xval_output[-1] = ModelOutput(recalls, probs)
             self.xval_output[-1].compute_roc()
             self.xval_output[-1].compute_tercile_stats()
 
+            print '----------------TESTING PAL1 AND FR1----------------------- '
             print 'auc_encoding=', auc_encoding, np.mean(auc_encoding)
             print 'auc_retrieval=', auc_retrieval, np.mean(auc_retrieval)
             print 'auc_both=', auc_both, np.mean(auc_both)
+
+            print '\n\n'
+
+            print '----------------TESTING PAL1 ONLY----------------------- '
+            print 'auc_encoding_pal=', auc_encoding_pal, np.mean(auc_encoding_pal[auc_encoding_pal>0.0])
+            print 'auc_retrieval_pal=', auc_retrieval_pal, np.mean(auc_retrieval_pal[auc_encoding_pal>0.0])
+            print 'auc_both_pal=', auc_both_pal, np.mean(auc_both_pal[auc_encoding_pal>0.0])
+
+            print '\n\n'
+
+            # for sess_key in sorted(self.xval_output.keys()):
+            #     xval_out = self.xval_output[sess_key]
+            #     print '-----------sess %s' % str(sess_key)
+            #     print 'AUC: ', xval_out.auc
+            #     print 'median classifier = ',xval_out.jstat_thresh
+
+
 
         self.pass_object('auc_encoding' + self.suffix, auc_encoding)
         self.pass_object('auc_retrieval' + self.suffix, auc_retrieval)
@@ -546,7 +596,7 @@ class ComputeClassifier(RamTask):
         insample_auc = roc_auc_score(recalls, recall_prob_array)
         print 'in-sample AUC=', insample_auc
 
-        print 'training retrieval_clasifiers = ', recall_prob_array[evs.type == 'REC_EVENT']
+        # print 'training retrieval_clasifiers = ', recall_prob_array[evs.type == 'REC_EVENT']
         self.pass_object('rec_pow_mat', self.pow_mat[evs.type == 'REC_EVENT'])
 
         self.pass_objects()
