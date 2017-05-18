@@ -54,12 +54,16 @@ class ComputeFR1Powers(ReportRamTask):
     def restore(self):
         subject = self.pipeline.subject
         task = self.pipeline.task
+        events = self.get_passed_object(task+'_events')
 
         self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-pow_mat.pkl'))
         self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
 
-        self.pass_object('pow_mat', self.pow_mat)
-        self.pass_object('samplerate', self.samplerate)
+        if len(events) != len(self.pow_mat):
+            self.run()
+        else:
+            self.pass_object('pow_mat', self.pow_mat)
+            self.pass_object('samplerate', self.samplerate)
 
     def run(self):
         subject = self.pipeline.subject
@@ -77,9 +81,23 @@ class ComputeFR1Powers(ReportRamTask):
         if compute_powers is None:
             self.compute_powers(events,sessions,monopolar_channels,bipolar_pairs)
         else:
-            self.pow_mat,events=compute_powers(events,monopolar_channels, bipolar_pairs,
+            encoding_mask = events.type=='WORD'
+
+
+            encoding_pow_mat,encoding_events=compute_powers(events[encoding_mask],monopolar_channels, bipolar_pairs,
                                                params.fr1_start_time,params.fr1_end_time,params.fr1_buf,
                                                params.freqs,params.log_powers)
+            retrieval_pow_mat, retrieval_events = compute_powers(events[~encoding_mask],monopolar_channels, bipolar_pairs,
+                                               params.fr1_retrieval_start_time,params.fr1_retrieval_end_time,params.fr1_retrieval_buf,
+                                               params.freqs,params.log_powers)
+
+            events = np.concatenate([encoding_events,retrieval_events]).view(np.recarray)
+            events.sort(order='mstime')
+            encoding_mask = events.type=='WORD'
+            self.pow_mat = np.zeros((len(events),len(bipolar_pairs)*len(params.freqs)))
+            self.pow_mat[encoding_mask] = encoding_pow_mat
+            self.pow_mat[~encoding_mask] = retrieval_pow_mat
+
             self.pass_object(task+'_events',events)
 
         self.pass_object('pow_mat', self.pow_mat)

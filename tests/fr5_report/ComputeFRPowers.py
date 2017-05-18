@@ -58,12 +58,18 @@ class ComputeFRPowers(RamTask):
 
     def restore(self):
         subject = self.pipeline.subject
-
-        self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
-        self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
-
-        self.pass_object('pow_mat', self.pow_mat)
-        self.pass_object('samplerate', self.samplerate)
+        try:
+            self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
+            self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
+            events = joblib.load(self.get_path_to_resource_in_workspace(subject + '-fr1_events.pkl'))
+            new_events = self.get_passed_object('FR1_events')
+            assert (np.unique(events.session) == np.unique(new_events.session)).all()
+        except (IOError,AssertionError):
+            self.run()
+        else:
+            self.pass_object('FR1_events',events)
+            self.pass_object('pow_mat', self.pow_mat)
+            self.pass_object('samplerate', self.samplerate)
 
     def run(self):
         self.pipeline.subject = self.pipeline.subject.split('_')[0]
@@ -92,6 +98,12 @@ class ComputeFRPowers(RamTask):
                                               params.fr1_retrieval_start_time, params.fr1_retrieval_end_time, params.fr1_retrieval_buf,
                                               params.freqs, params.log_powers)
 
+        events = np.concatenate([encoding_events,retrieval_events]).view(np.recarray)
+        events.sort(order='mstime')
+
+        is_encoding_event = events.type=='WORD'
+        self.pass_object('FR1_events',events)
+
         self.pow_mat = np.zeros((len(events),len(bipolar_pairs)*len(params.freqs)))
         self.pow_mat[is_encoding_event,...] = encoding_pow_mat
         self.pow_mat[~is_encoding_event,...] = retrieval_pow_mat
@@ -102,7 +114,7 @@ class ComputeFRPowers(RamTask):
         self.pass_object('samplerate', self.samplerate)
 
 
-
+        joblib.dump(events,self.get_path_to_resource_in_workspace(subject+'-fr1_events.pkl'))
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
         joblib.dump(self.samplerate, self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
 

@@ -12,6 +12,7 @@ from ReportUtils import ReportRamTask
 import hashlib
 from copy import deepcopy
 from ReportTasks.RamTaskMethods import create_baseline_events
+import pandas as pd
 
 
 class FR1EventPreparation(ReportRamTask):
@@ -42,18 +43,42 @@ class FR1EventPreparation(ReportRamTask):
 
         json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
 
-        event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR1')))
-        fr1_events = [BaseEventReader(filename=f,eliminate_events_with_no_eeg=True).read() for f in event_files]
+        if self.pipeline.sessions:
+            print "Sessions: ", self.pipeline.sessions
+            fr1_sessions = [s for s in self.pipeline.sessions if s<100]
+            event_files = [json_reader.get_value('task_events', subject=subj_code,
+                                                                   montage=montage, experiment='FR1',session=s)
+                           for s in sorted(fr1_sessions)]
+
+            catfr1_sessions = [s-100 for s in self.pipeline.sessions if 100<s<200]
+
+            catfr1_event_files = [json_reader.get_value('task_events',
+                                                               subject=subj_code, montage=montage, experiment='catFR1',session=s)
+                                  for s in catfr1_sessions]
+
+        else:
+            print 'All sessions'
+            event_files = json_reader.aggregate_values('task_events',subject=subj_code,montage=montage,experiment='FR1')
+            catfr1_event_files = json_reader.aggregate_values('task_events',subject=subj_code,montage=montage,experiment='catFR1')
+
+        fr1_events = np.concatenate(
+            [BaseEventReader(filename=f, eliminate_events_with_no_eeg=True).read() for f in event_files]
+        ).view(np.recarray)
+
+        if any(catfr1_event_files):
+
+            catfr1_events = np.concatenate([BaseEventReader(filename=f,eliminate_events_with_no_eeg=True).read()
+                                            for f in catfr1_event_files]
+                                           ).view(np.recarray)
+            catfr1_events =catfr1_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
+            catfr1_events.session+=100
+            fr1_events = fr1_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
+
+            fr1_events=np.concatenate([fr1_events,catfr1_events]).view(np.recarray)
 
 
-        catfr1_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR1')))
-        catfr1_events = [BaseEventReader(filename=f,eliminate_events_with_no_eeg=True).read() for f in catfr1_event_files]
-
-
-        fr1_events=np.concatenate(fr1_events).view(np.recarray)
-        # catfr1_events = np.concatenate(catfr1_events).view(np.recarray)[list(fr1_events.dtype.names)]
         if not (fr1_events.type == 'REC_BASE').any():
-            fr1_events = create_baseline_events(fr1_events)
+            fr1_events = create_baseline_events(fr1_events,1000,29000)
 
         encoding_events_mask = fr1_events.type == 'WORD'
         retrieval_events_mask = (fr1_events.type == 'REC_WORD') | (fr1_events.type == 'REC_BASE')
@@ -61,21 +86,26 @@ class FR1EventPreparation(ReportRamTask):
         retrieval_events_mask_0s = retrieval_events_mask & (fr1_events.type == 'REC_BASE')
         retrieval_events_mask_1s = retrieval_events_mask & (fr1_events.type == 'REC_WORD') & (
         fr1_events.intrusion == 0) & (irts > 1000)
+        intr_events = fr1_events[(fr1_events.intrusion!=-999) & (fr1_events.intrusion !=0)]
 
         filtered_events = fr1_events[encoding_events_mask | retrieval_events_mask_0s | retrieval_events_mask_1s]
 
         fr1_events = filtered_events.view(np.recarray)
 
-        print len(fr1_events), 'WORD events'
+        print len(fr1_events), 'sample events'
 
         self.pass_object('FR1_events', fr1_events)
+        self.pass_object('FR1_intr_events',intr_events)
 
 
+class MissingEventError(Exception):
+    pass
 
 
 class FR5EventPreparation(ReportRamTask):
     def __init__(self):
         super(FR5EventPreparation,self).__init__(mark_as_completed=False)
+
     def run(self):
         jr  = JsonIndexReader(os.path.join(self.pipeline.mount_point,'protocols','r1.json'))
         temp=self.pipeline.subject.split('_')
@@ -83,83 +113,49 @@ class FR5EventPreparation(ReportRamTask):
         montage = 0 if len(temp)==1 else temp[1]
         task = self.pipeline.task
 
-        events = [ BaseEventReader(filename=event_path).read() for event_path in
+        events = np.concatenate([ BaseEventReader(filename=event_path).read() for event_path in
                                 jr.aggregate_values('task_events',subject=subject,montage=montage,experiment=task)]
+                                ).view(np.recarray)
 
-
-        if events:
-            events = np.concatenate(events).view(np.recarray)
-
-
-        if not (events.type=='REC_BASE').any():
-            events = create_baseline_events(events)
 
 
         self.pass_object('all_events', events)
 
-        math_events = BaseEventReader(
-            filename=jr.get_value('math_events',subject=subject,experiment=task,
-                                                                                 montage=montage)
-        ).read()#
+
+        events = events[(events.phase=='STIM') | (events.phase=='NON-STIM')]
+
+        if not (events.type=='WORD').any():
+            raise MissingEventError('No events found that are valid for analysis')
+
+        math_events = np.concatenate([BaseEventReader(filename=f).read() for f in
+                jr.aggregate_values('math_events',subject=subject,experiment=task,
+                                                                                 montage=montage)]
+                                     ).view(np.recarray)
+
+
         math_events = math_events[math_events.type=='PROB']
 
-        ps_events = [BaseEventReader(filename=event_path,eliminate_events_with_no_eeg=False).read()
-                     for event_path in jr.aggregate_values('ps4_events',subject=subject,experiment=task,montage=montage)]
-
-        if ps_events:
-            ps_events = np.concatenate(ps_events).view(np.recarray)
 
         rec_events = events[events.type == 'REC_WORD']
 
-        base_events= events[events.type=='REC_BASE']
+        ps_events = np.concatenate([BaseEventReader(filename=event_path).read() for event_path in
+                                    jr.aggregate_values('ps4_events',subject=subject,experiment=task,montage=montage)]
+                                   ).view(np.recarray)
+
 
         intr_events = rec_events[(rec_events.intrusion!=-999) & (rec_events.intrusion!=0)]
 
+        events = events[events.type=='WORD']
 
-        encoding_events_mask = events.type == 'WORD'
-        retrieval_events_mask = (events.type == 'REC_WORD') | (events.type == 'REC_BASE')
-        irts = np.append([0], np.diff(events.mstime))
-        retrieval_events_mask_0s = retrieval_events_mask & (events.type == 'REC_BASE')
-        retrieval_events_mask_1s = retrieval_events_mask & (events.type == 'REC_WORD') & (events.intrusion == 0) & (irts > 1000)
+        print len(events), 'WORD events'
 
 
-        filtered_events = events[encoding_events_mask | retrieval_events_mask_0s | retrieval_events_mask_1s].view(np.recarray)
-
-        print len(events), 'sample events'
-
-
-        self.pass_object('FR_baseline_events',base_events)
-        self.pass_object('FR_events', events)
         self.pass_object('FR_math_events', math_events)
         self.pass_object('FR_intr_events', intr_events)
         self.pass_object('FR_rec_events', rec_events)
         self.pass_object('ps_events',ps_events)
 
-        self.pass_object(task+'_events',filtered_events)
-
-def modify_recalls(events):
-    """ assigns recalls at random, and inserts rec_word events to match
-    For testing purposes only"""
-
-    encoding_mask = events.type=='WORD'
-    word_events = events[encoding_mask]
-    word_events.recalled = np.random.randint(2,size=word_events.shape)
-    rec_words = []
-    for word in word_events:
-        if word.recalled:
-            rec_start = events[(events.list==word.list) & (events.type=='REC_START')].mstime
-            rec_end = events[(events.list==word.list)& (events.type=='REC_END')].mstime
-            rec_eeg_start = events[(events.list==word.list) & (events.type=='REC_START')].eegoffset
-            rec_word = word.copy().view(np.recarray)
-            rec_word.type='REC_WORD'
-            rec_word.mstime = np.random.randint(rec_start,rec_end)
-            rec_word.eegoffset = rec_eeg_start + (rec_word.mstime-rec_start)
-            rec_words.append(rec_word)
-    events[encoding_mask] = word_events
-    events = np.concatenate([events,rec_words]).view(np.recarray)
-    events.sort(order='mstime')
-    return events
-
+        self.pass_object(task+'_events',events)
 
 def free_epochs(times, duration, pre, post, start=None, end=None):
     # (list(vector(int))*int*int*int) -> list(vector(int))

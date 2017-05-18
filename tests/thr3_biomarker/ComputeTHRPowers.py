@@ -82,8 +82,9 @@ class ComputeTHRPowers(RamTask):
         else:
             self.compute_powers(events,sessions,monopolar_channels,bipolar_pairs)
 
+        self.samplerate = float(self.samplerate)
         self.pass_object('pow_mat', self.pow_mat)
-        self.pass_object('samplerate', float(self.samplerate))
+        self.pass_object('samplerate', self.samplerate)
 
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
         joblib.dump(self.samplerate, self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
@@ -112,10 +113,10 @@ class ComputeTHRPowers(RamTask):
             # eegs = time_series_reader.read(monopolar_channels)
 
             eeg_reader = EEGReader(events=sess_events, channels=monopolar_channels,
-                                   start_time=self.params.fr1_start_time,
-                                   end_time=self.params.fr1_end_time, buffer_time=0.0)
+                                   start_time=self.params.thr_start_time,
+                                   end_time=self.params.thr_end_time, buffer_time=0.0)
 
-            eegs = eeg_reader.read().add_mirror_buffer(duration=self.params.fr1_buf)
+            eegs = eeg_reader.read().add_mirror_buffer(duration=self.params.thr_buf)
 
             # mirroring
             # eegs[...,:1365] = eegs[...,2730:1365:-1]

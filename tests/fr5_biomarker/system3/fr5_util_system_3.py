@@ -95,8 +95,8 @@ class Params(object):
 
         self.include_fr1 = True
         self.include_catfr1 = True
-        self.include_fr3 = True
-        self.include_catfr3 = True
+        self.include_fr3 = False
+        self.include_catfr3 = False
 
         self.width = 5
 
@@ -108,10 +108,7 @@ class Params(object):
         self.fr1_retrieval_end_time = 0.0
         self.fr1_retrieval_buf = 0.524
 
-        # self.retrieval_samples_weight = 2.5
         self.encoding_samples_weight = 2.5
-        # self.encoding_samples_weight = 1.0
-
 
         self.filt_order = 4
 
@@ -148,6 +145,22 @@ class Params(object):
 
 
 params = Params()
+# class ConfigError(Exception):
+#     pass
+#
+#
+# config_file = args.electrode_config_file
+#
+# if config_file.endswith('csv'):
+#     if not isfile(config_file.replace('csv','bin')):
+#         raise ConfigError('Needs binary config file along with csv config file')
+# elif config_file.endswith('bin'):
+#     if not isfile(config_file.replace('bin','csv')):
+#         raise ConfigError('Needs csv config file along with binary file')
+#
+# else:
+#     raise ConfigError('Unknown config file type')
+
 
 
 class ReportPipeline(RamPipeline):
@@ -169,7 +182,7 @@ report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
 
 report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=False))
+report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
 

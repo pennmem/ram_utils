@@ -226,7 +226,7 @@ class ModelOutput(object):
         self.n1 = len(class1_probs)
         class1_normal = np.log(class1_probs / (1.0 - class1_probs))
         self.mean1 = np.mean(class1_normal)
-        # self.std1 = np.std(class1_normal, ddof=1)
+        #self.std1 = np.std(class1_normal, ddof=1)
         var1 = np.var(class1_normal, ddof=1)
         print 'Positive class: mean =', self.mean1, 'variance =', var1, 'n =', self.n1
 
@@ -306,19 +306,26 @@ def run_lolo_xval(events, recalls, pow_mat, lr_classifier, xval_output, permuted
 
     sessions = np.unique(events.session)
 
+    if 'list' in events.dtype.names:
+        trial_type='list'
+    elif 'trial' in events.dtype.names:
+        trial_type='trial'
+    else:
+        raise RuntimeError('Unknown trial type')
+
     if permuted:
         for sess in sessions:
-            sess_lists = np.unique(events[events.session == sess].list)
+            sess_lists = np.unique(events[events.session==sess][trial_type])
             for lst in sess_lists:
-                sel = (events.session == sess) & (events.list == lst)
+                sel = (events.session==sess) & (events[trial_type]==lst)
                 list_permuted_recalls = recalls[sel]
                 shuffle(list_permuted_recalls)
                 recalls[sel] = list_permuted_recalls
 
     for sess in sessions:
-        sess_lists = np.unique(events[events.session == sess].list)
+        sess_lists = np.unique(events[events.session==sess][trial_type])
         for lst in sess_lists:
-            insample_mask = (events.session != sess) | (events.list != lst)
+            insample_mask = (events.session!=sess) | (events[trial_type]!=lst)
             insample_pow_mat = pow_mat[insample_mask]
             insample_recalls = recalls[insample_mask]
 
@@ -435,7 +442,7 @@ def free_epochs(times, duration, pre, post, start=None, end=None):
     return epoch_array
 
 
-def create_baseline_events(events):
+def create_baseline_events(events,start_buffer,end_buffer):
     '''
     Match recall events to matching baseline periods of failure to recall.
     Baseline events all begin at least 1000 ms after a vocalization, and end at least 1000 ms before a vocalization.
@@ -460,9 +467,10 @@ def create_baseline_events(events):
         times = [voc_events[(voc_events.list == lst)].mstime for lst in rec_lists]
         start_times = starts.mstime
         end_times = ends.mstime
-        epochs = free_epochs(times, 500, 1000, 1000, start=start_times, end=end_times)
-        rel_times = [t - i for (t, i) in
-                     zip([rec_events[rec_events.list == lst].mstime for lst in rec_lists], start_times)]
+        epochs = free_epochs(times, 500, 2000, 1000, start=start_times, end=end_times)
+        rel_times = [(t - i)[(t-i>start_buffer) & (t-i<end_buffer)] for (t, i) in
+                     zip([rec_events[rec_events.list == lst].mstime for lst in rec_lists ], start_times)
+                     ]
         rel_epochs = epochs - start_times[:, None]
         full_match_accum = np.zeros(epochs.shape, dtype=np.bool)
         for (i, rec_times_list) in enumerate(rel_times):

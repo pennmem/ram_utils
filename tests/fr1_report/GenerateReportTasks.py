@@ -105,8 +105,12 @@ class GenerateTex(ReportRamTask):
                         '<AUC>': cumulative_summary.auc,
                         '<PERM-P-VALUE>': cumulative_summary.perm_test_pvalue,
                         '<J-THRESH>': cumulative_summary.jstat_thresh,
+                        '<JOINT-AUC>': cumulative_summary.joint_auc,
+                        '<JOINT-PERM-P-VALUE>': cumulative_summary.joint_perm_test_pvalue,
+                        '<JOINT-J-THRESH>': cumulative_summary.joint_jstat_thresh,
                         '<J-PERC>': cumulative_summary.jstat_percentile,
-                        '<ROC_AND_TERC_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-roc_and_terc_plot_combined.pdf'
+                        '<ROC_AND_TERC_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-roc_and_terc_plot_combined.pdf',
+                        '<JOINT_ROC_AND_TERC_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-joint-roc_and_terc_plot_combined.pdf'
                         }
 
         TextTemplateUtils.replace_template(template_file_name=tex_combined_template, out_file_name=combined_report_tex_file_name, replace_dict=replace_dict)
@@ -236,6 +240,24 @@ class GeneratePlots(ReportRamTask):
         plot = panel_plot.generate_plot()
 
         plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-roc_and_terc_plot_combined.pdf')
+
+        plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+
+        panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', labelsize=18)
+
+        pd1 = PlotData(x=cumulative_summary.joint_fpr, y=cumulative_summary.joint_tpr, xlim=[0.0,1.0], ylim=[0.0,1.0], xlabel='False Alarm Rate\n(a)', ylabel='Hit Rate', levelline=((0.001,0.999),(0.001,0.999)), color='k', markersize=1.0, xlabel_fontsize=18, ylabel_fontsize=18)
+
+        ylim = np.max(np.abs(cumulative_summary.joint_pc_diff_from_mean)) + 5.0
+        if ylim > 100.0:
+            ylim = 100.0
+        pd2 = BarPlotData(x=(0,1,2), y=cumulative_summary.joint_pc_diff_from_mean, ylim=[-ylim,ylim], xlabel='Tercile of Classifier Estimate\n(b)', ylabel='Recall Change From Mean (%)', x_tick_labels=['Low', 'Middle', 'High'], xhline_pos=0.0, barcolors=['grey','grey', 'grey'], xlabel_fontsize=18, ylabel_fontsize=18, barwidth=0.5)
+
+        panel_plot.add_plot_data(0, 0, plot_data=pd1)
+        panel_plot.add_plot_data(0, 1, plot_data=pd2)
+
+        plot = panel_plot.generate_plot()
+
+        plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-joint-roc_and_terc_plot_combined.pdf')
 
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 

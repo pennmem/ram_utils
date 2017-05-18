@@ -87,33 +87,37 @@ class EvaluateClassifier(ReportRamTask):
         task = self.pipeline.task
         self.lr_classifier = self.get_passed_object('lr_classifier')
         events = self.get_passed_object(task+'_events')
-        recalls = events.recalled
-        self.pow_mat = self.get_passed_object('fr_stim_pow_mat')
-        # print 'self.pow_mat.shape:',self.pow_mat.shape
-        # print 'len fr5_events:',len(events)
-        probs = self.lr_classifier.predict_proba(self.pow_mat)[:,1]
-        self.xval_output[-1] = ModelOutput(recalls, probs)
-        self.xval_output[-1].compute_roc()
-        self.xval_output[-1].compute_tercile_stats()
-        self.xval_output[-1].compute_normal_approx()
+        non_stim = events.type=='NON-STIM'
 
-        print 'AUC = %f'%self.xval_output[-1].auc
-        sessions = np.unique(events.session)
-        if len(sessions)>1:
-            print 'Performing permutation test'
-            events = events[events.stim_list==False]
-
-            self.perm_AUCs = self.permuted_loso_AUCs(events.session, recalls)
-
+        if not non_stim.any():
+            self.xval_output = self.perm_AUCs = self.pvalue = None
         else:
-            print 'Performing in-session permutation test'
-            self.perm_AUCs = self.permuted_lolo_AUCs(events)
+            recalls = events.recalled
+            self.pow_mat = self.get_passed_object('fr_stim_pow_mat')[non_stim]
+            events = events[non_stim]
+            # print 'self.pow_mat.shape:',self.pow_mat.shape
+            # print 'len fr5_events:',len(events)
+            probs = self.lr_classifier.predict_proba(self.pow_mat)[:,1]
+            self.xval_output[-1] = ModelOutput(recalls, probs)
+            self.xval_output[-1].compute_roc()
+            self.xval_output[-1].compute_tercile_stats()
+            self.xval_output[-1].compute_normal_approx()
 
+            print 'AUC = %f'%self.xval_output[-1].auc
+            sessions = np.unique(events.session)
+            if len(sessions)>1:
+                print 'Performing permutation test'
+                events = events[events.stim_list==False]
 
+                self.perm_AUCs = self.permuted_loso_AUCs(events.session, recalls)
 
-        self.pvalue = np.sum(self.perm_AUCs >= self.xval_output[-1].auc) / float(self.perm_AUCs.size)
+            else:
+                print 'Performing in-session permutation test'
+                self.perm_AUCs = self.permuted_lolo_AUCs(events)
 
-        print 'Perm test p-value = ', self.pvalue
+            self.pvalue = np.sum(self.perm_AUCs >= self.xval_output[-1].auc) / float(self.perm_AUCs.size)
+
+            print 'Perm test p-value = ', self.pvalue
         self.pass_object(task+'_xval_output', self.xval_output)
         self.pass_object(task+'_perm_AUCs', self.perm_AUCs)
         self.pass_object(task+'_pvalue', self.pvalue)
