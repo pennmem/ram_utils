@@ -13,10 +13,12 @@ from prompt_toolkit.contrib.completers import PathCompleter
 
 num_stim_pairs = 2
 
+
 class Args(object):
     """
     Class that stores output of the command line parsing
     """
+
     def __init__(self):
         self.anode_nums = None
         self.anode = ''
@@ -35,6 +37,7 @@ class Args(object):
         self.workspace_dir = ''
         self.target_amplitude = 0.5
         self.allow_fast_rerun = False
+        self.classifier_type_to_output = 'combined'  # 'pal' is the other option
 
 
 example_style = style_from_dict({
@@ -132,7 +135,7 @@ class AmplitudeValidator(Validator):
         try:
             ampl = float(document.text)
         except:
-            raise ValidationError(message='Please enter a floating point number.' ,
+            raise ValidationError(message='Please enter a floating point number.',
                                   cursor_position=len(document.text))  # Move cursor to end of input.
 
         if ampl >= self.min_ampl and ampl < self.max_ampl:
@@ -160,19 +163,19 @@ class MaxAmplitudeValidator(Validator):
                 message='Max amplitude has to be greater than min amplitude %.3f.' % (self.min_ampl_input),
                 cursor_position=len(document.text))  # Move cursor to end of input.
 
-class ElectrodeLabelValidator(Validator):
 
+class ElectrodeLabelValidator(Validator):
     def validate(self, document):
 
         if not len(document.text):
             raise ValidationError(
-                message='Electrode label cannot be empty. Please enter a valid labels e.g. LPOG10' ,
+                message='Electrode label cannot be empty. Please enter a valid labels e.g. LPOG10',
                 cursor_position=len(document.text))  # Move cursor to end of input.
 
         try:
             float(document.text)
             raise ValidationError(
-                message='Electrode label cannot be a number. Please enter a valid labels e.g. LPOG10' ,
+                message='Electrode label cannot be a number. Please enter a valid labels e.g. LPOG10',
                 cursor_position=len(document.text))  # Move cursor to end of input.
         except ValueError:
             pass
@@ -187,17 +190,18 @@ def parse_command_line():
 
     args_obj.subject = prompt('Subject: ', default='R1250N')
 
-    args_obj.experiment = prompt('Experiment: ', completer=experiment_completer, validator=ExperimentValidator(experiment_list),
-                        default='PS4_CatFR5')
+    args_obj.experiment = prompt('Experiment: ', completer=experiment_completer,
+                                 validator=ExperimentValidator(experiment_list),
+                                 default='PS4_CatFR5')
 
     if sys.platform.startswith('win'):
         workspace_dir = prompt('Workspace directory: ', validator=DirValidator(), completer=path_completer,
-                                     default='D:/scratch')
+                               default='D:/scratch')
         mount_point = prompt('Mount Point (do not modify): ', validator=DirValidator(), completer=path_completer,
                              default='D:/')
     else:
         workspace_dir = prompt('Workspace directory: ', validator=DirValidator(), completer=path_completer,
-                                     default='/scratch')
+                               default='/scratch')
         mount_point = prompt('Mount Point (do not modify): ', validator=DirValidator(), completer=path_completer,
                              default='/')
 
@@ -205,14 +209,13 @@ def parse_command_line():
     args_obj.mount_point = mount_point
 
     args_obj.electrode_config_file = prompt('Electrode Configuration file (.csv): ', validator=CSVFileValidator(),
-                                   completer=path_completer, default='d:/experiment_configs/R1284N_FromJson.csv')
+                                            completer=path_completer,
+                                            default='d:/experiment_configs/R1284N_FromJson.csv')
 
     args_obj.pulse_frequency = prompt('Stimulation Frequency (Hz) - FYI - DO NOT MODIFY ',
-                            validator=TypedNumberValidator(int, 'integer'), default='200')
-
+                                      validator=TypedNumberValidator(int, 'integer'), default='200')
 
     for stim_pair_num in xrange(num_stim_pairs):
-
         anode = prompt('Anode label for stim_pair %d: ' % stim_pair_num, validator=ElectrodeLabelValidator())
         args_obj.anodes.append(anode)
 
@@ -227,14 +230,14 @@ def parse_command_line():
                           validator=MaxAmplitudeValidator(min_ampl))
         args_obj.max_amplitudes.append(max_ampl)
 
+    args_obj.classifier_type_to_output = prompt('Classifier Type To Output: ', completer=experiment_completer,
+                                                validator=ExperimentValidator(['combined','pal']),
+                                                default='combined')
+
+    ExperimentValidator(experiment_list)
 
     return args_obj
 
+
 if __name__ == '__main__':
-
     args = parse_command_line()
-
-
-
-
-

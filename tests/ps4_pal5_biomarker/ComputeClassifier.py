@@ -158,8 +158,6 @@ class ComputeClassifier(RamTask):
         auc_retrieval_fr = np.zeros(sessions.shape[0], dtype=np.float)
         auc_both_fr = np.zeros(sessions.shape[0], dtype=np.float)
 
-
-
         for sess_idx, sess in enumerate(sessions):
             outsample_classifier = self.create_classifier_obj()
             insample_mask = (event_sessions != sess)
@@ -239,17 +237,17 @@ class ComputeClassifier(RamTask):
                 outsample_retrieval_mask = (events.session == sess) & (events.type == 'REC_EVENT')
                 outsample_both_mask = (events.session == sess)
 
+                outsample_encoding_pal_mask = (events.session == sess) & (events.type == 'WORD') & (
+                    events.exp_name == 'PAL1')
+                outsample_retrieval_pal_mask = (events.session == sess) & (events.type == 'REC_EVENT') & (
+                    events.exp_name == 'PAL1')
+                outsample_both_pal_mask = (events.session == sess) & (events.exp_name == 'PAL1')
 
-                outsample_encoding_pal_mask = (events.session == sess) & (events.type == 'WORD') & (events.exp_name=='PAL1')
-                outsample_retrieval_pal_mask = (events.session == sess) & (events.type == 'REC_EVENT') & (events.exp_name=='PAL1')
-                outsample_both_pal_mask = (events.session == sess) & (events.exp_name=='PAL1')
-
-
-                outsample_encoding_fr_mask = (events.session == sess) & (events.type == 'WORD') & (events.exp_name=='FR1')
-                outsample_retrieval_fr_mask = (events.session == sess) & (events.type == 'REC_EVENT') & (events.exp_name=='FR1')
-                outsample_both_fr_mask = (events.session == sess) & (events.exp_name=='FR1')
-
-
+                outsample_encoding_fr_mask = (events.session == sess) & (events.type == 'WORD') & (
+                    events.exp_name == 'FR1')
+                outsample_retrieval_fr_mask = (events.session == sess) & (events.type == 'REC_EVENT') & (
+                    events.exp_name == 'FR1')
+                outsample_both_fr_mask = (events.session == sess) & (events.exp_name == 'FR1')
 
                 # print 'num outsample_encoding_pal = ', np.sum(outsample_encoding_pal_mask.astype(np.int))
                 # print 'num outsample_retrieval_pal_mask = ', np.sum(outsample_retrieval_pal_mask.astype(np.int))
@@ -278,8 +276,8 @@ class ComputeClassifier(RamTask):
                         mask=outsample_retrieval_pal_mask)
 
                     auc_both_pal[sess_idx] = self.get_auc(
-                        classifier=outsample_classifier, features=self.pow_mat, recalls=recalls, mask=outsample_both_pal_mask)
-
+                        classifier=outsample_classifier, features=self.pow_mat, recalls=recalls,
+                        mask=outsample_both_pal_mask)
 
                 # testing FR1 only here
                 if np.sum(outsample_encoding_fr_mask.astype(np.int)) != 0:
@@ -292,10 +290,8 @@ class ComputeClassifier(RamTask):
                         mask=outsample_retrieval_fr_mask)
 
                     auc_both_fr[sess_idx] = self.get_auc(
-                        classifier=outsample_classifier, features=self.pow_mat, recalls=recalls, mask=outsample_both_fr_mask)
-
-
-
+                        classifier=outsample_classifier, features=self.pow_mat, recalls=recalls,
+                        mask=outsample_both_fr_mask)
 
         if not permuted:
             self.xval_output[-1] = ModelOutput(recalls, probs)
@@ -310,17 +306,16 @@ class ComputeClassifier(RamTask):
             print '\n\n'
 
             print '----------------TESTING PAL1 ONLY----------------------- '
-            print 'auc_encoding_pal=', auc_encoding_pal, np.mean(auc_encoding_pal[auc_encoding_pal>0.0])
-            print 'auc_retrieval_pal=', auc_retrieval_pal, np.mean(auc_retrieval_pal[auc_encoding_pal>0.0])
-            print 'auc_both_pal=', auc_both_pal, np.mean(auc_both_pal[auc_encoding_pal>0.0])
+            print 'auc_encoding_pal=', auc_encoding_pal, np.mean(auc_encoding_pal[auc_encoding_pal > 0.0])
+            print 'auc_retrieval_pal=', auc_retrieval_pal, np.mean(auc_retrieval_pal[auc_encoding_pal > 0.0])
+            print 'auc_both_pal=', auc_both_pal, np.mean(auc_both_pal[auc_encoding_pal > 0.0])
 
             print '\n\n'
 
             print '----------------TESTING FR1 ONLY----------------------- '
-            print 'auc_encoding_fr=', auc_encoding_fr, np.mean(auc_encoding_fr[auc_encoding_fr>0.0])
-            print 'auc_retrieval_fr=', auc_retrieval_fr, np.mean(auc_retrieval_fr[auc_encoding_fr>0.0])
-            print 'auc_both_fr=', auc_both_fr, np.mean(auc_both_fr[auc_encoding_fr>0.0])
-
+            print 'auc_encoding_fr=', auc_encoding_fr, np.mean(auc_encoding_fr[auc_encoding_fr > 0.0])
+            print 'auc_retrieval_fr=', auc_retrieval_fr, np.mean(auc_retrieval_fr[auc_encoding_fr > 0.0])
+            print 'auc_both_fr=', auc_both_fr, np.mean(auc_both_fr[auc_encoding_fr > 0.0])
 
             print '\n\n'
 
@@ -329,8 +324,6 @@ class ComputeClassifier(RamTask):
             #     print '-----------sess %s' % str(sess_key)
             #     print 'AUC: ', xval_out.auc
             #     print 'median classifier = ',xval_out.jstat_thresh
-
-
 
         self.pass_object('auc_encoding' + self.suffix, auc_encoding)
         self.pass_object('auc_retrieval' + self.suffix, auc_retrieval)
@@ -419,19 +412,21 @@ class ComputeClassifier(RamTask):
 
     def pass_objects(self):
         subject = self.pipeline.subject
-        self.pass_object('lr_classifier', self.lr_classifier)
-        self.pass_object('xval_output', self.xval_output)
-        self.pass_object('perm_AUCs', self.perm_AUCs)
-        self.pass_object('pvalue', self.pvalue)
+        self.pass_object('lr_classifier' + self.suffix, self.lr_classifier)
+        self.pass_object('xval_output' + self.suffix, self.xval_output)
+        self.pass_object('perm_AUCs' + self.suffix, self.perm_AUCs)
+        self.pass_object('pvalue' + self.suffix, self.pvalue)
 
-        classifier_path = self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl')
+        classifier_path = self.get_path_to_resource_in_workspace(subject + '-lr_classifier' + self.suffix + '.pkl')
         joblib.dump(self.lr_classifier, classifier_path)
         # joblib.dump(self.lr_classifier, self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl'))
-        joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace(subject + '-xval_output.pkl'))
-        joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace(subject + '-perm_AUCs.pkl'))
-        joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject + '-pvalue.pkl'))
+        joblib.dump(self.xval_output,
+                    self.get_path_to_resource_in_workspace(subject + '-xval_output' + self.suffix + '.pkl'))
+        joblib.dump(self.perm_AUCs,
+                    self.get_path_to_resource_in_workspace(subject + '-perm_AUCs' + self.suffix + '.pkl'))
+        joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject + '-pvalue' + self.suffix + '.pkl'))
 
-        self.pass_object('classifier_path', classifier_path)
+        self.pass_object('classifier_path' + self.suffix, classifier_path)
 
     def create_classifier_obj(self):
         return LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
@@ -458,19 +453,19 @@ class ComputeClassifier(RamTask):
         pal_n_ret_0 = evs[pal_mask & retrieval_mask & (evs.correct == 0)].shape[0]
         pal_n_ret_1 = evs[pal_mask & retrieval_mask & (evs.correct == 1)].shape[0]
 
-
         fr_n_enc_0 = evs[fr_mask & enc_mask & (evs.correct == 0)].shape[0]
         fr_n_enc_1 = evs[fr_mask & enc_mask & (evs.correct == 1)].shape[0]
 
         fr_n_ret_0 = evs[fr_mask & retrieval_mask & (evs.correct == 0)].shape[0]
         fr_n_ret_1 = evs[fr_mask & retrieval_mask & (evs.correct == 1)].shape[0]
 
-        ev_count_list = [pal_n_enc_0,pal_n_enc_1 ,pal_n_ret_0, pal_n_ret_1, fr_n_enc_0,fr_n_enc_1 ,fr_n_ret_0, fr_n_ret_1]
+        ev_count_list = [pal_n_enc_0, pal_n_enc_1, pal_n_ret_0, pal_n_ret_1, fr_n_enc_0, fr_n_enc_1, fr_n_ret_0,
+                         fr_n_ret_1]
 
-        n_vec = np.array([0.0]*8, dtype=np.float)
+        n_vec = np.array([0.0] * 8, dtype=np.float)
 
         for i, ev_count in enumerate(ev_count_list):
-            n_vec[i] = 1./ev_count if ev_count else 0.0
+            n_vec[i] = 1. / ev_count if ev_count else 0.0
 
         n_vec /= np.mean(n_vec)
 
@@ -478,8 +473,8 @@ class ComputeClassifier(RamTask):
         n_vec[0:4] *= self.params.pal_samples_weight
         n_vec /= np.mean(n_vec)
 
-        #scaling encoding
-        n_vec[[0,1,4,5]] *= self.params.encoding_samples_weight
+        # scaling encoding
+        n_vec[[0, 1, 4, 5]] *= self.params.encoding_samples_weight
         n_vec /= np.mean(n_vec)
 
         samples_weights = np.ones(evs.shape[0], dtype=np.float)
@@ -488,12 +483,11 @@ class ComputeClassifier(RamTask):
         samples_weights[pal_mask & enc_mask & (evs.correct == 1)] = n_vec[1]
         samples_weights[pal_mask & retrieval_mask & (evs.correct == 0)] = n_vec[2]
         samples_weights[pal_mask & retrieval_mask & (evs.correct == 1)] = n_vec[3]
-        
+
         samples_weights[fr_mask & enc_mask & (evs.correct == 0)] = n_vec[4]
         samples_weights[fr_mask & enc_mask & (evs.correct == 1)] = n_vec[5]
         samples_weights[fr_mask & retrieval_mask & (evs.correct == 0)] = n_vec[6]
         samples_weights[fr_mask & retrieval_mask & (evs.correct == 1)] = n_vec[7]
-        
 
         return samples_weights
 
@@ -542,11 +536,7 @@ class ComputeClassifier(RamTask):
     # 
     #     return samples_weights
 
-
-    def run(self):
-
-        evs = self.get_passed_object('combined_evs')
-        # self.get_pow_mat() is essential - it does the filtering on the
+    def run_classifier_pipeline(self, evs):
 
         encoding_mask = (evs.type == 'WORD')
 
@@ -566,46 +556,31 @@ class ComputeClassifier(RamTask):
 
         print
 
-        # ORIGINAL CODE
-        # self.pow_mat = normalize_sessions(self.filter_pow_mat(), events)
-
-        # n1 = np.sum(events.recalled)
-        # n0 = len(events) - n1
-        # w0 = (2.0/n0) / ((1.0/n0)+(1.0/n1))
-        # w1 = (2.0/n1) / ((1.0/n0)+(1.0/n1))
-
-        # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
-        #                                         solver='liblinear')
-        #
-        # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
-        #                                         solver='newton-cg')
-
         self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
                                                 solver='newton-cg')
 
         sessions_array = evs.session
 
         recalls = evs.correct
-        # recalls[events.type == 'REC_WORD'] = 1
-        # recalls[events.type == 'REC_BASE'] = 0
-
-        # samples_weights = np.ones(evs.shape[0], dtype=np.float)
-        #
-        # # samples_weights[~(events.type=='WORD')] = self.params.retrieval_samples_weight
-        #
-        # samples_weights[
-        #     (evs.type == 'WORD')] = self.params.encoding_samples_weight
-        #
-        # samples_weights[
-        #     (evs.exp_name == 'PAL1')] *= self.params.pal_samples_weight
 
         sessions = np.unique(sessions_array)
         if len(sessions) > 1:
             print 'Performing permutation test'
             self.perm_AUCs = self.permuted_loso_AUCs(sessions_array, recalls, use_samples_weights=True, events=evs)
-
             print 'Performing leave-one-session-out xval'
             self.run_loso_xval(sessions_array, recalls, permuted=False, use_samples_weights=True, events=evs)
+
+            # # ------------------------ fitting PAL1-only classifier
+            # pal_mask = (evs.exp_name == 'PAL1')
+            # pal_sessions_array = evs.session[pal_mask]
+            # pal_recalls = recalls[pal_mask]
+            # pal_evs = evs[pal_mask]
+            #
+            # self.pal_perm_AUCs = self.permuted_loso_AUCs(pal_sessions_array, recalls, use_samples_weights=True, events=pal_evs)
+            #
+            # self.run_loso_xval(pal_sessions_array, pal_recalls, permuted=False, use_samples_weights=True,
+            #                    events=pal_evs)
+
         else:
             raise RuntimeError("Training of the combined PAL1 & FR1 classifier requires at least two sessions")
 
@@ -616,8 +591,6 @@ class ComputeClassifier(RamTask):
         print 'Perm test p-value =', self.pvalue
 
         print 'thresh =', self.xval_output[-1].jstat_thresh, 'quantile =', self.xval_output[-1].jstat_quantile
-
-
 
         # Finally, fitting classifier on all available data
         samples_weights = self.get_sample_weights_vector(evs=evs)
@@ -632,6 +605,11 @@ class ComputeClassifier(RamTask):
         self.pass_object('rec_pow_mat', self.pow_mat[evs.type == 'REC_EVENT'])
 
         self.pass_objects()
+
+    def run(self):
+
+        evs = self.get_passed_object('combined_evs')
+        self.run_classifier_pipeline(evs)
 
     def restore(self):
         subject = self.pipeline.subject
@@ -688,3 +666,48 @@ class ComputeFullClassifier(ComputeClassifier):
         self.suffix = '_full'
         super(ComputeFullClassifier, self).run()
         self.compare_AUCs()
+
+
+class ComputePAL1Classifier(ComputeClassifier):
+    def restore(self):
+        subject = self.pipeline.subject
+        full_classifier_path = self.get_path_to_resource_in_workspace(subject + '-xval_output_all_electrodes.pkl')
+        self.xval_output = joblib.load(full_classifier_path)
+        self.compare_AUCs()
+        self.pass_object('full_classifier_path', full_classifier_path)
+        self.pass_object('xval_output_all_electrodes', self.xval_output)
+
+    # def pass_objects(self):
+    #     subject = self.pipeline.subject
+    #     classifier_path = self.get_path_to_resource_in_workspace(subject + 'lr_classifier_full.pkl')
+    #     joblib.dump(self.lr_classifier, classifier_path)
+    #     joblib.dump(self.xval_output,
+    #                 self.get_path_to_resource_in_workspace(subject + '-xval_output_all_electrodes.pkl'))
+    #     self.pass_object('classifier_path', classifier_path)
+    #     self.pass_object('xval_output_all_electrodes', self.xval_output)
+
+    def compare_AUCs(self):
+        reduced_xval_output = self.get_passed_object('xval_output')
+        print '\n\n'
+        print 'AUC WITH ALL ELECTRODES: ', self.xval_output[-1].auc
+        print 'AUC EXCLUDING STIM-ADJACENT ELECTRODES: ', reduced_xval_output[-1].auc
+
+    def filter_pow_mat(self):
+        pow_mat = super(ComputePAL1Classifier, self).filter_pow_mat()
+        evs = self.get_passed_object('combined_evs')
+
+        pow_mat = pow_mat[evs.exp_name == 'PAL1']
+
+        return pow_mat
+
+
+
+    def run(self):
+        self.suffix = '_pal'
+        evs = self.get_passed_object('combined_evs')
+        evs = evs[evs.exp_name == 'PAL1']
+
+        print '\n\n ---------------- PAL1 CLASSIFIER ONLY------------------\n\n'
+
+        super(ComputePAL1Classifier, self).run_classifier_pipeline(evs)
+

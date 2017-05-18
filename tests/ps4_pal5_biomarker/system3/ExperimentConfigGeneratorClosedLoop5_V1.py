@@ -16,7 +16,7 @@ from itertools import cycle
 from system_3_utils import ElectrodeConfigSystem3
 
 
-class ExperimentConfigGeneratorClosedLoop5(RamTask):
+class ExperimentConfigGeneratorClosedLoop5_V1(RamTask):
     def __init__(self, params, mark_as_completed=False):
         RamTask.__init__(self, mark_as_completed)
 
@@ -87,13 +87,18 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
         stim_frequency = self.pipeline.args.pulse_frequency
         stim_amplitude = self.pipeline.args.target_amplitude
         bipolar_pairs_path = self.get_passed_object('bipolar_pairs_path')
+
         classifier_path = self.get_passed_object('classifier_path')
+
+        if self.pipeline.args.classifier_type_to_output == 'pal':
+            classifier_path = self.get_passed_object('classifier_path_pal')
+
         stim_chan_label = self.get_passed_object('stim_chan_label')
         excluded_pairs_path = self.get_passed_object('excluded_pairs_path')
-        xval_full = self.get_passed_object('xval_output_all_electrodes')
-        xval_output = self.get_passed_object('xval_output')
+        # xval_full = self.get_passed_object('xval_output_all_electrodes')
+        # xval_output = self.get_passed_object('xval_output')
 
-        retrieval_biomarker_threshold = self.get_passed_object('retrieval_biomarker_threshold')
+        # retrieval_biomarker_threshold = self.get_passed_object('retrieval_biomarker_threshold')
 
         stim_params_dict = {}
         stim_params_list = zip(anodes, cathodes, cycle(self.pipeline.args.min_amplitudes),
@@ -137,10 +142,8 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
             montage_file='config_files/%s' % basename(bipolar_pairs_path),
             excluded_montage_file='config_files/%s' % basename(excluded_pairs_path),
             biomarker_threshold=0.5,
-            retrieval_biomarker_threshold = retrieval_biomarker_threshold,
-            fr5_stim_channel=fr5_stim_channel,
-            auc_all_electrodes=xval_full[-1].auc,
-            auc_no_stim_adjacent_electrodes=xval_output[-1].auc,
+            # retrieval_biomarker_threshold = retrieval_biomarker_threshold,
+            fr5_stim_channel=fr5_stim_channel
         )
 
         experiment_config_file, experiment_config_full_filename = self.create_file_in_workspace_dir(
