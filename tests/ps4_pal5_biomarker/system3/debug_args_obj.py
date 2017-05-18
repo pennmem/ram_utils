@@ -141,9 +141,9 @@ args_obj_R1232N.workspace_dir = join(prefix, 'scratch', args_obj_R1232N.subject)
 
 
 
-args_obj_R1250N.classifier_type_to_output = 'pal'
-args_list.append(args_obj_R1250N)
-# args_list.append(args_obj_R1095N)
+# args_obj_R1250N.classifier_type_to_output = 'pal'
+# args_list.append(args_obj_R1250N)
+args_list.append(args_obj_R1095N)
 # args_list.append(args_obj_R1284N)
 # args_list.append(args_obj_R1002P)
 # args_list.append(args_obj_R1065J)

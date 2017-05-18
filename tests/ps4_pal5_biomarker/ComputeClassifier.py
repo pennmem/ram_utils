@@ -491,50 +491,7 @@ class ComputeClassifier(RamTask):
 
         return samples_weights
 
-    # def get_sample_weights_vector(self, evs):
-    #     """
-    #     Computes vector of sample weihghts taking int account number fo 0'1 1's , 
-    #     whether the sample is retrieval or encoding. Or whether the sample is from PAL or from FR experiment.
-    #     The weighting should be desribed in detail in the design doc
-    #     :param evs: events
-    #     :return: {ndarray} vector of sample weights 
-    #     """
-    #     # evs = evs.view(np.recarray)
-    #     enc_mask = (evs.type == 'WORD')
-    #     retrieval_mask = (evs.type == 'REC_EVENT')
-    #     
-    # 
-    #     n_enc_0 = evs[enc_mask & (evs.correct == 0)].shape[0]
-    #     n_enc_1 = evs[enc_mask & (evs.correct == 1)].shape[0]
-    # 
-    #     n_ret_0 = evs[retrieval_mask & (evs.correct == 0)].shape[0]
-    #     n_ret_1 = evs[retrieval_mask & (evs.correct == 1)].shape[0]
-    # 
-    #     n_vec = np.array([1.0 / n_enc_0, 1.0 / n_enc_1, 1.0 / n_ret_0, 1.0 / n_ret_1], dtype=np.float)
-    #     # n_vec /= np.mean(n_vec)
-    # 
-    #     # n_vec[:2] *= self.params.encoding_samples_weight
-    # 
-    #     # n_vec /= np.mean(n_vec)
-    # 
-    # 
-    #     samples_weights = np.ones(evs.shape[0], dtype=np.float)
-    # 
-    #     samples_weights[enc_mask & (evs.correct == 0)] = n_vec[0]
-    #     samples_weights[enc_mask & (evs.correct == 1)] = n_vec[1]
-    #     samples_weights[retrieval_mask & (evs.correct == 0)] = n_vec[2]
-    #     samples_weights[retrieval_mask & (evs.correct == 1)] = n_vec[3]
-    # 
-    #     # scaling encoding weights
-    #     samples_weights[enc_mask] *= self.params.encoding_samples_weight
-    # 
-    #     #scaling PAL1
-    # 
-    #     # samples_weights[evs.exp_type == 'PAL1'] *= self.params.self.pal_samples_weight
-    # 
-    #     samples_weights /= np.mean(samples_weights)
-    # 
-    #     return samples_weights
+
 
     def run_classifier_pipeline(self, evs):
 
@@ -570,16 +527,6 @@ class ComputeClassifier(RamTask):
             print 'Performing leave-one-session-out xval'
             self.run_loso_xval(sessions_array, recalls, permuted=False, use_samples_weights=True, events=evs)
 
-            # # ------------------------ fitting PAL1-only classifier
-            # pal_mask = (evs.exp_name == 'PAL1')
-            # pal_sessions_array = evs.session[pal_mask]
-            # pal_recalls = recalls[pal_mask]
-            # pal_evs = evs[pal_mask]
-            #
-            # self.pal_perm_AUCs = self.permuted_loso_AUCs(pal_sessions_array, recalls, use_samples_weights=True, events=pal_evs)
-            #
-            # self.run_loso_xval(pal_sessions_array, pal_recalls, permuted=False, use_samples_weights=True,
-            #                    events=pal_evs)
 
         else:
             raise RuntimeError("Training of the combined PAL1 & FR1 classifier requires at least two sessions")

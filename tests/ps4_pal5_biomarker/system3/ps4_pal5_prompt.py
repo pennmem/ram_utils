@@ -188,6 +188,7 @@ def parse_command_line():
     """
     args_obj = Args()
 
+
     args_obj.subject = prompt('Subject: ', default='R1250N')
 
     args_obj.experiment = prompt('Experiment: ', completer=experiment_completer,
@@ -230,7 +231,8 @@ def parse_command_line():
                           validator=MaxAmplitudeValidator(min_ampl))
         args_obj.max_amplitudes.append(max_ampl)
 
-    args_obj.classifier_type_to_output = prompt('Classifier Type To Output: ', completer=experiment_completer,
+
+    args_obj.classifier_type_to_output = prompt('Classifier Type To Output: ', completer=WordCompleter(['combined','pal']),
                                                 validator=ExperimentValidator(['combined','pal']),
                                                 default='combined')
 
