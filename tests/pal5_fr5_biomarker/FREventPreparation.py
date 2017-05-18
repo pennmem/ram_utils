@@ -97,8 +97,7 @@ class FREventPreparation(RamTask):
         # fr1_events = np.append(fr1_events, catfr1_events).view(np.recarray)
 
 
-        fr1_events = create_baseline_events(fr1_events)
-
+        fr1_events = create_baseline_events(fr1_events, 1000,29000)
 
         encoding_events_mask = fr1_events.type == 'WORD'
         retrieval_events_mask = (fr1_events.type == 'REC_WORD') | (fr1_events.type == 'REC_BASE')
