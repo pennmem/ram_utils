@@ -154,6 +154,11 @@ class ComputeClassifier(RamTask):
         auc_retrieval_pal = np.zeros(sessions.shape[0], dtype=np.float)
         auc_both_pal = np.zeros(sessions.shape[0], dtype=np.float)
 
+        auc_encoding_fr = np.zeros(sessions.shape[0], dtype=np.float)
+        auc_retrieval_fr = np.zeros(sessions.shape[0], dtype=np.float)
+        auc_both_fr = np.zeros(sessions.shape[0], dtype=np.float)
+
+
 
         for sess_idx, sess in enumerate(sessions):
             outsample_classifier = self.create_classifier_obj()
@@ -240,6 +245,11 @@ class ComputeClassifier(RamTask):
                 outsample_both_pal_mask = (events.session == sess) & (events.exp_name=='PAL1')
 
 
+                outsample_encoding_fr_mask = (events.session == sess) & (events.type == 'WORD') & (events.exp_name=='FR1')
+                outsample_retrieval_fr_mask = (events.session == sess) & (events.type == 'REC_EVENT') & (events.exp_name=='FR1')
+                outsample_both_fr_mask = (events.session == sess) & (events.exp_name=='FR1')
+
+
 
                 # print 'num outsample_encoding_pal = ', np.sum(outsample_encoding_pal_mask.astype(np.int))
                 # print 'num outsample_retrieval_pal_mask = ', np.sum(outsample_retrieval_pal_mask.astype(np.int))
@@ -271,6 +281,20 @@ class ComputeClassifier(RamTask):
                         classifier=outsample_classifier, features=self.pow_mat, recalls=recalls, mask=outsample_both_pal_mask)
 
 
+                # testing FR1 only here
+                if np.sum(outsample_encoding_fr_mask.astype(np.int)) != 0:
+                    auc_encoding_fr[sess_idx] = self.get_auc(
+                        classifier=outsample_classifier, features=self.pow_mat, recalls=recalls,
+                        mask=outsample_encoding_fr_mask)
+
+                    auc_retrieval_fr[sess_idx] = self.get_auc(
+                        classifier=outsample_classifier, features=self.pow_mat, recalls=recalls,
+                        mask=outsample_retrieval_fr_mask)
+
+                    auc_both_fr[sess_idx] = self.get_auc(
+                        classifier=outsample_classifier, features=self.pow_mat, recalls=recalls, mask=outsample_both_fr_mask)
+
+
 
 
         if not permuted:
@@ -289,6 +313,14 @@ class ComputeClassifier(RamTask):
             print 'auc_encoding_pal=', auc_encoding_pal, np.mean(auc_encoding_pal[auc_encoding_pal>0.0])
             print 'auc_retrieval_pal=', auc_retrieval_pal, np.mean(auc_retrieval_pal[auc_encoding_pal>0.0])
             print 'auc_both_pal=', auc_both_pal, np.mean(auc_both_pal[auc_encoding_pal>0.0])
+
+            print '\n\n'
+
+            print '----------------TESTING FR1 ONLY----------------------- '
+            print 'auc_encoding_fr=', auc_encoding_fr, np.mean(auc_encoding_fr[auc_encoding_fr>0.0])
+            print 'auc_retrieval_fr=', auc_retrieval_fr, np.mean(auc_retrieval_fr[auc_encoding_fr>0.0])
+            print 'auc_both_fr=', auc_both_fr, np.mean(auc_both_fr[auc_encoding_fr>0.0])
+
 
             print '\n\n'
 

@@ -111,20 +111,24 @@ class ComputePowers(RamTask):
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
         params = self.params
 
-        print 'Computing powers during FR encoding'
-        encoding_fr1_pow_mat, encoding_fr1_events = compute_powers(evs[fr1_encoding_mask], monopolar_channels,
-                                                                   bipolar_pairs,
-                                                                   params.fr1_start_time, params.fr1_end_time,
-                                                                   params.fr1_buf,
-                                                                   params.freqs, params.log_powers)
+        fr_session_present = np.sum(fr1_encoding_mask.astype(np.int)) != 0
 
-        print 'Computing powers during FR retrieval'
-        retrieval_fr1_pow_mat, retrieval_fr1_events = compute_powers(evs[fr1_retrieval_mask], monopolar_channels,
-                                                                     bipolar_pairs,
-                                                                     params.fr1_retrieval_start_time,
-                                                                     params.fr1_retrieval_end_time,
-                                                                     params.fr1_retrieval_buf,
-                                                                     params.freqs, params.log_powers)
+        if fr_session_present:
+            print 'Computing powers during FR encoding'
+            encoding_fr1_pow_mat, encoding_fr1_events = compute_powers(evs[fr1_encoding_mask], monopolar_channels,
+                                                                       bipolar_pairs,
+                                                                       params.fr1_start_time, params.fr1_end_time,
+                                                                       params.fr1_buf,
+                                                                       params.freqs, params.log_powers)
+
+            print 'Computing powers during FR retrieval'
+            retrieval_fr1_pow_mat, retrieval_fr1_events = compute_powers(evs[fr1_retrieval_mask], monopolar_channels,
+                                                                         bipolar_pairs,
+                                                                         params.fr1_retrieval_start_time,
+                                                                         params.fr1_retrieval_end_time,
+                                                                         params.fr1_retrieval_buf,
+                                                                         params.freqs, params.log_powers)
+
 
         print 'Computing powers during PAL encoding'
         encoding_pal1_pow_mat, encoding_pal1_events = compute_powers(evs[pal1_encoding_mask], monopolar_channels,
@@ -143,8 +147,11 @@ class ComputePowers(RamTask):
 
         self.pow_mat = np.zeros((len(evs), len(bipolar_pairs) * len(params.freqs)))
 
-        self.pow_mat[fr1_encoding_mask, ...] = encoding_fr1_pow_mat
-        self.pow_mat[fr1_retrieval_mask, ...] = retrieval_fr1_pow_mat
+
+        if fr_session_present:
+            self.pow_mat[fr1_encoding_mask, ...] = encoding_fr1_pow_mat
+            self.pow_mat[fr1_retrieval_mask, ...] = retrieval_fr1_pow_mat
+
         self.pow_mat[pal1_encoding_mask, ...] = encoding_pal1_pow_mat
         self.pow_mat[pal1_retrieval_mask, ...] = retrieval_pal1_pow_mat
 

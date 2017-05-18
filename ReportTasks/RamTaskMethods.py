@@ -186,7 +186,9 @@ def compute_powers(events, monopolar_channels, bipolar_pairs,
 
         pow_mat = sess_pow_mat if pow_mat is None else np.concatenate((pow_mat, sess_pow_mat))
 
+
     pow_mat = pow_mat.reshape((len(events), len(bipolar_pairs) * len(freqs)))
+
     print 'Total time elapsed: {}'.format(time.time() - tic)
     # print 'Time spent on wavelet filter: {}'.format(filter_time)
     if ComputePowers is not None:
