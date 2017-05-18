@@ -39,7 +39,5 @@
         "sampling_rate": 1000,
         "odin_lib_debug_level": 0,
         "connect_to_task_laptop": true
-    },
-    "AUC_all_electrodes": {{auc_all_electrodes}},
-    "AUC_no_stim_adjacent_electrodes": {{auc_no_stim_adjacent_electrodes}}
+    }
 }
