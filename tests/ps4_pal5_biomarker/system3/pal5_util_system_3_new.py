@@ -3,7 +3,7 @@ DEBUG = True
 
 from os.path import *
 
-from pal5_prompt import parse_command_line, Args
+from ps4_pal5_prompt import parse_command_line, Args
 
 from system_3_utils.ram_tasks.CMLParserClosedLoop5 import CMLParserCloseLoop5
 import sys

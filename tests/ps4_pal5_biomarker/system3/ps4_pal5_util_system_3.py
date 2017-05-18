@@ -2,7 +2,7 @@ DEBUG = True
 
 from os.path import *
 
-from pal5_prompt import parse_command_line, Args
+from ps4_pal5_prompt import parse_command_line, Args
 
 from system_3_utils.ram_tasks.CMLParserClosedLoop5 import CMLParserCloseLoop5
 import sys
@@ -196,25 +196,25 @@ except:
 
 from RamPipeline import RamPipeline
 
-from tests.pal5_fr5_biomarker.PAL1EventPreparation import PAL1EventPreparation
+from tests.ps4_pal5_biomarker.PAL1EventPreparation import PAL1EventPreparation
 
-from tests.pal5_fr5_biomarker.FREventPreparation import FREventPreparation
+from tests.ps4_pal5_biomarker.FREventPreparation import FREventPreparation
 
-from tests.pal5_fr5_biomarker.CombinedEventPreparation import CombinedEventPreparation
+from tests.ps4_pal5_biomarker.CombinedEventPreparation import CombinedEventPreparation
 
-from tests.pal5_fr5_biomarker.ComputePowers import ComputePowers
+from tests.ps4_pal5_biomarker.ComputePowers import ComputePowers
 
-from tests.pal5_fr5_biomarker.MontagePreparation import MontagePreparation
+from tests.ps4_pal5_biomarker.MontagePreparation import MontagePreparation
 
 from system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
 
-from tests.pal5_fr5_biomarker.ComputeClassifier import ComputeClassifier
+from tests.ps4_pal5_biomarker.ComputeClassifier import ComputeClassifier
 
-from tests.pal5_fr5_biomarker.ComputeClassifier import ComputeFullClassifier
+from tests.ps4_pal5_biomarker.ComputeClassifier import ComputeFullClassifier
 
-from tests.pal5_fr5_biomarker.ComputeEncodingClassifier import ComputeEncodingClassifier
+from tests.ps4_pal5_biomarker.ComputeEncodingClassifier import ComputeEncodingClassifier
 
-from tests.pal5_fr5_biomarker.LogResults import LogResults
+from tests.ps4_pal5_biomarker.LogResults import LogResults
 
 from tests.pal5_biomarker.system3.ExperimentConfigGeneratorClosedLoop5_V1 import ExperimentConfigGeneratorClosedLoop5_V1
 
