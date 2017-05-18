@@ -58,6 +58,17 @@ class ComputePowers(RamTask):
                 warnings.warn('Could not process %s. Please make sure that the event file exist' % fname,
                               RuntimeWarning)
 
+        fr11_event_files = sorted(
+            list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR1')))
+        for fname in pal1_event_files:
+            try:
+                with open(fname, 'rb') as f:
+                    hash_md5.update(f.read())
+            except IOError:
+                warnings.warn('Could not process %s. Please make sure that the event file exist' % fname,
+                              RuntimeWarning)
+
+
         # pal3_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='PAL3')))
         # for fname in pal3_event_files:
         #     with open(fname,'rb') as f: hash_md5.update(f.read())
