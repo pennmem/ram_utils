@@ -16,26 +16,28 @@ else:
 
     prefix = '/'
 
+args_list = []
 try:
     args_obj = parse_command_line()
+    args_list.append(args_obj)
 except:
     args_list = []
 
-    # args_obj = Args()
-    #
-    # args_obj.subject = 'R1250N'
-    # args_obj.anodes = ['PG10', 'PG11']
-    # args_obj.cathodes = ['PG11', 'PG12']
-    # args_obj.electrode_config_file = join(prefix, 'experiment_configs', 'contacts%s.csv' % args_obj.subject)
-    # args_obj.experiment = 'PS4_CatFR5'
-    # args_obj.min_amplitudes = [0.25, 0.25]
-    # args_obj.max_amplitudes = [1.0, 1.0]
-    # args_obj.mount_point = prefix
-    # args_obj.pulse_frequency = 200
-    # args_obj.workspace_dir = join(prefix, 'scratch', args_obj.subject)
-    # args_obj.allow_fast_rerun = True
-    #
-    # args_list.append(args_obj)
+    args_obj = Args()
+
+    args_obj.subject = 'R1250N'
+    args_obj.anodes = ['PG10', 'PG11']
+    args_obj.cathodes = ['PG11', 'PG12']
+    args_obj.electrode_config_file = join(prefix, 'experiment_configs', 'contacts%s.csv' % args_obj.subject)
+    args_obj.experiment = 'PS4_CatFR5'
+    args_obj.min_amplitudes = [0.25, 0.25]
+    args_obj.max_amplitudes = [1.0, 1.0]
+    args_obj.mount_point = prefix
+    args_obj.pulse_frequency = 200
+    args_obj.workspace_dir = join(prefix, 'scratch', args_obj.subject)
+    args_obj.allow_fast_rerun = True
+
+    args_list.append(args_obj)
 
     # args_obj = Args()
     #

@@ -68,7 +68,7 @@ def get_prompt_tokens(cli):
 
 path_completer = PathCompleter()
 
-experiment_list = ['PAL5', 'PS4_PAL5']
+experiment_list = ['PAL5', 'PS4_CatFR5']
 
 experiment_completer = WordCompleter(experiment_list)
 
@@ -188,7 +188,7 @@ def parse_command_line():
     args_obj.subject = prompt('Subject: ', default='R1250N')
 
     args_obj.experiment = prompt('Experiment: ', completer=experiment_completer, validator=ExperimentValidator(experiment_list),
-                        default='PS4_PAL5')
+                        default='PS4_CatFR5')
 
     if sys.platform.startswith('win'):
         workspace_dir = prompt('Workspace directory: ', validator=DirValidator(), completer=path_completer,

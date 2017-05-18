@@ -64,7 +64,10 @@ class FREventPreparation(RamTask):
             list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR1')))
 
 
-        fr1_evs_list  = [BaseEventReader(filename=event_path).read() for event_path in event_files]
+
+        # have to convert path to str explicitely to avoid exception in TypedUtils from PTSA.
+        # when path comes from the console it is a unicode str.
+        fr1_evs_list = [BaseEventReader(filename=str(event_path)).read() for event_path in event_files]
         if not len(fr1_evs_list):
             self.pass_object('FR_events', None)
             return
