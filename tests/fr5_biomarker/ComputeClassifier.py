@@ -115,6 +115,17 @@ class ComputeClassifier(RamTask):
 
 
     def run_loso_xval(self, event_sessions, recalls, permuted=False,samples_weights=None, events=None):
+        """
+        Note samples_weights is not really used for computations it is used to only check if it is None i.e. as a flag
+         Weird but will leave it for now
+        :param event_sessions:
+        :param recalls:
+        :param permuted:
+        :param samples_weights:
+        :param events:
+        :return:
+        """
+
         probs = np.empty_like(recalls, dtype=np.float)
 
         sessions = np.unique(event_sessions)

@@ -72,7 +72,7 @@ except:
     args_obj.anodes = ['LPF1', 'LPF3']
     args_obj.cathodes = ['LPF2','LPF4']
     args_obj.electrode_config_file = join(prefix, 'experiment_configs', 'contacts%s.csv'%args_obj.subject)
-    args_obj.experiment = 'PS4_FR5'
+    args_obj.experiment = 'PS4_CatFR5'
     args_obj.min_amplitudes = [0.25,0.25]
     args_obj.max_amplitudes = [1.0,1.0]
     args_obj.mount_point = prefix
@@ -213,7 +213,7 @@ from tests.pal5_fr5_biomarker.ComputeEncodingClassifier import ComputeEncodingCl
 
 from tests.pal5_fr5_biomarker.LogResults import LogResults
 
-from tests.pal5_biomarker.system3.ExperimentConfigGeneratorClosedLoop5 import ExperimentConfigGeneratorClosedLoop5
+from tests.pal5_biomarker.system3.ExperimentConfigGeneratorClosedLoop5_V1 import ExperimentConfigGeneratorClosedLoop5_V1
 
 import numpy as np
 
@@ -261,7 +261,8 @@ class Params(object):
 
         # self.retrieval_samples_weight = 2.5
         # self.encoding_samples_weight = 2.5
-        self.encoding_samples_weight = 1.0
+        self.encoding_samples_weight = 7.2
+        self.pal_samples_weight = 1.93
 
         self.recall_period = 5.0
 
@@ -276,8 +277,8 @@ class Params(object):
         self.log_powers = True
 
         self.penalty_type = 'l2'
-        # self.C = 7.2e-4  # TODO - remove it from production code
-        self.C = 0.048
+        self.C = 7.2e-4
+        # self.C = 0.048 # TODO - remove it from production code - original PAL5 value
 
 
         # self.n_perm = 200
@@ -327,11 +328,14 @@ if __name__ == '__main__':
 
         # report_pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=False))
         #
-        # report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
+        report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
+
+        report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop5_V1(params=params, mark_as_completed=False))
+
         #
         # report_pipeline.add_task(LogResults(params=params, mark_as_completed=False, log_filename=log_filename))
         #
-        # report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=True))
+        report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=True))
 
         # starts processing pipeline
         report_pipeline.execute_pipeline()

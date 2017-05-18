@@ -21,8 +21,8 @@ def normalize_sessions(pow_mat, events):
         pow_mat[sess_event_mask] = zscore(pow_mat[sess_event_mask], axis=0, ddof=1)
     return pow_mat
 
-def compute_z_scoring_vecs(pow_mat, events):
 
+def compute_z_scoring_vecs(pow_mat, events):
     mean_dict = {}
     std_dict = {}
     sessions = np.unique(events.session)
@@ -35,13 +35,11 @@ def compute_z_scoring_vecs(pow_mat, events):
         mean_dict[sess] = m
         std_dict[sess] = s
 
-
     return mean_dict, std_dict
-        # pow_mat[sess_event_mask] = zscore(pow_mat[sess_event_mask], axis=0, ddof=1)
+    # pow_mat[sess_event_mask] = zscore(pow_mat[sess_event_mask], axis=0, ddof=1)
 
     # self.m = np.mean(mp_rs, axis=0)
     # self.s = np.std(mp_rs, axis=0, ddof=1)
-
 
 
 class ModelOutput(object):
@@ -140,7 +138,7 @@ class ComputeClassifier(RamTask):
         auc = roc_auc_score(masked_recalls, probs)
         return auc
 
-    def run_loso_xval(self, event_sessions, recalls, permuted=False, samples_weights=None, events=None):
+    def run_loso_xval(self, event_sessions, recalls, permuted=False, use_samples_weights=False, events=None):
 
         # outsample_classifier = self.create_classifier_obj()
 
@@ -156,38 +154,36 @@ class ComputeClassifier(RamTask):
             outsample_classifier = self.create_classifier_obj()
             insample_mask = (event_sessions != sess)
 
-
-
             insample_pow_mat = self.pow_mat[insample_mask]
             insample_recalls = recalls[insample_mask]
-            insample_samples_weights = samples_weights[insample_mask]
 
-            insample_enc_mask = insample_mask & ((events.type == 'STUDY_PAIR'))
+            insample_enc_mask = insample_mask & ((events.type == 'WORD'))
             insample_retrieval_mask = insample_mask & (events.type == 'REC_EVENT')
 
+            # n_enc_0 = events[insample_enc_mask & (events.correct == 0)].shape[0]
+            # n_enc_1 = events[insample_enc_mask & (events.correct == 1)].shape[0]
+            #
+            # n_ret_0 = events[insample_retrieval_mask & (events.correct == 0)].shape[0]
+            # n_ret_1 = events[insample_retrieval_mask & (events.correct == 1)].shape[0]
+            #
+            # n_vec = np.array([1.0 / n_enc_0, 1.0 / n_enc_1, 1.0 / n_ret_0, 1.0 / n_ret_1], dtype=np.float)
+            # # n_vec /= np.mean(n_vec)
+            #
+            # n_vec[:2] *= self.params.encoding_samples_weight
+            #
+            # n_vec /= np.mean(n_vec)
+            #
+            # # insample_samples_weights = np.ones(n_enc_0 + n_enc_1 + n_ret_0 + n_ret_1, dtype=np.float)
+            # insample_samples_weights = np.ones(events.shape[0], dtype=np.float)
+            #
+            # insample_samples_weights[insample_enc_mask & (events.correct == 0)] = n_vec[0]
+            # insample_samples_weights[insample_enc_mask & (events.correct == 1)] = n_vec[1]
+            # insample_samples_weights[insample_retrieval_mask & (events.correct == 0)] = n_vec[2]
+            # insample_samples_weights[insample_retrieval_mask & (events.correct == 1)] = n_vec[3]
+            #
+            # insample_samples_weights = insample_samples_weights[insample_mask]
 
-            n_enc_0 = events[insample_enc_mask & (events.correct == 0)].shape[0]
-            n_enc_1 = events[insample_enc_mask & (events.correct == 1)].shape[0]
-
-            n_ret_0 = events[insample_retrieval_mask & (events.correct == 0)].shape[0]
-            n_ret_1 = events[insample_retrieval_mask & (events.correct == 1)].shape[0]
-
-            n_vec = np.array([1.0 / n_enc_0, 1.0 / n_enc_1, 1.0 / n_ret_0, 1.0 / n_ret_1], dtype=np.float)
-            n_vec /= np.mean(n_vec)
-
-            n_vec[:2] *= self.params.encoding_samples_weight
-
-            n_vec /= np.mean(n_vec)
-
-            # insample_samples_weights = np.ones(n_enc_0 + n_enc_1 + n_ret_0 + n_ret_1, dtype=np.float)
-            insample_samples_weights = np.ones(events.shape[0], dtype=np.float)
-
-            insample_samples_weights[insample_enc_mask & (events.correct == 0)] = n_vec[0]
-            insample_samples_weights[insample_enc_mask & (events.correct == 1)] = n_vec[1]
-            insample_samples_weights[insample_retrieval_mask & (events.correct == 0)] = n_vec[2]
-            insample_samples_weights[insample_retrieval_mask & (events.correct == 1)] = n_vec[3]
-
-            insample_samples_weights = insample_samples_weights[insample_mask]
+            insample_samples_weights = self.get_sample_weights_vector(evs=events[insample_mask])
 
             outsample_both_mask = (events.session == sess)
 
@@ -205,7 +201,7 @@ class ComputeClassifier(RamTask):
             # TODO ORIGINAL CODE
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                if samples_weights is not None:
+                if use_samples_weights:
                     outsample_classifier.fit(insample_pow_mat, insample_recalls, insample_samples_weights)
                 else:
                     outsample_classifier.fit(insample_pow_mat, insample_recalls)
@@ -228,17 +224,15 @@ class ComputeClassifier(RamTask):
 
             probs[outsample_mask] = outsample_probs
 
-
             if events is not None:
-                outsample_encoding_mask = (events.session == sess) & ((events.type == 'STUDY_PAIR')|(events.type == 'PRACTICE_PAIR'))
-                outsample_retrieval_mask = (events.session == sess) & ((events.type == 'REC_EVENT'))
-
-
+                outsample_encoding_mask = (events.session == sess) & (events.type == 'WORD')
+                outsample_retrieval_mask = (events.session == sess) & (events.type == 'REC_EVENT')
 
                 outsample_both_mask = (events.session == sess)
 
                 auc_encoding[sess_idx] = self.get_auc(
-                    classifier=outsample_classifier, features=self.pow_mat, recalls=recalls, mask=outsample_encoding_mask)
+                    classifier=outsample_classifier, features=self.pow_mat, recalls=recalls,
+                    mask=outsample_encoding_mask)
 
                 auc_retrieval[sess_idx] = self.get_auc(
                     classifier=outsample_classifier, features=self.pow_mat, recalls=recalls,
@@ -247,27 +241,22 @@ class ComputeClassifier(RamTask):
                 auc_both[sess_idx] = self.get_auc(
                     classifier=outsample_classifier, features=self.pow_mat, recalls=recalls, mask=outsample_both_mask)
 
-
-
         if not permuted:
             self.xval_output[-1] = ModelOutput(recalls, probs)
             self.xval_output[-1].compute_roc()
             self.xval_output[-1].compute_tercile_stats()
 
-
             print 'auc_encoding=', auc_encoding, np.mean(auc_encoding)
             print 'auc_retrieval=', auc_retrieval, np.mean(auc_retrieval)
             print 'auc_both=', auc_both, np.mean(auc_both)
 
-
-        self.pass_object('auc_encoding'+self.suffix, auc_encoding)
-        self.pass_object('auc_retrieval'+self.suffix, auc_retrieval)
-        self.pass_object('auc_both'+self.suffix, auc_both)
-
+        self.pass_object('auc_encoding' + self.suffix, auc_encoding)
+        self.pass_object('auc_retrieval' + self.suffix, auc_retrieval)
+        self.pass_object('auc_both' + self.suffix, auc_both)
 
         return probs
 
-    def permuted_loso_AUCs(self, event_sessions, recalls, samples_weights=None, events=None):
+    def permuted_loso_AUCs(self, event_sessions, recalls, use_samples_weights=False, events=None):
         n_perm = self.params.n_perm
         permuted_recalls = np.array(recalls)
         AUCs = np.empty(shape=n_perm, dtype=np.float)
@@ -279,7 +268,7 @@ class ComputeClassifier(RamTask):
                     shuffle(sess_permuted_recalls)
                     permuted_recalls[sel] = sess_permuted_recalls
                 probs = self.run_loso_xval(event_sessions, permuted_recalls, permuted=True,
-                                           samples_weights=samples_weights, events=events)
+                                           use_samples_weights=use_samples_weights, events=events)
                 AUCs[i] = roc_auc_score(recalls, probs)
                 print 'AUC =', AUCs[i]
             except ValueError:
@@ -362,34 +351,133 @@ class ComputeClassifier(RamTask):
 
         self.pass_object('classifier_path', classifier_path)
 
-
     def create_classifier_obj(self):
         return LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
-                                                        solver='newton-cg')
+                                  solver='newton-cg')
+
+    def get_sample_weights_vector(self, evs):
+        """
+        Computes vector of sample weihghts taking int account number fo 0'1 1's , 
+        whether the sample is retrieval or encoding. Or whether the sample is from PAL or from FR experiment.
+        The weighting should be desribed in detail in the design doc
+        :param evs: events
+        :return: {ndarray} vector of sample weights 
+        """
+        # evs = evs.view(np.recarray)
+        enc_mask = (evs.type == 'WORD')
+        retrieval_mask = (evs.type == 'REC_EVENT')
+
+        pal_mask = (evs.exp_name == 'PAL1')
+        fr_mask = ~pal_mask
+
+        pal_n_enc_0 = evs[pal_mask & enc_mask & (evs.correct == 0)].shape[0]
+        pal_n_enc_1 = evs[pal_mask & enc_mask & (evs.correct == 1)].shape[0]
+
+        pal_n_ret_0 = evs[pal_mask & retrieval_mask & (evs.correct == 0)].shape[0]
+        pal_n_ret_1 = evs[pal_mask & retrieval_mask & (evs.correct == 1)].shape[0]
+
+
+        fr_n_enc_0 = evs[fr_mask & enc_mask & (evs.correct == 0)].shape[0]
+        fr_n_enc_1 = evs[fr_mask & enc_mask & (evs.correct == 1)].shape[0]
+
+        fr_n_ret_0 = evs[fr_mask & retrieval_mask & (evs.correct == 0)].shape[0]
+        fr_n_ret_1 = evs[fr_mask & retrieval_mask & (evs.correct == 1)].shape[0]
+
+        ev_count_list = [pal_n_enc_0,pal_n_enc_1 ,pal_n_ret_0, pal_n_ret_1, fr_n_enc_0,fr_n_enc_1 ,fr_n_ret_0, fr_n_ret_1]
+
+        n_vec = np.array([0.0]*8, dtype=np.float)
+
+        for i, ev_count in enumerate(ev_count_list):
+            n_vec[i] = 1./ev_count if ev_count else 0.0
+
+        n_vec /= np.mean(n_vec)
+
+        # scaling PAL1 task
+        n_vec[0:4] *= self.params.pal_samples_weight
+        n_vec /= np.mean(n_vec)
+
+        #scaling encoding
+        n_vec[[0,1,4,5]] *= self.params.encoding_samples_weight
+        n_vec /= np.mean(n_vec)
+
+        samples_weights = np.ones(evs.shape[0], dtype=np.float)
+
+        samples_weights[pal_mask & enc_mask & (evs.correct == 0)] = n_vec[0]
+        samples_weights[pal_mask & enc_mask & (evs.correct == 1)] = n_vec[1]
+        samples_weights[pal_mask & retrieval_mask & (evs.correct == 0)] = n_vec[2]
+        samples_weights[pal_mask & retrieval_mask & (evs.correct == 1)] = n_vec[3]
+        
+        samples_weights[fr_mask & enc_mask & (evs.correct == 0)] = n_vec[4]
+        samples_weights[fr_mask & enc_mask & (evs.correct == 1)] = n_vec[5]
+        samples_weights[fr_mask & retrieval_mask & (evs.correct == 0)] = n_vec[6]
+        samples_weights[fr_mask & retrieval_mask & (evs.correct == 1)] = n_vec[7]
+        
+
+        return samples_weights
+
+    # def get_sample_weights_vector(self, evs):
+    #     """
+    #     Computes vector of sample weihghts taking int account number fo 0'1 1's , 
+    #     whether the sample is retrieval or encoding. Or whether the sample is from PAL or from FR experiment.
+    #     The weighting should be desribed in detail in the design doc
+    #     :param evs: events
+    #     :return: {ndarray} vector of sample weights 
+    #     """
+    #     # evs = evs.view(np.recarray)
+    #     enc_mask = (evs.type == 'WORD')
+    #     retrieval_mask = (evs.type == 'REC_EVENT')
+    #     
+    # 
+    #     n_enc_0 = evs[enc_mask & (evs.correct == 0)].shape[0]
+    #     n_enc_1 = evs[enc_mask & (evs.correct == 1)].shape[0]
+    # 
+    #     n_ret_0 = evs[retrieval_mask & (evs.correct == 0)].shape[0]
+    #     n_ret_1 = evs[retrieval_mask & (evs.correct == 1)].shape[0]
+    # 
+    #     n_vec = np.array([1.0 / n_enc_0, 1.0 / n_enc_1, 1.0 / n_ret_0, 1.0 / n_ret_1], dtype=np.float)
+    #     # n_vec /= np.mean(n_vec)
+    # 
+    #     # n_vec[:2] *= self.params.encoding_samples_weight
+    # 
+    #     # n_vec /= np.mean(n_vec)
+    # 
+    # 
+    #     samples_weights = np.ones(evs.shape[0], dtype=np.float)
+    # 
+    #     samples_weights[enc_mask & (evs.correct == 0)] = n_vec[0]
+    #     samples_weights[enc_mask & (evs.correct == 1)] = n_vec[1]
+    #     samples_weights[retrieval_mask & (evs.correct == 0)] = n_vec[2]
+    #     samples_weights[retrieval_mask & (evs.correct == 1)] = n_vec[3]
+    # 
+    #     # scaling encoding weights
+    #     samples_weights[enc_mask] *= self.params.encoding_samples_weight
+    # 
+    #     #scaling PAL1
+    # 
+    #     # samples_weights[evs.exp_type == 'PAL1'] *= self.params.self.pal_samples_weight
+    # 
+    #     samples_weights /= np.mean(samples_weights)
+    # 
+    #     return samples_weights
 
 
     def run(self):
 
-        events = self.get_passed_object('PAL1_events')
+        evs = self.get_passed_object('combined_evs')
         # self.get_pow_mat() is essential - it does the filtering on the
 
-        encoding_mask = (events.type == 'STUDY_PAIR') | (events.type == 'PRACTICE_PAIR')
+        encoding_mask = (evs.type == 'WORD')
 
         # pow_mat = self.filter_pow_mat()
         pow_mat_copy = np.copy(self.filter_pow_mat())
 
         self.pow_mat = self.filter_pow_mat()
-        self.pow_mat[encoding_mask] = normalize_sessions(self.pow_mat[encoding_mask], events[encoding_mask])
-        self.pow_mat[~encoding_mask] = normalize_sessions(self.pow_mat[~encoding_mask], events[~encoding_mask])
+        self.pow_mat[encoding_mask] = normalize_sessions(self.pow_mat[encoding_mask], evs[encoding_mask])
+        self.pow_mat[~encoding_mask] = normalize_sessions(self.pow_mat[~encoding_mask], evs[~encoding_mask])
 
         # computing z-scoring vectors
 
-        mean_dict, std_dict = compute_z_scoring_vecs(pow_mat_copy[~encoding_mask], events[~encoding_mask])
-
-        # for sess in np.unique(events.session):
-        #     z_scored_pow = (pow_mat_copy[~encoding_mask & (events.session == sess)] - mean_dict[sess])/std_dict[sess]
-        #     orig_z_scored = self.pow_mat[~encoding_mask & (events.session == sess)]
-        #     print
+        mean_dict, std_dict = compute_z_scoring_vecs(pow_mat_copy[~encoding_mask], evs[~encoding_mask])
 
         self.pass_object('features_mean_dict', mean_dict)
         self.pass_object('features_std_dict', std_dict)
@@ -413,35 +501,31 @@ class ComputeClassifier(RamTask):
         self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
                                                 solver='newton-cg')
 
-        event_sessions = events.session
+        sessions_array = evs.session
 
-        recalls = events.correct
+        recalls = evs.correct
         # recalls[events.type == 'REC_WORD'] = 1
         # recalls[events.type == 'REC_BASE'] = 0
 
-        samples_weights = np.ones(events.shape[0], dtype=np.float)
+        # samples_weights = np.ones(evs.shape[0], dtype=np.float)
+        #
+        # # samples_weights[~(events.type=='WORD')] = self.params.retrieval_samples_weight
+        #
+        # samples_weights[
+        #     (evs.type == 'WORD')] = self.params.encoding_samples_weight
+        #
+        # samples_weights[
+        #     (evs.exp_name == 'PAL1')] *= self.params.pal_samples_weight
 
-        # samples_weights[~(events.type=='WORD')] = self.params.retrieval_samples_weight
-
-        samples_weights[
-            (events.type == 'STUDY_PAIR') | (events.type == 'PRACTICE_PAIR')] = self.params.encoding_samples_weight
-
-        sessions = np.unique(event_sessions)
+        sessions = np.unique(sessions_array)
         if len(sessions) > 1:
             print 'Performing permutation test'
-            self.perm_AUCs = self.permuted_loso_AUCs(event_sessions, recalls, samples_weights, events=events)
+            self.perm_AUCs = self.permuted_loso_AUCs(sessions_array, recalls, use_samples_weights=True, events=evs)
 
             print 'Performing leave-one-session-out xval'
-            self.run_loso_xval(event_sessions, recalls, permuted=False, samples_weights=samples_weights, events=events)
+            self.run_loso_xval(sessions_array, recalls, permuted=False, use_samples_weights=True, events=evs)
         else:
-            sess = sessions[0]
-            event_lists = events.list
-
-            print 'Performing in-session permutation test'
-            self.perm_AUCs = self.permuted_lolo_AUCs(sess, event_lists, recalls, samples_weights=samples_weights)
-
-            print 'Performing leave-one-list-out xval'
-            self.run_lolo_xval(sess, event_lists, recalls, permuted=False, samples_weights=samples_weights)
+            raise RuntimeError("Training of the combined PAL1 & FR1 classifier requires at least two sessions")
 
         print 'CROSS VALIDATION AUC =', self.xval_output[-1].auc
 
@@ -451,7 +535,10 @@ class ComputeClassifier(RamTask):
 
         print 'thresh =', self.xval_output[-1].jstat_thresh, 'quantile =', self.xval_output[-1].jstat_quantile
 
+
+
         # Finally, fitting classifier on all available data
+        samples_weights = self.get_sample_weights_vector(evs=evs)
         self.lr_classifier.fit(self.pow_mat, recalls, samples_weights)
 
         # FYI - in-sample AUC
@@ -459,8 +546,8 @@ class ComputeClassifier(RamTask):
         insample_auc = roc_auc_score(recalls, recall_prob_array)
         print 'in-sample AUC=', insample_auc
 
-        print 'training retrieval_clasifiers = ', recall_prob_array[events.type=='REC_EVENT']
-        self.pass_object('rec_pow_mat',self.pow_mat[events.type=='REC_EVENT'])
+        print 'training retrieval_clasifiers = ', recall_prob_array[evs.type == 'REC_EVENT']
+        self.pass_object('rec_pow_mat', self.pow_mat[evs.type == 'REC_EVENT'])
 
         self.pass_objects()
 
@@ -519,5 +606,3 @@ class ComputeFullClassifier(ComputeClassifier):
         self.suffix = '_full'
         super(ComputeFullClassifier, self).run()
         self.compare_AUCs()
-
-
