@@ -10,22 +10,11 @@ from os.path import *
 from system_3_utils.ram_tasks.CMLParserClosedLoop3 import CMLParserCloseLoop3
 
 cml_parser = CMLParserCloseLoop3(arg_count_threshold=1)
-# cml_parser.arg('--workspace-dir','D:/scratch/FR5/R1247P')
-# cml_parser.arg('--experiment','FR5')
-# cml_parser.arg('--mount-point','D:/')
-# cml_parser.arg('--subject','R1247P')
-# cml_parser.arg('--electrode-config-file',r'd:\experiment_configs\R1247P_FR5.bin')
-# cml_parser.arg('--pulse-frequency','100')
-# cml_parser.arg('--target-amplitude','1000')
-# cml_parser.arg('--anode-num','95')
-# cml_parser.arg('--anode','Rd7')
-# cml_parser.arg('--cathode-num','97')
-# cml_parser.arg('--cathode','RE1')
 
 subject= 'R1230J'
 cml_parser.arg('--workspace-dir','/home1/leond/fr5_config')
 cml_parser.arg('--experiment','FR5')
-cml_parser.arg('--mount-point','/')
+cml_parser.arg('--mount-point','/Volumes/rhino_root')
 cml_parser.arg('--subject',subject)
 cml_parser.arg('--electrode-config-file','/home1/leond/fr5_config/contacts%s.csv'%subject)
 cml_parser.arg('--pulse-frequency','200')
@@ -171,9 +160,9 @@ report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, m
 
 report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 
-report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
+report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 
-report_pipeline.add_task(ComputeFullClassifier(params=params,mark_as_completed=False))
+report_pipeline.add_task(ComputeFullClassifier(params=params,mark_as_completed=True))
 
 report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop3(params=params, mark_as_completed=False))
 

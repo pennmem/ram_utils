@@ -57,6 +57,8 @@ python ../../system_3_utils/odin_config_tool_generator.py --subject=${subject}\
  --stim-channels ${stim_pair_1} ${stim_pair_2}
 
 config_file=${config_dir}/contacts${subject}.csv
+bin_file=${config_dir}/contacts${subject}.bin
+touch ${bin_file}
 fi
 
 workspace_dir="/scratch/system3_configs/${experiment}_biomarkers/${subject}_${experiment}_${anode1}_${cathode1}_${max_amplitude_1}mA_${anode2}_${cathode2}_${max_amplitude_2}mA_${today}"

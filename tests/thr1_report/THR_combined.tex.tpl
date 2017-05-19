@@ -23,13 +23,13 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{RAM THR report v 2.12}
+\lhead{RAM THR1 report v 2.12}
 \chead{Subject: \textbf{<SUBJECT>}}
 \rhead{Date created: <DATE>}
 \begin{document}
 
 
-\section*{<SUBJECT> RAM THR Report}
+\section*{<SUBJECT> RAM THR1 Report}
 
 \begin{tabular}{ccc}
 \begin{minipage}[htbp]{200pt}

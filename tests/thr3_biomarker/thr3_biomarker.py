@@ -9,7 +9,7 @@ from os.path import *
 from BiomarkerUtils import CMLParserBiomarker
 
 
-cml_parser = CMLParserBiomarker(arg_count_threshold=1)
+cml_parser = CMLParserBiomarker()
 cml_parser.arg('--workspace-dir','/scratch/jfm2/THR3_biomarkers')
 cml_parser.arg('--subject','R1294C')
 cml_parser.arg('--n-channels','128')
@@ -99,7 +99,7 @@ class Params(object):
 params = Params()
 
 
-report_pipeline = ReportPipeline(subject=args.subject,
+report_pipeline = ReportPipeline(subject=args.subject, sessions = args.sessions,
                                        workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point)
 
 report_pipeline.add_task(THREventPreparation(mark_as_completed=False))

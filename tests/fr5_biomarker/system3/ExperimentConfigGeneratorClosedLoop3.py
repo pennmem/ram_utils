@@ -14,6 +14,7 @@ import shutil
 import pathlib
 from itertools import cycle
 from system_3_utils import ElectrodeConfigSystem3
+from itertools import chain
 
 class ExperimentConfigGeneratorClosedLoop3(RamTask):
     def __init__(self, params, mark_as_completed=False):
@@ -89,12 +90,10 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
         electrode_config_file = self.pipeline.args.electrode_config_file
 
         ec = ElectrodeConfigSystem3.ElectrodeConfig(electrode_config_file)
-        for stim_channel  in ec.stim_channels:
-            anode_name,cathode_name = ec.stim_channels[stim_channel].name.split('_')
-            if anode_name not in anodes:
-                raise ConfigError('Stim channel name is not correctly formatted')
-            if cathode_name not in cathodes:
-                raise ConfigError('Stim channel name is not correctly formatted')
+        config_chan_names =  [ec.stim_channels[stim_channel].name for stim_channel in ec.stim_channels]
+        for stim_pair in zip(anodes,cathodes):
+            if '_'.join(stim_pair) not in config_chan_names:
+                raise ConfigError('Stim channel %s is missing from electrode config file'%('_'.join(stim_pair)))
 
         config_name = self.get_passed_object('config_name')
         subject = self.pipeline.subject.split('_')[0]
@@ -172,7 +171,10 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
                                          target_dir=config_files_dir)
 
         # zipping project_dir
-        zip_filename = join(dirname(project_dir),experiment)+'.zip'
+        zip_filename = self.get_path_to_resource_in_workspace(
+                        '%s_%s_'%(subject,experiment)
+                        +'_'.join(chain(*[(anode,cathode,str(max_amplitude)) for anode,cathode,_,max_amplitude in stim_params_list]))
+                        + '.zip')
         zipf = zipfile.ZipFile(zip_filename, 'w', zipfile.ZIP_DEFLATED)
         self.zipdir(project_dir, zipf)
         zipf.close()

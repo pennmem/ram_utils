@@ -2,8 +2,8 @@
 
 subject=R1111M
 experiment=FR3
-workspace=/scratch/pwanda/system3/$exeperiment
-#workspace=/scratch/leond/FR3_biomarkers
+workspace=/scratch/system3_configs/${experiment}
+
 electrode_config_file=${workspace}/electrode_config/contactsR1111M.csv
 anode=LPOG10
 anode_num=10

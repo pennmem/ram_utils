@@ -28,7 +28,10 @@ class CMLParser(object):
     def arg(self, name, val=None):
         self.arg_list.append(name)
         if val is not None:
-            self.arg_list.append(val)
+            if isinstance(val,list):
+                self.arg_list.extend(val)
+            else:
+                self.arg_list.append(val)
 
     def configure_python_paths(self,paths):
         for path in paths:
