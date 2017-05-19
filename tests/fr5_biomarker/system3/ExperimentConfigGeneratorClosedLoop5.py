@@ -16,7 +16,7 @@ from itertools import cycle
 from system_3_utils import ElectrodeConfigSystem3
 from itertools import chain
 
-class ExperimentConfigGeneratorClosedLoop3(RamTask):
+class ExperimentConfigGeneratorClosedLoop5(RamTask):
     def __init__(self, params, mark_as_completed=False):
         RamTask.__init__(self, mark_as_completed)
 

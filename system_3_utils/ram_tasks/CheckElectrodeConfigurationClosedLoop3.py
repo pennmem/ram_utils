@@ -27,8 +27,8 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
         bp_ch_0 = np.array(map(lambda tup: int(tup[0]), bipolar_pairs), dtype=np.int)
         bp_ch_1 = np.array(map(lambda tup: int(tup[1]), bipolar_pairs), dtype=np.int)
 
-        bipolar_pairs_int = np.rec.array(bipolar_pairs, dtype=[('ch0', np.int), ('ch1', np.int)])
-        bipolar_pairs_int_2D = bipolar_pairs_int.view(np.int).reshape(-1, 2)
+        # bipolar_pairs_int = np.rec.array(bipolar_pairs, dtype=[('ch0', np.int), ('ch1', np.int)])
+        # bipolar_pairs_int_2D = bipolar_pairs_int.view(np.int).reshape(-1, 2)
 
         sense_array_int = sense_channels_array.jack_box_num.astype(np.int)
         # check if monopolar channels are the same as sense channels in the .bin/.csv file

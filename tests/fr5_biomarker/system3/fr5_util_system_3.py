@@ -43,7 +43,7 @@ from tests.fr5_biomarker.ComputeClassifier import ComputeClassifier
 
 from tests.fr5_biomarker.ComputeClassifier import ComputeFullClassifier
 
-from tests.fr5_biomarker.system3.ExperimentConfigGeneratorClosedLoop3 import ExperimentConfigGeneratorClosedLoop3
+from tests.fr5_biomarker.system3.ExperimentConfigGeneratorClosedLoop5 import ExperimentConfigGeneratorClosedLoop5
 
 
 import numpy as np
@@ -160,11 +160,11 @@ report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, m
 
 report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 
-report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(ComputeFullClassifier(params=params,mark_as_completed=True))
+report_pipeline.add_task(ComputeFullClassifier(params=params,mark_as_completed=False))
 
-report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop3(params=params, mark_as_completed=False))
+report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
 
 
 # starts processing pipeline
