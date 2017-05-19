@@ -11,9 +11,6 @@ from prompt_toolkit.auto_suggest import AutoSuggestFromHistory, AutoSuggest, Sug
 
 from prompt_toolkit.contrib.completers import PathCompleter
 
-num_stim_pairs = 2
-
-
 class Args(object):
     """
     Class that stores output of the command line parsing
@@ -69,11 +66,11 @@ def get_prompt_tokens(cli):
     ]
 
 
-path_completer = PathCompleter()
-
-experiment_list = ['PAL5', 'PS4_CatFR5']
-
-experiment_completer = WordCompleter(experiment_list)
+# path_completer = PathCompleter()
+#
+# experiment_list = ['PAL5', 'PS4_CatFR5']
+#
+# experiment_completer = WordCompleter(experiment_list)
 
 
 class ExperimentValidator(Validator):
@@ -186,6 +183,15 @@ def parse_command_line():
     Parses command line using prompt_toolkit
     :return: Instance of Args class
     """
+    num_stim_pairs = 2
+
+    path_completer = PathCompleter()
+
+    experiment_list = ['PAL5', 'PS4_CatFR5']
+
+    experiment_completer = WordCompleter(experiment_list)
+
+
     args_obj = Args()
 
 
@@ -225,6 +231,7 @@ def parse_command_line():
     if args_obj.experiment.upper() =='PAL5':
         num_stim_pairs = 1
 
+    print 'num_stim_pairs=',num_stim_pairs
     for stim_pair_num in xrange(num_stim_pairs):
         anode = prompt('Anode label for stim_pair %d: ' % stim_pair_num, validator=ElectrodeLabelValidator())
         args_obj.anodes.append(anode)

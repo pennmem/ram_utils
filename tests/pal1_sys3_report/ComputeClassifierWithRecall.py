@@ -142,6 +142,11 @@ class ComputeClassifierWithRecall(RamTask):
 
         # outsample_classifier = self.create_classifier_obj()
 
+        encoding_mask = (events.type == 'WORD')
+        encoding_evs = events[encoding_mask]
+        encoding_recalls = recalls[encoding_mask]
+        encoding_probs = np.empty_like(encoding_recalls, dtype=np.float)
+
         probs = np.empty_like(recalls, dtype=np.float)
 
         sessions = np.unique(event_sessions)
@@ -284,6 +289,11 @@ class ComputeClassifierWithRecall(RamTask):
             print 'auc_encoding_fr=', auc_encoding_fr, np.mean(auc_encoding_fr[auc_encoding_fr > 0.0])
             print 'auc_retrieval_fr=', auc_retrieval_fr, np.mean(auc_retrieval_fr[auc_encoding_fr > 0.0])
             print 'auc_both_fr=', auc_both_fr, np.mean(auc_both_fr[auc_encoding_fr > 0.0])
+
+            self.xval_output['combined_on_encoding'] = ModelOutput(recalls, probs)
+            self.xval_output['combined_on_encoding'].compute_roc()
+            self.xval_output['combined_on_encoding'].compute_tercile_stats()
+
 
             print '\n\n'
 

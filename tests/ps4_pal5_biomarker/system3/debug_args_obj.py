@@ -142,10 +142,10 @@ args_obj_R1232N.workspace_dir = join(prefix, 'scratch', args_obj_R1232N.subject)
 
 
 args_obj_R1250N.classifier_type_to_output = 'pal'
-args_obj_R1250N.experiment = 'PAL5'
-args_obj_R1250N.anodes = ['PG10']
-args_obj_R1250N.cathodes = ['PG11']
-args_obj_R1250N.target_amplitude = 0.768
+# args_obj_R1250N.experiment = 'PAL5'
+# args_obj_R1250N.anodes = ['PG10']
+# args_obj_R1250N.cathodes = ['PG11']
+# args_obj_R1250N.target_amplitude = 0.768
 
 
 args_list.append(args_obj_R1250N)
