@@ -158,12 +158,11 @@ if __name__=='__main__':
 
     report_pipeline.add_task(ComputePAL1Classifier(params=params, mark_as_completed=False))
 
-    #
-    # report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
-    #
-    # report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
-    #
-    # report_pipeline.add_task(GenerateTex(mark_as_completed=False))
+    report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
+
+    report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
+
+    report_pipeline.add_task(GenerateTex(mark_as_completed=False))
     #
     # report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
