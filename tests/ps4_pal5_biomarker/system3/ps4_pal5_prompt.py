@@ -209,9 +209,15 @@ def parse_command_line():
     args_obj.workspace_dir = workspace_dir
     args_obj.mount_point = mount_point
 
+
+    if sys.platform.startswith('win'):
+        elestrode_file_default_location = 'd:/experiment_configs/R1284N_FromJson.csv'
+    else:
+        elestrode_file_default_location = '/scratch/system3_configs/ODIN_configs'
+
     args_obj.electrode_config_file = prompt('Electrode Configuration file (.csv): ', validator=CSVFileValidator(),
                                             completer=path_completer,
-                                            default='d:/experiment_configs/R1284N_FromJson.csv')
+                                            default=elestrode_file_default_location)
 
     args_obj.pulse_frequency = prompt('Stimulation Frequency (Hz) - FYI - DO NOT MODIFY ',
                                       validator=TypedNumberValidator(int, 'integer'), default='200')
