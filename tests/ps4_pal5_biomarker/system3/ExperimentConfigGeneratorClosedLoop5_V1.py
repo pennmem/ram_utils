@@ -129,22 +129,43 @@ class ExperimentConfigGeneratorClosedLoop5_V1(RamTask):
 
         core_name_for_electrode_file = '{subject}_{config_name}'.format(subject=subject, config_name=config_name)
 
-        experiment_config_content = experiment_config_template.generate(
-            subject=subject,
-            experiment=experiment,
-            classifier_file='config_files/%s' % basename(classifier_path),
-            stim_params_dict=stim_params_dict,
+        if experiment == 'PAL5':
+            experiment_config_content = experiment_config_template.generate(
+                subject=subject,
+                experiment=experiment,
+                classifier_file='config_files/%s' % basename(classifier_path),
 
-            # electrode_config_file='config_files/{subject}_{config_name}.bin'.format(subject=subject,config_name=config_name),
-            electrode_config_file='config_files/{core_name_for_electrode_file}.bin'.format(
-                core_name_for_electrode_file=core_name_for_electrode_file),
+                target_amplitude=self.pipeline.args.target_amplitude,
 
-            montage_file='config_files/%s' % basename(bipolar_pairs_path),
-            excluded_montage_file='config_files/%s' % basename(excluded_pairs_path),
-            biomarker_threshold=0.5,
-            # retrieval_biomarker_threshold = retrieval_biomarker_threshold,
-            fr5_stim_channel=fr5_stim_channel
-        )
+                # electrode_config_file='config_files/{subject}_{config_name}.bin'.format(subject=subject,config_name=config_name),
+                electrode_config_file='config_files/{core_name_for_electrode_file}.bin'.format(
+                    core_name_for_electrode_file=core_name_for_electrode_file),
+
+                montage_file='config_files/%s' % basename(bipolar_pairs_path),
+                excluded_montage_file='config_files/%s' % basename(excluded_pairs_path),
+                biomarker_threshold=0.5,
+                # retrieval_biomarker_threshold = retrieval_biomarker_threshold,
+                fr5_stim_channel=fr5_stim_channel
+            )
+
+        else:
+
+            experiment_config_content = experiment_config_template.generate(
+                subject=subject,
+                experiment=experiment,
+                classifier_file='config_files/%s' % basename(classifier_path),
+                stim_params_dict=stim_params_dict,
+
+                # electrode_config_file='config_files/{subject}_{config_name}.bin'.format(subject=subject,config_name=config_name),
+                electrode_config_file='config_files/{core_name_for_electrode_file}.bin'.format(
+                    core_name_for_electrode_file=core_name_for_electrode_file),
+
+                montage_file='config_files/%s' % basename(bipolar_pairs_path),
+                excluded_montage_file='config_files/%s' % basename(excluded_pairs_path),
+                biomarker_threshold=0.5,
+                # retrieval_biomarker_threshold = retrieval_biomarker_threshold,
+                fr5_stim_channel=fr5_stim_channel
+            )
 
         experiment_config_file, experiment_config_full_filename = self.create_file_in_workspace_dir(
             project_dir_corename + '/experiment_config.json')

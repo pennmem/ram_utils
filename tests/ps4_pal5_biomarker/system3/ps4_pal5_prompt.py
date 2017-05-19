@@ -216,6 +216,9 @@ def parse_command_line():
     args_obj.pulse_frequency = prompt('Stimulation Frequency (Hz) - FYI - DO NOT MODIFY ',
                                       validator=TypedNumberValidator(int, 'integer'), default='200')
 
+    if args_obj.experiment.upper() =='PAL5':
+        num_stim_pairs = 1
+
     for stim_pair_num in xrange(num_stim_pairs):
         anode = prompt('Anode label for stim_pair %d: ' % stim_pair_num, validator=ElectrodeLabelValidator())
         args_obj.anodes.append(anode)
@@ -223,13 +226,19 @@ def parse_command_line():
         cathode = prompt('Cathode label for stim_pair %d: ' % stim_pair_num, validator=ElectrodeLabelValidator())
         args_obj.cathodes.append(cathode)
 
-        min_ampl = prompt('Min stim amplitude (in mA ) for stim_pair %d: ' % stim_pair_num,
-                          validator=AmplitudeValidator())
-        args_obj.min_amplitudes.append(min_ampl)
+        if args_obj.experiment.upper() != 'PAL5':
 
-        max_ampl = prompt('Max stim amplitude (in mA ) for stim_pair %d: ' % stim_pair_num,
-                          validator=MaxAmplitudeValidator(min_ampl))
-        args_obj.max_amplitudes.append(max_ampl)
+            min_ampl = prompt('Min stim amplitude (in mA ) for stim_pair %d: ' % stim_pair_num,
+                              validator=AmplitudeValidator())
+            args_obj.min_amplitudes.append(min_ampl)
+
+            max_ampl = prompt('Max stim amplitude (in mA ) for stim_pair %d: ' % stim_pair_num,
+                              validator=MaxAmplitudeValidator(min_ampl))
+            args_obj.max_amplitudes.append(max_ampl)
+
+        else:
+            args_obj.target_amplitude = prompt('Stim amplitude (in mA ) for stim_pair %d: ' % stim_pair_num,
+                              validator=MaxAmplitudeValidator(0.05))
 
 
     args_obj.classifier_type_to_output = prompt('Classifier Type To Output: ', completer=WordCompleter(['combined','pal']),
