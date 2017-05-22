@@ -70,7 +70,7 @@ class CombinedEventPreparation(RamTask):
 
         # filtering catfr1_evs
         # NOTICE: we will relabel catFR1 events as FR1 events, hence task_name='FR1' below.
-        catfr1_evs = self.process_events(evs=catfr1_evs, session_increment=100, columns_to_keep=columns_to_keep,
+        catfr1_evs = self.process_events(evs=catfr1_evs, session_increment=200, columns_to_keep=columns_to_keep,
                                          columns_to_keep_fr=columns_to_keep_fr1, task_name='FR1')
 
         # filtering pal1_evs

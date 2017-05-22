@@ -384,14 +384,14 @@ class ComputeClassifierWithRecall(RamTask):
         self.pass_object('perm_AUCs_combined' + self.suffix, self.perm_AUCs)
         self.pass_object('pvalue_combined' + self.suffix, self.pvalue)
 
-        classifier_path = self.get_path_to_resource_in_workspace(subject + '-lr_classifier' + self.suffix + '.pkl')
+        classifier_path = self.get_path_to_resource_in_workspace(subject + '-combined_lr_classifier' + self.suffix + '.pkl')
         joblib.dump(self.lr_classifier, classifier_path)
-        # joblib.dump(self.lr_classifier, self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl'))
+        joblib.dump(self.lr_classifier, self.get_path_to_resource_in_workspace(subject + '-combined_lr_classifier' + self.suffix + '.pkl'))
         joblib.dump(self.xval_output,
-                    self.get_path_to_resource_in_workspace(subject + '-xval_output' + self.suffix + '.pkl'))
+                    self.get_path_to_resource_in_workspace(subject + '-combined_xval_output' + self.suffix + '.pkl'))
         joblib.dump(self.perm_AUCs,
-                    self.get_path_to_resource_in_workspace(subject + '-perm_AUCs' + self.suffix + '.pkl'))
-        joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject + '-pvalue' + self.suffix + '.pkl'))
+                    self.get_path_to_resource_in_workspace(subject + '-combined_perm_AUCs' + self.suffix + '.pkl'))
+        joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject + '-combined_pvalue' + self.suffix + '.pkl'))
 
         self.pass_object('classifier_path_combined' + self.suffix, classifier_path)
 
@@ -524,14 +524,16 @@ class ComputeClassifierWithRecall(RamTask):
         self.run_classifier_pipeline(evs)
 
     def restore(self):
+
         subject = self.pipeline.subject
 
-        classifier_path = self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl')
+        classifier_path = self.get_path_to_resource_in_workspace(subject + '-combined_lr_classifier' + self.suffix + '.pkl')
+        # classifier_path = self.get_path_to_resource_in_workspace(subject + '-combined_lr_classifier.pkl')
         self.lr_classifier = joblib.load(classifier_path)
-        # self.lr_classifier = joblib.load(self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl'))
-        self.xval_output = joblib.load(self.get_path_to_resource_in_workspace(subject + '-xval_output.pkl'))
-        self.perm_AUCs = joblib.load(self.get_path_to_resource_in_workspace(subject + '-perm_AUCs.pkl'))
-        self.pvalue = joblib.load(self.get_path_to_resource_in_workspace(subject + '-pvalue.pkl'))
+
+        self.xval_output = joblib.load(self.get_path_to_resource_in_workspace(subject + '-combined_xval_output' + self.suffix + '.pkl'))
+        self.perm_AUCs = joblib.load(self.get_path_to_resource_in_workspace(subject + '-combined_perm_AUCs' + self.suffix + '.pkl'))
+        self.pvalue = joblib.load(self.get_path_to_resource_in_workspace(subject + '-combined_pvalue' + self.suffix + '.pkl'))
 
         self.pass_object('classifier_path_combined' + self.suffix, classifier_path)
         self.pass_object('lr_classifier_combined' + self.suffix, self.lr_classifier)
@@ -559,6 +561,8 @@ class ComputeFullClassifier(ComputeClassifierWithRecall):
         self.pass_object('full_classifier_path', full_classifier_path)
         self.pass_object('xval_output_all_electrodes', self.xval_output)
 
+
+
     def pass_objects(self):
         subject = self.pipeline.subject
         classifier_path = self.get_path_to_resource_in_workspace(subject + 'lr_classifier_full.pkl')
@@ -583,17 +587,17 @@ class ComputeFullClassifier(ComputeClassifierWithRecall):
 class ComputePAL1Classifier(ComputeClassifierWithRecall):
     def restore(self):
         subject = self.pipeline.subject
-        full_classifier_path = self.get_path_to_resource_in_workspace(subject + '-xval_output_all_electrodes.pkl')
-        self.xval_output = joblib.load(full_classifier_path)
+        pal1_only_classifier_path = self.get_path_to_resource_in_workspace(subject + '-xval_output_pal1_only.pkl')
+        self.xval_output = joblib.load(pal1_only_classifier_path)
         self.compare_AUCs()
-        self.pass_object('full_classifier_path', full_classifier_path)
-        self.pass_object('xval_output_all_electrodes', self.xval_output)
+        self.pass_object('pal1_only_classidier_path_path', pal1_only_classifier_path)
+        self.pass_object('xval_output_pal1_only', self.xval_output)
 
-    def compare_AUCs(self):
-        reduced_xval_output = self.get_passed_object('xval_output')
-        print '\n\n'
-        print 'AUC WITH ALL ELECTRODES: ', self.xval_output[-1].auc
-        print 'AUC EXCLUDING STIM-ADJACENT ELECTRODES: ', reduced_xval_output[-1].auc
+    # def compare_AUCs(self):
+    #     reduced_xval_output = self.get_passed_object('xval_output')
+    #     print '\n\n'
+    #     print 'AUC WITH ALL ELECTRODES: ', self.xval_output[-1].auc
+    #     print 'AUC EXCLUDING STIM-ADJACENT ELECTRODES: ', reduced_xval_output[-1].auc
 
     def filter_pow_mat(self):
         pow_mat = super(ComputePAL1Classifier, self).filter_pow_mat()

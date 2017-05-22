@@ -147,7 +147,7 @@ class FREventPreparation(RamTask):
 
 
 
-    def restore(self):
-        subject = self.pipeline.subject
-        events = joblib.load(self.get_path_to_resource_in_workspace(subject + '-FR_events.pkl'))
-        self.pass_object('FR_events', events)
+    # def restore(self):
+    #     subject = self.pipeline.subject
+    #     events = joblib.load(self.get_path_to_resource_in_workspace(subject + '-FR_events.pkl'))
+    #     self.pass_object('FR_events', events)
