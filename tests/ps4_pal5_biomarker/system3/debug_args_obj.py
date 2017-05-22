@@ -7,10 +7,12 @@ import sys
 if sys.platform.startswith('win'):
 
     prefix = 'd:/'
+    default_workspace_dir = 'D:/scratch_PS4_CatFR5'
 
 else:
 
     prefix = '/'
+    default_workspace_dir = '/scratch/PS4_CatFR5'
 
 args_list = []
 
@@ -25,7 +27,7 @@ args_obj_R1250N.min_amplitudes = [0.25, 0.25]
 args_obj_R1250N.max_amplitudes = [1.0, 1.0]
 args_obj_R1250N.mount_point = prefix
 args_obj_R1250N.pulse_frequency = 200
-args_obj_R1250N.workspace_dir = None
+args_obj_R1250N.workspace_dir = default_workspace_dir
 args_obj_R1250N.allow_fast_rerun = True
 
 
@@ -40,6 +42,7 @@ args_obj_R1095N.min_amplitudes = [0.25,0.25]
 args_obj_R1095N.max_amplitudes = [1.0,1.0]
 args_obj_R1095N.mount_point = prefix
 args_obj_R1095N.pulse_frequency = 200
+args_obj_R1250N.workspace_dir = default_workspace_dir
 args_obj_R1095N.allow_fast_rerun = True
 
 # ------------------------------------------------- R1284N
@@ -54,6 +57,7 @@ args_obj_R1284N.max_amplitudes = [1.0,1.0]
 args_obj_R1284N.mount_point = prefix
 args_obj_R1284N.pulse_frequency = 200
 args_obj_R1095N.allow_fast_rerun = True
+args_obj_R1250N.workspace_dir = default_workspace_dir
 
 
 # ------------------------------------------------- R1002P
@@ -68,6 +72,7 @@ args_obj_R1002P.max_amplitudes = [1.0,1.0]
 args_obj_R1002P.mount_point = prefix
 args_obj_R1002P.pulse_frequency = 200
 args_obj_R1095N.allow_fast_rerun = True
+args_obj_R1250N.workspace_dir = default_workspace_dir
 
 # ------------------------------------------------- R1065J
 args_obj_R1065J = Args()
@@ -81,7 +86,7 @@ args_obj_R1065J.max_amplitudes = [1.0,1.0]
 args_obj_R1065J.mount_point = prefix
 args_obj_R1065J.pulse_frequency = 200
 args_obj_R1095N.allow_fast_rerun = True
-
+args_obj_R1250N.workspace_dir = default_workspace_dir
 
 # ------------------------------------------------- R1162N
 args_obj_R1162N = Args()
@@ -94,7 +99,8 @@ args_obj_R1162N.min_amplitudes = [0.25,0.25]
 args_obj_R1162N.max_amplitudes = [1.0,1.0]
 args_obj_R1162N.mount_point = prefix
 args_obj_R1162N.pulse_frequency = 200
-args_obj_R1162N.workspace_dir = join(prefix, 'scratch', args_obj_R1162N.subject)
+args_obj_R1250N.workspace_dir = default_workspace_dir
+# args_obj_R1162N.workspace_dir = join(prefix, 'scratch', args_obj_R1162N.subject)
 
 
 # ------------------------------------------------- R1175N
@@ -108,7 +114,8 @@ args_obj_R1175N.min_amplitudes = [0.25,0.25]
 args_obj_R1175N.max_amplitudes = [1.0,1.0]
 args_obj_R1175N.mount_point = prefix
 args_obj_R1175N.pulse_frequency = 200
-args_obj_R1175N.workspace_dir = join(prefix, 'scratch', args_obj_R1175N.subject)
+args_obj_R1250N.workspace_dir = default_workspace_dir
+# args_obj_R1175N.workspace_dir = join(prefix, 'scratch', args_obj_R1175N.subject)
 
 # ------------------------------------------------- R1212P
 args_obj_R1212P = Args()
@@ -121,8 +128,8 @@ args_obj_R1212P.min_amplitudes = [0.25,0.25]
 args_obj_R1212P.max_amplitudes = [1.0,1.0]
 args_obj_R1212P.mount_point = prefix
 args_obj_R1212P.pulse_frequency = 200
-args_obj_R1212P.workspace_dir = join(prefix, 'scratch', args_obj_R1212P.subject)
-
+# args_obj_R1212P.workspace_dir = join(prefix, 'scratch', args_obj_R1212P.subject)
+args_obj_R1250N.workspace_dir = default_workspace_dir
 
     
 # ------------------------------------------------- R1232N    
@@ -136,18 +143,18 @@ args_obj_R1232N.min_amplitudes = [0.25,0.25]
 args_obj_R1232N.max_amplitudes = [1.0,1.0]
 args_obj_R1232N.mount_point = prefix
 args_obj_R1232N.pulse_frequency = 200
-args_obj_R1232N.workspace_dir = join(prefix, 'scratch', args_obj_R1232N.subject)
+# args_obj_R1232N.workspace_dir = join(prefix, 'scratch', args_obj_R1232N.subject)
+args_obj_R1250N.workspace_dir = default_workspace_dir
 
 
 
-
-args_obj_R1250N.classifier_type_to_output = 'pal'
+# args_obj_R1250N.classifier_type_to_output = 'pal'
 # args_obj_R1250N.experiment = 'PAL5'
 # args_obj_R1250N.anodes = ['PG10']
 # args_obj_R1250N.cathodes = ['PG11']
 # args_obj_R1250N.target_amplitude = 0.768
 
-
+# args_obj_R1250N.workspace_dir = 'D:/scratch_PS4_CatFR5'
 args_list.append(args_obj_R1250N)
 
 # args_list.append(args_obj_R1095N)
