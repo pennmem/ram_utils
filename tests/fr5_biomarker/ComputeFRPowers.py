@@ -97,8 +97,9 @@ class ComputeFRPowers(RamTask):
                                               params.freqs, params.log_powers)
 
         events = np.concatenate([encoding_events,retrieval_events]).view(np.recarray)
-        events.sort(order='mstime')
+        events.sort(order=['session','list','mstime'])
         self.pass_object('FR_events',events)
+        joblib.dump(events,self.get_path_to_resource_in_workspace('%s-FR_events.pkl'%subject))
         is_encoding_event = events.type=='WORD'
 
         self.pow_mat = np.zeros((len(events),len(bipolar_pairs)*len(params.freqs)))

@@ -5,9 +5,9 @@ import numpy as np
 
 parser = CMLParser()
 # Default-ish args here
-parser.arg('--subject','R1299T')
+parser.arg('--subject','R1302M')
 parser.arg('--task','FR5')
-parser.arg('--workspace-dir','fr5_reports')
+parser.arg('--workspace-dir','/scratch/leond/fr5_reports')
 parser.arg('--mount-point','')
 # parser.arg('--sessions',['1','2','101'])
 

@@ -259,7 +259,9 @@ class ComputeClassifier(RamTask):
             print 'auc_retrieval=', auc_retrieval, np.mean(auc_retrieval)
             print 'auc_both=', auc_both, np.mean(auc_both)
 
-
+        joblib.dump({'auc_encoding'+self.suffix:auc_encoding,
+                     'auc_retrieval'+self.suffix:auc_retrieval,
+                     'auc_both'+self.suffix:auc_both},self.get_path_to_resource_in_workspace('aucs.pkl'))
         self.pass_object('auc_encoding'+self.suffix, auc_encoding)
         self.pass_object('auc_retrieval'+self.suffix, auc_retrieval)
         self.pass_object('auc_both'+self.suffix, auc_both)
@@ -393,6 +395,8 @@ class ComputeClassifier(RamTask):
 
         self.pass_object('features_mean_dict', mean_dict)
         self.pass_object('features_std_dict', std_dict)
+        joblib.dump(mean_dict,self.get_path_to_resource_in_workspace('features_mean_dict.pkl'),)
+        joblib.dump(std_dict,self.get_path_to_resource_in_workspace('features_std_dict.pkl'),)
 
         print
 
@@ -474,11 +478,22 @@ class ComputeClassifier(RamTask):
         self.perm_AUCs = joblib.load(self.get_path_to_resource_in_workspace(subject + '-perm_AUCs.pkl'))
         self.pvalue = joblib.load(self.get_path_to_resource_in_workspace(subject + '-pvalue.pkl'))
 
+
         self.pass_object('classifier_path', classifier_path)
         self.pass_object('lr_classifier', self.lr_classifier)
         self.pass_object('xval_output', self.xval_output)
         self.pass_object('perm_AUCs', self.perm_AUCs)
         self.pass_object('pvalue', self.pvalue)
+
+        aucs_dict = joblib.load(self.get_path_to_resource_in_workspace('aucs.pkl'))
+        for k in aucs_dict:
+            self.pass_object(k,aucs_dict[k])
+
+        mean_dict=joblib.load(self.get_path_to_resource_in_workspace('features_mean_dict.pkl'))
+        std_dict = joblib.load(self.get_path_to_resource_in_workspace('features_std_dict.pkl'))
+        self.pass_object('features_mean_dict', mean_dict)
+        self.pass_object('features_std_dict', std_dict)
+
 
 
 class ComputeFullClassifier(ComputeClassifier):

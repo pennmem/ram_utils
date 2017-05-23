@@ -2,8 +2,8 @@
 
 subject=R1250N
 experiment=PAL3
-workspace=/scratch/pwanda/system3/$experiment
-electrode_config_file=/scratch/electrode_configs/R1250N_PAL3.bin
+workspace=/scratch/system3_configs/$experiment
+electrode_config_file=${workspace}/electrode_configs/R1250N_PAL3.bin
 anode=PG10
 anode_num=10
 cathode=PG11

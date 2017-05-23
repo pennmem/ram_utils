@@ -7,7 +7,7 @@ read -p "LOCALIZATION:" localization
 read -p "MONTAGE:" montage
 #montage=0
 #stim_pair=LPOG10-LPOG11
-read -p "STIM PAIR:" stim_pair
+read -p "STIM PAIR[S]:" stim_pair
 
 contacts_json="/protocols/r1/subjects/${subject}/localizations/${localization}/montages/${montage}/neuroradiology/current_processed/contacts.json"
 #contacts_json_output_dir="/home1/leond"

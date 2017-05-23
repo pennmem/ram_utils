@@ -1,6 +1,6 @@
 #!/bin/bash
 
-workspace=/scratch/leond/TH3_biomarkers
+workspace=/scratch/pwanda/TH3_biomarkers
 subject=R1294C
 n_channels=128
 anode=RHH11
