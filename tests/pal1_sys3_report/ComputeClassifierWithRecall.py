@@ -142,6 +142,8 @@ class ComputeClassifierWithRecall(RamTask):
 
         # outsample_classifier = self.create_classifier_obj()
 
+        encoding_mask = (events.type == 'WORD')
+
         probs = np.empty_like(recalls, dtype=np.float)
 
         sessions = np.unique(event_sessions)
@@ -168,11 +170,11 @@ class ComputeClassifierWithRecall(RamTask):
             insample_enc_mask = insample_mask & ((events.type == 'WORD'))
             insample_retrieval_mask = insample_mask & (events.type == 'REC_EVENT')
 
-
             insample_samples_weights = self.get_sample_weights_vector(evs=events[insample_mask])
 
             outsample_both_mask = (events.session == sess)
 
+            outsample_encoding_mask = encoding_mask & (events.session == sess)
 
             # TODO ORIGINAL CODE
             with warnings.catch_warnings():
@@ -216,11 +218,6 @@ class ComputeClassifierWithRecall(RamTask):
                 outsample_retrieval_fr_mask = (events.session == sess) & (events.type == 'REC_EVENT') & (
                     events.exp_name == 'FR1')
                 outsample_both_fr_mask = (events.session == sess) & (events.exp_name == 'FR1')
-
-                # print 'num outsample_encoding_pal = ', np.sum(outsample_encoding_pal_mask.astype(np.int))
-                # print 'num outsample_retrieval_pal_mask = ', np.sum(outsample_retrieval_pal_mask.astype(np.int))
-                # print 'num outsample_both_pal_mask = ', np.sum(outsample_both_pal_mask.astype(np.int))
-                #
 
                 auc_encoding[sess_idx] = self.get_auc(
                     classifier=outsample_classifier, features=self.pow_mat, recalls=recalls,
@@ -284,6 +281,11 @@ class ComputeClassifierWithRecall(RamTask):
             print 'auc_encoding_fr=', auc_encoding_fr, np.mean(auc_encoding_fr[auc_encoding_fr > 0.0])
             print 'auc_retrieval_fr=', auc_retrieval_fr, np.mean(auc_retrieval_fr[auc_encoding_fr > 0.0])
             print 'auc_both_fr=', auc_both_fr, np.mean(auc_both_fr[auc_encoding_fr > 0.0])
+
+            self.xval_output['tested_on_encoding'] = ModelOutput(recalls[encoding_mask], probs[encoding_mask])
+            self.xval_output['tested_on_encoding'].compute_roc()
+            self.xval_output['tested_on_encoding'].compute_tercile_stats()
+            print 'AUC tested on encoding only = ', self.xval_output['tested_on_encoding'].auc
 
             print '\n\n'
 
@@ -382,14 +384,17 @@ class ComputeClassifierWithRecall(RamTask):
         self.pass_object('perm_AUCs_combined' + self.suffix, self.perm_AUCs)
         self.pass_object('pvalue_combined' + self.suffix, self.pvalue)
 
-        classifier_path = self.get_path_to_resource_in_workspace(subject + '-lr_classifier' + self.suffix + '.pkl')
+        classifier_path = self.get_path_to_resource_in_workspace(
+            subject + '-combined_lr_classifier' + self.suffix + '.pkl')
         joblib.dump(self.lr_classifier, classifier_path)
-        # joblib.dump(self.lr_classifier, self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl'))
+        joblib.dump(self.lr_classifier,
+                    self.get_path_to_resource_in_workspace(subject + '-combined_lr_classifier' + self.suffix + '.pkl'))
         joblib.dump(self.xval_output,
-                    self.get_path_to_resource_in_workspace(subject + '-xval_output' + self.suffix + '.pkl'))
+                    self.get_path_to_resource_in_workspace(subject + '-combined_xval_output' + self.suffix + '.pkl'))
         joblib.dump(self.perm_AUCs,
-                    self.get_path_to_resource_in_workspace(subject + '-perm_AUCs' + self.suffix + '.pkl'))
-        joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject + '-pvalue' + self.suffix + '.pkl'))
+                    self.get_path_to_resource_in_workspace(subject + '-combined_perm_AUCs' + self.suffix + '.pkl'))
+        joblib.dump(self.pvalue,
+                    self.get_path_to_resource_in_workspace(subject + '-combined_pvalue' + self.suffix + '.pkl'))
 
         self.pass_object('classifier_path_combined' + self.suffix, classifier_path)
 
@@ -455,8 +460,6 @@ class ComputeClassifierWithRecall(RamTask):
         samples_weights[fr_mask & retrieval_mask & (evs.correct == 1)] = n_vec[7]
 
         return samples_weights
-
-
 
     def run_classifier_pipeline(self, evs):
 
@@ -524,20 +527,26 @@ class ComputeClassifierWithRecall(RamTask):
         self.run_classifier_pipeline(evs)
 
     def restore(self):
+
         subject = self.pipeline.subject
 
-        classifier_path = self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl')
+        classifier_path = self.get_path_to_resource_in_workspace(
+            subject + '-combined_lr_classifier' + self.suffix + '.pkl')
+        # classifier_path = self.get_path_to_resource_in_workspace(subject + '-combined_lr_classifier.pkl')
         self.lr_classifier = joblib.load(classifier_path)
-        # self.lr_classifier = joblib.load(self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl'))
-        self.xval_output = joblib.load(self.get_path_to_resource_in_workspace(subject + '-xval_output.pkl'))
-        self.perm_AUCs = joblib.load(self.get_path_to_resource_in_workspace(subject + '-perm_AUCs.pkl'))
-        self.pvalue = joblib.load(self.get_path_to_resource_in_workspace(subject + '-pvalue.pkl'))
 
-        self.pass_object('classifier_path_combined'+self.suffix, classifier_path)
-        self.pass_object('lr_classifier_combined'+self.suffix, self.lr_classifier)
-        self.pass_object('xval_output_combined'+self.suffix, self.xval_output)
-        self.pass_object('perm_AUCs_combined'+self.suffix, self.perm_AUCs)
-        self.pass_object('pvalue_combined'+self.suffix, self.pvalue)
+        self.xval_output = joblib.load(
+            self.get_path_to_resource_in_workspace(subject + '-combined_xval_output' + self.suffix + '.pkl'))
+        self.perm_AUCs = joblib.load(
+            self.get_path_to_resource_in_workspace(subject + '-combined_perm_AUCs' + self.suffix + '.pkl'))
+        self.pvalue = joblib.load(
+            self.get_path_to_resource_in_workspace(subject + '-combined_pvalue' + self.suffix + '.pkl'))
+
+        self.pass_object('classifier_path_combined' + self.suffix, classifier_path)
+        self.pass_object('lr_classifier_combined' + self.suffix, self.lr_classifier)
+        self.pass_object('xval_output_combined' + self.suffix, self.xval_output)
+        self.pass_object('perm_AUCs_combined' + self.suffix, self.perm_AUCs)
+        self.pass_object('pvalue_combined' + self.suffix, self.pvalue)
 
 
 class ComputeFullClassifier(ComputeClassifierWithRecall):
@@ -583,26 +592,11 @@ class ComputeFullClassifier(ComputeClassifierWithRecall):
 class ComputePAL1Classifier(ComputeClassifierWithRecall):
     def restore(self):
         subject = self.pipeline.subject
-        full_classifier_path = self.get_path_to_resource_in_workspace(subject + '-xval_output_all_electrodes.pkl')
-        self.xval_output = joblib.load(full_classifier_path)
+        pal1_only_classifier_path = self.get_path_to_resource_in_workspace(subject + '-xval_output_pal1_only.pkl')
+        self.xval_output = joblib.load(pal1_only_classifier_path)
         self.compare_AUCs()
-        self.pass_object('full_classifier_path', full_classifier_path)
-        self.pass_object('xval_output_all_electrodes', self.xval_output)
-
-    # def pass_objects(self):
-    #     subject = self.pipeline.subject
-    #     classifier_path = self.get_path_to_resource_in_workspace(subject + 'lr_classifier_full.pkl')
-    #     joblib.dump(self.lr_classifier, classifier_path)
-    #     joblib.dump(self.xval_output,
-    #                 self.get_path_to_resource_in_workspace(subject + '-xval_output_all_electrodes.pkl'))
-    #     self.pass_object('classifier_path', classifier_path)
-    #     self.pass_object('xval_output_all_electrodes', self.xval_output)
-
-    def compare_AUCs(self):
-        reduced_xval_output = self.get_passed_object('xval_output')
-        print '\n\n'
-        print 'AUC WITH ALL ELECTRODES: ', self.xval_output[-1].auc
-        print 'AUC EXCLUDING STIM-ADJACENT ELECTRODES: ', reduced_xval_output[-1].auc
+        self.pass_object('pal1_only_classidier_path_path', pal1_only_classifier_path)
+        self.pass_object('xval_output_pal1_only', self.xval_output)
 
     def filter_pow_mat(self):
         pow_mat = super(ComputePAL1Classifier, self).filter_pow_mat()
@@ -620,4 +614,3 @@ class ComputePAL1Classifier(ComputeClassifierWithRecall):
         print '\n\n ---------------- PAL1 CLASSIFIER ONLY------------------\n\n'
 
         super(ComputePAL1Classifier, self).run_classifier_pipeline(evs)
-

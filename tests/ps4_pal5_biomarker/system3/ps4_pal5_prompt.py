@@ -11,9 +11,6 @@ from prompt_toolkit.auto_suggest import AutoSuggestFromHistory, AutoSuggest, Sug
 
 from prompt_toolkit.contrib.completers import PathCompleter
 
-num_stim_pairs = 2
-
-
 class Args(object):
     """
     Class that stores output of the command line parsing
@@ -69,11 +66,11 @@ def get_prompt_tokens(cli):
     ]
 
 
-path_completer = PathCompleter()
-
-experiment_list = ['PAL5', 'PS4_CatFR5']
-
-experiment_completer = WordCompleter(experiment_list)
+# path_completer = PathCompleter()
+#
+# experiment_list = ['PAL5', 'PS4_CatFR5']
+#
+# experiment_completer = WordCompleter(experiment_list)
 
 
 class ExperimentValidator(Validator):
@@ -186,6 +183,15 @@ def parse_command_line():
     Parses command line using prompt_toolkit
     :return: Instance of Args class
     """
+    num_stim_pairs = 2
+
+    path_completer = PathCompleter()
+
+    experiment_list = ['PAL5', 'PS4_CatFR5']
+
+    experiment_completer = WordCompleter(experiment_list)
+
+
     args_obj = Args()
 
 
@@ -209,13 +215,23 @@ def parse_command_line():
     args_obj.workspace_dir = workspace_dir
     args_obj.mount_point = mount_point
 
+
+    if sys.platform.startswith('win'):
+        elestrode_file_default_location = 'd:/experiment_configs/R1284N_FromJson.csv'
+    else:
+        elestrode_file_default_location = '/scratch/system3_configs/ODIN_configs'
+
     args_obj.electrode_config_file = prompt('Electrode Configuration file (.csv): ', validator=CSVFileValidator(),
                                             completer=path_completer,
-                                            default='d:/experiment_configs/R1284N_FromJson.csv')
+                                            default=elestrode_file_default_location)
 
     args_obj.pulse_frequency = prompt('Stimulation Frequency (Hz) - FYI - DO NOT MODIFY ',
                                       validator=TypedNumberValidator(int, 'integer'), default='200')
 
+    if args_obj.experiment.upper() =='PAL5':
+        num_stim_pairs = 1
+
+    print 'num_stim_pairs=',num_stim_pairs
     for stim_pair_num in xrange(num_stim_pairs):
         anode = prompt('Anode label for stim_pair %d: ' % stim_pair_num, validator=ElectrodeLabelValidator())
         args_obj.anodes.append(anode)
@@ -223,13 +239,19 @@ def parse_command_line():
         cathode = prompt('Cathode label for stim_pair %d: ' % stim_pair_num, validator=ElectrodeLabelValidator())
         args_obj.cathodes.append(cathode)
 
-        min_ampl = prompt('Min stim amplitude (in mA ) for stim_pair %d: ' % stim_pair_num,
-                          validator=AmplitudeValidator())
-        args_obj.min_amplitudes.append(min_ampl)
+        if args_obj.experiment.upper() != 'PAL5':
 
-        max_ampl = prompt('Max stim amplitude (in mA ) for stim_pair %d: ' % stim_pair_num,
-                          validator=MaxAmplitudeValidator(min_ampl))
-        args_obj.max_amplitudes.append(max_ampl)
+            min_ampl = prompt('Min stim amplitude (in mA ) for stim_pair %d: ' % stim_pair_num,
+                              validator=AmplitudeValidator())
+            args_obj.min_amplitudes.append(min_ampl)
+
+            max_ampl = prompt('Max stim amplitude (in mA ) for stim_pair %d: ' % stim_pair_num,
+                              validator=MaxAmplitudeValidator(min_ampl))
+            args_obj.max_amplitudes.append(max_ampl)
+
+        else:
+            args_obj.target_amplitude = prompt('Stim amplitude (in mA ) for stim_pair %d: ' % stim_pair_num,
+                              validator=MaxAmplitudeValidator(0.05))
 
 
     args_obj.classifier_type_to_output = prompt('Classifier Type To Output: ', completer=WordCompleter(['combined','pal']),

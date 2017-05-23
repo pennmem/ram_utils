@@ -97,7 +97,7 @@ Type & Channel \# & Electrode Pair & Atlas Loc & \textit{p} & \textit{t}-stat \\
 
 \clearpage
 \begin{center}
-\textbf{\Large Multivariate classification analysis}
+\textbf{\Large Multivariate classification analysis - trained on PAL1 encoding}
 \end{center}
 
 \begin{figure}[!h]
@@ -114,6 +114,50 @@ $\bullet$ Area Under Curve = $<AUC>$\%
 $\bullet$ Permutation test $p$-value $<PERM-P-VALUE>$
 
 $\bullet$ Median of classifier output = $<J-THRESH>$
+
+
+\clearpage
+\begin{center}
+\textbf{\Large Multivariate classification analysis - training on FR1/PAL1 }
+\end{center}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.45]{<ROC_AND_TERC_PLOT_FILE_FR_PAL_ENC>}
+\caption{\textbf{(a)} ROC curve for the subject;
+\textbf{(b)} Subject recall performance represented as
+percentage devation from the (subject) mean, separated by tercile
+of the classifier encoding efficiency estimate for each encoded word.}
+\end{figure}
+
+$\bullet$ Area Under Curve = $<AUC_FR_PAL_ENC>$\%
+
+$\bullet$ Permutation test $p$-value $<PERM-P-VALUE_FR_PAL_ENC>$
+
+$\bullet$ Median of classifier output = $<J-THRESH_FR_PAL_ENC>$
+
+
+\clearpage
+\begin{center}
+\textbf{\Large Multivariate classification analysis - training on PAL1 }
+\end{center}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.45]{<ROC_AND_TERC_PLOT_FILE_PAL_ENC>}
+\caption{\textbf{(a)} ROC curve for the subject;
+\textbf{(b)} Subject recall performance represented as
+percentage devation from the (subject) mean, separated by tercile
+of the classifier encoding efficiency estimate for each encoded word.}
+\end{figure}
+
+$\bullet$ Area Under Curve = $<AUC_PAL_ENC>$\%
+
+$\bullet$ Permutation test $p$-value $<PERM-P-VALUE_PAL_ENC>$
+
+$\bullet$ Median of classifier output = $<J-THRESH_PAL_ENC>$
+
+
 
 %\begin{figure}[!h]
 %\centering

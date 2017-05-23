@@ -144,7 +144,8 @@ if __name__ == '__main__':
     for args_obj in args_list:
 
         # setting workspace
-        args_obj.workspace_dir = join(prefix, 'scratch_'+args_obj.experiment, args_obj.subject)
+
+        args_obj.workspace_dir = join(args_obj.workspace_dir, args_obj.experiment, args_obj.subject)
 
         report_pipeline = ReportPipeline(subject=args_obj.subject,
                                          workspace_dir=join(args_obj.workspace_dir, args_obj.subject),

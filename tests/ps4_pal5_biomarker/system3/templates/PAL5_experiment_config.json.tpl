@@ -5,7 +5,7 @@
         "experiment_specific_data": {
             "classifier_file": "{{classifier_file}}",
             "stim_electrode_pair":"{{fr5_stim_channel}}",
-            "stim_amplitude" : {{stim_params_dict[fr5_stim_channel]['stim_amplitude']}},
+            "stim_amplitude" : {{target_amplitude}},
             "stim_frequency" : 200,
             "stim_duration"  : 500,
             "random_stim_prob": false,
@@ -25,7 +25,6 @@
         }
     },
     "biomarker_threshold":{{biomarker_threshold}},
-    "retrieval_biomarker_threshold":{{retrieval_biomarker_threshold}},
     "electrode_config_file": "{{electrode_config_file}}",
     "montage_file": "{{montage_file}}",
     "excluded_montage_file": "{{excluded_montage_file}}",
