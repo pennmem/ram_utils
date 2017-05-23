@@ -76,6 +76,7 @@ class ComposeSessionSummary(ReportRamTask):
 
         self.pass_object('NUMBER_OF_SESSIONS', len(sessions))
         self.pass_object('NUMBER_OF_ELECTRODES', len(monopolar_channels))
+        self.pass_object('params',self.params)
 
         session_data = []
         session_summary_array = []

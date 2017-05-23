@@ -46,6 +46,7 @@ class GenerateTex(ReportRamTask):
 
         pal_cumulative_summary = self.get_passed_object('pal_cumulative_summary')
 
+        params = self.get_passed_object('params')
 
         replace_dict = {
             '<PROB_RECALL_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-prob_recall_plot_combined.pdf',
@@ -87,6 +88,8 @@ class GenerateTex(ReportRamTask):
             '<PERM-P-VALUE_PAL_ENC>':pal_cumulative_summary.perm_test_pvalue,
             '<J-THRESH_PAL_ENC>':pal_cumulative_summary.jstat_thresh,
             '<AUC_PAL_ENC>': pal_cumulative_summary.auc,
+            '<ENCODING_SAMPLES_WEIGHT>':params.encoding_samples_weight,
+            '<PAL_SAMPLES_WEIGHT>':params.pal_samples_weight,
 
             }
 
