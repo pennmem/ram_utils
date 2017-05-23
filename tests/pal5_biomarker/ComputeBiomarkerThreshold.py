@@ -224,3 +224,8 @@ class ComputeBiomarkerThreshold(RamTask):
         print "retrieval_biomarker_threshold=",retrieval_biomarker_threshold
 
         self.pass_object('retrieval_biomarker_threshold', retrieval_biomarker_threshold)
+        np.save(self.get_path_to_resource_in_workspace('retrieval_biomarker_threshold.npy'),retrieval_biomarker_threshold)
+
+    def restore(self):
+        retrieval_biomarker_threshold = np.load(self.get_path_to_resource_in_workspace('retrieval_biomarker_threshold.npy'))
+        self.pass_object('retrieval_biomarker_threshold', retrieval_biomarker_threshold)

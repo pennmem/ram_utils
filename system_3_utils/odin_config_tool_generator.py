@@ -39,7 +39,7 @@ montage=0
 
 cml_parser.arg('--subject',subject)
 # cml_parser.arg('--contacts-json',r"d:\protocols\r1\subjects\%s\localizations\%s\montages\%s\neuroradiology\current_processed\contacts.json"%(subject, localization, localization))
-jr=JsonIndexReader('D:/protocols/r1.json')
+jr=JsonIndexReader('/protocols/r1.json')
 cml_parser.arg('--contacts-json',jr.get_value('contacts',subject=subject,montage=montage))
 
 # cml_parser.arg('--subject','R1247P_1')
@@ -65,7 +65,6 @@ subject_code=args.subject.split('_')[0]
 montage = args.subject.split('_')[1] if len(args.subject.split('_'))>1 else 0
 print subject_code,montage
 
-# montage = 1
 
 if not args.contacts_json :
     print 'finding contacts:'

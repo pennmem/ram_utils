@@ -194,8 +194,10 @@ def parse_command_line():
         mount_point = prompt('Mount Point (do not modify): ', validator=DirValidator(), completer=path_completer,
                              default='D:/')
     else:
-        workspace_dir = prompt('Workspace directory: ', validator=DirValidator(), completer=path_completer,
-                                     default='/scratch')
+        # workspace_dir = prompt('Workspace directory: ', validator=DirValidator(), completer=path_completer,
+        #                              default='/scratch')
+        workspace_dir = prompt('Workspace directory: ', completer=path_completer,
+                                     default='/scratch/system3_configs/PAL5/')
         mount_point = prompt('Mount Point (do not modify): ', validator=DirValidator(), completer=path_completer,
                              default='/')
 
@@ -203,9 +205,10 @@ def parse_command_line():
     args_obj.mount_point = mount_point
 
     args_obj.electrode_config_file = prompt('Electrode Configuration file (.csv): ', validator=CSVFileValidator(),
-                                   completer=path_completer, default='d:/experiment_configs/R1284N_FromJson.csv')
+                                   # completer=path_completer, default='d:/experiment_configs/R1284N_FromJson.csv')
+                                   completer=path_completer,)
 
-    args_obj.pulse_frequency = prompt('Stimulation Frequency (Hz) - FYI - DO NOT MODIFY ',
+    args_obj.pulse_frequency = prompt('Stimulation Frequency (Hz) -  DO NOT MODIFY ',
                             validator=TypedNumberValidator(int, 'integer'), default='200')
 
 

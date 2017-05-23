@@ -15,179 +15,27 @@ if sys.platform.startswith('win'):
 else:
 
     prefix = '/'
+args_list = []
 
 try:
     args_obj = parse_command_line()
 except:
-    args_list = []
 
-    # args_obj = Args()
-    #
-    # args_obj.subject = 'R1250N'
-    # args_obj.anodes = ['PG10', 'PG11']
-    # args_obj.cathodes = ['PG11', 'PG12']
-    # args_obj.electrode_config_file = join(prefix, 'experiment_configs', 'contacts%s.csv' % args_obj.subject)
-    # args_obj.experiment = 'PS4_PAL5'
-    # args_obj.min_amplitudes = [0.25, 0.25]
-    # args_obj.max_amplitudes = [1.0, 1.0]
-    # args_obj.mount_point = prefix
-    # args_obj.pulse_frequency = 200
-    # args_obj.workspace_dir = join(prefix, 'scratch', args_obj.subject)
-    #
-    # args_list.append(args_obj)
-
-    # args_obj = Args()
-    #
-    # args_obj.subject = 'R1095N'
-    # args_obj.anodes = ['RTT1', 'RTT3']
-    # args_obj.cathodes = ['RTT2', 'RTT4']
-    # args_obj.electrode_config_file = join(prefix, 'experiment_configs', 'contacts%s.csv'%args_obj.subject)
-    # args_obj.experiment = 'PS4_PAL5'
-    # args_obj.min_amplitudes = [0.25,0.25]
-    # args_obj.max_amplitudes = [1.0,1.0]
-    # args_obj.mount_point = prefix
-    # args_obj.pulse_frequency = 200
-    # args_obj.workspace_dir = join(prefix, 'scratch', args_obj.subject)
-    #
-    # args_list.append(args_obj)
-    #
-    # args_obj = Args()
-    #
-    # args_obj.subject = 'R1284N'
-    # args_obj.anodes = ['LMD1', 'LMD3']
-    # args_obj.cathodes = ['LMD2','LMD4']
-    # args_obj.electrode_config_file = join(prefix, 'experiment_configs', 'contacts%s.csv'%args_obj.subject)
-    # args_obj.experiment = 'PS4_PAL5'
-    # args_obj.min_amplitudes = [0.25,0.25]
-    # args_obj.max_amplitudes = [1.0,1.0]
-    # args_obj.mount_point = prefix
-    # args_obj.pulse_frequency = 200
-    # args_obj.workspace_dir = join(prefix, 'scratch', args_obj.subject)
-    #
-    # args_list.append(args_obj)
 
     args_obj = Args()
 
-    args_obj.subject = 'R1002P'
-    args_obj.anodes = ['LPF1', 'LPF3']
-    args_obj.cathodes = ['LPF2','LPF4']
-    args_obj.electrode_config_file = join(prefix, 'experiment_configs', 'contacts%s.csv'%args_obj.subject)
+    args_obj.subject = 'R1250N'
+    args_obj.anodes =   ['AT1','AT2']
+    args_obj.cathodes = ['AT2','AT3']
+    args_obj.electrode_config_file = join(prefix,'scratch','leond','pal5_biomarker', 'electrode_configs', 'contacts%s.csv'%args_obj.subject)
     args_obj.experiment = 'PS4_PAL5'
     args_obj.min_amplitudes = [0.25,0.25]
     args_obj.max_amplitudes = [1.0,1.0]
     args_obj.mount_point = prefix
     args_obj.pulse_frequency = 200
-    args_obj.workspace_dir = join(prefix, 'scratch', args_obj.subject)
+    args_obj.workspace_dir = join(prefix, 'scratch', 'leond','pal5_biomarker')
 
-    args_list.append(args_obj)
-    #
-    # args_obj = Args()
-    #
-    # args_obj.subject = 'R1065J'
-    # args_obj.anodes = ['LS1', 'LS3']
-    # args_obj.cathodes = ['LS2', 'LS4']
-    # args_obj.electrode_config_file = join(prefix, 'experiment_configs', 'contacts%s.csv'%args_obj.subject)
-    # args_obj.experiment = 'PS4_PAL5'
-    # args_obj.min_amplitudes = [0.25,0.25]
-    # args_obj.max_amplitudes = [1.0,1.0]
-    # args_obj.mount_point = prefix
-    # args_obj.pulse_frequency = 200
-    # args_obj.workspace_dir = join(prefix, 'scratch', args_obj.subject)
-    #
-    # args_list.append(args_obj)
-
-    #
-    # # messed up localization
-    # # args_obj = Args()
-    # #
-    # # args_obj.subject = 'R1118N'
-    # # args_obj.anodes = ['G11', 'G13']
-    # # args_obj.cathodes = ['G12', 'G14']
-    # # args_obj.electrode_config_file = join(prefix, 'experiment_configs', 'contacts%s.csv'%args_obj.subject)
-    # # args_obj.experiment = 'PS4_PAL5'
-    # # args_obj.min_amplitudes = [0.25,0.25]
-    # # args_obj.max_amplitudes = [1.0,1.0]
-    # # args_obj.mount_point = prefix
-    # # args_obj.pulse_frequency = 200
-    # # args_obj.workspace_dir = join(prefix, 'scratch', args_obj.subject)
-    #
-    # # messed up data
-    # args_obj = Args()
-    #
-    # args_obj.subject = 'R1121M'
-    # args_obj.anodes = ['RFG1', 'RFG3']
-    # args_obj.cathodes = ['RFG2', 'RFG4']
-    # args_obj.electrode_config_file = join(prefix, 'experiment_configs', 'contacts%s.csv'%args_obj.subject)
-    # args_obj.experiment = 'PS4_PAL5'
-    # args_obj.min_amplitudes = [0.25,0.25]
-    # args_obj.max_amplitudes = [1.0,1.0]
-    # args_obj.mount_point = prefix
-    # args_obj.pulse_frequency = 200
-    # args_obj.workspace_dir = join(prefix, 'scratch', args_obj.subject)
-    #
-    # args_list.append(args_obj)
-
-    #
-    # args_obj = Args()
-    #
-    # args_obj.subject = 'R1162N'
-    # args_obj.anodes = ['G11', 'G13']
-    # args_obj.cathodes = ['G12', 'G14']
-    # args_obj.electrode_config_file = join(prefix, 'experiment_configs', 'contacts%s.csv'%args_obj.subject)
-    # args_obj.experiment = 'PS4_PAL5'
-    # args_obj.min_amplitudes = [0.25,0.25]
-    # args_obj.max_amplitudes = [1.0,1.0]
-    # args_obj.mount_point = prefix
-    # args_obj.pulse_frequency = 200
-    # args_obj.workspace_dir = join(prefix, 'scratch', args_obj.subject)
-    #
-    # args_list.append(args_obj)
-    #
-    # args_obj = Args()
-    #
-    # args_obj.subject = 'R1175N'
-    # args_obj.anodes = ['LAT1', 'LAT3']
-    # args_obj.cathodes = ['LAT2','LAT4']
-    # args_obj.electrode_config_file = join(prefix, 'experiment_configs', 'contacts%s.csv'%args_obj.subject)
-    # args_obj.experiment = 'PS4_PAL5'
-    # args_obj.min_amplitudes = [0.25,0.25]
-    # args_obj.max_amplitudes = [1.0,1.0]
-    # args_obj.mount_point = prefix
-    # args_obj.pulse_frequency = 200
-    # args_obj.workspace_dir = join(prefix, 'scratch', args_obj.subject)
-    #
-    # args_list.append(args_obj)
-    #
-    #
-    # args_obj = Args()
-    #
-    # args_obj.subject = 'R1212P'
-    # args_obj.anodes = ['LXB1', 'LXB3']
-    # args_obj.cathodes = ['LXB2','LXB4']
-    # args_obj.electrode_config_file = join(prefix, 'experiment_configs', 'contacts%s.csv'%args_obj.subject)
-    # args_obj.experiment = 'PS4_PAL5'
-    # args_obj.min_amplitudes = [0.25,0.25]
-    # args_obj.max_amplitudes = [1.0,1.0]
-    # args_obj.mount_point = prefix
-    # args_obj.pulse_frequency = 200
-    # args_obj.workspace_dir = join(prefix, 'scratch', args_obj.subject)
-    #
-    # args_list.append(args_obj)
-    #
-    # args_obj = Args()
-    #
-    # args_obj.subject = 'R1232N'
-    # args_obj.anodes = ['LAT1', 'LAT3']
-    # args_obj.cathodes = ['LAT2','LAT4']
-    # args_obj.electrode_config_file = join(prefix, 'experiment_configs', 'contacts%s.csv'%args_obj.subject)
-    # args_obj.experiment = 'PS4_PAL5'
-    # args_obj.min_amplitudes = [0.25,0.25]
-    # args_obj.max_amplitudes = [1.0,1.0]
-    # args_obj.mount_point = prefix
-    # args_obj.pulse_frequency = 200
-    # args_obj.workspace_dir = join(prefix, 'scratch', args_obj.subject)
-    #
-    # args_list.append(args_obj)
+args_list.append(args_obj)
 
 # ------------------------------- end of processing command line
 
@@ -268,8 +116,8 @@ class Params(object):
         self.C = 0.048
 
 
-        # self.n_perm = 200
-        self.n_perm = 10  # TODO - remove it from production code
+        self.n_perm = 200
+
 
         self.stim_params = StimParams(
         )
@@ -293,11 +141,19 @@ if __name__ == '__main__':
     #                                  args=args)
 
 
-    log_filename = join('D:/PAL5', 'PAL5_' + time.strftime('%Y_%m_%d_%H_%M_%S')+'.csv')
+    # log_filename = join('D:/PAL5', 'PAL5_' + time.strftime('%Y_%m_%d_%H_%M_%S')+'.csv')
+
 
     for args_obj in args_list:
+        log_filename = join(args_obj.workspace_dir,args_obj.subject,time.strftime('%Y_%m_%d')+'.csv')
         report_pipeline = ReportPipeline(subject=args_obj.subject,
-                                         workspace_dir=join(args_obj.workspace_dir, args_obj.subject),
+                                         workspace_dir=join(args_obj.workspace_dir,
+                                            '{}_{}_{}_{}_{}_{}_{}_{}'.format(
+                                            args_obj.subject,args_obj.experiment,
+                                            args_obj.anodes[0],args_obj.cathodes[0],args_obj.max_amplitudes[0],
+                                            args_obj.anodes[1],args_obj.cathodes[1],args_obj.max_amplitudes[1]
+                                            )
+                                                            ),
                                          mount_point=args_obj.mount_point,
                                          args=args_obj)
 
@@ -310,61 +166,21 @@ if __name__ == '__main__':
         #
         report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=True))
 
-        report_pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=False))
+        report_pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=True))
 
-        report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
+        report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 
 
-        report_pipeline.add_task(ComputeBiomarkerThreshold(params=params, mark_as_completed=False))
-        #
-        #
-        #
-        # #
-        # report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
-        #
+        report_pipeline.add_task(ComputeBiomarkerThreshold(params=params, mark_as_completed=True))
+
+
 
         report_pipeline.add_task(LogResults(params=params, mark_as_completed=False, log_filename=log_filename))
-
         report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=True))
+
+        report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
 
         # starts processing pipeline
         report_pipeline.execute_pipeline()
 
 
-
-#
-# if __name__ == '__main__':
-#     # report_pipeline = ReportPipeline(subject=args.subject,
-#     #                                  workspace_dir=join(args.workspace_dir, args.subject), mount_point=args.mount_point,
-#     #                                  args=args)
-#
-#     report_pipeline = ReportPipeline(subject=args_obj.subject,
-#                                      workspace_dir=join(args_obj.workspace_dir, args_obj.subject), mount_point=args_obj.mount_point,
-#                                      args=args_obj)
-#
-#
-#     report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
-#
-#     report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
-#     #
-#     report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
-#     #
-#     report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=True))
-#
-#     report_pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=False))
-#
-#     report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
-#
-#     report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=True))
-#
-#
-#
-#     # report_pipeline.add_task(ComputeBiomarkerThreshold(params=params, mark_as_completed=False))
-#     #
-#     #
-#     #
-#     # #
-#     # report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
-#     #
-#     # starts processing pipeline
-#     report_pipeline.execute_pipeline()
