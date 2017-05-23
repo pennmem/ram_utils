@@ -127,7 +127,7 @@ $\bullet$ Median of classifier output = $<J-THRESH>$
 \caption{\textbf{(a)} ROC curve for the subject;
 \textbf{(b)} Subject recall performance represented as
 percentage devation from the (subject) mean, separated by tercile
-of the classifier encoding efficiency estimate for each encoded word. Weighting factor for encoding samples wass $<ENCODING_SAMPLES_WEIGHT>$ and PAL/FR relative sample weighting was $<PAL_SAMPLES_WEIGHT>$}
+of the classifier encoding efficiency estimate for each encoded word. Weighting factor for encoding samples was $<ENCODING_SAMPLES_WEIGHT>$ and PAL/FR relative sample weighting was $<PAL_SAMPLES_WEIGHT>$}
 \end{figure}
 
 $\bullet$ Area Under Curve = $<AUC_FR_PAL_ENC>$\%
@@ -148,7 +148,7 @@ $\bullet$ Median of classifier output = $<J-THRESH_FR_PAL_ENC>$
 \caption{\textbf{(a)} ROC curve for the subject;
 \textbf{(b)} Subject recall performance represented as
 percentage devation from the (subject) mean, separated by tercile
-of the classifier encoding efficiency estimate for each encoded word. Weighting factor for encoding samples wass $<ENCODING_SAMPLES_WEIGHT>$. }
+of the classifier encoding efficiency estimate for each encoded word. Weighting factor for encoding samples was $<ENCODING_SAMPLES_WEIGHT>$. }
 \end{figure}
 
 $\bullet$ Area Under Curve = $<AUC_PAL_ENC>$\%
