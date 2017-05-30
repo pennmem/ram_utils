@@ -11,6 +11,7 @@ from RamPipeline import *
 from ReportUtils import ReportRamTask
 
 import hashlib
+from ReportTasks.RamTaskMethods import create_baseline_events
 
 
 class FR1EventPreparation(ReportRamTask):
@@ -91,6 +92,9 @@ class FR1EventPreparation(ReportRamTask):
 
         events = np.hstack((fr1_events,catfr1_events)).view(np.recarray)
 
+        events = create_baseline_events(events,start_buffer=1000,end_buffer=29000)
+
+
         self.pass_object('all_events', events)
 
 
@@ -100,9 +104,9 @@ class FR1EventPreparation(ReportRamTask):
 
         intr_events = rec_events[(rec_events.intrusion!=-999) & (rec_events.intrusion!=0)]
 
-        events = events[events.type == 'WORD']
+        events = events[(events.type == 'WORD') | (events.type=='REC_BASE') | (events.intrusion==0)]
 
-        print len(events), 'WORD events'
+        print len(events), 'task events'
 
         self.pass_object('events', events)
         self.pass_object('math_events', math_events)

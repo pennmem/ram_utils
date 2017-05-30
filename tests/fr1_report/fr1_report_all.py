@@ -8,9 +8,10 @@ from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--task','FR1')
-cml_parser.arg('--workspace-dir','/scratch/RAM_maint/automated_reports_json/FR1_reports')
-cml_parser.arg('--mount-point','')
-cml_parser.arg('--recompute-on-no-status')
+cml_parser.arg('--workspace-dir','scratch/leond/FR1_reports')
+cml_parser.arg('--mount-point','/Volumes/rhino_root')
+# cml_parser.arg('--recompute-on-no-status')
+cml_parser.arg('--status-output-dir','scratch/leond/FR1_reports')
 # cml_parser.arg('--exit-on-no-change')
 
 #cml_parser.arg('--task','FR1')
@@ -39,7 +40,7 @@ from ComputeFR1HFPowers import ComputeFR1HFPowers
 
 from ComputeTTest import ComputeTTest
 
-from ComputeClassifier import ComputeClassifier
+from ComputeClassifier import ComputeClassifier,ComputeJointClassifier
 
 from ComposeSessionSummary import ComposeSessionSummary
 
@@ -58,6 +59,11 @@ class Params(object):
         self.fr1_end_time = 1.366
         self.fr1_buf = 1.365
 
+
+        self.fr1_retrieval_start_time= -0.525
+        self.fr1_retrieval_end_time=0.0
+        self.fr1_retrieval_buf = 0.524
+
         self.hfs_start_time = 0.0
         self.hfs_end_time = 1.6
         self.hfs_buf = 1.0
@@ -70,8 +76,10 @@ class Params(object):
 
         self.log_powers = True
 
+
         self.penalty_type = 'l2'
         self.C = 7.2e-4
+        self.encoding_samples_weight=2.5
 
         self.n_perm = 200
 
@@ -127,6 +135,8 @@ for subject in subjects:
 
     report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 
+    report_pipeline.add_task(ComputeJointClassifier(params=params, mark_as_completed=True))
+
     report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
 
     report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
@@ -135,7 +145,8 @@ for subject in subjects:
 
     report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
-    report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
+    if not args.mount_point:
+        report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
 
     report_pipeline.execute_pipeline()
 

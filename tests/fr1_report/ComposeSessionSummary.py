@@ -47,6 +47,7 @@ class ComposeSessionSummary(ReportRamTask):
         task = self.pipeline.task
 
         events = self.get_passed_object(task + '_events')
+        events= events[events.type=='WORD']
         math_events = self.get_passed_object(task + '_math_events')
         intr_events = self.get_passed_object(task + '_intr_events')
         rec_events = self.get_passed_object(task + '_rec_events')

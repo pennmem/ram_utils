@@ -67,7 +67,7 @@ class RepetitionRatio(RamTask):
         self.pass_object('repetition_ratios', self.repetition_ratios)
         # self.pass_object('repetition_percentiles', self.repetition_percentiles)
 
-        joblib.dump(all_recall_ratios_dict, path.join(self.get_workspace_dir(), 'all_recall_ratios_dict'))
+        joblib.dump(all_recall_ratios_dict, path.join(path.dirname(self.get_workspace_dir()),'all_repetition_ratios_dict'))
         joblib.dump(self.repetition_ratios,
                     path.join(self.pipeline.mount_point, self.workspace_dir, subject + '-repetition-ratios.pkl'))
 
@@ -81,7 +81,7 @@ class RepetitionRatio(RamTask):
 
     def initialize_repetition_ratio(self):
         task = self.pipeline.task
-        j_reader = JsonIndexReader('/protocols/r1.json')
+        j_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point,'protocols/r1.json'))
         subjects = j_reader.subjects(experiment='catFR1')
         all_repetition_rates = {}
     
@@ -94,7 +94,7 @@ class RepetitionRatio(RamTask):
                 evs_field_list += ['category', 'category_num']
     
 
-                json_reader = JsonIndexReader(path.join('/','protocols/r1.json'))
+                json_reader = JsonIndexReader(path.join(self.pipeline.mount_point,'protocols/r1.json'))
     
                 event_files = sorted(
                     list(json_reader.aggregate_values('task_events', subject=subject, experiment='catFR1')))

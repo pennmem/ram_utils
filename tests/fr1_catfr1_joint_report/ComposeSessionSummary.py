@@ -43,6 +43,7 @@ class ComposeSessionSummary(ReportRamTask):
         task = self.pipeline.task
 
         events = self.get_passed_object('events')
+        events = events[events.type=='WORD']
         math_events = self.get_passed_object('math_events')
         intr_events = self.get_passed_object('intr_events')
         rec_events = self.get_passed_object('rec_events')
@@ -55,6 +56,8 @@ class ComposeSessionSummary(ReportRamTask):
 
         xval_output = self.get_passed_object('xval_output')
         perm_test_pvalue = self.get_passed_object('pvalue')
+        joint_xval_output = self.get_passed_object('joint_xval_output')
+        joint_perm_test_pvalue = self.get_passed_object('joint_pvalue')
 
         sessions = np.unique(events.session)
 
@@ -203,6 +206,20 @@ class ComposeSessionSummary(ReportRamTask):
         cumulative_summary.perm_test_pvalue = ('= %.3f' % perm_test_pvalue) if perm_test_pvalue>=0.001 else '\leq 0.001'
         cumulative_summary.jstat_thresh = '%.3f' % cumulative_xval_output.jstat_thresh
         cumulative_summary.jstat_percentile = '%.2f' % (100.0*cumulative_xval_output.jstat_quantile)
+
+
+        cumulative_xval_output = joint_xval_output[-1]
+
+        cumulative_summary.joint_auc = '%.2f' % (100*cumulative_xval_output.auc)
+        cumulative_summary.joint_fpr = cumulative_xval_output.fpr
+        cumulative_summary.joint_tpr = cumulative_xval_output.tpr
+        cumulative_summary.joint_pc_diff_from_mean = (cumulative_xval_output.low_pc_diff_from_mean, cumulative_xval_output.mid_pc_diff_from_mean, cumulative_xval_output.high_pc_diff_from_mean)
+        cumulative_summary.joint_perm_AUCs = self.get_passed_object('perm_AUCs')
+        cumulative_summary.joint_perm_test_pvalue = ('= %.3f' % joint_perm_test_pvalue) if joint_perm_test_pvalue>=0.001 else '\leq 0.001'
+        cumulative_summary.joint_jstat_thresh = '%.3f' % cumulative_xval_output.jstat_thresh
+        cumulative_summary.joint_jstat_percentile = '%.2f' % (100.0*cumulative_xval_output.jstat_quantile)
+
+
 
         self.pass_object('cumulative_summary', cumulative_summary)
 
