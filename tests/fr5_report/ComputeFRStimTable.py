@@ -75,13 +75,16 @@ class ComputeFRStimTable(ReportRamTask):
         all_events = self.get_passed_object('all_events')
         events = self.get_passed_object(task+'_events')
         events = events[(events.phase=='STIM') | (events.phase=='NON-STIM')]
-        ps_events = self.get_passed_object('ps_events')
-        ps_sessions = np.unique(ps_events.session)
+        try:
+            ps_events = self.get_passed_object('ps_events')
+            ps_sessions = np.unique(ps_events.session)
+        except KeyError:
+            ps_sessions = []
 
 
-        lr_classifier = self.get_passed_object('lr_classifier')
+        lr_classifier = self.get_passed_object('lr_classifier_full')
 
-        xval_output = self.get_passed_object('xval_output')
+        xval_output = self.get_passed_object('xval_output_all_electrodes')
         eval_output = self.get_passed_object(task+'_xval_output')
         class_thresh = xval_output[-1].jstat_thresh
 

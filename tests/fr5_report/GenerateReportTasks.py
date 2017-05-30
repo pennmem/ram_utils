@@ -27,7 +27,7 @@ class GeneratePlots(ReportRamTask):
         fr5_events = self.get_passed_object(task+'_events')
         fr5_session_summaries = self.get_passed_object('fr_session_summary')
 
-        xval_output = self.get_passed_object('xval_output')
+        xval_output = self.get_passed_object('xval_output_all_electrodes')
 
         fr1_summary = xval_output[-1]
 
@@ -251,19 +251,21 @@ class GenerateTex(ReportRamTask):
         task = self.pipeline.task
         monopolar_channels = self.get_passed_object('monopolar_channels')
         xval_output = self.get_passed_object(task+'_xval_output')
-        fr1_xval_output = self.get_passed_object('xval_output')
+        fr1_xval_output = self.get_passed_object('xval_output_all_electrodes')
         fr1_auc = fr1_xval_output[-1].auc
-        fr1_pvalue = self.get_passed_object('pvalue')
-        session_data =self.get_passed_object('session_table')
+        fr1_pvalue = self.get_passed_object('pvalue_full')
+        session_data =self.get_passed_object('fr5_session_table')
 
         if xval_output:
             fr5_auc = '%2.2f'%xval_output[-1].auc
             fr5_perm_pvalue = self.get_passed_object(task+'_pvalue')
             roc_title = 'Classifier generalization to FR5'
+            fr5_jstat_thresh = '%2.2f'%xval_output[-1].jstat_thresh
         else:
             fr5_auc = fr1_auc
             fr5_perm_pvalue = fr1_pvalue
             roc_title = 'FR1 Classifier Performance'
+            fr5_jstat_thresh = fr1_xval_output[-1].jstat_thresh
 
 
         fr5_events  = self.get_passed_object(task+'_events')
@@ -349,6 +351,7 @@ class GenerateTex(ReportRamTask):
                 '<FR5-AUC>':fr5_auc,
                 '<ROC_TITLE>':roc_title,
                 '<FR5-PERM-P-VALUE>':fr5_perm_pvalue if fr5_perm_pvalue>0 else '<0.01',
+                '<FR5-JSTAT-THRESH>':fr5_jstat_thresh,
                 '<ROC_AND_TERC_PLOT_FILE>':self.get_passed_object('ROC_AND_TERC_PLOT_FILE'),
                 '<REPORT_PAGES>':all_session_tex
             }

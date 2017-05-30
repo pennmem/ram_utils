@@ -135,17 +135,22 @@ class MontagePreparation(RamTask):
             anode_nums = filter(None,np.unique(stim_events.anode_num))
             cathode_nums = filter(None,np.unique(stim_events.cathode_num))
 
-            stim_pairs = anode_nums+cathode_nums
-            bipolar_pairs = np.array(bipolar_pairs, dtype=[('ch0', 'S3'), ('ch1', 'S3')]).view(np.recarray)
-            include = [int(bp.ch0) not in stim_pairs and int(bp.ch1) not in stim_pairs for bp in bipolar_pairs]
-
-
-
-            reduced_pairs = bipolar_pairs[np.array(include)]
-            self.pass_object('reduced_pairs', reduced_pairs)
-            joblib.dump(reduced_pairs, self.get_path_to_resource_in_workspace(subject + '-reduced_pairs.pkl'))
         except KeyError:
-            pass
+            events = self.get_passed_object('all_events')
+            stim_events = events[events.type=='STIM_ON'].stim_params
+            anode_nums = filter(None,np.unique(stim_events.anode_number))
+            cathode_nums = filter(None,np.unique(stim_events.cathode_number))
+
+        stim_pairs = anode_nums+cathode_nums
+        bipolar_pairs = np.array(bipolar_pairs, dtype=[('ch0', 'S3'), ('ch1', 'S3')]).view(np.recarray)
+        include = [int(bp.ch0) not in stim_pairs and int(bp.ch1) not in stim_pairs for bp in bipolar_pairs]
+
+
+
+        reduced_pairs = bipolar_pairs[np.array(include)]
+        self.pass_object('reduced_pairs', reduced_pairs)
+        joblib.dump(reduced_pairs, self.get_path_to_resource_in_workspace(subject + '-reduced_pairs.pkl'))
+
 
         self.pass_object('monopolar_channels', monopolar_channels)
         self.pass_object('bipolar_pairs', bipolar_pairs)

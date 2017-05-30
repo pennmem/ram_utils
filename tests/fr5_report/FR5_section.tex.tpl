@@ -34,7 +34,9 @@ of the classifier encoding efficiency estimate for each encoded word.}
 
 $\bullet$ Area Under Curve = $<FR5-AUC>$
 
-$\bullet$ Permutation test $p$-value $<FR5-PERM-P-VALUE>$
+$\bullet$ Permutation test $p$-value = $<FR5-PERM-P-VALUE>$
+
+$\bullet$ Median of classifier output = $<FR5-JSTAT-THRESH>$
 
 <REPORT_PAGES>
 

@@ -123,7 +123,7 @@ class ComposeSessionSummary(ReportRamTask):
             session_summary.prob_recall = fr_stim_session_table.groupby('serialpos').recalled.mean()
             session_summary.prob_stim_recall = fr_stim_session_table.loc[fr_stim_session_table.is_stim_item==1].groupby('serialpos').recalled.sum().values.astype(np.float)
             session_summary.prob_nostim_recall = fr_stim_session_table.loc[fr_stim_session_table.is_stim_item==0].groupby('serialpos').recalled.sum().values.astype(np.float)
-            session_summary.prob_stim = fr_stim_table_by_pos.is_stim_item.mean().values
+            session_summary.prob_stim = fr_stim_table_by_pos[fr_stim_session_table.is_stim_list==1].is_stim_item.mean().values
 
             session_summary.prob_stim_recall /= (fr_stim_session_table.is_stim_item==1).sum().astype(np.float)
             session_summary.prob_nostim_recall /= (fr_stim_session_table.is_stim_item==0).sum().astype(np.float)
@@ -432,7 +432,7 @@ class ComposeSessionSummary(ReportRamTask):
         sessions = sorted(fr_stim_table.session.unique())
 
         self.pass_object('NUMBER_OF_FR_SESSIONS', len(sessions))
-        self.pass_object('NUMBER_OF_ELrec_eventsECTRODES', len(monopolar_channels))
+        self.pass_object('NUMBER_OF_ELECTRODES', len(monopolar_channels))
 
         session_data = []
 
@@ -528,6 +528,7 @@ class ComposeSessionSummary(ReportRamTask):
             session_summary.n_recalls_per_list = np.empty(len(fr_stim_table_by_session_list), dtype=int)
             session_summary.n_stims_per_list = np.zeros(len(fr_stim_table_by_session_list), dtype=int)
             session_summary.is_stim_list = np.zeros(len(fr_stim_table_by_session_list), dtype=np.bool)
+            session_summary.is_nonstim_list = np.zeros(len(fr_stim_table_by_session_list), dtype=np.bool)
             session_summary.is_baseline_list = np.zeros(len(fr_stim_table_by_session_list), dtype=np.bool)
             session_summary.is_ps_list = np.zeros(len(fr_stim_table_by_session_list), dtype=np.bool)
 
@@ -539,7 +540,7 @@ class ComposeSessionSummary(ReportRamTask):
                 lst = sess_list[1]
 
 
-                list_rec_events = [(rec_events.session==session) & (rec_events['list']==lst) & (rec_events['intrusion']==0)]
+                list_rec_events = rec_events[(rec_events.session==session) & (rec_events['list']==lst) & (rec_events['intrusion']==0)]
                 if list_rec_events.size > 0:
                     item_nums = fr_stim_sess_list_table.item_name.values == list_rec_events[0].item_name
                     tmp = np.where(item_nums)[0]

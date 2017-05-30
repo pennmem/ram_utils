@@ -138,9 +138,11 @@ class FR5EventPreparation(ReportRamTask):
 
         rec_events = events[events.type == 'REC_WORD']
 
-        ps_events = np.concatenate([BaseEventReader(filename=event_path).read() for event_path in
+        ps_events = [BaseEventReader(filename=event_path).read() for event_path in
                                     jr.aggregate_values('ps4_events',subject=subject,experiment=task,montage=montage)]
-                                   ).view(np.recarray)
+        if ps_events:
+            ps_events = np.concatenate(ps_events).view(np.recarray)
+            self.pass_object('ps_events',ps_events)
 
 
         intr_events = rec_events[(rec_events.intrusion!=-999) & (rec_events.intrusion!=0)]
@@ -153,7 +155,6 @@ class FR5EventPreparation(ReportRamTask):
         self.pass_object('FR_math_events', math_events)
         self.pass_object('FR_intr_events', intr_events)
         self.pass_object('FR_rec_events', rec_events)
-        self.pass_object('ps_events',ps_events)
 
         self.pass_object(task+'_events',events)
 

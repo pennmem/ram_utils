@@ -85,16 +85,15 @@ class EvaluateClassifier(ReportRamTask):
     def run(self):
         subject = self.pipeline.subject
         task = self.pipeline.task
-        self.lr_classifier = self.get_passed_object('lr_classifier')
+        self.lr_classifier = self.get_passed_object('lr_classifier_full')
         events = self.get_passed_object(task+'_events')
-        non_stim = events.type=='NON-STIM'
-
+        non_stim = events.phase != 'STIM'
         if not non_stim.any():
             self.xval_output = self.perm_AUCs = self.pvalue = None
         else:
-            recalls = events.recalled
             self.pow_mat = self.get_passed_object('fr_stim_pow_mat')[non_stim]
             events = events[non_stim]
+            recalls = events.recalled
             # print 'self.pow_mat.shape:',self.pow_mat.shape
             # print 'len fr5_events:',len(events)
             probs = self.lr_classifier.predict_proba(self.pow_mat)[:,1]
@@ -121,6 +120,7 @@ class EvaluateClassifier(ReportRamTask):
         self.pass_object(task+'_xval_output', self.xval_output)
         self.pass_object(task+'_perm_AUCs', self.perm_AUCs)
         self.pass_object(task+'_pvalue', self.pvalue)
+
 
         joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace('-'.join((subject, task, 'xval_output.pkl'))))
         joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace('-'.join((subject, task, 'perm_AUCs.pkl'))))
