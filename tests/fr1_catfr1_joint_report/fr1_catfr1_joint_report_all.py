@@ -88,7 +88,7 @@ subjects.sort()
 
 rsi = ReportSummaryInventory(label='FR1_catFR1_joint')
 
-for subject in subjects[-1:]:
+for subject in subjects:
     print '--Generating FR1&CatFR1 joint report for', subject
     if args.skip_subjects is not None and subject in args.skip_subjects:
         continue
