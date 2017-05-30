@@ -491,8 +491,6 @@ class ComputeClassifier(RamTask):
 
         return samples_weights
 
-
-
     def run_classifier_pipeline(self, evs):
 
         encoding_mask = (evs.type == 'WORD')
@@ -647,8 +645,6 @@ class ComputePAL1Classifier(ComputeClassifier):
 
         return pow_mat
 
-
-
     def run(self):
         self.suffix = '_pal'
         evs = self.get_passed_object('combined_evs')
@@ -656,5 +652,11 @@ class ComputePAL1Classifier(ComputeClassifier):
 
         print '\n\n ---------------- PAL1 CLASSIFIER ONLY------------------\n\n'
 
-        super(ComputePAL1Classifier, self).run_classifier_pipeline(evs)
+        sessions_array = evs.session
 
+        if len(np.unique(sessions_array)) < 2:
+            warnings.warn('SKIPPING PAL1-only classifier because it needs more than one session of PAL1 ',
+                          RuntimeWarning)
+            return
+
+        super(ComputePAL1Classifier, self).run_classifier_pipeline(evs)

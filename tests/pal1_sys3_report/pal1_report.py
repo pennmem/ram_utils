@@ -113,7 +113,7 @@ class Params(object):
         self.penalty_type = 'l2'
         self.C = 7.2e-4
 
-        self.n_perm = 10 # todo change it to 200 in production code
+        self.n_perm = 30 # todo change it to 200 in production code
 
 
 params = Params()

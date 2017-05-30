@@ -155,9 +155,11 @@ args_obj_R1250N.workspace_dir = default_workspace_dir
 # args_obj_R1250N.target_amplitude = 0.768
 
 # args_obj_R1250N.workspace_dir = 'D:/scratch_PS4_CatFR5'
-args_list.append(args_obj_R1250N)
+# args_list.append(args_obj_R1250N)
 
-# args_list.append(args_obj_R1095N)
+
+args_obj_R1095N.classifier_type_to_output = 'pal'
+args_list.append(args_obj_R1095N)
 # args_list.append(args_obj_R1284N)
 # args_list.append(args_obj_R1002P)
 # args_list.append(args_obj_R1065J)

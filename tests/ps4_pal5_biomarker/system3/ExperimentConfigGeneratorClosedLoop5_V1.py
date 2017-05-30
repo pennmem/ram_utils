@@ -14,6 +14,8 @@ import shutil
 import pathlib
 from itertools import cycle
 from system_3_utils import ElectrodeConfigSystem3
+import warnings
+import sys
 
 
 class ExperimentConfigGeneratorClosedLoop5_V1(RamTask):
@@ -91,7 +93,13 @@ class ExperimentConfigGeneratorClosedLoop5_V1(RamTask):
         classifier_path = self.get_passed_object('classifier_path')
 
         if self.pipeline.args.classifier_type_to_output == 'pal':
-            classifier_path = self.get_passed_object('classifier_path_pal')
+            try:
+                classifier_path = self.get_passed_object('classifier_path_pal')
+            except KeyError:
+                warnings.warn(
+                    'Cannot generate PAL1-only classifier- most likely due to insufficient number of PAL1 sessions',
+                    RuntimeWarning)
+                sys.exit(1)
 
         stim_chan_label = self.get_passed_object('stim_chan_label')
         excluded_pairs_path = self.get_passed_object('excluded_pairs_path')
@@ -181,11 +189,9 @@ class ExperimentConfigGeneratorClosedLoop5_V1(RamTask):
         # copy reduced_pairs.json
         self.copy_resource_to_target_dir(excluded_pairs_path, config_files_dir)
 
-
         # vars for file moving/copy
         electrode_config_file_core, ext = splitext(electrode_config_file)
         electrode_config_file_dir = dirname(electrode_config_file)
-
 
         # self.copy_resource_to_target_dir(resource_filename=electrode_config_file, target_dir=config_files_dir)
         # self.copy_resource_to_target_dir(resource_filename=electrode_config_file_core + '.csv',
@@ -193,19 +199,16 @@ class ExperimentConfigGeneratorClosedLoop5_V1(RamTask):
 
         # renaming .csv file to the same core name as .bin file - see variable -  core_name_for_electrode_file
         old_csv_fname = electrode_config_file
-        new_csv_fname = join(config_files_dir, core_name_for_electrode_file+'.csv')
+        new_csv_fname = join(config_files_dir, core_name_for_electrode_file + '.csv')
         shutil.copy(old_csv_fname, new_csv_fname)
-
 
         try:
             old_bin_fname = join(electrode_config_file_dir, core_name_for_electrode_file + '.bin')
-            new_bin_fname = join(config_files_dir, core_name_for_electrode_file+'.bin')
+            new_bin_fname = join(config_files_dir, core_name_for_electrode_file + '.bin')
             shutil.copy(old_bin_fname, new_bin_fname)
         except IOError:
             raise IOError('Please make sure that binary electrode configuration file is '
-                          'in the same directory as %s and is called %s' %(electrode_config_file,old_bin_fname) )
-
-
+                          'in the same directory as %s and is called %s' % (electrode_config_file, old_bin_fname))
 
         # zipping project_dir
         zip_filename = join(dirname(project_dir), experiment) + '.zip'

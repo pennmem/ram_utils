@@ -118,7 +118,7 @@ class Params(object):
 
 
         # self.n_perm = 200
-        self.n_perm = 10  # TODO - remove it from production code
+        self.n_perm = 30  # TODO - remove it from production code
 
         self.stim_params = StimParams(
         )

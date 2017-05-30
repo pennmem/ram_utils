@@ -97,7 +97,7 @@ Type & Channel \# & Electrode Pair & Atlas Loc & \textit{p} & \textit{t}-stat \\
 
 \clearpage
 \begin{center}
-\textbf{\Large Multivariate classification analysis - trained on PAL1 encoding}
+\textbf{\Large Multivariate classification analysis - trained on PAL1 encoding, testing on PAL1 encoding}
 \end{center}
 
 \begin{figure}[!h]
@@ -118,7 +118,7 @@ $\bullet$ Median of classifier output = $<J-THRESH>$
 
 \clearpage
 \begin{center}
-\textbf{\Large Multivariate classification analysis - training on FR1/PAL1 }
+\textbf{\Large Multivariate classification analysis - training on FR1/PAL1, testing on FR1/PAL1 encoding}
 \end{center}
 
 \begin{figure}[!h]
@@ -139,7 +139,7 @@ $\bullet$ Median of classifier output = $<J-THRESH_FR_PAL_ENC>$
 
 \clearpage
 \begin{center}
-\textbf{\Large Multivariate classification analysis - training on PAL1 }
+\textbf{\Large Multivariate classification analysis - training on PAL1, testing on PAL1 encoding }
 \end{center}
 
 \begin{figure}[!h]
