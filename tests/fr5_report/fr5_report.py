@@ -100,17 +100,15 @@ report_pipeline = ReportPipeline(subject=args.subject, task=args.task,experiment
 
 report_pipeline.add_task(FR1EventPreparation())
 
+report_pipeline.add_task(FR5EventPreparation())
 
 report_pipeline.add_task(MontagePreparation(params=params,mark_as_completed=False))
 
 report_pipeline.add_task(ComputeFRPowers(params=params,mark_as_completed=True))
 
-
 report_pipeline.add_task(ComputeFullClassifier(params=params,mark_as_completed=True))
 
 report_pipeline.add_task(ComputeFR5Powers(params=params,mark_as_completed=True))
-
-report_pipeline.add_task(FR5EventPreparation())
 
 report_pipeline.add_task(EvaluateClassifier(params=params,mark_as_completed=True))
 
