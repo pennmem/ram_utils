@@ -77,20 +77,24 @@ fi
 #lockfile -r 0 ${automated_reports_dir}/automated_reports.lock || exit 1
 
 
-
-# FR1
-report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/fr1_report
+#PS4
+report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/ps4_report
 cd ${report_code_dir}
 
-workspace_dir=${automated_reports_dir}/FR1_reports
+workspace_dir=${automated_reports_dir}/PS4_reports
 status_output_dir=${workspace_dir}/${datetime}
 status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python ${report_code_dir}/fr1_report_all.py  --task=FR1 \
- --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
- --skip-subjects R1055J R1061T R1090C R1092J_2 R1093J_1 R2009P_1 R2012P_1 R2015P_1
+task=FR5
+python ${report_code_dir}/ps4_report_all.py  --task=${task} \
+  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
+
+task=PAL5
+python ${report_code_dir}/ps4_report_all.py  --task=${task} \
+  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
+
 
 # FR3
 report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/fr_stim_report
@@ -178,6 +182,21 @@ python ${report_code_dir}/th_stim_report_all.py  --task=TH3 \
 #python ${report_code_dir}/fr_stim_report_all.py  --task=FR4 \
 # --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 #
+
+
+# FR1
+report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/fr1_report
+cd ${report_code_dir}
+
+workspace_dir=${automated_reports_dir}/FR1_reports
+status_output_dir=${workspace_dir}/${datetime}
+status_output_dirs+=(${status_output_dir})
+
+remove_old_status_dirs ${workspace_dir}
+
+python ${report_code_dir}/fr1_report_all.py  --task=FR1 \
+ --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
+ --skip-subjects R1055J R1061T R1090C R1092J_2 R1093J_1 R2009P_1 R2012P_1 R2015P_1
 
 #CatFR1
 report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/fr1_report
@@ -382,23 +401,6 @@ python ${report_code_dir}/ps_th_report_all.py  --task=PS2.1 \
   --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 
 
-
-report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/ps4_report
-cd ${report_code_dir}
-
-workspace_dir=${automated_reports_dir}/PS4_reports
-status_output_dir=${workspace_dir}/${datetime}
-status_output_dirs+=(${status_output_dir})
-
-remove_old_status_dirs ${workspace_dir}
-
-task=FR5
-python ${report_code_dir}/ps4_report_all.py  --task=${task} \
-  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
-
-task=PAL5
-python ${report_code_dir}/ps4_report_all.py  --task=${task} \
-  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 
 # TH_PS3
 #report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/ps_th_report
