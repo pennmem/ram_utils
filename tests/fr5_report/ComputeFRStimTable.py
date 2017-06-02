@@ -74,7 +74,6 @@ class ComputeFRStimTable(ReportRamTask):
 
         all_events = self.get_passed_object('all_events')
         events = self.get_passed_object(task+'_events')
-        events = events[(events.phase=='STIM') | (events.phase=='NON-STIM')]
         try:
             ps_events = self.get_passed_object('ps_events')
             ps_sessions = np.unique(ps_events.session)
@@ -91,7 +90,6 @@ class ComputeFRStimTable(ReportRamTask):
         fr_stim_pow_mat = self.get_passed_object('fr_stim_pow_mat')
         if eval_output:
             fr_stim_prob = lr_classifier.predict_proba(fr_stim_pow_mat[events.type=='WORD'])[:,1]
-        events = events[events.type=='WORD']
         n_events = len(events)
 
         is_stim_item = np.zeros(n_events, dtype=np.bool)
@@ -101,7 +99,10 @@ class ComputeFRStimTable(ReportRamTask):
 
         j = 0
         sessions = np.unique(events.session)
-        all_sess_events = all_events[np.in1d(all_events.session,sessions) & ((all_events.phase=='STIM') | (all_events.phase=='NON-STIM'))]
+        all_sess_events = all_events[np.in1d(all_events.session,sessions) & ((all_events.phase=='STIM')
+                                                                             | (all_events.phase=='NON-STIM')
+                                                                             | (all_events.phase=='BASELINE')
+                                                                             | (all_events.phase=='PRACTICE'))]
         n_stims = (all_sess_events.type=='STIM_ON').sum()
         n_stim_off = (all_sess_events.type=='STIM_OFF').sum()
         n_words = (all_sess_events.type=='WORD').sum()
@@ -127,7 +128,7 @@ class ComputeFRStimTable(ReportRamTask):
         self.fr_stim_table['is_stim_item'] = is_stim_item
         self.fr_stim_table['is_post_stim_item'] = is_post_stim_item
         self.fr_stim_table['recalled'] = events.recalled
-        self.fr_stim_table['thresh'] = class_thresh
+        self.fr_stim_table['thresh'] = 0.5
         self.fr_stim_table['is_ps4_session'] = is_ps4_session
 
         self.stim_params_to_sess = dict()

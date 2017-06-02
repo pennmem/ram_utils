@@ -122,8 +122,6 @@ class FR5EventPreparation(ReportRamTask):
         self.pass_object('all_events', events)
 
 
-        events = events[(events.phase=='STIM') | (events.phase=='NON-STIM')]
-
         if not (events.type=='WORD').any():
             raise MissingEventError('No events found that are valid for analysis')
 

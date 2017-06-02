@@ -120,9 +120,11 @@ class ComposeSessionSummary(ReportRamTask):
 
 
             fr_stim_table_by_pos = fr_stim_session_table.groupby('serialpos')
-            session_summary.prob_recall = fr_stim_session_table.groupby('serialpos').recalled.mean()
-            session_summary.prob_stim_recall = fr_stim_session_table.loc[fr_stim_session_table.is_stim_item==1].groupby('serialpos').recalled.sum().values.astype(np.float)
-            session_summary.prob_nostim_recall = fr_stim_session_table.loc[fr_stim_session_table.is_stim_item==0].groupby('serialpos').recalled.sum().values.astype(np.float)
+            session_summary.prob_recall = fr_stim_table_by_pos.recalled.mean()
+            session_summary.prob_stim_recall = fr_stim_table_by_pos.loc[fr_stim_table_by_pos.is_stim_item==1].recalled.sum().values.astype(np.float)
+            session_summary.prob_nostim_recall = fr_stim_table_by_pos.loc[fr_stim_table_by_pos.is_stim_item==0].recalled.sum().values.astype(np.float)
+            # session_summary.prob_stim_recall = fr_stim_session_table.loc[fr_stim_session_table.is_stim_item==1].groupby('serialpos').recalled.sum().values.astype(np.float)
+            # session_summary.prob_nostim_recall = fr_stim_session_table.loc[fr_stim_session_table.is_stim_item==0].groupby('serialpos').recalled.sum().values.astype(np.float)
             session_summary.prob_stim = fr_stim_table_by_pos[fr_stim_session_table.is_stim_list==1].is_stim_item.mean().values
 
             session_summary.prob_stim_recall /= (fr_stim_session_table.is_stim_item==1).sum().astype(np.float)
@@ -496,8 +498,10 @@ class ComposeSessionSummary(ReportRamTask):
 
             fr_stim_table_by_pos = fr_stim_session_table.groupby('serialpos')
             session_summary.prob_recall = fr_stim_session_table.groupby('serialpos').recalled.mean()
-            session_summary.prob_stim_recall = fr_stim_session_table.loc[fr_stim_session_table.is_stim_item==True].groupby('serialpos').recalled.mean().values
-            session_summary.prob_nostim_recall = fr_stim_session_table.loc[fr_stim_session_table.is_stim_item==False].groupby('serialpos').recalled.mean().values
+            session_summary.prob_stim_recall = fr_stim_session_table.loc[fr_stim_session_table.is_stim_item==True].groupby('serialpos').recalled.mean()
+            session_summary.prob_nostim_recall = fr_stim_session_table.loc[fr_stim_session_table.is_stim_item==False].groupby('serialpos').recalled.mean()
+
+
             session_summary.prob_stim = fr_stim_table_by_pos.is_stim_item.mean().values
 
             # session_summary.prob_recall = np.empty(len(fr_stim_table_by_pos), dtype=float)
