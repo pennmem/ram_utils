@@ -29,16 +29,8 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
         :return:
         """
 
-        if isfile(resource_filename):
-            resource_dst = join(target_dir, basename(resource_filename))
-            try:
-
-                shutil.copyfile(resource_filename, resource_dst)
-            except shutil.Error as e:
-                print ( "Could not copy %s to %s . " % (resource_filename, resource_dst))
-                pass  # ignore any copy errors
-
-            return
+        resource_dst = join(target_dir, basename(resource_filename))
+        shutil.copyfile(resource_filename, resource_dst)
 
     def copy_pickle_resource_to_target_dir(self, resource_filename, target_dir):
         """
