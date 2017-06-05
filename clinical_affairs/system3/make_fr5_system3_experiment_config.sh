@@ -4,7 +4,7 @@
 
 read -p "SUBJECT: " subject
 read -p "EXPERIMENT (PS4_FR5 | PS4_catFR5 | catFR5 | FR5): " experiment
-read -p "ELECTRODE CONFIG FILE : " config_file
+read -p "PATH TO ELECTRODE CONFIG CSV FILE : " config_file
 if [[ "${experiment}" = "PS4_FR5" ]] | [[ "${experiment}" = "PS4_catFR5" ]]
 then
     read -p "ANODE1:   " anode1

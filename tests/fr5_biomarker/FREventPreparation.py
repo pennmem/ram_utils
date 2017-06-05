@@ -85,9 +85,15 @@ class FREventPreparation(RamTask):
                                                                           montage = montage)]
         if len(catfr1_events):
             catfr1_events = np.concatenate(catfr1_events).view(np.recarray)
-            catfr1_events=catfr1_events[list(fr1_events.dtype.names)]
+            catfr1_events=catfr1_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment',
+                                         'mstime', 'type', 'eegoffset',  'recalled', 'item_name',
+                                         'intrusion', 'montage', 'list', 'eegfile', 'msoffset']].copy()
             catfr1_events.session += 100
-        fr1_events = np.append(fr1_events,catfr1_events).view(np.recarray) if len(catfr1_events) else fr1_events
+            fr1_events = fr1_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime',
+                                     'type', 'eegoffset', 'recalled', 'item_name', 'intrusion',
+                                     'montage', 'list', 'eegfile', 'msoffset']].copy()
+            fr1_events = np.append(fr1_events,catfr1_events).view(np.recarray)
+
         fr1_events = create_baseline_events(fr1_events,1000,29000)
 
 

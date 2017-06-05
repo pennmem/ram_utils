@@ -131,7 +131,8 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
         config_files_dir = self.get_path_to_resource_in_workspace(project_dir_corename+'/config_files')
 
 
-        experiment_config_template_filename = join(dirname(__file__),'templates','{}_experiment_config.json.tpl'.format(experiment))
+        experiment_config_template_filename = join(dirname(__file__),'templates','{}_experiment_config.json.tpl'.format(
+            'PS4_FR5' if 'PS4' in experiment else 'FR5'))
         experiment_config_template = Template(open(experiment_config_template_filename ,'r').read())
 
         electrode_config_file_core, ext = splitext(electrode_config_file)
