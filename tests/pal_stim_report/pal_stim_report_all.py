@@ -59,6 +59,7 @@ class Params(object):
         self.C = 7.2e-4
 
         self.n_perm = 200
+        self.parallelize = False
 
 
 params = Params()

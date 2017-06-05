@@ -72,6 +72,8 @@ class Params(object):
         self.include_fr1 = True
         self.include_catfr1 = True
 
+        self.parallelize = False
+
 
 params = Params()
 

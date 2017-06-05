@@ -88,13 +88,6 @@ class Params(object):
         self.pal1_retrieval_end_time = -0.1
         self.pal1_retrieval_buf = 0.524
 
-
-        # # todo remove in the production code
-        # self.pal1_retrieval_start_time = -0.600
-        # self.pal1_retrieval_end_time = -0.1
-        # self.pal1_retrieval_buf = 0.499
-
-
         # self.retrieval_samples_weight = 2.5
         # self.encoding_samples_weight = 2.5
         self.encoding_samples_weight = 7.2
@@ -108,17 +101,15 @@ class Params(object):
         self.filt_order = 4
 
         self.freqs = np.logspace(np.log10(6), np.log10(180), 8)
-        # self.freqs = np.logspace(np.log10(3), np.log10(180), 8)  # TODO - remove it from production code
 
         self.log_powers = True
 
         self.penalty_type = 'l2'
         self.C = 7.2e-4
-        # self.C = 0.048 # TODO - remove it from production code - original PAL5 value
 
 
-        # self.n_perm = 200
-        self.n_perm = 30  # TODO - remove it from production code
+        self.n_perm = 200
+
 
         self.stim_params = StimParams(
         )

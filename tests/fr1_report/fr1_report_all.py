@@ -70,7 +70,7 @@ class Params(object):
 
         self.filt_order = 4
 
-        self.freqs = np.logspace(np.log10(3), np.log10(180), 8)
+        self.freqs = np.logspace(np.log10(6), np.log10(180), 8)
         self.hfs = np.logspace(np.log10(2), np.log10(200), 50)
         self.hfs = self.hfs[self.hfs>=70.0]
 
@@ -82,6 +82,8 @@ class Params(object):
         self.encoding_samples_weight=2.5
 
         self.n_perm = 200
+        self.parallelize = False
+
 
 
 params = Params()
@@ -105,7 +107,7 @@ subjects.sort()
 rsi = ReportSummaryInventory(label=task)
 
 
-for subject in subjects:
+for subject in subjects[-1:]:
     if args.skip_subjects is not None and subject in args.skip_subjects:
         continue
     print '--Generating', task, 'report for', subject

@@ -67,6 +67,7 @@ class Params(object):
         self.encoding_samples_weight=2.5
 
         self.n_perm = 200
+        self.parallelize=False
 
 
 

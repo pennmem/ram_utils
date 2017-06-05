@@ -8,10 +8,10 @@ from ReportUtils import CMLParser, ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--task','PAL1')
-cml_parser.arg('--workspace-dir','/scratch/busygin/PAL1_reports')
-cml_parser.arg('--mount-point','')
-cml_parser.arg('--recompute-on-no-status')
-cml_parser.arg('--exit-on-no-change')
+cml_parser.arg('--workspace-dir','scratch/PAL1_reports')
+cml_parser.arg('--mount-point','/Volumes/rhino_root')
+# cml_parser.arg('--recompute-on-no-status')
+# cml_parser.arg('--exit-on-no-change')
 
 args = cml_parser.parse()
 
@@ -63,6 +63,7 @@ class Params(object):
         self.C = 7.2e-4
 
         self.n_perm = 200
+        self.parallelize = False
 
 
 params = Params()
@@ -131,7 +132,7 @@ for subject in subjects:
     rsi.add_report_summary(report_summary=report_pipeline.get_report_summary())
 
 
-print 'this is summary for all reports report ', rsi.compose_summary(detail_level=1)
+print 'this is summary for all reports report ', rsi.compose_summary(detail_level=2)
 
 rsi.output_json_files(dir=args.status_output_dir)
 # rsi.send_email_digest()

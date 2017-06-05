@@ -62,6 +62,7 @@ class Params(object):
         self.C = 7.2e-4
 
         self.n_perm = 200
+        self.parallelize=False
 
         self.include_fr1 = True
         self.include_catfr1 = True

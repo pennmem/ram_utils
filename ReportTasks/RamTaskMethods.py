@@ -276,11 +276,23 @@ def permuted_loso_AUCs(self, event_sessions, recalls):
     n_perm = self.params.n_perm
     permuted_recalls = np.array(recalls)
     AUCs = np.empty(shape=n_perm, dtype=np.float)
-    with joblib.Parallel(n_jobs=-1, verbose=20, ) as parallel:
-        probs = parallel(joblib.delayed(run_loso_xval)(event_sessions, permuted_recalls,
-                                                       self.pow_mat, self.lr_classifier, self.xval_output,
-                                                       permuted=True, iter=i) for i in xrange(n_perm))
-        AUCs[:] = [roc_auc_score(recalls, prob) for prob in probs]
+    try:
+        parallelize = self.params.parallelize
+    except AttributeError:
+        parallelize = True
+    if parallelize:
+        with joblib.Parallel(n_jobs=-1, verbose=20, ) as parallel:
+            probs = parallel(joblib.delayed(run_loso_xval)(event_sessions, permuted_recalls,
+                                                           self.pow_mat, self.lr_classifier, self.xval_output,
+                                                           permuted=True, iter=i) for i in xrange(n_perm))
+    else:
+        for i in range(n_perm):
+            probs  = run_loso_xval(event_sessions,permuted_recalls,
+                                   self.pow_mat,self.lr_classifier,self.xval_output,permuted=True)
+            auc = roc_auc_score(recalls,probs)
+            print("AUC = %s"%str(auc))
+            AUCs[i] = auc
+
     return AUCs
 
 
@@ -293,11 +305,23 @@ def permuted_lolo_AUCs(self, events):
     permuted_recalls = np.array(recalls)
     AUCs = np.empty(shape=n_perm, dtype=np.float)
     sessions = np.unique(events.session)
-    with joblib.Parallel(n_jobs=-1, verbose=20, max_nbytes=1e4) as parallel:
-        probs = parallel(joblib.delayed(run_lolo_xval)(events, permuted_recalls, self.pow_mat, self.lr_classifier,
-                                                       self.xval_output, permuted=True, iter=i)
-                         for i in xrange(n_perm))
-        AUCs[:] = [roc_auc_score(recalls, p) for p in probs]
+    try:
+        parallelize = self.params.parallelize
+    except AttributeError:
+        parallelize = True
+    if parallelize:
+        with joblib.Parallel(n_jobs=-1, verbose=20, max_nbytes=1e4) as parallel:
+            probs = parallel(joblib.delayed(run_lolo_xval)(events, permuted_recalls, self.pow_mat, self.lr_classifier,
+                                                           self.xval_output, permuted=True, iter=i)
+                             for i in xrange(n_perm))
+            AUCs[:] = [roc_auc_score(recalls, p) for p in probs]
+    else:
+        for i in range(n_perm):
+            probs  = run_lolo_xval(events,permuted_recalls,
+                                   self.pow_mat,self.lr_classifier,self.xval_output,permuted=True)
+            auc = roc_auc_score(recalls,probs)
+            print("AUC = %s"%str(auc))
+            AUCs[i] = auc
     return AUCs
 
 

@@ -69,9 +69,9 @@ class GeneratePlots(ReportRamTask):
             panel_plot = PanelPlot(i_max=1,j_max=2,xfigsize=15, yfigsize=7.5, title='', labelsize=18)
 
             pdca = PlotDataCollection(xlim=(0,12), ylim=(0.0, 1.0), xlabel='(a)', ylabel='Stim vs Non-Stim Items', xlabel_fontsize=20,ylabel_fontsize=20)
-            pd1a = PlotData(x=session_summary.prob_stim_recall.index.values+1, y=session_summary.prob_stim_recall.values,linestyle='-',label='Stim items')
+            pd1a = PlotData(x=session_summary.prob_stim_recall.index.values, y=session_summary.prob_stim_recall.values,linestyle='-',label='Stim items')
             pdca.add_plot_data(pd1a)
-            pd2a = PlotData(x = session_summary.prob_nostim_recall.index.values+1, y=session_summary.prob_nostim_recall.values,linestyle = '--',label='Non-stim Items')
+            pd2a = PlotData(x = session_summary.prob_nostim_recall.index.values, y=session_summary.prob_nostim_recall.values,linestyle = '--',label='Non-stim Items')
             pdca.add_plot_data(pd2a)
             panel_plot.add_plot_data_collection(0,0,plot_data_collection=pdca)
 
