@@ -13,7 +13,7 @@ from ReportUtils import CMLParser,ReportPipeline
 cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--subject','R1111M')
 cml_parser.arg('--task','FR1')
-cml_parser.arg('--workspace-dir','/Users/leond/FR1_reports/')
+cml_parser.arg('--workspace-dir','scratch/FR1_reports/')
 cml_parser.arg('--mount-point','/Volumes/rhino_root/')
 #cml_parser.arg('--recompute-on-no-status')
 # cml_parser.arg('--exit-on-no-change')
@@ -23,11 +23,11 @@ print sys.path
 args = cml_parser.parse()
 
 
-from FR1EventPreparation import FR1EventPreparation
+from ReportTasks.EventPreparation import FREventPreparation
 
 from RepetitionRatio import RepetitionRatio
 
-from ComputeFR1Powers import ComputeFR1Powers
+from ReportTasks.ComputePowers import ComputePowers
 
 from MontagePreparation import MontagePreparation
 
@@ -47,20 +47,18 @@ from GenerateReportTasks import *
 class Params(object):
     def __init__(self):
         self.width = 5
+        self.task = args.task
 
-        self.fr1_start_time = 0.0
-        self.fr1_end_time = 1.366
-        self.fr1_buf = 1.365
+        self.start = 0.0
+        self.end = 1.366
+        self.buf = 1.365
 
-        self.hfs_start_time = 0.0
-        self.hfs_end_time = 1.6
-        self.hfs_buf = 1.0
 
         self.filt_order = 4
+        self.butter_freqs = [58.,62.]
+
 
         self.freqs = np.logspace(np.log10(3), np.log10(180), 8)
-        self.hfs = np.logspace(np.log10(2), np.log10(200), 50)
-        self.hfs = self.hfs[self.hfs>=70.0]
 
         self.log_powers = True
 
@@ -69,10 +67,20 @@ class Params(object):
 
         self.n_perm = 200
 
+class HFParams(Params):
+    def __init__(self):
+        super(HFParams, self).__init__()
+        self.end = 1.6
+        self.buf = 1.0
+
+        self.freqs = np.logspace(np.log10(2), np.log10(200), 50)
+        self.freqs = self.freqs[self.freqs>=70.0]
+
+
 
 params = Params()
 
-
+hf_params = HFParams()
 
 # sets up processing pipeline
 report_pipeline = ReportPipeline(subject=args.subject, task=args.task,experiment=args.task,sessions=args.sessions,
@@ -80,16 +88,16 @@ report_pipeline = ReportPipeline(subject=args.subject, task=args.task,experiment
                                  recompute_on_no_status=args.recompute_on_no_status)
 
 
-report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
+report_pipeline.add_task(FREventPreparation(task=args.task,sessions = args.sessions,))
 
 report_pipeline.add_task(MontagePreparation(params, mark_as_completed=False))
 
 if 'cat' in args.task:
     report_pipeline.add_task(RepetitionRatio(mark_as_completed=False))
 
-report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputePowers(params=params, mark_as_completed=True,name='ComputeFR1Powers'))
 
-report_pipeline.add_task(ComputeFR1HFPowers(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputePowers(params=hf_params, mark_as_completed=True,name='ComputeFR1HFPowers'))
 
 report_pipeline.add_task(ComputeTTest(params=params, mark_as_completed=False))
 

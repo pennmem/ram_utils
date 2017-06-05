@@ -36,13 +36,14 @@ class EventPreparation(ReportRamTask):
             event_paths = [jr.get_value(self.event_field,subject=subject,montage=montage,experiment=task,session=s)
                            for s in sessions]
 
-        return np.array([BaseEventReader(filename=event_path).read() for event_path in event_paths]).view(np.recarray)
+        return np.concatenate([BaseEventReader(filename=event_path).read() for event_path in event_paths]).view(np.recarray)
 
     def process_events(self,events):
         return {'events' : events}
 
     def run(self):
-        events_to_pass = self.process_events(self.load_events())
+        events = self.load_events()
+        events_to_pass = self.process_events(events)
         for name in events_to_pass:
             self.pass_object(name,events_to_pass[name])
 

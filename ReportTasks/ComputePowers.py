@@ -10,8 +10,8 @@ from ptsa.data.TimeSeriesX import TimeSeriesX
 import xarray
 
 class ComputePowers(ReportRamTask):
-    def __init__(self,params,mark_as_completed=True):
-        super(ComputePowers,self).__init__(mark_as_completed=mark_as_completed)
+    def __init__(self,params,**kwargs):
+        super(ComputePowers,self).__init__(**kwargs)
         self.params = params
         self.pow_mat = None
 
@@ -19,18 +19,13 @@ class ComputePowers(ReportRamTask):
         task = self.params.task
         subject = self.pipeline.subject.split('_')
         subj_code =subject[0]
-        montage = subject[1]
-        jr = JsonIndexReader(os.path.join(self.pipeline.mount_point,'/protocols/r1.json'))
+        montage = 0 if len(subject)==1 else int(subject[1])
+        jr = JsonIndexReader(os.path.join(self.pipeline.mount_point,'protocols/r1.json'))
 
         event_paths = jr.aggregate_values('task_events',subject=subj_code,montage=montage,experiment=task)
         for path in event_paths:
             with open(os.path.join(self.pipeline.mount_point,path)) as event:
                 self.hash.update(event.read())
-
-    @property
-    def events(self):
-        return self.get_passed_object('events')
-
 
     def run(self):
         events = self.get_passed_object('%s_events'%(self.params.task))
@@ -54,7 +49,7 @@ class ComputePowers(ReportRamTask):
         if eeg_reader.removed_bad_data():
             print 'REMOVED SOME BAD EVENTS !!!'
         eeg = eeg.add_mirror_buffer(self.params.buf).filtered(self.params.butter_freqs,filt_type='stop',
-                                                              order=self.params.order)
+                                                              order=self.params.filt_order)
         self.eeg = MonopolarToBipolarMapper(time_series = eeg,bipolar_pairs=bipolar_pairs).filter()
         return self.eeg['events'].values.view(np.recarray)
 
