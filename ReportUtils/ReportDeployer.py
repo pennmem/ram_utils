@@ -65,6 +65,7 @@ class ReportDeployer(object):
             (subject+'_'+self.pipeline.experiment+'_'+classifier_experiment+'_report.pdf')
 
         standard_report_path = join(report_dir,standard_report_basename)
+        self.add_report_file(file=standard_report_path)
 
 
         #  using copyfile is the right solution when copying files
@@ -75,7 +76,6 @@ class ReportDeployer(object):
 
 
 
-        self.add_report_file(file=standard_report_path)
 
         standard_report_link = join(self.pipeline.report_site_URL, report_base_dir, standard_report_basename)
         self.add_report_link(link=standard_report_link)

@@ -251,7 +251,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     dir_list = args.status_output_dirs
     print dir_list
-    print 'arror log file=',args.error_log_file
+    print 'error log file=',args.error_log_file
     rm = ReportMailer()
     rm.add_directories(*dir_list)
     # rm.compose_summary(detail_level=0)

@@ -13,7 +13,7 @@ class ReportPipelineBase(RamPipeline):
     def __init__(self, **options):
         RamPipeline.__init__(self)
         # experiment_label is used to label experiment in the JSON status output file
-        self.__option_list = ['args','subject','experiment','experiment_label','task','workspace_dir','mount_point','exit_on_no_change','recompute_on_no_status','sessions','args']
+        self.__option_list = ['args','subject','experiment','experiment_label','task','workspace_dir','mount_point','exit_on_no_change','recompute_on_no_status']
 
         #sanity check
         for option_name, option_val in options.iteritems():

@@ -49,7 +49,7 @@ class ReportSummaryInventory(object):
 
     def compose_summary(self, detail_level=2):
         d = date.today()
-        s = 'Report status summary as of : ' + d.isoformat() + '\n'
+        s = 'Report status summary as of {} :\n '.format(d.isoformat())
 
         reports_with_missing_data = OrderedDict()
         reports_with_missing_experiment = OrderedDict()
