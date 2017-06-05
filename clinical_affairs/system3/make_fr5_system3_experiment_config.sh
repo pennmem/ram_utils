@@ -3,7 +3,7 @@
 # THIS IS THE CONFIG FILE GENERATOR FOR PS4_FR5 AND FOR FR5.
 
 read -p "SUBJECT: " subject
-read -p "EXPERIMENT (PS4_FR5 | PS4_catFR5| catFR5 | FR5): " experiment
+read -p "EXPERIMENT (PS4_FR5 | PS4_catFR5 | catFR5 | FR5): " experiment
 read -p "ELECTRODE CONFIG FILE : " config_file
 if [[ "${experiment}" = "PS4_FR5" ]] | [[ "${experiment}" = "PS4_catFR5" ]]
 then
