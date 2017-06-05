@@ -3,9 +3,9 @@
 # THIS IS THE CONFIG FILE GENERATOR FOR PS4_FR5 AND FOR FR5.
 
 read -p "SUBJECT: " subject
-read -p "EXPERIMENT (PS4_FR5 | FR5): " experiment
+read -p "EXPERIMENT (PS4_FR5 | PS4_catFR5| catFR5 | FR5): " experiment
 read -p "ELECTRODE CONFIG FILE : " config_file
-if [ "${experiment}" = "PS4_FR5" ]
+if [[ "${experiment}" = "PS4_FR5" ]] | [[ "${experiment}" = "PS4_catFR5" ]]
 then
     read -p "ANODE1:   " anode1
     read -p "CATHODE1: " cathode1
@@ -17,7 +17,7 @@ then
     read -p "Minimum amplitude 2(mA): " min_amplitude_2
     read -p "Maximum amplitude 2(mA): " max_amplitude_2
     target_amplitude=${max_amplitude_1}
-elif [ "${experiment}" = "FR5" ]
+elif [[ "${experiment}" = "FR5" ]] || [[ "${experiment}" = "catFR5" ]]
 then
     read -p "STIM ANODE: " anode1
     read -p "STIM CATHODE: " cathode1
@@ -51,7 +51,7 @@ stim_pair_2=${anode2}-${cathode2}
 if [ -z "${config_file}" ]
 then
 
-config_dir="/scratch/system3_configs/${experiment}_biomarkers/${subject}_${experiment}_${anode1}_${cathode1}_${max_amplitude_1}mA_${anode2}_${cathode2}_${max_amplitude_2}mA_${today}/electrode_configs"
+config_dir="/scratch/leond/system3_configs/${experiment}_biomarkers/${subject}_${experiment}_${anode1}_${cathode1}_${max_amplitude_1}mA_${anode2}_${cathode2}_${max_amplitude_2}mA_${today}/electrode_configs"
 python ../../system_3_utils/odin_config_tool_generator.py --subject=${subject}\
  --contacts-json-output-dir=${config_dir}\
  --stim-channels ${stim_pair_1} ${stim_pair_2}
@@ -59,10 +59,10 @@ python ../../system_3_utils/odin_config_tool_generator.py --subject=${subject}\
 config_file=${config_dir}/contacts${subject}.csv
 bin_file=${config_dir}/contacts${subject}.bin
 touch ${bin_file}
-fi
-
+workspace_dir="scratch/leond/system3_configs/${experiment}_biomarkers/${subject}_${experiment}_${anode1}_${cathode1}_${max_amplitude_1}mA_${anode2}_${cathode2}_${max_amplitude_2}mA_${today}/"
+else
 workspace_dir="/scratch/system3_configs/${experiment}_biomarkers/${subject}_${experiment}_${anode1}_${cathode1}_${max_amplitude_1}mA_${anode2}_${cathode2}_${max_amplitude_2}mA_${today}"
-
+fi
 
 python ../../tests/fr5_biomarker/system3/fr5_util_system_3.py\
  --subject=${subject}\
