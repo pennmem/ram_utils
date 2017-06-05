@@ -109,6 +109,10 @@ class ComputePAL1Powers(RamTask):
                                                              params.pal1_retrieval_end_time, params.pal1_retrieval_buf,
                                                              params.freqs, params.log_powers)
 
+        events =  np.concatenate(encoding_events,retrieval_events)
+        events.sort(order=['session','list','mstime'])
+        is_encoding_event  = (events.type=='PRACTICE_PAIR') | (events.type=='STUDY_PAIR')
+        self.pass_object('PAL1_events',events)
 
         self.pow_mat = np.zeros((len(events), len(bipolar_pairs) * len(params.freqs)))
         self.pow_mat[is_encoding_event, ...] = encoding_pow_mat
