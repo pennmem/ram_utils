@@ -37,7 +37,7 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
         if not monopolar_same_as_sense:
             print '\n\nELECTRODE CONFIG ERROR:'
             print 'Sense electrodes jack_box numbers defined in .bin/.csv file do not match jack_box_numbers in contacts.json'
-            sys.exit(1)
+            # sys.exit(1)
 
 
         # check if specified stim pair is present in the bipolar pairs and .bin/.csv file
@@ -52,14 +52,14 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
             if anode_num == cathode_num:
                 print '\n\nELECTRODE CONFIG ERROR:'
                 print 'Anode jackbox number must be different from cathode number'
-                sys.exit(1)
+                # sys.exit(1)
 
             stim_index_pair_present = np.all(np.in1d([anode_num, cathode_num],monopolar_channels_int_array))
 
             if not stim_index_pair_present:
                 print '\n\nELECTRODE CONFIG ERROR:'
                 print 'Could not find requested stim pair electrode numbers in contacts.json'
-                sys.exit(1)
+                # sys.exit(1)
 
             # for bp_idx, bp in enumerate(bipolar_pairs_int_2D):
             #     if bp[0] == anode_num and bp[1] == cathode_num:
@@ -81,7 +81,7 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
             if not stim_channel_present:
                 print '\n\nELECTRODE CONFIG ERROR:'
                 print 'Could not find requested stim pair electrode numbers in .csv/.bin electrode configuration file'
-                sys.exit(1)
+                # sys.exit(1)
 
             # finally will check labels if user provided the labels
             anode_label = self.pipeline.args.anode.strip().upper()
@@ -102,7 +102,7 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
                     print '\n\nELECTRODE CONFIG ERROR:'
                     print 'specified electrode labels for anode and cathode (%s, %s) do no match electrodes' \
                           ' found in contacts.json (%s,%s)'%(anode_label,cathode_label,anode_label_from_contacts,cathode_label_from_contacts)
-                    sys.exit(1)
+                    # sys.exit(1)
 
             self.pass_object('stim_chan_label',stim_chan_label)
             print

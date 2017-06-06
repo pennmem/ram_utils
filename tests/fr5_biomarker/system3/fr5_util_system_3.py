@@ -150,7 +150,7 @@ class ReportPipeline(RamPipeline):
 
 
 report_pipeline = ReportPipeline(subject=args.subject,
-                                       workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point, args=args)
+                                       workspace_dir=args.workspace_dir, mount_point=args.mount_point, args=args)
 
 report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
 

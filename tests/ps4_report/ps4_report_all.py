@@ -4,7 +4,6 @@ from os.path import join
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
 parser=CMLParser()
-parser.arg('--subject','R1293P')
 parser.arg('--task','FR5')
 parser.arg('--workspace-dir','/Users/leond/ps4_reports')
 parser.arg('--mount-point','/Volumes/rhino_root/')
@@ -28,14 +27,11 @@ from ReportUtils import ReportSummaryInventory
 rsi = ReportSummaryInventory(label='PS4_%s'%args.task)
 
 jr = JsonIndexReader(join(args.mount_point,'protocols','r1.json'))
-subjects = jr.subjects()
-
+subjects = [s for s in jr.subjects() if jr.aggregate_values('ps4_events',subject=s,experiment=args.task)]
 for subject in subjects:
-    if jr.aggregate_values('ps4_events',subject=subject) and args.task in jr.experiments(subject=subject):
 
-
-        report_pipeline = ReportPipeline(subject=args.subject,task=args.task,workspace_dir= join(args.workspace_dir,args.subject),
-                                         mount_point=args.mount_point,sessions=args.sessions,
+        report_pipeline = ReportPipeline(subject=args.subject,task=args.task,workspace_dir= join(args.workspace_dir,subject),
+                                         mount_point=args.mount_point,
                                          exit_on_no_change=args.exit_on_no_change,recompute_on_no_status=args.recompute_on_no_status)
 
         report_pipeline.add_task(EventPreparation(mark_as_completed=False))

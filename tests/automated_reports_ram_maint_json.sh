@@ -95,6 +95,18 @@ task=PAL5
 python ${report_code_dir}/ps4_report_all.py  --task=${task} \
   --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 
+# FR5
+report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/fr5_report
+cd ${report_code_dir}
+
+workspace_dir=${automated_reports_dir}/FR5_reports
+status_output_dir=${workspace_dir}/${datetime}
+status_output_dirs+=(${status_output_dir})
+
+remove_old_status_dirs ${workspace_dir}
+
+python ${report_code_dir}/fr_5_report_all.py  --task=FR5 \
+ --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
 
 # FR3
 report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/fr_stim_report
