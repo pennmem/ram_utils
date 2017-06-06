@@ -14,7 +14,7 @@ then
 experiment="CatFR5"
 fi
 
-if [[ "${experiment}" = "PS4_FR5" ]] | [[ "${experiment}" = "PS4_CatFR5" ]]
+if [[ "${experiment}" = "PS4_FR5" ]] || [[ "${experiment}" = "PS4_CatFR5" ]]
 then
     read -p "ANODE1:   " anode1
     read -p "CATHODE1: " cathode1
