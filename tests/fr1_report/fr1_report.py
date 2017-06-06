@@ -29,7 +29,7 @@ from RepetitionRatio import RepetitionRatio
 
 from ReportTasks.ComputePowers import ComputePowers
 
-from MontagePreparation import MontagePreparation
+from ReportTasks.MontagePreparation import MontagePreparation
 
 from ComputeFR1HFPowers import ComputeFR1HFPowers
 
@@ -59,11 +59,15 @@ class Params(object):
 
 
         self.freqs = np.logspace(np.log10(3), np.log10(180), 8)
+        self.cpus=10
 
-        self.log_powers = True
+        self.log10 = True
+        self.zscore = False
+        self.name='pow_mat'
 
         self.penalty_type = 'l2'
         self.C = 7.2e-4
+
 
         self.n_perm = 200
 
@@ -75,6 +79,9 @@ class HFParams(Params):
 
         self.freqs = np.logspace(np.log10(2), np.log10(200), 50)
         self.freqs = self.freqs[self.freqs>=70.0]
+        self.zscore=True
+
+        self.name='hf_pow_mat'
 
 
 

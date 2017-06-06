@@ -106,7 +106,8 @@ class MontagePreparation(ReportRamTask):
             bp_tal_structs = pd.DataFrame(bp_tal_structs, index=bp_tags, columns=['channel_1', 'channel_2', 'etype', 'bp_atlas_loc'])
             bp_tal_structs.sort_values(by=['channel_1', 'channel_2'], inplace=True)
             monopolar_channels = np.unique(np.hstack((bp_tal_structs.channel_1.values,bp_tal_structs.channel_2.values)))
-            bipolar_pairs = zip(bp_tal_structs.channel_1.values,bp_tal_structs.channel_2.values)
+            bipolar_pairs = np.array(zip(bp_tal_structs.channel_1.values,bp_tal_structs.channel_2.values),
+                                     dtype=[('ch0','S3'),('ch1','S3')])
 
             self.pass_object('monopolar_channels', monopolar_channels)
             self.pass_object('bipolar_pairs', bipolar_pairs)

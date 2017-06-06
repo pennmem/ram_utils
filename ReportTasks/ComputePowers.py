@@ -14,6 +14,7 @@ class ComputePowers(ReportRamTask):
         super(ComputePowers,self).__init__(**kwargs)
         self.params = params
         self.pow_mat = None
+        self.events = None
 
     def input_hashsum(self):
         task = self.params.task
@@ -26,14 +27,17 @@ class ComputePowers(ReportRamTask):
         for path in event_paths:
             with open(os.path.join(self.pipeline.mount_point,path)) as event:
                 self.hash.update(event.read())
+        return self.hash.digest()
 
     def run(self):
         events = self.get_passed_object('%s_events'%(self.params.task))
         for session in np.unique(events.session):
-            events = self.prepare_eeg(events[events.session == session])
+            print('Session %s'%session)
+            sess_events = events[events.session ==session]
+            new_events = self.prepare_eeg(sess_events)
             sess_pow_mat = self.compute_powers()
-            self.events = events if self.events is None else np.concatenate(self.events,events)
-            self.pow_mat = sess_pow_mat if self.pow_mat is None else np.concatenate(self.pow_mat,sess_pow_mat)
+            self.events =  np.concatenate([self.events,new_events]).view(np.recarray) if self.events is not None else new_events
+            self.pow_mat =  np.concatenate([self.pow_mat,sess_pow_mat]) if self.pow_mat is not None else sess_pow_mat
 
         self.pow_mat = np.nanmean(self.pow_mat,-1)
         self.pow_mat = self.pow_mat.reshape((len(self.events),-1))

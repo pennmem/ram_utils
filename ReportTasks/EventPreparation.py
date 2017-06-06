@@ -15,7 +15,7 @@ class EventPreparation(ReportRamTask):
             For PAL and FR experiments, "all_events" combines the task and the math distractor;
             Other experiments don't have a distractor, and so the events are stored as "task_events"
         '''
-        return 'all_events' if ('PAL'in task or 'FR' in task) else 'task_events'
+        return 'all_events' if ('PAL' in task or 'FR' in task) else 'task_events'
 
     def __init__(self,task,sessions):
         super(ReportRamTask,self).__init__(mark_as_completed=False)
@@ -23,7 +23,10 @@ class EventPreparation(ReportRamTask):
         self.sessions = sessions
 
     def load_events(self):
-        ''' Load the events for this object's task and sessions. '''
+        '''
+        Load the events for this object's task and sessions.
+        '''
+
         task = self.task
         jr = JsonIndexReader(os.path.join(self.pipeline.mount_point,'protocols/r1.json'))
         subject_parts = self.pipeline.subject.split('_')
@@ -56,6 +59,7 @@ class FREventPreparation(EventPreparation):
         * math_events
         * rec_events (recall events)
         * intr_events (intrusions) '''
+        all_events = events
 
         math_events = events[events.type == 'PROB']
 
@@ -65,10 +69,11 @@ class FREventPreparation(EventPreparation):
 
         events = events[events.type == 'WORD']
         return {
+            '%s_all_events'%self.task:all_events,
             '%s_events'%(self.task): events,
-            'math_events': math_events,
-            'rec_events': rec_events,
-            'intr_events': intr_events
+            '%s_math_events'%self.task: math_events,
+            '%s_rec_events'%self.task: rec_events,
+            '%s_intr_events'%self.task: intr_events
         }
 
 class JointFR1EventPreparation(FREventPreparation):
