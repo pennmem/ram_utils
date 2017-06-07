@@ -39,18 +39,18 @@ args = cml_parser.parse()
 # ------------------------------- end of processing command line
 
 from ReportUtils import ReportPipeline
-
-from tests.fr3_biomarker.FREventPreparation import FREventPreparation
-
-from tests.fr3_biomarker.ComputeFRPowers import ComputeFRPowers
-
-from tests.fr3_biomarker.MontagePreparation import MontagePreparation
-
 from system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
 
-from tests.fr3_biomarker.ComputeClassifier import ComputeClassifier
+from ..fr3_biomarker import FREventPreparation
 
-from tests.fr3_biomarker.system3.ExperimentConfigGeneratorClosedLoop3 import ExperimentConfigGeneratorClosedLoop3
+from ..fr3_biomarker import ComputeFRPowers
+
+from ..fr3_biomarker import MontagePreparation
+
+
+from ..fr3_biomarker import ComputeClassifier
+
+from .ExperimentConfigGeneratorClosedLoop3 import ExperimentConfigGeneratorClosedLoop3
 
 
 import numpy as np
@@ -120,29 +120,24 @@ class Params(object):
         #     target_amplitude=args.target_amplitude
         # )
 
-
-params = Params()
-
-
-
-report_pipeline = ReportPipeline(subject=args.subject,
-                                       workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point, args=args)
-
-report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
-
-report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
-
-report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
-
-report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
-
-report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
-
-report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop3(params=params, mark_as_completed=False))
+def make_biomarker(args):
+    params = Params()
 
 
-#
-# # report_pipeline.add_task(SaveMatlabFile(params=params, mark_as_completed=False))
 
-# starts processing pipeline
-report_pipeline.execute_pipeline()
+    report_pipeline = ReportPipeline(subject=args.subject,
+                                           workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point, args=args)
+
+    report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
+
+    report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
+
+    report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
+
+    report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
+
+    report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
+
+    report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop3(params=params, mark_as_completed=False))
+
+    report_pipeline.execute_pipeline()

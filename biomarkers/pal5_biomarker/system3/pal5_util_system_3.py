@@ -1,12 +1,10 @@
 DEBUG = True
 
+import sys
+import time
 from os.path import *
 
 from pal5_prompt import parse_command_line, Args
-
-from system_3_utils.ram_tasks.CMLParserClosedLoop5 import CMLParserCloseLoop5
-import sys
-import time
 
 if sys.platform.startswith('win'):
 
@@ -41,24 +39,24 @@ args_list.append(args_obj)
 
 from RamPipeline import RamPipeline
 
-from tests.pal5_biomarker.PAL1EventPreparation import PAL1EventPreparation
+from biomarkers.pal5_biomarker import PAL1EventPreparation
 
-from tests.pal5_biomarker.ComputePAL1Powers import ComputePAL1Powers
+from biomarkers.pal5_biomarker import ComputePAL1Powers
 
-from tests.pal5_biomarker.MontagePreparation import MontagePreparation
+from biomarkers.pal5_biomarker.MontagePreparation import MontagePreparation
 
 from system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
 
-from tests.pal5_biomarker.ComputeClassifier import ComputeClassifier
+from biomarkers.pal5_biomarker import ComputeClassifier
 
-from tests.pal5_biomarker.ComputeClassifier import ComputeFullClassifier
+from biomarkers.pal5_biomarker import ComputeFullClassifier
 
-from tests.pal5_biomarker.ComputeEncodingClassifier import ComputeEncodingClassifier
-from tests.pal5_biomarker.LogResults import LogResults
+from biomarkers.pal5_biomarker.ComputeEncodingClassifier import ComputeEncodingClassifier
+from biomarkers.pal5_biomarker import LogResults
 
-from tests.pal5_biomarker.ComputeBiomarkerThreshold import ComputeBiomarkerThreshold
+from biomarkers.pal5_biomarker import ComputeBiomarkerThreshold
 
-from tests.pal5_biomarker.system3.ExperimentConfigGeneratorClosedLoop5 import ExperimentConfigGeneratorClosedLoop5
+from biomarkers.pal5_biomarker import ExperimentConfigGeneratorClosedLoop5
 
 import numpy as np
 

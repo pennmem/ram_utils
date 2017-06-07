@@ -1,12 +1,10 @@
 DEBUG = True
 
-from os.path import *
-
-from ps4_pal5_prompt import parse_command_line, Args
-
-from system_3_utils.ram_tasks.CMLParserClosedLoop5 import CMLParserCloseLoop5
 import sys
 import time
+from os.path import *
+
+from ps4_pal5_prompt import parse_command_line
 
 if sys.platform.startswith('win'):
 
@@ -28,28 +26,24 @@ except:
 
 from RamPipeline import RamPipeline
 
-from tests.ps4_pal5_biomarker.PAL1EventPreparation import PAL1EventPreparation
+from biomarkers.ps4_pal5_biomarker.PAL1EventPreparation import PAL1EventPreparation
 
-from tests.ps4_pal5_biomarker.FREventPreparation import FREventPreparation
+from biomarkers.ps4_pal5_biomarker.FREventPreparation import FREventPreparation
 
-from tests.ps4_pal5_biomarker.CombinedEventPreparation import CombinedEventPreparation
+from biomarkers.ps4_pal5_biomarker.CombinedEventPreparation import CombinedEventPreparation
 
-from tests.ps4_pal5_biomarker.ComputePowers import ComputePowers
+from biomarkers.ps4_pal5_biomarker.ComputePowers import ComputePowers
 
-from tests.ps4_pal5_biomarker.MontagePreparation import MontagePreparation
+from biomarkers.ps4_pal5_biomarker.MontagePreparation import MontagePreparation
 
 from system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
 
-from tests.ps4_pal5_biomarker.ComputeClassifier import ComputeClassifier
-from tests.ps4_pal5_biomarker.ComputeClassifier import ComputePAL1Classifier
+from biomarkers.ps4_pal5_biomarker.ComputeClassifier import ComputeClassifier
+from biomarkers.ps4_pal5_biomarker.ComputeClassifier import ComputePAL1Classifier
 
-from tests.ps4_pal5_biomarker.ComputeClassifier import ComputeFullClassifier
+from biomarkers.ps4_pal5_biomarker.ComputeClassifier import ComputeFullClassifier
 
-from tests.ps4_pal5_biomarker.ComputeEncodingClassifier import ComputeEncodingClassifier
-
-from tests.ps4_pal5_biomarker.LogResults import LogResults
-
-from tests.ps4_pal5_biomarker.system3.ExperimentConfigGeneratorClosedLoop5_V1 import ExperimentConfigGeneratorClosedLoop5_V1
+from biomarkers.ps4_pal5_biomarker.system3 import ExperimentConfigGeneratorClosedLoop5_V1
 
 import numpy as np
 

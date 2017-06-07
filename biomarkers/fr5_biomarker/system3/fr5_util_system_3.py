@@ -10,28 +10,19 @@ from os.path import *
 from system_3_utils.ram_tasks.CMLParserClosedLoop3 import CMLParserCloseLoop3
 
 cml_parser = CMLParserCloseLoop3(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','/scratch/leond/R1250N')
-cml_parser.arg('--experiment','PAL3')
-cml_parser.arg('--mount-point','/')
-cml_parser.arg('--subject','R1250N')
-cml_parser.arg('--electrode-config-file','/home1/leond/fr3_config/contactsR1250N.csv')
-cml_parser.arg('--pulse-frequency','100')
-cml_parser.arg('--target-amplitude','1000')
-cml_parser.arg('--anode-num','10')
-cml_parser.arg('--anode','PG10')
-cml_parser.arg('--cathode-num','11')
-cml_parser.arg('--cathode','PG11')
 
-
-
-# cml_parser.arg('--workspace-dir','/scratch/busygin/FR3_biomarkers')
-# cml_parser.arg('--subject','R1145J_1')
-# cml_parser.arg('--n-channels','128')
-# cml_parser.arg('--anode-num','3')
-# cml_parser.arg('--cathode-num','4')
-# cml_parser.arg('--pulse-frequency','200')
-# cml_parser.arg('--pulse-count','100')
-# cml_parser.arg('--target-amplitude','1000')
+subject= 'R1230J'
+cml_parser.arg('--workspace-dir','/home1/leond/fr5_config')
+cml_parser.arg('--experiment','FR5')
+cml_parser.arg('--mount-point','/Volumes/rhino_root')
+cml_parser.arg('--subject',subject)
+cml_parser.arg('--electrode-config-file','/home1/leond/fr5_config/contacts%s.csv'%subject)
+cml_parser.arg('--pulse-frequency','200')
+cml_parser.arg('--target-amplitude','1.0')
+cml_parser.arg('--anodes','3LAHD2','12RGRD1')
+cml_parser.arg('--cathodes', '3LAHD3','12RGRD2')
+cml_parser.arg('--min-amplitudes','0.25')
+cml_parser.arg('--max-amplitudes','1.0')
 
 
 args = cml_parser.parse()
@@ -40,18 +31,19 @@ args = cml_parser.parse()
 
 from RamPipeline import RamPipeline
 
-from tests.pal3_biomarker.PAL1EventPreparation import PAL1EventPreparation
+from biomarkers.fr5_biomarker import FREventPreparation
 
+from biomarkers.fr5_biomarker.ComputeFRPowers import ComputeFRPowers
 
-from tests.pal3_biomarker.ComputePAL1Powers import ComputePAL1Powers
-
-from tests.pal3_biomarker.MontagePreparation import MontagePreparation
+from biomarkers.fr5_biomarker.MontagePreparation import MontagePreparation
 
 from system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
 
-from tests.pal3_biomarker.ComputeClassifier import ComputeClassifier
+from biomarkers.fr5_biomarker import ComputeClassifier
 
-from tests.pal3_biomarker.system3.ExperimentConfigGeneratorClosedLoop3 import ExperimentConfigGeneratorClosedLoop3
+from biomarkers.fr5_biomarker import ComputeFullClassifier
+
+from biomarkers.fr5_biomarker.system3 import ExperimentConfigGeneratorClosedLoop5
 
 
 import numpy as np
@@ -60,20 +52,43 @@ import numpy as np
 class StimParams(object):
     def __init__(self,**kwds):
         pass
+        # self.n_channels = kwds['n_channels']
+        # self.elec1 = kwds['anode_num']
+        # self.anode = kwds.get('anode', '')
+        # self.elec2 = kwds['cathode_num']
+        # self.cathode = kwds.get('cathode', '')
+        # self.pulseFrequency = kwds['pulse_frequency']
+        # self.pulseCount = kwds['pulse_count']
+        # self.amplitude = kwds['target_amplitude']
+        #
+        # self.duration = 300
+        # self.trainFrequency = 1
+        # self.trainCount = 1
 
 class Params(object):
     def __init__(self):
         self.version = '3.00'
 
+        self.include_fr1 = True
+        self.include_catfr1 = True
+        self.include_fr3 = False
+        self.include_catfr3 = False
+
         self.width = 5
 
-        self.pal1_start_time = 0.3
-        self.pal1_end_time = 2.0
-        self.pal1_buf = 1.0
+        self.fr1_start_time = 0.0
+        self.fr1_end_time = 1.366
+        self.fr1_buf = 1.365
+
+        self.fr1_retrieval_start_time = -0.525
+        self.fr1_retrieval_end_time = 0.0
+        self.fr1_retrieval_buf = 0.524
+
+        self.encoding_samples_weight = 2.5
 
         self.filt_order = 4
 
-        self.freqs = np.logspace(np.log10(3), np.log10(180), 8)
+        self.freqs = np.logspace(np.log10(6), np.log10(180), 8)
 
         self.log_powers = True
 
@@ -81,7 +96,6 @@ class Params(object):
         self.C = 7.2e-4
 
         self.n_perm = 200
-
 
         self.stim_params = StimParams(
             # n_channels=args.n_channels,
@@ -107,6 +121,22 @@ class Params(object):
 
 
 params = Params()
+# class ConfigError(Exception):
+#     pass
+#
+#
+# config_file = args.electrode_config_file
+#
+# if config_file.endswith('csv'):
+#     if not isfile(config_file.replace('csv','bin')):
+#         raise ConfigError('Needs binary config file along with csv config file')
+# elif config_file.endswith('bin'):
+#     if not isfile(config_file.replace('bin','csv')):
+#         raise ConfigError('Needs csv config file along with binary file')
+#
+# else:
+#     raise ConfigError('Unknown config file type')
+
 
 
 class ReportPipeline(RamPipeline):
@@ -122,21 +152,20 @@ class ReportPipeline(RamPipeline):
 report_pipeline = ReportPipeline(subject=args.subject,
                                        workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point, args=args)
 
-report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
+report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
 
 report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
 
 report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 
-report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop3(params=params, mark_as_completed=False))
+report_pipeline.add_task(ComputeFullClassifier(params=params,mark_as_completed=False))
 
+report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
 
-#
-# # report_pipeline.add_task(SaveMatlabFile(params=params, mark_as_completed=False))
 
 # starts processing pipeline
 report_pipeline.execute_pipeline()
