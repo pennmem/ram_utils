@@ -164,7 +164,7 @@ class PAL1EventPreparation(RamTask):
         :return: filtered event recarray
         """
 
-        rec_evs = evs[evs.type == 'TEST_PROBE']
+        rec_evs = evs[(evs.type == 'TEST_PROBE') | (evs.type == 'PROBE_START')]
 
         incorrect_has_response_mask = (rec_evs.RT != -999) & (rec_evs.correct == 0)
         incorrect_no_response_mask = rec_evs.RT == -999
@@ -183,7 +183,7 @@ class PAL1EventPreparation(RamTask):
 
         correct_response_times = rec_evs[ correct_mask].RT # todo fixed based on Jim's suggestion
 
-        response_time_rand_indices = np.random.randint(0, len(correct_response_times), sum(incorrect_no_response_mask))
+        # response_time_rand_indices = np.random.randint(0, len(correct_response_times), sum(incorrect_no_response_mask))
 
         # rec_evs.RT[incorrect_no_response_mask] = correct_response_times[response_time_rand_indices]
         rec_evs.RT[incorrect_no_response_mask] = 2500 # todo remove from production code

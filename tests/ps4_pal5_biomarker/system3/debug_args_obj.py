@@ -147,6 +147,37 @@ args_obj_R1232N.pulse_frequency = 200
 args_obj_R1250N.workspace_dir = default_workspace_dir
 
 
+# # ------------------------------------------------- R1307N
+# prefix = '/Volumes/rhino_root'
+# args_obj_R1307N = Args()
+# args_obj_R1307N.subject = 'R1307N'
+# args_obj_R1307N.anodes = ['LALT5']
+# args_obj_R1307N.cathodes = ['LALT6']
+# args_obj_R1307N.electrode_config_file = join(prefix, 'scratch','experiment_configs', 'R1307N_R1307N08JUNE17STIM.csv')
+# args_obj_R1307N.experiment = 'PAL5'
+# args_obj_R1307N.min_amplitudes = [0.1,0.1]
+# args_obj_R1307N.max_amplitudes = [1.9,1.9]
+# args_obj_R1307N.mount_point = prefix
+# args_obj_R1307N.pulse_frequency = 200
+# # args_obj_R1307N.workspace_dir = join(prefix, 'scratch', args_obj_R1307N.subject)
+# args_obj_R1307N.workspace_dir = join(prefix,'scratch','experiment_configs')
+# args_obj_R1307N.classifier_type_to_output = 'pal'
+
+# ------------------------------------------------- R1307N WINDOWS TEST
+args_obj_R1307N = Args()
+args_obj_R1307N.subject = 'R1307N'
+args_obj_R1307N.anodes = ['LALT5']
+args_obj_R1307N.cathodes = ['LALT6']
+args_obj_R1307N.electrode_config_file = join(prefix, 'scratch','experiment_configs', 'R1307N_R1307N08JUNE17STIM.csv')
+args_obj_R1307N.experiment = 'PAL5'
+args_obj_R1307N.min_amplitudes = [0.1,0.1]
+args_obj_R1307N.max_amplitudes = [1.9,1.9]
+args_obj_R1307N.mount_point = prefix
+args_obj_R1307N.pulse_frequency = 200
+# args_obj_R1307N.workspace_dir = join(prefix, 'scratch', args_obj_R1307N.subject)
+args_obj_R1307N.workspace_dir = join(prefix,'scratch','experiment_configs')
+args_obj_R1307N.classifier_type_to_output = 'pal'
+
 
 # args_obj_R1250N.classifier_type_to_output = 'pal'
 # args_obj_R1250N.experiment = 'PAL5'
@@ -157,9 +188,44 @@ args_obj_R1250N.workspace_dir = default_workspace_dir
 # args_obj_R1250N.workspace_dir = 'D:/scratch_PS4_CatFR5'
 # args_list.append(args_obj_R1250N)
 
+# # ------------------------------------------------- R1095N
+# args_obj_R1095N = Args()
+# args_obj_R1095N.subject = 'R1095N'
+# args_obj_R1095N.anodes = ['RTT1', 'RTT3']
+# args_obj_R1095N.cathodes = ['RTT2', 'RTT4']
+# args_obj_R1095N.electrode_config_file = join(prefix, 'scratch', 'experiment_configs', 'contacts%s.csv'%args_obj_R1095N.subject)
+# args_obj_R1095N.experiment = 'PS4_CatFR5'
+# args_obj_R1095N.min_amplitudes = [0.25,0.25]
+# args_obj_R1095N.max_amplitudes = [1.0,1.0]
+# args_obj_R1095N.mount_point = prefix
+# args_obj_R1095N.pulse_frequency = 200
+# args_obj_R1095N.workspace_dir = join(prefix,'scratch','experiment_configs')
+# args_obj_R1095N.allow_fast_rerun = True
+# args_obj_R1095N.classifier_type_to_output = 'pal'
 
-args_obj_R1095N.classifier_type_to_output = 'pal'
-args_list.append(args_obj_R1095N)
+# ------------------------------------------------- R1250N
+prefix = 'U:/'
+args_obj_R1250N = Args()
+args_obj_R1250N.subject = 'R1250N'
+args_obj_R1250N.anodes = ['PG10', 'PG11']
+args_obj_R1250N.cathodes = ['PG11', 'PG12']
+args_obj_R1250N.electrode_config_file = join(prefix, 'scratch', 'experiment_configs', 'contacts%s.csv' % args_obj_R1250N.subject)
+args_obj_R1250N.experiment = 'PS4_CatFR5'
+args_obj_R1250N.min_amplitudes = [0.25, 0.25]
+args_obj_R1250N.max_amplitudes = [1.0, 1.0]
+args_obj_R1250N.mount_point = prefix
+args_obj_R1250N.pulse_frequency = 200
+args_obj_R1250N.workspace_dir = join(prefix,'scratch','experiment_configs')
+args_obj_R1250N.allow_fast_rerun = True
+args_obj_R1250N.classifier_type_to_output = 'pal'
+
+
+
+args_list.append(args_obj_R1250N)
+
+
+# args_list.append(args_obj_R1307N)
+# args_list.append(args_obj_R1095N)
 # args_list.append(args_obj_R1284N)
 # args_list.append(args_obj_R1002P)
 # args_list.append(args_obj_R1065J)

@@ -145,15 +145,60 @@ class ComputePowers(RamTask):
                                                                        params.pal1_retrieval_buf,
                                                                        params.freqs, params.log_powers)
 
+        # in case compute powers removes some of the BAD events (e.g. offset )
+        if fr_session_present:
+            evs = np.concatenate((encoding_pal1_events,
+                                  retrieval_pal1_events,
+                                  encoding_fr1_events,
+                                  retrieval_fr1_events)).view(np.recarray)
+        else:
+
+            evs = np.concatenate((encoding_pal1_events,
+                                  retrieval_pal1_events)).view(np.recarray)
+
+
+        ev_fields = evs.dtype.names
+        order = tuple(f for f in ['session', 'list', 'mstime'] if f in ev_fields)
+        ev_order = np.argsort(evs, order=order)
+        evs = evs[ev_order]
+
+        # passing fixed events
+        self.pass_object('combined_evs', evs)
+
+        # recalculating masks - because events might have changed
+
+        fr1_encoding_mask = (evs.type == 'WORD') & (evs.exp_name == 'FR1')
+        fr1_retrieval_mask = (evs.type == 'REC_EVENT') & (evs.exp_name == 'FR1')
+
+        pal1_encoding_mask = (evs.type == 'WORD') & (evs.exp_name == 'PAL1')
+        pal1_retrieval_mask = (evs.type == 'REC_EVENT') & (evs.exp_name == 'PAL1')
+
+
+
         self.pow_mat = np.zeros((len(evs), len(bipolar_pairs) * len(params.freqs)))
 
 
         if fr_session_present:
-            self.pow_mat[fr1_encoding_mask, ...] = encoding_fr1_pow_mat
-            self.pow_mat[fr1_retrieval_mask, ...] = retrieval_fr1_pow_mat
+            self.pow_mat = np.concatenate((encoding_pal1_pow_mat,
+                                           retrieval_pal1_pow_mat,
+                                           encoding_fr1_pow_mat,
+                                           retrieval_fr1_pow_mat)
+                                          )
 
-        self.pow_mat[pal1_encoding_mask, ...] = encoding_pal1_pow_mat
-        self.pow_mat[pal1_retrieval_mask, ...] = retrieval_pal1_pow_mat
+            # self.pow_mat[fr1_encoding_mask, ...] = encoding_fr1_pow_mat
+            # self.pow_mat[fr1_retrieval_mask, ...] = retrieval_fr1_pow_mat
+        else:
+            self.pow_mat = np.concatenate((encoding_pal1_pow_mat,
+                                           retrieval_pal1_pow_mat)
+                                          )
+
+
+        # self.pow_mat[pal1_encoding_mask, ...] = encoding_pal1_pow_mat
+        # self.pow_mat[pal1_retrieval_mask, ...] = retrieval_pal1_pow_mat
+
+        # after we constructed pow_mat (we followed the same order of concatenation)
+        # we need to reorder pow_mat in the same way evs were reordered
+        self.pow_mat = self.pow_mat[ev_order]
 
         self.pass_object('pow_mat', self.pow_mat)
 
