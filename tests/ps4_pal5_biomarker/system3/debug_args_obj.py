@@ -147,8 +147,23 @@ args_obj_R1232N.pulse_frequency = 200
 args_obj_R1250N.workspace_dir = default_workspace_dir
 
 
-# ------------------------------------------------- R1307N
-prefix = '/Volumes/rhino_root'
+# # ------------------------------------------------- R1307N
+# prefix = '/Volumes/rhino_root'
+# args_obj_R1307N = Args()
+# args_obj_R1307N.subject = 'R1307N'
+# args_obj_R1307N.anodes = ['LALT5']
+# args_obj_R1307N.cathodes = ['LALT6']
+# args_obj_R1307N.electrode_config_file = join(prefix, 'scratch','experiment_configs', 'R1307N_R1307N08JUNE17STIM.csv')
+# args_obj_R1307N.experiment = 'PAL5'
+# args_obj_R1307N.min_amplitudes = [0.1,0.1]
+# args_obj_R1307N.max_amplitudes = [1.9,1.9]
+# args_obj_R1307N.mount_point = prefix
+# args_obj_R1307N.pulse_frequency = 200
+# # args_obj_R1307N.workspace_dir = join(prefix, 'scratch', args_obj_R1307N.subject)
+# args_obj_R1307N.workspace_dir = join(prefix,'scratch','experiment_configs')
+# args_obj_R1307N.classifier_type_to_output = 'pal'
+
+# ------------------------------------------------- R1307N WINDOWS TEST
 args_obj_R1307N = Args()
 args_obj_R1307N.subject = 'R1307N'
 args_obj_R1307N.anodes = ['LALT5']
@@ -189,6 +204,7 @@ args_obj_R1307N.classifier_type_to_output = 'pal'
 # args_obj_R1095N.classifier_type_to_output = 'pal'
 
 # ------------------------------------------------- R1250N
+prefix = 'U:/'
 args_obj_R1250N = Args()
 args_obj_R1250N.subject = 'R1250N'
 args_obj_R1250N.anodes = ['PG10', 'PG11']
