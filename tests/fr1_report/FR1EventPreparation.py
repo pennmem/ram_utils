@@ -60,7 +60,7 @@ class FR1EventPreparation(ReportRamTask):
         events = None
         for sess_file in event_files:
             e_path = os.path.join(self.pipeline.mount_point, str(sess_file))
-            e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
+            e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=False)
 
             sess_events = e_reader.read()[evs_field_list]
 
@@ -75,7 +75,7 @@ class FR1EventPreparation(ReportRamTask):
 
         self.pass_object(task+'_all_events', events)
 
-        events = create_baseline_events(events,start_buffer=1000,end_buffer=29000)
+        events = create_baseline_events(events, start_time=1000, end_time=29000)
 
         math_events = events[events.type == 'PROB']
 

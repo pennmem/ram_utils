@@ -118,7 +118,7 @@ class ComposeSessionSummary(ReportRamTask):
 
             session_summary.prob_recall = prob_recall
 
-            lists = np.unique(session_events.list)
+            lists = np.unique(session_all_events.list)
             n_lists = len(lists)
 
             session_data.append([session, session_date, session_length, n_lists, '$%.2f$\\%%' % session_summary.pc_correct_words])
