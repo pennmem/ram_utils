@@ -5,12 +5,13 @@ import os.path
 from os.path import *
 import numpy as np
 from sklearn.externals import joblib
+from collections import defaultdict
 
 class RamTaskL(luigi.Task):
     pipeline = luigi.Parameter(default=None)
     mark_as_completed = luigi.BoolParameter(default=False)
     # file_resources_to_copy = luigi.Parameter(default={})
-    file_resources_to_copy = {}
+    file_resources_to_copy = defaultdict(dict)
 
     def input_hashsum(self):
         return ''
@@ -19,9 +20,16 @@ class RamTaskL(luigi.Task):
         return self.__class__.__name__
 
     def add_file_resource(self, name, folder='', ext='pkl', action='copy'):
+        if folder == '' or folder == self.__class__.__name__:
+            folder_tmp = self.__class__.__name__
+        elif folder.strip() == '.':
+            folder_tmp = ''
+        else:
+            folder_tmp = folder
+
 
         self.file_resources_to_copy[self.__class__.__name__][name] = luigi.LocalTarget(
-            join(self.pipeline.workspace_dir, folder, name + '.' + ext.replace('.', '')))
+            join(self.pipeline.workspace_dir, folder_tmp, name + '.' + ext.replace('.', '')))
 
     def get_task_completed_file_name(self):
         """
@@ -147,17 +155,55 @@ class RamTaskL(luigi.Task):
     def run_impl(self):
         pass
 
-    def pass_object(self, name, obj):
-        joblib.dump(obj, self.output()[name].path)
+    def serialize(self, name, obj):
+        joblib.dump(obj, join(self.pipeline.workspace_dir,name,'.pkl'))
+
+    def deserialize(self, name):
+        return joblib.load(join(self.pipeline.workspace_dir,name,'.pkl'))
+
+
+    def pass_object(self, name, obj, serialize=True):
+        # blanking the file
+
+        self.pipeline.passed_objects_dict[name] = obj
+        if serialize:
+
+            with self.output()[name].open('w'):
+                pass
+
+            joblib.dump(obj, self.output()[name].path)
 
     def get_passed_object(self, name):
+        try:
+            return self.pipeline.passed_objects_dict[name]
+        except KeyError:
+            obj_list = []
+            for input_dict in self.input():
 
-        return joblib.load(self.input()[0][name].path)
+                try:
+                    obj = joblib.load(input_dict[name].path)
+                    obj_list.append(obj)
+                except KeyError:
+                    pass
+            if len(obj_list)>1:
+                raise KeyError('Found multiple %s in the inputs. This is illegal in RamTasks'%name)
+            elif len(obj_list)==0:
+                raise KeyError('Could not find %s in any of the inputs'%name)
 
-    def serialize(self, name, obj):
 
-        with self.output()[name].open('wb') as obj_out:
-            joblib.dump(obj, obj_out)
+            self.pipeline.passed_objects_dict[name] = obj_list[0]
+
+            return obj_list[0]
+
+
+
+
+#
+    # def serialize(self, name, obj):
+    #
+    #
+    #     with self.output()[name].open('wb') as obj_out:
+    #         joblib.dump(obj, obj_out)
 
     def define_outputs(self):
         pass
@@ -165,6 +211,9 @@ class RamTaskL(luigi.Task):
     def output(self):
 
         self.define_outputs()
+        if self.mark_as_completed:
+            self.add_file_resource(self.__class__.__name__,  folder='.', ext='completed', action='copy')
+
         try:
             return self.file_resources_to_copy[self.__class__.__name__]
         except KeyError:
@@ -205,7 +254,9 @@ class RamTaskL(luigi.Task):
         if not self.is_completed():
             self.remove_outputs()
             # super(ReportRamTaskL, self).run()
+
             self.run_impl()
+
             if self.mark_as_completed:
                 hs = self.input_hashsum()
                 try:
