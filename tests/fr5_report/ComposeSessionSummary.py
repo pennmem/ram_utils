@@ -456,7 +456,7 @@ class ComposeSessionSummary(ReportRamTask):
         self.pass_object('fr5_session_table', session_data)
 
         session_summary_array = self.get_passed_object('fr_session_summary')
-        fr_stim_table_by_phase = fr_stim_table.loc[~fr_stim_table['is_ps4']]
+        fr_stim_table_by_phase = fr_stim_table.loc[~fr_stim_table['is_ps4_session']]
 
         fr_stim_group_table_group = fr_stim_table_by_phase.groupby(['stimAnodeTag','stimCathodeTag'])
         for stim_param,fr_stim_session_table in fr_stim_group_table_group:

@@ -281,7 +281,7 @@ class GenerateTex(ReportRamTask):
             for session_summary in fr5_session_summary:
                 sessions = session_summary.sessions
                 if len(sessions)>1:
-                    sessions = ','.join(sessions)
+                    sessions = ','.join([str(x) for x in sessions])
                 else:
                     sessions = str(sessions)
 
