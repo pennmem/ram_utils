@@ -203,7 +203,7 @@ class GenerateTex(ReportRamTask):
                              '<EXPERIMENT>':experiment,
                              '<DATE>':date,
                              '<FR5_SECTION>':fr5_latex})
-        self.pass_object('report_tex_file_name','FR5_report.tex')
+        self.pass_object('report_tex_file_name','%s-FR5_report.tex'%subject)
 
 
     def generate_ps_latex(self):
