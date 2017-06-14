@@ -292,13 +292,13 @@ class GenerateTex(ReportRamTask):
 
                 recognition_tex = (replace_template_to_string('recognition.tex.tpl',
                                                              {
-                                                                 '<PHITS_STIM>': '%2.2d' % session_summary.pc_hits_stim,
-                                                                 '<PHITS_NO_STIM>': '%2.2d' % session_summary.pc_hits_nostim,
-                                                                 '<PFALSE_ALARMS>': '%2.2d' % session_summary.pc_false_alarms,
-                                                                 '<DPRIME>': '%2.2d' % session_summary.dprime,
+                                                                 '<PHITS_STIM>': '%2.2f' % session_summary.pc_stim_hits,
+                                                                 '<PHITS_NO_STIM>': '%2.2f' % session_summary.pc_nonstim_hits,
+                                                                 '<PFALSE_ALARMS>': '%2.2f' % session_summary.pc_false_alarms,
+                                                                 '<DPRIME>': session_summary.dprime,
 
                                                              })
-                                   if session_summary.dprime != -999 else '')
+                                   if session_summary.dprime != 'nan' else '')
                 item_level_comparison = '' #if session_summary.chisqr_last == -999 else latex_table(session_summary.last_recall_table)
                 session_tex = replace_template_to_string('fr5_session.tex.tpl',
                              {

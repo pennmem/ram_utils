@@ -6,15 +6,15 @@ import time
 class PS4SessionSummary(object):
     def __init__(self):
         self.info_by_location = {} # location
-        self.sham_dc  = -999
-        self.sham_sem = -999
+        self.sham_dc  = -999.
+        self.sham_sem = -999.
         self.best_location = ''
-        self.best_amplitude=-999
-        self.pval = -999
-        self.tstat = -999
+        self.best_amplitude=-999.
+        self.pval = -999.
+        self.tstat = -999.
         self.tie = True
-        self.pval_vs_sham = -999
-        self.tstat_vs_sham = -999
+        self.pval_vs_sham = -999.
+        self.tstat_vs_sham = -999.
         self.decision_info = {}
 
 
@@ -23,11 +23,13 @@ class PS4LocationSummary(object):
     def __init__(self, loc_tag):
         self.loc_tag=loc_tag
         self.delta_classifiers = {}
+        self.post_stim_biomarkers = {}
         self.amplitudes = {}
-        self.sem  = -999
-        self.snr = -999
-        self.best_amplitude = -999
-        self.best_delta_classifier = -999
+        self.post_stim_amplitudes=  {}
+        self.sem  = -999.
+        self.snr = -999.
+        self.best_amplitude = -999.
+        self.best_delta_classifier = -999.
 
 
 class ComposeSessionSummary(ReportRamTask):
@@ -58,24 +60,31 @@ class ComposeSessionSummary(ReportRamTask):
                     opt_events = loc_events.loc[loc_events.type=='OPTIMIZATION'].groupby('list_phase')
 
                     for i,(phase,phase_opt_events) in enumerate(opt_events):
+                        post_stim_phase_events = loc_events.loc[(event_frame.list_phase==phase)
+                                                                 & (event_frame.type=='BIOMARKER')
+                                                                 & (event_frame.position=='POST')]
                         loc_decision_info = decision.loc1 if decision.loc1.loc_name==loc_tag else decision.loc2
                         location_summary.amplitudes[phase]=phase_opt_events.amplitude.values/1000.
                         location_summary.delta_classifiers[phase] = phase_opt_events.delta_classifier.values
-                        location_summary.best_amplitude = loc_decision_info.amplitude[0]
-                        location_summary.best_delta_classifier = loc_decision_info.delta_classifier[0]
-                        location_summary.sem = loc_decision_info.sem[0]
-                        location_summary.snr = loc_decision_info.snr[0]
+                        location_summary.post_stim_biomarkers[phase]=post_stim_phase_events.biomarker_value
+                        location_summary.post_stim_amplitudes[phase] = post_stim_phase_events.amplitude.values/1000.
+                        if len(loc_decision_info):
+                            location_summary.best_amplitude = loc_decision_info.amplitude[0]
+                            location_summary.best_delta_classifier = loc_decision_info.delta_classifier[0]
+                            location_summary.sem = loc_decision_info.sem[0]
+                            location_summary.snr = loc_decision_info.snr[0]
 
                     session_summary.info_by_location[loc_tag] = location_summary
-            session_summary.sham_dc = decision.sham.delta_classifier[0]
-            session_summary.sham_sem = decision.sham.sem[0]
-            session_summary.best_location = decision.decision.best_location[0]
-            session_summary.best_amplitude = (decision.loc1 if decision.loc1.loc_name==session_summary.best_location else decision.loc2).amplitude[0]
-            session_summary.pval = decision.decision.p_val[0]
-            session_summary.tstat = decision.decision.t_stat[0]
-            session_summary.tie = decision.decision.tie[0]
-            session_summary.tstat_vs_sham = decision.sham.t_stat[0]
-            session_summary.pval_vs_sham = decision.sham.p_val[0]
+            if len(decision):
+                session_summary.sham_dc = decision.sham.delta_classifier[0]
+                session_summary.sham_sem = decision.sham.sem[0]
+                session_summary.best_location = decision.decision.best_location[0]
+                session_summary.best_amplitude = (decision.loc1 if decision.loc1.loc_name==session_summary.best_location else decision.loc2).amplitude[0]
+                session_summary.pval = decision.decision.p_val[0]
+                session_summary.tstat = decision.decision.t_stat[0]
+                session_summary.tie = decision.decision.tie[0]
+                session_summary.tstat_vs_sham = decision.sham.t_stat[0]
+                session_summary.pval_vs_sham = decision.sham.p_val[0]
 
             session_summaries[session] = session_summary
 

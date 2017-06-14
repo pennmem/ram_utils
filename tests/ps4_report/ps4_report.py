@@ -5,7 +5,7 @@ from os.path import join
 parser=CMLParser()
 parser.arg('--subject','R1302M')
 parser.arg('--task','FR5')
-parser.arg('--workspace-dir','/Users/leond/ps4_reports')
+parser.arg('--workspace-dir','scratch')
 parser.arg('--mount-point','/Volumes/rhino_root/')
 parser.arg('--recompute-on-no-status')
 

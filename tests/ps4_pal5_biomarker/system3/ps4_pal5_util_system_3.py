@@ -129,7 +129,7 @@ class ReportPipeline(RamPipeline):
 
 if __name__ == '__main__':
 
-    log_filename = join('D:/PAL5', 'PAL5_' + time.strftime('%Y_%m_%d_%H_%M_%S')+'.csv')
+    # log_filename = join('D:/PAL5', 'PAL5_' + time.strftime('%Y_%m_%d_%H_%M_%S')+'.csv')
 
 
     for args_obj in args_list:
