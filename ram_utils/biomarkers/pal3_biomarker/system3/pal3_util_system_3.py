@@ -34,7 +34,7 @@ cml_parser.arg('--cathode','PG11')
 # cml_parser.arg('--target-amplitude','1000')
 
 
-args = cml_parser.parse()
+# args = cml_parser.parse()
 
 # ------------------------------- end of processing command line
 
@@ -104,38 +104,39 @@ class Params(object):
         #     target_amplitude=args.target_amplitude
         # )
 
+def make_biomarker(args):
 
-params = Params()
-
-
-class ReportPipeline(RamPipeline):
-
-    def __init__(self, subject, workspace_dir, mount_point=None, args=None):
-        RamPipeline.__init__(self)
-        self.subject = subject
-        self.mount_point = mount_point
-        self.set_workspace_dir(workspace_dir)
-        self.args = args
+    params = Params()
 
 
-report_pipeline = ReportPipeline(subject=args.subject,
-                                       workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point, args=args)
+    class ReportPipeline(RamPipeline):
 
-report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
-
-report_pipeline.add_task(MontagePreparation(params=params,mark_as_completed=False))
-
-report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
-
-report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=True))
-
-report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
-
-report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop3(params=params, mark_as_completed=False))
+        def __init__(self, subject, workspace_dir, mount_point=None, args=None):
+            RamPipeline.__init__(self)
+            self.subject = subject
+            self.mount_point = mount_point
+            self.set_workspace_dir(workspace_dir)
+            self.args = args
 
 
-#
-# # report_pipeline.add_task(SaveMatlabFile(params=params, mark_as_completed=False))
+    report_pipeline = ReportPipeline(subject=args.subject,
+                                           workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point, args=args)
 
-# starts processing pipeline
-report_pipeline.execute_pipeline()
+    report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
+
+    report_pipeline.add_task(MontagePreparation(params=params,mark_as_completed=False))
+
+    report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
+
+    report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=True))
+
+    report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
+
+    report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop3(params=params, mark_as_completed=False))
+
+
+    #
+    # # report_pipeline.add_task(SaveMatlabFile(params=params, mark_as_completed=False))
+
+    # starts processing pipeline
+    report_pipeline.execute_pipeline()

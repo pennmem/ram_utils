@@ -22,7 +22,7 @@ cml_parser.arg('--pulse-duration','500')
 cml_parser.arg('--target-amplitude','1000')
 
 
-args = cml_parser.parse()
+# args = cml_parser.parse()
 
 
 # ------------------------------- end of processing command line
@@ -60,7 +60,7 @@ class StimParams(object):
         self.trainCount = 1
 
 class Params(object):
-    def __init__(self):
+    def __init__(self,args):
         self.version = '2.00'
 
         self.width = 5
@@ -91,34 +91,34 @@ class Params(object):
             pulse_count=args.pulse_frequency*args.pulse_duration/1000,
             target_amplitude=args.target_amplitude
         )
+def make_biomarker(args):
+
+    params = Params(args)
 
 
-params = Params()
+    class ReportPipeline(RamPipeline):
+
+        def __init__(self, subject, workspace_dir, mount_point=None):
+            RamPipeline.__init__(self)
+            self.subject = subject
+            self.mount_point = mount_point
+            self.set_workspace_dir(workspace_dir)
 
 
-class ReportPipeline(RamPipeline):
+    report_pipeline = ReportPipeline(subject=args.subject,
+                                           workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point)
 
-    def __init__(self, subject, workspace_dir, mount_point=None):
-        RamPipeline.__init__(self)
-        self.subject = subject
-        self.mount_point = mount_point
-        self.set_workspace_dir(workspace_dir)
+    report_pipeline.add_task(THEventPreparation(mark_as_completed=False))
 
+    report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
 
-report_pipeline = ReportPipeline(subject=args.subject,
-                                       workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point)
+    report_pipeline.add_task(CheckElectrodeLabels(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(THEventPreparation(mark_as_completed=False))
+    report_pipeline.add_task(ComputeTHClassPowers(params=params, mark_as_completed=True))
 
-report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
+    report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 
-report_pipeline.add_task(CheckElectrodeLabels(params=params, mark_as_completed=False))
+    report_pipeline.add_task(SaveMatlabFile(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(ComputeTHClassPowers(params=params, mark_as_completed=True))
-
-report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
-
-report_pipeline.add_task(SaveMatlabFile(params=params, mark_as_completed=False))
-
-# starts processing pipeline
-report_pipeline.execute_pipeline()
+    # starts processing pipeline
+    report_pipeline.execute_pipeline()

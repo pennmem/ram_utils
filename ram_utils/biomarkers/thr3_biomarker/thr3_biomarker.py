@@ -22,7 +22,7 @@ cml_parser.arg('--pulse-duration','500')
 cml_parser.arg('--target-amplitude','1000')
 
 
-args = cml_parser.parse()
+# args = cml_parser.parse()
 
 
 # ------------------------------- end of processing command line

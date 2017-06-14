@@ -1,54 +1,27 @@
-DEBUG = True
-
 import sys
 import time
 from os.path import *
 
 from pal5_prompt import parse_command_line, Args
 
-if sys.platform.startswith('win'):
-
-    prefix = 'd:/'
-
-else:
-
-    prefix = '/'
-args_list = []
-
-try:
-    args_obj = parse_command_line()
-except:
-
-
-    args_obj = Args()
-
-    args_obj.subject = 'R1250N'
-    args_obj.anodes =   ['AT1','AT2']
-    args_obj.cathodes = ['AT2','AT3']
-    args_obj.electrode_config_file = join(prefix,'scratch','leond','pal5_biomarker', 'electrode_configs', 'contacts%s.csv'%args_obj.subject)
-    args_obj.experiment = 'PS4_PAL5'
-    args_obj.min_amplitudes = [0.25,0.25]
-    args_obj.max_amplitudes = [1.0,1.0]
-    args_obj.mount_point = prefix
-    args_obj.pulse_frequency = 200
-    args_obj.workspace_dir = join(prefix, 'scratch', 'leond','pal5_biomarker')
-
-args_list.append(args_obj)
-
-# ------------------------------- end of processing command line
-
 from ....RamPipeline import RamPipeline
 
-from ...pal5_biomarker import MontagePreparation
+from ..MontagePreparation import MontagePreparation
 
 from ....system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
 
-from ..ComputeClassifier import ComputeFullClassifier
+from ..ComputeClassifier import ComputeClassifier,ComputeFullClassifier
 
-from ...pal5_biomarker.ComputeEncodingClassifier import ComputeEncodingClassifier
+from ..ComputeBiomarkerThreshold import ComputeBiomarkerThreshold
 
-from ...pal5_biomarker import ComputeBiomarkerThreshold, ComputePAL1Powers, PAL1EventPreparation, \
-    ComputeClassifier, LogResults
+from ..ComputePAL1Powers import ComputePAL1Powers
+
+from ..PAL1EventPreparation import PAL1EventPreparation
+
+from ..LogResults import LogResults
+
+from ..ComputeEncodingClassifier import ComputeEncodingClassifier
+
 
 from .ExperimentConfigGeneratorClosedLoop5 import ExperimentConfigGeneratorClosedLoop5
 
@@ -105,64 +78,58 @@ class Params(object):
         )
 
 
-params = Params()
 
 
-class ReportPipeline(RamPipeline):
-    def __init__(self, subject, workspace_dir, mount_point=None, args=None):
-        RamPipeline.__init__(self)
-        self.subject = subject
-        self.mount_point = mount_point
-        self.set_workspace_dir(workspace_dir)
-        self.args = args_obj
 
 
-if __name__ == '__main__':
-    # report_pipeline = ReportPipeline(subject=args.subject,
+def make_biomaker(args_obj):    # report_pipeline = ReportPipeline(subject=args.subject,
     #                                  workspace_dir=join(args.workspace_dir, args.subject), mount_point=args.mount_point,
     #                                  args=args)
+    params=Params()
+
+    class ReportPipeline(RamPipeline):
+        def __init__(self, subject, workspace_dir, mount_point=None, args=None):
+            RamPipeline.__init__(self)
+            self.subject = subject
+            self.mount_point = mount_point
+            self.set_workspace_dir(workspace_dir)
+            self.args = args_obj
+
+    log_filename = join(args_obj.workspace_dir,args_obj.subject,time.strftime('%Y_%m_%d')+'.csv')
+    report_pipeline = ReportPipeline(subject=args_obj.subject,
+                                     workspace_dir=join(args_obj.workspace_dir,
+                                        '{}_{}_{}_{}_{}_{}_{}_{}'.format(
+                                        args_obj.subject,args_obj.experiment,
+                                        args_obj.anodes[0],args_obj.cathodes[0],args_obj.max_amplitudes[0],
+                                        args_obj.anodes[1],args_obj.cathodes[1],args_obj.max_amplitudes[1]
+                                        )
+                                                        ),
+                                     mount_point=args_obj.mount_point,
+                                     args=args_obj)
+
+    report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
+
+    report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
+
+    #
+    report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
+    #
+    report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=True))
+
+    report_pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=True))
+
+    report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
 
 
-    # log_filename = join('D:/PAL5', 'PAL5_' + time.strftime('%Y_%m_%d_%H_%M_%S')+'.csv')
+    report_pipeline.add_task(ComputeBiomarkerThreshold(params=params, mark_as_completed=True))
 
+    report_pipeline.add_task(LogResults(params=params, mark_as_completed=False, log_filename=log_filename))
 
-    for args_obj in args_list:
-        log_filename = join(args_obj.workspace_dir,args_obj.subject,time.strftime('%Y_%m_%d')+'.csv')
-        report_pipeline = ReportPipeline(subject=args_obj.subject,
-                                         workspace_dir=join(args_obj.workspace_dir,
-                                            '{}_{}_{}_{}_{}_{}_{}_{}'.format(
-                                            args_obj.subject,args_obj.experiment,
-                                            args_obj.anodes[0],args_obj.cathodes[0],args_obj.max_amplitudes[0],
-                                            args_obj.anodes[1],args_obj.cathodes[1],args_obj.max_amplitudes[1]
-                                            )
-                                                            ),
-                                         mount_point=args_obj.mount_point,
-                                         args=args_obj)
+    report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=True))
 
-        report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
+    report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
 
-        report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
-
-        #
-        report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
-        #
-        report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=True))
-
-        report_pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=True))
-
-        report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
-
-
-        report_pipeline.add_task(ComputeBiomarkerThreshold(params=params, mark_as_completed=True))
-
-
-
-        report_pipeline.add_task(LogResults(params=params, mark_as_completed=False, log_filename=log_filename))
-        report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=True))
-
-        report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
-
-        # starts processing pipeline
-        report_pipeline.execute_pipeline()
+    # starts processing pipeline
+    report_pipeline.execute_pipeline()
 
 

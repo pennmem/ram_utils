@@ -25,7 +25,7 @@ cml_parser.arg('--min-amplitudes','0.25')
 cml_parser.arg('--max-amplitudes','1.0')
 
 
-args = cml_parser.parse()
+# args = cml_parser.parse()
 
 # ------------------------------- end of processing command line
 
@@ -117,7 +117,6 @@ class Params(object):
         # )
 
 
-params = Params()
 # class ConfigError(Exception):
 #     pass
 #
@@ -146,23 +145,26 @@ class ReportPipeline(RamPipeline):
         self.args = args
 
 
-report_pipeline = ReportPipeline(subject=args.subject,
-                                       workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point, args=args)
+def make_biomarker(args):
+    params = Params()
 
-report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
+    report_pipeline = ReportPipeline(subject=args.subject,
+                                           workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point, args=args)
 
-report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
+    report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
 
-report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
+    report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
 
-report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
+    report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
+    report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 
-report_pipeline.add_task(ComputeFullClassifier(params=params,mark_as_completed=False))
+    report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
+    report_pipeline.add_task(ComputeFullClassifier(params=params,mark_as_completed=False))
+
+    report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
 
 
-# starts processing pipeline
-report_pipeline.execute_pipeline()
+    # starts processing pipeline
+    report_pipeline.execute_pipeline()

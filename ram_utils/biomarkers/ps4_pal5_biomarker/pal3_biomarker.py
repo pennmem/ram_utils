@@ -22,24 +22,24 @@ cml_parser.arg('--pulse-duration','300')
 cml_parser.arg('--target-amplitude','1250')
 
 
-args = cml_parser.parse()
+# args = cml_parser.parse()
 
 
 # ------------------------------- end of processing command line
 
-from ram_utils.RamPipeline import RamPipeline
+from ...RamPipeline import RamPipeline
 
-from PAL1EventPreparation import PAL1EventPreparation
+from .PAL1EventPreparation import PAL1EventPreparation
 
-from ComputePowers import ComputePowers
+from .ComputePowers import ComputePowers
 
-from MontagePreparation import MontagePreparation
+from .MontagePreparation import MontagePreparation
 
-from CheckElectrodeLabels import CheckElectrodeLabels
+from .CheckElectrodeLabels import CheckElectrodeLabels
 
-from ComputeClassifier import ComputeClassifier
+from .ComputeClassifier import ComputeClassifier
 
-from SaveMatlabFile import SaveMatlabFile
+from .SaveMatlabFile import SaveMatlabFile
 
 import numpy as np
 
@@ -91,33 +91,33 @@ class Params(object):
             target_amplitude=args.target_amplitude
         )
 
-
-params = Params()
-
-
-class ReportPipeline(RamPipeline):
-
-    def __init__(self, subject, workspace_dir, mount_point=None):
-        RamPipeline.__init__(self)
-        self.subject = subject
-        self.mount_point = mount_point
-        self.set_workspace_dir(workspace_dir)
+def make_biomarker(args):
+    params = Params()
 
 
-report_pipeline = ReportPipeline(subject=args.subject,
-                                       workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point)
+    class ReportPipeline(RamPipeline):
 
-report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
+        def __init__(self, subject, workspace_dir, mount_point=None):
+            RamPipeline.__init__(self)
+            self.subject = subject
+            self.mount_point = mount_point
+            self.set_workspace_dir(workspace_dir)
 
-report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
 
-report_pipeline.add_task(CheckElectrodeLabels(params=params, mark_as_completed=False))
+    report_pipeline = ReportPipeline(subject=args.subject,
+                                           workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point)
 
-report_pipeline.add_task(ComputePowers(params=params, mark_as_completed=True))
+    report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
 
-report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
+    report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
 
-report_pipeline.add_task(SaveMatlabFile(params=params, mark_as_completed=False))
+    report_pipeline.add_task(CheckElectrodeLabels(params=params, mark_as_completed=False))
 
-# starts processing pipeline
-report_pipeline.execute_pipeline()
+    report_pipeline.add_task(ComputePowers(params=params, mark_as_completed=True))
+
+    report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
+
+    report_pipeline.add_task(SaveMatlabFile(params=params, mark_as_completed=False))
+
+    # starts processing pipeline
+    report_pipeline.execute_pipeline()

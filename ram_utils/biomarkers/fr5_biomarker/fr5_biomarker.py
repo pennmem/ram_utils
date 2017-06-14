@@ -24,7 +24,7 @@ cml_parser.arg('--anode-num','34')
 cml_parser.arg('--cathode-num','35')
 
 
-args = cml_parser.parse()
+# args = cml_parser.parse()
 
 
 # ------------------------------- end of processing command line

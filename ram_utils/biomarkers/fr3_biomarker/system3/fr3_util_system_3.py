@@ -7,7 +7,7 @@ print "See https://github.com/busygin/morlet_for_sys2_biomarker/blob/master/READ
 
 from os.path import *
 
-from ram_utils.system_3_utils.ram_tasks.CMLParserClosedLoop3 import CMLParserCloseLoop3
+from ....system_3_utils.ram_tasks.CMLParserClosedLoop3 import CMLParserCloseLoop3
 
 cml_parser = CMLParserCloseLoop3(arg_count_threshold=1)
 cml_parser.arg('--workspace-dir','/scratch/leond/FR3_biomarkers/R1247P_1')
@@ -34,7 +34,7 @@ cml_parser.arg('--cathode','RE1')
 # cml_parser.arg('--target-amplitude','1000')
 
 
-args = cml_parser.parse()
+# # args = cml_parser.parse()
 
 # ------------------------------- end of processing command line
 
