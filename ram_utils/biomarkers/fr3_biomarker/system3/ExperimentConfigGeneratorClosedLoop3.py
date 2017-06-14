@@ -1,6 +1,6 @@
 from ram_utils.RamPipeline import *
 
-import TextTemplateUtils
+from ... import TextTemplateUtils
 import os
 import zipfile
 from os.path import  *

@@ -4,7 +4,7 @@ import hashlib
 import os.path
 
 import numpy as np
-from ReportUtils import RamTask
+from ...ReportUtils import RamTask
 from ptsa.data.readers import BaseEventReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
 

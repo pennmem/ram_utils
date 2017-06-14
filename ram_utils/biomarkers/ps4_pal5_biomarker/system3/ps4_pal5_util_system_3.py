@@ -24,26 +24,26 @@ except:
 
 # ------------------------------- end of processing command line
 
-from ram_utils.RamPipeline import RamPipeline
+from ....RamPipeline import RamPipeline
 
-from ram_utils.biomarkers.ps4_pal5_biomarker import PAL1EventPreparation
+from ...ps4_pal5_biomarker.PAL1EventPreparation import PAL1EventPreparation
 
-from ram_utils.biomarkers.ps4_pal5_biomarker import FREventPreparation
+from ...ps4_pal5_biomarker.FREventPreparation import FREventPreparation
 
-from ram_utils.biomarkers.ps4_pal5_biomarker import CombinedEventPreparation
+from ...ps4_pal5_biomarker.CombinedEventPreparation import CombinedEventPreparation
 
-from ram_utils.biomarkers.ps4_pal5_biomarker.ComputePowers import ComputePowers
+from ...ps4_pal5_biomarker.ComputePowers import ComputePowers
 
-from ram_utils.biomarkers.ps4_pal5_biomarker import MontagePreparation
+from ...ps4_pal5_biomarker.MontagePreparation import MontagePreparation
 
-from ram_utils.system_3_utils import CheckElectrodeConfigurationClosedLoop3
+from ....system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import  CheckElectrodeConfigurationClosedLoop3
 
-from ram_utils.biomarkers.ps4_pal5_biomarker import ComputeClassifier
-from ram_utils.biomarkers.ps4_pal5_biomarker import ComputePAL1Classifier
+from ...ps4_pal5_biomarker.ComputeClassifier import ComputeClassifier
+from ...ps4_pal5_biomarker.ComputeClassifier import ComputePAL1Classifier
 
-from ram_utils.biomarkers.ps4_pal5_biomarker import ComputeFullClassifier
+from ...ps4_pal5_biomarker.ComputeClassifier import ComputeFullClassifier
 
-from ram_utils.biomarkers.ps4_pal5_biomarker.system3 import ExperimentConfigGeneratorClosedLoop5_V1
+from .ExperimentConfigGeneratorClosedLoop5_V1 import ExperimentConfigGeneratorClosedLoop5_V1
 
 import numpy as np
 
@@ -123,13 +123,13 @@ class ReportPipeline(RamPipeline):
 
 if __name__ == '__main__':
 
-    log_filename = join('D:/PAL5', 'PAL5_' + time.strftime('%Y_%m_%d_%H_%M_%S')+'.csv')
+
 
 
     for args_obj in args_list:
 
         # setting workspace
-
+        log_filename = join(args_obj.workspace_dir, 'PAL5_' + time.strftime('%Y_%m_%d_%H_%M_%S') + '.csv')
         args_obj.workspace_dir = join(args_obj.workspace_dir, args_obj.experiment, args_obj.subject)
 
         report_pipeline = ReportPipeline(subject=args_obj.subject,

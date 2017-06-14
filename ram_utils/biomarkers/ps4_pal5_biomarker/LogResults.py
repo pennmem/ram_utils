@@ -8,7 +8,7 @@ import io
 
 from sklearn.externals import joblib
 
-from ReportUtils import RamTask
+from ...ReportUtils import RamTask
 
 import hashlib
 

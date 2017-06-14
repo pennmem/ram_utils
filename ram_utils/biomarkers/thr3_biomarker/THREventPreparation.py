@@ -8,7 +8,7 @@ from ptsa.data.readers import BaseEventReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
 from ram_utils.RamPipeline import *
-from ram_utils.ReportUtils import RamTask
+from ...ReportUtils import RamTask
 
 import hashlib
 

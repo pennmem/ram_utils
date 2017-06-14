@@ -3,7 +3,7 @@ import warnings
 from random import shuffle
 
 import numpy as np
-from ReportTasks.RamTaskMethods import ModelOutput
+from ...ReportTasks.RamTaskMethods import ModelOutput
 from ptsa.data.readers.IndexReader import JsonIndexReader
 from scipy.stats.mstats import zscore
 from sklearn.externals import joblib

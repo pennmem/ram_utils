@@ -1,6 +1,6 @@
 from ram_utils.RamPipeline import *
 
-from ram_utils import TextTemplateUtils
+from ... import TextTemplateUtils
 
 import numpy as np
 from scipy.io import savemat

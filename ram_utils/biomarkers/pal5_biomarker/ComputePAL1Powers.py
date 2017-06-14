@@ -14,8 +14,8 @@ import hashlib
 import warnings
 
 try:
-    from ReportTasks.RamTaskMethods import compute_powers
-    from ReportTasks.RamTaskMethods import compute_wavelets_powers
+    from ...ReportTasks.RamTaskMethods import compute_powers
+    from ...ReportTasks.RamTaskMethods import compute_wavelets_powers
 except ImportError as ie:
     if 'MorletWaveletFilterCpp' in ie.message:
         print 'Update PTSA for better perfomance'

@@ -5,7 +5,7 @@ from scipy.stats.mstats import zscore
 from sklearn.linear_model import LogisticRegression
 from random import shuffle
 from sklearn.metrics import roc_auc_score, roc_curve
-from ReportTasks.RamTaskMethods import run_lolo_xval, run_loso_xval, permuted_lolo_AUCs, permuted_loso_AUCs, ModelOutput
+from ...ReportTasks.RamTaskMethods import run_lolo_xval, run_loso_xval, permuted_lolo_AUCs, permuted_loso_AUCs, ModelOutput
 from sklearn.externals import joblib
 import warnings
 

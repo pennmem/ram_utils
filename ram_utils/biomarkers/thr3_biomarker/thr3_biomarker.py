@@ -6,7 +6,7 @@ print "Windows binaries from https://github.com/busygin/morlet_for_sys2_biomarke
 print "See https://github.com/busygin/morlet_for_sys2_biomarker/blob/master/README for detail."
 
 from os.path import *
-from BiomarkerUtils import CMLParserBiomarker
+from ...BiomarkerUtils import CMLParserBiomarker
 
 
 cml_parser = CMLParserBiomarker()
@@ -27,7 +27,7 @@ args = cml_parser.parse()
 
 # ------------------------------- end of processing command line
 
-from ram_utils.ReportUtils import ReportPipeline
+from ...ReportUtils import ReportPipeline
 
 from THREventPreparation import THREventPreparation
 

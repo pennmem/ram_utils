@@ -8,11 +8,11 @@ from ptsa.data.readers import BaseEventReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
 from ram_utils.RamPipeline import *
-from ReportUtils import RamTask
+from ...ReportUtils import RamTask
 
 import hashlib
 from sklearn.externals import joblib
-from ReportTasks.RamTaskMethods import create_baseline_events
+from ...ReportTasks.RamTaskMethods import create_baseline_events
 from numpy.lib.recfunctions import append_fields
 
 

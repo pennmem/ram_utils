@@ -37,20 +37,20 @@ args_list.append(args_obj)
 
 # ------------------------------- end of processing command line
 
-from ram_utils.RamPipeline import RamPipeline
+from ....RamPipeline import RamPipeline
 
-from ram_utils.biomarkers import MontagePreparation
+from ...pal5_biomarker import MontagePreparation
 
-from ram_utils.system_3_utils import CheckElectrodeConfigurationClosedLoop3
+from ....system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
 
-from ram_utils.biomarkers import ComputeFullClassifier
+from ..ComputeClassifier import ComputeFullClassifier
 
-from ram_utils.biomarkers.pal5_biomarker.ComputeEncodingClassifier import ComputeEncodingClassifier
+from ...pal5_biomarker.ComputeEncodingClassifier import ComputeEncodingClassifier
 
-from ram_utils.biomarkers.pal5_biomarker import ComputeBiomarkerThreshold, ComputePAL1Powers, PAL1EventPreparation, \
+from ...pal5_biomarker import ComputeBiomarkerThreshold, ComputePAL1Powers, PAL1EventPreparation, \
     ComputeClassifier, LogResults
 
-from ram_utils.biomarkers import ExperimentConfigGeneratorClosedLoop5
+from .ExperimentConfigGeneratorClosedLoop5 import ExperimentConfigGeneratorClosedLoop5
 
 import numpy as np
 
@@ -81,14 +81,6 @@ class Params(object):
         self.pal1_retrieval_buf = 0.524
 
 
-        # # todo remove in the production code
-        # self.pal1_retrieval_start_time = -0.600
-        # self.pal1_retrieval_end_time = -0.1
-        # self.pal1_retrieval_buf = 0.499
-
-
-        # self.retrieval_samples_weight = 2.5
-        # self.encoding_samples_weight = 2.5
         self.encoding_samples_weight = 1.0
 
         self.recall_period = 5.0
@@ -99,12 +91,10 @@ class Params(object):
         self.filt_order = 4
 
         self.freqs = np.logspace(np.log10(6), np.log10(180), 8)
-        # self.freqs = np.logspace(np.log10(3), np.log10(180), 8)  # TODO - remove it from production code
 
         self.log_powers = True
 
         self.penalty_type = 'l2'
-        # self.C = 7.2e-4  # TODO - remove it from production code
         self.C = 0.048
 
 

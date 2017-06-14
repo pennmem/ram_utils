@@ -1,7 +1,7 @@
 import datetime
 from subprocess import call
 
-import TextTemplateUtils
+from ... import TextTemplateUtils
 import numpy as np
 from scipy.io import savemat
 

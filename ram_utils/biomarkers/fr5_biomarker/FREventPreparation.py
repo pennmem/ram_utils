@@ -4,8 +4,8 @@ import hashlib
 import os.path
 
 import numpy as np
-from ReportTasks.RamTaskMethods import create_baseline_events
-from ReportUtils import RamTask
+from ...ReportTasks.RamTaskMethods import create_baseline_events
+from ...ReportUtils import RamTask
 from ptsa.data.readers import BaseEventReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
 from sklearn.externals import joblib

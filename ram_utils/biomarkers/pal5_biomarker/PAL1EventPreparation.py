@@ -11,11 +11,11 @@ from ptsa.data.readers import BaseEventReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
 from ram_utils.RamPipeline import *
-from ReportUtils import RamTask
+from ...ReportUtils import RamTask
 
 import hashlib
 import warnings
-from ReportTasks.RamTaskMethods import create_baseline_events_pal
+from ...ReportTasks.RamTaskMethods import create_baseline_events_pal
 from ptsa.data.readers import EEGReader
 
 

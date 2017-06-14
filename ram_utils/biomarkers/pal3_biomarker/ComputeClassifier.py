@@ -3,7 +3,7 @@ from ram_utils.RamPipeline import *
 import numpy as np
 from scipy.stats.mstats import zscore
 from sklearn.linear_model import LogisticRegression
-from ReportTasks.RamTaskMethods import run_lolo_xval,run_loso_xval,permuted_lolo_AUCs,permuted_loso_AUCs, ModelOutput
+from ...ReportTasks.RamTaskMethods import run_lolo_xval,run_loso_xval,permuted_lolo_AUCs,permuted_loso_AUCs, ModelOutput
 from sklearn.externals import joblib
 import warnings
 

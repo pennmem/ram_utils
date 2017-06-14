@@ -4,7 +4,7 @@ import hashlib
 import warnings
 
 import numpy as np
-from ReportTasks.RamTaskMethods import compute_wavelets_powers
+from ...ReportTasks.RamTaskMethods import compute_wavelets_powers
 from ptsa.data.readers import EEGReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
 

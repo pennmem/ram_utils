@@ -7,7 +7,7 @@ print "See https://github.com/busygin/morlet_for_sys2_biomarker/blob/master/READ
 
 from os.path import *
 
-from BiomarkerUtils import CMLParserBiomarker
+from ...BiomarkerUtils import CMLParserBiomarker
 
 cml_parser = CMLParserBiomarker(arg_count_threshold=1)
 cml_parser.arg('--workspace-dir','/scratch/leond/PAL3_biomarkers')

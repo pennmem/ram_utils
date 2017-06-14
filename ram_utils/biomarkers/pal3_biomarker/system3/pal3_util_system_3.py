@@ -38,17 +38,19 @@ args = cml_parser.parse()
 
 # ------------------------------- end of processing command line
 
-from ram_utils.RamPipeline import RamPipeline
+from ....RamPipeline import RamPipeline
 
-from ram_utils.biomarkers.pal3_biomarker import ComputePAL1Powers
+from ....system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
 
-from ram_utils.biomarkers.pal3_biomarker import MontagePreparation, PAL1EventPreparation
+from ..ComputePAL1Powers import ComputePAL1Powers
 
-from ram_utils.system_3_utils import CheckElectrodeConfigurationClosedLoop3
+from ..MontagePreparation import MontagePreparation
 
-from ram_utils.biomarkers.pal3_biomarker import ComputeClassifier
+from ..PAL1EventPreparation import  PAL1EventPreparation
 
-from ram_utils.biomarkers.pal3_biomarker import ExperimentConfigGeneratorClosedLoop3
+from ..ComputeClassifier import ComputeClassifier
+
+from .ExperimentConfigGeneratorClosedLoop3 import ExperimentConfigGeneratorClosedLoop3
 
 
 import numpy as np
@@ -121,7 +123,7 @@ report_pipeline = ReportPipeline(subject=args.subject,
 
 report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
 
-report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
+report_pipeline.add_task(MontagePreparation(params=params,mark_as_completed=False))
 
 report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
 

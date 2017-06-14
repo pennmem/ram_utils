@@ -12,7 +12,7 @@ from ptsa.data.readers.IndexReader import JsonIndexReader
 
 import hashlib
 try:
-    from ReportTasks.RamTaskMethods import compute_powers
+    from ...ReportTasks.RamTaskMethods import compute_powers
 except ImportError as ie:
     if 'MorletWaveletFilterCpp' in ie.message:
         print 'Update PTSA for better perfomance'

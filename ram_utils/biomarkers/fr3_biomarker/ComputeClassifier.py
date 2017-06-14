@@ -6,10 +6,10 @@ from scipy.stats.mstats import zscore
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, roc_curve
 from sklearn.externals import joblib
-from ReportTasks.RamTaskMethods import run_lolo_xval,run_loso_xval,permuted_loso_AUCs,permuted_lolo_AUCs,ModelOutput
+from ...ReportTasks.RamTaskMethods import run_lolo_xval,run_loso_xval,permuted_loso_AUCs,permuted_lolo_AUCs,ModelOutput
 import warnings
 from ptsa.data.readers.IndexReader import JsonIndexReader
-from ReportUtils import ReportRamTask
+from ...ReportUtils import ReportRamTask
 
 import hashlib
 

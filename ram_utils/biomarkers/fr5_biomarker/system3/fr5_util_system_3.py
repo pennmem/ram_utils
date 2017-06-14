@@ -29,21 +29,19 @@ args = cml_parser.parse()
 
 # ------------------------------- end of processing command line
 
-from ram_utils.RamPipeline import RamPipeline
+from ....RamPipeline import RamPipeline
 
-from ram_utils.biomarkers.fr5_biomarker import FREventPreparation
+from ..FREventPreparation import FREventPreparation
 
-from ram_utils.biomarkers.fr5_biomarker import ComputeFRPowers
+from ..ComputeFRPowers import ComputeFRPowers
 
-from ram_utils.biomarkers.fr5_biomarker import MontagePreparation
+from ..MontagePreparation import MontagePreparation
 
-from ram_utils.system_3_utils import CheckElectrodeConfigurationClosedLoop3
+from ....system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
 
-from ram_utils.biomarkers.fr5_biomarker import ComputeClassifier
+from ..ComputeClassifier import ComputeClassifier,ComputeFullClassifier
 
-from ram_utils.biomarkers.fr5_biomarker import ComputeFullClassifier
-
-from ram_utils.biomarkers.fr5_biomarker.system3 import ExperimentConfigGeneratorClosedLoop5
+from .ExperimentConfigGeneratorClosedLoop5 import ExperimentConfigGeneratorClosedLoop5
 
 import numpy as np
 

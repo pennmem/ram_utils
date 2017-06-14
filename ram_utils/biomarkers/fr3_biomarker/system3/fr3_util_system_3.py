@@ -38,15 +38,14 @@ args = cml_parser.parse()
 
 # ------------------------------- end of processing command line
 
-from ReportUtils import ReportPipeline
-from ram_utils.system_3_utils import CheckElectrodeConfigurationClosedLoop3
+from ....ReportUtils import ReportPipeline
+from ....system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
 
 from ..fr3_biomarker import FREventPreparation
 
 from ..fr3_biomarker import ComputeFRPowers
 
 from ..fr3_biomarker import MontagePreparation
-
 
 from ..fr3_biomarker import ComputeClassifier
 

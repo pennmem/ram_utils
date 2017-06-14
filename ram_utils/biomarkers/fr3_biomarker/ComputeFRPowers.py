@@ -8,7 +8,7 @@ from sklearn.externals import joblib
 
 from ram_utils.RamPipeline import *
 try:
-    from ReportTasks.RamTaskMethods import compute_powers
+    from ...ReportTasks.RamTaskMethods import compute_powers
 except ImportError:
     compute_powers=None
 

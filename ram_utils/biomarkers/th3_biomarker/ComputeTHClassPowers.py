@@ -7,7 +7,7 @@ from sklearn.externals import joblib
 
 from ram_utils.RamPipeline import *
 try:
-    from ReportTasks.RamTaskMethods import compute_powers
+    from ...ReportTasks.RamTaskMethods import compute_powers
 except ImportError as ie:
     if 'MorletWaveletFilterCpp' in ie.message:
         print 'Update PTSA for better perfomance'

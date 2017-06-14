@@ -4,7 +4,7 @@ import os
 
 from ptsa.data.readers import TalReader
 
-from ReportUtils import RamTask
+from ...ReportUtils import RamTask
 
 import os.path
 
@@ -15,7 +15,7 @@ import pandas as pd
 
 from sklearn.externals import joblib
 
-from ReportUtils import RamTask
+from ...ReportUtils import RamTask
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
 import hashlib
