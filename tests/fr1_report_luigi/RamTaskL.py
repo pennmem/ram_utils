@@ -13,6 +13,10 @@ class RamTaskL(luigi.Task):
     # file_resources_to_copy = luigi.Parameter(default={})
     file_resources_to_copy = defaultdict(dict)
 
+    file_resources_to_copy_direct = defaultdict()
+    file_resources_to_move_direct = defaultdict()  # {file_resource:dst_dir}
+
+
     def input_hashsum(self):
         return ''
 
@@ -55,6 +59,95 @@ class RamTaskL(luigi.Task):
             return hs == self.input_hashsum()
         else:
             return False
+
+    def set_file_resources_to_copy(self, *file_resources, **kwds):
+        """
+        setter method that allows users to specify file resources and subfolder of the workspace dir
+        where the file respirces should be copied
+        :param file_resources: arguments list specifying list of files to copy
+        :param kwds: dst - destination directory for the move operation - the option supported here
+        :return:None
+        """
+
+        for file_resource in file_resources:
+            try:
+                self.file_resources_to_copy_direct[file_resource] = kwds['dst']
+            except LookupError:
+                self.file_resources_to_copy_direct[file_resource] = ''
+
+    def set_file_resources_to_move(self, *file_resources, **kwds):
+        """
+        setter method that allows users to specify file resources and subfolder of the workspace dir
+        where the file respirces should be moved
+        :param file_resources: arguments list specifying list of files to move
+        :param kwds: dst - destination directory for the move operation - the option supported here
+        :return:None
+        """
+
+        for file_resource in file_resources:
+            try:
+                self.file_resources_to_move_direct[file_resource] = kwds['dst']
+            except LookupError:
+                self.file_resources_to_move_direct[file_resource] = ''
+
+    def make_dir_tree(self, dirname):
+        """
+        attempts to create directory tree
+        :param dirname: directory name
+        :return:None
+        """
+        import os
+        import errno
+        try:
+            os.makedirs(dirname)
+        except OSError, e:
+            if e.errno != errno.EEXIST:
+                raise IOError('Could not make directory: ' + dirname)
+
+
+    def copy_file_resources_to_workspace(self):
+        """
+        Examines dictionary of files to copy and copies listed files to the appropriate workspace folder or its subfolder
+        :return:None
+        """
+
+        import shutil
+        import os
+
+        for file_resource, dst_relative_path in self.file_resources_to_copy_direct.items():
+            if dst_relative_path != '':
+                self.make_dir_tree(os.path.join(self.pipeline.workspace_dir, dst_relative_path))
+
+            file_resource_base_name = os.path.basename(file_resource)
+            try:
+                target_path = os.path.abspath(
+                    os.path.join(self.pipeline.workspace_dir, dst_relative_path, file_resource_base_name))
+                shutil.copy(file_resource, target_path)
+            except IOError:
+                print 'Could not copy file: ', file_resource, ' to ', target_path
+
+    def move_file_resources_to_workspace(self):
+        """
+        Examines dictionary of files to move and moves listed files to the appropriate workspace folder or its subfolder
+        :return:None
+        """
+
+        import shutil
+        import os
+        for file_resource, dst_relative_path in self.file_resources_to_move_direct.items():
+
+            if dst_relative_path != '':
+                self.make_dir_tree(os.path.join(self.pipeline.workspace_dir, dst_relative_path))
+
+            file_resource_base_name = os.path.basename(file_resource)
+            try:
+                target_path = os.path.abspath(
+                    os.path.join(self.pipeline.workspace_dir, dst_relative_path, file_resource_base_name))
+                shutil.move(file_resource, target_path)
+            except IOError:
+                print 'Could not move file: ', file_resource, ' to ', target_path
+            except OSError:
+                shutil.copyfile(file_resource, target_path)
 
     @property
     def workspace_dir(self):
@@ -273,6 +366,10 @@ class RamTaskL(luigi.Task):
             # super(ReportRamTaskL, self).run()
 
             self.run_impl()
+
+            self.copy_file_resources_to_workspace()  # copies only those resources that user requested to be copied
+            self.move_file_resources_to_workspace()  # moves only those resources that user requested to be moved
+
 
             if self.mark_as_completed:
                 hs = self.input_hashsum()
