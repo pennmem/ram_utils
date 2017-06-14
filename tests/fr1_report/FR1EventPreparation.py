@@ -70,6 +70,7 @@ class FR1EventPreparation(ReportRamTask):
                 events = np.hstack((events,sess_events))
 
         events = events.view(np.recarray)
+        events = events[events.list>-1]
 
 
 
