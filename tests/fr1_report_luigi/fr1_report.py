@@ -66,6 +66,13 @@ from FR1EventPreparation import FR1EventPreparation
 from RepetitionRatio import RepetitionRatio
 from MontagePreparation import MontagePreparation
 from ComputeFR1Powers import ComputeFR1Powers
+from ComputeFR1HFPowers import ComputeFR1HFPowers
+from ComputeTTest import ComputeTTest
+from ComputeClassifier import ComputeClassifier
+from ComputeClassifier import ComputeJointClassifier
+from ComposeSessionSummary import ComposeSessionSummary
+from GenerateReportTasks import GeneratePlots
+from GenerateReportTasks import GenerateTex
 
 params = Params()
 pipeline = Pipeline(params)
@@ -105,6 +112,13 @@ if __name__ == '__main__':
                  MontagePreparation(pipeline=pipeline, mark_as_completed=True),
                  RepetitionRatio(pipeline=pipeline),
                  ComputeFR1Powers(pipeline=pipeline, mark_as_completed=True),
+                 ComputeFR1HFPowers(pipeline=pipeline, mark_as_completed=True),
+                 ComputeTTest(pipeline=pipeline,mark_as_completed=False),
+                 ComputeClassifier(pipeline=pipeline,mark_as_completed=True),
+                 ComputeJointClassifier(pipeline=pipeline,mark_as_completed=True),
+                 ComposeSessionSummary(pipeline=pipeline,mark_as_completed=False),
+                 GeneratePlots(pipeline=pipeline,mark_as_completed=False),
+                 GenerateTex(pipeline=pipeline,mark_as_completed=False)
                  ],
                 local_scheduler=True)
     # except RuntimeError as e:

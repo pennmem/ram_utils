@@ -73,10 +73,10 @@ class MontagePreparation(RamTaskL):
 
     def define_outputs(self):
 
-        self.add_file_resource('monopolar_channels', folder=self.__class__.__name__)
-        self.add_file_resource('bipolar_pairs', folder=self.__class__.__name__)
-        self.add_file_resource('bp_tal_structs', folder=self.__class__.__name__)
-        self.add_file_resource('dupa', folder=self.__class__.__name__)
+        self.add_file_resource('monopolar_channels')
+        self.add_file_resource('bipolar_pairs')
+        self.add_file_resource('bp_tal_structs')
+        self.add_file_resource('dupa')
 
     def input_hashsum(self):
         subject = self.pipeline.subject
@@ -94,19 +94,6 @@ class MontagePreparation(RamTaskL):
                 hash_md5.update(f.read())
 
         return hash_md5.digest()
-
-    # def restore(self):
-    #     subject = self.pipeline.subject
-    #
-    #     monopolar_channels = joblib.load(self.get_path_to_resource_in_workspace(subject + '-monopolar_channels.pkl'))
-    #     bipolar_pairs = joblib.load(self.get_path_to_resource_in_workspace(subject + '-bipolar_pairs.pkl'))
-    #     bp_tal_structs = pd.read_pickle(self.get_path_to_resource_in_workspace(subject + '-bp_tal_structs.pkl'))
-    #
-    #     self.pass_object('monopolar_channels', monopolar_channels)
-    #     self.pass_object('bipolar_pairs', bipolar_pairs)
-    #     self.pass_object('bp_tal_structs', bp_tal_structs)
-
-
 
 
     def run_impl(self):

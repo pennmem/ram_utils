@@ -56,12 +56,17 @@ class RamTaskL(luigi.Task):
         else:
             return False
 
+    @property
+    def workspace_dir(self):
+        return self.pipeline.workspace_dir
+
     def get_workspace_dir(self):
         """
         Returns full path to the workspace dir
         :return: full path to the workspace dir
         """
-        return self.pipeline.workspace_dir
+        return self.workspace_dir
+        # return self.pipeline.workspace_dir
 
     def create_file_in_workspace_dir(self, file_name, mode='w'):
         """
@@ -150,6 +155,18 @@ class RamTaskL(luigi.Task):
                 pass
 
         return dir_name_dict
+
+    def get_path_to_resource_in_workspace(self, *rel_path_components):
+        """
+        Returns absolute path to the rel_path_component assuming that rel_path_component is specified w.r.t workspace_dir
+        :param rel_path_components: path relative to the workspace dir
+        :return:absolute path
+        """
+
+        assert self.workspace_dir is not None, "Workspace directory was not set"
+
+        return abspath(join(self.workspace_dir, *rel_path_components))
+
 
 
     def run_impl(self):

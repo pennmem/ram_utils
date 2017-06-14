@@ -41,9 +41,9 @@ class RepetitionRatio(RamTaskL):
 
     def define_outputs(self):
 
-        self.add_file_resource('all_repetition_ratios', folder=self.__class__.__name__)
-        self.add_file_resource('repetition_ratios', folder=self.__class__.__name__)
-        self.add_file_resource('all_recall_ratios_dict', folder=self.__class__.__name__)
+        self.add_file_resource('all_repetition_ratios')
+        self.add_file_resource('repetition_ratios')
+        self.add_file_resource('all_recall_ratios_dict')
 
 
     def requires(self):
@@ -74,7 +74,7 @@ class RepetitionRatio(RamTaskL):
         subject = self.pipeline.subject.split('_')[0]
         task = self.pipeline.task
         events = self.get_passed_object(task+'_all_events')
-        return
+
         recalls = events[events.recalled == 1]
         sessions = np.unique(recalls.session)
         print '%d sessions' % len(sessions)
@@ -90,6 +90,7 @@ class RepetitionRatio(RamTaskL):
 
             except IOError:
                 all_recall_ratios_dict = self.initialize_repetition_ratio()
+        self.pass_object('all_recall_ratios_dict',all_recall_ratios_dict)
         # self.pass_object('all_recall_ratios_dict',all_recall_ratios_dict)
         self.repetition_ratios = all_recall_ratios_dict[subject]
 

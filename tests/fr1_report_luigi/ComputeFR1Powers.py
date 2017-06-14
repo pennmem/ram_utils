@@ -62,11 +62,8 @@ class ComputeFR1Powers(RamTaskL):
     def define_outputs(self):
 
         task = self.pipeline.task
-        # self.add_file_resource('event_files')
-        # self.add_file_resource(task + '_events', folder=self.__class__.__name__)
-        # self.add_file_resource('samplerate', folder=self.__class__.__name__)
-        self.add_file_resource('pow_mat', folder=self.__class__.__name__)
-        self.add_file_resource(task + '_events_compute_powers', folder=self.__class__.__name__)
+        self.add_file_resource('pow_mat')
+        self.add_file_resource(task + '_events_compute_powers')
 
     def input_hashsum(self):
 
@@ -91,21 +88,6 @@ class ComputeFR1Powers(RamTaskL):
 
         return hash_md5.digest()
 
-    # def restore(self):
-    #     self.params = self.pipeline.params
-    #
-    #     subject = self.pipeline.subject
-    #     task = self.pipeline.task
-    #     events = self.get_passed_object(task+'_events')
-    #
-    #     self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-pow_mat.pkl'))
-    #     self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
-    #
-    #     if len(events) != len(self.pow_mat):
-    #         self.run()
-    #     else:
-    #         self.pass_object('pow_mat', self.pow_mat)
-    #         self.pass_object('samplerate', self.samplerate)
 
     def run_impl(self):
         subject = self.pipeline.subject
@@ -114,8 +96,6 @@ class ComputeFR1Powers(RamTaskL):
 
         events = self.get_passed_object(task + '_events')
 
-        dupa = self.get_passed_object('dupa')
-        print 'dupa=', dupa
 
         sessions = np.unique(events.session)
         print 'sessions:', sessions
@@ -151,10 +131,6 @@ class ComputeFR1Powers(RamTaskL):
             self.pass_object(task + '_events_compute_powers', events)
 
         self.pass_object('pow_mat', self.pow_mat)
-        # self.pass_object('samplerate', self.samplerate)
-
-        # joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-' + task + '-pow_mat.pkl'))
-        # joblib.dump(self.samplerate, self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
 
     def compute_powers(self, events, sessions, monopolar_channels, bipolar_pairs):
         n_freqs = len(self.params.freqs)
