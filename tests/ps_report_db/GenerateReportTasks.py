@@ -1,21 +1,16 @@
 __author__ = 'm'
 
-from RamPipeline import *
-
 import datetime
-import numpy as np
+from collections import namedtuple
 
-from PlotUtils import PlotData, BarPlotData, PlotDataCollection, PanelPlot
 import TextTemplateUtils
-
-from latex_table import latex_table
+import numpy as np
+from RamPipeline import *
 from ReportUtils import ReportRamTask
 
-import re
-from collections import namedtuple
+from latex_table import latex_table
+from ram_utils.PlotUtils import PlotData, BarPlotData, PlotDataCollection, PanelPlot
 SplitSubjectCode = namedtuple(typename='SplitSubjectCode',field_names=['protocol','id','site','montage'])
-import os
-import shutil
 
 
 def pvalue_formatting(p):

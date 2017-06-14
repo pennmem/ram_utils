@@ -1,9 +1,6 @@
-from RamPipeline import *
-
-import numpy as np
-import pandas as pd
-
 from sklearn.externals import joblib
+
+from ram_utils.RamPipeline import *
 
 
 class CountSessions(RamTask):

@@ -1,22 +1,19 @@
 __author__ = 'm'
 
-import numpy as np
-import pandas as pd
 import time
+from collections import OrderedDict
 from copy import deepcopy
 
-from SessionSummary import SessionSummary
-
-from PlotUtils import PlotData
-
+import numpy as np
+from ReportUtils import ReportRamTask
+from scipy.stats import ttest_ind, ttest_1samp
+from sklearn.externals import joblib
 from statsmodels.formula.api import ols
 from statsmodels.stats.anova import anova_lm
-from scipy.stats import ttest_ind, ttest_1samp
 
-from sklearn.externals import joblib
+from SessionSummary import SessionSummary
+from ram_utils.PlotUtils import PlotData
 
-from collections import OrderedDict
-from ReportUtils import ReportRamTask
 
 def plot_data(ps_table, delta_column_name, ps_sham, param1_name, param2_name, param2_unit):
     x_start_pos = 2 if len(ps_sham)>0 else 1

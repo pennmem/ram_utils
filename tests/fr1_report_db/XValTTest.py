@@ -1,4 +1,4 @@
-from RamPipeline import *
+from ram_utils.RamPipeline import *
 
 import numpy as np
 from scipy.stats import ttest_ind

@@ -1,12 +1,11 @@
 __author__ = 'm'
 
-import os
 import os.path
-import numpy as np
 
+import numpy as np
 from ptsa.data.readers import BaseEventReader
 
-from RamPipeline import *
+from ram_utils.RamPipeline import *
 
 
 def construct_stim_item_mask(events):

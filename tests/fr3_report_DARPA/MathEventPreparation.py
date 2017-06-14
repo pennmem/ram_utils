@@ -1,6 +1,5 @@
-from RamPipeline import *
-
 from BaseEventReader import BaseEventReader
+from ram_utils.RamPipeline import *
 
 
 class MathEventPreparation(RamTask):

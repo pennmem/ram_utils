@@ -1,11 +1,9 @@
-from RamPipeline import *
-
 from math import log
+
 import numpy as np
 import pandas as pd
-from scipy.stats import norm
-from sklearn.externals import joblib
 from ReportUtils import ReportRamTask
+from scipy.stats import norm
 
 
 def prob2perf_norm(xval_output, p):

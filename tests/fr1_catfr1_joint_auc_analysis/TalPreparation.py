@@ -1,10 +1,9 @@
 __author__ = 'm'
 
+from ReportUtils import ReportRamTask
 from ptsa.data.readers import TalReader
 
-from RamPipeline import *
-
-from ReportUtils import ReportRamTask
+from ram_utils.RamPipeline import *
 
 
 class TalPreparation(ReportRamTask):

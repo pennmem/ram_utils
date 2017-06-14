@@ -1,19 +1,15 @@
-from RamPipeline import *
+import datetime
+from collections import namedtuple
+from subprocess import call
 
 import TextTemplateUtils
-from PlotUtils import PlotData, BarPlotData, PanelPlot
-from latex_table import latex_table
-
 import numpy as np
-import datetime
-from subprocess import call
+from RamPipeline import *
 from ReportUtils import ReportRamTask
 
-import re
-from collections import namedtuple
+from latex_table import latex_table
+from ram_utils.PlotUtils import PlotData, BarPlotData, PanelPlot
 SplitSubjectCode = namedtuple(typename='SplitSubjectCode',field_names=['protocol','id','site','montage'])
-import os
-import shutil
 
 
 class GenerateTex(ReportRamTask):

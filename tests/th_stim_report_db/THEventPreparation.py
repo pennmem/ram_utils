@@ -5,7 +5,7 @@ import os.path
 import numpy as np
 from ptsa.data.readers import BaseEventReader
 
-from RamPipeline import *
+from ram_utils.RamPipeline import *
 from ReportUtils import ReportRamTask
 from numpy.lib.recfunctions import append_fields
 

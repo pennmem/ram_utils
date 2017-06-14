@@ -1,14 +1,11 @@
 __author__ = 'm'
 
-from RamPipeline import *
-
 import numpy as np
-#from morlet import MorletWaveletTransform
+from ReportUtils import ReportRamTask
+from ptsa.data.readers import EEGReader
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from sklearn.externals import joblib
 
-from ptsa.data.readers import EEGReader
-from ReportUtils import ReportRamTask
 
 class ComputeTH1Powers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):

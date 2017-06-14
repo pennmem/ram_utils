@@ -6,7 +6,7 @@ import numpy as np
 
 from ptsa.data.readers import BaseEventReader
 
-from RamPipeline import *
+from ram_utils.RamPipeline import *
 from ReportUtils import ReportRamTask
 
 class FR1EventPreparation(ReportRamTask):

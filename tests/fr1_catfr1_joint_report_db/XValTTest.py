@@ -1,14 +1,10 @@
-from RamPipeline import *
-
 import numpy as np
 from scipy.stats import ttest_ind
-from sklearn.linear_model import LogisticRegression,LogisticRegressionCV
+from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
-from sklearn.externals import joblib
-
-from scipy.stats import describe
 
 import normalize
+from ram_utils.RamPipeline import *
 
 class XValResults(object):
     def __init__(self):

@@ -1,14 +1,13 @@
-from RamPipeline import *
-
-import TextTemplateUtils
-from PlotUtils import PlotData, BarPlotData, PanelPlot
-from latex_table import latex_table
-import re
-import numpy as np
 import datetime
 from subprocess import call
 
+import TextTemplateUtils
+import numpy as np
+from RamPipeline import *
 from ReportUtils import ReportRamTask
+
+from latex_table import latex_table
+from ram_utils.PlotUtils import PlotData, BarPlotData, PanelPlot
 
 # import re
 # from collections import namedtuple

@@ -6,7 +6,7 @@ from sklearn.externals import joblib
 
 from ptsa.data.readers import BaseEventReader
 
-from RamPipeline import *
+from ram_utils.RamPipeline import *
 from ReportUtils import MissingExperimentError, MissingDataError
 
 from ReportUtils import ReportRamTask

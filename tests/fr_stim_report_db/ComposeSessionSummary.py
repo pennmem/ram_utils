@@ -1,14 +1,10 @@
-from RamPipeline import *
-from SessionSummary import SessionSummary
-
-import numpy as np
 import time
 
+import numpy as np
+from ReportUtils import ReportRamTask
 from statsmodels.stats.proportion import proportions_chisquare
 
-
-
-from ReportUtils import ReportRamTask
+from SessionSummary import SessionSummary
 
 class ComposeSessionSummary(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):

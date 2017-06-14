@@ -1,6 +1,6 @@
-from RamPipeline import *
-
 import numpy as np
+
+from ram_utils.RamPipeline import *
 
 
 class CheckTTest(RamTask):

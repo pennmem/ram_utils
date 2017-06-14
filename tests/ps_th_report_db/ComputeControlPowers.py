@@ -1,17 +1,12 @@
 __author__ = 'm'
 
-from RamPipeline import *
-
 import numpy as np
-from scipy.stats.mstats import zscore
-#from morlet import MorletWaveletTransform
+from ReportUtils import ReportRamTask
+from ptsa.data.readers import EEGReader
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
+from scipy.stats.mstats import zscore
 from sklearn.externals import joblib
 
-from ptsa.data.events import Events
-from ptsa.data.readers import EEGReader
-
-from ReportUtils import ReportRamTask
 
 class ComputeControlPowers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):

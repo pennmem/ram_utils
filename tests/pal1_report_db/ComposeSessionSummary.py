@@ -1,14 +1,11 @@
-from RamPipeline import *
-from SessionSummary import SessionSummary
-
-import numpy as np
-import pandas as pd
 import time
 from operator import itemgetter
 
+import numpy as np
+from ReportUtils import ReportRamTask
 from statsmodels.stats.proportion import proportion_confint
 
-from ReportUtils import ReportRamTask
+from SessionSummary import SessionSummary
 
 
 def make_ttest_table(bp_tal_structs, ttest_results):

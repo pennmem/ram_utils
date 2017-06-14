@@ -1,13 +1,13 @@
 __author__ = 'm'
 
-import os
 import os.path
+
 import numpy as np
 import scipy.io as spio
-from ptsa.data.readers import BaseEventReader
 from numpy.lib.recfunctions import append_fields
+from ptsa.data.readers import BaseEventReader
 
-from RamPipeline import *
+from ram_utils.RamPipeline import *
 
 
 class THEventPreparation(RamTask):

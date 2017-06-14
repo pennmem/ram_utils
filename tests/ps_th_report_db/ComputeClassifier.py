@@ -1,15 +1,15 @@
-from RamPipeline import *
-
-from math import sqrt
-import numpy as np
 from copy import deepcopy
+from math import sqrt
+from random import shuffle
+
+import numpy as np
+from ReportUtils import ReportRamTask
 from scipy.stats.mstats import zscore
+from sklearn.cross_validation import StratifiedKFold
+from sklearn.externals import joblib
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, roc_curve
-from sklearn.cross_validation import StratifiedKFold
-from random import shuffle
-from sklearn.externals import joblib
-from ReportUtils import ReportRamTask
+
 
 def normalize_sessions(pow_mat, events):
     sessions = np.unique(events.session)

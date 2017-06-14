@@ -1,4 +1,4 @@
-from RamPipeline import *
+from ram_utils.RamPipeline import *
 from SessionSummary import SessionSummary
 
 import numpy as np

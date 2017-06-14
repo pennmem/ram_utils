@@ -1,13 +1,8 @@
-from RamPipeline import *
-
-from random import shuffle
 import numpy as np
-from scipy.stats import zmap
-import circular_stat
-
+from ReportUtils import ReportRamTask
 from sklearn.externals import joblib
 
-from ReportUtils import ReportRamTask
+import circular_stat
 
 
 class ComputePPCFeatures(ReportRamTask):

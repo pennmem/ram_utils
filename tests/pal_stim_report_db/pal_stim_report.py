@@ -15,8 +15,8 @@ args = cml_parser.parse()
 
 
 import numpy as np
-from RamPipeline import RamPipeline
-from RamPipeline import RamTask
+from ram_utils.RamPipeline import RamPipeline
+from ram_utils.RamPipeline import RamTask
 
 from PAL1EventPreparation import PAL1EventPreparation
 

@@ -1,8 +1,8 @@
 __author__ = 'm'
+import numpy as np
 from RamPipeline import *
 
-from PlotUtils import PlotData, PanelPlot
-import numpy as np
+from ram_utils.PlotUtils import PlotData, PanelPlot
 
 #
 # class PlotData(object):

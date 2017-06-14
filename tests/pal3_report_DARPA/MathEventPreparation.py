@@ -1,4 +1,4 @@
-from RamPipeline import *
+from ram_utils.RamPipeline import *
 
 from BaseEventReader import BaseEventReader
 

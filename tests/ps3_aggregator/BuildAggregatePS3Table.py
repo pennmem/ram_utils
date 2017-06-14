@@ -1,13 +1,11 @@
-from RamPipeline import *
-
 import os
+from bisect import bisect_right
 from os.path import join
 
 import numpy as np
 import pandas as pd
-from sklearn.externals import joblib
 
-from bisect import bisect_right
+from ram_utils.RamPipeline import *
 
 
 def brain_area(region):

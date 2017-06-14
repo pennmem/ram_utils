@@ -1,14 +1,9 @@
-from RamPipeline import *
-
 from collections import OrderedDict
 
 import numpy as np
-import pandas as pd
-#import statsmodels.formula.api as smf
-from statsmodels.formula.api import ols, mixedlm
-from statsmodels.stats.anova import anova_lm
+from RamPipeline import *
 
-from PlotUtils import PlotData, BarPlotData
+from ram_utils.PlotUtils import PlotData, BarPlotData
 
 
 class RegionFrequencyAnalysis(object):

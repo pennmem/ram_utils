@@ -1,14 +1,12 @@
 __author__ = 'm'
 
-from RamPipeline import *
-
 import numpy as np
-from scipy.stats.mstats import zscore
+from ReportUtils import ReportRamTask
 from morlet import MorletWaveletTransform
+from ptsa.data.readers import EEGReader
+from scipy.stats.mstats import zscore
 from sklearn.externals import joblib
 
-from ptsa.data.readers import EEGReader
-from ReportUtils import ReportRamTask
 
 class ComputePALStimPowers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):

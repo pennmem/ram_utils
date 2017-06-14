@@ -27,7 +27,7 @@ configure_python_paths(args.python_path)
 # ------------------------------- end of processing command line
 
 import numpy as np
-from RamPipeline import RamPipeline
+from ram_utils.RamPipeline import RamPipeline
 from ReportUtils import ReportPipelineBase
 
 from PAL1EventPreparation import PAL1EventPreparation

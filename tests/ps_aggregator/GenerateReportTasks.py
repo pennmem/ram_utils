@@ -1,15 +1,14 @@
 __author__ = 'm'
 
+import datetime
+import shutil
+
+import TextTemplateUtils
+import numpy as np
 from RamPipeline import *
 
-from PlotUtils import PlotData, BarPlotData, PlotDataCollection, PanelPlot
-import TextTemplateUtils
-
-import datetime
-import numpy as np
-
 from latex_table import latex_table
-import shutil
+from ram_utils.PlotUtils import PlotDataCollection, PanelPlot
 
 def pvalue_formatting(p):
     return '\leq 0.001' if p<=0.001 else ('%.3f'%p)

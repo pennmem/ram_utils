@@ -5,7 +5,7 @@ import os
 
 from get_bipolar_subj_elecs import get_bipolar_subj_elecs
 
-from RamPipeline import *
+from ram_utils.RamPipeline import *
 
 
 class TalPreparation(RamTask):

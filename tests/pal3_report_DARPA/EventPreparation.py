@@ -1,11 +1,9 @@
-import os
 import os.path
 
+from ReportUtils import ReportRamTask
 from ptsa.data.readers import BaseEventReader
 
-from RamPipeline import *
-
-from ReportUtils import ReportRamTask
+from ram_utils.RamPipeline import *
 
 class EventPreparation(ReportRamTask):
     def __init__(self, mark_as_completed=True):

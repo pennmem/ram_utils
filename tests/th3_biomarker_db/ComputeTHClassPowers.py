@@ -1,12 +1,11 @@
 __author__ = 'm'
 
-from RamPipeline import *
-
 import numpy as np
+from ptsa.data.readers import EEGReader
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from sklearn.externals import joblib
 
-from ptsa.data.readers import EEGReader
+from ram_utils.RamPipeline import *
 try:
     from ReportTasks.RamTaskMethods import compute_powers
 except ImportError as ie:

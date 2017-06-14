@@ -5,7 +5,7 @@ sys.path.append('/Users/m/PTSA_NEW_GIT')
 
 
 
-from RamPipeline import *
+from ram_utils.RamPipeline import *
 
 from ptsa.data.readers import BaseEventReader
 from ptsa.data.readers import PTSAEventReader

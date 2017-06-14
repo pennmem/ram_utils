@@ -6,8 +6,8 @@ print "Windows binaries from https://github.com/busygin/morlet_for_sys2_biomarke
 print "See https://github.com/busygin/morlet_for_sys2_biomarker/blob/master/README for detail."
 
 from os.path import *
-from BiomarkerUtils import CMLParserBiomarker
 
+from BiomarkerUtils import CMLParserBiomarker
 
 cml_parser = CMLParserBiomarker(arg_count_threshold=1)
 cml_parser.arg('--workspace-dir','/scratch/leond/PAL3_biomarkers')
@@ -27,7 +27,7 @@ args = cml_parser.parse()
 
 # ------------------------------- end of processing command line
 
-from RamPipeline import RamPipeline
+from ram_utils.RamPipeline import RamPipeline
 
 from PAL1EventPreparation import PAL1EventPreparation
 

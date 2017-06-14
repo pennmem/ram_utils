@@ -1,11 +1,11 @@
-from RamPipeline import *
-
-import TextTemplateUtils
-
-import numpy as np
-from scipy.io import savemat
 import datetime
 from subprocess import call
+
+import TextTemplateUtils
+import numpy as np
+from scipy.io import savemat
+
+from ram_utils.RamPipeline import *
 
 
 class SaveMatlabFile(RamTask):

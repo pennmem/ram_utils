@@ -5,7 +5,7 @@ import scipy.io as spio
 import numpy as np
 from numpy.lib.recfunctions import append_fields
 from ptsa.data.readers import BaseEventReader
-from RamPipeline import *
+from ram_utils.RamPipeline import *
 from ReportUtils import ReportRamTask
 
 class EventPreparation(ReportRamTask):

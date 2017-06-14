@@ -1,10 +1,8 @@
-from RamPipeline import *
-
 import numpy as np
+from ReportUtils import ReportRamTask
 from scipy.stats import ttest_ind
 from sklearn.externals import joblib
 
-from ReportUtils import ReportRamTask
 
 class ComputeTTest(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):

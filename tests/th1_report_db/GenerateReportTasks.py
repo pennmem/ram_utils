@@ -1,14 +1,14 @@
-from RamPipeline import *
-
-import TextTemplateUtils
-from PlotUtils import PlotData, BarPlotData, PanelPlot
-from latex_table import latex_table
-
-import numpy as np
-import matplotlib.pyplot as plt
 import datetime
 from subprocess import call
+
+import TextTemplateUtils
+import matplotlib.pyplot as plt
+import numpy as np
+from RamPipeline import *
 from ReportUtils import ReportRamTask
+
+from latex_table import latex_table
+from ram_utils.PlotUtils import PlotData, BarPlotData, PanelPlot
 
 class GenerateTex(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):

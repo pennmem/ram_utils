@@ -1,11 +1,12 @@
-from RamPipeline import *
-
 from collections import defaultdict
+
 import numpy as np
 from scipy.stats.mstats import zscore
+from sklearn.externals import joblib
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
-from sklearn.externals import joblib
+
+from ram_utils.RamPipeline import *
 
 
 def none_function():

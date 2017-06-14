@@ -25,7 +25,7 @@ args = cml_parser.parse()
 
 # ------------------------------- end of processing command line
 
-from RamPipeline import RamPipeline
+from ram_utils.RamPipeline import RamPipeline
 
 from FREventPreparation import FREventPreparation
 

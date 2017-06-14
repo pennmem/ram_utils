@@ -1,13 +1,13 @@
 __author__ = 'm'
 
-import os
 import os.path
+
 import numpy as np
+from ReportUtils import ReportRamTask
 from ptsa.data.readers import BaseEventReader
 
-from RamPipeline import *
-from ReportUtils import ReportRamTask
-from ReportUtils import ReportRamTask
+from ram_utils.RamPipeline import *
+
 
 class ControlEventPreparation(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):

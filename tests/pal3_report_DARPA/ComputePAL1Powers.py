@@ -1,15 +1,11 @@
 __author__ = 'm'
 
-from RamPipeline import *
-
 import numpy as np
+from ReportUtils import ReportRamTask
 from morlet import MorletWaveletTransform
+from ptsa.data.readers import EEGReader
 from sklearn.externals import joblib
 
-from ptsa.data.events import Events
-from ptsa.data.readers import EEGReader
-from ReportUtils import MissingDataError
-from ReportUtils import ReportRamTask
 
 class ComputePAL1Powers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):

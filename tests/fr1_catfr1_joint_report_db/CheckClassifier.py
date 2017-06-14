@@ -1,7 +1,7 @@
-from RamPipeline import *
-
 import numpy as np
+
 import normalize
+from ram_utils.RamPipeline import *
 
 
 class CheckClassifier(RamTask):

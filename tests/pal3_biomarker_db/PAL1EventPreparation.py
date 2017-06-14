@@ -6,7 +6,7 @@ import numpy as np
 
 from ptsa.data.readers import BaseEventReader
 
-from RamPipeline import *
+from ram_utils.RamPipeline import *
 
 class PAL1EventPreparation(RamTask):
     def __init__(self, mark_as_completed=True):

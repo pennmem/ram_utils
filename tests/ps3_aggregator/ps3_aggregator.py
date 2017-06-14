@@ -1,8 +1,8 @@
 # command line example:
 
 import sys
+
 from setup_utils import parse_command_line, configure_python_paths
-from os.path import join
 
 # -------------------------------processing command line
 if len(sys.argv)>2:
@@ -28,8 +28,6 @@ configure_python_paths(args.python_path)
 # ------------------------------- end of processing command line
 
 
-import numpy as np
-from RamPipeline import RamPipeline
 from ReportUtils import ReportSummaryInventory
 from ReportUtils import ReportPipelineBase
 

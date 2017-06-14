@@ -1,11 +1,10 @@
 import sys
 from glob import glob
 
+import matplotlib
 import numpy as np
 import pandas as pd
 from sklearn.externals import joblib
-
-import matplotlib
 
 matplotlib.use('Agg')
 
@@ -15,7 +14,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 # sys.path.append('/home1/busygin/ram_utils_new_ptsa')
 sys.path.append('/home1/mswat/RAM_UTILS_GIT')
 
-from PlotUtils import BrickHeatmapPlotData, draw_brick_heatmap
+from ram_utils.PlotUtils import BrickHeatmapPlotData, draw_brick_heatmap
 
 
 def duration_plot(ps1_dur_table):

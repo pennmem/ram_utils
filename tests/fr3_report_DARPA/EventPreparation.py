@@ -1,9 +1,8 @@
-import os
 import os.path
 
 from ptsa.data.readers import BaseEventReader
 
-from RamPipeline import *
+from ram_utils.RamPipeline import *
 
 
 class EventPreparation(RamTask):

@@ -1,8 +1,9 @@
 __author__ = 'm'
 
-from RamPipeline import *
-from PlotUtils import *
 import numpy as np
+from RamPipeline import *
+
+from ram_utils.PlotUtils import *
 
 
 class PlotTask(RamTask):

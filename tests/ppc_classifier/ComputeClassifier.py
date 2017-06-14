@@ -1,20 +1,15 @@
-from RamPipeline import *
-
+import warnings
 from math import sqrt
+from random import shuffle
+
 import numpy as np
+from ReportUtils import ReportRamTask
 from numpy.linalg import norm
-from numpy.random import randn
 from scipy.stats.mstats import zscore
-from sklearn.preprocessing import normalize
+from sklearn.externals import joblib
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, roc_curve
-from random import shuffle
-from sklearn.externals import joblib
-import warnings
-
-from ReportUtils import ReportRamTask
-
-from scipy.stats import describe
+from sklearn.preprocessing import normalize
 
 
 def normalize_sessions(pow_mat, events):

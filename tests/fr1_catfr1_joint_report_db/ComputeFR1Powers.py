@@ -1,6 +1,6 @@
 __author__ = 'm'
 
-from RamPipeline import *
+from ram_utils.RamPipeline import *
 
 import numpy as np
 #from morlet import MorletWaveletTransform
