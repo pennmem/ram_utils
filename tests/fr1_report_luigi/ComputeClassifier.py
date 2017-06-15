@@ -1,38 +1,16 @@
-from RamPipeline import *
-
-from math import sqrt
-import numpy as np
 from scipy.stats.mstats import zscore
 from sklearn.linear_model import LogisticRegression
 from ReportTasks.RamTaskMethods import run_lolo_xval, run_loso_xval, permuted_loso_AUCs, permuted_lolo_AUCs, ModelOutput
-from sklearn.externals import joblib
 import warnings
-from ptsa.data.readers.IndexReader import JsonIndexReader
-from ReportUtils import ReportRamTask
 from random import shuffle
 from sklearn.metrics import roc_auc_score
-
-import hashlib
-
-import luigi
-import numpy as np
-import os
 import os.path
 import numpy as np
-from sklearn.externals import joblib
 
-from ptsa.data.readers import BaseEventReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
-
 from RamPipeline import *
-from ReportUtils import ReportRamTask
-
 import hashlib
-from ReportTasks.RamTaskMethods import create_baseline_events
-
 from RamTaskL import RamTaskL
-from FR1EventPreparation import FR1EventPreparation
-from MontagePreparation import MontagePreparation
 from ComputeFR1Powers import ComputeFR1Powers
 
 
@@ -55,7 +33,6 @@ class ComputeClassifier(RamTaskL):
 
     def define_outputs(self):
 
-        subject = self.pipeline.subject
         self.add_file_resource('lr_classifier')
         self.add_file_resource('xval_output')
         self.add_file_resource('perm_AUCs')

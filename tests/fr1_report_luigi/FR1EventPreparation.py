@@ -1,38 +1,18 @@
-import luigi
-import numpy as np
-import os
 import os.path
 import numpy as np
-from sklearn.externals import joblib
-
+import hashlib
 from ptsa.data.readers import BaseEventReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
-
 from RamPipeline import *
-from ReportUtils import ReportRamTask
-
-import hashlib
 from ReportTasks.RamTaskMethods import create_baseline_events
 
 from RamTaskL import RamTaskL
 
 class FR1EventPreparation(RamTaskL):
 
-    #
-    #     return out_dict
-
-    # return self.file_resources_to_copy
-
     def define_outputs(self):
 
         task = self.pipeline.task
-        # self.add_file_resource('event_files')
-        # self.add_file_resource(task + '_all_events', folder=self.__class__.__name__)
-        # self.add_file_resource(task + '_events', folder=self.__class__.__name__)
-        # self.add_file_resource(task + '_math_events', folder=self.__class__.__name__)
-        # self.add_file_resource(task + '_intr_events', folder=self.__class__.__name__)
-        # self.add_file_resource(task + '_rec_events', folder=self.__class__.__name__)
-        # self.add_file_resource('dupa', folder=self.__class__.__name__)
 
         self.add_file_resource(task + '_events')
         self.add_file_resource(task + '_all_events')
@@ -41,8 +21,6 @@ class FR1EventPreparation(RamTaskL):
         self.add_file_resource(task + '_rec_events')
         self.add_file_resource('dupa')
 
-
-        # return self.file_resources_to_copy
 
     def input_hashsum(self):
 

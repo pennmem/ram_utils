@@ -1,34 +1,14 @@
-import os
 import json
-
-import numpy as np
 import pandas as pd
 
-from sklearn.externals import joblib
-
-from ReportUtils import ReportRamTask
-from ptsa.data.readers import TalReader
-from ptsa.data.readers.IndexReader import JsonIndexReader
-
-import hashlib
-import luigi
-import numpy as np
-import os
 import os.path
 import numpy as np
-from sklearn.externals import joblib
-
-from ptsa.data.readers import BaseEventReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
-
-from RamPipeline import *
-from ReportUtils import ReportRamTask
-
+# from RamPipeline import *
 import hashlib
-from ReportTasks.RamTaskMethods import create_baseline_events
 
 from RamTaskL import RamTaskL
-from FR1EventPreparation import FR1EventPreparation
+
 
 
 def atlas_location(bp_data):

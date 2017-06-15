@@ -1,46 +1,18 @@
-from RamPipeline import *
-
-import numpy as np
 from scipy.stats import ttest_ind
-from sklearn.externals import joblib
-
-from ReportUtils import ReportRamTask
-
-import luigi
 import numpy as np
-import os
-import os.path
-import numpy as np
-from sklearn.externals import joblib
-
-from ptsa.data.readers import BaseEventReader
-from ptsa.data.readers.IndexReader import JsonIndexReader
-
-from RamPipeline import *
-from ReportUtils import ReportRamTask
-
-import hashlib
-from ReportTasks.RamTaskMethods import create_baseline_events
-
 from RamTaskL import RamTaskL
-from FR1EventPreparation import FR1EventPreparation
-from MontagePreparation import MontagePreparation
-from ComputeFR1Powers import ComputeFR1Powers
 from ComputeFR1HFPowers import ComputeFR1HFPowers
 
 class ComputeTTest(RamTaskL):
+
     def requires(self):
         yield ComputeFR1HFPowers(pipeline=self.pipeline)
-
 
     def define_outputs(self):
 
         self.add_file_resource('ttest')
 
-
-    def run(self):
-        subject = self.pipeline.subject
-        task = self.pipeline.task
+    def run_impl(self):
 
         pow_mat = self.get_passed_object('hf_pow_mat')
         print 'pow_mat.shape:',pow_mat.shape

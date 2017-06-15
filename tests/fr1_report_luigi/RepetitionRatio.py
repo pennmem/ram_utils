@@ -1,30 +1,9 @@
-from RamPipeline import RamTask
 from os import path
-import os
-import numpy as np
-import cPickle
-from sklearn.externals import joblib
-from ptsa.data.readers.IndexReader import JsonIndexReader
-from ptsa.data.readers import BaseEventReader
-import hashlib
-
-
 import luigi
 import numpy as np
-import os
-import os.path
-import numpy as np
-from sklearn.externals import joblib
-
 from ptsa.data.readers import BaseEventReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
-
-from RamPipeline import *
-from ReportUtils import ReportRamTask
-
 import hashlib
-from ReportTasks.RamTaskMethods import create_baseline_events
-
 from RamTaskL import RamTaskL
 from FR1EventPreparation import FR1EventPreparation
 
@@ -33,11 +12,6 @@ class RepetitionRatio(RamTaskL):
     repetition_ratios = None
     repetition_percentiles = None
 
-    # def __init__(self, recompute_all_ratios=False, mark_as_completed=False):
-    #     super(RepetitionRatio, self).__init__(mark_as_completed)
-    #     self.repetition_ratios = None
-    #     self.repetition_percentiles = None
-    #     self.recompute_all_ratios = recompute_all_ratios
 
     def define_outputs(self):
 
@@ -47,8 +21,7 @@ class RepetitionRatio(RamTaskL):
 
 
     def requires(self):
-        # yield FR1EventPreparation(pipeline=self.pipeline, mark_as_completed=True)
-        yield FR1EventPreparation(pipeline=self.pipeline,mark_as_completed=True)
+        yield FR1EventPreparation(pipeline=self.pipeline)
 
 
     def input_hashsum(self):

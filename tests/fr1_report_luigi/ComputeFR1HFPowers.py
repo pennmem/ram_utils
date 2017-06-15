@@ -1,34 +1,18 @@
 __author__ = 'm'
 
-from RamPipeline import *
-
-import numpy as np
 from scipy.stats.mstats import zscore
-#from morlet import MorletWaveletTransform
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
-from sklearn.externals import joblib
-
-
-import luigi
-import numpy as np
-import os
 import os.path
 import numpy as np
-from sklearn.externals import joblib
-
-from ptsa.data.readers import BaseEventReader
-from ptsa.data.readers.IndexReader import JsonIndexReader
-
 from RamPipeline import *
-from ReportUtils import ReportRamTask
-
-import hashlib
-from ReportTasks.RamTaskMethods import create_baseline_events
-
 from RamTaskL import RamTaskL
 from FR1EventPreparation import FR1EventPreparation
 from MontagePreparation import MontagePreparation
 from ComputeFR1Powers import ComputeFR1Powers
+from ptsa.data.readers import EEGReader
+from ptsa.data.readers.IndexReader import JsonIndexReader
+import hashlib
+
 
 
 try:
@@ -40,11 +24,6 @@ except ImportError as ie:
     else:
         raise ie
 
-from ptsa.data.readers import EEGReader
-from ptsa.data.readers.IndexReader import JsonIndexReader
-from ReportUtils import ReportRamTask
-
-import hashlib
 
 
 class ComputeFR1HFPowers(RamTaskL):
@@ -60,12 +39,8 @@ class ComputeFR1HFPowers(RamTaskL):
 
 
     def define_outputs(self):
-
-        task = self.pipeline.task
         self.add_file_resource('hf_pow_mat')
         self.add_file_resource('hf_events')
-
-        # self.add_file_resource(task + '_events_compute_powers', folder=self.__class__.__name__)
 
 
     def input_hashsum(self):
@@ -89,19 +64,12 @@ class ComputeFR1HFPowers(RamTaskL):
 
         return hash_md5.digest()
 
-    # def restore(self):
-    #     subject = self.pipeline.subject
-    #     task = self.pipeline.task
-    #
-    #     self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-hf_pow_mat.pkl'))
-    #     self.pass_object('hf_pow_mat', self.pow_mat)
 
     def run_impl(self):
-        subject = self.pipeline.subject
+
         task = self.pipeline.task
         params = self.pipeline.params
 
-        # events = self.get_passed_object(task+'_events')
         events = self.get_passed_object(task+'_events_compute_powers')
 
 
@@ -125,8 +93,6 @@ class ComputeFR1HFPowers(RamTaskL):
             self.pass_object('hf_events',events)
 
         self.pass_object('hf_pow_mat', self.pow_mat)
-
-        # joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-' + task + '-hf_pow_mat.pkl'))
 
     def compute_powers(self, events, sessions,monopolar_channels , bipolar_pairs ):
         n_hfs = len(self.params.hfs)

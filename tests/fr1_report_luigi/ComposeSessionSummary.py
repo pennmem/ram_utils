@@ -1,32 +1,13 @@
-from RamPipeline import *
+
 from SessionSummary import SessionSummary
 import pandas as pd
 from matplotlib import cm
 from matplotlib.colors import Normalize
-
-import numpy as np
 import time
 from operator import itemgetter
-
-from ReportUtils import ReportRamTask
-from scipy import stats
-
-import luigi
-import numpy as np
-import os
 import os.path
 import numpy as np
-from sklearn.externals import joblib
-
-from ptsa.data.readers import BaseEventReader
-from ptsa.data.readers.IndexReader import JsonIndexReader
-
 from RamPipeline import *
-from ReportUtils import ReportRamTask
-
-import hashlib
-from ReportTasks.RamTaskMethods import create_baseline_events
-
 from RamTaskL import RamTaskL
 from FR1EventPreparation import FR1EventPreparation
 from MontagePreparation import MontagePreparation
@@ -81,13 +62,6 @@ class ComposeSessionSummary(RamTaskL):
         yield ComputeJointClassifier(pipeline=self.pipeline)
         yield ComputeTTest(pipeline=self.pipeline)
 
-
-    # def __init__(self, params, mark_as_completed=True):
-    #     super(ComposeSessionSummary,self).__init__(mark_as_completed)
-    #     self.params = params
-    #     if self.dependency_inventory:
-    #         self.dependency_inventory.add_dependent_resource(resource_name='localization',
-    #                                     access_path = ['electrodes','localization'])
 
     def run_impl(self):
         self.params = self.pipeline.params

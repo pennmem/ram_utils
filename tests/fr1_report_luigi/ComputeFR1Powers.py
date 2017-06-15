@@ -1,33 +1,17 @@
 __author__ = 'm'
 
-from RamPipeline import *
-
-import numpy as np
-
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
-from sklearn.externals import joblib
-
 from ptsa.data.readers import EEGReader
-
-import luigi
-import numpy as np
-import os
 import os.path
 import numpy as np
-from sklearn.externals import joblib
-
-from ptsa.data.readers import BaseEventReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
-
-from RamPipeline import *
-from ReportUtils import ReportRamTask
-
 import hashlib
-from ReportTasks.RamTaskMethods import create_baseline_events
+import time
 
 from RamTaskL import RamTaskL
 from FR1EventPreparation import FR1EventPreparation
 from MontagePreparation import MontagePreparation
+
 
 try:
     from ReportTasks.RamTaskMethods import compute_powers
@@ -37,19 +21,9 @@ except ImportError as ie:
         compute_powers = None
     else:
         raise ie
-from ptsa.data.readers.IndexReader import JsonIndexReader
-from ReportUtils import ReportRamTask
-
-import hashlib
-import time
 
 
 class ComputeFR1Powers(RamTaskL):
-    # def __init__(self, params, mark_as_completed=True):
-    #     super(ComputeFR1Powers,self).__init__(mark_as_completed)
-    #     self.params = params
-    #     self.pow_mat = None
-    #     self.samplerate = None
     pow_mat = None
     samplerate = None
     wavelet_transform = MorletWaveletTransform()
@@ -57,7 +31,6 @@ class ComputeFR1Powers(RamTaskL):
     def requires(self):
         yield MontagePreparation(pipeline=self.pipeline)
         yield FR1EventPreparation(pipeline=self.pipeline)
-        # yield FR1EventPreparation(pipeline=self.pipeline)
 
     def define_outputs(self):
 
@@ -90,10 +63,8 @@ class ComputeFR1Powers(RamTaskL):
 
 
     def run_impl(self):
-        subject = self.pipeline.subject
         task = self.pipeline.task
         params = self.pipeline.params
-
         events = self.get_passed_object(task + '_events')
 
 
