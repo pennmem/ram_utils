@@ -3,8 +3,8 @@ from os.path import *
 
 import numpy as np
 
-from ReportUtils import RamTask
-from ram_utils.system_3_utils.ElectrodeConfigSystem3 import ElectrodeConfig
+from ...ReportUtils import RamTask
+from ..ElectrodeConfigSystem3 import ElectrodeConfig
 
 
 class CheckElectrodeConfigurationClosedLoop3(RamTask):
