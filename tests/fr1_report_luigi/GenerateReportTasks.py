@@ -71,7 +71,7 @@ class GenerateTex(RamTaskL):
             '<J-PERC>': cumulative_summary.jstat_percentile,
             '<ROC_AND_TERC_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-roc_and_terc_plot_combined.pdf',
             '<JOINT_ROC_AND_TERC_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-joint-roc_and_terc_plot_combined.pdf'
-            }
+        }
 
         TextTemplateUtils.replace_template(template_file_name=tex_combined_template,
                                            out_file_name=combined_report_tex_file_name, replace_dict=replace_dict)
@@ -80,14 +80,25 @@ class GenerateTex(RamTaskL):
 
 
 class GeneratePlots(RamTaskL):
+    def define_outputs(self):
+        task = self.pipeline.task
+        subject = self.pipeline.subject
+        self.add_file_resource(task + '-' + subject + '-prob_recall_plot_combined', folder='reports', ext='pdf')
+        self.add_file_resource(task + '-' + subject + '-roc_and_terc_plot_combined.pdf', folder='reports', ext='pdf')
+        self.add_file_resource(task + '-' + subject + '-joint-roc_and_terc_plot_combined.pdf', folder='reports', ext='pdf')
+
+        if task == 'catFR1':
+            self.add_file_resource(task + '-' + subject + '-category-plots', folder='reports', ext='pdf')
+
     def requires(self):
         yield ComposeSessionSummary(pipeline=self.pipeline)
 
     def run_impl(self):
+
         subject = self.pipeline.subject
         task = self.pipeline.task
 
-        self.create_dir_in_workspace('reports')
+        # self.create_dir_in_workspace('reports')
 
         # session_summary_array = self.get_passed_object('session_summary_array')
 
@@ -109,10 +120,15 @@ class GeneratePlots(RamTaskL):
 
         plot = panel_plot.generate_plot()
 
-        plot_out_fname = self.get_path_to_resource_in_workspace(
-            'reports/' + task + '-' + subject + '-prob_recall_plot_combined.pdf')
+        # plot_out_fname = self.get_path_to_resource_in_workspace(
+        #     'reports/' + task + '-' + subject + '-prob_recall_plot_combined.pdf')
+
+        # plot_out_fname = self.output()[task + '-' + subject + '-prob_recall_plot_combined'].path
+        plot_out_fname = self.clear_output_file(task + '-' + subject + '-prob_recall_plot_combined')
 
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+
+
 
         if task == 'catFR1':
             panel_plot = PanelPlot(yfigsize=6.0, i_max=1, j_max=2, labelsize=18, hspaces=1.0, wspace=20.0)
@@ -145,8 +161,12 @@ class GeneratePlots(RamTaskL):
                           xytext=(mean_rr + 0.1, max(all_rr_hist[0]) * 0.9), arrowprops={'arrowstyle': '->'})
             plot.hist(all_repetition_ratios, bins=nbins, range=[0., 1.],
                       color='grey', alpha=0.5)
-            plot_out_fname = self.get_path_to_resource_in_workspace(
-                'reports/' + task + '-' + subject + '-category-plots.pdf')
+
+            plot_out_fname = self.output()[task + '-' + subject + '-category-plots.pdf'].path
+
+            # plot_out_fname = self.get_path_to_resource_in_workspace(
+            #     'reports/' + task + '-' + subject + '-category-plots.pdf')
+
             plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
         panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', labelsize=18)
@@ -168,10 +188,18 @@ class GeneratePlots(RamTaskL):
 
         plot = panel_plot.generate_plot()
 
-        plot_out_fname = self.get_path_to_resource_in_workspace(
-            'reports/' + task + '-' + subject + '-roc_and_terc_plot_combined.pdf')
 
+        # plot_out_fname = self.get_path_to_resource_in_workspace(
+        #     'reports/' + task + '-' + subject + '-roc_and_terc_plot_combined.pdf')
+
+        # return
+
+        # plot_out_fname = self.output()[task + '-' + subject + '-roc_and_terc_plot_combined.pdf'].path
+
+        plot_out_fname = self.clear_output_file(task + '-' + subject + '-roc_and_terc_plot_combined.pdf')
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+
+
 
         panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', labelsize=18)
 
@@ -192,31 +220,149 @@ class GeneratePlots(RamTaskL):
 
         plot = panel_plot.generate_plot()
 
-        plot_out_fname = self.get_path_to_resource_in_workspace(
-            'reports/' + task + '-' + subject + '-joint-roc_and_terc_plot_combined.pdf')
+        # plot_out_fname = self.get_path_to_resource_in_workspace(
+        #     'reports/' + task + '-' + subject + '-joint-roc_and_terc_plot_combined.pdf')
 
+        # plot_out_fname = self.output()[task + '-' + subject + '-joint-roc_and_terc_plot_combined.pdf'].path
+        plot_out_fname = self.clear_output_file(task + '-' + subject + '-joint-roc_and_terc_plot_combined.pdf')
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
 
-class GenerateReportPDF(ReportRamTask):
-    def __init__(self, mark_as_completed=True):
-        super(GenerateReportPDF, self).__init__(mark_as_completed)
+# class GeneratePlots(RamTaskL):
+#
+#
+#     def requires(self):
+#         yield ComposeSessionSummary(pipeline=self.pipeline)
+#
+#     def run_impl(self):
+#
+#         subject = self.pipeline.subject
+#         task = self.pipeline.task
+#
+#         self.create_dir_in_workspace('reports')
+#
+#         # session_summary_array = self.get_passed_object('session_summary_array')
+#
+#         serial_positions = np.arange(1, 13)
+#
+#         cumulative_summary = self.get_passed_object('cumulative_summary')
+#
+#         panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, labelsize=18, wspace=20.0)
+#
+#         pd1 = PlotData(x=serial_positions, y=cumulative_summary.prob_recall, xlim=(0, 12), ylim=(0.0, 1.0),
+#                        xlabel='Serial position\n(a)', ylabel='Probability of recall', xlabel_fontsize=18,
+#                        ylabel_fontsize=18)
+#         pd2 = PlotData(x=serial_positions, y=cumulative_summary.prob_first_recall, xlim=(0, 12), ylim=(0.0, 1.0),
+#                        xlabel='Serial position\n(b)', ylabel='Probability of first recall', xlabel_fontsize=18,
+#                        ylabel_fontsize=18)
+#
+#         panel_plot.add_plot_data(0, 0, plot_data=pd1)
+#         panel_plot.add_plot_data(0, 1, plot_data=pd2)
+#
+#         plot = panel_plot.generate_plot()
+#
+#         plot_out_fname = self.get_path_to_resource_in_workspace(
+#             'reports/' + task + '-' + subject + '-prob_recall_plot_combined.pdf')
+#
+#         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+#
+#         if task == 'catFR1':
+#             panel_plot = PanelPlot(yfigsize=6.0, i_max=1, j_max=2, labelsize=18, hspaces=1.0, wspace=20.0)
+#             pd = BarPlotData(x=[0, 1], y=[cumulative_summary.irt_within_cat, cumulative_summary.irt_between_cat],
+#                              ylabel='IRT (msec)', xlabel='(a)', x_tick_labels=['Within Cat', 'Between Cat'],
+#                              barcolors=['grey', 'grey'], barwidth=0.5, xlabel_fontsize=18, ylabel_fontsize=18)
+#             panel_plot.add_plot_data(0, 0, plot_data=pd)
+#             # plot = panel_plot.generate_plot()
+#             # plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-irt_plot_combined.pdf')
+#             # plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+#
+#             repetition_ratio = cumulative_summary.repetition_ratio
+#
+#             all_repetition_ratios = self.get_passed_object('all_repetition_ratios')
+#             all_repetition_ratios = all_repetition_ratios[np.isfinite(all_repetition_ratios)]
+#             nbins = max(10, int(np.log2(all_repetition_ratios.size) + 1))
+#             all_rr_hist = np.histogram(all_repetition_ratios, range=[0., 1], bins=nbins)
+#
+#             mean_rr = np.nanmean(repetition_ratio)
+#             pd2 = PlotData(x=[], y=[], xlim=[0, 1], ylim=[0, max(all_rr_hist[0]) + 0.1],
+#                            levelline=[[mean_rr, mean_rr], [0, max(all_rr_hist[0])]], xlabel='(b)',
+#                            ylabel='# of lists', xlabel_fontsize=18, ylabel_fontsize=24)
+#             # hist = BarPlotData(y=all_rr_hist[0],x=all_rr_hist[1][1:],barcolors=['grey' for h in all_rr_hist[0]], xlim=[0,1],
+#             #         levelline=[[mean_rr,mean_rr],[0,max(all_rr_hist[0])]],barwidth=0.05, xlabel='(b)',
+#             #                    ylabel='# of lists',xlabel_fontsize=18, ylabel_fontsize=24)
+#             panel_plot.add_plot_data(0, 1, plot_data=pd2)
+#             plot = panel_plot.generate_plot()
+#             percentile = np.nanmean(all_repetition_ratios < mean_rr) * 100
+#             plot.annotate(s='{:2}th \n percentile'.format(percentile), xy=(mean_rr, max(all_rr_hist[0])),
+#                           xytext=(mean_rr + 0.1, max(all_rr_hist[0]) * 0.9), arrowprops={'arrowstyle': '->'})
+#             plot.hist(all_repetition_ratios, bins=nbins, range=[0., 1.],
+#                       color='grey', alpha=0.5)
+#             plot_out_fname = self.get_path_to_resource_in_workspace(
+#                 'reports/' + task + '-' + subject + '-category-plots.pdf')
+#             plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+#
+#         panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', labelsize=18)
+#
+#         pd1 = PlotData(x=cumulative_summary.fpr, y=cumulative_summary.tpr, xlim=[0.0, 1.0], ylim=[0.0, 1.0],
+#                        xlabel='False Alarm Rate\n(a)', ylabel='Hit Rate', levelline=((0.001, 0.999), (0.001, 0.999)),
+#                        color='k', markersize=1.0, xlabel_fontsize=18, ylabel_fontsize=18)
+#
+#         ylim = np.max(np.abs(cumulative_summary.pc_diff_from_mean)) + 5.0
+#         if ylim > 100.0:
+#             ylim = 100.0
+#         pd2 = BarPlotData(x=(0, 1, 2), y=cumulative_summary.pc_diff_from_mean, ylim=[-ylim, ylim],
+#                           xlabel='Tercile of Classifier Estimate\n(b)', ylabel='Recall Change From Mean (%)',
+#                           x_tick_labels=['Low', 'Middle', 'High'], xhline_pos=0.0, barcolors=['grey', 'grey', 'grey'],
+#                           xlabel_fontsize=18, ylabel_fontsize=18, barwidth=0.5)
+#
+#         panel_plot.add_plot_data(0, 0, plot_data=pd1)
+#         panel_plot.add_plot_data(0, 1, plot_data=pd2)
+#
+#         plot = panel_plot.generate_plot()
+#
+#         plot_out_fname = self.get_path_to_resource_in_workspace(
+#             'reports/' + task + '-' + subject + '-roc_and_terc_plot_combined.pdf')
+#
+#         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
+#
+#         panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', labelsize=18)
+#
+#         pd1 = PlotData(x=cumulative_summary.joint_fpr, y=cumulative_summary.joint_tpr, xlim=[0.0, 1.0], ylim=[0.0, 1.0],
+#                        xlabel='False Alarm Rate\n(a)', ylabel='Hit Rate', levelline=((0.001, 0.999), (0.001, 0.999)),
+#                        color='k', markersize=1.0, xlabel_fontsize=18, ylabel_fontsize=18)
+#
+#         ylim = np.max(np.abs(cumulative_summary.joint_pc_diff_from_mean)) + 5.0
+#         if ylim > 100.0:
+#             ylim = 100.0
+#         pd2 = BarPlotData(x=(0, 1, 2), y=cumulative_summary.joint_pc_diff_from_mean, ylim=[-ylim, ylim],
+#                           xlabel='Tercile of Classifier Estimate\n(b)', ylabel='Recall Change From Mean (%)',
+#                           x_tick_labels=['Low', 'Middle', 'High'], xhline_pos=0.0, barcolors=['grey', 'grey', 'grey'],
+#                           xlabel_fontsize=18, ylabel_fontsize=18, barwidth=0.5)
+#
+#         panel_plot.add_plot_data(0, 0, plot_data=pd1)
+#         panel_plot.add_plot_data(0, 1, plot_data=pd2)
+#
+#         plot = panel_plot.generate_plot()
+#
+#         plot_out_fname = self.get_path_to_resource_in_workspace(
+#             'reports/' + task + '-' + subject + '-joint-roc_and_terc_plot_combined.pdf')
+#
+#         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
-    def run(self):
+
+class GenerateReportPDF(RamTaskL):
+    def requires(self):
+        yield ComposeSessionSummary(pipeline=self.pipeline)
+        yield GeneratePlots(pipeline=self.pipeline)
+
+        yield GenerateTex(pipeline=self.pipeline)
+
+    def run_impl(self):
         output_directory = self.get_path_to_resource_in_workspace('reports')
+        print 'PDF GENERATOR NEEDS TO BE TESTED ON LINUX OR OSX'
+        return
 
         texinputs_set_str = r'export TEXINPUTS="' + output_directory + '":$TEXINPUTS;'
-
-        # report_tex_file_names = self.get_passed_object('report_tex_file_names')
-        # for f in report_tex_file_names:
-        #     # + '/Library/TeX/texbin/pdflatex '\
-        #     pdflatex_command_str = texinputs_set_str \
-        #                            + 'module load Tex; pdflatex '\
-        #                            + ' -output-directory '+output_directory\
-        #                            + ' -shell-escape ' \
-        #                            + self.get_path_to_resource_in_workspace('reports/'+f)
-        #
-        #     call([pdflatex_command_str], shell=True)
 
         combined_report_tex_file_name = self.get_passed_object('combined_report_tex_file_name')
 

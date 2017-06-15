@@ -35,6 +35,17 @@ class RamTaskL(luigi.Task):
         self.file_resources_to_copy[self.__class__.__name__][name] = luigi.LocalTarget(
             join(self.pipeline.workspace_dir, folder_tmp, name + '.' + ext.replace('.', '')))
 
+    def clear_output_file(self,output_name):
+        """
+        Creates empty file - creates all necessary intermediate directories. Uses luigi backend to manage
+         filesystem operations
+        :param output_name: name of the output (defined in the def define_outputs(self ) function)
+        :return: full path name to the newly created file
+        """
+        with self.output()[output_name].open('w'):
+            pass
+        return self.output()[output_name].path
+
     def get_task_completed_file_name(self):
         """
         retunrs name of the task
