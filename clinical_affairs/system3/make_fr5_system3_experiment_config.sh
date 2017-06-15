@@ -67,7 +67,7 @@ python ../../system_3_utils/odin_config_tool_generator.py --subject=${subject}\
 config_file=${config_dir}/contacts${subject}.csv
 bin_file=${config_dir}/contacts${subject}.bin
 touch ${bin_file}
-workspace_dir="scratch/leond/system3_configs/${experiment}_biomarkers/${subject}"
+workspace_dir="/scratch/leond/system3_configs/${experiment}_biomarkers/${subject}"
 else
 workspace_dir="/scratch/system3_configs/${experiment}_biomarkers/${subject}/${subject}_${experiment}_${anode1}_${cathode1}_${max_amplitude_1}_${anode2}_${cathode2}_${max_amplitude_2}"
 fi

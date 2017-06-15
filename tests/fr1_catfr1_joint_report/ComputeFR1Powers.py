@@ -72,7 +72,11 @@ class ComputeFR1Powers(ReportRamTask):
             events=joblib.load(self.get_path_to_resource_in_workspace(subject + '-fr1_events.pkl'))
             self.pass_object('events',events)
         except IOError:
-            pass
+            events = self.get_passed_object('events')
+            if len(events)>len(self.pow_mat):
+                self.run()
+            else:
+                pass
 
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
@@ -119,6 +123,7 @@ class ComputeFR1Powers(ReportRamTask):
                 self.pow_mat[encoding_mask] = encoding_pow_mat
                 self.pow_mat[~encoding_mask] = retrieval_pow_mat
 
+                joblib.dump(events,self.get_path_to_resource_in_workspace(subject+'-fr1_events.pkl'))
                 self.pass_object('events', events)
 
             self.pass_object('pow_mat', self.pow_mat)

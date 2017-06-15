@@ -12,8 +12,6 @@ parser.parser.add_argument('--classsifier')
 
 args_obj=parser.parse()
 
-from RamPipeline import RamPipeline
-
 from PAL1EventPreparation import PAL1EventPreparation
 from PAL5EventPreparation import PAL5EventPreparation
 

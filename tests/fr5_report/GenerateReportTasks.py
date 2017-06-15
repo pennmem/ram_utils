@@ -16,8 +16,6 @@ class GeneratePlots(ReportRamTask):
     def __init__(self):
         super(GeneratePlots,self).__init__(mark_as_completed=False)
 
-
-
     def run(self):
         self.create_dir_in_workspace('reports')
         task = self.pipeline.task
@@ -194,57 +192,17 @@ class GenerateTex(ReportRamTask):
         experiment = self.pipeline.task
         date = datetime.date.today()
 
-        # ps_latex = self.generate_ps_latex()
         fr5_latex = self.generate_fr5_latex()
+        report_tex_file_name = '%s-FR5_report.tex'%subject
 
-        replace_template('ps4_fr5_report_base.tex.tpl',self.get_path_to_resource_in_workspace('reports','FR5_report.tex'),
+        replace_template('ps4_fr5_report_base.tex.tpl',self.get_path_to_resource_in_workspace('reports',report_tex_file_name),
                          {
                              '<SUBJECT>':subject,
                              '<EXPERIMENT>':experiment,
                              '<DATE>':date,
                              '<FR5_SECTION>':fr5_latex})
-        self.pass_object('report_tex_file_name','%s-FR5_report.tex'%subject)
+        self.pass_object('report_tex_file_name',report_tex_file_name)
 
-
-    def generate_ps_latex(self):
-        ps_events = self.get_passed_object('ps_events')
-        ps_session_summary = self.get_passed_object('ps_session_summary')
-        ps_latex = ''
-        if ps_session_summary:
-            n_sessions = len(ps_session_summary)
-            n_electrodes = len(self.get_passed_object('monopolar_channels'))
-            if ps_events is not None and ps_events.shape:
-                for session in np.unique(ps_events.session):
-                    if ps_session_summary[session].preferred_location:
-                        session_decision = replace_template_to_string('ps_decision.tex.tpl',
-                                                                      {
-                                                                          '<PREFERRED_LOCATION>': ps_session_summary[
-                                                                              session].preferred_location,
-                                                                          '<PREFERRED_AMPLITUDE>': ps_session_summary[
-                                                                              session].preferred_amplitude,
-                                                                          '<TSTAT>': ps_session_summary[session].tstat,
-                                                                          '<PVALUE>': ps_session_summary[session].pvalue
-                                                                      })
-                    else:
-                        session_decision = 'No significant parameters found.'
-                    ps_session_latex = replace_template_to_string('ps4_session.tex.tpl',
-                                                                  {
-                                                                      '<SESSION>':session,
-                                                                      '<LOC1>': ps_session_summary[session].locations[0],
-                                                                      '<LOC2>': ps_session_summary[session].locations[1],
-                                                                      '<PS_PLOT_FILE>': ps_session_summary[session].PS_PLOT_FILE,
-                                                                      '<DECISION>': session_decision
-                                                                  })
-                    ps_latex += ps_session_latex
-                ps_latex = replace_template_to_string('PS4_section.tex.tpl',
-                                                      {
-                                                          '<SUBJECT>':self.pipeline.subject,
-                                                          '<NUMBER_OF_PS4_SESSIONS>':n_sessions,
-                                                          '<NUMBER_OF_ELECTRODES>':n_electrodes,
-                                                          '<SESSION_DATA>':latex_table(self.get_passed_object('ps_session_data')),
-                                                          '<PS4_SESSION_PAGES>':ps_latex
-                                                      })
-        return ps_latex
 
     def generate_fr5_latex(self):
         subject =self.pipeline.subject
