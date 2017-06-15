@@ -92,7 +92,7 @@ class FR1EventPreparation(ReportRamTask):
 
         events = np.hstack((fr1_events,catfr1_events)).view(np.recarray)
 
-        events = create_baseline_events(events,start_buffer=1000,end_buffer=29000)
+        events = create_baseline_events(events, start_time=1000, end_time=29000)
 
 
         self.pass_object('all_events', events)

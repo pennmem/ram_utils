@@ -78,22 +78,46 @@ fi
 
 
 #PS4
+
 report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/ps4_report
 cd ${report_code_dir}
 
-workspace_dir=${automated_reports_dir}/PS4_reports
+## PS4_FR5
+task=FR5
+
+workspace_dir=${automated_reports_dir}/PS4_${task}_reports
 status_output_dir=${workspace_dir}/${datetime}
 status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-task=FR5
 python ${report_code_dir}/ps4_report_all.py  --task=${task} \
   --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 
+## PS4_PAL5
 task=PAL5
+
+workspace_dir=${automated_reports_dir}/PS4_${task}_reports
+status_output_dir=${workspace_dir}/${datetime}
+status_output_dirs+=(${status_output_dir})
+
+remove_old_status_dirs ${workspace_dir}
+
 python ${report_code_dir}/ps4_report_all.py  --task=${task} \
   --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
+
+## PS4_catFR5
+task = catFR5
+workspace_dir=${automated_reports_dir}/PS4_${task}_reports
+status_output_dir=${workspace_dir}/${datetime}
+status_output_dirs+=(${status_output_dir})
+
+remove_old_status_dirs ${workspace_dir}
+
+python ${report_code_dir}/ps4_report_all.py  --task=${task} \
+  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
+
+
 
 # FR5
 report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/fr5_report
@@ -105,8 +129,9 @@ status_output_dirs+=(${status_output_dir})
 
 remove_old_status_dirs ${workspace_dir}
 
-python ${report_code_dir}/fr_5_report_all.py  --task=FR5 \
- --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
+python ${report_code_dir}/fr5_report_all.py  --task=FR5 \
+ --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
+
 
 # FR3
 report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/fr_stim_report

@@ -93,7 +93,7 @@ class FREventPreparation(RamTask):
                                      'type', 'eegoffset', 'recalled', 'item_name', 'intrusion',
                                      'montage', 'list', 'eegfile', 'msoffset']].copy()
             fr1_events = np.append(fr1_events,catfr1_events).view(np.recarray)
-
+        fr1_events = fr1_events[fr1_events.list>-1]
         fr1_events = create_baseline_events(fr1_events,1000,29000)
 
 

@@ -5,6 +5,11 @@
 \caption{Classifier response as a function of amplitude (mA)}
 \end{figure}
 
+\begin{figure}[ht!]
+\includegraphics[scale=0.375]{<PS_BIOMARKER_PLOT_FILE>}
+\caption{Post stimulation classifier output as a function of amplitude (mA)}
+\end{figure}
+
 Results:
 
 \quad\\

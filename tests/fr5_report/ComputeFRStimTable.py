@@ -144,8 +144,6 @@ class ComputeFRStimTable(ReportRamTask):
             #     fr_stim_prob[sess_mask] = sess_prob  # plug biomarker output
             # self.fr_stim_table.loc[sess_mask,'thresh'] = thresh
             sess_events = events[events.session==sess]
-            self.fr_stim_table.loc[events.session==sess,'is_ps4'] = (sess_events.phase=='PS').any()
-
 
             sess_stim_events = all_events[(all_events.session==sess) & (all_events.type=='STIM_ON')]
             sess_stim_event = sess_stim_events[-1]

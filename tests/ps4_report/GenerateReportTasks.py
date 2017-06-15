@@ -23,41 +23,75 @@ class GeneratePlots(ReportRamTask):
         for session in session_summaries:
             session_summary = session_summaries[session]
 
-            panel_plot = PlotUtils.PanelPlot(i_max = 1, j_max=len(session_summary.info_by_location),labelsize=16,)
+            session_summary.dc_plot_filename = self.get_path_to_resource_in_workspace(join('reports', 'session_%s_classifier_response_plot.pdf' % session))
+            session_summary.biomarker_plot_filename=self.get_path_to_resource_in_workspace(join('reports','session_%s_post_stim_biomarker_plot.pdf'%session))
+
+            panel_plot_delta_classifier = PlotUtils.PanelPlot(i_max = 1, j_max=len(session_summary.info_by_location),labelsize=16,
+                                                              xfigsize=18,yfigsize=8)
+            panel_plot_biomarker = PlotUtils.PanelPlot(i_max = 1, j_max=len(session_summary.info_by_location),labelsize=16,
+                                                              xfigsize=18,yfigsize=8)
+
 
             for i,location in enumerate(sorted(session_summary.info_by_location)):
 
                 loc_info = session_summary.info_by_location[location]
 
-                pdc = PlotUtils.PlotDataCollection(xlabel = location, ylabel='Change in classifier (post-pre)' if i==0 else '',
-                                                   xlabel_fontsize=18,ylabel_fontsize=18,xlim = (-0.01,xmax),ylim=(ymin,ymax)
-)
+                pdc_delta_classifier = PlotUtils.PlotDataCollection(xlabel = location, ylabel='Change in classifier (post-pre)' if i==0 else '',
+                                                   xlabel_fontsize=18,ylabel_fontsize=18,xlim = (-0.01,xmax),ylim=(ymin,ymax))
+
 
                 pd_enc  = PlotUtils.PlotData(x=loc_info.amplitudes['ENCODING'],y=loc_info.delta_classifiers['ENCODING'],
-                                            linestyle='', marker = 'x',color = 'red',label='encoding'
+                                            linestyle='', color = 'red',label='encoding',markersize = 10.0
                                              )
-                pdc.add_plot_data(pd_enc)
+                pdc_delta_classifier.add_plot_data(pd_enc)
 
                 pd_distr = PlotUtils.PlotData(x = loc_info.amplitudes['DISTRACT'],y=loc_info.delta_classifiers['DISTRACT'],
-                                              linestyle='', marker='x',color='green',label='distract',
+                                              linestyle='', color='green',label='distract',markersize = 10.0
                                               )
-                pdc.add_plot_data(pd_distr)
+                pdc_delta_classifier.add_plot_data(pd_distr)
 
                 pd_retr  = PlotUtils.PlotData(x = loc_info.amplitudes['RETRIEVAL'],y=loc_info.delta_classifiers['RETRIEVAL'],
-                                              linestyle='',marker='x',color='blue',label='retrieval',
+                                              linestyle='',color='blue',label='retrieval',markersize = 10.0
                                               )
-                pdc.add_plot_data(pd_retr)
+                pdc_delta_classifier.add_plot_data(pd_retr)
 
                 pd_sham = PlotUtils.PlotData(x=np.array([0]),y=session_summary.sham_dc,yerr=session_summary.sham_sem,color='black',
                                              label='sham',
                                              )
-                pdc.add_plot_data(pd_sham)
-                panel_plot.add_plot_data_collection(0,i,plot_data_collection=pdc)
+                pdc_delta_classifier.add_plot_data(pd_sham)
+                panel_plot_delta_classifier.add_plot_data_collection(0,i,plot_data_collection=pdc_delta_classifier)
 
-            session_summary.plot_filename = self.get_path_to_resource_in_workspace(join('reports','session_%s_classifier_response_plot.pdf'%session))
-            plt = panel_plot.generate_plot()
+            plt = panel_plot_delta_classifier.generate_plot()
             plt.legend()
-            plt.savefig(session_summary.plot_filename)
+            plt.savefig(session_summary.dc_plot_filename)
+            plt.close()
+
+            for i,location in enumerate(sorted(session_summary.info_by_location)):
+                loc_info = session_summary.info_by_location[location]
+
+                pdc_biomarker = PlotUtils.PlotDataCollection(xlabel=location, ylabel='Post-stimulation classifier output',
+                                                             xlabel_fontsize=18, ylabel_fontsize=18, xlim=(-0.01, xmax),
+                                                             ylim=(0, 1))
+                pd_enc  = PlotUtils.PlotData(x=loc_info.post_stim_amplitudes['ENCODING'],y=loc_info.post_stim_biomarkers['ENCODING'],
+                                            linestyle='', color = 'black',label='encoding' ,markersize = 10.0
+                                             )
+                pdc_biomarker.add_plot_data(pd_enc)
+
+                pd_distr = PlotUtils.PlotData(x = loc_info.post_stim_amplitudes['DISTRACT'],y=loc_info.post_stim_biomarkers['DISTRACT'],
+                                              linestyle='', color='black',label='distract',markersize = 10.0
+                                              )
+                pdc_biomarker.add_plot_data(pd_distr)
+
+                pd_retr  = PlotUtils.PlotData(x = loc_info.post_stim_amplitudes['RETRIEVAL'],y=loc_info.post_stim_biomarkers['RETRIEVAL'],
+                                              linestyle='',color='black',label='retrieval',markersize = 10.0
+                                              )
+                pdc_biomarker.add_plot_data(pd_retr)
+
+                panel_plot_biomarker.add_plot_data_collection(0,i,plot_data_collection=pdc_biomarker)
+
+            plt = panel_plot_biomarker.generate_plot()
+            plt.savefig(session_summary.biomarker_plot_filename)
+
 
 
 class GenerateTex(ReportRamTask):
@@ -82,7 +116,8 @@ class GenerateTex(ReportRamTask):
 
             session_tex += replace_template_to_string('ps4_session.tex.tpl',{
                 '<SESSION>':session,
-                '<PS_PLOT_FILE>':session_summary.plot_filename,
+                '<PS_PLOT_FILE>':session_summary.dc_plot_filename,
+                '<PS_BIOMARKER_PLOT_FILE>':session_summary.biomarker_plot_filename,
                 '<CONTEST_TABLE>':result_table.to_latex(),
                 '<BEST_LOCATION>':str(session_summary.best_location).replace('_','-'),
                 '<AMPLITUDE>':session_summary.best_amplitude,

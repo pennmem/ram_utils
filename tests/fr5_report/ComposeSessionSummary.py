@@ -442,8 +442,8 @@ class ComposeSessionSummary(ReportRamTask):
         fr_stim_table_by_session = fr_stim_table.groupby(['session'])
         for session,fr_stim_session_table in fr_stim_table_by_session:
             session_all_events = all_events[all_events.session == session]
-            first_time_stamp = session_all_events[session_all_events.type=='INSTRUCT_START'][0].mstime
             timestamps = session_all_events.mstime
+            first_time_stamp = timestamps.min()
             last_time_stamp = np.max(timestamps)
             session_length = '%.2f' % ((last_time_stamp - first_time_stamp) / 60000.0)
             session_date = time.strftime('%d-%b-%Y', time.localtime(last_time_stamp/1000))
@@ -456,7 +456,7 @@ class ComposeSessionSummary(ReportRamTask):
         self.pass_object('fr5_session_table', session_data)
 
         session_summary_array = self.get_passed_object('fr_session_summary')
-        fr_stim_table_by_phase = fr_stim_table.loc[~fr_stim_table['is_ps4']]
+        fr_stim_table_by_phase = fr_stim_table.loc[~fr_stim_table['is_ps4_session']]
 
         fr_stim_group_table_group = fr_stim_table_by_phase.groupby(['stimAnodeTag','stimCathodeTag'])
         for stim_param,fr_stim_session_table in fr_stim_group_table_group:
@@ -693,17 +693,21 @@ class ComposeSessionSummary(ReportRamTask):
             session_summary.chisqr_stim_item, session_summary.pvalue_stim_item, _ = proportions_chisquare([session_summary.n_correct_stim_items, session_summary.n_correct_nonstim_low_bio_items], [session_summary.n_total_stim_items, session_summary.n_total_nonstim_low_bio_items])
             session_summary.chisqr_post_stim_item, session_summary.pvalue_post_stim_item, _ = proportions_chisquare([session_summary.n_correct_post_stim_items, session_summary.n_correct_nonstim_post_low_bio_items], [session_summary.n_total_post_stim_items, session_summary.n_total_nonstim_post_low_bio_items])
 
-            if (fr_stim_session_table['recognized'].any()):
+
+            sess_recog_lures = session_all_events[session_all_events.type=='RECOG_LURE']
+            n_recog_prompts = len(sess_recog_lures) + len(session_all_events[session_all_events.type=='RECOG_TARGET'])
+            if (fr_stim_session_table['recognized']!=-999).any():
                 session_summary.n_stim_hits = (fr_stim_session_table[fr_stim_session_table['is_stim_item']].recognized>0).sum()
                 session_summary.n_nonstim_hits = (fr_stim_session_table[~fr_stim_session_table['is_stim_item']].recognized>0).sum()
-                session_summary.n_false_alarms = (fr_stim_session_table.rejected==0).sum()
-                session_summary.pc_stim_hits = 100*session_summary.n_stim_hits/float(len(fr_stim_session_table))
-                session_summary.pc_nonstim_hits = 100*session_summary.n_nonstim_hits/float(len(fr_stim_session_table))
-                session_summary.pc_false_alarms = 100*session_summary.n_false_alarms/float(len(fr_stim_session_table))
-                session_summary.dprime = (stats.norm.ppf(session_summary.pc_stim_hits+session_summary.pc_nonstim_hits) -
-                                          stats.norm.ppf(session_summary.pc_false_alarms/100.))
-                if np.isnan(session_summary.dprime):
-                    session_summary.dprime = -999.
+                session_summary.n_false_alarms = (sess_recog_lures.rejected==0).sum()
+                session_summary.pc_stim_hits = session_summary.n_stim_hits/float(n_recog_prompts)
+                session_summary.pc_nonstim_hits = session_summary.n_nonstim_hits/float(n_recog_prompts)
+                session_summary.pc_false_alarms = session_summary.n_false_alarms/float(n_recog_prompts)
+                session_summary.dprime = '{:03f}'.format(stats.norm.ppf(session_summary.pc_stim_hits+session_summary.pc_nonstim_hits) -
+                                          stats.norm.ppf(session_summary.pc_false_alarms))
+                session_summary.pc_stim_hits *= 100
+                session_summary.pc_nonstim_hits *= 100
+                session_summary.pc_false_alarms *= 100
 
 
             session_summary_array.append(session_summary)

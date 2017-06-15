@@ -466,7 +466,7 @@ def free_epochs(times, duration, pre, post, start=None, end=None):
     return epoch_array
 
 
-def create_baseline_events(events,start_buffer,end_buffer):
+def create_baseline_events(events, start_time, end_time):
     '''
     Match recall events to matching baseline periods of failure to recall.
     Baseline events all begin at least 1000 ms after a vocalization, and end at least 1000 ms before a vocalization.
@@ -476,6 +476,8 @@ def create_baseline_events(events,start_buffer,end_buffer):
     Parameters:
     -----------
     events: The event structure in which to incorporate these baseline periods
+    start_time: The amount of time to skip at the beginning of the session (ms)
+    end_time: The amount of time within the recall period to consider (ms)
 
     '''
 
@@ -488,11 +490,12 @@ def create_baseline_events(events,start_buffer,end_buffer):
         starts = sess_events[(sess_events.type == 'REC_START')]
         ends = sess_events[(sess_events.type == 'REC_END')]
         rec_lists = tuple(np.unique(starts.list))
-        times = [voc_events[(voc_events.list == lst)].mstime for lst in rec_lists]
+        times = [voc_events[(voc_events.list == lst)].mstime if (voc_events.list==lst).any() else []
+                 for lst in rec_lists]
         start_times = starts.mstime
         end_times = ends.mstime
         epochs = free_epochs(times, 500, 2000, 1000, start=start_times, end=end_times)
-        rel_times = [(t - i)[(t-i>start_buffer) & (t-i<end_buffer)] for (t, i) in
+        rel_times = [(t - i)[(t - i > start_time) & (t - i < end_time)] for (t, i) in
                      zip([rec_events[rec_events.list == lst].mstime for lst in rec_lists ], start_times)
                      ]
         rel_epochs = epochs - start_times[:, None]
