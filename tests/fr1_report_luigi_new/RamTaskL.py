@@ -11,7 +11,6 @@ from collections import defaultdict
 class RamTaskL(luigi.Task):
     pipeline = luigi.Parameter(default=None)
     mark_as_completed = luigi.BoolParameter(default=False)
-    # file_resources_to_copy = luigi.Parameter(default={})
     file_resources_to_copy = defaultdict(dict)
 
     file_resources_to_copy_direct = defaultdict()
