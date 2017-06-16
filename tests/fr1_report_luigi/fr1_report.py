@@ -63,18 +63,18 @@ class EventCheck(RamTaskL):
 
 if __name__ == '__main__':
     luigi.build([
-    # FR1EventPreparation(pipeline=pipeline, mark_as_completed=True),
-    #              EventCheck(pipeline=pipeline),
-    #              MontagePreparation(pipeline=pipeline, mark_as_completed=True),
-    #              RepetitionRatio(pipeline=pipeline),
-    #              ComputeFR1Powers(pipeline=pipeline, mark_as_completed=True),
-    #              ComputeFR1HFPowers(pipeline=pipeline, mark_as_completed=True),
-    #              ComputeTTest(pipeline=pipeline, mark_as_completed=False),
-    #              ComputeClassifier(pipeline=pipeline, mark_as_completed=True),
-    #              ComputeJointClassifier(pipeline=pipeline, mark_as_completed=True),
-    #              ComposeSessionSummary(pipeline=pipeline, mark_as_completed=False),
-    #              GeneratePlots(pipeline=pipeline, mark_as_completed=False),
-    #              GenerateTex(pipeline=pipeline, mark_as_completed=False),
+    FR1EventPreparation(pipeline=pipeline, mark_as_completed=True),
+                 EventCheck(pipeline=pipeline),
+                 MontagePreparation(pipeline=pipeline, mark_as_completed=True),
+                 RepetitionRatio(pipeline=pipeline),
+                 ComputeFR1Powers(pipeline=pipeline, mark_as_completed=True),
+                 ComputeFR1HFPowers(pipeline=pipeline, mark_as_completed=True),
+                 ComputeTTest(pipeline=pipeline, mark_as_completed=False),
+                 ComputeClassifier(pipeline=pipeline, mark_as_completed=True),
+                 ComputeJointClassifier(pipeline=pipeline, mark_as_completed=True),
+                 ComposeSessionSummary(pipeline=pipeline, mark_as_completed=False),
+                 GeneratePlots(pipeline=pipeline, mark_as_completed=False),
+                 GenerateTex(pipeline=pipeline, mark_as_completed=False),
                  GenerateReportPDF(pipeline=pipeline,mark_as_completed=False)
                  ],
                 local_scheduler=True)
