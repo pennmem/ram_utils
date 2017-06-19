@@ -492,8 +492,8 @@ def create_baseline_events(events, start_time, end_time):
         rec_lists = tuple(np.unique(starts.list))
         times = [voc_events[(voc_events.list == lst)].mstime if (voc_events.list==lst).any() else []
                  for lst in rec_lists]
-        start_times = starts.mstime
-        end_times = ends.mstime
+        start_times = starts.mstime.astype(np.int)
+        end_times = ends.mstime.astype(np.int)
         epochs = free_epochs(times, 500, 2000, 1000, start=start_times, end=end_times)
         rel_times = [(t - i)[(t - i > start_time) & (t - i < end_time)] for (t, i) in
                      zip([rec_events[rec_events.list == lst].mstime for lst in rec_lists ], start_times)
