@@ -102,10 +102,10 @@ subjects = jr.subjects(experiment='FR5')
 for subject in subjects:
     montages  = jr.montages(subject=subject,experiment='FR5')
     for montage in montages:
-        if montage != 0:
+        if montage != '0':
             subject = '%s_%s'%(subject,montage)
 # sets up processing pipeline
-    report_pipeline = ReportPipeline(subject=args.subject, task=args.task,experiment=args.task,
+    report_pipeline = ReportPipeline(subject=subject, task=args.task,experiment=args.task,
                                      workspace_dir=os.path.join(args.workspace_dir,subject), exit_on_no_change=args.exit_on_no_change,
                                      recompute_on_no_status=args.recompute_on_no_status)
 
@@ -141,7 +141,7 @@ for subject in subjects:
 
     rsi.add_report_summary(report_pipeline.get_report_summary())
 
-rsi.output_json_files(args.report_status_dir)
+rsi.output_json_files(args.status_output_dir)
 
 
 
