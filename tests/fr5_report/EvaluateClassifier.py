@@ -29,7 +29,6 @@ class EvaluateClassifier(ReportRamTask):
         json_reader = JsonIndexReader(path.join(self.pipeline.mount_point, 'protocols/r1.json'))
 
         hash_md5 = hashlib.md5()
-        hash_md5.update(__file__)
 
         bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
         for fname in bp_paths:
@@ -88,24 +87,16 @@ class EvaluateClassifier(ReportRamTask):
         task = self.pipeline.task
         self.lr_classifier = self.get_passed_object('lr_classifier_full')
         events = self.get_passed_object(task+'_events')
-        stim_off_events = self.get_passed_object('stim_off_events')
-        events = np.concatenate([events,stim_off_events]).view(np.recarray)
-        self.pow_mat = self.get_passed_object('fr_stim_pow_mat')
-        post_stim_pow_mat = self.get_passed_object('post_stim_pow_mat')
-        self.long_pow_mat = np.concatenate([self.pow_mat,post_stim_pow_mat])
-
-
-        all_probs = self.lr_classifier.predict_proba(self.long_pow_mat)[:, 1]
-
-        non_stim = (events.type=='WORD') & (events.phase != 'STIM')
+        non_stim = events.phase != 'STIM'
         if not non_stim.any():
             self.xval_output = self.perm_AUCs = self.pvalue = None
         else:
-            self.pow_mat = self.long_pow_mat[non_stim]
-            probs = all_probs[non_stim]
-            recalls = events[non_stim].recalled
+            self.pow_mat = self.get_passed_object('fr_stim_pow_mat')[non_stim]
+            events = events[non_stim]
+            recalls = events.recalled
             # print 'self.pow_mat.shape:',self.pow_mat.shape
             # print 'len fr5_events:',len(events)
+            probs = self.lr_classifier.predict_proba(self.pow_mat)[:,1]
             self.xval_output[-1] = ModelOutput(recalls, probs)
             self.xval_output[-1].compute_roc()
             self.xval_output[-1].compute_tercile_stats()
@@ -113,30 +104,24 @@ class EvaluateClassifier(ReportRamTask):
 
             print 'AUC = %f'%self.xval_output[-1].auc
             sessions = np.unique(events.session)
-            nonstimlist_events = events[events.stim_list == False]
             if len(sessions)>1:
                 print 'Performing permutation test'
+                events = events[events.stim_list==False]
 
-                self.perm_AUCs = self.permuted_loso_AUCs(nonstimlist_events.session, recalls)
+                self.perm_AUCs = self.permuted_loso_AUCs(events.session, recalls)
 
             else:
                 print 'Performing in-session permutation test'
-                self.perm_AUCs = self.permuted_lolo_AUCs(nonstimlist_events)
+                self.perm_AUCs = self.permuted_lolo_AUCs(events)
 
             self.pvalue = np.sum(self.perm_AUCs >= self.xval_output[-1].auc) / float(self.perm_AUCs.size)
 
             print 'Perm test p-value = ', self.pvalue
-
-        pre_stim_probs = all_probs[(events.type=='WORD') & (events.phase=='STIM')]
-        post_stim_probs = all_probs[events.type=='STIM_OFF']
         self.pass_object(task+'_xval_output', self.xval_output)
         self.pass_object(task+'_perm_AUCs', self.perm_AUCs)
         self.pass_object(task+'_pvalue', self.pvalue)
-        self.pass_object('pre_stim_probs',pre_stim_probs)
-        self.pass_object('post_stim_probs',post_stim_probs)
 
-        joblib.dump(pre_stim_probs,self.get_path_to_resource_in_workspace('-'.join((subject,task,'pre_stim_probs.pkl'))))
-        joblib.dump(post_stim_probs,self.get_path_to_resource_in_workspace('-'.join((subject,task,'post_stim_probs.pkl'))))
+
         joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace('-'.join((subject, task, 'xval_output.pkl'))))
         joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace('-'.join((subject, task, 'perm_AUCs.pkl'))))
         joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace('-'.join((subject, task, 'pvalue.pkl'))))
@@ -149,12 +134,7 @@ class EvaluateClassifier(ReportRamTask):
                     self.get_path_to_resource_in_workspace('-'.join((subject, task, 'xval_output.pkl'))))
         self.perm_AUCs = joblib.load(self.get_path_to_resource_in_workspace('-'.join((subject, task, 'perm_AUCs.pkl'))))
         self.pvalue = joblib.load(self.get_path_to_resource_in_workspace('-'.join((subject, task, 'pvalue.pkl'))))
-        pre_stim_probs = joblib.load(self.get_path_to_resource_in_workspace('-'.join((subject,task,'pre_stim_probs.pkl'))))
-        post_stim_probs = joblib.load(self.get_path_to_resource_in_workspace('-'.join((subject,task,'post_stim_probs.pkl'))))
 
-
-        self.pass_object('pre_stim_probs',pre_stim_probs)
-        self.pass_object('post_stim_probs',post_stim_probs)
         self.pass_object(task + '_xval_output', self.xval_output)
         self.pass_object(task + '_perm_AUCs', self.perm_AUCs)
         self.pass_object(task + '_pvalue', self.pvalue)

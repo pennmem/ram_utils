@@ -8,8 +8,6 @@ from scipy.stats.mstats import zscore
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from sklearn.externals import joblib
 
-from ReportTasks.RamTaskMethods import compute_powers
-
 from ptsa.data.readers import EEGReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
 from ReportUtils import ReportRamTask
@@ -35,7 +33,6 @@ class ComputeFR5Powers(ReportRamTask):
         json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
 
         hash_md5 = hashlib.md5()
-        hash_md5.update(__file__)
 
         bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
         for fname in bp_paths:
@@ -58,24 +55,15 @@ class ComputeFR5Powers(ReportRamTask):
         self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-fr_stim_pow_mat.pkl'))
         self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
 
+
         self.pass_object('fr_stim_pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
-
-        post_stim_pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject+'-post_stim_powers.pkl'))
-        stim_events = joblib.load(self.get_path_to_resource_in_workspace(subject+'-stim_off_events.pkl'))
-        self.pass_object('post_stim_pow_mat',post_stim_pow_mat)
-        self.pass_object('stim_off_events',stim_events)
-
 
     def run(self):
         subject = self.pipeline.subject
         task = self.pipeline.task
 
         events = self.get_passed_object(task+'_events')
-        all_events = self.get_passed_object('all_events')
-        stim_off_events = all_events[all_events.type=='STIM_OFF']
-
-
 
         sessions = np.unique(events.session)
         print 'sessions:', sessions
@@ -86,26 +74,13 @@ class ComputeFR5Powers(ReportRamTask):
         self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
         print 'self.pow_mat.shape:',self.pow_mat.shape
 
-        post_stim_powers, stim_off_events = compute_powers(stim_off_events,monopolar_channels,bipolar_pairs,
-                                                            self.params.post_stim_start_time,self.params.post_stim_end_time,
-                                                            self.params.post_stim_buf,self.params.freqs,self.params.log_powers)
-
-        for session in sessions:
-            sess_stims = stim_off_events.session==session
-            post_stim_powers[sess_stims] = zscore(post_stim_powers[sess_stims])
-
         self.pass_object('fr_stim_pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
-        self.pass_object('post_stim_pow_mat',post_stim_powers)
-        self.pass_object('stim_off_events',stim_off_events)
 
         events = self.get_passed_object(task+'_events')
         joblib.dump(events,self.get_path_to_resource_in_workspace(subject+'-events.pkl'))
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-' + task + '-fr_stim_pow_mat.pkl'))
         joblib.dump(self.samplerate, self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
-
-        joblib.dump(stim_off_events,self.get_path_to_resource_in_workspace(subject+'-stim_off_events.pkl'))
-        joblib.dump(post_stim_powers,self.get_path_to_resource_in_workspace(subject+'-post_stim_powers.pkl'))
 
     def compute_powers(self, events, sessions,monopolar_channels, bipolar_pairs):
         n_freqs = len(self.params.freqs)
