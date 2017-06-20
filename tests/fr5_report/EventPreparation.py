@@ -76,6 +76,7 @@ class FR1EventPreparation(ReportRamTask):
 
             fr1_events=np.concatenate([fr1_events,catfr1_events]).view(np.recarray)
 
+        fr1_events = fr1_events[fr1_events.list>-1]
 
         if not (fr1_events.type == 'REC_BASE').any():
             fr1_events = create_baseline_events(fr1_events,1000,29000)
@@ -120,7 +121,7 @@ class FR5EventPreparation(ReportRamTask):
 
 
         self.pass_object('all_events', events)
-
+        events = events[events.list>-1]
 
         if not (events.type=='WORD').any():
             raise MissingEventError('No events found that are valid for analysis')

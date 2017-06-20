@@ -178,7 +178,7 @@ def compute_powers(events, monopolar_channels, bipolar_pairs,
         sess_pow_mat, phase_mat = wavelet_filter.filter()
 
         print 'Total time for wavelet decomposition: %.5f s' % (time.time() - filter_tic)
-        sess_pow_mat = sess_pow_mat.remove_buffer(buffer_time).data
+        sess_pow_mat = sess_pow_mat.remove_buffer(buffer_time).data + np.finfo(np.float).eps/2.
 
         if log_powers:
             np.log10(sess_pow_mat, sess_pow_mat)
