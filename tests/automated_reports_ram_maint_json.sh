@@ -281,6 +281,23 @@ python ${report_code_dir}/pal1_report_all.py  --task=PAL1 \
   --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
   --skip-subjects R1050M R1136N
 
+
+# PAL1 -- system 3
+
+report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/pal1_sys3_report
+cd ${report_code_dir}
+
+workspace_dir=${automated_reports_dir}/PAL1_reports
+status_output_dir=${workspace_dir}/${datetime}
+status_output_dirs+=(${status_output_dir})
+
+remove_old_status_dirs ${workspace_dir}
+
+python ${report_code_dir}/pal1_report_all.py  --task=PAL1 \
+  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
+  --skip-subjects R1050M R1136N
+
+
 # PS1
 report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/ps_report
 cd ${report_code_dir}

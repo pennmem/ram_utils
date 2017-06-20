@@ -73,13 +73,15 @@ json_reader = JsonIndexReader(os.path.join(args.mount_point,'protocols/r1.json')
 subject_set = json_reader.aggregate_values('subjects', experiment=task)
 subjects = []
 for s in subject_set:
-    montages = json_reader.aggregate_values('montage', subject=s, experiment=task)
-    for m_ in montages:
-        m = str(m_)
-        subject = str(s)
-        if m!='0':
-            subject += '_' + m
-        subjects.append(subject)
+    systems = json_reader.aggregate_values('system_version',subject=s,experiment=task)
+    if 3.1 in systems:
+        montages = json_reader.aggregate_values('montage', subject=s, experiment=task)
+        for m_ in montages:
+            m = str(m_)
+            subject = str(s)
+            if m!='0':
+                subject += '_' + m
+            subjects.append(subject)
 subjects.sort()
 
 rsi = ReportSummaryInventory(label=task)
