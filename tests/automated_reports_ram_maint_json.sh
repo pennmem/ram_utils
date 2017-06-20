@@ -46,7 +46,7 @@ function remove_old_error_logs {
     find . -name "$(date --date="yesterday" +%Y_%m_%d)*" -type f | xargs rm -rf
 }
 
-
+report_code_base=/home2/RAM_maint/RAM_UTILS_GIT
 
 current_directory=$(pwd)
 
@@ -75,6 +75,24 @@ else
     touch ${LOCKFILE}
 fi
 #lockfile -r 0 ${automated_reports_dir}/automated_reports.lock || exit 1
+
+
+function reports {
+   # syntax: reports report_code_dir workspace_dir report_code_script ${@}
+   # report_code_dir is relative to RAM_UTILS_GIT/tests
+   report_code_dir=${report_code_base}/$1
+   cd ${report_code_dir}
+
+   workspace_dir=$2
+
+   status_output_dir=$2/${datetime}
+   status_output_dirs+=(${status_output_dir})
+
+   remove_old_status_dirs ${workspace_dir}
+   python ${report_code_dir}/$3.py --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir}\
+   ${exit_on_no_change_flag} --recompute-on-no-status "${@:4}"
+}
+
 
 
 #PS4
@@ -190,6 +208,20 @@ status_output_dirs+=(${status_output_dir})
 remove_old_status_dirs ${workspace_dir}
 
 python ${report_code_dir}/pal_stim_report_all.py  --task=PAL3 \
+ --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
+
+
+# PAL5
+report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/pal5_report
+cd ${report_code_dir}
+
+workspace_dir=${automated_reports_dir}/PAL5_reports
+status_output_dir=${workspace_dir}/${datetime}
+status_output_dirs+=(${status_output_dir})
+
+remove_old_status_dirs ${workspace_dir}
+
+python ${report_code_dir}/pal5_report_all.py  --task=PAL5 --classifier=PAL1 \
  --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}
 
 #TH3
