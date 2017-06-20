@@ -40,4 +40,12 @@ $\bullet$ Median of classifier output = $<FR5-JSTAT-THRESH>$
 
 <REPORT_PAGES>
 
+\clearpage
+\subsection*{Quality Control}
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.5]{<BIOMARKER_HISTOGRAM>}
+\caption{Classifier output distribution pre- and post-stimulation}
+\end{figure}
+
 \end{document}

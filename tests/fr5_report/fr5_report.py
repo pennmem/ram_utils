@@ -41,8 +41,8 @@ class Params(object):
 
         self.include_fr1 = True
         self.include_catfr1 = True
-        self.include_fr3 = True
-        self.include_catfr3 = True
+        self.include_fr3 = False
+        self.include_catfr3 = False
 
         self.width = 5
 
@@ -53,6 +53,10 @@ class Params(object):
         self.fr1_retrieval_start_time = -0.525
         self.fr1_retrieval_end_time = 0.0
         self.fr1_retrieval_buf = 0.524
+
+        self.post_stim_start_time = 0.030
+        self.post_stim_end_time = 0.555
+        self.post_stim_buf = 0.524
 
         # self.retrieval_samples_weight = 0.5
         self.encoding_samples_weight =2.5

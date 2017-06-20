@@ -70,9 +70,9 @@ class FR1EventPreparation(ReportRamTask):
             catfr1_events = np.concatenate([BaseEventReader(filename=f,eliminate_events_with_no_eeg=True).read()
                                             for f in catfr1_event_files]
                                            ).view(np.recarray)
-            catfr1_events =catfr1_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
+            catfr1_events =catfr1_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']].copy()
             catfr1_events.session+=100
-            fr1_events = fr1_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
+            fr1_events = fr1_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']].copy()
 
             fr1_events=np.concatenate([fr1_events,catfr1_events]).view(np.recarray)
 

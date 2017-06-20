@@ -83,6 +83,7 @@ class ComputeClassifier(RamTask):
         json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
 
         hash_md5 = hashlib.md5()
+        hash_md5.update(__file__)
 
         bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
         for fname in bp_paths:

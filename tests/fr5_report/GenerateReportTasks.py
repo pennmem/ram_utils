@@ -11,6 +11,8 @@ from subprocess import call
 from ReportUtils import ReportRamTask
 from TextTemplateUtils import replace_template,replace_template_to_string
 from TexUtils.latex_table import latex_table
+import numpy as np
+
 
 class GeneratePlots(ReportRamTask):
     def __init__(self):
@@ -57,6 +59,49 @@ class GeneratePlots(ReportRamTask):
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
         self.pass_object('ROC_AND_TERC_PLOT_FILE',plot_out_fname)
+
+
+        ## Biomarker histograms
+        panel_plot = PanelPlot(xfigsize = 12,yfigsize=5,i_max=1,j_max=2)
+
+        # pre-stim
+        pre_stim_probs = self.get_passed_object('pre_stim_probs')
+        hist,bin_edges = np.histogram(pre_stim_probs,bins = int(np.log2(pre_stim_probs.size)+1),)
+        bin_centers = np.diff(bin_edges)+bin_edges[:-1]
+        pd = BarPlotData(x = range(len(bin_centers)),y=hist,xlabel = 'Pre-stim classifier output',ylabel='',xlabel_fontsize=20,
+                         bar_width=1./float(len(bin_centers)),x_tick_labels=['{:2.2f}'.format(x) for x in bin_centers],
+                         )
+        panel_plot.add_plot_data(0,0,plot_data=pd)
+
+        # post-stim
+        post_stim_probs = self.get_passed_object('post_stim_probs')
+        hist,bin_edges = np.histogram(post_stim_probs,bins = int(np.log2(post_stim_probs.size)+1),)
+        bin_centers = np.diff(bin_edges)+bin_edges[:-1]
+        pd = BarPlotData(x = range(len(bin_centers)),y=hist,xlabel = 'Post-stim classifier output',ylabel='',xlabel_fontsize=20,
+                         bar_width=1./float(len(bin_centers)),x_tick_labels=['{:2.2f}'.format(x) for x in bin_centers],
+                         )
+        panel_plot.add_plot_data(0,1,plot_data=pd)
+
+        plt = panel_plot.generate_plot()
+
+        figname = self.get_path_to_resource_in_workspace('reports/'+self.pipeline.subject+'-biomarker-histograms.pdf')
+        plt.savefig(figname,dpi=300,bboxinches='tight')
+        self.pass_object('BIOMARKER_HISTOGRAM',figname)
+        plt.close()
+
+        panel_plot = PanelPlot(xfigsize = 7, yfigsize=4,i_max=1,j_max=1)
+        delta_classifiers = post_stim_probs - pre_stim_probs
+        hist,bin_edges = np.histogram(delta_classifiers,bins = int(np.log2(post_stim_probs.size)+1))
+        pd = BarPlotData(x = range(len(bin_centers)),y=hist,xlabel = 'Change in classifier output (post minus pre)',ylabel='',xlabel_fontsize=20,
+                         bar_width=1./float(len(bin_centers)),x_tick_labels=['{:2.2f}'.format(x) for x in bin_centers],
+                         )
+        panel_plot.add_plot_data(0,0,plot_data=pd)
+        plt = panel_plot.generate_plot()
+        figname = self.get_path_to_resource_in_workspace('reports/'+self.pipeline.subject+'-delta-classifier-histograms.pdf')
+        plt.savefig(figname)
+        self.pass_object('delta_classifiers',figname)
+        plt.close()
+
 
         sessions = np.unique(fr5_events.session)
 
@@ -234,6 +279,8 @@ class GenerateTex(ReportRamTask):
         fr5_session_summary = self.get_passed_object('fr_session_summary')
         all_session_tex = ''
 
+        biomarker_histogram = self.get_passed_object('BIOMARKER_HISTOGRAM')
+
         if fr5_events is not None and all(fr5_events.shape):
 
             for session_summary in fr5_session_summary:
@@ -311,7 +358,8 @@ class GenerateTex(ReportRamTask):
                 '<FR5-PERM-P-VALUE>':fr5_perm_pvalue if fr5_perm_pvalue>0 else '<0.01',
                 '<FR5-JSTAT-THRESH>':fr5_jstat_thresh,
                 '<ROC_AND_TERC_PLOT_FILE>':self.get_passed_object('ROC_AND_TERC_PLOT_FILE'),
-                '<REPORT_PAGES>':all_session_tex
+                '<REPORT_PAGES>':all_session_tex,
+                '<BIOMARKER_HISTOGRAM>':biomarker_histogram,
             }
         )
         return fr5_tex
