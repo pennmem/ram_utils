@@ -139,7 +139,7 @@ class ComputeFR5Powers(ReportRamTask):
                 bp_data = bp_data.filtered([58,62], filt_type='stop', order=self.params.filt_order)
                 for ev in xrange(n_events):
                     self.wavelet_transform.multiphasevec(bp_data[ev][0:winsize], pow_ev)
-                    pow_ev_stripped = np.reshape(pow_ev, (n_freqs,winsize))[:,bufsize:winsize-bufsize]
+                    pow_ev_stripped = np.reshape(pow_ev, (n_freqs,winsize))[:,bufsize:winsize-bufsize]+np.finfo(np.float).eps/2
                     pow_zeros = np.where(pow_ev_stripped==0.0)[0]
                     if len(pow_zeros)>0:
                         print bp, ev
