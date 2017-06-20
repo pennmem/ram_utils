@@ -41,7 +41,7 @@ $\bullet$ Median of classifier output = $<FR5-JSTAT-THRESH>$
 <REPORT_PAGES>
 
 \clearpage
-\subsection*{Quality Control}
+\subsection*{Data Quality Metrics}
 \begin{figure}[!h]
 \centering
 \includegraphics[scale=0.5]{<BIOMARKER_HISTOGRAM>}

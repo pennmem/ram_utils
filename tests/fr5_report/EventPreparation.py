@@ -119,9 +119,9 @@ class FR5EventPreparation(ReportRamTask):
                                 ).view(np.recarray)
 
 
+        events = events[events.list>-1]
 
         self.pass_object('all_events', events)
-        events = events[events.list>-1]
 
         if not (events.type=='WORD').any():
             raise MissingEventError('No events found that are valid for analysis')

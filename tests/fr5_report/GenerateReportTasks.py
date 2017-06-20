@@ -66,20 +66,21 @@ class GeneratePlots(ReportRamTask):
 
         # pre-stim
         pre_stim_probs = self.get_passed_object('pre_stim_probs')
-        hist,bin_edges = np.histogram(pre_stim_probs,bins = int(np.log2(pre_stim_probs.size)+1),)
-        bin_centers = np.diff(bin_edges)+bin_edges[:-1]
-        pd = BarPlotData(x = range(len(bin_centers)),y=hist,xlabel = 'Pre-stim classifier output',ylabel='',xlabel_fontsize=20,
-                         bar_width=1./float(len(bin_centers)),x_tick_labels=['{:2.2f}'.format(x) for x in bin_centers],
-                         ylim=[0, len(pre_stim_probs)])
+        hist,bin_edges = np.histogram(pre_stim_probs,range=[np.round(pre_stim_probs.min(),1),np.round(pre_stim_probs.max(),1)])
+        x_tick_labels = ['{:.2f}-\n{:.2f}'.format(x, y) for (x, y) in zip(bin_edges[:-1], bin_edges[1:])]
+        pd = BarPlotData(x = np.arange(len(hist))-0.25,y=hist,xlabel = 'Pre-stim classifier output',ylabel='',xlabel_fontsize=20,
+                         x_tick_labels=x_tick_labels,
+                         ylim=[0, len(pre_stim_probs)/2])
         panel_plot.add_plot_data(0,0,plot_data=pd)
 
         # post-stim
         post_stim_probs = self.get_passed_object('post_stim_probs')
-        hist,bin_edges = np.histogram(post_stim_probs,bins = int(np.log2(post_stim_probs.size)+1),)
-        bin_centers = np.diff(bin_edges)+bin_edges[:-1]
-        pd = BarPlotData(x = range(len(bin_centers)),y=hist,xlabel = 'Post-stim classifier output',ylabel='',xlabel_fontsize=20,
-                         bar_width=1./float(len(bin_centers)),x_tick_labels=['{:2.2f}'.format(x) for x in bin_centers],
-                         ylim =[0,len(post_stim_probs)])
+        hist,bin_edges = np.histogram(post_stim_probs,range=[np.round(post_stim_probs.min(),1),np.round(post_stim_probs.max(),1)])
+        x_tick_labels= ['{:.2f}-\n{:.2f}'.format(x, y) for (x, y) in zip(bin_edges[:-1], bin_edges[1:])]
+
+        pd = BarPlotData(x = np.arange(len(hist))-0.25,y=hist,xlabel = 'Post-stim classifier output',ylabel='',xlabel_fontsize=20,
+                         x_tick_labels=x_tick_labels,
+                         ylim =[0,len(post_stim_probs)/2])
         panel_plot.add_plot_data(0,1,plot_data=pd)
 
         plt = panel_plot.generate_plot()
@@ -92,10 +93,10 @@ class GeneratePlots(ReportRamTask):
         # delta classifier
         panel_plot = PanelPlot(xfigsize = 7, yfigsize=5,i_max=1,j_max=1)
         delta_classifiers = post_stim_probs - pre_stim_probs
-        hist,bin_edges = np.histogram(delta_classifiers,bins = int(np.log2(post_stim_probs.size)+1))
-        pd = BarPlotData(x = range(len(bin_centers)),y=hist,xlabel = 'Change in classifier output (post minus pre)',ylabel='',xlabel_fontsize=20,
-                         bar_width=1./float(len(bin_centers)),x_tick_labels=['{:2.2f}'.format(x) for x in bin_centers],
-                         ylim=[0, len(post_stim_probs)])
+        hist,bin_edges = np.histogram(delta_classifiers,range=[np.round(delta_classifiers.min(),1),np.round(delta_classifiers.max(),1)])
+        x_tick_labels = ['{:.2f}-\n{:.2f}'.format(x,y) for (x,y) in zip(bin_edges[:-1],bin_edges[1:])]
+        pd = BarPlotData(x = np.arange(len(hist))-0.25,y=hist,xlabel = 'Change in classifier output (post minus pre)',ylabel='',xlabel_fontsize=20,
+                         x_tick_labels=x_tick_labels,ylim=[0, len(post_stim_probs)/2])
         panel_plot.add_plot_data(0,0,plot_data=pd)
         plt = panel_plot.generate_plot()
         figname = self.get_path_to_resource_in_workspace('reports/'+self.pipeline.subject+'-delta-classifier-histograms.pdf')
