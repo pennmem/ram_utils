@@ -48,4 +48,10 @@ $\bullet$ Median of classifier output = $<FR5-JSTAT-THRESH>$
 \caption{Classifier output distribution pre- and post-stimulation}
 \end{figure}
 
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.5]{<DELTA_CLASSIFIER_HISTOGRAM>}
+\caption{Distribution of change in classifier output}
+\end{figure}
+
 \end{document}

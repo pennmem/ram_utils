@@ -127,7 +127,8 @@ class EvaluateClassifier(ReportRamTask):
 
             print 'Perm test p-value = ', self.pvalue
 
-        pre_stim_probs = all_probs[(events.type=='WORD') & (events.phase=='STIM')]
+        pre_stim_probs = all_probs[(events.type=='WORD')] # Slight misnomer here; these are only pre-stim in *potential*,
+                                                          # rather than in fact. This will be corrected in ComputeFRStimTable
         post_stim_probs = all_probs[events.type=='STIM_OFF']
         self.pass_object(task+'_xval_output', self.xval_output)
         self.pass_object(task+'_perm_AUCs', self.perm_AUCs)
