@@ -23,6 +23,9 @@ from ComposeSessionSummary import ComposeSessionSummary
 
 from GenerateReportTasks import GeneratePlots, GenerateTex, GenerateReportPDF,DeployReportPDF
 
+from LoadEEG import LoadPostStimEEG
+
+
 from ptsa.data.readers.IndexReader import JsonIndexReader
 parser = CMLParser()
 # Default-ish args here
@@ -75,6 +78,11 @@ class Params(object):
         self.fr1_retrieval_end_time = 0.0
         self.fr1_retrieval_buf = 0.524
 
+        self.post_stim_start_time = 0.030
+        self.post_stim_end_time = 0.555
+        self.post_stim_buf = 0.524
+
+
         # self.retrieval_samples_weight = 0.5
         self.encoding_samples_weight =2.5
 
@@ -122,6 +130,8 @@ for subject in subjects:
     report_pipeline.add_task(ComputeFullClassifier(params=params,mark_as_completed=True))
 
     report_pipeline.add_task(ComputeFR5Powers(params=params,mark_as_completed=True))
+
+    report_pipeline.add_task(LoadPostStimEEG(params=params, mark_as_completed=True))
 
     report_pipeline.add_task(EvaluateClassifier(params=params,mark_as_completed=True))
 
