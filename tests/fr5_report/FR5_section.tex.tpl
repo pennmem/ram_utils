@@ -41,17 +41,22 @@ $\bullet$ Median of classifier output = $<FR5-JSTAT-THRESH>$
 <REPORT_PAGES>
 
 \clearpage
-\subsection*{Data Quality Metrics}
+\section*{Data Quality Metrics}
+\subsection*{Biomarker Distributions}
 \begin{figure}[!h]
 \centering
 \includegraphics[scale=0.5]{<BIOMARKER_HISTOGRAM>}
-\caption{Classifier output distribution pre- and post-stimulation}
 \end{figure}
 
 \begin{figure}[!h]
 \centering
 \includegraphics[scale=0.5]{<DELTA_CLASSIFIER_HISTOGRAM>}
-\caption{Distribution of change in classifier output}
+\end{figure}
+\subsection*{EEG data}
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.5]{<POST_STIM_EEG>}
+\caption*{Voltage during the post-stimulation period,averaged across trials.}
 \end{figure}
 
 \end{document}

@@ -105,6 +105,20 @@ class GeneratePlots(ReportRamTask):
         plt.close()
 
 
+        post_stim_eeg = self.get_passed_object('post_stim_eeg')
+        plt.figure(figsize=(9,5.5))
+        plt.imshow(post_stim_eeg,cmap='bwr',aspect='auto',origin='lower')
+        cbar = plt.colorbar()
+        plt.clim([-500,500])
+        plt.xlabel('Time (ms)')
+        plt.ylabel('Channel (bipolar reference)')
+        cbar.set_label('Avg voltage ($\mu$V)')
+
+        figname = self.get_path_to_resource_in_workspace(join('reports',self.pipeline.subject+'-post-stim-eeg.pdf'))
+        plt.savefig(figname)
+        self.pass_object('post_stim_eeg_plot',figname)
+        plt.close()
+
         sessions = np.unique(fr5_events.session)
 
         serial_positions = np.arange(1, 13)
@@ -362,7 +376,8 @@ class GenerateTex(ReportRamTask):
                 '<ROC_AND_TERC_PLOT_FILE>':self.get_passed_object('ROC_AND_TERC_PLOT_FILE'),
                 '<REPORT_PAGES>':all_session_tex,
                 '<BIOMARKER_HISTOGRAM>':biomarker_histogram,
-                '<DELTA_CLASSIFIER_HISTOGRAM>':self.get_passed_object('delta_classifier_histogram')
+                '<DELTA_CLASSIFIER_HISTOGRAM>':self.get_passed_object('delta_classifier_histogram'),
+                '<POST_STIM_EEG>':self.get_passed_object('post_stim_eeg_plot')
             }
         )
         return fr5_tex

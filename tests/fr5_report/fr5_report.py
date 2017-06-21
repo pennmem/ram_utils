@@ -75,6 +75,7 @@ class Params(object):
 
 
 params=Params()
+from LoadEEG import LoadPostStimEEG
 
 from EventPreparation import FR1EventPreparation,FR5EventPreparation
 
@@ -113,6 +114,8 @@ report_pipeline.add_task(ComputeFRPowers(params=params,mark_as_completed=True))
 # report_pipeline.add_task(ComputeClassifier(params=params,mark_as_completed=True))
 
 report_pipeline.add_task(ComputeFullClassifier(params=params,mark_as_completed=True))
+
+report_pipeline.add_task(LoadPostStimEEG(params=params,mark_as_completed=True))
 
 report_pipeline.add_task(ComputeFR5Powers(params=params,mark_as_completed=True))
 
