@@ -92,6 +92,8 @@ class FR1EventPreparation(ReportRamTask):
 
         events = np.hstack((fr1_events,catfr1_events)).view(np.recarray)
 
+        events = events[events.list>-1]
+
         events = create_baseline_events(events, start_time=1000, end_time=29000)
 
 
