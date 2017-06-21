@@ -105,7 +105,7 @@ for subject in subjects:
         if montage != '0':
             subject = '%s_%s'%(subject,montage)
 # sets up processing pipeline
-    report_pipeline = ReportPipeline(subject=subject, task=args.task,experiment=args.task,
+    report_pipeline = ReportPipeline(subject=subject, task=args.task,experiment=args.task,mount_point=args.mount_point,
                                      workspace_dir=os.path.join(args.workspace_dir,subject), exit_on_no_change=args.exit_on_no_change,
                                      recompute_on_no_status=args.recompute_on_no_status)
 
