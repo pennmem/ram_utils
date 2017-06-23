@@ -53,10 +53,12 @@ $\bullet$ Median of classifier output = $<FR5-JSTAT-THRESH>$
 \includegraphics[scale=0.5]{<DELTA_CLASSIFIER_HISTOGRAM>}
 \end{figure}
 \subsection*{EEG data}
+\vspace{-1cm}
 \begin{figure}[!h]
 \centering
 \includegraphics[scale=0.5]{<POST_STIM_EEG>}
-\caption*{Voltage during the post-stimulation period,averaged across trials.}
+\caption*{Voltage during the post-stimulation period,averaged across trials.\\
+          Voltages beyond +-500 $\mu$V not shown.}
 \end{figure}
 
 \end{document}
