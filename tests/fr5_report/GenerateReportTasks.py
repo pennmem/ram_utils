@@ -104,6 +104,7 @@ class GeneratePlots(ReportRamTask):
         self.pass_object('delta_classifier_histogram',figname)
         plt.close()
 
+        # Post stim EEG plot
 
         post_stim_eeg = self.get_passed_object('post_stim_eeg')
         plt.figure(figsize=(9,5.5))
@@ -142,7 +143,7 @@ class GeneratePlots(ReportRamTask):
             panel_plot.add_plot_data_collection(0,1,plot_data_collection=pdcb)
             plot = panel_plot.generate_plot()
             plot.legend()
-            plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-split_prob_recall_plot_' + session_summary.STIMTAG + '_' + str(session_summary.frequency) + '.pdf')
+            plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-split_prob_recall_plot_' + session_summary.stimtag + '_' + str(session_summary.frequency) + '.pdf')
             plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
             session_summary.PROB_RECALL_PLOT_FILE = plot_out_fname
 
@@ -161,7 +162,7 @@ class GeneratePlots(ReportRamTask):
 
             plot = panel_plot.generate_plot()
 
-            session_summary.STIM_VS_NON_STIM_HALVES_PLOT_FILE = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-stim_vs_non_stim_halves_plot_' + session_summary.STIMTAG + '_' + str(session_summary.frequency) + '.pdf')
+            session_summary.STIM_VS_NON_STIM_HALVES_PLOT_FILE = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-stim_vs_non_stim_halves_plot_' + session_summary.stimtag + '_' + str(session_summary.frequency) + '.pdf')
 
             plot.savefig(session_summary.STIM_VS_NON_STIM_HALVES_PLOT_FILE, dpi=300, bboxinches='tight')
 
@@ -232,7 +233,7 @@ class GeneratePlots(ReportRamTask):
             plot = panel_plot.generate_plot()
 
             session_summary.STIM_AND_RECALL_PLOT_FILE = self.get_path_to_resource_in_workspace(
-                'reports/' + task + '-' + subject + '-stim_and_recall_plot_' + session_summary.STIMTAG + '-' + str(
+                'reports/' + task + '-' + subject + '-stim_and_recall_plot_' + session_summary.stimtag + '-' + str(
                     session_summary.frequency) + '.pdf')
 
             plot.savefig(session_summary.STIM_AND_RECALL_PLOT_FILE, dpi=300, bboxinches='tight')
@@ -242,7 +243,7 @@ class GeneratePlots(ReportRamTask):
                           xlabel='Serial Position',ylabel='Probability of stim',color='black')
             panel_plot.add_plot_data(0,0,plot_data=pd)
             plot = panel_plot.generate_plot()
-            session_summary.PROB_STIM_PLOT_FILE = self.get_path_to_resource_in_workspace('reports/'+subject+'p_stim_plot_'+session_summary.STIMTAG+'-'+str(session_summary.frequency)+'.pdf')
+            session_summary.PROB_STIM_PLOT_FILE = self.get_path_to_resource_in_workspace('reports/'+subject+'p_stim_plot_'+session_summary.stimtag+'-'+str(session_summary.frequency)+'.pdf')
             plot.savefig(session_summary.PROB_STIM_PLOT_FILE,dpi=300,bboxinches='tight')
 
 

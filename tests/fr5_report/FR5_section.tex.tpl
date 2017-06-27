@@ -57,8 +57,8 @@ $\bullet$ Median of classifier output = $<FR5-JSTAT-THRESH>$
 \begin{figure}[!h]
 \centering
 \includegraphics[scale=0.5]{<POST_STIM_EEG>}
-\caption*{Voltage during the post-stimulation period,averaged across trials.\\
-          Voltages beyond +-500 $\mu$V not shown.}
+\caption*{Voltage during the post-stimulation period, averaged across trials.\\
+          Voltages beyond +-500 $\mu$V not shown; voltages between -20 and 20 $mu$V are in white.}
 \end{figure}
 
 \end{document}

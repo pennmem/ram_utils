@@ -4,6 +4,8 @@ from ptsa.data.filters import MonopolarToBipolarMapper
 from sklearn.externals import joblib
 from ptsa.data.readers.IndexReader import JsonIndexReader
 import hashlib,os
+import numpy as np
+from matplotlib.colorbar import colorbar_doc
 
 class LoadPostStimEEG(ReportRamTask):
     def __init__(self,params,**kwargs):
@@ -45,6 +47,8 @@ class LoadPostStimEEG(ReportRamTask):
         eeg = eeg.filtered([58.,62.])
         eeg = MonopolarToBipolarMapper(time_series=eeg,bipolar_pairs=pairs).filter()
         eeg = eeg.mean(dim='events').data
+        eeg[np.abs(eeg)<5]=np.nan
+
 
         self.pass_object('post_stim_eeg',eeg)
         joblib.dump(eeg,self.get_path_to_resource_in_workspace('post_stim_eeg.pkl'))
