@@ -98,26 +98,36 @@ class ComputeFRStimTable(ReportRamTask):
         is_ps4_session = np.in1d(events.session,ps_sessions)
 
 
-        j = 0
         sessions = np.unique(events.session)
-        all_sess_events = all_events[np.in1d(all_events.session,sessions) & ((all_events.phase=='STIM')
+        all_events = all_events[np.in1d(all_events.session,sessions) & ((all_events.phase=='STIM')
                                                                              | (all_events.phase=='NON-STIM')
                                                                              | (all_events.phase=='BASELINE')
                                                                              | (all_events.phase=='PRACTICE'))]
-        n_stims = (all_sess_events.type=='STIM_ON').sum()
-        n_stim_off = (all_sess_events.type=='STIM_OFF').sum()
-        n_words = (all_sess_events.type=='WORD').sum()
-        for i,ev in enumerate(all_sess_events):
-            if ev.type=='WORD':
-                if ((all_sess_events[i+1].type=='STIM_ON')
-                        or (all_sess_events[i+1].type=='WORD_OFF' and
-                                (all_sess_events[i+2].type=='STIM_ON' or (all_sess_events[i+2].type=='DISTRACT_START'
-                                                                          and all_sess_events[i+3].type=='STIM_ON')))):
-                    is_stim_item[j] = True
-                if ( (all_sess_events[i-1].type=='STIM_OFF') or (all_sess_events[i+1].type=='STIM_OFF')
-                     or (all_sess_events[i-2].type=='STIM_OFF' and all_sess_events[i-1].type=='WORD_OFF')):
-                    is_post_stim_item[j] = True
-                j += 1
+        n_stims = (all_events.type=='STIM_ON').sum()
+        n_stim_off = (all_events.type=='STIM_OFF').sum()
+        n_words = (all_events.type=='WORD').sum()
+        for session in np.unique(all_events.session):
+            all_sess_events = all_events[all_events.session==session]
+            for lst in np.unique(all_sess_events.list):
+                all_lst_events= all_sess_events[all_sess_events.list==lst]
+                lst_stim_words = np.zeros(len(all_lst_events[all_lst_events.type == 'WORD']))
+                lst_post_stim_words = np.zeros(len(all_lst_events[all_lst_events.type == 'WORD']))
+                j = 0
+                for i,ev in enumerate(all_lst_events):
+                    if ev.type=='WORD':
+                        if ((all_lst_events[i+1].type=='STIM_ON')
+                                or (all_lst_events[i+1].type=='WORD_OFF' and
+                                        (all_lst_events[i+2].type=='STIM_ON' or (all_lst_events[i+2].type=='DISTRACT_START'
+                                                                                  and all_lst_events[i+3].type=='STIM_ON')))):
+                            lst_stim_words[j] = True
+                        if ( (all_lst_events[i-1].type=='STIM_OFF') or (all_lst_events[i+1].type=='STIM_OFF')
+                             or (all_lst_events[i-2].type=='STIM_OFF' and all_lst_events[i-1].type=='WORD_OFF')):
+                            lst_post_stim_words[j] = True
+                        j += 1
+                lst_mask = (events.session==session) & (events.list==lst)
+                is_stim_item[lst_mask]=lst_stim_words
+                is_post_stim_item[lst_mask]=lst_post_stim_words
+
 
         self.fr_stim_table = pd.DataFrame()
         self.fr_stim_table['item'] = events.item_name
