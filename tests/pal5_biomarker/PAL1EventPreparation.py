@@ -165,6 +165,8 @@ class PAL1EventPreparation(RamTask):
         """
 
         rec_evs = evs[evs.type == 'TEST_PROBE']
+        if not len(rec_evs):
+            rec_evs = evs[evs.type=='PROBE_START']
 
         incorrect_has_response_mask = (rec_evs.RT != -999) & (rec_evs.correct == 0)
         incorrect_no_response_mask = rec_evs.RT == -999
@@ -297,9 +299,14 @@ class PAL1EventPreparation(RamTask):
 
         json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
 
-        event_files = sorted(
-            list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='PAL1')))
+        if not self.pipeline.args.sessions:
+            event_files = sorted(
+                list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='PAL1')))
+        else:
+            event_files = [json_reader.get_value('task_events',subject=subj_code,montage=montage,experiment='PAL1',
+                                                 session=s) for s in sorted(self.pipeline.args.sessions)]
         events = None
+
 
         trivial_rec_events = None
 

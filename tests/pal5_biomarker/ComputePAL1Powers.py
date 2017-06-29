@@ -109,7 +109,7 @@ class ComputePAL1Powers(RamTask):
                                                              params.pal1_retrieval_end_time, params.pal1_retrieval_buf,
                                                              params.freqs, params.log_powers)
 
-        events =  np.concatenate(encoding_events,retrieval_events)
+        events =  np.concatenate([encoding_events,retrieval_events]).view(np.recarray)
         events.sort(order=['session','list','mstime'])
         is_encoding_event  = (events.type=='PRACTICE_PAIR') | (events.type=='STUDY_PAIR')
         self.pass_object('PAL1_events',events)
