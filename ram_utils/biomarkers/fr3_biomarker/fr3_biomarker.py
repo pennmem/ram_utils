@@ -60,7 +60,7 @@ class StimParams(object):
         self.trainCount = 1
 
 class Params(object):
-    def __init__(self):
+    def __init__(self,args):
         self.version = '2.00'
 
         self.include_fr1 = True
@@ -97,8 +97,7 @@ class Params(object):
         )
 
 def make_biomarker(args):
-    params = Params()
-
+    params = Params(args)
 
     report_pipeline = ReportPipeline(subject=args.subject,
                                            workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point)

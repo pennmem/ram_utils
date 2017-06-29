@@ -146,6 +146,13 @@ class ReportPipeline(RamPipeline):
 
 
 def make_biomarker(args):
+    try:
+        args.min_amplitudes = [args.min_amplitude_1, args.min_amplitude_2]
+        args.max_amplitudes = [args.max_amplitude_1, args.max_amplitude_2]
+    except AttributeError:
+        args.min_amplitudes = [args.min_amplitude]
+        args.max_amplitudes = [args.max_amplitude]
+
     params = Params()
 
     report_pipeline = ReportPipeline(subject=args.subject,

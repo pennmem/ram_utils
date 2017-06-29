@@ -125,7 +125,7 @@ def make_biomarker(args_obj):
 
     report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
     #
-    report_pipeline.add_task(ComputePowers(params=params, mark_as_completed=(True & args_obj.allow_fast_rerun)))
+    report_pipeline.add_task(ComputePowers(params=params, mark_as_completed=(True)))
 
     # report_pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=False))
     #
@@ -138,7 +138,7 @@ def make_biomarker(args_obj):
     #
     # report_pipeline.add_task(LogResults(params=params, mark_as_completed=False, log_filename=log_filename))
     #
-    report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=(True & args_obj.allow_fast_rerun)))
+    report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=(True )))
 
     # starts processing pipeline
     report_pipeline.execute_pipeline()

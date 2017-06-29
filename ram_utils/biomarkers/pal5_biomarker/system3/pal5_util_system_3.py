@@ -82,10 +82,16 @@ class Params(object):
 
 
 
-def make_biomaker(args_obj):    # report_pipeline = ReportPipeline(subject=args.subject,
+def make_biomarker(args):    # report_pipeline = ReportPipeline(subject=args.subject,
     #                                  workspace_dir=join(args.workspace_dir, args.subject), mount_point=args.mount_point,
     #                                  args=args)
     params=Params()
+    try:
+        args.min_amplitudes = [args.min_amplitude_1, args.min_amplitude_2]
+        args.max_amplitudes = [args.max_amplitude_1, args.max_amplitude_2]
+    except AttributeError:
+        args.min_amplitudes = [args.min_amplitude]
+        args.max_amplitudes = [args.max_amplitude]
 
     class ReportPipeline(RamPipeline):
         def __init__(self, subject, workspace_dir, mount_point=None, args=None):
@@ -93,19 +99,19 @@ def make_biomaker(args_obj):    # report_pipeline = ReportPipeline(subject=args.
             self.subject = subject
             self.mount_point = mount_point
             self.set_workspace_dir(workspace_dir)
-            self.args = args_obj
+            self.args = args
 
-    log_filename = join(args_obj.workspace_dir,args_obj.subject,time.strftime('%Y_%m_%d')+'.csv')
-    report_pipeline = ReportPipeline(subject=args_obj.subject,
-                                     workspace_dir=join(args_obj.workspace_dir,
+    log_filename = join(args.workspace_dir, args.subject, time.strftime('%Y_%m_%d') + '.csv')
+    report_pipeline = ReportPipeline(subject=args.subject,
+                                     workspace_dir=join(args.workspace_dir,
                                         '{}_{}_{}_{}_{}_{}_{}_{}'.format(
-                                        args_obj.subject,args_obj.experiment,
-                                        args_obj.anodes[0],args_obj.cathodes[0],args_obj.max_amplitudes[0],
-                                        args_obj.anodes[1],args_obj.cathodes[1],args_obj.max_amplitudes[1]
+                                        args.subject,args.experiment,
+                                        args.anodes[0],args.cathodes[0],args.max_amplitudes[0],
+                                        args.anodes[1],args.cathodes[1],args.max_amplitudes[1]
                                         )
                                                         ),
-                                     mount_point=args_obj.mount_point,
-                                     args=args_obj)
+                                     mount_point=args.mount_point,
+                                     args=args)
 
     report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
 
@@ -119,7 +125,6 @@ def make_biomaker(args_obj):    # report_pipeline = ReportPipeline(subject=args.
     report_pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=True))
 
     report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
-
 
     report_pipeline.add_task(ComputeBiomarkerThreshold(params=params, mark_as_completed=True))
 

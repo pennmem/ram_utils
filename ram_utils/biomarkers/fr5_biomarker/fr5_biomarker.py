@@ -65,8 +65,8 @@ class StimParams(object):
         self.trainCount = 1
 
 class Params(object):
-    def __init__(self):
-        self.version = '2.00'
+    def __init__(self,args):
+        self.version = '5.00'
 
         self.include_fr1 = True
         self.include_catfr1 = True
@@ -112,7 +112,15 @@ class Params(object):
         )
 
 def make_biomarker(args):
-    params = Params()
+    try:
+        args.min_amplitudes = [args.min_amplitude_1, args.min_amplitude_2]
+        args.max_amplitudes = [args.max_amplitude_1, args.max_amplitude_2]
+    except AttributeError:
+        args.min_amplitudes = [args.min_amplitude]
+        args.max_amplitudes = [args.max_amplitude]
+        
+    
+    params = Params(args)
 
 
     class ReportPipeline(RamPipeline):

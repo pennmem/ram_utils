@@ -22,7 +22,7 @@ class CMLParser(object):
         self.parser.add_argument('--skip-subjects',dest='skip_subjects', nargs='+')
         self.parser.add_argument('--sessions',nargs='*',action='store',dest='sessions',type=int)
         self.parser.add_argument('--classifier',required=False,action='store')
-
+        self.parser.add_argument('--all-reports', action='store_true')
         self.arg_list=[]
         self.arg_count_threshold = arg_count_threshold
 
