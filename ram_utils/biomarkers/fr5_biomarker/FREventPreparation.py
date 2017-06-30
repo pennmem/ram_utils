@@ -68,18 +68,20 @@ class FREventPreparation(RamTask):
             event_files = [json_reader.get_value('task_events',subject=subj_code,montage=montage,experiment='FR1',session=s)
                              for s in sorted(fr1_sessions)]
             fr1_events = np.concatenate(
-                [BaseEventReader(filename=event_path).read() for event_path in event_files]).view(np.recarray)
+                [BaseEventReader(filename=str(event_path)).read() for event_path in event_files]).view(np.recarray)
             event_files = [json_reader.get_value('task_events',subject=subj_code,montage=montage,experiment='catFR1',session=s)
                            for s in sorted(catfr1_sessions)]
-            catfr1_events = [BaseEventReader(filename=event_path).read() for event_path in event_files]
+            catfr1_events = [BaseEventReader(filename=str(event_path)).read() for event_path in event_files]
 
         else:
             event_files = sorted(
                list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR1')))
+            for f in event_files:
+                print type(f)
             fr1_events = np.concatenate(
-                [BaseEventReader(filename=event_path).read() for event_path in event_files]).view(np.recarray)
+                [BaseEventReader(filename=str(event_path)).read() for event_path in event_files]).view(np.recarray)
 
-            catfr1_events = [BaseEventReader(filename=event_path).read() for event_path in
+            catfr1_events = [BaseEventReader(filename=str(event_path)).read() for event_path in
                                              json_reader.aggregate_values('task_events',subject=subj_code,experiment='catFR1',
                                                                           montage = montage)]
         if len(catfr1_events):

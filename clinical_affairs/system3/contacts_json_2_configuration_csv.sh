@@ -11,9 +11,9 @@ read -p "STIM PAIR[S]:" stim_pair
 
 contacts_json="/protocols/r1/subjects/${subject}/localizations/${localization}/montages/${montage}/neuroradiology/current_processed/contacts.json"
 #contacts_json_output_dir="/home1/leond"
-read -p "Output Directory:" contacts_json_output_dir
+read -p "Output Directory: " contacts_json_output_dir
 
-if [ -z $stim_pair ]
+if [ -z ${stim_pair} ]
 then
    stim_command=""
 else
@@ -23,7 +23,7 @@ fi
 cd ../../
 pwd
 echo "---------------"
-python system_3_utils/odin_config_tool_generator.py\
+python ram_utils/system_3_utils/odin_config_tool_generator.py\
  --subject=$subject\
  --contacts-json-output-dir=$contacts_json_output_dir\
  ${stim_command}

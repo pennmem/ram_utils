@@ -16,6 +16,9 @@ from .pal5_biomarker.system3 import pal5_util_system_3
 from .ps4_pal5_biomarker.system3 import ps4_pal5_util_system_3
 from .th3_biomarker import th3_biomarker
 
+from ..system_3_utils.ram_tasks.CMLParserClosedLoop5 import CMLParserCloseLoop5
+from ..system_3_utils.ram_tasks.CMLParserClosedLoop3 import CMLParserCloseLoop3
+
 biomarker_scripts = {
     'FR3': fr3_biomarker,
     'FR5': fr5_biomarker,
@@ -34,6 +37,11 @@ experiment_config_scripts = {
     'PS4_PAL5': ps4_pal5_util_system_3
 }
 
+def biomarker_parser(experiment):
+    if experiment.endswith('3'):
+        return CMLParserCloseLoop3()
+    elif experiment.endswith('5'):
+        return CMLParserCloseLoop5()
 
 def system_to_method(system):
     if system=='2':
@@ -76,14 +84,14 @@ def get_arg_completer(argument,args):
     if argument in path_arguments:
         return completers.PathCompleter()
     elif 'anode' in argument or 'cathode' in argument:
-        split_subject = args.subject.split('_')
+        split_subject = args['subject'].split('_')
         subject = split_subject[0]
         montage = 0 if len(split_subject)==1 else split_subject[-1]
-        jr = IndexReader.JsonIndexReader(path.join(args.mount_point,'protocols','r1.json'))
+        jr = IndexReader.JsonIndexReader(path.join(args['mount_point'],'protocols','r1.json'))
         with open(jr.get_value('contacts',subject=subject,montage=montage)) as cfid:
             contacts = json.load(cfid)[subject]['contacts']
         if 'num' in argument:
-            completions = [unicode(contacts[args.anode if 'anode' in argument else args.cathode]['channel'])]
+            completions = [unicode(contacts[args['anode'] if 'anode' in argument else args['cathode']]['channel'])]
         else:
             completions = sorted(contacts.keys())
         return completers.WordCompleter(completions)
@@ -93,11 +101,24 @@ def get_args(system_no,experiment,args):
     args_list = (u'mount_point',)+ args_dict[(system_no,experiment)] + (u'workspace_dir',u'sessions')
     anode_args = [x for x in args_list if 'anode' in x]
     cathode_args = [x for x in args_list if 'cathode' in x]
+    parser = biomarker_parser(experiment)
     for argument in args_list:
-        arg_val = prompt_toolkit.prompt(unicode(argument.upper().replace('_',' ')+': '),completer=get_arg_completer(argument,args))
-        args.__setattr__(argument,str(arg_val))
-    args.anodes = [args.__getattribute__(k) for k in anode_args]
-    args.cathodes = [args.__getattribute__(k) for k in cathode_args]
+        arg_val = prompt_toolkit.prompt(unicode(argument.upper().replace('_', ' ') + ': '),
+                                        completer=get_arg_completer(argument, args))
+        args[argument] = arg_val
+        if argument not in anode_args+cathode_args and arg_val and not any([s in argument for s in ['min','max']]):
+            parser.arg('--%s'%argument.replace('_','-'),arg_val)
+    if 'min_amplitude_1' in args:
+        parser.arg('--min-amplitudes',args['min_amplitude_1'],args['min_amplitude_2'])
+        parser.arg('--max-amplitudes',args['max_amplitude_1'],args['max_amplitude_2'])
+    for a in ('subject', 'experiment'):
+        parser.arg('--%s'%a,args[a])
+    if experiment.endswith('5') and 'target_amplitude' not in args_list:
+        parser.arg('--target-amplitude','1.0')
+    parsed_args = parser.parse()
+    parsed_args.anodes = [args[k] for k in anode_args]
+    parsed_args.cathodes = [args[k] for k in cathode_args]
+    return parsed_args
 
 def load_args_from_file(file_path):
     with open(file_path) as jsn_file:
@@ -116,11 +137,31 @@ def main():
     system_no = prompt_toolkit.prompt(u'System #: ',completer=system_completer)
     experiment = prompt_toolkit.prompt(u'Experiment: ', completer=get_experiment_completer(system_no))
     subject = prompt_toolkit.prompt(u'Subject: ')
-    args = Args()
-    args.subject = subject
-    args.task = experiment
-    args.experiment = experiment
-    get_args(system_no,experiment,args)
+    args= {}
+    args['subject'] = subject
+    args['task']= experiment
+    args['experiment'] = experiment
+    parsed_args = get_args(system_no,experiment,args)
     if system_no == '3':
-        args.task = args.task.replace('cat','Cat')
-    system_to_method(system_no)[experiment].make_biomarker(args)
+        parsed_args.experiment = parsed_args.experiment.replace('cat','Cat')
+    system_to_method(system_no)[experiment].make_biomarker(parsed_args)
+
+
+def try_pal5():
+    class obj(object):
+        pass
+    args=obj()
+    args.subject='R1312N'
+    args.experiment='PAL5'
+    args.stim_anode = 'G10'
+    args.stim_cathode = 'G11'
+    args.anode2 = 'G11'
+    args.cathode2 = 'G12'
+    args.anodes=[args.stim_anode,args.anode2]
+    args.cathodes=[args.stim_cathode,args.cathode2]
+    args.target_amplitude=1.0
+    args.workspace_dir = '/Users/leond'
+    args.mount_point='/Volumes/rhino_root'
+    args.min_amplitude=args.max_amplitude=0.5
+    args.sessions=[]
+    pal5_util_system_3.make_biomarker(args)

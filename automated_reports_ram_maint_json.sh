@@ -47,6 +47,7 @@ function remove_old_error_logs {
 }
 
 
+reports=(FR1 catFR1 FR1_catFR1_joint FR3 catFR3 FR3_catFR3_joint FR5 catFR5 PAL1 PAL3 PAL5 TH1 TH3 THR1 PS4)
 
 current_directory=$(pwd)
 
@@ -76,8 +77,48 @@ else
 fi
 #lockfile -r 0 ${automated_reports_dir}/automated_reports.lock || exit 1
 
+cd /home2/RAM_maint/RAM_UTILS_GIT
+
+function run_report{
+
+    workspace_dir=${automated_reports_dir}/${1}
+    status_output_dir=${workspace_dir}/${datetime}
+    status_output_dirs+=(${status_output_dir})
+
+    remove_old_status_dirs ${workspace_dir}
+
+    python -m ram_utils.reports --all-reports --task=$1 --recompute-on-on-status ${exit_on_no_change_flag} \
+    --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir}
+
+}
+
+
+for report in ${reports[@]}:
+    do
+    run_report ${report}
+    done
+
+
+python /home2/RAM_maint/RAM_UTILS_GIT/ReportUtils/ReportMailer.py\
+ --status-output-dirs ${status_output_dirs[@]} --error-log-file=${automated_reports_dir}/error_logs/${datetime}.error.txt
+
+
+#removing old error logs
+cd ${automated_reports_dir}/error_logs
+remove_old_error_logs
+
+
+cd ${current_directory}
+
+# removing lockfile
+rm -f ${LOCKFILE}
+
+
 
 #PS4
+
+
+
 report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/ps4_report
 cd ${report_code_dir}
 
@@ -444,16 +485,3 @@ python ${report_code_dir}/th1_report_all.py  --task=TH1\
 #python /home2/RAM_maint/RAM_UTILS_GIT/tests/ps_ttest_table/ttest_table_with_params.py --workspace-dir=${automated_reports_dir}
 
 
-python /home2/RAM_maint/RAM_UTILS_GIT/ReportUtils/ReportMailer.py\
- --status-output-dirs ${status_output_dirs[@]} --error-log-file=${automated_reports_dir}/error_logs/${datetime}.error.txt
-
-
-#removing old error logs
-cd ${automated_reports_dir}/error_logs
-remove_old_error_logs
-
-
-cd ${current_directory}
-
-# removing lockfile
-rm -f ${LOCKFILE}

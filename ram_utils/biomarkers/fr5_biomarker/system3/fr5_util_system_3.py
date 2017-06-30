@@ -150,13 +150,17 @@ def make_biomarker(args):
         args.min_amplitudes = [args.min_amplitude_1, args.min_amplitude_2]
         args.max_amplitudes = [args.max_amplitude_1, args.max_amplitude_2]
     except AttributeError:
+        args.min_amplitude = 0.01
+        args.max_amplitude = args.target_amplitude+0.1
         args.min_amplitudes = [args.min_amplitude]
         args.max_amplitudes = [args.max_amplitude]
 
     params = Params()
 
+    workspace_dir = join(args.workspace_dir,args.subject,args.experiment)
+
     report_pipeline = ReportPipeline(subject=args.subject,
-                                           workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point, args=args)
+                                           workspace_dir=workspace_dir, mount_point=args.mount_point, args=args)
 
     report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
 

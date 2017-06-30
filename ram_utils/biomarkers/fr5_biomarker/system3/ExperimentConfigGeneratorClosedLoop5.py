@@ -84,7 +84,6 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
 
         config_name = self.get_passed_object('config_name')
         subject = self.pipeline.subject.split('_')[0]
-        stim_frequency = self.pipeline.args.pulse_frequency
         stim_amplitude = self.pipeline.args.target_amplitude
         bipolar_pairs_path = self.get_passed_object('bipolar_pairs_path')
         classifier_path = self.get_passed_object('classifier_path')
