@@ -21,8 +21,11 @@ from ReportUtils import ReportSummaryInventory
 
 
 from PAL1EventPreparation import PAL1EventPreparation
-
+from PAL1EventPreparationWithRecall import PAL1EventPreparationWithRecall
+from CombinedEventPreparation import CombinedEventPreparation
+from FREventPreparationWithRecall import FREventPreparationWithRecall
 from ComputePAL1Powers import ComputePAL1Powers
+from ComputePowersWithRecall import ComputePowersWithRecall
 
 from MontagePreparation import MontagePreparation
 
@@ -31,6 +34,11 @@ from ComputePAL1HFPowers import ComputePAL1HFPowers
 from ComputeTTest import ComputeTTest
 
 from ComputeClassifier import ComputeClassifier
+
+from ComputeClassifierWithRecall import ComputeClassifierWithRecall
+
+from ComputeClassifierWithRecall import ComputePAL1Classifier
+
 
 from ComposeSessionSummary import ComposeSessionSummary
 
@@ -106,17 +114,29 @@ for subject in subjects:
         workspace_dir=join(args.workspace_dir, subject)
     )
 
-    report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
-
     report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
 
+    report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
+
+    report_pipeline.add_task(PAL1EventPreparationWithRecall(mark_as_completed=False))
+
+    report_pipeline.add_task(FREventPreparationWithRecall(mark_as_completed=False))
+
+    report_pipeline.add_task(CombinedEventPreparation(mark_as_completed=False))
+
     report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=True))
+
+    report_pipeline.add_task(ComputePowersWithRecall(params=params, mark_as_completed=True))
 
     report_pipeline.add_task(ComputePAL1HFPowers(params=params, mark_as_completed=True))
 
     report_pipeline.add_task(ComputeTTest(params=params, mark_as_completed=False))
 
     report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
+
+    report_pipeline.add_task(ComputeClassifierWithRecall(params=params, mark_as_completed=False))
+
+    report_pipeline.add_task(ComputePAL1Classifier(params=params, mark_as_completed=False))
 
     report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
 
@@ -125,8 +145,6 @@ for subject in subjects:
     report_pipeline.add_task(GenerateTex(mark_as_completed=False))
 
     report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
-
-    report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
 
     report_pipeline.execute_pipeline()
 
