@@ -44,9 +44,9 @@ class LoadPostStimEEG(ReportRamTask):
         eeg = EEGReader(events=events,channels=channels,
                         start_time=self.params.post_stim_start_time,
                         end_time=self.params.post_stim_end_time+0.25,).read()
-        samplerate = eeg.attrs['samplerate']
+        samplerate = eeg['samplerate']
         eeg = eeg.filtered([58.,62.])
-        eeg.attrs['samplerate']=samplerate
+        eeg['samplerate']=samplerate
         eeg = MonopolarToBipolarMapper(time_series=eeg,bipolar_pairs=pairs).filter()
         eeg = eeg.mean(dim='events').data
         eeg[np.abs(eeg)<5]=np.nan
