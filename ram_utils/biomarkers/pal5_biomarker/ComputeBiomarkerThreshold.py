@@ -142,6 +142,7 @@ class ComputeBiomarkerThreshold(RamTask):
             # transposing so that event axis is first, and time axis is last
 
             retrieval_wavelet_pow_mat = retrieval_wavelet_pow_mat.transpose(2, 1, 0, 3)
+            retrieval_wavelet_pow_mat += np.finfo(np.float).eps
             np.log10(retrieval_wavelet_pow_mat, out=retrieval_wavelet_pow_mat)
 
             sess_rec_start_events = rec_start_events[rec_start_events.session == sess]

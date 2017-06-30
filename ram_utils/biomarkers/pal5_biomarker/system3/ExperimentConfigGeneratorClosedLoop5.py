@@ -10,6 +10,8 @@ from ram_utils.RamPipeline import *
 
 
 class ExperimentConfigGeneratorClosedLoop5(RamTask):
+    PULSE_FREQUENCY = 200
+
     def __init__(self, params, mark_as_completed=False):
         RamTask.__init__(self, mark_as_completed)
 
@@ -77,11 +79,10 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
         electrode_config_file = abspath(self.pipeline.args.electrode_config_file)
         config_name = self.get_passed_object('config_name')
         subject = self.pipeline.subject.split('_')[0]
-        stim_frequency = self.pipeline.args.pulse_frequency
         stim_amplitude = self.pipeline.args.target_amplitude if 'PS4' not in self.pipeline.args.experiment else 'N/A'
         bipolar_pairs_path = self.get_passed_object('bipolar_pairs_path')
         classifier_path = self.get_passed_object('classifier_path')
-        stim_chan_label = self.get_passed_object('stim_chan_label')
+        # stim_chan_label = self.get_passed_object('stim_chan_label')
         excluded_pairs_path = self.get_passed_object('excluded_pairs_path')
         xval_full = self.get_passed_object('xval_output_all_electrodes')
         xval_output = self.get_passed_object('xval_output')
@@ -181,10 +182,9 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
 
 
         # zipping project_dir
-        zip_filename = '{subject}_{experiment}_{anode1}_{cathode1}_{maxamp1}_{anode2}_{cathode2}_{maxamp2}.zip'.format(
+        zip_filename = '{subject}_{experiment}_{anode1}_{cathode1}_{anode2}_{cathode2}_{amplitude}.zip'.format(
             subject=subject, experiment=experiment,
-            anode1=anodes[0],cathode1=cathodes[0],maxamp1=self.pipeline.args.max_amplitudes[0],
-            anode2=anodes[1],cathode2=cathodes[1],maxamp2=self.pipeline.args.max_amplitudes[1],
+            anode1=anodes[0],cathode1=cathodes[0],anode2=anodes[1],cathode2=cathodes[1],amplitude=self.pipeline.args.target_amplitude
         )
 
         zipf = zipfile.ZipFile(self.get_path_to_resource_in_workspace(zip_filename), 'w', zipfile.ZIP_DEFLATED)

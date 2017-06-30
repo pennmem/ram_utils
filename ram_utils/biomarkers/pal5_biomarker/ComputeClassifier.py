@@ -221,6 +221,7 @@ class ComputeClassifier(RamTask):
 
             outsample_probs = outsample_classifier.predict_proba(outsample_pow_mat)[:, 1]
             if not permuted:
+                print("Saving results for session %s"%sess)
                 self.xval_output[sess] = ModelOutput(outsample_recalls, outsample_probs)
                 self.xval_output[sess].compute_roc()
                 self.xval_output[sess].compute_tercile_stats()

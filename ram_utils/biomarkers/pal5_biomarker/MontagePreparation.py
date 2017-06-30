@@ -139,7 +139,11 @@ class MontagePreparation(RamTask):
         if args.anode_nums:
             stim_pairs = args.anode_nums + args.cathode_nums
         else:
-            stim_pairs = [args.elec1, args.elec2]
+            try:
+                stim_pairs = [args.elec1, args.elec2]
+            except AttributeError:
+                stim_pairs = [args.anode_num,args.cathode_num]
+
         bipolar_pairs = np.array(bipolar_pairs, dtype=[('ch1', 'S3'), ('ch2', 'S3')]).view(np.recarray)
 
         include = [int(bp.ch1) not in stim_pairs and int(bp.ch2) not in stim_pairs for bp in bipolar_pairs]

@@ -86,12 +86,9 @@ def make_biomarker(args):    # report_pipeline = ReportPipeline(subject=args.sub
     #                                  workspace_dir=join(args.workspace_dir, args.subject), mount_point=args.mount_point,
     #                                  args=args)
     params=Params()
-    try:
-        args.min_amplitudes = [args.min_amplitude_1, args.min_amplitude_2]
-        args.max_amplitudes = [args.max_amplitude_1, args.max_amplitude_2]
-    except AttributeError:
-        args.min_amplitudes = [args.min_amplitude]
-        args.max_amplitudes = [args.max_amplitude]
+
+    args.min_amplitudes = [0.01]
+    args.max_amplitudes = [args.target_amplitude+0.1]
 
     class ReportPipeline(RamPipeline):
         def __init__(self, subject, workspace_dir, mount_point=None, args=None):
@@ -104,10 +101,10 @@ def make_biomarker(args):    # report_pipeline = ReportPipeline(subject=args.sub
     log_filename = join(args.workspace_dir, args.subject, time.strftime('%Y_%m_%d') + '.csv')
     report_pipeline = ReportPipeline(subject=args.subject,
                                      workspace_dir=join(args.workspace_dir,
-                                        '{}_{}_{}_{}_{}_{}_{}_{}'.format(
+                                        '{}_{}_{}_{}_{}_{}_{}'.format(
                                         args.subject,args.experiment,
-                                        args.anodes[0],args.cathodes[0],args.max_amplitudes[0],
-                                        args.anodes[1],args.cathodes[1],args.max_amplitudes[1]
+                                        args.anodes[0],args.cathodes[0],args.anodes[1],args.cathodes[1],
+                                            args.target_amplitude
                                         )
                                                         ),
                                      mount_point=args.mount_point,
@@ -128,7 +125,7 @@ def make_biomarker(args):    # report_pipeline = ReportPipeline(subject=args.sub
 
     report_pipeline.add_task(ComputeBiomarkerThreshold(params=params, mark_as_completed=True))
 
-    report_pipeline.add_task(LogResults(params=params, mark_as_completed=False, log_filename=log_filename))
+    # report_pipeline.add_task(LogResults(params=params, mark_as_completed=False, log_filename=log_filename))
 
     report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=True))
 
