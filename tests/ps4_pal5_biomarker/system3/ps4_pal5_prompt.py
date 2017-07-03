@@ -202,17 +202,12 @@ def parse_command_line():
                                  default='PS4_CatFR5')
 
     if sys.platform.startswith('win'):
-        workspace_dir = prompt('Workspace directory: ', validator=DirValidator(), completer=path_completer,
-                               default='D:/scratch')
         mount_point = prompt('Mount Point (do not modify): ', validator=DirValidator(), completer=path_completer,
                              default='D:/')
     else:
-        workspace_dir = prompt('Workspace directory: ', validator=DirValidator(), completer=path_completer,
-                               default='/scratch')
         mount_point = prompt('Mount Point (do not modify): ', validator=DirValidator(), completer=path_completer,
                              default='/')
 
-    args_obj.workspace_dir = workspace_dir
     args_obj.mount_point = mount_point
 
 
@@ -224,6 +219,14 @@ def parse_command_line():
     args_obj.electrode_config_file = prompt('Electrode Configuration file (.csv): ', validator=CSVFileValidator(),
                                             completer=path_completer,
                                             default=elestrode_file_default_location)
+
+    if sys.platform.startswith('win'):
+        workspace_dir = prompt('Workspace directory: ', validator=DirValidator(), completer=path_completer,
+                               default='D:/scratch')
+    else:
+        workspace_dir = prompt('Output directory: ', validator=DirValidator(), completer=path_completer,
+                               default='/scratch')
+    args_obj.workspace_dir = workspace_dir
 
     args_obj.pulse_frequency = prompt('Stimulation Frequency (Hz) - FYI - DO NOT MODIFY ',
                                       validator=TypedNumberValidator(int, 'integer'), default='200')
