@@ -695,15 +695,17 @@ class ComposeSessionSummary(ReportRamTask):
 
 
             sess_recog_lures = session_all_events[session_all_events.type=='RECOG_LURE']
-            n_recog_prompts = len(sess_recog_lures) + len(session_all_events[session_all_events.type=='RECOG_TARGET'])
+            sess_rec_targets = session_all_events[session_all_events.type=='RECOG_TARGET']
             if (fr_stim_session_table['recognized']!=-999).any():
-                session_summary.n_stim_hits = (fr_stim_session_table[fr_stim_session_table['is_stim_item']].recognized>0).sum()
-                session_summary.n_nonstim_hits = (fr_stim_session_table[~fr_stim_session_table['is_stim_item']].recognized>0).sum()
+                session_summary.n_stim_hits = (sess_rec_targets[sess_rec_targets.stim_list==1].recognized==1).sum()
+                session_summary.n_nonstim_hits =  (sess_rec_targets[sess_rec_targets.stim_list==0].recognized==1).sum()
                 session_summary.n_false_alarms = (sess_recog_lures.rejected==0).sum()
-                session_summary.pc_stim_hits = session_summary.n_stim_hits/float(n_recog_prompts)
-                session_summary.pc_nonstim_hits = session_summary.n_nonstim_hits/float(n_recog_prompts)
-                session_summary.pc_false_alarms = session_summary.n_false_alarms/float(n_recog_prompts)
-                session_summary.dprime = '{:03f}'.format(stats.norm.ppf(session_summary.pc_stim_hits+session_summary.pc_nonstim_hits) -
+                print session_summary.n_false_alarms
+                session_summary.pc_stim_hits =  (sess_rec_targets[sess_rec_targets.stim_list==1].recognized==1).mean()
+                session_summary.pc_nonstim_hits = np.nanmean((sess_rec_targets[sess_rec_targets.stim_list==0].recognized==1))
+                session_summary.pc_false_alarms = (sess_recog_lures.rejected==0).mean()
+                session_summary.dprime = '{:03f}'.format(stats.norm.ppf(
+                    (session_summary.n_stim_hits+session_summary.n_nonstim_hits)/float(len(sess_rec_targets))) -
                                           stats.norm.ppf(session_summary.pc_false_alarms))
                 session_summary.pc_stim_hits *= 100
                 session_summary.pc_nonstim_hits *= 100
