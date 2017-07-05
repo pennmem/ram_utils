@@ -27,18 +27,18 @@ class GeneratePlots(ReportRamTask):
         fr5_events = self.get_passed_object(task+'_events')
         fr5_session_summaries = self.get_passed_object('fr_session_summary')
 
-        xval_output = self.get_passed_object('xval_output_all_electrodes')
+        xval_output = self.get_passed_object(task+'_xval_output')
 
-        fr1_summary = xval_output[-1]
+        fr5_xval = xval_output[-1]
 
         panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, labelsize=16, wspace=5.0)
 
-        pd1 = PlotData(x=fr1_summary.fpr, y=fr1_summary.tpr, xlim=[0.0, 1.0], ylim=[0.0, 1.0],
+        pd1 = PlotData(x=fr5_xval.fpr, y=fr5_xval.tpr, xlim=[0.0, 1.0], ylim=[0.0, 1.0],
                        xlabel='False Alarm Rate\n(a)', ylabel='Hit Rate', xlabel_fontsize=20, ylabel_fontsize=20,
                        levelline=((0.0, 1.0), (0.0, 1.0)), color='k', markersize=1.0)
 
         pc_diff_from_mean = (
-        fr1_summary.low_pc_diff_from_mean, fr1_summary.mid_pc_diff_from_mean, fr1_summary.high_pc_diff_from_mean)
+        fr5_xval.low_pc_diff_from_mean, fr5_xval.mid_pc_diff_from_mean, fr5_xval.high_pc_diff_from_mean)
 
         ylim = np.max(np.abs(pc_diff_from_mean)) + 5.0
         if ylim > 100.0:
@@ -317,6 +317,8 @@ class GenerateTex(ReportRamTask):
                                                                  '<PHITS_STIM>': '%2.2f' % session_summary.pc_stim_hits,
                                                                  '<PHITS_NO_STIM>': '%2.2f' % session_summary.pc_nonstim_hits,
                                                                  '<PFALSE_ALARMS>': '%2.2f' % session_summary.pc_false_alarms,
+                                                                 '<PHITS_STIM_ITEMS>' : '%2.2f'%session_summary.pc_stim_item_hits,
+                                                                 '<PHITS_LOW_BIOMARKER_ITEMS>': '%2.2f'%session_summary.pc_low_biomarker_hits,
                                                                  '<DPRIME>': session_summary.dprime,
 
                                                              })

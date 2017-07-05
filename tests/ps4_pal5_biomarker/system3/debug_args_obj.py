@@ -11,8 +11,8 @@ if sys.platform.startswith('win'):
 
 else:
 
-    prefix = '/'
-    default_workspace_dir = '/scratch/PS4_CatFR5'
+    prefix = '/Volumes/rhino_root'
+    default_workspace_dir = '/Users/leond/scratch/PS4_CatFR5'
 
 args_list = []
 
@@ -165,17 +165,16 @@ args_obj_R1250N.workspace_dir = default_workspace_dir
 
 # ------------------------------------------------- R1307N WINDOWS TEST
 args_obj_R1307N = Args()
-args_obj_R1307N.subject = 'R1307N'
-args_obj_R1307N.anodes = ['LALT5']
-args_obj_R1307N.cathodes = ['LALT6']
-args_obj_R1307N.electrode_config_file = join(prefix, 'scratch','experiment_configs', 'R1307N_R1307N08JUNE17STIM.csv')
+args_obj_R1307N.subject = 'R1312N'
+args_obj_R1307N.anodes = ['G23','G29']
+args_obj_R1307N.cathodes = ['G31','G30']
+args_obj_R1307N.electrode_config_file = join(prefix, 'scratch','system3_configs', 'ODIN_configs','R1312N','R1312N_30JUN2017L0M0STIM.csv')
 args_obj_R1307N.experiment = 'PAL5'
 args_obj_R1307N.min_amplitudes = [0.1,0.1]
 args_obj_R1307N.max_amplitudes = [1.9,1.9]
 args_obj_R1307N.mount_point = prefix
 args_obj_R1307N.pulse_frequency = 200
-# args_obj_R1307N.workspace_dir = join(prefix, 'scratch', args_obj_R1307N.subject)
-args_obj_R1307N.workspace_dir = join(prefix,'scratch','experiment_configs')
+args_obj_R1307N.workspace_dir = join(prefix,'scratch','leond','experiment_configs')
 args_obj_R1307N.classifier_type_to_output = 'pal'
 
 
@@ -221,7 +220,7 @@ args_obj_R1250N.classifier_type_to_output = 'pal'
 
 
 
-args_list.append(args_obj_R1250N)
+args_list.append(args_obj_R1307N)
 
 
 # args_list.append(args_obj_R1307N)

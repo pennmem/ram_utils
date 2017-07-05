@@ -92,6 +92,21 @@ class GeneratePlots(ReportRamTask):
             plt = panel_plot_biomarker.generate_plot()
             plt.savefig(session_summary.biomarker_plot_filename)
 
+        plt.close()
+        post_stim_eeg = self.get_passed_object('eeg')
+        plt.figure(figsize=(10,7))
+        plt.imshow(post_stim_eeg,origin='lower',aspect='auto',cmap='viridis')
+        plt.colorbar()
+        figname = 'post_stim_eeg_plot.pdf'
+        plt.savefig(self.get_path_to_resource_in_workspace('reports',figname))
+        plt.close()
+        self.pass_object('post_stim_eeg_plot',figname)
+
+
+
+
+
+
 
 
 class GenerateTex(ReportRamTask):
@@ -133,7 +148,8 @@ class GenerateTex(ReportRamTask):
             '<DATE>':date.today(),
             '<SESSION_DATA>':latex_table(self.get_passed_object('session_data')),
             '<NUMBER_OF_PS4_SESSIONS>':len(session_summaries),
-            '<PS4_SESSION_PAGES>':session_tex
+            '<PS4_SESSION_PAGES>':session_tex,
+            '<POST_STIM_EEG>':self.get_passed_object('post_stim_eeg_plot'),
             })
 
         self.pass_object('report_tex_file_name',report_filename)

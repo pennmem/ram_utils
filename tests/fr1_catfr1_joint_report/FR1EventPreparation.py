@@ -110,6 +110,9 @@ class FR1EventPreparation(ReportRamTask):
 
         print len(events), 'task events'
 
+        for session in np.unique(events.session):
+            print np.unique(events[events.session==session].list)
+
         self.pass_object('events', events)
         self.pass_object('math_events', math_events)
         self.pass_object('intr_events', intr_events)

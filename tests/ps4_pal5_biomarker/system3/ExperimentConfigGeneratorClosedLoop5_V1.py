@@ -116,7 +116,7 @@ class ExperimentConfigGeneratorClosedLoop5_V1(RamTask):
             stim_params_dict[chan_label] = {
                 "min_stim_amplitude": min_amplitude,
                 "max_stim_amplitude": max_amplitude,
-                "stim_frequency": 200,
+                "stim_frequency": stim_frequency,
                 "stim_duration": 500,
                 "stim_amplitude": stim_amplitude
             }

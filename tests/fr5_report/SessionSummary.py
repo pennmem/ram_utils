@@ -46,9 +46,11 @@ class FR5SessionSummary(object):
         self.is_ps_list = []
         self.is_baseline_list = []
         self.prob_stim = []
-        self.pc_hits_stim = 0.0
-        self.pc_hits_nostim = 0.0
+        self.pc_stim_hits = 0.0
+        self.pc_nonstim_hits = 0.0
         self.pc_false_alarms = 0.0
+        self.pc_stim_item_hits = 0.0
+        self.pc_low_biomarker_hits = 0.0
         self.dprime = -999.
 
 
