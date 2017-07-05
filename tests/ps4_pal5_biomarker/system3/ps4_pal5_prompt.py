@@ -228,7 +228,7 @@ def parse_command_line():
                                default='/scratch')
     args_obj.workspace_dir = workspace_dir
 
-    args_obj.pulse_frequency = prompt('Stimulation Frequency (Hz) - FYI - DO NOT MODIFY ',
+    args_obj.pulse_frequency = prompt('Stimulation Frequency (Hz)',
                                       validator=TypedNumberValidator(int, 'integer'), default='200')
 
     if args_obj.experiment.upper() =='PAL5':

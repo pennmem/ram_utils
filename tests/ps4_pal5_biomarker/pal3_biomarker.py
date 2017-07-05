@@ -10,9 +10,10 @@ from BiomarkerUtils import CMLParserBiomarker
 
 
 cml_parser = CMLParserBiomarker(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','/scratch/leond/PAL3_biomarkers')
-cml_parser.arg('--subject','R1283T')
-cml_parser.arg('--n-channels','64')
+cml_parser.arg('--workspace-dir','scratch/PAL3_biomarkers')
+cml_parser.arg('--mount-point','/Volumes/rhino_root')
+cml_parser.arg('--subject','R1312N')
+cml_parser.arg('--n-channels','128')
 cml_parser.arg('--anode-num','19')
 cml_parser.arg('--anode','RA2')
 cml_parser.arg('--cathode-num','20')
@@ -61,34 +62,57 @@ class StimParams(object):
 
 class Params(object):
     def __init__(self):
-        self.version = '2.00'
+        self.version = '3.00'
+
+        self.include_fr1 = True
+        self.include_catfr1 = True
+        self.include_fr3 = True
+        self.include_catfr3 = True
 
         self.width = 5
 
+        self.fr1_start_time = 0.0
+        self.fr1_end_time = 1.366
+        self.fr1_buf = 1.365
+
+        self.fr1_retrieval_start_time = -0.525
+        self.fr1_retrieval_end_time = 0.0
+        self.fr1_retrieval_buf = 0.524
+
+
         self.pal1_start_time = 0.3
-        self.pal1_end_time = 2.0
-        self.pal1_buf = 1.0
+        self.pal1_end_time = 2.00
+        self.pal1_buf = 1.2
+
+        # original code
+        self.pal1_retrieval_start_time = -0.625
+        self.pal1_retrieval_end_time = -0.1
+        self.pal1_retrieval_buf = 0.524
+
+        # self.retrieval_samples_weight = 2.5
+        # self.encoding_samples_weight = 2.5
+        self.encoding_samples_weight = 7.2
+        self.pal_samples_weight = 1.93
+
+        self.recall_period = 5.0
+
+        self.sliding_window_interval = 0.1
+        self.sliding_window_start_offset = 0.3
 
         self.filt_order = 4
 
-        self.freqs = np.logspace(np.log10(3), np.log10(180), 8)
+        self.freqs = np.logspace(np.log10(6), np.log10(180), 8)
 
         self.log_powers = True
 
         self.penalty_type = 'l2'
         self.C = 7.2e-4
 
+
         self.n_perm = 200
 
+
         self.stim_params = StimParams(
-            n_channels=args.n_channels,
-            anode_num=args.anode_num,
-            anode=args.anode,
-            cathode_num=args.cathode_num,
-            cathode=args.cathode,
-            pulse_frequency=args.pulse_frequency,
-            pulse_count=args.pulse_frequency*args.pulse_duration/1000,
-            target_amplitude=args.target_amplitude
         )
 
 
@@ -97,19 +121,22 @@ params = Params()
 
 class ReportPipeline(RamPipeline):
 
-    def __init__(self, subject, workspace_dir, mount_point=None):
+    def __init__(self, subject, workspace_dir, mount_point=None,args=None):
         RamPipeline.__init__(self)
         self.subject = subject
         self.mount_point = mount_point
         self.set_workspace_dir(workspace_dir)
+        self.args=args
 
 
 report_pipeline = ReportPipeline(subject=args.subject,
-                                       workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point)
+                                       workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point,
+                                 args=args)
+
+report_pipeline.add_task(MontagePreparation(params=None,mark_as_completed=False))
 
 report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
 
-report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
 
 report_pipeline.add_task(CheckElectrodeLabels(params=params, mark_as_completed=False))
 
