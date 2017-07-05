@@ -20,6 +20,17 @@ from EventPreparation import EventPreparation
 
 from GenerateReportTasks import GeneratePlots,GenerateTex,GeneratePDF
 
+from MontagePreparation import MontagePreparation
+
+from LoadEEG import LoadEEG
+
+
+class Params(object):
+    def __init__(self):
+        self.start_time=-0.03
+        self.end_time=0.75
+
+params=Params()
 
 
 report_pipeline = ReportPipeline(subject=args.subject,task=args.task,workspace_dir= join(args.workspace_dir,args.subject),
@@ -27,6 +38,10 @@ report_pipeline = ReportPipeline(subject=args.subject,task=args.task,workspace_d
                                  exit_on_no_change=args.exit_on_no_change,recompute_on_no_status=args.recompute_on_no_status)
 
 report_pipeline.add_task(EventPreparation(mark_as_completed=False))
+
+report_pipeline.add_task(MontagePreparation(params=params,mark_as_completed=False))
+
+report_pipeline.add_task(LoadEEG(params=params,mark_as_completed=True))
 
 report_pipeline.add_task(ComposeSessionSummary(mark_as_completed=False))
 
