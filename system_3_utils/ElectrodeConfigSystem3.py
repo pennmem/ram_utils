@@ -4,7 +4,7 @@ import numpy as np
 import os
 import errno
 from os.path import *
-
+from ptsa.data.readers.IndexReader import JsonIndexReader
 
 
 class UnparseableConfigException(Exception):
@@ -138,6 +138,17 @@ class ElectrodeConfig(object):
             **self.as_dict()
         )
 
+    def as_pairs_csv(self):
+        if not self.initialized:
+            raise UnparseableConfigException("Config not initialized!")
+        return self.CSV_FORMAT.format(
+            contacts_csv=self.contacts_csv,
+            sense_channels_csv=self.sense_channels_csv,
+            stim_channels_csv=self.stim_channels_csv,
+            **self.as_dict()
+        )
+
+
     def __init__(self, filename=None):
 
         self.electrode_array_dtype = np.dtype(
@@ -240,6 +251,33 @@ class ElectrodeConfig(object):
             self.sense_channels[code] = SenseChannel(self.contacts[code], code, channel / 32 + 1, '0', 'x',
                                                      '#{}#'.format(description))
         self.initialized = True
+
+    def intitialize_from_pairs_dict(self, pairs_dict, config_name):
+        self.config_version = '1.2'
+        self.config_name = config_name
+        content = pairs_dict.values()[0]
+        self.subject_id = content['code']
+        self.ref = 'REF:,0,common'
+        for pair_entry in content['pairs'].values():
+            code = pair_entry['code']
+            ch1_code, ch2_code = code.split('-')
+            ch1_num, ch2_num = pair_entry['channel_1'], pair_entry['channel_2']
+            ch1_type, ch2_type = pair_entry['type_1'], pair_entry['type_2']
+            ch1_area, ch2_area = Contact.SURFACE_AREAS[ch1_type], Contact.SURFACE_AREAS[ch2_type]
+            description = None
+
+            # getting rid of commas from description - this fools csv parser
+            if description is None:
+                description = ''
+            description = description.replace(',','-')
+
+            self.contacts[ch1_code] = Contact(ch1_code, ch1_num, ch1_num, ch1_area, '#{}#'.format(description))
+            self.contacts[ch2_code] = Contact(ch2_code, ch2_num, ch2_num, ch2_area, '#{}#'.format(description))
+
+            self.sense_channels[code] = SenseChannel(self.contacts[ch1_code], ch2_code, ch1_num, ch2_num, 'x',
+                                                     '#{}#'.format(description))
+        self.initialized = True
+
 
     def parse_version(self, line, file):
         self.config_version = line.split(',')[1].strip('#')
@@ -357,6 +395,29 @@ def contacts_json_2_configuration_csv(contacts_json_path, output_dir, configurat
     open(out_file_name, 'w').write(csv_out)
     return True
 
+def pairs_json_2_configuration_csv(pairs_json_path, output_dir, configuration_label='_ODIN',anodes=(),cathodes=()):
+    import json
+    ec = ElectrodeConfig()
+    pairs_dict = json.load(open(pairs_json_path))
+    ec.intitialize_from_pairs_dict(pairs_dict, "FromJson")
+    for anode,cathode in zip(anodes,cathodes):
+        name = '_'.join([anode,cathode])
+        ec.stim_channels[name]=StimChannel(name=name,anodes=[ec.contacts[anode].jack_num],
+                                               cathodes=[ec.contacts[cathode].jack_num],comments='')
+    csv_out = ec.as_csv()
+    try:
+        mkdir_p(output_dir)
+    except AttributeError:
+        print '\n\nERROR IN CREATING DIRECTORY:'
+        print 'Could not create %s directory' % output_dir
+        return False
+
+    out_file_name = join(output_dir,'contacts'+configuration_label+'.csv')
+
+    open(out_file_name, 'w').write(csv_out)
+    return True
+
+
 
 def test_as_csv():
     import difflib
@@ -385,6 +446,36 @@ def test_from_dict():
     csv_out = ec.as_csv()
     open(r"C:\OdinWiFiServer\ns2\montage\contacts.csv", 'w').write(csv_out)
 
+
+# if __name__ == '__main__':
+#     from pprint import pprint
+#     subject = 'R1232N'
+#     localization = 0
+#     montage = 0
+#     jr = JsonIndexReader('/protocols/r1.json')
+#     output_dir = 'D:/experiment_configs1'
+#     pairs_json = jr.get_value('pairs',subject=subject,montage=montage)
+#
+#     stim_channels = ['LAT1-LAT2','LAT3-LAT4']
+#
+#     (anodes,cathodes) = zip(*[pair.split('-') for pair in stim_channels]) if stim_channels else ([],[])
+#
+#     success_flag = pairs_json_2_configuration_csv(
+#         pairs_json_path=pairs_json,
+#         output_dir=output_dir, configuration_label=subject, anodes=anodes, cathodes=cathodes
+#     )
+#
+#     # subject = 'R1232N'
+#     # localization = 0
+#     # montage = 0
+#     # jr = JsonIndexReader('/protocols/r1.json')
+#     # output_dir = 'D:/experiment_configs1'
+#     # contacts_json = jr.get_value('contacts', subject=subject, montage=montage)
+#     #
+#     # success_flag = contacts_json_2_configuration_csv(
+#     #     contacts_json_path=contacts_json,
+#     #     output_dir=output_dir, configuration_label=subject, anodes=[], cathodes=[]
+#     # )
 
 if __name__ == '__main__':
     from pprint import pprint
