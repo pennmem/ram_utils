@@ -317,6 +317,8 @@ class GenerateTex(ReportRamTask):
                                                                  '<PHITS_STIM>': '%2.2f' % session_summary.pc_stim_hits,
                                                                  '<PHITS_NO_STIM>': '%2.2f' % session_summary.pc_nonstim_hits,
                                                                  '<PFALSE_ALARMS>': '%2.2f' % session_summary.pc_false_alarms,
+                                                                 '<PHITS_STIM_ITEMS>' : '%2.2f'%session_summary.pc_stim_item_hits,
+                                                                 '<PHITS_LOW_BIOMARKER_ITEMS>': '%2.2f'%session_summary.pc_low_biomarker_hits,
                                                                  '<DPRIME>': session_summary.dprime,
 
                                                              })
