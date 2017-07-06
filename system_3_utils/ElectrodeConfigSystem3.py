@@ -463,7 +463,7 @@ def test_from_dict():
 #     success_flag = pairs_json_2_configuration_csv(
 #         pairs_json_path=pairs_json,
 #         output_dir=output_dir, configuration_label=subject, anodes=anodes, cathodes=cathodes
-#     )
+    )
 #
 #     # subject = 'R1232N'
 #     # localization = 0
@@ -477,11 +477,11 @@ def test_from_dict():
 #     #     output_dir=output_dir, configuration_label=subject, anodes=[], cathodes=[]
 #     # )
 
-if __name__ == '__main__':
-    from pprint import pprint
-
-    # ec = test_as_csv()
-    test_from_dict()
-    # pprint(ec.as_dict())
-    # print(ec.as_csv())
+# if __name__ == '__main__':
+#     from pprint import pprint
+#
+#     # ec = test_as_csv()
+#     test_from_dict()
+#     # pprint(ec.as_dict())
+#     # print(ec.as_csv())
 
