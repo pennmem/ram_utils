@@ -247,7 +247,7 @@ class ComputeClassifier(RamTask):
 
 
         if not permuted:
-            self.xval_output[-1] = ModelOutput(recalls, probs)
+            self.xval_output[-1] = ModelOutput(recalls[events.type=='WORD'], probs[events.type=='WORD'])
             self.xval_output[-1].compute_roc()
             self.xval_output[-1].compute_tercile_stats()
 
