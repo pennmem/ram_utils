@@ -453,7 +453,7 @@ def free_epochs(times, duration, pre, post, start=None, end=None):
         for interval in free_intervals:
             begin = post_times[interval]
             finish = pre_times[interval + 1] - duration
-            interval_epoch_times = range(begin.astype(int), finish.astype(int), duration.astype(int))
+            interval_epoch_times = range(int(begin), int(finish), int(duration))
             trial_epoch_times.extend(interval_epoch_times)
         epoch_times.append(np.array(trial_epoch_times))
     epoch_array = np.empty((n_trials, max([len(x) for x in epoch_times])))
