@@ -55,6 +55,8 @@ class PAL1EventPreparation(RamTask):
         """
 
         rec_evs = evs[evs.type == 'TEST_PROBE']
+        if len(rec_evs)==0:
+            rec_evs = evs[evs.type=='PROBE_START']
 
         incorrect_has_response_mask = (rec_evs.RT != -999) & (rec_evs.correct == 0)
         incorrect_no_response_mask = rec_evs.RT == -999

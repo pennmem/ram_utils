@@ -2,6 +2,7 @@
 import json
 
 import prompt_toolkit
+from prompt_toolkit import validation
 from  prompt_toolkit.contrib import completers
 from ptsa.data.readers import  IndexReader
 from os import path
@@ -51,7 +52,26 @@ def system_to_method(system):
     else:
         raise RuntimeError('System %s not supported'%system)
 
-system_completer = completers.WordCompleter(['2','3'])
+
+class WordValidator(validation.Validator):
+    def __init__(self,words):
+        self.words=words
+
+    def validate(self, document):
+        if document.text not in self.words:
+            raise validation.ValidationError
+
+
+class DummyValidator(validation.Validator):
+    def validate(self, document):
+        return
+
+
+def complete_and_validate(words):
+    return {u'completer':completers.WordCompleter(words),
+            u'validator':WordValidator(words)
+            }
+
 
 two_three_args = tuple(unicode(s) for s in
     ('n_channels','anode','anode_num','cathode','cathode_num','pulse_frequency','pulse_duration','target_amplitude',)
@@ -68,6 +88,9 @@ three_five_args = tuple(unicode(s) for s in
 args_dict ={('2',x):two_three_args for x in ['FR3','PAL3','TH3']}
 args_dict.update({('3',x):three_ps_args for x in ['PS4_FR5','PS4_catFR5','PS4_PAL5']})
 args_dict.update({('3',x):three_five_args for x in ['FR5','catFR5','PAL5']})
+args_dict[('3','PS4_PAL5')] = args_dict[('3','PS4_PAL5')]+('classifier_type_to_output',)
+
+path_arguments = (u'electrode_config_file', u'workspace_dir', u'mount_point')
 
 
 class Args(object):
@@ -75,36 +98,46 @@ class Args(object):
         for attr in (two_three_args + three_ps_args + three_five_args):
             self.__setattr__(attr,'')
 
-def get_experiment_completer(system):
-    possible_experiments_dict = system_to_method(system)
-    return completers.WordCompleter(possible_experiments_dict.keys())
 
-def get_arg_completer(argument,args):
-    path_arguments = (u'electrode_config_file',u'workspace_dir',u'mount_point')
+def get_experiment_completer_validator(system):
+    possible_experiments_dict = system_to_method(system)
+    return complete_and_validate(possible_experiments_dict.keys())
+
+
+def get_arg_completer_validator(index_reader,argument,args):
+    cv_dict = {u'completer':None,
+               u'validator':None}
     if argument in path_arguments:
-        return completers.PathCompleter()
+        cv_dict[u'completer']=completers.PathCompleter()
+        cv_dict[u'validator']=DummyValidator()
     elif 'anode' in argument or 'cathode' in argument:
         split_subject = args['subject'].split('_')
         subject = split_subject[0]
         montage = 0 if len(split_subject)==1 else split_subject[-1]
-        jr = IndexReader.JsonIndexReader(path.join(args['mount_point'],'protocols','r1.json'))
-        with open(jr.get_value('contacts',subject=subject,montage=montage)) as cfid:
+        with open(index_reader.get_value('contacts',subject=subject,montage=montage)) as cfid:
             contacts = json.load(cfid)[subject]['contacts']
         if 'num' in argument:
             completions = [unicode(contacts[args['anode'] if 'anode' in argument else args['cathode']]['channel'])]
         else:
             completions = sorted(contacts.keys())
-        return completers.WordCompleter(completions)
+        cv_dict = complete_and_validate(completions)
+    return cv_dict
 
-
-def get_args(system_no,experiment,args):
-    args_list = (u'mount_point',)+ args_dict[(system_no,experiment)] + (u'workspace_dir',u'sessions')
+def get_args(system_no,experiment,args,index_reader):
+    args_list = args_dict[(system_no,experiment)] + (u'workspace_dir',u'sessions')
     anode_args = [x for x in args_list if 'anode' in x]
     cathode_args = [x for x in args_list if 'cathode' in x]
     parser = biomarker_parser(experiment)
+    parser.arg('--mount-point',args['mount_point'])
+
     for argument in args_list:
+        if 'mount_point' in args and argument in path_arguments:
+            default = args['mount_point']
+        else:
+            default=u''
         arg_val = prompt_toolkit.prompt(unicode(argument.upper().replace('_', ' ') + ': '),
-                                        completer=get_arg_completer(argument, args))
+                                        default=default,
+                                        **get_arg_completer_validator(index_reader,argument, args))
         args[argument] = arg_val
         if argument not in anode_args+cathode_args and arg_val and not any([s in argument for s in ['min','max']]):
             parser.arg('--%s'%argument.replace('_','-'),arg_val)
@@ -132,19 +165,31 @@ def load_args_from_file(file_path):
     args.cathodes = [args.__getattribute__(k) for k in cathode_args]
     return args
 
+def prelim_experiment(experiment):
+    return experiment.split('_')[-1].replace('5','1').replace('3','1').replace('C','c')
 
 def main():
-    system_no = prompt_toolkit.prompt(u'System #: ',completer=system_completer)
-    experiment = prompt_toolkit.prompt(u'Experiment: ', completer=get_experiment_completer(system_no))
-    subject = prompt_toolkit.prompt(u'Subject: ')
+    system_no = prompt_toolkit.prompt(u'System #: ',**complete_and_validate(['2','3']))
+    experiment = prompt_toolkit.prompt(u'Classifier Experiment: ', **get_experiment_completer_validator(system_no))
+    mount_point = prompt_toolkit.prompt(u'Mount Point: ',default=u'/',completer=completers.PathCompleter())
+    biomarker_maker = system_to_method(system_no)[experiment]
+    jr = IndexReader.JsonIndexReader(path.join(mount_point,'protocols/r1.json'))
+    new_experiment = False
+    if experiment=='PS4_PAL5':
+        new_experiment= prompt_toolkit.prompt(u'Task Laptop Experiment: ',default=u'PS4_CatFR5')
+    subject = prompt_toolkit.prompt(u'Subject: ',
+                                    completer=completers.WordCompleter(jr.subjects(experiment=prelim_experiment(experiment))))
     args= {}
     args['subject'] = subject
-    args['task']= experiment
-    args['experiment'] = experiment
-    parsed_args = get_args(system_no,experiment,args)
+    args['task']= new_experiment or experiment
+    args['experiment'] = new_experiment or experiment
+    args['mount_point']=mount_point
+    parsed_args = get_args(system_no,experiment,args,jr)
     if system_no == '3':
         parsed_args.experiment = parsed_args.experiment.replace('cat','Cat')
-    system_to_method(system_no)[experiment].make_biomarker(parsed_args)
+    print(parsed_args)
+    prompt_toolkit.prompt(u'Continue?')
+    biomarker_maker.make_biomarker(parsed_args)
 
 
 def try_pal5():

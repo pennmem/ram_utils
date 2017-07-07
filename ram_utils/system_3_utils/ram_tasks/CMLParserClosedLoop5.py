@@ -27,6 +27,7 @@ class CMLParserCloseLoop5(object):
         self.parser.add_argument('--min-amplitudes',nargs='+',type=float)
         self.parser.add_argument('--max-amplitudes',nargs='+',type=float)
         self.parser.add_argument('--sessions',nargs='+',type=int)
+        self.parser.add_argument('--classifier-type-to-output', required=False, action='store')
 
 
         self.arg_list=[]
@@ -50,7 +51,7 @@ class CMLParserCloseLoop5(object):
 
         # making sure that sensible workspace directory is set if user does not provide one
         if not args.workspace_dir:
-            args.workspace_dir = abspath(join(expanduser('~'), 'scratch', args.task, args.subject))
+            args.workspace_dir = abspath(join(expanduser('~'), 'scratch', args.experiment, args.subject))
 
         # Converting matlab search paths to proper format
         if not args.mount_point:

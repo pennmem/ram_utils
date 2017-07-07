@@ -79,7 +79,6 @@ class ExperimentConfigGeneratorClosedLoop5_V1(RamTask):
         electrode_config_file = abspath(self.pipeline.args.electrode_config_file)
         config_name = self.get_passed_object('config_name')
         subject = self.pipeline.subject.split('_')[0]
-        stim_frequency = self.pipeline.args.pulse_frequency
         stim_amplitude = self.pipeline.args.target_amplitude
         bipolar_pairs_path = self.get_passed_object('bipolar_pairs_path')
 
@@ -99,7 +98,8 @@ class ExperimentConfigGeneratorClosedLoop5_V1(RamTask):
         # xval_full = self.get_passed_object('xval_output_all_electrodes')
         # xval_output = self.get_passed_object('xval_output')
 
-        # retrieval_biomarker_threshold = self.get_passed_object('retrieval_biomarker_threshold')
+        retrieval_biomarker_threshold = (self.get_passed_object('retrieval_biomarker_threshold')
+                                         if 'Cat' not in experiment else '')
 
         stim_params_dict = {}
         stim_params_list = zip(anodes, cathodes, cycle(self.pipeline.args.min_amplitudes),
@@ -125,7 +125,7 @@ class ExperimentConfigGeneratorClosedLoop5_V1(RamTask):
         config_files_dir = self.get_path_to_resource_in_workspace(project_dir_corename + '/config_files')
 
         experiment_config_template_filename = join(dirname(__file__), 'templates',
-                                                   '{}_experiment_config.json.tpl'.format(experiment))
+                                                   '%s_experiment_config.json.tpl'%experiment)
         experiment_config_template = Template(open(experiment_config_template_filename, 'r').read())
 
         core_name_for_electrode_file = '{subject}_{config_name}'.format(subject=subject, config_name=config_name)
@@ -164,7 +164,7 @@ class ExperimentConfigGeneratorClosedLoop5_V1(RamTask):
                 montage_file='config_files/%s' % basename(bipolar_pairs_path),
                 excluded_montage_file='config_files/%s' % basename(excluded_pairs_path),
                 biomarker_threshold=0.5,
-                # retrieval_biomarker_threshold = retrieval_biomarker_threshold,
+                retrieval_biomarker_threshold = retrieval_biomarker_threshold,
                 fr5_stim_channel=fr5_stim_channel
             )
 

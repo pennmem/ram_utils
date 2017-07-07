@@ -37,7 +37,7 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
         if not monopolar_same_as_sense:
             print '\n\nELECTRODE CONFIG ERROR:'
             print 'Sense electrodes jack_box numbers defined in .bin/.csv file do not match jack_box_numbers in contacts.json'
-            sys.exit(1)
+            # sys.exit(1)
 
 
         # check if specified stim pair is present in the bipolar pairs and .bin/.csv file

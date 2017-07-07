@@ -93,6 +93,8 @@ class Params(object):
 
 
 def make_biomarker(args_obj):
+    if 'PS4' in args_obj.experiment:
+        args_obj.experiment = 'PS4_CatFR5'
 
     params = Params()
 
