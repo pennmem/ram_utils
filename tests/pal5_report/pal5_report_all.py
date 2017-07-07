@@ -8,7 +8,7 @@ import time
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
 parser = CMLParser()
-parser.parser.add_argument('--classsifier')
+parser.parser.add_argument('--classifier')
 
 args_obj=parser.parse()
 
