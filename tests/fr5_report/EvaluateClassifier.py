@@ -113,7 +113,7 @@ class EvaluateClassifier(ReportRamTask):
 
             print 'AUC = %f'%self.xval_output[-1].auc
             sessions = np.unique(events.session)
-            nonstimlist_events = events[events.stim_list == False]
+            nonstimlist_events = events[non_stim]
             if len(sessions)>1:
                 print 'Performing permutation test'
 
