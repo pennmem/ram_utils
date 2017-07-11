@@ -463,8 +463,8 @@ def test_from_dict():
 #     success_flag = pairs_json_2_configuration_csv(
 #         pairs_json_path=pairs_json,
 #         output_dir=output_dir, configuration_label=subject, anodes=anodes, cathodes=cathodes
-    )
 #
+# #  )
 #     # subject = 'R1232N'
 #     # localization = 0
 #     # montage = 0
