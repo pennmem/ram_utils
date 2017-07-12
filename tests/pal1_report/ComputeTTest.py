@@ -3,13 +3,34 @@ from RamPipeline import *
 import numpy as np
 from scipy.stats import ttest_ind
 from sklearn.externals import joblib
-
+from ptsa.data.readers.IndexReader import JsonIndexReader
+import hashlib
 
 from ReportUtils import ReportRamTask
 
 class ComputeTTest(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
         super(ComputeTTest,self).__init__(mark_as_completed)
+
+    def input_hashsum(self):
+        subject = self.pipeline.subject
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp) == 1 else int(tmp[1])
+        task = self.pipeline.task
+
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
+
+        hash_md5 = hashlib.md5()
+
+        bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
+        for fname in bp_paths:
+            with open(fname, 'rb') as f: hash_md5.update(f.read())
+
+        fr1_event_files = sorted(
+            list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment=task)))
+        for fname in fr1_event_files:
+            with open(fname, 'rb') as f: hash_md5.update(f.read())
 
     def run(self):
         subject = self.pipeline.subject

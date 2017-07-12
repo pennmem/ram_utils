@@ -79,7 +79,7 @@ class PAL1EventPreparation(ReportRamTask):
 
         intr_events = rec_events[(rec_events.intrusion!=-999) & (rec_events.correct==0)]
 
-        test_probe_events = events[events.type == 'TEST_PROBE']
+        test_probe_events = events[(events.type == 'TEST_PROBE') | (events.type=='PROBE_START')]
 
         events = events[(events.type == 'STUDY_PAIR') & (events.correct!=-999)]
 
