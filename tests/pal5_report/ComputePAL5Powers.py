@@ -37,6 +37,15 @@ class ComputePAL5Powers(ReportRamTask):
         super(ComputePAL5Powers,self).__init__(mark_as_completed=mark_as_completed)
         self.samplerate = 1000
 
+    def restore(self):
+        events = joblib.load(self.get_path_to_resource_in_workspace('pal5_events.pkl'))
+        pow_mat = joblib.load(self.get_path_to_resource_in_workspace('pal5_pow_mat.pkl'))
+        samplerate = joblib.load(self.get_path_to_resource_in_workspace('samplerate.pkl'))
+
+        self.pass_object('events',events)
+        self.pass_object('pal_stim_pow_mat',pow_mat)
+        self.pass_object('pal_stim_samplerate',samplerate)
+
 
     def run(self):
         events = self.get_passed_object('events')
@@ -45,8 +54,8 @@ class ComputePAL5Powers(ReportRamTask):
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
 
         pow_mat,events = compute_powers(events,monopolar_channels,bipolar_pairs,
-                                        self.params.pal1_start_time,self.params.pal1_end_time, self.params.pal1_buf_time,
-                                        self.params.pal1_freqs,log_powers=True,ComputePowers=self)
+                                        self.params.pal1_start_time,self.params.pal1_end_time, self.params.pal1_buf,
+                                        self.params.freqs,log_powers=True,ComputePowers=self)
 
         joblib.dump(events,self.get_path_to_resource_in_workspace('pal5_events.pkl'))
         joblib.dump(pow_mat,self.get_path_to_resource_in_workspace('pal5_pow_mat.pkl'))

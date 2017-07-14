@@ -140,8 +140,6 @@ class ComputeClassifier(RamTask):
 
     def run_loso_xval(self, event_sessions, recalls, permuted=False, use_samples_weights=False, events=None):
 
-        # outsample_classifier = self.create_classifier_obj()
-
         probs = np.empty_like(recalls, dtype=np.float)
 
         sessions = np.unique(event_sessions)
@@ -552,12 +550,12 @@ class ComputeClassifier(RamTask):
     def restore(self):
         subject = self.pipeline.subject
 
-        classifier_path = self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl')
+        classifier_path = self.get_path_to_resource_in_workspace(subject + '-lr_classifier{}.pkl'.format(self.suffix))
         self.lr_classifier = joblib.load(classifier_path)
         # self.lr_classifier = joblib.load(self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl'))
-        self.xval_output = joblib.load(self.get_path_to_resource_in_workspace(subject + '-xval_output.pkl'))
-        self.perm_AUCs = joblib.load(self.get_path_to_resource_in_workspace(subject + '-perm_AUCs.pkl'))
-        self.pvalue = joblib.load(self.get_path_to_resource_in_workspace(subject + '-pvalue.pkl'))
+        self.xval_output = joblib.load(self.get_path_to_resource_in_workspace(subject + '-xval_output{}.pkl'.format(self.suffix)))
+        self.perm_AUCs = joblib.load(self.get_path_to_resource_in_workspace(subject + '-perm_AUCs{}.pkl'.format(self.suffix)))
+        self.pvalue = joblib.load(self.get_path_to_resource_in_workspace(subject + '-pvalue{}.pkl'.format(self.suffix)))
 
         self.pass_object('classifier_path', classifier_path)
         self.pass_object('lr_classifier', self.lr_classifier)
@@ -607,14 +605,14 @@ class ComputeFullClassifier(ComputeClassifier):
 
 
 class ComputePAL1Classifier(ComputeClassifier):
-    def restore(self):
-        subject = self.pipeline.subject
-        full_classifier_path = self.get_path_to_resource_in_workspace(subject + '-xval_output_all_electrodes.pkl')
-        self.xval_output = joblib.load(full_classifier_path)
-        self.compare_AUCs()
-        self.pass_object('full_classifier_path', full_classifier_path)
-        self.pass_object('xval_output_all_electrodes', self.xval_output)
-
+    # def restore(self):
+    #     subject = self.pipeline.subject
+    #     full_classifier_path = self.get_path_to_resource_in_workspace(subject + '-xval_output_all_electrodes.pkl')
+    #     self.xval_output = joblib.load(full_classifier_path)
+    #     self.compare_AUCs()
+    #     self.pass_object('full_classifier_path', full_classifier_path)
+    #     self.pass_object('xval_output_all_electrodes', self.xval_output)
+    #
     # def pass_objects(self):
     #     subject = self.pipeline.subject
     #     classifier_path = self.get_path_to_resource_in_workspace(subject + 'lr_classifier_full.pkl')
@@ -623,6 +621,11 @@ class ComputePAL1Classifier(ComputeClassifier):
     #                 self.get_path_to_resource_in_workspace(subject + '-xval_output_all_electrodes.pkl'))
     #     self.pass_object('classifier_path', classifier_path)
     #     self.pass_object('xval_output_all_electrodes', self.xval_output)
+
+    def __init__(self,*args,**kwargs):
+        super(ComputePAL1Classifier, self).__init__(*args,**kwargs)
+        self.suffix = '_pal'
+
 
     def compare_AUCs(self):
         reduced_xval_output = self.get_passed_object('xval_output')
@@ -639,7 +642,6 @@ class ComputePAL1Classifier(ComputeClassifier):
         return pow_mat
 
     def run(self):
-        self.suffix = '_pal'
         evs = self.get_passed_object('combined_evs')
         evs = evs[evs.exp_name == 'PAL1']
 
@@ -653,3 +655,4 @@ class ComputePAL1Classifier(ComputeClassifier):
             return
 
         super(ComputePAL1Classifier, self).run_classifier_pipeline(evs)
+
