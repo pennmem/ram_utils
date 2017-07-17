@@ -5,6 +5,7 @@ import os
 import errno
 from os.path import *
 from ptsa.data.readers.IndexReader import JsonIndexReader
+from ReportTasks.hdf5_utils import save_arrays_as_hdf5
 
 
 class UnparseableConfigException(Exception):
@@ -132,20 +133,19 @@ class ElectrodeConfig(object):
     def monopolar_trans_matrix(self):
         num_channels = len(self.sense_channels.keys())
 
-        tr_mat = np.zeros((256,256), dtype=np.int)
+        tr_mat = np.zeros((256, 256), dtype=np.int)
         for i, sense_channel in enumerate(sorted(self.sense_channels.values(), key=lambda s: s.contact.jack_num)):
             port_num = sense_channel.contact.port_num
             tr_mat[port_num - 1, port_num - 1] = 1
 
             ref_num = int(sense_channel.ref)
             if ref_num != 0:
-
                 tr_mat[port_num - 1, ref_num - 1] = -1
 
         # removing zero rows and columns
-        non_zero_mask = np.any(tr_mat!=0, axis=0)
-        tr_mat = tr_mat[non_zero_mask,:]
-        tr_mat = tr_mat[:,non_zero_mask]
+        non_zero_mask = np.any(tr_mat != 0, axis=0)
+        tr_mat = tr_mat[non_zero_mask, :]
+        tr_mat = tr_mat[:, non_zero_mask]
         return tr_mat
 
     def as_csv(self):
@@ -481,6 +481,7 @@ def contacts_json_2_bipol_medtronic_configuration_csv(contacts_json_path, output
         ec.stim_channels[name] = StimChannel(name=name, anodes=[ec.contacts[anode].jack_num],
                                              cathodes=[ec.contacts[cathode].jack_num], comments='')
     csv_out = ec.as_csv()
+    monopolar_trans_matrix = ec.monopolar_trans_matrix
     try:
         mkdir_p(output_dir)
     except AttributeError:
@@ -490,7 +491,11 @@ def contacts_json_2_bipol_medtronic_configuration_csv(contacts_json_path, output
 
     out_file_name = join(output_dir, 'contacts' + configuration_label + '.csv')
 
-    open(out_file_name, 'w').write(csv_out)
+    monopolar_trans_matrix_fname = join(output_dir, 'monopolar_trans_matrix' + configuration_label + '.h5')
+
+    save_arrays_as_hdf5(fname=monopolar_trans_matrix_fname,
+                        array_dict={'monopolar_trans_matrix': monopolar_trans_matrix})
+
     return True
 
 
