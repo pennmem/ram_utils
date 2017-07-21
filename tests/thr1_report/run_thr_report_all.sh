@@ -14,7 +14,7 @@ current_directory=$(pwd)
 
 # THR
 cd /home1/mswat/RAM_UTILS_GIT/tests/thr_report
-python /home1/mswat/RAM_UTILS_GIT/tests/thr_report/thr_report_all.py  --task=RAM_THR --workspace-dir=/scratch/mswat/automated_reports/THR_reports
+python /home1/mswat/RAM_UTILS_GIT/tests/thr_report/thr_report_all.py  --task=THR1 --workspace-dir=/scratch/mswat/automated_reports/THR_reports
 
 
 
