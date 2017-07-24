@@ -272,6 +272,18 @@ class ElectrodeConfig(object):
         self.initialized = True
 
     def intitialize_from_dict_bipol_medtronic(self, contacts_dict, config_name, references=()):
+        """
+        This iterates over all contacts stored in contacts.json and produces a list of sense channels
+        that implement mixed-mode referencing scheme based on banks of 16 electrodes whenre first 2
+        electrodes are connected to C/R and the remaining ones (in a given bank) are referenced to the first electrode
+        (in a given bank). The function does not return anything but instead it alters the state of self
+        (i.e. ElectrodeConfig class)
+
+        :param contacts_dict: dict representing content of contacts.json
+        :param config_name: {str} name of the configuration
+        :param references: cufrrently unused
+        :return: None
+        """
         step_fcn = lambda x: 1 * (x > 0)
 
         self.config_version = '1.2'
@@ -281,7 +293,7 @@ class ElectrodeConfig(object):
         self.ref = 'REF:,0,common'
         sorted_contact_values = sorted(content['contacts'].values(), key=lambda x: x['channel'])
         bank_16_capacity = 16
-        num_comm_ref_channels = 4  # number of channels in each bank connected to common reference
+        num_comm_ref_channels = 2  # number of channels in each bank connected to common reference
 
         # reference_contact = -1 # determines reference contact for the current bank
 
@@ -472,6 +484,18 @@ def contacts_json_2_configuration_csv(contacts_json_path, output_dir, configurat
 
 def contacts_json_2_bipol_medtronic_configuration_csv(contacts_json_path, output_dir, configuration_label='_ODIN',
                                                       anodes=(), cathodes=()):
+    """
+    Converts contacts.json file into Odin Tool .csv file that implements bipolar referencing based on banks of 16 electrodes
+    where first 4 electrodes int he bank are connected to C/R. Ut also saves transformation matrix (in the hdf5 format)
+    that allows recovery of monopolar recordings
+
+    :param contacts_json_path: path to contacts_json_path
+    :param output_dir: output directory for the .csv and .h5
+    :param configuration_label: label that gets inserted into .csv file name
+    :param anodes: list of stim anodes
+    :param cathodes: list of stim cathodes
+    :return: {boolean} flag that tells if the execution of function finished or not
+    """
     import json
     ec = ElectrodeConfig()
     contacts_dict = json.load(open(contacts_json_path))
@@ -490,6 +514,8 @@ def contacts_json_2_bipol_medtronic_configuration_csv(contacts_json_path, output
         return False
 
     out_file_name = join(output_dir, 'contacts' + configuration_label + '.csv')
+    open(out_file_name, 'w').write(csv_out)
+
 
     monopolar_trans_matrix_fname = join(output_dir, 'monopolar_trans_matrix' + configuration_label + '.h5')
 
@@ -553,20 +579,21 @@ def test_from_dict():
 if __name__ == '__main__':
     from pprint import pprint
 
-    subject = 'R1232N'
+    # subject = 'R1232N'
+    subject = 'R1111M'
     localization = 0
     montage = 0
     jr = JsonIndexReader('/protocols/r1.json')
     output_dir = 'D:/experiment_configs1'
     contacts_json = jr.get_value('contacts', subject=subject, montage=montage)
 
-    stim_channels = ['LAT1-LAT2', 'LAT3-LAT4']
-
+    # stim_channels = ['LAT1-LAT2', 'LAT3-LAT4']
+    stim_channels = ['LPOG14-LPOG15', 'LPOG15-LPOG16']
     (anodes, cathodes) = zip(*[pair.split('-') for pair in stim_channels]) if stim_channels else ([], [])
 
     success_flag = contacts_json_2_bipol_medtronic_configuration_csv(
         contacts_json_path=contacts_json,
-        output_dir=output_dir, configuration_label=subject, anodes=[], cathodes=[]
+        output_dir=output_dir, configuration_label=subject, anodes=anodes, cathodes=cathodes
     )
 
 
