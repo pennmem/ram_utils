@@ -5,6 +5,19 @@ read -p "SUBJECT:" subject
 read -p "LOCALIZATION:" localization
 #localization=0
 read -p "MONTAGE:" montage
+
+bipolar_arg='--bipolar'
+cont=1
+while [[ $cont = 1 ]];
+do {
+read -p "Bipolar (y/n):" bipolar_input;
+case $bipolar_input in
+ y| Y | yes | Yes | YES) cont=1;;
+ n|N|no|No|NO ) bipolar_arg='';cont=1;;
+ *);;
+esac
+};
+done
 #montage=0
 #stim_pair=LPOG10-LPOG11
 read -p "STIM PAIR[S]:" stim_pair
@@ -26,7 +39,7 @@ echo "---------------"
 python system_3_utils/odin_config_tool_generator.py\
  --subject=$subject\
  --contacts-json-output-dir=$contacts_json_output_dir\
- ${stim_command}
+ ${stim_command} ${bipolar_arg}
 
 cd -
 
