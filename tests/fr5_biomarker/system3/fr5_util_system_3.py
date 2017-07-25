@@ -6,24 +6,23 @@ print "Windows binaries from https://github.com/busygin/morlet_for_sys2_biomarke
 print "See https://github.com/busygin/morlet_for_sys2_biomarker/blob/master/README for detail."
 
 from os.path import *
-
+import sys
 from system_3_utils.ram_tasks.CMLParserClosedLoop3 import CMLParserCloseLoop3
 
 cml_parser = CMLParserCloseLoop3(arg_count_threshold=1)
 
-subject= 'R1230J'
-cml_parser.arg('--workspace-dir','/home1/leond/fr5_config')
-cml_parser.arg('--experiment','FR5')
-cml_parser.arg('--mount-point','/Volumes/rhino_root')
-cml_parser.arg('--subject',subject)
-cml_parser.arg('--electrode-config-file','/home1/leond/fr5_config/contacts%s.csv'%subject)
-cml_parser.arg('--pulse-frequency','200')
-cml_parser.arg('--target-amplitude','1.0')
-cml_parser.arg('--anodes','3LAHD2','12RGRD1')
-cml_parser.arg('--cathodes', '3LAHD3','12RGRD2')
-cml_parser.arg('--min-amplitudes','0.25')
-cml_parser.arg('--max-amplitudes','1.0')
-
+subject = 'R1230J'
+cml_parser.arg('--workspace-dir', '/home1/leond/fr5_config')
+cml_parser.arg('--experiment', 'FR5')
+cml_parser.arg('--mount-point', '/Volumes/rhino_root')
+cml_parser.arg('--subject', subject)
+cml_parser.arg('--electrode-config-file', '/home1/leond/fr5_config/contacts%s.csv' % subject)
+cml_parser.arg('--pulse-frequency', '200')
+cml_parser.arg('--target-amplitude', '1.0')
+cml_parser.arg('--anodes', '3LAHD2', '12RGRD1')
+cml_parser.arg('--cathodes', '3LAHD3', '12RGRD2')
+cml_parser.arg('--min-amplitudes', '0.25')
+cml_parser.arg('--max-amplitudes', '1.0')
 
 args = cml_parser.parse()
 
@@ -45,12 +44,11 @@ from tests.fr5_biomarker.ComputeClassifier import ComputeFullClassifier
 
 from tests.fr5_biomarker.system3.ExperimentConfigGeneratorClosedLoop5 import ExperimentConfigGeneratorClosedLoop5
 
-
 import numpy as np
 
 
 class StimParams(object):
-    def __init__(self,**kwds):
+    def __init__(self, **kwds):
         pass
         # self.n_channels = kwds['n_channels']
         # self.elec1 = kwds['anode_num']
@@ -64,6 +62,7 @@ class StimParams(object):
         # self.duration = 300
         # self.trainFrequency = 1
         # self.trainCount = 1
+
 
 class Params(object):
     def __init__(self):
@@ -138,9 +137,20 @@ params = Params()
 #     raise ConfigError('Unknown config file type')
 
 
+# TODO - we need to check if all files need for bipolar referencing are ready before executing the whole pipeine
+
+if args.bipolar:
+    electrode_config_file = args.electrode_config_file
+    electrode_config_file_dir = dirname(electrode_config_file)
+    trans_matrix_fname = join(electrode_config_file_dir, 'monopolar_trans_matrix%s.h5' % args.subject)
+
+    if not exists(trans_matrix_fname):
+        print ('Bipolar referencing needs %s' % ('monopolar_trans_matrix%s.h5' % args.subject))
+        print ('Please run jacksheet_2_configuration_csv.sh script located in clinical_affairs/syste,3 folder of the RAM_UTILS repository')
+        sys.exit(1)
+
 
 class ReportPipeline(RamPipeline):
-
     def __init__(self, subject, workspace_dir, mount_point=None, args=None):
         RamPipeline.__init__(self)
         self.subject = subject
@@ -150,7 +160,7 @@ class ReportPipeline(RamPipeline):
 
 
 report_pipeline = ReportPipeline(subject=args.subject,
-                                       workspace_dir=args.workspace_dir, mount_point=args.mount_point, args=args)
+                                 workspace_dir=args.workspace_dir, mount_point=args.mount_point, args=args)
 
 report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
 
@@ -162,10 +172,9 @@ report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(ComputeFullClassifier(params=params,mark_as_completed=False))
+report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=False))
 
 report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
-
 
 # starts processing pipeline
 report_pipeline.execute_pipeline()
