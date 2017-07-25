@@ -87,7 +87,7 @@ if args.contacts_json is not None:
     else:
         success_flag = contacts_json_2_configuration_csv(
             contacts_json_path=contacts_json_path,
-            output_dir=args.coutput_dir, configuration_label=args.subject, anodes=anodes, cathodes=cathodes
+            output_dir=args.output_dir, configuration_label=args.subject, anodes=anodes, cathodes=cathodes
         )
     if success_flag:
         print 'GENERATED CSV FILE in %s FOR Odin Config Tool' % args.output_dir
