@@ -6,6 +6,8 @@ import errno
 from os.path import *
 from ptsa.data.readers.IndexReader import JsonIndexReader
 from ReportTasks.hdf5_utils import save_arrays_as_hdf5
+from JSONUtils import JSONNode
+import json
 
 
 class UnparseableConfigException(Exception):
@@ -131,6 +133,16 @@ class ElectrodeConfig(object):
 
     @property
     def monopolar_trans_matrix(self):
+        """
+        Function that computes transformation matrix that takes mixed mode (a.k. Medtronic bipolar) recording and
+        transforms it into monopolar recordings
+        The formula that we implement to do bipolar referencing is the following (example):
+        E5E1 = E5EREF - E1EREF => E5EREF= E5E1 + E!EREF
+        So we measure E1EREF and E5E1 and the task is to recover E5EREF
+
+        :return: {ndarray} transformation matrix - mixed-mode -> monopolar
+        """
+
         num_channels = len(self.sense_channels.keys())
 
         tr_mat = np.zeros((256, 256), dtype=np.int)
@@ -140,7 +152,10 @@ class ElectrodeConfig(object):
 
             ref_num = int(sense_channel.ref)
             if ref_num != 0:
-                tr_mat[port_num - 1, ref_num - 1] = -1
+                # tr_mat[port_num - 1, ref_num - 1] = -1 # this was based on the original document from Medtronic - possibly buggy version
+
+                tr_mat[
+                    port_num - 1, ref_num - 1] = 1  # correct implementation that follows pattern described in the docstring
 
         # removing zero rows and columns
         non_zero_mask = np.any(tr_mat != 0, axis=0)
@@ -482,6 +497,57 @@ def contacts_json_2_configuration_csv(contacts_json_path, output_dir, configurat
     return True
 
 
+def jacksheet_leads_2_contacts_json(jacksheet_path, leads_path, subject):
+    """
+    Generates "emulated" contact.json that does not include coordinates biut contains channel name, jacksheet number type, description netc
+    It is used to interface with the functions that expect contact.json
+
+    :param jacksheet_path: path to jacksheet file
+    :param leads_path: path to leads.txt file
+    :return: {json-dict} emulated contact.json
+    """
+
+    jacksheet_lines = []
+    jacksheet_array = None
+    jacksheet_dtype = [('jacksheet_num','i4'),('label','|S256')]
+
+    with open(jacksheet_path,'r') as jf:
+        for line in jf.readlines():
+            line = line.strip()
+            jacksheet_lines.append(line.split())
+
+        jacksheet_array = np.empty(len(jacksheet_lines),dtype=jacksheet_dtype)
+        for i, line in enumerate(jacksheet_lines):
+            jacksheet_array['jacksheet_num'][i] = int(line[0])
+            jacksheet_array['label'][i] = line[1]
+
+    leads_list = []
+    with open(leads_path,'r') as lf:
+        for line in lf.readlines():
+            line = line.strip()
+            leads_list.append(int(line))
+
+    leads_array = np.array(leads_list,dtype=np.int)
+
+    filter_mask = np.in1d(jacksheet_array['jacksheet_num'],leads_array)
+
+    jacksheet_array = jacksheet_array[filter_mask]
+
+    contacts_jn = JSONNode()
+    contacts_jn[subject] = JSONNode(code=subject,contacts='contacts')
+    # contacts_jn['code'] = subject
+    contacts_jn[subject]['contacts']=JSONNode()
+    contacts_entry_jn = contacts_jn[subject]['contacts']
+    for jacksheet_entry in jacksheet_array:
+        label = jacksheet_entry['label']
+        jack_num = int(jacksheet_entry['jacksheet_num'])
+
+        contacts_entry_jn[label] = JSONNode(channel=jack_num,code=label,description=None,type='S')
+        print
+
+    return contacts_jn
+
+
 def contacts_json_2_bipol_medtronic_configuration_csv(contacts_json_path, output_dir, configuration_label='_ODIN',
                                                       anodes=(), cathodes=()):
     """
@@ -515,7 +581,6 @@ def contacts_json_2_bipol_medtronic_configuration_csv(contacts_json_path, output
 
     out_file_name = join(output_dir, 'contacts' + configuration_label + '.csv')
     open(out_file_name, 'w').write(csv_out)
-
 
     monopolar_trans_matrix_fname = join(output_dir, 'monopolar_trans_matrix' + configuration_label + '.h5')
 
@@ -585,14 +650,23 @@ if __name__ == '__main__':
     montage = 0
     jr = JsonIndexReader('/protocols/r1.json')
     output_dir = 'D:/experiment_configs1'
-    contacts_json = jr.get_value('contacts', subject=subject, montage=montage)
+    contacts_json_path = jr.get_value('contacts', subject=subject, montage=montage)
+
+    # # from JSONUtils import JSONNode
+    # # j_read = JSONNode().read(filename="d:\experiment_configs1\contacts_R1111M_demo.json")
+    # # contacts_json = j_read['R1111M']['contacts']
+    # contacts_json_path = 'd:\experiment_configs1\contacts_R1111M_demo.json'
+
+    jacksheet_path = 'D:/experiment_configs1/jacksheet_R1111M.txt'
+    leads_path = 'D:/experiment_configs1/leads_R1111M.txt'
+    contacts_json_content = jacksheet_leads_2_contacts_json(jacksheet_path=jacksheet_path, leads_path=leads_path, subject='R1111M')
 
     # stim_channels = ['LAT1-LAT2', 'LAT3-LAT4']
     stim_channels = ['LPOG14-LPOG15', 'LPOG15-LPOG16']
     (anodes, cathodes) = zip(*[pair.split('-') for pair in stim_channels]) if stim_channels else ([], [])
 
     success_flag = contacts_json_2_bipol_medtronic_configuration_csv(
-        contacts_json_path=contacts_json,
+        contacts_json_path=contacts_json_path,
         output_dir=output_dir, configuration_label=subject, anodes=anodes, cathodes=cathodes
     )
 
