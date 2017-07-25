@@ -1,10 +1,13 @@
 # from rampy.config import ConfigBase
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 import numpy as np
 import os
 import errno
 from os.path import *
 from ptsa.data.readers.IndexReader import JsonIndexReader
+from ReportTasks.hdf5_utils import save_arrays_as_hdf5
+from JSONUtils import JSONNode
+import json
 
 
 class UnparseableConfigException(Exception):
@@ -123,10 +126,42 @@ class ElectrodeConfig(object):
     @property
     def stim_channels_csv(self):
         stim_channels_as_csv = '\n'.join([stim_channel.as_csv() for stim_channel in
-                          sorted(self.stim_channels.values(), key=lambda s: s.anodes[0])])
+                                          sorted(self.stim_channels.values(), key=lambda s: s.anodes[0])])
         if stim_channels_as_csv:
-            stim_channels_as_csv = '\n'+stim_channels_as_csv
+            stim_channels_as_csv = '\n' + stim_channels_as_csv
         return stim_channels_as_csv
+
+    @property
+    def monopolar_trans_matrix(self):
+        """
+        Function that computes transformation matrix that takes mixed mode (a.k. Medtronic bipolar) recording and
+        transforms it into monopolar recordings
+        The formula that we implement to do bipolar referencing is the following (example):
+        E5E1 = E5EREF - E1EREF => E5EREF= E5E1 + E!EREF
+        So we measure E1EREF and E5E1 and the task is to recover E5EREF
+
+        :return: {ndarray} transformation matrix - mixed-mode -> monopolar
+        """
+
+        num_channels = len(self.sense_channels.keys())
+
+        tr_mat = np.zeros((256, 256), dtype=np.int)
+        for i, sense_channel in enumerate(sorted(self.sense_channels.values(), key=lambda s: s.contact.jack_num)):
+            port_num = sense_channel.contact.port_num
+            tr_mat[port_num - 1, port_num - 1] = 1
+
+            ref_num = int(sense_channel.ref)
+            if ref_num != 0:
+                # tr_mat[port_num - 1, ref_num - 1] = -1 # this was based on the original document from Medtronic - possibly buggy version
+
+                tr_mat[
+                    port_num - 1, ref_num - 1] = 1  # correct implementation that follows pattern described in the docstring
+
+        # removing zero rows and columns
+        non_zero_mask = np.any(tr_mat != 0, axis=0)
+        tr_mat = tr_mat[non_zero_mask, :]
+        tr_mat = tr_mat[:, non_zero_mask]
+        return tr_mat
 
     def as_csv(self):
         if not self.initialized:
@@ -147,7 +182,6 @@ class ElectrodeConfig(object):
             stim_channels_csv=self.stim_channels_csv,
             **self.as_dict()
         )
-
 
     def __init__(self, filename=None):
 
@@ -245,11 +279,78 @@ class ElectrodeConfig(object):
             # getting rid of commas from description - this fools csv parser
             if description is None:
                 description = ''
-            description = description.replace(',','-')
+            description = description.replace(',', '-')
 
             self.contacts[code] = Contact(code, channel, channel, area, '#{}#'.format(description))
             self.sense_channels[code] = SenseChannel(self.contacts[code], code, channel / 32 + 1, '0', 'x',
                                                      '#{}#'.format(description))
+        self.initialized = True
+
+    def intitialize_from_dict_bipol_medtronic(self, contacts_dict, config_name, references=()):
+        """
+        This iterates over all contacts stored in contacts.json and produces a list of sense channels
+        that implement mixed-mode referencing scheme based on banks of 16 electrodes whenre first 2
+        electrodes are connected to C/R and the remaining ones (in a given bank) are referenced to the first electrode
+        (in a given bank). The function does not return anything but instead it alters the state of self
+        (i.e. ElectrodeConfig class)
+
+        :param contacts_dict: dict representing content of contacts.json
+        :param config_name: {str} name of the configuration
+        :param references: cufrrently unused
+        :return: None
+        """
+        step_fcn = lambda x: 1 * (x > 0)
+
+        self.config_version = '1.2'
+        self.config_name = config_name
+        content = contacts_dict.values()[0]
+        self.subject_id = content['code']
+        self.ref = 'REF:,0,common'
+        sorted_contact_values = sorted(content['contacts'].values(), key=lambda x: x['channel'])
+        bank_16_capacity = 16
+        num_comm_ref_channels = 2  # number of channels in each bank connected to common reference
+
+        # reference_contact = -1 # determines reference contact for the current bank
+
+        # first_channel = int(sorted_contact_values[0]['channel'])
+        # bank_16_num = first_channel/bank_16_capacity # specifies to which bank of 16 a given contact belongs to
+
+        bank_list_dict = defaultdict(list)
+
+        bank_id = lambda x, bank_capacity: x / bank_capacity if x % bank_capacity else (x / bank_capacity) - 1
+
+        for contact_entry in sorted_contact_values:
+            code = contact_entry['code']
+            channel = contact_entry['channel']
+            area = Contact.SURFACE_AREAS[contact_entry['type']]
+            description = contact_entry['description']
+
+            # getting rid of commas from description - this fools csv parser
+            if description is None:
+                description = ''
+            description = description.replace(',', '-')
+
+            self.contacts[code] = Contact(code, channel, channel, area, '#{}#'.format(description))
+
+            sense_channel_obj = SenseChannel(contact=self.contacts[code],
+                                             name=code,
+                                             mux=channel / 32 + 1,
+                                             ref='0',
+                                             x='x',
+                                             description='#{}#'.format(description))
+
+            # bank_list_dict[(int(channel)-1)/bank_16_capacity].append(sense_channel_obj)
+            bank_list_dict[bank_id(int(channel), bank_16_capacity)].append(sense_channel_obj)
+
+        for bank_num in sorted(bank_list_dict.keys()):
+            sense_channel_list = bank_list_dict[bank_num]
+            ref_sense_channel = sense_channel_list[0]
+            for i, sense_channel in enumerate(sense_channel_list):
+                if i >= num_comm_ref_channels:
+                    sense_channel.ref = str(ref_sense_channel.contact.port_num)
+                self.sense_channels[sense_channel.contact.name] = sense_channel
+
+        tr_mat = self.monopolar_trans_matrix
         self.initialized = True
 
     def intitialize_from_pairs_dict(self, pairs_dict, config_name):
@@ -269,7 +370,7 @@ class ElectrodeConfig(object):
             # getting rid of commas from description - this fools csv parser
             if description is None:
                 description = ''
-            description = description.replace(',','-')
+            description = description.replace(',', '-')
 
             self.contacts[ch1_code] = Contact(ch1_code, ch1_num, ch1_num, ch1_area, '#{}#'.format(description))
             self.contacts[ch2_code] = Contact(ch2_code, ch2_num, ch2_num, ch2_area, '#{}#'.format(description))
@@ -277,7 +378,6 @@ class ElectrodeConfig(object):
             self.sense_channels[code] = SenseChannel(self.contacts[ch1_code], ch2_code, ch1_num, ch2_num, 'x',
                                                      '#{}#'.format(description))
         self.initialized = True
-
 
     def parse_version(self, line, file):
         self.config_version = line.split(',')[1].strip('#')
@@ -373,15 +473,16 @@ def mkdir_p(path):
             raise
 
 
-def contacts_json_2_configuration_csv(contacts_json_path, output_dir, configuration_label='_ODIN',anodes=(),cathodes=()):
+def contacts_json_2_configuration_csv(contacts_json_path, output_dir, configuration_label='_ODIN', anodes=(),
+                                      cathodes=()):
     import json
     ec = ElectrodeConfig()
     contacts_dict = json.load(open(contacts_json_path))
     ec.intitialize_from_dict(contacts_dict, "FromJson")
-    for anode,cathode in zip(anodes,cathodes):
-        name = '_'.join([anode,cathode])
-        ec.stim_channels[name]=StimChannel(name=name,anodes=[ec.contacts[anode].jack_num],
-                                               cathodes=[ec.contacts[cathode].jack_num],comments='')
+    for anode, cathode in zip(anodes, cathodes):
+        name = '_'.join([anode, cathode])
+        ec.stim_channels[name] = StimChannel(name=name, anodes=[ec.contacts[anode].jack_num],
+                                             cathodes=[ec.contacts[cathode].jack_num], comments='')
     csv_out = ec.as_csv()
     try:
         mkdir_p(output_dir)
@@ -390,20 +491,114 @@ def contacts_json_2_configuration_csv(contacts_json_path, output_dir, configurat
         print 'Could not create %s directory' % output_dir
         return False
 
-    out_file_name = join(output_dir,'contacts'+configuration_label+'.csv')
+    out_file_name = join(output_dir, 'contacts' + configuration_label + '.csv')
 
     open(out_file_name, 'w').write(csv_out)
     return True
 
-def pairs_json_2_configuration_csv(pairs_json_path, output_dir, configuration_label='_ODIN',anodes=(),cathodes=()):
+
+def jacksheet_leads_2_contacts_json(jacksheet_path, leads_path, subject):
+    """
+    Generates "emulated" contact.json that does not include coordinates biut contains channel name, jacksheet number type, description netc
+    It is used to interface with the functions that expect contact.json
+
+    :param jacksheet_path: path to jacksheet file
+    :param leads_path: path to leads.txt file
+    :return: {json-dict} emulated contact.json
+    """
+
+    jacksheet_lines = []
+    jacksheet_array = None
+    jacksheet_dtype = [('jacksheet_num','i4'),('label','|S256')]
+
+    with open(jacksheet_path,'r') as jf:
+        for line in jf.readlines():
+            line = line.strip()
+            jacksheet_lines.append(line.split())
+
+        jacksheet_array = np.empty(len(jacksheet_lines),dtype=jacksheet_dtype)
+        for i, line in enumerate(jacksheet_lines):
+            jacksheet_array['jacksheet_num'][i] = int(line[0])
+            jacksheet_array['label'][i] = line[1]
+
+    leads_list = []
+    with open(leads_path,'r') as lf:
+        for line in lf.readlines():
+            line = line.strip()
+            leads_list.append(int(line))
+
+    leads_array = np.array(leads_list,dtype=np.int)
+
+    filter_mask = np.in1d(jacksheet_array['jacksheet_num'],leads_array)
+
+    jacksheet_array = jacksheet_array[filter_mask]
+
+    contacts_jn = JSONNode()
+    contacts_jn[subject] = JSONNode(code=subject,contacts='contacts')
+    # contacts_jn['code'] = subject
+    contacts_jn[subject]['contacts']=JSONNode()
+    contacts_entry_jn = contacts_jn[subject]['contacts']
+    for jacksheet_entry in jacksheet_array:
+        label = jacksheet_entry['label']
+        jack_num = int(jacksheet_entry['jacksheet_num'])
+
+        contacts_entry_jn[label] = JSONNode(channel=jack_num,code=label,description=None,type='S')
+        print
+
+    return contacts_jn
+
+
+def contacts_json_2_bipol_medtronic_configuration_csv(contacts_json_path, output_dir, configuration_label='_ODIN',
+                                                      anodes=(), cathodes=()):
+    """
+    Converts contacts.json file into Odin Tool .csv file that implements bipolar referencing based on banks of 16 electrodes
+    where first 4 electrodes int he bank are connected to C/R. Ut also saves transformation matrix (in the hdf5 format)
+    that allows recovery of monopolar recordings
+
+    :param contacts_json_path: path to contacts_json_path
+    :param output_dir: output directory for the .csv and .h5
+    :param configuration_label: label that gets inserted into .csv file name
+    :param anodes: list of stim anodes
+    :param cathodes: list of stim cathodes
+    :return: {boolean} flag that tells if the execution of function finished or not
+    """
+    import json
+    ec = ElectrodeConfig()
+    contacts_dict = json.load(open(contacts_json_path))
+    ec.intitialize_from_dict_bipol_medtronic(contacts_dict, "FromJsonBpolAuto")
+    for anode, cathode in zip(anodes, cathodes):
+        name = '_'.join([anode, cathode])
+        ec.stim_channels[name] = StimChannel(name=name, anodes=[ec.contacts[anode].jack_num],
+                                             cathodes=[ec.contacts[cathode].jack_num], comments='')
+    csv_out = ec.as_csv()
+    monopolar_trans_matrix = ec.monopolar_trans_matrix
+    try:
+        mkdir_p(output_dir)
+    except AttributeError:
+        print '\n\nERROR IN CREATING DIRECTORY:'
+        print 'Could not create %s directory' % output_dir
+        return False
+
+    out_file_name = join(output_dir, 'contacts' + configuration_label + '.csv')
+    open(out_file_name, 'w').write(csv_out)
+
+    monopolar_trans_matrix_fname = join(output_dir, 'monopolar_trans_matrix' + configuration_label + '.h5')
+
+    save_arrays_as_hdf5(fname=monopolar_trans_matrix_fname,
+                        array_dict={'monopolar_trans_matrix': monopolar_trans_matrix})
+
+    return True
+
+
+def pairs_json_2_configuration_csv(pairs_json_path, output_dir, configuration_label='_ODIN', anodes=(), cathodes=()):
     import json
     ec = ElectrodeConfig()
     pairs_dict = json.load(open(pairs_json_path))
     ec.intitialize_from_pairs_dict(pairs_dict, "FromJson")
-    for anode,cathode in zip(anodes,cathodes):
-        name = '_'.join([anode,cathode])
-        ec.stim_channels[name]=StimChannel(name=name,anodes=[ec.contacts[anode].jack_num],
-                                               cathodes=[ec.contacts[cathode].jack_num],comments='')
+    for anode, cathode in zip(anodes, cathodes):
+        name = '_'.join([anode, cathode])
+        ec.stim_channels[name] = StimChannel(name=name, anodes=[ec.contacts[anode].jack_num],
+                                             cathodes=[ec.contacts[cathode].jack_num], comments='')
     csv_out = ec.as_csv()
     try:
         mkdir_p(output_dir)
@@ -412,11 +607,10 @@ def pairs_json_2_configuration_csv(pairs_json_path, output_dir, configuration_la
         print 'Could not create %s directory' % output_dir
         return False
 
-    out_file_name = join(output_dir,'contacts'+configuration_label+'.csv')
+    out_file_name = join(output_dir, 'contacts' + configuration_label + '.csv')
 
     open(out_file_name, 'w').write(csv_out)
     return True
-
 
 
 def test_as_csv():
@@ -447,6 +641,38 @@ def test_from_dict():
     open(r"C:\OdinWiFiServer\ns2\montage\contacts.csv", 'w').write(csv_out)
 
 
+if __name__ == '__main__':
+    from pprint import pprint
+
+    # subject = 'R1232N'
+    subject = 'R1111M'
+    localization = 0
+    montage = 0
+    jr = JsonIndexReader('/protocols/r1.json')
+    output_dir = 'D:/experiment_configs1'
+    contacts_json_path = jr.get_value('contacts', subject=subject, montage=montage)
+
+    # # from JSONUtils import JSONNode
+    # # j_read = JSONNode().read(filename="d:\experiment_configs1\contacts_R1111M_demo.json")
+    # # contacts_json = j_read['R1111M']['contacts']
+    # contacts_json_path = 'd:\experiment_configs1\contacts_R1111M_demo.json'
+
+    jacksheet_path = 'D:/experiment_configs1/jacksheet_R1111M.txt'
+    leads_path = 'D:/experiment_configs1/leads_R1111M.txt'
+    contacts_json_content = jacksheet_leads_2_contacts_json(jacksheet_path=jacksheet_path, leads_path=leads_path, subject='R1111M')
+
+    # stim_channels = ['LAT1-LAT2', 'LAT3-LAT4']
+    stim_channels = ['LPOG14-LPOG15', 'LPOG15-LPOG16']
+    (anodes, cathodes) = zip(*[pair.split('-') for pair in stim_channels]) if stim_channels else ([], [])
+
+    success_flag = contacts_json_2_bipol_medtronic_configuration_csv(
+        contacts_json_path=contacts_json_path,
+        output_dir=output_dir, configuration_label=subject, anodes=anodes, cathodes=cathodes
+    )
+
+
+
+
 # if __name__ == '__main__':
 #     from pprint import pprint
 #     subject = 'R1232N'
@@ -463,8 +689,8 @@ def test_from_dict():
 #     success_flag = pairs_json_2_configuration_csv(
 #         pairs_json_path=pairs_json,
 #         output_dir=output_dir, configuration_label=subject, anodes=anodes, cathodes=cathodes
+#     )
 #
-# #  )
 #     # subject = 'R1232N'
 #     # localization = 0
 #     # montage = 0
@@ -484,4 +710,3 @@ def test_from_dict():
 #     test_from_dict()
 #     # pprint(ec.as_dict())
 #     # print(ec.as_csv())
-

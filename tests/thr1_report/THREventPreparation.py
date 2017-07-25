@@ -46,11 +46,21 @@ class THREventPreparation(ReportRamTask):
 
         if self.pipeline.sessions is None:
             event_files = sorted(
-                list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment=task)))
+                list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='THR1')))
         else:
             event_files = [json_reader.get_value('task_events',subject=subj_code,
-                                                 montage=montage,experiment=task,session=sess)
+                                                 montage=montage,experiment='THR1',session=sess)
                            for sess in sorted(self.pipeline.sessions)]
+
+        if len(event_files) == 0:
+            if self.pipeline.sessions is None:
+                event_files = sorted(
+                    list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage,
+                                                      experiment='THR')))
+            else:
+                event_files = [json_reader.get_value('task_events', subject=subj_code,
+                                                     montage=montage, experiment='THR', session=sess)
+                               for sess in sorted(self.pipeline.sessions)]
 
         events = None
         print event_files

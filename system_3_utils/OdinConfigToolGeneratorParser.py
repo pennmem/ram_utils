@@ -14,6 +14,7 @@ class OdinConfigToolGeneratorParser(object):
         self.parser.add_argument('--contacts-json',required=False,action='store',default='')
         self.parser.add_argument('--stim-channels',nargs='+',action='store')
         self.parser.add_argument('--contacts-json-output-dir',required=True,action='store',default='')
+        self.parser.add_argument('--bipolar', action="store_true", default=False,help="Enable bipolar (aka mixed-mode) referencing inthe ENS")
 
 
         self.arg_list=[]
