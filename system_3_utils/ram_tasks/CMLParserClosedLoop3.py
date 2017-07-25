@@ -34,6 +34,8 @@ class CMLParserCloseLoop3(object):
         self.parser.add_argument('--min-amplitudes',nargs='+',type=float)
         self.parser.add_argument('--max-amplitudes',nargs='+',type=float)
         self.parser.add_argument('--sessions',nargs='+',type=int)
+        self.parser.add_argument('--bipolar',action="store_true", default=False,
+                        help="Enables bipolar referencing - will copy bipolar_2_monopolar_transformation matrix to the config_files ")
 
 
         self.arg_list=[]
