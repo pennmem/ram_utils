@@ -11,7 +11,7 @@ from ptsa.data.readers import TalReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
 import hashlib
-
+import traceback
 
 def atlas_location(bp_data):
     atlases = bp_data['atlases']
@@ -117,6 +117,7 @@ class MontagePreparation(ReportRamTask):
             bp_tal_structs.to_pickle(self.get_path_to_resource_in_workspace(subject + '-bp_tal_structs.pkl'))
 
         except:
+            traceback.print_exc()
             self.raise_and_log_report_exception(
                                                 exception_type='MissingDataError',
                                                 exception_message='Missing or corrupt montage data for subject %s' % subject

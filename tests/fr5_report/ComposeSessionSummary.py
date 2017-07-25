@@ -623,13 +623,13 @@ class ComposeSessionSummary(ReportRamTask):
             session_summary.pc_from_stim_intr = 100*session_summary.n_stim_intr / float(session_summary.n_total_stim)
             session_summary.pc_from_nonstim_intr = 100*session_summary.n_nonstim_intr / float(session_summary.n_total_nonstim)
 
-            fr_stim_stim_list_stim_item_table = fr_stim_stim_list_table[fr_stim_stim_list_table['is_stim_item']]
-            fr_stim_stim_list_stim_item_low_table = fr_stim_stim_list_stim_item_table[fr_stim_stim_list_stim_item_table['prev_prob']<fr_stim_stim_list_stim_item_table['thresh']]
-            fr_stim_stim_list_stim_item_high_table = fr_stim_stim_list_stim_item_table[fr_stim_stim_list_stim_item_table['prev_prob']>fr_stim_stim_list_stim_item_table['thresh']]
+            fr_stim_stim_list_stim_item_table = fr_stim_stim_list_table[fr_stim_stim_list_table.is_stim_item.values.astype(bool)]
+            fr_stim_stim_list_stim_item_low_table = fr_stim_stim_list_stim_item_table.loc[fr_stim_stim_list_stim_item_table['prev_prob']<fr_stim_stim_list_stim_item_table['thresh']]
+            fr_stim_stim_list_stim_item_high_table = fr_stim_stim_list_stim_item_table.loc[fr_stim_stim_list_stim_item_table['prev_prob']>fr_stim_stim_list_stim_item_table['thresh']]
 
-            fr_stim_stim_list_post_stim_item_table = fr_stim_stim_list_table[fr_stim_stim_list_table['is_post_stim_item']]
-            fr_stim_stim_list_post_stim_item_low_table = fr_stim_stim_list_post_stim_item_table[fr_stim_stim_list_post_stim_item_table['prev_prob']<fr_stim_stim_list_post_stim_item_table['thresh']]
-            fr_stim_stim_list_post_stim_item_high_table = fr_stim_stim_list_post_stim_item_table[fr_stim_stim_list_post_stim_item_table['prev_prob']>fr_stim_stim_list_post_stim_item_table['thresh']]
+            fr_stim_stim_list_post_stim_item_table = fr_stim_stim_list_table.loc[fr_stim_stim_list_table['is_post_stim_item']]
+            fr_stim_stim_list_post_stim_item_low_table = fr_stim_stim_list_post_stim_item_table.loc[fr_stim_stim_list_post_stim_item_table['prev_prob']<fr_stim_stim_list_post_stim_item_table['thresh']]
+            fr_stim_stim_list_post_stim_item_high_table = fr_stim_stim_list_post_stim_item_table.loc[fr_stim_stim_list_post_stim_item_table['prev_prob']>fr_stim_stim_list_post_stim_item_table['thresh']]
 
             session_summary.mean_prob_diff_all_stim_item = fr_stim_stim_list_stim_item_table['prob_diff'].mean()
             session_summary.sem_prob_diff_all_stim_item = fr_stim_stim_list_stim_item_table['prob_diff'].sem()

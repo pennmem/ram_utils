@@ -42,17 +42,10 @@ else
     echo "Unknown experiment type"
     exit 1
 fi
-#anode1=LTG29
-#cathode1=LTG30
-#anode2=LTG30
-#cathode2=LTG31
-#target_amplitude=1.9
-#min_amplitude=0.1
-#max_amplitude=1.9
 
 today=$(date +%m_%d_%y)
 
-pulse_frequency=200
+read -p "Pulse frequency: " pulse_frequency
 stim_pair_1=${anode1}-${cathode1}
 stim_pair_2=${anode2}-${cathode2}
 
@@ -60,6 +53,7 @@ if [ -z "${config_file}" ]
 then
 
 config_dir="/scratch/leond/system3_configs/${experiment}_biomarkers/${subject}/electrode_configs"
+
 python ../../system_3_utils/odin_config_tool_generator.py --subject=${subject}\
  --contacts-json-output-dir=${config_dir}\
  --stim-channels ${stim_pair_1} ${stim_pair_2}
@@ -71,8 +65,8 @@ workspace_dir="/scratch/leond/system3_configs/${experiment}_biomarkers/${subject
 else
 workspace_dir="/scratch/system3_configs/${experiment}_biomarkers/${subject}/${subject}_${experiment}_${anode1}_${cathode1}_${max_amplitude_1}_${anode2}_${cathode2}_${max_amplitude_2}"
 fi
-
-python ../../tests/fr5_biomarker/system3/fr5_util_system_3.py\
+cd ../..
+python tests/fr5_biomarker/system3/fr5_util_system_3.py\
  --subject=${subject}\
  --workspace-dir=${workspace_dir}\
  --experiment=${experiment}\

@@ -55,8 +55,13 @@ class ComputePAL1Powers(ReportRamTask):
         subject = self.pipeline.subject
         task = self.pipeline.task
 
+        # stupid hack to fix the problem of bad events
         self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-pow_mat.pkl'))
-        self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
+        events = self.get_passed_object(task+'_events')
+        if len(events) != len(self.pow_mat):
+            self.run()
+        else:
+            self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
 
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)

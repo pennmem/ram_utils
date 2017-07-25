@@ -21,15 +21,23 @@ def atlas_location(bp_data):
         if (loc_tag is not None) and (loc_tag!='') and (loc_tag!='None'):
             return loc_tag
 
-    if (bp_data['type_1']=='D') and ('wb' in atlases):
+    elif 'manual' in atlases:
+        return atlases['manual']
+
+    elif (bp_data.get('type_1')=='D' or bp_data.get('type')=='D') and ('wb' in atlases):
         wb_loc = atlases['wb']['region']
         if (wb_loc is not None) and (wb_loc!='') and (wb_loc!='None'):
             return wb_loc
 
-    if 'ind' in atlases:
+    elif 'whole_brain' in atlases:
+        return atlases['whole_brain']
+
+    elif 'ind' in atlases:
         ind_loc = atlases['ind']['region']
         if (ind_loc is not None) and (ind_loc!='') and (ind_loc!='None'):
             return ('Left ' if atlases['ind']['x']<0.0 else 'Right ') + ind_loc
+    elif 'dk' in atlases:
+        return atlases['dk'].rpartition('_')[0]
 
     return '--'
 
@@ -88,36 +96,39 @@ class MontagePreparation(ReportRamTask):
         json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
         bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
 
-        try:
-            bp_path = os.path.join(self.pipeline.mount_point, next(iter(bp_paths)))
-            f_pairs = open(bp_path, 'r')
-            bipolar_data = json.load(f_pairs)[subject]['pairs']
-            f_pairs.close()
-            bipolar_data = {bp_tag:bp_data for bp_tag,bp_data in bipolar_data.iteritems() if not bp_data['is_stim_only']}
+        # try:
+        bp_path = os.path.join(self.pipeline.mount_point, next(iter(bp_paths)))
+        f_pairs = open(bp_path, 'r')
+        bipolar_data = json.load(f_pairs)[subject]['pairs']
+        f_pairs.close()
+        bipolar_data = {bp_tag:bp_data for bp_tag,bp_data in bipolar_data.iteritems() if not bp_data.get('is_stim_only')}
 
-            bp_tags = []
-            bp_tal_structs = []
-            for bp_tag,bp_data in bipolar_data.iteritems():
-                bp_tags.append(bp_tag)
-                ch1 = bp_data['channel_1']
-                ch2 = bp_data['channel_2']
+        bp_tags = []
+        bp_tal_structs = []
+        for bp_tag,bp_data in bipolar_data.iteritems():
+            bp_tags.append(bp_tag)
+            ch1 = bp_data['channel_1']
+            ch2 = bp_data['channel_2']
+            try:
                 bp_tal_structs.append(['%03d'%ch1, '%03d'%ch2, bp_data['type_1'], atlas_location(bp_data)])
+            except KeyError:
+                bp_tal_structs.append(['%03d'%ch1, '%03d'%ch2, bp_data['type'], atlas_location(bp_data)])
 
-            bp_tal_structs = pd.DataFrame(bp_tal_structs, index=bp_tags, columns=['channel_1', 'channel_2', 'etype', 'bp_atlas_loc'])
-            bp_tal_structs.sort_values(by=['channel_1', 'channel_2'], inplace=True)
-            monopolar_channels = np.unique(np.hstack((bp_tal_structs.channel_1.values,bp_tal_structs.channel_2.values)))
-            bipolar_pairs = zip(bp_tal_structs.channel_1.values,bp_tal_structs.channel_2.values)
+        bp_tal_structs = pd.DataFrame(bp_tal_structs, index=bp_tags, columns=['channel_1', 'channel_2', 'etype', 'bp_atlas_loc'])
+        bp_tal_structs.sort_values(by=['channel_1', 'channel_2'], inplace=True)
+        monopolar_channels = np.unique(np.hstack((bp_tal_structs.channel_1.values,bp_tal_structs.channel_2.values)))
+        bipolar_pairs = zip(bp_tal_structs.channel_1.values,bp_tal_structs.channel_2.values)
 
-            self.pass_object('monopolar_channels', monopolar_channels)
-            self.pass_object('bipolar_pairs', bipolar_pairs)
-            self.pass_object('bp_tal_structs', bp_tal_structs)
+        self.pass_object('monopolar_channels', monopolar_channels)
+        self.pass_object('bipolar_pairs', bipolar_pairs)
+        self.pass_object('bp_tal_structs', bp_tal_structs)
 
-            joblib.dump(monopolar_channels, self.get_path_to_resource_in_workspace(subject + '-monopolar_channels.pkl'))
-            joblib.dump(bipolar_pairs, self.get_path_to_resource_in_workspace(subject + '-bipolar_pairs.pkl'))
-            bp_tal_structs.to_pickle(self.get_path_to_resource_in_workspace(subject + '-bp_tal_structs.pkl'))
+        joblib.dump(monopolar_channels, self.get_path_to_resource_in_workspace(subject + '-monopolar_channels.pkl'))
+        joblib.dump(bipolar_pairs, self.get_path_to_resource_in_workspace(subject + '-bipolar_pairs.pkl'))
+        bp_tal_structs.to_pickle(self.get_path_to_resource_in_workspace(subject + '-bp_tal_structs.pkl'))
 
-        except:
-            self.raise_and_log_report_exception(
-                                                exception_type='MissingDataError',
-                                                exception_message='Missing or corrupt montage data for subject %s' % subject
-                                               )
+        # except:
+        #     self.raise_and_log_report_exception(
+        #                                         exception_type='MissingDataError',
+        #                                         exception_message='Missing or corrupt montage data for subject %s' % subject
+        #                                        )

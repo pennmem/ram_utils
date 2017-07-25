@@ -139,12 +139,21 @@ class ComputeFRStimTable(ReportRamTask):
         self.fr_stim_table['rejected'] = events.rejected
         self.fr_stim_table['item_name'] = events.item_name
         self.fr_stim_table['is_stim_list'] = [e.phase=='STIM' for e in events]
-        self.fr_stim_table['is_stim_item'] = is_stim_item
-        self.fr_stim_table['is_post_stim_item'] = is_post_stim_item
+        self.fr_stim_table['is_post_stim_item'] = np.zeros(len(self.fr_stim_table))
+        self.fr_stim_table['is_stim_item'] = events.is_stim.astype(np.bool)
         self.fr_stim_table['recalled'] = events.recalled
         self.fr_stim_table['thresh'] = 0.5
         self.fr_stim_table['is_ps4_session'] = is_ps4_session
+        for (session,lst),_ in self.fr_stim_table.groupby(('session','list')):
+            sess_list = (self.fr_stim_table.session==session) & (self.fr_stim_table.list==lst)
+            fr_stim_sess_list_table = self.fr_stim_table.loc[sess_list]
+            post_is_stim = np.concatenate(([False],fr_stim_sess_list_table.is_stim_item.values[:-1].astype(bool)))
+            self.fr_stim_table.loc[sess_list,'is_post_stim_item']=post_is_stim
 
+        stim_diffs = (self.fr_stim_table['is_stim_item'] != is_stim_item)
+        post_stim_diffs = (self.fr_stim_table['is_post_stim_item'] != is_post_stim_item)
+        print('%s differences between old and new stim items'%stim_diffs.sum())
+        print('%s differences between old and new post-stim items' % post_stim_diffs.sum())
         self.stim_params_to_sess = dict()
         self.sess_to_thresh = dict()
         pre_stim_probs = pre_stim_probs[self.fr_stim_table.is_stim_item.values]

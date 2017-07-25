@@ -19,11 +19,11 @@ class ComposeSessionSummary(ReportRamTask):
         subject = self.pipeline.subject
         task = self.pipeline.task
 
-        #events = self.get_passed_object(task + '_events')
-        math_events = self.get_passed_object(task + '_math_events')
-        intr_events = self.get_passed_object(task + '_intr_events')
-        rec_events = self.get_passed_object(task + '_rec_events')
-        all_events = self.get_passed_object(task + '_all_events')
+        events = self.get_passed_object('events')
+        math_events = self.get_passed_object('math_events')
+        intr_events = self.get_passed_object('intr_events')
+        rec_events = self.get_passed_object('rec_events')
+        all_events = self.get_passed_object('all_events')
         monopolar_channels = self.get_passed_object('monopolar_channels')
         xval_output = self.get_passed_object('xval_output')
         thresh = xval_output[-1].jstat_thresh
@@ -44,7 +44,9 @@ class ComposeSessionSummary(ReportRamTask):
         pal_stim_table_by_session = pal_stim_table.groupby(['session'])
         for session,pal_stim_session_table in pal_stim_table_by_session:
             session_all_events = all_events[all_events.session == session]
-            first_time_stamp = session_all_events[(session_all_events.type=='INSTRUCT_VIDEO_ON') | (session_all_events.type=='ORIENT')][0].mstime
+            first_time_stamp = session_all_events[(session_all_events.type=='INSTRUCT_VIDEO_ON')
+                                                  | (session_all_events.type=='ORIENT')
+                                                  | (session_all_events.type=='INSTRUCT_START')][0].mstime
             timestamps = session_all_events.mstime
             last_time_stamp = np.max(timestamps)
             session_length = '%.2f' % ((last_time_stamp - first_time_stamp) / 60000.0)
@@ -127,11 +129,14 @@ class ComposeSessionSummary(ReportRamTask):
             session_summary.n_total_stim = len(pal_stim_stim_list_table)
             session_summary.pc_from_stim = 100 * session_summary.n_correct_stim / float(session_summary.n_total_stim)
 
-            session_summary.n_correct_nonstim = pal_stim_non_stim_list_table.recalled.sum()
-            session_summary.n_total_nonstim = len(pal_stim_non_stim_list_table)
-            session_summary.pc_from_nonstim = 100 * session_summary.n_correct_nonstim / float(session_summary.n_total_nonstim)
 
-            session_summary.chisqr, session_summary.pvalue, _ = proportions_chisquare([session_summary.n_correct_stim, session_summary.n_correct_nonstim], [session_summary.n_total_stim, session_summary.n_total_nonstim])
+            session_summary.n_total_nonstim = len(pal_stim_non_stim_list_table)
+            if session_summary.n_total_nonstim>0:
+
+                session_summary.n_correct_nonstim = pal_stim_non_stim_list_table.recalled.sum()
+                session_summary.pc_from_nonstim = 100 * session_summary.n_correct_nonstim / float(session_summary.n_total_nonstim)
+
+                session_summary.chisqr, session_summary.pvalue, _ = proportions_chisquare([session_summary.n_correct_stim, session_summary.n_correct_nonstim], [session_summary.n_total_stim, session_summary.n_total_nonstim])
 
             stim_lists = pal_stim_stim_list_table['list'].unique()
             non_stim_lists = pal_stim_non_stim_list_table['list'].unique()
@@ -144,7 +149,9 @@ class ComposeSessionSummary(ReportRamTask):
                 if ev.intrusion in non_stim_lists:
                     session_summary.n_nonstim_intr += 1
             session_summary.pc_from_stim_intr = 100*session_summary.n_stim_intr / float(session_summary.n_total_stim)
-            session_summary.pc_from_nonstim_intr = 100*session_summary.n_nonstim_intr / float(session_summary.n_total_nonstim)
+
+            if session_summary.n_total_nonstim>0:
+                session_summary.pc_from_nonstim_intr = 100*session_summary.n_nonstim_intr / float(session_summary.n_total_nonstim)
 
             pal_stim_stim_list_stim_item_table = pal_stim_stim_list_table[pal_stim_stim_list_table['is_stim_item']]
             pal_stim_stim_list_stim_item_low_table = pal_stim_stim_list_stim_item_table[pal_stim_stim_list_stim_item_table['prev_prob']<thresh]

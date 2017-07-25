@@ -8,7 +8,12 @@ import time
 
 
 parser = CMLParser()
-parser.parser.add_argument('--classsifier')
+parser.parser.add_argument('--classifier')
+
+parser.arg('--subject','R1312N')
+parser.arg('--workspace-dir','scratch',)
+parser.arg('--mount-point','/Volumes/rhino_root')
+parser.arg('--classifier','pal')
 
 args_obj=parser.parse()
 
@@ -111,17 +116,17 @@ if __name__ == '__main__':
                                          mount_point=args_obj.mount_point,
                                          args=args_obj)
 
-        report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
-
-        report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
-
         report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
 
         report_pipeline.add_task(PAL5EventPreparation(mark_as_completed=False))
 
+        report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
+
+        report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
+
         report_pipeline.add_task(CombinedEventPreparation(mark_as_completed=False))
 
-        report_pipeline.add_task(ComputePowers(params=params, mark_as_completed=(True & args_obj.allow_fast_rerun)))
+        report_pipeline.add_task(ComputePowers(params=params, mark_as_completed=True))
 
         report_pipeline.add_task(ComputePAL5Powers(params=params,mark_as_completed=True))
 

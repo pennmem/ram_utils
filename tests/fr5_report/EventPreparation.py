@@ -114,9 +114,12 @@ class FR5EventPreparation(ReportRamTask):
         montage = 0 if len(temp)==1 else temp[1]
         task = self.pipeline.task
 
-        events = np.concatenate([ BaseEventReader(filename=event_path).read() for event_path in
-                                sorted(jr.aggregate_values('task_events',subject=subject,montage=montage,experiment=task))]
-                                ).view(np.recarray)
+        fr5_sessions = [s for s in jr.sessions(subject=subject,montage=montage,experiment=task)
+                        if not jr.aggregate_values('ps4_events',subject=subject,montage=montage,experiment=task,session=s)
+                        ]
+        events = np.concatenate([ BaseEventReader(
+            filename=jr.get_value('task_events',subject=subject,montage=montage,experiment=task,session=s)).read()
+                                  for s in fr5_sessions]).view(np.recarray)
 
 
         events = events[events.list>-1]

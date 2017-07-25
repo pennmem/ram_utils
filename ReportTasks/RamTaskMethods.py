@@ -196,7 +196,7 @@ def compute_powers(events, monopolar_channels, bipolar_pairs,
     return pow_mat, events
 
 
-"""======================================== Classifier Functions =================================================== """
+# """======================================== Classifier Functions =================================================== """
 
 
 class ModelOutput(object):
@@ -376,18 +376,15 @@ def run_lolo_xval(events, recalls, pow_mat, lr_classifier, xval_output, permuted
 
 
 def run_loso_xval(event_sessions, recalls, pow_mat, classifier, xval_output, permuted=False, **kwargs):
-    if permuted:
-        for sess in event_sessions:
+    sessions = np.unique(event_sessions)
+    probs = np.empty_like(recalls, dtype=np.float)
+    for sess in sessions:
+        if permuted:
             sel = (event_sessions == sess)
             sess_permuted_recalls = recalls[sel]
             shuffle(sess_permuted_recalls)
             recalls[sel] = sess_permuted_recalls
 
-    probs = np.empty_like(recalls, dtype=np.float)
-
-    sessions = np.unique(event_sessions)
-
-    for sess in sessions:
         insample_mask = (event_sessions != sess)
         insample_pow_mat = pow_mat[insample_mask]
         insample_recalls = recalls[insample_mask]
@@ -456,7 +453,7 @@ def free_epochs(times, duration, pre, post, start=None, end=None):
         for interval in free_intervals:
             begin = post_times[interval]
             finish = pre_times[interval + 1] - duration
-            interval_epoch_times = range(begin, finish, duration)
+            interval_epoch_times = range(int(begin), int(finish), int(duration))
             trial_epoch_times.extend(interval_epoch_times)
         epoch_times.append(np.array(trial_epoch_times))
     epoch_array = np.empty((n_trials, max([len(x) for x in epoch_times])))

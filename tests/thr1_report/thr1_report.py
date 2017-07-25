@@ -11,8 +11,8 @@ from os.path import *
 from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1294C')
-cml_parser.arg('--task','THR')
+cml_parser.arg('--subject','R1315T')
+cml_parser.arg('--task','THR1')
 cml_parser.arg('--workspace-dir','/scratch/jfm2/THR_reports')
 cml_parser.arg('--mount-point','')
 #cml_parser.arg('--recompute-on-no-status')
