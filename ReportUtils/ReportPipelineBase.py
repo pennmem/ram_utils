@@ -27,7 +27,7 @@ class ReportPipelineBase(RamPipeline):
             args=None
 
 
-        for option_name  in self.__option_list[1:]:
+        for option_name  in self.__option_list:
             try:
                 # first check in kwds
                 option_val = options[option_name]

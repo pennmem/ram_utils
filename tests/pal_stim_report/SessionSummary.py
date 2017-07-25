@@ -28,16 +28,16 @@ class SessionSummary(object):
         self.is_stim_list = None
         self.n_correct_stim = None
         self.n_total_stim = None
-        self.pc_from_stim = None
+        self.pc_from_stim = -1.0
         self.n_correct_nonstim = None
         self.n_total_nonstim = None
-        self.pc_from_nonstim = None
+        self.pc_from_nonstim = -1.0
         self.chisqr = None
         self.pvalue = None
         self.n_stim_intr = None
         self.pc_from_stim_intr = None
         self.n_nonstim_intr = None
-        self.pc_from_nonstim_intr = None
+        self.pc_from_nonstim_intr = -1.0
         self.chisqr_intr = None
         self.pvalue_intr = None
 
