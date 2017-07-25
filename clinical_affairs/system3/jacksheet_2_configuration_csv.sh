@@ -7,9 +7,9 @@
 
 # subject=R1111M
 read -p "SUBJECT:" subject
-read -p "LOCALIZATION:" localization
+#read -p "LOCALIZATION:" localization
 #localization=0
-read -p "MONTAGE:" montage
+#read -p "MONTAGE:" montage
 #montage=0
 #stim_pair=LPOG10-LPOG11
 read -p "STIM PAIR[S]:" stim_pair
@@ -18,7 +18,7 @@ read -p 'Use mixed-mode referencing (aka bipolar ENS referencing )[y/n] : ' bipo
 
 #read -p "Mixed mode referencing (aka bipolar referencing) [y/n]" mixed_mode_referencing
 
-contacts_json="/protocols/r1/subjects/${subject}/localizations/${localization}/montages/${montage}/neuroradiology/current_processed/contacts.json"
+#contacts_json="/protocols/r1/subjects/${subject}/localizations/${localization}/montages/${montage}/neuroradiology/current_processed/contacts.json"
 jacksheet="/data/eeg/${subject}/docs/jacksheet.txt"
 leads="/data/eeg/${subject}/tal/leads.txt"
 
