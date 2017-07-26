@@ -6,7 +6,6 @@ print "Windows binaries from https://github.com/busygin/morlet_for_sys2_biomarke
 print "See https://github.com/busygin/morlet_for_sys2_biomarker/blob/master/README for detail."
 
 from os.path import *
-import sys
 from system_3_utils.ram_tasks.CMLParserClosedLoop3 import CMLParserCloseLoop3
 
 cml_parser = CMLParserCloseLoop3(arg_count_threshold=1)
@@ -137,17 +136,17 @@ params = Params()
 #     raise ConfigError('Unknown config file type')
 
 
-# TODO - we need to check if all files need for bipolar referencing are ready before executing the whole pipeine
-
-if args.bipolar:
-    electrode_config_file = args.electrode_config_file
-    electrode_config_file_dir = dirname(electrode_config_file)
-    trans_matrix_fname = join(electrode_config_file_dir, 'monopolar_trans_matrix%s.h5' % args.subject)
-
-    if not exists(trans_matrix_fname):
-        print ('Bipolar referencing needs %s' % ('monopolar_trans_matrix%s.h5' % args.subject))
-        print ('Please run jacksheet_2_configuration_csv.sh script located in clinical_affairs/syste,3 folder of the RAM_UTILS repository')
-        sys.exit(1)
+# # TODO - we need to check if all files need for bipolar referencing are ready before executing the whole pipeine
+#
+# if args.bipolar:
+#     electrode_config_file = args.electrode_config_file
+#     electrode_config_file_dir = dirname(electrode_config_file)
+#     trans_matrix_fname = join(electrode_config_file_dir, 'monopolar_trans_matrix%s.h5' % args.subject)
+#
+#     if not exists(trans_matrix_fname):
+#         print ('Bipolar referencing needs %s' % ('monopolar_trans_matrix%s.h5' % args.subject))
+#         print ('Please run jacksheet_2_configuration_csv.sh script located in clinical_affairs/syste,3 folder of the RAM_UTILS repository')
+#         sys.exit(1)
 
 
 class ReportPipeline(RamPipeline):
