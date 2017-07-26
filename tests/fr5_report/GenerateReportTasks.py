@@ -329,6 +329,7 @@ class GenerateTex(ReportRamTask):
                                  '<SESSIONS>':          sessions,
                                  '<STIMTAG>':           session_summary.stimtag,
                                  '<REGION>':            session_summary.region_of_interest,
+                                 '<PULSE_FREQ>':        session_summary.frequency,
                                  '<AMPLITUDE>':         session_summary.amplitude,
                                  '<N_WORDS>':           session_summary.n_words,
                                  '<N_CORRECT_WORDS>':   session_summary.n_correct_words,
