@@ -27,4 +27,4 @@ python /home1/mswat/RAM_UTILS_GIT/tests/fr1_report/fr1_report_all.py  --task=RAM
 
 #--exit-on-no-change
 
-#python fr1_report.py --subject=$1 --task=RAM_FR1 --workspace-dir=/scratch/pwanda/FR1_reports --mount-point='' --python-path=/home2/losu/ram_utils --python-path=/home2/losu/python/ptsa_latest
+#python fr1_raa_report.py --subject=$1 --task=RAM_FR1 --workspace-dir=/scratch/pwanda/FR1_reports --mount-point='' --python-path=/home2/losu/ram_utils --python-path=/home2/losu/python/ptsa_latest
