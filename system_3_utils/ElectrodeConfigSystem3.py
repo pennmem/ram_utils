@@ -582,11 +582,13 @@ def contacts_json_2_bipol_medtronic_configuration_csv(contacts_json_path, output
     out_file_name = join(output_dir, 'contacts' + configuration_label + '.csv')
     open(out_file_name, 'w').write(csv_out)
 
-    monopolar_trans_matrix_fname = join(output_dir, 'monopolar_trans_matrix' + configuration_label + '.h5')
+    # we decided not to save monopolar_trans_matrix
 
-    save_arrays_as_hdf5(fname=monopolar_trans_matrix_fname,
-                        array_dict={'monopolar_trans_matrix': monopolar_trans_matrix})
-
+    # monopolar_trans_matrix_fname = join(output_dir, 'monopolar_trans_matrix' + configuration_label + '.h5')
+    #
+    # save_arrays_as_hdf5(fname=monopolar_trans_matrix_fname,
+    #                     array_dict={'monopolar_trans_matrix': monopolar_trans_matrix})
+    #
     return True
 
 

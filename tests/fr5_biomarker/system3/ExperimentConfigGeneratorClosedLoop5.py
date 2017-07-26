@@ -163,18 +163,18 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
         self.copy_resource_to_target_dir(resource_filename=electrode_config_file_core+'.bin', target_dir=config_files_dir)
         self.copy_resource_to_target_dir(resource_filename=electrode_config_file_core + '.csv',
                                          target_dir=config_files_dir)
-
-        # copy transformation matrix hdf5 file (if such exists)
-
-        electrode_config_file_dir = dirname(electrode_config_file)
-        trans_matrix_fname =  join(electrode_config_file_dir,'monopolar_trans_matrix%s.h5'%subject)
-
-        if self.pipeline.args.bipolar:
-            if exists(trans_matrix_fname):
-                self.copy_resource_to_target_dir(resource_filename=trans_matrix_fname,target_dir=config_files_dir)
-            else:
-                print ('. Could not find bipolar_2 monpopolar transformation matrix . You have requested bipolar referencing in the ENS ')
-                print 'Configuration will be invalid'
+        #
+        # # copy transformation matrix hdf5 file (if such exists)
+        #
+        # electrode_config_file_dir = dirname(electrode_config_file)
+        # trans_matrix_fname =  join(electrode_config_file_dir,'monopolar_trans_matrix%s.h5'%subject)
+        #
+        # if self.pipeline.args.bipolar:
+        #     if exists(trans_matrix_fname):
+        #         self.copy_resource_to_target_dir(resource_filename=trans_matrix_fname,target_dir=config_files_dir)
+        #     else:
+        #         print ('. Could not find bipolar_2 monpopolar transformation matrix . You have requested bipolar referencing in the ENS ')
+        #         print 'Configuration will be invalid'
 
 
 
