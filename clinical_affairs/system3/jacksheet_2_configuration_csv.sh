@@ -1,6 +1,6 @@
 #
-# This script generates mixed-mode (aka bipolar) electrode config file (.csv) that is an input to  Odin Configuration Tool
-# In the future it willbe able to generate both bipolar and monopolar .csv files
+# This script generates mixed-mode (aka bipolar)  or monopolar electrode config file (.csv) that is an input to  Odin Configuration Tool
+# `It is a good idea to specify output dir individually for each patient/configuration
 #
 #
 #

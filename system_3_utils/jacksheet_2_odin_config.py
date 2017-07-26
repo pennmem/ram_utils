@@ -68,7 +68,7 @@ print subject_code, montage
 #     contacts_json_path = args.contacts_json
 
 contacts_json_content = jacksheet_leads_2_contacts_json(jacksheet_path=args.jacksheet, leads_path=args.leads, subject=args.subject)
-contacts_json_path = join(args.output_dir,'emulated_contacts_%s_.json'%args.subject)
+contacts_json_path = join(args.output_dir,'emulated_contacts_%s.json'%args.subject)
 
 contacts_json_content.write(contacts_json_path)
 
@@ -87,9 +87,9 @@ if args.contacts_json is not None:
     else:
         success_flag = contacts_json_2_configuration_csv(
             contacts_json_path=contacts_json_path,
-            output_dir=args.coutput_dir, configuration_label=args.subject, anodes=anodes, cathodes=cathodes
+            output_dir=args.output_dir, configuration_label=args.subject, anodes=anodes, cathodes=cathodes
         )
     if success_flag:
-        print 'GENERATED CSV FILE in %s FOR Odin Config Tool' % args.contacts_json_output_dir
+        print 'GENERATED CSV FILE in %s FOR Odin Config Tool' % args.output_dir
     else:
         print 'ERRORS WERE ENCOUNTERED. NO FILE WAS GENERATED'
