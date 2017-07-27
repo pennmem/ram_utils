@@ -46,11 +46,11 @@ dependencies:
 - xlrd=1.0.0=py27_0
 - zlib=1.2.8=3
 - ptsa
+- pytables=3.3.0
 - pip:
   - backports-abc==0.5
   - backports.ssl-match-hostname==3.4.0.2
   - pywavelets==0.4.0
   - xarray==0.8.2
   - prompt_toolkit
-#  - ptsa==1.0.3
 
