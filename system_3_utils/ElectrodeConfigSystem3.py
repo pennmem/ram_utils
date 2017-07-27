@@ -543,7 +543,6 @@ def jacksheet_leads_2_contacts_json(jacksheet_path, leads_path, subject):
         jack_num = int(jacksheet_entry['jacksheet_num'])
 
         contacts_entry_jn[label] = JSONNode(channel=jack_num,code=label,description=None,type='S')
-        print
 
     return contacts_jn
 
