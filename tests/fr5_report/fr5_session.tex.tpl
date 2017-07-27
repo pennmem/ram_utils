@@ -1,7 +1,7 @@
 \clearpage
 
 \begin{center}
-\textbf{\Large <STIMTAG> (<REGION>), 200 Hz, <AMPLITUDE> mA , Session(s): <SESSIONS>}
+\textbf{\Large <STIMTAG> (<REGION>), <PULSE_FREQ> Hz, <AMPLITUDE> mA , Session(s): <SESSIONS>}
 \end{center}
 
 \begin{table}[!h]

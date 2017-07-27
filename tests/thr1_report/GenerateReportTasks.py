@@ -27,7 +27,7 @@ class GenerateTex(ReportRamTask):
         n_sess = self.get_passed_object('NUMBER_OF_SESSIONS')
         n_bps = self.get_passed_object('NUMBER_OF_ELECTRODES')
 
-        tex_combined_template = task + '_combined.tex.tpl'
+        tex_combined_template = 'THR1_combined.tex.tpl'
         combined_report_tex_file_name = '%s_%s_report.tex' % (subject,task)
 
         self.set_file_resources_to_move(combined_report_tex_file_name, dst='reports')
