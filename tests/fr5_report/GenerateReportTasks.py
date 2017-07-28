@@ -413,7 +413,7 @@ class GenerateReportPDF(ReportRamTask):
 
 
 class DeployReportPDF(ReportRamTask):
-    def __init__(self, mark_as_completed=True):
+    def __init__(self, mark_as_completed=False):
         super(DeployReportPDF,self).__init__(mark_as_completed)
 
     def run(self):
