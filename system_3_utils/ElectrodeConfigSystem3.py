@@ -211,6 +211,8 @@ class ElectrodeConfig(object):
         )
 
         self.initialized = False
+        self.num_comm_ref_channels = 2  # number of channels in each bank connected to common reference
+        self.bank_capacity = 16 # number of channels in each bank (not each mux)
 
         if filename is not None:
             self.initialize(filename)
@@ -264,6 +266,10 @@ class ElectrodeConfig(object):
 
             self.initialized = True
 
+    def initialize_mixed_mode(self,config_filename):
+        self.initialize(config_filename=config_filename)
+        self.set_mixed_mode_references()
+
     def intitialize_from_dict(self, contacts_dict, config_name):
         self.config_version = '1.2'
         self.config_name = config_name
@@ -285,6 +291,10 @@ class ElectrodeConfig(object):
             self.sense_channels[code] = SenseChannel(self.contacts[code], code, channel / 32 + 1, '0', 'x',
                                                      '#{}#'.format(description))
         self.initialized = True
+
+    @staticmethod
+    def bank_id(channel,bank_capacity):
+        return channel/bank_capacity  if channel % bank_capacity else (channel/bank_capacity)-1
 
     def intitialize_from_dict_bipol_medtronic(self, contacts_dict, config_name, references=()):
         """
@@ -308,7 +318,6 @@ class ElectrodeConfig(object):
         self.ref = 'REF:,0,common'
         sorted_contact_values = sorted(content['contacts'].values(), key=lambda x: x['channel'])
         bank_16_capacity = 16
-        num_comm_ref_channels = 2  # number of channels in each bank connected to common reference
 
         # reference_contact = -1 # determines reference contact for the current bank
 
@@ -317,7 +326,7 @@ class ElectrodeConfig(object):
 
         bank_list_dict = defaultdict(list)
 
-        bank_id = lambda x, bank_capacity: x / bank_capacity if x % bank_capacity else (x / bank_capacity) - 1
+        # bank_id = lambda x, bank_capacity: x / bank_capacity if x % bank_capacity else (x / bank_capacity) - 1
 
         for contact_entry in sorted_contact_values:
             code = contact_entry['code']
@@ -340,18 +349,37 @@ class ElectrodeConfig(object):
                                              description='#{}#'.format(description))
 
             # bank_list_dict[(int(channel)-1)/bank_16_capacity].append(sense_channel_obj)
-            bank_list_dict[bank_id(int(channel), bank_16_capacity)].append(sense_channel_obj)
+            bank_list_dict[self.bank_id(int(channel), bank_16_capacity)].append(sense_channel_obj)
 
         for bank_num in sorted(bank_list_dict.keys()):
             sense_channel_list = bank_list_dict[bank_num]
             ref_sense_channel = sense_channel_list[0]
             for i, sense_channel in enumerate(sense_channel_list):
-                if i >= num_comm_ref_channels:
+                if i >= self.num_comm_ref_channels:
                     sense_channel.ref = str(ref_sense_channel.contact.port_num)
                 self.sense_channels[sense_channel.contact.name] = sense_channel
 
         tr_mat = self.monopolar_trans_matrix
         self.initialized = True
+
+
+    def set_mixed_mode_references(self):
+        bank_list_dict = defaultdict(list)
+        for sense_channel in self.sense_channels.values():
+            channel = sense_channel.contact.port_num
+            bank_list_dict[self.bank_id(int(channel), self.bank_capacity)].append(sense_channel)
+        for bank_num in sorted(bank_list_dict.keys()):
+            sense_channel_list = bank_list_dict[bank_num]
+            ref_sense_channel = sense_channel_list[0]
+            for i, sense_channel in enumerate(sense_channel_list):
+                if i >= self.num_comm_ref_channels:
+                    sense_channel.ref = str(ref_sense_channel.contact.port_num)
+                self.sense_channels[sense_channel.contact.name] = sense_channel
+
+
+
+
+
 
     def intitialize_from_pairs_dict(self, pairs_dict, config_name):
         self.config_version = '1.2'
@@ -497,6 +525,21 @@ def contacts_json_2_configuration_csv(contacts_json_path, output_dir, configurat
     return True
 
 
+def monopolar_to_mixed_mode_config(config_file,output_dir):
+    ec = ElectrodeConfig()
+    ec.initialize_mixed_mode(config_filename=config_file)
+
+    mkdir_p(os.path.abspath(output_dir))
+    if isfile(os.path.join(output_dir,config_file)):
+        split_config_file = os.path.splitext(config_file)
+        outfile = '%s%s.%s'%(split_config_file[0],'_mixed_mode.',split_config_file[-1])
+    else:
+        outfile = config_file
+    with open(os.path.join(output_dir,outfile),'w') as out:
+        out.write(ec.as_csv())
+    return True
+
+
 def jacksheet_leads_2_contacts_json(jacksheet_path, leads_path, subject):
     """
     Generates "emulated" contact.json that does not include coordinates biut contains channel name, jacksheet number type, description netc
@@ -535,7 +578,6 @@ def jacksheet_leads_2_contacts_json(jacksheet_path, leads_path, subject):
 
     contacts_jn = JSONNode()
     contacts_jn[subject] = JSONNode(code=subject,contacts='contacts')
-    # contacts_jn['code'] = subject
     contacts_jn[subject]['contacts']=JSONNode()
     contacts_entry_jn = contacts_jn[subject]['contacts']
     for jacksheet_entry in jacksheet_array:
@@ -674,40 +716,3 @@ if __name__ == '__main__':
 
 
 
-# if __name__ == '__main__':
-#     from pprint import pprint
-#     subject = 'R1232N'
-#     localization = 0
-#     montage = 0
-#     jr = JsonIndexReader('/protocols/r1.json')
-#     output_dir = 'D:/experiment_configs1'
-#     pairs_json = jr.get_value('pairs',subject=subject,montage=montage)
-#
-#     stim_channels = ['LAT1-LAT2','LAT3-LAT4']
-#
-#     (anodes,cathodes) = zip(*[pair.split('-') for pair in stim_channels]) if stim_channels else ([],[])
-#
-#     success_flag = pairs_json_2_configuration_csv(
-#         pairs_json_path=pairs_json,
-#         output_dir=output_dir, configuration_label=subject, anodes=anodes, cathodes=cathodes
-#     )
-#
-#     # subject = 'R1232N'
-#     # localization = 0
-#     # montage = 0
-#     # jr = JsonIndexReader('/protocols/r1.json')
-#     # output_dir = 'D:/experiment_configs1'
-#     # contacts_json = jr.get_value('contacts', subject=subject, montage=montage)
-#     #
-#     # success_flag = contacts_json_2_configuration_csv(
-#     #     contacts_json_path=contacts_json,
-#     #     output_dir=output_dir, configuration_label=subject, anodes=[], cathodes=[]
-#     # )
-
-# if __name__ == '__main__':
-#     from pprint import pprint
-#
-#     # ec = test_as_csv()
-#     test_from_dict()
-#     # pprint(ec.as_dict())
-#     # print(ec.as_csv())

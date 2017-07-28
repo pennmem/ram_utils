@@ -8,8 +8,8 @@ python odin_config_tool_generator.py --subject SUBJECT  --output-dir OUTPUT_DIR 
 """
 
 from OdinConfigToolGeneratorParser import OdinConfigToolGeneratorParser
-from system_3_utils.ElectrodeConfigSystem3 import contacts_json_2_configuration_csv, \
-    contacts_json_2_bipol_medtronic_configuration_csv, jacksheet_leads_2_contacts_json
+from system_3_utils.ElectrodeConfigSystem3 import (contacts_json_2_configuration_csv,
+    contacts_json_2_bipol_medtronic_configuration_csv, jacksheet_leads_2_contacts_json,monopolar_to_mixed_mode_config)
 from ptsa.data.readers.IndexReader import JsonIndexReader
 import argparse
 import sys
@@ -66,30 +66,33 @@ print subject_code, montage
 #     contacts_json_path = jr.get_value('contacts', subject=subject_code, montage=montage)
 # else:
 #     contacts_json_path = args.contacts_json
+success_flag = False
+if args.jacksheet.endswith('csv') and args.bipolar:
+    success_flag = monopolar_to_mixed_mode_config(args.jacksheet,args.output_dir)
+else:
+    contacts_json_content = jacksheet_leads_2_contacts_json(jacksheet_path=args.jacksheet, leads_path=args.leads, subject=args.subject)
+    contacts_json_path = join(args.output_dir,'emulated_contacts_%s.json'%args.subject)
 
-contacts_json_content = jacksheet_leads_2_contacts_json(jacksheet_path=args.jacksheet, leads_path=args.leads, subject=args.subject)
-contacts_json_path = join(args.output_dir,'emulated_contacts_%s.json'%args.subject)
-
-contacts_json_content.write(contacts_json_path)
+    contacts_json_content.write(contacts_json_path)
 
 
-print contacts_json_path
+    print contacts_json_path
 
-(anodes, cathodes) = zip(*[pair.split('-') for pair in args.stim_channels]) if args.stim_channels else ([], [])
-# generating .csv file for Odin Config Tool based on contacts.json
-if args.contacts_json is not None:
+    (anodes, cathodes) = zip(*[pair.split('-') for pair in args.stim_channels]) if args.stim_channels else ([], [])
+    # generating .csv file for Odin Config Tool based on contacts.json
+    if args.contacts_json is not None:
 
-    if args.bipolar:
-        success_flag = contacts_json_2_bipol_medtronic_configuration_csv(
-            contacts_json_path=contacts_json_path,
-            output_dir=args.output_dir, configuration_label=args.subject, anodes=anodes, cathodes=cathodes
-        )
-    else:
-        success_flag = contacts_json_2_configuration_csv(
-            contacts_json_path=contacts_json_path,
-            output_dir=args.output_dir, configuration_label=args.subject, anodes=anodes, cathodes=cathodes
-        )
-    if success_flag:
-        print 'GENERATED CSV FILE in %s FOR Odin Config Tool' % args.output_dir
-    else:
-        print 'ERRORS WERE ENCOUNTERED. NO FILE WAS GENERATED'
+        if args.bipolar:
+            success_flag = contacts_json_2_bipol_medtronic_configuration_csv(
+                contacts_json_path=contacts_json_path,
+                output_dir=args.output_dir, configuration_label=args.subject, anodes=anodes, cathodes=cathodes
+            )
+        else:
+            success_flag = contacts_json_2_configuration_csv(
+                contacts_json_path=contacts_json_path,
+                output_dir=args.output_dir, configuration_label=args.subject, anodes=anodes, cathodes=cathodes
+            )
+if success_flag:
+    print 'GENERATED CSV FILE in %s FOR Odin Config Tool' % args.output_dir
+else:
+    print 'ERRORS WERE ENCOUNTERED. NO FILE WAS GENERATED'
