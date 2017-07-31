@@ -526,17 +526,20 @@ def contacts_json_2_configuration_csv(contacts_json_path, output_dir, configurat
 
 
 def monopolar_to_mixed_mode_config(config_file,output_dir):
+    """
+    Loads an electrode config file, and saves a mixed-mode config file with the same name and contacts to output_dir.
+    :param config_file:
+    :param output_dir:
+    :return:
+    """
     ec = ElectrodeConfig()
     ec.initialize_mixed_mode(config_filename=config_file)
     config_base = os.path.basename(config_file)
+    if 'mixed_mode' not in config_base:
+        config_base += '_mixed_mode'
     mkdir_p(os.path.abspath(output_dir))
-    if isfile(os.path.join(output_dir,config_base)):
-        split_config_file = os.path.splitext(config_base)
-        outfile = '%s%s%s'%(split_config_file[0],'_mixed_mode',split_config_file[-1])
-    else:
-        outfile = config_base
-    with open(os.path.join(output_dir,outfile),'w') as out:
-        print('Saving %s'%outfile)
+    with open(os.path.join(output_dir,config_base),'w') as out:
+        print('Saving %s'%config_base)
         out.write(ec.as_csv())
     return True
 
