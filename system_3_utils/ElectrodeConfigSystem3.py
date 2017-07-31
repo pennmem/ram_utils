@@ -534,9 +534,9 @@ def monopolar_to_mixed_mode_config(config_file,output_dir):
     """
     ec = ElectrodeConfig()
     ec.initialize_mixed_mode(config_filename=config_file)
-    config_base = os.path.basename(config_file)
+    config_base = os.path.splitext(os.path.basename(config_file))
     if 'mixed_mode' not in config_base:
-        config_base += '_mixed_mode'
+        config_base = '%s_mixed_mode%s'%(config_base[0],config_base[-1])
     mkdir_p(os.path.abspath(output_dir))
     with open(os.path.join(output_dir,config_base),'w') as out:
         print('Saving %s'%config_base)
