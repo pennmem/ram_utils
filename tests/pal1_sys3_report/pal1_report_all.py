@@ -8,8 +8,8 @@ from ReportUtils import CMLParser, ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
 cml_parser.arg('--task','PAL1')
-cml_parser.arg('--workspace-dir','/scratch/busygin/PAL1_reports')
-cml_parser.arg('--mount-point','')
+cml_parser.arg('--workspace-dir','/Volumes/rhino_root/scratch/leond/PAL1_reports')
+cml_parser.arg('--mount-point','/Volumes/rhino_root')
 cml_parser.arg('--recompute-on-no-status')
 cml_parser.arg('--exit-on-no-change')
 
@@ -51,17 +51,38 @@ class Params(object):
     def __init__(self):
         self.width = 5
 
+
+        self.fr1_start_time = 0.0
+        self.fr1_end_time = 1.366
+        self.fr1_buf = 1.365
+
+        self.fr1_retrieval_start_time = -0.525
+        self.fr1_retrieval_end_time = 0.0
+        self.fr1_retrieval_buf = 0.524
+
         self.pal1_start_time = 0.3
         self.pal1_end_time = 2.0
-        self.pal1_buf = 1.0
+        self.pal1_buf = 1.2
+
+        self.pal1_retrieval_start_time = -0.625
+        self.pal1_retrieval_end_time = -0.1
+        self.pal1_retrieval_buf = 0.524
+
 
         self.hfs_start_time = 0.4
         self.hfs_end_time = 3.7
         self.hfs_buf = 1.0
 
+
+        self.encoding_samples_weight = 7.2
+        self.pal_samples_weight = 1.93
+
+        self.recall_period = 5.0
+
+
         self.filt_order = 4
 
-        self.freqs = np.logspace(np.log10(3), np.log10(180), 8)
+        self.freqs = np.logspace(np.log10(6), np.log10(180), 8)
         self.hfs = np.logspace(np.log10(2), np.log10(200), 50)
         self.hfs = self.hfs[self.hfs>=70.0]
 
