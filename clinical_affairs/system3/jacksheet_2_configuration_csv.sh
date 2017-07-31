@@ -7,7 +7,7 @@
 
 # subject=R1111M
 read -p "SUBJECT:" subject
-read -p "JACKSHEET: " jacksheet
+read -p "JACKSHEET or CONFIG FILE: " jacksheet
 read -p "STIM PAIR[S]:" stim_pair
 
 read -p 'Use mixed-mode referencing (aka bipolar ENS referencing )[y/n] : ' bipolar_referencing
