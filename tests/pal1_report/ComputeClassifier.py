@@ -51,6 +51,8 @@ class ComputeClassifier(ReportRamTask):
         for fname in fr1_event_files:
             with open(fname,'rb') as f: hash_md5.update(f.read())
 
+        return hash_md5.digest()
+
 
 
     def xval_test_type(self, events):
