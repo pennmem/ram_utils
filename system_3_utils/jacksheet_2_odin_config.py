@@ -24,7 +24,7 @@ class CMLParser(object):
         self.parser.add_argument('--stim-channels', nargs='+', action='store')
         self.parser.add_argument('--output-dir', required=True, action='store', default='')
         self.parser.add_argument('--jacksheet', required=True, action='store', default='')
-        self.parser.add_argument('--leads', required=True, action='store', default='')
+        self.parser.add_argument('--leads', required=False, action='store', default='')
         self.parser.add_argument('--bipolar', action="store_true", default=False,
                                  help="Enable bipolar (aka mixed-mode) referencing inthe ENS")
 
@@ -51,7 +51,12 @@ class CMLParser(object):
         return args
 
 cml_parser = CMLParser(arg_count_threshold=1)
+cml_parser.arg('--subject','R1232N')
 cml_parser.arg('--stim-channels', 'LAT1-LAT2', 'LAT3-LAT4', )  # R1232N
+cml_parser.arg('--jacksheet', '/Volumes/rhino_root/scratch/leond/monopolar_configs/contactsR1232N.csv')
+cml_parser.arg('--output-dir','/Volumes/rhino_root/scratch/leond/bipolar_configs')
+cml_parser.arg('--bipolar')
+cml_parser.arg('--leads','/Volumes/rhino_root/data/eeg/R1232N/tal/leads.txt')
 
 args = cml_parser.parse()
 

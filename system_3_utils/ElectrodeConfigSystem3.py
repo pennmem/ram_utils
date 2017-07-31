@@ -452,7 +452,7 @@ class ElectrodeConfig(object):
     def parse_stim_channel(self, line, file):
         split_line = line.split(',')
         name = split_line[1]
-        comment = split_line[3]
+        comment = split_line[3][1:-1]
 
         # Get anodes
         line = next(file)
@@ -528,14 +528,15 @@ def contacts_json_2_configuration_csv(contacts_json_path, output_dir, configurat
 def monopolar_to_mixed_mode_config(config_file,output_dir):
     ec = ElectrodeConfig()
     ec.initialize_mixed_mode(config_filename=config_file)
-
+    config_base = os.path.basename(config_file)
     mkdir_p(os.path.abspath(output_dir))
-    if isfile(os.path.join(output_dir,config_file)):
-        split_config_file = os.path.splitext(config_file)
-        outfile = '%s%s.%s'%(split_config_file[0],'_mixed_mode.',split_config_file[-1])
+    if isfile(os.path.join(output_dir,config_base)):
+        split_config_file = os.path.splitext(config_base)
+        outfile = '%s%s%s'%(split_config_file[0],'_mixed_mode',split_config_file[-1])
     else:
-        outfile = config_file
+        outfile = config_base
     with open(os.path.join(output_dir,outfile),'w') as out:
+        print('Saving %s'%outfile)
         out.write(ec.as_csv())
     return True
 
