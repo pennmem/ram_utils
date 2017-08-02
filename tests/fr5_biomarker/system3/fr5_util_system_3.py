@@ -10,6 +10,7 @@ from system_3_utils.ram_tasks.CMLParserClosedLoop3 import CMLParserCloseLoop3
 
 cml_parser = CMLParserCloseLoop3(arg_count_threshold=1)
 
+
 subject = 'R1230J'
 cml_parser.arg('--workspace-dir', '/home1/leond/fr5_config')
 cml_parser.arg('--experiment', 'FR5')
@@ -22,6 +23,7 @@ cml_parser.arg('--anodes', '3LAHD2', '12RGRD1')
 cml_parser.arg('--cathodes', '3LAHD3', '12RGRD2')
 cml_parser.arg('--min-amplitudes', '0.25')
 cml_parser.arg('--max-amplitudes', '1.0')
+
 
 args = cml_parser.parse()
 
@@ -37,11 +39,11 @@ from tests.fr5_biomarker.MontagePreparation import MontagePreparation
 
 from system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
 
-from tests.fr5_biomarker.ComputeClassifier import ComputeClassifier
-
-from tests.fr5_biomarker.ComputeClassifier import ComputeFullClassifier
+from tests.fr5_biomarker.ComputeClassifier import ComputeClassifier,ComputeFullClassifier,ComputeEncodingClassifier
 
 from tests.fr5_biomarker.system3.ExperimentConfigGeneratorClosedLoop5 import ExperimentConfigGeneratorClosedLoop5
+
+
 
 import numpy as np
 
@@ -169,7 +171,10 @@ report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, m
 
 report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 
-report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
+if args.encoding_only:
+    report_pipeline.add_task(ComputeEncodingClassifier(params=params,mark_as_completed=False))
+else:
+    report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
 
 report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=False))
 

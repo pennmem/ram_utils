@@ -2,6 +2,9 @@
 # NOTE:
 # THIS IS THE CONFIG FILE GENERATOR FOR PS4_FR5 AND FOR FR5.
 
+
+
+
 read -p "SUBJECT: " subject
 #read -p 'Use mixed-mode referencing (aka bipolar ENS referencing )[y/n] : ' bipolar_referencing
 #if [ $bipolar_referencing = "y" ] || [ $bipolar_referencing = "Y" ]; then
@@ -22,6 +25,17 @@ if [[ "${experiment}" = "catFR5" ]]
 then
 experiment="CatFR5"
 fi
+resp=''
+
+while [[ -z $resp ]];
+ do
+ read -p "USE RETRIEVAL DATA? (Y/N) : " resp
+ case $resp in
+ y| Y | yes | Yes | YES) classifier="";;
+ n|N|no|No|NO ) classifier="--encoding-only";;
+ *)resp='';;
+esac
+done
 
 if [[ "${experiment}" = "PS4_FR5" ]] || [[ "${experiment}" = "PS4_CatFR5" ]]
 then
@@ -85,4 +99,5 @@ python tests/fr5_biomarker/system3/fr5_util_system_3.py\
  --pulse-frequency=${pulse_frequency}\
  --target-amplitude=${target_amplitude}\
  --min-amplitudes ${min_amplitude_1} ${min_amplitude_2}\
- --max-amplitudes ${max_amplitude_1} ${max_amplitude_2} "${@:1}"
+ --max-amplitudes ${max_amplitude_1} ${max_amplitude_2}\
+  ${classifier} "${@:1}"

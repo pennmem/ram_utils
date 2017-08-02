@@ -1,5 +1,7 @@
-from RamPipeline import *
+from RamPipeline import RamTask
 
+from ReportTasks.RamTaskMethods import run_lolo_xval,run_loso_xval,permuted_loso_AUCs,permuted_lolo_AUCs,ModelOutput
+import os
 import numpy as np
 from scipy.stats.mstats import zscore
 from sklearn.linear_model import LogisticRegression
@@ -505,4 +507,128 @@ class ComputeFullClassifier(ComputeClassifier):
         super(ComputeFullClassifier,self).run()
         self.compare_AUCs()
 
+
+
+class ComputeEncodingClassifier(ComputeClassifier):
+
+    def input_hashsum(self):
+        subject = self.pipeline.subject
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp)==1 else int(tmp[1])
+
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols','r1.json'))
+
+        hash_md5 = hashlib.md5()
+
+        bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
+        for fname in bp_paths:
+            with open(fname,'rb') as f: hash_md5.update(f.read())
+
+        fr1_event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='FR1')))
+        for fname in fr1_event_files:
+            with open(fname,'rb') as f: hash_md5.update(f.read())
+
+        catfr1_event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='catFR1')))
+        for fname in catfr1_event_files:
+            with open(fname,'rb') as f: hash_md5.update(f.read())
+
+        return hash_md5.digest()
+
+
+    def xval_test_type(self, events):
+        event_sessions = events.session
+        sessions = np.unique(event_sessions)
+        if len(sessions) == 1:
+            return 'lolo'
+        for sess in sessions:
+            sess_events = events[event_sessions == sess]
+            if len(sess_events) >= 0.7 * len(events):
+                return 'lolo'
+        return 'loso'
+
+    @property
+    def events(self):
+        self._events = self.get_passed_object('FR_events')
+        return self._events[self._events.type=='WORD']
+
+    def _normalize_sessions(self,events):
+        self.pow_mat = normalize_sessions(self.pow_mat,events)
+
+    def get_pow_mat(self):
+        events = self.events
+        pow_mat = super(ComputeEncodingClassifier, self).get_pow_mat()
+        return pow_mat[self._events.type=='WORD',...]
+
+    def run(self):
+        subject = self.pipeline.subject
+
+        events = self.events
+        self.pow_mat = self.get_pow_mat()
+        self._normalize_sessions(events)
+
+        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto', solver='liblinear')
+
+        event_sessions = events.session
+        recalls = events.recalled
+
+        if self.xval_test_type(events) == 'loso':
+            print 'Performing permutation test'
+            self.perm_AUCs = permuted_loso_AUCs(self,event_sessions, recalls)
+
+            print 'Performing leave-one-session-out xval'
+            run_loso_xval(event_sessions, recalls,
+                                        self.pow_mat, self.lr_classifier,self.xval_output,permuted=False)
+        else:
+            print 'Performing in-session permutation test'
+            self.perm_AUCs = permuted_lolo_AUCs(self,events)
+
+            print 'Performing leave-one-list-out xval'
+            run_lolo_xval(events, recalls, self.pow_mat,self.lr_classifier,self.xval_output, permuted=False)
+
+        self.pvalue = np.sum(self.perm_AUCs >= self.xval_output[-1].auc) / float(self.perm_AUCs.size)
+        print 'Perm test p-value =', self.pvalue
+
+        print 'thresh =', self.xval_output[-1].jstat_thresh, 'quantile =', self.xval_output[-1].jstat_quantile
+
+        print 'AUC = ',self.xval_output[-1].auc
+
+        # Finally, fitting classifier on all available data
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            self.lr_classifier.fit(self.pow_mat, recalls)
+
+        self.pass_objects()
+
+    def pass_objects(self):
+        subject=self.pipeline.subject
+        classifier_path = self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl')
+        self.pass_object('lr_classifier', self.lr_classifier)
+        self.pass_object('xval_output', self.xval_output)
+        self.pass_object('perm_AUCs', self.perm_AUCs)
+        self.pass_object('pvalue', self.pvalue)
+        self.pass_object('classifier_path',classifier_path)
+
+        joblib.dump(self.lr_classifier, classifier_path)
+        joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace(subject + '-xval_output.pkl'))
+        joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace(subject + '-perm_AUCs.pkl'))
+        joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject + '-pvalue.pkl'))
+
+    def restore(self):
+        subject = self.pipeline.subject
+        task = self.pipeline.task
+
+        for attr in ['lr_classifier','xval_output','perm_AUCs','pvalue']:
+            try:
+                self.__setattr__(attr,joblib.load(self.get_path_to_resource_in_workspace(subject + '-%s.pkl'%attr)))
+            except IOError:
+                self.__setattr__(attr,joblib.load(self.get_path_to_resource_in_workspace(subject + '-'+task+'-%s.pkl'%attr)))
+
+
+        classifier_path = self.get_path_to_resource_in_workspace(subject+'lr_classifier.pkl')
+        self.pass_object('classifier_path',classifier_path)
+        self.pass_object('lr_classifier', self.lr_classifier)
+        self.pass_object('xval_output', self.xval_output)
+        self.pass_object('perm_AUCs', self.perm_AUCs)
+        self.pass_object('pvalue', self.pvalue)
 
