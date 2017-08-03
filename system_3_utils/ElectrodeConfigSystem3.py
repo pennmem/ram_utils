@@ -570,7 +570,7 @@ def jacksheet_leads_2_contacts_json(jacksheet_path, leads_path, subject):
 
     leads_list = []
     with open(leads_path,'r') as lf:
-        for line in lf.readlines():
+        for line in lf.read().splitlines():
             line = line.strip()
             leads_list.append(int(line))
 
