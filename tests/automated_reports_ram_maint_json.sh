@@ -95,6 +95,22 @@ function reports {
 
 
 
+## THR1
+report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/thr1_report
+cd ${report_code_dir}
+
+workspace_dir=${automated_reports_dir}/THR1_reports
+status_output_dir=${workspace_dir}/${datetime}
+status_output_dirs+=(${status_output_dir})
+
+remove_old_status_dirs ${workspace_dir}
+
+python ${report_code_dir}/thr1_report_all.py  --task=THR1\
+ --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
+
+python ${report_code_dir}/thr1_report_all.py  --task=THR\
+ --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
+
 #PS4
 
 report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/ps4_report
@@ -518,18 +534,6 @@ python ${report_code_dir}/th1_report_all.py  --task=TH1\
 
 
 
-## THR1
-report_code_dir=/home2/RAM_maint/RAM_UTILS_GIT/tests/thr1_report
-cd ${report_code_dir}
-
-workspace_dir=${automated_reports_dir}/THR1_reports
-status_output_dir=${workspace_dir}/${datetime}
-status_output_dirs+=(${status_output_dir})
-
-remove_old_status_dirs ${workspace_dir}
-
-python ${report_code_dir}/thr1_report_all.py  --task=THR1\
- --recompute-on-no-status --workspace-dir=${workspace_dir} --status-output-dir=${status_output_dir} ${exit_on_no_change_flag}\
 
 #PS1-2 aggregator
 #cd /home2/RAM_maint/RAM_UTILS_GIT/tests/ps_aggregator
