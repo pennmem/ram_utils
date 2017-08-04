@@ -29,21 +29,19 @@ from ReportUtils import ReportSummaryInventory, ReportSummary
 from ReportUtils import ReportPipelineBase
 
 
-from FR1EventPreparation import FR1EventPreparation
+from THREventPreparation import THREventPreparation
 
-from ComputeFR1Powers import ComputeFR1Powers
+from ComputeTHRPowers import ComputeTHRPowers
 
 from MontagePreparation import MontagePreparation
 
-from ComputeFR1HFPowers import ComputeFR1HFPowers
+from ComputeTHRHFPowers import ComputeTHRHFPowers
 
 from ComputeTTest import ComputeTTest
 
 from ComputeClassifier import ComputeClassifier
 
 from ComposeSessionSummary import ComposeSessionSummary
-
-from RepetitionRatio import RepetitionRatio
 
 from GenerateReportTasks import *
 
@@ -55,25 +53,27 @@ class Params(object):
         self.width = 5
 
         self.thr_start_time = 0.0
-        self.thr_end_time = 1.366
-        self.thr_buf = 1.365
+        self.thr_end_time = 1.3
+        self.thr_buf = 1.299
 
-        self.hfs_start_time = 0.0
-        self.hfs_end_time = 1.6
-        self.hfs_buf = 1.0
+        self.ttest_start_time = 0.0
+        self.ttest_end_time = 1.5
+        self.ttest_buf = 1.0
 
         self.filt_order = 4
 
         self.freqs = np.logspace(np.log10(3), np.log10(180), 8)
-        self.hfs = np.logspace(np.log10(2), np.log10(200), 50)
-        self.hfs = self.hfs[self.hfs>=70.0]
+
+        self.ttest_names = ['Low Theta', 'High Theta', 'Gamma', 'HFA']
+        self.ttest_freqs = np.logspace(np.log10(1), np.log10(200), 30)
+        self.ttest_frange = np.array([[1.0, 3.0], [3.0, 9.0], [40.0, 70.0], [70.0, 200.0]])
 
         self.log_powers = True
 
         self.penalty_type = 'l2'
         self.C = 7.2e-4
 
-        self.n_perm = 200
+        self.n_perm = 250
 
 
 params = Params()
@@ -112,20 +112,17 @@ for subject in subjects:
                                      mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change,
                                      recompute_on_no_status=args.recompute_on_no_status)
 
-    report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
+    report_pipeline.add_task(THREventPreparation(mark_as_completed=False))
 
-    report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
+    report_pipeline.add_task(MontagePreparation(params, mark_as_completed=False))
 
-    if 'cat' in args.task:
-        report_pipeline.add_task(RepetitionRatio(mark_as_completed=False))
+    report_pipeline.add_task(ComputeTHRPowers(params=params, mark_as_completed=False))
 
-    report_pipeline.add_task(ComputeFR1Powers(params=params, mark_as_completed=True))
-
-    report_pipeline.add_task(ComputeFR1HFPowers(params=params, mark_as_completed=True))
+    report_pipeline.add_task(ComputeTHRHFPowers(params=params, mark_as_completed=False))
 
     report_pipeline.add_task(ComputeTTest(params=params, mark_as_completed=False))
 
-    report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
+    report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
 
     report_pipeline.add_task(ComposeSessionSummary(params=params, mark_as_completed=False))
 
