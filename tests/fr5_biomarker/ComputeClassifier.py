@@ -118,7 +118,7 @@ class ComputeClassifier(RamTask):
     def get_pow_mat(self):
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
         reduced_pairs = self.get_passed_object('reduced_pairs')
-        to_include = np.in1d(bipolar_pairs,reduced_pairs)
+        to_include = np.array([bp in reduced_pairs for bp in bipolar_pairs])
         pow_mat =  self.get_passed_object('pow_mat')
         pow_mat = pow_mat.reshape((len(pow_mat),len(bipolar_pairs),-1))[:,to_include,:].reshape((len(pow_mat),-1))
         return pow_mat
