@@ -163,21 +163,6 @@ class ComputeClassifier(RamTask):
             outsample_both_mask = (events.session == sess)
 
 
-
-
-
-    # % even weights by class balance
-    # n_vec = [1/n_enc_pos 1/n_enc_neg 1/n_rec_pos 1/n_rec_neg];
-    # mean_tmp = mean(n_vec);
-    # n_vec = n_vec/mean_tmp;
-    #
-    # % add scalign by E
-    # n_vec(1:2) = n_vec(1:2)*E;
-    # mean_tmp = mean(n_vec);
-    # n_vec = n_vec/mean_tmp;
-
-
-
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 if samples_weights is not None:
@@ -196,23 +181,6 @@ class ComputeClassifier(RamTask):
                 self.xval_output[sess].compute_roc()
                 self.xval_output[sess].compute_tercile_stats()
             probs[outsample_mask] = outsample_probs
-
-
-            # import tables
-            #
-            # h5file = tables.open_file('%s_fold_%d.h5'%(self.pipeline.subject, sess), mode='w', title="Test Array")
-            # root = h5file.root
-            # h5file.create_array(root, "insample_recalls", insample_recalls)
-            # h5file.create_array(root, "insample_pow_mat", insample_pow_mat)
-            # h5file.create_array(root, "insample_samples_weights", insample_samples_weights)
-            # h5file.create_array(root, "outsample_recalls", outsample_recalls)
-            # h5file.create_array(root, "outsample_pow_mat", outsample_pow_mat)
-            # h5file.create_array(root, "outsample_probs", outsample_probs)
-            # h5file.create_array(root, "lr_classifier_coef", self.lr_classifier.coef_)
-            # h5file.create_array(root, "lr_classifier_intercept", self.lr_classifier.intercept_)
-            #
-            # h5file.close()
-            #
 
 
             if events is not None:
@@ -369,20 +337,11 @@ class ComputeClassifier(RamTask):
     def run(self):
 
         events = self.get_events()
-        self.pow_mat = normalize_sessions(self.get_pow_mat(), events)
+        self.pow_mat = self.get_pow_mat()
+        self.pow_mat[events.type=='WORD'] = normalize_sessions(self.pow_mat[events.type=='WORD'],events[events.type=='WORD'])
+        self.pow_mat[events.type!='WORD'] = normalize_sessions(self.pow_mat[events.type!='WORD'],events[events.type!='WORD'])
 
-        # n1 = np.sum(events.recalled)
-        # n0 = len(events) - n1
-        # w0 = (2.0/n0) / ((1.0/n0)+(1.0/n1))
-        # w1 = (2.0/n1) / ((1.0/n0)+(1.0/n1))
-
-        # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
-        #                                         solver='liblinear')
-        #
-        # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
-        #                                         solver='newton-cg')
-
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, #class_weight='auto',
+        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
                                                 solver='newton-cg')
 
 
@@ -394,7 +353,6 @@ class ComputeClassifier(RamTask):
 
         samples_weights = np.ones(events.shape[0], dtype=np.float)
 
-        # samples_weights[~(events.type=='WORD')] = self.params.retrieval_samples_weight
         samples_weights[(events.type=='WORD')] = self.params.encoding_samples_weight
 
 

@@ -99,7 +99,7 @@ class ComputeFRPowers(RamTask):
                                               params.freqs, params.log_powers)
 
         events = np.concatenate([encoding_events,retrieval_events]).view(np.recarray)
-        events.sort(order='mstime')
+        events.sort(order=['session','list','mstime'])
 
         is_encoding_event = events.type=='WORD'
         self.pass_object('FR1_events',events)

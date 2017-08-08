@@ -11,8 +11,8 @@ from system_3_utils.ram_tasks.CMLParserClosedLoop3 import CMLParserCloseLoop3
 cml_parser = CMLParserCloseLoop3(arg_count_threshold=1)
 
 
-subject = 'R1230J'
-cml_parser.arg('--workspace-dir', '/home1/leond/fr5_config')
+subject = 'R1320D'
+cml_parser.arg('--workspace-dir', '/Volumes/rhino_root/scratch/leond/fr5_config')
 cml_parser.arg('--experiment', 'FR5')
 cml_parser.arg('--mount-point', '/Volumes/rhino_root')
 cml_parser.arg('--subject', subject)
@@ -138,7 +138,7 @@ params = Params()
 #     raise ConfigError('Unknown config file type')
 
 
-# # TODO - we need to check if all files need for bipolar referencing are ready before executing the whole pipeine
+# TODO - we need to check if all files need for bipolar referencing are ready before executing the whole pipeine
 #
 # if args.bipolar:
 #     electrode_config_file = args.electrode_config_file

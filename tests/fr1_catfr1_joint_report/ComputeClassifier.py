@@ -260,7 +260,7 @@ class ComputeJointClassifier(ReportRamTask):
         self.pow_mat[~encoding_mask] = normalize_sessions(self.pow_mat[~encoding_mask],events[~encoding_mask])
 
 
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
+        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
                                                 solver='newton-cg')
 
 

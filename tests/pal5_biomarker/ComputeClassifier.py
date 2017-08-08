@@ -115,22 +115,6 @@ class ComputeClassifier(RamTask):
         for fname in bp_paths:
             with open(fname, 'rb') as f: hash_md5.update(f.read())
 
-        # fr1_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR1')))
-        # for fname in fr1_event_files:
-        #     with open(fname,'rb') as f: hash_md5.update(f.read())
-        #
-        # catfr1_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='catFR1')))
-        # for fname in catfr1_event_files:
-        #     with open(fname,'rb') as f: hash_md5.update(f.read())
-        #
-        # fr3_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR3')))
-        # for fname in fr3_event_files:
-        #     with open(fname,'rb') as f: hash_md5.update(f.read())
-        #
-        # catfr3_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='catFR3')))
-        # for fname in catfr3_event_files:
-        #     with open(fname,'rb') as f: hash_md5.update(f.read())
-
         return hash_md5.digest()
 
     def get_auc(self, classifier, features, recalls, mask):
@@ -190,16 +174,6 @@ class ComputeClassifier(RamTask):
             insample_samples_weights = insample_samples_weights[insample_mask]
 
             outsample_both_mask = (events.session == sess)
-
-            # % even weights by class balance
-            # n_vec = [1/n_enc_pos 1/n_enc_neg 1/n_rec_pos 1/n_rec_neg];
-            # mean_tmp = mean(n_vec);
-            # n_vec = n_vec/mean_tmp;
-            #
-            # % add scalign by E
-            # n_vec(1:2) = n_vec(1:2)*E;
-            # mean_tmp = mean(n_vec);
-            # n_vec = n_vec/mean_tmp;
 
 
             # TODO ORIGINAL CODE
@@ -388,31 +362,12 @@ class ComputeClassifier(RamTask):
 
         mean_dict, std_dict = compute_z_scoring_vecs(pow_mat_copy[~encoding_mask], events[~encoding_mask])
 
-        # for sess in np.unique(events.session):
-        #     z_scored_pow = (pow_mat_copy[~encoding_mask & (events.session == sess)] - mean_dict[sess])/std_dict[sess]
-        #     orig_z_scored = self.pow_mat[~encoding_mask & (events.session == sess)]
-        #     print
 
         self.pass_object('features_mean_dict', mean_dict)
         self.pass_object('features_std_dict', std_dict)
         joblib.dump(mean_dict,self.get_path_to_resource_in_workspace('features_mean_dict.pkl'),)
         joblib.dump(std_dict,self.get_path_to_resource_in_workspace('features_std_dict.pkl'),)
 
-        print
-
-        # ORIGINAL CODE
-        # self.pow_mat = normalize_sessions(self.filter_pow_mat(), events)
-
-        # n1 = np.sum(events.recalled)
-        # n0 = len(events) - n1
-        # w0 = (2.0/n0) / ((1.0/n0)+(1.0/n1))
-        # w1 = (2.0/n1) / ((1.0/n0)+(1.0/n1))
-
-        # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
-        #                                         solver='liblinear')
-        #
-        # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
-        #                                         solver='newton-cg')
 
         self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
                                                 solver='newton-cg')
@@ -420,8 +375,6 @@ class ComputeClassifier(RamTask):
         event_sessions = events.session
 
         recalls = events.correct
-        # recalls[events.type == 'REC_WORD'] = 1
-        # recalls[events.type == 'REC_BASE'] = 0
 
         samples_weights = np.ones(events.shape[0], dtype=np.float)
 
