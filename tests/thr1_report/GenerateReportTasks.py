@@ -160,10 +160,10 @@ class DeployReportPDF(ReportRamTask):
         report_file = self.get_passed_object('report_file')
         self.pipeline.deploy_report(report_path=report_file)
 
-        SME_file  = self.get_passed_object('SME_file')
+        # SME_file  = self.get_passed_object('SME_file')
         rd = ReportDeployer(pipeline=self.pipeline)
         ssc = rd.split_subject_code(self.pipeline.subject)
         report_base_dir = rd.report_base_dir(ssc)
-        shutil.copyfile(SME_file,os.path.join(self.pipeline.mount_point,report_base_dir,os.path.basename(SME_file)))
+        # shutil.copyfile(SME_file,os.path.join(self.pipeline.mount_point,report_base_dir,os.path.basename(SME_file)))
 
 
