@@ -285,6 +285,7 @@ def permuted_loso_AUCs(self, event_sessions, recalls):
             probs = parallel(joblib.delayed(run_loso_xval)(event_sessions, permuted_recalls,
                                                            self.pow_mat, self.lr_classifier, self.xval_output,
                                                            permuted=True, iter=i) for i in xrange(n_perm))
+            AUCs[:] = [roc_auc_score(recalls, p) for p in probs]
     else:
         for i in range(n_perm):
             probs  = run_loso_xval(event_sessions,permuted_recalls,
