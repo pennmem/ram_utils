@@ -7,13 +7,13 @@ and adding tasks to it in sequence.
 The `ReportPipeline` provides
 two ways for the tasks to share data:
 
-* <b>Pipeline attributes
+* Pipeline attributes
 
   Each RAM Task in the pipeline holds a reference to the pipeline object itself
   in self.pipeline. The subject, task, and mount point are stored as attributes
   of the pipeline, and are accessed in this way
 
-* <b>Object Passing
+* Object Passing
 
   The pipeline maintains a dictionary of objects that can be referenced from each
 task. To add an object to this dictionary from a Task, call `Task.pass_object(key,value)`.
