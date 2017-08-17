@@ -7,34 +7,22 @@ print "See https://github.com/busygin/morlet_for_sys2_biomarker/blob/master/READ
 
 from os.path import *
 
-from system_3_utils.ram_tasks.CMLParserClosedLoop3 import CMLParserCloseLoop3
-
-cml_parser = CMLParserCloseLoop3(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','/scratch/leond/FR3_biomarkers/R1247P_1')
-cml_parser.arg('--experiment','catFR3')
-cml_parser.arg('--mount-point','/')
-cml_parser.arg('--subject','R1247P_1')
-cml_parser.arg('--electrode-config-file',r'/home1/leond/fr3_config/contactsR1247P.csv')
-cml_parser.arg('--pulse-frequency','100')
-cml_parser.arg('--target-amplitude','1000')
-cml_parser.arg('--anode-num','95')
-cml_parser.arg('--anode','Rd7')
-cml_parser.arg('--cathode-num','97')
-cml_parser.arg('--cathode','RE1')
-
-
-
-# cml_parser.arg('--workspace-dir','/scratch/busygin/FR3_biomarkers')
-# cml_parser.arg('--subject','R1145J_1')
-# cml_parser.arg('--n-channels','128')
-# cml_parser.arg('--anode-num','3')
-# cml_parser.arg('--cathode-num','4')
-# cml_parser.arg('--pulse-frequency','200')
-# cml_parser.arg('--pulse-count','100')
+from system_3_utils.ram_tasks import CMLParserCloseLoop3
+cml_parser = CMLParserCloseLoop3.CMLParserCloseLoop3(arg_count_threshold=1)
+# cml_parser.arg('--workspace-dir','/scratch/leond/THR3_biomarkers/R1247P_1')
+# cml_parser.arg('--experiment','THR3')
+# cml_parser.arg('--mount-point','/')
+# cml_parser.arg('--subject','R1315T')
+# cml_parser.arg('--electrode-config-file',r'/home1/leond/fr3_config/contactsR1247P.csv')
+# cml_parser.arg('--pulse-frequency','100')
 # cml_parser.arg('--target-amplitude','1000')
+# cml_parser.arg('--anode-num','95')
+# cml_parser.arg('--anode','Rd7')
+# cml_parser.arg('--cathode-num','97')
+# cml_parser.arg('--cathode','RE1')
 
 
-args = cml_parser.parse()
+
 
 # ------------------------------- end of processing command line
 
@@ -52,36 +40,76 @@ from tests.thr3_biomarker.ComputeClassifier import ComputeClassifier
 
 from tests.thr3_biomarker.system3.ExperimentConfigGeneratorClosedLoop3 import ExperimentConfigGeneratorClosedLoop3
 
-from tests.thr3_biomarker.thr3_biomarker import Params
-
 import numpy as np
 
 
 
+class StimParams(object):
+    def __init__(self,**kwds):
+        self.n_channels = kwds['n_channels']
+        self.elec1 = kwds['anode_num']
+        self.anode = kwds.get('anode', '')
+        self.elec2 = kwds['cathode_num']
+        self.cathode = kwds.get('cathode', '')
+        self.pulseFrequency = kwds['pulse_frequency']
+        self.pulseCount = kwds['pulse_count']
+        self.amplitude = kwds['target_amplitude']
+
+        self.duration = 300
+        self.trainFrequency = 1
+        self.trainCount = 1
+
+class Params(object):
+    def __init__(self,args):
+        self.version = '2.00'
+
+        # These don't do anything? Left in anyway
+        self.include_thr = True
+        self.include_thr3 = True
+
+        self.width = 5
+
+        self.thr_start_time = 0.0
+        self.thr_end_time = 1.366
+        self.thr_buf = 1.365
+
+        self.filt_order = 4
+
+        self.freqs = np.logspace(np.log10(3), np.log10(180), 8)
+
+        self.log_powers = True
+
+        self.penalty_type = 'l2'
+        self.C = 7.2e-4
+
+        self.n_perm = 200
+
+        self.stim_params = None
 
 
-params = Params()
+if __name__ =='__main__':
+    args = cml_parser.parse()
+
+    params = Params(args)
+
+    report_pipeline = ReportPipeline(subject=args.subject,
+                                           workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point, args=args)
+
+    report_pipeline.add_task(THREventPreparation(mark_as_completed=False))
+
+    report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
+
+    report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
+
+    report_pipeline.add_task(ComputeTHRPowers(params=params, mark_as_completed=True))
+
+    report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
+
+    report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop3(params=params, mark_as_completed=False))
 
 
+    #
+    # # report_pipeline.add_task(SaveMatlabFile(params=params, mark_as_completed=False))
 
-report_pipeline = ReportPipeline(subject=args.subject,
-                                       workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point, args=args)
-
-report_pipeline.add_task(THREventPreparation(mark_as_completed=False))
-
-report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
-
-report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
-
-report_pipeline.add_task(ComputeTHRPowers(params=params, mark_as_completed=True))
-
-report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
-
-report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop3(params=params, mark_as_completed=False))
-
-
-#
-# # report_pipeline.add_task(SaveMatlabFile(params=params, mark_as_completed=False))
-
-# starts processing pipeline
-report_pipeline.execute_pipeline()
+    # starts processing pipeline
+    report_pipeline.execute_pipeline()
