@@ -114,7 +114,7 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
             stim_frequency=stim_frequency,
             stim_amplitude=stim_amplitude,
             stim_electrode_pair=stim_chan_label,
-            electrode_config_file=electrode_config_bin,
+            electrode_config_file='config_files/%s'%basename(electrode_config_bin),
             montage_file='config_files/%s'%basename(bipolar_pairs_path)
         )
 
