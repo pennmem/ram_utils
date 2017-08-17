@@ -1,14 +1,14 @@
-#!/bin/bash
+#! /usr/bin/bash
 
-subject=R1111M
+subject=R1328E
 experiment=THR3
 workspace=/scratch/system3_configs/${experiment}
 
-electrode_config_file=${workspace}/electrode_config/contactsR1111M.csv
-anode=LPOG10
-anode_num=10
-cathode=LPOG11
-cathode_num=11
+electrode_config_file=/scratch/system3_configs/ODIN_configs/R1328E/R1328E_L0M0STIMaug152017.csv
+anode=5Ld8
+anode_num=48
+cathode=5Ld9
+cathode_num=49
 pulse_frequency=200
 target_amplitude=1.0
 
