@@ -1,16 +1,17 @@
 #! /usr/bin/bash
 
-subject=R1328E
 experiment=THR3
 workspace=/scratch/system3_configs/${experiment}
 
-electrode_config_file=/scratch/system3_configs/ODIN_configs/R1328E/R1328E_L0M0STIMaug152017.csv
-anode=5Ld8
-anode_num=48
-cathode=5Ld9
-cathode_num=49
-pulse_frequency=200
-target_amplitude=1.0
+#electrode_config_file=/scratch/system3_configs/ODIN_configs/R1328E/R1328E_L0M0STIMaug152017.csv
+read -p 'SUBJECT' subject
+read -p 'ELECTRODE CONFIG FILE' electrode_config_file
+read -p 'ANODE' anode
+read -p 'ANODE_NUM' anode_num
+read -p 'CATHODE' cathode
+read -p 'CATHODE_NUM' cathode_num
+read -p 'PULSE FREQUENCY (Hz)' pulse_frequency
+read -p 'STIM AMPLITUDE (mA)' target_amplitude
 
 #cd ../../tests/fr3_biomarker/system3
 cd ../../
