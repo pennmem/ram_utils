@@ -132,7 +132,8 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
                                          target_dir=config_files_dir)
 
         # zipping project_dir
-        zip_filename = join(dirname(project_dir),experiment)+'.zip'
+        zip_filename = self.get_path_to_resource_in_workspace('{subject}_{experiment}_{stim_channel}_{amplitude}mA_{freq}Hz.zip'.format(
+            subject=subject,experiment=experiment,stim_channel=stim_chan_label,amplitude=stim_amplitude,freq=stim_frequency))
         zipf = zipfile.ZipFile(zip_filename, 'w', zipfile.ZIP_DEFLATED)
         self.zipdir(project_dir, zipf)
         zipf.close()
