@@ -138,3 +138,5 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
         self.zipdir(project_dir, zipf)
         zipf.close()
 
+        print('Saved experiment configuration to %s'%zip_filename)
+
