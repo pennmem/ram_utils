@@ -48,11 +48,17 @@ class THREventPreparation(RamTask):
 
         if self.pipeline.sessions is None:
             event_files = sorted(
-                list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='THR')))
+                list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='THR'))+
+                list(json_reader.aggregate_values('task_events',subject=subj_code,montage=montage,experiment='THR1')))
         else:
-            event_files = [json_reader.get_value('task_events',subject=subj_code,
-                                                 montage=montage,experiment='THR',session=sess)
-                           for sess in sorted(self.pipeline.sessions)]
+            try:
+                event_files = [json_reader.get_value('task_events',subject=subj_code,
+                                                     montage=montage,experiment='THR',session=sess)
+                               for sess in sorted(self.pipeline.sessions)]
+            except Exception:
+                event_files  = [json_reader.get_value('task_events',subject=subj_code,
+                                                     montage=montage,experiment='THR1',session=sess)
+                               for sess in sorted(self.pipeline.sessions)]
         events = None
         for sess_file in event_files:
             e_path = os.path.join(self.pipeline.mount_point, str(sess_file))
