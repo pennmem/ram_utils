@@ -4,14 +4,14 @@ experiment=THR3
 workspace=/scratch/system3_configs/${experiment}
 
 #electrode_config_file=/scratch/system3_configs/ODIN_configs/R1328E/R1328E_L0M0STIMaug152017.csv
-read -p 'SUBJECT' subject
-read -p 'ELECTRODE CONFIG FILE' electrode_config_file
-read -p 'ANODE' anode
-read -p 'ANODE_NUM' anode_num
-read -p 'CATHODE' cathode
-read -p 'CATHODE_NUM' cathode_num
-read -p 'PULSE FREQUENCY (Hz)' pulse_frequency
-read -p 'STIM AMPLITUDE (mA)' target_amplitude
+read -p 'SUBJECT: ' subject
+read -p 'ELECTRODE CONFIG FILE: ' electrode_config_file
+read -p 'ANODE: ' anode
+read -p 'ANODE_NUM: ' anode_num
+read -p 'CATHODE: ' cathode
+read -p 'CATHODE_NUM: ' cathode_num
+read -p 'PULSE FREQUENCY (Hz): ' pulse_frequency
+read -p 'STIM AMPLITUDE (mA): ' target_amplitude
 
 #cd ../../tests/fr3_biomarker/system3
 cd ../../
