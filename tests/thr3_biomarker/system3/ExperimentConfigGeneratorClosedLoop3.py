@@ -88,6 +88,10 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
         classifier_path = self.get_passed_object('classifier_path')
         stim_chan_label = self.get_passed_object('stim_chan_label')
 
+        electrode_config_file_core, ext = splitext(electrode_config_file)
+        electrode_config_csv = electrode_config_file_core+'.csv'
+        electrode_config_bin = electrode_config_file_core+'.bin'
+
         project_dir_corename = 'experiment_config_dir/%s/%s'%(subject,experiment)
         project_dir = self.create_dir_in_workspace(project_dir_corename)
 
@@ -110,7 +114,7 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
             stim_frequency=stim_frequency,
             stim_amplitude=stim_amplitude,
             stim_electrode_pair=stim_chan_label,
-            electrode_config_file='config_files/{subject}_{config_name}.bin'.format(subject=subject,config_name=config_name),
+            electrode_config_file=electrode_config_bin,
             montage_file='config_files/%s'%basename(bipolar_pairs_path)
         )
 
@@ -124,12 +128,8 @@ class ExperimentConfigGeneratorClosedLoop3(RamTask):
         # copy pairs.json
         self.copy_resource_to_target_dir(bipolar_pairs_path,config_files_dir)
 
-
-        electrode_config_file_core, ext = splitext(electrode_config_file)
-
-        self.copy_resource_to_target_dir(resource_filename=electrode_config_file, target_dir=config_files_dir)
-        self.copy_resource_to_target_dir(resource_filename=electrode_config_file_core + '.csv',
-                                         target_dir=config_files_dir)
+        self.copy_resource_to_target_dir(resource_filename=electrode_config_bin, target_dir=config_files_dir)
+        self.copy_resource_to_target_dir(resource_filename=electrode_config_csv, target_dir=config_files_dir)
 
         # zipping project_dir
         zip_filename = self.get_path_to_resource_in_workspace('{subject}_{experiment}_{stim_channel}_{amplitude}mA_{freq}Hz.zip'.format(
