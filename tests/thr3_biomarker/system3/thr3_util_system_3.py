@@ -7,8 +7,8 @@ print "See https://github.com/busygin/morlet_for_sys2_biomarker/blob/master/READ
 
 from os.path import *
 
-from system_3_utils.ram_tasks import CMLParserCloseLoop3
-cml_parser = CMLParserCloseLoop3.CMLParserCloseLoop3(arg_count_threshold=1)
+from system_3_utils.ram_tasks import CMLParserClosedLoop3
+cml_parser = CMLParserClosedLoop3.CMLParserCloseLoop3(arg_count_threshold=1)
 # cml_parser.arg('--workspace-dir','/scratch/leond/THR3_biomarkers/R1247P_1')
 # cml_parser.arg('--experiment','THR3')
 # cml_parser.arg('--mount-point','/')
