@@ -1,10 +1,11 @@
+from __future__ import print_function
 import os
 from os.path import *
 
 from DataModel import DataLayoutJSONUtils
 from JSONUtils import JSONNode
-from MatlabRamTask import MatlabRamTask
-from TaskRegistry import TaskRegistry
+from .matlab import MatlabRamTask
+from .task import TaskRegistry
 
 
 class RamPipeline(object):
@@ -24,14 +25,6 @@ class RamPipeline(object):
 
         self.exit_on_no_change = False
         self.recompute_on_no_status = False
-        # self.json_saved_data_status_node = None
-        # self.json_latest_status_node = None
-
-    # def pass_object(self, name, obj):
-    #     self.passed_objects_dict[name] = obj
-    #
-    # def get_passed_object(self, name):
-    #     return self.passed_objects_dict[name]
 
     def set_workspace_dir(self, output_dir):
         import os
@@ -44,7 +37,7 @@ class RamPipeline(object):
         try:
             os.makedirs(output_dir_normalized)
         except OSError:
-            print 'Output dir: ' + output_dir_normalized + ' already exists'
+            print('Output dir: ' + output_dir_normalized + ' already exists')
 
     def add_task(self, task):
         task.set_pipeline(self)
@@ -60,7 +53,7 @@ class RamPipeline(object):
 
         # Sets up Matlab Paths
         if self.matlab_paths:
-            print 'Will add the following Matlab paths: ', self.matlab_paths
+            print('Will add the following Matlab paths: ', self.matlab_paths)
             MatlabUtils.add_matlab_search_paths(*self.matlab_paths)
 
         # sys.exit()
@@ -83,8 +76,6 @@ class RamPipeline(object):
             rp = DataLayoutJSONUtils()
             rp.mount_point = self.mount_point
             self.json_latest_status_node = rp.create_subject_JSON_stub(subject_code=subject_code)
-            # print self.json_latest_status_node.output()
-
 
     def get_latest_data_status(self):
         return self.json_latest_status_node
@@ -92,8 +83,6 @@ class RamPipeline(object):
     def read_saved_data_status(self):
         json_index_file = join(self.workspace_dir,'_status','index.json')
         self.json_saved_data_status_node = JSONNode.read(filename=json_index_file)
-        # rp = DataLayoutJSONUtils()
-        # self.json_latest_status_node = rp.create_subject_JSON_stub(subject_code=self.)
 
     def get_saved_data_status(self):
         return self.json_saved_data_status_node
@@ -109,7 +98,7 @@ class RamPipeline(object):
                 try:
                     # removing task_completed_file
                     os.remove(task.get_task_completed_file_name())
-                    print 'will rerun task ', task.name()
+                    print('will rerun task ', task.name())
                 except OSError:
                     pass
             return 1
@@ -126,7 +115,7 @@ class RamPipeline(object):
                     hs = f.read()
                     f.close()
                     if hs != task_hs:
-                        print 'will rerun task ', task.name()
+                        print('will rerun task ', task.name())
                         change_counter += 1
 
         if new_dependency_tracking_style:
@@ -142,7 +131,7 @@ class RamPipeline(object):
                     try:
                         #removing task_completed_file
                         os.remove(task.get_task_completed_file_name())
-                        print 'will rerun task ', task.name()
+                        print('will rerun task ', task.name())
                     except OSError:
                         pass
 
@@ -158,14 +147,13 @@ class RamPipeline(object):
                 if task.is_completed():
                     continue  # we do not want to start Matlab for tasks that already completed
 
-                print 'GOT MATLAB MODULE ', task
+                print('GOT MATLAB MODULE ', task)
 
                 if not matlab_engine_started:
                     matlab_engine = self.__enable_matlab()
                     matlab_engine_started = True
 
                 task.set_matlab_engine(matlab_engine)
-
 
     def initialize_tasks(self):
         for task_name, task in self.task_registry.task_dict.items():
@@ -189,8 +177,6 @@ class RamPipeline(object):
 
         self.prepare_matlab_tasks()
 
-
-
         if self.dependency_change_tracker:
             change_counter = self.resolve_dependencies()
 
@@ -204,11 +190,11 @@ class RamPipeline(object):
             task_completed_file_name = task.get_task_completed_file_name()
 
             if task.is_completed():
-                print 'RESTORING COMPLETED TASK: ', task_name, ' obj=', task
+                print('RESTORING COMPLETED TASK: ', task_name, ' obj=', task)
                 task.restore()
 
             else:
-                print 'RUNNING TASK: ', task_name, ' obj=', task
+                print('RUNNING TASK: ', task_name, ' obj=', task)
                 task.pre()
                 task.run()
                 task.post()
@@ -222,7 +208,7 @@ class RamPipeline(object):
                         f.write(hs)
                         f.close()
                     except:
-                        print 'No .completed file found'
+                        print('No .completed file found')
                         task.create_file_in_workspace_dir(task_completed_file_name, 'w')
 
         if self.dependency_change_tracker:

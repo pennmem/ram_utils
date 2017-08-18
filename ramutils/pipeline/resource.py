@@ -1,7 +1,8 @@
 from JSONUtils import JSONNode
 
+
 class RamResource(object):
-    def __init__(self,name='',task='',status=''):
+    def __init__(self, name='', task='', status=''):
         self.name = name
         self.task = task
         self.status = status
@@ -13,6 +14,7 @@ class RamResource(object):
         jn['status']=self.status
 
         return jn
+
     def __str__(self):
         return self.name + ' ' + self.status
 

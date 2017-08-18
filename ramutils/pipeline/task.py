@@ -1,11 +1,10 @@
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 import os
 from os.path import *
-
 from distutils.dir_util import mkpath
 
 from JSONUtils import JSONNode
-from .DependencyInventory import DependencyInventory
+from .dependency import DependencyInventory
 
 
 class RamTask(object):
@@ -50,7 +49,7 @@ class RamTask(object):
 
     def check_json_stub(self):
         json_stub_file = join(self.workspace_dir, 'index.json')
-        print 'json stub=', JSONNode.read(filename=json_stub_file)
+        print('json stub=', JSONNode.read(filename=json_stub_file))
 
     def is_completed(self):
         """
@@ -203,7 +202,7 @@ class RamTask(object):
                 dir_name_dict[dir_name] = dir_name_full_path
 
             except OSError:
-                print 'skipping: ' + dir_name_full_path + ' perhaps it already exists'
+                print('skipping: ' + dir_name_full_path + ' perhaps it already exists')
                 pass
 
         return dir_name_dict
@@ -248,7 +247,7 @@ class RamTask(object):
         import errno
         try:
             os.makedirs(dirname)
-        except OSError, e:
+        except OSError as e:
             if e.errno != errno.EEXIST:
                 raise IOError('Could not make directory: ' + dirname)
 
@@ -271,7 +270,7 @@ class RamTask(object):
                     os.path.join(self.pipeline.workspace_dir, dst_relative_path, file_resource_base_name))
                 shutil.copy(file_resource, target_path)
             except IOError:
-                print 'Could not copy file: ', file_resource, ' to ', target_path
+                print('Could not copy file: ', file_resource, ' to ', target_path)
 
     def move_file_resources_to_workspace(self):
         """
@@ -292,7 +291,7 @@ class RamTask(object):
                     os.path.join(self.pipeline.workspace_dir, dst_relative_path, file_resource_base_name))
                 shutil.move(file_resource, target_path)
             except IOError:
-                print 'Could not move file: ', file_resource, ' to ', target_path
+                print('Could not move file: ', file_resource, ' to ', target_path)
             except OSError:
                 shutil.copyfile(file_resource, target_path)
 
@@ -322,7 +321,6 @@ class RamTask(object):
         """
         return self.workspace_dir
 
-
     def initialize(self):
         pass
 
@@ -331,36 +329,35 @@ class RamTask(object):
         Core function that restores saved results of the task so that following tasks in the pipeline can continue
         :return:
         """
-        pass
 
     def pre(self):
         """
         Core function will be called before run - can be used in subclasses to run code just before run object gets called
         :return:None
         """
-        pass
 
     def post(self):
         """
         Core function will be called before run - can be used in subclasses to run code right after run object gets called
         :return:None
         """
-        pass
 
     def run(self):
         """
         Core function of the task object - needs to be reimplmented in each subslacc deriving from RamTask
         :return:None
         """
-        pass
 
 
-if __name__ == '__main__':
-    rt = RamTask()
-    rt.set_workspace_dir('/Users/m/my_workspace')
-    print 'rt.workspace_dir = ', rt.workspace_dir
-    print 'rt.get_workspace_dir=', rt.get_workspace_dir()
+class TaskRegistry(object):
+    def __init__(self):
+        self.task_dict = OrderedDict()
 
-    print 'get_path_to_file_in_workspace = ', rt.get_path_to_resource_in_workspace('abc/cba/cbos', 'mst')
+    def register_task(self, task):
+        task.set_name(type(task).__name__)
+        self.task_dict[task.name()] = task
 
-    # print 'this is get_path_to_file_in_workspace=',rt.get_path_to_file_in_workspace('demo1')
+    def run_tasks(self):
+        for task_name, task in self.task_dict.items():
+            print('RUNNING TASK:', task_name, ' obj=', task)
+            task.run()

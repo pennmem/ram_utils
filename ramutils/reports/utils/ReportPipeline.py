@@ -1,16 +1,16 @@
 import sys
 import traceback
 
-from ...pipeline import RamPipeline
+from ...pipeline import pipeline
 from .DependencyChangeTrackerLegacy import DependencyChangeTrackerLegacy
 from .ReportSummary import ReportSummary
 from .ReportExceptions import MissingExperimentError, MissingDataError, NumericalError
 from . import ReportDeployer
 
 
-class ReportPipeline(RamPipeline):
+class ReportPipeline(pipeline):
     def __init__(self, **options):
-        super(RamPipeline, self).__init__()
+        super(pipeline, self).__init__()
 
         # experiment_label is used to label experiment in the JSON status output file
         self.__option_list = ['args','subject','experiment','experiment_label','task','workspace_dir','mount_point','exit_on_no_change','recompute_on_no_status','sessions']
@@ -85,7 +85,7 @@ class ReportPipeline(RamPipeline):
             self.report_summary.set_experiment_name(exp_name='Unknown_Experiment')
 
         try:
-            super(RamPipeline, self).execute_pipeline()
+            super(pipeline, self).execute_pipeline()
         except KeyboardInterrupt:
             print('GOT KEYBOARD INTERUPT. EXITING')
             sys.exit()

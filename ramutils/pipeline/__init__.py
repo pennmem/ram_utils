@@ -1,8 +1,4 @@
-__author__ = 'm'
-
-from MatlabRamTask import *
-from RamPipeline import *
-from RamTask import *
-from TaskRegistry import *
-from RamResource import *
-
+from .matlab import *
+from .pipeline import *
+from .task import *
+from .resource import *
