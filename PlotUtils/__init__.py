@@ -1,5 +1,5 @@
-__author__ = 'm'
-
+from __future__ import print_function
+from collections import namedtuple
 import numpy as np
 
 # this makes matplotlib independend of the X server - comes handy on clusters
@@ -8,7 +8,6 @@ import matplotlib
 matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
-from collections import namedtuple
 
 PlotDataOption = namedtuple('PlotDataOption', ['name', 'default_value'])
 
@@ -25,8 +24,9 @@ class OptionsObject(object):
             if hasattr(self, option.name): continue
             try:
                 setattr(self, option.name, options[option.name])
-                print 'option_name=', option.name, ' val=', options[option.name], ' value_check = ', getattr(self,
-                                                                                                             option.name)
+                print('option_name=', option.name, ' val=',
+                      options[option.name], ' value_check = ',
+                      getattr(self, option.name))
             except LookupError:
                 setattr(self, option.name, option.default_value)
 
@@ -257,8 +257,8 @@ class PanelPlot(OptionsObject):
         :return:None
         '''
 
-        print 'i', i_panel, ' j ', j_panel
-        print 'options=', options
+        print('i', i_panel, ' j ', j_panel)
+        print('options=', options)
         try:
             pd = options['plot_data']
         except LookupError:
@@ -604,7 +604,7 @@ def draw_brick_heatmap(plot_data):
             try:
                 ax.text(x, y, pd.annot_dict[(j, i)], color=annotation_font_color, ha="center", va="center")
             except LookupError:
-                print 'COULD NOT GET i,j = ', (j, i)
+                print('COULD NOT GET i,j = ', (j, i))
                 pass
 
     # ax.text(6.0, 3.5,'Right the plot', fontsize=10, rotation=270)
