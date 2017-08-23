@@ -92,16 +92,21 @@ class GeneratePlots(ReportRamTask):
             plt = panel_plot_biomarker.generate_plot()
             plt.savefig(session_summary.biomarker_plot_filename)
 
-        plt.close()
-        post_stim_eeg = self.get_passed_object('eeg')
-        plt.figure(figsize=(10,7))
-        plt.imshow(post_stim_eeg,origin='lower',aspect='auto',cmap='viridis')
-        plt.colorbar()
-        figname = 'post_stim_eeg_plot.pdf'
-        plt.savefig(self.get_path_to_resource_in_workspace('reports',figname))
-        plt.close()
-        self.pass_object('post_stim_eeg_plot',figname)
+            plt.close()
 
+        post_stim_eeg = self.get_passed_object('eeg')
+        plt.figure(figsize=(9,5.5))
+        plt.imshow(post_stim_eeg,cmap='bwr',aspect='auto',origin='lower')
+        cbar = plt.colorbar()
+        plt.clim([-500,500])
+        plt.xlabel('Time (ms)')
+        plt.ylabel('Channel (bipolar reference)')
+        cbar.set_label('Avg voltage ($\mu$V)')
+
+        figname = self.get_path_to_resource_in_workspace(join('reports',self.pipeline.subject+'-post-stim-eeg.pdf'))
+        plt.savefig(figname)
+        self.pass_object('post_stim_eeg_plot',figname)
+        plt.close()
 
 
 

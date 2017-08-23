@@ -3,9 +3,9 @@ from ReportUtils import ReportPipeline,CMLParser
 from os.path import join
 
 parser=CMLParser()
-parser.arg('--subject','R1302M')
-parser.arg('--task','FR5')
-parser.arg('--workspace-dir','scratch')
+parser.arg('--subject','R1332M')
+parser.arg('--task','catFR5')
+parser.arg('--workspace-dir','/Volumes/rhino_root/scratch/leond')
 parser.arg('--mount-point','/Volumes/rhino_root/')
 parser.arg('--recompute-on-no-status')
 

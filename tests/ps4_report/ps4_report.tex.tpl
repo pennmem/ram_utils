@@ -40,7 +40,11 @@
 
 <PS4_SESSION_PAGES>
 
-
+\subsection*{Post-stim EEG}
+\begin{figure}[ht!]
+\includegraphics[scale=0.7]{<POST_STIM_EEG>}
+\caption{Post-stimulation EEG signal,averaged across events}
+\end{figure}
 \end{document}
 
 
