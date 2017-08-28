@@ -365,14 +365,22 @@ class ElectrodeConfig(object):
 
     def set_mixed_mode_references(self):
         bank_list_dict = defaultdict(list)
+        stim_contact_names = [x.split('_')[0] for x in self.stim_channels] + [x.split('_')[1] for x in self.stim_channels]
         for sense_channel in self.sense_channels.values():
             channel = sense_channel.contact.port_num
             bank_list_dict[self.bank_id(int(channel), self.bank_capacity)].append(sense_channel)
         for bank_num in sorted(bank_list_dict.keys()):
             sense_channel_list = bank_list_dict[bank_num]
-            ref_sense_channel = sense_channel_list[0]
             for i, sense_channel in enumerate(sense_channel_list):
-                if i >= self.num_comm_ref_channels:
+                if sense_channel.name not in stim_contact_names:
+                    ref_sense_channel = sense_channel
+                    break
+            else:
+                raise UnparseableConfigException('No non-stim channels in bank %s'%bank_num)
+            for j,_ in enumerate(sense_channel_list):
+                n = (i+j)%len(sense_channel_list)
+                sense_channel = sense_channel_list[n]
+                if j >= self.num_comm_ref_channels:
                     sense_channel.ref = str(ref_sense_channel.contact.port_num)
                 self.sense_channels[sense_channel.contact.name] = sense_channel
 
