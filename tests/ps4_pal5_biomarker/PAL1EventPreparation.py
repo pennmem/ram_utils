@@ -309,6 +309,8 @@ class PAL1EventPreparation(RamTask):
             e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
             try:
                 sess_events = e_reader.read()[evs_field_list]
+                print(np.unique(sess_events['list']))
+
             except IOError:
                 warnings.warn('Could not process %s. Please make sure that the event file exist' % e_path,
                               RuntimeWarning)
@@ -378,7 +380,7 @@ class PAL1EventPreparation(RamTask):
                 events = np.hstack((events, merged_events))
 
             events = events.view(np.recarray)
-
+        events = events[(events.correct==0)|(events.correct==1)]
         self.pass_object('PAL1_events', events)
 
         rec_start_events = events.copy()

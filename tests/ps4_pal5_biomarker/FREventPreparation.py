@@ -62,7 +62,11 @@ class FREventPreparation(RamTask):
         catfr1_evs_list = [BaseEventReader(filename=str(event_path)).read() for event_path in catfr1_event_files]
 
         processed_fr1_events = self.process_events(fr1_evs_list)
+        if processed_fr1_events is not None:
+            processed_fr1_events = processed_fr1_events[(processed_fr1_events.recalled==0)| (processed_fr1_events.recalled==1)]
         processed_catfr1_events = self.process_events(catfr1_evs_list)
+        if processed_catfr1_events is not None:
+            processed_catfr1_events = processed_catfr1_events[(processed_catfr1_events.recalled==0)| (processed_catfr1_events.recalled==1)]
 
         self.pass_object('FR_events', processed_fr1_events)
         self.pass_object('CatFR_events', processed_catfr1_events)
