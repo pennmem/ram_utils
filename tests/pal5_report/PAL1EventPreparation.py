@@ -353,7 +353,8 @@ class PAL1EventPreparation(RamTask):
 
 
             # study_pair_events = sess_events[(sess_events.type == 'STUDY_PAIR') | (sess_events.type == 'PRACTICE_PAIR')]
-            study_pair_events = sess_events[(sess_events.type == 'STUDY_PAIR')]
+            study_pair_events = sess_events[(sess_events.type == 'STUDY_PAIR') &
+                                            ((sess_events.correct==0)| (sess_events.correct==1))]
 
             # rec_rvs_trivial_sess = self.process_trivial_session_rec_events(sess_events)
 
