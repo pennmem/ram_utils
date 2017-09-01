@@ -5,9 +5,9 @@ import numpy as np
 
 parser = CMLParser()
 # Default-ish args here
-parser.arg('--subject','R1320D')
-parser.arg('--task','FR5')
-parser.arg('--workspace-dir','scratch/leond/fr5_reports')
+parser.arg('--subject','R1334T')
+parser.arg('--task','catFR5')
+parser.arg('--workspace-dir','scratch/leond/catfr5_reports')
 parser.arg('--mount-point','/Volumes/rhino_root')
 # parser.arg('--sessions',['1','2','101'])
 

@@ -255,7 +255,7 @@ class GenerateTex(ReportRamTask):
         date = datetime.date.today()
 
         fr5_latex = self.generate_fr5_latex()
-        report_tex_file_name = '%s-FR5_report.tex'%subject
+        report_tex_file_name = '%s-%s_report.tex'%(subject,experiment)
 
         replace_template('ps4_fr5_report_base.tex.tpl',self.get_path_to_resource_in_workspace('reports',report_tex_file_name),
                          {
@@ -368,6 +368,7 @@ class GenerateTex(ReportRamTask):
             'FR5_section.tex.tpl',
             {
                 '<SUBJECT>':subject,
+                '<TASK>':task,
                 '<NUMBER_OF_ELECTRODES>':len(monopolar_channels),
                 '<NUMBER_OF_SESSIONS>':n_sessions,
                 '<AUC>':'%2.2f'%fr1_auc,
