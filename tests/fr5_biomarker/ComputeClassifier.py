@@ -156,7 +156,7 @@ class ComputeClassifier(RamTask):
         # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
         #                                         solver='liblinear')
         #
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
+        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,fit_intercept=False,
                                                 solver='newton-cg')
 
         # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
