@@ -340,8 +340,8 @@ class ComputeClassifier(RamTask):
         self.pow_mat = self.get_pow_mat()
         self.pow_mat[events.type=='WORD'] = normalize_sessions(self.pow_mat[events.type=='WORD'],events[events.type=='WORD'])
         self.pow_mat[events.type!='WORD'] = normalize_sessions(self.pow_mat[events.type!='WORD'],events[events.type!='WORD'])
-
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
+        self.pow_mat = np.append(self.pow_mat,np.ones((len(self.pow_mat),1)),axis=1)
+        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,fit_intercept=False,
                                                 solver='newton-cg')
 
 
