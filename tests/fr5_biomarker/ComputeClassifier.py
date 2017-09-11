@@ -403,9 +403,15 @@ class ComputeClassifier(RamTask):
             try:
                 for sess in event_sessions:
                     sel = (event_sessions == sess)
-                    sess_permuted_recalls = permuted_recalls[sel]
-                    shuffle(sess_permuted_recalls)
-                    permuted_recalls[sel] = sess_permuted_recalls
+                    if events is not None:
+                        for type_sel in [events.type=='WORD', events.type != 'WORD']:
+                            sess_permuted_recalls = permuted_recalls[sel & type_sel]
+                            shuffle(sess_permuted_recalls)
+                            permuted_recalls[sel & type_sel] = sess_permuted_recalls
+                    else:
+                        sess_permuted_recalls = permuted_recalls[sel]
+                        shuffle(sess_permuted_recalls)
+                        permuted_recalls[sel] = sess_permuted_recalls
                 probs = self.run_loso_xval(event_sessions, permuted_recalls, permuted=True,samples_weights=samples_weights,events=events)[0]
                 AUCs[i] = roc_auc_score(recalls, probs)
                 print 'AUC =', AUCs[i]
