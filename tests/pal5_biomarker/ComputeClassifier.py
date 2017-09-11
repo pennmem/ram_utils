@@ -357,13 +357,10 @@ class ComputeClassifier(RamTask):
         self.pow_mat = self.filter_pow_mat()
         self.pow_mat[encoding_mask] = normalize_sessions(self.pow_mat[encoding_mask], events[encoding_mask])
         self.pow_mat[~encoding_mask] = normalize_sessions(self.pow_mat[~encoding_mask], events[~encoding_mask])
-        self.pow_mat = np.append(self.pow_mat,np.ones((len(self.pow_mat),1)),axis=1)
-
 
         # computing z-scoring vectors
 
         mean_dict, std_dict = compute_z_scoring_vecs(pow_mat_copy[~encoding_mask], events[~encoding_mask])
-        self.pow_mat = np.append(self.pow_mat,np.ones((len(self.pow_mat),1)),axis=1)
 
 
         self.pass_object('features_mean_dict', mean_dict)
