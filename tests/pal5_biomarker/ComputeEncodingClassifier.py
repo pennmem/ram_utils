@@ -326,7 +326,7 @@ class ComputeEncodingClassifier(RamTask):
         encoding_recalls = encoding_events.correct
 
 
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
+        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',fit_intercept=False,
                                                 solver='newton-cg')
 
         event_sessions = encoding_events.session
