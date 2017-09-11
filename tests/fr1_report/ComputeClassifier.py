@@ -202,9 +202,10 @@ class ComputeJointClassifier(ReportRamTask):
         encoding_mask = events.type=='WORD'
         self.pow_mat[encoding_mask] = normalize_sessions(self.pow_mat[encoding_mask],events[encoding_mask])
         self.pow_mat[~encoding_mask] = normalize_sessions(self.pow_mat[~encoding_mask],events[~encoding_mask])
+        self.pow_mat = np.append(self.pow_mat,np.ones((len(self.pow_mat),1)),axis=1)
 
 
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
+        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,fit_intercept=False,
                                                 solver='newton-cg')
 
 
