@@ -150,10 +150,6 @@ class ComputeClassifier(ReportRamTask):
         events = events[events.type=='WORD']
         self.pow_mat = normalize_sessions(self.pow_mat, events)
 
-        #n1 = np.sum(events.recalled)
-        #n0 = len(events) - n1
-        #w0 = (2.0/n0) / ((1.0/n0)+(1.0/n1))
-        #w1 = (2.0/n1) / ((1.0/n0)+(1.0/n1))
         self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto', solver='liblinear')
 
         event_sessions = events.session
@@ -256,11 +252,11 @@ class ComputeJointClassifier(ReportRamTask):
         events = self.events
         self.pow_mat = self.get_pow_mat()
         encoding_mask = events.type=='WORD'
-        self.pow_mat[encoding_mask] = normalize_sessions(self.pow_mat[encoding_mask],events[encoding_mask])
-        self.pow_mat[~encoding_mask] = normalize_sessions(self.pow_mat[~encoding_mask],events[~encoding_mask])
+        self._normalize_sessions(events)
+        self.pow_mat = np.append(self.pow_mat,np.ones((len(self.pow_mat),1)),axis=1)
 
 
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
+        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,fit_intercept=False,
                                                 solver='newton-cg')
 
 
@@ -280,7 +276,7 @@ class ComputeJointClassifier(ReportRamTask):
         sessions = np.unique(event_sessions)
         if len(sessions) > 1:
             print 'Performing permutation test'
-            self.perm_AUCs = self.permuted_loso_AUCs(event_sessions, recalls, samples_weights,events=events)
+            self.perm_AUCs,_ = self.permuted_loso_AUCs(event_sessions, recalls, samples_weights,events=events)
 
             print 'Performing leave-one-session-out xval'
             self.run_loso_xval(event_sessions, recalls, permuted=False,samples_weights=samples_weights, events=events)
@@ -289,7 +285,7 @@ class ComputeJointClassifier(ReportRamTask):
             event_lists = events.list
 
             print 'Performing in-session permutation test'
-            self.perm_AUCs = self.permuted_lolo_AUCs(sess, event_lists, recalls,samples_weights=samples_weights)
+            self.perm_AUCs,_ = self.permuted_lolo_AUCs(sess, event_lists, recalls,samples_weights=samples_weights)
 
             print 'Performing leave-one-list-out xval'
             self.run_lolo_xval(sess, event_lists, recalls, permuted=False,samples_weights=samples_weights)
@@ -461,19 +457,28 @@ class ComputeJointClassifier(ReportRamTask):
         n_perm = self.params.n_perm
         permuted_recalls = np.array(recalls)
         AUCs = np.empty(shape=n_perm, dtype=np.float)
+        probs = []
         for i in xrange(n_perm):
             try:
                 for sess in event_sessions:
                     sel = (event_sessions == sess)
-                    sess_permuted_recalls = permuted_recalls[sel]
-                    shuffle(sess_permuted_recalls)
-                    permuted_recalls[sel] = sess_permuted_recalls
-                probs = self.run_loso_xval(event_sessions, permuted_recalls, permuted=True,samples_weights=samples_weights,events=events)
-                AUCs[i] = roc_auc_score(recalls[events.type=='WORD'], probs)
+                    if events is not None:
+                        encoding_sel = sel & (events.type=='WORD')
+                        retrieval_sel = sel & (events.type!='WORD')
+                        for sel_ in [encoding_sel,retrieval_sel]:
+                            sess_phase_perm_recalls = permuted_recalls[sel_]
+                            shuffle(sess_phase_perm_recalls)
+                            permuted_recalls[sel_] = sess_phase_perm_recalls
+                    else:
+                        sess_permuted_recalls = permuted_recalls[sel]
+                        shuffle(sess_permuted_recalls)
+                        permuted_recalls[sel] = sess_permuted_recalls
+                probs.append( self.run_loso_xval(event_sessions, permuted_recalls, permuted=True,samples_weights=samples_weights,events=events))
+                AUCs[i] = roc_auc_score(recalls[events.type=='WORD'], probs[-1])
                 print 'AUC =', AUCs[i]
             except ValueError:
                 AUCs[i] = np.nan
-        return AUCs
+        return AUCs,probs
 
 
     def run_lolo_xval(self, sess, event_lists, recalls, permuted=False, samples_weights=None):
@@ -513,16 +518,17 @@ class ComputeJointClassifier(ReportRamTask):
         n_perm = self.params.n_perm
         permuted_recalls = np.array(recalls)
         AUCs = np.empty(shape=n_perm, dtype=np.float)
+        probs = []
         for i in xrange(n_perm):
             for lst in event_lists:
                 sel = (event_lists == lst)
                 list_permuted_recalls = permuted_recalls[sel]
                 shuffle(list_permuted_recalls)
                 permuted_recalls[sel] = list_permuted_recalls
-            probs = self.run_lolo_xval(sess, event_lists, permuted_recalls, permuted=True,samples_weights=samples_weights)
-            AUCs[i] = roc_auc_score(recalls, probs)
+            probs.append(self.run_lolo_xval(sess, event_lists, permuted_recalls, permuted=True,samples_weights=samples_weights))
+            AUCs[i] = roc_auc_score(recalls, probs[-1])
             print 'AUC =', AUCs[i]
-        return AUCs
+        return AUCs,probs
 
 
     def restore(self):
