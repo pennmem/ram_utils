@@ -340,7 +340,7 @@ class ComputeClassifier(RamTask):
 
 
     def create_classifier_obj(self):
-        return LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',fit_intercept=False,
+        return LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
                                                         solver='newton-cg')
 
 
@@ -369,7 +369,7 @@ class ComputeClassifier(RamTask):
         joblib.dump(std_dict,self.get_path_to_resource_in_workspace('features_std_dict.pkl'),)
 
 
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',fit_intercept=False,
+        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
                                                 solver='newton-cg')
 
         event_sessions = events.session

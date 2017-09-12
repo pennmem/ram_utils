@@ -149,8 +149,6 @@ class ComputeClassifier(RamTask):
         encoding_mask = events.type=='WORD'
         self.pow_mat[encoding_mask] = normalize_sessions(self.pow_mat[encoding_mask],events[encoding_mask])
         self.pow_mat[~encoding_mask] = normalize_sessions(self.pow_mat[~encoding_mask],events[~encoding_mask])
-        self.pow_mat = np.append(self.pow_mat,np.ones((len(self.pow_mat),1)),axis=1)
-
         # Add bias term
         # self.pow_mat = np.append(np.ones((len(self.pow_mat),1)),self.pow_mat,axis=1)
 
@@ -158,7 +156,7 @@ class ComputeClassifier(RamTask):
         # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
         #                                         solver='liblinear')
         #
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,fit_intercept=False,
+        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
                                                 solver='newton-cg')
 
         # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
@@ -403,15 +401,9 @@ class ComputeClassifier(RamTask):
             try:
                 for sess in event_sessions:
                     sel = (event_sessions == sess)
-                    if events is not None:
-                        for type_sel in [events.type=='WORD', events.type != 'WORD']:
-                            sess_permuted_recalls = permuted_recalls[sel & type_sel]
-                            shuffle(sess_permuted_recalls)
-                            permuted_recalls[sel & type_sel] = sess_permuted_recalls
-                    else:
-                        sess_permuted_recalls = permuted_recalls[sel]
-                        shuffle(sess_permuted_recalls)
-                        permuted_recalls[sel] = sess_permuted_recalls
+                    sess_permuted_recalls = permuted_recalls[sel]
+                    shuffle(sess_permuted_recalls)
+                    permuted_recalls[sel] = sess_permuted_recalls
                 probs = self.run_loso_xval(event_sessions, permuted_recalls, permuted=True,samples_weights=samples_weights,events=events)[0]
                 AUCs[i] = roc_auc_score(recalls, probs)
                 print 'AUC =', AUCs[i]
