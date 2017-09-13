@@ -4,6 +4,7 @@
         "type": "{{experiment}}",
         "experiment_specific_data": {
             "classifier_file": "{{classifier_file}}",
+            "classifier_version":"{{classifier_version}}",
             "stim_electrode_pair":"{{fr5_stim_channel}}",
             "stim_amplitude" : {{stim_params_dict[fr5_stim_channel]['stim_amplitude']}},
             "stim_frequency" : {{stim_params_dict[fr5_stim_channel]['stim_frequency']}},

@@ -16,6 +16,8 @@ from itertools import cycle
 from system_3_utils import ElectrodeConfigSystem3
 from itertools import chain
 
+CLASSIFIER_VERSION = '1.0.1'
+
 class ExperimentConfigGeneratorClosedLoop5(RamTask):
     def __init__(self, params, mark_as_completed=False):
         RamTask.__init__(self, mark_as_completed)
@@ -135,6 +137,7 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
             subject=subject,
             experiment=experiment,
             classifier_file='config_files/%s'%basename(classifier_path),
+            classifier_version=CLASSIFIER_VERSION,
             stim_params_dict=stim_params_dict,
             electrode_config_file='config_files/%s'%basename(electrode_config_file_core+'.bin'),
             montage_file='config_files/%s'%basename(bipolar_pairs_path),

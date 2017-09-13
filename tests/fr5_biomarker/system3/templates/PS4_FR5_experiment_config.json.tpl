@@ -4,6 +4,8 @@
         "type": "{{experiment}}",
         "experiment_specific_data": {
             "classifier_file": "{{classifier_file}}",
+            "classifier_version":"{{classifier_version}}",
+
             "stim_channels": {
                 {% for (i,stim_channel) in enumerate(stim_params_dict) %}"{{stim_channel}}":
                 {
