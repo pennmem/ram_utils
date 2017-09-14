@@ -11,6 +11,7 @@ from RamPipeline import *
 from ReportUtils import ReportRamTask
 
 import hashlib
+from ReportTasks.RamTaskMethods import filter_session
 
 
 class PAL1EventPreparation(ReportRamTask):
@@ -61,7 +62,7 @@ class PAL1EventPreparation(ReportRamTask):
             e_path = os.path.join(self.pipeline.mount_point, str(sess_file))
             e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
-            sess_events = e_reader.read()
+            sess_events = filter_session(e_reader.read())
             sess_events = sess_events[evs_field_list].copy()
 
             if events is None:
