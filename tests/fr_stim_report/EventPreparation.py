@@ -1,4 +1,4 @@
-import os
+from ReportTasks.RamTaskMethods import filter_session
 import os.path
 import numpy as np
 
@@ -54,7 +54,7 @@ class EventPreparation(ReportRamTask):
             print e_path
             e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
-            sess_events = e_reader.read()
+            sess_events = filter_session(e_reader.read())
 
             if events is None:
                 events = sess_events

@@ -11,7 +11,7 @@ from RamPipeline import *
 from ReportUtils import ReportRamTask
 
 import hashlib
-
+from ReportTasks.RamTaskMethods import filter_session
 
 class FREventPreparation(ReportRamTask):
     def __init__(self, mark_as_completed=True):
@@ -52,7 +52,7 @@ class FREventPreparation(ReportRamTask):
             print e_path
             e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
-            sess_events = e_reader.read()[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'iscorrect', 'answer', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
+            sess_events = filter_session(e_reader.read())[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'iscorrect', 'answer', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
 
             if fr1_events is None:
                 fr1_events = sess_events
@@ -67,7 +67,7 @@ class FREventPreparation(ReportRamTask):
             print e_path
             e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
-            sess_events = e_reader.read()
+            sess_events = filter_session(e_reader.read())
             sess_events.session += 100
             sess_events = sess_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'iscorrect', 'answer', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
 
