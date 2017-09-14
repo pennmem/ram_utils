@@ -417,6 +417,10 @@ def run_loso_xval(event_sessions, recalls, pow_mat, classifier, xval_output, per
 
 "============================================================"
 
+def filter_session(sess_events):
+    last_list = sess_events[sess_events.type == 'REC_END'][-1]['list']  # drop any incomplete lists
+    return sess_events[sess_events.list <= last_list]
+
 
 def free_epochs(times, duration, pre, post, start=None, end=None):
     # (list(vector(int))*int*int*int) -> list(vector(int))
