@@ -12,7 +12,7 @@ from ReportUtils import ReportRamTask
 
 import hashlib
 from ReportTasks.RamTaskMethods import create_baseline_events
-
+from ReportTasks.RamTaskMethods import filter_session
 
 class FR1EventPreparation(ReportRamTask):
     def __init__(self, mark_as_completed=True):
@@ -60,9 +60,9 @@ class FR1EventPreparation(ReportRamTask):
         events = None
         for sess_file in event_files:
             e_path = os.path.join(self.pipeline.mount_point, str(sess_file))
-            e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=False)
+            e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
-            sess_events = e_reader.read()[evs_field_list]
+            sess_events = filter_session(e_reader.read()[evs_field_list])
 
             if events is None:
                 events = sess_events
