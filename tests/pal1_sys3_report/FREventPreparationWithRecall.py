@@ -13,6 +13,7 @@ from ReportUtils import RamTask
 import hashlib
 from sklearn.externals import joblib
 from ReportTasks.RamTaskMethods import create_baseline_events
+from ReportTasks.RamTaskMethods import filter_session
 
 
 class FREventPreparationWithRecall(RamTask):
@@ -57,9 +58,9 @@ class FREventPreparationWithRecall(RamTask):
 
         # have to convert path to str explicitly to avoid exception in TypedUtils from PTSA.
         # when path comes from the console it is a unicode str.
-        fr1_evs_list = [BaseEventReader(filename=str(event_path)).read() for event_path in event_files]
+        fr1_evs_list = [filter_session(BaseEventReader(filename=str(event_path)).read()) for event_path in event_files]
 
-        catfr1_evs_list = [BaseEventReader(filename=str(event_path)).read() for event_path in catfr1_event_files]
+        catfr1_evs_list = [filter_session(BaseEventReader(filename=str(event_path)).read()) for event_path in catfr1_event_files]
 
         processed_fr1_events = self.process_events(fr1_evs_list)
         processed_catfr1_events = self.process_events(catfr1_evs_list)
