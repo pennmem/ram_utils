@@ -17,7 +17,7 @@ import hashlib
 import warnings
 from ReportTasks.RamTaskMethods import create_baseline_events_pal
 from ptsa.data.readers import EEGReader
-
+from ReportTasks.RamTaskMethods import filter_session
 
 class PAL1EventPreparation(RamTask):
     def __init__(self, mark_as_completed=True):
@@ -307,7 +307,7 @@ class PAL1EventPreparation(RamTask):
 
             e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
             try:
-                sess_events = e_reader.read()[evs_field_list]
+                sess_events = filter_session(e_reader.read())[evs_field_list]
             except IOError:
                 warnings.warn('Could not process %s. Please make sure that the event file exist' % e_path,
                               RuntimeWarning)

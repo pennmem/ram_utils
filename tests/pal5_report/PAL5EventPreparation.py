@@ -3,7 +3,7 @@ from ReportUtils import ReportRamTask
 from ptsa.data.readers.IndexReader import JsonIndexReader
 from ptsa.data.readers import BaseEventReader
 import os
-
+from ReportTasks.RamTaskMethods import filter_session
 
 class PAL5EventPreparation(ReportRamTask):
 
@@ -13,7 +13,7 @@ class PAL5EventPreparation(ReportRamTask):
         subject= subject_list[0]
 
         jr = JsonIndexReader(os.path.join(self.pipeline.mount_point,'protocols/r1.json'))
-        events = np.concatenate([BaseEventReader(filename=pf).read() for pf in
+        events = np.concatenate([filter_session(BaseEventReader(filename=pf).read()) for pf in
                                  jr.aggregate_values('all_events',subject=subject,montage=montage,experiment='PAL5')]
                                 ).view(np.recarray)
 
