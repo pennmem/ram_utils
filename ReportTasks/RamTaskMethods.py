@@ -16,7 +16,7 @@ from math import sqrt
 from random import shuffle
 from sklearn.metrics import roc_auc_score, roc_curve
 from sklearn.externals import joblib
-
+from itertools import tee,groupby
 
 
 def compute_wavelets_powers(events, monopolar_channels, bipolar_pairs,
@@ -417,9 +417,12 @@ def run_loso_xval(event_sessions, recalls, pow_mat, classifier, xval_output, per
 
 "============================================================"
 
-def filter_session(sess_events):
-    last_list = sess_events[sess_events.type == 'REC_END'][-1]['list']  # drop any incomplete lists
-    return sess_events[sess_events.list <= last_list]
+def filter_session(events):
+    # Remove all lists from an event structure that don't have a "REC_END" event
+    events_by_list = (np.array([l for l in list_group]) for listno,list_group in groupby(events, lambda x:x.list))
+    list_has_end = (any([l['type']=='REC_END' for l in list_group]) or listno == -999 for listno,list_group in groupby(events, lambda x:x.list))
+    events = np.concatenate([e for (e, a) in zip(events_by_list, list_has_end) if a])
+    return events
 
 
 def free_epochs(times, duration, pre, post, start=None, end=None):
