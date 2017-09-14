@@ -118,12 +118,12 @@ class FR5EventPreparation(ReportRamTask):
                         if not jr.aggregate_values('ps4_events',subject=subject,montage=montage,experiment=task,session=s)
                         ]
         if montage:
-            events = np.concatenate([ BaseEventReader(
-                filename=jr.get_value('task_events',subject=subject,montage=montage,experiment=task,session=s)).read()
+            events = np.concatenate([ filter_session(BaseEventReader(
+                filename=jr.get_value('task_events',subject=subject,montage=montage,experiment=task,session=s)).read())
                                       for s in fr5_sessions]).view(np.recarray)
         else:
-            events = np.concatenate([ BaseEventReader(
-                filename=jr.get_value('task_events',subject=subject,experiment=task,session=s)).read()
+            events = np.concatenate([ filter_session(BaseEventReader(
+                filename=jr.get_value('task_events',subject=subject,experiment=task,session=s)).read())
                                       for s in fr5_sessions]).view(np.recarray)
 
         events = events[events.list>-1]
