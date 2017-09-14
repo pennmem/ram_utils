@@ -1,7 +1,7 @@
 __author__ = 'm'
 
 
-
+from ReportTasks.RamTaskMethods import filter_session
 import random
 import os
 import os.path
@@ -315,7 +315,7 @@ class PAL1EventPreparation(RamTask):
 
             e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
             try:
-                sess_events = e_reader.read()[evs_field_list]
+                sess_events = filter_session(e_reader.read())[evs_field_list]
             except IOError:
                 warnings.warn('Could not process %s. Please make sure that the event file exist' % e_path,
                               RuntimeWarning)
