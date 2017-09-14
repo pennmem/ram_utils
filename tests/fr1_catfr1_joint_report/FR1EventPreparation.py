@@ -12,6 +12,7 @@ from ReportUtils import ReportRamTask
 
 import hashlib
 from ReportTasks.RamTaskMethods import create_baseline_events
+from ReportTasks.RamTaskMethods import filter_session
 
 
 class FR1EventPreparation(ReportRamTask):
@@ -58,9 +59,7 @@ class FR1EventPreparation(ReportRamTask):
             print e_path
             e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
-            sess_events = e_reader.read()[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'iscorrect', 'answer', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
-            last_list = sess_events[sess_events.type=='REC_END'][-1]['list'] # drop any incomplete lists
-            sess_events = sess_events[sess_events.list<=last_list]
+            sess_events = filter_session(e_reader.read())[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'iscorrect', 'answer', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
             if fr1_events is None:
                 fr1_events = sess_events
             else:
@@ -79,10 +78,8 @@ class FR1EventPreparation(ReportRamTask):
             print e_path
             e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
-            sess_events = e_reader.read()
+            sess_events = filter_session(e_reader.read())
             sess_events.session += 100
-            last_list = sess_events[sess_events.type=='REC_END'][-1]['list'] # drop any incomplete lists
-            sess_events = sess_events[sess_events.list<=last_list]
             if catfr1_events is None:
                 catfr1_events = sess_events
             else:
