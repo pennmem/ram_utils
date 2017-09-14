@@ -11,7 +11,7 @@ from RamPipeline import *
 from ReportUtils import RamTask
 
 import hashlib
-
+from ReportTasks.RamTaskMethods import filter_session
 
 class FREventPreparation(RamTask):
     def __init__(self, mark_as_completed=True):
@@ -61,7 +61,7 @@ class FREventPreparation(RamTask):
             print e_path
             e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
-            sess_events = e_reader.read()[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'mstime', 'type', 'eegoffset', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
+            sess_events = filter_session(e_reader.read())[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'mstime', 'type', 'eegoffset', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
             sess_events = sess_events[sess_events.type=='WORD']
 
             if events is None:
@@ -75,7 +75,7 @@ class FREventPreparation(RamTask):
             print e_path
             e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
-            sess_events = e_reader.read()
+            sess_events = filter_session(e_reader.read())
             sess_events.session += 100
             sess_events = sess_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'mstime', 'type', 'eegoffset', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
             sess_events = sess_events[sess_events.type=='WORD']
@@ -91,7 +91,7 @@ class FREventPreparation(RamTask):
             print e_path
             e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
-            sess_events = e_reader.read()
+            sess_events = filter_session(e_reader.read())
             sess_events = sess_events[(sess_events.stim_list==0) & (sess_events.type=='WORD')]
             sess_events.session += 200
             sess_events = sess_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'mstime', 'type', 'eegoffset', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
@@ -107,7 +107,7 @@ class FREventPreparation(RamTask):
             print e_path
             e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
-            sess_events = e_reader.read()
+            sess_events = filter_session(e_reader.read())
             sess_events = sess_events[(sess_events.stim_list==0) & (sess_events.type=='WORD')]
             sess_events.session += 300
             sess_events = sess_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'mstime', 'type', 'eegoffset', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
