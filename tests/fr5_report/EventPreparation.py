@@ -13,7 +13,7 @@ import hashlib
 from copy import deepcopy
 from ReportTasks.RamTaskMethods import create_baseline_events
 import pandas as pd
-
+from ReportTasks.RamTaskMethods import filter_session
 
 class FR1EventPreparation(ReportRamTask):
     def __init__(self, mark_as_completed=False):
@@ -62,12 +62,12 @@ class FR1EventPreparation(ReportRamTask):
             catfr1_event_files = json_reader.aggregate_values('task_events',subject=subj_code,montage=montage,experiment='catFR1')
 
         fr1_events = np.concatenate(
-            [BaseEventReader(filename=f, eliminate_events_with_no_eeg=True).read() for f in event_files]
+            filter_session([BaseEventReader(filename=f, eliminate_events_with_no_eeg=True).read() for f in event_files])
         ).view(np.recarray)
 
         if any(catfr1_event_files):
 
-            catfr1_events = np.concatenate([BaseEventReader(filename=f,eliminate_events_with_no_eeg=True).read()
+            catfr1_events = np.concatenate([filter_session(BaseEventReader(filename=f,eliminate_events_with_no_eeg=True).read())
                                             for f in catfr1_event_files]
                                            ).view(np.recarray)
             catfr1_events =catfr1_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
