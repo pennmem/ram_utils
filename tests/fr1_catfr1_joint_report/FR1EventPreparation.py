@@ -59,7 +59,8 @@ class FR1EventPreparation(ReportRamTask):
             e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
 
             sess_events = e_reader.read()[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type', 'eegoffset', 'iscorrect', 'answer', 'recalled', 'item_name', 'intrusion', 'montage', 'list', 'eegfile', 'msoffset']]
-
+            last_list = sess_events[sess_events.type=='REC_END'][-1]['list'] # drop any incomplete lists
+            sess_events = sess_events[sess_events.list<=last_list]
             if fr1_events is None:
                 fr1_events = sess_events
             else:
@@ -80,7 +81,8 @@ class FR1EventPreparation(ReportRamTask):
 
             sess_events = e_reader.read()
             sess_events.session += 100
-            sess_events = sess_events
+            last_list = sess_events[sess_events.type=='REC_END'][-1]['list'] # drop any incomplete lists
+            sess_events = sess_events[sess_events.list<=last_list]
             if catfr1_events is None:
                 catfr1_events = sess_events
             else:
