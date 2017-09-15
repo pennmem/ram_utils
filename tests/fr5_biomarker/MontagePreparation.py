@@ -89,6 +89,8 @@ class MontagePreparation(RamTask):
         subj_code = tmp[0]
         montage = 0 if len(tmp)==1 else int(tmp[1])
 
+        events = self.get_passed_object('FR_events')
+
         json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
         bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
 
@@ -98,6 +100,7 @@ class MontagePreparation(RamTask):
 
             f_pairs = open(bp_path, 'r')
             bipolar_dict = json.load(f_pairs)[subject]['pairs']
+            self.pass_object('bipolar_dict',bipolar_dict)
             f_pairs.close()
             bipolar_data_stim_only = {bp_tag:bp_data for bp_tag,bp_data in bipolar_dict.iteritems() if bp_data['is_stim_only']}
             bipolar_data = {bp_tag:bp_data for bp_tag,bp_data in bipolar_dict.iteritems() if not bp_data['is_stim_only']}
@@ -123,18 +126,13 @@ class MontagePreparation(RamTask):
             # print bp_tal_structs
             # exit()
 
-            if self.pipeline.args.anode_nums:
-                stim_pairs = self.pipeline.args.anode_nums + self.pipeline.args.cathode_nums
-            else:
-                stim_pairs = [self.pipeline.args.anode_num, self.pipeline.args.cathode_num]
-            reduced_pairs = [bp for bp in bipolar_pairs if (bp[0]) not in stim_pairs and int(bp[1]) not in stim_pairs]
+            reduced_pairs = get_reduced_pairs(self,bipolar_pairs)
 
-            reduced_dict = {bp_tag:bipolar_dict[bp_tag] for bp_tag in bipolar_dict
-                            if ('%03d'%bipolar_dict[bp_tag]['channel_1'],'%03d'%bipolar_dict[bp_tag]['channel_2'])  not in reduced_pairs}
+            excluded_dict = get_excluded_dict(bipolar_dict, reduced_pairs)
 
 
             with open(self.get_path_to_resource_in_workspace('excluded_pairs.json'),'w') as rjfile:
-                json.dump({subject: {'pairs': reduced_dict}},rjfile)
+                json.dump({subject: {'pairs': excluded_dict}},rjfile)
 
             bp_tal_stim_only_structs = pd.Series()
             if bipolar_data_stim_only:
@@ -171,3 +169,18 @@ class MontagePreparation(RamTask):
                                                )
             except (TypeError,AttributeError):
                 raise e
+
+def get_excluded_dict(bipolar_dict, reduced_pairs):
+    reduced_dict = {bp_tag: bipolar_dict[bp_tag] for bp_tag in bipolar_dict
+                    if ('%03d' % bipolar_dict[bp_tag]['channel_1'],
+                        '%03d' % bipolar_dict[bp_tag]['channel_2']) not in reduced_pairs}
+    return reduced_dict
+
+
+def get_reduced_pairs(self, bipolar_pairs):
+    if self.pipeline.args.anode_nums:
+        stim_pairs = self.pipeline.args.anode_nums + self.pipeline.args.cathode_nums
+    else:
+        stim_pairs = [self.pipeline.args.anode_num, self.pipeline.args.cathode_num]
+    reduced_pairs = [bp for bp in bipolar_pairs if (bp[0]) not in stim_pairs and int(bp[1]) not in stim_pairs]
+    return reduced_pairs

@@ -10,17 +10,17 @@ from os.path import *
 from system_3_utils.ram_tasks.CMLParserClosedLoop3 import CMLParserCloseLoop3
 
 cml_parser = CMLParserCloseLoop3(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','/scratch/leond/FR3_biomarkers/R1247P_1')
+cml_parser.arg('--workspace-dir','/Volumes/rhino_root/scratch/leond/FR3_biomarkers/R1308T')
 cml_parser.arg('--experiment','catFR3')
-cml_parser.arg('--mount-point','/')
-cml_parser.arg('--subject','R1247P_1')
-cml_parser.arg('--electrode-config-file',r'/home1/leond/fr3_config/contactsR1247P.csv')
+cml_parser.arg('--mount-point','/Users/leond')
+cml_parser.arg('--subject','R1308T')
+cml_parser.arg('--electrode-config-file','/Volumes/rhino_root/scratch/system3_configs/ODIN_configs/R1308T/R1308T_14JUN2017L0M0STIM.csv')
 cml_parser.arg('--pulse-frequency','100')
-cml_parser.arg('--target-amplitude','1000')
-cml_parser.arg('--anode-num','95')
-cml_parser.arg('--anode','Rd7')
-cml_parser.arg('--cathode-num','97')
-cml_parser.arg('--cathode','RE1')
+cml_parser.arg('--target-amplitude','1.0')
+cml_parser.arg('--anode-num','11')
+cml_parser.arg('--anode','LB6')
+cml_parser.arg('--cathode-num','12')
+cml_parser.arg('--cathode','LB7')
 
 
 

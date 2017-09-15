@@ -6,22 +6,25 @@ print "Windows binaries from https://github.com/busygin/morlet_for_sys2_biomarke
 print "See https://github.com/busygin/morlet_for_sys2_biomarker/blob/master/README for detail."
 
 from os.path import *
-from BiomarkerUtils import CMLParserBiomarker
+from system_3_utils.ram_tasks.CMLParserClosedLoop5 import CMLParserCloseLoop5
 
 
-cml_parser = CMLParserBiomarker(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','scratch/PAL3_biomarkers')
-cml_parser.arg('--mount-point','/Volumes/rhino_root')
-cml_parser.arg('--subject','R1312N')
-cml_parser.arg('--n-channels','128')
-cml_parser.arg('--anode-num','3')
-cml_parser.arg('--anode','G3')
-cml_parser.arg('--cathode-num','4')
-cml_parser.arg('--cathode','G4')
+cml_parser = CMLParserCloseLoop5()
+cml_parser.arg('--workspace-dir','/Volumes/rhino_root/scratch/PAL3_biomarkers')
+cml_parser.arg('--mount-point','/Users/leond')
+cml_parser.arg('--subject','R1333N')
+cml_parser.arg('--experiment','catFR5')
+# cml_parser.arg('--n-channels','128')
+cml_parser.arg('--anode-num','27')
+cml_parser.arg('--anode','RAD1')
+cml_parser.arg('--cathode-num','28')
+cml_parser.arg('--cathode','RAD2')
 cml_parser.arg('--pulse-frequency','100')
-cml_parser.arg('--pulse-duration','300')
-cml_parser.arg('--target-amplitude','1250')
+# cml_parser.arg('--pulse-duration','300')
+cml_parser.arg('--target-amplitude','1.0')
 cml_parser.arg('--sessions','1','2')
+cml_parser.arg('--electrode-config-file','/Volumes/rhino_root/scratch/system3_configs/ODIN_configs/R1333N/R1333N_28AUG2017L0M0STIM.csv')
+
 
 
 args = cml_parser.parse()
@@ -39,6 +42,8 @@ from MontagePreparation import MontagePreparation
 
 from CheckElectrodeLabels import CheckElectrodeLabels
 
+from system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
+
 from ComputeClassifier import ComputeClassifier
 
 from ComputeEncodingClassifier import ComputeEncodingClassifier
@@ -54,13 +59,14 @@ import numpy as np
 
 class StimParams(object):
     def __init__(self,**kwds):
-        self.n_channels = kwds['n_channels']
+        self.n_channels = kwds.get('n_channels',128)
         self.elec1 = kwds['anode_num']
         self.anode = kwds.get('anode', '')
         self.elec2 = kwds['cathode_num']
         self.cathode = kwds.get('cathode', '')
         self.pulseFrequency = kwds['pulse_frequency']
         self.amplitude = kwds['target_amplitude']
+        pass
 
 class Params(object):
     def __init__(self):
@@ -132,6 +138,8 @@ report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
 
 report_pipeline.add_task(CheckElectrodeLabels(params=params, mark_as_completed=False))
 
+report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
+
 report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=True))
@@ -141,6 +149,7 @@ report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True
 report_pipeline.add_task(ComputeBiomarkerThreshold(params=params, mark_as_completed=True))
 
 report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
+
 
 # starts processing pipeline
 report_pipeline.execute_pipeline()

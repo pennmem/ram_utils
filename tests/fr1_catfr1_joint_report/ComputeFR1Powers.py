@@ -105,16 +105,18 @@ class ComputeFR1Powers(ReportRamTask):
                 encoding_mask = events.type == 'WORD'
 
                 encoding_pow_mat, encoding_events = compute_powers(events[encoding_mask], monopolar_channels,
-                                                                   bipolar_pairs,
+
                                                                    params.fr1_start_time, params.fr1_end_time,
                                                                    params.fr1_buf,
-                                                                   params.freqs, params.log_powers)
+                                                                   params.freqs, params.log_powers,
+                                                                   bipolar_pairs=bipolar_pairs,)
                 retrieval_pow_mat, retrieval_events = compute_powers(events[~encoding_mask], monopolar_channels,
-                                                                     bipolar_pairs,
+
                                                                      params.fr1_retrieval_start_time,
                                                                      params.fr1_retrieval_end_time,
                                                                      params.fr1_retrieval_buf,
-                                                                     params.freqs, params.log_powers)
+                                                                     params.freqs, params.log_powers,
+                                                                     bipolar_pairs=bipolar_pairs,)
 
                 events = np.concatenate([encoding_events, retrieval_events]).view(np.recarray)
                 events.sort(order=['session', 'list', 'mstime'])

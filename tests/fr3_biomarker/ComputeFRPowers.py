@@ -87,10 +87,12 @@ class ComputeFRPowers(RamTask):
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
 
         if compute_powers:
-                self.pow_mat, events = compute_powers(events, monopolar_channels, bipolar_pairs,
+                self.pow_mat, events = compute_powers(events, monopolar_channels,
                                                        self.params.fr1_start_time, self.params.fr1_end_time,
                                                        self.params.fr1_buf,
-                                                       self.params.freqs, self.params.log_powers,ComputePowers=self)
+                                                       self.params.freqs, self.params.log_powers,
+                                                      bipolar_pairs,
+                                                      ComputePowers=self)
         else:
             self.compute_powers(events,sessions,monopolar_channels,bipolar_pairs)
 

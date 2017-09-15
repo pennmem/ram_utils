@@ -76,9 +76,10 @@ class ComputePAL1Powers(ReportRamTask):
         if compute_powers is None:
             self.compute_powers(events,sessions,monopolar_channels,bipolar_pairs)
         else:
-            self.pow_mat,events =compute_powers(events, monopolar_channels, bipolar_pairs,
+            self.pow_mat,events =compute_powers(events, monopolar_channels,
                                          params.pal1_start_time, params.pal1_end_time,params.pal1_buf,
-                                         params.freqs, params.log_powers)
+                                         params.freqs, params.log_powers,
+                                                bipolar_pairs=bipolar_pairs)
 
             self.pass_object(task+'_events',events)
         self.pass_object('pow_mat', self.pow_mat)

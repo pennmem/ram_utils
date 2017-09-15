@@ -97,24 +97,25 @@ class ComputePAL1Powers(RamTask):
         params = self.params
 
         print 'Computing powers during encoding'
-        encoding_pow_mat, encoding_events = compute_powers(events[is_encoding_event], monopolar_channels, bipolar_pairs,
+        encoding_pow_mat, encoding_events = compute_powers(events[is_encoding_event], monopolar_channels,
                                                            params.pal1_start_time, params.pal1_end_time, params.pal1_buf,
-                                                           params.freqs, params.log_powers)
+                                                           params.freqs, params.log_powers,
+                                                           bipolar_pairs=bipolar_pairs)
 
         print 'Computing powers during retrieval'
 
         retrieval_pow_mat, retrieval_events = compute_powers(events[~is_encoding_event], monopolar_channels,
-                                                             bipolar_pairs,
                                                              params.pal1_retrieval_start_time,
                                                              params.pal1_retrieval_end_time, params.pal1_retrieval_buf,
-                                                             params.freqs, params.log_powers)
+                                                             params.freqs, params.log_powers,
+                                                             bipolar_pairs,)
 
         events =  np.concatenate([encoding_events,retrieval_events]).view(np.recarray)
         events.sort(order=['session','list','mstime'])
         is_encoding_event  = (events.type=='PRACTICE_PAIR') | (events.type=='STUDY_PAIR')
         self.pass_object('PAL1_events',events)
 
-        self.pow_mat = np.zeros((len(events), len(bipolar_pairs) * len(params.freqs)))
+        self.pow_mat = np.zeros((len(events),encoding_pow_mat.shape[-1]))
         self.pow_mat[is_encoding_event, ...] = encoding_pow_mat
         self.pow_mat[~is_encoding_event, ...] = retrieval_pow_mat
 

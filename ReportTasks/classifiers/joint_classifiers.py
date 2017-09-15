@@ -17,15 +17,11 @@ class JointEncodingRetrievalClassifier(RAMClassifier):
     def compute_features(self):
         encoding_events = self.events[self.encoding]
         retrieval_events = self.events[~self.encoding]
-        encoding_powers, encoding_events = compute_powers(encoding_events, self.channels, self.pairs,
-                                                            self.start_time, self.end_time,
-                                                            self.buffer_time,
-                                                            self.freqs, True
-                                                            )
-        retrieval_powers,retrieval_events = compute_powers(retrieval_events,self.channels,self.pairs,
-                                                           self.retrieval_start_time,self.retrieval_end_time,self.retrival_buf,
-                                                           self.freqs,True
-                                                           )
+        encoding_powers, encoding_events = compute_powers(encoding_events, self.channels, self.start_time,
+                                                          self.end_time, self.buffer_time, self.freqs, True, self.pairs)
+        retrieval_powers,retrieval_events = compute_powers(retrieval_events, self.channels, self.retrieval_start_time,
+                                                           self.retrieval_end_time, self.retrival_buf, self.freqs, True,
+                                                           self.pairs)
 
         self.events = np.concatenate([encoding_events,retrieval_events]).astype(np.recarray).sort(order=['session','list','mstime'])
         self.pow_mat = np.empty((len(self.events),encoding_powers.shape[-1]))

@@ -45,7 +45,8 @@ def compute_wavelets_powers(events, monopolar_channels, bipolar_pairs,
     eeg = eeg.add_mirror_buffer(duration=buffer_time)
 
     # Use bipolar pairs
-    eeg = MonopolarToBipolarMapper(time_series=eeg, bipolar_pairs=bipolar_pairs).filter()
+    if 'bipolar_pairs' not in eeg.dims:
+        eeg = MonopolarToBipolarMapper(time_series=eeg, bipolar_pairs=bipolar_pairs).filter()
     # Butterworth filter to remove line noise
     eeg = eeg.filtered(freq_range=[58., 62.], filt_type='stop', order=filt_order)
     eeg['samplerate'] = samplerate
@@ -126,17 +127,17 @@ def compute_wavelets_powers(events, monopolar_channels, bipolar_pairs,
 
 
 
+def compute_powers(events, monopolar_channels, start_time, end_time, buffer_time, freqs, log_powers, bipolar_pairs=None,
+                   ComputePowers=None, filt_order=4, width=5):
+    if bipolar_pairs is not None:
+        if not isinstance(bipolar_pairs, np.recarray):
+            # it expects to receive a list
+            bipolar_pairs = np.array(bipolar_pairs, dtype=[('ch0', 'S3'), ('ch1', 'S3')]).view(np.recarray)
+        else:
+            # to get the same treatment if we get recarray , we will convert it to a list and then bask to
+            # recarray with correct dtype
+            bipolar_pairs = np.array(list(bipolar_pairs), dtype=[('ch0', 'S3'), ('ch1', 'S3')]).view(np.recarray)
 
-def compute_powers(events, monopolar_channels, bipolar_pairs,
-                   start_time, end_time, buffer_time,
-                   freqs, log_powers, ComputePowers=None, filt_order=4, width=5):
-    if not isinstance(bipolar_pairs, np.recarray):
-        # it expects to receive a list
-        bipolar_pairs = np.array(bipolar_pairs, dtype=[('ch0', 'S3'), ('ch1', 'S3')]).view(np.recarray)
-    else:
-        # to get the same treatment if we get recarray , we will convert it to a list and then bask to
-        # recarray with correct dtype
-        bipolar_pairs = np.array(list(bipolar_pairs), dtype=[('ch0', 'S3'), ('ch1', 'S3')]).view(np.recarray)
 
     sessions = np.unique(events.session)
     pow_mat = None
@@ -161,8 +162,11 @@ def compute_powers(events, monopolar_channels, bipolar_pairs,
             # The task will have to actually handle passing the new events
         eeg = eeg.add_mirror_buffer(duration=buffer_time)
 
-        # Use bipolar pairs
-        eeg = MonopolarToBipolarMapper(time_series=eeg, bipolar_pairs=bipolar_pairs).filter()
+        # Use bipolar pairs if they exist and recording is not already bipolar
+        if bipolar_pairs is not None and 'bipolar_pairs' not in eeg.coords:
+            eeg = MonopolarToBipolarMapper(time_series=eeg, bipolar_pairs=bipolar_pairs).filter()
+        elif 'bipolar_pairs' in eeg.coords and ComputePowers is not None:
+            ComputePowers.bipolar_pairs = eeg['bipolar_pairs'].values
         # Butterworth filter to remove line noise
         eeg = eeg.filtered(freq_range=[58., 62.], filt_type='stop', order=filt_order)
         eeg['samplerate'] = samplerate
@@ -187,7 +191,7 @@ def compute_powers(events, monopolar_channels, bipolar_pairs,
         pow_mat = sess_pow_mat if pow_mat is None else np.concatenate((pow_mat, sess_pow_mat))
 
 
-    pow_mat = pow_mat.reshape((len(events), len(bipolar_pairs) * len(freqs)))
+    pow_mat = pow_mat.reshape((len(events),-1))
 
     print 'Total time elapsed: {}'.format(time.time() - tic)
     # print 'Time spent on wavelet filter: {}'.format(filter_time)
@@ -422,7 +426,7 @@ def filter_session(events):
     events_by_list = (np.array([l for l in list_group]) for listno,list_group in groupby(events, lambda x:x.list))
     list_has_end = (any([l['type']=='REC_END' for l in list_group]) or listno == -999 for listno,list_group in groupby(events, lambda x:x.list))
     events = np.concatenate([e for (e, a) in zip(events_by_list, list_has_end) if a])
-    return events
+    return events.view(np.recarray)
 
 
 def free_epochs(times, duration, pre, post, start=None, end=None):
