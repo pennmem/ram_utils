@@ -43,7 +43,7 @@ class EventPreparation(ReportRamTask):
 
         events = None
 
-        if self.pipeline.sessions is None:
+        if self.pipeline.sessions is None or not self.pipeline.sessions:
             event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment=task)))
         else:
             fr_sessions = [s for s in self.pipeline.sessions if s <100]
@@ -64,7 +64,7 @@ class EventPreparation(ReportRamTask):
                 events = np.hstack((events,sess_events))
         fr_event_fields=list(events.dtype.names)
 
-        if self.pipeline.sessions is None:
+        if self.pipeline.sessions is None or not self.pipeline.sessions:
             cat_event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='cat'+task)))
         else:
             catfr_sessions = [s-100 for s in self.pipeline.sessions if s>=100]

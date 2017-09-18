@@ -30,8 +30,6 @@ cml_parser.arg('--mount-point',  '/Volumes/rhino_root')
 
 args = cml_parser.parse()
 
-
-
 from FR1EventPreparation import FR1EventPreparation
 
 from RepetitionRatio import RepetitionRatio

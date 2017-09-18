@@ -45,7 +45,7 @@ class FREventPreparation(ReportRamTask):
 
         json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
 
-        if self.pipeline.sessions is None:
+        if self.pipeline.sessions is None or not self.pipeline.sessions:
             event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='FR1')))
         else :
             fr1_sessions = [s for s in self.pipeline.sessions if s<100]
@@ -65,7 +65,7 @@ class FREventPreparation(ReportRamTask):
             else:
                 fr1_events = np.hstack((fr1_events,sess_events))
 
-        if self.pipeline.sessions is None:
+        if self.pipeline.sessions is None or not self.pipeline.sessions:
             event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='catFR1')))
         else:
             catfr1_sessions = [s for s in self.pipeline.sessions if s>=100]
