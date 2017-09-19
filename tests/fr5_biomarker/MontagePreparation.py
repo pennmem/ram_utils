@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from sklearn.externals import joblib
-
+from ReportTasks.RamTaskMethods import get_reduced_pairs,get_excluded_dict
 from RamPipeline import RamTask
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
@@ -170,17 +170,3 @@ class MontagePreparation(RamTask):
             except (TypeError,AttributeError):
                 raise e
 
-def get_excluded_dict(bipolar_dict, reduced_pairs):
-    reduced_dict = {bp_tag: bipolar_dict[bp_tag] for bp_tag in bipolar_dict
-                    if ('%03d' % bipolar_dict[bp_tag]['channel_1'],
-                        '%03d' % bipolar_dict[bp_tag]['channel_2']) not in reduced_pairs}
-    return reduced_dict
-
-
-def get_reduced_pairs(self, bipolar_pairs):
-    if self.pipeline.args.anode_nums:
-        stim_pairs = self.pipeline.args.anode_nums + self.pipeline.args.cathode_nums
-    else:
-        stim_pairs = [self.pipeline.args.anode_num, self.pipeline.args.cathode_num]
-    reduced_pairs = [bp for bp in bipolar_pairs if (bp[0]) not in stim_pairs and int(bp[1]) not in stim_pairs]
-    return reduced_pairs

@@ -5,6 +5,8 @@ import numpy as np
 
 from ReportUtils import RamTask
 from system_3_utils.ElectrodeConfigSystem3 import ElectrodeConfig
+import json
+from collections import OrderedDict
 
 
 class CheckElectrodeConfigurationClosedLoop3(RamTask):
@@ -129,6 +131,17 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
         ec.initialize(electrode_csv)
 
         self.validate_montage(electrode_config=ec)
+        sense_channels = ec.sense_channels_as_recarray()
+        ec_pairs = sorted(((n,c.contact.port_num,int(c.ref)) for n,c in ec.sense_channels.items()),cmp=lambda x,y: cmp(x[1:],y[1:]))
+        new_dict = OrderedDict()
+        for (n, anode, cathode) in ec_pairs:
+              new_dict['%s-%s'%(sense_channels[sense_channels.port_electrode.astype(int)==anode].contact_name[0],
+                    sense_channels[sense_channels.port_electrode.astype(int)==cathode].contact_name[0])] ={'channel_1':anode,'channel_2':cathode}
+        pairs_from_ec = {self.pipeline.subject:{'pairs':new_dict}}
+        with open(self.get_path_to_resource_in_workspace('pairs.json'),'w') as pf:
+            json.dump(pairs_from_ec,pf,indent=2)
+        self.pass_object('config_pairs_path',self.get_path_to_resource_in_workspace('pairs.json'))
+        self.pass_object('config_pairs_dict',pairs_from_ec)
         self.pass_object('config_name',ec.config_name)
 
         print

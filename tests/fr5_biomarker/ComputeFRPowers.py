@@ -3,7 +3,6 @@ __author__ = 'm'
 from RamPipeline import *
 
 import numpy as np
-from .MontagePreparation import get_reduced_pairs,get_excluded_dict
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from sklearn.externals import joblib
 import json
@@ -12,7 +11,7 @@ from ptsa.data.readers import EEGReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
 import hashlib
-from ReportTasks.RamTaskMethods import compute_powers
+from ReportTasks.RamTaskMethods import compute_powers,get_reduced_pairs,get_excluded_dict
 
 
 class ComputeFRPowers(RamTask):
@@ -48,6 +47,11 @@ class ComputeFRPowers(RamTask):
 
         self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
         self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
+        try:
+            bipolar_pairs = joblib.load(self.get_path_to_resource_in_workspace(subject+'-bipolar_pairs.pkl')) or self.get_passed_object('bipolar_pairs')
+            self.pass_object('bipolar_pairs',bipolar_pairs)
+        except OSError:
+            pass
         events =self.get_passed_object('FR_events')
         if not len(events)==len(self.pow_mat):
             print 'Restored matrix of different length than events. Recomputing powers.'
@@ -75,23 +79,34 @@ class ComputeFRPowers(RamTask):
 
         print 'Computing powers during encoding'
         encoding_pow_mat, encoding_events = compute_powers(events[is_encoding_event], monopolar_channels,
-                                              params.fr1_start_time, params.fr1_end_time, params.fr1_buf,
-                                              params.freqs, params.log_powers,
-                                                           bipolar_pairs=bipolar_pairs,ComputePowers=self)
+                                                           bipolar_pairs=bipolar_pairs,
+                                                           start_time=params.fr1_start_time,
+                                                           end_time=params.fr1_end_time, buffer_time=params.fr1_buf,
+                                                           freqs=params.freqs, log_powers=params.log_powers,
+                                                           ComputePowers=self)
 
         print 'Computing powers during retrieval'
         retrieval_pow_mat, retrieval_events = compute_powers(events[~is_encoding_event], monopolar_channels,
-                                              params.fr1_retrieval_start_time, params.fr1_retrieval_end_time, params.fr1_retrieval_buf,
-                                              params.freqs, params.log_powers, bipolar_pairs=bipolar_pairs,
-                                                             ComputePowers=self)
+                                                             bipolar_pairs=bipolar_pairs,
+                                                             start_time=params.fr1_retrieval_start_time,
+                                                             end_time=params.fr1_retrieval_end_time,
+                                                             buffer_time=params.fr1_retrieval_buf, freqs=params.freqs,
+                                                             log_powers=params.log_powers, ComputePowers=self)
         if self.bipolar_pairs is not None:
             # recording was in bipolar mode; re-compute excluded pairs
             reduced_pairs = get_reduced_pairs(self,self.bipolar_pairs)
-            reduced_pair_dict = get_excluded_dict(self.get_passed_object('bipolar_dict'), reduced_pairs)
-            self.pass_object('reduced_pairs',reduced_pairs)
-            self.pass_object('bipolar_pairs',self.bipolar_pairs)
+            config_pairs_dict  = self.get_passed_object('config_pairs_dict')[subject]['pairs']
+            excluded_pairs = get_excluded_dict(config_pairs_dict, reduced_pairs)
+            joblib.dump(reduced_pairs,self.get_path_to_resource_in_workspace(subject+'-reduced_pairs.pkl'))
             with open(self.get_path_to_resource_in_workspace('excluded_pairs.json'),'w') as excluded_file:
-                json.dump({subject:{'pairs':reduced_pair_dict}},excluded_file)
+                json.dump({subject:{'pairs':excluded_pairs}},excluded_file)
+            self.pass_object('reduced_pairs',reduced_pairs)
+            # replace bipolar_pairs_path with config_pairs_path
+            self.pass_object('bipolar_pairs_path',self.get_passed_object('config_pairs_path'))
+
+        joblib.dump(bipolar_pairs,self.get_path_to_resource_in_workspace(subject + '-bipolar_pairs.pkl'))
+
+        self.pass_object('bipolar_pairs',self.bipolar_pairs)
 
         events = np.concatenate([encoding_events,retrieval_events]).view(np.recarray)
         events.sort(order=['session','list','mstime'])

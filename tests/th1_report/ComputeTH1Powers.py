@@ -28,6 +28,7 @@ class ComputeTH1Powers(ReportRamTask):
         self.ttest_pow_mat = None
         self.samplerate = None
         self.wavelet_transform = MorletWaveletTransform()
+        self.bipolar_pairs = None
 
     def input_hashsum(self):
         subject = self.pipeline.subject
@@ -57,7 +58,9 @@ class ComputeTH1Powers(ReportRamTask):
 
         self.ttest_pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-ttest_pow_mat.pkl'))
         self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
-
+        if os.path.isfile(self.get_path_to_resource_in_workspace(subject+'-bipolar_pairs.pkl')):
+            bipolar_pairs = joblib.load(self.get_path_to_resource_in_workspace(subject+'-bipolar_pairs.pkl'))
+            self.pass_object('bipolar_pairs',bipolar_pairs)
         self.pass_object('ttest_pow_mat', self.ttest_pow_mat)
         self.pass_object('samplerate', self.samplerate)
 
@@ -76,11 +79,13 @@ class ComputeTH1Powers(ReportRamTask):
         else:
             self.ttest_pow_mat,events=compute_powers(events, monopolar_channels, bipolar_pairs,
                                                self.params.th1_start_time,self.params.th1_end_time,self.params.th1_buf,
-                                               self.params.freqs,self.params.log_powers)
+                                               self.params.freqs,self.params.log_powers,ComputePowers=self)
+            if self.bipolar_pairs is not None:
+                self.pass_object('bipolar_pairs',bipolar_pairs)
 
         self.pass_object('ttest_pow_mat', self.ttest_pow_mat)
         self.pass_object('samplerate', self.samplerate)
-
+        joblib.dump(self.bipolar_pairs or bipolar_pairs, self.get_path_to_resource_in_workspace(subject+'-bipolar_pairs.pkl'))
         joblib.dump(self.ttest_pow_mat, self.get_path_to_resource_in_workspace(subject + '-' + task + '-ttest_pow_mat.pkl'))
         joblib.dump(self.samplerate, self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
 

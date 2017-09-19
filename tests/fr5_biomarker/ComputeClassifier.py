@@ -120,7 +120,7 @@ class ComputeClassifier(RamTask):
         reduced_pairs = self.get_passed_object('reduced_pairs')
         to_include = np.array([bp in reduced_pairs for bp in bipolar_pairs])
         pow_mat =  self.get_passed_object('pow_mat')
-        pow_mat = pow_mat.reshape((len(pow_mat),len(bipolar_pairs),-1))[:,to_include,:].reshape((len(pow_mat),-1))
+        pow_mat = pow_mat.reshape((len(pow_mat),-1,len(self.params.freqs)))[:,to_include,:].reshape((len(pow_mat),-1))
         return pow_mat
 
     def pass_objects(self):
@@ -399,7 +399,7 @@ class ComputeClassifier(RamTask):
         AUCs = np.empty(shape=n_perm, dtype=np.float)
         for i in xrange(n_perm):
             try:
-                for sess in event_sessions:
+                for sess in np.unique(event_sessions):
                     sel = (event_sessions == sess)
                     sess_permuted_recalls = permuted_recalls[sel]
                     shuffle(sess_permuted_recalls)

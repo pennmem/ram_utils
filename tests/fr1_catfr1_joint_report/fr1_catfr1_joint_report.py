@@ -19,6 +19,7 @@ cml_parser.arg('--workspace-dir','/Volumes/rhino_root/scratch/leond/FR1_joint_re
 cml_parser.arg('--mount-point',  '/Volumes/rhino_root')
 #cml_parser.arg('--recompute-on-no-status')
 # cml_parser.arg('--exit-on-no-change')
+cml_parser.arg('--sessions',['0','1','2','101'])
 
 #cml_parser.arg('--python-path','/Users/m/PTSA_NEW_GIT/')
 

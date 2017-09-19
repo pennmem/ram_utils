@@ -127,6 +127,22 @@ def compute_wavelets_powers(events, monopolar_channels, bipolar_pairs,
 
 
 
+def get_excluded_dict(bipolar_dict, reduced_pairs):
+    reduced_dict = {bp_tag: bipolar_dict[bp_tag] for bp_tag in bipolar_dict
+                    if ('%03d' % bipolar_dict[bp_tag]['channel_1'],
+                        '%03d' % bipolar_dict[bp_tag]['channel_2']) not in reduced_pairs}
+    return reduced_dict
+
+
+def get_reduced_pairs(self, bipolar_pairs):
+    if self.pipeline.args.anode_nums:
+        stim_pairs = self.pipeline.args.anode_nums + self.pipeline.args.cathode_nums
+    else:
+        stim_pairs = [self.pipeline.args.anode_num, self.pipeline.args.cathode_num]
+    reduced_pairs = [bp for bp in bipolar_pairs if (bp[0]) not in stim_pairs and int(bp[1]) not in stim_pairs]
+    return reduced_pairs
+
+
 def compute_powers(events, monopolar_channels, bipolar_pairs, start_time, end_time, buffer_time, freqs, log_powers,
                    ComputePowers=None, filt_order=4, width=5):
     if not isinstance(bipolar_pairs, np.recarray):
@@ -165,7 +181,7 @@ def compute_powers(events, monopolar_channels, bipolar_pairs, start_time, end_ti
         if bipolar_pairs is not None and 'bipolar_pairs' not in eeg.coords:
             eeg = MonopolarToBipolarMapper(time_series=eeg, bipolar_pairs=bipolar_pairs).filter()
         elif 'bipolar_pairs' in eeg.coords and ComputePowers is not None:
-            ComputePowers.bipolar_pairs = eeg['bipolar_pairs'].values
+            ComputePowers.bipolar_pairs = [('%03d'%a,'%03d'%b) for (a,b) in eeg['bipolar_pairs'].values]
         # Butterworth filter to remove line noise
         eeg = eeg.filtered(freq_range=[58., 62.], filt_type='stop', order=filt_order)
         eeg['samplerate'] = samplerate

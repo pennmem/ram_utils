@@ -58,8 +58,9 @@ class RAMClassifier(object):
         :return: good_events
             The events for which the EEG signal could successfully be read. Always a subset of `events`
         """
-        pow_mat,good_events= compute_powers(self.events, self.channels, self.start_time, self.end_time,
-                                            self.buffer_time, self.freqs, log_powers=True, bipolar_pairs=self.pairs)
+        pow_mat,good_events= compute_powers(self.events, self.channels, bipolar_pairs=self.pairs,
+                                            start_time=self.start_time, end_time=self.end_time,
+                                            buffer_time=self.buffer_time, freqs=self.freqs, log_powers=True)
         for session in np.unique(good_events.session):
             in_session = good_events.session == session
             pow_mat[in_session]= zscore(in_session,axis=0, ddof=1)

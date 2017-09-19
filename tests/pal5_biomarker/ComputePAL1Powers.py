@@ -12,6 +12,8 @@ from ptsa.data.readers.IndexReader import JsonIndexReader
 
 import hashlib
 import warnings
+from ReportTasks.RamTaskMethods import get_reduced_pairs,get_excluded_dict
+import json
 
 try:
     from ReportTasks.RamTaskMethods import compute_powers
@@ -32,6 +34,7 @@ class ComputePAL1Powers(RamTask):
         self.samplerate = None
         self.wavelet_transform = MorletWaveletTransform()
         self.wavelet_transform_retrieval = MorletWaveletTransform()
+        self.bipolar_pairs= None
 
     def input_hashsum(self):
         subject = self.pipeline.subject
@@ -97,18 +100,27 @@ class ComputePAL1Powers(RamTask):
         params = self.params
 
         print 'Computing powers during encoding'
-        encoding_pow_mat, encoding_events = compute_powers(events[is_encoding_event], monopolar_channels,
+        encoding_pow_mat, encoding_events = compute_powers(events[is_encoding_event], monopolar_channels,bipolar_pairs,
                                                            params.pal1_start_time, params.pal1_end_time, params.pal1_buf,
-                                                           params.freqs, params.log_powers,
-                                                           bipolar_pairs=bipolar_pairs)
+                                                           params.freqs, params.log_powers,ComputePowers=self,
+                                                           )
 
         print 'Computing powers during retrieval'
 
-        retrieval_pow_mat, retrieval_events = compute_powers(events[~is_encoding_event], monopolar_channels,
+        retrieval_pow_mat, retrieval_events = compute_powers(events[~is_encoding_event], monopolar_channels,bipolar_pairs,
                                                              params.pal1_retrieval_start_time,
                                                              params.pal1_retrieval_end_time, params.pal1_retrieval_buf,
-                                                             params.freqs, params.log_powers,
-                                                             bipolar_pairs,)
+                                                             params.freqs, params.log_powers,ComputePowers=self,
+                                                             )
+
+        if self.bipolar_pairs is not None:
+            # recording was in bipolar mode; re-compute excluded pairs
+            reduced_pairs = get_reduced_pairs(self, self.bipolar_pairs)
+            reduced_pair_dict = get_excluded_dict(self.get_passed_object('bipolar_dict'), reduced_pairs)
+            self.pass_object('reduced_pairs', reduced_pairs)
+            self.pass_object('bipolar_pairs', self.bipolar_pairs)
+            with open(self.get_path_to_resource_in_workspace('excluded_pairs.json'), 'w') as excluded_file:
+                json.dump({subject: {'pairs': reduced_pair_dict}}, excluded_file)
 
         events =  np.concatenate([encoding_events,retrieval_events]).view(np.recarray)
         events.sort(order=['session','list','mstime'])

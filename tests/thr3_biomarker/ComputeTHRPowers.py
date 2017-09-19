@@ -79,6 +79,7 @@ class ComputeTHRPowers(RamTask):
                                                        self.params.thr_start_time, self.params.thr_end_time,
                                                        self.params.thr_buf,
                                                        self.params.freqs, self.params.log_powers,ComputePowers=self)
+                self.pass_object('THR_events',events)
         else:
             self.compute_powers(events,sessions,monopolar_channels,bipolar_pairs)
 

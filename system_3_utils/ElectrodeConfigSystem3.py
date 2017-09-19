@@ -257,7 +257,7 @@ class ElectrodeConfig(object):
         with open(config_filename, 'r') as config_file:
             line = next(config_file)
             while (line != False):
-                line = line.strip()
+                line = line.strip().rstrip(',')
                 label = line.split(':')[0]
                 if label not in self.parse_fields:
                     raise UnparseableConfigException("Could not parse field {}".format(label))
@@ -428,11 +428,11 @@ class ElectrodeConfig(object):
         return next(file)
 
     def parse_contacts(self, line, file):
-        line = next(file).strip()
+        line = next(file).strip().rstrip(',')
         split_line = line.split(',')
         while (len(split_line) == 5):
             self.contacts[split_line[0]] = Contact(*split_line)
-            line = next(file).strip()
+            line = next(file).strip().rstrip(',')
             split_line = line.split(',')
         return line
 
@@ -441,12 +441,12 @@ class ElectrodeConfig(object):
         return next(file)
 
     def parse_sense_channels(self, line, file):
-        line = next(file).strip()
+        line = next(file).strip().rstrip(',')
         split_line = line.split(',')
         while (len(split_line) == 6):
             self.sense_channels[split_line[1]] = \
                 SenseChannel(self.contacts[split_line[0]], *split_line[1:])
-            line = next(file).strip()
+            line = next(file).strip().rstrip(',')
             split_line = line.split(',')
         return line
 
@@ -458,12 +458,12 @@ class ElectrodeConfig(object):
         return next(file)
 
     def parse_stim_channel(self, line, file):
-        split_line = line.split(',')
+        split_line = line.rstrip(',').split(',')
         name = split_line[1]
         comment = split_line[3][1:-1]
 
         # Get anodes
-        line = next(file)
+        line = next(file).strip().rstrip(',')
         split_line = line.split(':')
         if split_line[0] != 'Anodes':
             raise UnparseableConfigException("Expected \"Anodes\", found {}".format(split_line[0]))
@@ -473,7 +473,7 @@ class ElectrodeConfig(object):
             raise UnparseableConfigException("Found no anodes for stim channel {}".format(name))
 
         # Get cathodes
-        line = next(file)
+        line = next(file).strip().rstrip(',')
         split_line = line.split(':')
         if split_line[0] != "Cathodes":
             raise UnparseableConfigException("Expected \"Cathodes\", found {}".format(split_line[0]))

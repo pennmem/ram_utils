@@ -16,7 +16,7 @@ cml_parser.arg('--workspace-dir', '/Volumes/rhino_root/scratch/leond/fr5_config/
 cml_parser.arg('--experiment', 'FR5')
 cml_parser.arg('--mount-point', '/Users/leond')
 cml_parser.arg('--subject', subject)
-cml_parser.arg('--electrode-config-file', '/Volumes/rhino_root/scratch/system3_configs/ODIN_configs/R1308T/R1308T_14JUN2017L0M0STIM.csv')
+cml_parser.arg('--electrode-config-file', '/Volumes/PATRIOT/R1308T/R1308T_18SEP2017L0M0STIM.csv')
 cml_parser.arg('--pulse-frequency', '200')
 cml_parser.arg('--target-amplitude', '1.0')
 cml_parser.arg('--anodes', 'LB6', 'LC7')
@@ -169,7 +169,7 @@ report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
 
 report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
+report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=False))
 
 if args.encoding_only:
     report_pipeline.add_task(ComputeEncodingClassifier(params=params,mark_as_completed=False))

@@ -9,17 +9,17 @@ from os.path import *
 
 from system_3_utils.ram_tasks import CMLParserClosedLoop3
 cml_parser = CMLParserClosedLoop3.CMLParserCloseLoop3(arg_count_threshold=1)
-# cml_parser.arg('--workspace-dir','/scratch/leond/THR3_biomarkers/R1247P_1')
-# cml_parser.arg('--experiment','THR3')
-# cml_parser.arg('--mount-point','/')
-# cml_parser.arg('--subject','R1315T')
-# cml_parser.arg('--electrode-config-file',r'/home1/leond/fr3_config/contactsR1247P.csv')
-# cml_parser.arg('--pulse-frequency','100')
-# cml_parser.arg('--target-amplitude','1000')
-# cml_parser.arg('--anode-num','95')
-# cml_parser.arg('--anode','Rd7')
-# cml_parser.arg('--cathode-num','97')
-# cml_parser.arg('--cathode','RE1')
+cml_parser.arg('--workspace-dir','/Volumes/rhino_root/scratch/leond/THR3_biomarkers/R1328E')
+cml_parser.arg('--experiment','THR3')
+cml_parser.arg('--mount-point','/Users/leond')
+cml_parser.arg('--subject','R1328E')
+cml_parser.arg('--electrode-config-file',r'/Volumes/PATRIOT/R1328E/R1328E_19SEP2017L0M0STIM.csv')
+cml_parser.arg('--pulse-frequency','100')
+cml_parser.arg('--target-amplitude','1.0')
+cml_parser.arg('--anode-num','48')
+cml_parser.arg('--anode','5LD8')
+cml_parser.arg('--cathode-num','49')
+cml_parser.arg('--cathode','5LD9')
 
 
 
@@ -101,9 +101,9 @@ if __name__ =='__main__':
 
     report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
 
-    report_pipeline.add_task(ComputeTHRPowers(params=params, mark_as_completed=True))
+    report_pipeline.add_task(ComputeTHRPowers(params=params, mark_as_completed=False))
 
-    report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
+    report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
 
     report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop3(params=params, mark_as_completed=False))
 

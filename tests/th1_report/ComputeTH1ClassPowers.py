@@ -29,6 +29,7 @@ class ComputeTH1ClassPowers(ReportRamTask):
         self.classify_pow_mat = None
         self.samplerate = None
         self.wavelet_transform = MorletWaveletTransform()
+        self.bipolar_pairs = None
 
     def input_hashsum(self):
         subject = self.pipeline.subject
@@ -84,7 +85,9 @@ class ComputeTH1ClassPowers(ReportRamTask):
         else:
             self.classify_pow_mat,events=compute_powers(events, monopolar_channels, bipolar_pairs,
                            self.params.th1_start_time,self.params.th1_end_time,self.params.th1_buf,
-                           self.params.classifier_freqs,self.params.log_powers)
+                           self.params.classifier_freqs,self.params.log_powers,ComputePowers=self)
+            if self.bipolar_pairs is not None:
+                self.pass_object('bipolar_pairs',bipolar_pairs)
 
             self.pass_object(task+'_events',events)
 

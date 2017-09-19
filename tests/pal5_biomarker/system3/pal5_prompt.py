@@ -33,6 +33,7 @@ class Args(object):
         self.pulse_frequency = None
         self.subject = ''
         self.workspace_dir = ''
+        self.sessions = None
 
 
 example_style = style_from_dict({
