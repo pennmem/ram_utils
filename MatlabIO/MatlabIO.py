@@ -5,6 +5,7 @@ import scipy.io as sio
 
 class MatlabIO(object):
     __class_name = ''
+    debug = False
     def __init__(self):
         pass
 
@@ -34,7 +35,9 @@ class MatlabIO(object):
         a_dict={}
         self.fill_dict(a_dict)
 
-        print a_dict
+        if MatlabIO.debug:
+            print a_dict
+
         sio.savemat(name, a_dict)
 
 

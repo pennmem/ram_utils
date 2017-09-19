@@ -1,0 +1,20 @@
+8/8/17
+------
+- Removed "class_weights='auto' " option in FR5-like classifiers; classifier medians now around 0.5, rather than 0.7
+
+
+3/6/17
+------
+- Classifier permutation testing now multiprocessed
+
+2/26/2017
+---------
+- Began using a single function for most power decompositions
+- Powers computed via multi-threading
+
+
+11/21/2016
+----------
+- Switched to JSON-based reporting
+
+

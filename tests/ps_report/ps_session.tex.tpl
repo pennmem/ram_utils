@@ -1,19 +1,20 @@
 
-\section*{\hfil Session <SESS_NUM> \hfil}
+\clearpage
+
+\section*{\hfil Channel <STIMTAG> (<REGION>) \hfil}
 
 \begin{tabular}{ccc}
 \begin{minipage}[htbp]{160pt}
-\textbf{Parameters:} \\
-$\bullet$ <CONSTANT_NAME>: $<CONSTANT_VALUE>$ <CONSTANT_UNIT> \\
-$\bullet$ ISI: $<ISI_MID>$ ($\pm <ISI_HALF_RANGE>$) ms \\
-$\bullet$ Channel: <STIMTAG> \\
-$\bullet$ Region: <REGION>
+\begin{itemize}
+\item Session(s): <SESSIONS>
+\item <CONSTANT_NAME>: $<CONSTANT_VALUE>$ <CONSTANT_UNIT>
+\item ISI: $<ISI_MID>$ ($\pm <ISI_HALF_RANGE>$) ms
+\end{itemize}
 \end{minipage}
 &
 \begin{minipage}[htbp]{280pt}
 \centering
 \textbf{Two-factor ANOVA}
-% {<PARAMETER1> $\times$ <PARAMETER2>}
 
 \begin{tabular}{|c|c|c|c|}
 \hline & <PARAMETER1> & <PARAMETER2> & <PARAMETER1> $\times$ <PARAMETER2> \\
@@ -24,13 +25,11 @@ $\bullet$ Region: <REGION>
 \end{minipage}
 \end{tabular}
 
-\begin{figure}[!h]
-\centering
-\subfigure{\includegraphics[scale=0.35]{<PLOT_FILE>}}
+\begin{figure}[ht!]
+<PS_PLOTS>
+\caption{\textbf{(a)} Means and standard errors of difference in classifier output post- and pre-stim;
+\textbf{(b)} Means and standard errors of {\em Expected Recall Change}.}
 \end{figure}
-
-<PARAM1_TTEST_TABLE>
-<PARAM2_TTEST_TABLE>
-<PARAM12_TTEST_TABLE>
-
-\clearpage
+<TTEST_AGAINST_SHAM_TABLE>
+<TTEST_AGAINST_ZERO_TABLE>
+\textit{\small T-tests are computed regardless of significance as measured by 2-way ANOVA.}

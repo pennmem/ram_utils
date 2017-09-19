@@ -1,42 +1,32 @@
 # command line example:
 
 import sys
+
 from setup_utils import parse_command_line, configure_python_paths
-from os.path import join
-
-# -------------------------------processing command line
-if len(sys.argv)>2:
-
-    args = parse_command_line()
 
 
-else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1138T_1',
-                                         '--experiment','PS2',
-                                         '--workspace-dir','/scratch/busygin/PS2_joint',
-                                         '--mount-point','',
-                                         '--python-path','/home1/busygin/ram_utils_new_ptsa',
-                                         '--python-path','/home1/busygin/python/ptsa_latest']
+from ReportUtils import CMLParser,ReportPipeline
 
-    args = parse_command_line(command_line_emulation_argument_list)
+cml_parser = CMLParser(arg_count_threshold=1)
+cml_parser.arg('--experiment','PS2.1')
+cml_parser.arg('--subject','R1236J')
+cml_parser.arg('--workspace-dir','/scratch/leond/PS2.1_reports')
+cml_parser.arg('--mount-point','')
+#cml_parser.arg('--recompute-on-no-status')
 
-configure_python_paths(args.python_path)
+# cml_parser.arg('--exit-on-no-change')
 
-# ------------------------------- end of processing command line
+args = cml_parser.parse()
 
-
-import numpy as np
-from RamPipeline import RamPipeline
 
 from FREventPreparation import FREventPreparation
-from ControlEventPreparation import ControlEventPreparation
 from PSEventPreparation import PSEventPreparation
 
 from ComputeFRPowers import ComputeFRPowers
 from ComputeControlPowers import ComputeControlPowers
 from ComputePSPowers import ComputePSPowers
 
-from TalPreparation import TalPreparation
+from MontagePreparation import MontagePreparation
 
 from ComputeClassifier import ComputeClassifier
 
@@ -58,9 +48,12 @@ class Params(object):
         self.fr1_end_time = 1.366
         self.fr1_buf = 1.365
 
-        self.control_start_time = -1.0
-        self.control_end_time = 0.0
-        self.control_buf = 1.0
+        self.sham1_start_time = 1.0
+        self.sham1_end_time = 2.0
+        self.sham_buf = 1.0
+
+        self.sham2_start_time = 10.0 - 3.7
+        self.sham2_end_time = 10.0 - 2.7
 
         self.ps_start_time = -1.0
         self.ps_end_time = 0.0
@@ -85,28 +78,21 @@ class Params(object):
 params = Params()
 
 
-class ReportPipeline(RamPipeline):
-    def __init__(self, subject, experiment, workspace_dir, mount_point=None):
-        RamPipeline.__init__(self)
-        self.subject = subject
-        #self.task = 'RAM_FR1'
-        self.experiment = experiment
-        self.mount_point = mount_point
-        self.set_workspace_dir(workspace_dir)
-
-
-
 # sets up processing pipeline
-report_pipeline = ReportPipeline(subject=args.subject, experiment=args.experiment,
-                                       workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point)
 
-report_pipeline.add_task(FREventPreparation(params=params, mark_as_completed=False))
+report_pipeline = ReportPipeline(subject=args.subject,
+                                 task=args.experiment,
+                                 sessions = args.sessions,
+                                 workspace_dir=join(args.workspace_dir, args.subject),
+                                 mount_point=args.mount_point,
+                                 exit_on_no_change=args.exit_on_no_change,
+                                 recompute_on_no_status=args.recompute_on_no_status)
 
-report_pipeline.add_task(ControlEventPreparation(params=params, mark_as_completed=False))
+report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
 
 report_pipeline.add_task(PSEventPreparation(mark_as_completed=False))
 
-report_pipeline.add_task(TalPreparation(mark_as_completed=False))
+report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
 
 report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 

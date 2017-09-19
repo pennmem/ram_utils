@@ -1,42 +1,30 @@
-from glob import glob
-import re
-
 import sys
 from setup_utils import parse_command_line, configure_python_paths
 from os.path import join
+from ptsa.data.readers.IndexReader import JsonIndexReader
+from ReportUtils import CMLParser,ReportPipeline
 
-# -------------------------------processing command line
-if len(sys.argv)>2:
+cml_parser = CMLParser(arg_count_threshold=1)
+cml_parser.arg('--task','PS2.1')
+cml_parser.arg('--workspace-dir','/scratch/busygin/PS2.1')
+cml_parser.arg('--mount-point','')
+cml_parser.arg('--recompute-on-no-status')
+cml_parser.arg('--exit-on-no-change')
 
-    args = parse_command_line()
+args = cml_parser.parse()
 
-
-else: # emulate command line
-    command_line_emulation_argument_list = ['--subject','R1124J_1',
-                                            '--experiment','PS3',
-                                            '--workspace-dir','/scratch/busygin/PS3_joint',
-                                            '--mount-point','',
-                                            '--python-path','/home1/busygin/ram_utils_new_ptsa',
-                                            '--python-path','/home1/busygin/python/ptsa_latest',
-                                            ]
-    args = parse_command_line(command_line_emulation_argument_list)
-
-configure_python_paths(args.python_path)
-
-# ------------------------------- end of processing command line
 
 import numpy as np
-from RamPipeline import RamPipeline
+from ReportUtils import ReportSummaryInventory
 
 from FREventPreparation import FREventPreparation
-from ControlEventPreparation import ControlEventPreparation
 from PSEventPreparation import PSEventPreparation
 
 from ComputeFRPowers import ComputeFRPowers
 from ComputeControlPowers import ComputeControlPowers
 from ComputePSPowers import ComputePSPowers
 
-from TalPreparation import TalPreparation
+from MontagePreparation import MontagePreparation
 
 from ComputeClassifier import ComputeClassifier
 
@@ -58,9 +46,12 @@ class Params(object):
         self.fr1_end_time = 1.366
         self.fr1_buf = 1.365
 
-        self.control_start_time = -1.0
-        self.control_end_time = 0.0
-        self.control_buf = 1.0
+        self.sham1_start_time = 1.0
+        self.sham1_end_time = 2.0
+        self.sham_buf = 1.0
+
+        self.sham2_start_time = 10.0 - 3.7
+        self.sham2_end_time = 10.0 - 2.7
 
         self.ps_start_time = -1.0
         self.ps_end_time = 0.0
@@ -81,43 +72,54 @@ class Params(object):
         self.include_fr1 = True
         self.include_catfr1 = True
 
+        self.parallelize = False
+
 
 params = Params()
 
+task = args.task
 
-class ReportPipeline(RamPipeline):
-    def __init__(self, subject, experiment, workspace_dir, mount_point=None):
-        RamPipeline.__init__(self)
-        self.subject = subject
-        self.experiment = experiment
-        self.mount_point = mount_point
-        self.set_workspace_dir(workspace_dir)
+json_reader = JsonIndexReader(os.path.join(args.mount_point,'protocols/r1.json'))
+subject_set = json_reader.aggregate_values('subjects', experiment=task) & (json_reader.aggregate_values('subjects', experiment='FR1') | json_reader.aggregate_values('subjects', experiment='catFR1'))
 
-
-task = 'RAM_PS'
-
-
-def find_subjects_by_task(task):
-    ev_files = glob('/data/events/%s/R*_events.mat' % task)
-    return [re.search(r'R\d\d\d\d[A-Z](_\d+)?', f).group() for f in ev_files]
-
-
-subjects = find_subjects_by_task(task)
-#subjects.append('TJ086')
+subjects = []
+for s in subject_set:
+    montages = json_reader.aggregate_values('montage', subject=s, experiment=task)
+    subject = str(s)
+    for m_ in montages:
+        m = str(m_)
+        has_fr = bool(json_reader.aggregate_values('sessions', subject=subject, montage=m, experiment='FR1') | json_reader.aggregate_values('sessions', subject=subject, montage=m, experiment='catFR1'))
+        if has_fr:
+            if m!='0':
+                subject += '_' + m
+            subjects.append(subject)
 subjects.sort()
 
+subject_fail_list = []
+subject_missing_experiment_list = []
+subject_missing_data_list = []
+
+rsi = ReportSummaryInventory(label=args.task)
+
 for subject in subjects:
+    print subject
+    if args.skip_subjects is not None and subject in args.skip_subjects:
+        continue
+
     # sets up processing pipeline
-    report_pipeline = ReportPipeline(subject=subject, experiment=args.experiment,
-                                       workspace_dir=join(args.workspace_dir,subject), mount_point=args.mount_point)
 
-    report_pipeline.add_task(FREventPreparation(params=params, mark_as_completed=False))
+    report_pipeline = ReportPipeline(subject=subject,
+                                     task=args.task,
+                                     workspace_dir=join(args.workspace_dir, subject),
+                                     mount_point=args.mount_point,
+                                     exit_on_no_change=args.exit_on_no_change,
+                                     recompute_on_no_status=args.recompute_on_no_status)
 
-    report_pipeline.add_task(ControlEventPreparation(params=params, mark_as_completed=False))
+    report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
 
-    report_pipeline.add_task(PSEventPreparation(mark_as_completed=False))
+    report_pipeline.add_task(PSEventPreparation(mark_as_completed=True))
 
-    report_pipeline.add_task(TalPreparation(mark_as_completed=False))
+    report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
 
     report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 
@@ -139,9 +141,19 @@ for subject in subjects:
 
     report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
-    # starts processing pipeline
-    try:
-        report_pipeline.execute_pipeline()
-    except:
-        #print e
-        pass
+    report_pipeline.add_task(DeployReportPDF(mark_as_completed=False))
+
+    report_pipeline.execute_pipeline()
+
+    rsi.add_report_summary(report_summary=report_pipeline.get_report_summary())
+
+print 'all subjects = ', subjects
+print 'subject_fail_list=', subject_fail_list
+print 'subject_missing_experiment_list=', subject_missing_experiment_list
+print 'subject_missing_data_list=', subject_missing_data_list
+
+print 'this is summary for all reports report ', rsi.compose_summary(detail_level=1)
+
+rsi.output_json_files(dir=args.status_output_dir)
+# rsi.send_email_digest()
+# print report_pipeline.report_summary.compose_summary()

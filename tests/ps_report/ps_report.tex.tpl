@@ -1,17 +1,11 @@
 \documentclass[a4paper]{article} 
-\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
-\usepackage{graphicx,multirow} 
-\usepackage{epstopdf} 
-\usepackage{subfigure,amsmath} 
-\usepackage{wrapfig}
-\usepackage{booktabs}
-\usepackage{longtable} 
-\usepackage{pdfpages}
-\usepackage{mathtools}
-\usepackage{array}
-\usepackage{enumitem}
-\usepackage[small,bf,it]{caption}
-\setlength\belowcaptionskip{2pt}
+
+\usepackage[table]{xcolor}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{caption}
+\usepackage[skip=0pt]{subcaption}
+\usepackage{morefloats}
 
 \addtolength{\oddsidemargin}{-.875in} 
 \addtolength{\evensidemargin}{-.875in} 
@@ -23,7 +17,7 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{<EXPERIMENT> report v 2.4}
+\lhead{<EXPERIMENT> report v 3.10}
 \chead{Subject: \textbf{<SUBJECT>}}
 \rhead{Date created: <DATE>}
 \begin{document}
@@ -50,9 +44,9 @@
 \textbf{\Large Classifier performance}
 \end{center}
 
-\begin{figure}[!h]
+\begin{figure}[ht!]
 \centering
-\subfigure{\includegraphics[scale=0.45]{<ROC_AND_TERC_PLOT_FILE>}}
+\includegraphics[scale=0.45]{<ROC_AND_TERC_PLOT_FILE>}
 \caption{\textbf{(a)} ROC curve for the subject;
 \textbf{(b)} Subject recall performance represented as
 percentage devation from the (subject) mean, separated by tercile
@@ -63,45 +57,16 @@ $\bullet$ Area Under Curve = $<AUC>$\%
 
 $\bullet$ Permutation test $p$-value $<PERM-P-VALUE>$
 
-\clearpage
-
 <REPORT_PAGES>
 
-\section*{\hfil Combined Report \hfil}
+\clearpage
 
-\begin{tabular}{ccc}
-\begin{minipage}[htbp]{160pt}
-\textbf{Parameters:} \\
-$\bullet$ ISI: $<CUMULATIVE_ISI_MID>$ ($\pm <CUMULATIVE_ISI_HALF_RANGE>$) ms \\
-$\bullet$ All channels
-\end{minipage}
-&
-\begin{minipage}[htbp]{280pt}
-\centering
-\textbf{Two-factor ANOVA}
+\section*{APPENDIX: Calculating Expected Recall Change}
 
-\begin{tabular}{|c|c|c|c|}
-\hline & <CUMULATIVE_PARAMETER1> & <CUMULATIVE_PARAMETER2> & <CUMULATIVE_PARAMETER1> $\times$ <CUMULATIVE_PARAMETER2> \\
-\hline $F$ & $<CUMULATIVE_FVALUE1>$ & $<CUMULATIVE_FVALUE2>$ & $<CUMULATIVE_FVALUE12>$ \\
-\hline $p$ & $<CUMULATIVE_PVALUE1>$ & $<CUMULATIVE_PVALUE2>$ & $<CUMULATIVE_PVALUE12>$ \\
-\hline
-\end{tabular}
-\end{minipage}
-\end{tabular}
-
-%\textbf{Parameters:}
-%\begin{itemize}
-%  \item ISI: $<CUMULATIVE_ISI_MID>$ ($\pm <CUMULATIVE_ISI_HALF_RANGE>$) ms
-%  \item All channels
-%\end{itemize}
-
-\begin{figure}[!h]
-\centering
-\subfigure{\includegraphics[scale=0.35]{<CUMULATIVE_PLOT_FILE>}}
-\end{figure}
-
-<CUMULATIVE_PARAM1_TTEST_TABLE>
-<CUMULATIVE_PARAM2_TTEST_TABLE>
-<CUMULATIVE_PARAM12_TTEST_TABLE>
+\[ \textrm{Expected Recall Change} = \left. \left( \frac{N_1 \Phi_1(\xi_{\textrm{post}})}{N_1 \Phi_1(\xi_{\textrm{post}}) + N_0 \Phi_0(\xi_{\textrm{post}})} - \frac{N_1 \Phi_1(\xi_{\textrm{pre}})}{N_1 \Phi_1(\xi_{\textrm{pre}}) + N_0 \Phi_0(\xi_{\textrm{pre}})}\right) \middle/ (N_1/N) \right., \]
+$\bullet$ $N_1$ is \#recalls, $N_0$ is \#non-recalls, $N=N_1+N_0$; \\
+$\bullet$ $\xi_{\textrm{post}} = \ln \frac{C_{\textrm{post}}}{1-C_{\textrm{post}}}$ is inverse logit of classifier post-stim output $C_{\textrm{post}}$; \\
+$\bullet$ $\xi_{\textrm{pre}} = \ln \frac{C_{\textrm{pre}}}{1-C_{\textrm{pre}}}$ is inverse logit of classifier pre-stim output $C_{\textrm{pre}}$; \\
+$\bullet$ $\Phi_1,\Phi_0$ are cdfs of Normal fits for inverse logit of classifier output for recalls/non-recalls with equal variance.
 
 \end{document}

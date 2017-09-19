@@ -51,7 +51,7 @@ class ReportPipeline(RamPipeline):
 # sets up processing pipeline - the entire computation is divided into separate tasks that are manages
 # by the Pipeline object
 report_pipeline = ReportPipeline(subject=args.subject, task=args.task,
-                                       workspace_dir=join(args.workspace_dir,args.task+'_'+args.subject), mount_point=args.mount_point)
+                                       workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point)
 
 # EventPreparation task reads experiment summary file (so called events file) containing information about
 # events that took place during the course of experiment. This file focuses on the word presentation events

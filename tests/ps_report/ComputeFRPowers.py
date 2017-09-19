@@ -3,19 +3,58 @@ __author__ = 'm'
 from RamPipeline import *
 
 import numpy as np
-from morlet import MorletWaveletTransform
+#from morlet import MorletWaveletTransform
+from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from sklearn.externals import joblib
 
 from ptsa.data.events import Events
 from ptsa.data.readers import EEGReader
+from ReportUtils import MissingDataError
+from ReportUtils import ReportRamTask
+from ptsa.data.readers.IndexReader import JsonIndexReader
 
-class ComputeFRPowers(RamTask):
+import hashlib
+try:
+    from ReportTasks.RamTaskMethods import compute_powers
+except ImportError as ie:
+    if 'MorletWaveletFilterCpp' in ie.message:
+        print 'Update PTSA for better perfomance'
+        compute_powers = None
+    else:
+        raise ie
+
+
+class ComputeFRPowers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(ComputeFRPowers, self).__init__(mark_as_completed)
         self.params = params
         self.pow_mat = None
         self.samplerate = None
         self.wavelet_transform = MorletWaveletTransform()
+
+    def input_hashsum(self):
+        subject = self.pipeline.subject
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp)==1 else int(tmp[1])
+
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
+
+        hash_md5 = hashlib.md5()
+
+        bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
+        for fname in bp_paths:
+            with open(fname,'rb') as f: hash_md5.update(f.read())
+
+        fr1_event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='FR1')))
+        for fname in fr1_event_files:
+            with open(fname,'rb') as f: hash_md5.update(f.read())
+
+        catfr1_event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment='catFR1')))
+        for fname in catfr1_event_files:
+            with open(fname,'rb') as f: hash_md5.update(f.read())
+
+        return hash_md5.digest()
 
     def restore(self):
         subject = self.pipeline.subject
@@ -39,7 +78,33 @@ class ComputeFRPowers(RamTask):
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
 
-        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
+        has_fr1 = (sessions<100).any()
+        has_catfr1 = (sessions>=100).any()
+
+        try:
+            fr1_powers = joblib.load(self.get_path_to_resource_in_workspace(subject + '-FR1-pow_mat.pkl'))
+        except IOError:
+            fr1_powers = None
+        try:
+            catfr1_powers = joblib.load(self.get_path_to_resource_in_workspace(subject + '-catFR1-pow_mat.pkl'))
+        except IOError:
+            catfr1_powers = None
+
+        if (has_fr1 and fr1_powers is None) or (has_catfr1 and catfr1_powers is None):
+            params = self.params
+            if compute_powers is None:
+                self.compute_powers(events,sessions,monopolar_channels,bipolar_pairs)
+            else:
+                self.pow_mat, events = compute_powers(events, monopolar_channels, bipolar_pairs,
+                                                      params.fr1_start_time, params.fr1_end_time, params.fr1_buf,
+                                                      params.freqs, params.log_powers)
+
+                self.pass_object('FR_events', events)
+
+        elif fr1_powers is not None and catfr1_powers is not None:
+            self.pow_mat = np.vstack((fr1_powers,catfr1_powers))
+        else:
+            self.pow_mat = fr1_powers if catfr1_powers is None else catfr1_powers
 
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
@@ -73,8 +138,17 @@ class ComputeFRPowers(RamTask):
             eeg_reader = EEGReader(events=sess_events, channels=monopolar_channels,
                                    start_time=self.params.fr1_start_time,
                                    end_time=self.params.fr1_end_time, buffer_time=self.params.fr1_buf)
+            try:
 
-            eegs = eeg_reader.read()
+                eegs = eeg_reader.read()
+            except IOError as err:
+                self.raise_and_log_report_exception(
+                                                    exception_type='MissingDataError',
+                                                    exception_message='Could not read EEG file for subject %s'%(self.pipeline.subject)
+                                                    )
+
+                # raise MissingDataError('Could not read EEG file for subject %s'%(self.pipeline.subject))
+
             if eeg_reader.removed_bad_data():
                 print 'REMOVED SOME BAD EVENTS !!!'
                 sess_events = eegs['events'].values.view(np.recarray)
@@ -106,13 +180,15 @@ class ComputeFRPowers(RamTask):
             sess_pow_mat = np.empty(shape=(n_events, n_bps, n_freqs), dtype=np.float)
 
             #monopolar_channels_np = np.array(monopolar_channels)
-            for i,ti in enumerate(bipolar_pairs):
+            for i,bp in enumerate(bipolar_pairs):
                 # print bp
                 # print monopolar_channels
 
                 # print np.where(monopolar_channels == bp[0])
                 # print np.where(monopolar_channels == bp[1])
-                bp = ti['channel_str']
+
+                # bp = ti['channel_str']
+
                 print 'Computing powers for bipolar pair', bp
                 elec1 = np.where(monopolar_channels == bp[0])[0][0]
                 elec2 = np.where(monopolar_channels == bp[1])[0][0]
@@ -125,7 +201,7 @@ class ComputeFRPowers(RamTask):
                 # eegs_elec1.reset_coords('channels')
                 # eegs_elec2.reset_coords('channels')
 
-                bp_data = eegs[elec1] - eegs[elec2]
+                bp_data = np.subtract(eegs[elec1],eegs[elec2])
                 bp_data.attrs['samplerate'] = self.samplerate
 
                 # bp_data = eegs[elec1] - eegs[elec2]

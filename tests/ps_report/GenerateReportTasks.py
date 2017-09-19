@@ -9,22 +9,33 @@ from PlotUtils import PlotData, BarPlotData, PlotDataCollection, PanelPlot
 import TextTemplateUtils
 
 from latex_table import latex_table
+from ReportUtils import ReportRamTask
+
+import re
+from collections import namedtuple
+SplitSubjectCode = namedtuple(typename='SplitSubjectCode',field_names=['protocol','id','site','montage'])
+import os
+import shutil
 
 
 def pvalue_formatting(p):
     return '\leq 0.001' if p<=0.001 else ('%.3f'%p)
 
 
-class GenerateTex(RamTask):
-    def __init__(self, mark_as_completed=True): RamTask.__init__(self, mark_as_completed)
+class GenerateTex(ReportRamTask):
+    def __init__(self, mark_as_completed=True):
+        super(GenerateTex,self).__init__(mark_as_completed)
 
     def run(self):
         tex_template = 'ps_report.tex.tpl'
         tex_session_template = 'ps_session.tex.tpl'
+        tex_sham_plots_template = 'ps_sham_plots.tex.tpl'
+        tex_nosham_plots_template = 'ps_nosham_plots.tex.tpl'
         tex_ttest_table1_template = 'ttest_table1.tex.tpl'
         tex_ttest_table2_template = 'ttest_table2.tex.tpl'
+        tex_ttest_against_sham_template = 'ttest_against_sham.tex.tpl'
 
-        report_tex_file_name = self.pipeline.experiment + '-' + self.pipeline.subject + '-' + 'report.tex'
+        report_tex_file_name = self.pipeline.task + '-' + self.pipeline.subject + '-' + 'report.tex'
         self.pass_object('report_tex_file_name',report_tex_file_name)
 
         self.set_file_resources_to_move(report_tex_file_name, dst='reports')
@@ -37,13 +48,6 @@ class GenerateTex(RamTask):
 
         const_param_name = self.get_passed_object('const_param_name')
         const_unit = self.get_passed_object('const_unit')
-
-        cumulative_anova_fvalues = self.get_passed_object('CUMULATIVE_ANOVA_FVALUES')
-        cumulative_anova_pvalues = self.get_passed_object('CUMULATIVE_ANOVA_PVALUES')
-
-        cumulative_param1_ttest_table = self.get_passed_object('CUMULATIVE_PARAM1_TTEST_TABLE')
-        cumulative_param2_ttest_table = self.get_passed_object('CUMULATIVE_PARAM2_TTEST_TABLE')
-        cumulative_param12_ttest_table = self.get_passed_object('CUMULATIVE_PARAM12_TTEST_TABLE')
 
         session_summary_array = self.get_passed_object('session_summary_array')
 
@@ -81,12 +85,42 @@ class GenerateTex(RamTask):
                 param12_ttest_table = TextTemplateUtils.replace_template_to_string(tex_ttest_table2_template, ttest_replace_dict)
                 n_ttest_tables += 1
 
-            conditional_clearpage = '\\clearpage\n' if n_ttest_tables>0 else ''
+            adhoc_page_title = ''
+            if n_ttest_tables > 0:
+                adhoc_page_title = '\n\\subsection*{\\hfil Post hoc significance analysis \\hfil}\n\n'
 
-            replace_dict = {'<SESS_NUM>': session_summary.sess_num,
-                            '<PLOT_FILE>': self.pipeline.experiment + '-' + self.pipeline.subject + '-report_plot_' + session_summary.name + '.pdf',
+            n_significantly_above_zero_params = len(session_summary.ttest_against_zero_table)
+            #ttest_against_zero_title = '\n\\subsection*{\\hfil $t$-test against zero \\hfil}\n\n' if n_significantly_above_zero_params>0 else ''
+            ttest_against_zero_table = '\n{\em No significant parameters for $t$-test against zero}.\n'
+            if n_significantly_above_zero_params > 0:
+                ttest_replace_dict = {'<PARAMETER1>': param1_name,
+                                      '<UNIT1>': param1_unit,
+                                      '<PARAMETER2>': param2_name,
+                                      '<UNIT2>': param2_unit,
+                                      '<TABLE>': latex_table(session_summary.ttest_against_zero_table, hlines=False)
+                                      }
+                ttest_against_zero_table = TextTemplateUtils.replace_template_to_string(tex_ttest_table2_template, ttest_replace_dict)
+
+            n_significantly_above_sham_params = len(session_summary.ttest_against_sham_table) if session_summary.ttest_against_sham_table is not None else 0
+            ttest_against_sham_table = '' if self.pipeline.task!='PS2.1' else '\n{\em No significant parameters for $t$-test against sham for the lower half}.\n\\vspace{1pc}\n'
+            if n_significantly_above_sham_params > 0:
+                ttest_replace_dict = {'<PARAMETER1>': param1_name,
+                                      '<UNIT1>': param1_unit,
+                                      '<PARAMETER2>': param2_name,
+                                      '<UNIT2>': param2_unit,
+                                      '<TABLE>': latex_table(session_summary.ttest_against_sham_table, hlines=False)
+                                      }
+                ttest_against_sham_table = TextTemplateUtils.replace_template_to_string(tex_ttest_against_sham_template, ttest_replace_dict)
+
+            plot_replace_dict = {'<LOW_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-low_plot_' + session_summary.stimtag + '.pdf',
+                                '<ALL_PLOT_FILE>': self.pipeline.task + '-' + self.pipeline.subject + '-all_plot_' + session_summary.stimtag + '.pdf'}
+
+            ps_plots = TextTemplateUtils.replace_template_to_string(tex_sham_plots_template if self.pipeline.task=='PS2.1' else tex_nosham_plots_template, plot_replace_dict)
+
+            replace_dict = {'<PS_PLOTS>': ps_plots,
                             '<STIMTAG>': session_summary.stimtag,
                             '<REGION>': session_summary.region_of_interest,
+                            '<SESSIONS>': session_summary.sessions,
                             '<CONSTANT_NAME>': const_param_name,
                             '<CONSTANT_VALUE>': session_summary.const_param_value,
                             '<CONSTANT_UNIT>': const_unit,
@@ -100,10 +134,12 @@ class GenerateTex(RamTask):
                             '<PVALUE1>': pvalue_formatting(session_summary.anova_pvalues[0]),
                             '<PVALUE2>': pvalue_formatting(session_summary.anova_pvalues[1]),
                             '<PVALUE12>': pvalue_formatting(session_summary.anova_pvalues[2]),
+                            '<TTEST_AGAINST_SHAM_TABLE>': ttest_against_sham_table,
+                            '<TTEST_AGAINST_ZERO_TABLE>': ttest_against_zero_table,
+                            '<ADHOC_PAGE_TITLE>': adhoc_page_title,
                             '<PARAM1_TTEST_TABLE>': param1_ttest_table,
                             '<PARAM2_TTEST_TABLE>': param2_ttest_table,
-                            '<PARAM12_TTEST_TABLE>': param12_ttest_table,
-                            'CONDITIONAL_CLEARPAGE': conditional_clearpage
+                            '<PARAM12_TTEST_TABLE>': param12_ttest_table
                             }
 
             tex_session_pages_str += TextTemplateUtils.replace_template_to_string(tex_session_template, replace_dict)
@@ -115,57 +151,16 @@ class GenerateTex(RamTask):
         xval_output = self.get_passed_object('xval_output')
         perm_test_pvalue = self.get_passed_object('pvalue')
 
-        param1_ttest_table = ''
-        if cumulative_param1_ttest_table is not None:
-            ttest_replace_dict = {'<PARAMETER>': param1_name,
-                                  '<UNIT>': param1_unit,
-                                  '<TABLE>': latex_table(cumulative_param1_ttest_table, hlines=False)
-                                 }
-            param1_ttest_table = TextTemplateUtils.replace_template_to_string(tex_ttest_table1_template, ttest_replace_dict)
-
-        param2_ttest_table = ''
-        if cumulative_param2_ttest_table is not None:
-            ttest_replace_dict = {'<PARAMETER>': param2_name,
-                                  '<UNIT>': param2_unit,
-                                  '<TABLE>': latex_table(cumulative_param2_ttest_table, hlines=False)
-                                  }
-            param2_ttest_table = TextTemplateUtils.replace_template_to_string(tex_ttest_table1_template, ttest_replace_dict)
-
-        param12_ttest_table = ''
-        if cumulative_param12_ttest_table is not None:
-            ttest_replace_dict = {'<PARAMETER1>': param1_name,
-                                  '<UNIT1>': param1_unit,
-                                  '<PARAMETER2>': param2_name,
-                                  '<UNIT2>': param2_unit,
-                                  '<TABLE>': latex_table(cumulative_param12_ttest_table, hlines=False)
-                                  }
-            param12_ttest_table = TextTemplateUtils.replace_template_to_string(tex_ttest_table2_template, ttest_replace_dict)
-
         replace_dict = {
             '<SUBJECT>': self.pipeline.subject.replace('_', '\\textunderscore'),
-            '<EXPERIMENT>': self.pipeline.experiment,
+            '<EXPERIMENT>': self.pipeline.task,
             '<DATE>': datetime.date.today(),
             '<SESSION_DATA>': session_data_tex_table,
             '<NUMBER_OF_SESSIONS>': self.get_passed_object('NUMBER_OF_SESSIONS'),
             '<NUMBER_OF_ELECTRODES>': self.get_passed_object('NUMBER_OF_ELECTRODES'),
             '<REPORT_PAGES>': tex_session_pages_str,
-            '<CUMULATIVE_ISI_MID>': self.get_passed_object('CUMULATIVE_ISI_MID'),
-            '<CUMULATIVE_ISI_HALF_RANGE>': self.get_passed_object('CUMULATIVE_ISI_HALF_RANGE'),
-            '<CUMULATIVE_PLOT_FILE>': self.pipeline.experiment + '-' + self.pipeline.subject + '-report_plot_Cumulative.pdf',
-            '<CUMULATIVE_PARAMETER1>': param1_name,
-            '<CUMULATIVE_PARAMETER2>': param2_name,
-            '<CUMULATIVE_FVALUE1>': '%.2f' % cumulative_anova_fvalues[0],
-            '<CUMULATIVE_FVALUE2>': '%.2f' % cumulative_anova_fvalues[1],
-            '<CUMULATIVE_FVALUE12>': '%.2f' % cumulative_anova_fvalues[2],
-            '<CUMULATIVE_PVALUE1>': pvalue_formatting(cumulative_anova_pvalues[0]),
-            '<CUMULATIVE_PVALUE2>': pvalue_formatting(cumulative_anova_pvalues[1]),
-            '<CUMULATIVE_PVALUE12>': pvalue_formatting(cumulative_anova_pvalues[2]),
-            '<CUMULATIVE_PARAM1_TTEST_TABLE>': param1_ttest_table,
-            '<CUMULATIVE_PARAM2_TTEST_TABLE>': param2_ttest_table,
-            '<CUMULATIVE_PARAM12_TTEST_TABLE>': param12_ttest_table,
             '<AUC>': '%.2f' % (100*xval_output[-1].auc),
             '<PERM-P-VALUE>': pvalue_formatting(perm_test_pvalue),
-            '<J-THRESH>': '%.3f' % xval_output[-1].jstat_thresh,
             '<ROC_AND_TERC_PLOT_FILE>': self.pipeline.subject + '-roc_and_terc_plot_combined.pdf'
         }
 
@@ -174,29 +169,26 @@ class GenerateTex(RamTask):
 
 
 
-class GeneratePlots(RamTask):
+class GeneratePlots(ReportRamTask):
     def __init__(self, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(GeneratePlots,self).__init__(mark_as_completed)
 
     def run(self):
-        #experiment = self.pipeline.experiment
-
         self.create_dir_in_workspace('reports')
 
         xval_output = self.get_passed_object('xval_output')
         fr1_summary = xval_output[-1]
 
-        panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, title='', wspace=0.3, hspace=0.3)
+        panel_plot = PanelPlot(xfigsize=15, yfigsize=7.5, i_max=1, j_max=2, labelsize=16, wspace=5.0)
 
-        pd1 = PlotData(x=fr1_summary.fpr, y=fr1_summary.tpr, xlim=[0.0,1.0], ylim=[0.0,1.0], xlabel='False Alarm Rate\n(a)', ylabel='Hit Rate', levelline=((0.0,1.0),(0.0,1.0)))
+        pd1 = PlotData(x=fr1_summary.fpr, y=fr1_summary.tpr, xlim=[0.0,1.0], ylim=[0.0,1.0], xlabel='False Alarm Rate\n(a)', ylabel='Hit Rate', xlabel_fontsize=20, ylabel_fontsize=20, levelline=((0.0,1.0),(0.0,1.0)), color='k', markersize=1.0)
 
         pc_diff_from_mean = (fr1_summary.low_pc_diff_from_mean, fr1_summary.mid_pc_diff_from_mean, fr1_summary.high_pc_diff_from_mean)
 
         ylim = np.max(np.abs(pc_diff_from_mean)) + 5.0
         if ylim > 100.0:
             ylim = 100.0
-        # pd2 = BarPlotData(x=(0,1,2), y=pc_diff_from_mean, ylim=[-ylim,ylim], xlabel='Tercile of Classifier Estimate\n(b)', ylabel='Recall Change From Mean (%)', x_tick_labels=['Low', 'Middle', 'High'], xhline_pos=0.0, barcolors=['grey','grey', 'grey'], barwidth=0.5)
-        pd2 = BarPlotData(x=(0,1,2), y=pc_diff_from_mean, ylim=[-ylim,ylim], xlabel='Tercile of Classifier Estimate\n(b)', ylabel='Recall Change From Mean (%)', x_tick_labels=['Low', 'Middle', 'High'], xhline_pos=0.0, barcolors=['grey','grey', 'grey'], barwidth=0.5)
+        pd2 = BarPlotData(x=(0,1,2), y=pc_diff_from_mean, ylim=[-ylim,ylim], xlabel='Tercile of Classifier Estimate\n(b)', ylabel='Recall Change From Mean (%)', x_tick_labels=['Low', 'Middle', 'High'], xlabel_fontsize=20, ylabel_fontsize=20, xhline_pos=0.0, barcolors=['grey','grey', 'grey'], barwidth=0.5)
 
         panel_plot.add_plot_data(0, 0, plot_data=pd1)
         panel_plot.add_plot_data(0, 1, plot_data=pd2)
@@ -214,54 +206,56 @@ class GeneratePlots(RamTask):
 
 
         for session_summary in session_summary_array:
-            # panel_plot = PanelPlot(i_max=1, j_max=1, title='', xtitle=param1_title, xtitle_fontsize=24, ytitle='$\Delta$ Post-Pre Classifier Output',ytitle_fontsize=24, wspace=0.3, hspace=0.3)
+            panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=2, labelsize=16, wspace=5.0)
 
-            panel_plot = PanelPlot(i_max=1, j_max=1, title='', ytitle='$\Delta$ Post-Pre Classifier Output',ytitle_fontsize=24, wspace=0.3, hspace=0.3)
-
-            pdc = PlotDataCollection(legend_on=True)
-            pdc.xlabel = param1_title
-            pdc.xlabel_fontsize = 24
-
-            for v,p in session_summary.plots.iteritems():
+            pdc = PlotDataCollection(legend_on=True, legend_loc=3, xlabel=param1_title+'\n(a)', ylabel='$\Delta$ Post-Pre Classifier Output', xlabel_fontsize=20, ylabel_fontsize=20)
+            for v,p in session_summary.low_classifier_delta_plot.iteritems():
                 p.xhline_pos=0.0
                 pdc.add_plot_data(p)
 
-
             panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
+
+            pdc = PlotDataCollection(legend_on=True, legend_loc=3, xlabel=param1_title+'\n(b)', ylabel='Expected Recall Change (%)', xlabel_fontsize=20, ylabel_fontsize=20)
+            for v,p in session_summary.low_recall_delta_plot.iteritems():
+                p.xhline_pos=0.0
+                pdc.add_plot_data(p)
+
+            panel_plot.add_plot_data_collection(0, 1, plot_data_collection=pdc)
 
             plot = panel_plot.generate_plot()
 
-            plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + self.pipeline.experiment + '-' + self.pipeline.subject + '-report_plot_' + session_summary.name + '.pdf')
+            plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + self.pipeline.task + '-' + self.pipeline.subject + '-low_plot_' + session_summary.stimtag + '.pdf')
 
             plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
-        cumulative_plots = self.get_passed_object('cumulative_plots')
+
+            panel_plot = PanelPlot(xfigsize=16, yfigsize=6.5, i_max=1, j_max=2, labelsize=16, wspace=5.0)
+
+            pdc = PlotDataCollection(legend_on=True, legend_loc=3, xlabel=param1_title+'\n(a)', ylabel='$\Delta$ Post-Pre Classifier Output', xlabel_fontsize=20, ylabel_fontsize=20)
+            for v,p in session_summary.all_classifier_delta_plot.iteritems():
+                p.xhline_pos=0.0
+                pdc.add_plot_data(p)
+
+            panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
+
+            pdc = PlotDataCollection(legend_on=True, legend_loc=3, xlabel=param1_title+'\n(b)', ylabel='Expected Recall Change (%)', xlabel_fontsize=20, ylabel_fontsize=20)
+            for v,p in session_summary.all_recall_delta_plot.iteritems():
+                p.xhline_pos=0.0
+                pdc.add_plot_data(p)
+
+            panel_plot.add_plot_data_collection(0, 1, plot_data_collection=pdc)
+
+            plot = panel_plot.generate_plot()
+
+            plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + self.pipeline.task + '-' + self.pipeline.subject + '-all_plot_' + session_summary.stimtag + '.pdf')
+
+            plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
 
-
-        # panel_plot = PanelPlot(i_max=1, j_max=1, title='', xtitle=param1_title, y_axis_title='$\Delta$ Post-Pre Classifier Output')
-        panel_plot = PanelPlot(i_max=1, j_max=1, title='',ytitle='$\Delta$ Post-Pre Classifier Output', ytitle_fontsize=24)
-
-        pdc = PlotDataCollection(legend_on=True)
-        pdc.xlabel = param1_title
-        pdc.xlabel_fontsize = 24
-
-        for v,p in cumulative_plots.iteritems():
-            p.xhline_pos=0.0
-            pdc.add_plot_data(p)
-
-        panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
-
-        plot = panel_plot.generate_plot()
-
-        plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + self.pipeline.experiment + '-' + self.pipeline.subject + '-report_plot_Cumulative.pdf')
-
-        plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
-
-
-class GenerateReportPDF(RamTask):
+class GenerateReportPDF(ReportRamTask):
     def __init__(self, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(GenerateReportPDF,self).__init__(mark_as_completed)
+
 
     def run(self):
         from subprocess import call
@@ -280,3 +274,16 @@ class GenerateReportPDF(RamTask):
                                + self.get_path_to_resource_in_workspace('reports/'+report_tex_file_name)
 
         call([pdflatex_command_str], shell=True)
+
+        report_core_file_name, ext = splitext(report_tex_file_name)
+        report_file = join(output_directory,report_core_file_name+'.pdf')
+
+        self.pass_object('report_file', report_file)
+
+class DeployReportPDF(ReportRamTask):
+    def __init__(self, mark_as_completed=True):
+        super(DeployReportPDF, self).__init__(mark_as_completed)
+
+    def run(self):
+        report_file = self.get_passed_object('report_file')
+        self.pipeline.deploy_report(report_path=report_file)
