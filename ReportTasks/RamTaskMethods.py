@@ -127,16 +127,15 @@ def compute_wavelets_powers(events, monopolar_channels, bipolar_pairs,
 
 
 
-def compute_powers(events, monopolar_channels, start_time, end_time, buffer_time, freqs, log_powers, bipolar_pairs=None,
+def compute_powers(events, monopolar_channels, bipolar_pairs, start_time, end_time, buffer_time, freqs, log_powers,
                    ComputePowers=None, filt_order=4, width=5):
-    if bipolar_pairs is not None:
-        if not isinstance(bipolar_pairs, np.recarray):
-            # it expects to receive a list
-            bipolar_pairs = np.array(bipolar_pairs, dtype=[('ch0', 'S3'), ('ch1', 'S3')]).view(np.recarray)
-        else:
-            # to get the same treatment if we get recarray , we will convert it to a list and then bask to
-            # recarray with correct dtype
-            bipolar_pairs = np.array(list(bipolar_pairs), dtype=[('ch0', 'S3'), ('ch1', 'S3')]).view(np.recarray)
+    if not isinstance(bipolar_pairs, np.recarray):
+        # it expects to receive a list
+        bipolar_pairs = np.array(bipolar_pairs, dtype=[('ch0', 'S3'), ('ch1', 'S3')]).view(np.recarray)
+    else:
+        # to get the same treatment if we get recarray , we will convert it to a list and then bask to
+        # recarray with correct dtype
+        bipolar_pairs = np.array(list(bipolar_pairs), dtype=[('ch0', 'S3'), ('ch1', 'S3')]).view(np.recarray)
 
 
     sessions = np.unique(events.session)
