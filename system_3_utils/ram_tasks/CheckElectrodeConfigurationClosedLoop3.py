@@ -147,12 +147,14 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
             self.pass_object('monopolar_channels',channels)
             self.pass_object('config_pairs_path',self.get_path_to_resource_in_workspace('pairs.json'))
             self.pass_object('config_pairs_dict',pairs_from_ec)
-            self.pass_object('config_name',ec.config_name)
         except IndexError:
             pass
+        finally:
+            self.pass_object('config_name', ec.config_name)
 
 
-        # anode_num = self.params.stim_params.elec1
+
+            # anode_num = self.params.stim_params.elec1
         # cathode_num = self.params.stim_params.elec2
         #
         # stim_pair = self.params.stim_params.anode + '-' + self.params.stim_params.cathode
