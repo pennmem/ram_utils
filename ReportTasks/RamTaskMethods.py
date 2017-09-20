@@ -17,7 +17,7 @@ from random import shuffle
 from sklearn.metrics import roc_auc_score, roc_curve
 from sklearn.externals import joblib
 from itertools import tee,groupby
-
+from collections import OrderedDict
 
 def compute_wavelets_powers(events, monopolar_channels, bipolar_pairs,
                    start_time, end_time, buffer_time,
@@ -128,9 +128,12 @@ def compute_wavelets_powers(events, monopolar_channels, bipolar_pairs,
 
 
 def get_excluded_dict(bipolar_dict, reduced_pairs):
-    reduced_dict = {bp_tag: bipolar_dict[bp_tag] for bp_tag in bipolar_dict
-                    if ('%03d' % bipolar_dict[bp_tag]['channel_1'],
-                        '%03d' % bipolar_dict[bp_tag]['channel_2']) not in reduced_pairs}
+    reduced_dict = OrderedDict()
+    for (bp_tag,bp_dict) in sorted(bipolar_dict.items(),cmp=lambda x,y:cmp((x[1]['channel_1'],x[1]['channel_2']),
+                                                                         (y[1]['channel_1'],y[1]['channel_2']))):
+        if ('%03d' % bp_dict['channel_1'],
+                        '%03d' % bp_dict['channel_2']) not in reduced_pairs:
+            reduced_dict[bp_tag]=bp_dict
     return reduced_dict
 
 
@@ -139,7 +142,7 @@ def get_reduced_pairs(self, bipolar_pairs):
         stim_pairs = self.pipeline.args.anode_nums + self.pipeline.args.cathode_nums
     else:
         stim_pairs = [self.pipeline.args.anode_num, self.pipeline.args.cathode_num]
-    reduced_pairs = [bp for bp in bipolar_pairs if (bp[0]) not in stim_pairs and int(bp[1]) not in stim_pairs]
+    reduced_pairs = [bp for bp in bipolar_pairs if int(bp[0]) not in stim_pairs and int(bp[1]) not in stim_pairs]
     return reduced_pairs
 
 

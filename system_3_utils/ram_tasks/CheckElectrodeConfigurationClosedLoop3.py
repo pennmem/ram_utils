@@ -134,17 +134,23 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
         sense_channels = ec.sense_channels_as_recarray()
         ec_pairs = sorted(((n,c.contact.port_num,int(c.ref)) for n,c in ec.sense_channels.items()),cmp=lambda x,y: cmp(x[1:],y[1:]))
         new_dict = OrderedDict()
-        for (n, anode, cathode) in ec_pairs:
-              new_dict['%s-%s'%(sense_channels[sense_channels.port_electrode.astype(int)==anode].contact_name[0],
-                    sense_channels[sense_channels.port_electrode.astype(int)==cathode].contact_name[0])] ={'channel_1':anode,'channel_2':cathode}
-        pairs_from_ec = {self.pipeline.subject:{'pairs':new_dict}}
-        with open(self.get_path_to_resource_in_workspace('pairs.json'),'w') as pf:
-            json.dump(pairs_from_ec,pf,indent=2)
-        self.pass_object('config_pairs_path',self.get_path_to_resource_in_workspace('pairs.json'))
-        self.pass_object('config_pairs_dict',pairs_from_ec)
-        self.pass_object('config_name',ec.config_name)
+        try:
+            for (n, anode, cathode) in ec_pairs:
+                name0 = sense_channels[sense_channels.port_electrode.astype(int)==anode].contact_name
+                name1 = sense_channels[sense_channels.port_electrode.astype(int)==cathode].contact_name
+                new_dict['%s-%s'%(name0[0],name1[0])] ={'channel_1':anode,'channel_2':cathode} # fails with IndexError for channels referenced to common reference; in that case, this whole business is unnecessary
 
-        print
+            pairs_from_ec = {self.pipeline.subject:{'pairs':new_dict}}
+            with open(self.get_path_to_resource_in_workspace('pairs.json'),'w') as pf:
+                json.dump(pairs_from_ec,pf,indent=2)
+            channels = np.array(['{:03d}'.format(i) for i in sense_channels.jack_box_num])
+            self.pass_object('monopolar_channels',channels)
+            self.pass_object('config_pairs_path',self.get_path_to_resource_in_workspace('pairs.json'))
+            self.pass_object('config_pairs_dict',pairs_from_ec)
+            self.pass_object('config_name',ec.config_name)
+        except IndexError:
+            pass
+
 
         # anode_num = self.params.stim_params.elec1
         # cathode_num = self.params.stim_params.elec2

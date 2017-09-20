@@ -99,14 +99,16 @@ class ComputeFRPowers(RamTask):
             excluded_pairs = get_excluded_dict(config_pairs_dict, reduced_pairs)
             joblib.dump(reduced_pairs,self.get_path_to_resource_in_workspace(subject+'-reduced_pairs.pkl'))
             with open(self.get_path_to_resource_in_workspace('excluded_pairs.json'),'w') as excluded_file:
-                json.dump({subject:{'pairs':excluded_pairs}},excluded_file)
+                json.dump({subject:{'pairs':excluded_pairs}},excluded_file,indent=2)
             self.pass_object('reduced_pairs',reduced_pairs)
             # replace bipolar_pairs_path with config_pairs_path
+            joblib.dump(self.bipolar_pairs,self.get_path_to_resource_in_workspace(subject+'-bipolar_pairs.pkl'))
             self.pass_object('bipolar_pairs_path',self.get_passed_object('config_pairs_path'))
+            self.pass_object('bipolar_pairs',self.bipolar_pairs)
+
 
         joblib.dump(bipolar_pairs,self.get_path_to_resource_in_workspace(subject + '-bipolar_pairs.pkl'))
 
-        self.pass_object('bipolar_pairs',self.bipolar_pairs)
 
         events = np.concatenate([encoding_events,retrieval_events]).view(np.recarray)
         events.sort(order=['session','list','mstime'])
