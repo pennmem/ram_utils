@@ -90,13 +90,11 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
             if '_'.join(stim_pair) not in config_chan_names:
                 raise ConfigError('Stim channel %s is missing from electrode config file'%('_'.join(stim_pair)))
 
-        config_name = self.get_passed_object('config_name')
         subject = self.pipeline.subject.split('_')[0]
         stim_frequency = self.pipeline.args.pulse_frequency
         stim_amplitude = self.pipeline.args.target_amplitude
         bipolar_pairs_path = self.get_passed_object('bipolar_pairs_path')
         classifier_path = self.get_passed_object('classifier_path')
-        stim_chan_label = self.get_passed_object('stim_chan_label')
         excluded_pairs_path = self.get_passed_object('excluded_pairs_path')
         xval_full = self.get_passed_object('xval_output_all_electrodes')
         xval_output = self.get_passed_object('xval_output')
