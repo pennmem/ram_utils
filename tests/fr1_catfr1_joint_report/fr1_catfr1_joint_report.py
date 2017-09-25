@@ -12,14 +12,14 @@ from ReportUtils import CMLParser, ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
 
-cml_parser.arg('--subject','R1337E')
+cml_parser.arg('--subject','R1342M')
 # cml_parser.arg('--task','RAM_FR1')
 cml_parser.arg('--task','FR1')
 cml_parser.arg('--workspace-dir','/Volumes/rhino_root/scratch/leond/FR1_joint_reports')
 cml_parser.arg('--mount-point',  '/Volumes/rhino_root')
 #cml_parser.arg('--recompute-on-no-status')
 # cml_parser.arg('--exit-on-no-change')
-cml_parser.arg('--sessions',['0','1','2','101'])
+# cml_parser.arg('--sessions',['0','1','2','101'])
 
 #cml_parser.arg('--python-path','/Users/m/PTSA_NEW_GIT/')
 

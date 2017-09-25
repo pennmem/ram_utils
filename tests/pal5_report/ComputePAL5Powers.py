@@ -53,8 +53,8 @@ class ComputePAL5Powers(ReportRamTask):
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
 
-        pow_mat,events = compute_powers(events, monopolar_channels, None, bipolar_pairs, self.params.pal1_start_time,
-                                        self.params.pal1_end_time, self.params.pal1_buf, log_powers=True,
+        pow_mat,events = compute_powers(events, monopolar_channels, bipolar_pairs, self.params.pal1_start_time,
+                                        self.params.pal1_end_time, self.params.pal1_buf, self.params.freqs,log_powers=True,
                                         ComputePowers=self)
 
         joblib.dump(events,self.get_path_to_resource_in_workspace('pal5_events.pkl'))

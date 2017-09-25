@@ -39,7 +39,11 @@ def compute_wavelets_powers(events, monopolar_channels, bipolar_pairs,
     # Load EEG
     eeg_reader = EEGReader(events=sess_events, channels=monopolar_channels, start_time=start_time,
                            end_time=end_time)
-    eeg = eeg_reader.read()
+    try:
+        eeg = eeg_reader.read()
+    except IndexError:
+        eeg_reader.channels = np.array([])
+        eeg = eeg_reader.read()
     samplerate = eeg['samplerate']
 
     eeg = eeg.add_mirror_buffer(duration=buffer_time)
@@ -167,7 +171,12 @@ def compute_powers(events, monopolar_channels, bipolar_pairs, start_time, end_ti
         # Load EEG
         eeg_reader = EEGReader(events=sess_events, channels=monopolar_channels, start_time=start_time,
                                end_time=end_time)
-        eeg = eeg_reader.read()
+
+        try:
+            eeg = eeg_reader.read()
+        except IndexError: # recording was done in bipolar mode, and the channels are different than what we expect
+            eeg_reader.channels = np.array([])
+            eeg= eeg_reader.read()
         samplerate = eeg['samplerate']
         if eeg_reader.removed_bad_data():
             print 'REMOVED SOME BAD EVENTS !!!'

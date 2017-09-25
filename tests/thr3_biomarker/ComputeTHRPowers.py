@@ -9,6 +9,8 @@ from sklearn.externals import joblib
 
 from ptsa.data.readers import EEGReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
+from ReportTasks.RamTaskMethods import get_excluded_dict,get_reduced_pairs
+import json
 try:
     from ReportTasks.RamTaskMethods import compute_powers
 except ImportError:
@@ -24,6 +26,7 @@ class ComputeTHRPowers(RamTask):
         self.pow_mat = None
         self.samplerate = None
         self.wavelet_transform = MorletWaveletTransform()
+        self.bipolar_pairs = None
 
     def input_hashsum(self):
         subject = self.pipeline.subject
@@ -80,6 +83,17 @@ class ComputeTHRPowers(RamTask):
                                                        self.params.thr_buf,
                                                        self.params.freqs, self.params.log_powers,ComputePowers=self)
                 self.pass_object('THR_events',events)
+                if self.bipolar_pairs is not None:
+                    reduced_pairs = get_reduced_pairs(self, self.bipolar_pairs)
+                    config_pairs_dict = self.get_passed_object('config_pairs_dict')[subject]['pairs']
+                    excluded_pairs = get_excluded_dict(config_pairs_dict, reduced_pairs)
+                    joblib.dump(reduced_pairs, self.get_path_to_resource_in_workspace(subject + '-reduced_pairs.pkl'))
+                    with open(self.get_path_to_resource_in_workspace('excluded_pairs.json'), 'w') as excluded_file:
+                        json.dump({subject: {'pairs': excluded_pairs}}, excluded_file)
+                    self.pass_object('reduced_pairs', reduced_pairs)
+                    # replace bipolar_pairs_path with config_pairs_path
+                    self.pass_object('bipolar_pairs_path', self.get_passed_object('config_pairs_path'))
+
         else:
             self.compute_powers(events,sessions,monopolar_channels,bipolar_pairs)
 

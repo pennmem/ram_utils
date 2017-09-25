@@ -76,10 +76,10 @@ class ComputePAL1HFPowers(ReportRamTask):
         if compute_powers is None:
             self.compute_powers(events,sessions,monopolar_channels,bipolar_pairs)
         else:
-            self.pow_mat,events=compute_powers(events,monopolar_channels,
+            self.pow_mat,events=compute_powers(events,monopolar_channels,bipolar_pairs,
                                                params.hfs_start_time,params.hfs_end_time,params.hfs_buf,
                                                params.hfs,params.log_powers,
-                                               bipolar_pairs=bipolar_pairs)
+                                               )
             self.pow_mat = self.pow_mat.reshape((len(events),-1,len(params.hfs)))
             for session in sessions:
                 self.pow_mat[events.session==session] = zscore(self.pow_mat[events.session==session],axis=0,ddof=1)
