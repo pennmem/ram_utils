@@ -99,37 +99,34 @@ class ComputeFR1Powers(ReportRamTask):
         if compute_powers is None:
             self.compute_powers(events,sessions,monopolar_channels,bipolar_pairs)
         else:
-            if compute_powers is None:
-                self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
-            else:
-                encoding_mask = events.type == 'WORD'
+            encoding_mask = events.type == 'WORD'
 
-                encoding_pow_mat, encoding_events = compute_powers(events[encoding_mask], monopolar_channels,
-                                                                   bipolar_pairs,
-                                                                   params.fr1_start_time, params.fr1_end_time,
-                                                                   params.fr1_buf,
-                                                                   params.freqs, params.log_powers,
-                                                                   )
-                retrieval_pow_mat, retrieval_events = compute_powers(events[~encoding_mask], monopolar_channels,
-                                                                     bipolar_pairs,
-                                                                     params.fr1_retrieval_start_time,
-                                                                     params.fr1_retrieval_end_time,
-                                                                     params.fr1_retrieval_buf,
-                                                                     params.freqs, params.log_powers,
-                                                                     )
+            encoding_pow_mat, encoding_events = compute_powers(events[encoding_mask], monopolar_channels,
+                                                               bipolar_pairs,
+                                                               params.fr1_start_time, params.fr1_end_time,
+                                                               params.fr1_buf,
+                                                               params.freqs, params.log_powers,
+                                                               )
+            retrieval_pow_mat, retrieval_events = compute_powers(events[~encoding_mask], monopolar_channels,
+                                                                 bipolar_pairs,
+                                                                 params.fr1_retrieval_start_time,
+                                                                 params.fr1_retrieval_end_time,
+                                                                 params.fr1_retrieval_buf,
+                                                                 params.freqs, params.log_powers,
+                                                                 )
 
-                events = np.concatenate([encoding_events, retrieval_events]).view(np.recarray)
-                events.sort(order=['session', 'list', 'mstime'])
-                encoding_mask = events.type == 'WORD'
-                self.pow_mat = np.zeros((len(events), len(bipolar_pairs) * len(params.freqs)))
-                self.pow_mat[encoding_mask] = encoding_pow_mat
-                self.pow_mat[~encoding_mask] = retrieval_pow_mat
+            events = np.concatenate([encoding_events, retrieval_events]).view(np.recarray)
+            events.sort(order=['session', 'list', 'mstime'])
+            encoding_mask = events.type == 'WORD'
+            self.pow_mat = np.zeros((len(events), len(bipolar_pairs) * len(params.freqs)))
+            self.pow_mat[encoding_mask] = encoding_pow_mat
+            self.pow_mat[~encoding_mask] = retrieval_pow_mat
 
-                joblib.dump(events,self.get_path_to_resource_in_workspace(subject+'-fr1_events.pkl'))
-                self.pass_object('events', events)
+            joblib.dump(events,self.get_path_to_resource_in_workspace(subject+'-fr1_events.pkl'))
+            self.pass_object('events', events)
 
-            self.pass_object('pow_mat', self.pow_mat)
-            self.pass_object('samplerate', self.samplerate)
+        self.pass_object('pow_mat', self.pow_mat)
+        self.pass_object('samplerate', self.samplerate)
 
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
         joblib.dump(self.samplerate, self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
