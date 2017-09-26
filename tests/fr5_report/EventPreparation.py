@@ -62,7 +62,7 @@ class FR1EventPreparation(ReportRamTask):
             catfr1_event_files = json_reader.aggregate_values('task_events',subject=subj_code,montage=montage,experiment='catFR1')
 
         fr1_events = np.concatenate(
-            filter_session([BaseEventReader(filename=f, eliminate_events_with_no_eeg=True).read() for f in event_files])
+            [filter_session(BaseEventReader(filename=f, eliminate_events_with_no_eeg=True).read()) for f in event_files]
         ).view(np.recarray)
 
         if any(catfr1_event_files):
