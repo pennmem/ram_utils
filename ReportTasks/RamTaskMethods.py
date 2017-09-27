@@ -449,12 +449,20 @@ def run_loso_xval(event_sessions, recalls, pow_mat, classifier, xval_output, per
 "============================================================"
 
 def filter_session(events):
-    # Remove all lists from an event structure that don't have a "REC_END" event
-    events_by_list = (np.array([l for l in list_group]) for listno,list_group in groupby(events, lambda x:x.list))
-    list_has_end = (any([l['type']=='REC_END' for l in list_group]) or listno == -999 for listno,list_group in groupby(events, lambda x:x.list))
-    events = np.concatenate([e for (e, a) in zip(events_by_list, list_has_end) if a])
-    return events.view(np.recarray)
+    # partition events into math and task
+    math_mask = np.in1d(events.type,['START','STOP','PROB'])
 
+    task_events = events[~math_mask]
+    math_events = events[math_mask]
+    events = task_events
+    # Remove all lists from task event structure that don't have a "REC_END" event
+    events_by_list = (np.array([l for l in list_group]) for listno,list_group in groupby(events, lambda x:x.list))
+    list_has_end = [any([l['type']=='REC_END' for l in list_group]) or listno == -999 for listno,list_group in groupby(events, lambda x:x.list)]
+    events = np.concatenate([e for (e, a) in zip(events_by_list, list_has_end) if a])
+    events = np.concatenate([events,math_events]).view(np.recarray)
+    events.sort(order=['session', 'list', 'mstime'])
+
+    return events
 
 def free_epochs(times, duration, pre, post, start=None, end=None):
     # (list(vector(int))*int*int*int) -> list(vector(int))
