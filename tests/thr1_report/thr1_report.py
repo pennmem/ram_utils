@@ -11,10 +11,10 @@ from os.path import *
 from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)
-cml_parser.arg('--subject','R1315T')
+cml_parser.arg('--subject','R1328E')
 cml_parser.arg('--task','THR1')
-cml_parser.arg('--workspace-dir','/scratch/jfm2/THR_reports')
-cml_parser.arg('--mount-point','')
+cml_parser.arg('--workspace-dir','/Volumes/rhino_root/scratch/leond/THR_reports')
+cml_parser.arg('--mount-point','/Users/leond')
 #cml_parser.arg('--recompute-on-no-status')
 # cml_parser.arg('--exit-on-no-change')
 

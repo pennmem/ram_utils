@@ -77,8 +77,8 @@ class ComputeTHRHFPowers(ReportRamTask):
             self.pow_mat,events=compute_powers(events,monopolar_channels, bipolar_pairs,
                                                    params.ttest_start_time,params.ttest_end_time,params.ttest_buf,
                                                    params.ttest_freqs,params.log_powers)
-            self.pow_mat = self.pow_mat.reshape((len(events),len(bipolar_pairs),-1))
-            self.pow_mat_mean = np.zeros((len(events),len(bipolar_pairs), params.ttest_frange.shape[0]))
+            self.pow_mat = self.pow_mat.reshape((len(events),-1,len(params.ttest_freqs)))
+            self.pow_mat_mean = np.zeros((len(events),self.pow_mat.shape[1], params.ttest_frange.shape[0]))
             for session in sessions:
                 self.pow_mat[events.session==session] = zscore(self.pow_mat[events.session==session],axis=0,ddof=1)
 
