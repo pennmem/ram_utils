@@ -89,6 +89,9 @@ class ComputeClassifier(ReportRamTask):
         events = self.events
         self.pow_mat = self.get_pow_mat()
         self._normalize_sessions(events)
+        # Add bias term
+        self.pow_mat = np.append(np.ones((len(self.pow_mat),1)),self.pow_mat,axis=1)
+
 
         #n1 = np.sum(events.recalled)
         #n0 = len(events) - n1
@@ -133,6 +136,12 @@ class ComputeClassifier(ReportRamTask):
         new_classifier.intercept_ = self.lr_classifier.coef_[...,:1]
         self.lr_classifier = new_classifier
 
+        new_classifier=  LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
+                                                solver='newton-cg',fit_intercept=False,)
+
+        new_classifier.coef_ = self.lr_classifier.coef_[...,1:]
+        new_classifier.intercept_ = self.lr_classifier.coef_[...,:1]
+        self.lr_classifier = new_classifier
 
         self.pass_objects()
 
