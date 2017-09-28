@@ -340,6 +340,8 @@ class ComputeClassifier(RamTask):
         self.pow_mat = self.get_pow_mat()
         self.pow_mat[events.type=='WORD'] = normalize_sessions(self.pow_mat[events.type=='WORD'],events[events.type=='WORD'])
         self.pow_mat[events.type!='WORD'] = normalize_sessions(self.pow_mat[events.type!='WORD'],events[events.type!='WORD'])
+        # Add bias term
+        self.pow_mat = np.append(np.ones((len(self.pow_mat),1)),self.pow_mat,axis=1)
 
         self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
                                                 solver='newton-cg')
@@ -392,6 +394,12 @@ class ComputeClassifier(RamTask):
         insample_auc = roc_auc_score(recalls, recall_prob_array)
         print 'in-sample AUC=', insample_auc
 
+        new_classifier=  LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
+                                                solver='newton-cg',fit_intercept=False,)
+
+        new_classifier.coef_ = self.lr_classifier.coef_[...,1:]
+        new_classifier.intercept_ = self.lr_classifier.coef_[...,:1]
+        self.lr_classifier = new_classifier
         self.pass_objects()
 
 
