@@ -262,7 +262,7 @@ class ComputeJointClassifier(ReportRamTask):
         # Add bias term
         self.pow_mat = np.append(np.ones((len(self.pow_mat),1)),self.pow_mat,axis=1)
 
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
+        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,fit_intercept=False,
                                                 solver='newton-cg')
 
 

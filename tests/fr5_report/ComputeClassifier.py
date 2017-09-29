@@ -344,7 +344,7 @@ class ComputeClassifier(RamTask):
         self.pow_mat = np.append(np.ones((len(self.pow_mat),1)),self.pow_mat,axis=1)
 
         self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
-                                                solver='newton-cg')
+                                                solver='newton-cg',fit_intercept=False)
 
 
         event_sessions = events.session
