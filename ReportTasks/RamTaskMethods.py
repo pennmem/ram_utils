@@ -455,6 +455,7 @@ def filter_session(events):
     task_events = events[~math_mask]
     math_events = events[math_mask]
     events = task_events
+    events.sort(order=['session','list','mstime'])
     # Remove all lists from task event structure that don't have a "REC_END" event
     events_by_list = (np.array([l for l in list_group]) for listno,list_group in groupby(events, lambda x:x.list))
     list_has_end = [any([l['type']=='REC_END' for l in list_group]) or listno == -999 for listno,list_group in groupby(events, lambda x:x.list)]
