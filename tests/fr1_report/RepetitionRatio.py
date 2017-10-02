@@ -40,7 +40,7 @@ class RepetitionRatio(RamTask):
             path.join(self.pipeline.mount_point, self.workspace_dir, subject + '-repetition-ratios.pkl'))
         # self.repetition_percentiles = joblib.load(path.join(self.pipeline.mount_point,self.workspace_dir,subject+'-repetition-percentiles.pkl'))
         all_recall_ratios_dict = joblib.load(
-            path.join(path.dirname(self.get_workspace_dir()), 'all_repetition_ratios_dict'))
+            path.join(path.dirname(self.get_path_to_resource_in_workspace( 'all_recall_ratios_dict'))))
         all_recall_ratios = np.array([np.nanmean(x) for x in all_recall_ratios_dict.itervalues()])
 
 
