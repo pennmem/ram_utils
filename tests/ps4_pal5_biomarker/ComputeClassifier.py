@@ -429,7 +429,7 @@ class ComputeClassifier(RamTask):
         self.pass_object('classifier_path' + self.suffix, classifier_path)
 
     def create_classifier_obj(self):
-        return LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
+        return LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced',
                                   solver='newton-cg')
 
     def get_sample_weights_vector(self, evs):
@@ -511,7 +511,7 @@ class ComputeClassifier(RamTask):
 
         print
 
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
+        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced',
                                                 solver='newton-cg')
 
         sessions_array = evs.session

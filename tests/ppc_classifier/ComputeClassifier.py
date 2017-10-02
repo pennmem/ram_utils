@@ -295,7 +295,7 @@ class ComputeClassifier(ReportRamTask):
                         insample_recalls = recalls[insample_mask]
                         with warnings.catch_warnings():
                             warnings.simplefilter("ignore")
-                            self.lr_classifier = LogisticRegression(C=C[i], penalty=self.params.penalty_type, class_weight='auto', solver='liblinear')
+                            self.lr_classifier = LogisticRegression(C=C[i], penalty=self.params.penalty_type, class_weight='balanced', solver='liblinear')
                             self.lr_classifier.fit(self.ppc_features[insample_mask,:], insample_recalls)
 
                         outsample_mask = (event_sessions == sess)
@@ -351,7 +351,7 @@ class ComputeClassifier(ReportRamTask):
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            self.lr_classifier = LogisticRegression(dual=True, C=self.params.C, penalty=self.params.penalty_type, class_weight='auto', solver='liblinear')
+            self.lr_classifier = LogisticRegression(dual=True, C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced', solver='liblinear')
 
         event_sessions = events.session
         recalls = events.recalled

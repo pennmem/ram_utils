@@ -130,7 +130,7 @@ class ComputeClassifier(ReportRamTask):
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto', solver='liblinear')
+            self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced', solver='liblinear')
 
         event_sessions = events.session
         recalls = np.array(events.recalled, dtype=np.bool)

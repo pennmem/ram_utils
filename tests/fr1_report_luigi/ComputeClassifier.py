@@ -103,7 +103,7 @@ class ComputeClassifier(RamTaskL):
         # n0 = len(events) - n1
         # w0 = (2.0/n0) / ((1.0/n0)+(1.0/n1))
         # w1 = (2.0/n1) / ((1.0/n0)+(1.0/n1))
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
+        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced',
                                                 solver='liblinear')
 
         event_sessions = events.session
@@ -202,7 +202,7 @@ class ComputeJointClassifier(RamTaskL):
         self.pow_mat[encoding_mask] = normalize_sessions(self.pow_mat[encoding_mask], events[encoding_mask])
         self.pow_mat[~encoding_mask] = normalize_sessions(self.pow_mat[~encoding_mask], events[~encoding_mask])
 
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
+        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced',
                                                 solver='newton-cg')
 
         event_sessions = events.session

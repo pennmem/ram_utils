@@ -567,7 +567,7 @@ class ComputeEncodingClassifier(ComputeClassifier):
         self.pow_mat = self.get_pow_mat()
         self._normalize_sessions(events)
 
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto', solver='liblinear')
+        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced', solver='liblinear')
 
         event_sessions = events.session
         recalls = events.recalled

@@ -178,7 +178,7 @@ class ComputeClassifier_conf(ReportRamTask):
 
 
         # self.lr_classifier_conf = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto', solver='liblinear')
-        self.lr_classifier_conf = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto', solver='liblinear')
+        self.lr_classifier_conf = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced', solver='liblinear')
         # self.lr_classifier_conf = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced',solver='liblinear',fit_intercept=False)
 
         event_sessions = events.session    

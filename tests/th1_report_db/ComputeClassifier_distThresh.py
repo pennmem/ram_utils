@@ -121,7 +121,7 @@ class ComputeClassifier_distThresh(ReportRamTask):
         self.events = events
         self.pow_mat = normalize_sessions(self.get_passed_object('classify_pow_mat'), events)
         
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',solver='liblinear')        
+        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced',solver='liblinear')
 
         event_sessions = events.session    
         recalls = events.recalled

@@ -73,7 +73,7 @@ class ComputeAUCs(RamTask):
             self.pow_mat = normalize_sessions(self.get_passed_object('pow_mat'), events)
             recalls = events.correct
             for C in self.params.Cs:
-                self.lr_classifier = LogisticRegression(C=C, penalty=self.params.penalty_type, class_weight='auto', solver='liblinear')
+                self.lr_classifier = LogisticRegression(C=C, penalty=self.params.penalty_type, class_weight='balanced', solver='liblinear')
 
                 print 'Performing leave-one-session-out xval'
                 self.xval_output[C] = self.run_loso_xval(event_sessions, recalls)

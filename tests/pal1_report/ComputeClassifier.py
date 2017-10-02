@@ -77,7 +77,7 @@ class ComputeClassifier(ReportRamTask):
         #n0 = len(events) - n1
         #w0 = (2.0/n0) / ((1.0/n0)+(1.0/n1))
         #w1 = (2.0/n1) / ((1.0/n0)+(1.0/n1))
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto', solver='liblinear')
+        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced', solver='liblinear')
 
         event_sessions = events.session
         recalls = events.correct
