@@ -10,6 +10,11 @@ from random import shuffle
 from sklearn.externals import joblib
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
+try:
+    from typing import Dict
+except ImportError:
+    pass
+
 import hashlib
 import warnings
 
@@ -72,7 +77,10 @@ class ComputeClassifier(RamTask):
         self.params = params
         self.pow_mat = None
         self.lr_classifier = None
-        self.xval_output = dict()  # ModelOutput per session; xval_output[-1] is across all sessions
+
+        # ModelOutput per session; xval_output[-1] is across all sessions
+        self.xval_output = dict()  # type: Dict[ModelOutput]
+
         self.perm_AUCs = None
         self.pvalue = None
 

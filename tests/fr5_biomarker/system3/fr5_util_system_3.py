@@ -1,29 +1,44 @@
-# command line example:
-# python fr3_util_system_3.py --workspace-dir=/scratch/busygin/FR3_biomarkers --subject=R1145J_1 --n-channels=128 --anode=RD2 --anode-num=34 --cathode=RD3 --cathode-num=35 --pulse-frequency=200 --pulse-duration=500 --target-amplitude=1000
+"""command line example::
 
-print "ATTN: Wavelet params and interval length are hardcoded!! To change them, recompile"
-print "Windows binaries from https://github.com/busygin/morlet_for_sys2_biomarker"
-print "See https://github.com/busygin/morlet_for_sys2_biomarker/blob/master/README for detail."
+    python fr3_util_system_3.py --workspace-dir=/scratch/busygin/FR3_biomarkers --subject=R1145J_1 --n-channels=128 --anode=RD2 --anode-num=34 --cathode=RD3 --cathode-num=35 --pulse-frequency=200 --pulse-duration=500 --target-amplitude=1000
+"""
 
+from __future__ import print_function
 from os.path import *
 from system_3_utils.ram_tasks.CMLParserClosedLoop3 import CMLParserCloseLoop3
 
+print("ATTN: Wavelet params and interval length are hardcoded!! To change them, recompile")
+print("Windows binaries from https://github.com/busygin/morlet_for_sys2_biomarker")
+print("See https://github.com/busygin/morlet_for_sys2_biomarker/blob/master/README for detail.")
+
 cml_parser = CMLParserCloseLoop3(arg_count_threshold=1)
 
+# subject = 'R1337E'
+# cml_parser.arg('--workspace-dir', '/Volumes/rhino_root/scratch/leond/fr5_config/R1337E')
+# cml_parser.arg('--experiment', 'PS4_FR5')
+# cml_parser.arg('--mount-point', '/Users/leond')
+# cml_parser.arg('--subject', subject)
+# cml_parser.arg('--electrode-config-file', '/Volumes/rhino_root/scratch/system3_configs/ODIN_configs/%s/R1337E_20SEP17L0M0STIM.csv'%subject)
+# cml_parser.arg('--pulse-frequency', '200')
+# cml_parser.arg('--target-amplitude', '1.0')
+# cml_parser.arg('--anodes', '1Ld9', '9Ld9')
+# cml_parser.arg('--cathodes', '1Ld10', '9Ld10')
+# cml_parser.arg('--min-amplitudes', '0.25')
+# cml_parser.arg('--max-amplitudes', '1.0')
 
 subject = 'R1337E'
-cml_parser.arg('--workspace-dir', '/Volumes/rhino_root/scratch/leond/fr5_config/R1337E')
-cml_parser.arg('--experiment', 'PS4_FR5')
-cml_parser.arg('--mount-point', '/Users/leond')
+cml_parser.arg('--workspace-dir', expanduser('~/tmp/ramutils/{}'.format(subject)))
+cml_parser.arg('--experiment', 'FR5')
+cml_parser.arg('--mount-point', expanduser('~/mnt/rhino'))
 cml_parser.arg('--subject', subject)
-cml_parser.arg('--electrode-config-file', '/Volumes/rhino_root/scratch/system3_configs/ODIN_configs/%s/R1337E_20SEP17L0M0STIM.csv'%subject)
+cml_parser.arg('--electrode-config-file',
+               expanduser('~/mnt/rhino/scratch/system3_configs/ODIN_configs/{}/R1337E_20SEP17L0M0STIM.csv'.format(subject)))
 cml_parser.arg('--pulse-frequency', '200')
 cml_parser.arg('--target-amplitude', '1.0')
 cml_parser.arg('--anodes', '1Ld9', '9Ld9')
 cml_parser.arg('--cathodes', '1Ld10', '9Ld10')
 cml_parser.arg('--min-amplitudes', '0.25')
 cml_parser.arg('--max-amplitudes', '1.0')
-
 
 args = cml_parser.parse()
 
