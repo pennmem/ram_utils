@@ -72,8 +72,8 @@ class ModelOutput(object):
 
 
 class ComputeClassifier(RamTask):
-    def __init__(self, params, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+    def __init__(self, params, mark_as_completed=True, force_rerun=False):
+        RamTask.__init__(self, mark_as_completed, force_rerun)
         self.params = params
         self.pow_mat = None
         self.lr_classifier = None
@@ -124,11 +124,16 @@ class ComputeClassifier(RamTask):
         return auc
 
     def get_pow_mat(self):
+        """Filters the whole power matrix by removing excluded pairs.
+
+        This should really be defined as a property...
+
+        """
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
         reduced_pairs = self.get_passed_object('reduced_pairs')
         to_include = np.array([bp in reduced_pairs for bp in bipolar_pairs])
-        pow_mat =  self.get_passed_object('pow_mat')
-        pow_mat = pow_mat.reshape((len(pow_mat),-1,len(self.params.freqs)))[:,to_include,:].reshape((len(pow_mat),-1))
+        pow_mat = self.get_passed_object('pow_mat')
+        pow_mat = pow_mat.reshape((len(pow_mat), -1, len(self.params.freqs)))[:,to_include,:].reshape((len(pow_mat),-1))
         return pow_mat
 
     def pass_objects(self):
@@ -137,6 +142,7 @@ class ComputeClassifier(RamTask):
         self.pass_object('xval_output', self.xval_output)
         self.pass_object('perm_AUCs', self.perm_AUCs)
         self.pass_object('pvalue', self.pvalue)
+        self.pass_object('reduced_pow_mat', self.pow_mat)
 
         classifier_path = self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl')
         joblib.dump(self.lr_classifier, classifier_path)
@@ -144,10 +150,9 @@ class ComputeClassifier(RamTask):
         joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace(subject + '-xval_output.pkl'))
         joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace(subject + '-perm_AUCs.pkl'))
         joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject + '-pvalue.pkl'))
+        joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-reduced_pow_mat.pkl'))
 
         self.pass_object('classifier_path', classifier_path)
-
-
 
     def run(self):
 
