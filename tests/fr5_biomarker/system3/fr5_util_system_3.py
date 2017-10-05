@@ -174,25 +174,21 @@ class ReportPipeline(RamPipeline):
         self.set_workspace_dir(workspace_dir)
         self.args = args
 
+mark_as_completed = True
 
 report_pipeline = ReportPipeline(subject=args.subject,
                                  workspace_dir=args.workspace_dir, mount_point=args.mount_point, args=args)
-
-report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
-
-report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
-
-report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
-
-report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=False))
+report_pipeline.add_task(FREventPreparation(mark_as_completed=mark_as_completed))
+report_pipeline.add_task(MontagePreparation(mark_as_completed=mark_as_completed, force_rerun=True))
+report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=mark_as_completed))
+report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=mark_as_completed))
 
 if args.encoding_only:
-    report_pipeline.add_task(ComputeEncodingClassifier(params=params,mark_as_completed=False))
+    report_pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=mark_as_completed))
 else:
-    report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
+    report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=mark_as_completed, force_rerun=True))
 
-report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=False))
-
+report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=mark_as_completed))
 report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
 
 # starts processing pipeline

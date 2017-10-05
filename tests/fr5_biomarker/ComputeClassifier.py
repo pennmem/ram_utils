@@ -227,8 +227,6 @@ class ComputeClassifier(RamTask):
 
         self.pass_objects()
 
-
-
     def run_loso_xval(self, event_sessions, recalls, permuted=False,samples_weights=None, events=None):
         """
         Note samples_weights is not really used for computations it is used to only check if it is None i.e. as a flag
@@ -251,13 +249,11 @@ class ComputeClassifier(RamTask):
         auc_retrieval = np.empty(sessions.shape[0], dtype=np.float)
         auc_both = np.empty(sessions.shape[0], dtype=np.float)
 
-
         for sess_idx, sess in enumerate(sessions):
             insample_mask = (event_sessions != sess)
             insample_pow_mat = self.pow_mat[insample_mask]
             insample_recalls = recalls[insample_mask]
             insample_samples_weights = samples_weights[insample_mask]
-
 
             insample_enc_mask = insample_mask & (events.type == 'WORD')
             insample_retrieval_mask = insample_mask & ((events.type == 'REC_BASE') | (events.type == 'REC_WORD'))
@@ -281,10 +277,10 @@ class ComputeClassifier(RamTask):
             # insample_samples_weights = np.ones(n_enc_0 + n_enc_1 + n_ret_0 + n_ret_1, dtype=np.float)
             insample_samples_weights = np.ones(events.shape[0], dtype=np.float)
 
-            insample_samples_weights [insample_enc_mask & (events.recalled == 0)] = n_vec[0]
-            insample_samples_weights [insample_enc_mask & (events.recalled == 1)] = n_vec[1]
-            insample_samples_weights [insample_retrieval_mask & (events.type == 'REC_BASE')] = n_vec[2]
-            insample_samples_weights [insample_retrieval_mask & (events.type == 'REC_WORD')] = n_vec[3]
+            insample_samples_weights[insample_enc_mask & (events.recalled == 0)] = n_vec[0]
+            insample_samples_weights[insample_enc_mask & (events.recalled == 1)] = n_vec[1]
+            insample_samples_weights[insample_retrieval_mask & (events.type == 'REC_BASE')] = n_vec[2]
+            insample_samples_weights[insample_retrieval_mask & (events.type == 'REC_WORD')] = n_vec[3]
 
             insample_samples_weights = insample_samples_weights[insample_mask]
             # insample_samples_weights /= insample_samples_weights.mean()
@@ -292,29 +288,12 @@ class ComputeClassifier(RamTask):
 
             outsample_both_mask = (events.session == sess)
 
-
-
-
-
-    # % even weights by class balance
-    # n_vec = [1/n_enc_pos 1/n_enc_neg 1/n_rec_pos 1/n_rec_neg];
-    # mean_tmp = mean(n_vec);
-    # n_vec = n_vec/mean_tmp;
-    #
-    # % add scalign by E
-    # n_vec(1:2) = n_vec(1:2)*E;
-    # mean_tmp = mean(n_vec);
-    # n_vec = n_vec/mean_tmp;
-
-
-
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 if samples_weights is not None:
                     self.lr_classifier.fit(insample_pow_mat, insample_recalls,insample_samples_weights)
                 else:
                     self.lr_classifier.fit(insample_pow_mat, insample_recalls)
-
 
             outsample_mask = ~insample_mask
             outsample_pow_mat = self.pow_mat[outsample_mask]
@@ -326,7 +305,6 @@ class ComputeClassifier(RamTask):
                 self.xval_output[sess].compute_roc()
                 self.xval_output[sess].compute_tercile_stats()
             probs[outsample_mask] = outsample_probs
-
 
             # import tables
             #
@@ -344,7 +322,6 @@ class ComputeClassifier(RamTask):
             # h5file.close()
             #
 
-
             if events is not None:
 
                 outsample_encoding_mask = (events.session == sess) & (events.type == 'WORD')
@@ -361,7 +338,6 @@ class ComputeClassifier(RamTask):
                 auc_both[sess_idx] = self.get_auc(
                     classifier=self.lr_classifier, features=self.pow_mat, recalls=recalls, mask=outsample_both_mask)
 
-
                 # outsample_encoding_recalls = recalls[outsample_encoding_mask]
                 # outsample_retrieval_recalls = recalls[outsample_retrieval_mask]
                 #
@@ -374,7 +350,6 @@ class ComputeClassifier(RamTask):
                 #
                 # , outsample_encoding_auc
                 # print 'outsample_retrieval_auc= ', outsample_retrieval_auc
-
 
         if not permuted:
             self.xval_output[-1] = ModelOutput(recalls[events.type=='WORD'], probs[events.type=='WORD'])

@@ -48,9 +48,6 @@ def atlas_location_matlab(tag, atlas_loc, comments):
         return '--'
 
 class MontagePreparation(RamTask):
-    def __init__(self, mark_as_completed=True):
-        super(MontagePreparation,self).__init__(mark_as_completed)
-
     @property
     def bipolar_pairs_path(self):
         subject = self.pipeline.subject

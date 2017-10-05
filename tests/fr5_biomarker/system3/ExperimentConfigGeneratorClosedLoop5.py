@@ -1,20 +1,21 @@
-from RamPipeline import *
-
-import TextTemplateUtils
 import os
+import json
 import zipfile
-from os.path import  *
-import numpy as np
-from scipy.io import savemat
-import datetime
-from subprocess import call
-from tornado.template import Template
+from os.path import *
 from glob import glob
 import shutil
 import pathlib
-from itertools import cycle
+from itertools import chain, cycle
+
+import numpy as np
+from sklearn.externals import joblib
+
+from tornado.template import Template
+
+from classiflib import ClassifierContainer, dtypes
+
+from RamPipeline import *
 from system_3_utils import ElectrodeConfigSystem3
-from itertools import chain
 
 CLASSIFIER_VERSION = '1.0.1'
 
@@ -119,17 +120,14 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
         # making sure we get the path even if the actual directory is not created
         project_dir = self.get_path_to_resource_in_workspace(project_dir_corename)
 
-
         config_files_dir = self.create_dir_in_workspace(abspath(join(project_dir,'config_files')))
         config_files_dir = self.get_path_to_resource_in_workspace(project_dir_corename+'/config_files')
-
 
         experiment_config_template_filename = join(dirname(__file__),'templates','{}_experiment_config.json.tpl'.format(
             'PS4_FR5' if 'PS4' in experiment else 'FR5'))
         experiment_config_template = Template(open(experiment_config_template_filename ,'r').read())
 
         electrode_config_file_core, ext = splitext(electrode_config_file)
-
 
         experiment_config_content = experiment_config_template.generate(
             subject=subject,
@@ -150,8 +148,43 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
         experiment_config_file.write(experiment_config_content)
         experiment_config_file.close()
 
+        # 8<---
+        # FIXME: move to separate function
+
+        with open(bipolar_pairs_path, 'r') as f:
+            all_pairs = json.load(f)[subject]['pairs']
+
+        with open(excluded_pairs_path, 'r') as f:
+            excluded_pairs = json.load(f)[subject]['pairs']
+
+        used_pairs = {
+            key: value for key, value in all_pairs.items()
+            if key not in excluded_pairs
+        }
+
+        pairs = np.rec.fromrecords([
+            (item['channel_1'], item['channel_2'],
+             pair.split('-')[0], pair.split('-')[1])
+            for pair, item in used_pairs.items()
+        ], dtype=dtypes.pairs)
+
+        classifier = joblib.load(classifier_path)
+        container = ClassifierContainer(
+            classifier=classifier,
+            pairs=pairs,
+            powers=self.get_passed_object('reduced_pow_mat'),
+            # frequencies=None,
+            classifier_info={
+                'auc': xval_output[-1].auc,
+                'subject': subject
+            }
+        )
+        container.save(join(config_files_dir, "{}-lr_classifier.h5".format(subject)))
+
+        # --->8
+
         # copying classifier pickle file
-        self.copy_pickle_resource_to_target_dir(classifier_path, config_files_dir)
+        # self.copy_pickle_resource_to_target_dir(classifier_path, config_files_dir)
 
         # copy pairs.json
         self.copy_resource_to_target_dir(bipolar_pairs_path,config_files_dir)
@@ -189,4 +222,3 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
         zipf.close()
 
         print("Created experiment_config zip file: \n%s"%zip_filename)
-
