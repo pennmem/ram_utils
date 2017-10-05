@@ -22,7 +22,7 @@ class RamTask(object):
         self.workspace_dir = None
         self.file_resources_to_copy = defaultdict()
         self.file_resources_to_move = defaultdict()  # {file_resource:dst_dir}
-        self.mark_as_completed = True
+        self.mark_as_completed = mark_as_completed
         self.__force_rerun = force_rerun
         self.__name = None
 
