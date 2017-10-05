@@ -9,6 +9,7 @@ dependencies:
 #- fontconfig=2.11.1=6
 #- freetype=2.5.5=1
 #- glib=2.43.0=1
+- h5py
 - harfbuzz=0.9.39=1
 #- libffi=3.2.1=0
 #- libgfortran=3.0.0=1
