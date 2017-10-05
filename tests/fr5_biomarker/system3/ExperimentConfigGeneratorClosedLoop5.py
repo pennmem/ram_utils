@@ -74,6 +74,38 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
 
                 ziph.write(os.path.join(root, file), relative_path )
 
+    def save_classifier(self, subject, bipolar_pairs_path, excluded_pairs_path,
+                        classifier_path, config_files_dir, xval_output):
+        with open(bipolar_pairs_path, 'r') as f:
+            all_pairs = json.load(f)[subject]['pairs']
+
+        with open(excluded_pairs_path, 'r') as f:
+            excluded_pairs = json.load(f)[subject]['pairs']
+
+        used_pairs = {
+            key: value for key, value in all_pairs.items()
+            if key not in excluded_pairs
+        }
+
+        pairs = np.rec.fromrecords([
+            (item['channel_1'], item['channel_2'],
+             pair.split('-')[0], pair.split('-')[1])
+            for pair, item in used_pairs.items()
+        ], dtype=dtypes.pairs).sort(order='channel_1')
+
+        classifier = joblib.load(classifier_path)
+        container = ClassifierContainer(
+            classifier=classifier,
+            pairs=pairs,
+            powers=self.get_passed_object('reduced_pow_mat'),
+            # frequencies=None,
+            classifier_info={
+                'auc': xval_output[-1].auc,
+                'subject': subject
+            }
+        )
+        container.save(join(config_files_dir, "{}-lr_classifier.h5".format(subject)))
+
     def run(self):
         class ConfigError(Exception):
             pass
@@ -148,40 +180,8 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
         experiment_config_file.write(experiment_config_content)
         experiment_config_file.close()
 
-        # 8<---
-        # FIXME: move to separate function
-
-        with open(bipolar_pairs_path, 'r') as f:
-            all_pairs = json.load(f)[subject]['pairs']
-
-        with open(excluded_pairs_path, 'r') as f:
-            excluded_pairs = json.load(f)[subject]['pairs']
-
-        used_pairs = {
-            key: value for key, value in all_pairs.items()
-            if key not in excluded_pairs
-        }
-
-        pairs = np.rec.fromrecords([
-            (item['channel_1'], item['channel_2'],
-             pair.split('-')[0], pair.split('-')[1])
-            for pair, item in used_pairs.items()
-        ], dtype=dtypes.pairs)
-
-        classifier = joblib.load(classifier_path)
-        container = ClassifierContainer(
-            classifier=classifier,
-            pairs=pairs,
-            powers=self.get_passed_object('reduced_pow_mat'),
-            # frequencies=None,
-            classifier_info={
-                'auc': xval_output[-1].auc,
-                'subject': subject
-            }
-        )
-        container.save(join(config_files_dir, "{}-lr_classifier.h5".format(subject)))
-
-        # --->8
+        self.save_classifier(subject, bipolar_pairs_path, excluded_pairs_path,
+                             classifier_path, config_files_dir, xval_output)
 
         # copying classifier pickle file
         # self.copy_pickle_resource_to_target_dir(classifier_path, config_files_dir)
