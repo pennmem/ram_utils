@@ -51,6 +51,20 @@ class MontagePreparation(RamTask):
     def __init__(self, mark_as_completed=True):
         super(MontagePreparation,self).__init__(mark_as_completed)
 
+    @property
+    def bipolar_pairs_path(self):
+        subject = self.pipeline.subject
+
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp) == 1 else int(tmp[1])
+
+        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
+        bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
+        bp_path = os.path.join(self.pipeline.mount_point, next(iter(bp_paths)))
+
+        return bp_path
+
     def input_hashsum(self):
         subject = self.pipeline.subject
         tmp = subject.split('_')
@@ -69,37 +83,29 @@ class MontagePreparation(RamTask):
 
     def restore(self):
         subject = self.pipeline.subject
-
         monopolar_channels = joblib.load(self.get_path_to_resource_in_workspace(subject + '-monopolar_channels.pkl'))
         bipolar_pairs = joblib.load(self.get_path_to_resource_in_workspace(subject + '-bipolar_pairs.pkl'))
         bp_tal_structs = pd.read_pickle(self.get_path_to_resource_in_workspace(subject + '-bp_tal_structs.pkl'))
         bp_tal_stim_only_structs = pd.read_pickle(self.get_path_to_resource_in_workspace(subject + '-bp_tal_stim_only_structs.pkl'))
         reduced_pairs = joblib.load(self.get_path_to_resource_in_workspace(subject+'-reduced_pairs.pkl'))
-
+        bp_path = self.bipolar_pairs_path
 
         self.pass_object('reduced_pairs',reduced_pairs)
         self.pass_object('monopolar_channels', monopolar_channels)
         self.pass_object('bipolar_pairs', bipolar_pairs)
         self.pass_object('bp_tal_structs', bp_tal_structs)
         self.pass_object('bp_tal_stim_only_structs', bp_tal_stim_only_structs)
+        self.pass_object('bipolar_pairs_path', bp_path)
 
     def run(self):
         subject = self.pipeline.subject
-        tmp = subject.split('_')
-        subj_code = tmp[0]
-        montage = 0 if len(tmp)==1 else int(tmp[1])
 
         events = self.get_passed_object('FR_events')
 
-        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
-        bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
-
-        bp_path = os.path.join(self.pipeline.mount_point, next(iter(bp_paths)))
-        self.pass_object('bipolar_pairs_path', bp_path)
-
+        bp_path = self.bipolar_pairs_path
         f_pairs = open(bp_path, 'r')
         bipolar_dict = json.load(f_pairs)[subject]['pairs']
-        self.pass_object('bipolar_dict',bipolar_dict)
+        self.pass_object('bipolar_dict', bipolar_dict)
         f_pairs.close()
         bipolar_data_stim_only = {bp_tag:bp_data for bp_tag,bp_data in bipolar_dict.iteritems() if bp_data['is_stim_only']}
         bipolar_data = {bp_tag:bp_data for bp_tag,bp_data in bipolar_dict.iteritems() if not bp_data['is_stim_only']}
@@ -149,13 +155,14 @@ class MontagePreparation(RamTask):
         self.pass_object('bipolar_pairs', bipolar_pairs)
         self.pass_object('bp_tal_structs', bp_tal_structs)
         self.pass_object('bp_tal_stim_only_structs', bp_tal_stim_only_structs)
-        self.pass_object('excluded_pairs_path',self.get_path_to_resource_in_workspace('excluded_pairs.json'))
+        self.pass_object('excluded_pairs_path', self.get_path_to_resource_in_workspace('excluded_pairs.json'))
+        self.pass_object('bipolar_pairs_path', self.bipolar_pairs_path)
 
         # print '%d bipolar pairs'%len(bipolar_pairs)
         # print '%d non-stim-adjacent pairs'%len(reduced_pairs)
         # raw_input('continue')
 
-        joblib.dump(reduced_pairs,self.get_path_to_resource_in_workspace(subject+'-reduced_pairs.pkl'))
+        joblib.dump(reduced_pairs, self.get_path_to_resource_in_workspace(subject+'-reduced_pairs.pkl'))
         joblib.dump(monopolar_channels, self.get_path_to_resource_in_workspace(subject + '-monopolar_channels.pkl'))
         joblib.dump(bipolar_pairs, self.get_path_to_resource_in_workspace(subject + '-bipolar_pairs.pkl'))
         bp_tal_structs.to_pickle(self.get_path_to_resource_in_workspace(subject + '-bp_tal_structs.pkl'))
