@@ -22,7 +22,7 @@ CLASSIFIER_VERSION = '1.0.1'
 class ExperimentConfigGeneratorClosedLoop5(RamTask):
     def __init__(self, params, mark_as_completed=False):
         RamTask.__init__(self, mark_as_completed)
-
+        self.params = params
 
     def copy_resource_to_target_dir(self, resource_filename, target_dir):
         """
@@ -167,13 +167,19 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
         ], dtype=dtypes.pairs)
         pairs.sort(order='contact1')
 
+        events = self.get_passed_object('FR_events')
+
+        # FIXME: this is simplified from ComputeClassifier, but should really be more centralized instead of repeating
+        sample_weight = np.ones(events.shape[0], dtype=np.float)
+        sample_weight[events.type == 'WORD'] = self.params.encoding_samples_weight
+
         classifier = joblib.load(classifier_path)
         container = ClassifierContainer(
             classifier=classifier,
             pairs=pairs,
-            powers=joblib.load(self.get_path_to_resource_in_workspace(subject + '-reduced_pow_mat.pkl')),
-            # powers=self.get_passed_object('reduced_pow_mat'),
-            # frequencies=None,
+            features=joblib.load(self.get_path_to_resource_in_workspace(subject + '-reduced_pow_mat.pkl')),
+            events=events,
+            sample_weight=sample_weight,
             classifier_info={
                 'auc': xval_output[-1].auc,
                 'subject': subject
