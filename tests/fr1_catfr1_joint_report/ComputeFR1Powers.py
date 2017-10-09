@@ -119,7 +119,7 @@ class ComputeFR1Powers(ReportRamTask):
             events = np.concatenate([encoding_events, retrieval_events]).view(np.recarray)
             events.sort(order=['session', 'list', 'mstime'])
             encoding_mask = events.type == 'WORD'
-            self.pow_mat = np.zeros((len(events), len(bipolar_pairs) * len(params.freqs)))
+            self.pow_mat = np.zeros((len(events), encoding_pow_mat.shape[-1]))
             self.pow_mat[encoding_mask] = encoding_pow_mat
             self.pow_mat[~encoding_mask] = retrieval_pow_mat
 
