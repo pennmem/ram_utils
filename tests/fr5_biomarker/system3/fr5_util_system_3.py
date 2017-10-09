@@ -28,7 +28,7 @@ cml_parser = CMLParserCloseLoop3(arg_count_threshold=1)
 
 subject = 'R1337E'
 cml_parser.arg('--workspace-dir', expanduser('~/tmp/ramutils/{}'.format(subject)))
-cml_parser.arg('--experiment', 'FR5')
+cml_parser.arg('--experiment', 'PS4_FR5')
 cml_parser.arg('--mount-point', expanduser('~/mnt/rhino'))
 cml_parser.arg('--subject', subject)
 cml_parser.arg('--electrode-config-file',
