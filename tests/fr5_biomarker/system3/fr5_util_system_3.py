@@ -186,7 +186,7 @@ report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=mark_a
 if args.encoding_only:
     report_pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=mark_as_completed))
 else:
-    report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=mark_as_completed, force_rerun=True))
+    report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=mark_as_completed, force_rerun=False))
 
 report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=mark_as_completed))
 report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))

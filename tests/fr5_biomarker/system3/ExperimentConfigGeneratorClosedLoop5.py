@@ -129,15 +129,16 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
 
         electrode_config_file_core, ext = splitext(electrode_config_file)
 
+        # FIXME: more intelligently set classifier filename
         experiment_config_content = experiment_config_template.generate(
             subject=subject,
             experiment=experiment,
-            classifier_file='config_files/%s'%basename(classifier_path),
+            classifier_file='config_files/%s' % basename(classifier_path.replace('.pkl', '.zip')),
             classifier_version=CLASSIFIER_VERSION,
             stim_params_dict=stim_params_dict,
-            electrode_config_file='config_files/%s'%basename(electrode_config_file_core+'.bin'),
-            montage_file='config_files/%s'%basename(bipolar_pairs_path),
-            excluded_montage_file='config_files/%s'%basename(excluded_pairs_path),
+            electrode_config_file='config_files/%s' % basename(electrode_config_file_core+'.bin'),
+            montage_file='config_files/%s' % basename(bipolar_pairs_path),
+            excluded_montage_file='config_files/%s' % basename(excluded_pairs_path),
             biomarker_threshold=0.5,
             fr5_stim_channel=fr5_stim_channel,
             auc_all_electrodes = xval_full[-1].auc,
@@ -170,14 +171,18 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
         container = ClassifierContainer(
             classifier=classifier,
             pairs=pairs,
-            powers=self.get_passed_object('reduced_pow_mat'),
+            powers=joblib.load(self.get_path_to_resource_in_workspace(subject + '-reduced_pow_mat.pkl')),
+            # powers=self.get_passed_object('reduced_pow_mat'),
             # frequencies=None,
             classifier_info={
                 'auc': xval_output[-1].auc,
                 'subject': subject
             }
         )
-        container.save(join(config_files_dir, "{}-lr_classifier.h5".format(subject)))
+        container.save(
+            join(config_files_dir, "{}-lr_classifier.zip".format(subject)),
+            overwrite=True
+        )
 
         # copying classifier pickle file
         # self.copy_pickle_resource_to_target_dir(classifier_path, config_files_dir)
