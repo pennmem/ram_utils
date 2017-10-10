@@ -104,7 +104,7 @@ class ComputeFRPowers(RamTask):
         is_encoding_event = events.type=='WORD'
         self.pass_object('FR1_events',events)
 
-        self.pow_mat = np.zeros((len(events),len(bipolar_pairs)*len(params.freqs)))
+        self.pow_mat = np.zeros((len(events),encoding_pow_mat.shape[-1]))
         self.pow_mat[is_encoding_event,...] = encoding_pow_mat
         self.pow_mat[~is_encoding_event,...] = retrieval_pow_mat
 

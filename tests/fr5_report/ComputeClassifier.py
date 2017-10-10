@@ -251,9 +251,15 @@ class ComputeClassifier(RamTask):
             try:
                 for sess in event_sessions:
                     sel = (event_sessions == sess)
-                    sess_permuted_recalls = permuted_recalls[sel]
-                    shuffle(sess_permuted_recalls)
-                    permuted_recalls[sel] = sess_permuted_recalls
+                    if events is not None:
+                        for phase_sel in [sel & (events.type=='WORD'),sel & (events.type != 'WORD')]:
+                            sess_permuted_recalls = permuted_recalls[phase_sel]
+                            shuffle(sess_permuted_recalls)
+                            permuted_recalls[phase_sel] = sess_permuted_recalls
+                    else:
+                        sess_permuted_recalls = permuted_recalls[sel]
+                        shuffle(sess_permuted_recalls)
+                        permuted_recalls[sel] = sess_permuted_recalls
                 probs = self.run_loso_xval(event_sessions, permuted_recalls, permuted=True,samples_weights=samples_weights,events=events)
                 AUCs[i] = roc_auc_score(recalls, probs)
                 print 'AUC =', AUCs[i]
@@ -450,6 +456,7 @@ class ComputeFullClassifier(ComputeClassifier):
         joblib.dump(self.lr_classifier,classifier_path)
         joblib.dump(self.xval_output,self.get_path_to_resource_in_workspace(subject+'-xval_output_all_electrodes.pkl'))
         self.pass_object('full_classifier_path',classifier_path)
+        self.pass_object('perm_AUCs_all_electrodes',self.perm_AUCs)
         self.pass_object('xval_output_all_electrodes',self.xval_output)
         joblib.dump(self.pvalue,self.get_path_to_resource_in_workspace(subject+'-pvalue_full.pkl'))
         self.pass_object('pvalue_full',self.pvalue)
