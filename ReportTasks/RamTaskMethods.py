@@ -160,7 +160,11 @@ def compute_powers(events, monopolar_channels, bipolar_pairs, start_time, end_ti
         # recarray with correct dtype
         bipolar_pairs = np.array(list(bipolar_pairs), dtype=[('ch0', 'S3'), ('ch1', 'S3')]).view(np.recarray)
 
-
+    # since it's already not guaranteed that there will be a time series for each event
+    n_events  = len(events)
+    events = events[events['eegoffset']>=0]
+    if n_events != len(events):
+        print('Removed %s events with negative offsets'%(n_events-len(events)))
     sessions = np.unique(events.session)
     pow_mat = None
     tic = time.time()
