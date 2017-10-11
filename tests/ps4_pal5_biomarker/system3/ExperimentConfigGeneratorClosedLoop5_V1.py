@@ -90,7 +90,7 @@ class ExperimentConfigGeneratorClosedLoop5_V1(RamTask):
         stim_amplitude = self.pipeline.args.target_amplitude
         bipolar_pairs_path = self.get_passed_object('bipolar_pairs_path')
 
-        classifier_path = self.get_passed_object('classifier_path')
+        classifier_path = self.get_passed_object(('encoding_' if self.pipeline.args.encoding else '')+'classifier_path')
 
         if self.pipeline.args.classifier_type_to_output == 'pal':
             try:
