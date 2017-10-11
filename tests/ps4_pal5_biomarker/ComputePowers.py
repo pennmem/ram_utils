@@ -12,6 +12,10 @@ from ptsa.data.readers.IndexReader import JsonIndexReader
 
 import hashlib
 import warnings
+from ReportTasks.RamTaskMethods import get_reduced_pairs,get_excluded_dict
+import json
+
+
 
 try:
     from ReportTasks.RamTaskMethods import compute_powers
@@ -86,6 +90,7 @@ class ComputePowers(RamTask):
             subject + '-combined_pow_mat_%d_%d.pkl' % (freq_min, freq_max)))
 
         self.pass_object('pow_mat', self.pow_mat)
+        self.bipolar_pairs = None
 
     def run(self):
 
@@ -135,7 +140,7 @@ class ComputePowers(RamTask):
                                                                      bipolar_pairs,
                                                                      params.pal1_start_time, params.pal1_end_time,
                                                                      params.pal1_buf,
-                                                                     params.freqs, params.log_powers)
+                                                                     params.freqs, params.log_powers,ComputePowers=self)
 
         print 'Computing powers during PAL retrieval'
         retrieval_pal1_pow_mat, retrieval_pal1_events = compute_powers(evs[pal1_retrieval_mask], monopolar_channels,
@@ -143,7 +148,23 @@ class ComputePowers(RamTask):
                                                                        params.pal1_retrieval_start_time,
                                                                        params.pal1_retrieval_end_time,
                                                                        params.pal1_retrieval_buf,
-                                                                       params.freqs, params.log_powers)
+                                                                       params.freqs, params.log_powers,ComputePowers=self)
+
+        if self.bipolar_pairs is not None:
+            # recording was in bipolar mode; re-compute excluded pairs
+            reduced_pairs = get_reduced_pairs(self,self.bipolar_pairs)
+            config_pairs_dict  = self.get_passed_object('config_pairs_dict')[subject]['pairs']
+            excluded_pairs = get_excluded_dict(config_pairs_dict, reduced_pairs)
+            joblib.dump(reduced_pairs,self.get_path_to_resource_in_workspace(subject+'-reduced_pairs.pkl'))
+            with open(self.get_path_to_resource_in_workspace('excluded_pairs.json'),'w') as excluded_file:
+                json.dump({subject:{'pairs':excluded_pairs}},excluded_file,indent=2)
+            self.pass_object('reduced_pairs',reduced_pairs)
+            # replace bipolar_pairs_path with config_pairs_path
+            joblib.dump(self.bipolar_pairs,self.get_path_to_resource_in_workspace(subject+'-bipolar_pairs.pkl'))
+            self.pass_object('bipolar_pairs_path',self.get_passed_object('config_pairs_path'))
+            self.pass_object('bipolar_pairs',self.bipolar_pairs)
+
+        
 
         # in case compute powers removes some of the BAD events (e.g. offset )
         if fr_session_present:
@@ -172,10 +193,6 @@ class ComputePowers(RamTask):
 
         pal1_encoding_mask = (evs.type == 'WORD') & (evs.exp_name == 'PAL1')
         pal1_retrieval_mask = (evs.type == 'REC_EVENT') & (evs.exp_name == 'PAL1')
-
-
-
-        self.pow_mat = np.zeros((len(evs), len(bipolar_pairs) * len(params.freqs)))
 
 
         if fr_session_present:
