@@ -155,8 +155,8 @@ if __name__ == '__main__':
         #
         report_pipeline.add_task(ComputePowers(params=params, mark_as_completed=(True & args_obj.allow_fast_rerun)))
 
-        # report_pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=False))
-        #
+        report_pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=False))
+
         report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
 
         report_pipeline.add_task(ComputePAL1Classifier(params=params, mark_as_completed=False))
