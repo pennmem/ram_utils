@@ -180,8 +180,8 @@ class ElectrodeLabelValidator(Validator):
 
 class YesNoValidator(Validator):
     def validate(self, document):
-        if re.match(r'yes|y',document.text.lower()) is None or re.match(r'no|n',document.text.lower()) is None:
-            raise ValidationError
+        if 'yes' not in document.text.lower() or  'no' not in document.text.lower():
+            raise ValidationError(message='Please type \'yes\' or \'no\'',cursor_position=len(document.text))
 
 
 
@@ -270,7 +270,7 @@ def parse_command_line():
 
     encoding = prompt('Use encoding classifier? (yes/no)',
                       validator=YesNoValidator())
-    args_obj.encoding = bool(re.match('yes|y',encoding.lower()))
+    args_obj.encoding = 'yes' in encoding.lower()
 
 
     ExperimentValidator(experiment_list)
