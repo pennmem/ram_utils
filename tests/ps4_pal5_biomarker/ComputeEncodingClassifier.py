@@ -295,7 +295,7 @@ class ComputeEncodingClassifier(RamTask):
         joblib.dump(self.lr_classifier, classifier_path)
         joblib.dump(self.xval_output,
                     self.get_path_to_resource_in_workspace(subject + '-xval_output_encoding.pkl'))
-        self.pass_object('encoding_encoding_classifier_path', classifier_path)
+        self.pass_object('encoding_classifier_path', classifier_path)
         self.pass_object('xval_encoding_output', self.xval_output)
 
     # def compare_AUCs(self):
