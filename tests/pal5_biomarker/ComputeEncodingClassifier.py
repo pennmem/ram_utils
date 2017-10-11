@@ -117,9 +117,9 @@ class ComputeEncodingClassifier(RamTask):
         for fname in bp_paths:
             with open(fname, 'rb') as f: hash_md5.update(f.read())
 
-        # fr1_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR1')))
-        # for fname in fr1_event_files:
-        #     with open(fname,'rb') as f: hash_md5.update(f.read())
+        pal1_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='PAL1')))
+        for fname in pal1_event_files:
+            with open(fname,'rb') as f: hash_md5.update(f.read())
         #
         # catfr1_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='catFR1')))
         # for fname in catfr1_event_files:
@@ -295,7 +295,7 @@ class ComputeEncodingClassifier(RamTask):
         joblib.dump(self.lr_classifier, classifier_path)
         joblib.dump(self.xval_output,
                     self.get_path_to_resource_in_workspace(subject + '-xval_output_encoding.pkl'))
-        self.pass_object('encoding_encoding_classifier_path', classifier_path)
+        self.pass_object('encoding_classifier_path', classifier_path)
         self.pass_object('xval_encoding_output', self.xval_output)
 
     # def compare_AUCs(self):
