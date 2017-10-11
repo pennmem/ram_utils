@@ -178,18 +178,13 @@ class ElectrodeLabelValidator(Validator):
         except ValueError:
             pass
 
-class YesNoValidator(Validator):
-    def validate(self, document):
-        if 'yes' not in document.text.lower() or  'no' not in document.text.lower():
-            raise ValidationError(message='Please type \'yes\' or \'no\'',cursor_position=len(document.text))
-
-
 
 def parse_command_line():
     """
     Parses command line using prompt_toolkit
     :return: Instance of Args class
     """
+
     num_stim_pairs = 2
 
     path_completer = PathCompleter()
@@ -268,9 +263,9 @@ def parse_command_line():
                                                 validator=ExperimentValidator(['combined','pal']),
                                                 default='combined')
 
-    encoding = prompt('Use encoding classifier? (yes/no)',
-                      validator=YesNoValidator())
+    encoding = prompt('Use encoding classifier? (yes/no) : ',)
     args_obj.encoding = 'yes' in encoding.lower()
+    print args_obj.encoding
 
 
     ExperimentValidator(experiment_list)

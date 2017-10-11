@@ -236,9 +236,8 @@ def parse_command_line():
 
         args_obj.max_amplitudes.append(max_ampl)
 
-    encoding = prompt('Use encoding classifier? (yes/no)',
-                      validator=YesNoValidator())
-    args_obj.encoding = bool(re.match('yes|y',encoding.lower()))
+    encoding = prompt('Use encoding classifier? (yes/no)',)
+    args_obj.encoding = 'yes' in encoding.lower()
 
     return args_obj
 
