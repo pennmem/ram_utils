@@ -6,6 +6,7 @@ from prompt_toolkit.token import Token
 from prompt_toolkit.contrib.completers import WordCompleter
 from prompt_toolkit.validation import Validator, ValidationError
 from os.path import *
+import re
 
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory, AutoSuggest, Suggestion
 
@@ -177,6 +178,12 @@ class ElectrodeLabelValidator(Validator):
         except ValueError:
             pass
 
+class YesNoValidator(Validator):
+    def validate(self, document):
+        if re.match(r'yes|y',document.text.lower()) is None or re.match(r'no|n',document.text.lower()) is None:
+            raise ValidationError
+
+
 
 def parse_command_line():
     """
@@ -260,6 +267,11 @@ def parse_command_line():
     args_obj.classifier_type_to_output = prompt('Classifier Type To Output: ', completer=WordCompleter(['combined','pal']),
                                                 validator=ExperimentValidator(['combined','pal']),
                                                 default='combined')
+
+    encoding = prompt('Use encoding classifier? (yes/no)',
+                      validator=YesNoValidator())
+    args_obj.encoding = bool(re.match('yes|y',encoding.lower()))
+
 
     ExperimentValidator(experiment_list)
 
