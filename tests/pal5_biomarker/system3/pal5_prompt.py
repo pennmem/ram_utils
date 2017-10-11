@@ -238,7 +238,7 @@ def parse_command_line():
 
     encoding = prompt('Use encoding classifier? (yes/no)',
                       validator=YesNoValidator())
-    args_obj.encoding = encoding
+    args_obj.encoding = bool(re.match('yes|y',encoding.lower()))
 
     return args_obj
 
