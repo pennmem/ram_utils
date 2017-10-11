@@ -6,6 +6,7 @@ from prompt_toolkit.token import Token
 from prompt_toolkit.contrib.completers import WordCompleter
 from prompt_toolkit.validation import Validator, ValidationError
 from os.path import *
+import re
 
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory, AutoSuggest, Suggestion
 
@@ -176,6 +177,11 @@ class ElectrodeLabelValidator(Validator):
         except ValueError:
             pass
 
+class YesNoValidator(Validator):
+    def validate(self, document):
+        if re.match(r'yes|y',document.text.lower()) is None or re.match(r'no|n',document.text.lower()) is None:
+            raise ValidationError
+
 
 def parse_command_line():
     """
@@ -227,8 +233,12 @@ def parse_command_line():
 
         max_ampl = prompt('Max stim amplitude (in mA ) for stim_pair %d: ' % stim_pair_num,
                           validator=MaxAmplitudeValidator(min_ampl))
+
         args_obj.max_amplitudes.append(max_ampl)
 
+    encoding = prompt('Use encoding classifier? (yes/no)',
+                      validator=YesNoValidator())
+    args_obj.encoding = encoding
 
     return args_obj
 
