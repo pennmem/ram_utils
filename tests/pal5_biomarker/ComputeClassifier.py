@@ -357,6 +357,8 @@ class ComputeClassifier(RamTask):
         self.pow_mat = self.filter_pow_mat()
         self.pow_mat[encoding_mask] = normalize_sessions(self.pow_mat[encoding_mask], events[encoding_mask])
         self.pow_mat[~encoding_mask] = normalize_sessions(self.pow_mat[~encoding_mask], events[~encoding_mask])
+        # Add bias term
+        self.pow_mat = np.append(np.ones((len(self.pow_mat),1)),self.pow_mat,axis=1)
 
         # computing z-scoring vectors
 
@@ -369,8 +371,9 @@ class ComputeClassifier(RamTask):
         joblib.dump(std_dict,self.get_path_to_resource_in_workspace('features_std_dict.pkl'),)
 
 
+
         self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced',
-                                                solver='newton-cg')
+                                                fit_intercept=False,solver='newton-cg')
 
         event_sessions = events.session
 
@@ -418,6 +421,13 @@ class ComputeClassifier(RamTask):
 
         print 'training retrieval_clasifiers = ', recall_prob_array[events.type=='REC_EVENT']
         self.pass_object('rec_pow_mat',self.pow_mat[events.type=='REC_EVENT'])
+
+        new_classifier=  LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
+                                                solver='newton-cg',fit_intercept=False,)
+
+        new_classifier.coef_ = self.lr_classifier.coef_[...,1:]
+        new_classifier.intercept_ = self.lr_classifier.coef_[...,:1]
+        self.lr_classifier=new_classifier
 
         self.pass_objects()
 

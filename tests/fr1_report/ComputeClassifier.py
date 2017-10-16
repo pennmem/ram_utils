@@ -90,6 +90,7 @@ class ComputeClassifier(ReportRamTask):
         self.pow_mat = self.get_pow_mat()
         self._normalize_sessions(events)
 
+
         #n1 = np.sum(events.recalled)
         #n0 = len(events) - n1
         #w0 = (2.0/n0) / ((1.0/n0)+(1.0/n1))
@@ -124,6 +125,7 @@ class ComputeClassifier(ReportRamTask):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             self.lr_classifier.fit(self.pow_mat, recalls)
+
 
         self.pass_objects()
 
@@ -202,10 +204,12 @@ class ComputeJointClassifier(ReportRamTask):
         encoding_mask = events.type=='WORD'
         self.pow_mat[encoding_mask] = normalize_sessions(self.pow_mat[encoding_mask],events[encoding_mask])
         self.pow_mat[~encoding_mask] = normalize_sessions(self.pow_mat[~encoding_mask],events[~encoding_mask])
+        # Add bias term
+        self.pow_mat = np.append(np.ones((len(self.pow_mat),1)),self.pow_mat,axis=1)
 
 
         self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
-                                                solver='newton-cg')
+                                                solver='newton-cg',fit_intercept=False)
 
 
         event_sessions = events.session
@@ -250,7 +254,13 @@ class ComputeJointClassifier(ReportRamTask):
         # Finally, fitting classifier on all available data
         self.lr_classifier.fit(self.pow_mat, recalls, samples_weights)
 
-        # FYI - in-sample AUC
+        # New classifier with weights and bias set on self.lr_classifier
+        new_classifier=  LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
+                                                solver='newton-cg',fit_intercept=False,)
+
+        new_classifier.coef_ = self.lr_classifier.coef_[...,1:]
+        new_classifier.intercept_ = self.lr_classifier.coef_[...,:1]
+        self.lr_classifier = new_classifier
 
         self.pass_objects()
 

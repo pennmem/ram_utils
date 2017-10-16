@@ -83,7 +83,10 @@ class ComputeFR5Powers(ReportRamTask):
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
 
-        self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
+        self.pow_mat,events = compute_powers(events, monopolar_channels, bipolar_pairs,
+                                             self.params.fr1_start_time,self.params.fr1_end_time,self.params.fr1_buf,
+                                             self.params.freqs,self.params.log_powers)
+        self.pass_object(task+'_events',events)
         print 'self.pow_mat.shape:',self.pow_mat.shape
 
         post_stim_powers, stim_off_events = compute_powers(stim_off_events,monopolar_channels,bipolar_pairs,

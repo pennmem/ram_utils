@@ -11,16 +11,15 @@ from system_3_utils.ram_tasks.CMLParserClosedLoop3 import CMLParserCloseLoop3
 cml_parser = CMLParserCloseLoop3(arg_count_threshold=1)
 
 
-subject = 'R1337E'
-cml_parser.arg('--workspace-dir', '/Volumes/rhino_root/scratch/leond/fr5_config/R1337E')
+cml_parser.arg('--workspace-dir', '/Volumes/rhino_root/scratch/leond/fr5_config/R1334T')
 cml_parser.arg('--experiment', 'PS4_FR5')
-cml_parser.arg('--mount-point', '/Users/leond')
-cml_parser.arg('--subject', subject)
-cml_parser.arg('--electrode-config-file', '/Volumes/rhino_root/scratch/system3_configs/ODIN_configs/%s/R1337E_20SEP17L0M0STIM.csv'%subject)
+cml_parser.arg('--mount-point', '/Volumes/rhino_root')
+cml_parser.arg('--subject', 'R1334T')
+cml_parser.arg('--electrode-config-file', '/Volumes/rhino_root/scratch/system3_configs/ODIN_configs/R1334T/R1334T_R1334TAL0M0STIM30AUG.csv')
 cml_parser.arg('--pulse-frequency', '200')
 cml_parser.arg('--target-amplitude', '1.0')
-cml_parser.arg('--anodes', '1Ld9', '9Ld9')
-cml_parser.arg('--cathodes', '1Ld10', '9Ld10')
+cml_parser.arg('--anodes', 'LC5', 'LB11')
+cml_parser.arg('--cathodes', 'LC6', 'LB12')
 cml_parser.arg('--min-amplitudes', '0.25')
 cml_parser.arg('--max-amplitudes', '1.0')
 
@@ -169,7 +168,7 @@ report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
 
 report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
 
-report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=False))
+report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 
 if args.encoding_only:
     report_pipeline.add_task(ComputeEncodingClassifier(params=params,mark_as_completed=False))

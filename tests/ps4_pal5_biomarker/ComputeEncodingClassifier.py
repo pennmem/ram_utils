@@ -275,7 +275,7 @@ class ComputeEncodingClassifier(RamTask):
         reduced_pairs = self.get_passed_object('reduced_pairs')
         to_include = np.array([bp in reduced_pairs for bp in bipolar_pairs])
         pow_mat = self.get_passed_object('pow_mat')
-        pow_mat = pow_mat.reshape((len(pow_mat), len(bipolar_pairs), -1))[:, to_include, :]
+        pow_mat = pow_mat.reshape((len(pow_mat), -1, len(self.params.freqs)))[:, to_include, :]
         return pow_mat.reshape((len(pow_mat), -1))
 
 
@@ -295,7 +295,7 @@ class ComputeEncodingClassifier(RamTask):
         joblib.dump(self.lr_classifier, classifier_path)
         joblib.dump(self.xval_output,
                     self.get_path_to_resource_in_workspace(subject + '-xval_output_encoding.pkl'))
-        self.pass_object('encoding_encoding_classifier_path', classifier_path)
+        self.pass_object('encoding_classifier_path', classifier_path)
         self.pass_object('xval_encoding_output', self.xval_output)
 
     # def compare_AUCs(self):

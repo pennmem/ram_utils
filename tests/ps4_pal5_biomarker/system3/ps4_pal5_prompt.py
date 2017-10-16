@@ -6,6 +6,7 @@ from prompt_toolkit.token import Token
 from prompt_toolkit.contrib.completers import WordCompleter
 from prompt_toolkit.validation import Validator, ValidationError
 from os.path import *
+import re
 
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory, AutoSuggest, Suggestion
 
@@ -183,6 +184,7 @@ def parse_command_line():
     Parses command line using prompt_toolkit
     :return: Instance of Args class
     """
+
     num_stim_pairs = 2
 
     path_completer = PathCompleter()
@@ -260,6 +262,11 @@ def parse_command_line():
     args_obj.classifier_type_to_output = prompt('Classifier Type To Output: ', completer=WordCompleter(['combined','pal']),
                                                 validator=ExperimentValidator(['combined','pal']),
                                                 default='combined')
+
+    encoding = prompt('Use encoding classifier? (yes/no) : ',)
+    args_obj.encoding = 'yes' in encoding.lower()
+    print args_obj.encoding
+
 
     ExperimentValidator(experiment_list)
 

@@ -5,10 +5,17 @@ from ReportUtils import ReportPipeline, CMLParser
 
 parser = CMLParser()
 # Default-ish args here
+<<<<<<< HEAD
 parser.arg('--subject','R1328E')
 parser.arg('--task','FR5')
 parser.arg('--workspace-dir','scratch/zduey/samplefr5_reports')
 parser.arg('--mount-point','/Volumes/RHINO')
+=======
+parser.arg('--subject','R1345D')
+parser.arg('--task','FR5')
+parser.arg('--workspace-dir','/Volumes/rhino_root/scratch/leond/fr5_reports')
+parser.arg('--mount-point','/Volumes/rhino_root')
+>>>>>>> 56f210161a6b62831f6a0386501b8d75f08723dd
 # parser.arg('--sessions',['1','2','101'])
 
 

@@ -150,17 +150,17 @@ class ComputeClassifier(RamTask):
         self.pow_mat[encoding_mask] = normalize_sessions(self.pow_mat[encoding_mask],events[encoding_mask])
         self.pow_mat[~encoding_mask] = normalize_sessions(self.pow_mat[~encoding_mask],events[~encoding_mask])
         # Add bias term
-        # self.pow_mat = np.append(np.ones((len(self.pow_mat),1)),self.pow_mat,axis=1)
+        self.pow_mat = np.append(np.ones((len(self.pow_mat),1)),self.pow_mat,axis=1)
 
 
         # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto',
         #                                         solver='liblinear')
         #
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
-                                                solver='newton-cg')
-
         # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
-        #                                         solver='newton-cg',fit_intercept=False)
+        #                                         solver='newton-cg')
+
+        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
+                                                solver='newton-cg',fit_intercept=False)
 
 
         event_sessions = events.session
@@ -179,7 +179,7 @@ class ComputeClassifier(RamTask):
         sessions = np.unique(event_sessions)
         if len(sessions) > 1:
             print 'Performing permutation test'
-            self.perm_AUCs = self.permuted_loso_AUCs(event_sessions, recalls, samples_weights,events=events)[0]
+            self.perm_AUCs = self.permuted_loso_AUCs(event_sessions, recalls, samples_weights,events=events)
 
             print 'Performing leave-one-session-out xval'
             _,encoding_probs = self.run_loso_xval(event_sessions, recalls, permuted=False,samples_weights=samples_weights, events=events)
@@ -211,6 +211,16 @@ class ComputeClassifier(RamTask):
         recall_prob_array = self.lr_classifier.predict_proba(self.pow_mat)[:,1]
         insample_auc = roc_auc_score(recalls, recall_prob_array)
         print 'in-sample AUC=', insample_auc
+
+        # New classifier with weights and bias set on self.lr_classifier
+        new_classifier=  LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
+                                                solver='newton-cg',fit_intercept=False,)
+
+        new_classifier.coef_ = self.lr_classifier.coef_[...,1:]
+        new_classifier.intercept_ = self.lr_classifier.coef_[...,:1]
+        new_prob_array = new_classifier.predict_proba(self.pow_mat[...,1:])[:,1]
+        np.testing.assert_almost_equal(new_prob_array,recall_prob_array,err_msg='Predictions do not match')
+        self.lr_classifier = new_classifier
 
         self.pass_objects()
 

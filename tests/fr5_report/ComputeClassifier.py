@@ -251,9 +251,15 @@ class ComputeClassifier(RamTask):
             try:
                 for sess in event_sessions:
                     sel = (event_sessions == sess)
-                    sess_permuted_recalls = permuted_recalls[sel]
-                    shuffle(sess_permuted_recalls)
-                    permuted_recalls[sel] = sess_permuted_recalls
+                    if events is not None:
+                        for phase_sel in [sel & (events.type=='WORD'),sel & (events.type != 'WORD')]:
+                            sess_permuted_recalls = permuted_recalls[phase_sel]
+                            shuffle(sess_permuted_recalls)
+                            permuted_recalls[phase_sel] = sess_permuted_recalls
+                    else:
+                        sess_permuted_recalls = permuted_recalls[sel]
+                        shuffle(sess_permuted_recalls)
+                        permuted_recalls[sel] = sess_permuted_recalls
                 probs = self.run_loso_xval(event_sessions, permuted_recalls, permuted=True,samples_weights=samples_weights,events=events)
                 AUCs[i] = roc_auc_score(recalls, probs)
                 print 'AUC =', AUCs[i]
@@ -313,7 +319,7 @@ class ComputeClassifier(RamTask):
         reduced_pairs = self.get_passed_object('reduced_pairs')
         to_include = np.array([bp in reduced_pairs for bp in bipolar_pairs])
         pow_mat =  self.get_passed_object('pow_mat')
-        pow_mat = pow_mat.reshape((len(pow_mat),len(bipolar_pairs),-1))[:,to_include,:]
+        pow_mat = pow_mat.reshape((len(pow_mat),-1, len(self.params.freqs)))[:,to_include,:]
         return pow_mat.reshape((len(pow_mat),-1))
 
     def pass_objects(self):
@@ -340,9 +346,11 @@ class ComputeClassifier(RamTask):
         self.pow_mat = self.get_pow_mat()
         self.pow_mat[events.type=='WORD'] = normalize_sessions(self.pow_mat[events.type=='WORD'],events[events.type=='WORD'])
         self.pow_mat[events.type!='WORD'] = normalize_sessions(self.pow_mat[events.type!='WORD'],events[events.type!='WORD'])
+        # Add bias term
+        self.pow_mat = np.append(np.ones((len(self.pow_mat),1)),self.pow_mat,axis=1)
 
         self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
-                                                solver='newton-cg')
+                                                solver='newton-cg',fit_intercept=False)
 
 
         event_sessions = events.session
@@ -392,6 +400,12 @@ class ComputeClassifier(RamTask):
         insample_auc = roc_auc_score(recalls, recall_prob_array)
         print 'in-sample AUC=', insample_auc
 
+        new_classifier=  LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
+                                                solver='newton-cg',fit_intercept=False,)
+
+        new_classifier.coef_ = self.lr_classifier.coef_[...,1:]
+        new_classifier.intercept_ = self.lr_classifier.coef_[...,:1]
+        self.lr_classifier = new_classifier
         self.pass_objects()
 
 
@@ -442,6 +456,7 @@ class ComputeFullClassifier(ComputeClassifier):
         joblib.dump(self.lr_classifier,classifier_path)
         joblib.dump(self.xval_output,self.get_path_to_resource_in_workspace(subject+'-xval_output_all_electrodes.pkl'))
         self.pass_object('full_classifier_path',classifier_path)
+        self.pass_object('perm_AUCs_all_electrodes',self.perm_AUCs)
         self.pass_object('xval_output_all_electrodes',self.xval_output)
         joblib.dump(self.pvalue,self.get_path_to_resource_in_workspace(subject+'-pvalue_full.pkl'))
         self.pass_object('pvalue_full',self.pvalue)

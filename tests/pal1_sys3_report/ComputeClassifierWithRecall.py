@@ -400,7 +400,8 @@ class ComputeClassifierWithRecall(RamTask):
 
     def create_classifier_obj(self):
         return LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced',
-                                  solver='newton-cg')
+                                  solver='newton-cg',fit_intercept=False)
+
 
     def get_sample_weights_vector(self, evs):
         """
@@ -471,7 +472,8 @@ class ComputeClassifierWithRecall(RamTask):
         self.pow_mat = self.filter_pow_mat()
         self.pow_mat[encoding_mask] = normalize_sessions(self.pow_mat[encoding_mask], evs[encoding_mask])
         self.pow_mat[~encoding_mask] = normalize_sessions(self.pow_mat[~encoding_mask], evs[~encoding_mask])
-
+        # Add bias term
+        self.pow_mat = np.append(np.ones((len(self.pow_mat),1)),self.pow_mat,axis=1)
         # computing z-scoring vectors
 
         mean_dict, std_dict = compute_z_scoring_vecs(pow_mat_copy[~encoding_mask], evs[~encoding_mask])
@@ -481,9 +483,9 @@ class ComputeClassifierWithRecall(RamTask):
 
         print
 
+
         self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced',
                                                 solver='newton-cg')
-
         sessions_array = evs.session
 
         recalls = evs.correct
@@ -518,6 +520,13 @@ class ComputeClassifierWithRecall(RamTask):
 
         # print 'training retrieval_clasifiers = ', recall_prob_array[evs.type == 'REC_EVENT']
         self.pass_object('rec_pow_mat', self.pow_mat[evs.type == 'REC_EVENT'])
+
+        new_classifier=  LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
+                                                solver='newton-cg',fit_intercept=False,)
+
+        new_classifier.coef_ = self.lr_classifier.coef_[...,1:]
+        new_classifier.intercept_ = self.lr_classifier.coef_[...,:1]
+        self.lr_classifier=new_classifier
 
         self.pass_objects()
 

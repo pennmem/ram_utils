@@ -259,8 +259,10 @@ class ComputeJointClassifier(ReportRamTask):
         self.pow_mat[encoding_mask] = normalize_sessions(self.pow_mat[encoding_mask],events[encoding_mask])
         self.pow_mat[~encoding_mask] = normalize_sessions(self.pow_mat[~encoding_mask],events[~encoding_mask])
 
+        # Add bias term
+        self.pow_mat = np.append(np.ones((len(self.pow_mat),1)),self.pow_mat,axis=1)
 
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
+        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,fit_intercept=False,
                                                 solver='newton-cg')
 
 
@@ -307,6 +309,12 @@ class ComputeJointClassifier(ReportRamTask):
         self.lr_classifier.fit(self.pow_mat, recalls, samples_weights)
 
         # FYI - in-sample AUC
+        new_classifier=  LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
+                                                solver='newton-cg',fit_intercept=False,)
+
+        new_classifier.coef_ = self.lr_classifier.coef_[...,1:]
+        new_classifier.intercept_ = self.lr_classifier.coef_[...,:1]
+        self.lr_classifier = new_classifier
 
         self.pass_objects()
 
