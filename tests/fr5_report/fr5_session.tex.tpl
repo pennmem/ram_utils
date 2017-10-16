@@ -60,6 +60,7 @@ $<N_STIM_INTR>/<N_TOTAL_STIM>$ ($<PC_FROM_STIM_INTR>$\%) from stim lists & $<N_N
 \begin{center}
 \textbf{\Large Stim and recall analysis}
 \end{center}
+
 \begin{figure}[!h]
 \centering
 \includegraphics[height=0.25\textheight]{<STIM_AND_RECALL_PLOT_FILE>}
@@ -70,11 +71,13 @@ Grey circles represent the number of recalled items from parameter search lists.
 Bars represent the number of stims per list.}
 \textbf{Probability of Stimulation}
 \end{figure}
+
 \begin{figure}[!h]
 \centering
 \includegraphics[scale=0.3]{<PROB_STIM_PLOT_FILE>}
 \caption*{Probability of stimulation as a function of serial position.}
 \end{figure}
+
 <BIOMARKER_PLOTS>
 
 

@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
-
-from RamPipeline import *
-
-from PlotUtils import PlotData, BarPlotData, PlotDataCollection, PanelPlot
-
 import numpy as np
 import datetime
 from subprocess import call
 
+
+from RamPipeline import *
+from PlotUtils import PlotData, BarPlotData, PlotDataCollection, PanelPlot
+
 from ReportUtils import ReportRamTask
+from ModelUtils.HierarchicalModel import HierarchicalModelPlots
 from TextTemplateUtils import replace_template,replace_template_to_string
 from TexUtils.latex_table import latex_table
-import numpy as np
 
 
 class GeneratePlots(ReportRamTask):
@@ -22,7 +21,6 @@ class GeneratePlots(ReportRamTask):
         self.create_dir_in_workspace('reports')
         task = self.pipeline.task
         subject= self.pipeline.subject
-
 
         fr5_events = self.get_passed_object(task+'_events')
         fr5_session_summaries = self.get_passed_object('fr_session_summary')
@@ -376,9 +374,13 @@ class GenerateTex(ReportRamTask):
                 '<SESSION_DATA>':latex_table(session_data),
                 '<FR5-AUC>':fr5_auc,
                 '<ROC_TITLE>':roc_title,
+                '<STIM_TITLE>': 'Estimated Effects of Stim',
                 '<FR5-PERM-P-VALUE>':fr5_perm_pvalue if fr5_perm_pvalue>0 else '<0.01',
                 '<FR5-JSTAT-THRESH>':fr5_jstat_thresh,
                 '<ROC_AND_TERC_PLOT_FILE>':self.get_passed_object('ROC_AND_TERC_PLOT_FILE'),
+                '<ESTIMATED_STIM_EFFECT_PLOT_FILE_list>': self.get_path_to_resource_in_workspace('reports/' + '_'.join([self.pipeline.subject, 'list', 'forestplot.pdf'])),
+                '<ESTIMATED_STIM_EFFECT_PLOT_FILE_stim>': self.get_path_to_resource_in_workspace('reports/' + '_'.join([self.pipeline.subject, 'stim', 'forestplot.pdf'])),
+                '<ESTIMATED_STIM_EFFECT_PLOT_FILE_post_stim>': self.get_path_to_resource_in_workspace('reports/' + '_'.join([self.pipeline.subject, 'post_stim', 'forestplot.pdf'])),
                 '<REPORT_PAGES>':all_session_tex,
                 '<BIOMARKER_HISTOGRAM>':biomarker_histogram,
                 '<DELTA_CLASSIFIER_HISTOGRAM>':self.get_passed_object('delta_classifier_histogram'),
