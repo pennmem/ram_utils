@@ -94,7 +94,7 @@ from ComputeClassifier import ComputeClassifier,ComputeFullClassifier
 
 from ComputeFRStimTable import ComputeFRStimTable
 
-from ModelUtils.ComputeStimEffect import ComputeStimEffect
+from ModelUtils.stim_effects import ComputeStimEffect
 
 from ComposeSessionSummary import ComposeSessionSummary
 

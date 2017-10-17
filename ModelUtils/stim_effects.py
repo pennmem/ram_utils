@@ -6,7 +6,7 @@ import pymc3 as pm
 import matplotlib.pyplot as plt
 from RamPipeline import *
 from sklearn.externals import joblib
-from ModelUtils.HierarchicalModel import HierarchicalModel, HierarchicalModelPlots
+from ModelUtils.hmm import HierarchicalModel, HierarchicalModelPlots
 
 
 class ComputeStimEffect(RamTask):
