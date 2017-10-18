@@ -1,12 +1,15 @@
-# command line example:
-# python fr3_util_system_3.py --workspace-dir=/scratch/busygin/FR3_biomarkers --subject=R1145J_1 --n-channels=128 --anode=RD2 --anode-num=34 --cathode=RD3 --cathode-num=35 --pulse-frequency=200 --pulse-duration=500 --target-amplitude=1000
+"""command line example::
 
-print "ATTN: Wavelet params and interval length are hardcoded!! To change them, recompile"
-print "Windows binaries from https://github.com/busygin/morlet_for_sys2_biomarker"
-print "See https://github.com/busygin/morlet_for_sys2_biomarker/blob/master/README for detail."
+    python fr3_util_system_3.py --workspace-dir=/scratch/busygin/FR3_biomarkers --subject=R1145J_1 --n-channels=128 --anode=RD2 --anode-num=34 --cathode=RD3 --cathode-num=35 --pulse-frequency=200 --pulse-duration=500 --target-amplitude=1000
+"""
 
+from __future__ import print_function
 from os.path import *
 from system_3_utils.ram_tasks.CMLParserClosedLoop3 import CMLParserCloseLoop3
+
+print("ATTN: Wavelet params and interval length are hardcoded!! To change them, recompile")
+print("Windows binaries from https://github.com/busygin/morlet_for_sys2_biomarker")
+print("See https://github.com/busygin/morlet_for_sys2_biomarker/blob/master/README for detail.")
 
 cml_parser = CMLParserCloseLoop3(arg_count_threshold=1)
 
@@ -22,7 +25,6 @@ cml_parser.arg('--anodes', 'LC5', 'LB11')
 cml_parser.arg('--cathodes', 'LC6', 'LB12')
 cml_parser.arg('--min-amplitudes', '0.25')
 cml_parser.arg('--max-amplitudes', '1.0')
-
 
 args = cml_parser.parse()
 
@@ -158,25 +160,21 @@ class ReportPipeline(RamPipeline):
         self.set_workspace_dir(workspace_dir)
         self.args = args
 
+mark_as_completed = True
 
 report_pipeline = ReportPipeline(subject=args.subject,
                                  workspace_dir=args.workspace_dir, mount_point=args.mount_point, args=args)
-
-report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
-
-report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
-
-report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
-
-report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
+report_pipeline.add_task(FREventPreparation(mark_as_completed=mark_as_completed))
+report_pipeline.add_task(MontagePreparation(mark_as_completed=mark_as_completed, force_rerun=True))
+report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=mark_as_completed))
+report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=mark_as_completed))
 
 if args.encoding_only:
-    report_pipeline.add_task(ComputeEncodingClassifier(params=params,mark_as_completed=False))
+    report_pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=mark_as_completed))
 else:
-    report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
+    report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=mark_as_completed, force_rerun=False))
 
-report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=False))
-
+report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=mark_as_completed))
 report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
 
 # starts processing pipeline

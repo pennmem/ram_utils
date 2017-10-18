@@ -1,27 +1,28 @@
-from RamPipeline import *
-
-import TextTemplateUtils
 import os
+import json
 import zipfile
-from os.path import  *
-import numpy as np
-from scipy.io import savemat
-import datetime
-from subprocess import call
-from tornado.template import Template
+from os.path import *
 from glob import glob
 import shutil
 import pathlib
-from itertools import cycle
+from itertools import chain, cycle
+
+import numpy as np
+from sklearn.externals import joblib
+
+from tornado.template import Template
+
+from classiflib import ClassifierContainer, dtypes
+
+from RamPipeline import *
 from system_3_utils import ElectrodeConfigSystem3
-from itertools import chain
 
 CLASSIFIER_VERSION = '1.0.1'
 
 class ExperimentConfigGeneratorClosedLoop5(RamTask):
     def __init__(self, params, mark_as_completed=False):
         RamTask.__init__(self, mark_as_completed)
-
+        self.params = params
 
     def copy_resource_to_target_dir(self, resource_filename, target_dir):
         """
@@ -119,10 +120,8 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
         # making sure we get the path even if the actual directory is not created
         project_dir = self.get_path_to_resource_in_workspace(project_dir_corename)
 
-
         config_files_dir = self.create_dir_in_workspace(abspath(join(project_dir,'config_files')))
         config_files_dir = self.get_path_to_resource_in_workspace(project_dir_corename+'/config_files')
-
 
         experiment_config_template_filename = join(dirname(__file__),'templates','{}_experiment_config.json.tpl'.format(
             'PS4_FR5' if 'PS4' in experiment else 'FR5'))
@@ -130,16 +129,16 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
 
         electrode_config_file_core, ext = splitext(electrode_config_file)
 
-
+        # FIXME: more intelligently set classifier filename
         experiment_config_content = experiment_config_template.generate(
             subject=subject,
             experiment=experiment,
-            classifier_file='config_files/%s'%basename(classifier_path),
+            classifier_file='config_files/%s' % basename(classifier_path.replace('.pkl', '.zip')),
             classifier_version=CLASSIFIER_VERSION,
             stim_params_dict=stim_params_dict,
-            electrode_config_file='config_files/%s'%basename(electrode_config_file_core+'.bin'),
-            montage_file='config_files/%s'%basename(bipolar_pairs_path),
-            excluded_montage_file='config_files/%s'%basename(excluded_pairs_path),
+            electrode_config_file='config_files/%s' % basename(electrode_config_file_core+'.bin'),
+            montage_file='config_files/%s' % basename(bipolar_pairs_path),
+            excluded_montage_file='config_files/%s' % basename(excluded_pairs_path),
             biomarker_threshold=0.5,
             fr5_stim_channel=fr5_stim_channel,
             auc_all_electrodes = xval_full[-1].auc,
@@ -150,8 +149,49 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
         experiment_config_file.write(experiment_config_content)
         experiment_config_file.close()
 
+        with open(bipolar_pairs_path, 'r') as f:
+            all_pairs = json.load(f)[subject]['pairs']
+
+        with open(excluded_pairs_path, 'r') as f:
+            excluded_pairs = json.load(f)[subject]['pairs']
+
+        used_pairs = {
+            key: value for key, value in all_pairs.items()
+            if key not in excluded_pairs
+        }
+
+        pairs = np.rec.fromrecords([
+            (item['channel_1'], item['channel_2'],
+             pair.split('-')[0], pair.split('-')[1])
+            for pair, item in used_pairs.items()
+        ], dtype=dtypes.pairs)
+        pairs.sort(order='contact1')
+
+        events = self.get_passed_object('FR_events')
+
+        # FIXME: this is simplified from ComputeClassifier, but should really be more centralized instead of repeating
+        sample_weight = np.ones(events.shape[0], dtype=np.float)
+        sample_weight[events.type == 'WORD'] = self.params.encoding_samples_weight
+
+        classifier = joblib.load(classifier_path)
+        container = ClassifierContainer(
+            classifier=classifier,
+            pairs=pairs,
+            features=joblib.load(self.get_path_to_resource_in_workspace(subject + '-reduced_pow_mat.pkl')),
+            events=events,
+            sample_weight=sample_weight,
+            classifier_info={
+                'auc': xval_output[-1].auc,
+                'subject': subject
+            }
+        )
+        container.save(
+            join(config_files_dir, "{}-lr_classifier.zip".format(subject)),
+            overwrite=True
+        )
+
         # copying classifier pickle file
-        self.copy_pickle_resource_to_target_dir(classifier_path, config_files_dir)
+        # self.copy_pickle_resource_to_target_dir(classifier_path, config_files_dir)
 
         # copy pairs.json
         self.copy_resource_to_target_dir(bipolar_pairs_path,config_files_dir)
@@ -189,4 +229,3 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
         zipf.close()
 
         print("Created experiment_config zip file: \n%s"%zip_filename)
-
