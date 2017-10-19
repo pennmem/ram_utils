@@ -9,13 +9,21 @@ from DependencyInventory import DependencyInventory
 
 
 class RamTask(object):
-    def __init__(self, mark_as_completed=True):
+    def __init__(self, mark_as_completed=True, force_rerun=False):
+        """
+        :param bool mark_as_completed:
+            Mark the task as completed upon completion.
+        :param bool force_rerun:
+            Force a rerun even if the task was already marked as complete.
+
+        """
         self.outputs = []
         self.pipeline = None
         self.workspace_dir = None
         self.file_resources_to_copy = defaultdict()
         self.file_resources_to_move = defaultdict()  # {file_resource:dst_dir}
-        self.mark_as_completed = True
+        self.mark_as_completed = mark_as_completed
+        self.__force_rerun = force_rerun
         self.__name = None
 
         self.set_mark_as_completed(mark_as_completed)
@@ -59,6 +67,9 @@ class RamTask(object):
         :return: bool indicating if the file marking the completeion of the task is present
         and if the dependency hashsum stored in it is equal to the current dependency hashsum
         """
+        if self.__force_rerun:
+            return False
+
         completed_file_name = self.get_task_completed_file_name()
         if isfile(completed_file_name):
             f = open(completed_file_name, 'rb')
