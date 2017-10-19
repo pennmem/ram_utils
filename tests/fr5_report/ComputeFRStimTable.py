@@ -126,8 +126,10 @@ class ComputeFRStimTable(ReportRamTask):
                         j += 1
                 lst_mask = (events.session==session) & (events.list==lst)
                 if sum(lst_mask) != len(lst_stim_words):
-                    lst_stim_words = lst_stim_words[np.in1d(all_lst_events[all_lst_events.type=='WORD'].item_name,
-                                                            events[lst_mask].item_name)]
+                    new_mask  = np.in1d(all_lst_events[all_lst_events.type=='WORD'].item_name,
+                                                            events[lst_mask].item_name)
+                    lst_stim_words = lst_stim_words[new_mask]
+                    lst_post_stim_words = lst_post_stim_words[new_mask]
                 is_stim_item[lst_mask]=lst_stim_words
                 is_post_stim_item[lst_mask]=lst_post_stim_words
 

@@ -48,10 +48,10 @@ $\bullet$ Median of classifier output = $<FR5-JSTAT-THRESH>$
 \includegraphics[scale=0.5]{<BIOMARKER_HISTOGRAM>}
 \end{figure}
 
-\begin{figure}[!h]
-\centering
-\includegraphics[scale=0.5]{<DELTA_CLASSIFIER_HISTOGRAM>}
-\end{figure}
+%\begin{figure}[!h]
+%\centering
+%\includegraphics[scale=0.5]{<DELTA_CLASSIFIER_HISTOGRAM>}
+%\end{figure}
 \subsection*{EEG data}
 \vspace{-1cm}
 \begin{figure}[!h]

@@ -91,18 +91,18 @@ class GeneratePlots(ReportRamTask):
         plt.close()
 
         # delta classifier
-        panel_plot = PanelPlot(xfigsize = 7, yfigsize=5,i_max=1,j_max=1)
-        delta_classifiers = post_stim_probs - pre_stim_probs
-        hist,bin_edges = np.histogram(delta_classifiers,range=[np.round(delta_classifiers.min(),1),np.round(delta_classifiers.max(),1)])
-        x_tick_labels = ['{:.2f}-\n{:.2f}'.format(x,y) for (x,y) in zip(bin_edges[:-1],bin_edges[1:])]
-        pd = BarPlotData(x = np.arange(len(hist))-0.25,y=hist,xlabel = 'Change in classifier output (post minus pre)',ylabel='',xlabel_fontsize=20,
-                         x_tick_labels=x_tick_labels,ylim=[0, len(post_stim_probs)/2])
-        panel_plot.add_plot_data(0,0,plot_data=pd)
-        plt = panel_plot.generate_plot()
-        figname = self.get_path_to_resource_in_workspace('reports/'+self.pipeline.subject+'-delta-classifier-histograms.pdf')
-        plt.savefig(figname)
-        self.pass_object('delta_classifier_histogram',figname)
-        plt.close()
+        # panel_plot = PanelPlot(xfigsize = 7, yfigsize=5,i_max=1,j_max=1)
+        # delta_classifiers = post_stim_probs - pre_stim_probs
+        # hist,bin_edges = np.histogram(delta_classifiers,range=[np.round(delta_classifiers.min(),1),np.round(delta_classifiers.max(),1)])
+        # x_tick_labels = ['{:.2f}-\n{:.2f}'.format(x,y) for (x,y) in zip(bin_edges[:-1],bin_edges[1:])]
+        # pd = BarPlotData(x = np.arange(len(hist))-0.25,y=hist,xlabel = 'Change in classifier output (post minus pre)',ylabel='',xlabel_fontsize=20,
+        #                  x_tick_labels=x_tick_labels,ylim=[0, len(post_stim_probs)/2])
+        # panel_plot.add_plot_data(0,0,plot_data=pd)
+        # plt = panel_plot.generate_plot()
+        # figname = self.get_path_to_resource_in_workspace('reports/'+self.pipeline.subject+'-delta-classifier-histograms.pdf')
+        # plt.savefig(figname)
+        # self.pass_object('delta_classifier_histogram',figname)
+        # plt.close()
 
         # Post stim EEG plot
 
@@ -381,7 +381,7 @@ class GenerateTex(ReportRamTask):
                 '<ROC_AND_TERC_PLOT_FILE>':self.get_passed_object('ROC_AND_TERC_PLOT_FILE'),
                 '<REPORT_PAGES>':all_session_tex,
                 '<BIOMARKER_HISTOGRAM>':biomarker_histogram,
-                '<DELTA_CLASSIFIER_HISTOGRAM>':self.get_passed_object('delta_classifier_histogram'),
+                # '<DELTA_CLASSIFIER_HISTOGRAM>':self.get_passed_object('delta_classifier_histogram'),
                 '<POST_STIM_EEG>':self.get_passed_object('post_stim_eeg_plot')
             }
         )
