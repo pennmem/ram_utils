@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import os
 from os.path import *
+import shutil
 
 from DataModel import DataLayoutJSONUtils
 from JSONUtils import JSONNode
@@ -13,6 +14,7 @@ class RamPipeline(object):
     def __init__(self):
         self.task_registry = TaskRegistry()
         self.workspace_dir = ''
+        self.objects_dir = None  # type: str
         self.passed_objects_dict = {}
         self.mount_point = '/'
 
@@ -28,6 +30,10 @@ class RamPipeline(object):
         self.recompute_on_no_status = False
 
     def set_workspace_dir(self, output_dir):
+        """Sets the directory for writing data. This also creates a directory
+        to cache all data that is passed to tasks further down the pipeline.
+
+        """
         output_dir_normalized = os.path.abspath(os.path.expanduser(output_dir))
         self.workspace_dir = output_dir_normalized
 
@@ -35,6 +41,22 @@ class RamPipeline(object):
             os.makedirs(output_dir_normalized)
         except OSError:
             print('Output dir: ' + output_dir_normalized + ' already exists')
+
+        # Make directory to store objects stored with task's `pass_object` method
+        self.objects_dir = join(output_dir_normalized, 'passed_objs')
+        try:
+            os.makedirs(join(output_dir_normalized, 'passed_objs'))
+        except OSError:
+            pass
+
+    def clear_cached_objects(self):
+        """Removes all cached passed objects from disk. This requires that the
+        workspace directory is already set.
+
+        """
+        if self.objects_dir is not None:
+            raise RuntimeError("Workspace directory not yet set!")
+        shutil.rmtree(self.objects_dir, True)
 
     def add_task(self, task):
         task.set_pipeline(self)
