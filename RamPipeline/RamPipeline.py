@@ -18,6 +18,10 @@ class RamPipeline(object):
         self.passed_objects_dict = {}
         self.mount_point = '/'
 
+        # set to False to keep cached objects around even when the pipeline is
+        # successful
+        self.clear_cache_on_success = True
+
         # stores matlab paths
         self.matlab_paths = None
 
@@ -63,7 +67,7 @@ class RamPipeline(object):
         self.task_registry.register_task(task)
 
     def __enable_matlab(self):
-        """Starts Matlab Angine and sets up Matlab tasks
+        """Starts Matlab engine and sets up Matlab tasks
 
         :return: instance of Matlab engine
 
@@ -227,4 +231,7 @@ class RamPipeline(object):
                         task.create_file_in_workspace_dir(task_completed_file_name, 'w')
 
         if self.dependency_change_tracker:
-                    self.dependency_change_tracker.write_latest_data_status()
+            self.dependency_change_tracker.write_latest_data_status()
+
+        if self.clear_cache_on_success:
+            self.clear_cached_objects()
