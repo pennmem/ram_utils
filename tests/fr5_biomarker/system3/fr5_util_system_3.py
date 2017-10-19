@@ -5,6 +5,7 @@
 
 from __future__ import print_function
 from os.path import *
+import numpy as np
 from system_3_utils.ram_tasks.CMLParserClosedLoop3 import CMLParserCloseLoop3
 
 print("ATTN: Wavelet params and interval length are hardcoded!! To change them, recompile")
@@ -33,37 +34,16 @@ args = cml_parser.parse()
 from RamPipeline import RamPipeline
 
 from tests.fr5_biomarker.FREventPreparation import FREventPreparation
-
 from tests.fr5_biomarker.ComputeFRPowers import ComputeFRPowers
-
 from tests.fr5_biomarker.MontagePreparation import MontagePreparation
-
 from system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
-
 from tests.fr5_biomarker.ComputeClassifier import ComputeClassifier,ComputeFullClassifier,ComputeEncodingClassifier
-
 from tests.fr5_biomarker.system3.ExperimentConfigGeneratorClosedLoop5 import ExperimentConfigGeneratorClosedLoop5
-
-
-
-import numpy as np
 
 
 class StimParams(object):
     def __init__(self, **kwds):
         pass
-        # self.n_channels = kwds['n_channels']
-        # self.elec1 = kwds['anode_num']
-        # self.anode = kwds.get('anode', '')
-        # self.elec2 = kwds['cathode_num']
-        # self.cathode = kwds.get('cathode', '')
-        # self.pulseFrequency = kwds['pulse_frequency']
-        # self.pulseCount = kwds['pulse_count']
-        # self.amplitude = kwds['target_amplitude']
-        #
-        # self.duration = 300
-        # self.trainFrequency = 1
-        # self.trainCount = 1
 
 
 class Params(object):
@@ -109,35 +89,7 @@ class Params(object):
             # target_amplitude=args.target_amplitude
         )
 
-        # self.stim_params = StimParams(
-        #     n_channels=args.n_channels,
-        #     anode_num=args.anode_num,
-        #     anode=args.anode,
-        #     cathode_num=args.cathode_num,
-        #     cathode=args.cathode,
-        #     pulse_frequency=args.pulse_frequency,
-        #     pulse_count=args.pulse_frequency*args.pulse_duration/1000,
-        #     target_amplitude=args.target_amplitude
-        # )
-
-
 params = Params()
-# class ConfigError(Exception):
-#     pass
-#
-#
-# config_file = args.electrode_config_file
-#
-# if config_file.endswith('csv'):
-#     if not isfile(config_file.replace('csv','bin')):
-#         raise ConfigError('Needs binary config file along with csv config file')
-# elif config_file.endswith('bin'):
-#     if not isfile(config_file.replace('bin','csv')):
-#         raise ConfigError('Needs csv config file along with binary file')
-#
-# else:
-#     raise ConfigError('Unknown config file type')
-
 
 # TODO - we need to check if all files need for bipolar referencing are ready before executing the whole pipeine
 #
