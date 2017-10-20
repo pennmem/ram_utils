@@ -78,6 +78,7 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
         class ConfigError(Exception):
             pass
 
+
         anodes = self.pipeline.args.anodes if self.pipeline.args.anodes else [self.pipeline.args.anode]
         cathodes = self.pipeline.args.cathodes if self.pipeline.args.cathodes else [self.pipeline.args.cathode]
 
@@ -177,7 +178,10 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
         container = ClassifierContainer(
             classifier=classifier,
             pairs=pairs,
-            features=joblib.load(self.get_path_to_resource_in_workspace(subject + '-reduced_pow_mat.pkl')),
+            features=joblib.load(self.get_path_to_resource_in_workspace(subject +
+                                                                        ('' if self.pipeline.args.encoding_only else
+                                                                        '-reduced_')
+                                                                        +'pow_mat.pkl')),
             events=events,
             sample_weight=sample_weight,
             classifier_info={
