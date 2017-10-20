@@ -26,6 +26,7 @@ cml_parser.arg('--anodes', 'LC5', 'LB11')
 cml_parser.arg('--cathodes', 'LC6', 'LB12')
 cml_parser.arg('--min-amplitudes', '0.25')
 cml_parser.arg('--max-amplitudes', '1.0')
+cml_parser.arg('--encoding-only')
 
 args = cml_parser.parse()
 
@@ -115,7 +116,7 @@ class ReportPipeline(RamPipeline):
 mark_as_completed = True
 
 report_pipeline = ReportPipeline(subject=args.subject,
-                                 workspace_dir=args.workspace_dir, mount_point=args.mount_point, args=args)
+                                 workspace_dir=args.workspace_dir, mount_point=args.mount_point, args=args,)
 report_pipeline.add_task(FREventPreparation(mark_as_completed=mark_as_completed))
 report_pipeline.add_task(MontagePreparation(mark_as_completed=mark_as_completed, force_rerun=True))
 report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=mark_as_completed))
@@ -125,8 +126,8 @@ if args.encoding_only:
     report_pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=mark_as_completed))
 else:
     report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=mark_as_completed, force_rerun=False))
-
 report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=mark_as_completed))
+
 report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
 
 # starts processing pipeline

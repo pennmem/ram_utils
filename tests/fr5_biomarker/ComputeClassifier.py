@@ -234,6 +234,7 @@ class ComputeClassifier(RamTask):
         new_prob_array = new_classifier.predict_proba(self.pow_mat[...,1:])[:,1]
         np.testing.assert_almost_equal(new_prob_array,recall_prob_array,err_msg='Predictions do not match')
         self.lr_classifier = new_classifier
+        self.pow_mat = self.pow_mat[:,1:]
 
         self.pass_objects()
 
@@ -600,7 +601,7 @@ class ComputeEncodingClassifier(ComputeClassifier):
 
     def pass_objects(self):
         subject=self.pipeline.subject
-        classifier_path = self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl')
+        classifier_path = self.get_path_to_resource_in_workspace(subject + '-lr_classifier_encoding.pkl')
         self.pass_object('lr_classifier', self.lr_classifier)
         self.pass_object('xval_output', self.xval_output)
         self.pass_object('perm_AUCs', self.perm_AUCs)
@@ -614,17 +615,18 @@ class ComputeEncodingClassifier(ComputeClassifier):
 
     def restore(self):
         subject = self.pipeline.subject
-        task = self.pipeline.task
+        task = self.pipeline.args.experiment
 
-        for attr in ['lr_classifier','xval_output','perm_AUCs','pvalue']:
+        for attr in ['xval_output','perm_AUCs','pvalue']:
             try:
                 self.__setattr__(attr,joblib.load(self.get_path_to_resource_in_workspace(subject + '-%s.pkl'%attr)))
             except IOError:
                 self.__setattr__(attr,joblib.load(self.get_path_to_resource_in_workspace(subject + '-'+task+'-%s.pkl'%attr)))
 
 
-        classifier_path = self.get_path_to_resource_in_workspace(subject+'lr_classifier.pkl')
+        classifier_path = self.get_path_to_resource_in_workspace(subject+'-lr_classifier_encoding.pkl')
         self.pass_object('classifier_path',classifier_path)
+        self.lr_classifier = joblib.load(classifier_path)
         self.pass_object('lr_classifier', self.lr_classifier)
         self.pass_object('xval_output', self.xval_output)
         self.pass_object('perm_AUCs', self.perm_AUCs)

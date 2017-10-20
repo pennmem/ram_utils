@@ -174,25 +174,6 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
         sample_weight = np.ones(events.shape[0], dtype=np.float)
         sample_weight[events.type == 'WORD'] = self.params.encoding_samples_weight
 
-        classifier = joblib.load(classifier_path)
-        container = ClassifierContainer(
-            classifier=classifier,
-            pairs=pairs,
-            features=joblib.load(self.get_path_to_resource_in_workspace(subject +
-                                                                        ('-' if self.pipeline.args.encoding_only else
-                                                                        '-reduced_')
-                                                                        +'pow_mat.pkl')),
-            events=events,
-            sample_weight=sample_weight,
-            classifier_info={
-                'auc': xval_output[-1].auc,
-                'subject': subject
-            }
-        )
-        container.save(
-            join(config_files_dir, "{}-lr_classifier.zip".format(subject)),
-            overwrite=True
-        )
 
         # copying classifier pickle file
         # self.copy_pickle_resource_to_target_dir(classifier_path, config_files_dir)
