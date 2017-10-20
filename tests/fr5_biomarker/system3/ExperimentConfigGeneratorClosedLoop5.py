@@ -179,7 +179,7 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
             classifier=classifier,
             pairs=pairs,
             features=joblib.load(self.get_path_to_resource_in_workspace(subject +
-                                                                        ('' if self.pipeline.args.encoding_only else
+                                                                        ('-' if self.pipeline.args.encoding_only else
                                                                         '-reduced_')
                                                                         +'pow_mat.pkl')),
             events=events,
