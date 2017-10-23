@@ -58,7 +58,7 @@ class RamPipeline(object):
         workspace directory is already set.
 
         """
-        if self.objects_dir is not None:
+        if self.objects_dir is None:
             raise RuntimeError("Workspace directory not yet set!")
         shutil.rmtree(self.objects_dir, True)
 
