@@ -607,11 +607,13 @@ class ComputeEncodingClassifier(ComputeClassifier):
         self.pass_object('perm_AUCs', self.perm_AUCs)
         self.pass_object('pvalue', self.pvalue)
         self.pass_object('classifier_path',classifier_path)
+        self.pass_object('reduced_pow_mat',self.pow_mat)
 
         joblib.dump(self.lr_classifier, classifier_path)
         joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace(subject + '-xval_output.pkl'))
         joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace(subject + '-perm_AUCs.pkl'))
         joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject + '-pvalue.pkl'))
+        joblib.dump(self.pow_mat,self.get_path_to_resource_in_workspace(subject+ '-reduced_pow_mat.pkl'))
 
     def restore(self):
         subject = self.pipeline.subject
