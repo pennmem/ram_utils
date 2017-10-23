@@ -36,7 +36,7 @@ class _Schema(HasTraits):
                 dset.attrs['desc'] = trait.desc
 
 
-class SessionSummary(_Schema):
+class FRSessionSummary(_Schema):
     number = Int(desc='session number')  # FIXME: not seemingly used
     name = String(desc='experiment name')
     start = Float(desc='start timestamp')
@@ -59,10 +59,6 @@ class SessionSummary(_Schema):
     pc_correct_math = Float(desc='percentage of correctly answered math problems')
     math_per_list = Float(desc='mean number of math problems per list')
 
-    # catFR-specific things
-    irt_within_cat = Float(desc='average inter-response time within categories')
-    irt_between_cat = Float(desc='average inter-response time between categories')
-
     auc = Float(desc='classifier AUC')
     fpr = Array(dtype=np.float64, desc='false positive rate')
     tpr = Array(dtype=np.float64, desc='true positive rate')
@@ -74,10 +70,15 @@ class SessionSummary(_Schema):
     jstat_percentile = Float(desc='J statistic percentile')
 
 
+class CatFRSessionSummary(FRSessionSummary):
+    irt_within_cat = Float(desc='average inter-response time within categories')
+    irt_between_cat = Float(desc='average inter-response time between categories')
+
+
 if __name__ == "__main__":
     import time
 
-    summary = SessionSummary()
+    summary = FRSessionSummary()
     summary.number = 0
     summary.name = "FR1"
     summary.start = time.time() - 100
