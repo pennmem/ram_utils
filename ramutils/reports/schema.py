@@ -11,7 +11,7 @@ class _Schema(HasTraits):
 
 
 class SessionSummary(_Schema):
-    number = Int(desc='session number')
+    number = Int(desc='session number')  # FIXME: not seemingly used
     name = String(desc='experiment name')
     start = Float(desc='start timestamp')
     end = Float(desc='end timestamp')
@@ -29,23 +29,19 @@ class SessionSummary(_Schema):
     pc_correct_math = Float(desc='percentage of correctly answered math problems')
     math_per_list = Float(desc='mean number of math problems per list')
 
-    # FIXME: what are these?
-    # irt_within_cat = None
-    # irt_between_cat = None
+    # catFR-specific things
+    irt_within_cat = Float(desc='average inter-response time within categories')
+    irt_between_cat = Float(desc='average inter-response time between categories')
 
     auc = Float(desc='classifier AUC')
-
-    # FIXME: what are these?
-    # ltt = None
-    # fpr = None
-    # tpr = None
+    fpr = Array(dtype=np.float64, desc='false positive rate')
+    tpr = Array(dtype=np.float64, desc='true positive rate')
 
     pc_diff_from_mean = Float(desc='percentage difference from mean')
-    perm_AUCs = Float(desc='permutation test AUCs')
-    perm_test_pvalue = None
-    jstat_thresh = None
-    jstat_percentile = None
-    repetition_ratio = None
+    perm_AUCs = Array(dtype=np.float64, desc='permutation test AUCs')
+    perm_test_pvalue = Float(desc='permutation test p-value')
+    jstat_thresh = Float(desc='J statistic')
+    jstat_percentile = Float(desc='J statistic percentile')
 
 
 if __name__ == "__main__":
