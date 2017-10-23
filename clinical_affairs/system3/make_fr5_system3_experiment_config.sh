@@ -88,6 +88,7 @@ workspace_dir="/scratch/leond/system3_configs/${experiment}_biomarkers/${subject
 else
 workspace_dir="/scratch/system3_configs/${experiment}_biomarkers/${subject}/${subject}_${experiment}_${anode1}_${cathode1}_${max_amplitude_1}_${anode2}_${cathode2}_${max_amplitude_2}"
 fi
+
 cd ../..
 python tests/fr5_biomarker/system3/fr5_util_system_3.py\
  --subject=${subject}\
