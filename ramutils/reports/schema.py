@@ -9,6 +9,17 @@ from traits.api import HasTraits, Int, Float, String, Array
 
 class _Schema(HasTraits):
     """Base class for defining serializable schema."""
+    def __init__(self, **kwargs):
+        super(_Schema, self).__init__(**kwargs)
+
+        traits = self.class_visible_traits()
+        for key, value in kwargs.items():
+            if key not in traits:
+                raise RuntimeError("trait {} is not in {}".format(
+                    key, self.__class__.__name__
+                ))
+            setattr(self, key, value)
+
     def _get_type_handler(self, trait):
         return {
             Int: self._scalar_handler,
@@ -78,32 +89,39 @@ class CatFRSessionSummary(FRSessionSummary):
 if __name__ == "__main__":
     import time
 
-    summary = FRSessionSummary()
-    summary.number = 0
-    summary.name = "FR1"
-    summary.start = time.time() - 100
-    summary.end = time.time()
-    summary.n_words = 100
-    summary.n_correct_words = 30
-    summary.pc_correct_words = summary.n_correct_words / summary.n_words
-    summary.n_pli = 10
-    summary.pc_pli = summary.n_pli / summary.n_words
-    summary.n_eli = 0
-    summary.pc_eli = 0.
-    summary.prob_recall = np.random.random((12,))
-    summary.prob_first_recall = np.random.random((12,))
-    summary.n_math = 100
-    summary.n_correct_math = 30
-    summary.pc_correct_math = summary.n_correct_math / summary.n_math
-    summary.math_per_list = 10.
-    # FIXME: catFR stuff
-    summary.auc = 0.5
-    summary.fpr = np.random.random((32,))  # FIXME: length
-    summary.tpr = np.random.random((32,))  # FIXME: length
-    summary.pc_diff_from_mean = np.random.random((3,))  # FIXME: length
-    summary.perm_AUCs = np.random.random((32,))  # FIXME: length
-    summary.perm_test_pvalue = 0.001
-    summary.jstat_thresh = 0.5
-    summary.jstat_percentile = 0.5
+    data = dict(
+        number=0,
+        name="FR1",
+        start=time.time() - 100,
+        end=time.time(),
+        n_words=100,
+        n_correct_words=30,
+        pc_correct_words=100/30.,
+        n_pli=10,
+        pc_pli=10/100.,
+        n_eli=0,
+        pc_eli=0.,
+        prob_recall=np.random.random((12,)),
+        prob_first_recall=np.random.random((12,)),
+        n_math=100,
+        n_correct_math=30,
+        pc_correct_math=30/100.,
+        math_per_list=10.,
+        auc=0.5,
+        fpr=np.random.random((32,)),  # FIXME: length
+        tpr=np.random.random((32,)),  # FIXME: length
+        pc_diff_from_mean=np.random.random((3,)),  # FIXME: length
+        perm_AUCs=np.random.random((32,)),  # FIXME: length
+        perm_test_pvalue=0.001,
+        jstat_thresh=0.5,
+        jstat_percentile=0.5,
+    )
 
+    summary = FRSessionSummary(**data)
     summary.to_hdf('/tmp/summary.h5')
+
+    cat_data = data.copy()
+    cat_data['irt_within_cat'] = 0.5
+    cat_data['irt_between_cat'] = 0.5
+    cat_summary = CatFRSessionSummary(**cat_data)
+    cat_summary.to_hdf('/tmp/cat_summary.h5')
