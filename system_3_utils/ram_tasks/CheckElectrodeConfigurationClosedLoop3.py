@@ -4,9 +4,11 @@ from os.path import *
 import numpy as np
 
 from ReportUtils import RamTask
-from system_3_utils.ElectrodeConfigSystem3 import ElectrodeConfig
+# from system_3_utils.ElectrodeConfigSystem3 import ElectrodeConfig
 import json
 from collections import OrderedDict
+
+from bptools.odin import ElectrodeConfig
 
 
 class CheckElectrodeConfigurationClosedLoop3(RamTask):
@@ -15,6 +17,8 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
         self.params = params
 
     def validate_montage(self, electrode_config):
+        # FIXME: update this for bptools
+
         args = self.pipeline.args
 
         bp_tal_structs = self.get_passed_object('bp_tal_structs')
@@ -41,7 +45,6 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
             print 'Sense electrodes jack_box numbers defined in .bin/.csv file do not match jack_box_numbers in contacts.json'
             # sys.exit(1)
 
-
         # check if specified stim pair is present in the bipolar pairs and .bin/.csv file
         stim_index_pair_present = False
 
@@ -61,16 +64,6 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
             if not stim_index_pair_present:
                 print '\n\nELECTRODE CONFIG ERROR:'
                 print 'Could not find requested stim pair electrode numbers in contacts.json'
-                # sys.exit(1)
-
-            # for bp_idx, bp in enumerate(bipolar_pairs_int_2D):
-            #     if bp[0] == anode_num and bp[1] == cathode_num:
-            #         stim_index_pair_present = True
-            #         break
-            #
-            # if not stim_index_pair_present:
-            #     print 'Could not find requested stim pair electrode numbers in pairs.json'
-            #     sys.exit(1)
 
             # looping over stim channels to check if there exist a channel for which anode and cathode jackbox numbers
             # match those specified by the user
@@ -127,45 +120,36 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
 
             sys.exit(1)
 
-        ec = ElectrodeConfig()
-        ec.initialize(electrode_csv)
+        ec = ElectrodeConfig(electrode_csv)
 
-        self.validate_montage(electrode_config=ec)
-        sense_channels = ec.sense_channels_as_recarray()
-        ec_pairs = sorted(((n,c.contact.port_num,int(c.ref)) for n,c in ec.sense_channels.items()),cmp=lambda x,y: cmp(x[1:],y[1:]))
+        # FIXME: validate!
+        # self.validate_montage(electrode_config=ec)
+
         new_dict = OrderedDict()
         try:
-            for (n, anode, cathode) in ec_pairs:
-                name0 = sense_channels[sense_channels.port_electrode.astype(int)==anode].contact_name
-                name1 = sense_channels[sense_channels.port_electrode.astype(int)==cathode].contact_name
-                new_dict['%s-%s'%(name0[0],name1[0])] ={'channel_1':anode,'channel_2':cathode} # fails with IndexError for channels referenced to common reference; in that case, this whole business is unnecessary
+            contacts = ec.contacts_as_recarray()
+
+            # FIXME: move this logic into bptools
+            for ch in ec.sense_channels:
+                anode, cathode = ch.contact, ch.ref
+                aname = contacts[contacts.jack_box_num == anode].contact_name
+                cname = contacts[contacts.jack_box_num == cathode].contact_name
+                name = '{}-{}'.format(aname, cname)
+                new_dict[name] = {
+                    'channel_1': anode,
+                    'channel_2': cathode
+                }
 
             pairs_from_ec = {self.pipeline.subject:{'pairs':new_dict}}
             with open(self.get_path_to_resource_in_workspace('pairs.json'),'w') as pf:
                 json.dump(pairs_from_ec,pf,indent=2)
-            channels = np.array(['{:03d}'.format(i) for i in sense_channels.jack_box_num])
-            self.pass_object('monopolar_channels',channels)
-            self.pass_object('config_pairs_path',self.get_path_to_resource_in_workspace('pairs.json'))
-            self.pass_object('config_pairs_dict',pairs_from_ec)
+            channels = np.array(['{:03d}'.format(contact.port) for contact in ec.contacts])
+
+            # FIXME: what passed objects do we actually need here?
+            self.pass_object('monopolar_channels', channels)
+            self.pass_object('config_pairs_path', self.get_path_to_resource_in_workspace('pairs.json'))
+            self.pass_object('config_pairs_dict', pairs_from_ec)
         except IndexError:
-            pass
+            raise
         finally:
-            self.pass_object('config_name', ec.config_name)
-
-
-
-            # anode_num = self.params.stim_params.elec1
-        # cathode_num = self.params.stim_params.elec2
-        #
-        # stim_pair = self.params.stim_params.anode + '-' + self.params.stim_params.cathode
-        #
-        # if not stim_pair in bp_tal_structs.index:
-        #     print 'Unknown bipolar pair:', stim_pair
-        #     sys.exit(1)
-        #
-        # found_anode_num = int(bp_tal_structs.channel_1[stim_pair])
-        # found_cathode_num = int(bp_tal_structs.channel_2[stim_pair])
-        #
-        # if (anode_num != found_anode_num) or (cathode_num != found_cathode_num):
-        #     print 'Wrong stim pair for %s: expected %d-%d, found %d-%d' % (stim_pair,anode_num,cathode_num,found_anode_num,found_cathode_num)
-        #     sys.exit(1)
+            self.pass_object('config_name', ec.name)
