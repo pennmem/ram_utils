@@ -13,11 +13,12 @@ from sklearn.externals import joblib
 from tornado.template import Template
 
 from classiflib import ClassifierContainer, dtypes
+from bptools.odin import ElectrodeConfig
 
 from RamPipeline import *
-from system_3_utils import ElectrodeConfigSystem3
 
 CLASSIFIER_VERSION = '1.0.1'
+
 
 class ExperimentConfigGeneratorClosedLoop5(RamTask):
     def __init__(self, params, mark_as_completed=False):
@@ -86,10 +87,11 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
         experiment = self.pipeline.args.experiment if self.pipeline.args.experiment else 'FR5'
         electrode_config_file = self.pipeline.args.electrode_config_file
 
-        ec = ElectrodeConfigSystem3.ElectrodeConfig(electrode_config_file)
-        config_chan_names =  [ec.stim_channels[stim_channel].name for stim_channel in ec.stim_channels]
-        for stim_pair in zip(anodes,cathodes):
-            if '_'.join(stim_pair) not in config_chan_names:
+        # FIXME: these checks should have happened earlier with the other electrode conf checks
+        ec = ElectrodeConfig(electrode_config_file)
+        stim_channel_names = [ch.name for ch in ec.stim_channels]
+        for stim_pair in zip(anodes, cathodes):
+            if '_'.join(stim_pair) not in stim_channel_names:
                 raise ConfigError('Stim channel %s is missing from electrode config file'%('_'.join(stim_pair)))
 
         subject = self.pipeline.subject.split('_')[0]
