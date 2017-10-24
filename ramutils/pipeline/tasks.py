@@ -1,5 +1,8 @@
+from __future__ import print_function
+
 import os
 import os.path as osp
+import shutil
 from collections import defaultdict, OrderedDict
 from distutils.dir_util import mkpath
 
@@ -75,7 +78,7 @@ class RamTask(object):
 
     def check_json_stub(self):
         json_stub_file = osp.join(self.workspace_dir, 'index.json')
-        print 'json stub=', JSONNode.read(filename=json_stub_file)
+        print('json stub=', JSONNode.read(filename=json_stub_file))
 
     def is_completed(self):
         """
@@ -224,15 +227,13 @@ class RamTask(object):
         assert self.workspace_dir is not None, "Workspace directory was not set"
         dir_name_dict = {}
         for dir_name in dir_names:
-            # print dir_name
             try:
                 dir_name_full_path = osp.abspath(osp.join(self.workspace_dir, dir_name))
                 os.makedirs(dir_name_full_path)
                 dir_name_dict[dir_name] = dir_name_full_path
 
             except OSError:
-                print 'skipping: ' + dir_name_full_path + ' perhaps it already exists'
-                pass
+                print('skipping: ' + dir_name_full_path + ' perhaps it already exists')
 
         return dir_name_dict
 
@@ -285,10 +286,6 @@ class RamTask(object):
         Examines dictionary of files to copy and copies listed files to the appropriate workspace folder or its subfolder
         :return:None
         """
-
-        import shutil
-        import os
-
         for file_resource, dst_relative_path in self.file_resources_to_copy.items():
             if dst_relative_path != '':
                 self.make_dir_tree(os.path.join(self.pipeline.workspace_dir, dst_relative_path))
@@ -299,16 +296,13 @@ class RamTask(object):
                     os.path.join(self.pipeline.workspace_dir, dst_relative_path, file_resource_base_name))
                 shutil.copy(file_resource, target_path)
             except IOError:
-                print 'Could not copy file: ', file_resource, ' to ', target_path
+                print('Could not copy file: ', file_resource, ' to ', target_path)
 
     def move_file_resources_to_workspace(self):
         """
         Examines dictionary of files to move and moves listed files to the appropriate workspace folder or its subfolder
         :return:None
         """
-
-        import shutil
-        import os
         for file_resource, dst_relative_path in self.file_resources_to_move.items():
 
             if dst_relative_path != '':
@@ -320,7 +314,7 @@ class RamTask(object):
                     os.path.join(self.pipeline.workspace_dir, dst_relative_path, file_resource_base_name))
                 shutil.move(file_resource, target_path)
             except IOError:
-                print 'Could not move file: ', file_resource, ' to ', target_path
+                print('Could not move file: ', file_resource, ' to ', target_path)
             except OSError:
                 shutil.copyfile(file_resource, target_path)
 
@@ -409,5 +403,5 @@ class TaskRegistry(object):
 
     def run_tasks(self):
         for task_name, task in self.task_dict.items():
-            print 'RUNNIGN TASK:', task_name,' obj=',task
+            print('RUNNING TASK:', task_name,' obj=', task)
             task.run()
