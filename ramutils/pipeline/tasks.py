@@ -32,11 +32,13 @@ class RamTask(object):
     def input_hashsum(self):
         return ''
 
-    def set_name(self, name):
-        self.__name = name
-
+    @property
     def name(self):
         return self.__name
+
+    @name.setter
+    def name(self, name):
+        self.__name = name
 
     def _obj_filename(self, name):
         return osp.join(self.pipeline.objects_dir, "{}.pkl".format(name))
@@ -67,7 +69,7 @@ class RamTask(object):
         :param task: task object object derived from RamTask or MatlabRamTask
         :return: task name - this is the name of the derived class
         """
-        return osp.join(self.workspace_dir, self.name() + '.completed')
+        return osp.join(self.workspace_dir, self.name + '.completed')
 
     def is_completed(self):
         """
@@ -387,7 +389,7 @@ class TaskRegistry(object):
         self.task_dict = OrderedDict()
 
     def register_task(self, task):
-        task.set_name(type(task).__name__)
+        task.name = type(task).__name__
         self.task_dict[task.name()] = task
 
     def run_tasks(self):
