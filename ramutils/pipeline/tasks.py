@@ -8,8 +8,6 @@ from distutils.dir_util import mkpath
 
 from sklearn.externals import joblib
 
-from .deps import DependencyInventory
-
 
 class RamTask(object):
     def __init__(self, mark_as_completed=True, force_rerun=False):
@@ -31,13 +29,8 @@ class RamTask(object):
 
         self.set_mark_as_completed(mark_as_completed)
 
-        self.dependency_inventory = DependencyInventory()
-
     def input_hashsum(self):
         return ''
-
-    def get_dependency_inventory(self):
-        return self.dependency_inventory
 
     def set_name(self, name):
         self.__name = name
