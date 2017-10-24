@@ -16,12 +16,12 @@ cml_parser = CMLParserCloseLoop3(arg_count_threshold=1)
 
 
 cml_parser.arg('--workspace-dir', '/Users/depalati/mnt/rhino/scratch/depalati/fr5_config/R1355T')
-cml_parser.arg('--experiment', 'PS4_FR5')
+cml_parser.arg('--experiment', 'FR5')
 cml_parser.arg('--mount-point', '/Users/depalati/mnt/rhino')
 cml_parser.arg('--subject', 'R1355T')
 cml_parser.arg('--electrode-config-file', '/Users/depalati/mnt/rhino/scratch/system3_configs/ODIN_configs/R1355T/R1355T_20OCT2017LOMOSTIM.csv')
 cml_parser.arg('--pulse-frequency', '200')
-cml_parser.arg('--target-amplitude', '1.0')
+cml_parser.arg('--target-amplitude', '0.5')
 cml_parser.arg('--anodes', 'LB9', 'RC8')
 cml_parser.arg('--cathodes', 'LB10', 'RC9')
 cml_parser.arg('--min-amplitudes', '0.1')
@@ -113,22 +113,22 @@ class ReportPipeline(RamPipeline):
         self.set_workspace_dir(workspace_dir)
         self.args = args
 
-mark_as_completed = True
+mark_as_completed = False
 
-report_pipeline = ReportPipeline(subject=args.subject,
-                                 workspace_dir=args.workspace_dir, mount_point=args.mount_point, args=args,)
-report_pipeline.add_task(FREventPreparation(mark_as_completed=mark_as_completed))
-report_pipeline.add_task(MontagePreparation(mark_as_completed=mark_as_completed, force_rerun=True))
-report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=mark_as_completed))
-report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=mark_as_completed))
+pipeline = ReportPipeline(subject=args.subject,
+                          workspace_dir=args.workspace_dir, mount_point=args.mount_point, args=args, )
+pipeline.add_task(FREventPreparation(mark_as_completed=mark_as_completed))
+pipeline.add_task(MontagePreparation(mark_as_completed=mark_as_completed, force_rerun=True))
+pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=mark_as_completed))
+pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=mark_as_completed))
 
 if args.encoding_only:
-    report_pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=mark_as_completed))
+    pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=mark_as_completed, force_rerun=True))
 else:
-    report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=mark_as_completed, force_rerun=False))
-report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=mark_as_completed))
+    pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=mark_as_completed, force_rerun=False))
+pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=mark_as_completed))
 
-report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
+pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
 
 # starts processing pipeline
-report_pipeline.execute_pipeline()
+pipeline.execute_pipeline()
