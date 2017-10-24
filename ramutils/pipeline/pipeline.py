@@ -4,9 +4,6 @@ import os
 from os.path import *
 import shutil
 
-from DataModel import DataLayoutJSONUtils
-from JSONUtils import JSONNode
-
 from .tasks import MatlabRamTask, TaskRegistry
 
 
@@ -27,8 +24,6 @@ class RamPipeline(object):
 
         # flag indicating if Matlab tasks are present
         self.matlab_tasks_present = False
-
-        self.dependency_change_tracker = None
 
         self.exit_on_no_change = False
         self.recompute_on_no_status = False
@@ -92,77 +87,6 @@ class RamPipeline(object):
         """
         self.matlab_paths = paths
 
-    # FIXME: this does not appear to be used anywhere
-    def generate_latest_data_status(self):
-        if not self.json_saved_data_status_node:
-            self.read_saved_data_status()
-
-        if self.json_saved_data_status_node:
-            subject_code = self.json_saved_data_status_node['subject']['code']
-            rp = DataLayoutJSONUtils()
-            rp.mount_point = self.mount_point
-            self.json_latest_status_node = rp.create_subject_JSON_stub(subject_code=subject_code)
-
-    def get_latest_data_status(self):
-        return self.json_latest_status_node
-
-    def read_saved_data_status(self):
-        json_index_file = join(self.workspace_dir, '_status', 'index.json')
-        self.json_saved_data_status_node = JSONNode.read(filename=json_index_file)
-
-    def get_saved_data_status(self):
-        return self.json_saved_data_status_node
-
-    def set_dependency_tracker(self, dependency_tracker):
-        self.dependency_change_tracker = dependency_tracker
-
-    def resolve_dependencies(self):
-        self.dependency_change_tracker.initialize()
-
-        if self.recompute_on_no_status and not self.dependency_change_tracker.is_saved_status_present():
-            for task_name, task in self.task_registry.task_dict.items():
-                try:
-                    # removing task_completed_file
-                    os.remove(task.get_task_completed_file_name())
-                    print('will rerun task ', task.name())
-                except OSError:
-                    pass
-            return 1
-
-        new_dependency_tracking_style = False
-        change_counter = 0
-        for task_name, task in self.task_registry.task_dict.items():
-            task_hs = task.input_hashsum()
-            if task_hs != '':
-                new_dependency_tracking_style = True
-                completed_file_name = task.get_task_completed_file_name()
-                if isfile(completed_file_name):
-                    f = open(completed_file_name, 'rb')
-                    hs = f.read()
-                    f.close()
-                    if hs != task_hs:
-                        print('will rerun task ', task.name())
-                        change_counter += 1
-
-        if new_dependency_tracking_style:
-            return change_counter
-
-        change_counter = 0
-        if self.dependency_change_tracker:
-            for task_name, task in self.task_registry.task_dict.items():
-
-                change_flag = self.dependency_change_tracker.check_dependency_change(task)
-                if change_flag:
-                    change_counter +=1
-                    try:
-                        # removing task_completed_file
-                        os.remove(task.get_task_completed_file_name())
-                        print('will rerun task ', task.name())
-                    except OSError:
-                        pass
-
-        return change_counter
-
     def prepare_matlab_tasks(self):
         for task_name, task in self.task_registry.task_dict.items():
             if isinstance(task, MatlabRamTask):
@@ -196,12 +120,6 @@ class RamPipeline(object):
         self.initialize_tasks()
         self.prepare_matlab_tasks()
 
-        if self.dependency_change_tracker:
-            change_counter = self.resolve_dependencies()
-
-            if not change_counter and self.exit_on_no_change:
-                return
-
         # executing pipeline
         for task_name, task in self.task_registry.task_dict.items():
 
@@ -229,9 +147,6 @@ class RamPipeline(object):
                     except:
                         print('No .completed file found')
                         task.create_file_in_workspace_dir(task_completed_file_name, 'w')
-
-        if self.dependency_change_tracker:
-            self.dependency_change_tracker.write_latest_data_status()
 
         if self.clear_cache_on_success:
             self.clear_cached_objects()
