@@ -1,18 +1,21 @@
-from ReportUtils import ReportPipeline,CMLParser
-
 import os
 import numpy as np
 
+
+from ReportUtils import ReportPipeline,CMLParser
+from LoadEEG import LoadPostStimEEG
+from EventPreparation import FR1EventPreparation,FR5EventPreparation
+from MontagePreparation import MontagePreparation
+from ComputeFR5Powers import ComputeFR5Powers
+from EvaluateClassifier import EvaluateClassifier
+from ComputeFRPowers import ComputeFRPowers
+from ComputeClassifier import ComputeClassifier,ComputeFullClassifier
+from ComputeFRStimTable import ComputeFRStimTable
+from ComposeSessionSummary import ComposeSessionSummary
+from GenerateReportTasks import GeneratePlots, GenerateTex, GenerateReportPDF
+
+
 parser = CMLParser()
-# Default-ish args here
-parser.arg('--subject','R1351M')
-parser.arg('--task','FR5')
-parser.arg('--workspace-dir','/Volumes/rhino_root/scratch/leond/fr5_reports')
-parser.arg('--mount-point','/Volumes/rhino_root')
-# parser.arg('--sessions',['1','2','101'])
-
-
-#
 args = parser.parse()
 
 
@@ -58,7 +61,6 @@ class Params(object):
         self.post_stim_end_time = 0.555
         self.post_stim_buf = 0.524
 
-        # self.retrieval_samples_weight = 0.5
         self.encoding_samples_weight =2.5
 
 
@@ -74,63 +76,28 @@ class Params(object):
         self.n_perm = 200
 
 
-params=Params()
-from LoadEEG import LoadPostStimEEG
+params = Params()
 
-from EventPreparation import FR1EventPreparation,FR5EventPreparation
-
-from MontagePreparation import MontagePreparation
-
-from ComputeFR5Powers import ComputeFR5Powers
-
-from EvaluateClassifier import EvaluateClassifier
-
-# from ComputePSPowers import ComputePSPowers
-
-from ComputeFRPowers import ComputeFRPowers
-
-from ComputeClassifier import ComputeClassifier,ComputeFullClassifier
-
-from ComputeFRStimTable import ComputeFRStimTable
-
-from ComposeSessionSummary import ComposeSessionSummary
-
-from GenerateReportTasks import GeneratePlots, GenerateTex, GenerateReportPDF
-
-
-# sets up processing pipeline
-report_pipeline = ReportPipeline(subject=args.subject, task=args.task,experiment=args.task, sessions=args.sessions,
-                                 workspace_dir=os.path.join(args.workspace_dir,args.subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change,
+report_pipeline = ReportPipeline(subject=args.subject,
+                                 task=args.task,
+                                 experiment=args.task,
+                                 sessions=args.sessions,
+                                 workspace_dir=os.path.join(args.workspace_dir,args.subject),
+                                 mount_point=args.mount_point,
+                                 exit_on_no_change=args.exit_on_no_change,
                                  recompute_on_no_status=args.recompute_on_no_status)
-
 report_pipeline.add_task(FR1EventPreparation())
-
 report_pipeline.add_task(FR5EventPreparation())
-
 report_pipeline.add_task(MontagePreparation(params=params,mark_as_completed=False))
-
 report_pipeline.add_task(ComputeFRPowers(params=params,mark_as_completed=True))
-
-# report_pipeline.add_task(ComputeClassifier(params=params,mark_as_completed=True))
-
 report_pipeline.add_task(ComputeFullClassifier(params=params,mark_as_completed=True))
-
 report_pipeline.add_task(LoadPostStimEEG(params=params,mark_as_completed=True))
-
 report_pipeline.add_task(ComputeFR5Powers(params=params,mark_as_completed=True))
-
 report_pipeline.add_task(EvaluateClassifier(params=params,mark_as_completed=True))
-
 report_pipeline.add_task(ComputeFRStimTable(params=params,mark_as_completed=False))
-
 report_pipeline.add_task(ComposeSessionSummary(params=params,mark_as_completed=False))
-
 report_pipeline.add_task(GeneratePlots())
-
 report_pipeline.add_task(GenerateTex(mark_as_completed=False))
-
 report_pipeline.add_task(GenerateReportPDF())
-
 report_pipeline.execute_pipeline()
-
 
