@@ -1,12 +1,11 @@
-from collections import defaultdict
 import os
-from os.path import *
+import os.path as osp
+from collections import defaultdict, OrderedDict
 from distutils.dir_util import mkpath
 
 from sklearn.externals import joblib
 
-from JSONUtils import JSONNode
-from DependencyInventory import DependencyInventory
+from .deps import DependencyInventory
 
 
 class RamTask(object):
@@ -44,7 +43,7 @@ class RamTask(object):
         return self.__name
 
     def _obj_filename(self, name):
-        return join(self.pipeline.objects_dir, "{}.pkl".format(name))
+        return osp.join(self.pipeline.objects_dir, "{}.pkl".format(name))
 
     def pass_object(self, name, obj):
         """Makes an object accessible further down the pipeline."""
@@ -72,10 +71,10 @@ class RamTask(object):
         :param task: task object object derived from RamTask or MatlabRamTask
         :return: task name - this is the name of the derived class
         """
-        return join(self.workspace_dir, self.name() + '.completed')
+        return osp.join(self.workspace_dir, self.name() + '.completed')
 
     def check_json_stub(self):
-        json_stub_file = join(self.workspace_dir, 'index.json')
+        json_stub_file = osp.join(self.workspace_dir, 'index.json')
         print 'json stub=', JSONNode.read(filename=json_stub_file)
 
     def is_completed(self):
@@ -89,7 +88,7 @@ class RamTask(object):
             return False
 
         completed_file_name = self.get_task_completed_file_name()
-        if isfile(completed_file_name):
+        if osp.isfile(completed_file_name):
             f = open(completed_file_name, 'rb')
             hs = f.read()
             f.close()
@@ -143,7 +142,7 @@ class RamTask(object):
         assert self.workspace_dir is not None, "Workspace directory was not set"
 
         try:
-            full_file_name = abspath(join(self.workspace_dir, file_name))
+            full_file_name = osp.abspath(osp.join(self.workspace_dir, file_name))
             file = open(full_file_name, mode)
             return file, full_file_name
         except IOError:
@@ -185,9 +184,9 @@ class RamTask(object):
 
         for rel_file_name in rel_file_names:
 
-            output_file_name = join(self.workspace_dir, rel_file_name)
-            output_file_name = abspath(output_file_name)  # normalizing path
-            dir_for_output_file_name = dirname(output_file_name)
+            output_file_name = osp.join(self.workspace_dir, rel_file_name)
+            output_file_name = osp.abspath(output_file_name)  # normalizing path
+            dir_for_output_file_name = osp.dirname(output_file_name)
 
             try:
                 mkpath(dir_for_output_file_name)
@@ -227,7 +226,7 @@ class RamTask(object):
         for dir_name in dir_names:
             # print dir_name
             try:
-                dir_name_full_path = abspath(join(self.workspace_dir, dir_name))
+                dir_name_full_path = osp.abspath(osp.join(self.workspace_dir, dir_name))
                 os.makedirs(dir_name_full_path)
                 dir_name_dict[dir_name] = dir_name_full_path
 
@@ -334,7 +333,7 @@ class RamTask(object):
 
         assert self.workspace_dir is not None, "Workspace directory was not set"
 
-        return abspath(join(self.workspace_dir, *rel_path_components))
+        return osp.abspath(osp.join(self.workspace_dir, *rel_path_components))
 
     def get_pipeline(self):
         """
@@ -349,7 +348,6 @@ class RamTask(object):
         :return: full path to the workspace dir
         """
         return self.workspace_dir
-
 
     def initialize(self):
         pass
@@ -383,12 +381,33 @@ class RamTask(object):
         pass
 
 
-if __name__ == '__main__':
-    rt = RamTask()
-    rt.set_workspace_dir('/Users/m/my_workspace')
-    print 'rt.workspace_dir = ', rt.workspace_dir
-    print 'rt.get_workspace_dir=', rt.get_workspace_dir()
+class MatlabRamTask(RamTask):
+    def __init__(self, mark_as_completed=True):
+        RamTask.__init__(self, mark_as_completed)
+        self.eng = None
 
-    print 'get_path_to_file_in_workspace = ', rt.get_path_to_resource_in_workspace('abc/cba/cbos', 'mst')
+    def set_matlab_engine(self, eng):
+        """Sets matlab engine - this is done by the pipeline to avoid starting
+        of the matlab engine when class inheriting from MatlabRamTask gets
+        created. Matlab engines starts are very slow
 
-    # print 'this is get_path_to_file_in_workspace=',rt.get_path_to_file_in_workspace('demo1')
+        :param eng: instance of matlab engine
+        :return:None
+
+        """
+        self.eng = eng
+
+
+class TaskRegistry(object):
+    """Registry for a series of tasks."""
+    def __init__(self):
+        self.task_dict = OrderedDict()
+
+    def register_task(self, task):
+        task.set_name(type(task).__name__)
+        self.task_dict[task.name()] = task
+
+    def run_tasks(self):
+        for task_name, task in self.task_dict.items():
+            print 'RUNNIGN TASK:', task_name,' obj=',task
+            task.run()

@@ -6,8 +6,8 @@ import shutil
 
 from DataModel import DataLayoutJSONUtils
 from JSONUtils import JSONNode
-from MatlabRamTask import MatlabRamTask
-from TaskRegistry import TaskRegistry
+
+from .tasks import MatlabRamTask, TaskRegistry
 
 
 class RamPipeline(object):
