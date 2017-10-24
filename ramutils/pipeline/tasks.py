@@ -69,10 +69,6 @@ class RamTask(object):
         """
         return osp.join(self.workspace_dir, self.name() + '.completed')
 
-    def check_json_stub(self):
-        json_stub_file = osp.join(self.workspace_dir, 'index.json')
-        print('json stub=', JSONNode.read(filename=json_stub_file))
-
     def is_completed(self):
         """
         returns flag indicating if the task was completed or not
@@ -270,7 +266,7 @@ class RamTask(object):
         import errno
         try:
             os.makedirs(dirname)
-        except OSError, e:
+        except OSError as e:
             if e.errno != errno.EEXIST:
                 raise IOError('Could not make directory: ' + dirname)
 
