@@ -166,7 +166,7 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
              pair.split('-')[0], pair.split('-')[1])
             for pair, item in used_pairs.items()
         ], dtype=dtypes.pairs)
-        pairs.sort(order='contact1')
+        pairs.sort(order='contact0')
 
         events = self.get_passed_object('FR_events')
         if self.pipeline.args.encoding_only:
