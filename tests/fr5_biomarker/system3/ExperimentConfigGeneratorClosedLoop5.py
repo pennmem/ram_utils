@@ -189,7 +189,7 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
             }
         )
         container.save(
-            join(config_files_dir, "{}-lr_classifier.zip".format(subject)),
+            join(config_files_dir, basename(classifier_path.replace('.pkl', '.zip'))),
             overwrite=True
         )
 
