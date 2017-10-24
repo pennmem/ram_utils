@@ -14,6 +14,7 @@ import hashlib
 from sklearn.externals import joblib
 from ReportTasks.RamTaskMethods import create_baseline_events
 
+
 class FREventPreparation(RamTask):
     def __init__(self, mark_as_completed=True):
         super(FREventPreparation, self).__init__(mark_as_completed)
@@ -55,12 +56,7 @@ class FREventPreparation(RamTask):
         tmp = subject.split('_')
         subj_code = tmp[0]
         montage = 0 if len(tmp) == 1 else int(tmp[1])
-
-        # fr1_events_fname = os.path.abspath(
-        #     os.path.join(self.pipeline.mount_point, 'scratch','jkragel','events_FR5','RAM_FR1', subj_code + '_events.mat'))
-
         json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
-
 
         if self.pipeline.args.sessions:
             fr1_sessions = [s for s in self.pipeline.args.sessions if s < 100]
@@ -96,11 +92,6 @@ class FREventPreparation(RamTask):
         fr1_events = fr1_events[fr1_events.list>-1]
         fr1_events = create_baseline_events(fr1_events,1000,29000)
 
-
-        # e_reader = BaseEventReader(filename=fr1_events_fname, eliminate_events_with_no_eeg=True,common_root='scratch')
-        # fr1_events = e_reader.read()
-
-
         encoding_events_mask = fr1_events.type == 'WORD'
         retrieval_events_mask = (fr1_events.type == 'REC_WORD') | (fr1_events.type == 'REC_BASE')
         irts = np.append([0],np.diff(fr1_events.mstime))
@@ -115,17 +106,11 @@ class FREventPreparation(RamTask):
 
         joblib.dump(events,self.get_path_to_resource_in_workspace(subject+'-FR_events.pkl'))
         self.pass_object('FR_events', events)
-        # self.pass_object('encoding_events_mask',encoding_events_mask)
-        # self.pass_object('retrieval_events_mask_0s',retrieval_events_mask_0s)
-        # self.pass_object('retrieval_events_mask_1s',retrieval_events_mask_1s)
 
     def restore(self):
         subject=self.pipeline.subject
         events = joblib.load(self.get_path_to_resource_in_workspace(subject+'-FR_events.pkl'))
         self.pass_object('FR_events',events)
-
-
-
 
 
 def filter_session(sess_events):
