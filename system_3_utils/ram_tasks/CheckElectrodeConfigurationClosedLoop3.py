@@ -149,6 +149,8 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
             self.pass_object('monopolar_channels', channels)
             self.pass_object('config_pairs_path', self.get_path_to_resource_in_workspace('pairs.json'))
             self.pass_object('config_pairs_dict', pairs_from_ec)
+
+        # This is leftover from the old implementation but shouldn't happen.
         except IndexError:
             raise
         finally:
