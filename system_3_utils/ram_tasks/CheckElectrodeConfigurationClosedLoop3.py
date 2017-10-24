@@ -125,7 +125,9 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
         # FIXME: validate!
         # self.validate_montage(electrode_config=ec)
 
-        new_dict = OrderedDict()
+        # This will mimic pairs.json (but only with labels).
+        pairs_dict = OrderedDict()
+
         try:
             contacts = ec.contacts_as_recarray()
 
@@ -135,12 +137,12 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
                 aname = contacts[contacts.jack_box_num == anode].contact_name
                 cname = contacts[contacts.jack_box_num == cathode].contact_name
                 name = '{}-{}'.format(aname, cname)
-                new_dict[name] = {
+                pairs_dict[name] = {
                     'channel_1': anode,
                     'channel_2': cathode
                 }
 
-            pairs_from_ec = {self.pipeline.subject:{'pairs':new_dict}}
+            pairs_from_ec = {self.pipeline.subject: {'pairs': pairs_dict}}
             with open(self.get_path_to_resource_in_workspace('pairs.json'),'w') as pf:
                 json.dump(pairs_from_ec,pf,indent=2)
             channels = np.array(['{:03d}'.format(contact.port) for contact in ec.contacts])
