@@ -13,16 +13,21 @@ from sklearn.externals import joblib
 from tornado.template import Template
 
 from classiflib import ClassifierContainer, dtypes
+from bptools.odin import ElectrodeConfig
 
 from RamPipeline import *
-from system_3_utils import ElectrodeConfigSystem3
 
 CLASSIFIER_VERSION = '1.0.1'
+
 
 class ExperimentConfigGeneratorClosedLoop5(RamTask):
     def __init__(self, params, mark_as_completed=False):
         RamTask.__init__(self, mark_as_completed)
         self.params = params
+
+    @property
+    def classifier_container_path(self):
+        return basename(self.get_passed_object('classifier_path').replace('.pkl', '.zip'))
 
     def copy_resource_to_target_dir(self, resource_filename, target_dir):
         """
@@ -55,10 +60,8 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
         # except IOError:
 
     def zipdir(self, path, ziph):
-
         root_paths_parts = pathlib.Path(str(path)).parts
         root_path_len = len(root_paths_parts)
-
 
         # ziph is zipfile handle
         for root, dirs, files in os.walk(path):
@@ -78,18 +81,17 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
         class ConfigError(Exception):
             pass
 
-
         anodes = self.pipeline.args.anodes if self.pipeline.args.anodes else [self.pipeline.args.anode]
         cathodes = self.pipeline.args.cathodes if self.pipeline.args.cathodes else [self.pipeline.args.cathode]
 
         experiment = self.pipeline.args.experiment if self.pipeline.args.experiment else 'FR5'
         electrode_config_file = self.pipeline.args.electrode_config_file
 
-
-        ec = ElectrodeConfigSystem3.ElectrodeConfig(electrode_config_file)
-        config_chan_names =  [ec.stim_channels[stim_channel].name for stim_channel in ec.stim_channels]
-        for stim_pair in zip(anodes,cathodes):
-            if '_'.join(stim_pair) not in config_chan_names:
+        # FIXME: these checks should have happened earlier with the other electrode conf checks
+        ec = ElectrodeConfig(electrode_config_file)
+        stim_channel_names = [ch.name for ch in ec.stim_channels]
+        for stim_pair in zip(anodes, cathodes):
+            if '_'.join(stim_pair) not in stim_channel_names:
                 raise ConfigError('Stim channel %s is missing from electrode config file'%('_'.join(stim_pair)))
 
         subject = self.pipeline.subject.split('_')[0]
@@ -104,14 +106,14 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
         stim_params_dict = {}
         stim_params_list = zip(anodes,cathodes,cycle(self.pipeline.args.min_amplitudes),
                                cycle(self.pipeline.args.max_amplitudes))
-        for anode,cathode,min_amplitude,max_amplitude in stim_params_list:
-            chan_label = '_'.join([anode,cathode])
-            stim_params_dict[chan_label]={
-                "min_stim_amplitude":min_amplitude,
-                "max_stim_amplitude":max_amplitude,
-                "stim_frequency":stim_frequency,
-                "stim_duration":500,
-                "stim_amplitude":stim_amplitude
+        for anode, cathode, min_amplitude, max_amplitude in stim_params_list:
+            chan_label = '_'.join([anode, cathode])
+            stim_params_dict[chan_label] = {
+                "min_stim_amplitude": min_amplitude,
+                "max_stim_amplitude": max_amplitude,
+                "stim_frequency": stim_frequency,
+                "stim_duration": 500,
+                "stim_amplitude": stim_amplitude
             }
 
         fr5_stim_channel = '%s_%s'%(anodes[0],cathodes[0])
@@ -134,19 +136,19 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
         experiment_config_content = experiment_config_template.generate(
             subject=subject,
             experiment=experiment,
-            classifier_file='config_files/%s' % basename(classifier_path.replace('.pkl', '.zip')),
+            classifier_file='config_files/%s' % self.classifier_container_path,
             classifier_version=CLASSIFIER_VERSION,
             stim_params_dict=stim_params_dict,
-            electrode_config_file='config_files/%s' % basename(electrode_config_file_core+'.bin'),
+            electrode_config_file='config_files/%s' % basename(electrode_config_file_core + '.bin'),
             montage_file='config_files/%s' % basename(bipolar_pairs_path),
             excluded_montage_file='config_files/%s' % basename(excluded_pairs_path),
             biomarker_threshold=0.5,
             fr5_stim_channel=fr5_stim_channel,
-            auc_all_electrodes = xval_full[-1].auc,
-            auc_no_stim_adjacent_electrodes = xval_output[-1].auc,
+            auc_all_electrodes=xval_full[-1].auc,
+            auc_no_stim_adjacent_electrodes=xval_output[-1].auc,
         )
 
-        experiment_config_file,experiment_config_full_filename = self.create_file_in_workspace_dir(project_dir_corename+'/experiment_config.json')
+        experiment_config_file, experiment_config_full_filename = self.create_file_in_workspace_dir(project_dir_corename+'/experiment_config.json')
         experiment_config_file.write(experiment_config_content)
         experiment_config_file.close()
 
@@ -189,7 +191,7 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
             }
         )
         container.save(
-            join(config_files_dir, "{}-lr_classifier.zip".format(subject)),
+            join(config_files_dir, self.classifier_container_path),
             overwrite=True
         )
 

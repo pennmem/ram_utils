@@ -266,7 +266,6 @@ class ComputeClassifier(RamTask):
             print 'auc_retrieval=',auc_retrieval, np.mean(auc_retrieval)
             print 'auc_both=',auc_both, np.mean(auc_both)
 
-
         if events is None:
             return probs
         else:
@@ -513,4 +512,3 @@ class ComputeEncodingClassifier(ComputeClassifier):
         self.pass_object('xval_output', self.xval_output)
         self.pass_object('perm_AUCs', self.perm_AUCs)
         self.pass_object('pvalue', self.pvalue)
-

@@ -135,7 +135,7 @@ class MontagePreparation(RamTask):
             anode_nums = filter(None,np.unique(stim_events.anode_num))
             cathode_nums = filter(None,np.unique(stim_events.cathode_num))
 
-        except KeyError:
+        except Exception:
             events = self.get_passed_object('all_events')
             stim_events = events[events.type=='STIM_ON'].stim_params
             anode_nums = filter(None,np.unique(stim_events.anode_number))

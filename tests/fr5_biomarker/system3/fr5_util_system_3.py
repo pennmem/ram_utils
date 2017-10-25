@@ -115,20 +115,20 @@ class ReportPipeline(RamPipeline):
 
 mark_as_completed = True
 
-report_pipeline = ReportPipeline(subject=args.subject,
-                                 workspace_dir=args.workspace_dir, mount_point=args.mount_point, args=args,)
-report_pipeline.add_task(FREventPreparation(mark_as_completed=mark_as_completed))
-report_pipeline.add_task(MontagePreparation(mark_as_completed=mark_as_completed, force_rerun=True))
-report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=mark_as_completed))
-report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=mark_as_completed))
+pipeline = ReportPipeline(subject=args.subject,
+                          workspace_dir=args.workspace_dir, mount_point=args.mount_point, args=args,)
+pipeline.add_task(FREventPreparation(mark_as_completed=mark_as_completed))
+pipeline.add_task(MontagePreparation(mark_as_completed=mark_as_completed, force_rerun=True))
+pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False, force_rerun=True))
+pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=mark_as_completed))
 
 if args.encoding_only:
-    report_pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=mark_as_completed))
+    pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=mark_as_completed, force_rerun=True))
 else:
-    report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=mark_as_completed, force_rerun=False))
-report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=mark_as_completed))
+    pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=mark_as_completed, force_rerun=False))
+pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=mark_as_completed))
 
-report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
+pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
 
 # starts processing pipeline
-report_pipeline.execute_pipeline()
+pipeline.execute_pipeline()
