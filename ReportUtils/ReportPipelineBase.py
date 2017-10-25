@@ -1,9 +1,9 @@
 import sys
-from RamPipeline import RamPipeline
 from ReportUtils.DependencyChangeTrackerLegacy import DependencyChangeTrackerLegacy
 from ReportUtils.ReportSummary import ReportSummary
 from ReportUtils.ReportExceptions import MissingExperimentError, MissingDataError, NumericalError
 from ReportUtils import ReportDeployer
+from ramutils.pipeline import RamPipeline
 
 
 class ReportPipelineBase(RamPipeline):

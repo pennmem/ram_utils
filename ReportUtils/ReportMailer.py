@@ -1,14 +1,12 @@
-from JSONUtils import JSONNode
 from os.path import *
 import glob
 import base64
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict
 from datetime import date
-import pandas as pd
-import shutil
 import os
-
 from email.mime.text import MIMEText
+
+from JSONUtils import JSONNode
 
 
 class ReportMailer(object):
@@ -259,12 +257,3 @@ if __name__ == '__main__':
 
     if args.error_log_file:
         rm.output_error_log(args.error_log_file)
-
-
-# if __name__ == '__main__':
-#     dir_list = ['/Volumes/rhino_root/scratch/mswat/automated_reports/FR1_reports/status_output/']
-#
-#     rm = ReportMailer()
-#     rm.add_directories(*dir_list)
-#     # rm.compose_summary(detail_level=0)
-#     rm.mail_report_summary(detail_level_list=[0, 1])

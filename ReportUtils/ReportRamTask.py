@@ -1,8 +1,10 @@
-from RamPipeline import RamTask
-from ReportUtils import *
 import inspect
 from os.path import *
 from hashlib import md5
+
+from ReportUtils import *
+from ramutils.pipeline import RamTask
+
 
 class ReportRamTask(RamTask):
     def __init__(self, mark_as_completed,name=None):
@@ -25,15 +27,6 @@ class ReportRamTask(RamTask):
         rs = ReportStatus(task=self.__class__.__name__, message=message, file=file, line=line)
 
         self.pipeline.report_summary.add_report_status_obj(status_obj=rs)
-
-
-    # def add_report_file(self,file):
-    #     self.pipeline.report_summary.add_report_file(file=file)
-    #
-    #
-    # def add_report_link(self,link):
-    #     self.pipeline.report_summary.add_report_link(link=link)
-
 
     def pre(self):
         if self.pipeline.report_summary is None:
@@ -86,6 +79,5 @@ class ReportRamTask(RamTask):
         error_rs = ReportStatus(task=self.__class__.__name__, error=excpt, file=file, line=line)
 
         self.pipeline.report_summary.add_report_error_status(error_status=error_rs)
-
 
         raise excpt
