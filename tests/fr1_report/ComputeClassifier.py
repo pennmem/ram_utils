@@ -1,18 +1,19 @@
-from RamPipeline import *
+import os
+from random import shuffle
+import warnings
+import hashlib
 
-from math import sqrt
 import numpy as np
 from scipy.stats.mstats import zscore
+
 from sklearn.linear_model import LogisticRegression
-from ReportTasks.RamTaskMethods import run_lolo_xval,run_loso_xval,permuted_loso_AUCs,permuted_lolo_AUCs,ModelOutput
 from sklearn.externals import joblib
-import warnings
-from ptsa.data.readers.IndexReader import JsonIndexReader
-from ReportUtils import ReportRamTask
-from random import shuffle
 from sklearn.metrics import roc_auc_score
 
-import hashlib
+from ptsa.data.readers.IndexReader import JsonIndexReader
+
+from ReportTasks.RamTaskMethods import run_lolo_xval,run_loso_xval,permuted_loso_AUCs,permuted_lolo_AUCs,ModelOutput
+from ReportUtils import ReportRamTask
 
 
 def normalize_sessions(pow_mat, events):
@@ -21,7 +22,6 @@ def normalize_sessions(pow_mat, events):
         sess_event_mask = (events.session == sess)
         pow_mat[sess_event_mask] = zscore(pow_mat[sess_event_mask], axis=0, ddof=1)
     return pow_mat
-
 
 
 class ComputeClassifier(ReportRamTask):
@@ -33,7 +33,6 @@ class ComputeClassifier(ReportRamTask):
         self.xval_output = dict()   # ModelOutput per session; xval_output[-1] is across all sessions
         self.perm_AUCs = None
         self.pvalue = None
-
 
     def input_hashsum(self):
         subject = self.pipeline.subject
@@ -58,7 +57,6 @@ class ComputeClassifier(ReportRamTask):
             with open(fname,'rb') as f: hash_md5.update(f.read())
 
         return hash_md5.digest()
-
 
     def xval_test_type(self, events):
         event_sessions = events.session
@@ -89,12 +87,6 @@ class ComputeClassifier(ReportRamTask):
         events = self.events
         self.pow_mat = self.get_pow_mat()
         self._normalize_sessions(events)
-
-
-        #n1 = np.sum(events.recalled)
-        #n0 = len(events) - n1
-        #w0 = (2.0/n0) / ((1.0/n0)+(1.0/n1))
-        #w1 = (2.0/n1) / ((1.0/n0)+(1.0/n1))
         self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced', solver='liblinear')
 
         event_sessions = events.session
@@ -125,7 +117,6 @@ class ComputeClassifier(ReportRamTask):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             self.lr_classifier.fit(self.pow_mat, recalls)
-
 
         self.pass_objects()
 
@@ -169,7 +160,6 @@ class ComputeJointClassifier(ReportRamTask):
         self.perm_AUCs = None
         self.pvalue = None
 
-
     def input_hashsum(self):
         subject = self.pipeline.subject
         tmp = subject.split('_')
@@ -194,11 +184,7 @@ class ComputeJointClassifier(ReportRamTask):
 
         return hash_md5.digest()
 
-
-
     def run(self):
-
-
         events = self.events
         self.pow_mat = self.get_pow_mat()
         encoding_mask = events.type=='WORD'
@@ -211,7 +197,6 @@ class ComputeJointClassifier(ReportRamTask):
         self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
                                                 solver='newton-cg',fit_intercept=False)
 
-
         event_sessions = events.session
 
         recalls = events.recalled
@@ -222,8 +207,6 @@ class ComputeJointClassifier(ReportRamTask):
 
         # samples_weights[~(events.type=='WORD')] = self.params.retrieval_samples_weight
         samples_weights[(events.type=='WORD')] = self.params.encoding_samples_weight
-
-
 
         sessions = np.unique(event_sessions)
         if len(sessions) > 1:
@@ -248,8 +231,6 @@ class ComputeJointClassifier(ReportRamTask):
         print 'Perm test p-value =', self.pvalue
 
         print 'thresh =', self.xval_output[-1].jstat_thresh, 'quantile =', self.xval_output[-1].jstat_quantile
-
-
 
         # Finally, fitting classifier on all available data
         self.lr_classifier.fit(self.pow_mat, recalls, samples_weights)
@@ -289,7 +270,6 @@ class ComputeJointClassifier(ReportRamTask):
         joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace(subject +        '-joint_perm_AUCs.pkl'))
         joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject +           '-joint_pvalue.pkl'))
 
-
     def run_loso_xval(self, event_sessions, recalls, permuted=False,samples_weights=None, events=None):
         probs = np.empty_like(events[events.type=='WORD'], dtype=np.float)
 
@@ -299,13 +279,11 @@ class ComputeJointClassifier(ReportRamTask):
         auc_retrieval = np.empty(sessions.shape[0], dtype=np.float)
         auc_both = np.empty(sessions.shape[0], dtype=np.float)
 
-
         for sess_idx, sess in enumerate(sessions):
             insample_mask = (event_sessions != sess)
             insample_pow_mat = self.pow_mat[insample_mask]
             insample_recalls = recalls[insample_mask]
             insample_samples_weights = samples_weights[insample_mask]
-
 
             insample_enc_mask = insample_mask & (events.type == 'WORD')
             insample_retrieval_mask = insample_mask & ((events.type == 'REC_BASE') | (events.type == 'REC_WORD'))
@@ -343,7 +321,6 @@ class ComputeJointClassifier(ReportRamTask):
                 else:
                     self.lr_classifier.fit(insample_pow_mat, insample_recalls)
 
-
             outsample_mask = (~insample_mask) & (events.type=='WORD')
             outsample_pow_mat = self.pow_mat[outsample_mask]
             outsample_recalls = recalls[outsample_mask]
@@ -354,24 +331,6 @@ class ComputeJointClassifier(ReportRamTask):
                 self.xval_output[sess].compute_roc()
                 self.xval_output[sess].compute_tercile_stats()
             probs[events[events.type=='WORD'].session==sess] = outsample_probs
-
-
-            # import tables
-            #
-            # h5file = tables.open_file('%s_fold_%d.h5'%(self.pipeline.subject, sess), mode='w', title="Test Array")
-            # root = h5file.root
-            # h5file.create_array(root, "insample_recalls", insample_recalls)
-            # h5file.create_array(root, "insample_pow_mat", insample_pow_mat)
-            # h5file.create_array(root, "insample_samples_weights", insample_samples_weights)
-            # h5file.create_array(root, "outsample_recalls", outsample_recalls)
-            # h5file.create_array(root, "outsample_pow_mat", outsample_pow_mat)
-            # h5file.create_array(root, "outsample_probs", outsample_probs)
-            # h5file.create_array(root, "lr_classifier_coef", self.lr_classifier.coef_)
-            # h5file.create_array(root, "lr_classifier_intercept", self.lr_classifier.intercept_)
-            #
-            # h5file.close()
-            #
-
 
             if events is not None:
 
@@ -388,15 +347,10 @@ class ComputeJointClassifier(ReportRamTask):
                 auc_both[sess_idx] = self.get_auc(
                     classifier=self.lr_classifier, features=self.pow_mat, recalls=recalls, mask=outsample_both_mask)
 
-
-
-
         if not permuted:
             self.xval_output[-1] = ModelOutput(recalls[events.type=='WORD'], probs)
             self.xval_output[-1].compute_roc()
             self.xval_output[-1].compute_tercile_stats()
-
-
             print 'auc_encoding=',auc_encoding, np.mean(auc_encoding)
             print 'auc_retrieval=',auc_retrieval, np.mean(auc_retrieval)
             print 'auc_both=',auc_both, np.mean(auc_both)
@@ -409,7 +363,6 @@ class ComputeJointClassifier(ReportRamTask):
         probs = classifier.predict_proba(features[mask])[:, 1]
         auc = roc_auc_score(masked_recalls, probs)
         return auc
-
 
     def permuted_loso_AUCs(self, event_sessions, recalls, samples_weights=None,events=None):
         n_perm = self.params.n_perm
@@ -428,7 +381,6 @@ class ComputeJointClassifier(ReportRamTask):
             except ValueError:
                 AUCs[i] = np.nan
         return AUCs
-
 
     def run_lolo_xval(self, sess, event_lists, recalls, permuted=False, samples_weights=None):
         probs = np.empty_like(recalls, dtype=np.float)
@@ -462,7 +414,6 @@ class ComputeJointClassifier(ReportRamTask):
 
         return probs
 
-
     def permuted_lolo_AUCs(self, sess, event_lists, recalls,samples_weights=None):
         n_perm = self.params.n_perm
         permuted_recalls = np.array(recalls)
@@ -478,7 +429,6 @@ class ComputeJointClassifier(ReportRamTask):
             print 'AUC =', AUCs[i]
         return AUCs
 
-
     def restore(self):
         subject = self.pipeline.subject
 
@@ -489,7 +439,3 @@ class ComputeJointClassifier(ReportRamTask):
         self.pass_object('joint_xval_output', self.xval_output)
         self.pass_object('joint_perm_AUCs', self.perm_AUCs)
         self.pass_object('joint_pvalue', self.pvalue)
-
-
-
-

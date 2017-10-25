@@ -15,7 +15,7 @@ from tornado.template import Template
 from classiflib import ClassifierContainer, dtypes
 from bptools.odin import ElectrodeConfig
 
-from RamPipeline import *
+from ramutils.pipeline import *
 
 CLASSIFIER_VERSION = '1.0.1'
 

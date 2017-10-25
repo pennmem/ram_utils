@@ -6,8 +6,9 @@ print "Windows binaries from https://github.com/busygin/morlet_for_sys2_biomarke
 print "See https://github.com/busygin/morlet_for_sys2_biomarker/blob/master/README for detail."
 
 from os.path import *
-from BiomarkerUtils import CMLParserBiomarker
+import numpy as np
 
+from BiomarkerUtils import CMLParserBiomarker
 
 cml_parser = CMLParserBiomarker(arg_count_threshold=1)
 cml_parser.arg('--workspace-dir','/scratch/leond/FR3_biomarkers_json')
@@ -23,32 +24,19 @@ cml_parser.arg('--target-amplitude','250')
 cml_parser.arg('--anode-num','34')
 cml_parser.arg('--cathode-num','35')
 
-
 args = cml_parser.parse()
 
-
-# ------------------------------- end of processing command line
-
-from RamPipeline import RamPipeline
-
+from ramutils.pipeline import RamPipeline
 from FREventPreparation import FREventPreparation
-
 from ComputeFRPowers import ComputeFRPowers
-
 from MontagePreparation import MontagePreparation
-
 from CheckElectrodeLabels import CheckElectrodeLabels
-
 from ComputeClassifier import ComputeClassifier
-
 from SaveMatlabFile import SaveMatlabFile
 
-import numpy as np
 
 class ArgumentError(Exception):
     pass
-
-
 
 
 class StimParams(object):
@@ -69,6 +57,7 @@ class StimParams(object):
         self.duration = 300
         self.trainFrequency = 1
         self.trainCount = 1
+
 
 class Params(object):
     def __init__(self):
@@ -132,19 +121,14 @@ class ReportPipeline(RamPipeline):
 
 
 report_pipeline = ReportPipeline(subject=args.subject,
-                                       workspace_dir=join(args.workspace_dir,args.subject), mount_point=args.mount_point,
+                                 workspace_dir=join(args.workspace_dir,args.subject),
+                                 mount_point=args.mount_point,
                                  args=args)
-
 report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
-
 report_pipeline.add_task(MontagePreparation(mark_as_completed=False))
-
 report_pipeline.add_task(CheckElectrodeLabels(params=params, mark_as_completed=False))
-
 report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
-
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
-
 report_pipeline.add_task(SaveMatlabFile(params=params, mark_as_completed=False))
 
 # starts processing pipeline
