@@ -1,5 +1,4 @@
-from RamPipeline import *
-
+import os
 import numpy as np
 from copy import deepcopy
 from scipy.stats.mstats import zscore
@@ -14,6 +13,7 @@ from ReportUtils import ReportRamTask
 from ptsa.data.readers.IndexReader import JsonIndexReader
 import hashlib
 
+
 def normalize_sessions(pow_mat, events):
     sessions = np.unique(events.session)
     for sess in sessions:
@@ -25,7 +25,7 @@ class ModelOutput(object):
     def __init__(self):
         self.aucs_by_thresh = np.nan
         self.pval_by_thresh = np.nan
-        self.pCorr_by_thresh = np.nan        
+        self.pCorr_by_thresh = np.nan
         self.thresholds = np.nan
 
 class ComputeClassifier_distThresh(ReportRamTask):
@@ -33,7 +33,7 @@ class ComputeClassifier_distThresh(ReportRamTask):
         super(ComputeClassifier_distThresh,self).__init__(mark_as_completed)
         self.params = params
         self.pow_mat = None
-               
+
     def input_hashsum(self):
         subject = self.pipeline.subject
 
@@ -95,7 +95,7 @@ class ComputeClassifier_distThresh(ReportRamTask):
         lists = np.unique(event_lists)
 
         for lst in lists:
-            
+
             # zpow_mat = standardize_pow_mat(self.pow_mat,self.events,[sess],lst)[0]
             insample_mask = (event_lists != lst)
             insample_pow_mat = self.pow_mat[insample_mask]
@@ -135,20 +135,20 @@ class ComputeClassifier_distThresh(ReportRamTask):
         events = self.get_passed_object(task + '_events')
         self.events = events
         self.pow_mat = normalize_sessions(self.get_passed_object('classify_pow_mat'), events)
-        
+
         self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced',solver='liblinear')
         # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced',solver='liblinear',fit_intercept=False)
 
-        event_sessions = events.session    
+        event_sessions = events.session
         recalls = events.recalled
         distErrs = np.sort(events.distErr)
         lowThresh = np.percentile(distErrs,5)
         highThresh = np.percentile(distErrs,95)
         thresholds =  np.arange(np.ceil(lowThresh),np.floor(highThresh))
-    
-        
+
+
         sessions = np.unique(event_sessions)
-        
+
         self.model_output_thresh = ModelOutput()
         self.model_output_thresh.thresholds = thresholds
         self.model_output_thresh.aucs_by_thresh  = np.zeros(len(thresholds),dtype=np.float)
@@ -158,7 +158,7 @@ class ComputeClassifier_distThresh(ReportRamTask):
 
             recalls = events.distErr <= thresh
             self.model_output_thresh.pCorr_by_thresh[i] = np.mean(recalls)
-            
+
             if len(sessions) > 1:
                 perm_AUCs = self.permuted_loso_AUCs(event_sessions, recalls)
 
@@ -174,20 +174,20 @@ class ComputeClassifier_distThresh(ReportRamTask):
                     for ind, (train_index, test_index) in enumerate(skf):
                         event_lists[test_index] = ind
 
-                perm_AUCs = self.permuted_lolo_AUCs(sess, event_lists, recalls)            
+                perm_AUCs = self.permuted_lolo_AUCs(sess, event_lists, recalls)
                 probs = self.run_lolo_xval(sess, event_lists, recalls, permuted=False)
                 self.model_output_thresh.aucs_by_thresh[i] = roc_auc_score(recalls, probs)
                 self.model_output_thresh.pval_by_thresh[i] = np.mean(self.model_output_thresh.aucs_by_thresh[i] < perm_AUCs)
                 print 'Thresh:', thresh, 'AUC =', self.model_output_thresh.aucs_by_thresh[i], 'pval =', self.model_output_thresh.pval_by_thresh[i]
 
-        self.pass_object('model_output_thresh', self.model_output_thresh)     
-        joblib.dump(self.model_output_thresh, self.get_path_to_resource_in_workspace(subject + '-' + task + '-model_output_thresh.pkl'))             
+        self.pass_object('model_output_thresh', self.model_output_thresh)
+        joblib.dump(self.model_output_thresh, self.get_path_to_resource_in_workspace(subject + '-' + task + '-model_output_thresh.pkl'))
 
     def restore(self):
         subject = self.pipeline.subject
         task = self.pipeline.task
 
-        self.model_output_thresh = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-model_output_thresh.pkl'))            
+        self.model_output_thresh = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-model_output_thresh.pkl'))
         self.pass_object('model_output_thresh', self.model_output_thresh)
-     
+
 

@@ -1,9 +1,7 @@
-from RamPipeline import *
 from SessionSummary import SessionSummary
 
 import numpy as np
 from scipy.stats import sem
-import pandas as pd
 import time
 from operator import itemgetter
 
@@ -14,6 +12,7 @@ def make_ttest_table(bp_tal_structs, ttest_results):
     contact_nos = bp_tal_structs.channel_1.str.lstrip('0') + '-' + bp_tal_structs.channel_2.str.lstrip('0')
     ttest_data = [list(a) for a in zip(bp_tal_structs.etype.values, contact_nos.values, bp_tal_structs.index.values, bp_tal_structs.bp_atlas_loc, ttest_results[1], ttest_results[0])]
     return ttest_data
+
 
 def format_ttest_table(table_data):
     for i,line in enumerate(table_data):
@@ -58,14 +57,14 @@ class ComposeSessionSummary(ReportRamTask):
 
         if self.params.doConf_classification & self.get_passed_object('conf_decode_success'):
             xval_output_conf = self.get_passed_object('xval_output_conf')
-            perm_test_pvalue_conf = self.get_passed_object('pvalue_conf')        
+            perm_test_pvalue_conf = self.get_passed_object('pvalue_conf')
 
-        if self.params.doDist_classification:        
+        if self.params.doDist_classification:
             xval_output_thresh = self.get_passed_object('model_output_thresh')
 
         if self.params.doClass_wTranspose:
             xval_output_transpose = self.get_passed_object('xval_output_transpose')
-            perm_test_pvalue_transpose = self.get_passed_object('pvalue_transpose') 
+            perm_test_pvalue_transpose = self.get_passed_object('pvalue_transpose')
 
         sessions = np.unique(events.session)
         self.pass_object('NUMBER_OF_SESSIONS', len(sessions))
@@ -100,20 +99,20 @@ class ComposeSessionSummary(ReportRamTask):
             session_completed = True if n_sess_events==100 else False
             n_items = len(session_events)
             n_correct_items = np.sum(session_events.recalled)
-            pc_correct_items = 100*n_correct_items / float(n_items)  
-            
+            pc_correct_items = 100*n_correct_items / float(n_items)
+
             n_correct_items_transpose   = np.sum((session_events.recalled==True)|(session_events.recalled_ifFlipped==True))
-            pc_correct_items_transpose = 100*n_correct_items_transpose / float(n_items)             
-                   
+            pc_correct_items_transpose = 100*n_correct_items_transpose / float(n_items)
+
             lists = np.unique(session_events.trial)
-            n_lists = len(lists)          
-            print 'Session =', session_name, 'Score = ', session_score 
+            n_lists = len(lists)
+            print 'Session =', session_name, 'Score = ', session_score
 
             session_data.append([session, session_date, session_length, n_lists, '$%.2f$\\%%' % pc_correct_items,session_score])
         print '\n\n session_data: {} \n\n'.format(session_data)
 
         self.pass_object('SESSION_DATA', session_data)
-    
+
 
         # cumulative results across all sessions
         cumulative_summary = SessionSummary()
@@ -130,32 +129,32 @@ class ComposeSessionSummary(ReportRamTask):
         # analysis 2: probability histogram of of distance error for each confidence level
         prob_by_conf = np.zeros(3,dtype=float)
         dist_hist = np.zeros((3,20),dtype=float)
-        percent_conf = np.zeros(3,dtype=float)        
+        percent_conf = np.zeros(3,dtype=float)
         for conf in xrange(3):
             prob_by_conf[conf] = events.recalled[events.confidence==conf].mean()
-            percent_conf[conf] = np.mean(events.confidence==conf)            
+            percent_conf[conf] = np.mean(events.confidence==conf)
             [hist,b]=np.histogram(events.distErr[events.confidence==conf],bins=20,range=(0,100))
             hist = hist / float(np.sum(hist))
             dist_hist[conf] = hist
 
         cumulative_summary.prob_by_conf = prob_by_conf
-        cumulative_summary.percent_conf = percent_conf        
+        cumulative_summary.percent_conf = percent_conf
         cumulative_summary.dist_hist = dist_hist
-        
+
         # analysis 3: distance error by block number
         err_by_block = np.zeros(5,dtype=float)
         err_by_block_sem = np.zeros(5,dtype=float)
         for block in xrange(5):
-            err_by_block[block] = events.distErr[events.block==block].mean() 
+            err_by_block[block] = events.distErr[events.block==block].mean()
             err_by_block_sem[block] = sem(events.distErr[events.block==block])
-            
-        cumulative_summary.err_by_block = err_by_block 
-        cumulative_summary.err_by_block_sem = err_by_block_sem         
+
+        cumulative_summary.err_by_block = err_by_block
+        cumulative_summary.err_by_block_sem = err_by_block_sem
         if self.params.doDist_classification:
             cumulative_summary.aucs_by_thresh = xval_output_thresh.aucs_by_thresh
             cumulative_summary.pval_by_thresh = xval_output_thresh.pval_by_thresh
             cumulative_summary.pCorr_by_thresh = xval_output_thresh.pCorr_by_thresh
-            cumulative_summary.thresholds = xval_output_thresh.thresholds        
+            cumulative_summary.thresholds = xval_output_thresh.thresholds
 
         # classification results
         cumulative_xval_output = xval_output[-1]
@@ -190,8 +189,8 @@ class ComposeSessionSummary(ReportRamTask):
             cumulative_summary.perm_test_pvalue_transpose = ('= %.3f' % perm_test_pvalue_transpose) if perm_test_pvalue_transpose>=0.001 else '\leq 0.001'
             cumulative_summary.jstat_thresh_transpose = '%.3f' % cumulative_xval_output_transpose.jstat_thresh
             cumulative_summary.jstat_percentile_transpose = '%.2f' % (100.0*cumulative_xval_output_transpose.jstat_quantile)
-            
-            
+
+
         self.pass_object('cumulative_summary', cumulative_summary)
 
         # electrode tttest data for each freq_bin
@@ -199,18 +198,18 @@ class ComposeSessionSummary(ReportRamTask):
         cumulative_ttest_data_LTA.sort(key=itemgetter(-2))
         cumulative_ttest_data_LTA = format_ttest_table(cumulative_ttest_data_LTA)
         self.pass_object('cumulative_ttest_data_LTA', cumulative_ttest_data_LTA)
-        
+
         cumulative_ttest_data_HTA = make_ttest_table(bp_tal_structs, ttest[1])
         cumulative_ttest_data_HTA.sort(key=itemgetter(-2))
-        cumulative_ttest_data_HTA = format_ttest_table(cumulative_ttest_data_HTA)  
-        self.pass_object('cumulative_ttest_data_HTA', cumulative_ttest_data_HTA)      
-        
+        cumulative_ttest_data_HTA = format_ttest_table(cumulative_ttest_data_HTA)
+        self.pass_object('cumulative_ttest_data_HTA', cumulative_ttest_data_HTA)
+
         cumulative_ttest_data_G = make_ttest_table(bp_tal_structs, ttest[2])
         cumulative_ttest_data_G.sort(key=itemgetter(-2))
-        cumulative_ttest_data_G = format_ttest_table(cumulative_ttest_data_G)      
-        self.pass_object('cumulative_ttest_data_G', cumulative_ttest_data_G)              
-        
+        cumulative_ttest_data_G = format_ttest_table(cumulative_ttest_data_G)
+        self.pass_object('cumulative_ttest_data_G', cumulative_ttest_data_G)
+
         cumulative_ttest_data_HFA = make_ttest_table(bp_tal_structs, ttest[3])
         cumulative_ttest_data_HFA.sort(key=itemgetter(-2))
-        cumulative_ttest_data_HFA = format_ttest_table(cumulative_ttest_data_HFA)  
-        self.pass_object('cumulative_ttest_data_HFA', cumulative_ttest_data_HFA)      
+        cumulative_ttest_data_HFA = format_ttest_table(cumulative_ttest_data_HFA)
+        self.pass_object('cumulative_ttest_data_HFA', cumulative_ttest_data_HFA)

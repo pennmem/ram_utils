@@ -1,5 +1,4 @@
-from RamPipeline import *
-
+import os
 from ptsa.data.readers.IndexReader import JsonIndexReader
 import hashlib
 
@@ -13,6 +12,7 @@ from sklearn.cross_validation import StratifiedKFold
 from random import shuffle
 from sklearn.externals import joblib
 from ReportUtils import ReportRamTask
+
 
 def normalize_sessions(pow_mat, events):
     sessions = np.unique(events.session)
@@ -181,14 +181,14 @@ class ComputeClassifier(ReportRamTask):
         AUCs = np.empty(shape=n_perm, dtype=np.float)
         for i in xrange(n_perm):
             shuffle(permuted_recalls)
-            
-            # JFM Note: I'm not permuting within list bc there are only 2 or 3 items per list            
+
+            # JFM Note: I'm not permuting within list bc there are only 2 or 3 items per list
             # for lst in event_lists:
                 # sel = (event_lists == lst)
                 # list_permuted_recalls = permuted_recalls[sel]
                 # shuffle(list_permuted_recalls)
                 # permuted_recalls[sel] = list_permuted_recalls
-                
+
             probs = self.run_lolo_xval(sess, event_lists, permuted_recalls, permuted=True)
             AUCs[i] = roc_auc_score(recalls, probs)
             print 'AUC = ', AUCs[i]
@@ -200,12 +200,12 @@ class ComputeClassifier(ReportRamTask):
 
         events = self.get_passed_object(task + '_events')
         self.pow_mat = normalize_sessions(self.get_passed_object('classify_pow_mat'), events)
-        
+
         # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto', solver='liblinear')
         # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto', solver='liblinear')
         self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced',solver='liblinear',fit_intercept=False)
 
-        event_sessions = events.session    
+        event_sessions = events.session
         # recalls = events.recalled
         recalls = events.distErr <= np.max([events[0].radius_size, np.median(events.distErr)])
         recalls[events.confidence==0]=0
@@ -219,7 +219,7 @@ class ComputeClassifier(ReportRamTask):
             self.run_loso_xval(event_sessions, recalls, permuted=False)
         else:
             sess = sessions[0]
-            
+
             # doing this because I'm changing the lists hen doing k-fold
             event_lists = deepcopy(events.trial)
 
@@ -229,7 +229,7 @@ class ComputeClassifier(ReportRamTask):
                 skf = StratifiedKFold(recalls, n_splits=self.params.n_folds,shuffle=True)
                 for i, (train_index, test_index) in enumerate(skf):
                     event_lists[test_index] = i
-            
+
             print 'Performing in-session permutation test'
             self.perm_AUCs = self.permuted_lolo_AUCs(sess, event_lists, recalls)
 
