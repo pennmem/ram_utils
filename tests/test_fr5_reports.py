@@ -1,3 +1,10 @@
+"""
+    Tests that the classifier output (weights and predicted probabilities) for
+    the fr1 report, fr5 biomarker, and fr5 report all match the expected values
+    based on MATLAB code. Note: These tests are only semi-automated. You will
+    need to run the black-box functional tests in test_reports.py first for
+    these tests to be using updated output.
+"""
 import os
 import h5py
 import pytest
@@ -9,10 +16,12 @@ TEST_DIR = os.path.dirname(__file__)
 @pytest.mark.parametrize("test_dir,subject", [
     ("/scratch/zduey/samplefr5_reports/{}/","R1308T"),
     ("/scratch/zduey/samplefr1_reports/{}/", "R1308T"),
-    ("/scratch/zduey/sample_fr5biomarkers/{}", "R1308T"),
+    ("/scratch/zduey/sample_fr5biomarkers/{}/", "R1308T"),
+    ("/scratch/zduey/samplefr5_reports/{}/","R1275D"),
+    ("/scratch/zduey/samplefr1_reports/{}/", "R1275D"),
 ])
 def test_compare_matlab_python_joint_classifier(test_dir, subject):
-    """ 
+    """
         Compare the model coefficients and predicted probabilites from matlab and python
         implementations of the joint classifier. This is NOT an automated test. You must
         first run the necessary reports to ensure that the updated outputs exist in the
