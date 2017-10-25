@@ -1,9 +1,5 @@
-__author__ = 'm'
-
-from RamPipeline import *
-
+import os
 import numpy as np
-#from morlet import MorletWaveletTransform
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from sklearn.externals import joblib
 
@@ -15,6 +11,8 @@ except ImportError:
     compute_powers=None
 
 import hashlib
+
+from ramutils.pipeline import RamTask
 
 
 class ComputeFRPowers(RamTask):
