@@ -1,13 +1,13 @@
-from RamPipeline import *
+import warnings
 
 import numpy as np
 from scipy.stats.mstats import zscore
 from scipy.stats import ttest_ind
+
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, roc_curve
-from random import shuffle
 from sklearn.externals import joblib
-import warnings
+
 from ReportUtils import ReportRamTask
 
 
@@ -176,7 +176,6 @@ class Analyze_HFA_AUC(ReportRamTask):
 
         joblib.dump(self.outsample_probs, self.get_path_to_resource_in_workspace('fs_hfa_outsample_probs.pkl'))
         joblib.dump(self.AUCs, self.get_path_to_resource_in_workspace('fs_hfa_AUCs.pkl'))
-
 
     def restore(self):
         self.outsample_probs = joblib.load(self.get_path_to_resource_in_workspace('fs_hfa_outsample_probs.pkl'))

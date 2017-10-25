@@ -1,5 +1,3 @@
-from RamPipeline import *
-
 import numpy as np
 from scipy.stats.mstats import zscore
 from scipy.stats import ttest_ind
