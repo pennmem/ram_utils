@@ -12,6 +12,7 @@ from prompt_toolkit.auto_suggest import AutoSuggestFromHistory, AutoSuggest, Sug
 
 from prompt_toolkit.contrib.completers import PathCompleter
 
+
 class Args(object):
     """
     Class that stores output of the command line parsing

@@ -1,5 +1,4 @@
-from RamPipeline import *
-
+import os
 import numpy as np
 from scipy.stats.mstats import zscore
 from sklearn.linear_model import LogisticRegression
@@ -12,6 +11,8 @@ import warnings
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
 import hashlib
+
+from ramutils.pipeline import RamTask
 
 
 def normalize_sessions(pow_mat, events):
@@ -434,11 +435,11 @@ class ComputeClassifier(RamTask):
 
     def get_sample_weights_vector(self, evs):
         """
-        Computes vector of sample weihghts taking int account number fo 0'1 1's , 
+        Computes vector of sample weihghts taking int account number fo 0'1 1's ,
         whether the sample is retrieval or encoding. Or whether the sample is from PAL or from FR experiment.
         The weighting should be desribed in detail in the design doc
         :param evs: events
-        :return: {ndarray} vector of sample weights 
+        :return: {ndarray} vector of sample weights
         """
         # evs = evs.view(np.recarray)
         enc_mask = (evs.type == 'WORD')

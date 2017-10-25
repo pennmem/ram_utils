@@ -26,7 +26,7 @@ except:
 
 # ------------------------------- end of processing command line
 
-from RamPipeline import RamPipeline
+from ramutils.pipeline import RamPipeline
 
 from tests.ps4_pal5_biomarker.PAL1EventPreparation import PAL1EventPreparation
 

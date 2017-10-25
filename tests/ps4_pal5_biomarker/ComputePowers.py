@@ -1,9 +1,5 @@
-__author__ = 'm'
-
-from RamPipeline import *
-
+import os
 import numpy as np
-# from morlet import MorletWaveletTransform
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from sklearn.externals import joblib
 
@@ -14,6 +10,8 @@ import hashlib
 import warnings
 from ReportTasks.RamTaskMethods import get_reduced_pairs,get_excluded_dict
 import json
+
+from ramutils.pipeline import RamTask
 
 
 
@@ -164,7 +162,7 @@ class ComputePowers(RamTask):
             self.pass_object('bipolar_pairs_path',self.get_passed_object('config_pairs_path'))
             self.pass_object('bipolar_pairs',self.bipolar_pairs)
 
-        
+
 
         # in case compute powers removes some of the BAD events (e.g. offset )
         if fr_session_present:
