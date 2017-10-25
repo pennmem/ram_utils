@@ -79,9 +79,13 @@ class RamTask(object):
             # Try loading from memory
             obj = self.pipeline.passed_objects_dict[name]
         except KeyError:
-            obj = joblib.load(self._obj_filename(name))
-        except:
-            raise RuntimeError("Could not find passed object {} in memory or on disk".format(name))
+            try:
+                # This may also fail if the object was not saved to disk
+                # If that is the case, then raise the original KeyError exception
+                # so that calling code can choose what to do with it
+                obj = joblib.load(self._obj_filename(name))
+            except:
+                raise KeyError
         return obj
 
     def get_task_completed_file_name(self):
