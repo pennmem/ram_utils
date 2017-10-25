@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from RamPipeline import *
-
+from os.path import join, splitext
 from PlotUtils import PlotData, BarPlotData, PlotDataCollection, PanelPlot
 
 import numpy as np

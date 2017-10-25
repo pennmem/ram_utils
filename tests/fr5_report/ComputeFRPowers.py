@@ -1,9 +1,5 @@
-__author__ = 'm'
-
-from RamPipeline import *
-
+import os
 import numpy as np
-#from morlet import MorletWaveletTransform
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from sklearn.externals import joblib
 
@@ -11,7 +7,9 @@ from ptsa.data.readers import EEGReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
 import hashlib
+
 from ReportTasks.RamTaskMethods import compute_powers
+from ramutils.pipeline import RamTask
 
 
 class ComputeFRPowers(RamTask):

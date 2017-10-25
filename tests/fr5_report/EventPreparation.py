@@ -1,12 +1,9 @@
-__author__ = 'm'
-
 import os.path
 import numpy as np
 
 from ptsa.data.readers import BaseEventReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
-from RamPipeline import *
 from ReportUtils import ReportRamTask
 
 import hashlib

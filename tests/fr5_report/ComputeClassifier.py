@@ -1,15 +1,19 @@
-from RamPipeline import *
+import os
+import hashlib
+import warnings
+from random import shuffle
 
 import numpy as np
 from scipy.stats.mstats import zscore
+
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, roc_curve
-from random import shuffle
 from sklearn.externals import joblib
+
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
-import hashlib
-import warnings
+from ramutils.pipeline import RamTask
+
 
 def normalize_sessions(pow_mat, events):
     sessions = np.unique(events.session)
@@ -88,22 +92,6 @@ class ComputeClassifier(RamTask):
         for fname in bp_paths:
             with open(fname,'rb') as f: hash_md5.update(f.read())
 
-        # fr1_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR1')))
-        # for fname in fr1_event_files:
-        #     with open(fname,'rb') as f: hash_md5.update(f.read())
-        #
-        # catfr1_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='catFR1')))
-        # for fname in catfr1_event_files:
-        #     with open(fname,'rb') as f: hash_md5.update(f.read())
-        #
-        # fr3_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR3')))
-        # for fname in fr3_event_files:
-        #     with open(fname,'rb') as f: hash_md5.update(f.read())
-        #
-        # catfr3_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='catFR3')))
-        # for fname in catfr3_event_files:
-        #     with open(fname,'rb') as f: hash_md5.update(f.read())
-
         return hash_md5.digest()
 
     def get_auc(self, classifier, features, recalls, mask):
@@ -112,7 +100,6 @@ class ComputeClassifier(RamTask):
         probs = classifier.predict_proba(features[mask])[:, 1]
         auc = roc_auc_score(masked_recalls, probs)
         return auc
-
 
     def run_loso_xval(self, event_sessions, recalls, permuted=False,samples_weights=None, events=None):
         probs = np.empty_like(recalls, dtype=np.float)
