@@ -6,8 +6,6 @@ from numpy.lib.recfunctions import append_fields
 from ptsa.data.readers import BaseEventReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
-from ReportUtils import RamTask
-
 import hashlib
 import warnings
 from ReportTasks.RamTaskMethods import create_baseline_events_pal

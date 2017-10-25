@@ -1,7 +1,4 @@
-__author__ = 'm'
-
-from RamPipeline import *
-
+import os
 import datetime
 import numpy as np
 
@@ -11,11 +8,8 @@ import TextTemplateUtils
 from latex_table import latex_table
 from ReportUtils import ReportRamTask
 
-import re
 from collections import namedtuple
 SplitSubjectCode = namedtuple(typename='SplitSubjectCode',field_names=['protocol','id','site','montage'])
-import os
-import shutil
 
 
 def pvalue_formatting(p):
@@ -275,8 +269,8 @@ class GenerateReportPDF(ReportRamTask):
 
         call([pdflatex_command_str], shell=True)
 
-        report_core_file_name, ext = splitext(report_tex_file_name)
-        report_file = join(output_directory,report_core_file_name+'.pdf')
+        report_core_file_name, ext = os.path.splitext(report_tex_file_name)
+        report_file = os.path.join(output_directory,report_core_file_name+'.pdf')
 
         self.pass_object('report_file', report_file)
 

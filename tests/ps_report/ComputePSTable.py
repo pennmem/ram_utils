@@ -1,22 +1,12 @@
-from RamPipeline import *
-
+import os
 from math import log
 import numpy as np
 import pandas as pd
-from sklearn.externals import joblib
-from bisect import bisect_right
 from scipy.stats import norm
-import sys
-from scipy.stats import describe
 from ReportUtils import ReportRamTask
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
 import hashlib
-
-
-# def prob2perf(probs, true_labels, p):
-#     idx = bisect_right(probs, p)
-#     return np.sum(true_labels[0:idx]) / float(idx) if idx>0 else 0.0
 
 
 def prob2perf_norm(xval_output, p):
@@ -136,7 +126,7 @@ class ComputePSTable(ReportRamTask):
         self.ps_table['prob_diff'] = prob_diff
         self.ps_table['perf_diff'] = perf_diff
         self.ps_table['isi'] = ps_events.isi
-        
+
         self.pass_object('ps_table', self.ps_table)
         self.ps_table.to_pickle(self.get_path_to_resource_in_workspace(subject+'-'+task+'-ps_table.pkl'))
 
