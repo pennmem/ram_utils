@@ -13,3 +13,4 @@ Thumbs.db
 VTKLibs
 vtk
 *~
+*.cache

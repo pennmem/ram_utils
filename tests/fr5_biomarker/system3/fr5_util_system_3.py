@@ -15,18 +15,18 @@ print("See https://github.com/busygin/morlet_for_sys2_biomarker/blob/master/READ
 cml_parser = CMLParserCloseLoop3(arg_count_threshold=1)
 
 
-cml_parser.arg('--workspace-dir', '/Users/depalati/mnt/rhino/scratch/depalati/fr5_config/R1350D')
-cml_parser.arg('--experiment', 'PS4_FR5')
-cml_parser.arg('--mount-point', '/Users/depalati/mnt/rhino')
-cml_parser.arg('--subject', 'R1350D')
-cml_parser.arg('--electrode-config-file', '/Users/depalati/mnt/rhino/scratch/system3_configs/ODIN_configs/R1350D/R1350D_18OCT2017L0M0STIM.csv')
+cml_parser.arg('--workspace-dir', '/scratch/zduey/sample_fr5biomarkers/')
+cml_parser.arg('--experiment', 'FR5')
+cml_parser.arg('--mount-point', '/')
+cml_parser.arg('--subject', 'R1308T')
+cml_parser.arg('--electrode-config-file', '/home1/zduey/ram_utils/tests/test_data/R1308T_R1308T08JUNE2017NOSTIM.csv')
 cml_parser.arg('--pulse-frequency', '200')
-cml_parser.arg('--target-amplitude', '0.5')
-cml_parser.arg('--anodes', 'LAHCD7', 'LAD8')
-cml_parser.arg('--cathodes', 'LAHCD8', 'LAD9')
+cml_parser.arg('--target-amplitude', '1.0')
+cml_parser.arg('--anodes', 'LB6')
+cml_parser.arg('--cathodes', 'LB7')
 cml_parser.arg('--min-amplitudes', '0.1')
 cml_parser.arg('--max-amplitudes', '0.5')
-cml_parser.arg('--encoding-only')
+#cml_parser.arg('--encoding-only')
 
 args = cml_parser.parse()
 
