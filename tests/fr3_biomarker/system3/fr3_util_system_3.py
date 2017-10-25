@@ -40,17 +40,17 @@ args = cml_parser.parse()
 
 from ReportUtils import ReportPipeline
 
-from reports.fr3_biomarker.FREventPreparation import FREventPreparation
+from tests.fr3_biomarker.FREventPreparation import FREventPreparation
 
-from reports.fr3_biomarker.ComputeFRPowers import ComputeFRPowers
+from tests.fr3_biomarker.ComputeFRPowers import ComputeFRPowers
 
-from reports.fr3_biomarker.MontagePreparation import MontagePreparation
+from tests.fr3_biomarker.MontagePreparation import MontagePreparation
 
 from system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
 
-from reports.fr3_biomarker.ComputeClassifier import ComputeClassifier
+from tests.fr3_biomarker.ComputeClassifier import ComputeClassifier
 
-from reports.fr3_biomarker.system3.ExperimentConfigGeneratorClosedLoop3 import ExperimentConfigGeneratorClosedLoop3
+from tests.fr3_biomarker.system3.ExperimentConfigGeneratorClosedLoop3 import ExperimentConfigGeneratorClosedLoop3
 
 
 import numpy as np

@@ -68,23 +68,23 @@ except:
 
 from RamPipeline import RamPipeline
 
-from reports.pal5_biomarker.PAL1EventPreparation import PAL1EventPreparation
+from tests.pal5_biomarker.PAL1EventPreparation import PAL1EventPreparation
 
-from reports.pal5_biomarker.ComputePAL1Powers import ComputePAL1Powers
+from tests.pal5_biomarker.ComputePAL1Powers import ComputePAL1Powers
 
-from reports.pal5_biomarker.MontagePreparation import MontagePreparation
+from tests.pal5_biomarker.MontagePreparation import MontagePreparation
 
 from system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
 
-from reports.pal5_biomarker.ComputeClassifier import ComputeClassifier
+from tests.pal5_biomarker.ComputeClassifier import ComputeClassifier
 
-from reports.pal5_biomarker.ComputeClassifier import ComputeFullClassifier
+from tests.pal5_biomarker.ComputeClassifier import ComputeFullClassifier
 
-from reports.pal5_biomarker.ComputeEncodingClassifier import ComputeEncodingClassifier
+from tests.pal5_biomarker.ComputeEncodingClassifier import ComputeEncodingClassifier
 
-from reports.pal5_biomarker.ComputeBiomarkerThreshold import ComputeBiomarkerThreshold
+from tests.pal5_biomarker.ComputeBiomarkerThreshold import ComputeBiomarkerThreshold
 
-from reports.pal5_biomarker.system3.ExperimentConfigGeneratorClosedLoop5 import ExperimentConfigGeneratorClosedLoop5
+from tests.pal5_biomarker.system3.ExperimentConfigGeneratorClosedLoop5 import ExperimentConfigGeneratorClosedLoop5
 
 import numpy as np
 

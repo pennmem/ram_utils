@@ -34,12 +34,12 @@ args = cml_parser.parse()
 
 from RamPipeline import RamPipeline
 
-from reports.fr5_biomarker.FREventPreparation import FREventPreparation
-from reports.fr5_biomarker.ComputeFRPowers import ComputeFRPowers
-from reports.fr5_biomarker.MontagePreparation import MontagePreparation
+from tests.fr5_biomarker.FREventPreparation import FREventPreparation
+from tests.fr5_biomarker.ComputeFRPowers import ComputeFRPowers
+from tests.fr5_biomarker.MontagePreparation import MontagePreparation
 from system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
-from reports.fr5_biomarker.ComputeClassifier import ComputeClassifier,ComputeFullClassifier,ComputeEncodingClassifier
-from reports.fr5_biomarker.system3.ExperimentConfigGeneratorClosedLoop5 import ExperimentConfigGeneratorClosedLoop5
+from tests.fr5_biomarker.ComputeClassifier import ComputeClassifier,ComputeFullClassifier,ComputeEncodingClassifier
+from tests.fr5_biomarker.system3.ExperimentConfigGeneratorClosedLoop5 import ExperimentConfigGeneratorClosedLoop5
 
 
 class StimParams(object):

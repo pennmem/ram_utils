@@ -40,18 +40,18 @@ args = cml_parser.parse()
 
 from RamPipeline import RamPipeline
 
-from reports.pal3_biomarker.PAL1EventPreparation import PAL1EventPreparation
+from tests.pal3_biomarker.PAL1EventPreparation import PAL1EventPreparation
 
 
-from reports.pal3_biomarker.ComputePAL1Powers import ComputePAL1Powers
+from tests.pal3_biomarker.ComputePAL1Powers import ComputePAL1Powers
 
-from reports.pal3_biomarker.MontagePreparation import MontagePreparation
+from tests.pal3_biomarker.MontagePreparation import MontagePreparation
 
 from system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
 
-from reports.pal3_biomarker.ComputeClassifier import ComputeClassifier
+from tests.pal3_biomarker.ComputeClassifier import ComputeClassifier
 
-from reports.pal3_biomarker.system3.ExperimentConfigGeneratorClosedLoop3 import ExperimentConfigGeneratorClosedLoop3
+from tests.pal3_biomarker.system3.ExperimentConfigGeneratorClosedLoop3 import ExperimentConfigGeneratorClosedLoop3
 
 
 import numpy as np
