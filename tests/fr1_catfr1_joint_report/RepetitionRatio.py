@@ -1,12 +1,14 @@
-from RamPipeline import RamTask
 from os import path
 import os
 import numpy as np
-import cPickle
+import hashlib
+
 from sklearn.externals import joblib
+
 from ptsa.data.readers.IndexReader import JsonIndexReader
 from ptsa.data.readers import BaseEventReader
-import hashlib
+
+from ramutils.pipeline import RamTask
 
 
 class RepetitionRatio(RamTask):
@@ -84,39 +86,39 @@ class RepetitionRatio(RamTask):
         j_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point,'protocols/r1.json'))
         subjects = j_reader.subjects(experiment='catFR1')
         all_repetition_rates = {}
-    
+
         for subject in sorted(subjects):
                 print 'Repetition ratios for subject: ',subject
-    
+
                 evs_field_list = ['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type',
                                   'eegoffset',  'recalled', 'item_name', 'intrusion', 'montage', 'list',
                                   'eegfile', 'msoffset']
                 evs_field_list += ['category', 'category_num']
-    
+
 
                 json_reader = JsonIndexReader(path.join(self.pipeline.mount_point,'protocols/r1.json'))
-    
+
                 event_files = sorted(
                     list(json_reader.aggregate_values('task_events', subject=subject, experiment='catFR1')))
                 events = None
                 for sess_file in event_files:
                     e_path = path.join(str(sess_file))
                     e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
-    
+
                     sess_events = e_reader.read()[evs_field_list]
-    
+
                     if events is None:
                         events = sess_events
                     else:
                         events = np.hstack((events, sess_events))
-    
+
                 events = events.view(np.recarray)
                 print len(events),' events found'
                 recalls = events[events.recalled==1]
                 sessions = np.unique(recalls.session)
                 lists=np.unique(recalls.list)
                 repetition_rates = np.empty([len(sessions),len(lists)])
-    
+
                 for i,r in enumerate(repetition_rates.flat):
                     repetition_rates.flat[i] = np.nan
                 for i,session in enumerate(sessions):

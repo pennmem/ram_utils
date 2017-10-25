@@ -1,5 +1,3 @@
-import sys
-import os
 from ptsa.data.readers.IndexReader import JsonIndexReader
 from ReportUtils import CMLParser,ReportPipeline
 
@@ -14,27 +12,16 @@ args = cml_parser.parse()
 
 
 from ReportUtils import ReportSummaryInventory
-
 from FR1EventPreparation import FR1EventPreparation
-
 from RepetitionRatio import RepetitionRatio
-
 from ComputeFR1Powers import ComputeFR1Powers
-
 from MontagePreparation import MontagePreparation
-
 from ComputeFR1HFPowers import ComputeFR1HFPowers
-
 from ComputeTTest import ComputeTTest
-
 from ComputeClassifier import ComputeClassifier,ComputeJointClassifier
-
 from ComposeSessionSummary import ComposeSessionSummary
-
 from GenerateReportTasks import *
 
-
-# turn it into command line options
 
 class Params(object):
     def __init__(self):
@@ -94,16 +81,6 @@ for subject in subjects:
     if args.skip_subjects is not None and subject in args.skip_subjects:
         continue
 
-
-    # sets up processing pipeline
-    # report_pipeline = ReportPipeline(subject=subject,
-    #                                  task='RAM_FR1_CatFR1_joint',
-    #                                  experiment='RAM_FR1_CatF R1_joint',
-    #                                  workspace_dir=join(args.workspace_dir, subject),
-    #                                  mount_point=args.mount_point,
-    #                                  exit_on_no_change=args.exit_on_no_change,
-    #                                  recompute_on_no_status=args.recompute_on_no_status)
-
     report_pipeline = ReportPipeline(
         args=args,
         subject=subject,
@@ -142,8 +119,6 @@ for subject in subjects:
     report_pipeline.execute_pipeline()
 
     rsi.add_report_summary(report_summary=report_pipeline.get_report_summary())
-
-
 
 print 'this is summary for all reports report ', rsi.compose_summary(detail_level=1)
 

@@ -1,13 +1,12 @@
-from RamPipeline import *
-
 import numpy as np
+
+from ramutils.pipeline import RamTask
 
 
 class CheckTTest(RamTask):
     def __init__(self, params, mark_as_completed=True):
         RamTask.__init__(self, mark_as_completed)
         self.params = params
-
 
     def run(self):
         subject = self.pipeline.subject
@@ -28,9 +27,6 @@ class CheckTTest(RamTask):
 
             sess_events = events[events.session==sess]
             sess_ttest_output = ttest_output[sess]
-            
-            #print sess_ttest_output[0].shape
-            #print sess_ttest_output[1].shape
 
             t = sess_ttest_output[0]
             p = sess_ttest_output[1]

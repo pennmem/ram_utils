@@ -1,6 +1,4 @@
-__author__ = 'm'
-
-from RamPipeline import *
+import os
 try:
     from ReportTasks.RamTaskMethods import compute_powers
 except ImportError as ie:
