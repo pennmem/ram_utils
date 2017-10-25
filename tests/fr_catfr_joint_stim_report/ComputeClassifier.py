@@ -1,6 +1,4 @@
-from RamPipeline import *
-
-from math import sqrt
+import os.path
 import numpy as np
 from scipy.stats.mstats import zscore
 from sklearn.linear_model import LogisticRegression
@@ -19,8 +17,6 @@ def normalize_sessions(pow_mat, events):
         sess_event_mask = (events.session == sess)
         pow_mat[sess_event_mask] = zscore(pow_mat[sess_event_mask], axis=0, ddof=1)
     return pow_mat
-
-
 
 
 class ComputeClassifier(ReportRamTask):

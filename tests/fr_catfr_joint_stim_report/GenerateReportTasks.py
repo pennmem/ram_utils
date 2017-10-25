@@ -1,5 +1,4 @@
-from RamPipeline import *
-
+import os.path
 import TextTemplateUtils
 from PlotUtils import PlotData, BarPlotData, PlotDataCollection, PanelPlot
 from latex_table import latex_table
@@ -9,7 +8,6 @@ import datetime
 from subprocess import call
 
 from ReportUtils import ReportRamTask
-import sys
 
 
 def pvalue_formatting(p):
@@ -388,11 +386,9 @@ class GenerateReportPDF(ReportRamTask):
 
         call([pdflatex_command_str], shell=True)
 
-        report_core_file_name, ext = splitext(report_tex_file_name)
-        report_file = join(output_directory,report_core_file_name+'.pdf')
+        report_core_file_name, ext = os.path.splitext(report_tex_file_name)
+        report_file = os.path.join(output_directory,report_core_file_name+'.pdf')
         self.pass_object('report_file',report_file)
-
-
 
 
 class DeployReportPDF(ReportRamTask):
