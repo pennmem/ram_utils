@@ -28,17 +28,17 @@ cml_parser.arg('--cathode','5LD9')
 
 from ReportUtils import ReportPipeline
 
-from tests.thr3_biomarker.THREventPreparation import THREventPreparation
+from reports.thr3_biomarker.THREventPreparation import THREventPreparation
 
-from tests.thr3_biomarker.ComputeTHRPowers import ComputeTHRPowers
+from reports.thr3_biomarker.ComputeTHRPowers import ComputeTHRPowers
 
-from tests.thr3_biomarker.MontagePreparation import MontagePreparation
+from reports.thr3_biomarker.MontagePreparation import MontagePreparation
 
 from system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
 
-from tests.thr3_biomarker.ComputeClassifier import ComputeClassifier
+from reports.thr3_biomarker.ComputeClassifier import ComputeClassifier
 
-from tests.thr3_biomarker.system3.ExperimentConfigGeneratorClosedLoop3 import ExperimentConfigGeneratorClosedLoop3
+from reports.thr3_biomarker.system3.ExperimentConfigGeneratorClosedLoop3 import ExperimentConfigGeneratorClosedLoop3
 
 import numpy as np
 

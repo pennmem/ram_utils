@@ -14,24 +14,22 @@ from FREventPreparation import FREventPreparation
 from ComputeFRPowers import ComputeFRPowers
 from MontagePreparation import MontagePreparation
 from CheckElectrodeLabels import CheckElectrodeLabels
-from ComputeClassifier import ComputeClassifier
+from ComputeClassifier import ComputeClassifier, ComputeFullClassifier
 from SaveMatlabFile import SaveMatlabFile
 
 
 
 cml_parser = CMLParserBiomarker(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','/scratch/leond/FR3_biomarkers_json')
-cml_parser.arg('--subject','R1124J_1')
+cml_parser.arg('--workspace-dir','/scratch/zduey/sample_fr5biomarkers/')
+cml_parser.arg('--subject','R1308T')
 cml_parser.arg('--n-channels','128')
-cml_parser.arg('--anode-nums','34','86')
-cml_parser.arg('--anodes','LDA1','RDA3')
-cml_parser.arg('--cathode-nums','35','87')
-cml_parser.arg('--cathodes','LDA2','RDA4')
+cml_parser.arg('--anode','LB6')
+cml_parser.arg('--cathode','LB7')
 cml_parser.arg('--pulse-frequency','200')
 cml_parser.arg('--pulse-duration','500')
 cml_parser.arg('--target-amplitude','250')
-cml_parser.arg('--anode-num','34')
-cml_parser.arg('--cathode-num','35')
+cml_parser.arg('--anode-num','11')
+cml_parser.arg('--cathode-num','12')
 
 
 args = cml_parser.parse()
