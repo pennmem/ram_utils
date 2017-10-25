@@ -1,21 +1,30 @@
 from collections import defaultdict
 import os
 from os.path import *
-
 from distutils.dir_util import mkpath
+
+from sklearn.externals import joblib
 
 from JSONUtils import JSONNode
 from DependencyInventory import DependencyInventory
 
 
 class RamTask(object):
-    def __init__(self, mark_as_completed=True):
+    def __init__(self, mark_as_completed=True, force_rerun=False):
+        """
+        :param bool mark_as_completed:
+            Mark the task as completed upon completion.
+        :param bool force_rerun:
+            Force a rerun even if the task was already marked as complete.
+
+        """
         self.outputs = []
         self.pipeline = None
         self.workspace_dir = None
         self.file_resources_to_copy = defaultdict()
         self.file_resources_to_move = defaultdict()  # {file_resource:dst_dir}
-        self.mark_as_completed = True
+        self.mark_as_completed = mark_as_completed
+        self.__force_rerun = force_rerun
         self.__name = None
 
         self.set_mark_as_completed(mark_as_completed)
@@ -34,11 +43,28 @@ class RamTask(object):
     def name(self):
         return self.__name
 
+    def _obj_filename(self, name):
+        return join(self.pipeline.objects_dir, "{}.pkl".format(name))
+
     def pass_object(self, name, obj):
+        """Makes an object accessible further down the pipeline."""
+        # Store on disk
+        joblib.dump(obj, self._obj_filename(name))
+
+        # Store in memory
         self.pipeline.passed_objects_dict[name] = obj
 
     def get_passed_object(self, name):
-        return self.pipeline.passed_objects_dict[name]
+        """Loads a passed object from earlier in the pipeline."""
+        try:
+            # Try loading from memory
+            obj = self.pipeline.passed_objects_dict[name]
+        except KeyError:
+            try:
+                obj = joblib.load(self._obj_filename(name))
+            except:
+                raise RuntimeError("Could not find passed object {} in memory or on disk".format(name))
+        return obj
 
     def get_task_completed_file_name(self):
         """
@@ -59,6 +85,9 @@ class RamTask(object):
         :return: bool indicating if the file marking the completeion of the task is present
         and if the dependency hashsum stored in it is equal to the current dependency hashsum
         """
+        if self.__force_rerun:
+            return False
+
         completed_file_name = self.get_task_completed_file_name()
         if isfile(completed_file_name):
             f = open(completed_file_name, 'rb')
@@ -295,7 +324,6 @@ class RamTask(object):
                 print 'Could not move file: ', file_resource, ' to ', target_path
             except OSError:
                 shutil.copyfile(file_resource, target_path)
-
 
     def get_path_to_resource_in_workspace(self, *rel_path_components):
         """

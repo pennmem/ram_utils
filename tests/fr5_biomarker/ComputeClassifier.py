@@ -10,6 +10,11 @@ from random import shuffle
 from sklearn.externals import joblib
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
+try:
+    from typing import Dict
+except ImportError:
+    pass
+
 import hashlib
 import warnings
 
@@ -67,12 +72,15 @@ class ModelOutput(object):
 
 
 class ComputeClassifier(RamTask):
-    def __init__(self, params, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+    def __init__(self, params, mark_as_completed=True, force_rerun=False):
+        RamTask.__init__(self, mark_as_completed, force_rerun)
         self.params = params
         self.pow_mat = None
         self.lr_classifier = None
-        self.xval_output = dict()  # ModelOutput per session; xval_output[-1] is across all sessions
+
+        # ModelOutput per session; xval_output[-1] is across all sessions
+        self.xval_output = dict()  # type: Dict[ModelOutput]
+
         self.perm_AUCs = None
         self.pvalue = None
 
@@ -116,11 +124,16 @@ class ComputeClassifier(RamTask):
         return auc
 
     def get_pow_mat(self):
+        """Filters the whole power matrix by removing excluded pairs.
+
+        This should really be defined as a property...
+
+        """
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
         reduced_pairs = self.get_passed_object('reduced_pairs')
         to_include = np.array([bp in reduced_pairs for bp in bipolar_pairs])
-        pow_mat =  self.get_passed_object('pow_mat')
-        pow_mat = pow_mat.reshape((len(pow_mat),-1,len(self.params.freqs)))[:,to_include,:].reshape((len(pow_mat),-1))
+        pow_mat = self.get_passed_object('pow_mat')
+        pow_mat = pow_mat.reshape((len(pow_mat), -1, len(self.params.freqs)))[:,to_include,:].reshape((len(pow_mat),-1))
         return pow_mat
 
     def pass_objects(self):
@@ -129,6 +142,7 @@ class ComputeClassifier(RamTask):
         self.pass_object('xval_output', self.xval_output)
         self.pass_object('perm_AUCs', self.perm_AUCs)
         self.pass_object('pvalue', self.pvalue)
+        self.pass_object('reduced_pow_mat', self.pow_mat)
 
         classifier_path = self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl')
         joblib.dump(self.lr_classifier, classifier_path)
@@ -136,10 +150,9 @@ class ComputeClassifier(RamTask):
         joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace(subject + '-xval_output.pkl'))
         joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace(subject + '-perm_AUCs.pkl'))
         joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject + '-pvalue.pkl'))
+        joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-reduced_pow_mat.pkl'))
 
         self.pass_object('classifier_path', classifier_path)
-
-
 
     def run(self):
 
@@ -221,10 +234,9 @@ class ComputeClassifier(RamTask):
         new_prob_array = new_classifier.predict_proba(self.pow_mat[...,1:])[:,1]
         np.testing.assert_almost_equal(new_prob_array,recall_prob_array,err_msg='Predictions do not match')
         self.lr_classifier = new_classifier
+        self.pow_mat = self.pow_mat[:,1:]
 
         self.pass_objects()
-
-
 
     def run_loso_xval(self, event_sessions, recalls, permuted=False,samples_weights=None, events=None):
         """
@@ -248,13 +260,11 @@ class ComputeClassifier(RamTask):
         auc_retrieval = np.empty(sessions.shape[0], dtype=np.float)
         auc_both = np.empty(sessions.shape[0], dtype=np.float)
 
-
         for sess_idx, sess in enumerate(sessions):
             insample_mask = (event_sessions != sess)
             insample_pow_mat = self.pow_mat[insample_mask]
             insample_recalls = recalls[insample_mask]
             insample_samples_weights = samples_weights[insample_mask]
-
 
             insample_enc_mask = insample_mask & (events.type == 'WORD')
             insample_retrieval_mask = insample_mask & ((events.type == 'REC_BASE') | (events.type == 'REC_WORD'))
@@ -278,10 +288,10 @@ class ComputeClassifier(RamTask):
             # insample_samples_weights = np.ones(n_enc_0 + n_enc_1 + n_ret_0 + n_ret_1, dtype=np.float)
             insample_samples_weights = np.ones(events.shape[0], dtype=np.float)
 
-            insample_samples_weights [insample_enc_mask & (events.recalled == 0)] = n_vec[0]
-            insample_samples_weights [insample_enc_mask & (events.recalled == 1)] = n_vec[1]
-            insample_samples_weights [insample_retrieval_mask & (events.type == 'REC_BASE')] = n_vec[2]
-            insample_samples_weights [insample_retrieval_mask & (events.type == 'REC_WORD')] = n_vec[3]
+            insample_samples_weights[insample_enc_mask & (events.recalled == 0)] = n_vec[0]
+            insample_samples_weights[insample_enc_mask & (events.recalled == 1)] = n_vec[1]
+            insample_samples_weights[insample_retrieval_mask & (events.type == 'REC_BASE')] = n_vec[2]
+            insample_samples_weights[insample_retrieval_mask & (events.type == 'REC_WORD')] = n_vec[3]
 
             insample_samples_weights = insample_samples_weights[insample_mask]
             # insample_samples_weights /= insample_samples_weights.mean()
@@ -289,29 +299,12 @@ class ComputeClassifier(RamTask):
 
             outsample_both_mask = (events.session == sess)
 
-
-
-
-
-    # % even weights by class balance
-    # n_vec = [1/n_enc_pos 1/n_enc_neg 1/n_rec_pos 1/n_rec_neg];
-    # mean_tmp = mean(n_vec);
-    # n_vec = n_vec/mean_tmp;
-    #
-    # % add scalign by E
-    # n_vec(1:2) = n_vec(1:2)*E;
-    # mean_tmp = mean(n_vec);
-    # n_vec = n_vec/mean_tmp;
-
-
-
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 if samples_weights is not None:
                     self.lr_classifier.fit(insample_pow_mat, insample_recalls,insample_samples_weights)
                 else:
                     self.lr_classifier.fit(insample_pow_mat, insample_recalls)
-
 
             outsample_mask = ~insample_mask
             outsample_pow_mat = self.pow_mat[outsample_mask]
@@ -323,24 +316,6 @@ class ComputeClassifier(RamTask):
                 self.xval_output[sess].compute_roc()
                 self.xval_output[sess].compute_tercile_stats()
             probs[outsample_mask] = outsample_probs
-
-
-            # import tables
-            #
-            # h5file = tables.open_file('%s_fold_%d.h5'%(self.pipeline.subject, sess), mode='w', title="Test Array")
-            # root = h5file.root
-            # h5file.create_array(root, "insample_recalls", insample_recalls)
-            # h5file.create_array(root, "insample_pow_mat", insample_pow_mat)
-            # h5file.create_array(root, "insample_samples_weights", insample_samples_weights)
-            # h5file.create_array(root, "outsample_recalls", outsample_recalls)
-            # h5file.create_array(root, "outsample_pow_mat", outsample_pow_mat)
-            # h5file.create_array(root, "outsample_probs", outsample_probs)
-            # h5file.create_array(root, "lr_classifier_coef", self.lr_classifier.coef_)
-            # h5file.create_array(root, "lr_classifier_intercept", self.lr_classifier.intercept_)
-            #
-            # h5file.close()
-            #
-
 
             if events is not None:
 
@@ -358,45 +333,14 @@ class ComputeClassifier(RamTask):
                 auc_both[sess_idx] = self.get_auc(
                     classifier=self.lr_classifier, features=self.pow_mat, recalls=recalls, mask=outsample_both_mask)
 
-
-                # outsample_encoding_recalls = recalls[outsample_encoding_mask]
-                # outsample_retrieval_recalls = recalls[outsample_retrieval_mask]
-                #
-                # outsample_probs_encoding = self.lr_classifier.predict_proba(self.pow_mat[outsample_encoding_mask])[:, 1]
-                # outsample_probs_retrieval = self.lr_classifier.predict_proba(self.pow_mat[outsample_retrieval_mask])[:, 1]
-                #
-                # outsample_encoding_auc = roc_auc_score(outsample_encoding_recalls, outsample_probs_encoding)
-                # outsample_retrieval_auc = roc_auc_score(outsample_retrieval_recalls, outsample_probs_retrieval)
-                #
-                #
-                # , outsample_encoding_auc
-                # print 'outsample_retrieval_auc= ', outsample_retrieval_auc
-
-
         if not permuted:
             self.xval_output[-1] = ModelOutput(recalls[events.type=='WORD'], probs[events.type=='WORD'])
             self.xval_output[-1].compute_roc()
             self.xval_output[-1].compute_tercile_stats()
 
-            # outsample_encoding_mask = (events.type == 'WORD')
-            # outsample_retrieval_mask =((events.type == 'REC_BASE') | (events.type == 'REC_WORD'))
-            #
-            # outsample_encoding_recalls = recalls[outsample_encoding_mask]
-            # outsample_retrieval_recalls = recalls[outsample_retrieval_mask]
-            #
-            # outsample_probs_encoding = self.lr_classifier.predict_proba(self.pow_mat[outsample_encoding_mask])[:, 1]
-            # outsample_probs_retrieval = self.lr_classifier.predict_proba(self.pow_mat[outsample_retrieval_mask])[:, 1]
-            #
-            # outsample_encoding_auc = roc_auc_score(outsample_encoding_recalls, outsample_probs_encoding)
-            # outsample_retrieval_auc = roc_auc_score(outsample_retrieval_recalls, outsample_probs_retrieval)
-            #
-            # print 'TOTAL outsample_encoding_auc =', outsample_encoding_auc
-            # print 'TOTAL outsample_retrieval_auc= ', outsample_retrieval_auc
-
             print 'auc_encoding=',auc_encoding, np.mean(auc_encoding)
             print 'auc_retrieval=',auc_retrieval, np.mean(auc_retrieval)
             print 'auc_both=',auc_both, np.mean(auc_both)
-
 
         if events is None:
             return probs
@@ -612,33 +556,35 @@ class ComputeEncodingClassifier(ComputeClassifier):
 
     def pass_objects(self):
         subject=self.pipeline.subject
-        classifier_path = self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl')
+        classifier_path = self.get_path_to_resource_in_workspace(subject + '-lr_classifier_encoding.pkl')
         self.pass_object('lr_classifier', self.lr_classifier)
         self.pass_object('xval_output', self.xval_output)
         self.pass_object('perm_AUCs', self.perm_AUCs)
         self.pass_object('pvalue', self.pvalue)
         self.pass_object('classifier_path',classifier_path)
+        self.pass_object('reduced_pow_mat',self.pow_mat)
 
         joblib.dump(self.lr_classifier, classifier_path)
         joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace(subject + '-xval_output.pkl'))
         joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace(subject + '-perm_AUCs.pkl'))
         joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject + '-pvalue.pkl'))
+        joblib.dump(self.pow_mat,self.get_path_to_resource_in_workspace(subject+ '-reduced_pow_mat.pkl'))
 
     def restore(self):
         subject = self.pipeline.subject
-        task = self.pipeline.task
+        task = self.pipeline.args.experiment
 
-        for attr in ['lr_classifier','xval_output','perm_AUCs','pvalue']:
+        for attr in ['xval_output','perm_AUCs','pvalue']:
             try:
                 self.__setattr__(attr,joblib.load(self.get_path_to_resource_in_workspace(subject + '-%s.pkl'%attr)))
             except IOError:
                 self.__setattr__(attr,joblib.load(self.get_path_to_resource_in_workspace(subject + '-'+task+'-%s.pkl'%attr)))
 
 
-        classifier_path = self.get_path_to_resource_in_workspace(subject+'lr_classifier.pkl')
+        classifier_path = self.get_path_to_resource_in_workspace(subject+'-lr_classifier_encoding.pkl')
         self.pass_object('classifier_path',classifier_path)
+        self.lr_classifier = joblib.load(classifier_path)
         self.pass_object('lr_classifier', self.lr_classifier)
         self.pass_object('xval_output', self.xval_output)
         self.pass_object('perm_AUCs', self.perm_AUCs)
         self.pass_object('pvalue', self.pvalue)
-

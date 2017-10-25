@@ -22,7 +22,9 @@ def atlas_location(bp_data):
             return loc_tag
 
     elif 'manual' in atlases:
-        return atlases['manual']
+        loc_tag = atlases['manual']['region']
+        if (loc_tag is not None) and (loc_tag!='') and (loc_tag!='None'):
+            return loc_tag
 
     elif (bp_data.get('type_1')=='D' or bp_data.get('type')=='D') and ('wb' in atlases):
         wb_loc = atlases['wb']['region']
@@ -36,6 +38,7 @@ def atlas_location(bp_data):
         ind_loc = atlases['ind']['region']
         if (ind_loc is not None) and (ind_loc!='') and (ind_loc!='None'):
             return ('Left ' if atlases['ind']['x']<0.0 else 'Right ') + ind_loc
+
     elif 'dk' in atlases:
         return atlases['dk'].rpartition('_')[0]
 

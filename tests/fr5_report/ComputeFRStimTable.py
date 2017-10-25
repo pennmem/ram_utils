@@ -78,7 +78,7 @@ class ComputeFRStimTable(ReportRamTask):
         try:
             ps_events = self.get_passed_object('ps_events')
             ps_sessions = np.unique(ps_events.session)
-        except KeyError:
+        except RuntimeError:
             ps_sessions = []
 
 
@@ -125,6 +125,11 @@ class ComputeFRStimTable(ReportRamTask):
                             lst_post_stim_words[j] = True
                         j += 1
                 lst_mask = (events.session==session) & (events.list==lst)
+                if sum(lst_mask) != len(lst_stim_words):
+                    new_mask  = np.in1d(all_lst_events[all_lst_events.type=='WORD'].item_name,
+                                                            events[lst_mask].item_name)
+                    lst_stim_words = lst_stim_words[new_mask]
+                    lst_post_stim_words = lst_post_stim_words[new_mask]
                 is_stim_item[lst_mask]=lst_stim_words
                 is_post_stim_item[lst_mask]=lst_post_stim_words
 
@@ -139,8 +144,8 @@ class ComputeFRStimTable(ReportRamTask):
         self.fr_stim_table['rejected'] = events.rejected
         self.fr_stim_table['item_name'] = events.item_name
         self.fr_stim_table['is_stim_list'] = [e.phase=='STIM' for e in events]
-        self.fr_stim_table['is_post_stim_item'] = np.zeros(len(self.fr_stim_table))
-        self.fr_stim_table['is_stim_item'] = events.is_stim.astype(np.bool)
+        self.fr_stim_table['is_post_stim_item'] = is_post_stim_item
+        self.fr_stim_table['is_stim_item'] = is_stim_item
         self.fr_stim_table['recalled'] = events.recalled
         self.fr_stim_table['thresh'] = 0.5
         self.fr_stim_table['is_ps4_session'] = is_ps4_session
@@ -156,7 +161,7 @@ class ComputeFRStimTable(ReportRamTask):
         print('%s differences between old and new post-stim items' % post_stim_diffs.sum())
         self.stim_params_to_sess = dict()
         self.sess_to_thresh = dict()
-        pre_stim_probs = pre_stim_probs[self.fr_stim_table.is_stim_item.values]
+        pre_stim_probs = pre_stim_probs[is_stim_item]
         self.pass_object('pre_stim_probs',pre_stim_probs)
 
         sessions = np.unique(events.session)
