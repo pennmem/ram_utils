@@ -78,7 +78,7 @@ class ComputeFRStimTable(ReportRamTask):
         try:
             ps_events = self.get_passed_object('ps_events')
             ps_sessions = np.unique(ps_events.session)
-        except KeyError:
+        except RuntimeError:
             ps_sessions = []
 
 

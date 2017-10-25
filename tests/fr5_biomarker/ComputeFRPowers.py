@@ -95,7 +95,7 @@ class ComputeFRPowers(RamTask):
         if self.bipolar_pairs is not None:
             # recording was in bipolar mode; re-compute excluded pairs
             reduced_pairs = get_reduced_pairs(self,self.bipolar_pairs)
-            config_pairs_dict  = self.get_passed_object('config_pairs_dict')[subject]['pairs']
+            config_pairs_dict = self.get_passed_object('config_pairs_dict')[subject]['pairs']
             excluded_pairs = get_excluded_dict(config_pairs_dict, reduced_pairs)
             joblib.dump(reduced_pairs,self.get_path_to_resource_in_workspace(subject+'-reduced_pairs.pkl'))
             with open(self.get_path_to_resource_in_workspace('excluded_pairs.json'),'w') as excluded_file:
@@ -117,23 +117,8 @@ class ComputeFRPowers(RamTask):
         is_encoding_event = events.type=='WORD'
 
         self.pow_mat = np.zeros((len(events),encoding_pow_mat.shape[-1]))
-
-
-
         self.pow_mat[is_encoding_event,...] = encoding_pow_mat
         self.pow_mat[~is_encoding_event,...] = retrieval_pow_mat
-        # self.compute_powers(events,events.session,monopolar_channels,bipolar_pairs)
-        # if subject == 'R1302M':
-        #     # Exclude some known bad events for this subject
-        #     try:
-        #         short_events = np.concatenate(events[:499],events[621:]).view(np.recarray)
-        #         self.pow_mat = self.pow_mat[np.in1d(events,short_events)]
-        #         self.pass_object('FR_events',events)
-        #     except Exception:
-        #         print('Using all events as specified')
-        #         pass
-
-        # self.compute_powers(events, sessions, monopolar_channels, bipolar_pairs)
 
         self.pass_object('pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
