@@ -1,13 +1,10 @@
-__author__ = 'm'
-
+import os
 import numpy as np
 import pandas as pd
 from sklearn.externals import joblib
 
 from ptsa.data.readers import BaseEventReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
-
-from RamPipeline import *
 
 from ReportUtils import ReportRamTask
 

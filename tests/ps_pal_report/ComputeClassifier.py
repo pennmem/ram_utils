@@ -1,6 +1,5 @@
-from RamPipeline import *
+import os
 
-from math import sqrt
 import numpy as np
 from scipy.stats.mstats import zscore
 from sklearn.linear_model import LogisticRegression
