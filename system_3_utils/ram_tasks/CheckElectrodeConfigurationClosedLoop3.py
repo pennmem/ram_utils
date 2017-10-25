@@ -12,8 +12,8 @@ from bptools.odin import ElectrodeConfig
 
 
 class CheckElectrodeConfigurationClosedLoop3(RamTask):
-    def __init__(self, params, mark_as_completed=True):
-        super(CheckElectrodeConfigurationClosedLoop3, self).__init__(mark_as_completed)
+    def __init__(self, params, mark_as_completed=True, force_rerun=False):
+        super(CheckElectrodeConfigurationClosedLoop3, self).__init__(mark_as_completed, force_rerun=force_rerun)
         self.params = params
 
     def validate_montage(self, electrode_config):
@@ -103,8 +103,6 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
             print
 
     def run(self):
-        bp_tal_structs = self.get_passed_object('bp_tal_structs')
-
         # stim_electrode_pair = self.pipeline.args.stim_electrode_pair
         electrode_config_file = self.pipeline.args.electrode_config_file
 
@@ -115,7 +113,7 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
         self.electrode_config_file = electrode_fname
 
         if not isfile(electrode_csv):
-            print ('Missing .csv Electrode Config File. Please make sure that %s is stored in %s' % (
+            print('Missing .csv Electrode Config File. Please make sure that %s is stored in %s' % (
                 electrode_csv, dirname(electrode_csv)))
 
             sys.exit(1)
@@ -134,8 +132,8 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
             # FIXME: move this logic into bptools
             for ch in ec.sense_channels:
                 anode, cathode = ch.contact, ch.ref
-                aname = contacts[contacts.jack_box_num == anode].contact_name
-                cname = contacts[contacts.jack_box_num == cathode].contact_name
+                aname = contacts[contacts.jack_box_num == anode].contact_name[0]
+                cname = contacts[contacts.jack_box_num == cathode].contact_name[0]
                 name = '{}-{}'.format(aname, cname)
                 pairs_dict[name] = {
                     'channel_1': anode,

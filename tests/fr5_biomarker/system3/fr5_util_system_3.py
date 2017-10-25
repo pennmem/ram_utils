@@ -119,7 +119,7 @@ pipeline = ReportPipeline(subject=args.subject,
                           workspace_dir=args.workspace_dir, mount_point=args.mount_point, args=args,)
 pipeline.add_task(FREventPreparation(mark_as_completed=mark_as_completed))
 pipeline.add_task(MontagePreparation(mark_as_completed=mark_as_completed, force_rerun=True))
-pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=mark_as_completed))
+pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False, force_rerun=True))
 pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=mark_as_completed))
 
 if args.encoding_only:
