@@ -7,7 +7,6 @@ import time
 from operator import itemgetter
 import os.path
 import numpy as np
-from RamPipeline import *
 from RamTaskL import RamTaskL
 from FR1EventPreparation import FR1EventPreparation
 from MontagePreparation import MontagePreparation

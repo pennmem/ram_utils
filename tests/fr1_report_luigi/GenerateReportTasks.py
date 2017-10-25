@@ -7,7 +7,6 @@ from ReportUtils import ReportDeployer
 import shutil
 import os.path
 import numpy as np
-from RamPipeline import *
 from ReportUtils import ReportRamTask
 from RamTaskL import RamTaskL
 from ComposeSessionSummary import ComposeSessionSummary

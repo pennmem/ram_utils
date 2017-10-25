@@ -4,7 +4,6 @@ import pandas as pd
 import os.path
 import numpy as np
 from ptsa.data.readers.IndexReader import JsonIndexReader
-# from RamPipeline import *
 import hashlib
 
 from RamTaskL import RamTaskL
