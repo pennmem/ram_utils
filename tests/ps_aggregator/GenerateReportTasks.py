@@ -1,7 +1,4 @@
-__author__ = 'm'
-
-from RamPipeline import *
-
+import os
 from PlotUtils import PlotData, BarPlotData, PlotDataCollection, PanelPlot
 import TextTemplateUtils
 
@@ -10,6 +7,9 @@ import numpy as np
 
 from latex_table import latex_table
 import shutil
+
+from ramutils.pipeline import RamTask
+
 
 def pvalue_formatting(p):
     return '\leq 0.001' if p<=0.001 else ('%.3f'%p)
@@ -370,7 +370,7 @@ class GeneratePlots(RamTask):
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
 
 
-        
+
 class GenerateReportPDF(RamTask):
     def __init__(self, mark_as_completed=True):
         RamTask.__init__(self, mark_as_completed)
@@ -394,10 +394,10 @@ class GenerateReportPDF(RamTask):
         call([pdflatex_command_str], shell=True)
 
 
-        report_core_file_name, ext = splitext(report_tex_file_name)
+        report_core_file_name, ext = os.path.splitext(report_tex_file_name)
 
 
-        src = join(output_directory,report_core_file_name + '.pdf')
+        src = os.path.join(output_directory,report_core_file_name + '.pdf')
         dst = '/protocols/r1/reports/ps1-2_dashboard.pdf'
 
         shutil.copy(src,dst)

@@ -1,11 +1,11 @@
-from RamPipeline import *
-
 import numpy as np
 from scipy.stats.mstats import zscore
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, roc_curve
 from random import shuffle
 from sklearn.externals import joblib
+
+from ramutils.pipeline import RamTask
 
 
 def normalize_sessions(pow_mat, events):
