@@ -1,4 +1,4 @@
-from RamPipeline import *
+import os
 from SessionSummary import SessionSummary
 from matplotlib import cm
 from matplotlib.colors import Normalize
@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 import time
 from operator import itemgetter
-from pandas import Series
 from statsmodels.stats.proportion import proportion_confint
 
 from ReportUtils import ReportRamTask
