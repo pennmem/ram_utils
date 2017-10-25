@@ -390,7 +390,7 @@ class TaskRegistry(object):
 
     def register_task(self, task):
         task.name = type(task).__name__
-        self.task_dict[task.name()] = task
+        self.task_dict[task.name] = task
 
     def run_tasks(self):
         for task_name, task in self.task_dict.items():
