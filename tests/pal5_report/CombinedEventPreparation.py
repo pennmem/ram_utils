@@ -1,5 +1,3 @@
-__author__ = 'm'
-
 import os
 import os.path
 import numpy as np
@@ -7,13 +5,14 @@ import numpy as np
 from ptsa.data.readers import BaseEventReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
-from RamPipeline import *
 from ReportUtils import RamTask
 
 import hashlib
 from sklearn.externals import joblib
 from ReportTasks.RamTaskMethods import create_baseline_events
 from numpy.lib.recfunctions import append_fields
+
+from ramutils.pipeline import RamTask
 
 
 class CombinedEventPreparation(RamTask):
@@ -111,14 +110,14 @@ class CombinedEventPreparation(RamTask):
 
     def process_events(self, evs, session_increment, columns_to_keep, columns_to_keep_fr, task_name='FR1'):
         """
-        
-        :param evs: recarray fo events         
-        :param session_increment: this is a fixed number we add to a session column to allow concatenation 
+
+        :param evs: recarray fo events
+        :param session_increment: this is a fixed number we add to a session column to allow concatenation
         of events from different tasks into a single recarray (we add 100 for FR1 and 200 for CatFR1)
         :param columns_to_keep: list of column names to retain in the final recarray
-        :param columns_to_keep_fr: list of columns to process in the FR or CatFR1 session  
+        :param columns_to_keep_fr: list of columns to process in the FR or CatFR1 session
         :param task_name: name of the task
-        :return: recarray with 
+        :return: recarray with
         """
         if evs is None:
             return evs
