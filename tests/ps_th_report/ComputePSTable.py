@@ -1,20 +1,11 @@
-from RamPipeline import *
-
+import os
 from math import log
 import numpy as np
 import pandas as pd
-from sklearn.externals import joblib
-from bisect import bisect_right
 from scipy.stats import norm
-import sys
-from scipy.stats import describe
 from ReportUtils import ReportRamTask
 from ptsa.data.readers.IndexReader import JsonIndexReader
 import hashlib
-
-# def prob2perf(probs, true_labels, p):
-#     idx = bisect_right(probs, p)
-#     return np.sum(true_labels[0:idx]) / float(idx) if idx>0 else 0.0
 
 
 def prob2perf_norm(xval_output, p):

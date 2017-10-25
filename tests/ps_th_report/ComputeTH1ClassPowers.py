@@ -1,9 +1,5 @@
-__author__ = 'm'
-
-from RamPipeline import *
-
+import os
 import numpy as np
-#from morlet import MorletWaveletTransform
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from sklearn.externals import joblib
 
@@ -97,7 +93,7 @@ class ComputeTH1ClassPowers(ReportRamTask):
 
             print 'Loading EEG for', n_events, 'events of session', sess
 
-          
+
             eeg_reader = EEGReader(events=sess_events, channels=monopolar_channels,
                                    start_time=self.params.th1_start_time,
                                    end_time=self.params.th1_end_time, buffer_time=0.0)

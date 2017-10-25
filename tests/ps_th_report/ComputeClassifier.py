@@ -1,5 +1,3 @@
-from RamPipeline import *
-
 from math import sqrt
 import numpy as np
 from copy import deepcopy
@@ -11,6 +9,7 @@ from random import shuffle
 from sklearn.externals import joblib
 from ReportUtils import ReportRamTask
 import warnings
+
 
 def normalize_sessions(pow_mat, events):
     sessions = np.unique(events.session)
@@ -230,12 +229,12 @@ class ComputeClassifier(ReportRamTask):
 
         events = self.get_passed_object('TH_events')
         self.pow_mat = normalize_sessions(self.get_passed_object('classify_pow_mat'), events)
-        
+
         # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='auto', solver='liblinear')
         self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced', solver='liblinear')
         # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced',solver='liblinear',fit_intercept=False)
 
-        event_sessions = events.session    
+        event_sessions = events.session
         # recalls = events.recalled
         recalls = events.distErr <= np.max([events[0].radius_size, np.median(events.distErr)])
         recalls[events.confidence==0]=0
@@ -249,7 +248,7 @@ class ComputeClassifier(ReportRamTask):
             run_loso_xval(event_sessions, recalls, self.pow_mat,self.lr_classifier,self.xval_output,permuted=False)
         else:
             sess = sessions[0]
-            
+
             # doing this because I'm changing the lists hen doing k-fold
             event_lists = deepcopy(events.trial)
 
@@ -259,7 +258,7 @@ class ComputeClassifier(ReportRamTask):
                 skf = StratifiedKFold(recalls, n_folds=self.params.n_folds,shuffle=True)
                 for i, (train_index, test_index) in enumerate(skf):
                     event_lists[test_index] = i
-            
+
             print 'Performing in-session permutation test'
             self.perm_AUCs = self.permuted_lolo_AUCs(sess, event_lists, recalls)
 

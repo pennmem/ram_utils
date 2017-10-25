@@ -1,7 +1,3 @@
-__author__ = 'm'
-
-from RamPipeline import *
-
 import numpy as np
 from scipy.stats.mstats import zscore
 #from morlet import MorletWaveletTransform
