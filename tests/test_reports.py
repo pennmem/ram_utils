@@ -21,7 +21,7 @@ def test_fr1_report(subject):
     workspace = WORKSPACE_BASE + "samplefr1_reports/"
     command = "python fr1_report.py --subject={} --task=FR1 --workspace-dir={} --mount-point={}".format(subject, workspace, MOUNT)
     retcode = subprocess.call(command, shell=True)
-    assert retcode == 0
+    assert (retcode == 0)
     return
 
 @pytest.mark.parametrize("subject",[
@@ -34,7 +34,7 @@ def test_fr5_report(subject):
     workspace = WORKSPACE_BASE + "samplefr5_reports/"
     command = "python fr5_report.py --subject={} --task=FR5 --workspace-dir={} --mount-point={}".format(subject, workspace, MOUNT)
     retcode = subprocess.call(command, shell=True)
-    assert retcode == 0
+    assert (retcode == 0)
     return
 
 @pytest.mark.parametrize("subject, n_channels, anode, cathode, pulse_frequency, pulse_duration, target_amplitude, anode_num, cathode_num",[
@@ -67,6 +67,6 @@ def test_fr5_biomarker(subject, n_channels, anode, cathode, pulse_frequency, pul
                                        workspace,
                                        MOUNT)
     retcode = subprocess.call(command, shell=True)
-    assert retcode == 0
+    assert (retcode == 0)
     return
 
