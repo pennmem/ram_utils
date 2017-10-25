@@ -1,10 +1,6 @@
-__author__ = 'm'
-
-from RamPipeline import *
-
+import os
 import numpy as np
 from scipy.stats.mstats import zscore
-#from morlet import MorletWaveletTransform
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from sklearn.externals import joblib
 
@@ -13,6 +9,7 @@ from ptsa.data.readers.IndexReader import JsonIndexReader
 from ReportUtils import ReportRamTask
 
 import hashlib
+
 try:
     from ReportTasks.RamTaskMethods import compute_powers
 except ImportError as ie:
@@ -21,6 +18,7 @@ except ImportError as ie:
         compute_powers = None
     else:
         raise ie
+
 
 class ComputeFRStimPowers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
