@@ -1,4 +1,4 @@
-from RamPipeline import *
+import os
 from SessionSummary import SessionSummary
 import pandas as pd
 from matplotlib import cm
@@ -9,7 +9,6 @@ import time
 from operator import itemgetter
 
 from ReportUtils import ReportRamTask
-from scipy import stats
 
 def make_ttest_table(bp_tal_structs, ttest_results):
     contact_nos = bp_tal_structs.channel_1.str.lstrip('0') + '-' + bp_tal_structs.channel_2.str.lstrip('0')

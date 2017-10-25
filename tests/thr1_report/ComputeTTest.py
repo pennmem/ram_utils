@@ -1,5 +1,3 @@
-from RamPipeline import *
-
 import numpy as np
 from scipy.stats import ttest_ind
 from sklearn.externals import joblib

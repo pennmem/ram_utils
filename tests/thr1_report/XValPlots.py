@@ -1,8 +1,7 @@
-__author__ = 'm'
-from RamPipeline import *
-
+import os
 from PlotUtils import PlotData, PanelPlot
 import numpy as np
+from ramutils.pipeline import RamTask
 
 #
 # class PlotData(object):
@@ -70,7 +69,7 @@ class XValPlots(RamTask):
             num_features_median = np.median(auc_results_t_thresh.num_features)
             num_features_min = np.min(auc_results_t_thresh.num_features)
             num_features_max = np.max(auc_results_t_thresh.num_features)
-            
+
             y_features[i] = num_features_median
             y_features_err[i] = num_features_max - num_features_median
 
@@ -124,8 +123,5 @@ class XValPlots(RamTask):
         #
         # plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + self.pipeline.experiment + '-' + self.pipeline.subject + '-report_plot_Cumulative.pdf')
 
-        plot_out_fname = join(self.pipeline.output_dir, 'plot_'+self.pipeline.subject+'.pdf')
+        plot_out_fname = os.path.join(self.pipeline.output_dir, 'plot_'+self.pipeline.subject+'.pdf')
         plot.savefig(plot_out_fname, dpi=300, bboxinches='tight')
-
-
-

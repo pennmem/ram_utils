@@ -1,7 +1,4 @@
-__author__ = 'm'
-
-from RamPipeline import *
-
+import os
 import numpy as np
 
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
