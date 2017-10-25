@@ -1,8 +1,8 @@
-from collections import defaultdict
 import os
+import h5py
 from os.path import *
 from distutils.dir_util import mkpath
-
+from collections import defaultdict
 from sklearn.externals import joblib
 
 from JSONUtils import JSONNode
@@ -53,6 +53,25 @@ class RamTask(object):
 
         # Store in memory
         self.pipeline.passed_objects_dict[name] = obj
+    
+    def save_array_to_hdf5(self, output, data_name, data):
+        """ Save an array of data to hdf5
+
+        Parameters:
+        -----------
+        output: (str) Path to hdf5 output file
+        data_name: (str) Name of the dataset
+        data: (np.ndarray) Data array
+
+        Notes:
+        ------
+        Primarily useful for debugging purposes. Could be used to save underlying
+        data for report plots
+        """
+        hdf = h5py.File(output, 'a') # append by default to avoid overwriting
+        hdf.create_dataset(data_name, data=data)
+        hdf.close()
+        return
 
     def get_passed_object(self, name):
         """Loads a passed object from earlier in the pipeline."""

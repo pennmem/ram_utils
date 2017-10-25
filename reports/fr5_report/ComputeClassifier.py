@@ -259,7 +259,7 @@ class ComputeClassifier(RamTask):
 
 
     def run(self):
-
+        subject = self.pipeline.subject
         events = self.get_events()
         self.pow_mat = self.get_pow_mat()
         self.pow_mat[events.type=='WORD'] = normalize_sessions(self.pow_mat[events.type=='WORD'],
@@ -278,22 +278,24 @@ class ComputeClassifier(RamTask):
         recalls[events.type=='REC_WORD'] = 1
         recalls[events.type=='REC_BASE'] = 0
 
+        sample_weights = get_sample_weights(events, self.params.encoding_samples_weight)
+
         sessions = np.unique(event_sessions)
         if len(sessions) > 1:
             print 'Performing permutation test'
-            self.perm_AUCs = self.permuted_loso_AUCs(event_sessions, recalls, samples_weights,events=events)
+            self.perm_AUCs = self.permuted_loso_AUCs(event_sessions, recalls, sample_weights,events=events)
 
             print 'Performing leave-one-session-out xval'
-            self.run_loso_xval(event_sessions, recalls, permuted=False,samples_weights=samples_weights, events=events)
+            self.run_loso_xval(event_sessions, recalls, permuted=False,samples_weights=sample_weights, events=events)
         else:
             sess = sessions[0]
             event_lists = events.list
 
             print 'Performing in-session permutation test'
-            self.perm_AUCs = self.permuted_lolo_AUCs(sess, event_lists, recalls,samples_weights=samples_weights)
+            self.perm_AUCs = self.permuted_lolo_AUCs(sess, event_lists, recalls,samples_weights=sample_weights)
 
             print 'Performing leave-one-list-out xval'
-            self.run_lolo_xval(sess, event_lists, recalls, permuted=False,samples_weights=samples_weights)
+            self.run_lolo_xval(sess, event_lists, recalls, permuted=False,samples_weights=sample_weights)
 
         print 'CROSS VALIDATION AUC =', self.xval_output[-1].auc
 
@@ -304,12 +306,21 @@ class ComputeClassifier(RamTask):
         print 'thresh =', self.xval_output[-1].jstat_thresh, 'quantile =', self.xval_output[-1].jstat_quantile
 
 
-        sample_weights = get_sample_weights(events, self.params.encoding_samples_weight)
         self.lr_classifier.fit(self.pow_mat, recalls, sample_weights)
 
         recall_prob_array = self.lr_classifier.predict_proba(self.pow_mat)[:,1]
         insample_auc = roc_auc_score(recalls, recall_prob_array)
         print 'in-sample AUC=', insample_auc
+
+        # Save predicted probabilities and model weights
+        model_output = self.lr_classifier.predict_proba(self.pow_mat)[:, 1]
+        model_weights = self.lr_classifier.coef_
+        self.save_array_to_hdf5(self.get_path_to_resource_in_workspace(subject + "-debug_data.h5"),
+                           "model_output",
+                           model_output)
+        self.save_array_to_hdf5(self.get_path_to_resource_in_workspace(subject + "-debug_data.h5"),
+                           "model_weights",
+                           model_weights)
 
         self.pass_objects()
 

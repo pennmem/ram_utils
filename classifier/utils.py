@@ -1,17 +1,30 @@
 """ Utility functions used during classifier training """
 
+import h5py
 import numpy as np
 from scipy.stats.mstats import zscore
 
 
-
 def normalize_sessions(pow_mat, events):
-    """ z-score powers within session """
+    """ z-score powers within session
+
+    Parameters:
+    ----------
+    pow_mat: (np.ndarray) Power matrix, i.e. the data matrix for the classifier (features)
+    events: (pd.DataFrame) Behavioral events data
+
+    Returns
+    -------
+    pow_mat: np.ndarray
+        Normalized features
+
+    """
 
     sessions = np.unique(events.session)
     for sess in sessions:
         sess_event_mask = (events.session == sess)
         pow_mat[sess_event_mask] = zscore(pow_mat[sess_event_mask], axis=0, ddof=1)
+
     return pow_mat
 
 
@@ -55,5 +68,9 @@ def get_sample_weights(events, encoding_multiplier):
 
 
     return weights
+
+
+def get_pal_sample_weights():
+    return
 
 
