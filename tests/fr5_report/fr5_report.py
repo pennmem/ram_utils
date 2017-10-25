@@ -1,14 +1,14 @@
-from ReportUtils import ReportPipeline,CMLParser
-
 import os
 import numpy as np
 
+from ReportUtils import ReportPipeline, CMLParser
+
 parser = CMLParser()
 # Default-ish args here
-parser.arg('--subject','R1351M')
+parser.arg('--subject','R1328E')
 parser.arg('--task','FR5')
-parser.arg('--workspace-dir','/Volumes/rhino_root/scratch/leond/fr5_reports')
-parser.arg('--mount-point','/Volumes/rhino_root')
+parser.arg('--workspace-dir','scratch/zduey/samplefr5_reports')
+parser.arg('--mount-point','/Volumes/RHINO')
 # parser.arg('--sessions',['1','2','101'])
 
 
@@ -75,6 +75,7 @@ class Params(object):
 
 
 params=Params()
+
 from LoadEEG import LoadPostStimEEG
 
 from EventPreparation import FR1EventPreparation,FR5EventPreparation
@@ -93,14 +94,21 @@ from ComputeClassifier import ComputeClassifier,ComputeFullClassifier
 
 from ComputeFRStimTable import ComputeFRStimTable
 
+from ModelUtils.stim_effects import ComputeStimEffect
+
 from ComposeSessionSummary import ComposeSessionSummary
 
 from GenerateReportTasks import GeneratePlots, GenerateTex, GenerateReportPDF
 
 
 # sets up processing pipeline
-report_pipeline = ReportPipeline(subject=args.subject, task=args.task,experiment=args.task, sessions=args.sessions,
-                                 workspace_dir=os.path.join(args.workspace_dir,args.subject), mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change,
+report_pipeline = ReportPipeline(subject=args.subject,
+                                 task=args.task,
+                                 experiment=args.task,
+                                 sessions=args.sessions,
+                                 workspace_dir=os.path.join(args.workspace_dir,args.subject),
+                                 mount_point=args.mount_point,
+                                 exit_on_no_change=args.exit_on_no_change,
                                  recompute_on_no_status=args.recompute_on_no_status)
 
 report_pipeline.add_task(FR1EventPreparation())
@@ -124,6 +132,8 @@ report_pipeline.add_task(EvaluateClassifier(params=params,mark_as_completed=True
 report_pipeline.add_task(ComputeFRStimTable(params=params,mark_as_completed=False))
 
 report_pipeline.add_task(ComposeSessionSummary(params=params,mark_as_completed=False))
+
+report_pipeline.add_task(ComputeStimEffect(params=params, mark_as_completed=False))
 
 report_pipeline.add_task(GeneratePlots())
 

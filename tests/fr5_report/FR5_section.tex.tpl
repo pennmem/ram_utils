@@ -17,7 +17,7 @@ In the free recall task, participants are presented with a list of words, one af
 \end{tabular}
 \end{tabular}
 
-\vspace{3pc}
+\vspace{1pc}
 
 \begin{center}
 \textbf{\Large <ROC_TITLE>}
@@ -25,7 +25,7 @@ In the free recall task, participants are presented with a list of words, one af
 
 \begin{figure}[!h]
 \centering
-\includegraphics[scale=0.45]{<ROC_AND_TERC_PLOT_FILE>}
+\includegraphics[scale=0.25]{<ROC_AND_TERC_PLOT_FILE>}
 \caption{\textbf{(a)} ROC curve for the subject;
 \textbf{(b)} Subject recall performance represented as
 percentage devation from the (subject) mean, separated by tercile
@@ -37,6 +37,30 @@ $\bullet$ Area Under Curve = $<FR5-AUC>$
 $\bullet$ Permutation test $p$-value = $<FR5-PERM-P-VALUE>$
 
 $\bullet$ Median of classifier output = $<FR5-JSTAT-THRESH>$
+
+\begin{center}
+\textbf{\Large <STIM_TITLE>}
+\end{center}
+
+\begin{figure}[!h]
+    \begin{subfigure}[b]{.30\textwidth}
+        \includegraphics[width=\linewidth, height=.2\textheight]{<ESTIMATED_STIM_EFFECT_PLOT_FILE_list>}
+    \end{subfigure}\hfill
+    \begin{subfigure}[b]{.30\textwidth}
+        \includegraphics[width=\linewidth, height=.2\textheight]{<ESTIMATED_STIM_EFFECT_PLOT_FILE_stim>}
+    \end{subfigure}\hfill
+    \begin{subfigure}[b]{.30\textwidth}
+        \includegraphics[width=\linewidth, height=.2\textheight]{<ESTIMATED_STIM_EFFECT_PLOT_FILE_post_stim>}
+    \end{subfigure}\hfill
+    \caption*{\textbf{Estimated effect of stim:} Filled circles represent point estimates
+    for the effect of stimulation, while horizontal lines are the 95\% credible intervals.
+    To get odds ratios from the point estimates, calcualte $e^{\beta}$ where $\beta$ is 
+    the coefficient of interest. Estimates come from a hierarchical model predicting
+    word-level recall from stimulation controlling for serial position effects. 
+    Session-specific effects are assumed to come from a common group distribution
+    centered around the cross-session average. The model is fit using MCMC sampling
+    with 5,000 draws.}
+\end{figure}
 
 <REPORT_PAGES>
 
