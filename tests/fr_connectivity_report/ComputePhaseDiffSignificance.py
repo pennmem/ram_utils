@@ -1,5 +1,4 @@
-from RamPipeline import *
-
+import os
 from random import shuffle
 import numpy as np
 from scipy.stats import zmap
@@ -10,23 +9,6 @@ from ptsa.data.readers.IndexReader import JsonIndexReader
 from ReportUtils import ReportRamTask
 
 import hashlib
-
-
-#def compute_f_stat(phase_diff_mat, recalls, f_stat_mat):
-#    n_bp_pairs, n_freqs, n_bins, n_events = phase_diff_mat.shape
-#
-#    n_recalls = recalls.sum()
-#    n_non_recalls = n_events - n_recalls
-#    for i in xrange(n_bp_pairs):
-#        for f in xrange(n_freqs):
-#            for j in xrange(n_bins):
-#                phase_diffs_1 = np.array(phase_diff_mat[i,f,j,recalls], copy=True)
-#                r_recalls = resultant_vector_length(phase_diffs_1)
-#
-#                phase_diffs_2 = np.array(phase_diff_mat[i,f,j,~recalls], copy=True)
-#                r_non_recalls = resultant_vector_length(phase_diffs_2)
-#
-#                f_stat_mat[i,f,j] = ((n_recalls-1)*(n_non_recalls-r_non_recalls)) / ((n_non_recalls-1)*(n_recalls-r_recalls))
 
 
 class ComputePhaseDiffSignificance(ReportRamTask):

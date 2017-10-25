@@ -1,6 +1,4 @@
-__author__ = 'm'
-
-from RamPipeline import *
+import os
 import time
 import numpy as np
 from ptsa.extensions.morlet import morlet
