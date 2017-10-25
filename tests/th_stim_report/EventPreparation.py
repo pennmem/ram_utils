@@ -1,3 +1,4 @@
+import os
 from os.path import *
 import sys
 sys.path.append(join(dirname(__file__),'..','..'))
@@ -7,8 +8,8 @@ import numpy as np
 from numpy.lib.recfunctions import append_fields
 from ptsa.data.readers import BaseEventReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
-from RamPipeline import *
 from ReportUtils import ReportRamTask
+
 
 class EventPreparation(ReportRamTask):
     def __init__(self, mark_as_completed=True):

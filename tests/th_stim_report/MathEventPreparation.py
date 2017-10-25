@@ -1,5 +1,4 @@
-from RamPipeline import *
-
+from os.path import join
 from BaseEventReader import BaseEventReader
 
 

@@ -15,11 +15,6 @@ cml_parser.arg('--mount-point','')
 
 args = cml_parser.parse()
 
-
-import numpy as np
-from RamPipeline import RamPipeline
-from RamPipeline import RamTask
-
 from THEventPreparation import THEventPreparation
 
 from EventPreparation import EventPreparation

@@ -1,4 +1,4 @@
-from RamPipeline import *
+import os
 
 import TextTemplateUtils
 from PlotUtils import PlotData, BarPlotData, PlotDataCollection, PanelPlot
@@ -247,27 +247,27 @@ class GeneratePlots(ReportRamTask):
             pdc.ylabel_fontsize = 20
 
             # stim items
-            stim_items = np.where(session_summary.is_stim_item)            
+            stim_items = np.where(session_summary.is_stim_item)
             stim_scatter = PlotData(x=stim_items[0], y=session_summary.all_dist_errs[stim_items], linestyle='', marker='.', markersize=20, color='r', label='Stim')
-            
+
             # non-stim items all
             # nonstim_items = np.where(~session_summary.is_stim_item)
             # nonstim_scatter = PlotData(x=nonstim_items[0], y=session_summary.all_dist_errs[nonstim_items], linestyle='', marker='.', markersize=20, color='b', label='non-Stim')
 
             # non-stim items on stim lists
             nonstim_stim_list_items = np.where(~session_summary.is_stim_item & session_summary.is_stim_list)
-            nonstim_stim_list_scatter = PlotData(x=nonstim_stim_list_items[0], y=session_summary.all_dist_errs[nonstim_stim_list_items], linestyle='', marker='.', markersize=20, color='b', label='non-Stim from stim list')            
-            
+            nonstim_stim_list_scatter = PlotData(x=nonstim_stim_list_items[0], y=session_summary.all_dist_errs[nonstim_stim_list_items], linestyle='', marker='.', markersize=20, color='b', label='non-Stim from stim list')
+
             # non-stim items on non-stim lists
             nonstim_nonstim_list_items = np.where(~session_summary.is_stim_item & ~session_summary.is_stim_list)
-            nonstim_nonstim_list_scatter = PlotData(x=nonstim_nonstim_list_items[0], y=session_summary.all_dist_errs[nonstim_nonstim_list_items], linestyle='', marker='.', markersize=20, color='k', label='non-stim list')            
+            nonstim_nonstim_list_scatter = PlotData(x=nonstim_nonstim_list_items[0], y=session_summary.all_dist_errs[nonstim_nonstim_list_items], linestyle='', marker='.', markersize=20, color='k', label='non-stim list')
 
             stim_lists = np.where(session_summary.is_stim_list)
             nonstim_lists = np.where(~session_summary.is_stim_list)
             stim_list_indicator = PlotData(x=stim_lists[0], y=[-1]*len(stim_lists[0]), linestyle='', marker='.', markersize=20, color='r')
             nonstim_list_indicator = PlotData(x=nonstim_lists[0], y=[-1]*len(nonstim_lists[0]), linestyle='', marker='.', markersize=20, color='k')
             thresh_line = PlotData(x=[0, len(session_summary.is_stim_item)],y=[session_summary.correct_thresh]*2, linestyle='--', color='k', ylim=(-2,70))
-            pdc.add_plot_data(stim_scatter)            
+            pdc.add_plot_data(stim_scatter)
             # pdc.add_plot_data(nonstim_scatter)
             pdc.add_plot_data(nonstim_stim_list_scatter)
             pdc.add_plot_data(nonstim_nonstim_list_scatter)
@@ -331,8 +331,8 @@ class GenerateReportPDF(ReportRamTask):
 
         call([pdflatex_command_str], shell=True)
 
-        report_core_file_name, ext = splitext(report_tex_file_name)
-        report_file = join(output_directory,report_core_file_name+'.pdf')
+        report_core_file_name, ext = os.path.splitext(report_tex_file_name)
+        report_file = os.path.join(output_directory,report_core_file_name+'.pdf')
         self.pass_object('report_file',report_file)
 
 
