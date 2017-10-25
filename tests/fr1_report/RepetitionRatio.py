@@ -1,12 +1,11 @@
-from RamPipeline import RamTask
 from os import path
 import os
 import numpy as np
-import cPickle
 from sklearn.externals import joblib
 from ptsa.data.readers.IndexReader import JsonIndexReader
 from ptsa.data.readers import BaseEventReader
 import hashlib
+from ramutils.pipeline import RamTask
 
 
 class RepetitionRatio(RamTask):

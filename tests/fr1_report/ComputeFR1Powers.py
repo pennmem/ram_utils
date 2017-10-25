@@ -1,13 +1,11 @@
-__author__ = 'm'
-
-from RamPipeline import *
-
+import os
 import numpy as np
 
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from sklearn.externals import joblib
 
 from ptsa.data.readers import EEGReader
+
 try:
     from ReportTasks.RamTaskMethods import compute_powers
 except ImportError as ie:
@@ -21,6 +19,7 @@ from ReportUtils import ReportRamTask
 
 import hashlib
 import time
+
 
 class ComputeFR1Powers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):

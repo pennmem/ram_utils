@@ -26,18 +26,14 @@ configure_python_paths(args.python_path)
 # ------------------------------- end of processing command line
 
 import numpy as np
-from RamPipeline import RamPipeline
 
 from FR1EventPreparation import FR1EventPreparation
-
 from ComputeFR1Powers import ComputeFR1Powers
-
 from TalPreparation import TalPreparation
-
 from ComputeAUCs import ComputeAUCs
 
+from ramutils.pipeline import RamPipeline
 
-# turn it into command line options
 
 class Params(object):
     def __init__(self):

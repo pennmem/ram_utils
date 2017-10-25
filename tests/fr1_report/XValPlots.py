@@ -1,35 +1,8 @@
-__author__ = 'm'
-from RamPipeline import *
-
-from PlotUtils import PlotData, PanelPlot
+from os.path import join
 import numpy as np
 
-#
-# class PlotData(object):
-#     # def __init__(self, x, y, xerr=None, yerr=None, x_tick_labels=None, y_tick_labels=None, title=''):
-#     def __init__(self, x, y, **options):
-#         self.ylabel_fontsize = 12
-#         self.xlabel_fontsize = 12
-#
-#         for option_name in ['xerr', 'yerr', 'x_tick_labels', 'y_tick_labels','title', 'ylabel_fontsize','ylabel_fontsize', 'xlim','ylim']:
-#             try:
-#                 setattr(self, option_name, options[option_name])
-#                 print 'option_name=',option_name,' val=',options[option_name], ' value_check = ', getattr(self, option_name)
-#             except LookupError:
-#                 setattr(self, option_name, None)
-#
-#         self.x = x
-#         self.y = y
-#
-#         # self.xerr = xerr
-#         # self.yerr = yerr
-#         # self.x_tick_labels = x_tick_labels
-#         # self.y_tick_labels = y_tick_labels
-#         #
-        # self.title = title
-
-
-
+from PlotUtils import PlotData, PanelPlot
+from ramutils.pipeline import RamTask
 
 
 class XValResults(object):
@@ -70,7 +43,7 @@ class XValPlots(RamTask):
             num_features_median = np.median(auc_results_t_thresh.num_features)
             num_features_min = np.min(auc_results_t_thresh.num_features)
             num_features_max = np.max(auc_results_t_thresh.num_features)
-            
+
             y_features[i] = num_features_median
             y_features_err[i] = num_features_max - num_features_median
 
