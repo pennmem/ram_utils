@@ -32,8 +32,6 @@ args = cml_parser.parse()
 
 # ------------------------------- end of processing command line
 
-from RamPipeline import RamPipeline
-
 from PAL1EventPreparation import PAL1EventPreparation
 
 from ComputePAL1Powers import ComputePAL1Powers
@@ -55,6 +53,8 @@ from system3.ExperimentConfigGeneratorClosedLoop5 import ExperimentConfigGenerat
 from SaveMatlabFile import SaveMatlabFile
 
 import numpy as np
+
+from ramutils.pipeline import RamPipeline
 
 
 class StimParams(object):
