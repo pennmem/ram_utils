@@ -16,7 +16,7 @@ WORKSPACE_BASE = "/scratch/zduey/"
 ]
 )
 def test_fr1_report(subject):
-    os.chdir(CODE_DIR + "/reports/fr1_report/")
+    os.chdir(CODE_DIR + "/tests/fr1_report/")
     print(os.getcwd())
     workspace = WORKSPACE_BASE + "samplefr1_reports/"
     command = "python fr1_report.py --subject={} --task=FR1 --workspace-dir={} --mount-point={}".format(subject, workspace, MOUNT)
@@ -30,7 +30,7 @@ def test_fr1_report(subject):
 ]
 )
 def test_fr5_report(subject):
-    os.chdir(CODE_DIR + "/reports/fr5_report/")
+    os.chdir(CODE_DIR + "/tests/fr5_report/")
     workspace = WORKSPACE_BASE + "samplefr5_reports/"
     command = "python fr5_report.py --subject={} --task=FR5 --workspace-dir={} --mount-point={}".format(subject, workspace, MOUNT)
     retcode = subprocess.call(command, shell=True)
@@ -42,7 +42,7 @@ def test_fr5_report(subject):
 ]
 )
 def test_fr5_biomarker(subject, n_channels, anode, cathode, pulse_frequency, pulse_duration, target_amplitude, anode_num, cathode_num):
-    os.chdir(CODE_DIR + "/reports/fr5_biomarker/")
+    os.chdir(CODE_DIR + "/tests/fr5_biomarker/")
     workspace = WORKSPACE_BASE + "samplefr5_biomarkers/"
     command = "python fr5_biomarker.py\
               --subject={}\
