@@ -22,8 +22,8 @@ def normalize_sessions(pow_mat, events):
         pow_mat[sess_event_mask] = zscore(pow_mat[sess_event_mask], axis=0, ddof=1)
     return pow_mat
 
-def compute_z_scoring_vecs(pow_mat, events):
 
+def compute_z_scoring_vecs(pow_mat, events):
     mean_dict = {}
     std_dict = {}
     sessions = np.unique(events.session)
@@ -42,7 +42,6 @@ def compute_z_scoring_vecs(pow_mat, events):
 
     # self.m = np.mean(mp_rs, axis=0)
     # self.s = np.std(mp_rs, axis=0, ddof=1)
-
 
 
 class ModelOutput(object):
@@ -90,9 +89,6 @@ class ModelOutput(object):
         self.high_pc_diff_from_mean = 100.0 * (high_terc_recall_rate - recall_rate) / recall_rate
 
 
-
-
-
 class ComputeEncodingClassifier(RamTask):
 
     def __init__(self, params, mark_as_completed=True):
@@ -121,18 +117,6 @@ class ComputeEncodingClassifier(RamTask):
         pal1_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='PAL1')))
         for fname in pal1_event_files:
             with open(fname,'rb') as f: hash_md5.update(f.read())
-        #
-        # catfr1_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='catFR1')))
-        # for fname in catfr1_event_files:
-        #     with open(fname,'rb') as f: hash_md5.update(f.read())
-        #
-        # fr3_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR3')))
-        # for fname in fr3_event_files:
-        #     with open(fname,'rb') as f: hash_md5.update(f.read())
-        #
-        # catfr3_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='catFR3')))
-        # for fname in catfr3_event_files:
-        #     with open(fname,'rb') as f: hash_md5.update(f.read())
 
         return hash_md5.digest()
 
@@ -186,13 +170,10 @@ class ComputeEncodingClassifier(RamTask):
                 auc_encoding[sess_idx] = self.get_auc(
                     classifier=self.lr_classifier, features=self.pow_mat, recalls=recalls, mask=outsample_encoding_mask)
 
-
         if not permuted:
             self.xval_output[-1] = ModelOutput(recalls, probs)
             self.xval_output[-1].compute_roc()
             self.xval_output[-1].compute_tercile_stats()
-
-
 
             print 'ENCODING ONLY CLASSIFIER auc_encoding=', auc_encoding, np.mean(auc_encoding)
             # print 'auc_retrieval=', auc_retrieval, np.mean(auc_retrieval)
@@ -299,12 +280,6 @@ class ComputeEncodingClassifier(RamTask):
         self.pass_object('encoding_classifier_path', classifier_path)
         self.pass_object('xval_encoding_output', self.xval_output)
 
-    # def compare_AUCs(self):
-    #     reduced_xval_output = self.get_passed_object('xval_output')
-    #     print '\n\n'
-    #     print 'AUC WITH ALL ELECTRODES: ', self.xval_output[-1].auc
-    #     print 'AUC EXCLUDING STIM-ADJACENT ELECTRODES: ', reduced_xval_output[-1].auc
-
     def run(self):
 
         events = self.get_passed_object('PAL1_events')
@@ -312,29 +287,21 @@ class ComputeEncodingClassifier(RamTask):
 
         encoding_mask = (events.type == 'STUDY_PAIR') | (events.type == 'PRACTICE_PAIR')
 
-
-
         # pow_mat = self.filter_pow_mat()
         pow_mat_copy = np.copy(self.filter_pow_mat())
 
         self.pow_mat = self.filter_pow_mat()
         self.pow_mat[encoding_mask] = normalize_sessions(self.pow_mat[encoding_mask], events[encoding_mask])
-
-
-
         self.pow_mat = self.pow_mat[encoding_mask]
         encoding_events = events[encoding_mask]
         encoding_recalls = encoding_events.correct
-
 
         self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced',
                                                 solver='newton-cg')
 
         event_sessions = encoding_events.session
 
-
         samples_weights = np.ones(encoding_events.shape[0], dtype=np.float)
-
 
         sessions = np.unique(event_sessions)
         if len(sessions) > 1:

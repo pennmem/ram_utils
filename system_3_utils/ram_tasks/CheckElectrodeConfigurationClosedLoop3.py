@@ -18,6 +18,10 @@ logger = get_logger()
 
 class CheckElectrodeConfigurationClosedLoop3(RamTask):
     """Task to validate and process Odin electrode configuration files."""
+    def __init__(self, params, mark_as_completed=True, force_rerun=False):
+        super(CheckElectrodeConfigurationClosedLoop3, self).__init__(mark_as_completed, force_rerun=force_rerun)
+        self.params = params
+
     def validate_montage(self, electrode_config):
         # FIXME: update this for bptools
 
@@ -122,11 +126,12 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
 
         channels = np.array(['{:03d}'.format(contact.port) for contact in ec.contacts])
 
+        # FIXME: move the following logic into bptools
+
         # Hardware bipolar mode
         if not xform.monopolar_possible():
             contacts = ec.contacts_as_recarray()
 
-            # FIXME: move this logic into bptools
             for ch in ec.sense_channels:
                 anode, cathode = ch.contact, ch.ref
                 aname = contacts[contacts.jack_box_num == anode].contact_name[0]
