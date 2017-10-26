@@ -17,7 +17,7 @@ class RamPipeline(object):
 
         # set to False to keep cached objects around even when the pipeline is
         # successful
-        self.clear_cache_on_success = True
+        self.clear_cache_on_success = False
 
         # stores matlab paths
         self.matlab_paths = None

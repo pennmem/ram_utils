@@ -17,7 +17,7 @@ TEST_OUTPUT_DIR = "/scratch/RAM_maint/automated_reports_json/tmp_testing_data/"
 @pytest.mark.parametrize("test_dir,subject", [
     (TEST_OUTPUT_DIR + "samplefr5_reports/{}/","R1308T"),
     (TEST_OUTPUT_DIR + "samplefr1_reports/{}/", "R1308T"),
-    (TEST_OUTPUT_DIR + "sample_fr5biomarkers/{}/", "R1308T"),
+    (TEST_OUTPUT_DIR + "samplefr5_biomarkers/{}/", "R1308T"),
     (TEST_OUTPUT_DIR + "samplefr5_reports/{}/","R1275D"),
     (TEST_OUTPUT_DIR + "samplefr1_reports/{}/", "R1275D"),
 ])
