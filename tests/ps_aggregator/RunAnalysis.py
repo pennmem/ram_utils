@@ -1,5 +1,3 @@
-from RamPipeline import *
-
 from collections import OrderedDict
 
 import numpy as np
@@ -9,6 +7,8 @@ from statsmodels.formula.api import ols, mixedlm
 from statsmodels.stats.anova import anova_lm
 
 from PlotUtils import PlotData, BarPlotData
+
+from ramutils.pipeline import RamTask
 
 
 class RegionFrequencyAnalysis(object):

@@ -4,14 +4,10 @@
 # python ps_report.py --subject=R1056M --task=FR1 --workspace-dir=/data10/scratch/mswat/py_run_9 --matlab-path=~/eeg --matlab-path=~/matlab/beh_toolbox --matlab-path=~/RAM/RAM_reporting --matlab-path=~/RAM/RAM_sys2Biomarkers --python-path=~/RAM_UTILS_GIT
 
 # python ps_report.py --subject=R1086M --task=FR1 --workspace-dir=/data10/scratch/mswat/R1086M_2 --matlab-path=~/eeg --matlab-path=~/matlab/beh_toolbox --matlab-path=~/RAM/RAM_reporting --matlab-path=~/RAM/RAM_sys2Biomarkers --matlab-path=~/RAM_UTILS_GIT/tests/ps2_report/AuxiliaryMatlab --python-path=~/RAM_UTILS_GIT
-import sys
 from os.path import *
 from ReportUtils import CMLParser,ReportPipeline
 from ReportUtils import ReportSummaryInventory
 from ptsa.data.readers.IndexReader import JsonIndexReader
-import re
-from glob import glob
-
 
 cml_parser = CMLParser(arg_count_threshold=1)
 
@@ -24,10 +20,6 @@ cml_parser.arg('--exit-on-no-change')
 args = cml_parser.parse()
 
 # ------------------------------- end of processing command line
-
-# import numpy as np
-# from RamPipeline import RamPipeline
-# from RamPipeline import RamTask
 
 from TH1EventPreparation import TH1EventPreparation
 
@@ -81,10 +73,10 @@ class Params(object):
         self.n_perm = 200
         self.doStratKFold = False
         self.n_folds = 8
-        
+
         self.doConf_classification = True
         self.doDist_classification = False
-        self.doClass_wTranspose    = False        
+        self.doClass_wTranspose    = False
 
 params = Params()
 

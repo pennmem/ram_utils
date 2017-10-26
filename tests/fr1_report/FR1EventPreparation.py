@@ -1,18 +1,15 @@
-__author__ = 'm'
-
 import os
 import os.path
+import hashlib
 import numpy as np
 
 from ptsa.data.readers import BaseEventReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
-from RamPipeline import *
 from ReportUtils import ReportRamTask
-
-import hashlib
 from ReportTasks.RamTaskMethods import create_baseline_events
 from ReportTasks.RamTaskMethods import filter_session
+
 
 class FR1EventPreparation(ReportRamTask):
     def __init__(self, mark_as_completed=True):

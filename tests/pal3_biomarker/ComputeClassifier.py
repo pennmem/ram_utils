@@ -1,5 +1,4 @@
-from RamPipeline import *
-
+import os
 import numpy as np
 from scipy.stats.mstats import zscore
 from sklearn.linear_model import LogisticRegression
@@ -10,6 +9,9 @@ import warnings
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
 import hashlib
+
+from ramutils.pipeline import RamTask
+
 
 def normalize_sessions(pow_mat, events):
     sessions = np.unique(events.session)

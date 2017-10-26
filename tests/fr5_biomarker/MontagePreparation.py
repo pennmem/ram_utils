@@ -1,16 +1,15 @@
 import os.path
-
 import json
+import hashlib
 
 import numpy as np
 import pandas as pd
-
 from sklearn.externals import joblib
-from ReportTasks.RamTaskMethods import get_reduced_pairs,get_excluded_dict
-from RamPipeline import RamTask
+
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
-import hashlib
+from ReportTasks.RamTaskMethods import get_reduced_pairs, get_excluded_dict
+from ramutils.pipeline import RamTask
 
 
 def atlas_location(bp_data):
@@ -32,6 +31,7 @@ def atlas_location(bp_data):
             return ('Left ' if atlases['ind']['x']<0.0 else 'Right ') + ind_loc
 
     return '--'
+
 
 def atlas_location_matlab(tag, atlas_loc, comments):
 

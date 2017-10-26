@@ -1,15 +1,17 @@
-from RamPipeline import *
+from random import shuffle
+import warnings
 
 import numpy as np
 from scipy.stats.mstats import zscore
 from scipy.stats import ttest_ind
+
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, roc_curve
 from sklearn.decomposition import PCA
-from random import shuffle
 from sklearn.externals import joblib
-import warnings
+
 from ReportUtils import ReportRamTask
+
 
 def normalize_sessions(pow_mat, events):
     sessions = np.unique(events.session)
@@ -41,9 +43,6 @@ class ModelOutput(object):
         self.fpr, self.tpr, self.thresholds = roc_curve(self.true_labels, self.probs)
         self.jstat_quantile = 0.5
         self.jstat_thresh = np.median(self.probs)
-        # idx = np.argmax(self.tpr-self.fpr)
-        # self.jstat_thresh = self.thresholds[idx]
-        # self.jstat_quantile = np.sum(self.probs <= self.jstat_thresh) / float(self.probs.size)
 
     def compute_tercile_stats(self):
         thresh_low = np.percentile(self.probs, 100.0/3.0)
@@ -98,8 +97,6 @@ class Analyze_HFA_PCA_AUC(ReportRamTask):
             insample_recalls = recalls[insample_mask]
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-
-
                 self.lr_classifier.fit(insample_pow_mat, insample_recalls)
 
             outsample_mask = ~insample_mask
@@ -182,7 +179,6 @@ class Analyze_HFA_PCA_AUC(ReportRamTask):
 
         joblib.dump(self.outsample_probs, self.get_path_to_resource_in_workspace('fs_hfa_pca_outsample_probs.pkl'))
         joblib.dump(self.AUCs, self.get_path_to_resource_in_workspace('fs_hfa_pca_AUCs.pkl'))
-
 
     def restore(self):
         self.outsample_probs = joblib.load(self.get_path_to_resource_in_workspace('fs_hfa_pca_outsample_probs.pkl'))

@@ -1,15 +1,15 @@
-from RamPipeline import *
-
 from collections import defaultdict
 import numpy as np
 from scipy.stats.mstats import zscore
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
 from sklearn.externals import joblib
+from ramutils.pipeline import RamTask
 
 
 def none_function():
     return None
+
 
 def normalize_sessions(pow_mat, events):
     sessions = np.unique(events.session)

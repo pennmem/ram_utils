@@ -1,7 +1,3 @@
-__author__ = 'm'
-
-from RamPipeline import *
-
 import numpy as np
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from sklearn.externals import joblib
@@ -15,6 +11,9 @@ except ImportError as ie:
         compute_powers = None
     else:
         raise ie
+
+from ramutils.pipeline import RamTask
+
 
 class ComputeTHClassPowers(RamTask):
     def __init__(self, params, mark_as_completed=True):
@@ -70,7 +69,7 @@ class ComputeTHClassPowers(RamTask):
 
             print 'Loading EEG for', n_events, 'events of session', sess
 
-          
+
             eeg_reader = EEGReader(events=sess_events, channels=monopolar_channels,
                                    start_time=self.params.th1_start_time,
                                    end_time=self.params.th1_end_time, buffer_time=0.0)

@@ -1,17 +1,13 @@
-from RamPipeline import *
-
-import TextTemplateUtils
 import os
 import zipfile
 from os.path import  *
-import numpy as np
-from scipy.io import savemat
-import datetime
-from subprocess import call
 from tornado.template import Template
 from glob import glob
 import shutil
 import pathlib
+
+from ramutils.pipeline import RamTask
+
 
 class ExperimentConfigGeneratorClosedLoop3(RamTask):
     def __init__(self, params, mark_as_completed=False):

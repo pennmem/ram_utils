@@ -1,5 +1,3 @@
-from RamPipeline import *
-
 import TextTemplateUtils
 import os
 import zipfile
@@ -14,6 +12,8 @@ import shutil
 import pathlib
 from itertools import cycle
 from system_3_utils import ElectrodeConfigSystem3
+
+from ramutils.pipeline import RamTask
 
 
 class ExperimentConfigGeneratorClosedLoop5_V1(RamTask):

@@ -1,7 +1,4 @@
-__author__ = 'm'
-
-from RamPipeline import *
-
+import os
 import numpy as np
 from scipy.stats.mstats import zscore
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
@@ -19,6 +16,7 @@ except ImportError as ie:
         compute_powers = None
     else:
         raise ie
+
 
 class ComputeTHStimPowers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):

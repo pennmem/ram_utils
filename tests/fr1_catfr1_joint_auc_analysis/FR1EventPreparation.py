@@ -1,14 +1,11 @@
-__author__ = 'm'
-
 import os
 import os.path
 import numpy as np
 
 from ptsa.data.readers import BaseEventReader
 
-from RamPipeline import *
-from ReportUtils import MissingDataError
 from ReportUtils import ReportRamTask
+
 
 class FR1EventPreparation(ReportRamTask):
     def __init__(self, mark_as_completed=True):

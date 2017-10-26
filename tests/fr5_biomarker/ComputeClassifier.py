@@ -1,17 +1,16 @@
-import os
 import hashlib
-import warnings
-import numpy as np
 
+from ramutils.pipeline import RamTask
+
+from ReportTasks.RamTaskMethods import run_lolo_xval,run_loso_xval,permuted_loso_AUCs,permuted_lolo_AUCs,ModelOutput
+import os
+import numpy as np
 from scipy.stats.mstats import zscore
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, roc_curve
 from random import shuffle
 from sklearn.externals import joblib
-
 from ptsa.data.readers.IndexReader import JsonIndexReader
-from RamPipeline import RamTask
-from ReportTasks.RamTaskMethods import run_lolo_xval,run_loso_xval,permuted_loso_AUCs,permuted_lolo_AUCs,ModelOutput
 from classifier.utils import normalize_sessions, get_sample_weights
 
 try:
@@ -179,7 +178,7 @@ class ComputeClassifier(RamTask):
         recall_prob_array = self.lr_classifier.predict_proba(self.pow_mat)[:,1]
         insample_auc = roc_auc_score(recalls, recall_prob_array)
         print 'in-sample AUC=', insample_auc
-       
+
         model_weights = self.lr_classifier.coef_
         self.save_array_to_hdf5(self.get_path_to_resource_in_workspace(subject + "-debug_data.h5"),
                                 "model_output",

@@ -1,6 +1,5 @@
-from RamPipeline import *
-
 import numpy as np
+from ramutils.pipeline import RamTask
 
 
 class CheckTTest(RamTask):
@@ -28,7 +27,7 @@ class CheckTTest(RamTask):
 
             sess_events = events[events.session==sess]
             sess_ttest_output = ttest_output[sess]
-            
+
             #print sess_ttest_output[0].shape
             #print sess_ttest_output[1].shape
 

@@ -4,6 +4,7 @@
 """
 
 from __future__ import print_function
+
 from os.path import *
 import numpy as np
 from system_3_utils.ram_tasks.CMLParserClosedLoop3 import CMLParserCloseLoop3
@@ -32,7 +33,7 @@ args = cml_parser.parse()
 
 # ------------------------------- end of processing command line
 
-from RamPipeline import RamPipeline
+from ramutils.pipeline import RamPipeline
 
 from tests.fr5_biomarker.FREventPreparation import FREventPreparation
 from tests.fr5_biomarker.ComputeFRPowers import ComputeFRPowers

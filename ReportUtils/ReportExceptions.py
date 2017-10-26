@@ -1,5 +1,6 @@
 import weakref
 
+
 class ReportError(Exception):
     def __init__(self, message, errors=None,status=None):
 
@@ -14,11 +15,13 @@ class ReportError(Exception):
             status.add_exception(self)
             self.status = weakref.ref(status)
 
+
 class MissingExperimentError(ReportError):
     def __init__(self, message, errors=None,status=None):
 
         # Call the base class constructor with the parameters it needs
         super(MissingExperimentError, self).__init__(message=message, errors=errors,status=status)
+
 
 class MissingDataError(ReportError):
     def __init__(self, message, errors=None,status=None):

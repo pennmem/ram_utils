@@ -1,4 +1,3 @@
-from RamPipeline import *
 from SessionSummary import SessionSummary
 
 import numpy as np
@@ -39,7 +38,7 @@ class ComposeSessionSummary(ReportRamTask):
         session_data = []
 
         th_stim_table_by_session = th_stim_table.groupby(['session'])
-        for session,th_stim_session_table in th_stim_table_by_session:            
+        for session,th_stim_session_table in th_stim_table_by_session:
             session_all_events = all_events[all_events.session == session]
             print 'session types: ',np.unique(session_all_events.type)
             # first_time_stamp = session_all_events[session_all_events.type=='SESS_START'][0].mstime

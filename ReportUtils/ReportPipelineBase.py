@@ -1,9 +1,9 @@
 import sys
-from RamPipeline import RamPipeline
-from ReportUtils.DependencyChangeTrackerLegacy import DependencyChangeTrackerLegacy
+# from ReportUtils.DependencyChangeTrackerLegacy import DependencyChangeTrackerLegacy
 from ReportUtils.ReportSummary import ReportSummary
 from ReportUtils.ReportExceptions import MissingExperimentError, MissingDataError, NumericalError
 from ReportUtils import ReportDeployer
+from ramutils.pipeline import RamPipeline
 
 
 class ReportPipelineBase(RamPipeline):
@@ -48,10 +48,11 @@ class ReportPipelineBase(RamPipeline):
 
         self.set_workspace_dir(self.workspace_dir)
 
-        dependency_tracker = DependencyChangeTrackerLegacy(subject=self.subject,
-                                                           workspace_dir=self.workspace_dir,
-                                                           mount_point=self.mount_point)
-        self.set_dependency_tracker(dependency_tracker=dependency_tracker)
+        # FIXME
+        # dependency_tracker = DependencyChangeTrackerLegacy(subject=self.subject,
+        #                                                    workspace_dir=self.workspace_dir,
+        #                                                    mount_point=self.mount_point)
+        # self.set_dependency_tracker(dependency_tracker=dependency_tracker)
 
         self.report_summary = ReportSummary()
         self.report_site_URL = 'https://memory.psych.upenn.edu/public/'
@@ -86,7 +87,6 @@ class ReportPipelineBase(RamPipeline):
             super(ReportPipelineBase, self).execute_pipeline()
 
         except KeyboardInterrupt:
-            print 'GOT KEYBOARD INTERUPT. EXITING'
             sys.exit()
         except MissingExperimentError as mee:
             pass
@@ -100,5 +100,6 @@ class ReportPipelineBase(RamPipeline):
 
             self.add_report_error(error=e, stacktrace=traceback.format_exc())
 
-        self.report_summary.add_changed_resources(
-            changed_resources=self.dependency_change_tracker.get_changed_resources())
+        # FIXME
+        # self.report_summary.add_changed_resources(
+        #     changed_resources=self.dependency_change_tracker.get_changed_resources())

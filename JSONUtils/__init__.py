@@ -1,1 +1,1 @@
-from JSONNode import JSONNode
+from .JSONNode import JSONNode

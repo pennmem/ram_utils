@@ -1,5 +1,4 @@
-from RamPipeline import *
-
+import os
 from math import log
 import numpy as np
 import pandas as pd
@@ -136,7 +135,7 @@ class ComputePSTable(ReportRamTask):
         self.ps_table['prob_diff'] = prob_diff
         self.ps_table['perf_diff'] = perf_diff
         self.ps_table['isi'] = ps_events.isi
-        
+
         self.pass_object('ps_table', self.ps_table)
         self.ps_table.to_pickle(self.get_path_to_resource_in_workspace(subject+'-'+task+'-ps_table.pkl'))
 

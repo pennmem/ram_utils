@@ -1,5 +1,4 @@
-from RamPipeline import *
-
+import os
 import numpy as np
 from scipy.stats import ttest_ind
 from sklearn.externals import joblib
@@ -7,6 +6,7 @@ from ptsa.data.readers.IndexReader import JsonIndexReader
 import hashlib
 
 from ReportUtils import ReportRamTask
+
 
 class ComputeTTest(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):

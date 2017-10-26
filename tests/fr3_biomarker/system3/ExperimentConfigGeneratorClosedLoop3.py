@@ -1,5 +1,3 @@
-from RamPipeline import *
-
 import TextTemplateUtils
 import os
 import zipfile
@@ -13,10 +11,12 @@ from glob import glob
 import shutil
 import pathlib
 
+from ramutils.pipeline import RamTask
+
+
 class ExperimentConfigGeneratorClosedLoop3(RamTask):
     def __init__(self, params, mark_as_completed=False):
         RamTask.__init__(self, mark_as_completed)
-
 
     def copy_resource_to_target_dir(self, resource_filename, target_dir):
         """

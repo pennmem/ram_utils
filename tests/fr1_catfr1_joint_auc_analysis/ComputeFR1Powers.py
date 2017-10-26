@@ -1,7 +1,3 @@
-__author__ = 'm'
-
-from RamPipeline import *
-
 import numpy as np
 from morlet import MorletWaveletTransform
 from sklearn.externals import joblib
@@ -9,6 +5,7 @@ from sklearn.externals import joblib
 from ptsa.data.readers import EEGReader
 
 from ReportUtils import ReportRamTask
+
 
 class ComputeFR1Powers(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
@@ -77,15 +74,6 @@ class ComputeFR1Powers(ReportRamTask):
 
             print 'Loading EEG for', n_events, 'events of session', sess
 
-            # eegs = Events(sess_events).get_data(channels=channels, start_time=self.params.fr1_start_time, end_time=self.params.fr1_end_time,
-            #                             buffer_time=self.params.fr1_buf, eoffset='eegoffset', keep_buffer=True, eoffset_in_time=False)
-
-            # from ptsa.data.readers import TimeSeriesEEGReader
-            # time_series_reader = TimeSeriesEEGReader(events=sess_events, start_time=self.params.fr1_start_time,
-            #                                  end_time=self.params.fr1_end_time, buffer_time=self.params.fr1_buf, keep_buffer=True)
-            #
-            # eegs = time_series_reader.read(monopolar_channels)
-
             # VERSION 2/22/2016
             # eeg_reader = EEGReader(events=sess_events, channels=monopolar_channels,
             #                        start_time=self.params.fr1_start_time,
@@ -107,13 +95,11 @@ class ComputeFR1Powers(ReportRamTask):
                 events = events[ev_order]
                 self.pass_object(self.pipeline.task+'_events', events)
 
-
             # mirroring
             #eegs[...,:1365] = eegs[...,2730:1365:-1]
             #eegs[...,2731:4096] = eegs[...,2729:1364:-1]
 
             #eegs = eegs.add_mirror_buffer(duration=self.params.fr1_buf)
-
 
             if self.samplerate is None:
                 self.samplerate = float(eegs.samplerate)

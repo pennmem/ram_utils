@@ -1,15 +1,9 @@
-__author__ = 'm'
-
-
-from RamPipeline import *
-
+import os
 import numpy as np
 from scipy.stats.mstats import zscore
-#from morlet import MorletWaveletTransform
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from sklearn.externals import joblib
 from ptsa.data.readers.IndexReader import JsonIndexReader
-from ptsa.data.events import Events
 from ptsa.data.readers import EEGReader,BaseRawReader
 from ReportUtils import ReportRamTask
 from ptsa.data.filters import MonopolarToBipolarMapper

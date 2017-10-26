@@ -1,4 +1,3 @@
-from RamPipeline import RamTask
 from os import path
 import numpy as np
 import cPickle
@@ -6,6 +5,7 @@ from sklearn.externals import joblib
 from ptsa.data.readers.IndexReader import JsonIndexReader
 from ptsa.data.readers import BaseEventReader
 import hashlib
+from ramutils.pipeline import RamTask
 
 
 class RepetitionRatio(RamTask):
@@ -96,11 +96,11 @@ class RepetitionRatio(RamTask):
         json_reader = JsonIndexReader(self.pipeline.mount_point+'/protocols/r1.json')
         subjects = json_reader.subjects(experiment='catFR1')
         all_repetition_rates = {}
-    
+
         for subject in subjects:
             try:
                 print 'Repetition ratios for subject: ',subject
-    
+
                 evs_field_list = ['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime', 'type',
                                   'eegoffset', 'iscorrect', 'answer', 'recalled', 'item_name', 'intrusion', 'montage', 'list',
                                   'eegfile', 'msoffset']
@@ -116,20 +116,20 @@ class RepetitionRatio(RamTask):
                 for sess_file in event_files:
                     e_path = path.join(str(sess_file))
                     e_reader = BaseEventReader(filename=e_path, eliminate_events_with_no_eeg=True)
-    
+
                     sess_events = e_reader.read()[evs_field_list]
-    
+
                     if events is None:
                         events = sess_events
                     else:
                         events = np.hstack((events, sess_events))
-    
+
                 events = events.view(np.recarray)
                 recalls = events[events.recalled==1]
                 sessions = np.unique(recalls.session)
                 lists=np.unique(recalls.list)
                 repetition_rates = np.empty([len(sessions),len(lists)])
-    
+
                 for i,r in enumerate(repetition_rates.flat):
                     repetition_rates.flat[i] = np.nan
                 for i,session in enumerate(sessions):

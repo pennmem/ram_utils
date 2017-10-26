@@ -1,9 +1,7 @@
-from RamPipeline import *
-
+import os
 import TextTemplateUtils
 from PlotUtils import PlotData, BarPlotData, PanelPlot,PlotDataCollection
 from latex_table import latex_table
-import re
 import numpy as np
 import datetime
 from subprocess import call
@@ -292,8 +290,8 @@ class GenerateReportPDF(ReportRamTask):
 
         call([pdflatex_command_str], shell=True)
 
-        report_core_file_name, ext = splitext(combined_report_tex_file_name)
-        report_file = join(output_directory,report_core_file_name+'.pdf')
+        report_core_file_name, ext = os.path.splitext(combined_report_tex_file_name)
+        report_file = os.path.join(output_directory,report_core_file_name+'.pdf')
         self.pass_object('report_file',report_file)
 
 
@@ -312,5 +310,3 @@ class DeployReportPDF(ReportRamTask):
         ssc = rd.split_subject_code(self.pipeline.subject)
         report_base_dir = rd.report_base_dir(ssc)
         shutil.copyfile(SME_file,os.path.join(self.pipeline.mount_point,report_base_dir,os.path.basename(SME_file)))
-
-

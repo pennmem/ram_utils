@@ -1,12 +1,9 @@
-__author__ = 'm'
-
-from RamPipeline import *
-
+import os
 import numpy as np
 from scipy.stats.mstats import zscore
-#from morlet import MorletWaveletTransform
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from sklearn.externals import joblib
+
 try:
     from ReportTasks.RamTaskMethods import compute_powers
 except ImportError as ie:

@@ -1,65 +1,42 @@
-DEBUG = True
-
+import time
 from os.path import *
+import numpy as np
 
 from pal5_prompt import parse_command_line, Args
 
-from system_3_utils.ram_tasks.CMLParserClosedLoop5 import CMLParserCloseLoop5
-import sys
-import time
-
-if sys.platform.startswith('win'):
-
-    prefix = 'd:/'
-
-else:
-
-    prefix = '/Volumes/rhino_root'
 args_list = []
 
 try:
+    # raise KeyboardInterrupt
     args_obj = parse_command_line()
 except KeyboardInterrupt:
 
     args_obj = Args()
 
     args_obj.subject = 'R1333N'
-    args_obj.anodes =   ['LPLT5','LAHD21']
-    args_obj.cathodes = ['LPLT6','LAHD22']
-    args_obj.electrode_config_file = '/Volumes/rhino_root/scratch/system3_configs/ODIN_configs/R1333N/R1333N_28AUG2017L0M0STIM.csv'
-    args_obj.experiment = 'PS4_PAL5'
-    args_obj.min_amplitudes = [0.25,0.25]
-    args_obj.max_amplitudes = [1.0,1.0]
-    args_obj.mount_point = prefix
+    args_obj.anodes = ['LPLT5', 'LAHD21']
+    args_obj.cathodes = ['LPLT6', 'LAHD22']
+    args_obj.electrode_config_file = '/Users/depalati/mnt/rhino/scratch/system3_configs/ODIN_configs/R1333N/R1333N_28AUG2017L0M0STIM.csv'
+    args_obj.experiment = 'PAL5'
+    args_obj.min_amplitudes = [0.25, 0.25]
+    args_obj.max_amplitudes = [1.0, 1.0]
+    args_obj.mount_point = '/Users/depalati/mnt/rhino'
     args_obj.pulse_frequency = 200
-    args_obj.workspace_dir = join('/Volumes','rhino_root', 'scratch', 'leond','pal5_biomarker')
+    args_obj.workspace_dir = '/Users/depalati/mnt/rhino/scratch/depalati/configs'
 
     args_list.append(args_obj)
 
-# ------------------------------- end of processing command line
-
-from RamPipeline import RamPipeline
-
+from ramutils.pipeline import RamPipeline
 from tests.pal5_biomarker.PAL1EventPreparation import PAL1EventPreparation
-
 from tests.pal5_biomarker.ComputePAL1Powers import ComputePAL1Powers
-
 from tests.pal5_biomarker.MontagePreparation import MontagePreparation
-
 from system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
-
 from tests.pal5_biomarker.ComputeClassifier import ComputeClassifier
-
 from tests.pal5_biomarker.ComputeClassifier import ComputeFullClassifier
-
 from tests.pal5_biomarker.ComputeEncodingClassifier import ComputeEncodingClassifier
 from tests.pal5_biomarker.LogResults import LogResults
-
 from tests.pal5_biomarker.ComputeBiomarkerThreshold import ComputeBiomarkerThreshold
-
 from tests.pal5_biomarker.system3.ExperimentConfigGeneratorClosedLoop5 import ExperimentConfigGeneratorClosedLoop5
-
-import numpy as np
 
 
 class StimParams(object):
@@ -82,20 +59,10 @@ class Params(object):
         self.pal1_end_time = 2.00
         self.pal1_buf = 1.2
 
-        # original code
         self.pal1_retrieval_start_time = -0.625
         self.pal1_retrieval_end_time = -0.1
         self.pal1_retrieval_buf = 0.524
 
-
-        # # todo remove in the production code
-        # self.pal1_retrieval_start_time = -0.600
-        # self.pal1_retrieval_end_time = -0.1
-        # self.pal1_retrieval_buf = 0.499
-
-
-        # self.retrieval_samples_weight = 2.5
-        # self.encoding_samples_weight = 2.5
         self.encoding_samples_weight = 1.0
 
         self.recall_period = 5.0
@@ -106,20 +73,15 @@ class Params(object):
         self.filt_order = 4
 
         self.freqs = np.logspace(np.log10(6), np.log10(180), 8)
-        # self.freqs = np.logspace(np.log10(3), np.log10(180), 8)  # TODO - remove it from production code
 
         self.log_powers = True
 
         self.penalty_type = 'l2'
-        # self.C = 7.2e-4  # TODO - remove it from production code
         self.C = 0.048
-
 
         self.n_perm = 200
 
-
-        self.stim_params = StimParams(
-        )
+        self.stim_params = StimParams()
 
 
 params = Params()
@@ -135,14 +97,6 @@ class ReportPipeline(RamPipeline):
 
 
 if __name__ == '__main__':
-    # report_pipeline = ReportPipeline(subject=args.subject,
-    #                                  workspace_dir=join(args.workspace_dir, args.subject), mount_point=args.mount_point,
-    #                                  args=args)
-
-
-    # log_filename = join('D:/PAL5', 'PAL5_' + time.strftime('%Y_%m_%d_%H_%M_%S')+'.csv')
-
-
     for args_obj in args_list:
         log_filename = join(args_obj.workspace_dir,args_obj.subject,time.strftime('%Y_%m_%d')+'.csv')
         report_pipeline = ReportPipeline(subject=args_obj.subject,
@@ -157,29 +111,12 @@ if __name__ == '__main__':
                                          args=args_obj)
 
         report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
-
         report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
-
-        #
         report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
-        #
         report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=False))
-
         report_pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=False))
-
         report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
-
-
         report_pipeline.add_task(ComputeBiomarkerThreshold(params=params, mark_as_completed=False))
-
-
-
-        # report_pipeline.add_task(LogResults(params=params, mark_as_completed=False, log_filename=log_filename))
         report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=False))
-
         report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
-
-        # starts processing pipeline
         report_pipeline.execute_pipeline()
-
-

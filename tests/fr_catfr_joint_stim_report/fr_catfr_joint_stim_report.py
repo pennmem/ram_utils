@@ -13,10 +13,7 @@ cml_parser.arg('--mount-point','')
 
 args = cml_parser.parse()
 
-
-import numpy as np
-from RamPipeline import RamPipeline
-from RamPipeline import RamTask
+from ramutils.pipeline import RamPipeline, RamTask
 
 from FREventPreparation import FREventPreparation
 
@@ -40,8 +37,6 @@ from ComposeSessionSummary import ComposeSessionSummary
 
 from GenerateReportTasks import *
 
-
-# turn it into command line options
 
 class Params(object):
     def __init__(self):

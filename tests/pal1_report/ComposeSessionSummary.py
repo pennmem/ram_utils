@@ -1,4 +1,4 @@
-from RamPipeline import *
+import os
 from SessionSummary import SessionSummary
 from matplotlib import cm
 from matplotlib.colors import Normalize
@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 import time
 from operator import itemgetter
-from pandas import Series
 from statsmodels.stats.proportion import proportion_confint
 
 from ReportUtils import ReportRamTask
@@ -47,7 +46,8 @@ class ComposeSessionSummary(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
         super(ComposeSessionSummary,self).__init__(mark_as_completed)
         self.params = params
-        if self.dependency_inventory:
+        # FIXME
+        if hasattr(self, 'dependency_inventory'):
             self.dependency_inventory.add_dependent_resource(resource_name='localization',
                                         access_path = ['electrodes','localization'])
 

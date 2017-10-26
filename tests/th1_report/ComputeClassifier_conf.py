@@ -1,5 +1,4 @@
-from RamPipeline import *
-
+import os
 from ptsa.data.readers.IndexReader import JsonIndexReader
 import hashlib
 
@@ -12,6 +11,7 @@ from sklearn.cross_validation import StratifiedKFold
 from random import shuffle
 from sklearn.externals import joblib
 from ReportUtils import ReportRamTask
+
 
 def normalize_sessions(pow_mat, events):
     sessions = np.unique(events.session)
@@ -196,17 +196,17 @@ class ComputeClassifier_conf(ReportRamTask):
         # self.lr_classifier_conf = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced', solver='liblinear')
         # self.lr_classifier_conf = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced',solver='liblinear',fit_intercept=False)
 
-        event_sessions = events.session    
+        event_sessions = events.session
         recalls = events.confidence == 2
 
         # Don't run confidence decoding if there are too few examples in each class
         if (np.sum(recalls==False) < 5) or (np.sum(recalls==True) < 5):
             self.conf_decode_success = False
             self.pass_object('conf_decode_success', self.conf_decode_success)
-            joblib.dump(self.pvalue_conf, self.get_path_to_resource_in_workspace(subject + '-' + task + '-conf_decode_success.pkl')) 
-        else:       
+            joblib.dump(self.pvalue_conf, self.get_path_to_resource_in_workspace(subject + '-' + task + '-conf_decode_success.pkl'))
+        else:
 
-        
+
             sessions = np.unique(event_sessions)
             if len(sessions) > 1:
                 print 'Performing permutation test'
@@ -225,7 +225,7 @@ class ComputeClassifier_conf(ReportRamTask):
                     skf = StratifiedKFold(recalls, n_splits=self.params.n_folds,shuffle=True)
                     for i, (train_index, test_index) in enumerate(skf):
                         event_lists[test_index] = i
-            
+
                 print 'Performing in-session permutation test'
                 self.perm_AUCs_conf = self.permuted_lolo_AUCs(sess, event_lists, recalls)
 
@@ -256,7 +256,7 @@ class ComputeClassifier_conf(ReportRamTask):
             joblib.dump(self.xval_output_conf, self.get_path_to_resource_in_workspace(subject + '-' + task + '-xval_output_conf.pkl'))
             joblib.dump(self.perm_AUCs_conf, self.get_path_to_resource_in_workspace(subject + '-' + task + '-perm_AUCs_conf.pkl'))
             joblib.dump(self.pvalue_conf, self.get_path_to_resource_in_workspace(subject + '-' + task + '-pvalue_conf.pkl'))
-            joblib.dump(self.conf_decode_success, self.get_path_to_resource_in_workspace(subject + '-' + task + '-conf_decode_success.pkl'))        
+            joblib.dump(self.conf_decode_success, self.get_path_to_resource_in_workspace(subject + '-' + task + '-conf_decode_success.pkl'))
 
     def restore(self):
         subject = self.pipeline.subject
@@ -266,10 +266,10 @@ class ComputeClassifier_conf(ReportRamTask):
         self.xval_output_conf = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-xval_output_conf.pkl'))
         self.perm_AUCs_conf = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-perm_AUCs_conf.pkl'))
         self.pvalue_conf = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-pvalue_conf.pkl'))
-        self.conf_decode_success = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-conf_decode_success.pkl'))        
+        self.conf_decode_success = joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-conf_decode_success.pkl'))
 
         self.pass_object('lr_classifier_conf', self.lr_classifier_conf)
         self.pass_object('xval_output_conf', self.xval_output_conf)
         self.pass_object('perm_AUCs_conf', self.perm_AUCs_conf)
         self.pass_object('pvalue_conf', self.pvalue_conf)
-        self.pass_object('conf_decode_success', self.conf_decode_success)        
+        self.pass_object('conf_decode_success', self.conf_decode_success)

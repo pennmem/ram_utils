@@ -1,7 +1,3 @@
-__author__ = 'm'
-
-
-
 import random
 import os
 import os.path
@@ -10,13 +6,12 @@ from numpy.lib.recfunctions import append_fields
 from ptsa.data.readers import BaseEventReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
-from RamPipeline import *
-from ReportUtils import RamTask
-
 import hashlib
 import warnings
 from ReportTasks.RamTaskMethods import create_baseline_events_pal
 from ptsa.data.readers import EEGReader
+
+from ramutils.pipeline import RamTask
 
 
 class PAL1EventPreparation(RamTask):

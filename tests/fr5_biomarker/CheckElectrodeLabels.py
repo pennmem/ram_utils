@@ -1,5 +1,6 @@
 import sys
-from ReportUtils import RamTask
+from ramutils.pipeline import RamTask
+
 
 class CheckElectrodeLabels(RamTask):
     def __init__(self, params, mark_as_completed=True):

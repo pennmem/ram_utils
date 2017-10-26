@@ -4,7 +4,6 @@ from scipy.stats.mstats import zscore
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 import os.path
 import numpy as np
-from RamPipeline import *
 from RamTaskL import RamTaskL
 from FR1EventPreparation import FR1EventPreparation
 from MontagePreparation import MontagePreparation

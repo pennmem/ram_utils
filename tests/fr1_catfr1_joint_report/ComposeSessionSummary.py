@@ -1,12 +1,13 @@
-from RamPipeline import *
-from SessionSummary import SessionSummary
+import os
+import time
+from operator import itemgetter
+import numpy as np
+
 import pandas as pd
 from matplotlib import cm
 from matplotlib.colors import Normalize
-import numpy as np
-import time
-from operator import itemgetter
 
+from SessionSummary import SessionSummary
 from ReportUtils import ReportRamTask
 
 
@@ -14,6 +15,7 @@ def make_ttest_table(bp_tal_structs, ttest_results):
     contact_nos = bp_tal_structs.channel_1.str.lstrip('0') + '-' + bp_tal_structs.channel_2.str.lstrip('0')
     ttest_data = [list(a) for a in zip(bp_tal_structs.etype.values, contact_nos.values, bp_tal_structs.index.values, bp_tal_structs.bp_atlas_loc, ttest_results[1], ttest_results[0])]
     return ttest_data
+
 
 def format_ttest_table(table_data):
     for i,line in enumerate(table_data):

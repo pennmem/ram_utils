@@ -1,5 +1,4 @@
-from RamPipeline import *
-
+import os
 import numpy as np
 from copy import deepcopy
 from scipy.stats.mstats import zscore
@@ -175,14 +174,14 @@ class ComputeClassifier_withTranspose(ReportRamTask):
         AUCs = np.empty(shape=n_perm, dtype=np.float)
         for i in xrange(n_perm):
             shuffle(permuted_recalls)
-            
-            # JFM Note: I'm not permuting within list bc there are only 2 or 3 items per list            
+
+            # JFM Note: I'm not permuting within list bc there are only 2 or 3 items per list
             # for lst in event_lists:
                 # sel = (event_lists == lst)
                 # list_permuted_recalls = permuted_recalls[sel]
                 # shuffle(list_permuted_recalls)
                 # permuted_recalls[sel] = list_permuted_recalls
-                
+
             probs = self.run_lolo_xval(sess, event_lists, permuted_recalls, permuted=True)
             AUCs[i] = roc_auc_score(recalls, probs)
             print 'AUC = ', AUCs[i]
@@ -194,12 +193,12 @@ class ComputeClassifier_withTranspose(ReportRamTask):
 
         events = self.get_passed_object(task + '_events')
         self.pow_mat = normalize_sessions(self.get_passed_object('classify_pow_mat'), events)
-        
+
         self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced', solver='liblinear')
         # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced', solver='liblinear')
         # self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced',solver='liblinear',fit_intercept=False)
 
-        event_sessions = events.session    
+        event_sessions = events.session
         recalls = (events.recalled==True)|(events.recalled_ifFlipped==True)
 
         sessions = np.unique(event_sessions)
@@ -211,7 +210,7 @@ class ComputeClassifier_withTranspose(ReportRamTask):
             self.run_loso_xval(event_sessions, recalls, permuted=False)
         else:
             sess = sessions[0]
-            
+
             # doing this because I'm changing the lists hen doing k-fold
             event_lists = deepcopy(events.trial)
 
@@ -221,7 +220,7 @@ class ComputeClassifier_withTranspose(ReportRamTask):
                 skf = StratifiedKFold(recalls, n_splits=self.params.n_folds,shuffle=True)
                 for i, (train_index, test_index) in enumerate(skf):
                     event_lists[test_index] = i
-            
+
             print 'Performing in-session permutation test'
             self.perm_AUCs = self.permuted_lolo_AUCs(sess, event_lists, recalls)
 
@@ -248,7 +247,7 @@ class ComputeClassifier_withTranspose(ReportRamTask):
 
         joblib.dump(self.lr_classifier, self.get_path_to_resource_in_workspace(subject + '-' + task + '-lr_classifier_transpose.pkl'))
         joblib.dump(self.xval_output, self.get_path_to_resource_in_workspace(subject + '-' + task + '-xval_output_transpose.pkl'))
-        joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace(subject + '-' + task + '-perm_AUCs_transpose.pkl')) 
+        joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace(subject + '-' + task + '-perm_AUCs_transpose.pkl'))
         joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject + '-' + task + '-pvalue_transpose.pkl'))
 
     def restore(self):

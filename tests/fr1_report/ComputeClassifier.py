@@ -1,21 +1,20 @@
-import hashlib
+import os
+from random import shuffle
 import warnings
-import h5py
-import numpy as np
+import hashlib
 
-from math import sqrt
+import numpy as np
 from scipy.stats.mstats import zscore
+
 from sklearn.linear_model import LogisticRegression
 from sklearn.externals import joblib
-from random import shuffle
 from sklearn.metrics import roc_auc_score
 
-from RamPipeline import *
-from ReportUtils import ReportRamTask
-from ReportTasks.RamTaskMethods import run_lolo_xval,run_loso_xval,permuted_loso_AUCs,permuted_lolo_AUCs,ModelOutput
 from ptsa.data.readers.IndexReader import JsonIndexReader
-from classifier.utils import normalize_sessions, get_sample_weights
 
+from ReportTasks.RamTaskMethods import run_lolo_xval,run_loso_xval,permuted_loso_AUCs,permuted_lolo_AUCs,ModelOutput
+from ReportUtils import ReportRamTask
+from classifier.utils import normalize_sessions, get_sample_weights
 
 
 class ComputeClassifier(ReportRamTask):
@@ -27,7 +26,6 @@ class ComputeClassifier(ReportRamTask):
         self.xval_output = dict()   # ModelOutput per session; xval_output[-1] is across all sessions
         self.perm_AUCs = None
         self.pvalue = None
-
 
     def input_hashsum(self):
         subject = self.pipeline.subject
@@ -52,7 +50,6 @@ class ComputeClassifier(ReportRamTask):
             with open(fname,'rb') as f: hash_md5.update(f.read())
 
         return hash_md5.digest()
-
 
     def xval_test_type(self, events):
         event_sessions = events.session
@@ -160,7 +157,6 @@ class ComputeJointClassifier(ReportRamTask):
         self.perm_AUCs = None
         self.pvalue = None
 
-
     def input_hashsum(self):
         subject = self.pipeline.subject
         tmp = subject.split('_')
@@ -184,8 +180,6 @@ class ComputeJointClassifier(ReportRamTask):
             with open(fname,'rb') as f: hash_md5.update(f.read())
 
         return hash_md5.digest()
-
-
 
     def run(self):
         subject = self.pipeline.subject
@@ -279,7 +273,6 @@ class ComputeJointClassifier(ReportRamTask):
         joblib.dump(self.perm_AUCs, self.get_path_to_resource_in_workspace(subject +        '-joint_perm_AUCs.pkl'))
         joblib.dump(self.pvalue, self.get_path_to_resource_in_workspace(subject +           '-joint_pvalue.pkl'))
 
-
     def run_loso_xval(self, event_sessions, recalls, permuted=False,samples_weights=None, events=None):
         probs = np.empty_like(events[events.type=='WORD'], dtype=np.float)
 
@@ -337,8 +330,6 @@ class ComputeJointClassifier(ReportRamTask):
             self.xval_output[-1] = ModelOutput(recalls[events.type=='WORD'], probs)
             self.xval_output[-1].compute_roc()
             self.xval_output[-1].compute_tercile_stats()
-
-
             print 'auc_encoding=',auc_encoding, np.mean(auc_encoding)
             print 'auc_retrieval=',auc_retrieval, np.mean(auc_retrieval)
             print 'auc_both=',auc_both, np.mean(auc_both)
@@ -351,7 +342,6 @@ class ComputeJointClassifier(ReportRamTask):
         probs = classifier.predict_proba(features[mask])[:, 1]
         auc = roc_auc_score(masked_recalls, probs)
         return auc
-
 
     def permuted_loso_AUCs(self, event_sessions, recalls, samples_weights=None,events=None):
         n_perm = self.params.n_perm
@@ -370,7 +360,6 @@ class ComputeJointClassifier(ReportRamTask):
             except ValueError:
                 AUCs[i] = np.nan
         return AUCs
-
 
     def run_lolo_xval(self, sess, event_lists, recalls, permuted=False, samples_weights=None):
         probs = np.empty_like(recalls, dtype=np.float)
@@ -404,7 +393,6 @@ class ComputeJointClassifier(ReportRamTask):
 
         return probs
 
-
     def permuted_lolo_AUCs(self, sess, event_lists, recalls,samples_weights=None):
         n_perm = self.params.n_perm
         permuted_recalls = np.array(recalls)
@@ -420,7 +408,6 @@ class ComputeJointClassifier(ReportRamTask):
             print 'AUC =', AUCs[i]
         return AUCs
 
-
     def restore(self):
         subject = self.pipeline.subject
 
@@ -431,7 +418,3 @@ class ComputeJointClassifier(ReportRamTask):
         self.pass_object('joint_xval_output', self.xval_output)
         self.pass_object('joint_perm_AUCs', self.perm_AUCs)
         self.pass_object('joint_pvalue', self.pvalue)
-
-
-
-

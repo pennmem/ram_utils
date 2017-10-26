@@ -1,4 +1,4 @@
-from RamPipeline import *
+import os
 from SessionSummary import SessionSummary
 import pandas as pd
 from matplotlib import cm
@@ -10,12 +10,13 @@ import time
 from operator import itemgetter
 
 from ReportUtils import ReportRamTask
-from scipy import stats
+
 
 def make_ttest_table(bp_tal_structs, ttest_results):
     contact_nos = bp_tal_structs.channel_1.str.lstrip('0') + '-' + bp_tal_structs.channel_2.str.lstrip('0')
     ttest_data = [list(a) for a in zip(bp_tal_structs.etype.values, contact_nos.values, bp_tal_structs.index.values, bp_tal_structs.bp_atlas_loc, ttest_results[1], ttest_results[0])]
     return ttest_data
+
 
 def format_ttest_table(table_data):
     for i,line in enumerate(table_data):
@@ -33,12 +34,12 @@ def format_ttest_table(table_data):
 
 
 class ComposeSessionSummary(ReportRamTask):
-
-
     def __init__(self, params, mark_as_completed=True):
         super(ComposeSessionSummary,self).__init__(mark_as_completed)
         self.params = params
-        if self.dependency_inventory:
+
+        # FIXME
+        if hasattr(self, 'dependency_inventory'):
             self.dependency_inventory.add_dependent_resource(resource_name='localization',
                                         access_path = ['electrodes','localization'])
 

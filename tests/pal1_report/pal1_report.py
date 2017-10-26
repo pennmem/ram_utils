@@ -5,7 +5,7 @@
 
 # python ps_report.py --subject=R1086M --task=FR1 --workspace-dir=/data10/scratch/mswat/R1086M_2 --matlab-path=~/eeg --matlab-path=~/matlab/beh_toolbox --matlab-path=~/RAM/RAM_reporting --matlab-path=~/RAM/RAM_sys2Biomarkers --matlab-path=~/RAM_UTILS_GIT/tests/ps2_report/AuxiliaryMatlab --python-path=~/RAM_UTILS_GIT
 
-
+import os.path
 
 from ReportUtils import CMLParser,ReportPipeline
 
@@ -14,9 +14,9 @@ cml_parser = CMLParser(arg_count_threshold=1)
 
 cml_parser.arg('--subject','R1333N')
 cml_parser.arg('--task','PAL1')
-cml_parser.arg('--workspace-dir','/Volumes/rhino_root/scratch/leond/PAL1_reports/R1333N')
+cml_parser.arg('--workspace-dir', '/Users/depalati/mnt/rhino/scratch/depalati/reports')
 # cml_parser.arg('--workspace-dir','/Users/m/automated_reports/PAL1_reports')
-cml_parser.arg('--mount-point','/Users/leond')
+cml_parser.arg('--mount-point', '/Users/depalati/mnt/rhino')
 # cml_parser.arg('--recompute-on-no-status')
 # cml_parser.arg('--exit-on-no-change')
 
@@ -83,7 +83,7 @@ params = Params()
 
 # # sets up processing pipeline
 report_pipeline = ReportPipeline(subject=args.subject, task=args.task,experiment=args.task,sessions=args.sessions,
-                                 workspace_dir=join(args.workspace_dir, args.subject),
+                                 workspace_dir=os.path.join(args.workspace_dir, args.subject),
                                  mount_point=args.mount_point, exit_on_no_change=args.exit_on_no_change,
                                  recompute_on_no_status=args.recompute_on_no_status)
 

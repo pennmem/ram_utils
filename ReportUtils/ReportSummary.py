@@ -1,13 +1,13 @@
 from collections import OrderedDict
 from datetime import date
-from ReportUtils import *
-from ReportUtils.ReportExceptions import *
-
-from JSONUtils import JSONNode
 from os.path import *
 import os
 import shutil
 import base64
+
+from ReportUtils import *
+from ReportUtils.ReportExceptions import *
+from JSONUtils import JSONNode
 
 
 class ReportStatus(object):
@@ -294,14 +294,9 @@ class ReportSummary(object):
         exp_node['changed_resources'] = []
         changed_res_list = exp_node['changed_resources']
         for resource_name, resource in self.changed_resources.items():
-            # res_node = JSONNode()
-            # res_node['task'] = resource
-            # res_node['resource'] = resource
-            # res_node['type'] = change_type
             changed_res_list.append(resource.to_json())
 
         return out_node
-
 
     def get_report_generated_flag(self):
         return bool(self.report_file)
@@ -320,10 +315,6 @@ class ReportSummary(object):
 
             if self.report_link:
                 s += 'Report URL: \n' + self.report_link + '\n'
-
-        # if not self.report_error_status:
-        #     s += 'No errors reported\n'
-
 
         if self.report_error_status:
             e = self.report_error_status.error

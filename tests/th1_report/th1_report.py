@@ -5,8 +5,6 @@
 
 # python ps_report.py --subject=R1086M --task=FR    1 --workspace-dir=/data10/scratch/mswat/R1086M_2 --matlab-path=~/eeg --matlab-path=~/matlab/beh_toolbox --matlab-path=~/RAM/RAM_reporting --matlab-path=~/RAM/RAM_sys2Biomarkers --matlab-path=~/RAM_UTILS_GIT/tests/ps2_report/AuxiliaryMatlab --python-path=~/RAM_UTILS_GIT
 
-
-import sys
 from os.path import *
 
 
@@ -36,11 +34,6 @@ args = cml_parser.parse()
 # args = cml_parser.parse()
 
 # ------------------------------- end of processing command line
-
-import numpy as np
-# from RamPipeline import RamPipeline
-# from RamPipeline import RamTask
-
 
 from TH1EventPreparation import TH1EventPreparation #TODO: WIP
 
@@ -94,7 +87,7 @@ class Params(object):
         self.n_perm = 200
         self.doStratKFold = False
         self.n_folds = 8
-        
+
         self.doConf_classification = True
         self.doDist_classification = False
         self.doClass_wTranspose    = False

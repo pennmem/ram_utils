@@ -1,5 +1,3 @@
-from RamPipeline import *
-
 from ReportUtils import ReportRamTask
 
 import numpy as np

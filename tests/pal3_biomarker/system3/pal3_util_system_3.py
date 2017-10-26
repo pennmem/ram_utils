@@ -38,8 +38,6 @@ args = cml_parser.parse()
 
 # ------------------------------- end of processing command line
 
-from RamPipeline import RamPipeline
-
 from tests.pal3_biomarker.PAL1EventPreparation import PAL1EventPreparation
 
 
@@ -53,8 +51,9 @@ from tests.pal3_biomarker.ComputeClassifier import ComputeClassifier
 
 from tests.pal3_biomarker.system3.ExperimentConfigGeneratorClosedLoop3 import ExperimentConfigGeneratorClosedLoop3
 
-
 import numpy as np
+
+from ramutils.pipeline import RamPipeline
 
 
 class StimParams(object):

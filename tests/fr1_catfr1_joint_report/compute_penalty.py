@@ -5,13 +5,10 @@ from os.path import *
 
 from setup_utils import parse_command_line, configure_python_paths
 
-# -------------------------------processing command line
 if len(sys.argv)>2:
-
     args = parse_command_line()
 
-
-else: # emulate command line
+else:  # emulate command line
     command_line_emulation_argument_list = ['--subject','R1086M',
                                             '--task','RAM_FR1',
                                             '--workspace-dir','/scratch/busygin/FR1_penalty',
@@ -23,21 +20,14 @@ else: # emulate command line
 
 configure_python_paths(args.python_path)
 
-# ------------------------------- end of processing command line
-
 import numpy as np
-from RamPipeline import RamPipeline
 
 from FR1EventPreparation import FR1EventPreparation
-
 from ComputeFR1Powers import ComputeFR1Powers
-
 from TalPreparation import TalPreparation
-
 from ComputeAUCs import ComputeAUCs
+from ramutils.pipeline import RamPipeline
 
-
-# turn it into command line options
 
 class Params(object):
     def __init__(self):

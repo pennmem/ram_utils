@@ -5,34 +5,34 @@ print "ATTN: Wavelet params and interval length are hardcoded!! To change them, 
 print "Windows binaries from https://github.com/busygin/morlet_for_sys2_biomarker"
 print "See https://github.com/busygin/morlet_for_sys2_biomarker/blob/master/README for detail."
 
-import numpy as np
 from os.path import *
+import numpy as np
 
 from BiomarkerUtils import CMLParserBiomarker
-from RamPipeline import RamPipeline
+
+cml_parser = CMLParserBiomarker(arg_count_threshold=1)
+cml_parser.arg('--workspace-dir','/scratch/leond/FR3_biomarkers_json')
+cml_parser.arg('--subject','R1124J_1')
+cml_parser.arg('--n-channels','128')
+cml_parser.arg('--anode-nums','34','86')
+cml_parser.arg('--anodes','LDA1','RDA3')
+cml_parser.arg('--cathode-nums','35','87')
+cml_parser.arg('--cathodes','LDA2','RDA4')
+cml_parser.arg('--pulse-frequency','200')
+cml_parser.arg('--pulse-duration','500')
+cml_parser.arg('--target-amplitude','250')
+cml_parser.arg('--anode-num','34')
+cml_parser.arg('--cathode-num','35')
+
+args = cml_parser.parse()
+
+from ramutils.pipeline import RamPipeline
 from FREventPreparation import FREventPreparation
 from ComputeFRPowers import ComputeFRPowers
 from MontagePreparation import MontagePreparation
 from CheckElectrodeLabels import CheckElectrodeLabels
-from ComputeClassifier import ComputeClassifier, ComputeFullClassifier
+from ComputeClassifier import ComputeClassifier
 from SaveMatlabFile import SaveMatlabFile
-
-
-
-cml_parser = CMLParserBiomarker(arg_count_threshold=1)
-cml_parser.arg('--workspace-dir','/scratch/zduey/sample_fr5biomarkers/')
-cml_parser.arg('--subject','R1308T')
-cml_parser.arg('--n-channels','128')
-cml_parser.arg('--anode','LB6')
-cml_parser.arg('--cathode','LB7')
-cml_parser.arg('--pulse-frequency','200')
-cml_parser.arg('--pulse-duration','500')
-cml_parser.arg('--target-amplitude','250')
-cml_parser.arg('--anode-num','11')
-cml_parser.arg('--cathode-num','12')
-
-
-args = cml_parser.parse()
 
 
 class ArgumentError(Exception):
@@ -57,6 +57,7 @@ class StimParams(object):
         self.duration = 300
         self.trainFrequency = 1
         self.trainCount = 1
+
 
 class Params(object):
     def __init__(self):
@@ -130,4 +131,3 @@ report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
 report_pipeline.add_task(SaveMatlabFile(params=params, mark_as_completed=False))
 report_pipeline.execute_pipeline()
-

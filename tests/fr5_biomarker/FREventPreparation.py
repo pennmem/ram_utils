@@ -1,17 +1,14 @@
-__author__ = 'm'
-
 import os
 import os.path
 import numpy as np
+import hashlib
+from sklearn.externals import joblib
 
 from ptsa.data.readers import BaseEventReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
-from RamPipeline import *
-from ReportUtils import RamTask
+from ramutils.pipeline import *
 
-import hashlib
-from sklearn.externals import joblib
 from ReportTasks.RamTaskMethods import create_baseline_events
 
 

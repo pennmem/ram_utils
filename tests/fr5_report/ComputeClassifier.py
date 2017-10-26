@@ -1,3 +1,4 @@
+import os
 import hashlib
 import warnings
 import numpy as np
@@ -9,8 +10,8 @@ from sklearn.externals import joblib
 
 from ptsa.data.readers.IndexReader import JsonIndexReader
 from classifier.utils import normalize_sessions, get_sample_weights
-from RamPipeline import *
 
+from ramutils.pipeline import RamTask
 
 
 class ModelOutput(object):
@@ -87,7 +88,6 @@ class ComputeClassifier(RamTask):
         probs = classifier.predict_proba(features[mask])[:, 1]
         auc = roc_auc_score(masked_recalls, probs)
         return auc
-
 
     def run_loso_xval(self, event_sessions, recalls, permuted=False,samples_weights=None, events=None):
         probs = np.empty_like(recalls, dtype=np.float)

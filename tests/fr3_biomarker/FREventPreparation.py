@@ -1,5 +1,3 @@
-__author__ = 'm'
-
 import os
 import os.path
 import numpy as np
@@ -7,11 +5,12 @@ import numpy as np
 from ptsa.data.readers import BaseEventReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
-from RamPipeline import *
+from ramutils.pipeline import RamTask
 from ReportUtils import RamTask
 
 import hashlib
 from ReportTasks.RamTaskMethods import filter_session
+
 
 class FREventPreparation(RamTask):
     def __init__(self, mark_as_completed=True):

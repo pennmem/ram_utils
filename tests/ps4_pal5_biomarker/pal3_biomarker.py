@@ -28,7 +28,7 @@ args = cml_parser.parse()
 
 # ------------------------------- end of processing command line
 
-from RamPipeline import RamPipeline
+from ramutils.pipeline import RamPipeline
 
 from PAL1EventPreparation import PAL1EventPreparation
 
