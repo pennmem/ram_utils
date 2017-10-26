@@ -1,14 +1,18 @@
+from __future__ import print_function
+
 import sys
 from os.path import *
-
-import numpy as np
-
-from ReportUtils import RamTask
-# from system_3_utils.ElectrodeConfigSystem3 import ElectrodeConfig
 import json
 from collections import OrderedDict
 
+import numpy as np
+
 from bptools.odin import ElectrodeConfig
+
+from ReportUtils import RamTask
+from ramutils.log import get_logger
+
+logger = get_logger()
 
 
 class CheckElectrodeConfigurationClosedLoop3(RamTask):
@@ -26,24 +30,21 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
         monopolar_channels = self.get_passed_object('monopolar_channels')
 
         monopolar_channels_int_array = monopolar_channels.astype(np.int)
-        # print 'monopolar_channels: ', monopolar_channels_int_array
 
         sense_channels_array = electrode_config.sense_channels_as_recarray()
 
         bp_ch_0 = np.array(map(lambda tup: int(tup[0]), bipolar_pairs), dtype=np.int)
         bp_ch_1 = np.array(map(lambda tup: int(tup[1]), bipolar_pairs), dtype=np.int)
 
-        # bipolar_pairs_int = np.rec.array(bipolar_pairs, dtype=[('ch0', np.int), ('ch1', np.int)])
-        # bipolar_pairs_int_2D = bipolar_pairs_int.view(np.int).reshape(-1, 2)
-
         sense_array_int = sense_channels_array.jack_box_num.astype(np.int)
+
         # check if monopolar channels are the same as sense channels in the .bin/.csv file
         monopolar_same_as_sense = np.array_equal(sense_array_int, monopolar_channels_int_array)
 
         if not monopolar_same_as_sense:
-            print '\n\nELECTRODE CONFIG ERROR:'
-            print 'Sense electrodes jack_box numbers defined in .bin/.csv file do not match jack_box_numbers in contacts.json'
-            # sys.exit(1)
+            logger.error(
+                'ELECTRODE CONFIG ERROR:\n%s',
+                'Sense electrodes jack_box numbers defined in .bin/.csv file do not match jack_box_numbers in contacts.json')
 
         # check if specified stim pair is present in the bipolar pairs and .bin/.csv file
         stim_index_pair_present = False
@@ -51,19 +52,19 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
         anode_nums = args.anode_nums if args.anode_nums else [args.anode_num]
         cathode_nums = args.cathode_nums if args.cathode_nums else [args.cathode_num]
         for (anode_num,cathode_num) in zip(anode_nums,cathode_nums):
-            print 'anode: ',anode_num
-            print 'cathode: ',cathode_num
+            logger.info('anode: %d', anode_num)
+            logger.info('cathode: %d', cathode_num)
 
             if anode_num == cathode_num:
-                print '\n\nELECTRODE CONFIG ERROR:'
-                print 'Anode jackbox number must be different from cathode number'
-                # sys.exit(1)
+                logger.error(
+                    'ELECTRODE CONFIG ERROR:\n%s',
+                    'Anode jackbox number must be different from cathode number')
 
             stim_index_pair_present = np.all(np.in1d([anode_num, cathode_num],monopolar_channels_int_array))
 
             if not stim_index_pair_present:
-                print '\n\nELECTRODE CONFIG ERROR:'
-                print 'Could not find requested stim pair electrode numbers in contacts.json'
+                logger.error('ELECTRODE CONFIG ERROR:\n%s',
+                             'Could not find requested stim pair electrode numbers in contacts.json')
 
             # looping over stim channels to check if there exist a channel for which anode and cathode jackbox numbers
             # match those specified by the user
@@ -74,9 +75,8 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
                     break
 
             if not stim_channel_present:
-                print '\n\nELECTRODE CONFIG ERROR:'
-                print 'Could not find requested stim pair electrode numbers in .csv/.bin electrode configuration file'
-                # sys.exit(1)
+                logger.error('ELECTRODE CONFIG ERROR:\n%s',
+                             'Could not find requested stim pair electrode numbers in .csv/.bin electrode configuration file')
 
             # finally will check labels if user provided the labels
             anode_label = self.pipeline.args.anode.strip().upper()
@@ -92,18 +92,18 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
                 anode_label_from_contacts = anode_label_from_contacts.strip().upper()
                 cathode_label_from_contacts = cathode_label_from_contacts.strip().upper()
 
-
                 if str(anode_label_from_contacts) != anode_label or cathode_label_from_contacts != cathode_label:
-                    print '\n\nELECTRODE CONFIG ERROR:'
-                    print 'specified electrode labels for anode and cathode (%s, %s) do no match electrodes' \
-                          ' found in contacts.json (%s,%s)'%(anode_label,cathode_label,anode_label_from_contacts,cathode_label_from_contacts)
-                    # sys.exit(1)
+                    logger.error(
+                        'ELECTRODE CONFIG ERROR:\n'
+                        'specified electrode labels for anode and cathode (%s, %s) do no match electrodes'
+                        ' found in contacts.json (%s,%s)',
+                        anode_label, cathode_label, anode_label_from_contacts,
+                        cathode_label_from_contacts
+                    )
 
-            self.pass_object('stim_chan_label',stim_chan_label)
-            print
+            self.pass_object('stim_chan_label', stim_chan_label)
 
     def run(self):
-        # stim_electrode_pair = self.pipeline.args.stim_electrode_pair
         electrode_config_file = self.pipeline.args.electrode_config_file
 
         electrode_fname = abspath(electrode_config_file)
@@ -150,7 +150,7 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
             self.pass_object('config_pairs_path', self.get_path_to_resource_in_workspace('pairs.json'))
             self.pass_object('config_pairs_dict', pairs_from_ec)
 
-        # This is leftover from the old implementation but shouldn't happen.
+        # FIXME: This is leftover from the old implementation but shouldn't happen.
         except IndexError:
             raise
         finally:
