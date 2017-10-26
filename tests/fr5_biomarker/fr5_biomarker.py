@@ -130,6 +130,4 @@ report_pipeline.add_task(CheckElectrodeLabels(params=params, mark_as_completed=F
 report_pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=True))
 report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
 report_pipeline.add_task(SaveMatlabFile(params=params, mark_as_completed=False))
-
-# starts processing pipeline
 report_pipeline.execute_pipeline()

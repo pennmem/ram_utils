@@ -1,11 +1,13 @@
 from __future__ import print_function
 
 import os
+from os.path import *
 import os.path as osp
 import shutil
 from collections import defaultdict, OrderedDict
 from distutils.dir_util import mkpath
 
+import h5py
 from sklearn.externals import joblib
 
 
@@ -51,6 +53,25 @@ class RamTask(object):
         # Store in memory
         self.pipeline.passed_objects_dict[name] = obj
 
+    def save_array_to_hdf5(self, output, data_name, data):
+        """ Save an array of data to hdf5
+
+        Parameters:
+        -----------
+        output: (str) Path to hdf5 output file
+        data_name: (str) Name of the dataset
+        data: (np.ndarray) Data array
+
+        Notes:
+        ------
+        Primarily useful for debugging purposes. Could be used to save underlying
+        data for report plots
+        """
+        hdf = h5py.File(output, 'a') # append by default to avoid overwriting
+        hdf.create_dataset(data_name, data=data)
+        hdf.close()
+        return
+
     def get_passed_object(self, name):
         """Loads a passed object from earlier in the pipeline."""
         try:
@@ -58,9 +79,12 @@ class RamTask(object):
             obj = self.pipeline.passed_objects_dict[name]
         except KeyError:
             try:
+                # This may also fail if the object was not saved to disk
+                # If that is the case, then raise the original KeyError exception
+                # so that calling code can choose what to do with it
                 obj = joblib.load(self._obj_filename(name))
             except:
-                raise RuntimeError("Could not find passed object {} in memory or on disk".format(name))
+                raise KeyError
         return obj
 
     def get_task_completed_file_name(self):
@@ -69,7 +93,7 @@ class RamTask(object):
         :param task: task object object derived from RamTask or MatlabRamTask
         :return: task name - this is the name of the derived class
         """
-        return osp.join(self.workspace_dir, self.name + '.completed')
+        return os.path.join(self.workspace_dir, self.name + '.completed')
 
     def is_completed(self):
         """
@@ -82,7 +106,7 @@ class RamTask(object):
             return False
 
         completed_file_name = self.get_task_completed_file_name()
-        if osp.isfile(completed_file_name):
+        if os.path.isfile(completed_file_name):
             f = open(completed_file_name, 'rb')
             hs = f.read()
             f.close()
@@ -136,7 +160,7 @@ class RamTask(object):
         assert self.workspace_dir is not None, "Workspace directory was not set"
 
         try:
-            full_file_name = osp.abspath(osp.join(self.workspace_dir, file_name))
+            full_file_name = abspath(join(self.workspace_dir, file_name))
             file = open(full_file_name, mode)
             return file, full_file_name
         except IOError:
@@ -178,9 +202,9 @@ class RamTask(object):
 
         for rel_file_name in rel_file_names:
 
-            output_file_name = osp.join(self.workspace_dir, rel_file_name)
-            output_file_name = osp.abspath(output_file_name)  # normalizing path
-            dir_for_output_file_name = osp.dirname(output_file_name)
+            output_file_name = join(self.workspace_dir, rel_file_name)
+            output_file_name = abspath(output_file_name)  # normalizing path
+            dir_for_output_file_name = dirname(output_file_name)
 
             try:
                 mkpath(dir_for_output_file_name)
@@ -219,7 +243,7 @@ class RamTask(object):
         dir_name_dict = {}
         for dir_name in dir_names:
             try:
-                dir_name_full_path = osp.abspath(osp.join(self.workspace_dir, dir_name))
+                dir_name_full_path = os.path.abspath(os.path.join(self.workspace_dir, dir_name))
                 os.makedirs(dir_name_full_path)
                 dir_name_dict[dir_name] = dir_name_full_path
 

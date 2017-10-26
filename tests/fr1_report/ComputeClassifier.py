@@ -14,14 +14,7 @@ from ptsa.data.readers.IndexReader import JsonIndexReader
 
 from ReportTasks.RamTaskMethods import run_lolo_xval,run_loso_xval,permuted_loso_AUCs,permuted_lolo_AUCs,ModelOutput
 from ReportUtils import ReportRamTask
-
-
-def normalize_sessions(pow_mat, events):
-    sessions = np.unique(events.session)
-    for sess in sessions:
-        sess_event_mask = (events.session == sess)
-        pow_mat[sess_event_mask] = zscore(pow_mat[sess_event_mask], axis=0, ddof=1)
-    return pow_mat
+from classifier.utils import normalize_sessions, get_sample_weights
 
 
 class ComputeClassifier(ReportRamTask):
@@ -75,7 +68,7 @@ class ComputeClassifier(ReportRamTask):
         return self._events[self._events.type=='WORD']
 
     def _normalize_sessions(self,events):
-        self.pow_mat = normalize_sessions(self.pow_mat,events)
+        self.pow_mat = normalize_sessions(self.pow_mat, events)
 
     def get_pow_mat(self):
         events = self.events
@@ -87,7 +80,11 @@ class ComputeClassifier(ReportRamTask):
         events = self.events
         self.pow_mat = self.get_pow_mat()
         self._normalize_sessions(events)
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced', solver='liblinear')
+
+        self.lr_classifier = LogisticRegression(C=self.params.C,
+                                                penalty=self.params.penalty_type,
+                                                class_weight='balanced',
+                                                solver='liblinear')
 
         event_sessions = events.session
         recalls = events.recalled
@@ -185,17 +182,17 @@ class ComputeJointClassifier(ReportRamTask):
         return hash_md5.digest()
 
     def run(self):
+        subject = self.pipeline.subject
         events = self.events
         self.pow_mat = self.get_pow_mat()
         encoding_mask = events.type=='WORD'
         self.pow_mat[encoding_mask] = normalize_sessions(self.pow_mat[encoding_mask],events[encoding_mask])
         self.pow_mat[~encoding_mask] = normalize_sessions(self.pow_mat[~encoding_mask],events[~encoding_mask])
-        # Add bias term
-        self.pow_mat = np.append(np.ones((len(self.pow_mat),1)),self.pow_mat,axis=1)
 
-
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
-                                                solver='newton-cg',fit_intercept=False)
+        self.lr_classifier = LogisticRegression(C=self.params.C,
+                                                penalty=self.params.penalty_type,
+                                                solver='liblinear',
+                                                fit_intercept=True)
 
         event_sessions = events.session
 
@@ -203,27 +200,24 @@ class ComputeJointClassifier(ReportRamTask):
         recalls[events.type=='REC_WORD'] = 1
         recalls[events.type=='REC_BASE'] = 0
 
-        samples_weights = np.ones(events.shape[0], dtype=np.float)
-
-        # samples_weights[~(events.type=='WORD')] = self.params.retrieval_samples_weight
-        samples_weights[(events.type=='WORD')] = self.params.encoding_samples_weight
+        sample_weights = get_sample_weights(events, self.params.encoding_samples_weight)
 
         sessions = np.unique(event_sessions)
         if len(sessions) > 1:
             print 'Performing permutation test'
-            self.perm_AUCs = self.permuted_loso_AUCs(event_sessions, recalls, samples_weights,events=events)
+            self.perm_AUCs = self.permuted_loso_AUCs(event_sessions, recalls, sample_weights,events=events)
 
             print 'Performing leave-one-session-out xval'
-            self.run_loso_xval(event_sessions, recalls, permuted=False,samples_weights=samples_weights, events=events)
+            self.run_loso_xval(event_sessions, recalls, permuted=False,samples_weights=sample_weights, events=events)
         else:
             sess = sessions[0]
             event_lists = events.list
 
             print 'Performing in-session permutation test'
-            self.perm_AUCs = self.permuted_lolo_AUCs(sess, event_lists, recalls,samples_weights=samples_weights)
+            self.perm_AUCs = self.permuted_lolo_AUCs(sess, event_lists, recalls,samples_weights=sample_weights)
 
             print 'Performing leave-one-list-out xval'
-            self.run_lolo_xval(sess, event_lists, recalls, permuted=False,samples_weights=samples_weights)
+            self.run_lolo_xval(sess, event_lists, recalls, permuted=False,samples_weights=sample_weights)
 
         print 'CROSS VALIDATION ENCODING AUC =', self.xval_output[-1].auc
 
@@ -232,16 +226,17 @@ class ComputeJointClassifier(ReportRamTask):
 
         print 'thresh =', self.xval_output[-1].jstat_thresh, 'quantile =', self.xval_output[-1].jstat_quantile
 
-        # Finally, fitting classifier on all available data
-        self.lr_classifier.fit(self.pow_mat, recalls, samples_weights)
+        self.lr_classifier.fit(self.pow_mat, recalls, sample_weights)
 
-        # New classifier with weights and bias set on self.lr_classifier
-        new_classifier=  LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
-                                                solver='newton-cg',fit_intercept=False,)
-
-        new_classifier.coef_ = self.lr_classifier.coef_[...,1:]
-        new_classifier.intercept_ = self.lr_classifier.coef_[...,:1]
-        self.lr_classifier = new_classifier
+        # Save predicted probabilities and model weights
+        model_output = self.lr_classifier.predict_proba(self.pow_mat)[:, 1]
+        model_weights = self.lr_classifier.coef_
+        self.save_array_to_hdf5(self.get_path_to_resource_in_workspace(subject + "-debug_data.h5"),
+                                "model_output",
+                                model_output)
+        self.save_array_to_hdf5(self.get_path_to_resource_in_workspace(subject + "-debug_data.h5"),
+                                "model_weights",
+                                model_weights)
 
         self.pass_objects()
 
@@ -283,41 +278,16 @@ class ComputeJointClassifier(ReportRamTask):
             insample_mask = (event_sessions != sess)
             insample_pow_mat = self.pow_mat[insample_mask]
             insample_recalls = recalls[insample_mask]
-            insample_samples_weights = samples_weights[insample_mask]
-
-            insample_enc_mask = insample_mask & (events.type == 'WORD')
-            insample_retrieval_mask = insample_mask & ((events.type == 'REC_BASE') | (events.type == 'REC_WORD'))
-
-            n_enc_0 = events[insample_enc_mask & (events.recalled == 0)].shape[0]
-            n_enc_1 = events[insample_enc_mask & (events.recalled == 1)].shape[0]
-
-            n_ret_0 = events[insample_retrieval_mask & (events.type == 'REC_BASE')].shape[0]
-            n_ret_1 = events[insample_retrieval_mask & (events.type == 'REC_WORD')].shape[0]
-
-            n_vec = np.array([1.0/n_enc_0, 1.0/n_enc_1, 1.0/n_ret_0, 1.0/n_ret_1 ], dtype=np.float)
-            n_vec /= np.mean(n_vec)
-
-            n_vec[:2] *= self.params.encoding_samples_weight
-
-            n_vec /= np.mean(n_vec)
-
-            # insample_samples_weights = np.ones(n_enc_0 + n_enc_1 + n_ret_0 + n_ret_1, dtype=np.float)
-            insample_samples_weights = np.ones(events.shape[0], dtype=np.float)
-
-            insample_samples_weights [insample_enc_mask & (events.recalled == 0)] = n_vec[0]
-            insample_samples_weights [insample_enc_mask & (events.recalled == 1)] = n_vec[1]
-            insample_samples_weights [insample_retrieval_mask & (events.type == 'REC_BASE')] = n_vec[2]
-            insample_samples_weights [insample_retrieval_mask & (events.type == 'REC_WORD')] = n_vec[3]
-
-            insample_samples_weights = insample_samples_weights[insample_mask]
-
-
+            insample_samples_weights = get_sample_weights(events[events.session != sess],
+                                                          self.params.encoding_samples_weight)
             outsample_both_mask = (events.session == sess)
 
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 if samples_weights is not None:
-                    self.lr_classifier.fit(insample_pow_mat, insample_recalls,insample_samples_weights)
+                    self.lr_classifier.fit(insample_pow_mat,
+                                           insample_recalls,
+                                           insample_samples_weights)
                 else:
                     self.lr_classifier.fit(insample_pow_mat, insample_recalls)
 
@@ -331,6 +301,7 @@ class ComputeJointClassifier(ReportRamTask):
                 self.xval_output[sess].compute_roc()
                 self.xval_output[sess].compute_tercile_stats()
             probs[events[events.type=='WORD'].session==sess] = outsample_probs
+
 
             if events is not None:
 

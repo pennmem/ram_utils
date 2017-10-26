@@ -1,26 +1,17 @@
 import os
 import hashlib
 import warnings
-from random import shuffle
-
 import numpy as np
-from scipy.stats.mstats import zscore
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, roc_curve
+from random import shuffle
 from sklearn.externals import joblib
 
 from ptsa.data.readers.IndexReader import JsonIndexReader
+from classifier.utils import normalize_sessions, get_sample_weights
 
 from ramutils.pipeline import RamTask
-
-
-def normalize_sessions(pow_mat, events):
-    sessions = np.unique(events.session)
-    for sess in sessions:
-        sess_event_mask = (events.session == sess)
-        pow_mat[sess_event_mask] = zscore(pow_mat[sess_event_mask], axis=0, ddof=1)
-    return pow_mat
 
 
 class ModelOutput(object):
@@ -43,9 +34,6 @@ class ModelOutput(object):
         except ValueError:
             return
         self.fpr, self.tpr, self.thresholds = roc_curve(self.true_labels, self.probs)
-        # idx = np.argmax(self.tpr-self.fpr)
-        # self.jstat_thresh = self.thresholds[idx]
-        # self.jstat_quantile = np.sum(self.probs <= self.jstat_thresh) / float(self.probs.size)
         self.jstat_quantile = 0.5
         self.jstat_thresh = np.median(self.probs)
 
@@ -117,46 +105,17 @@ class ComputeClassifier(RamTask):
             insample_mask = (event_sessions != sess)
             insample_pow_mat = self.pow_mat[insample_mask]
             insample_recalls = recalls[insample_mask]
-            insample_samples_weights = samples_weights[insample_mask]
-
-
-            insample_enc_mask = insample_mask & (events.type == 'WORD')
-            insample_retrieval_mask = insample_mask & ((events.type == 'REC_BASE') | (events.type == 'REC_WORD'))
-
-            n_enc_0 = events[insample_enc_mask & (events.recalled == 0)].shape[0]
-            n_enc_1 = events[insample_enc_mask & (events.recalled == 1)].shape[0]
-
-            n_ret_0 = events[insample_retrieval_mask & (events.type == 'REC_BASE')].shape[0]
-            n_ret_1 = events[insample_retrieval_mask & (events.type == 'REC_WORD')].shape[0]
-
-            n_vec = np.array([1.0/n_enc_0, 1.0/n_enc_1, 1.0/n_ret_0, 1.0/n_ret_1 ], dtype=np.float)
-            n_vec /= np.mean(n_vec)
-
-            n_vec[:2] *= self.params.encoding_samples_weight
-
-            n_vec /= np.mean(n_vec)
-
-            # insample_samples_weights = np.ones(n_enc_0 + n_enc_1 + n_ret_0 + n_ret_1, dtype=np.float)
-            insample_samples_weights = np.ones(events.shape[0], dtype=np.float)
-
-            insample_samples_weights [insample_enc_mask & (events.recalled == 0)] = n_vec[0]
-            insample_samples_weights [insample_enc_mask & (events.recalled == 1)] = n_vec[1]
-            insample_samples_weights [insample_retrieval_mask & (events.type == 'REC_BASE')] = n_vec[2]
-            insample_samples_weights [insample_retrieval_mask & (events.type == 'REC_WORD')] = n_vec[3]
-
-            insample_samples_weights = insample_samples_weights[insample_mask]
-
+            insample_weights = get_sample_weights(events[events.session != sess],
+                                                  self.params.encoding_samples_weight)
 
             outsample_both_mask = (events.session == sess)
-
 
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 if samples_weights is not None:
-                    self.lr_classifier.fit(insample_pow_mat, insample_recalls,insample_samples_weights)
+                    self.lr_classifier.fit(insample_pow_mat, insample_recalls,insample_weights)
                 else:
                     self.lr_classifier.fit(insample_pow_mat, insample_recalls)
-
 
             outsample_mask = ~insample_mask
             outsample_pow_mat = self.pow_mat[outsample_mask]
@@ -187,39 +146,11 @@ class ComputeClassifier(RamTask):
                     classifier=self.lr_classifier, features=self.pow_mat, recalls=recalls, mask=outsample_both_mask)
 
 
-                # outsample_encoding_recalls = recalls[outsample_encoding_mask]
-                # outsample_retrieval_recalls = recalls[outsample_retrieval_mask]
-                #
-                # outsample_probs_encoding = self.lr_classifier.predict_proba(self.pow_mat[outsample_encoding_mask])[:, 1]
-                # outsample_probs_retrieval = self.lr_classifier.predict_proba(self.pow_mat[outsample_retrieval_mask])[:, 1]
-                #
-                # outsample_encoding_auc = roc_auc_score(outsample_encoding_recalls, outsample_probs_encoding)
-                # outsample_retrieval_auc = roc_auc_score(outsample_retrieval_recalls, outsample_probs_retrieval)
-                #
-                #
-                # , outsample_encoding_auc
-                # print 'outsample_retrieval_auc= ', outsample_retrieval_auc
-
-
         if not permuted:
             self.xval_output[-1] = ModelOutput(recalls[events.type=='WORD'], probs[events.type=='WORD'])
             self.xval_output[-1].compute_roc()
             self.xval_output[-1].compute_tercile_stats()
 
-            # outsample_encoding_mask = (events.type == 'WORD')
-            # outsample_retrieval_mask =((events.type == 'REC_BASE') | (events.type == 'REC_WORD'))
-            #
-            # outsample_encoding_recalls = recalls[outsample_encoding_mask]
-            # outsample_retrieval_recalls = recalls[outsample_retrieval_mask]
-            #
-            # outsample_probs_encoding = self.lr_classifier.predict_proba(self.pow_mat[outsample_encoding_mask])[:, 1]
-            # outsample_probs_retrieval = self.lr_classifier.predict_proba(self.pow_mat[outsample_retrieval_mask])[:, 1]
-            #
-            # outsample_encoding_auc = roc_auc_score(outsample_encoding_recalls, outsample_probs_encoding)
-            # outsample_retrieval_auc = roc_auc_score(outsample_retrieval_recalls, outsample_probs_retrieval)
-            #
-            # print 'TOTAL outsample_encoding_auc =', outsample_encoding_auc
-            # print 'TOTAL outsample_retrieval_auc= ', outsample_retrieval_auc
 
             print 'auc_encoding=',auc_encoding, np.mean(auc_encoding)
             print 'auc_retrieval=',auc_retrieval, np.mean(auc_retrieval)
@@ -328,17 +259,18 @@ class ComputeClassifier(RamTask):
 
 
     def run(self):
-
+        subject = self.pipeline.subject
         events = self.get_events()
         self.pow_mat = self.get_pow_mat()
-        self.pow_mat[events.type=='WORD'] = normalize_sessions(self.pow_mat[events.type=='WORD'],events[events.type=='WORD'])
-        self.pow_mat[events.type!='WORD'] = normalize_sessions(self.pow_mat[events.type!='WORD'],events[events.type!='WORD'])
-        # Add bias term
-        self.pow_mat = np.append(np.ones((len(self.pow_mat),1)),self.pow_mat,axis=1)
+        self.pow_mat[events.type=='WORD'] = normalize_sessions(self.pow_mat[events.type=='WORD'],
+                                                               events[events.type=='WORD'])
+        self.pow_mat[events.type!='WORD'] = normalize_sessions(self.pow_mat[events.type!='WORD'],
+                                                               events[events.type!='WORD'])
 
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
-                                                solver='newton-cg',fit_intercept=False)
-
+        self.lr_classifier = LogisticRegression(C=self.params.C,
+                                                penalty=self.params.penalty_type,
+                                                solver='liblinear',
+                                                fit_intercept=True)
 
         event_sessions = events.session
 
@@ -346,28 +278,24 @@ class ComputeClassifier(RamTask):
         recalls[events.type=='REC_WORD'] = 1
         recalls[events.type=='REC_BASE'] = 0
 
-        samples_weights = np.ones(events.shape[0], dtype=np.float)
-
-        samples_weights[(events.type=='WORD')] = self.params.encoding_samples_weight
-
-
+        sample_weights = get_sample_weights(events, self.params.encoding_samples_weight)
 
         sessions = np.unique(event_sessions)
         if len(sessions) > 1:
             print 'Performing permutation test'
-            self.perm_AUCs = self.permuted_loso_AUCs(event_sessions, recalls, samples_weights,events=events)
+            self.perm_AUCs = self.permuted_loso_AUCs(event_sessions, recalls, sample_weights,events=events)
 
             print 'Performing leave-one-session-out xval'
-            self.run_loso_xval(event_sessions, recalls, permuted=False,samples_weights=samples_weights, events=events)
+            self.run_loso_xval(event_sessions, recalls, permuted=False,samples_weights=sample_weights, events=events)
         else:
             sess = sessions[0]
             event_lists = events.list
 
             print 'Performing in-session permutation test'
-            self.perm_AUCs = self.permuted_lolo_AUCs(sess, event_lists, recalls,samples_weights=samples_weights)
+            self.perm_AUCs = self.permuted_lolo_AUCs(sess, event_lists, recalls,samples_weights=sample_weights)
 
             print 'Performing leave-one-list-out xval'
-            self.run_lolo_xval(sess, event_lists, recalls, permuted=False,samples_weights=samples_weights)
+            self.run_lolo_xval(sess, event_lists, recalls, permuted=False,samples_weights=sample_weights)
 
         print 'CROSS VALIDATION AUC =', self.xval_output[-1].auc
 
@@ -378,21 +306,22 @@ class ComputeClassifier(RamTask):
         print 'thresh =', self.xval_output[-1].jstat_thresh, 'quantile =', self.xval_output[-1].jstat_quantile
 
 
+        self.lr_classifier.fit(self.pow_mat, recalls, sample_weights)
 
-        # Finally, fitting classifier on all available data
-        self.lr_classifier.fit(self.pow_mat, recalls, samples_weights)
-
-        # FYI - in-sample AUC
         recall_prob_array = self.lr_classifier.predict_proba(self.pow_mat)[:,1]
         insample_auc = roc_auc_score(recalls, recall_prob_array)
         print 'in-sample AUC=', insample_auc
 
-        new_classifier=  LogisticRegression(C=self.params.C, penalty=self.params.penalty_type,
-                                                solver='newton-cg',fit_intercept=False,)
+        # Save predicted probabilities and model weights
+        model_output = self.lr_classifier.predict_proba(self.pow_mat)[:, 1]
+        model_weights = self.lr_classifier.coef_
+        self.save_array_to_hdf5(self.get_path_to_resource_in_workspace(subject + "-debug_data.h5"),
+                           "model_output",
+                           model_output)
+        self.save_array_to_hdf5(self.get_path_to_resource_in_workspace(subject + "-debug_data.h5"),
+                           "model_weights",
+                           model_weights)
 
-        new_classifier.coef_ = self.lr_classifier.coef_[...,1:]
-        new_classifier.intercept_ = self.lr_classifier.coef_[...,:1]
-        self.lr_classifier = new_classifier
         self.pass_objects()
 
 
@@ -402,7 +331,6 @@ class ComputeClassifier(RamTask):
 
         classifier_path = self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl')
         self.lr_classifier = joblib.load(classifier_path)
-        # self.lr_classifier = joblib.load(self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl'))
         self.xval_output = joblib.load(self.get_path_to_resource_in_workspace(subject + '-xval_output.pkl'))
         self.perm_AUCs = joblib.load(self.get_path_to_resource_in_workspace(subject + '-perm_AUCs.pkl'))
         self.pvalue = joblib.load(self.get_path_to_resource_in_workspace(subject + '-pvalue.pkl'))
@@ -430,7 +358,6 @@ class ComputeFullClassifier(ComputeClassifier):
         self.lr_classifier = joblib.load(self.get_path_to_resource_in_workspace(subject+'lr_classifier_full.pkl'))
         self.pvalue = joblib.load(self.get_path_to_resource_in_workspace(subject+'-pvalue_full.pkl'))
 
-        # self.compare_AUCs()
         self.pass_object('full_classifier_path',full_classifier_path)
         self.pass_object('xval_output_all_electrodes',self.xval_output)
         self.pass_object('lr_classifier_full',self.lr_classifier)
@@ -458,6 +385,4 @@ class ComputeFullClassifier(ComputeClassifier):
 
     def run(self):
         super(ComputeFullClassifier,self).run()
-        # self.compare_AUCs()
-
 

@@ -27,8 +27,6 @@ from ComposeSessionSummary import ComposeSessionSummary
 from GenerateReportTasks import *
 
 
-# turn it into command line options
-
 class Params(object):
     def __init__(self):
         self.width = 5
@@ -64,15 +62,14 @@ class Params(object):
 
 params = Params()
 
-
-# sets up processing pipeline
-report_pipeline = ReportPipeline(subject=args.subject, task=args.task,
-                                 experiment=args.task, sessions=args.sessions,
+report_pipeline = ReportPipeline(subject=args.subject,
+                                 task=args.task,
+                                 experiment=args.task,
+                                 sessions=args.sessions,
                                  workspace_dir=os.path.join(args.workspace_dir, args.subject),
                                  mount_point=args.mount_point,
                                  exit_on_no_change=args.exit_on_no_change,
                                  recompute_on_no_status=args.recompute_on_no_status)
-
 report_pipeline.add_task(FR1EventPreparation(mark_as_completed=False))
 report_pipeline.add_task(MontagePreparation(params, mark_as_completed=False))
 
@@ -89,5 +86,4 @@ report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
 report_pipeline.add_task(GenerateTex(mark_as_completed=False))
 report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
 
-# starts processing pipeline
 report_pipeline.execute_pipeline()
