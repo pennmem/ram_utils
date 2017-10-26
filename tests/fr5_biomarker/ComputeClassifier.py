@@ -1,5 +1,5 @@
 import hashlib
-
+import warnings
 from ramutils.pipeline import RamTask
 
 from ReportTasks.RamTaskMethods import run_lolo_xval,run_loso_xval,permuted_loso_AUCs,permuted_lolo_AUCs,ModelOutput
@@ -12,7 +12,6 @@ from random import shuffle
 from sklearn.externals import joblib
 from ptsa.data.readers.IndexReader import JsonIndexReader
 from classifier.utils import normalize_sessions, get_sample_weights
-import warnings
 
 try:
     from typing import Dict
@@ -181,12 +180,14 @@ class ComputeClassifier(RamTask):
         print 'in-sample AUC=', insample_auc
 
         model_weights = self.lr_classifier.coef_
-
-        # FIXME: problem with h5py serialization
+        # Specify that the file should overwrite so that when
+        # ComputeClassifier and ComputeFullClassifier are run back to back,
+        # it will not complain about the dataset already existing in the h5 file
         try:
             self.save_array_to_hdf5(self.get_path_to_resource_in_workspace(subject + "-debug_data.h5"),
                                     "model_output",
-                                    recall_prob_array)
+                                    recall_prob_array,
+                                    overwrite=True)
             self.save_array_to_hdf5(self.get_path_to_resource_in_workspace(subject + "-debug_data.h5"),
                                     "model_weights",
                                 model_weights)

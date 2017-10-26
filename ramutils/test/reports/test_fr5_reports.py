@@ -11,14 +11,15 @@ import pytest
 import numpy as np
 
 TEST_DIR = os.path.dirname(__file__)
+TEST_OUTPUT_DIR = "/scratch/RAM_maint/automated_reports_json/tmp_testing_data/"
 
 
 @pytest.mark.parametrize("test_dir,subject", [
-    ("/scratch/zduey/samplefr5_reports/{}/","R1308T"),
-    ("/scratch/zduey/samplefr1_reports/{}/", "R1308T"),
-    ("/scratch/zduey/sample_fr5biomarkers/{}/", "R1308T"),
-    ("/scratch/zduey/samplefr5_reports/{}/","R1275D"),
-    ("/scratch/zduey/samplefr1_reports/{}/", "R1275D"),
+    (TEST_OUTPUT_DIR + "samplefr5_reports/{}/","R1308T"),
+    (TEST_OUTPUT_DIR + "samplefr1_reports/{}/", "R1308T"),
+    (TEST_OUTPUT_DIR + "samplefr5_biomarkers/{}/", "R1308T"),
+    (TEST_OUTPUT_DIR + "samplefr5_reports/{}/","R1275D"),
+    (TEST_OUTPUT_DIR + "samplefr1_reports/{}/", "R1275D"),
 ])
 def test_compare_matlab_python_joint_classifier(test_dir, subject):
     """
