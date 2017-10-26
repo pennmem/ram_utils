@@ -16,11 +16,11 @@ print("See https://github.com/busygin/morlet_for_sys2_biomarker/blob/master/READ
 cml_parser = CMLParserCloseLoop3(arg_count_threshold=1)
 
 
-cml_parser.arg('--workspace-dir', '/scratch/zduey/sample_fr5biomarkers/')
+cml_parser.arg('--workspace-dir', '/Users/depalati/mnt/rhino/scratch/depalati/configs')
 cml_parser.arg('--experiment', 'FR5')
-cml_parser.arg('--mount-point', '/')
+cml_parser.arg('--mount-point', '/Users/depalati/mnt/rhino')
 cml_parser.arg('--subject', 'R1308T')
-cml_parser.arg('--electrode-config-file', '/home1/zduey/ram_utils/tests/test_data/R1308T_R1308T08JUNE2017NOSTIM.csv')
+cml_parser.arg('--electrode-config-file', '/Users/depalati/mnt/rhino/scratch/system3_configs/ODIN_configs/R1308T/R1308T_14JUN2017L0M0STIM.csv')
 cml_parser.arg('--pulse-frequency', '200')
 cml_parser.arg('--target-amplitude', '1.0')
 cml_parser.arg('--anodes', 'LB6')

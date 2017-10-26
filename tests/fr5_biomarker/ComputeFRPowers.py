@@ -1,3 +1,4 @@
+import os
 from ramutils.pipeline import *
 
 import numpy as np
