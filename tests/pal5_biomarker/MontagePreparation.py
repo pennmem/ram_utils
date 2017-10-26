@@ -87,6 +87,8 @@ class MontagePreparation(RamTask):
         subject = self.pipeline.subject
         tmp = subject.split('_')
         subj_code = tmp[0]
+
+        # FIXME: montage number should be an input argument rather than this hack
         montage = 0 if len(tmp)==1 else int(tmp[1])
 
         json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
