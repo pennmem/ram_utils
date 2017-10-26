@@ -18,6 +18,7 @@ except KeyboardInterrupt:
     args_obj.cathodes = ['LPLT6', 'LAHD22']
     args_obj.electrode_config_file = '/Users/depalati/mnt/rhino/scratch/system3_configs/ODIN_configs/R1333N/R1333N_28AUG2017L0M0STIM.csv'
     args_obj.experiment = 'PAL5'
+    args_obj.target_amplitude = 0.5
     args_obj.min_amplitudes = [0.25, 0.25]
     args_obj.max_amplitudes = [1.0, 1.0]
     args_obj.mount_point = '/Users/depalati/mnt/rhino'
@@ -110,13 +111,15 @@ if __name__ == '__main__':
                                          mount_point=args_obj.mount_point,
                                          args=args_obj)
 
-        report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
-        report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
-        report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
-        report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=False))
-        report_pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=False))
-        report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
-        report_pipeline.add_task(ComputeBiomarkerThreshold(params=params, mark_as_completed=False))
-        report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=False))
+        mark_as_completed = True
+
+        report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=mark_as_completed))
+        report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=mark_as_completed))
+        report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=mark_as_completed))
+        report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=mark_as_completed))
+        report_pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=mark_as_completed))
+        report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=mark_as_completed))
+        report_pipeline.add_task(ComputeBiomarkerThreshold(params=params, mark_as_completed=mark_as_completed))
+        report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=mark_as_completed))
         report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
         report_pipeline.execute_pipeline()
