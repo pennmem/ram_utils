@@ -5,8 +5,8 @@ import pytest
 import subprocess
 
 
-# Assumes that testing folder is in the top level of ramutils
-CODE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Assumes that testing folder is in ramutils package and report code is in the tests/ folder at the top level
+CODE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 MOUNT = "/"
 TEST_DIR = "/scratch/RAM_maint/automated_reports_json/tmp_testing_data/"
 
