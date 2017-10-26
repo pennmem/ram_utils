@@ -1,5 +1,6 @@
 from ramutils.pipeline import *
 
+import os
 import numpy as np
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from sklearn.externals import joblib
