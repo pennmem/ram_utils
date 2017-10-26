@@ -46,7 +46,8 @@ class ComposeSessionSummary(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
         super(ComposeSessionSummary,self).__init__(mark_as_completed)
         self.params = params
-        if self.dependency_inventory:
+        # FIXME
+        if hasattr(self, 'dependency_inventory'):
             self.dependency_inventory.add_dependent_resource(resource_name='localization',
                                         access_path = ['electrodes','localization'])
 
