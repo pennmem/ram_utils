@@ -7,14 +7,15 @@ import json
 
 from ptsa.data.readers import EEGReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
+import os
 
 import hashlib
 from ReportTasks.RamTaskMethods import compute_powers,get_reduced_pairs,get_excluded_dict
 
 
 class ComputeFRPowers(RamTask):
-    def __init__(self, params, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+    def __init__(self, params, mark_as_completed=True,force_rerun=False):
+        RamTask.__init__(self, mark_as_completed,force_rerun)
         self.params = params
         self.pow_mat = None
         self.samplerate = None
@@ -45,10 +46,15 @@ class ComputeFRPowers(RamTask):
         self.pow_mat = joblib.load(self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
         self.samplerate = joblib.load(self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
         try:
+            bipolar_pairs = joblib.load(
+                self.get_path_to_resource_in_workspace(subject + '-bipolar_pairs.pkl')) or self.get_passed_object(
+                'bipolar_pairs')
+            self.pass_object('bipolar_pairs', bipolar_pairs)
+
+        except OSError:
             bipolar_pairs = joblib.load(self.get_path_to_resource_in_workspace(subject+'-bipolar_pairs.pkl')) or self.get_passed_object('bipolar_pairs')
             self.pass_object('bipolar_pairs',bipolar_pairs)
-        except OSError:
-            pass
+
         events =self.get_passed_object('FR_events')
         if not len(events)==len(self.pow_mat):
             print 'Restored matrix of different length than events. Recomputing powers.'
@@ -102,8 +108,8 @@ class ComputeFRPowers(RamTask):
             self.pass_object('bipolar_pairs_path',self.get_passed_object('config_pairs_path'))
             self.pass_object('bipolar_pairs',self.bipolar_pairs)
 
-
-        joblib.dump(bipolar_pairs,self.get_path_to_resource_in_workspace(subject + '-bipolar_pairs.pkl'))
+        else:
+            joblib.dump(bipolar_pairs,self.get_path_to_resource_in_workspace(subject + '-bipolar_pairs.pkl'))
 
         events = np.concatenate([encoding_events,retrieval_events]).view(np.recarray)
         events.sort(order=['session','list','mstime'])

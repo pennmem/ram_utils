@@ -49,22 +49,28 @@ def atlas_location_matlab(tag, atlas_loc, comments):
 
 
 class MontagePreparation(RamTask):
+    def __init__(self,*args,**kwargs):
+        super(MontagePreparation, self).__init__(*args,**kwargs)
+        self._bp_path=None
+
     @property
     def bipolar_pairs_path(self):
+        if self._bp_path is None:
         # FIXME: this takes a much longer time to run than one might expect, probably because of the json reader
-        subject = self.pipeline.subject
+            subject = self.pipeline.subject
 
-        tmp = subject.split('_')
-        subj_code = tmp[0]
-        montage = 0 if len(tmp) == 1 else int(tmp[1])
+            tmp = subject.split('_')
+            subj_code = tmp[0]
+            montage = 0 if len(tmp) == 1 else int(tmp[1])
 
-        json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
-        bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
-        bp_path = os.path.join(self.pipeline.mount_point, next(iter(bp_paths)))
+            json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
+            bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
+            self._bp_path = os.path.join(self.pipeline.mount_point, next(iter(bp_paths)))
 
-        return bp_path
+        return self._bp_path
 
     def input_hashsum(self):
+
         subject = self.pipeline.subject
         tmp = subject.split('_')
         subj_code = tmp[0]
