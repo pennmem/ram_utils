@@ -61,8 +61,7 @@ class FREventPreparation(RamTask):
 
             event_files = [json_reader.get_value('task_events',subject=subj_code,montage=montage,experiment='FR1',session=s)
                              for s in sorted(fr1_sessions)]
-            fr1_events = np.concatenate([filter_session(BaseEventReader(filename=event_path).read())
-            for event_path in event_files])
+            fr1_events = [filter_session(BaseEventReader(filename=event_path).read()) for event_path in event_files]
             event_files = [json_reader.get_value('task_events',subject=subj_code,montage=montage,experiment='catFR1',session=s)
                            for s in sorted(catfr1_sessions)]
             catfr1_events = [BaseEventReader(filename=event_path).read() for event_path in event_files]
@@ -70,32 +69,39 @@ class FREventPreparation(RamTask):
         else:
             event_files = sorted(
                list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR1')))
-            fr1_events = np.concatenate(
-                [filter_session(BaseEventReader(filename=event_path).read()) for event_path in event_files]).view(np.recarray)
+            fr1_events = [filter_session(BaseEventReader(filename=event_path).read()) for event_path in event_files]
 
             catfr1_events = [filter_session(BaseEventReader(filename=event_path).read()) for event_path in
                                              json_reader.aggregate_values('task_events',subject=subj_code,experiment='catFR1',
                                                                           montage = montage)]
+
+        if len(fr1_events):
+            fr1_events = np.concatenate(fr1_events).view(np.recarray)
         if len(catfr1_events):
             catfr1_events = np.concatenate(catfr1_events).view(np.recarray)
             catfr1_events=catfr1_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment',
                                          'mstime', 'type', 'eegoffset',  'recalled', 'item_name',
                                          'intrusion', 'montage', 'list', 'eegfile', 'msoffset']].copy()
             catfr1_events.session += 100
-            fr1_events = fr1_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime',
-                                     'type', 'eegoffset', 'recalled', 'item_name', 'intrusion',
-                                     'montage', 'list', 'eegfile', 'msoffset']].copy()
-            fr1_events = np.append(fr1_events,catfr1_events).view(np.recarray)
-        fr1_events = fr1_events[fr1_events.list>-1]
-        fr1_events = create_baseline_events(fr1_events,1000,29000)
+            if len(fr1_events):
+                fr1_events = fr1_events[['item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment', 'mstime',
+                                         'type', 'eegoffset', 'recalled', 'item_name', 'intrusion',
+                                         'montage', 'list', 'eegfile', 'msoffset']].copy()
 
-        encoding_events_mask = fr1_events.type == 'WORD'
-        retrieval_events_mask = (fr1_events.type == 'REC_WORD') | (fr1_events.type == 'REC_BASE')
+        if len(fr1_events) and len(catfr1_events):
+            events = np.append(fr1_events,catfr1_events).view(np.recarray)
+        else:
+            events = fr1_events if len(fr1_events) else catfr1_events
+        events = events[events.list>-1]
+        events = create_baseline_events(events,1000,29000)
+
+        encoding_events_mask = events.type == 'WORD'
+        retrieval_events_mask = (events.type == 'REC_WORD') | (events.type == 'REC_BASE')
         irts = np.append([0],np.diff(fr1_events.mstime))
-        retrieval_events_mask_0s = retrieval_events_mask & (fr1_events.type == 'REC_BASE')
-        retrieval_events_mask_1s = retrieval_events_mask & (fr1_events.type == 'REC_WORD') & (fr1_events.intrusion == 0)  & (irts > 1000)
+        retrieval_events_mask_0s = retrieval_events_mask & (events.type == 'REC_BASE')
+        retrieval_events_mask_1s = retrieval_events_mask & (events.type == 'REC_WORD') & (events.intrusion == 0)  & (irts > 1000)
 
-        filtered_events = fr1_events[encoding_events_mask | retrieval_events_mask_0s | retrieval_events_mask_1s]
+        filtered_events = events[encoding_events_mask | retrieval_events_mask_0s | retrieval_events_mask_1s]
 
         events = filtered_events.view(np.recarray)
 

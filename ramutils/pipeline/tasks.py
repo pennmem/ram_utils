@@ -53,7 +53,7 @@ class RamTask(object):
         # Store in memory
         self.pipeline.passed_objects_dict[name] = obj
 
-    def save_array_to_hdf5(self, output, data_name, data):
+    def save_array_to_hdf5(self, output, data_name, data, overwrite=False):
         """ Save an array of data to hdf5
 
         Parameters:
@@ -67,7 +67,10 @@ class RamTask(object):
         Primarily useful for debugging purposes. Could be used to save underlying
         data for report plots
         """
-        hdf = h5py.File(output, 'a') # append by default to avoid overwriting
+        mode = 'a'
+        if overwrite:
+            mode = 'w'
+        hdf = h5py.File(output, mode)
         hdf.create_dataset(data_name, data=data)
         hdf.close()
         return
