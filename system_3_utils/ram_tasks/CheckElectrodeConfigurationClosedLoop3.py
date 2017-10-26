@@ -16,10 +16,7 @@ logger = get_logger()
 
 
 class CheckElectrodeConfigurationClosedLoop3(RamTask):
-    def __init__(self, params, mark_as_completed=True, force_rerun=False):
-        super(CheckElectrodeConfigurationClosedLoop3, self).__init__(mark_as_completed, force_rerun=force_rerun)
-        self.params = params
-
+    """Task to validate and process Odin electrode configuration files."""
     def validate_montage(self, electrode_config):
         # FIXME: update this for bptools
 
@@ -131,7 +128,7 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
 
             pairs_from_ec = {self.pipeline.subject: {'pairs': pairs_dict}}
             with open(self.get_path_to_resource_in_workspace('pairs.json'),'w') as pf:
-                json.dump(pairs_from_ec,pf,indent=2)
+                json.dump(pairs_from_ec, pf, indent=2)
             channels = np.array(['{:03d}'.format(contact.port) for contact in ec.contacts])
 
             # FIXME: what passed objects do we actually need here?
