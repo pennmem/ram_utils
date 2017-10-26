@@ -25,17 +25,10 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
 
         args = self.pipeline.args
 
-        bp_tal_structs = self.get_passed_object('bp_tal_structs')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
         monopolar_channels = self.get_passed_object('monopolar_channels')
-
         monopolar_channels_int_array = monopolar_channels.astype(np.int)
-
         sense_channels_array = electrode_config.sense_channels_as_recarray()
-
-        bp_ch_0 = np.array(map(lambda tup: int(tup[0]), bipolar_pairs), dtype=np.int)
-        bp_ch_1 = np.array(map(lambda tup: int(tup[1]), bipolar_pairs), dtype=np.int)
-
         sense_array_int = sense_channels_array.jack_box_num.astype(np.int)
 
         # check if monopolar channels are the same as sense channels in the .bin/.csv file
@@ -45,9 +38,6 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
             logger.error(
                 'ELECTRODE CONFIG ERROR:\n%s',
                 'Sense electrodes jack_box numbers defined in .bin/.csv file do not match jack_box_numbers in contacts.json')
-
-        # check if specified stim pair is present in the bipolar pairs and .bin/.csv file
-        stim_index_pair_present = False
 
         anode_nums = args.anode_nums if args.anode_nums else [args.anode_num]
         cathode_nums = args.cathode_nums if args.cathode_nums else [args.cathode_num]
@@ -66,8 +56,9 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
                 logger.error('ELECTRODE CONFIG ERROR:\n%s',
                              'Could not find requested stim pair electrode numbers in contacts.json')
 
-            # looping over stim channels to check if there exist a channel for which anode and cathode jackbox numbers
-            # match those specified by the user
+            # looping over stim channels to check if there exist a channel for
+            # which anode and cathode jackbox numbers match those specified by
+            # the user
             stim_channel_present = False
             for stim_chan_label, stim_chan_data in electrode_config.stim_channels.items():
                 if stim_chan_data.anodes[0] == anode_num and stim_chan_data.cathodes[0] == cathode_num:
@@ -109,8 +100,6 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
         electrode_fname = abspath(electrode_config_file)
         electrode_core_fname, ext = splitext(electrode_fname)
         electrode_csv = electrode_core_fname + '.csv'
-
-        self.electrode_config_file = electrode_fname
 
         if not isfile(electrode_csv):
             print('Missing .csv Electrode Config File. Please make sure that %s is stored in %s' % (
