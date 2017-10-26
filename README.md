@@ -1,5 +1,11 @@
 # A Brief Guide to RAM Report Pipelines
 
+**Note**: This repo is undergoing a massive cleanup. Things will be gradually
+either moved into separate repositories (where common code can be shared in with
+other projects) or into a single, top-level `ramutils` package. The information
+below applies to the pre-cleanup code and will need to be updated once cleanup
+is complete.
+
 ## The Pipeline
 
 RAM reports are produced by instantiating a `ReportPipeline`
