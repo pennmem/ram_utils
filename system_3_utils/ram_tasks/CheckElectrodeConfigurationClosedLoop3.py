@@ -8,6 +8,7 @@ from collections import OrderedDict
 import numpy as np
 
 from bptools.odin import ElectrodeConfig
+from bptools.transform import SeriesTransformation
 
 from ReportUtils import RamTask
 from ramutils.log import get_logger
@@ -104,7 +105,14 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
 
             sys.exit(1)
 
-        ec = ElectrodeConfig(electrode_csv)
+        # Create SeriesTransformation object to determine if this is monopolar,
+        # mixed-mode, or bipolar
+        # FIXME: load excluded pairs
+        # FIXME: pass xform on?
+        xform = SeriesTransformation.create(electrode_csv, self.get_passed_object('bipolar_pairs_path'))
+
+        # Odin electrode configuration
+        ec = xform.elec_conf
 
         # FIXME: validate!
         # self.validate_montage(electrode_config=ec)
@@ -112,7 +120,10 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
         # This will mimic pairs.json (but only with labels).
         pairs_dict = OrderedDict()
 
-        try:
+        channels = np.array(['{:03d}'.format(contact.port) for contact in ec.contacts])
+
+        # Hardware bipolar mode
+        if not xform.monopolar_possible():
             contacts = ec.contacts_as_recarray()
 
             # FIXME: move this logic into bptools
@@ -127,17 +138,28 @@ class CheckElectrodeConfigurationClosedLoop3(RamTask):
                 }
 
             pairs_from_ec = {self.pipeline.subject: {'pairs': pairs_dict}}
-            with open(self.get_path_to_resource_in_workspace('pairs.json'),'w') as pf:
+            with open(self.get_path_to_resource_in_workspace('pairs.json'), 'w') as pf:
                 json.dump(pairs_from_ec, pf, indent=2)
-            channels = np.array(['{:03d}'.format(contact.port) for contact in ec.contacts])
 
-            # FIXME: what passed objects do we actually need here?
-            self.pass_object('monopolar_channels', channels)
-            self.pass_object('config_pairs_path', self.get_path_to_resource_in_workspace('pairs.json'))
+            # Note this is different from neurorad pipeline pairs.json because
+            # the electrode configuration trumps it
             self.pass_object('config_pairs_dict', pairs_from_ec)
 
-        # FIXME: This is leftover from the old implementation but shouldn't happen.
-        except IndexError:
-            raise
-        finally:
-            self.pass_object('config_name', ec.name)
+        # Monopolar or mixed-referencing scheme
+        else:
+            for ch in xform.montage_data:
+                name = ch.contact_name
+                pairs_dict[name] = {
+                    'channel_1': ch.ch0_idx,
+                    'channel_2': ch.ch1_idx
+                }
+
+            pairs_from_montage = {self.pipeline.subject: {'pairs': pairs_dict}}
+            with open(self.get_path_to_resource_in_workspace('pairs.json'), 'w') as f:
+                json.dump(pairs_from_montage, f, indent=2)
+
+            self.pass_object('config_pairs_dict', pairs_from_montage)
+
+        self.pass_object('config_pairs_path', self.get_path_to_resource_in_workspace('pairs.json'))
+        self.pass_object('monopolar_channels', channels)
+        self.pass_object('config_name', ec.name)
