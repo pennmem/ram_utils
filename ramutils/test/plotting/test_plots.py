@@ -5,7 +5,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-from plotting import plots
+from ramutils.plotting import plots
 
 
 def test_recall_prob_plot():
@@ -18,7 +18,7 @@ def test_recall_prob_plot():
         ax = plots.probability_lineplot(spos, recall_prob)
     except RuntimeError:
         pass # to be expected since no labels were passed
-    
+
     ax = plots.probability_lineplot(spos,
                                     recall_prob,
                                     labels=['Stim Items', 'Non-stim Items'])
