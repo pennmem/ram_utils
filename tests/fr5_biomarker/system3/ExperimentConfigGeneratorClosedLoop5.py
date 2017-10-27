@@ -127,7 +127,9 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
             dirname(__file__), 'templates',
             '{}_experiment_config.json'.format(prefix)
         )
-        experiment_config_template = Template(open(template_filename, 'r').read())
+
+        with open(template_filename, 'r') as f:
+            experiment_config_template = Template(f.read())
 
         electrode_config_file_core, ext = splitext(electrode_config_file)
 
