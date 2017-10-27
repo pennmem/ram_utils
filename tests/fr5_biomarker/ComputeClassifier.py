@@ -3,7 +3,10 @@ import warnings
 
 from ramutils.pipeline import RamTask
 
-from ReportTasks.RamTaskMethods import run_lolo_xval,run_loso_xval,permuted_loso_AUCs,permuted_lolo_AUCs,ModelOutput
+from ReportTasks.RamTaskMethods import (
+    run_lolo_xval, run_loso_xval, permuted_loso_AUCs, permuted_lolo_AUCs,
+    ModelOutput
+)
 import os
 import numpy as np
 from scipy.stats.mstats import zscore
@@ -314,7 +317,6 @@ class ComputeClassifier(RamTask):
                 else:
                     self.lr_classifier.fit(insample_pow_mat, insample_recalls)
 
-
             outsample_mask = ~insample_mask
             outsample_pow_mat = self.pow_mat[outsample_mask]
 
@@ -343,7 +345,6 @@ class ComputeClassifier(RamTask):
             print 'AUC =', AUCs[i]
         return AUCs
 
-
     def restore(self):
         subject = self.pipeline.subject
 
@@ -359,7 +360,6 @@ class ComputeClassifier(RamTask):
         self.pass_object('xval_output', self.xval_output)
         self.pass_object('perm_AUCs', self.perm_AUCs)
         self.pass_object('pvalue', self.pvalue)
-
 
 
 class ComputeFullClassifier(ComputeClassifier):
@@ -393,7 +393,6 @@ class ComputeFullClassifier(ComputeClassifier):
         self.compare_AUCs()
 
 
-
 class ComputeEncodingClassifier(ComputeClassifier):
 
     def input_hashsum(self):
@@ -419,7 +418,6 @@ class ComputeEncodingClassifier(ComputeClassifier):
             with open(fname,'rb') as f: hash_md5.update(f.read())
 
         return hash_md5.digest()
-
 
     def xval_test_type(self, events):
         event_sessions = events.session
@@ -505,12 +503,11 @@ class ComputeEncodingClassifier(ComputeClassifier):
         subject = self.pipeline.subject
         task = self.pipeline.args.experiment
 
-        for attr in ['xval_output','perm_AUCs','pvalue']:
+        for attr in ['xval_output', 'perm_AUCs', 'pvalue']:
             try:
-                self.__setattr__(attr,joblib.load(self.get_path_to_resource_in_workspace(subject + '-%s.pkl'%attr)))
+                self.__setattr__(attr, joblib.load(self.get_path_to_resource_in_workspace(subject + '-%s.pkl' % attr)))
             except IOError:
-                self.__setattr__(attr,joblib.load(self.get_path_to_resource_in_workspace(subject + '-'+task+'-%s.pkl'%attr)))
-
+                self.__setattr__(attr, joblib.load(self.get_path_to_resource_in_workspace(subject + '-' + task + '-%s.pkl' % attr)))
 
         classifier_path = self.get_path_to_resource_in_workspace(subject+'-lr_classifier_encoding.pkl')
         self.pass_object('classifier_path',classifier_path)

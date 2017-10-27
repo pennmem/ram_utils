@@ -49,14 +49,14 @@ def atlas_location_matlab(tag, atlas_loc, comments):
 
 
 class MontagePreparation(RamTask):
-    def __init__(self,*args,**kwargs):
-        super(MontagePreparation, self).__init__(*args,**kwargs)
-        self._bp_path=None
+    def __init__(self, *args, **kwargs):
+        super(MontagePreparation, self).__init__(*args, **kwargs)
+        self._bp_path = None
 
     @property
     def bipolar_pairs_path(self):
-        if self._bp_path is None:
         # FIXME: this takes a much longer time to run than one might expect, probably because of the json reader
+        if self._bp_path is None:
             subject = self.pipeline.subject
 
             tmp = subject.split('_')
@@ -70,7 +70,6 @@ class MontagePreparation(RamTask):
         return self._bp_path
 
     def input_hashsum(self):
-
         subject = self.pipeline.subject
         tmp = subject.split('_')
         subj_code = tmp[0]
