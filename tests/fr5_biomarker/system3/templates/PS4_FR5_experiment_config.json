@@ -7,10 +7,11 @@
             "classifier_version":"{{classifier_version}}",
 
             "stim_channels": {
-                {% for (i,stim_channel) in enumerate(stim_params_dict) %}"{{stim_channel}}":
+                {% for (i, stim_channel) in enumerate(stim_params_dict) %}"{{stim_channel}}":
                 {
-                    "min_stim_amplitude": {{ stim_params_dict[stim_channel]['min_stim_amplitude'] }},
+                    {% if 'PS4' in experiment %}"min_stim_amplitude": {{ stim_params_dict[stim_channel]['min_stim_amplitude'] }},
                     "max_stim_amplitude": {{ stim_params_dict[stim_channel]['max_stim_amplitude'] }},
+                    {% else %}"stim_amplitude": {{ stim_params_dict[stim_channel]['stim_amplitude'] }},{% end %}
                     "stim_frequency": {{ stim_params_dict[stim_channel]['stim_frequency'] }},
                     "stim_duration": {{ stim_params_dict[stim_channel]['stim_duration'] }}
                 }{% if (i+1) <len(stim_params_dict) %},
