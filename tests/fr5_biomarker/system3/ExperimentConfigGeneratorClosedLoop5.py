@@ -54,10 +54,6 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
 
     def build_experiment_config_dir(self):
         pass
-        # try:
-        #     # make_directory(full_dir_path=project_output_dir_tmp)
-        #     mkdir_p(project_output_dir_tmp)
-        # except IOError:
 
     def zipdir(self, path, ziph):
         root_paths_parts = pathlib.Path(str(path)).parts
@@ -65,17 +61,13 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
 
         # ziph is zipfile handle
         for root, dirs, files in os.walk(path):
-            for file in files:
-                file_abspath= os.path.join(root, file)
+            for f in files:
+                file_abspath = os.path.join(root, f)
                 file_abspath_segments = [x for x in pathlib.Path(str(file_abspath)).parts]
-
-                # relative_path_segments = [x for x in  pathlib.Path(file_abspath).parts[root_path_len:]]
-                # relative_path_segments.append(basename(file_abspath))
 
                 relative_path = join(*file_abspath_segments[root_path_len:])
 
-
-                ziph.write(os.path.join(root, file), relative_path )
+                ziph.write(os.path.join(root, f), relative_path )
 
     def run(self):
         class ConfigError(Exception):
@@ -116,19 +108,26 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
                 "stim_amplitude": stim_amplitude
             }
 
-        fr5_stim_channel = '%s_%s'%(anodes[0],cathodes[0])
-        project_dir_corename = 'experiment_config_dir/%s/%s'%(subject,experiment)
-        project_dir = self.create_dir_in_workspace(project_dir_corename)
+        fr5_stim_channel = '%s_%s' % (anodes[0], cathodes[0])
 
-        # making sure we get the path even if the actual directory is not created
+        project_dir_corename = 'experiment_config_dir/%s/%s' % (subject, experiment)
+        self.create_dir_in_workspace(project_dir_corename)
         project_dir = self.get_path_to_resource_in_workspace(project_dir_corename)
 
-        config_files_dir = self.create_dir_in_workspace(abspath(join(project_dir,'config_files')))
+        self.create_dir_in_workspace(abspath(join(project_dir,'config_files')))
         config_files_dir = self.get_path_to_resource_in_workspace(project_dir_corename+'/config_files')
 
-        experiment_config_template_filename = join(dirname(__file__),'templates','{}_experiment_config.json.tpl'.format(
-            'PS4_FR5' if 'PS4' in experiment else 'FR5'))
-        experiment_config_template = Template(open(experiment_config_template_filename ,'r').read())
+        if 'FR5' not in experiment:
+            # All experiments after FR5 share a similar config format to PS4,
+            # namely the stim channels are defined in a dict-like form.
+            prefix = 'PS4'
+        else:
+            prefix = 'FR5'
+        template_filename = join(
+            dirname(__file__), 'templates',
+            '{}_experiment_config.json.tpl'.format(prefix)
+        )
+        experiment_config_template = Template(open(template_filename, 'r').read())
 
         electrode_config_file_core, ext = splitext(electrode_config_file)
 
