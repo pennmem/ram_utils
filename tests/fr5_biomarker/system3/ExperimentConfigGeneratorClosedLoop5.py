@@ -125,7 +125,7 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
             prefix = 'FR5'
         template_filename = join(
             dirname(__file__), 'templates',
-            '{}_experiment_config.json.tpl'.format(prefix)
+            '{}_experiment_config.json'.format(prefix)
         )
         experiment_config_template = Template(open(template_filename, 'r').read())
 
