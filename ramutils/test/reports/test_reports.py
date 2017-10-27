@@ -33,10 +33,10 @@ def cleanup():
 )
 def test_fr1_report(subject):
     os.chdir(CODE_DIR + "/tests/fr1_report/")
-    print(os.getcwd())
     workspace = TEST_DIR + "samplefr1_reports/"
     command = "python fr1_report.py --subject={} --task=FR1 --workspace-dir={} --mount-point={}".format(subject, workspace, MOUNT)
     subprocess.check_output(command, shell=True)
+    assert os.path.exists(workspace + "{}/reports/{}_FR1_report.pdf".format(subject, subject))
     return
 
 @pytest.mark.parametrize("subject",[
@@ -49,6 +49,7 @@ def test_fr5_report(subject):
     workspace = TEST_DIR + "samplefr5_reports/"
     command = "python fr5_report.py --subject={} --task=FR5 --workspace-dir={} --mount-point={}".format(subject, workspace, MOUNT)
     subprocess.check_output(command, shell=True)
+    assert os.path.exists(workspace + "{}/reports/{}-FR5_report.pdf".format(subject, subject))
     return
 
 @pytest.mark.parametrize("subject, n_channels, anode, cathode, pulse_frequency, pulse_duration, target_amplitude, anode_num, cathode_num",[
@@ -140,6 +141,7 @@ def test_pal1_report(subject):
                 --workspace-dir={}\
                 --mount-point={}".format(subject, workspace, MOUNT)
     subprocess.check_output(command, shell=True)
+    assert os.path.exists(workspace + "{}/reports/{}_PAL1_report.pdf".format(subject, subject))
     return
 
 
@@ -157,6 +159,7 @@ def test_pal5_report(subject, classifier):
                 --workspace-dir={}\
                 --mount-point={}".format(subject, classifier, workspace, MOUNT)
     subprocess.check_output(command, shell=True)
+    assert os.path.exists(workspace + "{}/reports/PAL5-{}-report.pdf".format(subject, subject))
     return
 
 
@@ -219,7 +222,8 @@ def test_thr1_report(subject):
                --task=THR1\
                --workspace-dir={}\
                --mount-point={}".format(subject, workspace, MOUNT)
-    #subprocess.check_output(command, shell=True)
+    subprocess.check_output(command, shell=True)
+    assert os.path.exists(workspace + "{}/reports/{}_THR1_report.pdf".format(subject, subject))
     return
 
 def test_thr3_report():
