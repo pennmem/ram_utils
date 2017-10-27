@@ -3,8 +3,10 @@ import logging
 _logger = None
 
 
-def get_logger():
-    """Returns a configured logger to be used throughout the pipeline package.
+def get_logger(name='ramutils'):
+    """Returns a configured logger to be used throughout the ramutils package.
+
+    :param str name: Name for the logger (default: ``'ramutils'``)
 
     """
     global _logger
@@ -14,7 +16,7 @@ def get_logger():
         formatter = logging.Formatter(fmt='[%(levelname)1.1s %(asctime)s %(module)s:%(lineno)d]%(end_color)s %(message)s')
         handler.setFormatter(formatter)
 
-        _logger = logging.getLogger('pipeline')
+        _logger = logging.getLogger(name)
         _logger.addHandler(handler)
         _logger.setLevel(logging.INFO)
 

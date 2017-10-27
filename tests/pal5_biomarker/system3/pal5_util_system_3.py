@@ -5,12 +5,6 @@ import numpy as np
 from pal5_prompt import parse_command_line, Args
 
 args_list = []
-
-# try:
-#     # raise KeyboardInterrupt
-#     args_obj = parse_command_line()
-# except KeyboardInterrupt:
-
 args_obj = Args()
 
 args_obj.subject = 'R1333N'
@@ -110,13 +104,15 @@ if __name__ == '__main__':
                                          mount_point=args_obj.mount_point,
                                          args=args_obj)
 
-        report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
-        report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
-        report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False))
-        report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=False))
-        report_pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=False))
-        report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=False))
-        report_pipeline.add_task(ComputeBiomarkerThreshold(params=params, mark_as_completed=False))
-        report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=False))
+        mark_as_completed = True
+
+        report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=mark_as_completed))
+        report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=mark_as_completed))
+        report_pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=mark_as_completed))
+        report_pipeline.add_task(ComputePAL1Powers(params=params, mark_as_completed=mark_as_completed))
+        report_pipeline.add_task(ComputeEncodingClassifier(params=params, mark_as_completed=mark_as_completed))
+        report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=mark_as_completed))
+        report_pipeline.add_task(ComputeBiomarkerThreshold(params=params, mark_as_completed=mark_as_completed))
+        report_pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=mark_as_completed))
         report_pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
         report_pipeline.execute_pipeline()
