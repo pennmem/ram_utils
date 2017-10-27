@@ -3,6 +3,7 @@ import os
 import shutil
 import pytest
 import subprocess
+import classiflib
 
 
 # Assumes that testing folder is in ramutils package and report code is in the tests/ folder at the top level
@@ -15,7 +16,7 @@ def cleanup():
     """ Utility function for setting up test directory. Call manually before
         running a new batch of tests
     """
-    sample_reports = ["samplefr1_reports", "samplefr5_reports", 
+    sample_reports = ["samplefr1_reports", "samplefr5_reports",
                       "samplefr5_biomarkers", "samplepal1_reports",
                       "samplepal5_reports", "samplepal5_biomarkers",
                       "samplethr1_reports", "samplethr3_reports"]
@@ -116,7 +117,15 @@ def test_fr5_util_system_3(subject, experiment, electrode_config_file,
                                        workspace,
                                        MOUNT)
     subprocess.check_output(command, shell=True)
+    output_classifier = (workspace +
+                         "experiment_config_dir/{}/{}/config_files/{}-lr_classifier.zip"
+                        ).format(subject, experiment, subject)
+    classifier = classiflib.ClassifierContainer.load(output_classifier)
+    # If the sample weighting failed, there will only be 1s and 2.5s
+    assert (min(classifier.sample_weight) < 1)
     return
+
+
 
 @pytest.mark.parametrize("subject",[
     ("R1333N"),
