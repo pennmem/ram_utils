@@ -120,7 +120,7 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
         if 'FR5' not in experiment:
             # All experiments after FR5 share a similar config format to PS4,
             # namely the stim channels are defined in a dict-like form.
-            prefix = 'PS4'
+            prefix = 'PS4_FR5'
         else:
             prefix = 'FR5'
         template_filename = join(
