@@ -45,10 +45,6 @@ class CMLParserCloseLoop3(object):
         for val in vals:
             self.arg_list.append(val)
 
-    def configure_python_paths(self, paths):
-        for path in paths:
-            sys.path.append(path)
-
     def parse(self):
         print sys.argv
         if len(sys.argv) <= self.arg_count_threshold and len(self.arg_list):
