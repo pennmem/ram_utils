@@ -7,7 +7,16 @@ from __future__ import print_function
 
 from os.path import *
 import numpy as np
+from classifier.utils import get_sample_weights
 from system_3_utils.ram_tasks.CMLParserClosedLoop3 import CMLParserCloseLoop3
+from ramutils.pipeline import RamPipeline
+from tests.fr5_biomarker.FREventPreparation import FREventPreparation
+from tests.fr5_biomarker.ComputeFRPowers import ComputeFRPowers
+from tests.fr5_biomarker.MontagePreparation import MontagePreparation
+from system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
+from tests.fr5_biomarker.ComputeClassifier import ComputeClassifier,ComputeFullClassifier,ComputeEncodingClassifier
+from tests.fr5_biomarker.system3.ExperimentConfigGeneratorClosedLoop5 import ExperimentConfigGeneratorClosedLoop5
+
 
 print("ATTN: Wavelet params and interval length are hardcoded!! To change them, recompile")
 print("Windows binaries from https://github.com/busygin/morlet_for_sys2_biomarker")
@@ -30,17 +39,6 @@ cml_parser.arg('--max-amplitudes', '0.5')
 #cml_parser.arg('--encoding-only')
 
 args = cml_parser.parse()
-
-# ------------------------------- end of processing command line
-
-from ramutils.pipeline import RamPipeline
-
-from tests.fr5_biomarker.FREventPreparation import FREventPreparation
-from tests.fr5_biomarker.ComputeFRPowers import ComputeFRPowers
-from tests.fr5_biomarker.MontagePreparation import MontagePreparation
-from system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
-from tests.fr5_biomarker.ComputeClassifier import ComputeClassifier,ComputeFullClassifier,ComputeEncodingClassifier
-from tests.fr5_biomarker.system3.ExperimentConfigGeneratorClosedLoop5 import ExperimentConfigGeneratorClosedLoop5
 
 
 class StimParams(object):
@@ -81,29 +79,11 @@ class Params(object):
         self.n_perm = 200
 
         self.stim_params = StimParams(
-            # n_channels=args.n_channels,
-            # anode_num=args.anode_num,
-            # anode=args.anode,
-            # cathode_num=args.cathode_num,
-            # cathode=args.cathode,
-            # pulse_frequency=args.pulse_frequency,
-            # pulse_count=args.pulse_frequency*args.pulse_duration/1000,
-            # target_amplitude=args.target_amplitude
         )
 
 params = Params()
 
 # TODO - we need to check if all files need for bipolar referencing are ready before executing the whole pipeine
-#
-# if args.bipolar:
-#     electrode_config_file = args.electrode_config_file
-#     electrode_config_file_dir = dirname(electrode_config_file)
-#     trans_matrix_fname = join(electrode_config_file_dir, 'monopolar_trans_matrix%s.h5' % args.subject)
-#
-#     if not exists(trans_matrix_fname):
-#         print ('Bipolar referencing needs %s' % ('monopolar_trans_matrix%s.h5' % args.subject))
-#         print ('Please run jacksheet_2_configuration_csv.sh script located in clinical_affairs/syste,3 folder of the RAM_UTILS repository')
-#         sys.exit(1)
 
 
 class ReportPipeline(RamPipeline):
@@ -120,14 +100,14 @@ pipeline = ReportPipeline(subject=args.subject,
 pipeline.add_task(FREventPreparation(mark_as_completed=mark_as_completed))
 pipeline.add_task(MontagePreparation(mark_as_completed=mark_as_completed, force_rerun=True))
 pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(params=params, mark_as_completed=False, force_rerun=True))
-pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=mark_as_completed))
+pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=mark_as_completed, force_rerun=True))
 
 if args.encoding_only:
     pipeline.add_task(ComputeEncodingClassifier(params=params, 
                                                 mark_as_completed=mark_as_completed, 
                                                 force_rerun=True))
 else:
-    pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=mark_as_completed, force_rerun=False))
+    pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=mark_as_completed, force_rerun=True))
 pipeline.add_task(ComputeFullClassifier(params=params,
                                         mark_as_completed=mark_as_completed))
 pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params,
