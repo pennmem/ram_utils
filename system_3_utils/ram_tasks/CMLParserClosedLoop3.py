@@ -60,7 +60,7 @@ class CMLParserCloseLoop3(object):
 
         # check that target amplitude is in milliamps
         try:
-            assert args.target_amplitude < 2 and args.target_amplitude > 0
+            assert 0 < args.target_amplitude < 2
         except AssertionError:
             raise ValueError('Target amplitude should be between 0 and 2 milliamps')
 
