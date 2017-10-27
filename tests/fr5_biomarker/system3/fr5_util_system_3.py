@@ -7,7 +7,7 @@ from __future__ import print_function
 
 from os.path import *
 import numpy as np
-from classifier.utils import get_sample_weights
+from ramutils.classifier.utils import get_sample_weights
 from system_3_utils.ram_tasks.CMLParserClosedLoop3 import CMLParserCloseLoop3
 from ramutils.pipeline import RamPipeline
 from tests.fr5_biomarker.FREventPreparation import FREventPreparation

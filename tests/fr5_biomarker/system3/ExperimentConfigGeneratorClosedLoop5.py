@@ -14,7 +14,7 @@ from tornado.template import Template
 
 from classiflib import ClassifierContainer, dtypes
 from bptools.odin import ElectrodeConfig
-from classifier.utils import get_sample_weights
+from ramutils.classifier.utils import get_sample_weights
 
 from ramutils.pipeline import *
 
