@@ -5,27 +5,20 @@ import numpy as np
 from pal5_prompt import parse_command_line, Args
 
 args_list = []
+args_obj = Args()
 
-try:
-    # raise KeyboardInterrupt
-    args_obj = parse_command_line()
-except KeyboardInterrupt:
+args_obj.subject = 'R1333N'
+args_obj.anodes = ['LPLT5', 'LAHD21']
+args_obj.cathodes = ['LPLT6', 'LAHD22']
+args_obj.electrode_config_file = '/scratch/system3_configs/ODIN_configs/R1333N/R1333N_28AUG2017L0M0STIM.csv'
+args_obj.experiment = 'PAL5'
+args_obj.min_amplitudes = [0.25, 0.25]
+args_obj.max_amplitudes = [1.0, 1.0]
+args_obj.mount_point = '/'
+args_obj.pulse_frequency = 200
+args_obj.workspace_dir = '/scratch/RAM_maint/automated_reports_json/samplepal5_biomarkers/'
 
-    args_obj = Args()
-
-    args_obj.subject = 'R1333N'
-    args_obj.anodes = ['LPLT5', 'LAHD21']
-    args_obj.cathodes = ['LPLT6', 'LAHD22']
-    args_obj.electrode_config_file = '/Users/depalati/mnt/rhino/scratch/system3_configs/ODIN_configs/R1333N/R1333N_28AUG2017L0M0STIM.csv'
-    args_obj.experiment = 'PAL5'
-    args_obj.target_amplitude = 0.5
-    args_obj.min_amplitudes = [0.25, 0.25]
-    args_obj.max_amplitudes = [1.0, 1.0]
-    args_obj.mount_point = '/Users/depalati/mnt/rhino'
-    args_obj.pulse_frequency = 200
-    args_obj.workspace_dir = '/Users/depalati/mnt/rhino/scratch/depalati/configs'
-
-    args_list.append(args_obj)
+args_list.append(args_obj)
 
 from ramutils.pipeline import RamPipeline
 from tests.pal5_biomarker.PAL1EventPreparation import PAL1EventPreparation

@@ -10,7 +10,7 @@ import h5py
 import pytest
 import numpy as np
 
-TEST_DIR = os.path.dirname(__file__)
+TEST_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEST_OUTPUT_DIR = "/scratch/RAM_maint/automated_reports_json/tmp_testing_data/"
 
 
