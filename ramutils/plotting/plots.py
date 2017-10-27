@@ -161,21 +161,101 @@ def probability_lineplot(serial_positions, prob_of_recall,
     return ax
 
 
-def stim_recall():
+def stim_and_recall(num_lists, num_stim_per_list, stim_lists,
+                    stim_list_recalls, nostim_lists,
+                    nostim_list_recalls):
+    """ Combined barplot of stim items per list and scatter plot of number of recall items by stim/nostim
+
+    Parameters:
+    -----------
+    num_lists: int
+    num_stim_per_list: list
+    stim_lists: list
+    stim_list_recalls: list
+    nostim_lists: list
+    nostim_list_recalls:
+
+    Returns:
+    --------
+    ax
+        Matplotlib axes object
+    
+    """
+
+    _, ax = plt.subplots()
+    ax.bar(np.arange(num_lists), num_stim_per_list, color='g')
+    ax.scatter(stim_lists, stim_list_recalls, color='r')
+    ax.scatter(nostim_lists, nostim_list_recalls, color='b')
+    ax.set(xlabel="List Number",
+           ylabel="# Items",
+           ylim=(0, None))
     return
 
 
-def probability_of_stimulation():
-    return
+def delta_recall(percent_diff_from_mean):
+    """ Barplot of the difference in recall between stim and post stim items 
+    
+    Parameters:
+    -----------
+    percent_diff_from_mean: tuple
+        A tuple of numeric types (stim_percent_diff_from_mean, post_stim_percent_diff_from_mean)
+    
+    Returns:
+    --------
+    ax
+        Matplotlib axes object containing the plot
+    
+    """
+    if len(percent_diff_from_mean) != 2:
+        raise RuntimeError("Input should be a tuple of length 2")
+
+    _, ax = plt.subplots()
+
+    ax.bar([0, 1], percent_diff_from_mean, color='0.5')
+    ax.axhline(0, linestyle='dashed', color='0.5')
+
+    ax.set(ylabel="% Recall Difference (Stim - Nostim)",
+           xticks=[0, 1],
+           xticklabels=['Stim', 'Post Stim'])
+
+    return ax
 
 
-def delta_recall():
-    return
+def biomarker_distribution(probabilities, title):
+    """ Historgram of classifier output
+
+    Parameters:
+    -----------
+    probabilities: list
+
+    Returns:
+    --------
+    ax
+        Matplotlib axes object
+    """
+    _, ax = plt.subplots()
+    ax.hist(probabilities, bins=10)
+    ax.set(ylabel="# Trials",
+           title=title)
+
+    return ax
 
 
-def biomarker_distribution():
-    return
+def post_stim_eeg(eeg_data):
+    """ Diagnostic plot for identifying saturation EEG data 
+    
+    Parameters:
+    -----------
+    eeg_data: 
 
+    Returns:
+    --------
+    ax
+        Matplotlib axes object
 
-def post_stim_eeg():
-    return
+    """
+    _, ax = plt.subplots()
+    ax.imshow(eeg_data, cmap='bwr', aspect='auto', origin='lower')
+    ax.set(xlabel="Time (ms)",
+           ylabel="Channel (bipolar reference)")
+    return ax
