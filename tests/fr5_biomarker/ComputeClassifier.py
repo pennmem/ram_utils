@@ -184,13 +184,16 @@ class ComputeClassifier(RamTask):
         # Specify that the file should overwrite so that when
         # ComputeClassifier and ComputeFullClassifier are run back to back,
         # it will not complain about the dataset already existing in the h5 file
-        self.save_array_to_hdf5(self.get_path_to_resource_in_workspace(subject + "-debug_data.h5"),
-                                "model_output",
-                                recall_prob_array,
-                                overwrite=True)
-        self.save_array_to_hdf5(self.get_path_to_resource_in_workspace(subject + "-debug_data.h5"),
-                                "model_weights",
+        try:
+            self.save_array_to_hdf5(self.get_path_to_resource_in_workspace(subject + "-debug_data.h5"),
+                                    "model_output",
+                                    recall_prob_array,
+                                    overwrite=True)
+            self.save_array_to_hdf5(self.get_path_to_resource_in_workspace(subject + "-debug_data.h5"),
+                                    "model_weights",
                                 model_weights)
+        except Exception:
+            print('could not save debug data')
 
         self.pass_objects()
 

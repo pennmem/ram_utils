@@ -190,6 +190,8 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
                 'subject': subject
             }
         )
+        print('saving classifier container:')
+        print(join(config_files_dir,self.classifier_container_path))
         container.save(
             join(config_files_dir, self.classifier_container_path),
             overwrite=True

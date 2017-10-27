@@ -93,11 +93,12 @@ class FREventPreparation(RamTask):
         else:
             events = fr1_events if len(fr1_events) else catfr1_events
         events = events[events.list>-1]
+
         events = create_baseline_events(events,1000,29000)
+        irts = np.append([0],np.diff(events.mstime))
 
         encoding_events_mask = events.type == 'WORD'
         retrieval_events_mask = (events.type == 'REC_WORD') | (events.type == 'REC_BASE')
-        irts = np.append([0],np.diff(fr1_events.mstime))
         retrieval_events_mask_0s = retrieval_events_mask & (events.type == 'REC_BASE')
         retrieval_events_mask_1s = retrieval_events_mask & (events.type == 'REC_WORD') & (events.intrusion == 0)  & (irts > 1000)
 
