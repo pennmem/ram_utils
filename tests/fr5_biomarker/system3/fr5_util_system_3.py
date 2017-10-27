@@ -115,7 +115,6 @@ class ReportPipeline(RamPipeline):
         self.args = args
 
 mark_as_completed = True
-
 pipeline = ReportPipeline(subject=args.subject,
                           workspace_dir=args.workspace_dir,
                           mount_point=args.mount_point,
@@ -131,8 +130,7 @@ pipeline.add_task(ComputeFRPowers(params=params,
 
 if args.encoding_only:
     pipeline.add_task(ComputeEncodingClassifier(params=params,
-                                                mark_as_completed=mark_as_completed,
-                                                force_rerun=True))
+                                                mark_as_completed=mark_as_completed))
 else:
     pipeline.add_task(ComputeClassifier(params=params,
                                         mark_as_completed=mark_as_completed,
@@ -140,9 +138,6 @@ else:
 
 pipeline.add_task(ComputeFullClassifier(params=params,
                                         mark_as_completed=mark_as_completed))
-
 pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params,
                                                        mark_as_completed=False))
-
-# starts processing pipeline
 pipeline.execute_pipeline()

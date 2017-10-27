@@ -1,44 +1,31 @@
-DEBUG = False
-
+import sys
+import time
+import numpy as np
 from os.path import *
 
 from ReportUtils import CMLParser,ReportPipeline
-import sys
-import time
+from PAL1EventPreparation import PAL1EventPreparation
+from PAL5EventPreparation import PAL5EventPreparation
+from FREventPreparation import FREventPreparation
+from CombinedEventPreparation import CombinedEventPreparation
+from ComputePAL5Powers import ComputePAL5Powers
+from ComputePowers import ComputePowers
+from MontagePreparation import MontagePreparation
+from ComputeClassifier import ComputeClassifier
+from ComputeClassifier import ComputePAL1Classifier
+from ComputePALStimTable import ComputePALStimTable
+from ComposeSessionSummary import ComposeSessionSummary
+from GenerateReportTasks import GenerateReportPDF,GeneratePlots,GenerateTex
 
 
 parser = CMLParser()
 parser.parser.add_argument('--classifier')
-
 parser.arg('--subject','R1312N')
 parser.arg('--workspace-dir','scratch',)
 parser.arg('--mount-point','/Volumes/rhino_root')
 parser.arg('--classifier','pal')
 
 args_obj=parser.parse()
-
-from PAL1EventPreparation import PAL1EventPreparation
-from PAL5EventPreparation import PAL5EventPreparation
-
-
-
-from FREventPreparation import FREventPreparation
-
-from CombinedEventPreparation import CombinedEventPreparation
-
-from ComputePAL5Powers import ComputePAL5Powers
-
-from ComputePowers import ComputePowers
-
-from MontagePreparation import MontagePreparation
-
-from ComputeClassifier import ComputeClassifier
-from ComputeClassifier import ComputePAL1Classifier
-
-from ComputePALStimTable import ComputePALStimTable
-from ComposeSessionSummary import ComposeSessionSummary
-from GenerateReportTasks import GenerateReportPDF,GeneratePlots,GenerateTex
-import numpy as np
 
 
 class StimParams(object):
@@ -108,45 +95,24 @@ params = Params()
 
 
 if __name__ == '__main__':
-
-        # setting workspace
-
-        report_pipeline = ReportPipeline(subject=args_obj.subject, task = 'PAL5',
-                                         workspace_dir=join(args_obj.workspace_dir, args_obj.subject),
-                                         mount_point=args_obj.mount_point,
-                                         args=args_obj)
-
-        report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
-
-        report_pipeline.add_task(PAL5EventPreparation(mark_as_completed=False))
-
-        report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
-
-        report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
-
-        report_pipeline.add_task(CombinedEventPreparation(mark_as_completed=False))
-
-        report_pipeline.add_task(ComputePowers(params=params, mark_as_completed=True))
-
-        report_pipeline.add_task(ComputePAL5Powers(params=params,mark_as_completed=True))
-
-        if args_obj.classifier == 'combined':
-            report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
-        else:
-            report_pipeline.add_task(ComputePAL1Classifier(params=params, mark_as_completed=True))
-
-        report_pipeline.add_task(ComputePALStimTable(mark_as_completed=False,params=params))
-
-        report_pipeline.add_task(ComposeSessionSummary(mark_as_completed=False,params=params))
-
-        report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
-
-        report_pipeline.add_task(GenerateTex(mark_as_completed=False))
-
-        report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
-
-        # starts processing pipeline
-        report_pipeline.execute_pipeline()
-
-
-
+    report_pipeline = ReportPipeline(subject=args_obj.subject, task = 'PAL5',
+                                     workspace_dir=join(args_obj.workspace_dir, args_obj.subject),
+                                     mount_point=args_obj.mount_point,
+                                     args=args_obj)
+    report_pipeline.add_task(FREventPreparation(mark_as_completed=False))
+    report_pipeline.add_task(PAL5EventPreparation(mark_as_completed=False))
+    report_pipeline.add_task(MontagePreparation(params=params, mark_as_completed=False))
+    report_pipeline.add_task(PAL1EventPreparation(mark_as_completed=False))
+    report_pipeline.add_task(CombinedEventPreparation(mark_as_completed=False))
+    report_pipeline.add_task(ComputePowers(params=params, mark_as_completed=True))
+    report_pipeline.add_task(ComputePAL5Powers(params=params,mark_as_completed=True))
+    if args_obj.classifier == 'combined':
+        report_pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=True))
+    else:
+        report_pipeline.add_task(ComputePAL1Classifier(params=params, mark_as_completed=True))
+    report_pipeline.add_task(ComputePALStimTable(mark_as_completed=False,params=params))
+    report_pipeline.add_task(ComposeSessionSummary(mark_as_completed=False,params=params))
+    report_pipeline.add_task(GeneratePlots(mark_as_completed=False))
+    report_pipeline.add_task(GenerateTex(mark_as_completed=False))
+    report_pipeline.add_task(GenerateReportPDF(mark_as_completed=False))
+    report_pipeline.execute_pipeline()

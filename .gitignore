@@ -1,5 +1,6 @@
 .cache/
-testing/sample_plots/
+ramutils/test/plotting/sample_plots/
+
 # OS generated files #
 ######################
 .DS_Store
