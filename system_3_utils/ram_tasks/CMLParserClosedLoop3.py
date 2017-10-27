@@ -2,13 +2,21 @@ import sys
 import argparse
 from os.path import *
 
+# Valid experiments that we can generate Ramulator configuration files for
+_EXP_CHOICES = [
+    'FR5', 'catFR5',
+    'PS4_FR5', 'PS4_catFR5',
+    'FR6', 'catFR6',
+]
+
 
 # FIXME: just use ArgumentParser directly; this isn't doing anything that it can't
 class CMLParserCloseLoop3(object):
     def __init__(self, arg_count_threshold=1):
         self.parser = argparse.ArgumentParser(description='Report Generator')
+
         self.parser.add_argument('--subject', required=True)
-        self.parser.add_argument('--experiment', required=False)
+        self.parser.add_argument('--experiment', choices=_EXP_CHOICES, required=False)
         self.parser.add_argument('--workspace-dir', required=False)
         self.parser.add_argument('--mount-point', required=False)
         self.parser.add_argument('--electrode-config-file', required=True)
