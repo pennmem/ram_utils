@@ -1,3 +1,4 @@
+import os
 from math import sqrt
 import hashlib
 from random import shuffle
