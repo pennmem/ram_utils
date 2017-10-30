@@ -243,6 +243,7 @@ def test_joint_fr1_catfr1_report(subject):
                --workspace-dir={}\
                --mount-point={}".format(subject, workspace, MOUNT)
     subprocess.check_output(command, shell=True)
+    assert os.path.exists(workspace + "{}/reports/{}_FR1_catFR1_joined_report.pdf ".format(subject, subject))
     return
 
 
@@ -252,14 +253,12 @@ def test_joint_fr1_catfr1_report(subject):
 )
 def test_fr_stim_report(subject):
     os.chdir(CODE_DIR + "/tests/fr_stim_report/")
-    workspace = TEST_DIR + "sample_fr_stim_reports//"
+    workspace = TEST_DIR + "sample_fr_stim_reports/"
     command = "python fr_stim_report.py\
                --subject={}\
                --task=FR3\
                --workspace-dir={}\
                --mount-point={}".format(subject, workspace, MOUNT)
     subprocess.check_output(command, shell=True)
+    assert os.path.exists(workspace + "{}/reports/FR3-{}-report.pdf".format(subject, subject))
     return
-
-
-
