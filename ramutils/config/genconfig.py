@@ -5,7 +5,9 @@
 
 from __future__ import unicode_literals, print_function
 
-from subprocess import call
+import os.path as osp
+from subprocess import Popen
+
 from .prompts import *
 
 
@@ -36,4 +38,10 @@ def main():
         cmd += ["--encoding-only"]
 
     print(' '.join(cmd))
-    call(cmd)
+
+    # FIXME for reorganization
+    cwd = osp.join(osp.dirname(__file__),
+                   '..',  # ramutils package
+                   '..',  # ramutils repo root
+                   'tests', 'fr5_biomarker', 'system3')
+    Popen(cmd, cwd=cwd).wait()
