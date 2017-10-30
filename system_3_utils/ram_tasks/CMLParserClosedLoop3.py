@@ -21,7 +21,7 @@ class CMLParserCloseLoop3(object):
         self.parser.add_argument('--mount-point', required=False)
         self.parser.add_argument('--electrode-config-file', required=True)
         self.parser.add_argument('--pulse-frequency', required=True, type=int)
-        self.parser.add_argument('--target-amplitude', required=True, type=float)
+        self.parser.add_argument('--target-amplitude', nargs='+', required=True, type=float)
 
         self.parser.add_argument('--anode-num', required=False, type=int)
         self.parser.add_argument('--anode', required=False, default='')
@@ -62,10 +62,12 @@ class CMLParserCloseLoop3(object):
         else:
             args.mount_point = abspath(expanduser(args.mount_point))
 
+        # FIXME: validation should happen in a task
         # check that target amplitude is in milliamps
-        try:
-            assert 0 < args.target_amplitude < 2
-        except AssertionError:
-            raise ValueError('Target amplitude should be between 0 and 2 milliamps')
+        for ampl in args.target_amplitude:
+            try:
+                assert 0 < ampl < 2
+            except AssertionError:
+                raise ValueError('Target amplitude should be between 0 and 2 milliamps')
 
         return args

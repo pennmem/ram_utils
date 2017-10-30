@@ -40,11 +40,11 @@ def main():
         "--experiment={}".format(experiment),
         "--electrode-config-file={}".format(odin_config_filename),
         "--pulse-frequency=200",
-        "--target-amplitude={}".format(stim_pairs[0].stim_amplitude),  # FIXME for two channels
     ]
 
     cmd += ["--anodes"] + [pair.anode for pair in stim_pairs]
     cmd += ["--cathodes"] + [pair.cathode for pair in stim_pairs]
+    cmd += ["--target-amplitude"] + [str(pair.stim_amplitude) for pair in stim_pairs]
     cmd += ["--min-amplitudes"] + [str(pair.min_amplitude) for pair in stim_pairs]
     cmd += ["--max-amplitudes"] + [str(pair.max_amplitude) for pair in stim_pairs]
 
