@@ -4,7 +4,7 @@
 from __future__ import unicode_literals, print_function
 
 from subprocess import call
-from config_prompt import *
+from prompts import *
 
 
 def main():
