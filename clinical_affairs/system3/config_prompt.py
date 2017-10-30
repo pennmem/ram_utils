@@ -33,7 +33,6 @@ class ListValidator(Validator):
     """Validate input based on a list of possibilities."""
     def __init__(self, valid_items):
         self.valid_items = [item.strip() for item in valid_items]
-        print(self.valid_items)
 
     def validate(self, document):
         text = document.text.strip()
