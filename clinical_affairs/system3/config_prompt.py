@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals, print_function
 
+import os.path as osp
 from functools import partial
 
 from prompt_toolkit.validation import Validator, ValidationError
@@ -49,6 +50,33 @@ class YesNoValidator(Validator):
             raise ValidationError(message='Answer yes or no', cursor_position=len(text))
 
 
+class PathValidator(Validator):
+    """Validate a path.
+
+    :param bool isfile: Allow file paths.
+    :param bool isdir: Allow directory paths.
+
+    """
+    def __init__(self, isfile=True, isdir=True):
+        self.isfile = isfile
+        self.isdir = isdir
+        assert self.isfile or self.isdir, "at least one of isfile or isdir must be true"
+
+    def validate(self, document):
+        path = document.text
+        found = osp.exists(path)
+
+        if found and self.isfile:
+            if not osp.isfile(path):
+                raise ValidationError(message="path {} is not a file".format(path))
+
+        elif found and self.isdir:
+            if not osp.isdir(path):
+                raise ValidationError(message="path {} is not a directory".format(path))
+
+        else:
+            raise ValidationError(message="path {} does not exist".format(path))
+
 def get_subject():
     """Prompt for the subject ID."""
     return prompt("Subject ID: ")
@@ -64,6 +92,21 @@ def get_yes_or_no(msg):
         try:
             resp = prompt(msg, validator=YesNoValidator()).lower()
             return resp[0] == 'y'
+        except ValidationError as e:
+            print(e.message)
+
+
+def get_path(msg, isfile=True, isdir=True):
+    """Prompt for a path.
+
+    :param str msg: Prompt message.
+    :param bool isfile: Allow file paths.
+    :param bool isdir: Allow directory paths.
+
+    """
+    while True:
+        try:
+            return prompt(msg, validator=PathValidator(isfile, isdir))
         except ValidationError as e:
             print(e.message)
 
