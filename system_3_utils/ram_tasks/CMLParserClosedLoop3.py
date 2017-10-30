@@ -54,7 +54,7 @@ class CMLParserCloseLoop3(object):
 
         # making sure that sensible workspace directory is set if user does not provide one
         if not args.workspace_dir:
-            args.workspace_dir = abspath(join(expanduser('~'), 'scratch', args.task, args.subject))
+            args.workspace_dir = abspath(join(expanduser('~'), 'scratch', args.experiment, args.subject))
 
         # Converting matlab search paths to proper format
         if not args.mount_point:
