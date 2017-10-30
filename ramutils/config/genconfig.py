@@ -1,3 +1,5 @@
+"""Main script for generating Ramulator configuration files."""
+
 # FIXME: generalize this for all experiments (only FR6 now)
 # FIXME: handle command-line options and don't prompt for passed options
 
