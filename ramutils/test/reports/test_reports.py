@@ -15,7 +15,7 @@ def cleanup():
     """ Utility function for setting up test directory. Call manually before
         running a new batch of tests
     """
-    sample_reports = ["samplefr1_reports", "samplefr5_reports", 
+    sample_reports = ["samplefr1_reports", "samplefr5_reports",
                       "samplefr5_biomarkers", "samplepal1_reports",
                       "samplepal5_reports", "samplepal5_biomarkers",
                       "samplethr1_reports", "samplethr3_reports"]
@@ -215,3 +215,39 @@ def test_thr1_report(subject):
 
 def test_thr3_report():
     return
+
+
+
+@pytest.mark.parametrize("subject",[
+    ("R1342M"),
+]
+)
+def test_joint_fr1_catfr1_report(subject):
+    os.chdir(CODE_DIR + "/tests/fr1_catfr1_joint_report/")
+    workspace = TEST_DIR + "sample_fr1_catfr1_joint_reports/"
+    command = "python fr1_catfr1_joint_report.py\
+               --subject={}\
+               --task=FR1\
+               --workspace-dir={}\
+               --mount-point={}".format(subject, workspace, MOUNT)
+    subprocess.check_output(command, shell=True)
+    return
+
+
+@pytest.mark.parametrize("subject",[
+    ("R1293P"),
+]
+)
+def test_fr_stim_report(subject):
+    os.chdir(CODE_DIR + "/tests/fr_stim_report/")
+    workspace = TEST_DIR + "sample_fr_stim_reports//"
+    command = "python fr_stim_report.py\
+               --subject={}\
+               --task=FR3\
+               --workspace-dir={}\
+               --mount-point={}".format(subject, workspace, MOUNT)
+    subprocess.check_output(command, shell=True)
+    return
+
+
+
