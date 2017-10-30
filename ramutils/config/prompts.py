@@ -76,6 +76,7 @@ class PathValidator(Validator):
         else:
             raise ValidationError(message="path {} does not exist".format(path))
 
+
 def get_subject():
     """Prompt for the subject ID."""
     return prompt("Subject ID: ")
@@ -139,8 +140,8 @@ def get_stim_pair(experiment, pair_index=0):
     pprompt = partial(prompt, get_bottom_toolbar_tokens=lambda cli: tbmsg(msg))
     result = StimPairParams()
 
-    result.anode = int(pprompt('Anode: '))
-    result.cathode = int(pprompt('Cathode: '))
+    result.anode = pprompt('Anode: ')
+    result.cathode = pprompt('Cathode: ')
 
     if 'PS4' in experiment:
         result.min_amplitude = float(pprompt('Minimum amplitude [mA]: '))
