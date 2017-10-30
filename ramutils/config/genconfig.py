@@ -20,7 +20,7 @@ def main():
         stim_pairs.append(get_stim_pair(experiment, pair))
 
     cmd = [
-        "python",
+        "python", "tests/fr5_biomarker/system3/fr5_util_system3.py",
         "--subject={}".format(subject),
         "--experiment={}".format(experiment),
         "--electrode-config-file={}".format(odin_config_filename),
