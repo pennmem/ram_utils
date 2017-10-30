@@ -4,7 +4,7 @@
 from __future__ import unicode_literals, print_function
 
 from subprocess import call
-from prompts import *
+from .prompts import *
 
 
 def main():
@@ -35,7 +35,3 @@ def main():
 
     print(' '.join(cmd))
     call(cmd)
-
-
-if __name__ == "__main__":
-    main()
