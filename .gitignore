@@ -1,5 +1,6 @@
 .cache/
 ramutils/test/plotting/sample_plots/
+*.swp
 
 # OS generated files #
 ######################
