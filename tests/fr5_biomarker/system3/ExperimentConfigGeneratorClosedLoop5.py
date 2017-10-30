@@ -118,7 +118,7 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
         self.create_dir_in_workspace(abspath(join(project_dir,'config_files')))
         config_files_dir = self.get_path_to_resource_in_workspace(project_dir_corename+'/config_files')
 
-        if 'FR5' not in experiment:
+        if (experiment.lower() != "fr5") and (experiment.lower() != "catfr5"):
             # All experiments after FR5 share a similar config format to PS4,
             # namely the stim channels are defined in a dict-like form.
             prefix = 'PS4_FR5'
