@@ -39,13 +39,14 @@ def main():
         "--subject={}".format(subject),
         "--experiment={}".format(experiment),
         "--electrode-config-file={}".format(odin_config_filename),
-        "--anodes {}".format(" ".join([pair.anode for pair in stim_pairs])),
-        "--cathodes {}".format(" ".join([pair.cathode for pair in stim_pairs])),
         "--pulse-frequency=200",
         "--target-amplitude={}".format(stim_pairs[0].stim_amplitude),  # FIXME for two channels
-        "--min-amplitudes {}".format([pair.min_amplitude for pair in stim_pairs]),
-        "--max-amplitudes {}".format([pair.max_amplitude for pair in stim_pairs]),
     ]
+
+    cmd += ["--anodes"] + [pair.anode for pair in stim_pairs]
+    cmd += ["--cathodes"] + [pair.cathode for pair in stim_pairs]
+    cmd += ["--min-amplitudes"] + [str(pair.min_amplitude) for pair in stim_pairs]
+    cmd += ["--max-amplitudes"] + [str(pair.max_amplitude) for pair in stim_pairs]
 
     if not use_retrieval:
         cmd += ["--encoding-only"]
