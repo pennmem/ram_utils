@@ -1,3 +1,3 @@
-from genconfig import main
+from .genconfig import main
 
 main()
