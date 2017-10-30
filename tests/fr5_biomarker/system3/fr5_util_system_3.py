@@ -18,12 +18,6 @@ from tests.fr5_biomarker.ComputeClassifier import (
 from tests.fr5_biomarker.system3.ExperimentConfigGeneratorClosedLoop5 import ExperimentConfigGeneratorClosedLoop5
 from system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
 from system_3_utils.ram_tasks.CMLParserClosedLoop3 import CMLParserCloseLoop3
-from tests.fr5_biomarker.FREventPreparation import FREventPreparation
-from tests.fr5_biomarker.ComputeFRPowers import ComputeFRPowers
-from tests.fr5_biomarker.MontagePreparation import MontagePreparation
-from system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
-from tests.fr5_biomarker.ComputeClassifier import ComputeClassifier,ComputeFullClassifier,ComputeEncodingClassifier
-from tests.fr5_biomarker.system3.ExperimentConfigGeneratorClosedLoop5 import ExperimentConfigGeneratorClosedLoop5
 
 
 print("ATTN: Wavelet params and interval length are hardcoded!! To change them, recompile")
