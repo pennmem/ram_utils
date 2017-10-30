@@ -4,9 +4,12 @@ from os.path import *
 
 # Valid experiments that we can generate Ramulator configuration files for
 _EXP_CHOICES = [
-    'FR5', 'catFR5',
-    'PS4_FR5', 'PS4_catFR5',
-    'FR6', 'catFR6',
+    'FR5',
+    'catFR5',
+    'PS4_FR5', 
+    'PS4_CatFR5',
+    'FR6',
+    'catFR6',
 ]
 
 
