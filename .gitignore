@@ -1,5 +1,11 @@
 .cache/
 ramutils/test/plotting/sample_plots/
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.pdf
+*.synctex.gz
 
 # OS generated files #
 ######################
