@@ -3,9 +3,10 @@
     python fr3_util_system_3.py --workspace-dir=/scratch/busygin/FR3_biomarkers --subject=R1145J_1 --n-channels=128 --anode=RD2 --anode-num=34 --cathode=RD3 --cathode-num=35 --pulse-frequency=200 --pulse-duration=500 --target-amplitude=1000
 
 """
-import numpy as np
 
 from __future__ import print_function
+
+import numpy as np
 
 from ramutils.pipeline import RamPipeline
 from tests.fr5_biomarker.FREventPreparation import FREventPreparation
