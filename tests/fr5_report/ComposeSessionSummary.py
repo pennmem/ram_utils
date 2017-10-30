@@ -1,16 +1,16 @@
-import numpy as np
-from SessionSummary import FR5SessionSummary, PS4SessionSummary
-
-import numpy as np
 import time
-
-from statsmodels.stats.proportion import proportions_chisquare
-
-from ReportUtils import ReportRamTask
+import numpy as np
 import operator
 import pandas as pd
 from scipy import stats
+
+from statsmodels.stats.proportion import proportions_chisquare
+
+from ramutils.utils import safe_divide
+from ReportUtils import ReportRamTask
 from TexUtils.matrix2latex import matrix2latex
+from SessionSummary import FR5SessionSummary, PS4SessionSummary
+
 operator.div = np.true_divide
 
 
@@ -519,8 +519,6 @@ class ComposeSessionSummary(ReportRamTask):
             session_summary.mean_prob_diff_low_post_stim_item = fr_stim_stim_list_post_stim_item_low_table['prob_diff'].mean()
             session_summary.sem_prob_diff_low_post_stim_item = fr_stim_stim_list_post_stim_item_low_table['prob_diff'].sem()
 
-            #fr_stim_non_stim_list_table = fr_stim_non_stim_list_table[(~fr_stim_non_stim_list_table['is_stim_list']) & (fr_stim_non_stim_list_table['serialpos']>1)]
-
             low_state_mask = (fr_stim_non_stim_list_table['prob']<fr_stim_non_stim_list_table['thresh'])
             post_low_state_mask = low_state_mask.shift(1).fillna(False)
             post_low_state_mask[fr_stim_non_stim_list_table['serialpos']==1] = False
@@ -562,11 +560,11 @@ class ComposeSessionSummary(ReportRamTask):
 
             session_summary.n_correct_nonstim_low_bio_items = fr_stim_non_stim_list_low_table['recalled'].sum()
             session_summary.n_total_nonstim_low_bio_items = len(fr_stim_non_stim_list_low_table)
-            session_summary.pc_nonstim_low_bio_items = 100*session_summary.n_correct_nonstim_low_bio_items / float(session_summary.n_total_nonstim_low_bio_items)
+            session_summary.pc_nonstim_low_bio_items = safe_divide(100*session_summary.n_correct_nonstim_low_bio_items, float(session_summary.n_total_nonstim_low_bio_items))
 
             session_summary.n_correct_nonstim_post_low_bio_items = fr_stim_non_stim_list_post_low_table['recalled'].sum()
             session_summary.n_total_nonstim_post_low_bio_items = len(fr_stim_non_stim_list_post_low_table)
-            session_summary.pc_nonstim_post_low_bio_items = 100*session_summary.n_correct_nonstim_post_low_bio_items / float(session_summary.n_total_nonstim_post_low_bio_items)
+            session_summary.pc_nonstim_post_low_bio_items = safe_divide(100*session_summary.n_correct_nonstim_post_low_bio_items, float(session_summary.n_total_nonstim_post_low_bio_items))
 
             session_summary.chisqr_stim_item, session_summary.pvalue_stim_item, _ = proportions_chisquare([session_summary.n_correct_stim_items, session_summary.n_correct_nonstim_low_bio_items], [session_summary.n_total_stim_items, session_summary.n_total_nonstim_low_bio_items])
             session_summary.chisqr_post_stim_item, session_summary.pvalue_post_stim_item, _ = proportions_chisquare([session_summary.n_correct_post_stim_items, session_summary.n_correct_nonstim_post_low_bio_items], [session_summary.n_total_post_stim_items, session_summary.n_total_nonstim_post_low_bio_items])

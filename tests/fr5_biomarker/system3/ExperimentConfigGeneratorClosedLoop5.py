@@ -14,6 +14,7 @@ from tornado.template import Template
 
 from classiflib import ClassifierContainer, dtypes
 from bptools.odin import ElectrodeConfig
+from ramutils.classifier.utils import get_sample_weights
 
 from ramutils.pipeline import *
 
@@ -175,9 +176,8 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
         if self.pipeline.args.encoding_only:
             events = events[events.type=='WORD']
 
-        # FIXME: this is simplified from ComputeClassifier, but should really be more centralized instead of repeating
-        sample_weight = np.ones(events.shape[0], dtype=np.float)
-        sample_weight[events.type == 'WORD'] = self.params.encoding_samples_weight
+        # Re-compute sample weights for whatever events are included for config generation
+        sample_weights = get_sample_weights(events, self.params.encoding_samples_weight)
 
         classifier = joblib.load(classifier_path)
         container = ClassifierContainer(
@@ -185,7 +185,7 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
             pairs=pairs,
             features=joblib.load(self.get_path_to_resource_in_workspace(subject +'-reduced_pow_mat.pkl')),
             events=events,
-            sample_weight=sample_weight,
+            sample_weight=sample_weights,
             classifier_info={
                 'auc': xval_output[-1].auc,
                 'subject': subject
@@ -198,34 +198,15 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
             overwrite=True
         )
 
-        # copying classifier pickle file
-        # self.copy_pickle_resource_to_target_dir(classifier_path, config_files_dir)
-
         # copy pairs.json
         self.copy_resource_to_target_dir(bipolar_pairs_path,config_files_dir)
 
         # copy reduced_pairs.json
         self.copy_resource_to_target_dir(excluded_pairs_path,config_files_dir)
 
-
-
         self.copy_resource_to_target_dir(resource_filename=electrode_config_file_core+'.bin', target_dir=config_files_dir)
         self.copy_resource_to_target_dir(resource_filename=electrode_config_file_core + '.csv',
                                          target_dir=config_files_dir)
-        #
-        # # copy transformation matrix hdf5 file (if such exists)
-        #
-        # electrode_config_file_dir = dirname(electrode_config_file)
-        # trans_matrix_fname =  join(electrode_config_file_dir,'monopolar_trans_matrix%s.h5'%subject)
-        #
-        # if self.pipeline.args.bipolar:
-        #     if exists(trans_matrix_fname):
-        #         self.copy_resource_to_target_dir(resource_filename=trans_matrix_fname,target_dir=config_files_dir)
-        #     else:
-        #         print ('. Could not find bipolar_2 monpopolar transformation matrix . You have requested bipolar referencing in the ENS ')
-        #         print 'Configuration will be invalid'
-
-
 
         # zipping project_dir
         zip_filename = self.get_path_to_resource_in_workspace(

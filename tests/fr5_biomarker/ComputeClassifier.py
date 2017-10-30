@@ -15,7 +15,7 @@ from sklearn.metrics import roc_auc_score, roc_curve
 from random import shuffle
 from sklearn.externals import joblib
 from ptsa.data.readers.IndexReader import JsonIndexReader
-from classifier.utils import normalize_sessions, get_sample_weights
+from ramutils.classifier.utils import normalize_sessions, get_sample_weights
 
 try:
     from typing import Dict

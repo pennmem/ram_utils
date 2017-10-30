@@ -3,6 +3,7 @@ import os
 import shutil
 import pytest
 import subprocess
+import classiflib
 
 
 # Assumes that testing folder is in ramutils package and report code is in the tests/ folder at the top level
@@ -32,10 +33,10 @@ def cleanup():
 )
 def test_fr1_report(subject):
     os.chdir(CODE_DIR + "/tests/fr1_report/")
-    print(os.getcwd())
     workspace = TEST_DIR + "samplefr1_reports/"
     command = "python fr1_report.py --subject={} --task=FR1 --workspace-dir={} --mount-point={}".format(subject, workspace, MOUNT)
     subprocess.check_output(command, shell=True)
+    assert os.path.exists(workspace + "{}/reports/{}_FR1_report.pdf".format(subject, subject))
     return
 
 @pytest.mark.parametrize("subject",[
@@ -48,6 +49,7 @@ def test_fr5_report(subject):
     workspace = TEST_DIR + "samplefr5_reports/"
     command = "python fr5_report.py --subject={} --task=FR5 --workspace-dir={} --mount-point={}".format(subject, workspace, MOUNT)
     subprocess.check_output(command, shell=True)
+    assert os.path.exists(workspace + "{}/reports/{}-FR5_report.pdf".format(subject, subject))
     return
 
 @pytest.mark.parametrize("subject, n_channels, anode, cathode, pulse_frequency, pulse_duration, target_amplitude, anode_num, cathode_num",[
@@ -116,7 +118,15 @@ def test_fr5_util_system_3(subject, experiment, electrode_config_file,
                                        workspace,
                                        MOUNT)
     subprocess.check_output(command, shell=True)
+    output_classifier = (workspace +
+                         "experiment_config_dir/{}/{}/config_files/{}-lr_classifier.zip"
+                        ).format(subject, experiment, subject)
+    classifier = classiflib.ClassifierContainer.load(output_classifier)
+    # If the sample weighting failed, there will only be 1s and 2.5s
+    assert (min(classifier.sample_weight) < 1)
     return
+
+
 
 @pytest.mark.parametrize("subject",[
     ("R1333N"),
@@ -131,6 +141,7 @@ def test_pal1_report(subject):
                 --workspace-dir={}\
                 --mount-point={}".format(subject, workspace, MOUNT)
     subprocess.check_output(command, shell=True)
+    assert os.path.exists(workspace + "{}/reports/{}_PAL1_report.pdf".format(subject, subject))
     return
 
 
@@ -148,6 +159,7 @@ def test_pal5_report(subject, classifier):
                 --workspace-dir={}\
                 --mount-point={}".format(subject, classifier, workspace, MOUNT)
     subprocess.check_output(command, shell=True)
+    assert os.path.exists(workspace + "{}/reports/PAL5-{}-report.pdf".format(subject, subject))
     return
 
 
@@ -210,12 +222,12 @@ def test_thr1_report(subject):
                --task=THR1\
                --workspace-dir={}\
                --mount-point={}".format(subject, workspace, MOUNT)
-    #subprocess.check_output(command, shell=True)
+    subprocess.check_output(command, shell=True)
+    assert os.path.exists(workspace + "{}/reports/{}_THR1_report.pdf".format(subject, subject))
     return
 
 def test_thr3_report():
     return
-
 
 
 @pytest.mark.parametrize("subject",[

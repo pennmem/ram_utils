@@ -3,13 +3,11 @@
     python fr3_util_system_3.py --workspace-dir=/scratch/busygin/FR3_biomarkers --subject=R1145J_1 --n-channels=128 --anode=RD2 --anode-num=34 --cathode=RD3 --cathode-num=35 --pulse-frequency=200 --pulse-duration=500 --target-amplitude=1000
 
 """
+import numpy as np
 
 from __future__ import print_function
 
-import numpy as np
-
 from ramutils.pipeline import RamPipeline
-
 from tests.fr5_biomarker.FREventPreparation import FREventPreparation
 from tests.fr5_biomarker.ComputeFRPowers import ComputeFRPowers
 from tests.fr5_biomarker.MontagePreparation import MontagePreparation
@@ -19,6 +17,13 @@ from tests.fr5_biomarker.ComputeClassifier import (
 from tests.fr5_biomarker.system3.ExperimentConfigGeneratorClosedLoop5 import ExperimentConfigGeneratorClosedLoop5
 from system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
 from system_3_utils.ram_tasks.CMLParserClosedLoop3 import CMLParserCloseLoop3
+from tests.fr5_biomarker.FREventPreparation import FREventPreparation
+from tests.fr5_biomarker.ComputeFRPowers import ComputeFRPowers
+from tests.fr5_biomarker.MontagePreparation import MontagePreparation
+from system_3_utils.ram_tasks.CheckElectrodeConfigurationClosedLoop3 import CheckElectrodeConfigurationClosedLoop3
+from tests.fr5_biomarker.ComputeClassifier import ComputeClassifier,ComputeFullClassifier,ComputeEncodingClassifier
+from tests.fr5_biomarker.system3.ExperimentConfigGeneratorClosedLoop5 import ExperimentConfigGeneratorClosedLoop5
+
 
 print("ATTN: Wavelet params and interval length are hardcoded!! To change them, recompile")
 print("Windows binaries from https://github.com/busygin/morlet_for_sys2_biomarker")

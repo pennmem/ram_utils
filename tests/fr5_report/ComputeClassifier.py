@@ -9,7 +9,7 @@ from random import shuffle
 from sklearn.externals import joblib
 
 from ptsa.data.readers.IndexReader import JsonIndexReader
-from classifier.utils import normalize_sessions, get_sample_weights
+from ramutils.classifier.utils import normalize_sessions, get_sample_weights
 
 from ramutils.pipeline import RamTask
 
