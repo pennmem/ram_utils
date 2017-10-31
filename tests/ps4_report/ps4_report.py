@@ -3,8 +3,8 @@ from ReportUtils import ReportPipeline,CMLParser
 from os.path import join
 
 parser=CMLParser()
-parser.arg('--subject','R1332M')
-parser.arg('--task','catFR5')
+parser.arg('--subject','R1354E')
+parser.arg('--task','PS4_catFR5')
 parser.arg('--workspace-dir','/Volumes/rhino_root/scratch/leond')
 parser.arg('--mount-point','/Volumes/rhino_root/')
 parser.arg('--recompute-on-no-status')
@@ -32,8 +32,11 @@ class Params(object):
 
 params=Params()
 
+task = args.task
+if 'PS4_' in task:
+    task = task.split('_')[1]
 
-report_pipeline = ReportPipeline(subject=args.subject,task=args.task,workspace_dir= join(args.workspace_dir,args.subject),
+report_pipeline = ReportPipeline(subject=args.subject,task=task,workspace_dir= join(args.workspace_dir,args.subject),
                                  mount_point=args.mount_point,sessions=args.sessions,
                                  exit_on_no_change=args.exit_on_no_change,recompute_on_no_status=args.recompute_on_no_status)
 

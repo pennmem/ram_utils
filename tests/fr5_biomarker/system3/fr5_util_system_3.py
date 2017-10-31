@@ -28,16 +28,28 @@ cml_parser = CMLParserCloseLoop3()
 
 # These arguments are only used if command-line arguments are not given
 cml_parser.arg('--workspace-dir', '/Users/depalati/mnt/rhino/scratch/depalati/configs')
-cml_parser.arg('--experiment', 'FR5')
+# cml_parser.arg('--experiment', 'FR5')
 cml_parser.arg('--mount-point', '/Users/depalati/mnt/rhino')
-cml_parser.arg('--subject', 'R1308T')
-cml_parser.arg('--electrode-config-file', '/Users/depalati/mnt/rhino/scratch/system3_configs/ODIN_configs/R1308T/R1308T_14JUN2017L0M0STIM.csv')
+# cml_parser.arg('--subject', 'R1308T')
+# cml_parser.arg('--electrode-config-file', '/Users/depalati/mnt/rhino/scratch/system3_configs/ODIN_configs/R1308T/R1308T_14JUN2017L0M0STIM.csv')
+# cml_parser.arg('--pulse-frequency', '200')
+# cml_parser.arg('--target-amplitude', '1.0')
+# cml_parser.arg('--anodes', 'LB6')
+# cml_parser.arg('--cathodes', 'LB7')
+# cml_parser.arg('--min-amplitudes', '0.1')
+# cml_parser.arg('--max-amplitudes', '0.5')
+
+# cml_parser.arg('--workspace-dir', '/scratch/RAM_maint/automated_reports_json/samplefr5_biomarkers/')
+cml_parser.arg('--experiment', 'FR6')
+# cml_parser.arg('--mount-point', '/')
+cml_parser.arg('--subject', 'R1354E')
+cml_parser.arg('--electrode-config-file', '/Users/depalati/mnt/rhino/scratch/system3_configs/ODIN_configs/R1354E/R1354E_26OCT2017L0M0STIM.csv')
 cml_parser.arg('--pulse-frequency', '200')
-cml_parser.arg('--target-amplitude', '1.0')
-cml_parser.arg('--anodes', 'LB6')
-cml_parser.arg('--cathodes', 'LB7')
+cml_parser.arg('--target-amplitude', '1.0', '0.5')
+cml_parser.arg('--anodes', '1Ld9', '5Ld7')
+cml_parser.arg('--cathodes', '1Ld10', '5Ld8')
 cml_parser.arg('--min-amplitudes', '0.1')
-cml_parser.arg('--max-amplitudes', '0.5')
+cml_parser.arg('--max-amplitudes', '1.0')
 
 args = cml_parser.parse()
 
@@ -101,7 +113,7 @@ if __name__ == "__main__":
                               args=args)
 
     pipeline.add_task(FREventPreparation(mark_as_completed=mark_as_completed))
-    pipeline.add_task(MontagePreparation(mark_as_completed=mark_as_completed, force_rerun=True))
+    pipeline.add_task(MontagePreparation(mark_as_completed=mark_as_completed, force_rerun=False))
     pipeline.add_task(CheckElectrodeConfigurationClosedLoop3(
         params=params, mark_as_completed=False, force_rerun=True))
     pipeline.add_task(ComputeFRPowers(params=params, mark_as_completed=mark_as_completed))
@@ -111,6 +123,7 @@ if __name__ == "__main__":
     else:
         pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=mark_as_completed, force_rerun=False))
 
+    # FIXME: exclude excluded electrodes, i.e., don't run ComputeFullClassifier
     pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=mark_as_completed))
     pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
 
