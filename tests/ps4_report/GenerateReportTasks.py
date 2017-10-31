@@ -146,7 +146,7 @@ class GenerateTex(ReportRamTask):
                 '<SHAM_PVAL>':'{:.3}'.format(session_summary.pval_vs_sham),
             })
 
-        report_filename = '%s_%s_ps4_report.tex'%(subject,task)
+        report_filename = '%s_PS4_%s_report.tex'%(subject,task)
         replace_template('ps4_report.tex.tpl',self.get_path_to_resource_in_workspace('reports',report_filename),{
             '<SUBJECT>':subject,
             '<TASK>':task,
