@@ -111,6 +111,7 @@ if __name__ == "__main__":
     else:
         pipeline.add_task(ComputeClassifier(params=params, mark_as_completed=mark_as_completed, force_rerun=False))
 
+    # FIXME: exclude excluded electrodes, i.e., don't run ComputeFullClassifier
     pipeline.add_task(ComputeFullClassifier(params=params, mark_as_completed=mark_as_completed))
     pipeline.add_task(ExperimentConfigGeneratorClosedLoop5(params=params, mark_as_completed=False))
 

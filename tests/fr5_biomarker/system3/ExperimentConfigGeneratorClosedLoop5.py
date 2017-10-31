@@ -177,7 +177,10 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
             events = events[events.type=='WORD']
 
         # Re-compute sample weights for whatever events are included for config generation
-        sample_weights = get_sample_weights(events, self.params.encoding_samples_weight)
+        if events[events.type == 'REC_WORD'].shape[0] > 0:  # encoding-only classifier has no REC events
+            sample_weights = get_sample_weights(events, self.params.encoding_samples_weight)
+        else:  # encoding-only classifier
+            sample_weights = np.ones(events.shape)
 
         classifier = joblib.load(classifier_path)
         container = ClassifierContainer(
