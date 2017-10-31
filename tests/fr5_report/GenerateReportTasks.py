@@ -7,10 +7,12 @@ import numpy as np
 import datetime
 from subprocess import call
 
+
+from RamPipeline import *
 from ReportUtils import ReportRamTask
+from ramutils.hmm.HierarchicalModel import HierarchicalModelPlots
 from TextTemplateUtils import replace_template,replace_template_to_string
 from TexUtils.latex_table import latex_table
-import numpy as np
 
 
 class GeneratePlots(ReportRamTask):
@@ -21,7 +23,6 @@ class GeneratePlots(ReportRamTask):
         self.create_dir_in_workspace('reports')
         task = self.pipeline.task
         subject= self.pipeline.subject
-
 
         fr5_events = self.get_passed_object(task+'_events')
         fr5_session_summaries = self.get_passed_object('fr_session_summary')
@@ -89,22 +90,7 @@ class GeneratePlots(ReportRamTask):
         self.pass_object('BIOMARKER_HISTOGRAM',figname)
         plt.close()
 
-        # delta classifier
-        # panel_plot = PanelPlot(xfigsize = 7, yfigsize=5,i_max=1,j_max=1)
-        # delta_classifiers = post_stim_probs - pre_stim_probs
-        # hist,bin_edges = np.histogram(delta_classifiers,range=[np.round(delta_classifiers.min(),1),np.round(delta_classifiers.max(),1)])
-        # x_tick_labels = ['{:.2f}-\n{:.2f}'.format(x,y) for (x,y) in zip(bin_edges[:-1],bin_edges[1:])]
-        # pd = BarPlotData(x = np.arange(len(hist))-0.25,y=hist,xlabel = 'Change in classifier output (post minus pre)',ylabel='',xlabel_fontsize=20,
-        #                  x_tick_labels=x_tick_labels,ylim=[0, len(post_stim_probs)/2])
-        # panel_plot.add_plot_data(0,0,plot_data=pd)
-        # plt = panel_plot.generate_plot()
-        # figname = self.get_path_to_resource_in_workspace('reports/'+self.pipeline.subject+'-delta-classifier-histograms.pdf')
-        # plt.savefig(figname)
-        # self.pass_object('delta_classifier_histogram',figname)
-        # plt.close()
-
         # Post stim EEG plot
-
         post_stim_eeg = self.get_passed_object('post_stim_eeg')
         plt.figure(figsize=(9,5.5))
         plt.imshow(post_stim_eeg,cmap='bwr',aspect='auto',origin='lower')
@@ -219,13 +205,6 @@ class GeneratePlots(ReportRamTask):
                     print pd.x.shape
                     print pd.y.shape
                     pdc.add_plot_data(pd)
-
-            # for i in xrange(len(session_summary.list_number) - 1):
-            #     if session_summary.list_number[i] > session_summary.list_number[i + 1]:
-            #         sep_pos = i + 0.5
-            #         sep_plot_data = PlotData(x=[0], y=[0], levelline=[[sep_pos, sep_pos], [0, 12]], color='white',
-            #                                  alpha=0.0)
-            #         pdc.add_plot_data(sep_plot_data)
 
             panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
 
@@ -375,9 +354,13 @@ class GenerateTex(ReportRamTask):
                 '<SESSION_DATA>':latex_table(session_data),
                 '<FR5-AUC>':fr5_auc,
                 '<ROC_TITLE>':roc_title,
+                '<STIM_TITLE>': 'Estimated Effects of Stim',
                 '<FR5-PERM-P-VALUE>':fr5_perm_pvalue if fr5_perm_pvalue>0 else '<0.01',
                 '<FR5-JSTAT-THRESH>':fr5_jstat_thresh,
                 '<ROC_AND_TERC_PLOT_FILE>':self.get_passed_object('ROC_AND_TERC_PLOT_FILE'),
+                '<ESTIMATED_STIM_EFFECT_PLOT_FILE_list>': self.get_path_to_resource_in_workspace('reports/' + '_'.join([self.pipeline.subject, 'list', 'forestplot.pdf'])),
+                '<ESTIMATED_STIM_EFFECT_PLOT_FILE_stim>': self.get_path_to_resource_in_workspace('reports/' + '_'.join([self.pipeline.subject, 'stim', 'forestplot.pdf'])),
+                '<ESTIMATED_STIM_EFFECT_PLOT_FILE_post_stim>': self.get_path_to_resource_in_workspace('reports/' + '_'.join([self.pipeline.subject, 'post_stim', 'forestplot.pdf'])),
                 '<REPORT_PAGES>':all_session_tex,
                 '<BIOMARKER_HISTOGRAM>':biomarker_histogram,
                 # '<DELTA_CLASSIFIER_HISTOGRAM>':self.get_passed_object('delta_classifier_histogram'),

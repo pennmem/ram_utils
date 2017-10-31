@@ -7,10 +7,11 @@
             "classifier_version":"{{classifier_version}}",
 
             "stim_channels": {
-                {% for (i,stim_channel) in enumerate(stim_params_dict) %}"{{stim_channel}}":
+                {% for (i, stim_channel) in enumerate(stim_params_dict) %}"{{stim_channel}}":
                 {
-                    "min_stim_amplitude": {{ stim_params_dict[stim_channel]['min_stim_amplitude'] }},
+                    {% if 'PS4' in experiment %}"min_stim_amplitude": {{ stim_params_dict[stim_channel]['min_stim_amplitude'] }},
                     "max_stim_amplitude": {{ stim_params_dict[stim_channel]['max_stim_amplitude'] }},
+                    {% else %}"stim_amplitude": {{ stim_params_dict[stim_channel]['stim_amplitude'] }},{% end %}
                     "stim_frequency": {{ stim_params_dict[stim_channel]['stim_frequency'] }},
                     "stim_duration": {{ stim_params_dict[stim_channel]['stim_duration'] }}
                 }{% if (i+1) <len(stim_params_dict) %},
@@ -26,12 +27,12 @@
             "biomarker_sample_time_length": "1366",
             "buffer_time": "1365",
             "stim_duration": "500",
-            "retrieval_biomarker_sample_start_time_offset": "0",
+            {% if 'PS4' in experiment %}"retrieval_biomarker_sample_start_time_offset": "0",
             "retrieval_biomarker_sample_time_length": "525",
             "retrieval_buffer_time": "524",
             "post_stim_biomarker_sample_time_length": "500",
             "post_stim_buffer_time": "499",
-            "post_stim_wait_time":"100",
+            "post_stim_wait_time":"100",{% end %}
             "freq_min": "6",
             "freq_max": "180",
             "num_freqs": "8",
