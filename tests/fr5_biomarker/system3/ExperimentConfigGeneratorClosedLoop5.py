@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import os
 import json
 import zipfile
@@ -14,11 +16,13 @@ from tornado.template import Template
 
 from classiflib import ClassifierContainer, dtypes
 from bptools.odin import ElectrodeConfig
-from ramutils.classifier.utils import get_sample_weights
 
+from ramutils.classifier.utils import get_sample_weights
 from ramutils.pipeline import *
+from ramutils.log import get_logger
 
 CLASSIFIER_VERSION = '1.0.1'
+logger = get_logger()
 
 
 class ExperimentConfigGeneratorClosedLoop5(RamTask):
@@ -97,16 +101,17 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
         xval_output = self.get_passed_object('xval_output')
 
         stim_params_dict = {}
-        stim_params_list = zip(anodes,cathodes,cycle(self.pipeline.args.min_amplitudes),
+        stim_params_list = zip(anodes, cathodes,
+                               cycle(self.pipeline.args.min_amplitudes),
                                cycle(self.pipeline.args.max_amplitudes))
-        for anode, cathode, min_amplitude, max_amplitude in stim_params_list:
+        for idx, (anode, cathode, min_amplitude, max_amplitude) in enumerate(stim_params_list):
             chan_label = '_'.join([anode, cathode])
             stim_params_dict[chan_label] = {
                 "min_stim_amplitude": min_amplitude,
                 "max_stim_amplitude": max_amplitude,
                 "stim_frequency": stim_frequency,
                 "stim_duration": 500,
-                "stim_amplitude": stim_amplitude
+                "stim_amplitude": stim_amplitude[idx]
             }
 
         fr5_stim_channel = '%s_%s' % (anodes[0], cathodes[0])
@@ -194,12 +199,9 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
                 'subject': subject
             }
         )
-        print('saving classifier container:')
-        print(join(config_files_dir,self.classifier_container_path))
-        container.save(
-            join(config_files_dir, self.classifier_container_path),
-            overwrite=True
-        )
+        classifier_path = join(config_files_dir, self.classifier_container_path)
+        logger.info('Saving classifier container to %s', classifier_path)
+        container.save(classifier_path, overwrite=True)
 
         # copy pairs.json
         self.copy_resource_to_target_dir(bipolar_pairs_path,config_files_dir)
