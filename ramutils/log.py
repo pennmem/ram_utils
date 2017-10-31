@@ -13,7 +13,7 @@ def get_logger(name='ramutils'):
 
     if _logger is None:
         handler = logging.StreamHandler()
-        formatter = logging.Formatter(fmt='[%(levelname)1.1s %(asctime)s %(module)s:%(lineno)d]%(end_color)s %(message)s')
+        formatter = logging.Formatter(fmt='[%(levelname)1.1s %(asctime)s %(module)s:%(lineno)d] %(message)s')
         handler.setFormatter(formatter)
 
         _logger = logging.getLogger(name)
