@@ -5,11 +5,11 @@ from os.path import *
 # Valid experiments that we can generate Ramulator configuration files for
 _EXP_CHOICES = [
     'FR5',
-    'catFR5',
-    'PS4_FR5', 
+    'CatFR5',
+    'PS4_FR5',
     'PS4_CatFR5',
     'FR6',
-    'catFR6',
+    'CatFR6',
 ]
 
 
@@ -21,7 +21,7 @@ class CMLParserCloseLoop3(object):
         self.parser.add_argument('--subject', required=True)
         self.parser.add_argument('--experiment', choices=_EXP_CHOICES, required=False)
         self.parser.add_argument('--workspace-dir', required=False)
-        self.parser.add_argument('--mount-point', required=False)
+        self.parser.add_argument('--mount-point', default='/')
         self.parser.add_argument('--electrode-config-file', required=True)
         self.parser.add_argument('--pulse-frequency', required=True, type=int)
         self.parser.add_argument('--target-amplitude', nargs='+', required=True, type=float)
@@ -49,21 +49,17 @@ class CMLParserCloseLoop3(object):
             self.arg_list.append(val)
 
     def parse(self):
-        print sys.argv
         if len(sys.argv) <= self.arg_count_threshold and len(self.arg_list):
             args = self.parser.parse_args(self.arg_list)
         else:
             args = self.parser.parse_args()
 
-        # making sure that sensible workspace directory is set if user does not provide one
+        args.mount_point = abspath(expanduser(args.mount_point))
+
+        # making sure that sensible workspace directory is set if user does not
+        # provide one
         if not args.workspace_dir:
             args.workspace_dir = abspath(join(expanduser('~'), 'scratch', args.experiment, args.subject))
-
-        # Converting matlab search paths to proper format
-        if not args.mount_point:
-            args.mount_point = '/'
-        else:
-            args.mount_point = abspath(expanduser(args.mount_point))
 
         # FIXME: validation should happen in a task
         # check that target amplitude is in milliamps
