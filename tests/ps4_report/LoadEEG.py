@@ -41,11 +41,15 @@ class LoadEEG(ReportRamTask):
 
         channels = self.get_passed_object('monopolar_channels')
         pairs = self.get_passed_object('bipolar_pairs')
-
-        eeg = EEGReader(events=post_stim_events,channels=channels,start_time=self.params.start_time,
-                        end_time=self.params.end_time).read()
+        try:
+            eeg = EEGReader(events=post_stim_events,channels=channels,start_time=self.params.start_time,
+                            end_time=self.params.end_time).read()
+        except IndexError:
+            eeg = EEGReader(events= post_stim_events,channels=np.array([]),start_time=self.params.start_time,
+                            end_time = self.params.end_time).read()
         eeg = eeg.filtered([58.,62.])
-        eeg = MonopolarToBipolarMapper(time_series=eeg,bipolar_pairs=pairs).filter()
+        if 'channels' in eeg.dims:
+            eeg = MonopolarToBipolarMapper(time_series=eeg,bipolar_pairs=pairs).filter()
         eeg = eeg.mean(dim='events').data
         eeg[np.abs(eeg)<5]=np.nan
 
