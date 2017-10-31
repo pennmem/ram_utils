@@ -12,6 +12,7 @@ from ComputeClassifier import ComputeClassifier,ComputeFullClassifier
 from ComputeFRStimTable import ComputeFRStimTable
 from ComposeSessionSummary import ComposeSessionSummary
 from GenerateReportTasks import GeneratePlots, GenerateTex, GenerateReportPDF
+from ramutils.models.stim_effects import ComputeStimEffect
 
 
 parser = CMLParser()
@@ -93,9 +94,9 @@ report_pipeline.add_task(ComputeFullClassifier(params=params,mark_as_completed=T
 report_pipeline.add_task(LoadPostStimEEG(params=params,mark_as_completed=True))
 report_pipeline.add_task(ComputeFR5Powers(params=params,mark_as_completed=True))
 report_pipeline.add_task(EvaluateClassifier(params=params,mark_as_completed=True))
-report_pipeline.add_task(ComputeFRStimTable(params=params,mark_as_completed=False))
+report_pipeline.add_task(ComputeFRStimTable(params=params,mark_as_completed=True))
+report_pipeline.add_task(ComputeStimEffect(params=params, mark_as_completed=True))
 report_pipeline.add_task(ComposeSessionSummary(params=params,mark_as_completed=False))
-report_pipeline.add_task(ComputeStimEffect(params=params, mark_as_completed=False))
 report_pipeline.add_task(GeneratePlots())
 report_pipeline.add_task(GenerateTex(mark_as_completed=False))
 report_pipeline.add_task(GenerateReportPDF())

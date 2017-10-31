@@ -10,7 +10,7 @@ from subprocess import call
 
 from RamPipeline import *
 from ReportUtils import ReportRamTask
-from ramutils.hmm.HierarchicalModel import HierarchicalModelPlots
+from ramutils.models.hmm import HierarchicalModelPlots
 from TextTemplateUtils import replace_template,replace_template_to_string
 from TexUtils.latex_table import latex_table
 
