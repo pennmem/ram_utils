@@ -28,6 +28,7 @@ class Args(object):
         self.cathodes = []
         self.electrode_config_file = None
         self.experiment = ''
+        self.target_amplitude = None
         self.min_amplitudes = []
         self.max_amplitudes = []
         self.mount_point = ''

@@ -33,6 +33,9 @@ class FR1EventPreparation(ReportRamTask):
         return hash_md5.digest()
 
     def run(self):
+        # Create the directory earlier so that plots/tables can be saved along the way
+        # rather than only at the end
+        self.create_dir_in_workspace('reports')
         subject = self.pipeline.subject
         tmp = subject.split('_')
         subj_code = tmp[0]

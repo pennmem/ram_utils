@@ -1,6 +1,6 @@
+import os
 from ramutils.pipeline import *
 
-import os
 import numpy as np
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from sklearn.externals import joblib
@@ -8,7 +8,6 @@ import json
 
 from ptsa.data.readers import EEGReader
 from ptsa.data.readers.IndexReader import JsonIndexReader
-import os
 
 import hashlib
 from ReportTasks.RamTaskMethods import compute_powers,get_reduced_pairs,get_excluded_dict
@@ -28,7 +27,7 @@ class ComputeFRPowers(RamTask):
         subject = self.pipeline.subject
         tmp = subject.split('_')
         subj_code = tmp[0]
-        montage = 0 if len(tmp)==1 else int(tmp[1])
+        montage = 0 if len(tmp) == 1 else int(tmp[1])
 
         json_reader = JsonIndexReader(os.path.join(self.pipeline.mount_point, 'protocols/r1.json'))
 

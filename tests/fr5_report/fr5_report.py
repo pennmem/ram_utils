@@ -1,7 +1,6 @@
 import os
 import numpy as np
 
-
 from ReportUtils import ReportPipeline,CMLParser
 from LoadEEG import LoadPostStimEEG
 from EventPreparation import FR1EventPreparation,FR5EventPreparation
@@ -96,6 +95,7 @@ report_pipeline.add_task(ComputeFR5Powers(params=params,mark_as_completed=True))
 report_pipeline.add_task(EvaluateClassifier(params=params,mark_as_completed=True))
 report_pipeline.add_task(ComputeFRStimTable(params=params,mark_as_completed=False))
 report_pipeline.add_task(ComposeSessionSummary(params=params,mark_as_completed=False))
+report_pipeline.add_task(ComputeStimEffect(params=params, mark_as_completed=False))
 report_pipeline.add_task(GeneratePlots())
 report_pipeline.add_task(GenerateTex(mark_as_completed=False))
 report_pipeline.add_task(GenerateReportPDF())

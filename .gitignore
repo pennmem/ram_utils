@@ -1,5 +1,7 @@
 .cache/
-testing/sample_plots/
+ramutils/test/plotting/sample_plots/
+*.swp
+
 # OS generated files #
 ######################
 .DS_Store
@@ -16,3 +18,4 @@ VTKLibs
 vtk
 *~
 *.cache
+*.nfs*

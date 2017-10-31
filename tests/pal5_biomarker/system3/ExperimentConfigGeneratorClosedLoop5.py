@@ -81,14 +81,12 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
 
         experiment = self.pipeline.args.experiment if self.pipeline.args.experiment else 'PAL5'
         electrode_config_file = abspath(self.pipeline.args.electrode_config_file)
-        config_name = self.get_passed_object('config_name')
         subject = self.pipeline.subject.split('_')[0]
         stim_frequency = self.pipeline.args.pulse_frequency
         stim_amplitude = self.pipeline.args.target_amplitude if 'PS4' not in self.pipeline.args.experiment else 'N/A'
         bipolar_pairs_path = self.get_passed_object('bipolar_pairs_path')
         classifier_path = (self.get_passed_object('encoding_classifier_path')
-            if self.pipeline.args.encoding else self.get_passed_object('classifier_path'))
-        stim_chan_label = self.get_passed_object('stim_chan_label')
+            if hasattr(self.pipeline.args, 'encoding') else self.get_passed_object('classifier_path'))
         excluded_pairs_path = self.get_passed_object('excluded_pairs_path')
         xval_full = self.get_passed_object('xval_output_all_electrodes')
         xval_output = self.get_passed_object('xval_output')
@@ -110,13 +108,11 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
 
         fr5_stim_channel = '%s_%s' % (anodes[0], cathodes[0])
         project_dir_corename = 'experiment_config_dir/%s/%s' % (subject, experiment)
-        project_dir = self.create_dir_in_workspace(project_dir_corename)
 
         # making sure we get the path even if the actual directory is not created
         project_dir = self.get_path_to_resource_in_workspace(project_dir_corename)
 
-        config_files_dir = self.create_dir_in_workspace(abspath(join(project_dir, 'config_files')))
-        config_files_dir = self.get_path_to_resource_in_workspace(join(project_dir,'config_files'))
+        config_files_dir = self.get_path_to_resource_in_workspace(join(project_dir, 'config_files'))
 
         experiment_config_template_filename = join(dirname(__file__), 'templates',
                                                    '{}_experiment_config.json.tpl'.format(experiment))
@@ -126,14 +122,12 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
         electrode_config_file_core, ext = splitext(basename(electrode_config_file))
         electrode_config_file_dir = dirname(electrode_config_file)
 
-
         experiment_config_content = experiment_config_template.generate(
             subject=subject,
             experiment=experiment,
             classifier_file='config_files/%s' % basename(classifier_path),
             stim_params_dict=stim_params_dict,
 
-            # electrode_config_file='config_files/{subject}_{config_name}.bin'.format(subject=subject,config_name=config_name),
             electrode_config_file='config_files/{core_name_for_electrode_file}.bin'.format(
                 core_name_for_electrode_file=electrode_config_file_core),
 
@@ -159,23 +153,6 @@ class ExperimentConfigGeneratorClosedLoop5(RamTask):
 
         # copy reduced_pairs.json
         self.copy_resource_to_target_dir(excluded_pairs_path, config_files_dir)
-
-
-
-
-        # self.copy_resource_to_target_dir(resource_filename=electrode_config_file, target_dir=config_files_dir)
-        # self.copy_resource_to_target_dir(resource_filename=electrode_config_file_core + '.csv',
-        #                                  target_dir=config_files_dir)
-
-        # renaming .csv file to the same core name as .bin file - see variable -  core_name_for_electrode_file
-        # old_csv_fname = electrode_config_file
-        # new_csv_fname = join(config_files_dir, core_name_for_electrode_file+'.csv')
-        # shutil.copy(old_csv_fname, new_csv_fname)
-        # print 'electrode_config_file_dir: \t',electrode_config_file_dir
-        # print 'config_files_dir: \t',config_files_dir
-        # print 'electrode_config_file_core: \t', electrode_config_file_core
-        # exit()
-
 
         try:
             old_bin_fname = join(electrode_config_file_dir, electrode_config_file_core + '.bin')
