@@ -8,8 +8,11 @@ from . import memory as mem
 
 
 def _filter_session(sess_events):
-    last_list = sess_events[sess_events.type == 'REC_END'][-1]['list']  # drop any incomplete lists
-    return sess_events[sess_events.list <= last_list]
+    try:
+        last_list = sess_events[sess_events.type == 'REC_END'][-1]['list']  # drop any incomplete lists
+        return sess_events[sess_events.list <= last_list]
+    except IndexError:
+        return sess_events
 
 
 @delayed
