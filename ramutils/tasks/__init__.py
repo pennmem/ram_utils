@@ -1,8 +1,6 @@
 """Package for defining (functional) tasks. Tasks should be decorated with
-``@memory.cache`` in order to cache results (see ``joblib`` documentation for
- details). By default, all cached results will be stored in the directory that
- is returned by :func:`tempfile.gettempdir`; this can be changed by setting
- ``memory.cachedir`` prior to executing a pipeline.
+:func:`task`. To avoid caching results, decorate with the keyword argument
+``cache=False``.
 
 """
 
