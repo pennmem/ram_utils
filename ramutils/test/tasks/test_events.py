@@ -7,7 +7,6 @@ from ptsa.data.readers import JsonIndexReader, BaseEventReader
 
 from ramutils.tasks import memory
 from ramutils.tasks.events import *
-from ramutils.test import patch
 
 datafile = functools.partial(resource_filename, 'ramutils.test.test_data.protocols')
 
@@ -58,8 +57,7 @@ class TestEvents:
 
         events = np.array(data, dtype=dtype).view(np.recarray)
 
-        with patch('ReportTasks.RamTaskMethods.create_baseline_events', return_value=events):
-            word_events = select_word_events(events, retrieval).compute()
+        word_events = select_word_events(events, retrieval).compute()
 
         if retrieval:
             # TODO: understand why -1
