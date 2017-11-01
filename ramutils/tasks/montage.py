@@ -31,7 +31,7 @@ def _atlas_location(bp_data):
 
 
 @task()
-def load_pairs_json(index, subject):
+def load_pairs(index, subject):
     """Load pairs.json.
 
     FIXME: this takes a much longer time to run than one might expect, probably
@@ -177,7 +177,7 @@ if __name__ == "__main__":
     from ramutils.tasks import read_index
 
     index = read_index('~/mnt/rhino')
-    pairs = load_pairs_json(index, 'R1354E')
+    pairs = load_pairs(index, 'R1354E')
     reduced = remove_stim_pairs(pairs)
     tal_structs = build_tal_structs(pairs, ['1Ld9', '5Ld7'], ['1Ld10', '5Ld8'])
     monopolars = get_monopolar_channels(tal_structs)
