@@ -35,4 +35,4 @@ word_events.visualize()
 
 with timeit():
     output = word_events.compute()
-    print(output)
+    print(len(output), "events")
