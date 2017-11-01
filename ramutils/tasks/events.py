@@ -1,9 +1,7 @@
 import numpy as np
-from dask import delayed
-
 from ptsa.data.readers import BaseEventReader
 
-from . import memory as mem
+from . import task
 
 
 def _filter_session(sess_events):
@@ -14,8 +12,7 @@ def _filter_session(sess_events):
         return sess_events
 
 
-@delayed
-@mem.cache
+@task()
 def read_fr_events(index, subject, sessions=None, cat=False):
     """Read FR events.
 
@@ -54,8 +51,7 @@ def read_fr_events(index, subject, sessions=None, cat=False):
     return events
 
 
-@delayed
-@mem.cache
+@task()
 def concatenate_events(fr_events, catfr_events):
     """Concatenate FR and CatFR events.
 
@@ -136,8 +132,7 @@ def free_epochs(times, duration, pre, post, start=None, end=None):
     return epoch_array
 
 
-@delayed
-@mem.cache
+@task()
 def create_baseline_events(events, start_time, end_time):
     """Match recall events to matching baseline periods of failure to recall.
     Baseline events all begin at least 1000 ms after a vocalization, and end at
@@ -217,8 +212,7 @@ def create_baseline_events(events, start_time, end_time):
     return np.concatenate(all_events).view(np.recarray)
 
 
-@delayed
-@mem.cache
+@task()
 def select_word_events(events, include_retrieval=True):
     """Filter out non-WORD events.
 
