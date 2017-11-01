@@ -1,6 +1,7 @@
 import os
 import hashlib
 import warnings
+from glob import glob
 import numpy as np
 
 from sklearn.linear_model import LogisticRegression
@@ -8,9 +9,10 @@ from sklearn.metrics import roc_auc_score, roc_curve
 from random import shuffle
 from sklearn.externals import joblib
 
+from classiflib import ClassifierContainer
 from ptsa.data.readers.IndexReader import JsonIndexReader
-from ramutils.classifier.utils import normalize_sessions, get_sample_weights
 
+from ramutils.classifier.utils import normalize_sessions, get_sample_weights
 from ramutils.pipeline import RamTask
 
 
@@ -257,7 +259,6 @@ class ComputeClassifier(RamTask):
     def get_events(self):
         return self.get_passed_object('FR1_events')
 
-
     def run(self):
         subject = self.pipeline.subject
         events = self.get_events()
@@ -267,11 +268,24 @@ class ComputeClassifier(RamTask):
         self.pow_mat[events.type!='WORD'] = normalize_sessions(self.pow_mat[events.type!='WORD'],
                                                                events[events.type!='WORD'])
 
-        # TODO: Load me instead
-        self.lr_classifier = LogisticRegression(C=self.params.C,
-                                                penalty=self.params.penalty_type,
-                                                solver='liblinear',
-                                                fit_intercept=True)
+        base_path = os.path.join(self.pipeline.args.mount_point, 'data', 'eeg',
+                                 subject, 'behavioral', self.pipeline.args.task,
+                                 'session_{}'.format(self.pipeline.args.sessions[0]),  # FIXME: session number
+                                 'host_pc')
+
+        # FIXME: this needs a data quality check to confirm that all classifiers in a session are the same!
+        # We take the final timestamped directory because in principle retrained
+        # classifiers can be different depending on artifact detection. In
+        # reality, stim sessions should never be restarted (apart from issues
+        # getting things started in the first place).
+        config_path = os.path.join(base_path, os.listdir(base_path)[-1], 'config_files')
+        if 'retrained_classifier' in os.listdir(config_path):
+            classifier_filename = glob(os.path.join('retrained_classifier', '*classifier*.zip'))[0]
+        else:
+            classifier_filename = glob('*classifier*.zip')[0]
+        classifier_path = os.path.join(config_path, classifier_filename)
+        self.classifier_container = ClassifierContainer.load(classifier_path)
+        self.lr_classifier = self.classifier_container.classifier
 
         event_sessions = events.session
 
