@@ -98,7 +98,7 @@ python tests/fr5_biomarker/system3/fr5_util_system_3.py\
  --anodes ${anode1} ${anode2}\
  --cathodes ${cathode1} ${cathode2}\
  --pulse-frequency=${pulse_frequency}\
- --target-amplitude=${target_amplitude}\
+ --target-amplitude ${target_amplitude} ${target_amplitude}\
  --min-amplitudes ${min_amplitude_1} ${min_amplitude_2}\
  --max-amplitudes ${max_amplitude_1} ${max_amplitude_2}\
   ${classifier} "${@:1}"
