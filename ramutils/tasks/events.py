@@ -12,8 +12,8 @@ def _filter_session(sess_events):
     return sess_events[sess_events.list <= last_list]
 
 
-@mem.cache
 @delayed
+@mem.cache
 def read_fr_events(index, subject, sessions=None, cat=False):
     """Read FR events.
 
@@ -52,8 +52,8 @@ def read_fr_events(index, subject, sessions=None, cat=False):
     return events
 
 
-@mem.cache
 @delayed
+@mem.cache
 def concatenate_events(fr_events, catfr_events):
     """Concatenate FR and CatFR events.
 
@@ -87,8 +87,8 @@ def concatenate_events(fr_events, catfr_events):
     return events
 
 
-@mem.cache
 @delayed
+@mem.cache
 def select_word_events(events, include_retrieval=True):
     """Filter out non-WORD events.
 
