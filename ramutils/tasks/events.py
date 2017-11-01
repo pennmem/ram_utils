@@ -3,7 +3,6 @@ from dask import delayed
 
 from ptsa.data.readers import BaseEventReader
 
-from ReportTasks.RamTaskMethods import create_baseline_events  # FIXME
 from . import memory as mem
 
 
@@ -91,14 +90,15 @@ def concatenate_events(fr_events, catfr_events):
 
 
 # FIXME: better name?
-# FIXME: convert to task
+@delayed
+@mem.cache
 def free_epochs(times, duration, pre, post, start=None, end=None):
     """Given a list of event times, find epochs between them when nothing is
     happening.
 
     Parameters
     ----------
-    times : np.ndarray
+    times : list or np.ndarray
         An iterable of 1-d numpy arrays, each of which indicates event times
     duration : int
         The length of the desired empty epochs
@@ -106,6 +106,10 @@ def free_epochs(times, duration, pre, post, start=None, end=None):
         the time before each event to exclude
     post: int
         The time after each event to exclude
+
+    Returns
+    -------
+    epoch_array : np.ndarray
 
     """
     n_trials = len(times)
@@ -136,7 +140,7 @@ def free_epochs(times, duration, pre, post, start=None, end=None):
 
 @delayed
 @mem.cache
-def create_baseline_events(events, start_time, end_time):
+def create_baseline_events(events, start_time, end_time, epochs):
     """Match recall events to matching baseline periods of failure to recall.
     Baseline events all begin at least 1000 ms after a vocalization, and end at
     least 1000 ms before a vocalization. Each recall event is matched, wherever
@@ -151,11 +155,20 @@ def create_baseline_events(events, start_time, end_time):
         The amount of time to skip at the beginning of the session (ms)
     end_time : int
         The amount of time within the recall period to consider (ms)
+    epochs : np.ndarray
+        Result of :func:`free_epochs`
+
+    Notes
+    -----
+    Former call signature of free_epochs::
+
+        epochs = free_epochs(times, 500, 2000, 1000, start=start_times, end=end_times)
 
     """
     # TODO: clean this mess up
     # TODO: document within code blocks what is actually happening
 
+    # FIXME: some of the following can be pulled out and used as inputs to free_epochs
     all_events = []
     for session in np.unique(events.session):
         sess_events = events[(events.session == session)]
@@ -171,8 +184,6 @@ def create_baseline_events(events, start_time, end_time):
         start_times = starts.mstime.astype(np.int)
         end_times = ends.mstime.astype(np.int)
 
-        # FIXME: make epochs an input
-        epochs = free_epochs(times, 500, 2000, 1000, start=start_times, end=end_times)
         rel_times = [(t - i)[(t - i > start_time) & (t - i < end_time)] for (t, i) in
                      zip([rec_events[rec_events.list == lst].mstime for lst in rec_lists ], start_times)
                      ]
