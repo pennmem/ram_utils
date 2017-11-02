@@ -81,39 +81,11 @@ class FR6SessionSummary(object):
         self.n_total_post_stim_items = {}
         self.pc_post_stim_items = {}
 
-
-        # self.STIM_AND_RECALL_PLOT_FILE = {}
-        # self.PROB_STIM_PLOT_FILE = {}
-        # self.STIM_VS_NON_STIM_HALVES_PLOT_FILE = {}
-        # self.PROB_RECALL_PLOT_FILE = {}
-        # self.STIMTAG = {}
-        # self.REGION = {}
-        # self.N_WORDS = 0.0
-        # self.N_CORRECT_WORDS = 0.0
-        # self.PC_CORRECT_WORDS = 0.0
-        # self.N_PLI = 0.0
-        # self.PC_PLI = 0.0
-        # self.N_ELI = 0.0
-        # self.PC_ELI = 0.0
-        # self.N_MATH = 0.0
-        # self.N_CORRECT_MATH = 0.0
-        # self.PC_CORRECT_MATH = 0.0
-        # self.MATH_PER_LIST = 0.0
-        # self.N_CORRECT_STIM = 0.0
-        # self.N_TOTAL_STIM = 0.0
-        # self.PC_FROM_STIM = 0.0
-        # self.N_CORRECT_NONSTIM = 0.0
-        # self.N_TOTAL_NONSTIM = 0.0
-        # self.PC_FROM_NONSTIM = 0.0
-        # self.CHISQR = {}
-        # self.PVALUE = {}
-        # self.ITEMLEVEL_COMPARISON = ''
-        # self.N_STIM_INTR = {}
-        # self.N_TOTAL_STIM = {}
-        # self.PC_FROM_STIM_INTR = {}
-        # self.N_NONSTIM_INTR = {}
-        # self.N_TOTAL_NONSTIM = {}
-        # self.PC_FROM_NONSTIM_INTR = {}
+        # Plot files
+        self.STIM_AND_RECALL_PLOT_FILE = {}
+        self.PROB_STIM_PLOT_FILE = {}
+        self.STIM_VS_NON_STIM_HALVES_PLOT_FILE = {}
+        self.PROB_RECALL_PLOT_FILE = {}
         # self.chisqr_last = -999
         # self.prob_stim_recall = []
         # self.prob_nostim_recall = []

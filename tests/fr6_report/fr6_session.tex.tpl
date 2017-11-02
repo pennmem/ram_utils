@@ -1,9 +1,10 @@
 \clearpage
 
 \begin{center}
-\textbf{\Large <STIMTAG_A> (<REGION_A>), <PULSE_FREQ_A> Hz, <AMPLITUDE_A> mA , Session(s): <SESSIONS>}
-\textbf{\Large <STIMTAG_B> (<REGION_B>), <PULSE_FREQ_B> Hz, <AMPLITUDE_B> mA , Session(s): <SESSIONS>}
+\textbf{\Large <STIMTAG_A> (<REGION_A>), <PULSE_FREQ_A> Hz, <AMPLITUDE_A> mA , Session(s): <SESSIONS>}\newline
+\textbf{\Large <STIMTAG_B> (<REGION_B>), <PULSE_FREQ_B> Hz, <AMPLITUDE_B> mA , Session(s): <SESSIONS>}\newline
 \end{center}
+
 
 \begin{table}[!h]
 \centering
@@ -15,6 +16,7 @@ $<N_WORDS>$ words & $<N_CORRECT_WORDS>$ correct ($<PC_CORRECT_WORDS>$\%) &$<N_PL
 \caption{An intrusion was a word that was vocalized during the retrieval period that was not studied on the most recent list. Intrusions were either words from a previous list (\textbf{PLI}: prior-list intrusions) or words that were not studied at all (\textbf{ELI}: extra-list intrusions).}
 \end{table}
 
+
 \begin{table}[!h]
 \centering
 \begin{tabular}{c|c|c}
@@ -25,23 +27,15 @@ $<N_MATH>$ math problems & $<N_CORRECT_MATH>$ correct ($<PC_CORRECT_MATH>$\%) & 
 \caption{After each list, the patient was given 20 seconds to perform as many arithmetic problems as possible, which served as a distractor before the beginning of recall.}
 \end{table}
 
-\begin{figure}[!h]
-\centering
-\textbf{Probability of Recall}
-\includegraphics[scale=0.4]{<PROB_RECALL_PLOT_FILE>}
-\caption{\textbf{Free recall:}
-(a) Overall probability of recall as a function of serial position.
-(b) Probability of first recall as a function of serial position.}
-\end{figure}
 
 \begin{table}[!h]
 \centering
 \begin{tabular}{c|c|c|c|c}
 \multicolumn{5}{c}{\textbf{Stim vs <COMPARISON_LIST_TYPE> Recalls}} \\
 \hline
-A & $<N_CORRECT_STIM_A>/<N_TOTAL_STIM_A>$ ($<PC_FROM_STIM_A>$\%) from stim lists & $<N_CORRECT_NONSTIM_A>/<N_TOTAL_NONSTIM_A>$ ($<PC_FROM_NONSTIM_A>$\%) from <COMPARISON_LIST_TYPE> lists & $\chi^2(1)=<CHISQR_A>$ & $p=<PVALUE_A>$ \\
-B & $<N_CORRECT_STIM_B>/<N_TOTAL_STIM_B>$ ($<PC_FROM_STIM_B>$\%) from stim lists & $<N_CORRECT_NONSTIM_B>/<N_TOTAL_NONSTIM_B>$ ($<PC_FROM_NONSTIM_B>$\%) from <COMPARISON_LIST_TYPE> lists & $\chi^2(1)=<CHISQR_B>$ & $p=<PVALUE_B>$ \\
-A+B & $<N_CORRECT_STIM_AB>/<N_TOTAL_STIM_AB>$ ($<PC_FROM_STIM_AB>$\%) from stim lists & $<N_CORRECT_NONSTIM_AB>/<N_TOTAL_NONSTIM_AB>$ ($<PC_FROM_NONSTIM_AB>$\%) from <COMPARISON_LIST_TYPE> lists & $\chi^2(1)=<CHISQR_AB>$ & $p=<PVALUE_AB>$ \\
+A & $<N_CORRECT_STIM_A>/<N_TOTAL_STIM_A>$ ($<PC_FROM_STIM_A>$\%) from stim lists & $<N_CORRECT_NONSTIM>/<N_TOTAL_NONSTIM>$ ($<PC_FROM_NONSTIM>$\%) from <COMPARISON_LIST_TYPE> lists & $\chi^2(1)=<CHISQR_A>$ & $p=<PVALUE_A>$ \\
+B & $<N_CORRECT_STIM_B>/<N_TOTAL_STIM_B>$ ($<PC_FROM_STIM_B>$\%) from stim lists & $<N_CORRECT_NONSTIM>/<N_TOTAL_NONSTIM>$ ($<PC_FROM_NONSTIM>$\%) from <COMPARISON_LIST_TYPE> lists & $\chi^2(1)=<CHISQR_B>$ & $p=<PVALUE_B>$ \\
+A+B & $<N_CORRECT_STIM_AB>/<N_TOTAL_STIM_AB>$ ($<PC_FROM_STIM_AB>$\%) from stim lists & $<N_CORRECT_NONSTIM>/<N_TOTAL_NONSTIM>$ ($<PC_FROM_NONSTIM>$\%) from <COMPARISON_LIST_TYPE> lists & $\chi^2(1)=<CHISQR_AB>$ & $p=<PVALUE_AB>$ \\
 \hline
 <ITEMLEVEL_COMPARISON>
 \end{tabular}
@@ -52,13 +46,35 @@ A+B & $<N_CORRECT_STIM_AB>/<N_TOTAL_STIM_AB>$ ($<PC_FROM_STIM_AB>$\%) from stim 
 \begin{tabular}{c|c|c}
 \multicolumn{3}{c}{\textbf{Stim vs  <COMPARISON_LIST_TYPE> Intrusions}} \\
 \hline
-A & $<N_STIM_INTR_A>/<N_TOTAL_STIM_A>$ ($<PC_FROM_STIM_INTR_A>$\%) from stim lists & $<N_NONSTIM_INTR_A>/<N_TOTAL_NONSTIM_A>$ ($<PC_FROM_NONSTIM_INTR_A>$\%) from <COMPARISON_LIST_TYPE> lists \\
-B & $<N_STIM_INTR_B>/<N_TOTAL_STIM_B>$ ($<PC_FROM_STIM_INTR_B>$\%) from stim lists & $<N_NONSTIM_INTR_B>/<N_TOTAL_NONSTIM_B>$ ($<PC_FROM_NONSTIM_INTR_B>$\%) from <COMPARISON_LIST_TYPE> lists \\
-A+B & $<N_STIM_INTR_AB>/<N_TOTAL_STIM_AB>$ ($<PC_FROM_STIM_INTR_AB>$\%) from stim lists & $<N_NONSTIM_INTR_AB>/<N_TOTAL_NONSTIM_AB>$ ($<PC_FROM_NONSTIM_INTR_AB>$\%) from <COMPARISON_LIST_TYPE> lists \\
+A & $<N_STIM_INTR_A>/<N_TOTAL_STIM_A>$ ($<PC_FROM_STIM_INTR_A>$\%) from stim lists & $<N_NONSTIM_INTR>/<N_TOTAL_NONSTIM>$ ($<PC_FROM_NONSTIM_INTR>$\%) from <COMPARISON_LIST_TYPE> lists \\
+B & $<N_STIM_INTR_B>/<N_TOTAL_STIM_B>$ ($<PC_FROM_STIM_INTR_B>$\%) from stim lists & $<N_NONSTIM_INTR>/<N_TOTAL_NONSTIM>$ ($<PC_FROM_NONSTIM_INTR>$\%) from <COMPARISON_LIST_TYPE> lists \\
+A+B & $<N_STIM_INTR_AB>/<N_TOTAL_STIM_AB>$ ($<PC_FROM_STIM_INTR_AB>$\%) from stim lists & $<N_NONSTIM_INTR>/<N_TOTAL_NONSTIM>$ ($<PC_FROM_NONSTIM_INTR>$\%) from <COMPARISON_LIST_TYPE> lists \\
 \hline
 \end{tabular}
 \end{table}
 \clearpage
+
+\begin{center}
+\textbf{\Large Probability of Recall}
+\end{center}
+
+\begin{figure}[!h]
+    \centering
+    \begin{subfigure}[b]{.75\textwidth}
+        \includegraphics[width=1\linewidth]{<PROB_RECALL_PLOT_FILE_A>}
+    \end{subfigure}\hfill
+    \begin{subfigure}[b]{.75\textwidth}
+        \includegraphics[width=1\linewidth]{<PROB_RECALL_PLOT_FILE_B>}
+    \end{subfigure}\hfill
+    \begin{subfigure}[b]{.75\textwidth}
+        \includegraphics[width=1\linewidth]{<PROB_RECALL_PLOT_FILE_AB>}
+    \end{subfigure}\hfill
+    \caption{\textbf{Free recall:}
+    (a) Overall probability of recall as a function of serial position.
+    (b) Probability of first recall as a function of serial position.}
+\end{figure}
+\clearpage
+
 
 \begin{center}
 \textbf{\Large Stim and recall analysis}
@@ -85,6 +101,7 @@ A+B & $<N_STIM_INTR_AB>/<N_TOTAL_STIM_AB>$ ($<PC_FROM_STIM_INTR_AB>$\%) from sti
               Grey circles represent the number of recalled items from parameter search lists.
               Bars represent the number of stims per list.}
 \end{figure}
+\clearpage
 
 \begin{figure}[!h]
     \begin{subfigure}[b]{.30\textwidth}
@@ -100,6 +117,3 @@ A+B & $<N_STIM_INTR_AB>/<N_TOTAL_STIM_AB>$ ($<PC_FROM_STIM_INTR_AB>$\%) from sti
 \end{figure}
 
 <BIOMARKER_PLOTS>
-
-
-
