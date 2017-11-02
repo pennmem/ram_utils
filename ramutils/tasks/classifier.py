@@ -13,6 +13,14 @@ from ramutils.tasks import task
 logger = get_logger()
 
 
+# FIXME: move to ramutils.classifier.utils?
+def _get_auc(classifier, features, recalls, mask):
+    masked_recalls = recalls[mask]
+    probs = classifier.predict_proba(features[mask])[:, 1]
+    auc = roc_auc_score(masked_recalls, probs)
+    return auc
+
+
 @task()
 def compute_auc(classifier, features, recalls, mask):
     """Compute the AUC score.
@@ -73,6 +81,94 @@ def run_lolo_xval(classifier, session, event_lists, recalls, permuted=False, sam
         self.xval_output[session] = self.xval_output[-1] = xval_output
 
     return probs
+
+
+# FIXME: remove selfs
+# FIXME: split into smaller tasks for parallelization
+@task()
+def run_loso_xval(classifier, event_sessions, recalls, pow_mat, params,
+                  permuted=False, sample_weights=None, events=None):
+    """Leave-one-session-out cross-validation.
+
+    Note samples_weights is not really used for computations it is used to only
+    check if it is None i.e. as a flag. Weird but will leave it for now.
+
+    :param LogisticRegression classifier:
+    :param event_sessions:
+    :param np.ndarray recalls:
+    :param np.ndarray pow_mat: powers matrix
+    :param ExperimentParameters params:
+    :param bool permuted:
+    :param np.ndarray sample_weights:
+    :param np.recarray events:
+    :return:
+
+    """
+    probs = np.empty_like(recalls, dtype=np.float)
+    if events is not None:
+        encoding_probs = np.empty_like(events[events.type == 'WORD'], dtype=np.float)
+
+    sessions = np.unique(event_sessions)
+
+    auc_encoding = np.empty(sessions.shape[0], dtype=np.float)
+    auc_retrieval = np.empty(sessions.shape[0], dtype=np.float)
+    auc_both = np.empty(sessions.shape[0], dtype=np.float)
+
+    for idx, session in enumerate(sessions):
+        insample_mask = (event_sessions != session)
+        insample_pow_mat = pow_mat[insample_mask]
+        insample_recalls = recalls[insample_mask]
+        insample_samples_weights = get_sample_weights(events[events.session != session],
+                                                      params.encoding_samples_weight)
+
+        # FIXME: what are we ignoring???
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+
+            # FIXME: fit is fine with sample weights being None
+            if sample_weights is not None:
+                classifier.fit(insample_pow_mat, insample_recalls, insample_samples_weights)
+            else:
+                classifier.fit(insample_pow_mat, insample_recalls)
+
+        outsample_mask = ~insample_mask
+        outsample_pow_mat = pow_mat[outsample_mask]
+        outsample_recalls = recalls[outsample_mask]
+
+        outsample_probs = classifier.predict_proba(outsample_pow_mat)[:, 1]
+        if not permuted:
+            self.xval_output[session] = ModelOutput(true_labels=outsample_recalls,
+                                                 probs=outsample_probs)
+            self.xval_output[session].compute_roc()
+            self.xval_output[session].compute_tercile_stats()
+        probs[outsample_mask] = outsample_probs
+
+        if events is not None:
+            outsample_encoding_mask = (events.session == session) & (events.type == 'WORD')
+            outsample_retrieval_mask = (events.session == session) & ((events.type == 'REC_BASE') | (events.type == 'REC_WORD'))
+            outsample_both_mask = (events.session == session)
+
+            auc_encoding[idx] = _get_auc(classifier, pow_mat, recalls, outsample_encoding_mask)
+
+            encoding_probs[events[events.type == 'WORD'].session == session] = classifier.predict_proba(pow_mat[outsample_encoding_mask])[:,1]
+
+            auc_retrieval[idx] = _get_auc(classifier, pow_mat, recalls, outsample_retrieval_mask)
+            auc_both[idx] = _get_auc(classifier, pow_mat, recalls, outsample_both_mask)
+
+    if not permuted:
+        self.xval_output[-1] = ModelOutput(true_labels=recalls[events.type=='WORD'],
+                                           probs=probs[events.type=='WORD'])
+        self.xval_output[-1].compute_roc()
+        self.xval_output[-1].compute_tercile_stats()
+
+        logger.info('auc_encoding = %r %f', auc_encoding, np.mean(auc_encoding))
+        logger.info('auc_retrieval = %r %f', auc_retrieval, np.mean(auc_retrieval))
+        logger.info('auc_both = %r %f', auc_both, np.mean(auc_both))
+
+    if events is None:
+        return probs
+    else:
+        return (probs, encoding_probs)
 
 
 @task()
