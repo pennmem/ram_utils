@@ -38,20 +38,6 @@ $\bullet$ Permutation test $p$-value = $<PERM-P-VALUE-1>$
 
 $\bullet$ Median of classifier output = $<JSTAT-THRESH-1>$
 
-\begin{figure}[!h]
-\centering
-\includegraphics[scale=0.25]{<ROC_AND_TERC_PLOT_FILE_2>}
-\caption{\textbf{(a)} ROC curve for the subject;
-\textbf{(b)} Subject recall performance represented as
-percentage devation from the (subject) mean, separated by tercile
-of the classifier encoding efficiency estimate for each encoded word.}
-\end{figure}
-
-$\bullet$ Area Under Curve = $<AUC-2>$
-
-$\bullet$ Permutation test $p$-value = $<PERM-P-VALUE-2>$
-
-$\bullet$ Median of classifier output = $<JSTAT-THRESH-2>$
 
 %\begin{center}
 %\textbf{\Large <STIM_TITLE>}

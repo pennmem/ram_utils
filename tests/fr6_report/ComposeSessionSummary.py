@@ -374,7 +374,7 @@ class ComposeSessionSummary(ReportRamTask):
         for session, fr_stim_session_table in fr_stim_group_table_group:
             # Session-level summary information
             session_summary = FR6SessionSummary()
-            session_summary.session = sorted(fr_stim_session_table.session.unique())
+            session_summary.session = session
 
             session_summary.n_words = len(fr_stim_session_table)
             session_summary.n_correct_words = fr_stim_session_table.recalled.sum()
@@ -589,4 +589,3 @@ class ComposeSessionSummary(ReportRamTask):
 
             session_summary_array.append(session_summary)
         self.pass_object('fr_session_summary', session_summary_array)
-        assert 1 == 0
