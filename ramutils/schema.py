@@ -42,7 +42,8 @@ class Schema(HasTraits):
                 dset = hfile.create_dataset('/{}'.format(name),
                                             data=getattr(self, name),
                                             chunks=chunks)
-                dset.attrs['desc'] = trait.desc
+                if trait.desc is not None:
+                    dset.attrs['desc'] = trait.desc
 
 
 if __name__ == "__main__":
