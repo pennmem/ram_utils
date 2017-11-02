@@ -13,7 +13,19 @@ from sklearn.externals import joblib
 
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
+from ramutils.log import get_logger
+
 memory = joblib.Memory(cachedir=gettempdir(), verbose=0)
+logger = get_logger()
+
+
+def _log_call(func):
+    """Logs calling of a function."""
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        logger.info("calling %s with args=%r, kwargs=%r", func.__name__, args, kwargs)
+        return func(*args, **kwargs)
+    return wrapper
 
 
 def task(cache=True):
@@ -27,11 +39,12 @@ def task(cache=True):
     """
     def decorator(func):
         @functools.wraps(func)
-        def wrapper(*fargs, **fkwargs):
+        def wrapper(*args, **kwargs):
+            wrapped = _log_call(func)
             if cache:
-                wrapped = delayed(memory.cache(func))(*fargs, **fkwargs)
+                wrapped = delayed(memory.cache(wrapped))(*args, **kwargs)
             else:
-                wrapped = delayed(func)(*fargs, **fkwargs)
+                wrapped = delayed(wrapped)(*args, **kwargs)
             return wrapped
         return wrapper
     return decorator
@@ -59,4 +72,4 @@ if __name__ == "__main__":
         def test():
             print('hi!')
 
-        print(test)
+        test().compute()
