@@ -1,5 +1,3 @@
-from traits.api import HasTraits, Int, Float, Array
-
 import numpy as np
 
 from ptsa.data.readers import EEGReader
@@ -9,29 +7,6 @@ from ramutils.log import get_logger
 from ramutils.tasks import task
 
 logger = get_logger()
-
-
-# FIXME: move this somewhere more sensible
-class ExperimentParameters(HasTraits):
-    """Common parameters used in an experiment. Default values apply to the FR
-    class of experiments.
-
-    """
-    width = Float(5, desc='???')
-
-    start_time = Float(0, desc="encoding start time [s]")
-    end_time = Float(1.366, desc="encoding end time [s]")
-    buf = Float(1.365, desc="encoding buffer time [s]")
-
-    retrieval_start_time = Float(-0.525)
-    retrieval_end_time = Float(0)
-    retrieval_buf = Float(0.524)
-
-    freqs = Array(value=np.logspace(np.log10(6), np.log10(180), 8),
-                  desc='frequencies to compute powers for')
-    log_powers = True  # FIXME: do we really need this?
-
-    filt_order = Int(4, desc="Butterworth filter order")
 
 
 @task()
@@ -62,8 +37,8 @@ def compute_powers(events, monopolar_channels, bipolar_pairs, params):
     eegs = eeg_reader.read().add_mirror_buffer(duration=params.buf)
 
     eeg_retrieval_reader = EEGReader(events=events, channels=monopolar_channels,
-                           start_time=params.retrieval_start_time,
-                           end_time=params.retrieval_end_time, buffer_time=0.0)
+                                     start_time=params.retrieval_start_time,
+                                     end_time=params.retrieval_end_time, buffer_time=0.0)
 
     eegs_retrieval = eeg_retrieval_reader.read().add_mirror_buffer(duration=params.retrieval_buf)
 
