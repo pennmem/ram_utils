@@ -79,34 +79,35 @@ class ComputeFRStimTable(ReportRamTask):
         except KeyError:
             ps_sessions = []
 
-
         lr_classifier = self.get_passed_object('lr_classifier_full')
-
         xval_output = self.get_passed_object('xval_output_all_electrodes')
         eval_output = self.get_passed_object(task+'_xval_output')
+        
         class_thresh = xval_output[-1].jstat_thresh
 
         fr_stim_pow_mat = self.get_passed_object('fr_stim_pow_mat')
         if eval_output:
-            fr_stim_prob = lr_classifier.predict_proba(fr_stim_pow_mat[events.type=='WORD'])[:,1]
+           fr_stim_prob = lr_classifier.predict_proba(fr_stim_pow_mat[events.type=='WORD'])[:,1]
         n_events = len(events)
 
         is_stim_item = np.zeros(n_events, dtype=np.bool)
         is_post_stim_item = np.zeros(n_events, dtype=np.bool)
         is_ps4_session = np.in1d(events.session,ps_sessions)
 
-
         sessions = np.unique(events.session)
-        all_events = all_events[np.in1d(all_events.session,sessions) & ((all_events.phase=='STIM')
-                                                                             | (all_events.phase=='NON-STIM')
-                                                                             | (all_events.phase=='BASELINE')
-                                                                             | (all_events.phase=='PRACTICE'))]
+        all_events = all_events[np.in1d(all_events.session,sessions) & 
+                                ((all_events.phase=='STIM')
+                                 | (all_events.phase=='NON-STIM')
+                                 | (all_events.phase=='BASELINE')
+                                 | (all_events.phase=='PRACTICE'))]
+
         n_stims = (all_events.type=='STIM_ON').sum()
         n_stim_off = (all_events.type=='STIM_OFF').sum()
         n_words = (all_events.type=='WORD').sum()
         for session in np.unique(all_events.session):
             all_sess_events = all_events[all_events.session==session]
             for lst in np.unique(all_sess_events.list):
+                # Stim params do not change within list, so those could be calculated now
                 all_lst_events= all_sess_events[all_sess_events.list==lst]
                 lst_stim_words = np.zeros(len(all_lst_events[all_lst_events.type == 'WORD']))
                 lst_post_stim_words = np.zeros(len(all_lst_events[all_lst_events.type == 'WORD']))
@@ -114,8 +115,8 @@ class ComputeFRStimTable(ReportRamTask):
                 for i,ev in enumerate(all_lst_events):
                     if ev.type=='WORD':
                         if ((all_lst_events[i+1].type=='STIM_ON')
-                                or (all_lst_events[i+1].type=='WORD_OFF' and
-                                        (all_lst_events[i+2].type=='STIM_ON' or (all_lst_events[i+2].type=='DISTRACT_START'
+                             or (all_lst_events[i+1].type=='WORD_OFF' and
+                                (all_lst_events[i+2].type=='STIM_ON' or (all_lst_events[i+2].type=='DISTRACT_START'
                                                                                   and all_lst_events[i+3].type=='STIM_ON')))):
                             lst_stim_words[j] = True
                         if ( (all_lst_events[i-1].type=='STIM_OFF') or (all_lst_events[i+1].type=='STIM_OFF')
@@ -138,8 +139,6 @@ class ComputeFRStimTable(ReportRamTask):
         self.fr_stim_table['list'] = events.list
         self.fr_stim_table['serialpos'] = events.serialpos
         self.fr_stim_table['phase']=events.phase
-        self.fr_stim_table['recognized'] = events.recognized
-        self.fr_stim_table['rejected'] = events.rejected
         self.fr_stim_table['item_name'] = events.item_name
         self.fr_stim_table['is_stim_list'] = [e.phase=='STIM' for e in events]
         self.fr_stim_table['is_post_stim_item'] = is_post_stim_item
@@ -155,76 +154,45 @@ class ComputeFRStimTable(ReportRamTask):
 
         stim_diffs = (self.fr_stim_table['is_stim_item'] != is_stim_item)
         post_stim_diffs = (self.fr_stim_table['is_post_stim_item'] != is_post_stim_item)
-        print('%s differences between old and new stim items'%stim_diffs.sum())
-        print('%s differences between old and new post-stim items' % post_stim_diffs.sum())
+        
         self.stim_params_to_sess = dict()
         self.sess_to_thresh = dict()
         pre_stim_probs = pre_stim_probs[is_stim_item]
         self.pass_object('pre_stim_probs',pre_stim_probs)
-
-        sessions = np.unique(events.session)
-        for sess in sessions:
-            sess_events = events[events.session==sess]
-
-            sess_stim_events = all_events[(all_events.session==sess) & (all_events.type=='STIM_ON')]
-            sess_stim_event = sess_stim_events[-1]
-
-            ch1 = '%03d' % sess_stim_event.stim_params.anode_number
-            ch2 = '%03d' % sess_stim_event.stim_params.cathode_number
-
-            stim_tag = bp_tal_structs.index[((bp_tal_structs.channel_1==ch1) & (bp_tal_structs.channel_2==ch2)) | ((bp_tal_structs.channel_1==ch2) & (bp_tal_structs.channel_2==ch1))].values[0]
-            stim_anode_tag, stim_cathode_tag = stim_tag.split('-')
-
-            sess_stim_params = StimParams()
-            sess_stim_params.stimAnodeTag = stim_anode_tag
-            sess_stim_params.stimCathodeTag = stim_cathode_tag
-            sess_stim_params.pulse_frequency = sess_stim_event.stim_params.pulse_freq
-            sess_stim_params.amplitude = sess_stim_event.stim_params.amplitude / 1000.0
-            sess_stim_params.pulse_duration = 500
-            sess_stim_params.burst_frequency = -999
-
-            if sess_stim_params in self.stim_params_to_sess:
-                self.stim_params_to_sess[sess_stim_params].append(sess)
-            else:
-                self.stim_params_to_sess[sess_stim_params] = [sess]
-
-        if eval_output:
-            self.fr_stim_table['prob'] = fr_stim_prob
-        else:
-            self.fr_stim_table['prob'] = -999
-
-        stim_anode_tag = np.empty(n_events, dtype='|S16')
-        stim_cathode_tag = np.empty(n_events, dtype='|S16')
-        region = np.empty(n_events, dtype='|S64')
-        pulse_frequency = np.empty(n_events, dtype=int)
-        amplitude = np.empty(n_events, dtype=float)
-        pulse_duration = np.empty(n_events, dtype=int)
-        burst_frequency = np.empty(n_events, dtype=int)
-
-
-        for stim_params,sessions in self.stim_params_to_sess.iteritems():
-            sessions_mask = np.array([(ev.session in sessions) for ev in events], dtype=np.bool)
-            stim_anode_tag[sessions_mask] = stim_params.stimAnodeTag
-            stim_cathode_tag[sessions_mask] = stim_params.stimCathodeTag
-            region[sessions_mask] = bp_tal_structs.bp_atlas_loc.ix[stim_params.stimAnodeTag+'-'+stim_params.stimCathodeTag]
-            pulse_frequency[sessions_mask] = stim_params.pulse_frequency
-            amplitude[sessions_mask] = stim_params.amplitude
-            pulse_duration[sessions_mask] = stim_params.pulse_duration
-            burst_frequency[sessions_mask] = stim_params.burst_frequency
-
-        self.fr_stim_table['stimAnodeTag'] = stim_anode_tag
-        self.fr_stim_table['stimCathodeTag'] = stim_cathode_tag
-        self.fr_stim_table['Region'] = region
-        self.fr_stim_table['Pulse_Frequency'] = pulse_frequency
-        self.fr_stim_table['Amplitude'] = amplitude
-        self.fr_stim_table['Duration'] = pulse_duration
-        self.fr_stim_table['Burst_Frequency'] = burst_frequency
-
+        
+        # Calculate stim params on an event-by-event basis
+        stim_param_data = {
+            'session': [],
+            'list': [],
+            'amplitude': [],
+            'pulse_freq': [],
+            'stim_duration': [],
+            'stimAnodeTag': [],
+            'stimCathodeTag': [],
+            }   
+        for i in range(len(all_events)):
+            stim_params = all_events[i].stim_params
+            stim_param_data['session'].append(all_events[i].session)
+            stim_param_data['list'].append(all_events[i].list)
+            stim_param_data['amplitude'].append(",".join([str(stim_params[k].amplitude) for k in range(len(stim_params))]))
+            stim_param_data['pulse_freq'].append(",".join([str(stim_params[k].pulse_freq) for k in range(len(stim_params))]))
+            stim_param_data['stim_duration'].append(",".join([str(stim_params[k].stim_duration) for k in range(len(stim_params))]))
+            stim_param_data['stimAnodeTag'].append(",".join([str(stim_params[k].anode_label) for k in range(len(stim_params))]))
+            stim_param_data['stimCathodeTag'].append(",".join([str(stim_params[k].cathode_label) for k in range(len(stim_params))]))
+        
+        # Convert to dataframe for easier last-minute munging
+        stim_df = pd.DataFrame.from_dict(stim_param_data)
+        stim_df = stim_df.drop_duplicates()
+        stim_df['stimAnodeTag'] = stim_df['stimAnodeTag'].replace(',', np.nan) # this will allow us to drop non-stim information
+        stim_df = stim_df.dropna(how='any')
+        stim_df['stimAnodeTag'] = stim_df['stimAnodeTag'].str.rstrip(',')
+        stim_df['stimCathodeTag'] = stim_df['stimCathodeTag'].str.rstrip(',') 
+        self.fr_stim_table = self.fr_stim_table.merge(stim_df, on=['session', 'list'], how='left')
+        self.fr_stim_table.to_csv(self.get_path_to_resource_in_workspace('fr_stim_table.csv'), index=False)
+        
         self.pass_object('stim_params_to_sess', self.stim_params_to_sess)
         joblib.dump(self.stim_params_to_sess, self.get_path_to_resource_in_workspace(self.pipeline.subject+'-stim_params_to_sess.pkl'))
 
         self.pass_object('fr_stim_table', self.fr_stim_table)
         self.fr_stim_table.to_pickle(self.get_path_to_resource_in_workspace(self.pipeline.subject+'-fr_stim_table.pkl'))
-
-def get_biomarker_outputs(session):
-    pass
+        assert 1 ==0

@@ -98,11 +98,6 @@ class FR1EventPreparation(ReportRamTask):
         self.pass_object('FR1_events', fr1_events)
         self.pass_object('FR1_intr_events',intr_events)
 
-
-class MissingEventError(Exception):
-    pass
-
-
 class FR6EventPreparation(ReportRamTask):
     def __init__(self):
         super(FR6EventPreparation,self).__init__(mark_as_completed=False)
