@@ -86,31 +86,6 @@ class FR6SessionSummary(object):
         self.PROB_STIM_PLOT_FILE = {}
         self.STIM_VS_NON_STIM_HALVES_PLOT_FILE = {}
         self.PROB_RECALL_PLOT_FILE = {}
-        # self.chisqr_last = -999
-        # self.prob_stim_recall = []
-        # self.prob_nostim_recall = []
-        # self.prob_first_stim_recall = []
-        # self.prob_first_nostim_recall = []
-        # self.pc_diff_from_mean = []
-        # self.n_stims_per_list = []
-        # self.frequency = ''
-        # self.list_number = []
-        # self.is_stim_list = []
-        # self.is_ps_list = []
-        # self.is_baseline_list = []
-        # self.prob_stim = []
-        # self.pc_stim_hits = 0.0
-        # self.pc_nonstim_hits = 0.0
-        # self.pc_false_alarms = 0.0
-        # self.pc_stim_item_hits = 0.0
-        # self.pc_low_biomarker_hits = 0.0
-        # self.dprime = -999.
-    
-    def __str__(self):
-        """ Convenience representation of the object for debugging """
-        for attr in dir(self):
-            print("%s = %s" % (attr, getattr(self, attr)))
-        return
 
 
 class PS4SessionSummary(object):
