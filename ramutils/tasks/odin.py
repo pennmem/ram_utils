@@ -84,7 +84,7 @@ def generate_pairs_from_electrode_config(path, pairs_path, subject):
         return pairs_from_ec
 
 
-@task(cache=False)
+@task(cache=False, log_args=False)
 def save_montage_files(pairs, excluded_pairs, dest):
     """Saves the montage files (pairs.json and excluded_pairs.json) to the
     config directory.
