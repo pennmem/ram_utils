@@ -5,10 +5,17 @@ import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
 
+from classiflib import ClassifierContainer
+
 from ramutils.classifier import ModelOutput
 from ramutils.classifier.utils import normalize_sessions, get_sample_weights
 from ramutils.log import get_logger
 from ramutils.tasks import task
+
+try:
+    from typing import List
+except ImportError:
+    pass
 
 logger = get_logger()
 
@@ -83,6 +90,61 @@ def run_lolo_xval(classifier, session, event_lists, recalls, permuted=False, sam
     return probs
 
 
+@task()
+def run_loso_permutation(classifier, session, events, event_sessions, pow_mat,
+                         recalls, params):
+    """Run a single leave-one-session-out permutation.
+
+    :param LogisticRegression classifier:
+    :param int session: Session number
+    :param np.recarray events:
+    :param ??? event_sessions:
+    :param np.ndarray pow_mat:
+    :param ??? recalls:
+    :param ExperimentParameters params:
+
+    """
+    insample_mask = (event_sessions != session)
+    insample_pow_mat = pow_mat[insample_mask]
+    insample_recalls = recalls[insample_mask]
+    insample_samples_weights = get_sample_weights(events[events.session != session],
+                                                  params.encoding_samples_weight)
+
+    # FIXME: what are we ignoring???
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+
+        # FIXME: fit is fine with sample weights being None
+        if sample_weights is not None:
+            classifier.fit(insample_pow_mat, insample_recalls, insample_samples_weights)
+        else:
+            classifier.fit(insample_pow_mat, insample_recalls)
+
+    outsample_mask = ~insample_mask
+    outsample_pow_mat = pow_mat[outsample_mask]
+    outsample_recalls = recalls[outsample_mask]
+
+    outsample_probs = classifier.predict_proba(outsample_pow_mat)[:, 1]
+    if not permuted:
+        self.xval_output[session] = ModelOutput(true_labels=outsample_recalls,
+                                                probs=outsample_probs)
+        self.xval_output[session].compute_roc()
+        self.xval_output[session].compute_tercile_stats()
+    probs[outsample_mask] = outsample_probs
+
+    if events is not None:
+        outsample_encoding_mask = (events.session == session) & (events.type == 'WORD')
+        outsample_retrieval_mask = (events.session == session) & ((events.type == 'REC_BASE') | (events.type == 'REC_WORD'))
+        outsample_both_mask = (events.session == session)
+
+        auc_encoding[idx] = _get_auc(classifier, pow_mat, recalls, outsample_encoding_mask)
+
+        encoding_probs[events[events.type == 'WORD'].session == session] = classifier.predict_proba(pow_mat[outsample_encoding_mask])[:,1]
+
+        auc_retrieval[idx] = _get_auc(classifier, pow_mat, recalls, outsample_retrieval_mask)
+        auc_both[idx] = _get_auc(classifier, pow_mat, recalls, outsample_both_mask)
+
+
 # FIXME: remove selfs
 # FIXME: split into smaller tasks for parallelization
 @task()
@@ -114,46 +176,47 @@ def run_loso_xval(classifier, event_sessions, recalls, pow_mat, params,
     auc_retrieval = np.empty(sessions.shape[0], dtype=np.float)
     auc_both = np.empty(sessions.shape[0], dtype=np.float)
 
-    for idx, session in enumerate(sessions):
-        insample_mask = (event_sessions != session)
-        insample_pow_mat = pow_mat[insample_mask]
-        insample_recalls = recalls[insample_mask]
-        insample_samples_weights = get_sample_weights(events[events.session != session],
-                                                      params.encoding_samples_weight)
-
-        # FIXME: what are we ignoring???
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-
-            # FIXME: fit is fine with sample weights being None
-            if sample_weights is not None:
-                classifier.fit(insample_pow_mat, insample_recalls, insample_samples_weights)
-            else:
-                classifier.fit(insample_pow_mat, insample_recalls)
-
-        outsample_mask = ~insample_mask
-        outsample_pow_mat = pow_mat[outsample_mask]
-        outsample_recalls = recalls[outsample_mask]
-
-        outsample_probs = classifier.predict_proba(outsample_pow_mat)[:, 1]
-        if not permuted:
-            self.xval_output[session] = ModelOutput(true_labels=outsample_recalls,
-                                                 probs=outsample_probs)
-            self.xval_output[session].compute_roc()
-            self.xval_output[session].compute_tercile_stats()
-        probs[outsample_mask] = outsample_probs
-
-        if events is not None:
-            outsample_encoding_mask = (events.session == session) & (events.type == 'WORD')
-            outsample_retrieval_mask = (events.session == session) & ((events.type == 'REC_BASE') | (events.type == 'REC_WORD'))
-            outsample_both_mask = (events.session == session)
-
-            auc_encoding[idx] = _get_auc(classifier, pow_mat, recalls, outsample_encoding_mask)
-
-            encoding_probs[events[events.type == 'WORD'].session == session] = classifier.predict_proba(pow_mat[outsample_encoding_mask])[:,1]
-
-            auc_retrieval[idx] = _get_auc(classifier, pow_mat, recalls, outsample_retrieval_mask)
-            auc_both[idx] = _get_auc(classifier, pow_mat, recalls, outsample_both_mask)
+    # FIXME: run elsewhere, make this task combine results
+    # for idx, session in enumerate(sessions):
+    #     insample_mask = (event_sessions != session)
+    #     insample_pow_mat = pow_mat[insample_mask]
+    #     insample_recalls = recalls[insample_mask]
+    #     insample_samples_weights = get_sample_weights(events[events.session != session],
+    #                                                   params.encoding_samples_weight)
+    #
+    #     # FIXME: what are we ignoring???
+    #     with warnings.catch_warnings():
+    #         warnings.simplefilter("ignore")
+    #
+    #         # FIXME: fit is fine with sample weights being None
+    #         if sample_weights is not None:
+    #             classifier.fit(insample_pow_mat, insample_recalls, insample_samples_weights)
+    #         else:
+    #             classifier.fit(insample_pow_mat, insample_recalls)
+    #
+    #     outsample_mask = ~insample_mask
+    #     outsample_pow_mat = pow_mat[outsample_mask]
+    #     outsample_recalls = recalls[outsample_mask]
+    #
+    #     outsample_probs = classifier.predict_proba(outsample_pow_mat)[:, 1]
+    #     if not permuted:
+    #         self.xval_output[session] = ModelOutput(true_labels=outsample_recalls,
+    #                                              probs=outsample_probs)
+    #         self.xval_output[session].compute_roc()
+    #         self.xval_output[session].compute_tercile_stats()
+    #     probs[outsample_mask] = outsample_probs
+    #
+    #     if events is not None:
+    #         outsample_encoding_mask = (events.session == session) & (events.type == 'WORD')
+    #         outsample_retrieval_mask = (events.session == session) & ((events.type == 'REC_BASE') | (events.type == 'REC_WORD'))
+    #         outsample_both_mask = (events.session == session)
+    #
+    #         auc_encoding[idx] = _get_auc(classifier, pow_mat, recalls, outsample_encoding_mask)
+    #
+    #         encoding_probs[events[events.type == 'WORD'].session == session] = classifier.predict_proba(pow_mat[outsample_encoding_mask])[:,1]
+    #
+    #         auc_retrieval[idx] = _get_auc(classifier, pow_mat, recalls, outsample_retrieval_mask)
+    #         auc_both[idx] = _get_auc(classifier, pow_mat, recalls, outsample_both_mask)
 
     if not permuted:
         self.xval_output[-1] = ModelOutput(true_labels=recalls[events.type=='WORD'],
@@ -275,3 +338,30 @@ def compute_classifier(events, pow_mat, params):
     #                         model_weights)
     # except Exception:
     #     print('could not save debug data')
+
+
+@task(cache=False)
+def serialize_classifier(classifier, pairs, features, events, sample_weights,
+                         xval_output, subject):
+    """Serialize the classifier.
+
+    :param LogisticRegression classifier:
+    :param np.ndarray features:
+    :param np.recarray events:
+    :param np.ndarray sample_weights:
+    :param List[ModelOutput] xval_output:
+    :param str subject:
+    :rtype: ClassifierContainer
+
+    """
+    return ClassifierContainer(
+        classifier=classifier,
+        pairs=pairs,
+        features=features,
+        events=events,
+        sample_weight=sample_weights,
+        classifier_info={
+            'auc': xval_output[-1].auc,
+            'subject': subject
+        }
+    )
