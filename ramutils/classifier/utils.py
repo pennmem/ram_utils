@@ -65,7 +65,6 @@ def get_sample_weights(events, encoding_multiplier):
     weights[retrieval_mask & (events.type == 'REC_BASE')] = n_vec[2]
     weights[retrieval_mask & (events.type == 'REC_WORD')] = n_vec[3]
 
-
     return weights
 
 

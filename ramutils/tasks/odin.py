@@ -1,14 +1,25 @@
 """Tasks specific to the Medtronic Odin ENS."""
 
-import os.path
 from collections import OrderedDict
-# import json
+import functools
+from itertools import chain, cycle
+import json
+import os.path
+import zipfile
 
 import numpy as np
 
-from bptools.transform import SeriesTransformation
+from tornado.template import Template
 
+from bptools.transform import SeriesTransformation
+from classiflib import ClassifierContainer, dtypes
+
+from ramutils.log import get_logger
 from ramutils.tasks import task
+
+CLASSIFIER_VERSION = "1.0.2"
+
+logger = get_logger()
 
 
 @task()
@@ -71,3 +82,30 @@ def generate_pairs_from_electrode_config(path, pairs_path, subject):
         # FIXME: need to validate stim pair inputs match those defined in config file
 
         return pairs_from_ec
+
+
+@task(cache=False)
+def save_montage_files(pairs, excluded_pairs, dest):
+    """Saves the montage files (pairs.json and excluded_pairs.json) to the
+    config directory.
+
+    :param dict pairs:
+    :param dic excluded_pairs:
+    :param str dest: directory to write JSON files to
+
+    """
+    if not os.path.exists(dest):
+        try:
+            os.makedirs(dest)
+        except OSError:
+            pass
+    else:
+        assert os.path.isdir(dest), "dest must be a directory"
+
+    dump = functools.partial(json.dump, indent=2, sort_keys=True)
+
+    with open(os.path.join(dest, "pairs.json"), 'w') as f:
+        dump(pairs, f)
+
+    with open(os.path.join(dest, "excluded_pairs.json"), 'w') as f:
+        dump(excluded_pairs, f)
