@@ -5,6 +5,22 @@ from traits.api import Int, Float, Bool, Array, String
 from ramutils.schema import Schema
 
 
+class StimParameters(Schema):
+    """Single-channel stimulation parameters."""
+    label = String(desc="stim channel label")
+    anode = Int(desc="stim anode contact number")
+    cathode = Int(desc="stim cathode contact number")
+    frequency = Float(200., desc="stim pulse frequency [Hz]")
+    duration = Float(500., desc="stim duration [ms]")
+
+    # used in fixed-amplitidue experiments
+    target_amplitude = Float(0.5, desc="stim amplitude [mA]")
+
+    # used in variable-amplitude experiments
+    min_amplitude = Float(0.1, desc="minimum allowable stim amplitude [mA]")
+    max_amplitude = Float(2.0, desc="maximum allowable stim amplitude [mA]")
+
+
 class ExperimentParameters(Schema):
     """Common parameters used in an experiment. Default values apply to the FR
     class of experiments.
