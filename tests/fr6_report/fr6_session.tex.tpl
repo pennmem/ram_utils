@@ -5,6 +5,24 @@
 \textbf{\Large <STIMTAG_B> (<REGION_B>), <PULSE_FREQ_B> Hz, <AMPLITUDE_B> mA , Session(s): <SESSIONS>}\newline
 \end{center}
 
+\begin{center}
+\textbf{\Large <ROC_TITLE>}
+\end{center}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.25]{<ROC_AND_TERC_PLOT_FILE>}
+\caption{\textbf{(a)} ROC curve for the subject;
+\textbf{(b)} Subject recall performance represented as
+percentage devation from the (subject) mean, separated by tercile
+of the classifier encoding efficiency estimate for each encoded word.}
+\end{figure}
+
+$\bullet$ Area Under Curve = $<AUC>$
+
+$\bullet$ Permutation test $p$-value = $<PERM-P-VALUE>$
+
+$\bullet$ Median of classifier output = $<JSTAT-THRESH>$
 
 \begin{table}[!h]
 \centering
@@ -117,3 +135,25 @@ A+B & $<N_STIM_INTR_AB>/<N_TOTAL_STIM_AB>$ ($<PC_FROM_STIM_INTR_AB>$\%) from sti
 \end{figure}
 
 <BIOMARKER_PLOTS>
+
+\clearpage
+
+\section*{Data Quality Metrics}
+\subsection*{Biomarker Distributions}
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.5]{<BIOMARKER_HISTOGRAM>}
+\end{figure}
+
+%\begin{figure}[!h]
+%\centering
+%\includegraphics[scale=0.5]{<DELTA_CLASSIFIER_HISTOGRAM>}
+%\end{figure}
+\subsection*{EEG data}
+\vspace{-1cm}
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.5]{<POST_STIM_EEG>}
+\caption*{Voltage during the post-stimulation period, averaged across trials.\\
+          Voltages beyond +-500 $\mu$V not shown; voltages between -20 and 20 $mu$V are in white.}
+\end{figure}
