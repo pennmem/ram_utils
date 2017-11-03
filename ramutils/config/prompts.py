@@ -62,7 +62,7 @@ class PathValidator(Validator):
         assert self.isfile or self.isdir, "at least one of isfile or isdir must be true"
 
     def validate(self, document):
-        path = document.text
+        path = document.text.strip()
         found = osp.exists(path)
 
         if found and self.isfile:
@@ -106,7 +106,7 @@ def get_path(msg, isfile=True, isdir=True):
     """
     while True:
         try:
-            return prompt(msg, validator=PathValidator(isfile, isdir))
+            return prompt(msg, validator=PathValidator(isfile, isdir)).strip()
         except ValidationError as e:
             print(e.message)
 
