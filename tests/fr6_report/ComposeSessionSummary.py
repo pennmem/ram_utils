@@ -40,8 +40,6 @@ class ComposeSessionSummary(ReportRamTask):
         monopolar_channels = self.get_passed_object('monopolar_channels')
 
         fr1_events = self.get_passed_object('FR1_events')
-
-        stim_params_to_sess = self.get_passed_object('stim_params_to_sess')
         fr_stim_table = self.get_passed_object('fr_stim_table')
         fr_stim_table['prev_prob'] = fr_stim_table['prob'].shift(1)
         fr_stim_table['prob_diff'] = fr_stim_table['prob'] - fr_stim_table['prev_prob']
@@ -334,7 +332,6 @@ class ComposeSessionSummary(ReportRamTask):
 
         fr1_events = self.get_passed_object('FR1_events')
 
-        stim_params_to_sess = self.get_passed_object('stim_params_to_sess')
         fr_stim_table = self.get_passed_object('fr_stim_table')
         fr_stim_table['prev_prob'] = fr_stim_table['prob'].shift(1)
         fr_stim_table['prob_diff'] = fr_stim_table['prob'] - fr_stim_table['prev_prob']

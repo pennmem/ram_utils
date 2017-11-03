@@ -107,7 +107,6 @@ class MontagePreparation(RamTask):
             bp_tags.append(bp_tag)
             bp_tal_structs.append(['%03d'%ch1, '%03d'%ch2, bp_data['type_1'], atlas_location(bp_data)])
 
-
         bp_tal_structs = pd.DataFrame(bp_tal_structs, index=bp_tags, columns=['channel_1', 'channel_2', 'etype', 'bp_atlas_loc'])
         bp_tal_structs.sort_values(by=['channel_1', 'channel_2'], inplace=True)
 
@@ -130,7 +129,7 @@ class MontagePreparation(RamTask):
 
         except Exception:
             events = self.get_passed_object('all_events')
-            stim_events = events[events.type=='STIM_ON'].stim_params
+            stim_events = events[events.type=='STIM_ON'].stim_params # returns a list of stim params
             anode_nums = filter(None,np.unique(stim_events.anode_number))
             cathode_nums = filter(None,np.unique(stim_events.cathode_number))
 
@@ -138,13 +137,11 @@ class MontagePreparation(RamTask):
         bipolar_pairs = np.array(bipolar_pairs, dtype=[('ch0', 'S3'), ('ch1', 'S3')]).view(np.recarray)
         include = [int(bp.ch0) not in stim_pairs and int(bp.ch1) not in stim_pairs for bp in bipolar_pairs]
 
-
-
         reduced_pairs = bipolar_pairs[np.array(include)]
         self.pass_object('reduced_pairs', reduced_pairs)
         joblib.dump(reduced_pairs, self.get_path_to_resource_in_workspace(subject + '-reduced_pairs.pkl'))
 
-
+        self.pass_object('stim_pairs', stim_pairs)
         self.pass_object('monopolar_channels', monopolar_channels)
         self.pass_object('bipolar_pairs', bipolar_pairs)
         self.pass_object('bp_tal_structs', bp_tal_structs)

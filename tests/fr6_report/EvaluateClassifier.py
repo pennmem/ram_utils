@@ -16,8 +16,8 @@ class EvaluateClassifier(ReportRamTask):
         self.pow_mat = None
         self.lr_classifier = None
         self.xval_output = dict()  # ModelOutput per session; xval_output[-1] is across all sessions
-        self.perm_AUCs = None
-        self.pvalue = None
+        self.perm_AUCs = {}
+        self.pvalue = {}
 
 
     def input_hashsum(self):
@@ -94,13 +94,14 @@ class EvaluateClassifier(ReportRamTask):
         post_stim_pow_mat = self.get_passed_object('post_stim_pow_mat')
         self.long_pow_mat = np.concatenate([self.pow_mat,post_stim_pow_mat])
 
-
+        # TODO: This will change once we move to session-specific classifier?
         all_probs = self.lr_classifier.predict_proba(self.long_pow_mat)[:, 1]
 
         non_stim = (events.type=='WORD') & (events.phase != 'STIM')
         if not non_stim.any():
             self.xval_output = self.perm_AUCs = self.pvalue = None
         else:
+            # Need to also do this on a session-by-session basis
             self.pow_mat = self.long_pow_mat[non_stim]
             probs = all_probs[non_stim]
             recalls = events[non_stim].recalled
@@ -115,19 +116,34 @@ class EvaluateClassifier(ReportRamTask):
             if len(sessions)>1:
                 print 'Performing permutation test'
 
-                self.perm_AUCs = self.permuted_loso_AUCs(nonstimlist_events.session, recalls)
+                self.perm_AUCs[-1] = self.permuted_loso_AUCs(nonstimlist_events.session, recalls)
 
             else:
                 print 'Performing in-session permutation test'
-                self.perm_AUCs = self.permuted_lolo_AUCs(nonstimlist_events)
-
-            self.pvalue = np.sum(self.perm_AUCs >= self.xval_output[-1].auc) / float(self.perm_AUCs.size)
-
+                self.perm_AUCs[-1] = self.permuted_lolo_AUCs(nonstimlist_events)
+            self.pvalue[-1] = np.sum(self.perm_AUCs[-1] >= self.xval_output[-1].auc) / float(self.perm_AUCs[-1].size)
             print 'Perm test p-value = ', self.pvalue
 
-        pre_stim_probs = all_probs[(events.type=='WORD')] # Slight misnomer here; these are only pre-stim in *potential*,
-                                                          # rather than in fact. This will be corrected in ComputeFRStimTable
+            for session in sessions:
+                print("Evalutation session-specific classifier for session: {}".format(session))
+                sess_events = (events.session == session) & (non_stim)
+                self.pow_mat = self.long_pow_mat[sess_events]
+                probs = all_probs[sess_events]
+                recalls = events[sess_events].recalled
+                self.xval_output[session] = ModelOutput(recalls, probs)
+                self.xval_output[session].compute_roc()
+                self.xval_output[session].compute_tercile_stats()
+                self.xval_output[session].compute_normal_approx()
+                # Always perform in-session permutation test for single-session classifier info
+                sessions = np.unique(events.session)
+                self.perm_AUCs[session] = self.permuted_lolo_AUCs(events[sess_events])
+                self.pvalue[session] = np.sum(self.perm_AUCs[session] >= self.xval_output[session].auc) / float(self.perm_AUCs[session].size)
+        
+        # Slight misnomer here; these are only pre-stim in *potential*,
+        # rather than in fact. This will be corrected in ComputeFRStimTable
+        pre_stim_probs = all_probs[(events.type=='WORD')]
         post_stim_probs = all_probs[events.type=='STIM_OFF']
+        
         self.pass_object(task+'_xval_output', self.xval_output)
         self.pass_object(task+'_perm_AUCs', self.perm_AUCs)
         self.pass_object(task+'_pvalue', self.pvalue)

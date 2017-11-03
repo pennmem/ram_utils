@@ -36,24 +36,28 @@ class LoadPostStimEEG(ReportRamTask):
 
 
     def run(self):
+        post_stim_eeg = {}
         events = self.get_passed_object('all_events')
-        events = events[events.type=='STIM_OFF']
+        sessions = np.unique(events.session)
+        for session in sessions:
+            sess_events = events[events.type=='STIM_OFF']
+            sess_events = events[events.session == session]
+            channels = self.get_passed_object('monopolar_channels')
+            pairs = self.get_passed_object('bipolar_pairs')
+            eeg = EEGReader(events=sess_events,channels=channels,
+                            start_time=self.params.post_stim_start_time,
+                            end_time=self.params.post_stim_end_time + 0.25,).read()
+            samplerate = eeg['samplerate']
+            eeg = eeg.filtered([58.,62.])
+            eeg['samplerate']=samplerate
+            if 'channels' in eeg.coords:
+                eeg = MonopolarToBipolarMapper(time_series=eeg,bipolar_pairs=pairs).filter()
+            eeg = eeg.mean(dim='events').data
+            eeg[np.abs(eeg)<5] = np.nan
+            post_stim_eeg[session] = eeg
 
-        channels = self.get_passed_object('monopolar_channels')
-        pairs = self.get_passed_object('bipolar_pairs')
-        eeg = EEGReader(events=events,channels=channels,
-                        start_time=self.params.post_stim_start_time,
-                        end_time=self.params.post_stim_end_time+0.25,).read()
-        samplerate = eeg['samplerate']
-        eeg = eeg.filtered([58.,62.])
-        eeg['samplerate']=samplerate
-        if 'channels' in eeg.coords:
-            eeg = MonopolarToBipolarMapper(time_series=eeg,bipolar_pairs=pairs).filter()
-        eeg = eeg.mean(dim='events').data
-        eeg[np.abs(eeg)<5]=np.nan
-
-        self.pass_object('post_stim_eeg',eeg)
-        joblib.dump(eeg,self.get_path_to_resource_in_workspace('post_stim_eeg.pkl'))
+        self.pass_object('post_stim_eeg', post_stim_eeg)
+        joblib.dump(post_stim_eeg, self.get_path_to_resource_in_workspace('post_stim_eeg.pkl'))
 
     def restore(self):
         eeg = joblib.load(self.get_path_to_resource_in_workspace('post_stim_eeg.pkl'))

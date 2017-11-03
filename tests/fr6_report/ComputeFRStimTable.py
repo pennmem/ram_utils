@@ -9,24 +9,10 @@ from ReportUtils import ReportRamTask
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
 
-class StimParams(object):
-    def __init__(self):
-        self.amplitude = None
-        self.pulse_frequency = None
-        self.burst_frequency = None
-        self.pulse_duration = None
-        self.stimAnodeTag = None
-        self.stimCathodeTag = None
-
-    def __hash__(self):
-        return hash(repr(self.stimAnodeTag)+repr(self.stimCathodeTag)+repr(self.pulse_frequency))
-
-
 class ComputeFRStimTable(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):
         super(ComputeFRStimTable,self).__init__(mark_as_completed)
         self.params = params
-        self.stim_params_to_sess = None
         self.sess_to_thresh = None
         self.fr_stim_table = None
 
@@ -61,9 +47,7 @@ class ComputeFRStimTable(ReportRamTask):
 
     def restore(self):
         subject = self.pipeline.subject
-        self.stim_params_to_sess = joblib.load(self.get_path_to_resource_in_workspace(subject+'-stim_params_to_sess.pkl'))
         self.fr_stim_table = pd.read_pickle(self.get_path_to_resource_in_workspace(subject+'-fr_stim_table.pkl'))
-        self.pass_object('stim_params_to_sess', self.stim_params_to_sess)
         self.pass_object('fr_stim_table', self.fr_stim_table)
 
     def run(self):
@@ -188,11 +172,13 @@ class ComputeFRStimTable(ReportRamTask):
         stim_df['stimAnodeTag'] = stim_df['stimAnodeTag'].str.rstrip(',')
         stim_df['stimCathodeTag'] = stim_df['stimCathodeTag'].str.rstrip(',') 
         self.fr_stim_table = self.fr_stim_table.merge(stim_df, on=['session', 'list'], how='left')
-        self.fr_stim_table.to_csv(self.get_path_to_resource_in_workspace('fr_stim_table.csv'), index=False)
-        
-        self.pass_object('stim_params_to_sess', self.stim_params_to_sess)
-        joblib.dump(self.stim_params_to_sess, self.get_path_to_resource_in_workspace(self.pipeline.subject+'-stim_params_to_sess.pkl'))
 
+        # Create the list of stim targets
+        grouped = stim_df.groupby(by=['stimAnodeTag', 'stimCathodeTag'])
+        targets = grouped.groups.keys()
+        targets = ['-'.join(target) for target in targets] # this results in a really heinous multi-site target
+        self.pass_object('targets', targets)
+        
         self.pass_object('fr_stim_table', self.fr_stim_table)
         self.fr_stim_table.to_pickle(self.get_path_to_resource_in_workspace(self.pipeline.subject+'-fr_stim_table.pkl'))
         assert 1 ==0

@@ -86,7 +86,9 @@ class FR6SessionSummary(object):
         self.PROB_STIM_PLOT_FILE = {}
         self.STIM_VS_NON_STIM_HALVES_PLOT_FILE = {}
         self.PROB_RECALL_PLOT_FILE = {}
-
+        self.POST_STIM_EEG_PLOT_FILE = None
+        self.ROC_AND_TERC_PLOT_FILE = None
+        self.BIOMARKER_HISTOGRAM_PLOT_FILE = None
 
 class PS4SessionSummary(object):
     def __init__(self):
