@@ -2,10 +2,16 @@
 
 from collections import OrderedDict
 import functools
-from itertools import chain, cycle
+from itertools import chain
 import json
 import os.path
+from tempfile import gettempdir
 import zipfile
+
+try:
+    from typing import List
+except ImportError:
+    pass
 
 import numpy as np
 
@@ -15,7 +21,9 @@ from bptools.transform import SeriesTransformation
 from classiflib import ClassifierContainer, dtypes
 
 from ramutils.log import get_logger
+from ramutils.parameters import StimParameters
 from ramutils.tasks import task
+from ramutils.utils import reindent_json
 
 CLASSIFIER_VERSION = "1.0.2"
 
