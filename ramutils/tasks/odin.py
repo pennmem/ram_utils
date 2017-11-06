@@ -24,6 +24,8 @@ from ramutils.log import get_logger
 from ramutils.tasks import task
 from ramutils.utils import reindent_json
 
+__all__ = ['generate_pairs_from_electrode_config', 'generate_ramulator_config']
+
 CLASSIFIER_VERSION = "1.0.2"
 
 logger = get_logger()
@@ -91,42 +93,15 @@ def generate_pairs_from_electrode_config(subject, paths):
         return pairs_from_ec
 
 
-@task(cache=False, log_args=False)
-def save_montage_files(pairs, excluded_pairs, dest):
-    """Saves the montage files (pairs.json and excluded_pairs.json) to the
-    config directory.
-
-    :param dict pairs:
-    :param dic excluded_pairs:
-    :param str dest: directory to write JSON files to
-
-    """
-    if not os.path.exists(dest):
-        try:
-            os.makedirs(dest)
-        except OSError:
-            pass
-    else:
-        assert os.path.isdir(dest), "dest must be a directory"
-
-    dump = functools.partial(json.dump, indent=2, sort_keys=True)
-
-    with open(os.path.join(dest, "pairs.json"), 'w') as f:
-        dump(pairs, f)
-
-    with open(os.path.join(dest, "excluded_pairs.json"), 'w') as f:
-        dump(excluded_pairs, f)
-
-
 @task(cache=False)
 def generate_ramulator_config(subject, experiment, container, stim_params,
-                              paths, dest):
+                              paths, dest, excluded_pairs=None):
     """Create configuration files for Ramulator.
 
     Note that the current template format will not work for FR5 experiments
     since the config format is not the same.
 
-    In hardware biplar mode, the neurorad pipeline generates a ``pairs.json``
+    In hardware bipolar mode, the neurorad pipeline generates a ``pairs.json``
     file that differs from the electrode configured pairs. It is up to the user
     of the pipeline to ensure that the path to the correct ``pairs.json`` is
     supplied (although Ramulator does not use it in this case).
@@ -137,6 +112,8 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
     :param List[StimParameters] stim_params: list of stimulation parameters
     :param FilePaths paths:
     :param str dest: location to write configuration files to
+    :param dict excluded_pairs: Pairs excluded from the classifier (pairs that
+        contain a stim contact and possibly some others)
     :returns: path to generated configuration zip file
     :rtype: str
 
@@ -195,8 +172,9 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
 
     # Copy pairs.json and excluded_pairs.json to the config directory
     shutil.copy(paths.pairs, conffile('pairs.json'))
-    # FIXME: this isn't saved anywhere else
-    shutil.copy(paths.excluded_pairs, conffile('excluded_pairs.json'))
+    if excluded_pairs is not None:
+        with open(conffile('excluded_pairs.json'), 'w') as f:
+            json.dump(excluded_pairs, f)
 
     # Copy electrode config files
     csv = paths.electrode_config_file
