@@ -18,6 +18,14 @@ class Schema(HasTraits):
                 ))
             setattr(self, key, value)
 
+    def __str__(self):
+        attr_strs = ["{}={}".format(attr, getattr(self, attr))
+                     for attr in self.visible_traits()]
+        return "<{}({})>".format(self.__class__.__name__, '\n    '.join(attr_strs))
+
+    def __repr__(self):
+        return self.__str__()
+
     def _get_type_handler(self, trait):
         return {
             Int: self._scalar_handler,
