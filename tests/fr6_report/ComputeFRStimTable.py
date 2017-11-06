@@ -63,15 +63,13 @@ class ComputeFRStimTable(ReportRamTask):
         except KeyError:
             ps_sessions = []
 
-        lr_classifier = self.get_passed_object('lr_classifier_full')
         xval_output = self.get_passed_object('xval_output_all_electrodes')
         eval_output = self.get_passed_object(task+'_xval_output')
         
         class_thresh = xval_output[-1].jstat_thresh
 
         fr_stim_pow_mat = self.get_passed_object('fr_stim_pow_mat')
-        if eval_output:
-           fr_stim_prob = lr_classifier.predict_proba(fr_stim_pow_mat[events.type=='WORD'])[:,1]
+        fr_stim_prob = self.get_passed_object('word_probs')
         n_events = len(events)
 
         is_stim_item = np.zeros(n_events, dtype=np.bool)
@@ -91,7 +89,6 @@ class ComputeFRStimTable(ReportRamTask):
         for session in np.unique(all_events.session):
             all_sess_events = all_events[all_events.session==session]
             for lst in np.unique(all_sess_events.list):
-                # Stim params do not change within list, so those could be calculated now
                 all_lst_events= all_sess_events[all_sess_events.list==lst]
                 lst_stim_words = np.zeros(len(all_lst_events[all_lst_events.type == 'WORD']))
                 lst_post_stim_words = np.zeros(len(all_lst_events[all_lst_events.type == 'WORD']))
@@ -138,7 +135,12 @@ class ComputeFRStimTable(ReportRamTask):
 
         stim_diffs = (self.fr_stim_table['is_stim_item'] != is_stim_item)
         post_stim_diffs = (self.fr_stim_table['is_post_stim_item'] != is_post_stim_item)
-        
+
+        if eval_output:
+            self.fr_stim_table['prob'] = fr_stim_prob
+        else:
+            self.fr_stim_table['prob'] = -999
+
         self.stim_params_to_sess = dict()
         self.sess_to_thresh = dict()
         pre_stim_probs = pre_stim_probs[is_stim_item]
@@ -181,4 +183,3 @@ class ComputeFRStimTable(ReportRamTask):
         
         self.pass_object('fr_stim_table', self.fr_stim_table)
         self.fr_stim_table.to_pickle(self.get_path_to_resource_in_workspace(self.pipeline.subject+'-fr_stim_table.pkl'))
-        assert 1 ==0
