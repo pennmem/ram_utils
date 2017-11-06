@@ -23,9 +23,10 @@ class StimParameters(Schema):
 
 class FilePaths(Schema):
     """Paths to files that frequently get passed around to many tasks."""
+    rhino_root = String('/', desc="rhino root path")
     electrode_config_file = String(desc="Odin electrode config CSV file")
     pairs = String(desc="pairs.json")
-    excluded_pairs = String(desc="exlucded_pairs.json")
+    excluded_pairs = String(desc="excluded_pairs.json")
 
 
 class ExperimentParameters(Schema):
