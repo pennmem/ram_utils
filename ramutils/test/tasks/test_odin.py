@@ -1,8 +1,15 @@
+from collections import namedtuple
 import json
-from pkg_resources import resource_string
+import os.path
+
+from pkg_resources import resource_string, resource_filename
 import pytest
 
-from ramutils.tasks.odin import save_montage_files
+from classiflib import ClassifierContainer
+
+from ramutils.parameters import StimParameters, FilePaths
+from ramutils.tasks.odin import save_montage_files, generate_ramulator_config
+from ramutils.test import Mock
 
 
 def jsondata(s):
@@ -17,10 +24,10 @@ def test_save_montage_files(mkdir, tmpdir):
     dest = str(tmpdir.join('otherdir')) if mkdir else str(tmpdir)
     save_montage_files(pairs, excluded, dest).compute()
 
-    with open(str(tmpdir.join('pairs.json')), 'r') as f:
+    with open(os.path.join(dest, 'pairs.json'), 'r') as f:
         assert json.loads(f.read()) == pairs
 
-    with open(str(tmpdir.join('excluded_pairs.json')), 'r') as f:
+    with open(os.path.join(dest, 'excluded_pairs.json'), 'r') as f:
         assert json.loads(f.read()) == excluded
 
     # FIXME
