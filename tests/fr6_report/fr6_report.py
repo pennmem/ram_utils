@@ -88,9 +88,9 @@ report_pipeline.add_task(FR1EventPreparation())
 report_pipeline.add_task(FR6EventPreparation())
 report_pipeline.add_task(MontagePreparation(params=params,mark_as_completed=False))
 report_pipeline.add_task(ComputeFRPowers(params=params,mark_as_completed=True))
-report_pipeline.add_task(ComputeFullClassifier(params=params,mark_as_completed=True)) # load the classifier that was used rather than a new one
+report_pipeline.add_task(ComputeFullClassifier(params=params,mark_as_completed=True)) # This only applies to the FR1 events. This could be simplified to just load the classifier
 report_pipeline.add_task(LoadPostStimEEG(params=params,mark_as_completed=True))
-report_pipeline.add_task(ComputeFR6Powers(params=params,mark_as_completed=True)) # take into account the excluded electrodes
+report_pipeline.add_task(ComputeFR6Powers(params=params,mark_as_completed=True)) 
 report_pipeline.add_task(EvaluateClassifier(params=params,mark_as_completed=True)) 
 report_pipeline.add_task(ComputeFRStimTable(params=params,mark_as_completed=True))
 report_pipeline.add_task(ComposeSessionSummary(params=params,mark_as_completed=False))
@@ -99,4 +99,3 @@ report_pipeline.add_task(GeneratePlots())
 report_pipeline.add_task(GenerateTex(mark_as_completed=False))
 report_pipeline.add_task(GenerateReportPDF())
 report_pipeline.execute_pipeline()
-
