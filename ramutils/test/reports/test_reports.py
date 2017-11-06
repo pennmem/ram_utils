@@ -262,3 +262,7 @@ def test_fr_stim_report(subject):
     subprocess.check_output(command, shell=True)
     assert os.path.exists(workspace + "{}/reports/FR3-{}-report.pdf".format(subject, subject))
     return
+
+
+def test_fr6_report(subject):
+    return
