@@ -6,7 +6,7 @@ from itertools import chain
 import json
 import os.path
 from tempfile import gettempdir
-import zipfile
+import shutil
 
 try:
     from typing import List
@@ -21,7 +21,6 @@ from bptools.transform import SeriesTransformation
 from classiflib import ClassifierContainer, dtypes
 
 from ramutils.log import get_logger
-from ramutils.parameters import StimParameters
 from ramutils.tasks import task
 from ramutils.utils import reindent_json
 
@@ -117,3 +116,110 @@ def save_montage_files(pairs, excluded_pairs, dest):
 
     with open(os.path.join(dest, "excluded_pairs.json"), 'w') as f:
         dump(excluded_pairs, f)
+
+
+@task(cache=False)
+def generate_ramulator_config(subject, experiment, container, stim_params,
+                              paths, dest):
+    """Create configuration files for Ramulator.
+
+    Note that the current template format will not work for FR5 experiments
+    since the config format is not the same.
+
+    :param str subject:
+    :param str experiment:
+    :param ClassifierContainer container: serialized classifier
+    :param List[StimParameters] stim_params: list of stimulation parameters
+    :param FilePaths paths:
+    :param str dest: location to write configuration files to
+    :returns: path to generated configuration zip file
+    :rtype: str
+
+    """
+    subject = subject.split('_')[0]
+
+    stim_dict = {
+        stim_param.label: {
+            "min_stim_amplitude": stim_param.min_amplitude,
+            "max_stim_amplitude": stim_param.max_amplitude,
+            "stim_frequency": stim_param.frequency,
+            "stim_duration": stim_param.duration,
+            "stim_amplitude": stim_param.target_amplitude,
+        }
+        for stim_param in stim_params
+    }
+
+    dest = os.path.expanduser(dest)
+    config_dir_root = os.path.join(dest, subject, experiment)
+    config_files_dir = os.path.join(config_dir_root, 'config_files')
+    try:
+        os.makedirs(config_files_dir)
+    except OSError as e:
+        if e.errno != 17:  # File exists
+            raise
+
+    classifier_path = os.path.join(config_files_dir, '{}-classifier.zip'.format(subject))
+    ec_prefix, _ = os.path.splitext(paths.electrode_config_file)
+
+    template_filename = os.path.join(
+        os.path.dirname(__file__), 'templates', 'ramulator_config.json')
+
+    with open(template_filename, 'r') as f:
+        experiment_config_template = Template(f.read())
+
+    experiment_config_content = experiment_config_template.generate(
+        subject=subject,
+        experiment=experiment,
+        classifier_file='config_files/{}'.format(os.path.basename(classifier_path)),
+        classifier_version=CLASSIFIER_VERSION,
+        stim_params_dict=stim_dict,
+        electrode_config_file='config_files/{}'.format(os.path.basename(ec_prefix + '.bin')),
+        biomarker_threshold=0.5
+    )
+
+    with open(os.path.join(config_dir_root, 'experiment_config.json'), 'w') as f:
+        tmp_path = os.path.join(gettempdir(), "experiment_config.json")
+        with open(tmp_path, 'w') as tmpfile:
+            tmpfile.write(experiment_config_content)
+        f.write(reindent_json(tmp_path))
+
+    container.save(classifier_path, overwrite=True)
+
+    # FIXME
+    # with open(bipolar_pairs_path, 'r') as f:
+    #     all_pairs = json.load(f)[subject]['pairs']
+    #
+    # with open(excluded_pairs_path, 'r') as f:
+    #     excluded_pairs = json.load(f)[subject]['pairs']
+    #
+    # used_pairs = {
+    #     key: value for key, value in all_pairs.items()
+    #     if key not in excluded_pairs
+    # }
+    #
+    # pairs = np.rec.fromrecords([
+    #     (item['channel_1'], item['channel_2'],
+    #      pair.split('-')[0], pair.split('-')[1])
+    #     for pair, item in used_pairs.items()
+    # ], dtype=dtypes.pairs)
+    # pairs.sort(order='contact0')
+
+    conffile = functools.partial(os.path.join, config_files_dir)
+
+    # Copy pairs.json and excluded_pairs.json to the config directory. Note that
+    # in bipolar mode we don't actually use pairs.json since it is generated
+    # from the neurorad pipeline, but we always copy it over anyway.
+    shutil.copy(paths.pairs, conffile('pairs.json'))
+    shutil.copy(paths.excluded_pairs, conffile('excluded_pairs.json'))
+
+    # Copy electrode config files
+    csv = paths.electrode_config_file
+    bin = paths.electrode_config_file.replace('.csv', '.bin')
+    shutil.copy(csv, conffile(os.path.basename(csv)))
+    shutil.copy(bin, conffile(os.path.basename(bin)))
+
+    zip_prefix = os.path.join(dest, '{}_{}'.format(subject, experiment))
+    zip_path = zip_prefix + '.zip'
+    shutil.make_archive(zip_prefix, 'zip', root_dir=config_dir_root)
+    logger.info("Created experiment_config zip file: %s", zip_path)
+    return zip_path

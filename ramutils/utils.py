@@ -1,5 +1,6 @@
 from collections import OrderedDict
 import json
+import os
 
 
 def reindent_json(json_file, indent=2):
@@ -53,3 +54,9 @@ def safe_divide(a, b):
         result = 0
 
     return result
+
+
+def touch(path):
+    """Mimics the unix ``touch`` command."""
+    with open(path, 'a'):
+        os.utime(path, None)
