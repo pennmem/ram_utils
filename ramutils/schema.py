@@ -26,14 +26,6 @@ class Schema(HasTraits):
     def __repr__(self):
         return self.__str__()
 
-    def _get_type_handler(self, trait):
-        return {
-            Int: self._scalar_handler,
-            Float: self._scalar_handler,
-            String: self._string_handler,
-            Array: self._array_handler,
-        }[trait.trait_type]
-
     def to_hdf(self, filename, mode='w'):
         """Serialize schema to HDF5.
 
@@ -52,6 +44,20 @@ class Schema(HasTraits):
                                             chunks=chunks)
                 if trait.desc is not None:
                     dset.attrs['desc'] = trait.desc
+
+    @classmethod
+    def from_hdf(cls, filename):
+        """Deserialize from HDF5.
+
+        :param str filename:
+        :returns: Deserialized instance
+
+        """
+        self = cls()
+        with h5py.File(filename, 'r') as hfile:
+            for name in self.visible_traits():
+                setattr(self, name, hfile['/{}'.format(name)][:])
+        return self
 
 
 if __name__ == "__main__":
