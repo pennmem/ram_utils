@@ -21,6 +21,13 @@ class StimParameters(Schema):
     max_amplitude = Float(2.0, desc="maximum allowable stim amplitude [mA]")
 
 
+class FilePaths(Schema):
+    """Paths to files that frequently get passed around to many tasks."""
+    electrode_config_file = String(desc="Odin electrode config CSV file")
+    pairs = String(desc="pairs.json")
+    excluded_pairs = String(desc="exlucded_pairs.json")
+
+
 class ExperimentParameters(Schema):
     """Common parameters used in an experiment. Default values apply to the FR
     class of experiments.
