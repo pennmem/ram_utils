@@ -29,19 +29,19 @@ CLASSIFIER_VERSION = "1.0.2"
 logger = get_logger()
 
 
+# FIXME: logic for generating pairs should be in bptools
 @task()
-def generate_pairs_from_electrode_config(path, pairs_path, subject):
+def generate_pairs_from_electrode_config(subject, paths):
     """Load and verify the validity of the Odin electrode configuration file.
 
-    :param str path: Path to the Odin electrode .csv or .bin config file
-    :param str pairs_path: Path to pairs.json
     :param str subject: Subject ID
+    :param FilePaths paths:
     :returns: minimal pairs.json based on the electrode configuration
     :rtype: dict
     :raises RuntimeError: if the csv or bin file are not found
 
     """
-    prefix, _ = os.path.splitext(path)
+    prefix, _ = os.path.splitext(paths.electrode_config_file)
     csv_filename = prefix + '.csv'
     bin_filename = prefix + '.bin'
 
@@ -53,7 +53,7 @@ def generate_pairs_from_electrode_config(path, pairs_path, subject):
     # Create SeriesTransformation object to determine if this is monopolar,
     # mixed-mode, or bipolar
     # FIXME: load excluded pairs
-    xform = SeriesTransformation.create(csv_filename, pairs_path)
+    xform = SeriesTransformation.create(csv_filename, paths.pairs)
 
     # Odin electrode configuration
     ec = xform.elec_conf
@@ -126,6 +126,11 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
     Note that the current template format will not work for FR5 experiments
     since the config format is not the same.
 
+    In hardware biplar mode, the neurorad pipeline generates a ``pairs.json``
+    file that differs from the electrode configured pairs. It is up to the user
+    of the pipeline to ensure that the path to the correct ``pairs.json`` is
+    supplied (although Ramulator does not use it in this case).
+
     :param str subject:
     :param str experiment:
     :param ClassifierContainer container: serialized classifier
@@ -185,31 +190,12 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
 
     container.save(classifier_path, overwrite=True)
 
-    # FIXME
-    # with open(bipolar_pairs_path, 'r') as f:
-    #     all_pairs = json.load(f)[subject]['pairs']
-    #
-    # with open(excluded_pairs_path, 'r') as f:
-    #     excluded_pairs = json.load(f)[subject]['pairs']
-    #
-    # used_pairs = {
-    #     key: value for key, value in all_pairs.items()
-    #     if key not in excluded_pairs
-    # }
-    #
-    # pairs = np.rec.fromrecords([
-    #     (item['channel_1'], item['channel_2'],
-    #      pair.split('-')[0], pair.split('-')[1])
-    #     for pair, item in used_pairs.items()
-    # ], dtype=dtypes.pairs)
-    # pairs.sort(order='contact0')
-
+    # Save some typing below...
     conffile = functools.partial(os.path.join, config_files_dir)
 
-    # Copy pairs.json and excluded_pairs.json to the config directory. Note that
-    # in bipolar mode we don't actually use pairs.json since it is generated
-    # from the neurorad pipeline, but we always copy it over anyway.
+    # Copy pairs.json and excluded_pairs.json to the config directory
     shutil.copy(paths.pairs, conffile('pairs.json'))
+    # FIXME: this isn't saved anywhere else
     shutil.copy(paths.excluded_pairs, conffile('excluded_pairs.json'))
 
     # Copy electrode config files
