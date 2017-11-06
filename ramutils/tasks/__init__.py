@@ -31,7 +31,7 @@ def _log_call(func, with_args=True):
     return wrapper
 
 
-def task(cache=True, log_args=True):
+def task(cache=True, log_args=False):
     """Decorator to define a task.
 
     Keyword arguments
@@ -39,7 +39,7 @@ def task(cache=True, log_args=True):
     cache : bool
         Cache the task result (default: True)
     log_args : bool
-        Log arguments the task is called with (default: True)
+        Log arguments the task is called with (default: False)
 
     """
     def decorator(func):
