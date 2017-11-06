@@ -7,6 +7,8 @@ import pandas as pd
 
 from ramutils.tasks import task
 
+__all__ = ['load_pairs', 'reduce_pairs']
+
 
 # FIXME: document
 def _atlas_location(bp_data):
@@ -31,57 +33,49 @@ def _atlas_location(bp_data):
 
 
 @task()
-def load_pairs(index, subject):
+def load_pairs(path):
     """Load pairs.json.
 
-    FIXME: this takes a much longer time to run than one might expect, probably
-    because of the json reader.
-
-    :param JsonIndexReader index:
+    :param str path: Path to pairs.json
+    :returns: pairs.json as a dict
     :rtype: dict
 
     """
-    tmp = subject.split('_')
-    subj_code = tmp[0]
-    montage = 0 if len(tmp) == 1 else int(tmp[1])
-
-    bp_paths = index.aggregate_values('pairs', subject=subj_code, montage=montage)
-    mount_point = index.index_file.split('/protocols')[0]
-    path = os.path.join(mount_point, next(iter(bp_paths)))
-
     with open(path, 'r') as f:
-        bipolar_dict = json.load(f)[subject]['pairs']
+        pairs = json.load(f)
 
-    return bipolar_dict
+    return pairs
 
 
-@task()
-def remove_stim_pairs(pairs):
+@task(cache=False)
+def reduce_pairs(pairs, stim_params, return_excluded=False):
     """Remove stim pairs from the pairs.json dict.
 
+    FIXME: do these need to be sorted by channel_1?
+
     :param dict pairs: Full pairs.json as a dict
-    :returns: Dictionary of reduced pairs
+    :param List[StimParameters] stim_params:
+    :param bool return_excluded:
+    :returns: excluded pairs if not return_excluded else reduced pairs
+    :rtype: dict
 
     """
-    # FIXME
-    # if self.pipeline.args.anode_nums:
-    #     stim_pairs = self.pipeline.args.anode_nums + self.pipeline.args.cathode_nums
-    # else:
-    #     stim_pairs = [self.pipeline.args.anode_num, self.pipeline.args.cathode_num]
+    subject = list(pairs.keys())[0]
+    contacts = [(p.anode, p.cathode) for p in stim_params]
+    all_pairs = pairs[subject]['pairs']
+    reduced_pairs = OrderedDict()
+    excluded_pairs = OrderedDict()
 
-    reduced_pairs = [bp for bp in pairs if int(bp[0]) not in stim_pairs and int(bp[1]) not in stim_pairs]
+    for label, pair in all_pairs.items():
+        if pair['channel_1'] not in contacts and pair['channel_2'] not in contacts:
+            reduced_pairs[label] = pair
+        else:
+            excluded_pairs[label] = pair
 
-    # FIXME for modern Python
-    sorted_ = sorted(
-        pairs.items(),
-        cmp=lambda x, y: cmp((x[1]['channel_1'], x[1]['channel_2']),
-                             (y[1]['channel_1'], y[1]['channel_2'])))
-
-    reduced_dict = OrderedDict()
-    for (bp_tag, bp_dict) in sorted_:
-        if ('%03d' % bp_dict['channel_1'], '%03d' % bp_dict['channel_2']) not in reduced_pairs:
-            reduced_dict[bp_tag] = bp_dict
-    return reduced_dict
+    if return_excluded:
+        return excluded_pairs
+    else:
+        return reduced_pairs
 
 
 @task()
@@ -171,15 +165,3 @@ def get_bipolar_pairs(bp_tal_structs):
 
     """
     return list(zip(bp_tal_structs.channel_1.values, bp_tal_structs.channel_2.values))
-
-
-if __name__ == "__main__":
-    from ramutils.tasks import read_index
-
-    index = read_index('~/mnt/rhino')
-    pairs = load_pairs(index, 'R1354E')
-    reduced = remove_stim_pairs(pairs)
-    tal_structs = build_tal_structs(pairs, ['1Ld9', '5Ld7'], ['1Ld10', '5Ld8'])
-    monopolars = get_monopolar_channels(tal_structs)
-
-    monopolars.visualize()
