@@ -1,7 +1,18 @@
 from __future__ import division
 
+import json
+
 import h5py
+import numpy as np
 from traits.api import HasTraits
+
+
+class _NumpyJsonEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, np.ndarray):
+            return o.tolist()
+        else:
+            return json.JSONEncoder.default(self, o)
 
 
 class Schema(HasTraits):
@@ -57,3 +68,30 @@ class Schema(HasTraits):
             for name in self.visible_traits():
                 setattr(self, name, hfile['/{}'.format(name)][:])
         return self
+
+    def to_json(self):
+        """Serialize as a JSON string.
+
+        Notes
+        -----
+        This uses a custom JSON encoder to handle numpy arrays but could
+        conceivably lose precision. If this is important, please consider
+        serializing in HDF5 format instead.
+
+        """
+        d = {name: getattr(self, name) for name in self.visible_traits()}
+        return json.dumps(d, cls=_NumpyJsonEncoder)
+
+    @classmethod
+    def from_json(cls, data):
+        """Deserialize from a JSON string or file.
+
+        :param str or file data:
+
+        """
+        if not isinstance(data, str):
+            loaded = json.load(data)
+        else:
+            loaded = json.loads(data)
+
+        return cls(**{key: value for key, value in loaded.items()})

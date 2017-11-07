@@ -1,11 +1,17 @@
+import json
 import pytest
 import numpy as np
 from numpy.testing import assert_equal
 import h5py
 
-from traits.api import Array
+from traits.api import Array, String
 
 from ramutils.schema import Schema
+
+
+class SomeSchema(Schema):
+    x = Array(dtype=np.float)
+    name = String()
 
 
 @pytest.mark.parametrize('mode', ['w', 'a'])
@@ -42,3 +48,33 @@ def test_from_hdf(tmpdir):
 
     assert_equal(instance.x, x)
     assert_equal(instance.y, y)
+
+
+def test_to_json():
+    obj = SomeSchema(x=range(10), name="whatever")
+    jobj = obj.to_json()
+
+    loaded = json.loads(jobj)
+    assert_equal(loaded['x'], obj.x)
+    assert loaded['name'] == obj.name
+
+
+@pytest.mark.parametrize('fromfile', [True, False])
+def test_from_json(fromfile, tmpdir):
+    data = {
+        "x": range(10),
+        "name": "whatever"
+    }
+
+    if not fromfile:
+        obj = SomeSchema.from_json(json.dumps(data))
+    else:
+        filename = str(tmpdir.join('test.json'))
+        with open(filename, 'w') as f:
+            json.dump(data, f)
+
+        with open(filename, 'r') as f:
+            obj = SomeSchema.from_json(f)
+
+    assert_equal(obj.x, data['x'])
+    assert obj.name == data['name']
