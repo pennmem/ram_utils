@@ -357,7 +357,7 @@ class ComposeSessionSummary(ReportRamTask):
             session_date = time.strftime('%d-%b-%Y', time.localtime(last_time_stamp/1000))
             n_lists = len(fr_stim_session_table.list.unique())
             pc_correct_words = 100.0 * fr_stim_session_table.recalled.mean()
-            amplitude = fr_stim_session_table['Amplitude'].values[-1]
+            amplitude = ",".join([str(x) for x in fr_stim_session_table['amplitude'].unique()])
 
             session_data.append([session, session_date, session_length, n_lists, '$%.2f$\\%%' % pc_correct_words, amplitude])
 
@@ -441,9 +441,10 @@ class ComposeSessionSummary(ReportRamTask):
 
                 # Target summary info
                 session_summary.stimtag[target] = target
-                session_summary.region_of_interest[target] = fr_stim_target_table.Region.values[0] # both channels will be in the same region
-                session_summary.frequency[target] = fr_stim_target_table.Pulse_Frequency.values[0]
-                session_summary.amplitude[target] = fr_stim_target_table.Amplitude.values[0]
+                session_summary.region_of_interest[target] = ""
+                #session_summary.region_of_interest[target] = fr_stim_target_table.Region.values[0] # both channels will be in the same region
+                session_summary.frequency[target] = fr_stim_target_table.pulse_freq.values[0]
+                session_summary.amplitude[target] = fr_stim_target_table.amplitude.values[0]
                 
                 # Probability of recall and probability of first recall by list type, i.e. target
                 fr_stim_table_by_pos = fr_stim_target_table.groupby('serialpos')
