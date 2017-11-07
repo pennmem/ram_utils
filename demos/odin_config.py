@@ -22,8 +22,10 @@ pairs_path = os.path.join(
     'neuroradiology', 'current_processed', 'pairs.json')
 
 paths = FilePaths(
+    root=os.path.expanduser('~/tmp'),
     electrode_config_file=getpath('R1354E_26OCT2017L0M0STIM.csv'),
     pairs=pairs_path,
+    dest='output',
 )
 
 stim_params = [
@@ -51,12 +53,10 @@ pairs = load_pairs(pairs_path)
 reduced_pairs = reduce_pairs(pairs, stim_params, False)
 excluded_pairs = reduce_pairs(pairs, stim_params, True)
 
-pairs = generate_pairs_from_electrode_config('R1354E', paths)
+ec_pairs = generate_pairs_from_electrode_config('R1354E', paths)
 # FIXME: needs classifier container
 config_path = generate_ramulator_config(subject, 'FR6', Mock(), stim_params,
-                                        paths, '/tmp', excluded_pairs)
+                                        paths, ec_pairs, excluded_pairs)
 
 config_path.visualize()
 config_path.compute()
-
-print(pairs)
