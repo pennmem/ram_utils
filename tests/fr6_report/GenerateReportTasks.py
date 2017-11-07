@@ -96,7 +96,7 @@ class GeneratePlots(ReportRamTask):
             panel_plot = PanelPlot(xfigsize = 12,yfigsize=5,i_max=1,j_max=2)
             
             # pre-stim
-            pre_stim_probs_session = pre_stim_probs[(pre_stim_biomarker_events.session == i)]
+            pre_stim_probs_session = pre_stim_probs[(pre_stim_biomarker_events.session == session_summary.session)]
             hist,bin_edges = np.histogram(pre_stim_probs_session,range=[np.round(pre_stim_probs_session.min(),1),np.round(pre_stim_probs_session.max(),1)])
             x_tick_labels = ['{:.2f}-\n{:.2f}'.format(x, y) for (x, y) in zip(bin_edges[:-1], bin_edges[1:])]
             pd = BarPlotData(x = np.arange(len(hist))-0.25,y=hist,xlabel = 'Pre-stim classifier output',ylabel='',xlabel_fontsize=20,
@@ -105,7 +105,7 @@ class GeneratePlots(ReportRamTask):
             panel_plot.add_plot_data(0,0,plot_data=pd)
 
             # post-stim
-            post_stim_probs_session = post_stim_probs[(post_stim_biomarker_events.session == i)]
+            post_stim_probs_session = post_stim_probs[(post_stim_biomarker_events.session == session_summary.session)]
             hist,bin_edges = np.histogram(post_stim_probs_session,range=[np.round(post_stim_probs_session.min(),1),np.round(post_stim_probs_session.max(),1)])
             x_tick_labels= ['{:.2f}-\n{:.2f}'.format(x, y) for (x, y) in zip(bin_edges[:-1], bin_edges[1:])]
             pd = BarPlotData(x = np.arange(len(hist))-0.25,y=hist,xlabel = 'Post-stim classifier output',ylabel='',xlabel_fontsize=20,
@@ -120,7 +120,7 @@ class GeneratePlots(ReportRamTask):
             plt.close()
 
             ## Post stim EEG plot
-            eeg = post_stim_eeg[i]
+            eeg = post_stim_eeg[session_summary.session]
             print(eeg.shape)
             plt.figure(figsize=(9,5.5))
             plt.imshow(eeg,cmap='bwr',aspect='auto',origin='lower')
