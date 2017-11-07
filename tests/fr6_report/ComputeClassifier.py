@@ -318,7 +318,8 @@ class ComputeClassifier(RamTask):
         model_weights = self.lr_classifier.coef_
         self.save_array_to_hdf5(self.get_path_to_resource_in_workspace(subject + "-debug_data.h5"),
                            "model_output",
-                           model_output)
+                           model_output,
+                           overwrite=True)
         self.save_array_to_hdf5(self.get_path_to_resource_in_workspace(subject + "-debug_data.h5"),
                            "model_weights",
                            model_weights)
