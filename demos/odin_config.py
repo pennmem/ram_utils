@@ -42,11 +42,6 @@ stim_params = [
 ]
 
 
-@delayed
-def consume(reduced, excluded):
-    print(reduced, excluded)
-
-
 ### Pipeline
 
 pairs = load_pairs(pairs_path)

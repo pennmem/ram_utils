@@ -55,6 +55,38 @@ def task(cache=True, log_args=False):
     return decorator
 
 
+def make_task(func, *args, **kwargs):
+    """Wrap a function in a task.
+
+    Parameters
+    ----------
+    func : callable
+        Function to wrap
+    args
+        Arguments for the function
+    kwargs
+        Keyword arugments for the function plus ``cache`` and ``log_args`` for
+        use by the :func:`task` decorator.
+
+    """
+    try:
+        cache = kwargs.pop('cache')
+    except KeyError:
+        cache = True
+
+    try:
+        log_args = kwargs.pop('log_args')
+    except KeyError:
+        log_args = False
+
+    @task(cache, log_args)
+    @functools.wraps(func)
+    def wrapped(*a, **k):
+        return func(*a, **k)
+
+    return wrapped(*args, **kwargs)
+
+
 @task()
 def read_index(mount_point='/'):
     """Reads the JSON index reader.
