@@ -61,6 +61,8 @@ class RamTask(object):
         output: (str) Path to hdf5 output file
         data_name: (str) Name of the dataset
         data: (np.ndarray) Data array
+        overwrite: bool
+            Flag for if the file should be overwritten. Default is to append.
 
         Notes:
         ------
