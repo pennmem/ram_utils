@@ -22,16 +22,15 @@ def permuted_lolo_AUCs(classifier, powers, events, n_permutations):
 
     """
     recalls = events.recalled
-    permuted_recalls = np.random.randint(2,size=recalls.shape)
     permuted_recalls = np.array(recalls)
     AUCs = np.empty(shape=n_permutations, dtype=np.float)
     sessions = np.unique(events.session)
     for i in range(n_permutations):
         for sess in sessions:
-            sess_lists = np.unique(events[events.session==sess].list)
+            sess_lists = np.unique(events[events.session == sess].list)
             for lst in sess_lists:
                 # Permute recall outcome within each session/list
-                sel = (events.session==sess) & (events.list==lst)
+                sel = (events.session == sess) & (events.list == lst)
                 list_permuted_recalls = permuted_recalls[sel]
                 shuffle(list_permuted_recalls)
                 permuted_recalls[sel] = list_permuted_recalls
@@ -40,6 +39,7 @@ def permuted_lolo_AUCs(classifier, powers, events, n_permutations):
         AUCs[i] = roc_auc_score(permuted_recalls, probs)
 
     return AUCs
+
 
 def run_lolo_xval(classifier, powers, events, recalls):
     """ Perform single iteration of leave-one-list-out cross validation
