@@ -50,7 +50,7 @@ def consume(reduced, excluded):
 ### Pipeline
 
 pairs = load_pairs(pairs_path)
-reduced_pairs = reduce_pairs(pairs, stim_params, False)
+# reduced_pairs = reduce_pairs(pairs, stim_params, False)
 excluded_pairs = reduce_pairs(pairs, stim_params, True)
 
 ec_pairs = generate_pairs_from_electrode_config('R1354E', paths)

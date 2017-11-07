@@ -2,7 +2,6 @@
 
 from collections import OrderedDict
 import functools
-from itertools import chain
 import json
 import os.path
 from tempfile import gettempdir
@@ -13,12 +12,10 @@ try:
 except ImportError:
     pass
 
-import numpy as np
-
 from tornado.template import Template
 
 from bptools.transform import SeriesTransformation
-from classiflib import ClassifierContainer, dtypes
+from classiflib import ClassifierContainer
 
 from ramutils.log import get_logger
 from ramutils.tasks import task
