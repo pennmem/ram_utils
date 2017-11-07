@@ -1,5 +1,6 @@
 """Common experimental/model parameters."""
 
+import os.path
 import numpy as np
 from traits.api import Int, Float, Bool, Array, String
 from ramutils.schema import Schema
@@ -22,11 +23,30 @@ class StimParameters(Schema):
 
 
 class FilePaths(Schema):
-    """Paths to files that frequently get passed around to many tasks."""
-    rhino_root = String('/', desc="rhino root path")
+    """Paths to files that frequently get passed around to many tasks.
+
+    All paths given are relative to :attr:`root` when accessing attributes in a
+    dict-like fashion, otherwise they are absolute::
+
+        >>> paths = FilePaths(root='/tmp', pairs='pairs.json')
+        >>> paths['pairs']
+        '/tmp/pairs.json'
+        >>> paths.pairs
+        'pairs.json'
+
+    """
+    root = String('/', desc="root path")
+    dest = String(desc="location for writing files to")
     electrode_config_file = String(desc="Odin electrode config CSV file")
     pairs = String(desc="pairs.json")
     excluded_pairs = String(desc="excluded_pairs.json")
+
+    def __getitem__(self, item):
+        """Prepends a path with the root path."""
+        if item in self.visible_traits() and item != 'root':
+            return os.path.join(self.root, getattr(self, item))
+        else:
+            raise KeyError("No such trait: " + item)
 
 
 class ExperimentParameters(Schema):
