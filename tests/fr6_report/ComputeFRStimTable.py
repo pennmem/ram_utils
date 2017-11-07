@@ -144,7 +144,6 @@ class ComputeFRStimTable(ReportRamTask):
         self.stim_params_to_sess = dict()
         self.sess_to_thresh = dict()
         pre_stim_probs = pre_stim_probs[is_stim_item]
-        self.pass_object('pre_stim_probs',pre_stim_probs)
         
         # Calculate stim params on an event-by-event basis
         stim_param_data = {

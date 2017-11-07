@@ -17,7 +17,8 @@ def cleanup():
         running a new batch of tests
     """
     sample_reports = ["samplefr1_reports", "samplefr5_reports",
-                      "samplefr5_biomarkers", "samplepal1_reports",
+                      "samplefr5_biomarkers", "samplefr6_reports",
+                      "samplepal1_reports",
                       "samplepal5_reports", "samplepal5_biomarkers",
                       "samplethr1_reports", "samplethr3_reports"]
     for sample_report in sample_reports:
@@ -263,6 +264,20 @@ def test_fr_stim_report(subject):
     assert os.path.exists(workspace + "{}/reports/FR3-{}-report.pdf".format(subject, subject))
     return
 
-
-def test_fr6_report(subject):
+# Note: The special mount-point for this test is temporary until we have actual
+# FR6 data to use.
+@pytest.mark.parametrize("subject, mount_point",[
+    ("R1350D","/scratch/zduey/testing/fr6_mock/"),
+]
+)
+def test_fr6_report(subject, mount_point):
+    os.chdir(CODE_DIR + "/tests/fr6_report/")
+    workspace = TEST_DIR + "catfr6_reports/"
+    command = "python fr6_report.py\
+               --subject={}\
+               --task=catFR6\
+               --workspace-dir={}\
+               --mount-point={}".format(subject, workspace, mount_point)
+    subprocess.check_output(command, shell=True)
+    assert os.path.exists(workspace + "{}/reports/{}-catFR6_report.pdf".format(subject, subject))
     return
