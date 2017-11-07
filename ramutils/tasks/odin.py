@@ -63,8 +63,6 @@ def generate_pairs_from_electrode_config(subject, paths):
     # This will mimic pairs.json (but only with labels).
     pairs_dict = OrderedDict()
 
-    channels = np.array(['{:03d}'.format(contact.port) for contact in ec.contacts])
-
     # FIXME: move the following logic into bptools
     # Hardware bipolar mode
     if not xform.monopolar_possible():
@@ -84,18 +82,12 @@ def generate_pairs_from_electrode_config(subject, paths):
         # the electrode configuration trumps it
         pairs_from_ec = {subject: {'pairs': pairs_dict}}
 
-        # FIXME: new task to write pairs.json where it belongs
-        # with open(self.get_path_to_resource_in_workspace('pairs.json'), 'w') as pf:
-        #     json.dump(pairs_from_ec, pf, indent=2)
-
-        # FIXME: need to validate stim pair inputs match those defined in config file
-
         return pairs_from_ec
 
 
 @task(cache=False)
 def generate_ramulator_config(subject, experiment, container, stim_params,
-                              paths, dest, excluded_pairs=None):
+                              paths, pairs=None, excluded_pairs=None):
     """Create configuration files for Ramulator.
 
     Note that the current template format will not work for FR5 experiments
@@ -106,12 +98,14 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
     of the pipeline to ensure that the path to the correct ``pairs.json`` is
     supplied (although Ramulator does not use it in this case).
 
+    The destination path is assumed to be relative to the root path. All other
+    paths are assumed to be absolute.
+
     :param str subject:
     :param str experiment:
     :param ClassifierContainer container: serialized classifier
     :param List[StimParameters] stim_params: list of stimulation parameters
     :param FilePaths paths:
-    :param str dest: location to write configuration files to
     :param dict excluded_pairs: Pairs excluded from the classifier (pairs that
         contain a stim contact and possibly some others)
     :returns: path to generated configuration zip file
@@ -131,7 +125,7 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
         for stim_param in stim_params
     }
 
-    dest = os.path.expanduser(dest)
+    dest = paths['dest']
     config_dir_root = os.path.join(dest, subject, experiment)
     config_files_dir = os.path.join(config_dir_root, 'config_files')
     try:
@@ -170,15 +164,21 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
     # Save some typing below...
     conffile = functools.partial(os.path.join, config_files_dir)
 
-    # Copy pairs.json and excluded_pairs.json to the config directory
-    shutil.copy(paths.pairs, conffile('pairs.json'))
+    # Write pairs.json and excluded_pairs.json to the config directory. We can
+    # give pairs.json as a parameter (generally when read from the electrode
+    # config file) or as a path (when using the neurorad pipeline's pairs.json).
+    if pairs is not None:
+        with open(conffile('pairs.json'), 'w') as f:
+            json.dump(pairs, f)
+    else:
+        shutil.copy(paths.pairs, conffile('pairs.json'))
     if excluded_pairs is not None:
         with open(conffile('excluded_pairs.json'), 'w') as f:
             json.dump(excluded_pairs, f)
 
     # Copy electrode config files
     csv = paths.electrode_config_file
-    bin = paths.electrode_config_file.replace('.csv', '.bin')
+    bin = csv.replace('.csv', '.bin')
     shutil.copy(csv, conffile(os.path.basename(csv)))
     shutil.copy(bin, conffile(os.path.basename(bin)))
 
