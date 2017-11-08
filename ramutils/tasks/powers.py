@@ -62,7 +62,6 @@ def compute_powers(events, monopolar_channels, bipolar_pairs, params):
     logger.info('Computing FR1/catFR1 powers')
     pow_mat = np.empty(shape=(n_events, n_bps, n_freqs), dtype=np.float)
 
-    # FIXME: parallelize
     for i, bp in enumerate(bipolar_pairs):
         logger.info('Computing powers for bipolar pair %s', bp)
         elec1 = np.where(monopolar_channels == bp[0])[0][0]
@@ -70,7 +69,7 @@ def compute_powers(events, monopolar_channels, bipolar_pairs, params):
 
         bp_data = np.subtract(eegs[elec1], eegs[elec2])
         bp_data.attrs['samplerate'] = samplerate
-        bp_data_retrieval = np.subtract(eegs_retrieval[elec1],eegs_retrieval[elec2])
+        bp_data_retrieval = np.subtract(eegs_retrieval[elec1], eegs_retrieval[elec2])
         bp_data_retrieval.attrs['samplerate'] = samplerate
         bp_data = bp_data.filtered([58, 62], filt_type='stop', order=params.filt_order)
         bp_data_retrieval = bp_data_retrieval.filtered([58, 62], filt_type='stop', order=params.filt_order)
