@@ -127,6 +127,7 @@ class ComputeFRPowers(RamTask):
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(subject + '-pow_mat.pkl'))
         joblib.dump(self.samplerate, self.get_path_to_resource_in_workspace(subject + '-samplerate.pkl'))
 
+    # n.b., this is *not* used anywhere!
     def compute_powers(self, events, sessions, monopolar_channels , bipolar_pairs):
 
         retrieval_events_mask = (events.type == 'REC_WORD') | (events.type == 'REC_BASE')
