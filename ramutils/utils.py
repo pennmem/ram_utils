@@ -1,7 +1,12 @@
 from collections import OrderedDict
+from contextlib import contextmanager
 import json
 import os
+from timeit import default_timer
+
 import h5py
+
+from ramutils.log import get_logger
 
 
 def reindent_json(json_file, indent=2):
@@ -85,3 +90,29 @@ def save_array_to_hdf5(output, data_name, data, overwrite=False):
     hdf.create_dataset(data_name, data=data)
     hdf.close()
     return
+
+
+@contextmanager
+def timer(message="Elapsed time: %.3f s", logger=None):
+    """Context manager to log the elapsed time of a code block.
+
+    Parameters
+    ----------
+    message : str
+        Percent-formatted string to display the elapsed time
+    logger : str
+        Name of logger to use
+
+    """
+    ti = default_timer()
+    yield
+    tf = default_timer()
+    log = get_logger(logger)
+    log.info(message, tf - ti)
+
+
+if __name__ == "__main__":
+    import time
+
+    with timer("Slept for a total of %f s"):
+        time.sleep(1)
