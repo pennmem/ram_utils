@@ -31,6 +31,14 @@ class ModelOutput(Schema):
         if not len(self.true_labels) or not len(self.probs):
             raise RuntimeError("true_labels and probs must be set first")
 
+    def compute_metrics(self):
+        """Shorthand for calling both :meth:`compute_roc` and
+        :meth:`compute_tercile_stats`.
+
+        """
+        self.compute_roc()
+        self.compute_tercile_stats()
+
     def compute_roc(self):
         """Compute the ROC curve.
 

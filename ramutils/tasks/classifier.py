@@ -1,3 +1,5 @@
+from __future__ import division
+
 from random import shuffle
 
 import numpy as np
@@ -14,7 +16,7 @@ from ramutils.tasks import task
 from ramutils.utils import save_array_to_hdf5
 
 try:
-    from typing import List
+    from typing import Dict, Union, Tuple
 except ImportError:
     pass
 
@@ -40,33 +42,6 @@ def compute_auc(classifier, features, recalls, mask):
 
 
 @task()
-def compute_permuted_lolo_aucs(sess, event_lists, recalls, params,
-                               sample_weights=None):
-    """Compute permuted leave-one-list-out AUC scores.
-
-    :param int sess: session number
-    :param ??? event_lists:
-    :param ??? recalls:
-    :param ExperimentParameters params:
-    :param np.ndarray sample_weights: sample weights
-
-    """
-    n_perm = params.n_perm
-    permuted_recalls = np.array(recalls)
-    AUCs = np.empty(shape=n_perm, dtype=np.float)
-    for i in range(n_perm):
-        for lst in event_lists:
-            sel = (event_lists == lst)
-            list_permuted_recalls = permuted_recalls[sel]
-            shuffle(list_permuted_recalls)
-            permuted_recalls[sel] = list_permuted_recalls
-        probs = run_lolo_xval(sess, event_lists, permuted_recalls, permuted=True, sample_weights=sample_weights)
-        AUCs[i] = roc_auc_score(recalls, probs)
-        logger.info('AUC = %f', AUCs[i])
-    return AUCs
-
-
-@task()
 def compute_classifier(events, pow_mat, params, paths=None):
     """Compute the classifier.
 
@@ -77,6 +52,8 @@ def compute_classifier(events, pow_mat, params, paths=None):
     :param FilePaths paths:
         used for accessing the ``dest`` parameter for storing storing debug
         data to
+    :returns: trained classifier and cross-validation output
+    :rtype: Tuple[LogisticRegression, Dict[Union[str, int], ModelOutput]]
 
     """
     encoding_mask = events.type == 'WORD'
@@ -85,6 +62,10 @@ def compute_classifier(events, pow_mat, params, paths=None):
     classifier = LogisticRegression(C=params.C,
                                     penalty=params.penalty_type,
                                     solver='liblinear')
+
+    # Stores cross validation output. Keys are sessions or 'all' for all session
+    # cross validation.
+    xval = {}  # type: Dict[Union[str, int], ModelOutput]
 
     event_sessions = events.session
 
@@ -98,12 +79,18 @@ def compute_classifier(events, pow_mat, params, paths=None):
     if len(sessions > 1):
         raise RuntimeError("LOSO x-val not yet implemented")
     else:
-        sess = sessions[0]
+        session = sessions[0]
         event_lists = events.list
-        perm_AUCs = permuted_lolo_AUCs(sess, event_lists, recalls, params.n_perm)
-        # FIXME: run_lolo_xval()
+        perm_AUCs = permuted_lolo_AUCs(session, event_lists, recalls, params.n_perm)
+        probs = run_lolo_xval(classifier, pow_mat, event_lists, recalls)
 
-    # FIXME: pvalue
+        # Store model output statistics
+        output = ModelOutput(true_labels=recalls, probs=probs)
+        output.compute_metrics()
+        xval['all'] = xval[session] = output
+
+    pvalue = np.sum(perm_AUCs >= xval['all'].auc) / len(perm_AUCs)
+    logger.info("Permutation test p-value = %f", pvalue)
 
     classifier.fit(pow_mat, recalls, sample_weights)
     recall_prob = classifier.predict_proba(pow_mat)[:, 1]
@@ -118,6 +105,8 @@ def compute_classifier(events, pow_mat, params, paths=None):
     except Exception:
         logger.error('could not save debug data', exc_info=True)
 
+    return classifier, xval
+
 
 @task(cache=False)
 def serialize_classifier(classifier, pairs, features, events, sample_weights,
@@ -128,7 +117,7 @@ def serialize_classifier(classifier, pairs, features, events, sample_weights,
     :param np.ndarray features:
     :param np.recarray events:
     :param np.ndarray sample_weights:
-    :param List[ModelOutput] xval_output:
+    :param Dict[ModelOutput] xval_output:
     :param str subject:
     :rtype: ClassifierContainer
 
@@ -140,7 +129,7 @@ def serialize_classifier(classifier, pairs, features, events, sample_weights,
         events=events,
         sample_weight=sample_weights,
         classifier_info={
-            'auc': xval_output[-1].auc,
+            'auc': xval_output['all'].auc,
             'subject': subject
         }
     )
