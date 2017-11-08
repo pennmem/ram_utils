@@ -38,12 +38,6 @@ def compute_z_scoring_vecs(pow_mat, events):
 
 
     return mean_dict, std_dict
-        # pow_mat[sess_event_mask] = zscore(pow_mat[sess_event_mask], axis=0, ddof=1)
-
-    # self.m = np.mean(mp_rs, axis=0)
-    # self.s = np.std(mp_rs, axis=0, ddof=1)
-
-
 
 class ModelOutput(object):
     def __init__(self, true_labels, probs):
@@ -65,9 +59,6 @@ class ModelOutput(object):
         except ValueError:
             return
         self.fpr, self.tpr, self.thresholds = roc_curve(self.true_labels, self.probs)
-        # idx = np.argmax(self.tpr-self.fpr)
-        # self.jstat_thresh = self.thresholds[idx]
-        # self.jstat_quantile = np.sum(self.probs <= self.jstat_thresh) / float(self.probs.size)
         self.jstat_quantile = 0.5
         self.jstat_thresh = np.median(self.probs)
 
@@ -117,22 +108,6 @@ class ComputeEncodingClassifier(RamTask):
         bp_paths = json_reader.aggregate_values('pairs', subject=subj_code, montage=montage)
         for fname in bp_paths:
             with open(fname, 'rb') as f: hash_md5.update(f.read())
-
-        # fr1_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR1')))
-        # for fname in fr1_event_files:
-        #     with open(fname,'rb') as f: hash_md5.update(f.read())
-        #
-        # catfr1_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='catFR1')))
-        # for fname in catfr1_event_files:
-        #     with open(fname,'rb') as f: hash_md5.update(f.read())
-        #
-        # fr3_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='FR3')))
-        # for fname in fr3_event_files:
-        #     with open(fname,'rb') as f: hash_md5.update(f.read())
-        #
-        # catfr3_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='catFR3')))
-        # for fname in catfr3_event_files:
-        #     with open(fname,'rb') as f: hash_md5.update(f.read())
 
         return hash_md5.digest()
 
@@ -195,9 +170,6 @@ class ComputeEncodingClassifier(RamTask):
 
 
             print 'ENCODING ONLY CLASSIFIER auc_encoding=', auc_encoding, np.mean(auc_encoding)
-            # print 'auc_retrieval=', auc_retrieval, np.mean(auc_retrieval)
-            # print 'auc_both=', auc_both, np.mean(auc_both)
-
         return probs
 
     def permuted_loso_AUCs(self, event_sessions, recalls, samples_weights=None, events=None):
@@ -290,7 +262,6 @@ class ComputeEncodingClassifier(RamTask):
         self.pass_object('encoding_xval_output', self.xval_output)
 
     def pass_objects(self):
-        pass
         subject = self.pipeline.subject
         classifier_path = self.get_path_to_resource_in_workspace(subject + 'lr_classifier_encoding.pkl')
         joblib.dump(self.lr_classifier, classifier_path)
@@ -299,28 +270,18 @@ class ComputeEncodingClassifier(RamTask):
         self.pass_object('encoding_classifier_path', classifier_path)
         self.pass_object('xval_encoding_output', self.xval_output)
 
-    # def compare_AUCs(self):
-    #     reduced_xval_output = self.get_passed_object('xval_output')
-    #     print '\n\n'
-    #     print 'AUC WITH ALL ELECTRODES: ', self.xval_output[-1].auc
-    #     print 'AUC EXCLUDING STIM-ADJACENT ELECTRODES: ', reduced_xval_output[-1].auc
 
     def run(self):
-
         events = self.get_passed_object('PAL1_events')
         # self.get_pow_mat() is essential - it does the filtering on the
 
         encoding_mask = (events.type == 'STUDY_PAIR') | (events.type == 'PRACTICE_PAIR')
-
-
 
         # pow_mat = self.filter_pow_mat()
         pow_mat_copy = np.copy(self.filter_pow_mat())
 
         self.pow_mat = self.filter_pow_mat()
         self.pow_mat[encoding_mask] = normalize_sessions(self.pow_mat[encoding_mask], events[encoding_mask])
-
-
 
         self.pow_mat = self.pow_mat[encoding_mask]
         encoding_events = events[encoding_mask]

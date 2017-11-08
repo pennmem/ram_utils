@@ -70,11 +70,6 @@ class ComputePowers(RamTask):
                 warnings.warn('Could not process %s. Please make sure that the event file exist' % fname,
                               RuntimeWarning)
 
-
-        # pal3_event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment='PAL3')))
-        # for fname in pal3_event_files:
-        #     with open(fname,'rb') as f: hash_md5.update(f.read())
-
         return hash_md5.digest()
 
     def restore(self):
@@ -95,8 +90,6 @@ class ComputePowers(RamTask):
         self.pipeline.subject = self.pipeline.subject.split('_')[0]
         subject = self.pipeline.subject
 
-        # events = self.get_passed_object('PAL1_events')
-
         evs = self.get_passed_object('combined_evs')
 
         fr1_encoding_mask = (evs.type == 'WORD') & (evs.exp_name == 'FR1')
@@ -108,8 +101,6 @@ class ComputePowers(RamTask):
         sessions = np.unique(evs.session)
         print 'sessions:', sessions
 
-        # channels = self.get_passed_object('channels')
-        # tal_info = self.get_passed_object('tal_info')
         monopolar_channels = self.get_passed_object('monopolar_channels')
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
         params = self.params
@@ -199,9 +190,6 @@ class ComputePowers(RamTask):
                                            encoding_fr1_pow_mat,
                                            retrieval_fr1_pow_mat)
                                           )
-
-            # self.pow_mat[fr1_encoding_mask, ...] = encoding_fr1_pow_mat
-            # self.pow_mat[fr1_retrieval_mask, ...] = retrieval_fr1_pow_mat
         else:
             self.pow_mat = np.concatenate((encoding_pal1_pow_mat,
                                            retrieval_pal1_pow_mat)

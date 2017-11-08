@@ -562,7 +562,6 @@ class ComputeClassifier(RamTask):
 
         classifier_path = self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl')
         self.lr_classifier = joblib.load(classifier_path)
-        # self.lr_classifier = joblib.load(self.get_path_to_resource_in_workspace(subject + '-lr_classifier.pkl'))
         self.xval_output = joblib.load(self.get_path_to_resource_in_workspace(subject + '-xval_output.pkl'))
         self.perm_AUCs = joblib.load(self.get_path_to_resource_in_workspace(subject + '-perm_AUCs.pkl'))
         self.pvalue = joblib.load(self.get_path_to_resource_in_workspace(subject + '-pvalue.pkl'))
@@ -623,15 +622,6 @@ class ComputePAL1Classifier(ComputeClassifier):
         self.pass_object('full_classifier_path', full_classifier_path)
         self.pass_object('xval_output_all_electrodes', self.xval_output)
 
-    # def pass_objects(self):
-    #     subject = self.pipeline.subject
-    #     classifier_path = self.get_path_to_resource_in_workspace(subject + 'lr_classifier_full.pkl')
-    #     joblib.dump(self.lr_classifier, classifier_path)
-    #     joblib.dump(self.xval_output,
-    #                 self.get_path_to_resource_in_workspace(subject + '-xval_output_all_electrodes.pkl'))
-    #     self.pass_object('classifier_path', classifier_path)
-    #     self.pass_object('xval_output_all_electrodes', self.xval_output)
-
     def compare_AUCs(self):
         reduced_xval_output = self.get_passed_object('xval_output')
         print '\n\n'
@@ -641,7 +631,6 @@ class ComputePAL1Classifier(ComputeClassifier):
     def filter_pow_mat(self):
         pow_mat = super(ComputePAL1Classifier, self).filter_pow_mat()
         evs = self.get_passed_object('combined_evs')
-
         pow_mat = pow_mat[evs.exp_name == 'PAL1']
 
         return pow_mat
@@ -650,9 +639,6 @@ class ComputePAL1Classifier(ComputeClassifier):
         self.suffix = '_pal'
         evs = self.get_passed_object('combined_evs')
         evs = evs[evs.exp_name == 'PAL1']
-
-        print '\n\n ---------------- PAL1 CLASSIFIER ONLY------------------\n\n'
-
         sessions_array = evs.session
 
         if len(np.unique(sessions_array)) < 2:

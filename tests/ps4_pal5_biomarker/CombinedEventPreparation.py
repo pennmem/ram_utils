@@ -31,39 +31,9 @@ class CombinedEventPreparation(RamTask):
         columns_to_keep_fr1 = ['session', 'type', 'recalled', 'eegoffset', 'msoffset', 'eegfile']
         columns_to_keep_pal1 = ['session', 'type', 'correct', 'eegoffset', 'msoffset', 'eegfile']
 
-        # if fr1_evs is not None:
-        #     # filtering fr1_evs
-        #
-        #     # fr1_evs = fr1_evs[colums_to_keep_fr1]
-        #     # fr1_evs = fr1_evs[(fr1_evs.type == 'WORD') | (fr1_evs.type == 'REC_WORD') | (fr1_evs.type == 'REC_BASE')]
-        #     #
-        #     # fr1_evs = append_fields(fr1_evs, 'correct', fr1_evs.recalled,
-        #     #                         dtypes=fr1_evs.recalled.dtype, usemask=False,
-        #     #                         asrecarray=True)
-        #     #
-        #     # # in case we forgot to do this in earlier tasks
-        #     # fr1_evs.recalled[(fr1_evs.type == 'REC_WORD')] = 1
-        #     # fr1_evs.recalled[(fr1_evs.type == 'REC_BASE')] = 0
-        #     #
-        #     # fr1_evs.correct = np.copy(fr1_evs.recalled)
-        #     #
-        #     # fr1_evs.type[(fr1_evs.type == 'REC_WORD') | (fr1_evs.type == 'REC_BASE')] = 'REC_EVENT'
-        #     #
-        #     # fr1_evs = append_fields(fr1_evs, 'exp_name', fr1_evs.type,
-        #     #                         dtypes=fr1_evs.type.dtype, usemask=False,
-        #     #                         asrecarray=True)
-        #     #
-        #     # fr1_evs.exp_name = 'FR1'
-        #     # fr1_evs.session += 100
-        #     #
-        #     # # finalizing list of columns
-        #     #
-        #     # fr1_evs = fr1_evs[colums_to_keep]
-
         # filtering fr1_evs
         fr1_evs = self.process_events(evs=fr1_evs, session_increment=100, columns_to_keep=columns_to_keep,
                                       columns_to_keep_fr=columns_to_keep_fr1, task_name='FR1')
-
 
         # filtering catfr1_evs
         # NOTICE: we will relabel catFR1 events as FR1 events, hence task_name='FR1' below.
@@ -96,13 +66,6 @@ class CombinedEventPreparation(RamTask):
         combined_evs = np.concatenate(recarrays_to_concatenate)
 
         combined_evs = combined_evs.view(np.recarray)
-
-        # if fr1_evs is not None:
-        #     combined_evs = np.concatenate((fr1_evs, pal1_evs))
-        # else:
-        #     combined_evs = pal1_evs
-        #
-        # combined_evs = combined_evs.view(np.recarray)
 
         self.pass_object('combined_evs', combined_evs)
 

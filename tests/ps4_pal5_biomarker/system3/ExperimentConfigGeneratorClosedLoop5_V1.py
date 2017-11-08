@@ -103,10 +103,6 @@ class ExperimentConfigGeneratorClosedLoop5_V1(RamTask):
 
         stim_chan_label = self.get_passed_object('stim_chan_label')
         excluded_pairs_path = self.get_passed_object('excluded_pairs_path')
-        # xval_full = self.get_passed_object('xval_output_all_electrodes')
-        # xval_output = self.get_passed_object('xval_output')
-
-        # retrieval_biomarker_threshold = self.get_passed_object('retrieval_biomarker_threshold')
 
         stim_params_dict = {}
         stim_params_list = zip(anodes, cathodes, cycle(self.pipeline.args.min_amplitudes),
@@ -142,17 +138,12 @@ class ExperimentConfigGeneratorClosedLoop5_V1(RamTask):
                 subject=subject,
                 experiment=experiment,
                 classifier_file='config_files/%s' % basename(classifier_path),
-
                 target_amplitude=self.pipeline.args.target_amplitude,
-
-                # electrode_config_file='config_files/{subject}_{config_name}.bin'.format(subject=subject,config_name=config_name),
                 electrode_config_file='config_files/{core_name_for_electrode_file}.bin'.format(
                     core_name_for_electrode_file=core_name_for_electrode_file),
-
                 montage_file='config_files/%s' % basename(bipolar_pairs_path),
                 excluded_montage_file='config_files/%s' % basename(excluded_pairs_path),
                 biomarker_threshold=0.5,
-                # retrieval_biomarker_threshold = retrieval_biomarker_threshold,
                 fr5_stim_channel=fr5_stim_channel
             )
 
