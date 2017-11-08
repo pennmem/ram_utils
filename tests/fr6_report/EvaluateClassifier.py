@@ -12,7 +12,7 @@ from ptsa.data.readers.IndexReader import JsonIndexReader
 from ptsa.data.readers import EEGReader
 from ReportTasks.RamTaskMethods import ModelOutput
 from ramutils.classifier.utils import reload_classifier, get_sample_weights
-from ramutils.classifier.cross_validation import permuted_lolo_AUCs, permuted_loso_AUCs
+from ramutils.classifier.cross_validation import permuted_lolo_AUCs
 
 
 class EvaluateClassifier(ReportRamTask):
@@ -166,7 +166,7 @@ class EvaluateClassifier(ReportRamTask):
 
             # Average over the individual sessions to get cross-session p-value and permutation AUC
             self.pvalue[-1] =  np.mean([self.pvalue[session] for session in sessions])
-            # TODO: To get the permutation AUCs, we need a new procedure to appropriate apply LOLO
+            # TODO: To get the permutation AUCs, we need a new procedure to appropriate apply LOSO
             # when the number of features can be different across sessions
 
         # Slight misnomer here; these are only pre-stim in *potential*,
@@ -197,9 +197,11 @@ class EvaluateClassifier(ReportRamTask):
         self.pvalue = joblib.load(self.get_path_to_resource_in_workspace('-'.join((subject, task, 'pvalue.pkl'))))
         pre_stim_probs = joblib.load(self.get_path_to_resource_in_workspace('-'.join((subject,task,'pre_stim_probs.pkl'))))
         post_stim_probs = joblib.load(self.get_path_to_resource_in_workspace('-'.join((subject,task,'post_stim_probs.pkl'))))
+        word_probs = joblib.load(self.get_path_to_resource_in_workspace('_'.join((subject,task,'word_probs.pkl'))))
 
         self.pass_object('pre_stim_probs',pre_stim_probs)
         self.pass_object('post_stim_probs',post_stim_probs)
+        self.pass_object('word_probs', word_probs)
         self.pass_object(task + '_xval_output', self.xval_output)
         self.pass_object(task + '_perm_AUCs', self.perm_AUCs)
         self.pass_object(task + '_pvalue', self.pvalue)
