@@ -1,6 +1,7 @@
 from collections import OrderedDict
 import json
 import os
+import h5py
 
 
 def reindent_json(json_file, indent=2):
@@ -60,3 +61,27 @@ def touch(path):
     """Mimics the unix ``touch`` command."""
     with open(path, 'a'):
         os.utime(path, None)
+
+
+def save_array_to_hdf5(output, data_name, data, overwrite=False):
+    """Save an array of data to hdf5
+
+    Parameters:
+    -----------
+    output: (str) Path to hdf5 output file
+    data_name: (str) Name of the dataset
+    data: (np.ndarray) Data array
+
+    Notes:
+    ------
+    Primarily useful for debugging purposes. Could be used to save underlying
+    data for report plots.
+
+    """
+    mode = 'a'
+    if overwrite:
+        mode = 'w'
+    hdf = h5py.File(output, mode)
+    hdf.create_dataset(data_name, data=data)
+    hdf.close()
+    return

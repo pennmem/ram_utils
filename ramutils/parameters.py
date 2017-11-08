@@ -64,6 +64,7 @@ class ExperimentParameters(Schema):
 
     penalty_type = String('l2', desc='logistic regression penalty type')
     C = Float('7.2e-4', desc='inverse of regularization strength')
+    n_permutations = Int(200, desc='number of permutations to use for cross-validation')
 
 
 class FRParameters(ExperimentParameters):

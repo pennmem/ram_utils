@@ -4,6 +4,8 @@ import numpy as np
 from random import shuffle
 from sklearn.metrics import roc_auc_score
 
+__all__ = ['permuted_lolo_AUCs', 'run_lolo_xval']
+
 
 def permuted_lolo_AUCs(classifier, powers, events, n_permutations):
     """ Permuted leave one list out cross validation
