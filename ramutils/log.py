@@ -1,6 +1,6 @@
 import logging
 
-_logger = None
+_loggers = {}
 
 
 def get_logger(name='ramutils'):
@@ -9,15 +9,13 @@ def get_logger(name='ramutils'):
     :param str name: Name for the logger (default: ``'ramutils'``)
 
     """
-    global _logger
-
-    if _logger is None:
+    if name not in _loggers:
         handler = logging.StreamHandler()
         formatter = logging.Formatter(fmt='[%(levelname)1.1s %(asctime)s %(module)s:%(lineno)d] %(message)s')
         handler.setFormatter(formatter)
 
-        _logger = logging.getLogger(name)
-        _logger.addHandler(handler)
-        _logger.setLevel(logging.INFO)
+        _loggers[name] = logging.getLogger(name)
+        _loggers[name].addHandler(handler)
+        _loggers[name].setLevel(logging.INFO)
 
-    return _logger
+    return _loggers[name]
