@@ -21,7 +21,7 @@ except ImportError:
 logger = get_logger()
 
 
-@task(nout=2)
+@task(nout=3)
 def compute_classifier(events, pow_mat, params, paths=None):
     """Compute the classifier.
 
@@ -33,7 +33,7 @@ def compute_classifier(events, pow_mat, params, paths=None):
         used for accessing the ``dest`` parameter for storing storing debug
         data to (if not given, no debug data will be written)
     :returns: trained classifier and cross-validation output
-    :rtype: Tuple[LogisticRegression, Dict[Union[str, int], ModelOutput]]
+    :rtype: Tuple[LogisticRegression, Dict[Union[str, int], ModelOutput], np.ndarray]
 
     """
     encoding_mask = events.type == 'WORD'
@@ -56,6 +56,7 @@ def compute_classifier(events, pow_mat, params, paths=None):
     recalls[events.type == 'REC_WORD'] = 1
     recalls[events.type == 'REC_BASE'] = 0
 
+    # FIXME: make sample_weights an input
     sample_weights = get_sample_weights(events, params.encoding_samples_weight)
     sessions = np.unique(event_sessions)
 
@@ -101,7 +102,7 @@ def compute_classifier(events, pow_mat, params, paths=None):
     else:
         logger.warning("No debug data written since paths not given")
 
-    return classifier, xval
+    return classifier, xval, sample_weights
 
 
 # FIXME: update signature to be more in line with other tasks

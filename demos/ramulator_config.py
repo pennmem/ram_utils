@@ -11,6 +11,7 @@ from ramutils.tasks.events import *
 from ramutils.tasks.montage import *
 from ramutils.tasks.classifier import *
 from ramutils.tasks.odin import *
+from ramutils.tasks.powers import *
 
 getpath = functools.partial(resource_filename, 'ramutils.test.test_data')
 
@@ -43,13 +44,10 @@ stim_params = [
     )
 ]
 
+params = FRParameters()
+
 
 ### Pipeline
-
-# FIXME
-powers = None
-features = None
-sample_weights = None
 
 fr_events = read_fr_events(jr, subject, cat=False)
 catfr_events = read_fr_events(jr, subject, cat=True)
@@ -61,11 +59,12 @@ excluded_pairs = reduce_pairs(pairs, stim_params, True)
 
 ec_pairs = generate_pairs_from_electrode_config(subject, paths)
 
-classifier, xval = compute_classifier(events, powers, FRParameters(), paths)
-container = serialize_classifier(classifier, pairs, features, events, sample_weights, xval, subject)
+powers = compute_powers(events, params)
+classifier, xval, sample_weights = compute_classifier(events, powers, params, paths)
+container = serialize_classifier(classifier, pairs, powers, events, sample_weights, xval, subject)
 
 config_path = generate_ramulator_config(subject, 'FR6', container, stim_params,
                                         paths, ec_pairs, excluded_pairs)
 
 config_path.visualize()
-# config_path.compute()
+config_path.compute()
