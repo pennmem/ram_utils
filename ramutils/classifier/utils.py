@@ -1,7 +1,6 @@
 """ Utility functions used during classifier training """
 
 import os
-import h5py
 import numpy as np
 from glob import glob
 from scipy.stats.mstats import zscore
@@ -9,7 +8,7 @@ from classiflib.container import ClassifierContainer
 
 
 def reload_classifier(subject, task, session, mount_point='/'):
-    """ Loads the actual classifier used by RAMULATOR for a particular session
+    """Loads the actual classifier used by Ramulator for a particular session
 
     Parameters:
     -----------
@@ -21,7 +20,7 @@ def reload_classifier(subject, task, session, mount_point='/'):
         Session number
     mount_point: str, default '/'
         Mount point for RHINO
-    
+
     Returns:
     --------
     classifier_container: classiflib.container.ClassifierContainer
@@ -44,6 +43,7 @@ def reload_classifier(subject, task, session, mount_point='/'):
     classifier_container = ClassifierContainer.load(classifier_path)
 
     return classifier_container
+
 
 def normalize_sessions(pow_mat, events):
     """ z-score powers within session
@@ -97,7 +97,7 @@ def get_sample_weights(events, encoding_multiplier):
 
     n_vec /= np.mean(n_vec)
 
-    # Initialize observatoins weights to 1
+    # Initialize observation weights to 1
     weights = np.ones(events.shape[0], dtype=np.float)
 
     weights[enc_mask & (events.recalled == 0)] = n_vec[0]

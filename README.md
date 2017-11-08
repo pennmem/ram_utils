@@ -1,4 +1,4 @@
-# A Brief Guide to RAM Report Pipelines
+# RAM reporting and other utilities
 
 **Note**: This repo is undergoing a massive cleanup. Things will be gradually
 either moved into separate repositories (where common code can be shared in with

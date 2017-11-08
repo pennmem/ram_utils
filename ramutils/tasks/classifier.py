@@ -1,7 +1,5 @@
 from __future__ import division
 
-from random import shuffle
-
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
@@ -51,17 +49,20 @@ def compute_classifier(events, pow_mat, params, paths=None):
     :param ExperimentParameters params:
     :param FilePaths paths:
         used for accessing the ``dest`` parameter for storing storing debug
-        data to
+        data to (if not given, no debug data will be written)
     :returns: trained classifier and cross-validation output
     :rtype: Tuple[LogisticRegression, Dict[Union[str, int], ModelOutput]]
 
     """
     encoding_mask = events.type == 'WORD'
+
+    # z-score powers within sessions
     pow_mat[encoding_mask] = normalize_sessions(pow_mat[encoding_mask], events[encoding_mask])
     pow_mat[~encoding_mask] = normalize_sessions(pow_mat[~encoding_mask], events[~encoding_mask])
+
     classifier = LogisticRegression(C=params.C,
                                     penalty=params.penalty_type,
-                                    solver='liblinear')
+                                    solver=params.solver)
 
     # Stores cross validation output. Keys are sessions or 'all' for all session
     # cross validation.
@@ -97,13 +98,16 @@ def compute_classifier(events, pow_mat, params, paths=None):
     insample_auc = roc_auc_score(recalls, recall_prob)
     logger.info("in-sample AUC = %f", insample_auc)
 
-    try:
-        save_array_to_hdf5(paths.dest + "-debug_data.h5", "model_output",
-                           recall_prob, overwrite=True)
-        save_array_to_hdf5(paths.dest + "-debug_data.h5", "model_weights",
-                           classifier.coef_, overwrite=True)
-    except Exception:
-        logger.error('could not save debug data', exc_info=True)
+    if paths is not None:
+        try:
+            save_array_to_hdf5(paths.dest + "-debug_data.h5", "model_output",
+                               recall_prob, overwrite=True)
+            save_array_to_hdf5(paths.dest + "-debug_data.h5", "model_weights",
+                               classifier.coef_, overwrite=True)
+        except Exception:
+            logger.error('could not save debug data', exc_info=True)
+    else:
+        logger.warning("No debug data written since paths not given")
 
     return classifier, xval
 
