@@ -44,7 +44,7 @@ def permuted_lolo_AUCs(classifier, powers, events, n_permutations):
 
 
 def run_lolo_xval(classifier, powers, events, recalls):
-    """ Perform single iteration of leave-one-list-out cross validation
+    """Perform a single iteration of leave-one-list-out cross validation
 
     Parameters
     ----------
