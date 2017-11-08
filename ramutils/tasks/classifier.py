@@ -21,25 +21,7 @@ except ImportError:
 logger = get_logger()
 
 
-@task()
-def compute_auc(classifier, features, recalls, mask):
-    """Compute the AUC score.
-
-    :param classifier:
-    :param np.ndarray features:
-    :param np.recarray recalls:
-    :param mask:
-    :returns: computed AUC value
-    :rtype: float
-
-    """
-    masked_recalls = recalls[mask]
-    probs = classifier.predict_proba(features[mask])[:, 1]
-    auc = roc_auc_score(masked_recalls, probs)
-    return auc
-
-
-@task()
+@task(nout=2)
 def compute_classifier(events, pow_mat, params, paths=None):
     """Compute the classifier.
 
@@ -77,13 +59,23 @@ def compute_classifier(events, pow_mat, params, paths=None):
     sample_weights = get_sample_weights(events, params.encoding_samples_weight)
     sessions = np.unique(event_sessions)
 
+    # Run leave-one-session-out cross validation when we have > 1 session
     if len(sessions > 1):
-        raise RuntimeError("LOSO x-val not yet implemented")
+        logger.info("Performing LOSO cross validation")
+        perm_AUCs = permuted_loso_AUCs(classifier, pow_mat, events, params.n_perm)
+        probs = run_loso_xval(classifier, pow_mat, events, recalls, params.encoding_samples_weight)
+
+        # Store model output statistics
+        output = ModelOutput(true_labels=recalls, probs=probs)
+        output.compute_metrics()
+        xval['all'] = output
+
+    # ... otherwise run leave-one-list-out cross validation
     else:
+        logger.info("Performing LOLO cross validation")
         session = sessions[0]
-        event_lists = events.list
-        perm_AUCs = permuted_lolo_AUCs(session, event_lists, recalls, params.n_perm)
-        probs = run_lolo_xval(classifier, pow_mat, event_lists, recalls)
+        perm_AUCs = permuted_lolo_AUCs(session, pow_mat, events, params.n_perm)
+        probs = run_lolo_xval(classifier, pow_mat, events, recalls)
 
         # Store model output statistics
         output = ModelOutput(true_labels=recalls, probs=probs)
@@ -112,6 +104,7 @@ def compute_classifier(events, pow_mat, params, paths=None):
     return classifier, xval
 
 
+# FIXME: update signature to be more in line with other tasks
 @task(cache=False)
 def serialize_classifier(classifier, pairs, features, events, sample_weights,
                          xval_output, subject):

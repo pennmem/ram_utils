@@ -3,6 +3,13 @@ from ptsa.data.readers import BaseEventReader
 
 from . import task
 
+__all__ = [
+    'read_fr_events',
+    'concatenate_events',
+    'create_baseline_events',
+    'select_word_events',
+]
+
 
 def _filter_session(sess_events):
     try:
@@ -53,7 +60,9 @@ def read_fr_events(index, subject, sessions=None, cat=False):
 
 @task()
 def concatenate_events(fr_events, catfr_events):
-    """Concatenate FR and CatFR events.
+    """Concatenate FR and CatFR events. To make session numbers unique, 100 is
+    added to all CatFR sessions, otherwise this function could be made much
+    simpler.
 
     :param list fr_events:
     :param list catfr_events:

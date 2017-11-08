@@ -31,7 +31,7 @@ def _log_call(func, with_args=True):
     return wrapper
 
 
-def task(cache=True, log_args=False):
+def task(cache=True, log_args=False, nout=None):
     """Decorator to define a task.
 
     Keyword arguments
@@ -40,6 +40,9 @@ def task(cache=True, log_args=False):
         Cache the task result (default: True)
     log_args : bool
         Log arguments the task is called with (default: False)
+    nout : int
+        Number of return values of the wrapped function. Must be specified if
+        more than 1.
 
     """
     def decorator(func):
@@ -47,9 +50,9 @@ def task(cache=True, log_args=False):
         def wrapper(*args, **kwargs):
             wrapped = _log_call(func, log_args)
             if cache:
-                wrapped = delayed(memory.cache(wrapped))(*args, **kwargs)
+                wrapped = delayed(memory.cache(wrapped), nout=nout)(*args, **kwargs)
             else:
-                wrapped = delayed(wrapped)(*args, **kwargs)
+                wrapped = delayed(wrapped, nout=nout)(*args, **kwargs)
             return wrapped
         return wrapper
     return decorator
@@ -65,8 +68,8 @@ def make_task(func, *args, **kwargs):
     args
         Arguments for the function
     kwargs
-        Keyword arugments for the function plus ``cache`` and ``log_args`` for
-        use by the :func:`task` decorator.
+        Keyword arugments for the function plus keyword arguments accepted by
+        the :func:`task` decorator.
 
     """
     try:

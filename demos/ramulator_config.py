@@ -4,17 +4,19 @@ import functools
 import os.path
 from pkg_resources import resource_filename
 
-from dask import delayed
+from ptsa.data.readers import JsonIndexReader
 
-from ramutils.parameters import FilePaths, StimParameters
+from ramutils.parameters import FilePaths, StimParameters, FRParameters
+from ramutils.tasks.events import *
 from ramutils.tasks.montage import *
+from ramutils.tasks.classifier import *
 from ramutils.tasks.odin import *
-from ramutils.test import Mock
 
 getpath = functools.partial(resource_filename, 'ramutils.test.test_data')
 
 subject = 'R1354E'
 rhino = os.path.expanduser('~/mnt/rhino')
+jr = JsonIndexReader(os.path.join(rhino, "protocols", "r1.json"))
 pairs_path = os.path.join(
     rhino, 'protocols', 'r1', 'subjects', subject,
     'localizations', str(0),
@@ -44,14 +46,26 @@ stim_params = [
 
 ### Pipeline
 
+# FIXME
+powers = None
+features = None
+sample_weights = None
+
+fr_events = read_fr_events(jr, subject, cat=False)
+catfr_events = read_fr_events(jr, subject, cat=True)
+events = concatenate_events(fr_events, catfr_events)
+
 pairs = load_pairs(pairs_path)
 # reduced_pairs = reduce_pairs(pairs, stim_params, False)
 excluded_pairs = reduce_pairs(pairs, stim_params, True)
 
-ec_pairs = generate_pairs_from_electrode_config('R1354E', paths)
-# FIXME: needs classifier container
-config_path = generate_ramulator_config(subject, 'FR6', Mock(), stim_params,
+ec_pairs = generate_pairs_from_electrode_config(subject, paths)
+
+classifier, xval = compute_classifier(events, powers, FRParameters(), paths)
+container = serialize_classifier(classifier, pairs, features, events, sample_weights, xval, subject)
+
+config_path = generate_ramulator_config(subject, 'FR6', container, stim_params,
                                         paths, ec_pairs, excluded_pairs)
 
 config_path.visualize()
-config_path.compute()
+# config_path.compute()

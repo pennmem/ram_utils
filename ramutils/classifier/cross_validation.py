@@ -6,7 +6,12 @@ from sklearn.metrics import roc_auc_score
 
 from ramutils.classifier.utils import get_sample_weights
 
-__all__ = ['permuted_lolo_AUCs', 'run_lolo_xval']
+__all__ = [
+    'permuted_lolo_AUCs',
+    'run_lolo_xval',
+    'permuted_loso_AUCs',
+    'run_loso_xval'
+]
 
 
 def permuted_lolo_AUCs(classifier, powers, events, n_permutations):
