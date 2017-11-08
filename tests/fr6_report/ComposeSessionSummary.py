@@ -5,7 +5,7 @@ import pandas as pd
 from scipy import stats
 from statsmodels.stats.proportion import proportions_chisquare
 
-from ramutils.utils import safe_divide
+from ramutils.utils import safe_divide, join_tag_tuple
 from ReportUtils import ReportRamTask
 from TexUtils.matrix2latex import matrix2latex
 from SessionSummary import FR6SessionSummary, PS4SessionSummary
@@ -357,7 +357,7 @@ class ComposeSessionSummary(ReportRamTask):
             session_date = time.strftime('%d-%b-%Y', time.localtime(last_time_stamp/1000))
             n_lists = len(fr_stim_session_table.list.unique())
             pc_correct_words = 100.0 * fr_stim_session_table.recalled.mean()
-            amplitude = ",".join([str(x) for x in fr_stim_session_table['amplitude'].unique()])
+            amplitude = ",".join([str(x) if x > 0 else "" for x in fr_stim_session_table['amplitude'].unique()]) # exclude nans from list of amplitudes
 
             session_data.append([session, session_date, session_length, n_lists, '$%.2f$\\%%' % pc_correct_words, amplitude])
 
@@ -437,7 +437,7 @@ class ComposeSessionSummary(ReportRamTask):
             # List-type level information, i.e. target A, target B, target A+B, nostim
             fr_stim_target_group = fr_stim_session_table.groupby(by=['stimAnodeTag', 'stimCathodeTag'])
             for target, fr_stim_target_table in fr_stim_target_group:
-                target = "-".join(target)
+                target = join_tag_tuple(target)
 
                 # Target summary info
                 session_summary.stimtag[target] = target

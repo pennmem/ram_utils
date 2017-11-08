@@ -6,6 +6,7 @@ import pandas as pd
 from sklearn.externals import joblib
 
 from ReportUtils import ReportRamTask
+from ramutils.utils import combine_tag_names
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
 
@@ -48,7 +49,10 @@ class ComputeFRStimTable(ReportRamTask):
     def restore(self):
         subject = self.pipeline.subject
         self.fr_stim_table = pd.read_pickle(self.get_path_to_resource_in_workspace(subject+'-fr_stim_table.pkl'))
+        targets = joblib.load(self.get_path_to_resource_in_workspace('targets.pkl'))
         self.pass_object('fr_stim_table', self.fr_stim_table)
+        self.pass_object('targets', targets)
+        return
 
     def run(self):
         task = self.pipeline.task
@@ -177,8 +181,9 @@ class ComputeFRStimTable(ReportRamTask):
         # Create the list of stim targets
         grouped = stim_df.groupby(by=['stimAnodeTag', 'stimCathodeTag'])
         targets = grouped.groups.keys()
-        targets = ['-'.join(target) for target in targets] # this results in a really heinous multi-site target
+        targets = combine_tag_names(targets)
         self.pass_object('targets', targets)
+        joblib.dump(targets, self.get_path_to_resource_in_workspace('targets.pkl'))
         
         self.pass_object('fr_stim_table', self.fr_stim_table)
         self.fr_stim_table.to_pickle(self.get_path_to_resource_in_workspace(self.pipeline.subject+'-fr_stim_table.pkl'))

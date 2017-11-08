@@ -235,8 +235,6 @@ class GenerateTex(ReportRamTask):
         subject = self.pipeline.subject
         experiment = self.pipeline.task
         date = datetime.date.today()
-        targets = self.get_passed_object('targets')
-
         latex = self.generate_latex()
         report_tex_file_name = '%s-%s_report.tex'%(subject,experiment)
 
@@ -258,9 +256,24 @@ class GenerateTex(ReportRamTask):
         fr1_auc = fr1_xval_output[-1].auc
         fr1_pvalue = self.get_passed_object('pvalue_full')
         session_data =self.get_passed_object('session_table')
-        targets = self.get_passed_object('targets')
         p_values = self.get_passed_object(task+"_pvalue")
 
+        orig_targets = self.get_passed_object('targets')
+        if len(orig_targets) != 3:
+            raise RuntimeError("FR6 experiment should have 2 targets and 1 multi-site combined target")
+
+        # Find the multi-site target 
+        targets = []
+        for i, target in enumerate(orig_targets):
+            if target.find(":") != -1:
+                target_ab = target
+            else:
+                targets.append(target)
+
+        # Assign targets A and B
+        target_a = targets[0]
+        target_b = targets[1]
+        
         if xval_output:
             auc = '%2.2f'%xval_output[-1].auc
             perm_pvalue = p_values[-1]
@@ -285,23 +298,23 @@ class GenerateTex(ReportRamTask):
                 sessions = str(sessions)
 
                 biomarker_tex = replace_template_to_string('biomarker_plots.tex.tpl',
-                                                           {'<STIM_VS_NON_STIM_HALVES_PLOT_FILE_A>':session_summary.STIM_VS_NON_STIM_HALVES_PLOT_FILE[targets[0]],
-                                                            '<STIM_VS_NON_STIM_HALVES_PLOT_FILE_B>':session_summary.STIM_VS_NON_STIM_HALVES_PLOT_FILE[targets[1]],
-                                                            '<STIM_VS_NON_STIM_HALVES_PLOT_FILE_AB>':session_summary.STIM_VS_NON_STIM_HALVES_PLOT_FILE[targets[2]],
+                                                           {'<STIM_VS_NON_STIM_HALVES_PLOT_FILE_A>':session_summary.STIM_VS_NON_STIM_HALVES_PLOT_FILE[target_a],
+                                                            '<STIM_VS_NON_STIM_HALVES_PLOT_FILE_B>':session_summary.STIM_VS_NON_STIM_HALVES_PLOT_FILE[target_b],
+                                                            '<STIM_VS_NON_STIM_HALVES_PLOT_FILE_AB>':session_summary.STIM_VS_NON_STIM_HALVES_PLOT_FILE[target_ab],
                                                             ' <COMPARISON_LIST_TYPE>': 'non-stim' if ((events[np.in1d(events.session,session_summary.session)].phase=='NON-STIM')).any() else 'FR1'
                                                            })
                 item_level_comparison = '' 
                 session_tex = replace_template_to_string('fr6_session.tex.tpl',
                              {
                                  '<SESSIONS>': sessions,
-                                 '<STIMTAG_A>': session_summary.stimtag[targets[0]],
-                                 '<REGION_A>': session_summary.region_of_interest[targets[0]],
-                                 '<STIMTAG_B>': session_summary.stimtag[targets[1]],
-                                 '<REGION_B>': session_summary.region_of_interest[targets[1]],
-                                 '<PULSE_FREQ_A>': session_summary.frequency[targets[0]],
-                                 '<PULSE_FREQ_B>': session_summary.frequency[targets[1]],
-                                 '<AMPLITUDE_A>': session_summary.amplitude[targets[0]],
-                                 '<AMPLITUDE_B>': session_summary.amplitude[targets[1]],
+                                 '<STIMTAG_A>': session_summary.stimtag[target_a],
+                                 '<REGION_A>': session_summary.region_of_interest[target_a],
+                                 '<STIMTAG_B>': session_summary.stimtag[target_b],
+                                 '<REGION_B>': session_summary.region_of_interest[target_b],
+                                 '<PULSE_FREQ_A>': session_summary.frequency[target_a],
+                                 '<PULSE_FREQ_B>': session_summary.frequency[target_b],
+                                 '<AMPLITUDE_A>': session_summary.amplitude[target_a],
+                                 '<AMPLITUDE_B>': session_summary.amplitude[target_b],
                                  '<ROC_TITLE>': roc_title,
                                  '<ROC_AND_TERC_PLOT_FILE>': session_summary.ROC_AND_TERC_PLOT_FILE,
                                  '<AUC>':'%2.2f' % xval_output[session_summary.session].auc,
@@ -318,9 +331,9 @@ class GenerateTex(ReportRamTask):
                                  '<N_CORRECT_MATH>':session_summary.n_correct_math,
                                  '<PC_CORRECT_MATH>':'%2.2f'%session_summary.pc_correct_math,
                                  '<MATH_PER_LIST>':'%2.2f'%session_summary.math_per_list,
-                                 '<PROB_RECALL_PLOT_FILE_A>':session_summary.PROB_RECALL_PLOT_FILE[targets[0]],
-                                 '<PROB_RECALL_PLOT_FILE_B>':session_summary.PROB_RECALL_PLOT_FILE[targets[1]],
-                                 '<PROB_RECALL_PLOT_FILE_AB>':session_summary.PROB_RECALL_PLOT_FILE[targets[2]],
+                                 '<PROB_RECALL_PLOT_FILE_A>':session_summary.PROB_RECALL_PLOT_FILE[target_a],
+                                 '<PROB_RECALL_PLOT_FILE_B>':session_summary.PROB_RECALL_PLOT_FILE[target_b],
+                                 '<PROB_RECALL_PLOT_FILE_AB>':session_summary.PROB_RECALL_PLOT_FILE[target_ab],
                                  '<COMPARISON_LIST_TYPE>': 'non-stim' if ((events[np.in1d(events.session,session_summary.session)].phase=='NON-STIM')).any() else 'FR1',
                                  '<ITEMLEVEL_COMPARISON>': item_level_comparison,
                                  '<N_CORRECT_NONSTIM>':session_summary.n_correct_nonstim,
@@ -328,34 +341,34 @@ class GenerateTex(ReportRamTask):
                                  '<PC_FROM_NONSTIM>':'%2.2f'%session_summary.pc_from_nonstim,
                                  '<N_NONSTIM_INTR>':session_summary.n_nonstim_intr,
                                  '<PC_FROM_NONSTIM_INTR>':'%2.2f'%session_summary.pc_from_nonstim_intr,
-                                 '<N_CORRECT_STIM_A>':session_summary.n_correct_stim[targets[0]],
-                                 '<N_TOTAL_STIM_A>':session_summary.n_total_stim[targets[0]],
-                                 '<PC_FROM_STIM_A>':'%2.2f'%session_summary.pc_from_stim[targets[0]],
-                                 '<CHISQR_A>':'%.4f'%session_summary.chisqr[targets[0]],
-                                 '<PVALUE_A>':'%.4f'%session_summary.pvalue[targets[0]],
-                                 '<N_STIM_INTR_A>': session_summary.n_stim_intr[targets[0]],
-                                 '<PC_FROM_STIM_INTR_A>':'%2.2f'%session_summary.pc_from_stim_intr[targets[0]],
-                                 '<N_CORRECT_STIM_B>':session_summary.n_correct_stim[targets[1]],
-                                 '<N_TOTAL_STIM_B>':session_summary.n_total_stim[targets[1]],
-                                 '<PC_FROM_STIM_B>':'%2.2f'%session_summary.pc_from_stim[targets[1]],
-                                 '<CHISQR_B>':'%.4f'%session_summary.chisqr[targets[1]],
-                                 '<PVALUE_B>':'%.4f'%session_summary.pvalue[targets[1]],
-                                 '<N_STIM_INTR_B>': session_summary.n_stim_intr[targets[1]],
-                                 '<PC_FROM_STIM_INTR_B>':'%2.2f'%session_summary.pc_from_stim_intr[targets[1]],
-                                 '<N_CORRECT_STIM_AB>':session_summary.n_correct_stim[targets[2]],
-                                 '<N_TOTAL_STIM_AB>':session_summary.n_total_stim[targets[2]],
-                                 '<PC_FROM_STIM_AB>':'%2.2f'%session_summary.pc_from_stim[targets[2]],
-                                 '<CHISQR_AB>':'%.4f'%session_summary.chisqr[targets[2]],
-                                 '<PVALUE_AB>':'%.4f'%session_summary.pvalue[targets[2]],
-                                 '<N_STIM_INTR_AB>': session_summary.n_stim_intr[targets[2]],
-                                 '<PC_FROM_STIM_INTR_AB>':'%2.2f'%session_summary.pc_from_stim_intr[targets[2]],
-                                 '<STIM_AND_RECALL_PLOT_FILE_A>':session_summary.STIM_AND_RECALL_PLOT_FILE[targets[0]],
-                                 '<STIM_AND_RECALL_PLOT_FILE_B>':session_summary.STIM_AND_RECALL_PLOT_FILE[targets[1]],
-                                 '<STIM_AND_RECALL_PLOT_FILE_AB>':session_summary.STIM_AND_RECALL_PLOT_FILE[targets[2]],
-                                 '<STIM_AND_RECALL_PLOT_FILE_NOSTIM>':session_summary.STIM_AND_RECALL_PLOT_FILE[targets[2]], #FIXME: Actually build this one
-                                 '<PROB_STIM_PLOT_FILE_A>':session_summary.PROB_STIM_PLOT_FILE[targets[0]],
-                                 '<PROB_STIM_PLOT_FILE_B>':session_summary.PROB_STIM_PLOT_FILE[targets[1]],
-                                 '<PROB_STIM_PLOT_FILE_AB>':session_summary.PROB_STIM_PLOT_FILE[targets[2]],
+                                 '<N_CORRECT_STIM_A>':session_summary.n_correct_stim[target_a],
+                                 '<N_TOTAL_STIM_A>':session_summary.n_total_stim[target_a],
+                                 '<PC_FROM_STIM_A>':'%2.2f'%session_summary.pc_from_stim[target_a],
+                                 '<CHISQR_A>':'%.4f'%session_summary.chisqr[target_a],
+                                 '<PVALUE_A>':'%.4f'%session_summary.pvalue[target_a],
+                                 '<N_STIM_INTR_A>': session_summary.n_stim_intr[target_a],
+                                 '<PC_FROM_STIM_INTR_A>':'%2.2f'%session_summary.pc_from_stim_intr[target_a],
+                                 '<N_CORRECT_STIM_B>':session_summary.n_correct_stim[target_b],
+                                 '<N_TOTAL_STIM_B>':session_summary.n_total_stim[target_b],
+                                 '<PC_FROM_STIM_B>':'%2.2f'%session_summary.pc_from_stim[target_b],
+                                 '<CHISQR_B>':'%.4f'%session_summary.chisqr[target_b],
+                                 '<PVALUE_B>':'%.4f'%session_summary.pvalue[target_b],
+                                 '<N_STIM_INTR_B>': session_summary.n_stim_intr[target_b],
+                                 '<PC_FROM_STIM_INTR_B>':'%2.2f'%session_summary.pc_from_stim_intr[target_b],
+                                 '<N_CORRECT_STIM_AB>':session_summary.n_correct_stim[target_ab],
+                                 '<N_TOTAL_STIM_AB>':session_summary.n_total_stim[target_ab],
+                                 '<PC_FROM_STIM_AB>':'%2.2f'%session_summary.pc_from_stim[target_ab],
+                                 '<CHISQR_AB>':'%.4f'%session_summary.chisqr[target_ab],
+                                 '<PVALUE_AB>':'%.4f'%session_summary.pvalue[target_ab],
+                                 '<N_STIM_INTR_AB>': session_summary.n_stim_intr[target_ab],
+                                 '<PC_FROM_STIM_INTR_AB>':'%2.2f'%session_summary.pc_from_stim_intr[target_ab],
+                                 '<STIM_AND_RECALL_PLOT_FILE_A>':session_summary.STIM_AND_RECALL_PLOT_FILE[target_a],
+                                 '<STIM_AND_RECALL_PLOT_FILE_B>':session_summary.STIM_AND_RECALL_PLOT_FILE[target_b],
+                                 '<STIM_AND_RECALL_PLOT_FILE_AB>':session_summary.STIM_AND_RECALL_PLOT_FILE[target_ab],
+                                 '<STIM_AND_RECALL_PLOT_FILE_NOSTIM>':session_summary.STIM_AND_RECALL_PLOT_FILE[target_ab],
+                                 '<PROB_STIM_PLOT_FILE_A>':session_summary.PROB_STIM_PLOT_FILE[target_a],
+                                 '<PROB_STIM_PLOT_FILE_B>':session_summary.PROB_STIM_PLOT_FILE[target_b],
+                                 '<PROB_STIM_PLOT_FILE_AB>':session_summary.PROB_STIM_PLOT_FILE[target_ab],
                                  '<BIOMARKER_PLOTS>':biomarker_tex,
                                  '<BIOMARKER_HISTOGRAM>': session_summary.BIOMARKER_HISTOGRAM_PLOT_FILE,
                                  '<POST_STIM_EEG>': session_summary.POST_STIM_EEG_PLOT_FILE
