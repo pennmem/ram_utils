@@ -6,7 +6,7 @@ import pandas as pd
 from sklearn.externals import joblib
 
 from ReportUtils import ReportRamTask
-from ramutils.utils import combine_tag_names
+from ramutils.utils import combine_tag_names, sanitize_comma_sep_list
 from ptsa.data.readers.IndexReader import JsonIndexReader
 
 
@@ -168,7 +168,7 @@ class ComputeFRStimTable(ReportRamTask):
             stim_param_data['stim_duration'].append(",".join([str(stim_params[k].stim_duration) for k in range(len(stim_params))]))
             stim_param_data['stimAnodeTag'].append(",".join([str(stim_params[k].anode_label) for k in range(len(stim_params))]))
             stim_param_data['stimCathodeTag'].append(",".join([str(stim_params[k].cathode_label) for k in range(len(stim_params))]))
-        
+
         # Convert to dataframe for easier last-minute munging
         stim_df = pd.DataFrame.from_dict(stim_param_data)
         stim_df = stim_df.drop_duplicates()
@@ -176,6 +176,12 @@ class ComputeFRStimTable(ReportRamTask):
         stim_df = stim_df.dropna(how='any')
         stim_df['stimAnodeTag'] = stim_df['stimAnodeTag'].str.rstrip(',')
         stim_df['stimCathodeTag'] = stim_df['stimCathodeTag'].str.rstrip(',') 
+        stim_df['pair'] = stim_df['stimAnodeTag'] + '-' + stim_df['stimCathodeTag']
+
+        # Remove zeros from these values since the event files store nulls this way
+        for col in ['amplitude', 'pulse_freq', 'stim_duration']:
+            stim_df[col] = stim_df[col].apply(sanitize_comma_sep_list)
+
         self.fr_stim_table = self.fr_stim_table.merge(stim_df, on=['session', 'list'], how='left')
 
         # Create the list of stim targets
@@ -184,6 +190,15 @@ class ComputeFRStimTable(ReportRamTask):
         targets = combine_tag_names(targets)
         self.pass_object('targets', targets)
         joblib.dump(targets, self.get_path_to_resource_in_workspace('targets.pkl'))
+
+        # Add region to the stim table
+        target_location_map = {}
+        for target in targets:
+            if target.find(":") != -1:
+                continue
+            location = bp_tal_structs.loc[target].bp_atlas_loc
+            target_location_map[target] = location
         
+        self.fr_stim_table['region'] = self.fr_stim_table['pair'].map(target_location_map)
         self.pass_object('fr_stim_table', self.fr_stim_table)
         self.fr_stim_table.to_pickle(self.get_path_to_resource_in_workspace(self.pipeline.subject+'-fr_stim_table.pkl'))

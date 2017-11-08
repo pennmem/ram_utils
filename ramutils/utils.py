@@ -42,3 +42,10 @@ def join_tag_tuple(tag_tuple):
     joined = ":".join(pairs)
 
     return joined
+
+def sanitize_comma_sep_list(input_list):
+    """ Clean up a string with comma-separated values to remove 0 elements"""
+    tokens = input_list.split(",")
+    tokens = [token for token in tokens if token != "0"]
+    output = ",".join(tokens)
+    return output

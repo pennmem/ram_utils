@@ -121,7 +121,6 @@ class GeneratePlots(ReportRamTask):
 
             ## Post stim EEG plot
             eeg = post_stim_eeg[session_summary.session]
-            print(eeg.shape)
             plt.figure(figsize=(9,5.5))
             plt.imshow(eeg,cmap='bwr',aspect='auto',origin='lower')
             cbar = plt.colorbar()
@@ -150,6 +149,7 @@ class GeneratePlots(ReportRamTask):
                 pdcb.add_plot_data(pd1b)
                 pdcb.add_plot_data(pd2b)
                 panel_plot.add_plot_data_collection(0,1,plot_data_collection=pdcb)
+                panel_plot.title = target
                 plot = panel_plot.generate_plot()
                 plot.legend()
                 plot_out_fname = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-split_prob_recall_plot_'+ str(session_summary.session) + "-" + session_summary.stimtag[target] + '_' + str(session_summary.frequency[target]) + '.pdf')
@@ -157,7 +157,7 @@ class GeneratePlots(ReportRamTask):
                 session_summary.PROB_RECALL_PLOT_FILE[target] = plot_out_fname
 
                 # Change in recall
-                panel_plot = PanelPlot(xfigsize=6, yfigsize=7.5, i_max=1, j_max=1, title='', labelsize=18)
+                panel_plot = PanelPlot(xfigsize=6, yfigsize=7.5, i_max=1, j_max=1, labelsize=18)
                 ylim = np.nanmax(np.abs(session_summary.pc_diff_from_mean[target])) + 5.0
                 if ylim > 100.0:
                     ylim = 100.0
@@ -165,6 +165,7 @@ class GeneratePlots(ReportRamTask):
                     ylim=10.0
                 pd = BarPlotData(x=(0,1), y=session_summary.pc_diff_from_mean[target], ylim=[-ylim,ylim], xlabel='Items', ylabel='% Recall Difference (Stim-NoStim)', x_tick_labels=['Stim', 'PostStim'], xhline_pos=0.0, barcolors=['grey', 'grey'], xlabel_fontsize=18, ylabel_fontsize=18, barwidth=0.5)
                 panel_plot.add_plot_data(0, 0, plot_data=pd)
+                panel_plot.title = target
                 plot = panel_plot.generate_plot()
                 session_summary.STIM_VS_NON_STIM_HALVES_PLOT_FILE[target] = self.get_path_to_resource_in_workspace('reports/' + task + '-' + subject + '-stim_vs_non_stim_halves_plot_'+ str(session_summary.session) + "-" + session_summary.stimtag[target] + '_' + str(session_summary.frequency[target]) + '.pdf')
                 plot.savefig(session_summary.STIM_VS_NON_STIM_HALVES_PLOT_FILE[target], dpi=300, bboxinches='tight')
@@ -178,7 +179,7 @@ class GeneratePlots(ReportRamTask):
                     xfigsize = 18.0
                 panel_plot = PanelPlot(xfigsize=xfigsize, yfigsize=10.0, i_max=1, j_max=1, title='', xlabel='List',
                                     ylabel='# of items', labelsize=20)
-                pdc = PlotDataCollection()
+                pdc = PlotDataCollection(title=target)
                 pdc.xlabel = 'List number'
                 pdc.xlabel_fontsize = 20
                 pdc.ylabel = '#items'
@@ -211,8 +212,10 @@ class GeneratePlots(ReportRamTask):
                     if (pd.x.shape and pd.y.shape) and all(pd.x.shape) and all(pd.y.shape):
                         print pd.x.shape
                         print pd.y.shape
+                        pd.title=target
                         pdc.add_plot_data(pd)
                 panel_plot.add_plot_data_collection(0, 0, plot_data_collection=pdc)
+                panel_plot.title = target
                 plot = panel_plot.generate_plot()
                 session_summary.STIM_AND_RECALL_PLOT_FILE[target] = self.get_path_to_resource_in_workspace(
                     'reports/' + task + '-' + subject + '-stim_and_recall_plot_'+ str(session_summary.session) + "-" + session_summary.stimtag[target] + '-' + str(
@@ -220,7 +223,7 @@ class GeneratePlots(ReportRamTask):
                 plot.savefig(session_summary.STIM_AND_RECALL_PLOT_FILE[target], dpi=300, bboxinches='tight')
 
                 # Probability of stim plots
-                panel_plot = PanelPlot(xfigsize=8,yfigsize=5,i_max=1,j_max=1)
+                panel_plot = PanelPlot(xfigsize=8,yfigsize=5,i_max=1,j_max=1, title=target)
                 pd = PlotData(x=range(1,len(session_summary.prob_stim[target])+1),y=session_summary.prob_stim[target],ylim=[0,1],label_size=18,
                             xlabel='Serial Position',ylabel='Probability of stim',color='black')
                 panel_plot.add_plot_data(0,0,plot_data=pd)
@@ -391,10 +394,6 @@ class GenerateTex(ReportRamTask):
                 '<PERM-P-VALUE-1>':perm_pvalue if perm_pvalue>0 else '<0.01',
                 '<JSTAT-THRESH-1>':jstat_thresh,
                 '<ROC_AND_TERC_PLOT_FILE_1>':self.get_passed_object('ROC_AND_TERC_PLOT_FILE'),
-                '<AUC-2>':auc,
-                '<PERM-P-VALUE-2>':perm_pvalue if perm_pvalue>0 else '<0.01',
-                '<JSTAT-THRESH-2>':jstat_thresh,
-                '<ROC_AND_TERC_PLOT_FILE_2>':self.get_passed_object('ROC_AND_TERC_PLOT_FILE'),
 #                '<ESTIMATED_STIM_EFFECT_PLOT_FILE_list>': self.get_path_to_resource_in_workspace('reports/' + '_'.join([self.pipeline.subject, 'list', 'forestplot.pdf'])),
 #                '<ESTIMATED_STIM_EFFECT_PLOT_FILE_stim>': self.get_path_to_resource_in_workspace('reports/' + '_'.join([self.pipeline.subject, 'stim', 'forestplot.pdf'])),
 #                '<ESTIMATED_STIM_EFFECT_PLOT_FILE_post_stim>': self.get_path_to_resource_in_workspace('reports/' + '_'.join([self.pipeline.subject, 'post_stim', 'forestplot.pdf'])),

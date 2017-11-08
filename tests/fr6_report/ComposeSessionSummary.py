@@ -3,6 +3,7 @@ import numpy as np
 import operator
 import pandas as pd
 from scipy import stats
+from itertools import chain
 from statsmodels.stats.proportion import proportions_chisquare
 
 from ramutils.utils import safe_divide, join_tag_tuple
@@ -357,8 +358,13 @@ class ComposeSessionSummary(ReportRamTask):
             session_date = time.strftime('%d-%b-%Y', time.localtime(last_time_stamp/1000))
             n_lists = len(fr_stim_session_table.list.unique())
             pc_correct_words = 100.0 * fr_stim_session_table.recalled.mean()
-            amplitude = ",".join([str(x) if x > 0 else "" for x in fr_stim_session_table['amplitude'].unique()]) # exclude nans from list of amplitudes
-
+            # There should be an easier way to get this set of unique amplitudes excluding 0 and nan
+            all_amplitudes = fr_stim_session_table['amplitude'].unique()
+            all_amplitudes = [amp for amp in all_amplitudes if amp > 0]
+            all_amplitudes = [str(amp).split(",") for amp in all_amplitudes]
+            all_amplitudes = list(chain.from_iterable(all_amplitudes))
+            all_amplitudes = [el for el in set(all_amplitudes) if el != "0"]
+            amplitude = ",".join(all_amplitudes)
             session_data.append([session, session_date, session_length, n_lists, '$%.2f$\\%%' % pc_correct_words, amplitude])
 
         self.pass_object('session_table', session_data)
@@ -389,9 +395,9 @@ class ComposeSessionSummary(ReportRamTask):
             session_summary.n_lists = len(fr_stim_table_by_session_list)
 
             session_summary.n_pli = np.sum(sess_intr_events.intrusion > 0)
-            session_summary.pc_pli = 100*session_summary.n_pli / float(n_sess_rec_events)
+            session_summary.pc_pli = 100*session_summary.n_pli / float(session_summary.n_words)
             session_summary.n_eli = np.sum(sess_intr_events.intrusion == -1)
-            session_summary.pc_eli = 100*session_summary.n_eli / float(n_sess_rec_events)
+            session_summary.pc_eli = 100*session_summary.n_eli / float(session_summary.n_words)
 
             session_summary.n_math = len(sess_math_events)
             session_summary.n_correct_math = np.sum(sess_math_events.iscorrect)
@@ -437,12 +443,13 @@ class ComposeSessionSummary(ReportRamTask):
             # List-type level information, i.e. target A, target B, target A+B, nostim
             fr_stim_target_group = fr_stim_session_table.groupby(by=['stimAnodeTag', 'stimCathodeTag'])
             for target, fr_stim_target_table in fr_stim_target_group:
+                self.pass_object("sample_target_table_{}".format(target), fr_stim_target_table)
                 target = join_tag_tuple(target)
 
                 # Target summary info
                 session_summary.stimtag[target] = target
                 session_summary.region_of_interest[target] = ""
-                #session_summary.region_of_interest[target] = fr_stim_target_table.Region.values[0] # both channels will be in the same region
+                session_summary.region_of_interest[target] = fr_stim_target_table.region.unique()[0]
                 session_summary.frequency[target] = fr_stim_target_table.pulse_freq.values[0]
                 session_summary.amplitude[target] = fr_stim_target_table.amplitude.values[0]
                 
@@ -543,23 +550,22 @@ class ComposeSessionSummary(ReportRamTask):
                 session_summary.sem_prob_diff_all_post_stim_item[target] = fr_stim_stim_list_post_stim_item_table['prob_diff'].sem()
                 session_summary.mean_prob_diff_low_post_stim_item[target] = fr_stim_stim_list_post_stim_item_low_table['prob_diff'].mean()
                 session_summary.sem_prob_diff_low_post_stim_item[target] = fr_stim_stim_list_post_stim_item_low_table['prob_diff'].sem()
+                
 
-                stim_item_recall_rate, stim_item_recall_rate_low, stim_item_recall_rate_high = {}, {}, {}
-                stim_item_recall_rate[target] = fr_stim_stim_list_stim_item_table['recalled'].mean()
-                stim_item_recall_rate_low[target] = fr_stim_stim_list_stim_item_low_table['recalled'].mean()
-                stim_item_recall_rate_high[target] = fr_stim_stim_list_stim_item_high_table['recalled'].mean()
+                stim_item_recall_rate, stim_item_recall_rate_low, stim_item_recall_rate_high = 0, 0, 0
+                stim_item_recall_rate = fr_stim_stim_list_stim_item_table['recalled'].mean()
+                stim_item_recall_rate_low = fr_stim_stim_list_stim_item_low_table['recalled'].mean()
+                stim_item_recall_rate_high = fr_stim_stim_list_stim_item_high_table['recalled'].mean()
 
-                post_stim_item_recall_rate, post_stim_item_recall_rate_low, post_stim_item_recall_rate_high = {}, {}, {}
-                post_stim_item_recall_rate[target] = fr_stim_stim_list_post_stim_item_table['recalled'].mean()
-                post_stim_item_recall_rate_low[target] = fr_stim_stim_list_post_stim_item_low_table['recalled'].mean()
-                post_stim_item_recall_rate_high[target] = fr_stim_stim_list_post_stim_item_high_table['recalled'].mean()
+                post_stim_item_recall_rate, post_stim_item_recall_rate_low, post_stim_item_recall_rate_high = 0, 0, 0
+                post_stim_item_recall_rate = fr_stim_stim_list_post_stim_item_table['recalled'].mean()
+                post_stim_item_recall_rate_low = fr_stim_stim_list_post_stim_item_low_table['recalled'].mean()
+                post_stim_item_recall_rate_high = fr_stim_stim_list_post_stim_item_high_table['recalled'].mean()
 
                 recall_rate = session_summary.n_correct_words / float(session_summary.n_words)
-
-                stim_pc_diff_from_mean, post_stim_pc_diff_from_mean = {}, {}
-                stim_pc_diff_from_mean[target] = 100.0 * (stim_item_recall_rate[target] - non_stim_list_recall_rate_low) / recall_rate
-                post_stim_pc_diff_from_mean[target] = 100.0 * (post_stim_item_recall_rate[target] - non_stim_list_recall_rate_post_low) / recall_rate
-                session_summary.pc_diff_from_mean[target] = (stim_pc_diff_from_mean[target], post_stim_pc_diff_from_mean[target])
+                stim_pc_diff_from_mean = 100.0 * (stim_item_recall_rate - non_stim_list_recall_rate_low) / recall_rate
+                post_stim_pc_diff_from_mean = 100.0 * (post_stim_item_recall_rate - non_stim_list_recall_rate_post_low) / recall_rate
+                session_summary.pc_diff_from_mean[target] = (stim_pc_diff_from_mean, post_stim_pc_diff_from_mean)
 
                 session_summary.n_correct_stim_items[target] = fr_stim_stim_list_stim_item_table['recalled'].sum()
                 session_summary.n_total_stim_items[target] = len(fr_stim_stim_list_stim_item_table)
