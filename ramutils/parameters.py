@@ -70,7 +70,7 @@ class ExperimentParameters(Schema):
 
 class FRParameters(ExperimentParameters):
     """Free recall experiment parameters relevant for classification."""
-    start_time = Float(0, desc="encoding start time [s]")
+    start_time = Float(0., desc="encoding start time [s]")
     end_time = Float(1.366, desc="encoding end time [s]")
     buf = Float(1.365, desc="encoding buffer time [s]")
 
