@@ -155,5 +155,5 @@ A+B & $<N_STIM_INTR_AB>/<N_TOTAL_STIM_AB>$ ($<PC_FROM_STIM_INTR_AB>$\%) from sti
 \centering
 \includegraphics[scale=0.5]{<POST_STIM_EEG>}
 \caption*{Voltage during the post-stimulation period, averaged across trials.\\
-          Voltages beyond +-500 $\mu$V not shown; voltages between -20 and 20 $mu$V are in white.}
+          Voltages between -20 and 20 $mu$V are in white.}
 \end{figure}
