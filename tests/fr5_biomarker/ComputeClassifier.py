@@ -450,7 +450,10 @@ class ComputeEncodingClassifier(ComputeClassifier):
         self.pow_mat = self.get_pow_mat()
         self._normalize_sessions(events)
 
-        self.lr_classifier = LogisticRegression(C=self.params.C, penalty=self.params.penalty_type, class_weight='balanced', solver='liblinear')
+        sample_weights = np.ones(events.shape)
+        self.lr_classifier = LogisticRegression(C=self.params.C,
+                                                penalty=self.params.penalty_type,
+                                                solver='liblinear')
 
         event_sessions = events.session
         recalls = events.recalled
@@ -479,7 +482,7 @@ class ComputeEncodingClassifier(ComputeClassifier):
         # Finally, fitting classifier on all available data
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            self.lr_classifier.fit(self.pow_mat, recalls)
+            self.lr_classifier.fit(self.pow_mat, recalls, sample_weights)
 
         self.pass_objects()
 

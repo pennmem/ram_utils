@@ -81,15 +81,14 @@ def get_sample_weights(events, encoding_multiplier):
     weights: np.ndarray
 
     """
-
     enc_mask = (events.type == 'WORD')
     retrieval_mask = ((events.type == 'REC_BASE') | (events.type == 'REC_WORD'))
 
     n_enc_0 = events[enc_mask & (events.recalled == 0)].shape[0]
     n_enc_1 = events[enc_mask & (events.recalled == 1)].shape[0]
 
-    n_ret_0 = events[retrieval_mask & (events.type == 'REC_BASE')].shape[0]
-    n_ret_1 = events[retrieval_mask & (events.type == 'REC_WORD')].shape[0]
+    n_ret_0 = events[events.type == 'REC_BASE'].shape[0]
+    n_ret_1 = events[events.type == 'REC_WORD'].shape[0]
 
     n_vec = np.array([1.0/n_enc_0, 1.0/n_enc_1, 1.0/n_ret_0, 1.0/n_ret_1 ], dtype=np.float)
     n_vec /= np.mean(n_vec)
@@ -143,7 +142,7 @@ def get_pal_sample_weights(events, pal_sample_weights, encoding_sample_weights):
     fr_n_ret_0 = events[fr_mask & retrieval_mask & (events.correct == 0)].shape[0]
     fr_n_ret_1 = events[fr_mask & retrieval_mask & (events.correct == 1)].shape[0]
 
-    ev_count_list = [pal_n_enc_0, pal_n_enc_1, pal_n_ret_0, pal_n_ret_1, 
+    ev_count_list = [pal_n_enc_0, pal_n_enc_1, pal_n_ret_0, pal_n_ret_1,
                      fr_n_enc_0, fr_n_enc_1, fr_n_ret_0, fr_n_ret_1]
 
     n_vec = np.array([0.0] * 8, dtype=np.float)
@@ -172,5 +171,5 @@ def get_pal_sample_weights(events, pal_sample_weights, encoding_sample_weights):
     weights[fr_mask & enc_mask & (events.correct == 1)] = n_vec[5]
     weights[fr_mask & retrieval_mask & (events.correct == 0)] = n_vec[6]
     weights[fr_mask & retrieval_mask & (events.correct == 1)] = n_vec[7]
-    
+
     return weights

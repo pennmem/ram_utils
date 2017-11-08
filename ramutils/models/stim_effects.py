@@ -4,15 +4,15 @@ mpl.use('Agg') # allows matplotlib to work without x-windows (for RHINO)
 import sys, traceback
 import pymc3 as pm
 import matplotlib.pyplot as plt
-from RamPipeline import *
+from ReportUtils import ReportRamTask
 from sklearn.externals import joblib
 from ramutils.models.hmm import HierarchicalModel, HierarchicalModelPlots
 
 
-class ComputeStimEffect(RamTask):
+class ComputeStimEffect(ReportRamTask):
     """ Fit a multilvel model for estimating the effect of stimulation on recall """
     def __init__(self, params, mark_as_completed=True):
-        RamTask.__init__(self, mark_as_completed)
+        super(ComputeStimEffect, self).__init__(self, mark_as_completed)
         self.model_types = ['list', 'stim', 'post_stim']
         self.trace = None
         self.stim_effect_estimate = None

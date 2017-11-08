@@ -102,8 +102,8 @@ class MontagePreparation(RamTask):
         f_pairs = open(bp_path, 'r')
         bipolar_data = json.load(f_pairs)[subject]['pairs']
         f_pairs.close()
-        bipolar_data_stim_only = {bp_tag:bp_data for bp_tag,bp_data in bipolar_data.iteritems() if bp_data['is_stim_only']}
-        bipolar_data = {bp_tag:bp_data for bp_tag,bp_data in bipolar_data.iteritems() if not bp_data['is_stim_only']}
+        bipolar_data_stim_only = {bp_tag:bp_data for bp_tag,bp_data in bipolar_data.iteritems() if bp_data.get('is_stim_only')}
+        bipolar_data = {bp_tag:bp_data for bp_tag,bp_data in bipolar_data.iteritems() if not bp_data.get('is_stim_only')}
 
         bp_tags = []
         bp_tal_structs = []

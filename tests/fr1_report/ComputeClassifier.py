@@ -189,10 +189,12 @@ class ComputeJointClassifier(ReportRamTask):
         self.pow_mat[encoding_mask] = normalize_sessions(self.pow_mat[encoding_mask],events[encoding_mask])
         self.pow_mat[~encoding_mask] = normalize_sessions(self.pow_mat[~encoding_mask],events[~encoding_mask])
 
-        # Save this power matrix for debugging
+        # Save this power matrix for debugging. Make sure force overwrite on first save, otherwise
+        # there will be a non-graceful exit. #FIXME: There is probably a better way to handle this
         self.save_array_to_hdf5(self.get_path_to_resource_in_workspace(subject + "-debug_data.h5"),
                                 "norm_pow_mat",
-                                self.pow_mat)
+                                self.pow_mat,
+                                overwrite=True)
         self.save_array_to_hdf5(self.get_path_to_resource_in_workspace(subject + '-debug_data.h5'),
                                 "recall",
                                 events.recalled)
