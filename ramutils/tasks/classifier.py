@@ -25,7 +25,6 @@ logger = get_logger()
 def compute_classifier(events, pow_mat, params, paths=None):
     """Compute the classifier.
 
-    :param str subject:
     :param np.recarray events:
     :param np.ndarray pow_mat:
     :param ExperimentParameters params:

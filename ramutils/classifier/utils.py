@@ -56,7 +56,7 @@ def normalize_sessions(pow_mat, events):
     Returns
     -------
     pow_mat: np.ndarray
-        Normalized features
+        Normalized power matrix (features)
 
     """
 
