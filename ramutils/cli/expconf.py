@@ -54,7 +54,7 @@ def validate_stim_settings(args):
             raise ValidationError("Number of pulse frequencies doesn't match number of stim contacts")
 
 
-if __name__ == "__main__":
+def main():
     from ramutils.parameters import FilePaths, FRParameters
     from ramutils.pipelines.ramulator_config import make_ramulator_config
     from ramutils.tasks import memory
@@ -88,3 +88,7 @@ if __name__ == "__main__":
 
     # Generate!
     make_ramulator_config(args.subject, args.experiment, paths, exp_params)
+
+
+if __name__ == "__main__":
+    main()
