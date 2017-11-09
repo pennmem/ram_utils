@@ -46,6 +46,16 @@ def compute_single_session_powers(session, all_events, params, bipolar_pairs=Non
                            start_time=params.start_time,
                            end_time=params.end_time)
     eeg = eeg_reader.read()
+
+    if eeg_reader.removed_bad_data():
+        logger.warning('PTSA EEG reader elected to remove some bad events')
+        events = np.concatenate((events[events.session != session], 
+                                    eeg['events'].data.view(np.recarray))).view(np.recarray)
+        event_fields = events.dtype.names
+        order = tuple(f for f in ['session', 'list', 'mstime'] if f in event_fields)
+        ev_order = np.argsort(events, order=order)
+        events = events[ev_order]
+
     eeg.add_mirror_buffer(params.buf)
 
     # Use bipolar pairs if they exist and recording is not already bipolar
@@ -70,7 +80,7 @@ def compute_single_session_powers(session, all_events, params, bipolar_pairs=Non
         np.log10(sess_pow_mat, sess_pow_mat)
 
     sess_pow_mat = np.nanmean(sess_pow_mat.transpose(2, 1, 0, 3), -1)
-    return sess_pow_mat
+    return sess_pow_mat, events
 
 
 # FIXME: pass in params as single object
@@ -124,7 +134,7 @@ def compute_powers(events, start_time, end_time, buffer_time, freqs,
             # TODO: change this function's signature to take a params object
             # FIXME: generalize to other experiments
             params = FRParameters()
-            powers = compute_single_session_powers(sess, events, params, bipolar_pairs)
+            powers, events = compute_single_session_powers(sess, events, params, bipolar_pairs)
             pow_mat = powers if pow_mat is None else np.concatenate((pow_mat, powers))
 
         pow_mat = pow_mat.reshape((len(events), -1))
