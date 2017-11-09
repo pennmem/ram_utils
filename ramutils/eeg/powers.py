@@ -56,7 +56,6 @@ def compute_powers(events, start_time, end_time, buffer_time, freqs,
     sessions = np.unique(events.session)
     pow_mat = None
     tic = time.time()
-    filter_time = 0.
     for sess in sessions:
         print('Loading EEG for session {}'.format(sess))
         sess_events = events[events.session == sess]
