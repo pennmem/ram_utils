@@ -211,7 +211,7 @@ class DataLayoutJSONUtils(object):
 
     def walk_subject_directory(self,subject_dir):
 
-        import pathlib
+        import ramutils.pathlib
         pathlib_path_parts = pathlib.Path(subject_dir).parts
         print pathlib_path_parts
 
