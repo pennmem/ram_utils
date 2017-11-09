@@ -16,6 +16,10 @@ doctrees/
 # Dask task graphs' default filename
 mydask.png
 
+# Coverage
+.coverage
+htmlcov/
+
 # OS generated files #
 ######################
 .DS_Store
