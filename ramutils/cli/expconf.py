@@ -87,7 +87,8 @@ def main():
         raise ValidationError("Only FR-like experiments supported so far")
 
     # Generate!
-    make_ramulator_config(args.subject, args.experiment, paths, exp_params)
+    make_ramulator_config(args.subject, args.experiment, paths,
+                          args.anodes, args.cathodes, exp_params)
 
 
 if __name__ == "__main__":
