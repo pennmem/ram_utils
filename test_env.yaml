@@ -41,7 +41,6 @@ dependencies:
 - harfbuzz=0.9.39
 - hdf5=1.10.1
 - heapdict=1.0.0
-- html5lib=0.999999999
 - idna=2.6
 - imagesize=0.7.1
 - ipaddress=1.0.18
@@ -52,10 +51,6 @@ dependencies:
 - jinja2=2.9.6
 - jpeg=9b
 - jsonschema=2.6.0
-- jupyter=1.0.0
-- jupyter_client=5.1.0
-- jupyter_console=5.2.0
-- jupyter_core=4.3.0
 - locket=0.2.0
 - lzo=2.10
 - markupsafe=1.0
@@ -90,7 +85,6 @@ dependencies:
 - pygments=2.2.0
 - pyopenssl=17.2.0
 - pyparsing=2.1.4
-- pyqt=4.11.4
 - pysocks=1.6.7
 - pytables=3.4.2
 - pytest=3.2.1
@@ -102,7 +96,6 @@ dependencies:
 - pywavelets=0.5.2
 - pyyaml=3.12
 - pyzmq=16.0.2
-- qtconsole=4.3.1
 - readline=6.2
 - requests=2.18.4
 - scandir=1.5
