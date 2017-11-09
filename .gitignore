@@ -8,6 +8,11 @@ ramutils/test/plotting/sample_plots/
 *.synctex.gz
 *.swp
 
+# Sphinx documentation
+docs/_build/
+doctrees/
+.buildinfo
+
 # Dask task graphs' default filename
 mydask.png
 
