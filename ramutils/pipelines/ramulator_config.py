@@ -1,7 +1,9 @@
 import os.path
 
+from bptools.jacksheet import read_jacksheet
 from ptsa.data.readers import JsonIndexReader
 
+from ramutils.parameters import StimParameters
 from ramutils.tasks.classifier import *
 from ramutils.tasks.events import *
 from ramutils.tasks.montage import *
@@ -9,7 +11,47 @@ from ramutils.tasks.odin import *
 from ramutils.tasks.powers import *
 
 
-def make_ramulator_config(subject, experiment, paths, exp_params):
+def make_stim_params(subject, anodes, cathodes, root='/'):
+    """Construct :class:`StimParameters` objects from anode and cathode labels
+    for a specific subject.
+
+    Parameters
+    ----------
+    subject : str
+    andoes : List[str] anodes
+        anode labels
+    cathodes : List[str]
+        cathode labels
+    root : str
+        root directory to search for jacksheet
+
+    Returns
+    -------
+    stim_params : List[StimParams]
+
+    """
+    path = os.path.join(root, 'data', 'eeg', subject, 'docs', 'jacksheet')
+    jacksheet = read_jacksheet(path)
+
+    stim_params = []
+
+    for i in range(len(anodes)):
+        anode = anodes[i]
+        cathode = cathodes[i]
+        anode_idx = jacksheet[jacksheet.label == anode].index[0]
+        cathode_idx = jacksheet[jacksheet.label == cathode].index[0]
+        stim_params.append(
+            StimParameters(
+                label='-'.join([anode, cathode]),
+                anode=anode_idx,
+                cathode=cathode_idx
+            )
+        )
+
+    return stim_params
+
+
+def make_ramulator_config(subject, experiment, paths, anodes, cathodes, exp_params):
     """Generate configuration files for a Ramulator experiment.
 
     Parameters
@@ -19,6 +61,10 @@ def make_ramulator_config(subject, experiment, paths, exp_params):
     experiment : str
         Experiment to generate configuration file for
     paths : FilePaths
+    anodes : List[str]
+        List of stim anode contact labels
+    cathodes : List[str]
+        List of stim cathode contact labels
     exp_params : ExperimentParameters
 
     Returns
@@ -27,9 +73,7 @@ def make_ramulator_config(subject, experiment, paths, exp_params):
 
     """
     jr = JsonIndexReader(os.path.join(paths.root, "protocols", "r1.json"))
-
-    # FIXME
-    stim_params = None
+    stim_params = make_stim_params(subject, anodes, cathodes, paths.root)
 
     fr_events = read_fr_events(jr, subject, cat=False)
     catfr_events = read_fr_events(jr, subject, cat=True)
