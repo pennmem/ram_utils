@@ -1,7 +1,6 @@
 """Main script for generating Ramulator configuration files."""
 
-# FIXME: generalize this for all experiments (only FR6 now)
-# FIXME: handle command-line options and don't prompt for passed options
+# FIXME: this is deprecated in favor of ramutils.cli.expconf and should be removed prior to v2.0.0 release!
 
 from __future__ import unicode_literals, print_function
 
