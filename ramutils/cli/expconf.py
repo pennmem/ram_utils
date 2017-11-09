@@ -56,6 +56,7 @@ def validate_stim_settings(args):
 
 if __name__ == "__main__":
     from ramutils.parameters import FilePaths, FRParameters
+    from ramutils.pipelines.ramulator_config import make_ramulator_config
     from ramutils.tasks import memory
 
     args = parser.parse_args()
@@ -85,5 +86,5 @@ if __name__ == "__main__":
     else:
         raise ValidationError("Only FR-like experiments supported so far")
 
-    # TODO: configure stim parameters (with new task?)
-    # TODO: invoke pipeline
+    # Generate!
+    make_ramulator_config(args.subject, args.experiment, paths, exp_params)
