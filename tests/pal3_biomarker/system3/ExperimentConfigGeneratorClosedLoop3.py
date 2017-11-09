@@ -9,7 +9,7 @@ from subprocess import call
 from tornado.template import Template
 from glob import glob
 import shutil
-import pathlib
+import ramutils.pathlib
 
 from ramutils.pipeline import RamTask
 

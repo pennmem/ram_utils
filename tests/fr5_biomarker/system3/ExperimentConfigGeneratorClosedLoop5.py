@@ -6,7 +6,7 @@ import zipfile
 from os.path import *
 from glob import glob
 import shutil
-import pathlib
+import ramutils.pathlib
 from itertools import chain, cycle
 
 import numpy as np
