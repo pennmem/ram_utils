@@ -1,6 +1,8 @@
 import functools
 import random
 from pkg_resources import resource_filename
+
+import numpy as np
 import pytest
 
 from ptsa.data.readers import JsonIndexReader, BaseEventReader
