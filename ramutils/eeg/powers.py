@@ -113,11 +113,10 @@ def compute_powers(events, start_time, end_time, buffer_time, freqs,
     events = events[events['eegoffset'] >= 0]
 
     if n_events != len(events):
-        print('Removed %s events with negative offsets'%(n_events-len(events)))
+        logger.warning('Removed %s events with negative offsets', (n_events - len(events)))
 
     sessions = np.unique(events.session)
     pow_mat = None
-    tic = time.time()
 
     with timer("Total time for computing powers: %f"):
         for sess in sessions:
