@@ -28,7 +28,7 @@ class ValidationError(Exception):
     """Raised when command-line arguments are invalid."""
 
 
-def make_parser(description, allowed_experiments=EXPERIMENTS):
+def make_parser(description, allowed_experiments=sum([exps for exps in EXPERIMENTS.values()], [])):
     """Create a stub parser containing common options.
 
     Parameters

@@ -1,9 +1,8 @@
 """Script for generating reports."""
 
-from ramutils.cli import make_parser, configure_caching, EXPERIMENTS
+from ramutils.cli import make_parser, configure_caching
 
-parser = make_parser("Generate a report",
-                     [exp[group] for group, exp in EXPERIMENTS.items()][0])
+parser = make_parser("Generate a report")
 
 
 def main():
