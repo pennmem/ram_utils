@@ -84,9 +84,12 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes, exp_para
 
     ec_pairs = generate_pairs_from_electrode_config(subject, paths)
 
-    powers = compute_powers(events, exp_params)
-    classifier, xval, sample_weights = compute_classifier(events, powers, exp_params, paths)
-    container = serialize_classifier(classifier, pairs, powers, events, sample_weights, xval, subject)
+    if experiment != 'ampdet':
+        powers = compute_powers(events, exp_params)
+        classifier, xval, sample_weights = compute_classifier(events, powers, exp_params, paths)
+        container = serialize_classifier(classifier, pairs, powers, events, sample_weights, xval, subject)
+    else:
+        container = None
 
     config_path = generate_ramulator_config(subject, experiment, container,
                                             stim_params, paths, ec_pairs, excluded_pairs)
