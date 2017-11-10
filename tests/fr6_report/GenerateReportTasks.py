@@ -313,6 +313,7 @@ class GenerateTex(ReportRamTask):
                                  '<STIMTAG_A>': session_summary.stimtag[target_a],
                                  '<REGION_A>': session_summary.region_of_interest[target_a],
                                  '<STIMTAG_B>': session_summary.stimtag[target_b],
+                                 '<STIMTAG_AB>': session_summary.stimtag[target_ab],
                                  '<REGION_B>': session_summary.region_of_interest[target_b],
                                  '<PULSE_FREQ_A>': session_summary.frequency[target_a],
                                  '<PULSE_FREQ_B>': session_summary.frequency[target_b],

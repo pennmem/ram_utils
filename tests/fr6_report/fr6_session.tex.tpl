@@ -48,25 +48,37 @@ $<N_MATH>$ math problems & $<N_CORRECT_MATH>$ correct ($<PC_CORRECT_MATH>$\%) & 
 
 \begin{table}[!h]
 \centering
-\begin{tabular}{c|c|c|c|c}
+\begin{tabularx}{\linewidth}{l|X|X|X|X}
 \multicolumn{5}{c}{\textbf{Stim vs <COMPARISON_LIST_TYPE> Recalls}} \\
 \hline
-A & $<N_CORRECT_STIM_A>/<N_TOTAL_STIM_A>$ ($<PC_FROM_STIM_A>$\%) from stim lists & $<N_CORRECT_NONSTIM>/<N_TOTAL_NONSTIM>$ ($<PC_FROM_NONSTIM>$\%) from <COMPARISON_LIST_TYPE> lists & $\chi^2(1)=<CHISQR_A>$ & $p=<PVALUE_A>$ \\
-B & $<N_CORRECT_STIM_B>/<N_TOTAL_STIM_B>$ ($<PC_FROM_STIM_B>$\%) from stim lists & $<N_CORRECT_NONSTIM>/<N_TOTAL_NONSTIM>$ ($<PC_FROM_NONSTIM>$\%) from <COMPARISON_LIST_TYPE> lists & $\chi^2(1)=<CHISQR_B>$ & $p=<PVALUE_B>$ \\
-A+B & $<N_CORRECT_STIM_AB>/<N_TOTAL_STIM_AB>$ ($<PC_FROM_STIM_AB>$\%) from stim lists & $<N_CORRECT_NONSTIM>/<N_TOTAL_NONSTIM>$ ($<PC_FROM_NONSTIM>$\%) from <COMPARISON_LIST_TYPE> lists & $\chi^2(1)=<CHISQR_AB>$ & $p=<PVALUE_AB>$ \\
+Target & Stim & Non-stim & Test Statistic & P-Value \\
+\hline
+<STIMTAG_A> & $<N_CORRECT_STIM_A>/<N_TOTAL_STIM_A>$ ($<PC_FROM_STIM_A>$\%) &
+$<N_CORRECT_NONSTIM>/<N_TOTAL_NONSTIM>$ ($<PC_FROM_NONSTIM>$\%) & $\chi^2(1)=<CHISQR_A>$ & $p=<PVALUE_A>$ \\
+<STIMTAG_B> & $<N_CORRECT_STIM_B>/<N_TOTAL_STIM_B>$ ($<PC_FROM_STIM_B>$\%) &
+$<N_CORRECT_NONSTIM>/<N_TOTAL_NONSTIM>$ ($<PC_FROM_NONSTIM>$\%) & $\chi^2(1)
+=<CHISQR_B>$ & $p=<PVALUE_B>$ \\
+<STIMTAG_AB> & $<N_CORRECT_STIM_AB>/<N_TOTAL_STIM_AB>$ ($<PC_FROM_STIM_AB>$\%)
+ & $<N_CORRECT_NONSTIM>/<N_TOTAL_NONSTIM>$ ($<PC_FROM_NONSTIM>$\%) & $\chi^2
+ (1)=<CHISQR_AB>$ & $p=<PVALUE_AB>$ \\
 \hline
 <ITEMLEVEL_COMPARISON>
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 \begin{table}[!h]
 \centering
-\begin{tabular}{c|c|c}
+\begin{tabular}{l|c|c}
 \multicolumn{3}{c}{\textbf{Stim vs  <COMPARISON_LIST_TYPE> Intrusions}} \\
 \hline
-A & $<N_STIM_INTR_A>/<N_TOTAL_STIM_A>$ ($<PC_FROM_STIM_INTR_A>$\%) from stim lists & $<N_NONSTIM_INTR>/<N_TOTAL_NONSTIM>$ ($<PC_FROM_NONSTIM_INTR>$\%) from <COMPARISON_LIST_TYPE> lists \\
-B & $<N_STIM_INTR_B>/<N_TOTAL_STIM_B>$ ($<PC_FROM_STIM_INTR_B>$\%) from stim lists & $<N_NONSTIM_INTR>/<N_TOTAL_NONSTIM>$ ($<PC_FROM_NONSTIM_INTR>$\%) from <COMPARISON_LIST_TYPE> lists \\
-A+B & $<N_STIM_INTR_AB>/<N_TOTAL_STIM_AB>$ ($<PC_FROM_STIM_INTR_AB>$\%) from stim lists & $<N_NONSTIM_INTR>/<N_TOTAL_NONSTIM>$ ($<PC_FROM_NONSTIM_INTR>$\%) from <COMPARISON_LIST_TYPE> lists \\
+Target & Stim & Non-stim \\
+\hline
+<STIMTAG_A> & $<N_STIM_INTR_A>/<N_TOTAL_STIM_A>$ ($<PC_FROM_STIM_INTR_A>$\%)
+ & $<N_NONSTIM_INTR>/<N_TOTAL_NONSTIM>$ ($<PC_FROM_NONSTIM_INTR>$\%) from <COMPARISON_LIST_TYPE> lists \\
+<STIMTAG_B> & $<N_STIM_INTR_B>/<N_TOTAL_STIM_B>$ ($<PC_FROM_STIM_INTR_B>$\%)
+ & $<N_NONSTIM_INTR>/<N_TOTAL_NONSTIM>$ ($<PC_FROM_NONSTIM_INTR>$\%) from <COMPARISON_LIST_TYPE> lists \\
+<STIMTAG_AB> & $<N_STIM_INTR_AB>/<N_TOTAL_STIM_AB>$
+($<PC_FROM_STIM_INTR_AB>$\%)  & $<N_NONSTIM_INTR>/<N_TOTAL_NONSTIM>$ ($<PC_FROM_NONSTIM_INTR>$\%) from <COMPARISON_LIST_TYPE> lists \\
 \hline
 \end{tabular}
 \end{table}

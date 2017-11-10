@@ -4,6 +4,7 @@
 \usepackage{graphicx}
 \usepackage{grffile}
 \usepackage{caption}
+\usepackage{tabularx}
 \usepackage[skip=0pt]{subcaption}
 \usepackage{morefloats}
 \errorcontextlines 1000
