@@ -50,3 +50,28 @@ def make_parser(description, allowed_experiments=EXPERIMENTS):
     parser.add_argument('--experiment', '-x', required=True, type=str,
                         choices=allowed_experiments, help='experiment')
     return parser
+
+
+def configure_caching(cachedir, invalidate=False):
+    """Setup task caching.
+
+    Parameters
+    ----------
+    cachedir : str
+        Location to cache task outputs to.
+    invalidate : bool
+        Clear all cached files.
+
+    Returns
+    -------
+    Configured caching object.
+
+    """
+    from ramutils.tasks import memory
+
+    memory.cachedir = cachedir
+
+    if invalidate:
+        memory.clear()
+
+    return memory

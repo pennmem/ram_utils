@@ -4,7 +4,7 @@ Ramulator.
 """
 
 import os.path as osp
-from ramutils.cli import make_parser, ValidationError
+from ramutils.cli import make_parser, ValidationError, configure_caching
 
 # FIXME: should this generate record-only configs?
 RECORD_ONLY = []  # ['FR1', 'catFR1']
@@ -48,15 +48,10 @@ def validate_stim_settings(args):
 def main():
     from ramutils.parameters import FilePaths, FRParameters
     from ramutils.pipelines.ramulator_config import make_ramulator_config
-    from ramutils.tasks import memory
 
     args = parser.parse_args()
     validate_stim_settings(args)
-
-    # cache in the same place that we're dumping files to
-    memory.cachedir = args.dest
-    if args.force_rerun:
-        memory.clear()
+    configure_caching(args.dest, args.force_rerun)
 
     paths = FilePaths(
         root=osp.expanduser('/'),
