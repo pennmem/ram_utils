@@ -51,7 +51,7 @@ def test_from_hdf(tmpdir):
 
 
 def test_to_json():
-    obj = SomeSchema(x=range(10), name="whatever")
+    obj = SomeSchema(x=list(range(10)), name="whatever")
     jobj = obj.to_json()
 
     loaded = json.loads(jobj)
@@ -62,7 +62,7 @@ def test_to_json():
 @pytest.mark.parametrize('fromfile', [True, False])
 def test_from_json(fromfile, tmpdir):
     data = {
-        "x": range(10),
+        "x": list(range(10)),
         "name": "whatever"
     }
 
