@@ -11,7 +11,7 @@ RECORD_ONLY = []  # ['FR1', 'catFR1']
 PS = ['PS4_FR5', 'PS4_catFR5']
 
 # Supported experiments
-EXPERIMENTS = ['FR5', 'FR6', 'catFR5', 'catFR6'] + RECORD_ONLY + PS
+EXPERIMENTS = ['AmplitudeDetermination', 'FR5', 'FR6', 'catFR5', 'catFR6'] + RECORD_ONLY + PS
 
 parser = make_parser("Generate experiment configs for Ramulator", EXPERIMENTS)
 parser.add_argument('--localization', '-l', default=0, type=int, help='localization number')
