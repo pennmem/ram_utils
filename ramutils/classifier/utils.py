@@ -10,8 +10,8 @@ from classiflib.container import ClassifierContainer
 def reload_classifier(subject, task, session, mount_point='/'):
     """Loads the actual classifier used by Ramulator for a particular session
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     subject: str
         Subject ID
     task: str
@@ -21,8 +21,8 @@ def reload_classifier(subject, task, session, mount_point='/'):
     mount_point: str, default '/'
         Mount point for RHINO
 
-    Returns:
-    --------
+    Returns
+    -------
     classifier_container: classiflib.container.ClassifierContainer
 
     """
@@ -48,7 +48,7 @@ def reload_classifier(subject, task, session, mount_point='/'):
 def normalize_sessions(pow_mat, events):
     """ z-score powers within session
 
-    Parameters:
+    Parameters
     ----------
     pow_mat: (np.ndarray) Power matrix, i.e. the data matrix for the classifier (features)
     events: (pd.DataFrame) Behavioral events data
@@ -71,8 +71,8 @@ def normalize_sessions(pow_mat, events):
 def get_sample_weights(events, encoding_multiplier):
     """ Calculate class weights based on recall/non-recall in given events data
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     events: pd.DataFrame
     encoding_multiplier: (int) Scalar to determine how much more to weight encoding samples
 
@@ -111,8 +111,8 @@ def get_sample_weights(events, encoding_multiplier):
 def get_pal_sample_weights(events, pal_sample_weights, encoding_sample_weights):
     """ Calculate sample weights based on PAL-specific scheme
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     events: pd.DataFrame
     pal_sample_weights: (int) Scalar to determine how much more to weight pal samples
     encoding_sample_weights: (int) Scalar to determine how much more to weight encoding samples
