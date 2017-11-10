@@ -243,8 +243,8 @@ def select_word_events(events, include_retrieval=True):
 
     # FIXME: document what is going on here
     irts = np.append([0], np.diff(events.mstime))
-    encoding_events_mask = events.type == 'WORD'
-    retrieval_events_mask = (events.type == 'REC_WORD') | (events.type == 'REC_BASE')
+    encoding_events_mask = get_encoding_mask(events)
+    retrieval_events_mask = get_retrieval_mask(events)
     retrieval_events_mask_0s = retrieval_events_mask & (events.type == 'REC_BASE')
     retrieval_events_mask_1s = retrieval_events_mask & (events.type == 'REC_WORD') & (events.intrusion == 0) & (irts > 1000)
 
@@ -288,7 +288,7 @@ def get_encoding_mask(events):
 
 
 def get_retrieval_mask(events):
-    retrieval_mask = (events.type != "WORD")
+    retrieval_mask = (events.type == 'REC_WORD') | (events.type == 'REC_BASE')
     return retrieval_mask
 
 
@@ -298,5 +298,15 @@ def combine_events(event_list):
     events = np.concatenate(event_list).view(np.recarray)
     events.sort(order=['session', 'list', 'mstime'])
     return events
+
+
+@task()
+def remove_negative_offsets():
+    return
+
+
+@task()
+def remove_bad_events():
+    return
 
 

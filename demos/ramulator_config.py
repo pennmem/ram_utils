@@ -60,10 +60,15 @@ word_events = select_word_events(all_events, include_retrieval=True)
 encoding_events = select_encoding_events(word_events)
 retrieval_events = select_retrieval_events(word_events)
 
-pairs = load_pairs(pairs_path)
-excluded_pairs = reduce_pairs(pairs, stim_params, True)
 ec_pairs = generate_pairs_from_electrode_config(subject, paths)
+excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
+used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
+final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
 
+
+# FIXME: If PTSA is updated to not remove events behind this scenes, this
+# won't be necessary. Or, if we can remove bad events before passing to
+# compute powers, then we won't have to catch the events
 encoding_powers, good_encoding_events = compute_powers(encoding_events,
                                                        params)
 
@@ -80,15 +85,18 @@ task_events = combine_events([good_encoding_events, good_retrieval_events])
 powers = combine_encoding_retrieval_powers(task_events,
                                            normalized_encoding_powers,
                                            normalized_retrieval_powers)
+reduced_powers = reduce_powers(powers, used_pair_mask, len(params.freqs))
 
 sample_weights = get_sample_weights(task_events, params)
 classifier = train_classifier(powers, task_events, sample_weights, params)
-cross_validation_results = perform_cross_validation(classifier, powers,
+cross_validation_results = perform_cross_validation(classifier, reduced_powers,
                                                     task_events, params)
 
-container = serialize_classifier(classifier, pairs, powers, task_events,
-                                 sample_weights, cross_validation_results,
+container = serialize_classifier(classifier, final_pairs, reduced_powers,
+                                 task_events, sample_weights,
+                                 cross_validation_results,
                                  subject)
+
 config_path = generate_ramulator_config(subject, 'FR6', container, stim_params,
                                         paths, ec_pairs, excluded_pairs)
 

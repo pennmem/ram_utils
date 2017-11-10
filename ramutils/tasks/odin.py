@@ -170,6 +170,8 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
     else:
         shutil.copy(paths.pairs, conffile('pairs.json'))
     if excluded_pairs is not None:
+        # Make format of excluded pairs more standard
+        excluded_pairs = {subject: {'pairs': excluded_pairs}}
         with open(conffile('excluded_pairs.json'), 'w') as f:
             json.dump(excluded_pairs, f)
 

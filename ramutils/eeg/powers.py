@@ -119,7 +119,9 @@ def compute_powers(events, start_time, end_time, buffer_time, freqs,
     """
     # TODO: This should really be split up into a few smaller functions: load,
     # ButterworthFilter, WaveletFilter, etc.
-
+    # TODO: Compute powers should no longer be responsible for subsetting
+    # based on pairs. Be default, it should compute all powers and the subset
+    # determination should be up to the caller
     if (bipolar_pairs is not None) and (not isinstance(bipolar_pairs, np.recarray)):
         # it expects to receive a list
         bipolar_pairs = np.array(bipolar_pairs, dtype=[('ch0', 'S3'), ('ch1', 'S3')]).view(np.recarray)
