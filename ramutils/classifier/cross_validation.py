@@ -81,7 +81,8 @@ def run_lolo_xval(classifier, powers, events, recalls):
     return probs
 
 
-def permuted_loso_AUCs(classifier, powers, events, n_permutations):
+def permuted_loso_AUCs(classifier, powers, events, sample_weight,
+                       n_permutations):
     recalls = events.recalled
     permuted_recalls = np.array(recalls)
     AUCs = np.empty(shape=n_permutations, dtype=np.float)
@@ -94,7 +95,8 @@ def permuted_loso_AUCs(classifier, powers, events, n_permutations):
                 shuffle(sess_permuted_recalls)
                 permuted_recalls[sel] = sess_permuted_recalls
 
-            probs = run_loso_xval(classifier, powers, events, recalls)
+            probs = run_loso_xval(classifier, powers, events, recalls,
+                                  sample_weight)
             AUCs[i] = roc_auc_score(recalls, probs)
         except ValueError:
             AUCs[i] = np.nan
@@ -125,13 +127,8 @@ def run_loso_xval(classifier, powers, events, recalls, encoding_sample_weight):
 
     """
     probs = np.empty_like(recalls, dtype=np.float)
-    # encoding_probs = np.empty_like(events[events.type == 'WORD'], dtype=np.float)
 
-    sessions = np.unique(events.sesssion)
-
-    # auc_encoding = np.empty(sessions.shape[0], dtype=np.float)
-    # auc_retrieval = np.empty(sessions.shape[0], dtype=np.float)
-    # auc_both = np.empty(sessions.shape[0], dtype=np.float)
+    sessions = np.unique(events.session)
 
     for sess_idx, sess in enumerate(sessions):
         # training data
@@ -147,7 +144,6 @@ def run_loso_xval(classifier, powers, events, recalls, encoding_sample_weight):
         # testing data
         outsample_mask = ~insample_mask
         outsample_pow_mat = powers[outsample_mask]
-        # outsample_recalls = recalls[outsample_mask]
 
         outsample_probs = classifier.predict_proba(outsample_pow_mat)[:, 1]
         probs[outsample_mask] = outsample_probs

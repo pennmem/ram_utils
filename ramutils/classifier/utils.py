@@ -45,7 +45,7 @@ def reload_classifier(subject, task, session, mount_point='/'):
     return classifier_container
 
 
-def normalize_sessions(pow_mat, events):
+def normalize_powers_by_session(pow_mat, events):
     """ z-score powers within session
 
     Parameters:
@@ -63,7 +63,9 @@ def normalize_sessions(pow_mat, events):
     sessions = np.unique(events.session)
     for sess in sessions:
         sess_event_mask = (events.session == sess)
-        pow_mat[sess_event_mask] = zscore(pow_mat[sess_event_mask], axis=0, ddof=1)
+        pow_mat[sess_event_mask] = zscore(pow_mat[sess_event_mask],
+                                          axis=0,
+                                          ddof=1)
 
     return pow_mat
 
