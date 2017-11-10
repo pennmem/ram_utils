@@ -15,7 +15,7 @@ from ptsa.data.readers.IndexReader import JsonIndexReader
 
 from ramutils.log import get_logger
 
-memory = joblib.Memory(cachedir="/Users/zduey/tmp/", verbose=0)
+memory = joblib.Memory(cachedir=gettempdir(), verbose=0)
 logger = get_logger()
 
 
