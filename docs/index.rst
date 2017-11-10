@@ -8,3 +8,4 @@ RAM reporting pipeline
     pipeline
     timeseries
     classifier
+    models

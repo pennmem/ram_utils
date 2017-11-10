@@ -56,15 +56,14 @@ class HierarchicalModel(object):
         self.trace = None
         return
 
-
     def fit(self, draws=5000, tune=1000):
-        """ Fit a hierarchical model for the given subject and experiment 
+        """ Fit a hierarchical model for the given subject and experiment
 
         Returns
         -------
         trace (pymc3.backends.base.MultiTrace)
             A MultiTrace object that contains the samples
-        
+
         """
         method_str = "_fit_{}_model".format(self.experiment)
         dispatch_method = getattr(self, method_str)
