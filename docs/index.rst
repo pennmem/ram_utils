@@ -1,6 +1,11 @@
-ramutils
-========
+RAM reporting pipeline
+======================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :maxdepth: 2
+    :caption: Contents:
+
+    pipeline
+    timeseries
+    classifier
+    models
