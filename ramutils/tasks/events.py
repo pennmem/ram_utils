@@ -260,7 +260,7 @@ def select_word_events(events, include_retrieval=True):
     return events
 
 
-@task()
+@task(cache=False)
 def select_encoding_events(events):
     """ Select only encoding events
 
@@ -270,7 +270,7 @@ def select_encoding_events(events):
     return encoding_events
 
 
-@task()
+@task(cache=False)
 def select_retrieval_events(events):
     """ Select only retrieval events
 
@@ -292,7 +292,7 @@ def get_retrieval_mask(events):
     return retrieval_mask
 
 
-@task()
+@task(cache=False)
 def combine_events(event_list):
     """ Combines a list of events into single recarray """
     events = np.concatenate(event_list).view(np.recarray)

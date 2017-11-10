@@ -41,7 +41,7 @@ class TestEvents:
         ]
 
         concated = concatenate_events(fr_events, catfr_events).compute()
-        assert concated.shape == (380,)
+        assert concated.shape == (5804,)
 
     @pytest.mark.parametrize('retrieval', [True, False])
     def test_select_word_events(self, retrieval):
@@ -66,3 +66,24 @@ class TestEvents:
             assert len(word_events) == n_word + n_rec_word + n_rec_base - 1
         else:
             assert len(word_events) == n_word
+
+    def test_free_epochs(self):
+        return
+
+    def test_create_baseline_events(self):
+        return
+
+    def test_select_encoding_events(self):
+        return
+
+    def test_select_retrieval_events(self):
+        return
+
+    def test_combine_events(self):
+        return
+
+    def test_get_retrieval_mask(self):
+        return
+
+    def test_get_encoding_mask(self):
+        return
