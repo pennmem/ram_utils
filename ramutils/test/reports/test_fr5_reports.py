@@ -13,7 +13,7 @@ import numpy as np
 TEST_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEST_OUTPUT_DIR = "/scratch/RAM_maint/automated_reports_json/tmp_testing_data/"
 
-
+@pytest.mark.skip(reason="rhino")
 @pytest.mark.parametrize("test_dir,subject", [
     (TEST_OUTPUT_DIR + "samplefr5_reports/{}/","R1308T"),
     (TEST_OUTPUT_DIR + "samplefr1_reports/{}/", "R1308T"),
