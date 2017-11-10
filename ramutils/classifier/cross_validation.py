@@ -19,10 +19,13 @@ def permuted_lolo_AUCs(classifier, powers, events, n_permutations):
 
     Parameters
     ----------
-    classifier: sklearn model object, usually logistic regression classifier
-    powers: power matrix
-    events: recarray
-    n_permutations: number of permutation trials
+    classifier:
+        sklearn model object, usually logistic regression classifier
+    powers: np.ndarray
+        power matrix
+    events : recarray
+    n_permutations: int
+        number of permutation trials
 
     Returns
     -------
