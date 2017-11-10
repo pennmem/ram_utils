@@ -15,7 +15,7 @@ from sklearn.metrics import roc_auc_score, roc_curve
 from random import shuffle
 from sklearn.externals import joblib
 from ptsa.data.readers.IndexReader import JsonIndexReader
-from ramutils.classifier.utils import normalize_sessions, get_sample_weights
+from ramutils.classifier.utils import normalize_powers_by_session, get_sample_weights
 
 try:
     from typing import Dict
@@ -136,8 +136,8 @@ class ComputeClassifier(RamTask):
         events = self.get_passed_object('FR_events')
         self.pow_mat = self.get_pow_mat()
         encoding_mask = events.type=='WORD'
-        self.pow_mat[encoding_mask] = normalize_sessions(self.pow_mat[encoding_mask],events[encoding_mask])
-        self.pow_mat[~encoding_mask] = normalize_sessions(self.pow_mat[~encoding_mask],events[~encoding_mask])
+        self.pow_mat[encoding_mask] = normalize_powers_by_session(self.pow_mat[encoding_mask], events[encoding_mask])
+        self.pow_mat[~encoding_mask] = normalize_powers_by_session(self.pow_mat[~encoding_mask], events[~encoding_mask])
 
         self.lr_classifier = LogisticRegression(C=self.params.C,
                                                 penalty=self.params.penalty_type,
@@ -436,7 +436,7 @@ class ComputeEncodingClassifier(ComputeClassifier):
         return self._events[self._events.type=='WORD']
 
     def _normalize_sessions(self,events):
-        self.pow_mat = normalize_sessions(self.pow_mat,events)
+        self.pow_mat = normalize_powers_by_session(self.pow_mat, events)
 
     def get_pow_mat(self):
         events = self.events
