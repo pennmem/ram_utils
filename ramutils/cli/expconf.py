@@ -3,8 +3,8 @@ Ramulator.
 
 """
 
-from argparse import ArgumentParser
 import os.path as osp
+from ramutils.cli import make_parser, ValidationError
 
 # FIXME: should this generate record-only configs?
 RECORD_ONLY = []  # ['FR1', 'catFR1']
@@ -13,13 +13,9 @@ PS = ['PS4_FR5', 'PS4_catFR5']
 # Supported experiments
 EXPERIMENTS = ['FR5', 'FR6', 'catFR5', 'catFR6'] + RECORD_ONLY + PS
 
-parser = ArgumentParser(description="Generate experiment configs for Ramulator")
-parser.add_argument('--dest', '-d', default='.', help='directory to write output to')
-parser.add_argument('--subject', '-s', required=True, type=str, help='subject ID')
+parser = make_parser("Generate experiment configs for Ramulator", EXPERIMENTS)
 parser.add_argument('--localization', '-l', default=0, type=int, help='localization number')
 parser.add_argument('--montage', '-m', default=0, type=int, help='montage number')
-parser.add_argument('--experiment', '-x', required=True, type=str,
-                    choices=EXPERIMENTS, help='experiment')
 parser.add_argument('--electrode-config-file', '-e', required=True, type=str,
                     help='path to Odin electrode config csv file')
 parser.add_argument('--anodes', nargs='+', help='stim anode labels')
@@ -29,11 +25,6 @@ parser.add_argument('--max-amplitudes', nargs='+', help='maximum stim amplitudes
 parser.add_argument('--target-amplitudes', '-a', nargs='+', help='target stim amplitudes')
 parser.add_argument('--pulse-frequencies', '-f', nargs='+', type=float,
                     help='stim pulse frequencies (one to use same value)')
-parser.add_argument('--force-rerun', action='store_true', help='force re-running all tasks')
-
-
-class ValidationError(Exception):
-    """Raised when command-line arguments are invalid."""
 
 
 def validate_stim_settings(args):
