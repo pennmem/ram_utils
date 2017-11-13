@@ -24,13 +24,39 @@ logger = get_logger()
 
 @task()
 def get_sample_weights(events, params):
-    sample_weights = get_sample_weights_core(events,
-                                             params.encoding_samples_weight)
+    """Calculate class weights based on recall/non-recall in given events data.
+
+    Parameters
+    ----------
+    events : np.recarray
+    params : ExperimentParameters
+
+    Returns
+    -------
+    sample_weights : np.ndarray
+
+    """
+    sample_weights = get_sample_weights_core(events, params.encoding_samples_weight)
     return sample_weights
 
 
 @task()
 def train_classifier(pow_mat, events, sample_weights, params):
+    """Train a classifier.
+
+    Parameters
+    ----------
+    pow_mat : np.ndarray
+    events : np.recarray
+    sample_weights : np.ndarray
+    params : ExperimentParameters
+
+    Returns
+    -------
+    classifier : LogisticRegression
+        Trained classifier
+
+    """
     recalls = events.recalled
     recalls[events.type == 'REC_WORD'] = 1
     recalls[events.type == 'REC_BASE'] = 0
@@ -44,6 +70,21 @@ def train_classifier(pow_mat, events, sample_weights, params):
 
 @task()
 def perform_cross_validation(classifier, pow_mat, events, params):
+    """Perform LOSO or LOLO cross validation on a classifier.
+
+    Parameters
+    ----------
+    classifier : LogisticRegression
+    pow_mat : np.ndarray
+    events : np.recarray
+    params : ExperimentParameters
+
+    Returns
+    -------
+    xval : dict
+        Results of cross validation.
+
+    """
     recalls = events.recalled
     recalls[events.type == 'REC_WORD'] = 1
     recalls[events.type == 'REC_BASE'] = 0
