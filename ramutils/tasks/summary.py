@@ -14,19 +14,16 @@ logger = get_logger()
 
 
 @task()
-def generate_stim_table(events, all_events, pre_stim_probs,
-                        fr_stim_prob, bp_tal_structs, xval_output, eval_output,
-                        ps_events=None):
+def generate_stim_table(events, all_events, fr_stim_prob, bp_tal_structs,
+                        eval_output, ps_events=None):
     """Generate table of stim info for stim experiments.
 
     Parameters
     ----------
-    events
-    all_events
-    pre_stim_probs
+    events : np.recarray
+    all_events : np.recarray
     fr_stim_prob
     bp_tal_structs
-    xval_output
     eval_output
     ps_events
 
