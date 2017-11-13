@@ -7,8 +7,8 @@ from ramutils.pipelines.eventprep import preprocess_fr_events
 from ramutils.tasks import *
 
 
-def make_report(subject, experiment, paths, classifier=None, exp_params=None,
-                sessions=None, vispath=None):
+def make_report(subject, experiment, paths, stim_params=[], classifier=None,
+                exp_params=None, sessions=None, vispath=None):
     """Run a report.
 
     Parameters
@@ -18,6 +18,8 @@ def make_report(subject, experiment, paths, classifier=None, exp_params=None,
     experiment : str
         Experiment to generate report for
     paths : FilePaths
+    stim_params : List[StimParameters]
+        Stimulation parameters (empty list for non-stim experiments).
     classifier : ClassifierContainer
         For experiments that ran with a classifier, the container detailing the
         classifier that was actually used. When not given, a new classifier will
@@ -66,3 +68,6 @@ def make_report(subject, experiment, paths, classifier=None, exp_params=None,
     # TODO: generate summary
 
     # TODO: generate plots, generate tex, generate PDF
+
+    if vispath is not None:
+        pass  # TODO
