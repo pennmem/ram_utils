@@ -51,7 +51,8 @@ def make_stim_params(subject, anodes, cathodes, root='/'):
     return stim_params
 
 
-def make_ramulator_config(subject, experiment, paths, anodes, cathodes, exp_params):
+def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
+                          exp_params, vispath=None):
     """Generate configuration files for a Ramulator experiment.
 
     Parameters
@@ -66,6 +67,8 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes, exp_para
     cathodes : List[str]
         List of stim cathode contact labels
     exp_params : ExperimentParameters
+    vispath : str
+        Path to save task graph visualization to if given.
 
     Returns
     -------
@@ -94,4 +97,7 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes, exp_para
     config_path = generate_ramulator_config(subject, experiment, container,
                                             stim_params, paths, ec_pairs, excluded_pairs)
 
-    return config_path
+    if vispath is not None:
+        config_path.visualize(filename=vispath)
+
+    return config_path.compute()
