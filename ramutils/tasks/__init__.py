@@ -100,16 +100,3 @@ def read_index(mount_point='/'):
     """
     path = os.path.join(mount_point, 'protocols', 'r1.json')
     return JsonIndexReader(path)
-
-
-if __name__ == "__main__":
-    import warnings
-
-    with warnings.catch_warnings():
-        warnings.simplefilter('ignore')
-
-        @task()
-        def test():
-            print('hi!')
-
-        test().compute()
