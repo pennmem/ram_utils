@@ -116,3 +116,35 @@ if __name__ == "__main__":
 
     with timer("Slept for a total of %f s"):
         time.sleep(1)
+
+
+def combine_tag_names(tag_name_list):
+    """Generate sensible output from a list of tuples containing anode and
+    cathode contact names.
+
+    """
+    targets = [join_tag_tuple(target) for target in tag_name_list]
+    return targets
+
+
+def join_tag_tuple(tag_tuple):
+    # Check if there is single-target stimulation
+    if tag_tuple[0].find(",") == -1:
+        return "-".join(tag_tuple)
+
+    # First element of the tag tuple will be anodes, the second cathodes
+    anodes = [el for el in tag_tuple[0].split(",")]
+    cathodes = [el for el in tag_tuple[1].split(",")]
+
+    pairs = ["-".join((anodes[i], cathodes[i])) for i in range(len(anodes))]
+    joined = ":".join(pairs)
+
+    return joined
+
+
+def sanitize_comma_sep_list(input_list):
+    """Clean up a string with comma-separated values to remove 0 elements."""
+    tokens = input_list.split(",")
+    tokens = [token for token in tokens if token != "0"]
+    output = ",".join(tokens)
+    return output
