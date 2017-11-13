@@ -233,7 +233,6 @@ def summarize_session(experiment, all_events, math_events, intr_events,
     session_summary_array = self.get_passed_object('fr_session_summary')
     fr_stim_table_by_phase = stim_table.loc[~stim_table['is_ps4_session']]
 
-
     fr_stim_group_table_group = fr_stim_table_by_phase.groupby(['session'])
     for session, fr_stim_session_table in fr_stim_group_table_group:
         # Session-level summary information
@@ -445,4 +444,4 @@ def summarize_session(experiment, all_events, math_events, intr_events,
 
         session_summary_array.append(session_summary)
 
-        return session_summary_array
+    return session_summary_array
