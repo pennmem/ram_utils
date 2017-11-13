@@ -101,7 +101,6 @@ def concatenate_events(fr_events, catfr_events):
     return events
 
 
-
 # FIXME: better name?
 def free_epochs(times, duration, pre, post, start=None, end=None):
     """Given a list of event times, find epochs between them when nothing is
