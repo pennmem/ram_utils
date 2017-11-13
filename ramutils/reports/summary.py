@@ -28,7 +28,11 @@ def DictStrArray(**kwargs):
     return Dict(**kwargs)
 
 
-class FRSessionSummary(Schema):
+class Summary(Schema):
+    """Base class for all summary objects."""
+
+
+class FRSessionSummary(Summary):
     """Free recall session summary data."""
     number = Int(desc='session number')  # FIXME: not seemingly used
     name = String(desc='experiment name')
@@ -72,7 +76,7 @@ class CatFRSessionSummary(FRSessionSummary):
     irt_between_cat = Float(desc='average inter-response time between categories')
 
 
-class StimSummary(Schema):
+class StimSummary(Summary):
     """Stimulation-related summary of experiments.
 
     Notes
