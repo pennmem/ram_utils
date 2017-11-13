@@ -418,7 +418,13 @@ class ComposeSessionSummary(ReportRamTask):
             fr_stim_table_by_pos = fr_stim_session_table.groupby('serialpos')
             session_summary.prob_recall = fr_stim_session_table.groupby('serialpos').recalled.mean()
             session_summary.prob_stim_recall = fr_stim_session_table.loc[fr_stim_session_table.is_stim_item==True].groupby('serialpos').recalled.mean()
+            if len(session_summary.prob_stim_recall) == 0:
+                session_summary.prob_stim_recall = pd.Series(data=np.zeros(12))
+
             session_summary.prob_nostim_recall = fr_stim_session_table.loc[fr_stim_session_table.is_stim_item==False].groupby('serialpos').recalled.mean()
+            if len(session_summary.prob_nostim_recall) == 0:
+                session_summary.prob_nostim_recall = pd.Series(data=np.zeros(
+                    12))
 
             session_summary.prob_stim = fr_stim_session_table.loc[fr_stim_session_table['is_stim_list']==True].groupby('serialpos').is_stim_item.mean().values
             print 'session_summary.prob_stim:',session_summary.prob_stim
@@ -552,11 +558,15 @@ class ComposeSessionSummary(ReportRamTask):
 
             session_summary.n_correct_stim_items = fr_stim_stim_list_stim_item_table['recalled'].sum()
             session_summary.n_total_stim_items = len(fr_stim_stim_list_stim_item_table)
-            session_summary.pc_stim_items = 100*session_summary.n_correct_stim_items / float(session_summary.n_total_stim_items)
+            session_summary.pc_stim_items = \
+                100 * safe_divide(session_summary.n_correct_stim_items,
+                                    float(session_summary.n_total_stim_items))
 
             session_summary.n_correct_post_stim_items = fr_stim_stim_list_post_stim_item_table['recalled'].sum()
             session_summary.n_total_post_stim_items = len(fr_stim_stim_list_post_stim_item_table)
-            session_summary.pc_post_stim_items = 100*session_summary.n_correct_post_stim_items / float(session_summary.n_total_post_stim_items)
+            session_summary.pc_post_stim_items = 100 * safe_divide(
+                                                     session_summary.n_correct_post_stim_items,
+                                                     float(session_summary.n_total_post_stim_items))
 
             session_summary.n_correct_nonstim_low_bio_items = fr_stim_non_stim_list_low_table['recalled'].sum()
             session_summary.n_total_nonstim_low_bio_items = len(fr_stim_non_stim_list_low_table)

@@ -111,6 +111,8 @@ class GeneratePlots(ReportRamTask):
         for session_summary in fr5_session_summaries:
 
             # P_REC and PFR
+            # This can be problematic if there are no stim items or no
+            # nonstim items
             panel_plot = PanelPlot(i_max=1,j_max=2,xfigsize=15, yfigsize=7.5, title='', labelsize=18)
 
             pdca = PlotDataCollection(xlim=(0,12), ylim=(0.0, 1.0), xlabel='(a)', ylabel='Stim vs Non-Stim Items', xlabel_fontsize=20,ylabel_fontsize=20)
