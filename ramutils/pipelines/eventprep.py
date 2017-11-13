@@ -6,6 +6,7 @@ from ramutils.tasks import *
 ProcessedEvents = namedtuple("ProcessedEvents", "encoding, retrieval")
 
 
+# FIXME: also return stim events?
 def preprocess_fr_events(index, subject, compute=False):
     """Pre-processing for FR experiments.
 
