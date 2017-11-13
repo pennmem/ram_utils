@@ -1,7 +1,31 @@
 import numpy as np
-from traits.api import Int, Float, String, Array
+from traits.api import (
+    Int, Float, String, Array, Dict, DictStrFloat, DictStrInt, ListBool
+)
 
 from ramutils.schema import Schema
+
+
+def DictStrArray(**kwargs):
+    """Trait for a dict of numpy arrays.
+
+    Keyword arguments
+    -----------------
+    dtype : np.dtype
+        Array dtype (default: ``np.float64``)
+    shape : list-like
+        Shape for the array
+
+    Notes
+    -----
+    All keyword arguments not specified above are passed on to the ``Dict``
+    constructor.
+
+    """
+    kwargs['key_trait'] = String
+    kwargs['value_trait'] = Array(dtype=kwargs.pop('dtype', np.float64),
+                                  shape=kwargs.pop('shape', None))
+    return Dict(**kwargs)
 
 
 class FRSessionSummary(Schema):
@@ -21,7 +45,7 @@ class FRSessionSummary(Schema):
     pc_eli = Float(desc='percentage of extra-list intrusions')
 
     prob_recall = Array(dtype=np.float64, desc='probability of recall by encoding position')
-    prob_first_recall = Array(desc='probability of encoding position being recalled first')
+    prob_first_recall = Array(desc='probability of each encoding position being recalled first')
 
     n_math = Int(desc='number of math problems')
     n_correct_math = Int(desc='number of correctly answered math problems')
@@ -40,9 +64,48 @@ class FRSessionSummary(Schema):
 
 
 class CatFRSessionSummary(FRSessionSummary):
-    """Extends standard FR session summaries for categoried free recall
+    """Extends standard FR session summaries for categorized free recall
     experiments.
 
     """
     irt_within_cat = Float(desc='average inter-response time within categories')
     irt_between_cat = Float(desc='average inter-response time between categories')
+
+
+class StimSummary(Schema):
+    """Stimulation-related summary of experiments.
+
+    Notes
+    -----
+    All dicts use the stim pair label as the key.
+
+    """
+    frequency = DictStrFloat(desc='stimulation pulse frequency')
+    amplitude = DictStrFloat(desc='stimulation amplitude')
+
+    prob_recall = DictStrFloat(desc='average probability of recall by serial position')
+    prob_stim_recall = DictStrFloat(desc='probability of recall by serial position for stim lists')
+    prob_nostim_recall = DictStrFloat(desc='probability of recall by serial position for non-stim lists')
+    prob_stim = DictStrFloat(desc='probability of stimulation by serial position')
+    prob_first_stim_recall = DictStrArray(desc='probability of each encoding position being recalled first for stim lists')
+    prob_first_nostim_recall = DictStrArray(desc='probability of each encoding position being recalled first for non-stim lists')
+
+    # FIXME
+    list_number = DictStrArray(desc='???')
+
+    # FIXME: are these arrays?
+    n_recalls_per_list = DictStrArray(dtype=np.int, desc="number of recalls by list")
+    n_stims_per_list = DictStrArray(dtype=np.int, desc="number of recalls by stim list")
+
+    # FIXME: are these more complicated than just lists? In FR6 they are oddly dicts
+    is_baseline_list = ListBool(desc="masks which lists are baseline")
+    is_nonstim_list = ListBool(desc="masks which lists are non-stim")
+    is_stim_list = ListBool(desc="masks which lists are stim")
+    is_ps_list = ListBool(desc="masks which lists are PS")
+
+    n_correct_stim = DictStrInt(desc="total number of correctly recalled words for stim lists")
+    n_total_stim = DictStrInt(desc="total number of stim events ???")  # FIXME: desc
+    pc_from_stim = DictStrFloat(desc="percentage of correctly recalled stim words ???")  # FIXME: name, desc
+
+    chisqr = DictStrFloat(desc='chi squared for stim vs. non-stim lists')
+    pvalue = DictStrFloat(desc='p-value for stim vs. non-stim lists')
