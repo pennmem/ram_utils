@@ -47,6 +47,7 @@ def make_stim_params(subject, anodes, cathodes, root='/'):
     return stim_params
 
 
+# FIXME: optionally infer exp_params from experiment name
 def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
                           exp_params, vispath=None):
     """Generate configuration files for a Ramulator experiment.
