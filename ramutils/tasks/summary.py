@@ -163,6 +163,50 @@ def generate_stim_table(events, all_events, fr_stim_prob, bp_tal_structs,
     return stim_table
 
 
+@task()
+def construct_session_table(all_events, stim_table):
+    """Constructs a basic summary of sessions including date, length,
+    number of lists, etc.
+
+    Parameters
+    ----------
+    all_events : np.recarray
+    stim_table
+
+    Returns
+    -------
+    List of session info.
+
+    """
+    session_data = []
+
+    # TODO: This should be done by stim target pairs, i.e. if multiple
+    # multi-site targets are chosen, then we should calculate this table for
+    # each set of sessions corresponding
+    fr_stim_table_by_session = stim_table.groupby(['session'])
+    for session, fr_stim_session_table in fr_stim_table_by_session:
+        session_all_events = all_events[all_events.session == session]
+        timestamps = session_all_events.mstime
+        first_time_stamp = timestamps.min()
+        last_time_stamp = np.max(timestamps)
+        session_length = '%.2f' % ((last_time_stamp - first_time_stamp) / 60000.0)
+        session_date = time.strftime('%d-%b-%Y', time.localtime(last_time_stamp/1000))
+        n_lists = len(fr_stim_session_table.list.unique())
+        pc_correct_words = 100.0 * fr_stim_session_table.recalled.mean()
+
+        # There should be an easier way to get this set of unique amplitudes
+        # excluding 0 and nan
+        all_amplitudes = fr_stim_session_table['amplitude'].unique()
+        all_amplitudes = [amp for amp in all_amplitudes if amp > 0]
+        all_amplitudes = [str(amp).split(",") for amp in all_amplitudes]
+        all_amplitudes = list(chain.from_iterable(all_amplitudes))
+        all_amplitudes = [el for el in set(all_amplitudes) if el != "0"]
+        amplitude = ",".join(all_amplitudes)
+        session_data.append([session, session_date, session_length, n_lists, '$%.2f$\\%%' % pc_correct_words, amplitude])
+
+    return session_data
+
+
 def summarize_session(experiment, all_events, math_events, intr_events,
                       rec_events, record_only_events, stim_table):
     """Summarize a single session.
@@ -185,32 +229,6 @@ def summarize_session(experiment, all_events, math_events, intr_events,
     stim_table['prev_prob'] = stim_table['prob'].shift(1)
     stim_table['prob_diff'] = stim_table['prob'] - stim_table['prev_prob']
     stim_table = stim_table.loc[~stim_table['is_ps4_session']]
-
-    session_data = []
-
-    # TODO: This should be done by stim target pairs, i.e. if multiple multi-site targets are
-    # chosen, then we should calculate this table for each set of sessions corresponding
-    stim_targets = []
-    fr_stim_table_by_session = stim_table.groupby(['session'])
-    for session,fr_stim_session_table in fr_stim_table_by_session:
-        session_all_events = all_events[all_events.session == session]
-        timestamps = session_all_events.mstime
-        first_time_stamp = timestamps.min()
-        last_time_stamp = np.max(timestamps)
-        session_length = '%.2f' % ((last_time_stamp - first_time_stamp) / 60000.0)
-        session_date = time.strftime('%d-%b-%Y', time.localtime(last_time_stamp/1000))
-        n_lists = len(fr_stim_session_table.list.unique())
-        pc_correct_words = 100.0 * fr_stim_session_table.recalled.mean()
-        # There should be an easier way to get this set of unique amplitudes excluding 0 and nan
-        all_amplitudes = fr_stim_session_table['amplitude'].unique()
-        all_amplitudes = [amp for amp in all_amplitudes if amp > 0]
-        all_amplitudes = [str(amp).split(",") for amp in all_amplitudes]
-        all_amplitudes = list(chain.from_iterable(all_amplitudes))
-        all_amplitudes = [el for el in set(all_amplitudes) if el != "0"]
-        amplitude = ",".join(all_amplitudes)
-        session_data.append([session, session_date, session_length, n_lists, '$%.2f$\\%%' % pc_correct_words, amplitude])
-
-    # self.pass_object('session_table', session_data)
 
     session_summary_array = self.get_passed_object('fr_session_summary')
     fr_stim_table_by_phase = stim_table.loc[~stim_table['is_ps4_session']]
