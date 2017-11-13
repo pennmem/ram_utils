@@ -49,6 +49,8 @@ def make_parser(description, allowed_experiments=sum([exps for exps in EXPERIMEN
     parser.add_argument('--force-rerun', action='store_true', help='force re-running all tasks')
     parser.add_argument('--experiment', '-x', required=True, type=str,
                         choices=allowed_experiments, help='experiment')
+    parser.add_argument('--vispath', default=None, type=str,
+                        help='Path to save task graph visualization to')
     return parser
 
 

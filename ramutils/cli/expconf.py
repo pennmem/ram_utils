@@ -74,7 +74,7 @@ def main():
 
     # Generate!
     make_ramulator_config(args.subject, args.experiment, paths,
-                          args.anodes, args.cathodes, exp_params)
+                          args.anodes, args.cathodes, exp_params, args.vispath)
 
 
 if __name__ == "__main__":
