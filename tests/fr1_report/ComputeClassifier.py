@@ -14,7 +14,7 @@ from ptsa.data.readers.IndexReader import JsonIndexReader
 
 from ReportTasks.RamTaskMethods import run_lolo_xval,run_loso_xval,permuted_loso_AUCs,permuted_lolo_AUCs,ModelOutput
 from ReportUtils import ReportRamTask
-from ramutils.classifier.utils import normalize_sessions, get_sample_weights
+from ramutils.classifier.utils import normalize_powers_by_session, get_sample_weights
 
 
 class ComputeClassifier(ReportRamTask):
@@ -68,7 +68,7 @@ class ComputeClassifier(ReportRamTask):
         return self._events[self._events.type=='WORD']
 
     def _normalize_sessions(self,events):
-        self.pow_mat = normalize_sessions(self.pow_mat, events)
+        self.pow_mat = normalize_powers_by_session(self.pow_mat, events)
 
     def get_pow_mat(self):
         events = self.events
@@ -186,8 +186,8 @@ class ComputeJointClassifier(ReportRamTask):
         events = self.events
         self.pow_mat = self.get_pow_mat()
         encoding_mask = events.type=='WORD'
-        self.pow_mat[encoding_mask] = normalize_sessions(self.pow_mat[encoding_mask],events[encoding_mask])
-        self.pow_mat[~encoding_mask] = normalize_sessions(self.pow_mat[~encoding_mask],events[~encoding_mask])
+        self.pow_mat[encoding_mask] = normalize_powers_by_session(self.pow_mat[encoding_mask], events[encoding_mask])
+        self.pow_mat[~encoding_mask] = normalize_powers_by_session(self.pow_mat[~encoding_mask], events[~encoding_mask])
 
         # Save this power matrix for debugging
         self.save_array_to_hdf5(self.get_path_to_resource_in_workspace(subject + "-debug_data.h5"),
@@ -258,8 +258,8 @@ class ComputeJointClassifier(ReportRamTask):
 
     def _normalize_sessions(self,events):
         encoding_mask = events.type=='WORD'
-        self.pow_mat[encoding_mask]= normalize_sessions(self.pow_mat[encoding_mask],events[encoding_mask])
-        self.pow_mat[~encoding_mask] = normalize_sessions(self.pow_mat[~encoding_mask],events[~encoding_mask])
+        self.pow_mat[encoding_mask]= normalize_powers_by_session(self.pow_mat[encoding_mask], events[encoding_mask])
+        self.pow_mat[~encoding_mask] = normalize_powers_by_session(self.pow_mat[~encoding_mask], events[~encoding_mask])
 
     def pass_objects(self):
         subject = self.pipeline.subject

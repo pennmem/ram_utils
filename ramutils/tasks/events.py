@@ -8,6 +8,11 @@ __all__ = [
     'concatenate_events',
     'create_baseline_events',
     'select_word_events',
+    'get_encoding_mask',
+    'get_retrieval_mask',
+    'select_encoding_events',
+    'select_retrieval_events',
+    'combine_events'
 ]
 
 
@@ -30,6 +35,8 @@ def read_fr_events(index, subject, sessions=None, cat=False):
     :returns: list of events for each session
 
     """
+    # FIXME: We really shouldn't need to be extracting montage from the
+    # subject ID
     tmp = subject.split('_')
     montage = 0 if len(tmp) == 1 else int(tmp[1])
     subj_code = tmp[0]
@@ -43,14 +50,14 @@ def read_fr_events(index, subject, sessions=None, cat=False):
         use_sessions = [s - offset for s in sessions if s < 100]
 
         files = [
-            index.get_value('task_events', subject=subj_code, montage=montage,
+            index.get_value('all_events', subject=subj_code, montage=montage,
                             experiment=exp, session=s)
             for s in sorted(use_sessions)
         ]
         events = [_filter_session(BaseEventReader(filename=event_path).read()) for event_path in files]
     else:
         files = sorted(
-            list(index.aggregate_values('task_events', subject=subj_code,
+            list(index.aggregate_values('all_events', subject=subj_code,
                                         montage=montage, experiment=exp))
         )
         events = [_filter_session(BaseEventReader(filename=f).read()) for f in files]
@@ -92,6 +99,7 @@ def concatenate_events(fr_events, catfr_events):
 
     events = events[events.list > -1]
     return events
+
 
 
 # FIXME: better name?
@@ -235,8 +243,8 @@ def select_word_events(events, include_retrieval=True):
 
     # FIXME: document what is going on here
     irts = np.append([0], np.diff(events.mstime))
-    encoding_events_mask = events.type == 'WORD'
-    retrieval_events_mask = (events.type == 'REC_WORD') | (events.type == 'REC_BASE')
+    encoding_events_mask = get_encoding_mask(events)
+    retrieval_events_mask = get_retrieval_mask(events)
     retrieval_events_mask_0s = retrieval_events_mask & (events.type == 'REC_BASE')
     retrieval_events_mask_1s = retrieval_events_mask & (events.type == 'REC_WORD') & (events.intrusion == 0) & (irts > 1000)
 
@@ -250,3 +258,55 @@ def select_word_events(events, include_retrieval=True):
 
     events = filtered_events.view(np.recarray)
     return events
+
+
+@task(cache=False)
+def select_encoding_events(events):
+    """ Select only encoding events
+
+    """
+    encoding_mask = get_encoding_mask(events)
+    encoding_events = events[encoding_mask]
+    return encoding_events
+
+
+@task(cache=False)
+def select_retrieval_events(events):
+    """ Select only retrieval events
+
+    """
+    # FIXME: This assumes the given events have already been partially subset
+    # from all events
+    retrieval_mask = get_retrieval_mask(events)
+    retrieval_events = events[retrieval_mask]
+    return retrieval_events
+
+
+def get_encoding_mask(events):
+    encoding_mask = (events.type == "WORD")
+    return encoding_mask
+
+
+def get_retrieval_mask(events):
+    retrieval_mask = (events.type == 'REC_WORD') | (events.type == 'REC_BASE')
+    return retrieval_mask
+
+
+@task(cache=False)
+def combine_events(event_list):
+    """ Combines a list of events into single recarray """
+    events = np.concatenate(event_list).view(np.recarray)
+    events.sort(order=['session', 'list', 'mstime'])
+    return events
+
+
+@task()
+def remove_negative_offsets():
+    return
+
+
+@task()
+def remove_bad_events():
+    return
+
+
