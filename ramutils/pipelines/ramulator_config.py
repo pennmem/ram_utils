@@ -4,11 +4,7 @@ from bptools.jacksheet import read_jacksheet
 from ptsa.data.readers import JsonIndexReader
 
 from ramutils.parameters import StimParameters
-from ramutils.tasks.classifier import *
-from ramutils.tasks.events import *
-from ramutils.tasks.montage import *
-from ramutils.tasks.odin import *
-from ramutils.tasks.powers import *
+from ramutils.tasks import *
 
 
 def make_stim_params(subject, anodes, cathodes, root='/'):

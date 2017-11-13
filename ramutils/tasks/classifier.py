@@ -21,6 +21,13 @@ except ImportError:
 
 logger = get_logger()
 
+__all__ = [
+    'get_sample_weights',
+    'train_classifier',
+    'perform_cross_validation',
+    'serialize_classifier',
+]
+
 
 @task()
 def get_sample_weights(events, params):

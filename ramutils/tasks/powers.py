@@ -9,6 +9,13 @@ from ramutils.tasks import task
 
 logger = get_logger()
 
+__all__ = [
+    'compute_powers',
+    'combine_encoding_retrieval_powers',
+    'normalize_powers_by_session',
+    'reduce_powers',
+]
+
 
 @task(nout=2)
 def compute_powers(events, params):
