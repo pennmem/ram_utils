@@ -9,7 +9,7 @@ from random import shuffle
 from sklearn.externals import joblib
 
 from ptsa.data.readers.IndexReader import JsonIndexReader
-from ramutils.classifier.utils import normalize_sessions, get_sample_weights
+from ramutils.classifier.utils import normalize_powers_by_session, get_sample_weights
 
 from ramutils.pipeline import RamTask
 
@@ -262,10 +262,10 @@ class ComputeClassifier(RamTask):
         subject = self.pipeline.subject
         events = self.get_events()
         self.pow_mat = self.get_pow_mat()
-        self.pow_mat[events.type=='WORD'] = normalize_sessions(self.pow_mat[events.type=='WORD'],
-                                                               events[events.type=='WORD'])
-        self.pow_mat[events.type!='WORD'] = normalize_sessions(self.pow_mat[events.type!='WORD'],
-                                                               events[events.type!='WORD'])
+        self.pow_mat[events.type=='WORD'] = normalize_powers_by_session(self.pow_mat[events.type == 'WORD'],
+                                                                        events[events.type=='WORD'])
+        self.pow_mat[events.type!='WORD'] = normalize_powers_by_session(self.pow_mat[events.type != 'WORD'],
+                                                                        events[events.type!='WORD'])
 
         self.lr_classifier = LogisticRegression(C=self.params.C,
                                                 penalty=self.params.penalty_type,

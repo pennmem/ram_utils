@@ -4,9 +4,11 @@ from collections import OrderedDict
 import numpy as np
 import pandas as pd
 
+from classiflib import dtypes
 from ramutils.tasks import task
 
-__all__ = ['load_pairs', 'reduce_pairs']
+__all__ = ['load_pairs_from_json', 'reduce_pairs',
+           'generate_pairs_for_classifier', 'get_used_pair_mask']
 
 
 # FIXME: document
@@ -32,11 +34,11 @@ def _atlas_location(bp_data):
 
 
 @task()
-def load_pairs(path):
+def load_pairs_from_json(path):
     """Load pairs.json.
 
     :param str path: Path to pairs.json
-    :returns: pairs.json as a dict
+    :returns: pairs.json as a dict of bipolar pairs
     :rtype: dict
 
     """
@@ -59,22 +61,20 @@ def reduce_pairs(pairs, stim_params, return_excluded=False):
     :rtype: dict
 
     """
-    subject = list(pairs.keys())[0]
+    pairs = extract_pairs_dict(pairs)
     contacts = [(p.anode, p.cathode) for p in stim_params]
-    all_pairs = pairs[subject]['pairs']
     reduced_pairs = OrderedDict()
     excluded_pairs = OrderedDict()
 
-    for label, pair in all_pairs.items():
-        if pair['channel_1'] not in contacts and pair['channel_2'] not in contacts:
+    for label, pair in pairs.items():
+        if (pair['channel_1'], pair['channel_2']) not in contacts:
             reduced_pairs[label] = pair
         else:
             excluded_pairs[label] = pair
 
     if return_excluded:
-        return excluded_pairs
-    else:
-        return reduced_pairs
+        reduced_pairs = excluded_pairs
+    return reduced_pairs
 
 
 @task(cache=False)
@@ -98,3 +98,65 @@ def get_bipolar_pairs(bp_tal_structs):
 
     """
     return list(zip(bp_tal_structs.channel_1.values, bp_tal_structs.channel_2.values))
+
+
+@task()
+def generate_pairs_for_classifier(pairs, excluded_pairs):
+    """ Create recarray of electrode pairs for the classifier container
+
+    :param pairs: dict containting all electrode pairs in the montage
+    :param excluded_pairs: dict containing pairs excluded from the montage
+    :returns: recarray containing all pairs minus excluded pairs
+    :rtype: np.recarray
+
+    """
+    pairs = extract_pairs_dict(pairs)
+    used_pairs = {
+        key: value for key, value in pairs.items()
+        if key not in excluded_pairs
+        }
+
+    pairs = np.rec.fromrecords([(item['channel_1'], item['channel_2'],
+                                 pair.split('-')[0], pair.split('-')[1])
+                                 for pair, item in used_pairs.items()],
+                               dtype=dtypes.pairs)
+
+    pairs.sort(order='contact0')
+
+    return pairs
+
+
+@task()
+def get_used_pair_mask(all_pairs, excluded_pairs):
+    """ Get a mask of whether to include a pair in all_pairs based on
+    excluded pairs
+
+    :param all_pairs: dict containing all electrode pairs
+    :param excluded_pairs: dict containing pairs to exclude
+    :return: np.array containing a mask to identify excluded pairs from all
+    pairs
+
+    """
+    all_pairs = extract_pairs_dict(all_pairs).keys()
+    mask = [False if (label in excluded_pairs) else True for
+            label in all_pairs]
+    mask = np.array(mask)
+
+    return mask
+
+
+def extract_pairs_dict(pairs):
+    """ Extract a dictionary of pairs from the standard json structure
+
+    :param pairs: raw json pairs structure
+    :return:  dict containing just the pairs data
+
+    """
+    # Handle empty dictionary case
+    if len(pairs.keys()) == 0:
+        return pairs
+
+    subject = list(pairs.keys())[0]
+    pairs = pairs[subject]['pairs']
+
+    return pairs

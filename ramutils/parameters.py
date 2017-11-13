@@ -63,7 +63,7 @@ class ExperimentParameters(Schema):
     filt_order = Int(4, desc="Butterworth filter order")
 
     penalty_type = String('l2', desc='logistic regression penalty type')
-    C = Float('7.2e-4', desc='inverse of regularization strength')
+    C = Float(7.2e-4, desc='inverse of regularization strength')
     n_permutations = Int(200, desc='number of permutations to use for cross-validation')
     solver = String('liblinear', desc='algorithm to use in optimization process')
 
@@ -77,3 +77,7 @@ class FRParameters(ExperimentParameters):
     retrieval_start_time = Float(-0.525)
     retrieval_end_time = Float(0)
     retrieval_buf = Float(0.524)
+
+    encoding_samples_weight = Float(2.5, desc="weighting factor for encoding "
+                                              "samples")
+    n_perm = Int(200, desc="number of permutation samples for cross validation")
