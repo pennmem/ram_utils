@@ -3,7 +3,7 @@ import numpy as np
 from ramutils.eeg.powers import compute_powers as compute_powers_core
 from ramutils.classifier.utils import normalize_powers_by_session as \
     normalize_powers_by_session_core
-from ramutils.tasks.events import get_encoding_mask, get_retrieval_mask
+from ramutils.tasks.events import get_encoding_mask, get_all_retrieval_events_mask
 from ramutils.log import get_logger
 from ramutils.tasks import task
 
@@ -32,7 +32,7 @@ def compute_powers(events, params):
 def combine_encoding_retrieval_powers(events, encoding_powers,
                                       retrieval_powers):
     encoding_mask = get_encoding_mask(events)
-    retrieval_mask = get_retrieval_mask(events)
+    retrieval_mask = get_all_retrieval_events_mask(events)
 
     powers = np.zeros((len(events), encoding_powers.shape[-1]))
     powers[encoding_mask, ...] = encoding_powers
