@@ -65,7 +65,8 @@ class TestEvents:
         assert concated.shape == (5804,)
 
     def test_combine_events(self):
-        combined_events = combine_events([self.test_data, self.test_data])
+        combined_events = combine_events([self.test_data,
+                                          self.test_data]).compute()
         assert len(combined_events) == (2 * len(self.test_data))
         return
 
