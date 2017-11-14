@@ -12,7 +12,8 @@ from ramutils.reports.summary import (
 def fr5_events():
     """FR5 events for R1345D."""
     filename = resource_filename('ramutils.test.test_data', 'fr5-events.npz')
-    return np.load(filename)['events'].view(np.recarray)
+    events = np.load(filename)['events'].view(np.recarray)
+    return events[events.session == 0]
 
 
 class TestSummary:
@@ -34,6 +35,24 @@ class TestSummary:
         assert all(df.bools == summary.bools)
         assert all(df.ints == summary.ints)
         assert all(df.floats == summary.floats)
+
+    def test_session_length(self, fr5_events):
+        summary = Summary()
+        summary.events = fr5_events
+        assert np.floor(summary.session_length) == 2475
+
+    def test_session_datetime(self, fr5_events):
+        summary = Summary()
+        summary.events = fr5_events
+        dt = summary.session_datetime
+        assert dt.tzinfo is not None
+        assert dt.year == 2017
+        assert dt.month == 10
+        assert dt.day == 9
+        assert dt.hour == 18
+        assert dt.minute == 8
+        assert dt.second == 25
+        assert dt.utcoffset().total_seconds() == 0
 
 
 class TestFRSessionSummary:
@@ -61,9 +80,9 @@ class TestStimSessionSummary:
         summary.populate(fr5_events, is_ps4_session)
         df = summary.to_dataframe()
 
-        assert len(df[df.phase == 'BASELINE']) == 72
-        assert len(df[df.phase == 'STIM']) == 384
-        assert len(df[df.phase == 'NON-STIM']) == 144
+        assert len(df[df.phase == 'BASELINE']) == 36
+        assert len(df[df.phase == 'STIM']) == 192
+        assert len(df[df.phase == 'NON-STIM']) == 72
 
 
 class TestFRStimSessionSummary:
