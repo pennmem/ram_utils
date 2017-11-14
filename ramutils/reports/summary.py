@@ -10,6 +10,13 @@ from traits.api import Array, ArrayOrNone
 
 from ramutils.schema import Schema
 
+__all__ = [
+    'Summary',
+    'FRSessionSummary',
+    'FRStimSessionSummary',
+    'FR5SessionSummary',
+]
+
 
 class Summary(Schema):
     """Base class for all summary objects."""
