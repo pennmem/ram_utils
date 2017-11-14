@@ -1,5 +1,9 @@
+from datetime import datetime
+
 import numpy as np
 import pandas as pd
+import pytz
+
 from traits.api import Array, ArrayOrNone
 
 from ramutils.schema import Schema
@@ -16,8 +20,25 @@ class Summary(Schema):
 
     @events.setter
     def events(self, new_events):
-        if self._events is not None:
+        assert len(np.unique(new_events['session'])) == 1, "events should only be from a single session"
+        if self._events is None:
             self._events = new_events
+
+    @property
+    def session_length(self):
+        """Computes the total amount of time the session lasted in seconds."""
+        start = self.events.mstime.min()
+        end = self.events.mstime.max()
+        return (end - start) / 1000.
+
+    @property
+    def session_datetime(self):
+        """Returns a timezone-aware datetime object of the end time of the
+        session in UTC.
+
+        """
+        timestamp = self.events.mstime.max() / 1000.
+        return datetime.fromtimestamp(timestamp, pytz.utc)
 
     def to_dataframe(self, recreate=False):
         """Convert the summary to a :class:`pd.DataFrame` for easier
