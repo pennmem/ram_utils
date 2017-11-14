@@ -47,7 +47,7 @@ class Summary(Schema):
         pd.DataFrame
 
         """
-        if not hasattr(self, '_df'):
+        if not hasattr(self, '_df') or recreate:
             columns = {
                 trait: getattr(self, trait)
                 for trait in self.visible_traits()
