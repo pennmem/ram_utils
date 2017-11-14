@@ -129,7 +129,7 @@ def insert_baseline_retrieval_events(events, start_time, end_time):
     for session in np.unique(events.session):
         sess_events = events[(events.session == session)]
         rec_events = select_retrieval_events(sess_events)
-        voc_events = select_vocalization_events(events)
+        voc_events = select_vocalization_events(sess_events)
 
         # Events corresponding to the start of the recall period
         starts = sess_events[(sess_events.type == 'REC_START')]
@@ -207,7 +207,6 @@ def insert_baseline_retrieval_events(events, start_time, end_time):
     return np.concatenate(all_events).view(np.recarray)
 
 
-@task(cache=False)
 def find_free_time_periods(times, duration, pre, post, start=None, end=None):
     """
         Given a list of event times, find epochs between them when nothing is
@@ -330,7 +329,7 @@ def select_vocalization_events(events):
 def get_vocalization_mask(events):
     """ Create mask for vocalization events"""
     vocalization_mask = ((events.type == 'REC_WORD') |
-                         (events.type == 'REC_VV'))
+                         (events.type == 'REC_WORD_VV'))
     return vocalization_mask
 
 
@@ -390,6 +389,7 @@ def get_all_retrieval_events_mask(events):
     return all_retrieval_mask
 
 
+@task()
 def combine_events(event_list):
     """ Combines a list of events into single recarray """
     events = np.concatenate(event_list).view(np.recarray)
