@@ -71,6 +71,9 @@ class TestFRSessionSummary:
     def test_num_lists(self):
         assert self.summary.num_lists == 25
 
+    def test_percent_recalled(self):
+        assert self.summary.percent_recalled == 16
+
 
 class TestStimSessionSummary:
     @pytest.mark.parametrize('is_ps4_session', [True, False])

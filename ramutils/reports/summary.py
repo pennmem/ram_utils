@@ -1,3 +1,5 @@
+from __future__ import division
+
 from datetime import datetime
 
 import numpy as np
@@ -74,8 +76,7 @@ class Summary(Schema):
 
 class FRSessionSummary(Summary):
     """Free recall session summary data."""
-    # FIXME: string dtypes for arrays
-    item = Array(desc='list item (a.k.a. word)')
+    item = Array(dtype='|U256', desc='list item (a.k.a. word)')
     session = Array(dtype=int, desc='session number')
     listno = Array(dtype=int, desc="item's list number")
     serialpos = Array(dtype=int, desc='item serial position')
@@ -110,6 +111,12 @@ class FRSessionSummary(Summary):
     def num_lists(self):
         """Returns the total number of lists."""
         return len(self.to_dataframe().listno.unique())
+
+    @property
+    def percent_recalled(self):
+        """Calculates the percentage correctly recalled words."""
+        # FIXME: is length of events always equal to number of items?
+        return 100 * len(self.events[self.events.recalled == True]) / len(self.events)
 
 
 # FIXME
