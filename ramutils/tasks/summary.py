@@ -28,7 +28,7 @@ def summarize_session(events):
 
     Returns
     -------
-    summary : Summary
+    summary : SessionSummary
         Summary object for the proper experiment type.
 
     Raises
@@ -56,7 +56,7 @@ def summarize_session(events):
 
     # FIXME: recall_probs
     if experiment in ['FR1']:
-        summary = FRSessionSummary()
+        summary = FRSessionSessionSummary()
         summary.populate(events)
 
     # FIXME: recall_probs, ps4

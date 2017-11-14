@@ -11,8 +11,8 @@ from traits.api import Array, ArrayOrNone
 from ramutils.schema import Schema
 
 __all__ = [
-    'Summary',
-    'FRSessionSummary',
+    'SessionSummary',
+    'FRSessionSessionSummary',
     'FRStimSessionSummary',
     'FR5SessionSummary',
 ]
@@ -29,6 +29,24 @@ class Summary(Schema):
 
     @events.setter
     def events(self, new_events):
+        if self._events is None:
+            self._events = new_events
+
+
+class MathSummary(Schema):
+    """Summarizes data from math distractor periods."""
+    # TODO
+
+
+class SessionSummary(Summary):
+    """Base class for single-session objects."""
+    @property
+    def events(self):
+        return self._events
+
+    @events.setter
+    def events(self, new_events):
+        """Only allow setting of events which contain a single session."""
         assert len(np.unique(new_events['session'])) == 1, "events should only be from a single session"
         if self._events is None:
             self._events = new_events
@@ -86,7 +104,7 @@ class Summary(Schema):
         self.phase = events.phase
 
 
-class FRSessionSummary(Summary):
+class FRSessionSessionSummary(SessionSummary):
     """Free recall session summary data."""
     item = Array(dtype='|U256', desc='list item (a.k.a. word)')
     session = Array(dtype=int, desc='session number')
@@ -110,7 +128,7 @@ class FRSessionSummary(Summary):
             indicate this.
 
         """
-        Summary.populate(self, events)
+        SessionSummary.populate(self, events)
         self.item = events.item_name
         self.session = events.session
         self.listno = events.list
@@ -132,7 +150,7 @@ class FRSessionSummary(Summary):
 
 
 # FIXME
-# class CatFRSessionSummary(FRSessionSummary):
+# class CatFRSessionSummary(FRSessionSessionSummary):
 #     """Extends standard FR session summaries for categorized free recall
 #     experiments.
 #
@@ -141,8 +159,8 @@ class FRSessionSummary(Summary):
 #     irt_between_cat = Float(desc='average inter-response time between categories')
 
 
-class StimSessionSummary(Summary):
-    """Summary data specific to sessions with stimulation."""
+class StimSessionSessionSummary(SessionSummary):
+    """SessionSummary data specific to sessions with stimulation."""
     is_stim_list = Array(dtype=np.bool, desc='item is from a stim list')
     is_post_stim_item = Array(dtype=np.bool, desc='stimulation occurred on the previous item')
     is_stim_item = Array(dtype=np.bool, desc='stimulation occurred on this item')
@@ -165,7 +183,7 @@ class StimSessionSummary(Summary):
             Whether or not this experiment is also a PS4 session.
 
         """
-        Summary.populate(self, events)
+        SessionSummary.populate(self, events)
 
         self.is_stim_list = [e.phase == 'STIM' for e in events]
         self.is_stim_item = events.is_stim
@@ -182,11 +200,11 @@ class StimSessionSummary(Summary):
         self.duration = [e.stim_params.stim_duration for e in events]
 
 
-class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
-    """Summary for FR sessions with stim."""
+class FRStimSessionSummary(FRSessionSessionSummary, StimSessionSessionSummary):
+    """SessionSummary for FR sessions with stim."""
     def populate(self, events, recall_probs=None, is_ps4_session=False):
-        FRSessionSummary.populate(self, events, recall_probs)
-        StimSessionSummary.populate(self, events, is_ps4_session)
+        FRSessionSessionSummary.populate(self, events, recall_probs)
+        StimSessionSessionSummary.populate(self, events, is_ps4_session)
 
     @property
     def num_nonstim_lists(self):

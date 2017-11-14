@@ -4,7 +4,7 @@ import pytest
 from traits.api import ListInt, ListFloat, ListBool
 
 from ramutils.reports.summary import (
-    Summary, StimSessionSummary, FRSessionSummary, FRStimSessionSummary
+    SessionSummary, StimSessionSessionSummary, FRSessionSessionSummary, FRStimSessionSummary
 )
 
 
@@ -18,12 +18,12 @@ def fr5_events():
 
 class TestSummary:
     def test_to_dataframe(self):
-        class MySummary(Summary):
+        class MySessionSummary(SessionSummary):
             bools = ListBool()
             ints = ListInt()
             floats = ListFloat()
 
-        summary = MySummary(
+        summary = MySessionSummary(
             bools=[True, True, True],
             ints=[1, 2, 3],
             floats=[1., 2., 3.],
@@ -37,12 +37,12 @@ class TestSummary:
         assert all(df.floats == summary.floats)
 
     def test_session_length(self, fr5_events):
-        summary = Summary()
+        summary = SessionSummary()
         summary.events = fr5_events
         assert np.floor(summary.session_length) == 2475
 
     def test_session_datetime(self, fr5_events):
-        summary = Summary()
+        summary = SessionSummary()
         summary.events = fr5_events
         dt = summary.session_datetime
         assert dt.tzinfo is not None
@@ -58,13 +58,13 @@ class TestSummary:
 class TestFRSessionSummary:
     @classmethod
     def setup_class(cls):
-        cls.summary = FRSessionSummary()
+        cls.summary = FRSessionSessionSummary()
         events = fr5_events()
         probs = np.random.random(len(events))
         cls.summary.populate(events, probs)
 
     def test_no_probs_given(self, fr5_events):
-        summary = FRSessionSummary()
+        summary = FRSessionSessionSummary()
         summary.populate(fr5_events)
         assert all(summary.prob == -999)
 
@@ -79,7 +79,7 @@ class TestStimSessionSummary:
     @pytest.mark.parametrize('is_ps4_session', [True, False])
     def test_populate(self, fr5_events, is_ps4_session):
         """Basic tests that data was populated correctly from events."""
-        summary = StimSessionSummary()
+        summary = StimSessionSessionSummary()
         summary.populate(fr5_events, is_ps4_session)
         df = summary.to_dataframe()
 
