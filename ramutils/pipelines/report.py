@@ -45,6 +45,8 @@ def make_report(subject, experiment, paths, stim_params=[], classifier=None,
 
     """
     jr = JsonIndexReader(os.path.join(paths.root, "protocols", "r1.json"))
+    sessions = sessions if sessions is not None else jr.aggregate_values(
+        'sessions', subject=subject, experiment=experiment)
 
     if "FR" in experiment:
         encoding_events, retrieval_events = preprocess_fr_events(jr, subject)
@@ -63,9 +65,15 @@ def make_report(subject, experiment, paths, stim_params=[], classifier=None,
     # TODO: Compute powers
 
     if experiment in (EXPERIMENTS['closed_loop'] + EXPERIMENTS['ps']):
-        pass  # TODO: compute stim table
+        # FIXME: get stim events and add to events?
+        events = encoding_events
 
-    # TODO: generate summary
+    # generate summaries for each session
+    # FIXME: encoding events or all events?
+    session_summaries = [
+        summarize_session(events[events.session == session])
+        for session in sessions
+    ]
 
     # TODO: generate plots, generate tex, generate PDF
 

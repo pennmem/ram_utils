@@ -12,6 +12,10 @@ from ramutils.reports.summary import *
 
 logger = get_logger()
 
+__all__ = [
+    'summarize_session',
+]
+
 
 @task()
 def summarize_session(events):
