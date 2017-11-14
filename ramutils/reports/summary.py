@@ -34,6 +34,11 @@ class Summary(Schema):
             self._events = new_events
 
     @property
+    def session_number(self):
+        """Returns the session number for this summary."""
+        return self.events.session[0]
+
+    @property
     def session_length(self):
         """Computes the total amount of time the session lasted in seconds."""
         start = self.events.mstime.min()
