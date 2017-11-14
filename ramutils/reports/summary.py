@@ -1,6 +1,9 @@
 import numpy as np
+import pandas as pd
 from traits.api import (
-    Int, Float, String, Array, Dict, DictStrFloat, DictStrInt, ListBool
+    Int, Float, String, Array,
+    Dict, DictStrFloat, DictStrInt,
+    ListBool, ListStr,
 )
 
 from ramutils.schema import Schema
@@ -30,6 +33,21 @@ def DictStrArray(**kwargs):
 
 class Summary(Schema):
     """Base class for all summary objects."""
+    # FIXME: only convert to DataFrame once?
+    def to_dataframe(self):
+        """Convert the summary to a :class:`pd.DataFrame` for easier
+        manipulation.
+
+        Returns
+        -------
+        pd.DataFrame
+
+        """
+        columns = {
+            trait: getattr(self, trait)
+            for trait in self.visible_traits()
+        }
+        return pd.DataFrame(columns)
 
 
 class FRSessionSummary(Summary):
