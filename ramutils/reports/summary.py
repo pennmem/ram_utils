@@ -1,9 +1,7 @@
 import numpy as np
 import pandas as pd
 from traits.api import (
-    Int, Float, String, Array,
-    Dict, DictStrFloat, DictStrInt,
-    ListBool, ListStr, ListInt, ListFloat
+    String, Array, Dict, ListBool
 )
 
 from ramutils.schema import Schema
@@ -53,7 +51,7 @@ class Summary(Schema):
             columns = {
                 trait: getattr(self, trait)
                 for trait in self.visible_traits()
-                if trait not in ['recognized', 'rejected', 'prob']  # FIXME
+                if trait not in ['rejected', 'prob', 'region']  # FIXME
             }
             self._df = pd.DataFrame(columns)
         return self._df
@@ -67,10 +65,6 @@ class FRSessionSummary(Summary):
     listno = Array(dtype=int, desc="item's list number")
     serialpos = Array(dtype=int, desc='item serial position')
     phase = Array(desc='list phase type (stim, non-stim, etc.)')
-
-    # FIXME: these should allow Nones
-    recognized = ListBool(desc='item in recognition subtask recognized')
-    rejected = ListBool(desc='lure item in recognition subtask rejected')
 
     recalled = Array(dtype=bool, desc='item was recalled')
     thresh = Array(dtype=np.float64, desc='classifier threshold')
@@ -93,8 +87,6 @@ class FRSessionSummary(Summary):
         self.recalled = events.recalled
         self.thresh = [0.5] * len(self.item)
 
-        # FIXME: self.recognized
-        # FIXME: self.rejected
         # FIXME: self.prob
 
     @property
@@ -121,9 +113,9 @@ class StimSessionSummary(Summary):
     is_ps4_session = ListBool(desc='list is part of a PS4 session')
 
     # FIXME: tags, regions can be nullable
-    stim_anode_tag = ListStr(desc='stim anode label')
-    stim_cathode_tag = ListStr(desc='stim cathode label')
-    region = ListStr(desc='brain region of stim pair')
+    stim_anode_tag = Array(desc='stim anode label')
+    stim_cathode_tag = Array(desc='stim cathode label')
+    region = Array(desc='brain region of stim pair')
     pulse_frequency = Array(dtype=np.float64, desc='stim pulse frequency [Hz]')
     amplitude = Array(dtype=np.float64, desc='stim amplitude [mA]')
     duration = Array(dtype=np.float64, desc='stim duration [ms]')
@@ -178,3 +170,17 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
             if df[df.listno == listno].is_stim_list.all():
                 count += 1
         return count
+
+
+class FR5SessionSummary(FRStimSessionSummary):
+    """FR5-specific summary. This is a standard FR stim session with the
+    possible addition of a recognition subtask at the end (only when not also a
+    PS4 session).
+
+    """
+    recognized = Array(dtype=int, desc='item in recognition subtask recognized')
+    rejected = Array(dtype=int, desc='lure item in recognition subtask rejected')
+
+    def populate(self, events, is_ps4_session=False):
+        FRStimSessionSummary.populate(self, events, is_ps4_session)
+        self.recognized = events.recognized
