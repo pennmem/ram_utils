@@ -1,36 +1,24 @@
 import numpy as np
 import pandas as pd
-from traits.api import (
-    String, Array, Dict, ListBool
-)
+from traits.api import Array, ArrayOrNone
 
 from ramutils.schema import Schema
 
 
-def DictStrArray(**kwargs):
-    """Trait for a dict of numpy arrays.
-
-    Keyword arguments
-    -----------------
-    dtype : np.dtype
-        Array dtype (default: ``np.float64``)
-    shape : list-like
-        Shape for the array
-
-    Notes
-    -----
-    All keyword arguments not specified above are passed on to the ``Dict``
-    constructor.
-
-    """
-    kwargs['key_trait'] = String
-    kwargs['value_trait'] = Array(dtype=kwargs.pop('dtype', np.float64),
-                                  shape=kwargs.pop('shape', None))
-    return Dict(**kwargs)
-
-
 class Summary(Schema):
     """Base class for all summary objects."""
+    _events = ArrayOrNone(desc='all events from a session')
+    phase = Array(desc='list phase type (stim, non-stim, etc.)')
+
+    @property
+    def events(self):
+        return self._events
+
+    @events.setter
+    def events(self, new_events):
+        if self._events is not None:
+            self._events = new_events
+
     def to_dataframe(self, recreate=False):
         """Convert the summary to a :class:`pd.DataFrame` for easier
         manipulation.
@@ -51,10 +39,16 @@ class Summary(Schema):
             columns = {
                 trait: getattr(self, trait)
                 for trait in self.visible_traits()
-                if trait not in ['rejected', 'region']  # FIXME
+                if trait not in ['events',  # we don't need events in the dataframe
+                                 'rejected', 'region']  # FIXME
             }
             self._df = pd.DataFrame(columns)
         return self._df
+
+    def populate(self, events):
+        """Populate attributes and store events."""
+        self.events = events
+        self.phase = events.phase
 
 
 class FRSessionSummary(Summary):
@@ -64,7 +58,6 @@ class FRSessionSummary(Summary):
     session = Array(dtype=int, desc='session number')
     listno = Array(dtype=int, desc="item's list number")
     serialpos = Array(dtype=int, desc='item serial position')
-    phase = Array(desc='list phase type (stim, non-stim, etc.)')
 
     recalled = Array(dtype=bool, desc='item was recalled')
     thresh = Array(dtype=np.float64, desc='classifier threshold')
@@ -83,11 +76,11 @@ class FRSessionSummary(Summary):
             indicate this.
 
         """
+        Summary.populate(self, events)
         self.item = events.item_name
         self.session = events.session
         self.listno = events.list
         self.serialpos = events.serialpos
-        self.phase = events.phase
         self.recalled = events.recalled
         self.thresh = [0.5] * len(events)
         self.prob = recall_probs if recall_probs is not None else [-999] * len(events)
@@ -110,12 +103,11 @@ class FRSessionSummary(Summary):
 
 class StimSessionSummary(Summary):
     """Summary data specific to sessions with stimulation."""
-    is_stim_list = ListBool(desc='item is from a stim list')
-    is_post_stim_item = ListBool(desc='stimulation occurred on the previous item')
-    is_stim_item = ListBool(desc='stimulation occurred on this item')
-    is_ps4_session = ListBool(desc='list is part of a PS4 session')
+    is_stim_list = Array(dtype=np.bool, desc='item is from a stim list')
+    is_post_stim_item = Array(dtype=np.bool, desc='stimulation occurred on the previous item')
+    is_stim_item = Array(dtype=np.bool, desc='stimulation occurred on this item')
+    is_ps4_session = Array(dtype=np.bool, desc='list is part of a PS4 session')
 
-    # FIXME: tags, regions can be nullable
     stim_anode_tag = Array(desc='stim anode label')
     stim_cathode_tag = Array(desc='stim cathode label')
     region = Array(desc='brain region of stim pair')
@@ -133,9 +125,11 @@ class StimSessionSummary(Summary):
             Whether or not this experiment is also a PS4 session.
 
         """
+        Summary.populate(self, events)
+
         self.is_stim_list = [e.phase == 'STIM' for e in events]
-        # self.is_post_stim_item = is_post_stim_item   # FIXME
-        # self.is_stim_item = is_stim_item  # FIXME
+        self.is_stim_item = events.is_stim
+        self.is_post_stim_item = [False] + [events.is_stim[i - 1] for i in range(1, len(events))]
         self.is_ps4_session = [is_ps4_session] * len(events)
 
         # FIXME: region

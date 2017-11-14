@@ -4,7 +4,7 @@ import pytest
 from traits.api import ListInt, ListFloat, ListBool
 
 from ramutils.reports.summary import (
-    Summary, FRSessionSummary, FRStimSessionSummary
+    Summary, StimSessionSummary, FRSessionSummary, FRStimSessionSummary
 )
 
 
@@ -25,7 +25,8 @@ class TestSummary:
         summary = MySummary(
             bools=[True, True, True],
             ints=[1, 2, 3],
-            floats=[1., 2., 3.]
+            floats=[1., 2., 3.],
+            phase=['a', 'b', 'c']
         )
 
         df = summary.to_dataframe()
@@ -52,9 +53,23 @@ class TestFRSessionSummary:
         assert self.summary.num_lists == 25
 
 
+class TestStimSessionSummary:
+    @pytest.mark.parametrize('is_ps4_session', [True, False])
+    def test_populate(self, fr5_events, is_ps4_session):
+        """Basic tests that data was populated correctly from events."""
+        summary = StimSessionSummary()
+        summary.populate(fr5_events, is_ps4_session)
+        df = summary.to_dataframe()
+
+        assert len(df[df.phase == 'BASELINE']) == 72
+        assert len(df[df.phase == 'STIM']) == 384
+        assert len(df[df.phase == 'NON-STIM']) == 144
+
+
 class TestFRStimSessionSummary:
     @pytest.mark.skip
     def test_num_nonstim_lists(self, fr5_events):
         summary = FRStimSessionSummary()
         summary.populate(fr5_events)
         assert summary.num_nonstim_lists == 2
+
