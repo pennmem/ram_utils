@@ -1,0 +1,11 @@
+<div class="plot roc-curve">
+  <h2>Classifier generalization to {{ experiment }}</h2>
+  <figure>
+    <!-- FIXME: make this part a function to reuse -->
+    <img src='data:image/svg+xml;utf8,{{ roc_image }}'>
+    <!-- FIXME: tercile plot to the right -->
+    <figcaption>
+      ROC curve for the subject {{ subject }}.
+    </figcaption>
+  </figure>
+</div>
