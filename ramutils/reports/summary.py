@@ -33,37 +33,47 @@ def DictStrArray(**kwargs):
 
 class Summary(Schema):
     """Base class for all summary objects."""
-    # FIXME: only convert to DataFrame once?
-    def to_dataframe(self):
+    def to_dataframe(self, recreate=False):
         """Convert the summary to a :class:`pd.DataFrame` for easier
         manipulation.
+
+        Keyword arguments
+        -----------------
+        recreate : bool
+            Force re-creating the dataframe. Otherwise, it will only be created
+            the first time this method is called and stored as an instance
+            attribute.
 
         Returns
         -------
         pd.DataFrame
 
         """
-        columns = {
-            trait: getattr(self, trait)
-            for trait in self.visible_traits()
-        }
-        return pd.DataFrame(columns)
+        if not hasattr(self, '_df'):
+            columns = {
+                trait: getattr(self, trait)
+                for trait in self.visible_traits()
+                if trait not in ['recognized', 'rejected', 'prob']  # FIXME
+            }
+            self._df = pd.DataFrame(columns)
+        return self._df
 
 
 class FRSessionSummary(Summary):
     """Free recall session summary data."""
-    item = ListStr(desc='list item (a.k.a. word)')
-    session = ListInt(desc='session number')
-    listno = ListInt(desc="item's list number")
-    serialpos = ListInt(desc='item serial position')
-    phase = ListStr(desc='list phase type (stim, non-stim, etc.)')
+    # FIXME: string dtypes for arrays
+    item = Array(desc='list item (a.k.a. word)')
+    session = Array(dtype=int, desc='session number')
+    listno = Array(dtype=int, desc="item's list number")
+    serialpos = Array(dtype=int, desc='item serial position')
+    phase = Array(desc='list phase type (stim, non-stim, etc.)')
 
     # FIXME: these should allow Nones
     recognized = ListBool(desc='item in recognition subtask recognized')
     rejected = ListBool(desc='lure item in recognition subtask rejected')
 
-    recalled = ListBool(desc='item was recalled')
-    thresh = ListFloat(desc='classifier threshold')
+    recalled = Array(dtype=bool, desc='item was recalled')
+    thresh = Array(dtype=np.float64, desc='classifier threshold')
 
     prob = Array(dtype=np.float64, desc='probability of recall')
 
@@ -86,6 +96,12 @@ class FRSessionSummary(Summary):
         # FIXME: self.recognized
         # FIXME: self.rejected
         # FIXME: self.prob
+
+    @property
+    def num_lists(self):
+        """Returns the total number of lists."""
+        return len(self.to_dataframe().listno.unique())
+
 
 # FIXME
 # class CatFRSessionSummary(FRSessionSummary):
@@ -142,3 +158,23 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
     def populate(self, events, is_ps4_session=False):
         FRSessionSummary.populate(self, events)
         StimSessionSummary.populate(self, events, is_ps4_session)
+
+    @property
+    def num_nonstim_lists(self):
+        """Returns the number of non-stim lists."""
+        df = self.to_dataframe()
+        count = 0
+        for listno in df.listno.unique():
+            if not df[df.listno == listno].is_stim_list.all():
+                count += 1
+        return count
+
+    @property
+    def num_stim_lists(self):
+        """Returns the number of stim lists."""
+        df = self.to_dataframe()
+        count = 0
+        for listno in df.listno.unique():
+            if df[df.listno == listno].is_stim_list.all():
+                count += 1
+        return count
