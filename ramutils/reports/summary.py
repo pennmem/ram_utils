@@ -51,7 +51,7 @@ class Summary(Schema):
             columns = {
                 trait: getattr(self, trait)
                 for trait in self.visible_traits()
-                if trait not in ['rejected', 'prob', 'region']  # FIXME
+                if trait not in ['rejected', 'region']  # FIXME
             }
             self._df = pd.DataFrame(columns)
         return self._df
@@ -69,14 +69,18 @@ class FRSessionSummary(Summary):
     recalled = Array(dtype=bool, desc='item was recalled')
     thresh = Array(dtype=np.float64, desc='classifier threshold')
 
-    prob = Array(dtype=np.float64, desc='probability of recall')
+    prob = Array(dtype=np.float64, desc='predicted probability of recall')
 
-    def populate(self, events):
+    def populate(self, events, recall_probs=None):
         """Populate data from events.
 
         Parameters
         ----------
         events : np.recarray
+        recall_probs : np.ndarray
+            Predicted probabilities of recall per item. If not given, assumed
+            there is no relevant classifier and values of -999 are used to
+            indicate this.
 
         """
         self.item = events.item_name
@@ -85,9 +89,8 @@ class FRSessionSummary(Summary):
         self.serialpos = events.serialpos
         self.phase = events.phase
         self.recalled = events.recalled
-        self.thresh = [0.5] * len(self.item)
-
-        # FIXME: self.prob
+        self.thresh = [0.5] * len(events)
+        self.prob = recall_probs if recall_probs is not None else [-999] * len(events)
 
     @property
     def num_lists(self):
@@ -147,8 +150,8 @@ class StimSessionSummary(Summary):
 
 class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
     """Summary for FR sessions with stim."""
-    def populate(self, events, is_ps4_session=False):
-        FRSessionSummary.populate(self, events)
+    def populate(self, events, recall_probs=None, is_ps4_session=False):
+        FRSessionSummary.populate(self, events, recall_probs)
         StimSessionSummary.populate(self, events, is_ps4_session)
 
     @property
@@ -181,6 +184,6 @@ class FR5SessionSummary(FRStimSessionSummary):
     recognized = Array(dtype=int, desc='item in recognition subtask recognized')
     rejected = Array(dtype=int, desc='lure item in recognition subtask rejected')
 
-    def populate(self, events, is_ps4_session=False):
-        FRStimSessionSummary.populate(self, events, is_ps4_session)
+    def populate(self, events, recall_probs=None, is_ps4_session=False):
+        FRStimSessionSummary.populate(self, events, recall_probs, is_ps4_session)
         self.recognized = events.recognized
