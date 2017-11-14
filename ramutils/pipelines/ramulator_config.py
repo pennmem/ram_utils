@@ -85,10 +85,10 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
     fr_events = read_fr_events(jr, subject, cat=False)
     catfr_events = read_fr_events(jr, subject, cat=True)
     raw_events = concatenate_events(fr_events, catfr_events)
-    all_events = create_baseline_events(raw_events, 1000, 29000)
+    all_events = insert_baseline_retrieval_events(raw_events, 1000, 29000)
     word_events = select_word_events(all_events, include_retrieval=True)
     encoding_events = select_encoding_events(word_events)
-    retrieval_events = select_retrieval_events(word_events)
+    retrieval_events = select_all_retrieval_events(word_events)
 
     ec_pairs = generate_pairs_from_electrode_config(subject, paths)
     excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
