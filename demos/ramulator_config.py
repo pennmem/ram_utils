@@ -7,7 +7,6 @@ from pkg_resources import resource_filename
 from ptsa.data.readers import JsonIndexReader
 
 from ramutils.parameters import FilePaths, StimParameters, FRParameters
-# TODO: Don't use * for imports
 from ramutils.tasks.events import *
 from ramutils.tasks.montage import *
 from ramutils.tasks.classifier import *
@@ -52,13 +51,17 @@ params = FRParameters()
 
 #TODO: Add remove_bad_events() and remove_negative_offsets() functions to
 # process events
+# TODO: We really shouldn't pass a json index reader to the read function. The
+# client code should be oblivious to how the data is retrieved
 fr_events = read_fr_events(jr, subject, cat=False)
 catfr_events = read_fr_events(jr, subject, cat=True)
 raw_events = concatenate_events(fr_events, catfr_events)
-all_events = create_baseline_events(raw_events, 1000, 29000)
+
+# FIXME: Parametrize these two input values
+all_events = insert_baseline_retrieval_events(raw_events, 1000, 29000)
 word_events = select_word_events(all_events, include_retrieval=True)
 encoding_events = select_encoding_events(word_events)
-retrieval_events = select_retrieval_events(word_events)
+retrieval_events = select_all_retrieval_events(word_events)
 
 ec_pairs = generate_pairs_from_electrode_config(subject, paths)
 excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)

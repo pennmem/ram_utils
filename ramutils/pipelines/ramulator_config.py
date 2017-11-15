@@ -81,7 +81,6 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
         raise RuntimeError("Only FR-like experiments supported now.")
 
     encoding_events, retrieval_events = preprocess_fr_events(jr, subject)
-
     ec_pairs = generate_pairs_from_electrode_config(subject, paths)
     excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
     used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
@@ -90,10 +89,14 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
     # FIXME: If PTSA is updated to not remove events behind this scenes, this
     # won't be necessary. Or, if we can remove bad events before passing to
     # compute powers, then we won't have to catch the events
-    encoding_powers, good_encoding_events = compute_powers(encoding_events, exp_params)
-    retrieval_powers, good_retrieval_events = compute_powers(retrieval_events, exp_params)
-    normalized_encoding_powers = normalize_powers_by_session(encoding_powers, good_encoding_events)
-    normalized_retrieval_powers = normalize_powers_by_session(retrieval_powers, good_retrieval_events)
+    encoding_powers, good_encoding_events = compute_powers(encoding_events,
+                                                           exp_params)
+    retrieval_powers, good_retrieval_events = compute_powers(retrieval_events,
+                                                             exp_params)
+    normalized_encoding_powers = normalize_powers_by_session(encoding_powers,
+                                                             good_encoding_events)
+    normalized_retrieval_powers = normalize_powers_by_session(retrieval_powers,
+                                                              good_retrieval_events)
 
     task_events = combine_events([good_encoding_events, good_retrieval_events])
     powers = combine_encoding_retrieval_powers(task_events,
@@ -102,12 +105,22 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
     reduced_powers = reduce_powers(powers, used_pair_mask, len(exp_params.freqs))
 
     sample_weights = get_sample_weights(task_events, exp_params)
-    classifier = train_classifier(powers, task_events, sample_weights, exp_params)
-    cross_validation_results = perform_cross_validation(classifier, reduced_powers,
-                                                        task_events, exp_params)
 
-    container = serialize_classifier(classifier, final_pairs, reduced_powers,
-                                     task_events, sample_weights,
+    classifier = train_classifier(powers,
+                                  task_events,
+                                  sample_weights,
+                                  exp_params)
+
+    cross_validation_results = perform_cross_validation(classifier,
+                                                        reduced_powers,
+                                                        task_events,
+                                                        exp_params)
+
+    container = serialize_classifier(classifier,
+                                     final_pairs,
+                                     reduced_powers,
+                                     task_events,
+                                     sample_weights,
                                      cross_validation_results,
                                      subject)
 
