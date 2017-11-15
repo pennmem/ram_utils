@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>{% block title %}{% end %}</title>
+  <title>{% block title %}{% endblock %}</title>
 </head>
 <body>
 <div class="container">
@@ -10,7 +10,7 @@
     <h1>{{ subject }} RAM {{ experiment }} report</h1>
   </div>
   <div>
-    {% block report %}{% end %}
+    {% block report %}{% endblock %}
   </div>
 </div>
 </body>
