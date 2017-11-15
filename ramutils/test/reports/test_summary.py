@@ -72,6 +72,15 @@ class TestSummary:
 
 
 class TestMathSummary:
+    @staticmethod
+    def all_summaries(events):
+        summaries = []
+        for session in np.unique(events.session):
+            summary = MathSummary()
+            summary.populate(events[events.session == session])
+            summaries.append(summary)
+        return summaries
+
     def test_num_problems(self, math_events):
         probs = 0
         for session in np.unique(math_events.session):
@@ -102,32 +111,34 @@ class TestMathSummary:
 
         assert_almost_equal(percents, [94, 76, 90, 85], decimal=0)
 
-    def test_total_num_problems(self, math_events):
-        summaries = []
+    def test_problems_per_list(self, math_events):
+        ppl = []
         for session in np.unique(math_events.session):
+            events = math_events[math_events.session == session]
             summary = MathSummary()
-            summary.populate(math_events[math_events.session == session])
-            summaries.append(summary)
+            summary.populate(events)
+            ppl.append(summary.problems_per_list)
 
+        assert_almost_equal(ppl, [3.28, 3.47, 3, 4.24], decimal=2)
+
+    def test_total_num_problems(self, math_events):
+        summaries = self.all_summaries(math_events)
         assert MathSummary.total_num_problems(summaries) == 308
 
     def test_total_num_correct(self, math_events):
-        summaries = []
-        for session in np.unique(math_events.session):
-            summary = MathSummary()
-            summary.populate(math_events[math_events.session == session])
-            summaries.append(summary)
-
+        summaries = self.all_summaries(math_events)
         assert MathSummary.total_num_correct(summaries) == 268
 
     def test_total_percent_correct(self, math_events):
-        summaries = []
-        for session in np.unique(math_events.session):
-            summary = MathSummary()
-            summary.populate(math_events[math_events.session == session])
-            summaries.append(summary)
-
+        summaries = self.all_summaries(math_events)
         assert np.floor(MathSummary.total_percent_correct(summaries)) == 87
+
+    def test_total_problems_per_list(self, math_events):
+        summaries = self.all_summaries(math_events)
+
+        # FIXME: the existing R1111M FR1 report says this should be 3.62
+        assert_almost_equal([MathSummary.total_problems_per_list(summaries)],
+                            [3.46], decimal=2)
 
 
 class TestFRSessionSummary:

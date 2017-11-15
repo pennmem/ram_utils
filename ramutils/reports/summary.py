@@ -124,6 +124,12 @@ class MathSummary(SessionSummary):
         """Returns the percentage of problems solved correctly."""
         return 100 * self.num_correct / self.num_problems
 
+    @property
+    def problems_per_list(self):
+        """Returns the mean number of problems per list."""
+        n_lists = len(np.unique(self.events.list))
+        return self.num_problems / n_lists
+
     @staticmethod
     def total_num_problems(summaries):
         """Get total number of problems for multiple sessions.
@@ -171,6 +177,25 @@ class MathSummary(SessionSummary):
         probs = MathSummary.total_num_problems(summaries)
         correct = MathSummary.total_num_correct(summaries)
         return 100 * correct / probs
+
+    @staticmethod
+    def total_problems_per_list(summaries):
+        """Get the mean number of problems per list for multiple sessions.
+
+        FIXME: this doesn't seem to match R1111M's FR1 report.
+
+        Parameters
+        ----------
+        summaries : List[MathSummary]
+
+        Returns
+        -------
+        float
+
+        """
+        n_lists = sum(len(np.unique(summary.events[summary.events.list]))
+                      for summary in summaries)
+        return MathSummary.total_num_problems(summaries) / n_lists
 
 
 class FRSessionSessionSummary(SessionSummary):
