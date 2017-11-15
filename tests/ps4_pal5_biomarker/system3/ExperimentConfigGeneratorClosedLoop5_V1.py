@@ -1,26 +1,49 @@
-import TextTemplateUtils
 import os
-import zipfile
-from os.path import *
-import numpy as np
-from scipy.io import savemat
-import datetime
-from subprocess import call
-from tornado.template import Template
-from glob import glob
-import shutil
-import pathlib
-from itertools import cycle
-from system_3_utils import ElectrodeConfigSystem3
-import warnings
 import sys
+import json
+import pathlib
+import warnings
+import shutil
+import zipfile
+import numpy as np
 
+from glob import glob
+from itertools import cycle
+from os.path import *
+from sklearn.externals import joblib
+
+from classiflib import ClassifierContainer, dtypes
+from tornado.template import Template
 from ramutils.pipeline import RamTask
+from ramutils.log import get_logger
+from ramutils.classifier.utils import get_pal_sample_weights
+
+
+CLASSIFIER_VERSION = '1.0.1'
+logger = get_logger()
 
 
 class ExperimentConfigGeneratorClosedLoop5_V1(RamTask):
     def __init__(self, params, mark_as_completed=False):
         RamTask.__init__(self, mark_as_completed)
+        self.params = params
+
+    @property
+    def classifier_container_path(self):
+        classifier_path = self.get_passed_object(
+            ('encoding_' if self.pipeline.args.encoding else '') +
+            'classifier_path')
+        if self.pipeline.args.classifier_type_to_output == 'pal':
+            try:
+                classifier_path = self.get_passed_object('classifier_path_pal')
+            except KeyError:
+                warnings.warn(
+                    'Cannot generate PAL1-only classifier- most likely due to insufficient number of PAL1 sessions',
+                    RuntimeWarning)
+                sys.exit(1)
+        classifier_container_path = basename(classifier_path).replace('.pkl',
+                                                                      '.zip')
+        return classifier_container_path
 
     def copy_resource_to_target_dir(self, resource_filename, target_dir):
         """
@@ -55,13 +78,8 @@ class ExperimentConfigGeneratorClosedLoop5_V1(RamTask):
 
     def build_experiment_config_dir(self):
         pass
-        # try:
-        #     # make_directory(full_dir_path=project_output_dir_tmp)
-        #     mkdir_p(project_output_dir_tmp)
-        # except IOError:
 
     def zipdir(self, path, ziph):
-
         root_paths_parts = pathlib.Path(str(path)).parts
         root_path_len = len(root_paths_parts)
 
@@ -70,27 +88,33 @@ class ExperimentConfigGeneratorClosedLoop5_V1(RamTask):
             for file in files:
                 file_abspath = os.path.join(root, file)
                 file_abspath_segments = [x for x in pathlib.Path(str(file_abspath)).parts]
-
-                # relative_path_segments = [x for x in  pathlib.Path(file_abspath).parts[root_path_len:]]
-                # relative_path_segments.append(basename(file_abspath))
-
                 relative_path = join(*file_abspath_segments[root_path_len:])
-
                 ziph.write(os.path.join(root, file), relative_path)
 
     def run(self):
         anodes = self.pipeline.args.anodes if self.pipeline.args.anodes else [self.pipeline.args.anode]
         cathodes = self.pipeline.args.cathodes if self.pipeline.args.cathodes else [self.pipeline.args.cathode]
-
         experiment = self.pipeline.args.experiment if self.pipeline.args.experiment else 'PAL5'
         electrode_config_file = abspath(self.pipeline.args.electrode_config_file)
+
+        events = self.get_passed_object('combined_evs')
+
+        reduced_pow_mat = self.get_passed_object('reduced_pow_mat')
+        if self.pipeline.args.encoding:
+            reduced_pow_mat = self.get_passed_object('reduced_encoding_pow_mat')
+
         config_name = self.get_passed_object('config_name')
         subject = self.pipeline.subject.split('_')[0]
         stim_frequency = self.pipeline.args.pulse_frequency
         stim_amplitude = self.pipeline.args.target_amplitude
         bipolar_pairs_path = self.get_passed_object('bipolar_pairs_path')
+        xval_output = self.get_passed_object('xval_output')
+        excluded_pairs_path = self.get_passed_object('excluded_pairs_path')
 
-        classifier_path = self.get_passed_object(('encoding_' if self.pipeline.args.encoding else '')+'classifier_path')
+        # Figure out which classifier should be used
+        classifier_path = self.get_passed_object(('encoding_' if
+                                                  self.pipeline.args.encoding
+                                                  else '') + 'classifier_path')
 
         if self.pipeline.args.classifier_type_to_output == 'pal':
             try:
@@ -101,13 +125,7 @@ class ExperimentConfigGeneratorClosedLoop5_V1(RamTask):
                     RuntimeWarning)
                 sys.exit(1)
 
-        stim_chan_label = self.get_passed_object('stim_chan_label')
-        excluded_pairs_path = self.get_passed_object('excluded_pairs_path')
-        # xval_full = self.get_passed_object('xval_output_all_electrodes')
-        # xval_output = self.get_passed_object('xval_output')
-
-        # retrieval_biomarker_threshold = self.get_passed_object('retrieval_biomarker_threshold')
-
+        # TODO: Get this from the Odin config file instead?
         stim_params_dict = {}
         stim_params_list = zip(anodes, cathodes, cycle(self.pipeline.args.min_amplitudes),
                                cycle(self.pipeline.args.max_amplitudes))
@@ -141,37 +159,27 @@ class ExperimentConfigGeneratorClosedLoop5_V1(RamTask):
             experiment_config_content = experiment_config_template.generate(
                 subject=subject,
                 experiment=experiment,
-                classifier_file='config_files/%s' % basename(classifier_path),
-
+                classifier_file='config_files/%s' % self.classifier_container_path,
                 target_amplitude=self.pipeline.args.target_amplitude,
-
-                # electrode_config_file='config_files/{subject}_{config_name}.bin'.format(subject=subject,config_name=config_name),
                 electrode_config_file='config_files/{core_name_for_electrode_file}.bin'.format(
                     core_name_for_electrode_file=core_name_for_electrode_file),
-
                 montage_file='config_files/%s' % basename(bipolar_pairs_path),
                 excluded_montage_file='config_files/%s' % basename(excluded_pairs_path),
                 biomarker_threshold=0.5,
-                # retrieval_biomarker_threshold = retrieval_biomarker_threshold,
                 fr5_stim_channel=fr5_stim_channel
             )
 
         else:
-
             experiment_config_content = experiment_config_template.generate(
                 subject=subject,
                 experiment=experiment,
-                classifier_file='config_files/%s' % basename(classifier_path),
+                classifier_file='config_files/%s' % self.classifier_container_path,
                 stim_params_dict=stim_params_dict,
-
-                # electrode_config_file='config_files/{subject}_{config_name}.bin'.format(subject=subject,config_name=config_name),
                 electrode_config_file='config_files/{core_name_for_electrode_file}.bin'.format(
                     core_name_for_electrode_file=core_name_for_electrode_file),
-
                 montage_file='config_files/%s' % basename(bipolar_pairs_path),
                 excluded_montage_file='config_files/%s' % basename(excluded_pairs_path),
                 biomarker_threshold=0.5,
-                # retrieval_biomarker_threshold = retrieval_biomarker_threshold,
                 fr5_stim_channel=fr5_stim_channel
             )
 
@@ -180,8 +188,50 @@ class ExperimentConfigGeneratorClosedLoop5_V1(RamTask):
         experiment_config_file.write(experiment_config_content)
         experiment_config_file.close()
 
-        # copying classifier pickle file
-        self.copy_pickle_resource_to_target_dir(classifier_path, config_files_dir)
+        # Get all_pairs not from what is passed during the montage task, but the
+        # actual set of all pairs
+        all_pairs = self.get_passed_object('config_pairs_dict')
+        all_pairs = all_pairs[subject]['pairs']
+
+        with open(excluded_pairs_path, 'r') as f:
+            excluded_pairs = json.load(f)[subject]['pairs']
+
+        used_pairs = {
+            key: value for key, value in all_pairs.items()
+            if key not in excluded_pairs
+        }
+
+        pairs = np.rec.fromrecords([
+            (item['channel_1'], item['channel_2'],
+             pair.split('-')[0], pair.split('-')[1])
+            for pair, item in used_pairs.items()
+        ], dtype=dtypes.pairs)
+        pairs.sort(order='contact0')
+
+
+        # Sample weights are 1 if encoding classifier, otherwise it needs to
+        # be calcualted
+        sample_weights = get_pal_sample_weights(events,
+                                                self.params.pal_samples_weight,
+                                                self.params.encoding_samples_weight)
+        if self.pipeline.args.encoding:
+            sample_weights = np.ones(len(events))
+
+        classifier = joblib.load(classifier_path)
+        container = ClassifierContainer(
+            classifier=classifier,
+            pairs=pairs,
+            features=reduced_pow_mat,
+            events=events,
+            sample_weight=sample_weights,
+            classifier_info={
+                'auc': xval_output[-1].auc,
+                'subject': subject
+            }
+        )
+        classifier_path = join(config_files_dir, self.classifier_container_path)
+        logger.info('Saving classifier container to %s', classifier_path)
+        container.save(classifier_path, overwrite=True)
 
         # copy pairs.json
         self.copy_resource_to_target_dir(bipolar_pairs_path, config_files_dir)
@@ -192,10 +242,6 @@ class ExperimentConfigGeneratorClosedLoop5_V1(RamTask):
         # vars for file moving/copy
         electrode_config_file_core, ext = splitext(electrode_config_file)
         electrode_config_file_dir = dirname(electrode_config_file)
-
-        # self.copy_resource_to_target_dir(resource_filename=electrode_config_file, target_dir=config_files_dir)
-        # self.copy_resource_to_target_dir(resource_filename=electrode_config_file_core + '.csv',
-        #                                  target_dir=config_files_dir)
 
         # renaming .csv file to the same core name as .bin file - see variable -  core_name_for_electrode_file
         old_csv_fname = electrode_config_file
