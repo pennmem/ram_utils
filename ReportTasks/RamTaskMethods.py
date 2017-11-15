@@ -196,7 +196,13 @@ def compute_powers(events, monopolar_channels, bipolar_pairs, start_time, end_ti
         # Use bipolar pairs if they exist and recording is not already bipolar
         if bipolar_pairs is not None and 'bipolar_pairs' not in eeg.coords:
             eeg = MonopolarToBipolarMapper(time_series=eeg, bipolar_pairs=bipolar_pairs).filter()
+        # FIXME: Updating the bipolar pairs member variable of a
+        # task/pipeline should most certainly not be a side effect of calling
+        #  compute powers
         elif 'bipolar_pairs' in eeg.coords and ComputePowers is not None:
+            # Wow... So we have a generic compute_powers function that takes
+            # a RamTask object as an argument, which is part of a RamPipeline
+            #  and that is how we update state?
             ComputePowers.bipolar_pairs = [('%03d'%a,'%03d'%b) for (a,b) in eeg['bipolar_pairs'].values]
         # Butterworth filter to remove line noise
         eeg = eeg.filtered(freq_range=[58., 62.], filt_type='stop', order=filt_order)
