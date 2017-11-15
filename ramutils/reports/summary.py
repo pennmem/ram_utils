@@ -1,6 +1,7 @@
 from __future__ import division
 
 from datetime import datetime
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -31,11 +32,6 @@ class Summary(Schema):
     def events(self, new_events):
         if self._events is None:
             self._events = new_events
-
-
-class MathSummary(Schema):
-    """Summarizes data from math distractor periods."""
-    # TODO
 
 
 class SessionSummary(Summary):
@@ -101,7 +97,32 @@ class SessionSummary(Summary):
     def populate(self, events):
         """Populate attributes and store events."""
         self.events = events
-        self.phase = events.phase
+        try:
+            self.phase = events.phase
+        except AttributeError:
+            warnings.warn("phase not found in events (probably pre-dates phase)",
+                          UserWarning)
+
+
+class MathSummary(SessionSummary):
+    """Summarizes data from math distractor periods. Input events must either
+    be all events (which include math events) or just math events.
+
+    """
+    @property
+    def num_problems(self):
+        """Returns the total number of problems solved by the subject."""
+        return len(self.events[self.events.type == b'PROB'])
+
+    @property
+    def num_correct(self):
+        """Returns the number of problems solved correctly."""
+        return len(self.events[self.events.iscorrect == 1])
+
+    @property
+    def percent_correct(self):
+        """Returns the percentage of problems solved correctly."""
+        return 100 * self.num_correct / self.num_problems
 
 
 class FRSessionSessionSummary(SessionSummary):

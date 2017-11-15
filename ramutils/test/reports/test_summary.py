@@ -1,19 +1,35 @@
+import functools
 import numpy as np
 from pkg_resources import resource_filename
 import pytest
+
+from numpy.testing import assert_almost_equal
+
+from ptsa.data.readers import BaseEventReader
 from traits.api import ListInt, ListFloat, ListBool
 
 from ramutils.reports.summary import (
-    SessionSummary, StimSessionSessionSummary, FRSessionSessionSummary, FRStimSessionSummary
+    SessionSummary, StimSessionSessionSummary, MathSummary,
+    FRSessionSessionSummary, FRStimSessionSummary
 )
+
+datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
 
 
 @pytest.fixture(scope='session')
 def fr5_events():
     """FR5 events for R1345D."""
-    filename = resource_filename('ramutils.test.test_data', 'fr5-events.npz')
+    filename = datafile('fr5-events.npz')
     events = np.load(filename)['events'].view(np.recarray)
     return events[events.session == 0]
+
+
+@pytest.fixture(scope='session')
+def math_events():
+    """Math events for all FR1 sessions of R1111M."""
+    filename = datafile('R1111M_math_events.npz')
+    events = np.load(filename)['events'].view(np.recarray)
+    return events
 
 
 class TestSummary:
@@ -53,6 +69,39 @@ class TestSummary:
         assert dt.minute == 8
         assert dt.second == 25
         assert dt.utcoffset().total_seconds() == 0
+
+
+@pytest.mark.only
+class TestMathSummary:
+    def test_num_problems(self, math_events):
+        probs = 0
+        for session in np.unique(math_events.session):
+            events = math_events[math_events.session == session]
+            summary = MathSummary()
+            summary.populate(events)
+            probs += summary.num_problems
+
+        assert probs == 308
+
+    def test_num_correct(self, math_events):
+        correct = 0
+        for session in np.unique(math_events.session):
+            events = math_events[math_events.session == session]
+            summary = MathSummary()
+            summary.populate(events)
+            correct += summary.num_correct
+
+        assert correct == 268
+
+    def test_percent_correct(self, math_events):
+        percents = []
+        for session in np.unique(math_events.session):
+            events = math_events[math_events.session == session]
+            summary = MathSummary()
+            summary.populate(events)
+            percents.append(summary.percent_correct)
+
+        assert_almost_equal(percents, [94, 76, 90, 85], decimal=0)
 
 
 class TestFRSessionSummary:
