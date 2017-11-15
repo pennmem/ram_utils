@@ -71,7 +71,6 @@ class TestSummary:
         assert dt.utcoffset().total_seconds() == 0
 
 
-@pytest.mark.only
 class TestMathSummary:
     def test_num_problems(self, math_events):
         probs = 0
@@ -102,6 +101,33 @@ class TestMathSummary:
             percents.append(summary.percent_correct)
 
         assert_almost_equal(percents, [94, 76, 90, 85], decimal=0)
+
+    def test_total_num_problems(self, math_events):
+        summaries = []
+        for session in np.unique(math_events.session):
+            summary = MathSummary()
+            summary.populate(math_events[math_events.session == session])
+            summaries.append(summary)
+
+        assert MathSummary.total_num_problems(summaries) == 308
+
+    def test_total_num_correct(self, math_events):
+        summaries = []
+        for session in np.unique(math_events.session):
+            summary = MathSummary()
+            summary.populate(math_events[math_events.session == session])
+            summaries.append(summary)
+
+        assert MathSummary.total_num_correct(summaries) == 268
+
+    def test_total_percent_correct(self, math_events):
+        summaries = []
+        for session in np.unique(math_events.session):
+            summary = MathSummary()
+            summary.populate(math_events[math_events.session == session])
+            summaries.append(summary)
+
+        assert np.floor(MathSummary.total_percent_correct(summaries)) == 87
 
 
 class TestFRSessionSummary:

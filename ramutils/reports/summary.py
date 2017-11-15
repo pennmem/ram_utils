@@ -124,6 +124,54 @@ class MathSummary(SessionSummary):
         """Returns the percentage of problems solved correctly."""
         return 100 * self.num_correct / self.num_problems
 
+    @staticmethod
+    def total_num_problems(summaries):
+        """Get total number of problems for multiple sessions.
+
+        Parameters
+        ----------
+        summaries : List[MathSummary]
+
+        Returns
+        -------
+        : int
+
+        """
+        return sum(summary.num_problems for summary in summaries)
+
+    @staticmethod
+    def total_num_correct(summaries):
+        """Get the total number of correctly answered problems for multiple
+        sessions.
+
+        Parameters
+        ----------
+        summaries : List[MathSummary]
+
+        Returns
+        -------
+        : int
+
+        """
+        return sum(summary.num_correct for summary in summaries)
+
+    @staticmethod
+    def total_percent_correct(summaries):
+        """Get the percent correct problems for multiple sessions.
+
+        Parameters
+        ----------
+        summaries : List[MathSummary]
+
+        Returns
+        -------
+        : float
+
+        """
+        probs = MathSummary.total_num_problems(summaries)
+        correct = MathSummary.total_num_correct(summaries)
+        return 100 * correct / probs
+
 
 class FRSessionSessionSummary(SessionSummary):
     """Free recall session summary data."""
