@@ -1,0 +1,38 @@
+{# significant electrodes table for record-only experiments #}
+<table class="table">
+  <caption>
+    {# FIXME: don't hardcode all this text, cleanup #}
+    Subsequent memory effect HFA. High frequency activity (HFA, 70-200 Hz) was
+    measured across the word presentation interval (0 to 1600ms). At each
+    electrode, a t-test compared HFA for subsequently recalled vs subsequently
+    forgotten items. <b>Surface Electrodes</b>: Red - significant positive
+    effect (subsequently <i>remembered</i> HFA &gt; subsequently
+    <i>forgotten</i> HFA). Blue - significant negative effect (subsequently
+    <i>remembered</i> HFA &lt; subsequently <i>forgotten</i> HFA).
+    Black - difference not significant. <b>Depth Electrodes</b>: All bipolar
+    pairs shown in descending order of significance Bipolar pairs that exceed
+    significance threshold ($p < .05$) are in boldface.
+  </caption>
+  <thead>
+  <tr>
+    <td>Type</td>
+    <td>Contact numbers</td>
+    <td>Label</td>
+    <td>Atlas location</td>
+    <td>$p$-value</td>
+    <td>$t$-stat</td>
+  </tr>
+  </thead>
+  <tbody>
+  {% for pair in pairs %}
+    <tr>{# FIXME: color blue for sig. neg. effect, red for sig. pos. effect #}
+      <td>pair.type</td>
+      <td>pair.contact0</td>
+      <td>pair.contact1</td>
+      <td>pair.label</td>
+      <td>pair.pvalue</td>
+      <td>pair.tstat</td>
+    </tr>
+  {% end %}
+  </tbody>
+</table>
