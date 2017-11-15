@@ -88,7 +88,8 @@ class ComputePowers(RamTask):
             subject + '-combined_pow_mat_%d_%d.pkl' % (freq_min, freq_max)))
 
         self.pass_object('pow_mat', self.pow_mat)
-        self.bipolar_pairs = None
+        self.bipolar_pairs = self.get_passed_object('bipolar_pairs')
+        self.update_bipolar_pairs(subject)
 
     def run(self):
 
@@ -149,18 +150,7 @@ class ComputePowers(RamTask):
                                                                        params.freqs, params.log_powers,ComputePowers=self)
 
         if self.bipolar_pairs is not None:
-            # recording was in bipolar mode; re-compute excluded pairs
-            reduced_pairs = get_reduced_pairs(self,self.bipolar_pairs)
-            config_pairs_dict  = self.get_passed_object('config_pairs_dict')[subject]['pairs']
-            excluded_pairs = get_excluded_dict(config_pairs_dict, reduced_pairs)
-            joblib.dump(reduced_pairs,self.get_path_to_resource_in_workspace(subject+'-reduced_pairs.pkl'))
-            with open(self.get_path_to_resource_in_workspace('excluded_pairs.json'),'w') as excluded_file:
-                json.dump({subject:{'pairs':excluded_pairs}},excluded_file,indent=2)
-            self.pass_object('reduced_pairs',reduced_pairs)
-            # replace bipolar_pairs_path with config_pairs_path
-            joblib.dump(self.bipolar_pairs,self.get_path_to_resource_in_workspace(subject+'-bipolar_pairs.pkl'))
-            self.pass_object('bipolar_pairs_path',self.get_passed_object('config_pairs_path'))
-            self.pass_object('bipolar_pairs',self.bipolar_pairs)
+            self.update_bipolar_pairs(subject)
 
 
 
@@ -208,11 +198,6 @@ class ComputePowers(RamTask):
                                           )
 
 
-        # self.pow_mat[pal1_encoding_mask, ...] = encoding_pal1_pow_mat
-        # self.pow_mat[pal1_retrieval_mask, ...] = retrieval_pal1_pow_mat
-
-        # after we constructed pow_mat (we followed the same order of concatenation)
-        # we need to reorder pow_mat in the same way evs were reordered
         self.pow_mat = self.pow_mat[ev_order]
 
         self.pass_object('pow_mat', self.pow_mat)
@@ -222,4 +207,24 @@ class ComputePowers(RamTask):
 
         joblib.dump(self.pow_mat, self.get_path_to_resource_in_workspace(
             subject + '-combined_pow_mat_%d_%d.pkl' % (freq_min, freq_max)))
+
+    def update_bipolar_pairs(self, subject):
+        # recording was in bipolar mode; re-compute excluded pairs
+        reduced_pairs = get_reduced_pairs(self, self.bipolar_pairs)
+        config_pairs_dict = \
+        self.get_passed_object('config_pairs_dict')[subject]['pairs']
+        excluded_pairs = get_excluded_dict(config_pairs_dict, reduced_pairs)
+        joblib.dump(reduced_pairs, self.get_path_to_resource_in_workspace(
+            subject + '-reduced_pairs.pkl'))
+        with open(self.get_path_to_resource_in_workspace('excluded_pairs.json'),
+                  'w') as excluded_file:
+            json.dump({subject: {'pairs': excluded_pairs}}, excluded_file,
+                      indent=2)
+        self.pass_object('reduced_pairs', reduced_pairs)
+        # replace bipolar_pairs_path with config_pairs_path
+        joblib.dump(self.bipolar_pairs, self.get_path_to_resource_in_workspace(
+            subject + '-bipolar_pairs.pkl'))
+        self.pass_object('bipolar_pairs_path',
+                         self.get_passed_object('config_pairs_path'))
+        self.pass_object('bipolar_pairs', self.bipolar_pairs)
 
