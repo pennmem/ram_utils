@@ -5,7 +5,13 @@
   <title>{% block title %}{% end %}</title>
 </head>
 <body>
-{% block report %}
-{% end %}
+<div class="container">
+  <div>
+    <h1>{{ subject }} RAM {{ experiment }} report</h1>
+  </div>
+  <div>
+    {% block report %}{% end %}
+  </div>
+</div>
 </body>
 </html>
