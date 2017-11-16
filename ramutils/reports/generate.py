@@ -1,9 +1,11 @@
+import json
 import os.path as osp
 
 from jinja2 import Environment, PackageLoader
 import numpy as np
+from pkg_resources import resource_listdir, resource_string
 
-from ramutils.reports.summary import MathSummary
+from ramutils.reports.summary import FRSessionSummary, MathSummary
 
 
 class ReportGenerator(object):
@@ -55,7 +57,17 @@ class ReportGenerator(object):
         self._env = Environment(
             loader=PackageLoader('ramutils.reports', 'templates'),
         )
+
+        # Give access to some static methods
         self._env.globals['MathSummary'] = MathSummary
+
+        # Give access to Javascript sources. When we switch to a non-static
+        # reporting format, this will be handled by the web server's static file
+        # serving.
+        self._env.globals['js'] = {}
+        for filename in resource_listdir('ramutils.reports', 'static'):
+            script = resource_string('ramutils.reports.static', filename)
+            self._env.globals['js'][filename.split('.')[0]] = script
 
         self.dest = osp.realpath(osp.expanduser(dest))
 
@@ -83,9 +95,17 @@ class ReportGenerator(object):
 
         """
         template = self._env.get_template("fr1.html")
+
         return template.render(
             subject=self.subject,
             experiment='FR1',
             summaries=self.session_summaries,
             math_summaries=self.math_summaries,
+            plot_data={
+                'serialpos': json.dumps({
+                    'x': range(1, 13),
+                    'y1': FRSessionSummary.serialpos_probabilities(self.session_summaries, False),
+                    'y2': FRSessionSummary.serialpos_probabilities(self.session_summaries, True),
+                })
+            }
         )

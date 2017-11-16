@@ -270,7 +270,8 @@ class FRSessionSummary(SessionSummary):
         List[float]
 
         """
-        events = pd.concat([pd.DataFrame(s.events) for s in summaries])
+        columns = ['serialpos', 'list', 'recalled']
+        events = pd.concat([pd.DataFrame(s.events[columns]) for s in summaries])
 
         if first:
             firstpos = np.zeros(len(events.serialpos.unique()), dtype=np.float)
@@ -282,7 +283,7 @@ class FRSessionSummary(SessionSummary):
                 thispos = np.zeros(firstpos.shape, firstpos.dtype)
                 thispos[nonzero - 1] = 1
                 firstpos += thispos
-            return firstpos / events.list.max()
+            return (firstpos / events.list.max()).tolist()
         else:
             group = events.groupby('serialpos')
             return group.recalled.mean().tolist()
