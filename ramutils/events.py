@@ -55,7 +55,7 @@ def load_events(subject, experiment, sessions=None, rootdir='/'):
     return events
 
 
-def concatenate_events(event_list):
+def concatenate_events_across_experiments(event_list):
     """
         Concatenate events across different experiment types. To make session
         numbers unique, 100 is added to the second set of events in event_list,
@@ -82,8 +82,28 @@ def concatenate_events(event_list):
         final_event_list.append(events)
         session_offset += 100
 
-    # In order to combine events, we need have the same fields and types
-    final_events = np.concatenate(final_event_list).view(np.recarray)
+    # In order to combine events, we need have the same fields and types, which
+    # effectively makes the events appear as though coming from the same
+    # experiment
+    final_events = concatenate_events_for_single_experiment(final_event_list)
+
+    return final_events
+
+
+def concatenate_events_for_single_experiment(event_list):
+    """ Combine events that are part of the same experiment
+
+    Parameters
+    ----------
+    event_list
+
+    Returns
+    -------
+    np.recarray
+        The flattened set of events
+
+    """
+    final_events = np.concatenate(event_list).view(np.recarray)
     final_events.sort(order=['session', 'list', 'mstime'])
 
     return final_events

@@ -56,11 +56,20 @@ class TestEvents:
 
         return
 
-    def test_concatenate_events(self):
+    def test_concatenate_events_for_single_experiment(self):
+        fr_events = load_events(self.subject, 'FR1', rootdir=self.rootdir)
+
+        combined_events = concatenate_events_for_single_experiment([fr_events,
+                                                                    fr_events])
+        assert combined_events.shape == (2*len(fr_events),)
+        return
+
+    def test_concatenate_events_across_experiments(self):
         fr_events = load_events(self.subject, 'FR1', rootdir=self.rootdir)
         catfr_events = load_events(self.subject, 'catFR1', rootdir=self.rootdir)
 
-        combined_events = concatenate_events([fr_events, catfr_events])
+        combined_events = concatenate_events_across_experiments([fr_events,
+                                                                 catfr_events])
         assert combined_events.shape == (6053,)
 
         unique_sessions = np.unique(combined_events.session)
