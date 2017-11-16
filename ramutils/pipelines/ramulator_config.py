@@ -1,11 +1,10 @@
 import os.path
 
 from bptools.jacksheet import read_jacksheet
-from ptsa.data.readers import JsonIndexReader
 
 from ramutils.parameters import StimParameters
-from ramutils.pipelines.eventprep import preprocess_fr_events
 from ramutils.tasks import *
+from ramutils.events import *
 
 
 def make_stim_params(subject, anodes, cathodes, root='/'):
@@ -27,7 +26,7 @@ def make_stim_params(subject, anodes, cathodes, root='/'):
     stim_params : List[StimParams]
 
     """
-    path = os.path.join(root, 'data', 'eeg', subject, 'docs', 'jacksheet')
+    path = os.path.join(root, 'data', 'eeg', subject, 'docs', 'jacksheet.txt')
     jacksheet = read_jacksheet(path)
 
     stim_params = []
@@ -73,14 +72,13 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
     The path to the generated configuration zip file.
 
     """
-    jr = JsonIndexReader(os.path.join(paths.root, "protocols", "r1.json"))
     stim_params = make_stim_params(subject, anodes, cathodes, paths.root)
 
     # FIXME: update logic to work with PAL, AmplitudeDetermination
     if "FR" not in experiment:
         raise RuntimeError("Only FR-like experiments supported now.")
 
-    encoding_events, retrieval_events = preprocess_fr_events(jr, subject)
+    encoding_events, retrieval_events = preprocess_fr_events(subject)
     ec_pairs = generate_pairs_from_electrode_config(subject, paths)
     excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
     used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
@@ -98,7 +96,8 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
     normalized_retrieval_powers = normalize_powers_by_session(retrieval_powers,
                                                               good_retrieval_events)
 
-    task_events = combine_events([good_encoding_events, good_retrieval_events])
+    task_events = concatenate_events_for_single_experiment(
+        [good_encoding_events, good_retrieval_events])
     powers = combine_encoding_retrieval_powers(task_events,
                                                normalized_encoding_powers,
                                                normalized_retrieval_powers)
@@ -124,8 +123,13 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
                                      cross_validation_results,
                                      subject)
 
-    config_path = generate_ramulator_config(subject, 'FR6', container, stim_params,
-                                            paths, ec_pairs, excluded_pairs)
+    config_path = generate_ramulator_config(subject,
+                                            experiment,
+                                            container,
+                                            stim_params,
+                                            paths,
+                                            ec_pairs,
+                                            excluded_pairs)
 
     if vispath is not None:
         config_path.visualize(filename=vispath)
