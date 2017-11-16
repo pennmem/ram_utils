@@ -30,4 +30,7 @@ def test_generate_fr1_report():
         math_summaries.append(m_summary)
 
     generator = ReportGenerator(session_summaries, math_summaries)
-    generator.generate_fr1_report()
+    report = generator.generate_fr1_report()
+
+    with open('out.html', 'w') as rfile:
+        rfile.write(report)

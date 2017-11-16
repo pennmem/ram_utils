@@ -75,7 +75,13 @@ class ReportGenerator(object):
             raise NotImplementedError("Only FR1 reports are supported so far")
 
     def generate_fr1_report(self):
-        """Generate an FR1 report."""
+        """Generate an FR1 report.
+
+        Returns
+        -------
+        Rendered FR1 report as a string.
+
+        """
         template = self._env.get_template("fr1.html")
         return template.render(
             subject=self.subject,
