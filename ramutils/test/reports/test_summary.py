@@ -10,7 +10,7 @@ from traits.api import ListInt, ListFloat, ListBool
 
 from ramutils.reports.summary import (
     SessionSummary, StimSessionSessionSummary, MathSummary,
-    FRSessionSessionSummary, FRStimSessionSummary
+    FRSessionSummary, FRStimSessionSummary
 )
 
 datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
@@ -144,13 +144,13 @@ class TestMathSummary:
 class TestFRSessionSummary:
     @classmethod
     def setup_class(cls):
-        cls.summary = FRSessionSessionSummary()
+        cls.summary = FRSessionSummary()
         events = fr5_events()
         probs = np.random.random(len(events))
         cls.summary.populate(events, probs)
 
     def test_no_probs_given(self, fr5_events):
-        summary = FRSessionSessionSummary()
+        summary = FRSessionSummary()
         summary.populate(fr5_events)
         assert all(summary.prob == -999)
 

@@ -13,7 +13,7 @@ from ramutils.schema import Schema
 
 __all__ = [
     'SessionSummary',
-    'FRSessionSessionSummary',
+    'FRSessionSummary',
     'FRStimSessionSummary',
     'FR5SessionSummary',
 ]
@@ -85,11 +85,21 @@ class SessionSummary(Summary):
 
         """
         if not hasattr(self, '_df') or recreate:
+            # these attributes won't be included
+            ignore = [
+                'events',  # we don't need events in the dataframe
+                'rejected', 'region',  # FIXME: don't ignore
+            ]
+
+            # also ignore phase for events that predate it
+            if 'phase' in self.visible_traits():
+                if len(self.phase) == 0:
+                    ignore += ['phase']
+
             columns = {
                 trait: getattr(self, trait)
                 for trait in self.visible_traits()
-                if trait not in ['events',  # we don't need events in the dataframe
-                                 'rejected', 'region']  # FIXME
+                if trait not in ignore
             }
             self._df = pd.DataFrame(columns)
         return self._df
@@ -198,7 +208,7 @@ class MathSummary(SessionSummary):
         return MathSummary.total_num_problems(summaries) / n_lists
 
 
-class FRSessionSessionSummary(SessionSummary):
+class FRSessionSummary(SessionSummary):
     """Free recall session summary data."""
     item = Array(dtype='|U256', desc='list item (a.k.a. word)')
     session = Array(dtype=int, desc='session number')
@@ -244,7 +254,7 @@ class FRSessionSessionSummary(SessionSummary):
 
 
 # FIXME
-# class CatFRSessionSummary(FRSessionSessionSummary):
+# class CatFRSessionSummary(FRSessionSummary):
 #     """Extends standard FR session summaries for categorized free recall
 #     experiments.
 #
@@ -294,10 +304,10 @@ class StimSessionSessionSummary(SessionSummary):
         self.duration = [e.stim_params.stim_duration for e in events]
 
 
-class FRStimSessionSummary(FRSessionSessionSummary, StimSessionSessionSummary):
+class FRStimSessionSummary(FRSessionSummary, StimSessionSessionSummary):
     """SessionSummary for FR sessions with stim."""
     def populate(self, events, recall_probs=None, is_ps4_session=False):
-        FRSessionSessionSummary.populate(self, events, recall_probs)
+        FRSessionSummary.populate(self, events, recall_probs)
         StimSessionSessionSummary.populate(self, events, is_ps4_session)
 
     @property
