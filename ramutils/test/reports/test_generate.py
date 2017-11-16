@@ -2,7 +2,7 @@ import numpy as np
 from pkg_resources import resource_filename
 
 from ramutils.reports.generate import ReportGenerator
-from ramutils.reports.summary import SessionSummary, MathSummary
+from ramutils.reports.summary import FRSessionSummary, MathSummary
 
 
 def test_generate_fr1_report():
@@ -16,18 +16,18 @@ def test_generate_fr1_report():
     events = np.load(events_file)['events'].view(np.recarray)
     math_events = np.load(math_events_file)['events'].view(np.recarray)
 
-    # import pytest; pytest.set_trace()
-
     session_summaries = []
     math_summaries = []
     for session in np.unique(events.session):
-        s_summary = SessionSummary()
+        s_summary = FRSessionSummary()
         s_summary.populate(events[events.session == session])
         m_summary = MathSummary()
         m_summary.populate(math_events[math_events.session == session])
 
         session_summaries.append(s_summary)
         math_summaries.append(m_summary)
+
+    # import pytest; pytest.set_trace()
 
     generator = ReportGenerator(session_summaries, math_summaries)
     report = generator.generate_fr1_report()

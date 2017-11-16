@@ -1,11 +1,11 @@
-<table>
+<table class="table table-striped">
   <thead>
     <tr>
-      <td>Session</td>
-      <td>Date</td>
-      <td>Length [min]</td>
-      <td>Number of lists</td>
-      <td>Recall percentage</td>
+      <th>Session</th>
+      <th>Date</th>
+      <th>Length [min]</th>
+      <th>Number of lists</th>
+      <th>Recall percentage</th>
     </tr>
   </thead>
   <tbody>
@@ -13,6 +13,7 @@
       <tr>
         <td>{{ summary.session_number }}</td>
         <td>{{ summary.session_datetime.strftime('%Y-%m-%d') }}</td>
+        <td>{{ "{:.2f}".format(summary.session_length/60.0) }}</td>
         <td>{{ summary.num_lists }}</td>
         <td>{{ summary.percent_recalled }}</td>
       </tr>
