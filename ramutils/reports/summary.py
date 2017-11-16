@@ -252,6 +252,41 @@ class FRSessionSummary(SessionSummary):
         # FIXME: is length of events always equal to number of items?
         return 100 * len(self.events[self.events.recalled == True]) / len(self.events)
 
+    @staticmethod
+    def serialpos_probabilities(summaries, first=False):
+        """Computes the mean recall probability by word serial position.
+
+        Parameters
+        ----------
+        summaries : List[Summary]
+            Summaries of sessions.
+        first : bool
+            When True, return probabilities that each serial position is the
+            first recalled word. Otherwise, return the probability of recall
+            for each word by serial position.
+
+        Returns
+        -------
+        List[float]
+
+        """
+        events = pd.concat([pd.DataFrame(s.events) for s in summaries])
+
+        if first:
+            firstpos = np.zeros(len(events.serialpos.unique()), dtype=np.float)
+            for listno in events.list.unique():
+                try:
+                    nonzero = events[(events.list == listno) & (events.recalled == 1)].serialpos.iloc[0]
+                except IndexError:  # no items recalled this list
+                    continue
+                thispos = np.zeros(firstpos.shape, firstpos.dtype)
+                thispos[nonzero - 1] = 1
+                firstpos += thispos
+            return firstpos / events.list.max()
+        else:
+            group = events.groupby('serialpos')
+            return group.recalled.mean().tolist()
+
 
 # FIXME
 # class CatFRSessionSummary(FRSessionSummary):

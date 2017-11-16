@@ -1,23 +1,25 @@
-<table class="table table-striped">
+<div>
   <h2 id="session-summary">Summary of sessions</h2>
-  <thead>
-    <tr>
-      <th>Session</th>
-      <th>Date</th>
-      <th>Length [min]</th>
-      <th>Number of lists</th>
-      <th>Recall percentage</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for summary in summaries %}
+  <table class="table table-striped">
+    <thead>
       <tr>
-        <td>{{ summary.session_number }}</td>
-        <td>{{ summary.session_datetime.strftime('%Y-%m-%d') }}</td>
-        <td>{{ "{:.2f}".format(summary.session_length/60.0) }}</td>
-        <td>{{ summary.num_lists }}</td>
-        <td>{{ "{:.2f}".format(summary.percent_recalled) }}</td>
+        <th>Session</th>
+        <th>Date</th>
+        <th>Length [min]</th>
+        <th>Number of lists</th>
+        <th>Recall percentage</th>
       </tr>
-    {% endfor %}
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      {% for summary in summaries %}
+        <tr>
+          <td>{{ summary.session_number }}</td>
+          <td>{{ summary.session_datetime.strftime('%Y-%m-%d') }}</td>
+          <td>{{ "{:.2f}".format(summary.session_length/60.0) }}</td>
+          <td>{{ summary.num_lists }}</td>
+          <td>{{ "{:.2f}".format(summary.percent_recalled) }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

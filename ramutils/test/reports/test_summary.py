@@ -160,6 +160,16 @@ class TestFRSessionSummary:
     def test_percent_recalled(self):
         assert self.summary.percent_recalled == 16
 
+    @pytest.mark.parametrize('first', [True, False])
+    def test_serialpos_probabilities(self, first):
+        if first:
+            expected = [0.2, 0.12, 0.08, 0.08, 0.08, 0.0, 0.08, 0.04, 0.08, 0.0, 0.0, 0.04]
+        else:
+            expected = [0.2, 0.16, 0.08, 0.16, 0.16, 0.12, 0.28, 0.2, 0.08, 0.16, 0.24, 0.08]
+
+        probs = FRSessionSummary.serialpos_probabilities([self.summary], first)
+        assert_almost_equal(probs, expected, decimal=2)
+
 
 class TestStimSessionSummary:
     @pytest.mark.parametrize('is_ps4_session', [True, False])
