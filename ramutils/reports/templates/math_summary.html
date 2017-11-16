@@ -13,6 +13,9 @@
       <th scope="row">Percent correct</th>
       <td>{{ '{:.2f}'.format(MathSummary.total_percent_correct(math_summaries)) }}</td>
     </tr>
-    {# FIXME: number of problems per list #}
+    <tr>
+      <th scope="row">Problems per list</th>
+      <td>{{ '{:.2f}'.format(MathSummary.total_problems_per_list(math_summaries)) }}</td>
+    </tr>
   </table>
 </div>
