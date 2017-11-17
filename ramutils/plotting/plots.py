@@ -128,7 +128,6 @@ def probability_lineplot(serial_positions, prob_of_recall,
 
     """
     is_array = (type(prob_of_recall) == list)
-    print(is_array)
     if (is_array) and (len(labels) != len(prob_of_recall)):
         raise RuntimeError(
             "Number of labels should match the number of recall prob arrays")
