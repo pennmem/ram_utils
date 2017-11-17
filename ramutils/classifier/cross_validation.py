@@ -14,7 +14,7 @@ __all__ = [
 ]
 
 
-def permuted_lolo_AUCs(classifier, powers, events, n_permutations):
+def permuted_lolo_AUCs(classifier, powers, events, n_permutations, **kwargs):
     """Permuted leave-one-list-out cross validation
 
     Parameters
@@ -47,13 +47,13 @@ def permuted_lolo_AUCs(classifier, powers, events, n_permutations):
                 shuffle(list_permuted_recalls)
                 permuted_recalls[sel] = list_permuted_recalls
 
-        probs = run_lolo_xval(classifier, powers, events, recalls)
+        probs = run_lolo_xval(classifier, powers, events, recalls, **kwargs)
         AUCs[i] = roc_auc_score(permuted_recalls, probs)
 
     return AUCs
 
 
-def run_lolo_xval(classifier, powers, events, recalls):
+def run_lolo_xval(classifier, powers, events, recalls, **kwargs):
     """Perform a single iteration of leave-one-list-out cross validation
 
     Parameters
@@ -76,7 +76,8 @@ def run_lolo_xval(classifier, powers, events, recalls):
         insample_mask = (events.list != lst)
         insample_pow_mat = powers[insample_mask]
         insample_recalls = recalls[insample_mask]
-        classifier.fit(insample_pow_mat, insample_recalls)
+        insample_weights = get_sample_weights(events[insample_mask], **kwargs)
+        classifier.fit(insample_pow_mat, insample_recalls, insample_weights)
         outsample_mask = ~insample_mask
         outsample_pow_mat = powers[outsample_mask]
         probs[outsample_mask] = classifier.predict_proba(outsample_pow_mat)[:, 1]
@@ -84,8 +85,7 @@ def run_lolo_xval(classifier, powers, events, recalls):
     return probs
 
 
-def permuted_loso_AUCs(classifier, powers, events, sample_weight,
-                       n_permutations):
+def permuted_loso_AUCs(classifier, powers, events, n_permutations, **kwargs):
     recalls = events.recalled
     permuted_recalls = np.array(recalls)
     AUCs = np.empty(shape=n_permutations, dtype=np.float)
@@ -98,8 +98,7 @@ def permuted_loso_AUCs(classifier, powers, events, sample_weight,
                 shuffle(sess_permuted_recalls)
                 permuted_recalls[sel] = sess_permuted_recalls
 
-            probs = run_loso_xval(classifier, powers, events, recalls,
-                                  sample_weight)
+            probs = run_loso_xval(classifier, powers, events, recalls, **kwargs)
             AUCs[i] = roc_auc_score(recalls, probs)
         except ValueError:
             AUCs[i] = np.nan
@@ -107,7 +106,7 @@ def permuted_loso_AUCs(classifier, powers, events, sample_weight,
     return AUCs
 
 
-def run_loso_xval(classifier, powers, events, recalls, encoding_sample_weight):
+def run_loso_xval(classifier, powers, events, recalls, **kwargs):
     """Perform leave-one-session-out cross validation.
 
     Parameters
@@ -120,8 +119,6 @@ def run_loso_xval(classifier, powers, events, recalls, encoding_sample_weight):
         set of events for the session
     recalls : np.ndarray
         vector of recall outcomes
-    encoding_sample_weight : int
-        Scalar to determine how much more to weight encoding samples
 
     Returns
     -------
@@ -130,7 +127,6 @@ def run_loso_xval(classifier, powers, events, recalls, encoding_sample_weight):
 
     """
     probs = np.empty_like(recalls, dtype=np.float)
-
     sessions = np.unique(events.session)
 
     for sess_idx, sess in enumerate(sessions):
@@ -138,9 +134,8 @@ def run_loso_xval(classifier, powers, events, recalls, encoding_sample_weight):
         insample_mask = (events.session != sess)
         insample_pow_mat = powers[insample_mask]
         insample_recalls = recalls[insample_mask]
-        insample_samples_weights = get_sample_weights(events[events.session != sess],
-                                                      encoding_sample_weight)
-
+        insample_samples_weights = get_sample_weights(events[insample_mask],
+                                                      **kwargs)
         classifier.fit(insample_pow_mat, insample_recalls,
                        insample_samples_weights)
 
@@ -151,19 +146,4 @@ def run_loso_xval(classifier, powers, events, recalls, encoding_sample_weight):
         outsample_probs = classifier.predict_proba(outsample_pow_mat)[:, 1]
         probs[outsample_mask] = outsample_probs
 
-        # FIXME: this should be computed elsewhere
-        # outsample_encoding_mask = (events.session == sess) & (events.type == 'WORD')
-        # outsample_retrieval_mask = (events.session == sess) & ((events.type == 'REC_BASE') | (events.type == 'REC_WORD'))
-        # outsample_both_mask = (events.session == sess)
-        #
-        # auc_encoding[sess_idx] = self.get_auc(
-        #     classifier=classifier, features=powers, recalls=recalls, mask=outsample_encoding_mask)
-        # encoding_probs[events[events.type == 'WORD'].session == sess] = classifier.predict_proba(powers[outsample_encoding_mask])[:, 1]
-        #
-        # auc_retrieval[sess_idx] = self.get_auc(
-        #     classifier=classifier, features=powers, recalls=recalls, mask=outsample_retrieval_mask)
-        #
-        # auc_both[sess_idx] = self.get_auc(
-        #     classifier=classifier, features=powers, recalls=recalls, mask=outsample_both_mask)
-
-        return probs
+    return probs

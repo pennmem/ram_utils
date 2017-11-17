@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+<div class="container">
+  <div>
+    <h1>{{ subject }} RAM {{ experiment }} report</h1>
+  </div>
+  <div>
+    {% block report %}{% endblock %}
+  </div>
+</div>
+</body>
+</html>

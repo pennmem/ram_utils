@@ -1,0 +1,17 @@
+<div>
+  <table class="table">
+    <tr>
+      <th scope="row">Total problems</th>
+      <td>{{ MathSummary.total_num_problems(math_summaries) }}</td>
+    </tr>
+    <tr>
+      <th scope="row">Number correct</th>
+      <td>{{ MathSummary.total_num_correct(math_summaries) }}</td>
+    </tr>
+    <tr>
+      <th scope="row">Percent correct</th>
+      <td>{{ MathSummary.total_percent_correct(math_summaries) }}</td>
+    </tr>
+    {# FIXME: number of problems per list #}
+  </table>
+</div>

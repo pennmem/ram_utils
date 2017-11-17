@@ -33,7 +33,7 @@ def _atlas_location(bp_data):
     return '--'
 
 
-@task()
+@task(cache=False)
 def load_pairs_from_json(path):
     """Load pairs.json.
 
@@ -115,7 +115,7 @@ def generate_pairs_for_classifier(pairs, excluded_pairs):
     used_pairs = {
         key: value for key, value in pairs.items()
         if key not in excluded_pairs
-        }
+    }
 
     pairs = np.rec.fromrecords([(item['channel_1'], item['channel_2'],
                                  pair.split('-')[0], pair.split('-')[1])
@@ -127,7 +127,7 @@ def generate_pairs_for_classifier(pairs, excluded_pairs):
     return pairs
 
 
-@task()
+@task(cache=False)
 def get_used_pair_mask(all_pairs, excluded_pairs):
     """ Get a mask of whether to include a pair in all_pairs based on
     excluded pairs

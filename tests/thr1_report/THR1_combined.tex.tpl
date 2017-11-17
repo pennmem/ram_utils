@@ -1,9 +1,9 @@
-\documentclass[a4paper]{article} 
+\documentclass[a4paper]{article}
 \usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
-\usepackage{graphicx,multirow} 
+\usepackage{graphicx,multirow}
 %\usepackage{epstopdf}
 %\usepackage{wrapfig}
-\usepackage{longtable} 
+\usepackage{longtable}
 \usepackage{pdfpages}
 %\usepackage{mathtools}
 \usepackage{array}
@@ -13,13 +13,13 @@
 \usepackage[small,bf,it]{caption}
 \setlength\belowcaptionskip{2pt}
 
-\addtolength{\oddsidemargin}{-.875in} 
-\addtolength{\evensidemargin}{-.875in} 
-\addtolength{\textwidth}{1.75in} 
-\addtolength{\topmargin}{-.75in} 
-\addtolength{\textheight}{1.75in} 
+\addtolength{\oddsidemargin}{-.875in}
+\addtolength{\evensidemargin}{-.875in}
+\addtolength{\textwidth}{1.75in}
+\addtolength{\topmargin}{-.75in}
+\addtolength{\textheight}{1.75in}
 
-\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}} 
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
@@ -47,7 +47,7 @@ In the Treasure Hunt Recall (THR), participants navigate a virtual environment a
 \begin{table}[!h]
 \centering
 \begin{tabular}{c|c}
-\multicolumn{2}{c}{\textbf{Performance Summary}} \\
+\multicolumn{2}{c}{\textbf{Performance SessionSummary}} \\
 \hline
 $<N_WORDS>$ words & $<N_CORRECT_WORDS>$ correct ($<PC_CORRECT_WORDS>$\%)  \\ \hline
 \end{tabular}

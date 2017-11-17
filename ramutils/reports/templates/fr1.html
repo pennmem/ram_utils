@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}
+  {{ subject }} RAM FR1 Report
+{% endblock %}
+
+{% block report %}
+{% include 'session_summary.html' %}
+{% include 'math_summary.html' %}
+{% include 'roc_curve.html' %}
+{% endblock %}

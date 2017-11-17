@@ -21,27 +21,35 @@ except ImportError:
 
 logger = get_logger()
 
+__all__ = [
+    'get_sample_weights',
+    'train_classifier',
+    'perform_cross_validation',
+    'serialize_classifier',
+]
+
 
 @task()
-def get_sample_weights(events, params):
+def get_sample_weights(events, **kwargs):
     """Calculate class weights based on recall/non-recall in given events data.
 
     Parameters
     ----------
     events : np.recarray
-    params : ExperimentParameters
+    kwargs :
 
     Returns
     -------
     sample_weights : np.ndarray
 
     """
-    sample_weights = get_sample_weights_core(events, params.encoding_samples_weight)
+    sample_weights = get_sample_weights_core(events,
+                                             **kwargs)
     return sample_weights
 
 
 @task()
-def train_classifier(pow_mat, events, sample_weights, params):
+def train_classifier(pow_mat, events, sample_weights, **kwargs):
     """Train a classifier.
 
     Parameters
@@ -58,26 +66,24 @@ def train_classifier(pow_mat, events, sample_weights, params):
 
     """
     recalls = events.recalled
-    recalls[events.type == 'REC_WORD'] = 1
-    recalls[events.type == 'REC_BASE'] = 0
-
-    classifier = LogisticRegression(C=params.C,
-                                    penalty=params.penalty_type,
-                                    solver=params.solver)
+    classifier = LogisticRegression(C=kwargs['C'],
+                                    penalty=kwargs['penalty_type'],
+                                    solver=kwargs['solver'])
     classifier.fit(pow_mat, recalls, sample_weights)
     return classifier
 
 
 @task()
-def perform_cross_validation(classifier, pow_mat, events, params):
+def perform_cross_validation(classifier, pow_mat, events, n_permutations,
+                             **kwargs):
     """Perform LOSO or LOLO cross validation on a classifier.
 
     Parameters
     ----------
-    classifier : LogisticRegression
+    classifier : sklearn model object
     pow_mat : np.ndarray
     events : np.recarray
-    params : ExperimentParameters
+    n_permutations: int
 
     Returns
     -------
@@ -86,8 +92,6 @@ def perform_cross_validation(classifier, pow_mat, events, params):
 
     """
     recalls = events.recalled
-    recalls[events.type == 'REC_WORD'] = 1
-    recalls[events.type == 'REC_BASE'] = 0
 
     # Stores cross validation output. Keys are sessions or 'all' for all session
     # cross validation.
@@ -98,10 +102,8 @@ def perform_cross_validation(classifier, pow_mat, events, params):
     if len(sessions) > 1:
         logger.info("Performing LOSO cross validation")
         perm_AUCs = permuted_loso_AUCs(classifier, pow_mat, events,
-                                       params.encoding_samples_weight,
-                                       params.n_perm)
-        probs = run_loso_xval(classifier, pow_mat, events, recalls,
-                              params.encoding_samples_weight)
+                                       n_permutations, **kwargs)
+        probs = run_loso_xval(classifier, pow_mat, events, recalls)
 
         # Store model output statistics
         output = ModelOutput(true_labels=recalls, probs=probs)
@@ -113,7 +115,7 @@ def perform_cross_validation(classifier, pow_mat, events, params):
         logger.info("Performing LOLO cross validation")
         session = sessions[0]
         perm_AUCs = permuted_lolo_AUCs(classifier, pow_mat, events,
-                                       params.n_perm)
+                                       n_permutations, **kwargs)
         probs = run_lolo_xval(classifier, pow_mat, events, recalls)
 
         # Store model output statistics
@@ -145,7 +147,8 @@ def serialize_classifier(classifier, pairs, features, events, sample_weights,
     :rtype: ClassifierContainer
 
     """
-    return ClassifierContainer(
+
+    container = ClassifierContainer(
         classifier=classifier,
         pairs=pairs,
         features=features,
@@ -156,3 +159,4 @@ def serialize_classifier(classifier, pairs, features, events, sample_weights,
             'subject': subject
         }
     )
+    return container
