@@ -130,6 +130,9 @@ def clean_events(events):
     events = remove_practice_lists(events)
     events = remove_incomplete_lists(events)
     events = update_recall_outcome_for_retrieval_events(events)
+    events = combine_retrieval_events(events)
+    events = coerce_study_pair_to_word_event(events)
+
     return events
 
 
@@ -181,14 +184,42 @@ def update_recall_outcome_for_retrieval_events(events):
     return events
 
 
+def combine_retrieval_events(events):
+    """
+        Combine baseline retrieval and actual retrieval events into a single
+        event type.
+
+    """
+    events.type[(events.type == 'REC_WORD') |
+                (events.type == 'REC_BASE')] = 'REC_EVENT'
+    return events
+
+
+def coerce_study_pair_to_word_event(events):
+    """
+        Update STUDY_PAIR events to be WORD events. These are the same event
+        type, but PAL calls them STUDY_PAIR and FR/catFR call them WORD. In the
+        future, it may make more sense to make an update to event creation
+        instead of coercing the even types here
+    """
+    events.type[(events.type == 'STUDY_PAIR')] = 'WORD'
+    return events
+
+
 def remove_practice_lists(events):
+    """ Remove practice lists from the set of events """
     cleaned_events = events[events.list > -1]
     return cleaned_events
 
 
 def remove_bad_events():
-    # TODO: This should remove any events where the read window would be
-    # outside the bounds of the associated EEG file
+    """
+        Remove events whose offset values would result in trying to read data
+        that is out of bounds in the EEG file. Currently, this is done
+        automatically in PTSA when you load the EEG, but to avoid having to
+        catch updated events when reading the EEG, it should be done ahead of
+        time.
+    """
     raise NotImplementedError
 
 
@@ -469,8 +500,6 @@ def select_all_retrieval_events(events):
 def get_all_retrieval_events_mask(events):
     """ Create a boolean bask for any retrieval event """
     all_retrieval_mask = ((events.type == 'REC_WORD') |
-                          (events.type == 'REC_BASE'))
+                          (events.type == 'REC_BASE') |
+                          (events.type == 'REC_EVENT'))
     return all_retrieval_mask
-
-
-
