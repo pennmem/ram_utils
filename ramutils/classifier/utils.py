@@ -126,11 +126,11 @@ def determine_weighting_scheme_from_events(events):
     observed_event_types = np.unique(events.type)
     experiments = np.unique(events.experiment)
 
-    if ("PAL" in experiments):
+    if any([experiment.find("PAL") != -1 for experiment in experiments]):
         scheme = "PAL"
         event_types_to_check = ['STUDY_PAIR', 'WORD', 'REC_EVENT']
 
-    elif "FR" in experiments:
+    elif any([experiment.find("FR") != -1 for experiment in experiments]):
         scheme = "FR"
         event_types_to_check = ['WORD', 'REC_BASE', 'REC_WORD']
 
