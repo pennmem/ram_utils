@@ -106,7 +106,7 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
 
     sample_weights = get_sample_weights(task_events, **kwargs)
 
-    classifier = train_classifier(powers,
+    classifier = train_classifier(reduced_powers,
                                   task_events,
                                   sample_weights,
                                   **kwargs)

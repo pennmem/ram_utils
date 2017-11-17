@@ -73,6 +73,8 @@ def train_classifier(pow_mat, events, sample_weights, **kwargs):
     return classifier
 
 
+# FIXME: Remove the reliance on that weird ModelOutput object. Pull methods out
+# as functions and track results with a dict if that is really necessary
 @task()
 def perform_cross_validation(classifier, pow_mat, events, n_permutations,
                              **kwargs):
@@ -103,7 +105,7 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
         logger.info("Performing LOSO cross validation")
         perm_AUCs = permuted_loso_AUCs(classifier, pow_mat, events,
                                        n_permutations, **kwargs)
-        probs = run_loso_xval(classifier, pow_mat, events, recalls)
+        probs = run_loso_xval(classifier, pow_mat, events, recalls, **kwargs)
 
         # Store model output statistics
         output = ModelOutput(true_labels=recalls, probs=probs)
@@ -116,14 +118,14 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
         session = sessions[0]
         perm_AUCs = permuted_lolo_AUCs(classifier, pow_mat, events,
                                        n_permutations, **kwargs)
-        probs = run_lolo_xval(classifier, pow_mat, events, recalls)
+        probs = run_lolo_xval(classifier, pow_mat, events, recalls, **kwargs)
 
         # Store model output statistics
         output = ModelOutput(true_labels=recalls, probs=probs)
         output.compute_metrics()
         xval['all'] = xval[session] = output
 
-    pvalue = np.sum(perm_AUCs >= xval['all'].auc) / len(perm_AUCs)
+    pvalue = np.count_nonzero((perm_AUCs >= xval['all'].auc)) / len(perm_AUCs)
     logger.info("Permutation test p-value = %f", pvalue)
 
     recall_prob = classifier.predict_proba(pow_mat)[:, 1]
