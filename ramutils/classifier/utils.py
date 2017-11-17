@@ -82,15 +82,22 @@ def get_sample_weights(events, **kwargs):
 
     Parameters
     ----------
-    experiment: str
-    events: pd.DataFrame
+    events : np.recarray
+    kwargs : dict
+        encoding_multiplier: float
+            Scaling factor for encoding events
+        pal_mutiplier: float
+            Scaling factor for PAL events (if any exist)
+        scheme: str
+            Sample weighting scheme to use
 
     Returns
     -------
-    weights: np.ndarray
+    sample_weights : np.ndarray
 
     """
-    scheme = determine_weighting_scheme_from_events(events)
+    if 'scheme' not in kwargs:
+        scheme = determine_weighting_scheme_from_events(events)
 
     if scheme not in ['PAL', 'FR', 'EQUAL']:
         raise NotImplementedError("The requested weighting scheme has not "
@@ -109,12 +116,14 @@ def get_sample_weights(events, **kwargs):
 
 
 def determine_weighting_scheme_from_events(events):
-    """ Identify the weighting scheme to be used based on the event types
-    present in events
+    """
+        Identify the weighting scheme to be used based on the event types
+        present in events
 
     Parameters:
     -----------
-    events:
+    events: np.recarray
+        Set of events to use when determining sample weighting scheme to use
 
     Returns:
     --------

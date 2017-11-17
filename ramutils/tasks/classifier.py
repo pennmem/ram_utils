@@ -31,25 +31,14 @@ __all__ = [
 
 @task()
 def get_sample_weights(events, **kwargs):
-    """Calculate class weights based on recall/non-recall in given events data.
-
-    Parameters
-    ----------
-    events : np.recarray
-    kwargs :
-
-    Returns
-    -------
-    sample_weights : np.ndarray
-
-    """
     sample_weights = get_sample_weights_core(events,
                                              **kwargs)
     return sample_weights
 
 
 @task()
-def train_classifier(pow_mat, events, sample_weights, **kwargs):
+def train_classifier(pow_mat, events, sample_weights, penalty_param,
+                     penalty_type, solver):
     """Train a classifier.
 
     Parameters
@@ -57,7 +46,12 @@ def train_classifier(pow_mat, events, sample_weights, **kwargs):
     pow_mat : np.ndarray
     events : np.recarray
     sample_weights : np.ndarray
-    params : ExperimentParameters
+    penalty_param: Float
+        Penalty parameter to use
+    penalty_type: str
+        Type of penalty to use for regularized model (ex: L2)
+    solver: str
+        Solver to use when fitting the model (ex: liblinear)
 
     Returns
     -------
@@ -66,9 +60,9 @@ def train_classifier(pow_mat, events, sample_weights, **kwargs):
 
     """
     recalls = events.recalled
-    classifier = LogisticRegression(C=kwargs['C'],
-                                    penalty=kwargs['penalty_type'],
-                                    solver=kwargs['solver'])
+    classifier = LogisticRegression(C=penalty_param,
+                                    penalty=penalty_type,
+                                    solver=solver)
     classifier.fit(pow_mat, recalls, sample_weights)
     return classifier
 
@@ -86,6 +80,9 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
     pow_mat : np.ndarray
     events : np.recarray
     n_permutations: int
+    kwargs: dict
+        Extra keyword arguments that are passed to get_sample_weights. See
+        that function for more details
 
     Returns
     -------
@@ -138,18 +135,32 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
 @task(cache=False)
 def serialize_classifier(classifier, pairs, features, events, sample_weights,
                          xval_output, subject):
-    """Serialize the classifier.
 
-    :param LogisticRegression classifier:
-    :param np.ndarray features:
-    :param np.recarray events:
-    :param np.ndarray sample_weights:
-    :param Dict[ModelOutput] xval_output:
-    :param str subject:
-    :rtype: ClassifierContainer
+    """ Serialize classifier into a container object
+
+    Parameters
+    ----------
+    classifier: sklearn Estimator
+        Model used during training
+    pairs: array_like
+        bipolar pairs used for training
+    features: np.ndarray
+        Normalized power matrix used as features to the classifier
+    events: np.recarray
+        Set of events used for training
+    sample_weights: array_like
+        Weights used for each of the event
+    xval_output: ModelOutput
+        Object used for calculating and storing cross-validation-related metrics
+    subject: str
+        Subject identifier
+
+    Returns
+    -------
+    ClassififerContainer
+        Object representing all meta-data associated with training a classifier
 
     """
-
     container = ClassifierContainer(
         classifier=classifier,
         pairs=pairs,
