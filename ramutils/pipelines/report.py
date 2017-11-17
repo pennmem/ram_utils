@@ -1,0 +1,76 @@
+"""Pipeline for creating reports."""
+
+
+from ramutils.constants import EXPERIMENTS
+from ramutils.tasks import *
+
+
+def make_report(subject, experiment, paths, stim_params=[], classifier=None,
+                exp_params=None, sessions=None, vispath=None):
+    """Run a report.
+
+    Parameters
+    ----------
+    subject : str
+        Subject ID
+    experiment : str
+        Experiment to generate report for
+    paths : FilePaths
+    stim_params : List[StimParameters]
+        Stimulation parameters (empty list for non-stim experiments).
+    classifier : ClassifierContainer
+        For experiments that ran with a classifier, the container detailing the
+        classifier that was actually used. When not given, a new classifier will
+        be trained to (hopefully) recreate what was actually used.
+    exp_params : ExperimentParameters
+        When given, overrides the inferred default parameters to use for an
+        experiment.
+    sessions : list
+        For reports that span sessions, sessions to read data from.
+        When not given, all available sessions are used for reports.
+    vispath : str
+        Filename for task graph visualization.
+
+    Returns
+    -------
+    report_path : str
+        Path to generated report.
+
+    Notes
+    -----
+    Eventually this will return an object that summarizes all output of the
+    report rather than the report itself.
+
+    """
+    if "FR" in experiment:
+        encoding_events, retrieval_events = preprocess_fr_events(subject)
+    else:
+        raise RuntimeError("only FR supported so far")
+
+    # FIXME: can this be centralized?
+    ec_pairs = generate_pairs_from_electrode_config(subject, paths)
+    excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
+    used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
+    final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
+
+    if classifier is None:
+        # TODO: Load classifier if possible
+        pass  # TODO: compute powers, train classifier
+
+    # TODO: Compute powers
+
+    if experiment in (EXPERIMENTS['closed_loop'] + EXPERIMENTS['ps']):
+        # FIXME: get stim events and add to events?
+        events = encoding_events
+
+    # generate summaries for each session
+    # FIXME: encoding events or all events?
+    session_summaries = [
+        summarize_session(events[events.session == session])
+        for session in sessions
+    ]
+
+    # TODO: generate plots, generate tex, generate PDF
+
+    if vispath is not None:
+        pass  # TODO

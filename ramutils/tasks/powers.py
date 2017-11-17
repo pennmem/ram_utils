@@ -9,9 +9,16 @@ from ramutils.tasks import task
 
 logger = get_logger()
 
+__all__ = [
+    'compute_powers',
+    'combine_encoding_retrieval_powers',
+    'normalize_powers_by_session',
+    'reduce_powers',
+]
+
 
 @task(nout=2)
-def compute_powers(events, params):
+def compute_powers(events, **kwargs):
     """
 
     :param np.recarray events:
@@ -20,11 +27,11 @@ def compute_powers(events, params):
 
     """
     powers, updated_events = compute_powers_core(events,
-                                                 params.start_time,
-                                                 params.end_time,
-                                                 params.buf,
-                                                 params.freqs,
-                                                 params.log_powers)
+                                                 kwargs['start_time'],
+                                                 kwargs['end_time'],
+                                                 kwargs['buf'],
+                                                 kwargs['freqs'],
+                                                 kwargs['log_powers'])
     return powers, updated_events
 
 

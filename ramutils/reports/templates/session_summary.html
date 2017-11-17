@@ -1,0 +1,21 @@
+<table>
+  <thead>
+    <tr>
+      <td>Session</td>
+      <td>Date</td>
+      <td>Length [min]</td>
+      <td>Number of lists</td>
+      <td>Recall percentage</td>
+    </tr>
+  </thead>
+  <tbody>
+    {% for summary in summaries %}
+      <tr>
+        <td>{{ summary.session_number }}</td>
+        <td>{{ summary.session_datetime.strftime('%Y-%m-%d') }}</td>
+        <td>{{ summary.num_lists }}</td>
+        <td>{{ summary.percent_recalled }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
