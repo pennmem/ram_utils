@@ -144,8 +144,6 @@ class ComputeEncodingClassifier(RamTask):
             insample_recalls = recalls[insample_mask]
             insample_samples_weights = samples_weights[insample_mask]
 
-            insample_enc_mask = insample_mask & ((events.type == 'STUDY_PAIR') |(events.type == 'PRACTICE_PAIR'))
-
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 if samples_weights is not None:
@@ -166,7 +164,7 @@ class ComputeEncodingClassifier(RamTask):
 
 
             if events is not None:
-                outsample_encoding_mask = (events.session == sess) & ((events.type == 'STUDY_PAIR')|(events.type == 'PRACTICE_PAIR'))
+                outsample_encoding_mask = (events.session == sess)
 
                 auc_encoding[sess_idx] = self.get_auc(
                     classifier=self.lr_classifier, features=self.pow_mat, recalls=recalls, mask=outsample_encoding_mask)
@@ -192,7 +190,7 @@ class ComputeEncodingClassifier(RamTask):
         AUCs = np.empty(shape=n_perm, dtype=np.float)
         for i in range(n_perm):
             try:
-                for sess in event_sessions:
+                for sess in np.unique(event_sessions):
                     sel = (event_sessions == sess)
                     sess_permuted_recalls = permuted_recalls[sel]
                     shuffle(sess_permuted_recalls)
@@ -294,12 +292,15 @@ class ComputeEncodingClassifier(RamTask):
         self.pass_object('encoding_reduced_pow_mat', self.pow_mat)
 
     def run(self):
-        events = self.get_passed_object('PAL1_events')
-        encoding_mask = (events.type == 'STUDY_PAIR') | (events.type == 'PRACTICE_PAIR')
+        events = self.get_passed_object('combined_evs')
+        fr1_encoding_mask = (events.type == 'WORD') & (events.exp_name == 'FR1')
+        pal1_encoding_mask = (events.type == 'WORD') & (events.exp_name == 'PAL1')
+        encoding_mask = (fr1_encoding_mask | pal1_encoding_mask)
 
         self.pow_mat = self.filter_pow_mat()
         self.pow_mat[encoding_mask] = normalize_sessions(self.pow_mat[encoding_mask], events[encoding_mask])
         self.pow_mat = self.pow_mat[encoding_mask]
+
         encoding_events = events[encoding_mask]
         encoding_recalls = encoding_events.correct
 

@@ -101,7 +101,13 @@ class ExperimentConfigGeneratorClosedLoop5_V1(RamTask):
 
         reduced_pow_mat = self.get_passed_object('reduced_pow_mat')
         if self.pipeline.args.encoding:
-            reduced_pow_mat = self.get_passed_object('reduced_encoding_pow_mat')
+            reduced_pow_mat = self.get_passed_object('encoding_reduced_pow_mat')
+            fr1_encoding_mask = (events.type == 'WORD') & (
+            events.exp_name == 'FR1')
+            pal1_encoding_mask = (events.type == 'WORD') & (
+            events.exp_name == 'PAL1')
+            encoding_mask = (fr1_encoding_mask | pal1_encoding_mask)
+            events = events[encoding_mask]
 
         config_name = self.get_passed_object('config_name')
         subject = self.pipeline.subject.split('_')[0]

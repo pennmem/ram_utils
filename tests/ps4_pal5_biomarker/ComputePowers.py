@@ -95,9 +95,6 @@ class ComputePowers(RamTask):
 
         self.pipeline.subject = self.pipeline.subject.split('_')[0]
         subject = self.pipeline.subject
-
-        # events = self.get_passed_object('PAL1_events')
-
         evs = self.get_passed_object('combined_evs')
 
         fr1_encoding_mask = (evs.type == 'WORD') & (evs.exp_name == 'FR1')
