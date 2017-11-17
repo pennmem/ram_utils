@@ -148,3 +148,25 @@ def sanitize_comma_sep_list(input_list):
     tokens = [token for token in tokens if token != "0"]
     output = ",".join(tokens)
     return output
+
+
+def extract_subject_montage(subject_id):
+    """ Extract the subject ID and montage number from the subject ID
+
+    Parameters
+    ----------
+    subject_id: str
+        Subject identifier
+
+    Returns
+    -------
+    str:
+        Subject identifier with montage information removed
+    int:
+        Montage number
+
+    """
+    tokens = subject_id.split('_')
+    montage = 0 if len(tokens) == 1 else int(tokens[1])
+    subject = tokens[0]
+    return subject, montage

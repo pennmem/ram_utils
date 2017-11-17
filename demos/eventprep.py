@@ -2,11 +2,15 @@
 
 import os.path
 import time
+import functools
 from contextlib import contextmanager
+from pkg_resources import resource_filename
 
-from ramutils.tasks import memory, read_index
-from ramutils.tasks.events import *
+from ramutils.tasks import memory
+from ramutils.events import *
 
+
+datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
 
 @contextmanager
 def timeit():
@@ -22,15 +26,13 @@ except:
     pass
 
 subject = 'R1354E'
-
-jr = read_index(os.path.expanduser('~/mnt/rhino'))
-fr_events = read_fr_events(jr, subject, cat=False)
-catfr_events = read_fr_events(jr, subject, cat=True)
-all_events = concatenate_events(fr_events, catfr_events)
-matched_events = create_baseline_events(all_events, 1000, 29000)
+fr_events = load_events(subject, 'FR1')
+catfr_events = load_events(subject, 'catFR1')
+all_events = concatenate_events([fr_events, catfr_events])
+matched_events = insert_baseline_retrieval_events(all_events, 1000, 29000)
 word_events = select_word_events(matched_events)
 
-# Make sure to `conda install graphviz python-graphviz`
+# Make sure to `conda install gaphviz python-graphviz`
 word_events.visualize()
 
 with timeit():

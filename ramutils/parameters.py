@@ -78,6 +78,6 @@ class FRParameters(ExperimentParameters):
     retrieval_end_time = Float(0)
     retrieval_buf = Float(0.524)
 
-    encoding_samples_weight = Float(2.5, desc="weighting factor for encoding "
-                                              "samples")
+    encoding_multiplier = Float(2.5, desc="weighting factor for encoding "
+                                          "samples")
     n_perm = Int(200, desc="number of permutation samples for cross validation")

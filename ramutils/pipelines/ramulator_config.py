@@ -1,10 +1,8 @@
 import os.path
 
 from bptools.jacksheet import read_jacksheet
-from ptsa.data.readers import JsonIndexReader
 
 from ramutils.parameters import StimParameters
-from ramutils.pipelines.eventprep import preprocess_fr_events
 from ramutils.tasks import *
 
 
@@ -27,7 +25,7 @@ def make_stim_params(subject, anodes, cathodes, root='/'):
     stim_params : List[StimParams]
 
     """
-    path = os.path.join(root, 'data', 'eeg', subject, 'docs', 'jacksheet')
+    path = os.path.join(root, 'data', 'eeg', subject, 'docs', 'jacksheet.txt')
     jacksheet = read_jacksheet(path)
 
     stim_params = []
@@ -48,9 +46,11 @@ def make_stim_params(subject, anodes, cathodes, root='/'):
     return stim_params
 
 
-# FIXME: optionally infer exp_params from experiment name
+#FIXME: I don't like that make_ramulator_config has to know about the paths
+# object. I'd prefer the paths object and this function to be decoupled similar
+# to how this function no longer needs to know about the ExperimentParams object
 def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
-                          exp_params, vispath=None):
+                          vispath=None, **kwargs):
     """Generate configuration files for a Ramulator experiment.
 
     Parameters
@@ -64,7 +64,6 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
         List of stim anode contact labels
     cathodes : List[str]
         List of stim cathode contact labels
-    exp_params : ExperimentParameters
     vispath : str
         Path to save task graph visualization to if given.
 
@@ -73,14 +72,14 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
     The path to the generated configuration zip file.
 
     """
-    jr = JsonIndexReader(os.path.join(paths.root, "protocols", "r1.json"))
     stim_params = make_stim_params(subject, anodes, cathodes, paths.root)
 
     # FIXME: update logic to work with PAL, AmplitudeDetermination
     if "FR" not in experiment:
         raise RuntimeError("Only FR-like experiments supported now.")
 
-    encoding_events, retrieval_events = preprocess_fr_events(jr, subject)
+    encoding_events, retrieval_events = preprocess_fr_events(subject,
+                                                             paths.root).compute()
 
     ec_pairs = generate_pairs_from_electrode_config(subject, paths)
     excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
@@ -90,29 +89,48 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
     # FIXME: If PTSA is updated to not remove events behind this scenes, this
     # won't be necessary. Or, if we can remove bad events before passing to
     # compute powers, then we won't have to catch the events
-    encoding_powers, good_encoding_events = compute_powers(encoding_events, exp_params)
-    retrieval_powers, good_retrieval_events = compute_powers(retrieval_events, exp_params)
-    normalized_encoding_powers = normalize_powers_by_session(encoding_powers, good_encoding_events)
-    normalized_retrieval_powers = normalize_powers_by_session(retrieval_powers, good_retrieval_events)
+    encoding_powers, good_encoding_events = compute_powers(encoding_events,
+                                                           **kwargs)
+    retrieval_powers, good_retrieval_events = compute_powers(retrieval_events,
+                                                             **kwargs)
+    normalized_encoding_powers = normalize_powers_by_session(
+        encoding_powers, good_encoding_events)
+    normalized_retrieval_powers = normalize_powers_by_session(
+        retrieval_powers, good_retrieval_events)
 
     task_events = combine_events([good_encoding_events, good_retrieval_events])
     powers = combine_encoding_retrieval_powers(task_events,
                                                normalized_encoding_powers,
                                                normalized_retrieval_powers)
-    reduced_powers = reduce_powers(powers, used_pair_mask, len(exp_params.freqs))
+    reduced_powers = reduce_powers(powers, used_pair_mask, len(kwargs['freqs']))
 
-    sample_weights = get_sample_weights(task_events, exp_params)
-    classifier = train_classifier(powers, task_events, sample_weights, exp_params)
-    cross_validation_results = perform_cross_validation(classifier, reduced_powers,
-                                                        task_events, exp_params)
+    sample_weights = get_sample_weights(task_events, **kwargs)
 
-    container = serialize_classifier(classifier, final_pairs, reduced_powers,
-                                     task_events, sample_weights,
+    classifier = train_classifier(powers,
+                                  task_events,
+                                  sample_weights,
+                                  **kwargs)
+
+    cross_validation_results = perform_cross_validation(classifier,
+                                                        reduced_powers,
+                                                        task_events,
+                                                        **kwargs)
+
+    container = serialize_classifier(classifier,
+                                     final_pairs,
+                                     reduced_powers,
+                                     task_events,
+                                     sample_weights,
                                      cross_validation_results,
                                      subject)
 
-    config_path = generate_ramulator_config(subject, 'FR6', container, stim_params,
-                                            paths, ec_pairs, excluded_pairs)
+    config_path = generate_ramulator_config(subject,
+                                            experiment,
+                                            container,
+                                            stim_params,
+                                            paths,
+                                            ec_pairs,
+                                            excluded_pairs)
 
     if vispath is not None:
         config_path.visualize(filename=vispath)
