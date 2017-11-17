@@ -45,7 +45,7 @@ def validate_stim_settings(args):
 
 
 def main():
-    from ramutils.parameters import FilePaths, FRParameters
+    from ramutils.parameters import FilePaths
     from ramutils.pipelines.ramulator_config import make_ramulator_config
 
     args = parser.parse_args()
@@ -63,13 +63,6 @@ def main():
                            'localizations', args.localization,
                            'montages', args.montage,
                            'neuroradiology', 'current_processed', 'pairs.json')
-
-    # Get experiment-specific parameters
-    # FIXME: add PAL parameters
-    if 'FR' in args.experiment:
-        exp_params = FRParameters()
-    else:
-        raise ValidationError("Only FR-like experiments supported so far")
 
     # Generate!
     make_ramulator_config(args.subject, args.experiment, paths,
