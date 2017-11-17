@@ -26,7 +26,7 @@ paths = FilePaths(
     root="/Volumes/RHINO/",
     electrode_config_file=getpath('R1354E_26OCT2017L0M0STIM.csv'),
     pairs=pairs_path,
-    dest='scratch/zduey/' # This will fail if there is a leading /
+    dest='scratch/zduey/sample_fr6_biomarkers'
 )
 
 params = FRParameters()
