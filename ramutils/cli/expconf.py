@@ -4,16 +4,15 @@ Ramulator.
 """
 
 import os.path as osp
+from ramutils.constants import EXPERIMENTS
 from ramutils.cli import make_parser, ValidationError, configure_caching
 
-# FIXME: should this generate record-only configs?
-RECORD_ONLY = []  # ['FR1', 'catFR1']
-PS = ['PS4_FR5', 'PS4_catFR5']
-
 # Supported experiments
-EXPERIMENTS = ['AmplitudeDetermination', 'FR5', 'FR6', 'catFR5', 'catFR6'] + RECORD_ONLY + PS
+# FIXME: ensure PAL support
+experiments = ['AmplitdueDetermination'] + EXPERIMENTS['ps'] + \
+              [exp for exp in EXPERIMENTS['closed_loop'] if 'PAL' not in exp]
 
-parser = make_parser("Generate experiment configs for Ramulator", EXPERIMENTS)
+parser = make_parser("Generate experiment configs for Ramulator", experiments)
 parser.add_argument('--localization', '-l', default=0, type=int, help='localization number')
 parser.add_argument('--montage', '-m', default=0, type=int, help='montage number')
 parser.add_argument('--electrode-config-file', '-e', required=True, type=str,
