@@ -4,8 +4,9 @@ Ramulator.
 """
 
 import os.path as osp
-from ramutils.constants import EXPERIMENTS
+
 from ramutils.cli import make_parser, ValidationError, configure_caching
+from ramutils.constants import EXPERIMENTS
 
 # Supported experiments
 # FIXME: ensure PAL support
@@ -45,7 +46,7 @@ def validate_stim_settings(args):
 
 
 def main():
-    from ramutils.parameters import FilePaths
+    from ramutils.parameters import FilePaths, FRParameters
     from ramutils.pipelines.ramulator_config import make_ramulator_config
 
     args = parser.parse_args()
@@ -64,9 +65,15 @@ def main():
                            'montages', args.montage,
                            'neuroradiology', 'current_processed', 'pairs.json')
 
+    # Determine kwargs based on experiment type
+    if "FR" in args.experiment:
+        kwargs = FRParameters().to_dict()
+    else:
+        raise RuntimeError("FIXME: support more than FR")
+
     # Generate!
     make_ramulator_config(args.subject, args.experiment, paths,
-                          args.anodes, args.cathodes, vispath=args.vispath)
+                          args.anodes, args.cathodes, args.vispath, **kwargs)
 
 
 if __name__ == "__main__":
