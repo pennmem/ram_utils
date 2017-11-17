@@ -110,10 +110,11 @@ def concatenate_events_for_single_experiment(event_list):
 
 
 def clean_events(events):
-    """ Peform basic cleaning operations on events such as removing
-    incomplete sessions, negative offset events, etc. Any cleaning functions
-    called here should be agnostic to the type of experiment.
-    Experiment-specific cleaning should occur in a separate function
+    """
+        Peform basic cleaning operations on events such as removing
+        incomplete sessions, negative offset events, etc. Any cleaning functions
+        called here should be agnostic to the type of experiment.
+        Experiment-specific cleaning should occur in a separate function
 
     Parameters
     ----------
@@ -121,12 +122,14 @@ def clean_events(events):
 
     Returns
     -------
-    cleaned_events: np.recarray of cleaned up events
+    np.recarray
+        Cleaned set of events
 
     """
     events = remove_negative_offsets(events)
     events = remove_practice_lists(events)
     events = remove_incomplete_lists(events)
+    events = update_recall_outcome_for_retrieval_events(events)
     return events
 
 
@@ -151,10 +154,31 @@ def remove_incomplete_lists(events):
         except IndexError:
             final_event_list.append(sess_events)
 
-    final_events = np.concatenate(final_event_list)
-    final_events.sort(order=['session', 'list', 'mstim'])
+    final_events = concatenate_events_for_single_experiment(final_event_list)
 
     return final_events
+
+
+def update_recall_outcome_for_retrieval_events(events):
+    """
+        Manually override the recall outcomes for baseline retrieval and word
+        retrieval events. All baseline retrieval events should be marked as not
+        recalled and all word events in the recall period should be marked as
+        recalled. WHY??
+
+    Parameters:
+    -----------
+    events:
+
+    Returns:
+    --------
+    np.recarray
+        Events containing updated recall outcomes for retrieval events
+
+    """
+    events[events.type == 'REC_WORD'].recalled = 1
+    events[events.type == 'REC_BASE'].recalled = 0
+    return events
 
 
 def remove_practice_lists(events):
@@ -436,7 +460,7 @@ def get_retrieval_events_mask(events):
 
 
 def select_all_retrieval_events(events):
-    """ Select all retrieval events """
+    """ Select both baseline and actual retrieval events """
     retrieval_mask = get_all_retrieval_events_mask(events)
     retrieval_events = events[retrieval_mask]
     return retrieval_events
@@ -447,3 +471,6 @@ def get_all_retrieval_events_mask(events):
     all_retrieval_mask = ((events.type == 'REC_WORD') |
                           (events.type == 'REC_BASE'))
     return all_retrieval_mask
+
+
+
