@@ -26,11 +26,15 @@ def permuted_lolo_AUCs(classifier, powers, events, n_permutations, **kwargs):
     events : recarray
     n_permutations: int
         number of permutation trials
+    kwargs: dict
+        Optional keyword arguments. These are passed to get_sample_weights.
+        See that function for more details.
 
     Returns
     -------
     AUCs: list
-        List of AUCs from performing leave-one-list-out cross validation n_permutations times
+        List of AUCs from performing leave-one-list-out cross validation
+        n_permutations times
 
     """
     recalls = events.recalled
@@ -62,6 +66,9 @@ def run_lolo_xval(classifier, powers, events, recalls, **kwargs):
     powers: mean powers to use as features
     events: set of events for the session
     recalls: vector of recall outcomes
+    kwargs: dict
+         Optional keyword arguments. These are passed to get_sample_weights.
+        See that function for more details.
 
     Returns
     -------
@@ -86,6 +93,28 @@ def run_lolo_xval(classifier, powers, events, recalls, **kwargs):
 
 
 def permuted_loso_AUCs(classifier, powers, events, n_permutations, **kwargs):
+    """ Perform leave one session out cross validation
+
+    Parameters
+    ----------
+    classifier:
+        sklearn model object, usually logistic regression classifier
+    powers: np.ndarray
+        power matrix
+    events : recarray
+    n_permutations: int
+        number of permutation trials
+    kwargs: dict
+        Optional keyword arguments. These are passed to get_sample_weights.
+        See that function for more details.
+
+    Returns
+    -------
+    AUCs: list
+        List of AUCs from performing leave-one-list-out cross validation
+        n_permutations times
+
+    """
     recalls = events.recalled
     permuted_recalls = np.array(recalls)
     AUCs = np.empty(shape=n_permutations, dtype=np.float)
@@ -107,23 +136,25 @@ def permuted_loso_AUCs(classifier, powers, events, n_permutations, **kwargs):
 
 
 def run_loso_xval(classifier, powers, events, recalls, **kwargs):
-    """Perform leave-one-session-out cross validation.
+    """Perform single iteration of leave-one-session-out cross validation
 
     Parameters
     ----------
-    classifier : LogisticRegression
-        sklearn model object
-    powers : np.array
-        mean powers to use as features
+    classifier:
+        sklearn model object, usually logistic regression classifier
+    powers: np.ndarray
+        power matrix
     events : np.recarray
-        set of events for the session
-    recalls : np.ndarray
-        vector of recall outcomes
+    recalls: array_like
+        List of recall/not-recalled boolean values for each event
+    kwargs: dict
+        Optional keyword arguments. These are passed to get_sample_weights.
+        See that function for more details.
 
     Returns
     -------
     probs: np.array
-        Predicted probabilities for all lists
+        Predicted probabilities for all sessions
 
     """
     probs = np.empty_like(recalls, dtype=np.float)
