@@ -30,7 +30,8 @@ def reload_classifier(subject, task, session, mount_point='/'):
                              task, 'session_{}'.format(str(session)),
                              'host_pc')
 
-    # FIXME: this needs a data quality check to confirm that all classifiers in a session are the same!
+    # FIXME: this needs a data quality check to confirm that all classifiers in
+    # a session are the same!
     # We take the final timestamped directory because in principle retrained
     # classifiers can be different depending on artifact detection. In
     # reality, stim sessions should never be restarted (apart from issues
@@ -70,19 +71,91 @@ def normalize_powers_by_session(pow_mat, events):
     return pow_mat
 
 
-def get_sample_weights(events, encoding_multiplier):
-    """ Calculate class weights based on recall/non-recall in given events data
+def get_sample_weights(events, **kwargs):
+    """
+        Calculate class weights based on recall/non-recall in given events
+        data. Sample weights calculation can vary by experiment, so this
+        function serves as a dispatcher for the correct sample weighting
+        function. By default, it will try to choose the weighting scheme
+        based on the given events. If the user specifies as scheme kwarg,
+        then that scheme will be used instead.
 
     Parameters
     ----------
+    experiment: str
     events: pd.DataFrame
-    encoding_multiplier: (int) Scalar to determine how much more to weight encoding samples
 
     Returns
     -------
     weights: np.ndarray
 
     """
+    scheme = determine_weighting_scheme_from_events(events)
+
+    if scheme not in ['PAL', 'FR', 'EQUAL']:
+        raise NotImplementedError("The requested weighting scheme has not "
+                                  "been implemented.")
+
+    if scheme == 'FR':
+        weights = get_fr_sample_weights(events, kwargs['encoding_multiplier'])
+
+    elif scheme == 'PAL':
+        weights = get_pal_sample_weights(events, kwargs['pal_multiplier'])
+
+    else:
+        weights = get_equal_weights(events)
+
+    return weights
+
+
+def determine_weighting_scheme_from_events(events):
+    """ Identify the weighting scheme to be used based on the event types
+    present in events
+
+    Parameters:
+    -----------
+    events:
+
+    Returns:
+    --------
+    str
+        The suggested weighting scheme based on the given events
+
+    """
+
+    observed_event_types = np.unique(events.type)
+    experiments = np.unique(events.experiment)
+
+    if ("PAL" in experiments):
+        scheme = "PAL"
+        event_types_to_check = ['STUDY_PAIR', 'WORD', 'REC_EVENT']
+
+    elif "FR" in experiments:
+        scheme = "FR"
+        event_types_to_check = ['WORD', 'REC_BASE', 'REC_WORD']
+
+    else:
+        scheme = 'EQUAL'
+        event_types_to_check = []
+
+    for event_type in event_types_to_check:
+        if event_type not in observed_event_types:
+            raise RuntimeError("Unable to use desired weighting scheme based "
+                               "on the experiment. Check that your events "
+                               "were created with the correct event types")
+
+    return scheme
+
+
+def get_equal_weights(events):
+    """ Return a vector of ones the same length as events """
+
+    weights = np.ones(len(events))
+    return weights
+
+
+def get_fr_sample_weights(events, encoding_multiplier):
+    """ Create sample weights based on FR scheme """
     enc_mask = (events.type == 'WORD')
     retrieval_mask = ((events.type == 'REC_BASE') | (events.type == 'REC_WORD'))
 
@@ -110,14 +183,14 @@ def get_sample_weights(events, encoding_multiplier):
     return weights
 
 
-def get_pal_sample_weights(events, pal_sample_weights, encoding_sample_weights):
+def get_pal_sample_weights(events, encoding_multiplier, pal_multiplier):
     """ Calculate sample weights based on PAL-specific scheme
 
     Parameters
     ----------
     events: pd.DataFrame
-    pal_sample_weights: (int) Scalar to determine how much more to weight pal samples
-    encoding_sample_weights: (int) Scalar to determine how much more to weight encoding samples
+    pal_multiplier: (int) Scalar for weighting PAL samples
+    encoding_multiplier: (int) Scalar for weighting encoding samples
 
     Returns
     -------
@@ -154,11 +227,11 @@ def get_pal_sample_weights(events, pal_sample_weights, encoding_sample_weights):
     n_vec /= np.mean(n_vec)
 
     # scaling PAL1 task
-    n_vec[0:4] *= pal_sample_weights
+    n_vec[0:4] *= pal_multiplier
     n_vec /= np.mean(n_vec)
 
     # scaling encoding
-    n_vec[[0, 1, 4, 5]] *= encoding_sample_weights
+    n_vec[[0, 1, 4, 5]] *= encoding_multiplier
     n_vec /= np.mean(n_vec)
 
     weights = np.ones(events.shape[0], dtype=np.float)
