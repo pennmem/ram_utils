@@ -1,14 +1,14 @@
 import json
-from collections import OrderedDict
-
 import numpy as np
 import pandas as pd
 
+from collections import OrderedDict
 from classiflib import dtypes
 from ramutils.tasks import task
 
 __all__ = ['load_pairs_from_json', 'reduce_pairs',
-           'generate_pairs_for_classifier', 'get_used_pair_mask']
+           'generate_pairs_for_classifier', 'get_used_pair_mask',
+           'extract_pairs_dict']
 
 
 # FIXME: document
@@ -104,8 +104,9 @@ def get_bipolar_pairs(bp_tal_structs):
 def generate_pairs_for_classifier(pairs, excluded_pairs):
     """ Create recarray of electrode pairs for the classifier container
 
-    :param pairs: dict containting all electrode pairs in the montage
-    :param excluded_pairs: dict containing pairs excluded from the montage
+    :param pairs: JSON-format object containing all electrode pairs in the
+    montage
+    :param excluded_pairs: array-like containing pairs excluded from the montage
     :returns: recarray containing all pairs minus excluded pairs
     :rtype: np.recarray
 
@@ -131,8 +132,8 @@ def get_used_pair_mask(all_pairs, excluded_pairs):
     """ Get a mask of whether to include a pair in all_pairs based on
     excluded pairs
 
-    :param all_pairs: dict containing all electrode pairs
-    :param excluded_pairs: dict containing pairs to exclude
+    :param all_pairs: standard json-format pairs object
+    :param excluded_pairs: list containing pairs to exclude
     :return: np.array containing a mask to identify excluded pairs from all
     pairs
 

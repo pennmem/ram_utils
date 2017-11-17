@@ -55,6 +55,19 @@ class Schema(HasTraits):
                 if trait.desc is not None:
                     dset.attrs['desc'] = trait.desc
 
+    def to_dict(self):
+        """
+            Return all visible traits as a dictionary. This is useful if some
+            of the attributes need to be passed to functions as kwargs and you
+            do not want the fuction to need to know about Schema objects
+
+        """
+        dict_rep = {}
+        for name in self.class_visible_traits():
+            dict_rep[name] = getattr(self, name)
+
+        return dict_rep
+
     @classmethod
     def from_hdf(cls, filename):
         """Deserialize from HDF5.

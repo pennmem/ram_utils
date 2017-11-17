@@ -1,9 +1,7 @@
 """Pipeline for creating reports."""
 
-from ptsa.data.readers import JsonIndexReader
 
 from ramutils.constants import EXPERIMENTS
-from ramutils.pipelines.eventprep import preprocess_fr_events
 from ramutils.tasks import *
 
 
@@ -44,12 +42,8 @@ def make_report(subject, experiment, paths, stim_params=[], classifier=None,
     report rather than the report itself.
 
     """
-    jr = JsonIndexReader(os.path.join(paths.root, "protocols", "r1.json"))
-    sessions = sessions if sessions is not None else jr.aggregate_values(
-        'sessions', subject=subject, experiment=experiment)
-
     if "FR" in experiment:
-        encoding_events, retrieval_events = preprocess_fr_events(jr, subject)
+        encoding_events, retrieval_events = preprocess_fr_events(subject)
     else:
         raise RuntimeError("only FR supported so far")
 
@@ -60,6 +54,7 @@ def make_report(subject, experiment, paths, stim_params=[], classifier=None,
     final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
 
     if classifier is None:
+        # TODO: Load classifier if possible
         pass  # TODO: compute powers, train classifier
 
     # TODO: Compute powers
