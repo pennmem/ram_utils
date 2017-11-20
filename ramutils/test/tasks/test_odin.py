@@ -3,7 +3,6 @@ from __future__ import print_function
 from collections import namedtuple
 import functools
 import json
-import os.path
 from zipfile import ZipFile
 
 from pkg_resources import resource_string, resource_filename
