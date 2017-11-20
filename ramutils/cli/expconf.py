@@ -64,8 +64,10 @@ def main():
                            'montages', args.montage,
                            'neuroradiology', 'current_processed', 'pairs.json')
 
-    # Determine kwargs based on experiment type
-    if "FR" in args.experiment:
+    # Determine params based on experiment type
+    if args.experiment == 'AmplitudeDetermination':
+        params = None
+    elif "FR" in args.experiment:
         params = FRParameters()
     else:
         raise RuntimeError("FIXME: support more than FR")

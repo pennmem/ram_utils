@@ -8,7 +8,7 @@
         "classifier_version": "{{ classifier_version }}",
       {% end %}
       {% if experiment == 'AmplitudeDetermination' %}
-        "stim_electrode_pairs": {{ ','.join([label for label in stim_params_dict]) }},
+        "stim_electrode_pairs": {{ str([label for label in stim_params_dict]).replace("'", '"') }},
       {% else %}
         "stim_channels": {
           {% for (i, stim_channel) in enumerate(stim_params_dict) %}

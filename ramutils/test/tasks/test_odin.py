@@ -22,7 +22,7 @@ def jsondata(s):
     return json.loads(resource_string('ramutils.test.test_data', s))
 
 
-@pytest.mark.parametrize('experiment', ['FR6'])
+@pytest.mark.parametrize('experiment', ['AmplitudeDetermination', 'FR6'])
 def test_generate_ramulator_config(experiment):
     subject = 'R1354E'
 
@@ -62,7 +62,12 @@ def test_generate_ramulator_config(experiment):
     with open(getpath('R1328E_excluded_pairs.json'), 'r') as f:
         excluded_pairs = json.load(f)
 
-    exp_params = FRParameters()
+    if "FR" in experiment:
+        exp_params = FRParameters()
+    elif experiment == "AmplitudeDetermination":
+        exp_params = None
+    else:
+        raise RuntimeError("invalid experiment")
 
     with patch.object(container, 'save', side_effect=lambda *args, **kwargs: touch(classifier_path)):
         path = generate_ramulator_config(subject, experiment, container,
