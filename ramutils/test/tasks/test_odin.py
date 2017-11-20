@@ -11,7 +11,7 @@ import pytest
 
 from classiflib import ClassifierContainer
 
-from ramutils.parameters import StimParameters, FilePaths
+from ramutils.parameters import StimParameters, FilePaths, FRParameters
 from ramutils.tasks.odin import generate_ramulator_config
 from ramutils.test import Mock, patch
 from ramutils.utils import touch
@@ -57,15 +57,19 @@ def test_generate_ramulator_config(experiment, tmpdir):
     with open(getpath('R1328E_excluded_pairs.json'), 'r') as f:
         excluded_pairs = json.load(f)
 
+    exp_params = FRParameters()
+
     with patch.object(container, 'save', side_effect=lambda *args, **kwargs: touch(classifier_path)):
         path = generate_ramulator_config(subject, experiment, container,
                                          stim_params, paths,
-                                         excluded_pairs=excluded_pairs).compute()
+                                         excluded_pairs=excluded_pairs,
+                                         params=exp_params).compute()
 
     with ZipFile(path) as zf:
         members = zf.namelist()
 
     assert 'experiment_config.json' in members
+    assert 'exp_params.h5' in members
     assert 'config_files/pairs.json' in members
     assert 'config_files/excluded_pairs.json' in members
     assert 'config_files/' + ec_conf_prefix + '.csv' in members

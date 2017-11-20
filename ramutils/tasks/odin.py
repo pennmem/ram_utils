@@ -6,6 +6,7 @@ import json
 import os.path
 from tempfile import gettempdir
 import shutil
+import warnings
 
 try:
     from typing import List
@@ -84,7 +85,8 @@ def generate_pairs_from_electrode_config(subject, paths):
 
 @task(cache=False)
 def generate_ramulator_config(subject, experiment, container, stim_params,
-                              paths, pairs=None, excluded_pairs=None):
+                              paths, pairs=None, excluded_pairs=None,
+                              params=None):
     """Create configuration files for Ramulator.
 
     Note that the current template format will not work for FR5 experiments
@@ -105,6 +107,9 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
     :param FilePaths paths:
     :param dict excluded_pairs: Pairs excluded from the classifier (pairs that
         contain a stim contact and possibly some others)
+    :param ExperimentParameters params: All parameters used in training the
+        classifier. This is partially redundant with some data stored in the
+        ``container`` object.
     :returns: path to generated configuration zip file
     :rtype: str
 
@@ -180,6 +185,13 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
     bin = csv.replace('.csv', '.bin')
     shutil.copy(csv, conffile(os.path.basename(csv)))
     shutil.copy(bin, conffile(os.path.basename(bin)))
+
+    # Serialize experiment parameters
+    if params is not None:
+        params.to_hdf(os.path.join(config_dir_root, 'exp_params.h5'))
+    else:
+        warnings.warn("No ExperimentParameters object passed; "
+                      "classifier may not be 100% reproducible", UserWarning)
 
     zip_prefix = os.path.join(dest, '{}_{}'.format(subject, experiment))
     zip_path = zip_prefix + '.zip'
