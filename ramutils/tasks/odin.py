@@ -130,8 +130,8 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
             esd['stim_channels'][label]['stim_frequency'] = stim_params[label]['stim_frequency']
             esd['stim_channels'][label]['stim_duration'] = stim_params[label]['stim_duration']
 
-    esd['random_stim_prob'] = False
-    esd['save_debug_output'] = True
+    # esd['random_stim_prob'] = False
+    # esd['save_debug_output'] = True
     config['experiment']['experiment_specific_data'] = esd
 
     # FIXME: values below shouldn't be hardcoded
@@ -173,7 +173,7 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
             "max_session_length": 120,
             "sampling_rate": 1000,
             "odin_lib_debug_level": 0,
-            "connect_to_task_laptop": True
+            "connect_to_task_laptop": True if experiment != 'AmplitudeDetermination' else False
         }
     })
 
