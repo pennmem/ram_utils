@@ -10,7 +10,7 @@ from ramutils.constants import EXPERIMENTS
 
 # Supported experiments
 # FIXME: ensure PAL support
-experiments = ['AmplitdueDetermination'] + EXPERIMENTS['ps'] + \
+experiments = ['AmplitudeDetermination'] + EXPERIMENTS['ps'] + \
               [exp for exp in EXPERIMENTS['closed_loop'] if 'PAL' not in exp]
 
 parser = make_parser("Generate experiment configs for Ramulator", experiments)

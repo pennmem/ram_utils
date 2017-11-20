@@ -51,7 +51,7 @@ class FilePaths(object):
 
         def makepath(key):
             p = kwargs.get(key, None)
-            return os.path.join(self.root, p) if p is not None else p
+            return os.path.join(self.root, p.lstrip('/')) if p is not None else p
 
         self.dest = makepath('dest')
         self.electrode_config_file = makepath('electrode_config_file')
