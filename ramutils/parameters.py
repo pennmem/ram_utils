@@ -22,31 +22,41 @@ class StimParameters(Schema):
     max_amplitude = Float(2.0, desc="maximum allowable stim amplitude [mA]")
 
 
-class FilePaths(Schema):
+class FilePaths(object):
     """Paths to files that frequently get passed around to many tasks.
 
-    All paths given are relative to :attr:`root` when accessing attributes in a
-    dict-like fashion, otherwise they are absolute::
+    All paths given relative to the root path but are converted to absolute
+    paths on creation.
 
-        >>> paths = FilePaths(root='/tmp', pairs='pairs.json')
-        >>> paths['pairs']
-        '/tmp/pairs.json'
-        >>> paths.pairs
-        'pairs.json'
+    Keyword arguments
+    -----------------
+    root : str
+        Rhino mount point.
+    dest : str
+        Directory to write files to.
+    electrode_config_file : str
+        Path to Odin electrode configuration CSV file.
+    pairs : str
+        Path to ``pairs.json``.
+    excluded_pairs : str
+        Path to ``excluded_pairs.json``.
 
     """
-    root = String('/', desc="root path")
-    dest = String(desc="location for writing files to")
-    electrode_config_file = String(desc="Odin electrode config CSV file")
-    pairs = String(desc="pairs.json")
-    excluded_pairs = String(desc="excluded_pairs.json")
+    def __init__(self, **kwargs):
+        # root is the only required kwarg
+        self.root = os.path.expanduser(kwargs['root'])
 
-    def __getitem__(self, item):
-        """Prepends a path with the root path."""
-        if item in self.visible_traits() and item != 'root':
-            return os.path.join(self.root, getattr(self, item))
-        else:
-            raise KeyError("No such trait: " + item)
+        def get(key):
+            return kwargs.get(key, None)
+
+        def makepath(key):
+            p = kwargs.get(key, None)
+            return os.path.join(self.root, p) if p is not None else p
+
+        self.dest = makepath('dest')
+        self.electrode_config_file = makepath('electrode_config_file')
+        self.pairs = makepath('pairs')
+        self.excluded_pairs = makepath('excluded_pairs')
 
 
 class ExperimentParameters(Schema):

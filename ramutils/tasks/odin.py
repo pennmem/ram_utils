@@ -127,7 +127,7 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
         for stim_param in stim_params
     }
 
-    dest = paths['dest']
+    dest = paths.dest
     config_dir_root = os.path.join(dest, subject, experiment)
     config_files_dir = os.path.join(config_dir_root, 'config_files')
     try:
