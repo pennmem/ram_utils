@@ -277,7 +277,7 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
     if params is not None:
         params.to_hdf(os.path.join(config_dir_root, 'exp_params.h5'))
     else:
-        if experiment not in ['AmplitudeDeterimation'] + EXPERIMENTS['record_only']:
+        if experiment not in ['AmplitudeDetermination'] + EXPERIMENTS['record_only']:
             warnings.warn("No ExperimentParameters object passed; "
                           "classifier may not be 100% reproducible", UserWarning)
 
