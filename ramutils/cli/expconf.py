@@ -65,8 +65,8 @@ def main():
     )
 
     paths.pairs = osp.join(paths.root, 'protocols', 'subjects', args.subject,
-                           'localizations', args.localization,
-                           'montages', args.montage,
+                           'localizations', str(args.localization),
+                           'montages', str(args.montage),
                            'neuroradiology', 'current_processed', 'pairs.json')
 
     # Determine params based on experiment type
