@@ -79,7 +79,8 @@ def test_generate_ramulator_config(experiment):
         members = zf.namelist()
 
     assert 'experiment_config.json' in members
-    assert 'exp_params.h5' in members
+    if experiment != 'AmplitudeDetermination':
+        assert 'exp_params.h5' in members
     assert 'config_files/pairs.json' in members
     assert 'config_files/excluded_pairs.json' in members
     assert 'config_files/' + ec_conf_prefix + '.csv' in members
