@@ -156,7 +156,7 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
             "retrieval_buffer_time": 524,
             "post_stim_biomarker_sample_time_length": 500,
             "post_stim_buffer_time": 499,
-            "post_stim_wait_time":100,
+            "post_stim_wait_time": 100,
         })
 
     config.update({
@@ -177,7 +177,7 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
         }
     })
 
-    return json.dumps(config, indent=2)
+    return json.dumps(config, indent=2, sort_keys=True)
 
 
 @task(cache=False)

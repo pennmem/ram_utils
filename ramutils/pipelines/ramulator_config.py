@@ -37,7 +37,8 @@ def make_stim_params(subject, anodes, cathodes, root='/'):
         cathode_idx = jacksheet[jacksheet.label == cathode].index[0]
         stim_params.append(
             StimParameters(
-                label='-'.join([anode, cathode]),
+                # FIXME: figure out better way to generate labels (read config file?)
+                label='_'.join([anode, cathode]),
                 anode=anode_idx,
                 cathode=cathode_idx
             )
