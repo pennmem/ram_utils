@@ -50,7 +50,7 @@ def make_stim_params(subject, anodes, cathodes, root='/'):
 # object. I'd prefer the paths object and this function to be decoupled similar
 # to how this function no longer needs to know about the ExperimentParams object
 def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
-                          vispath=None, **kwargs):
+                          exp_params, vispath=None):
     """Generate configuration files for a Ramulator experiment.
 
     Parameters
@@ -64,46 +64,17 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
         List of stim anode contact labels
     cathodes : List[str]
         List of stim cathode contact labels
+    exp_params : ExperimentParameters
+        Parameters for the experiment.
     vispath : str
         Path to save task graph visualization to if given.
-
-    Keyword arguments
-    -----------------
-    start_time: float
-        Start of the period in the EEG to consider for each event
-    end_time: float
-        End of the period to consider
-    buffer_time: float
-        Buffer time
-    freqs: array_like
-        List of frequencies to use when applying Wavelet Filter
-    log_powers: bool
-        Whether to take the logarithm of the powers
-    filt_order: int
-        Filter order to use in Butterworth filter
-    width: int
-        Wavelet width to use in Wavelet Filter
-    penalty_param: float
-        Penalty parameter to use
-    penalty_type: str
-        Type of penalty to use for regularized model (ex: L2)
-    solver: str
-        Solver to use when fitting the model (ex: liblinear)
-    encoding_multiplier: float
-        Scaling factor for encoding events (required if using FR sample
-        weighting schme)
-    pal_mutiplier: float
-        Scaling factor for PAL events (required if using PAL weighting
-        scheme)
-    scheme: str
-        Sample weighting scheme to use (options: EQUAL, PAL, FR). See
-        get_sample_weights for details
 
     Returns
     -------
     The path to the generated configuration zip file.
 
     """
+    kwargs = exp_params.to_dict()
     stim_params = make_stim_params(subject, anodes, cathodes, paths.root)
 
     # FIXME: update logic to work with PAL, AmplitudeDetermination

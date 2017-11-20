@@ -67,13 +67,13 @@ def main():
 
     # Determine kwargs based on experiment type
     if "FR" in args.experiment:
-        kwargs = FRParameters().to_dict()
+        params = FRParameters()
     else:
         raise RuntimeError("FIXME: support more than FR")
 
     # Generate!
     make_ramulator_config(args.subject, args.experiment, paths,
-                          args.anodes, args.cathodes, args.vispath, **kwargs)
+                          args.anodes, args.cathodes, params, args.vispath)
 
 
 if __name__ == "__main__":
