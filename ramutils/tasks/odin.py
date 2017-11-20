@@ -18,6 +18,7 @@ from tornado.template import Template
 from bptools.transform import SeriesTransformation
 from classiflib import ClassifierContainer
 
+from ramutils.constants import EXPERIMENTS
 from ramutils.log import get_logger
 from ramutils.tasks import task
 from ramutils.utils import reindent_json
@@ -190,8 +191,9 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
     if params is not None:
         params.to_hdf(os.path.join(config_dir_root, 'exp_params.h5'))
     else:
-        warnings.warn("No ExperimentParameters object passed; "
-                      "classifier may not be 100% reproducible", UserWarning)
+        if experiment not in ['AmplitudeDeterimation'] + EXPERIMENTS['record_only']:
+            warnings.warn("No ExperimentParameters object passed; "
+                          "classifier may not be 100% reproducible", UserWarning)
 
     zip_prefix = os.path.join(dest, '{}_{}'.format(subject, experiment))
     zip_path = zip_prefix + '.zip'

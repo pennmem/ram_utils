@@ -56,10 +56,9 @@ def main():
     paths = FilePaths(
         root=osp.expanduser(args.root),
         electrode_config_file=osp.expanduser(args.electrode_config_file),
-        dest='scratch/ramutils2'  # FIXME: either always use abs paths or always use relpaths
+        dest='scratch/ramutils2'
     )
 
-    # FIXME: rhino root?
     paths.pairs = osp.join(paths.root, 'protocols', 'subjects', args.subject,
                            'localizations', args.localization,
                            'montages', args.montage,
