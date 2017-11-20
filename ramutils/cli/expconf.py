@@ -33,9 +33,12 @@ def validate_stim_settings(args):
         if not len(args.anodes) == len(args.cathodes):
             raise ValidationError("Number of anodes doesn't match number of cathodes")
 
-        min_max_lengths = len(args.anodes) == len(args.min_amplitudes) == len(args.max_amplitudes)
-        target_length = len(args.anodes) == len(args.target_amplitudes)
-        if not (min_max_lengths or target_length):
+        if args.experiment != "AmplitudeDetermination":
+            valid = len(args.anodes) == len(args.target_amplitudes)
+        else:
+            valid = len(args.anodes) == len(args.min_amplitudes) == len(args.max_amplitudes)
+
+        if not valid:
             raise ValidationError("Number of stim contacts doesn't match number of amplitude settings")
 
         if len(args.pulse_frequencies) == 1:
