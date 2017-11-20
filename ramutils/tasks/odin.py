@@ -246,7 +246,8 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
             tmpfile.write(experiment_config_content)
         f.write(reindent_json(tmp_path))
 
-    container.save(classifier_path, overwrite=True)
+    if experiment != 'AmplitudeDetermination':
+        container.save(classifier_path, overwrite=True)
 
     # Save some typing below...
     conffile = functools.partial(os.path.join, config_files_dir)

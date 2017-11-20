@@ -74,73 +74,75 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
     The path to the generated configuration zip file.
 
     """
-    kwargs = exp_params.to_dict()
     stim_params = make_stim_params(subject, anodes, cathodes, paths.root)
 
-    # FIXME: update logic to work with PAL, AmplitudeDetermination
-    if "FR" not in experiment:
-        raise RuntimeError("Only FR-like experiments supported now.")
-
-    encoding_events, retrieval_events = preprocess_fr_events(subject,
-                                                             paths.root).compute()
+    # this will be None for amp. det. experiments
+    if exp_params is not None:
+        kwargs = exp_params.to_dict()
 
     ec_pairs = generate_pairs_from_electrode_config(subject, paths)
     excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
     used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
     final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
 
-    # FIXME: If PTSA is updated to not remove events behind this scenes, this
-    # won't be necessary. Or, if we can remove bad events before passing to
-    # compute powers, then we won't have to catch the events
-    encoding_powers, good_encoding_events = compute_powers(encoding_events,
-                                                           kwargs['start_time'],
-                                                           kwargs['end_time'],
-                                                           kwargs['buf'],
-                                                           kwargs['freqs'],
-                                                           kwargs['log_powers'],
-                                                           kwargs['filt_order'],
-                                                           kwargs['width'])
+    if experiment != "AmplitudeDetermination":
+        encoding_events, retrieval_events = preprocess_fr_events(subject,
+                                                                 paths.root).compute()
 
-    retrieval_powers, good_retrieval_events = compute_powers(retrieval_events,
-                                                             kwargs['start_time'],
-                                                             kwargs['end_time'],
-                                                             kwargs['buf'],
-                                                             kwargs['freqs'],
-                                                             kwargs['log_powers'],
-                                                             kwargs['filt_order'],
-                                                             kwargs['width'])
-    normalized_encoding_powers = normalize_powers_by_session(
-        encoding_powers, good_encoding_events)
-    normalized_retrieval_powers = normalize_powers_by_session(
-        retrieval_powers, good_retrieval_events)
+        # FIXME: If PTSA is updated to not remove events behind this scenes, this
+        # won't be necessary. Or, if we can remove bad events before passing to
+        # compute powers, then we won't have to catch the events
+        encoding_powers, good_encoding_events = compute_powers(encoding_events,
+                                                               kwargs['start_time'],
+                                                               kwargs['end_time'],
+                                                               kwargs['buf'],
+                                                               kwargs['freqs'],
+                                                               kwargs['log_powers'],
+                                                               kwargs['filt_order'],
+                                                               kwargs['width'])
 
-    task_events = combine_events([good_encoding_events, good_retrieval_events])
-    powers = combine_encoding_retrieval_powers(task_events,
-                                               normalized_encoding_powers,
-                                               normalized_retrieval_powers)
-    reduced_powers = reduce_powers(powers, used_pair_mask, len(kwargs['freqs']))
+        retrieval_powers, good_retrieval_events = compute_powers(retrieval_events,
+                                                                 kwargs['start_time'],
+                                                                 kwargs['end_time'],
+                                                                 kwargs['buf'],
+                                                                 kwargs['freqs'],
+                                                                 kwargs['log_powers'],
+                                                                 kwargs['filt_order'],
+                                                                 kwargs['width'])
+        normalized_encoding_powers = normalize_powers_by_session(
+            encoding_powers, good_encoding_events)
+        normalized_retrieval_powers = normalize_powers_by_session(
+            retrieval_powers, good_retrieval_events)
 
-    sample_weights = get_sample_weights(task_events, **kwargs)
+        task_events = combine_events([good_encoding_events, good_retrieval_events])
+        powers = combine_encoding_retrieval_powers(task_events,
+                                                   normalized_encoding_powers,
+                                                   normalized_retrieval_powers)
+        reduced_powers = reduce_powers(powers, used_pair_mask, len(kwargs['freqs']))
 
-    classifier = train_classifier(reduced_powers,
-                                  task_events,
-                                  sample_weights,
-                                  kwargs['C'],
-                                  kwargs['penalty_type'],
-                                  kwargs['solver'])
+        sample_weights = get_sample_weights(task_events, **kwargs)
 
-    cross_validation_results = perform_cross_validation(classifier,
-                                                        reduced_powers,
-                                                        task_events,
-                                                        **kwargs)
+        classifier = train_classifier(reduced_powers,
+                                      task_events,
+                                      sample_weights,
+                                      kwargs['C'],
+                                      kwargs['penalty_type'],
+                                      kwargs['solver'])
 
-    container = serialize_classifier(classifier,
-                                     final_pairs,
-                                     reduced_powers,
-                                     task_events,
-                                     sample_weights,
-                                     cross_validation_results,
-                                     subject)
+        cross_validation_results = perform_cross_validation(classifier,
+                                                            reduced_powers,
+                                                            task_events,
+                                                            **kwargs)
+
+        container = serialize_classifier(classifier,
+                                         final_pairs,
+                                         reduced_powers,
+                                         task_events,
+                                         sample_weights,
+                                         cross_validation_results,
+                                         subject)
+    else:
+        container = None
 
     config_path = generate_ramulator_config(subject,
                                             experiment,
