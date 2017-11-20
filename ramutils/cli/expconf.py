@@ -43,6 +43,8 @@ def validate_stim_settings(args):
 
         if len(args.pulse_frequencies) == 1:
             args.pulse_frequencies = [args.pulse_frequencies[0]] * len(args.anodes)
+        elif len(args.pulse_frequencies) == 0:
+            args.pulse_frequencies = [200] * len(args.anodes)
 
         if not len(args.pulse_frequencies) == len(args.anodes):
             raise ValidationError("Number of pulse frequencies doesn't match number of stim contacts")
