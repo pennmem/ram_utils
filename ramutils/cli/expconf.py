@@ -54,7 +54,7 @@ def main():
     configure_caching(args.dest, args.force_rerun)
 
     paths = FilePaths(
-        root=osp.expanduser('/'),
+        root=osp.expanduser(args.root),
         electrode_config_file=osp.expanduser(args.electrode_config_file),
         dest='scratch/ramutils2'  # FIXME: either always use abs paths or always use relpaths
     )
