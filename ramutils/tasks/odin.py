@@ -103,7 +103,8 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
     """
     config = OrderedDict()
     config['subject'] = subject
-    config['experiment'] = experiment
+    config['experiment'] = OrderedDict()
+    config['experiment']['type'] = experiment
 
     # experiment_specific_data section
     esd = OrderedDict()
@@ -131,10 +132,10 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
 
     esd['random_stim_prob'] = False
     esd['save_debug_output'] = True
-    config['experiment_specific_data'] = esd
+    config['experiment']['experiment_specific_data'] = esd
 
     # FIXME: values below shouldn't be hardcoded
-    config['experiment_specs'] = {
+    config['experiment']['experiment_specs'] = {
         "version": "3.0.0",
         "experiment_type": experiment,
         "biomarker_sample_start_time_offset": 0,
