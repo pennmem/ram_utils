@@ -81,8 +81,8 @@ def test_generate_ramulator_config(experiment):
     assert 'experiment_config.json' in members
     if experiment != 'AmplitudeDetermination':
         assert 'exp_params.h5' in members
+        assert 'config_files/{}-classifier.zip'.format(subject) in members
     assert 'config_files/pairs.json' in members
     assert 'config_files/excluded_pairs.json' in members
     assert 'config_files/' + ec_conf_prefix + '.csv' in members
     assert 'config_files/' + ec_conf_prefix + '.bin' in members
-    assert 'config_files/{}-classifier.zip'.format(subject) in members
