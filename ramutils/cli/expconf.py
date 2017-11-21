@@ -58,12 +58,12 @@ def main():
 
     args = parser.parse_args()
     validate_stim_settings(args)
-    configure_caching(args.dest, args.force_rerun)
+    configure_caching(osp.join(args.dest, 'cache'), args.force_rerun)
 
     paths = FilePaths(
         root=osp.expanduser(args.root),
         electrode_config_file=osp.expanduser(args.electrode_config_file),
-        dest='scratch/ramutils2'
+        dest=args.dest
     )
 
     paths.pairs = osp.join(paths.root, 'protocols', 'subjects', args.subject,

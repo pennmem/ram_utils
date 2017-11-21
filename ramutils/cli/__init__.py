@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+import os.path
 from ramutils.constants import EXPERIMENTS
 
 
@@ -52,7 +53,7 @@ def configure_caching(cachedir, invalidate=False):
 
     memory.cachedir = cachedir
 
-    if invalidate:
+    if invalidate and os.path.isdir(cachedir):
         memory.clear()
 
     return memory
