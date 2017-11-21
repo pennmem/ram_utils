@@ -101,7 +101,8 @@ class FR1EventPreparation(ReportRamTask):
 
         intr_events = rec_events[(rec_events.intrusion!=-999) & (rec_events.intrusion!=0)]
 
-        events = events[(events.type == 'WORD') | (events.type=='REC_BASE') | (events.intrusion==0)]
+        irts = np.append([0],np.diff(events.mstime))
+        events = events[(events.type == 'WORD')| ((events.intrusion==0) & (irts>1000)) | (events.type=='REC_BASE')]
 
         print len(events), 'task events'
 
