@@ -52,11 +52,11 @@ def validate_stim_settings(args):
             raise ValidationError("Number of pulse frequencies doesn't match number of stim contacts")
 
 
-def main():
+def main(input_args=None):
     from ramutils.parameters import FilePaths, FRParameters
     from ramutils.pipelines.ramulator_config import make_ramulator_config
 
-    args = parser.parse_args()
+    args = parser.parse_args(input_args)
     validate_stim_settings(args)
     configure_caching(osp.join(args.dest, 'cache'), args.force_rerun)
 
@@ -85,4 +85,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main([
+        "-s", "R1364C", "-x", "FR5",
+        "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
+        "--anodes", "AMY7", "TOJ7", "--cathodes", "AMY8", "TOJ8",
+        "--target-amplitudes", "0.5", "0.5",
+        "--root", "~/mnt/rhino", "--dest", "scratch/ramutils2/demo"  # , "--force-rerun"
+    ])
