@@ -51,7 +51,8 @@ def make_stim_params(subject, anodes, cathodes, root='/'):
 # object. I'd prefer the paths object and this function to be decoupled similar
 # to how this function no longer needs to know about the ExperimentParams object
 def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
-                          exp_params, vispath=None):
+                          exp_params, combine_events=True, encoding_only=False,
+                          vispath=None):
     """Generate configuration files for a Ramulator experiment.
 
     Parameters
@@ -67,6 +68,11 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
         List of stim cathode contact labels
     exp_params : ExperimentParameters
         Parameters for the experiment.
+    combine_events : bool
+        Use all record-only events when set.
+    encoding_only : bool
+        Use only encoding events when set, otherwise also include retrieval
+        events.
     vispath : str
         Path to save task graph visualization to if given.
 
@@ -89,8 +95,8 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
     if experiment != "AmplitudeDetermination":
         events = preprocess_events(subject,
                                experiment,
-                               encoding_only=kwargs['encoding_only'],
-                               combine_events=kwargs['combine_events'],
+                               encoding_only=encoding_only,
+                               combine_events=combine_events,
                                root=paths.root)
 
         # FIXME: If PTSA is updated to not remove events behind this scenes, this
