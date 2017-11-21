@@ -58,7 +58,6 @@ def main(input_args=None):
 
     args = parser.parse_args(input_args)
     validate_stim_settings(args)
-    configure_caching(osp.join(args.dest, 'cache'), args.force_rerun)
 
     paths = FilePaths(
         root=osp.expanduser(args.root),
@@ -66,6 +65,7 @@ def main(input_args=None):
         dest=args.dest
     )
 
+    configure_caching(osp.join(paths.dest, 'cache'), args.force_rerun)
     paths.pairs = osp.join(paths.root, 'protocols', 'subjects', args.subject,
                            'localizations', str(args.localization),
                            'montages', str(args.montage),
