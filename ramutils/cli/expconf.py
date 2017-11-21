@@ -34,6 +34,8 @@ def validate_stim_settings(args):
             raise ValidationError("Number of anodes doesn't match number of cathodes")
 
         if args.experiment != "AmplitudeDetermination":
+            if args.target_amplitudes is None:
+                raise RuntimeError("--target-amplitudes is required")
             valid = len(args.anodes) == len(args.target_amplitudes)
         else:
             valid = len(args.anodes) == len(args.min_amplitudes) == len(args.max_amplitudes)
