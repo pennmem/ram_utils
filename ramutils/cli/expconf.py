@@ -7,6 +7,8 @@ import os.path as osp
 
 from ramutils.cli import make_parser, ValidationError, configure_caching
 from ramutils.constants import EXPERIMENTS
+from ramutils.log import get_logger
+from ramutils.utils import timer
 
 # Supported experiments
 # FIXME: ensure PAL support
@@ -25,6 +27,8 @@ parser.add_argument('--max-amplitudes', nargs='+', help='maximum stim amplitudes
 parser.add_argument('--target-amplitudes', '-a', nargs='+', help='target stim amplitudes')
 parser.add_argument('--pulse-frequencies', '-f', nargs='+', type=float,
                     help='stim pulse frequencies (one to use same value)')
+
+logger = get_logger()
 
 
 def validate_stim_settings(args):
@@ -66,7 +70,10 @@ def main(input_args=None):
     )
 
     # FIXME: figure out why MacOS won't work with sshfs-relative paths only here
-    configure_caching(osp.join(args.cachedir, 'cache'), args.force_rerun)
+    cachedir = osp.join(args.cachedir, 'cache')
+    logger.info("Using %s as cache dir", cachedir)
+    configure_caching(cachedir, args.force_rerun)
+
     paths.pairs = osp.join(paths.root, 'protocols', 'subjects', args.subject,
                            'localizations', str(args.localization),
                            'montages', str(args.montage),
@@ -81,13 +88,14 @@ def main(input_args=None):
         raise RuntimeError("FIXME: support more than FR")
 
     # Generate!
-    make_ramulator_config(args.subject, args.experiment, paths,
-                          args.anodes, args.cathodes, params, args.vispath)
+    with timer():
+        make_ramulator_config(args.subject, args.experiment, paths,
+                              args.anodes, args.cathodes, params, args.vispath)
 
 
 if __name__ == "__main__":
     main([
-        "-s", "R1364C", "-x", "FR5",
+        "-s", "R1364C", "-x", "CatFR5",
         "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
         "--anodes", "AMY7", "--cathodes", "TOJ8",
         "--target-amplitudes", "0.5",
