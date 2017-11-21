@@ -1,15 +1,96 @@
-""" A collection of utility functions for loading, combining, and cleaning
-events """
+"""
+
+    A collection of utility functions for loading, cleaning, normalizing, and
+    combining events. There are also a smattering of other helpfer function for
+    selecting specific types of events. In general, the following steps must be
+    taken to go from raw (on-disk) events to events that can be analyzed:
+
+        1. Load: Load events from disk into memory
+        2. Clean: Perform standard sets of cleaning operations
+        3. Normalize: Modify fields and values so that events from different
+           experiment can be easily combined
+
+"""
 
 import os
 import numpy as np
+
+from numpy.lib.recfunctions import rename_fields
 
 from ptsa.data.readers import BaseEventReader, JsonIndexReader
 from ramutils.utils import extract_subject_montage
 
 
+def preprocess_events(subject, experiment, combine_events=True,
+                      encoding_only=False, root='/'):
+    """
+        High-level pre-processing function for combining/cleaning record only
+        events to be used in config generation and reports
+
+    Parameters
+    ----------
+    subject : str
+        Subject ID.
+    experiment: str
+        Experiment that events are being combined for
+    combine_events: bool
+        Indicates if all record-only sessions should be combined for
+        classifier training.
+    encoding_only: bool
+        Flag for if only encoding events should be used (default is False,
+        i.e. encoding and retrieval events will be returned)
+    root: str
+        Base path for finding event files etc.
+
+    Returns
+    -------
+    np.recarray
+        Full set of cleaned task events
+    """
+    if ("FR" not in experiment) and ("PAL" not in experiment):
+        raise RuntimeError("Only PAL, FR, and catFR experiments are currently"
+                           "implemented")
+
+    if "PAL" in experiment:
+        pal_events = load_events(subject, "PAL1", rootdir=root)
+        pal_events = clean_events("PAL1", pal_events)
+        pal_events = normalize_pal_events(pal_events)
+
+    if ("FR" in experiment) or combine_events:
+        # How to handle the case where no FR sessions are present
+        fr_events = load_events(subject, 'FR1', rootdir=root)
+        fr_events = clean_events("FR1", fr_events, start_time=1000,
+                                 end_time=29000)
+        fr_events = normalize_fr_events(fr_events)
+
+        catfr_events = load_events(subject, 'catFR1', rootdir=root)
+        catfr_events = clean_events("catFR1", catfr_events, start_time=1000,
+                                    end_time=29000)
+        catfr_events = normalize_fr_events(catfr_events)
+
+        # Free recall events are always combined
+        free_recall_events = concatenate_events_across_experiments(
+            [fr_events, catfr_events])
+
+    if ("PAL" in experiment) and combine_events:
+        all_events = concatenate_events_across_experiments([
+            free_recall_events, pal_events])
+
+    elif ("PAL" in experiment) and not combine_events:
+        all_events = pal_events
+
+    else:
+        all_events = free_recall_events
+
+    final_events = select_word_events(all_events,
+                                      encoding_only=encoding_only)
+
+    return final_events
+
+
 def load_events(subject, experiment, sessions=None, rootdir='/'):
-    """ Load events for a specific subject and experiment
+    """ Load events for a specific subject and experiment. If no events are
+    found, an empty recarray with the correct datatypes are returned
 
     Parameters
     ----------
@@ -50,86 +131,85 @@ def load_events(subject, experiment, sessions=None, rootdir='/'):
     event_files = [os.path.join(rootdir, event_file) for event_file in
                    event_files]
 
+    if len(event_files) == 0:
+        empty_recarray = initialize_empty_event_reccarray()
+        return empty_recarray
+
     events = np.concatenate([BaseEventReader(filename=f).read() for f in
                              event_files]).view(np.recarray)
     return events
 
 
-def concatenate_events_across_experiments(event_list):
-    """
-        Concatenate events across different experiment types. To make session
-        numbers unique, 100 is added to the second set of events in event_list,
-        200 to the next set of events, and so on.
-
-    Parameters:
-    -----------
-    event_list: iterable
-        An iterable containing events to be concatenated
-
-    Returns:
-    --------
-    np.recarray
-        The combined set of events
-
-    """
-    # Update sessions to not be in conflict
-    session_offset = 0
-    final_event_list = []
-    for events in event_list:
-        events.session += session_offset
-        # This won't be necessary if using DataFrames
-        events = select_column_subset(events)
-        final_event_list.append(events)
-        session_offset += 100
-
-    # In order to combine events, we need have the same fields and types, which
-    # effectively makes the events appear as though coming from the same
-    # experiment
-    final_events = concatenate_events_for_single_experiment(final_event_list)
-
-    return final_events
-
-
-def concatenate_events_for_single_experiment(event_list):
-    """ Combine events that are part of the same experiment
-
-    Parameters
-    ----------
-    event_list
-
-    Returns
-    -------
-    np.recarray
-        The flattened set of events
-
-    """
-    final_events = np.concatenate(event_list).view(np.recarray)
-    final_events.sort(order=['session', 'list', 'mstime'])
-
-    return final_events
-
-
-def clean_events(events):
+def clean_events(experiment, events, start_time=None, end_time=None):
     """
         Peform basic cleaning operations on events such as removing
-        incomplete sessions, negative offset events, etc. Any cleaning functions
-        called here should be agnostic to the type of experiment.
-        Experiment-specific cleaning should occur in a separate function
+        incomplete sessions, negative offset events, and incomplete lists.
+        For FR events, baseline events needs to be found.
 
     Parameters
     ----------
+    experiment: str
     events: np.recarray of events
+    start_time:
+    end_time:
 
     Returns
     -------
     np.recarray
         Cleaned set of events
 
+    Notes
+    -----
+    This function should be called on an experiment by experiment basis and
+    should not be used to clean cross-experiment datasets
+
     """
     events = remove_negative_offsets(events)
     events = remove_practice_lists(events)
     events = remove_incomplete_lists(events)
+
+    if "FR" in experiment:
+        events = insert_baseline_retrieval_events(events,
+                                                  start_time,
+                                                  end_time)
+
+        events = remove_intrusions(events)
+
     events = update_recall_outcome_for_retrieval_events(events)
+
+    return events
+
+
+def normalize_fr_events(events):
+    events = combine_retrieval_events(events)
+    return events
+
+
+def normalize_pal_events(events):
+    """
+        Perform any normalization to PAL event so make the homogeneous enough
+        so that it is trivial to combine with other experiment events
+
+    """
+    events = rename_correct_to_recalled(events)
+    events = coerce_study_pair_to_word_event(events)
+    return events
+
+
+def rename_correct_to_recalled(events):
+    """
+    Parameters
+    ----------
+    events: np.recarray
+
+    Returns
+    -------
+    np.recarray
+        Events with a 'recalled' field added to mirror the 'correct' field
+
+    """
+    events = rename_fields(events, {'correct': 'recalled'})
+
     return events
 
 
@@ -140,9 +220,7 @@ def remove_negative_offsets(events):
 
 
 def remove_incomplete_lists(events):
-    """ Remove incomplete lists for every session in the given events
-
-    """
+    """ Remove incomplete lists for every session in the given events """
     sessions = np.unique(events.session)
     final_event_list = []
     for session in sessions:
@@ -164,11 +242,13 @@ def update_recall_outcome_for_retrieval_events(events):
         Manually override the recall outcomes for baseline retrieval and word
         retrieval events. All baseline retrieval events should be marked as not
         recalled and all word events in the recall period should be marked as
-        recalled. WHY??
+        recalled. This assumes that intrusions have already been removed from
+        the given set of events. It exists merely to serve as an extra check on
+        what should already be true in the raw events data
 
     Parameters:
     -----------
-    events:
+    events: np.recarray
 
     Returns:
     --------
@@ -181,32 +261,81 @@ def update_recall_outcome_for_retrieval_events(events):
     return events
 
 
+def combine_retrieval_events(events):
+    """
+        Combine baseline retrieval and actual retrieval events into a single
+        event type.
+
+    """
+    events.type[(events.type == 'REC_WORD') |
+                (events.type == 'REC_BASE')] = 'REC_EVENT'
+    return events
+
+
+def coerce_study_pair_to_word_event(events):
+    """
+        Update STUDY_PAIR events to be WORD events. These are the same event
+        type, but PAL calls them STUDY_PAIR and FR/catFR call them WORD. In the
+        future, it may make more sense to make an update to event creation
+        instead of coercing the even types here
+    """
+    events.type[(events.type == 'STUDY_PAIR')] = 'WORD'
+    return events
+
+
 def remove_practice_lists(events):
+    """ Remove practice lists from the set of events """
     cleaned_events = events[events.list > -1]
     return cleaned_events
 
 
-def remove_bad_events():
-    # TODO: This should remove any events where the read window would be
-    # outside the bounds of the associated EEG file
+def remove_bad_events(events):
+    """
+        Remove events whose offset values would result in trying to read data
+        that is out of bounds in the EEG file. Currently, this is done
+        automatically in PTSA when you load the EEG, but to avoid having to
+        catch updated events when reading the EEG, it should be done ahead of
+        time.
+    """
     raise NotImplementedError
 
 
 def select_column_subset(events):
-    # TODO: Need to update this to also work with PAL events
     columns = [
-        'item_num', 'serialpos', 'session', 'subject', 'rectime', 'experiment',
-        'mstime', 'type', 'eegoffset', 'recalled', 'item_name', 'intrusion',
+        'serialpos', 'session', 'subject', 'rectime', 'experiment',
+        'mstime', 'type', 'eegoffset', 'recalled', 'intrusion',
         'montage', 'list', 'eegfile', 'msoffset'
     ]
     events = events[columns]
     return events
 
 
+def initialize_empty_event_reccarray():
+    """ Utility function for generating a recarray that looks normalized,
+    but is empty """
+    empty_recarray = np.recarray((0, ), dtype=[('serialpos', int),
+                                               ('session', int),
+                                               ('subject', unicode),
+                                               ('rectime', int),
+                                               ('experiment', unicode),
+                                               ('mstime', int),
+                                               ('type', unicode),
+                                               ('eegoffset', int),
+                                               ('recalled', int),
+                                               ('intrusion', int),
+                                               ('montage', int),
+                                               ('list', int),
+                                               ('eegfile', unicode),
+                                               ('msoffset', int)])
+    return empty_recarray
+
+
 def insert_baseline_retrieval_events(events, start_time, end_time):
     """
         Match recall events to matching baseline periods of failure to recall.
-        Baseline events all begin at least 1000 ms after a vocalization, and end
+        This is required for all free recall events, but is not necessary for
+        PAL events, which have a natural baseline/comparison group. Baseline
+        events all begin at least 1000 ms after a vocalization, and end
         at least 1000 ms before a vocalization. Each recall event is matched,
         wherever possible, to a valid baseline period from a different list
         within 3 seconds relative to the onset of the recall period.
@@ -221,6 +350,9 @@ def insert_baseline_retrieval_events(events, start_time, end_time):
         The amount of time within the recall period to consider (ms)
 
     """
+
+    if len(events) == 0:
+        return events
 
     # TODO: document within code blocks what is actually happening
     # TODO: Finish cleaning this mess up
@@ -357,30 +489,107 @@ def find_free_time_periods(times, duration, pre, post, start=None, end=None):
     return epoch_array
 
 
-def select_word_events(events, include_retrieval=True):
+def concatenate_events_across_experiments(event_list):
     """
-        Filter out non-WORD events. Assumes that baseline events are in the
-        input events.
+        Concatenate events across different experiment types. To make session
+        numbers unique, 100 is added to the second set of events in event_list,
+        200 to the next set of events, and so on.
 
-    :param np.recarray events:
-    :param bool include_retrieval: Include REC_WORD and REC_BASE events
-    :return: filtered events recarray
+    Parameters:
+    -----------
+    event_list: iterable
+        An iterable containing events to be concatenated
+
+    Returns:
+    --------
+    np.recarray
+        The combined set of events
+
+    """
+    # Update sessions to not be in conflict
+    session_offset = 0
+    final_event_list = []
+    for events in event_list:
+        if len(events) == 0:
+            continue # we don't want to be incrementing if we dont have to
+        events.session += session_offset
+        # This won't be necessary if using DataFrames
+        events = select_column_subset(events)
+        final_event_list.append(events)
+        session_offset += 100
+
+    # In order to combine events, we need have the same fields and types, which
+    # effectively makes the events appear as though coming from the same
+    # experiment
+    final_events = concatenate_events_for_single_experiment(final_event_list)
+
+    return final_events
+
+
+def concatenate_events_for_single_experiment(event_list):
+    """ Combine events that are part of the same experiment
+
+    Parameters
+    ----------
+    event_list
+
+    Returns
+    -------
+    np.recarray
+        The flattened set of events
+
+    """
+    event_sizes = [len(events) for events in event_list]
+    if sum(event_sizes) == 0:
+        empty_events = initialize_empty_event_reccarray()
+        return empty_events
+    final_events = np.concatenate(event_list).view(np.recarray)
+    final_events.sort(order=['session', 'list', 'mstime'])
+
+    return final_events
+
+
+def remove_intrusions(events):
+    """
+
+    Select all encoding events that were part of the encoding period or
+    were non-intrusion retrieval events.
 
     """
     encoding_events_mask = get_encoding_mask(events)
-    baseline_retrieval_event_mask = get_baseline_retrieval_mask(events)
     retrieval_event_mask = get_retrieval_events_mask(events)
+    baseline_retrieval_event_mask = get_baseline_retrieval_mask(events)
 
-    if include_retrieval:
-        mask = (encoding_events_mask |
-                baseline_retrieval_event_mask |
-                retrieval_event_mask)
-    else:
-        mask = encoding_events_mask
+    mask = (encoding_events_mask |
+            retrieval_event_mask |
+            baseline_retrieval_event_mask)
 
     filtered_events = events[mask]
-
     events = filtered_events.view(np.recarray)
+    return events
+
+
+def select_word_events(events, encoding_only=True):
+    """ Filter out any non-word events
+
+    Parameters:
+    -----------
+    events: np.recarray
+    encoding_only: bool
+        Flag for whether retrieval events should be included
+
+    """
+    encoding_events_mask = get_encoding_mask(events)
+    retrieval_event_mask = get_all_retrieval_events_mask(events)
+
+    if encoding_only:
+        mask = encoding_events_mask
+    else:
+        mask = (encoding_events_mask | retrieval_event_mask)
+
+    filtered_events = events[mask]
+    events = filtered_events.view(np.recarray)
+
     return events
 
 
@@ -427,6 +636,11 @@ def select_baseline_retrieval_events(events):
 def get_baseline_retrieval_mask(events):
     """ Create a boolean mask for baseline retrieval events """
     mask = (events.type == 'REC_BASE')
+
+    # No events to mask
+    if len(mask) == 0:
+        return mask
+
     if max(mask) is False:
         raise RuntimeError("No baseline retrieval events found. Create "
                            "baseline retrieval events first.")
@@ -469,8 +683,40 @@ def select_all_retrieval_events(events):
 def get_all_retrieval_events_mask(events):
     """ Create a boolean bask for any retrieval event """
     all_retrieval_mask = ((events.type == 'REC_WORD') |
-                          (events.type == 'REC_BASE'))
+                          (events.type == 'REC_BASE') |
+                          (events.type == 'REC_EVENT'))
     return all_retrieval_mask
 
 
+def partition_events(events):
+    """
+        Split a given set of events into partitions by experiment class (
+        FR/PAL) and encoding/retrieval
 
+    Parameters:
+    -----------
+    events: np.recarray
+        Set of events to partition
+
+    Returns:
+    --------
+    list
+        A list containing all identified partitions to the data
+
+    """
+
+    retrieval_mask = get_all_retrieval_events_mask(events)
+    pal_mask = (events.experiment == "PAL1")
+
+    fr_encoding = events[(~retrieval_mask & ~pal_mask)]
+    fr_retrieval = events[(retrieval_mask & ~pal_mask)]
+    pal_encoding = events[(~retrieval_mask & pal_mask)]
+    pal_retrieval = events[(retrieval_mask & pal_mask)]
+
+    # Only add partitions with actual events
+    final_partitions = []
+    for partition in [fr_encoding, fr_retrieval, pal_encoding, pal_retrieval]:
+        if len(partition) > 0:
+            final_partitions.append(partition)
+
+    return final_partitions

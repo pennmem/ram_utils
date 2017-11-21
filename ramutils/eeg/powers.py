@@ -18,8 +18,31 @@ except ImportError:
 
 from ramutils.log import get_logger
 from ramutils.utils import timer
+from ramutils.events import partition_events, concatenate_events_for_single_experiment
 
 logger = get_logger()
+
+
+def compute_normalized_powers(events, start_time, end_time, buffer_time, freqs,
+                              log_powers, filt_order=4, width=5,
+                              bipolar_pairs=None):
+    """ Compute powers by session, encoding/retrieval, and FR vs. PAL """
+
+    event_partitions = partition_events(events)
+    power_partitions = []
+    cleaned_event_partitions = []
+    for event_subset in event_partitions:
+        powers, cleaned_events = compute_powers(event_subset, start_time,
+                                                end_time, buffer_time, freqs,
+                                                log_powers, filt_order, width)
+        cleaned_event_partitions.append(cleaned_events)
+        power_partitions.append(powers)
+
+    cleaned_events = concatenate_events_for_single_experiment(
+        cleaned_event_partitions)
+    combined_powers = np.concatenate(power_partitions)
+
+    return combined_powers, cleaned_events
 
 
 def compute_single_session_powers(session, all_events, start_time, end_time,
@@ -165,3 +188,32 @@ def compute_powers(events, start_time, end_time, buffer_time, freqs,
         pow_mat = pow_mat.reshape((len(events), -1))
 
     return pow_mat, events
+
+
+def reduce_powers(powers, mask, n_frequencies):
+    """ Create a subset of the full power matrix by excluding certain electrodes
+
+    Parameters
+    ----------
+    powers: np.ndarray
+        Original power matrix
+    mask: array_like
+        Boolean array of size n_channels
+    n_frequencies: int
+        Number of frequencies used in calculating the power matrix. This is
+        needed to be able to properly reshape the array
+
+    Returns
+    -------
+    np.ndarray
+        Subsetted power matrix
+
+    """
+    # Reshape into 3-dimensional array (n_events, n_electrodes, n_frequencies)
+    reduced_powers = powers.reshape((len(powers), -1, n_frequencies))
+    reduced_powers = reduced_powers[:, mask, :]
+
+    # Reshape back to 2D representation so it can be used as a feature matrix
+    reduced_powers = reduced_powers.reshape((len(reduced_powers), -1))
+
+    return reduced_powers
