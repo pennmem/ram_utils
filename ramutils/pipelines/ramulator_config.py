@@ -2,6 +2,8 @@ import os.path
 
 from bptools.jacksheet import read_jacksheet
 
+from ramutils.constants import EXPERIMENTS
+from ramutils.exc import MultistimNotAllowedException
 from ramutils.parameters import StimParameters
 from ramutils.tasks import *
 
@@ -82,6 +84,9 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
 
     """
     stim_params = make_stim_params(subject, anodes, cathodes, paths.root)
+
+    if len(stim_params) > 1 and experiment not in EXPERIMENTS['multistim']:
+        raise MultistimNotAllowedException
 
     # this will be None for amp. det. experiments
     if exp_params is not None:

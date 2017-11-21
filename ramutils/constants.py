@@ -18,5 +18,12 @@ EXPERIMENTS = {
         'PAL5',
         'FR6',
         'catFR6',
+    ],
+
+    # Experiments that allow multiple stim locations
+    'multistim': [
+        'AmplitudeDetermination',
+        'FR6',
+        'catFR6'
     ]
 }
