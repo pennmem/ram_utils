@@ -65,7 +65,8 @@ def main(input_args=None):
         dest=args.dest
     )
 
-    configure_caching(osp.join(paths.dest, 'cache'), args.force_rerun)
+    # FIXME: figure out why MacOS won't work with sshfs-relative paths only here
+    configure_caching(osp.join(args.cachedir, 'cache'), args.force_rerun)
     paths.pairs = osp.join(paths.root, 'protocols', 'subjects', args.subject,
                            'localizations', str(args.localization),
                            'montages', str(args.montage),

@@ -146,7 +146,8 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
                                                 stim_params,
                                                 paths,
                                                 ec_pairs,
-                                                excluded_pairs)
+                                                excluded_pairs,
+                                                exp_params)
 
     if vispath is not None:
         config_path.visualize(filename=vispath)
