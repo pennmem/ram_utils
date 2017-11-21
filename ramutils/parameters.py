@@ -74,7 +74,7 @@ class ExperimentParameters(Schema):
 
     penalty_type = String('l2', desc='logistic regression penalty type')
     C = Float(7.2e-4, desc='inverse of regularization strength')
-    n_permutations = Int(200, desc='number of permutations to use for cross-validation')
+    n_perm = Int(200, desc='number of permutations to use for cross-validation')
     solver = String('liblinear', desc='algorithm to use in optimization process')
 
 
@@ -84,10 +84,31 @@ class FRParameters(ExperimentParameters):
     end_time = Float(1.366, desc="encoding end time [s]")
     buf = Float(1.365, desc="encoding buffer time [s]")
 
-    retrieval_start_time = Float(-0.525)
-    retrieval_end_time = Float(0)
-    retrieval_buf = Float(0.524)
+    retrieval_start_time = Float(-0.525, desc="retrieval start time [s]")
+    retrieval_end_time = Float(0, desc="retrieval end time [s]")
+    retrieval_buf = Float(0.524, desc="retrieval buffer time [s]")
 
     encoding_multiplier = Float(2.5, desc="weighting factor for encoding "
                                           "samples")
-    n_perm = Int(200, desc="number of permutation samples for cross validation")
+
+
+class PALParameters(FRParameters):
+    """
+        Paired associates experiment parameters relevant for classification.
+        It inhertis all of the same parameters as FR experiments and adds a
+        few more
+    """
+
+    pal_start_time = Float(0.3, desc="encoding start time for PAL [s]")
+    pal_end_time = Float(2.00, desc="encoding end time for PAL [s]")
+    pal_buf = Float(1.2)
+
+    pal_retrieval_start_time = Float(-0.625, desc="retrieval start time for "
+                                                  "PAL [s]")
+    pal_retrieval_end_time = Float(-0.1, desc="retrieval end time for PAL [s]")
+    pal_retrieval_buf = Float(0.524, desc="retrieval buffer for PAL [s]")
+
+    encoding_multiplier = Float(7.2, desc="weighting factor for encoding "
+                                          "samples in PAL")
+    pal_multiplier = Float(1.93, desc="weighting factor for PAL samples")
+

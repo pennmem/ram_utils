@@ -13,7 +13,7 @@ def make_stim_params(subject, anodes, cathodes, root='/'):
     Parameters
     ----------
     subject : str
-    andoes : List[str] anodes
+    anodes : List[str]
         anode labels
     cathodes : List[str]
         cathode labels
@@ -87,38 +87,23 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
     final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
 
     if experiment != "AmplitudeDetermination":
-        encoding_events, retrieval_events = preprocess_fr_events(subject,
-                                                                 paths.root).compute()
+        events = preprocess_events(subject,
+                               experiment,
+                               encoding_only=kwargs['encoding_only'],
+                               combine_events=kwargs['combine_events'],
+                               root=paths.root)
 
         # FIXME: If PTSA is updated to not remove events behind this scenes, this
         # won't be necessary. Or, if we can remove bad events before passing to
         # compute powers, then we won't have to catch the events
-        encoding_powers, good_encoding_events = compute_powers(encoding_events,
-                                                               kwargs['start_time'],
-                                                               kwargs['end_time'],
-                                                               kwargs['buf'],
-                                                               kwargs['freqs'],
-                                                               kwargs['log_powers'],
-                                                               kwargs['filt_order'],
-                                                               kwargs['width'])
-
-        retrieval_powers, good_retrieval_events = compute_powers(retrieval_events,
-                                                                 kwargs['start_time'],
-                                                                 kwargs['end_time'],
-                                                                 kwargs['buf'],
-                                                                 kwargs['freqs'],
-                                                                 kwargs['log_powers'],
-                                                                 kwargs['filt_order'],
-                                                                 kwargs['width'])
-        normalized_encoding_powers = normalize_powers_by_session(
-            encoding_powers, good_encoding_events)
-        normalized_retrieval_powers = normalize_powers_by_session(
-            retrieval_powers, good_retrieval_events)
-
-        task_events = combine_events([good_encoding_events, good_retrieval_events])
-        powers = combine_encoding_retrieval_powers(task_events,
-                                                   normalized_encoding_powers,
-                                                   normalized_retrieval_powers)
+        powers, task_events = compute_normalized_powers(events,
+                                                        kwargs['start_time'],
+                                                        kwargs['end_time'],
+                                                        kwargs['buf'],
+                                                        kwargs['freqs'],
+                                                        kwargs['log_powers'],
+                                                        kwargs['filt_order'],
+                                                        kwargs['width'])
         reduced_powers = reduce_powers(powers, used_pair_mask, len(kwargs['freqs']))
 
         sample_weights = get_sample_weights(task_events, **kwargs)
@@ -133,6 +118,7 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
         cross_validation_results = perform_cross_validation(classifier,
                                                             reduced_powers,
                                                             task_events,
+                                                            kwargs['n_perm'],
                                                             **kwargs)
 
         container = serialize_classifier(classifier,
@@ -142,16 +128,14 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
                                          sample_weights,
                                          cross_validation_results,
                                          subject)
-    else:
-        container = None
 
-    config_path = generate_ramulator_config(subject,
-                                            experiment,
-                                            container,
-                                            stim_params,
-                                            paths,
-                                            ec_pairs,
-                                            excluded_pairs)
+        config_path = generate_ramulator_config(subject,
+                                                experiment,
+                                                container,
+                                                stim_params,
+                                                paths,
+                                                ec_pairs,
+                                                excluded_pairs)
 
     if vispath is not None:
         config_path.visualize(filename=vispath)
