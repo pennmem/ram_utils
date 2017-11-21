@@ -66,42 +66,44 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
         List of stim cathode contact labels
     vispath : str
         Path to save task graph visualization to if given.
-    kwargs
-        start_time: float
-            Start of the period in the EEG to consider for each event
-        end_time: float
-            End of the period to consider
-        buffer_time: float
-            Buffer time
-        freqs: array_like
-            List of frequencies to use when applying Wavelet Filter
-        log_powers: bool
-            Whether to take the logarithm of the powers
-        filt_order: Int
-            Filter order to use in Butterworth filter
-        width: Int
-            Wavelet width to use in Wavelet Filter
-        penalty_param: Float
-            Penalty parameter to use
-        penalty_type: str
-            Type of penalty to use for regularized model (ex: L2)
-        solver: str
-            Solver to use when fitting the model (ex: liblinear)
-        encoding_only: bool
-            Indicator for if encoding-only classifier should be used, i.e. do
-            not train on retrieval events
-        encoding_multiplier: float
-            Scaling factor for encoding events (required if using FR sample
-            weighting schme)
-        combine_events: bool
-            For PAL experiments, indicates if record-only sessions should be
-            combined, or if only PAL1 sessions should be used for training
-        pal_mutiplier: float
-            Scaling factor for PAL events (required if using PAL weighting
-            scheme)
-        scheme: str
-            Sample weighting scheme to use (options: EQUAL, PAL, FR). See
-            get_sample_weights for details
+
+    Keyword Arguments
+    -----------------
+    start_time: float
+        Start of period in the EEG to consider for each event
+    end_time: float
+        End of the period to consider
+    buffer_time: float
+        Buffer time
+    freqs: array_like
+        List of frequencies to use when applying Wavelet Filter
+    log_powers: bool
+        Whether to take the logarithm of the powers
+    filt_order: Int
+        Filter order to use in Butterworth filter
+    width: Int
+        Wavelet width to use in Wavelet Filter
+    penalty_param: Float
+        Penalty parameter to use
+    penalty_type: str
+        Type of penalty to use for regularized model (ex: L2)
+    solver: str
+        Solver to use when fitting the model (ex: liblinear)
+    encoding_only: bool
+        Indicator for if encoding-only classifier should be used, i.e. do
+        not train on retrieval events
+    encoding_multiplier: float
+        Scaling factor for encoding events (required if using FR sample
+        weighting schme)
+    combine_events: bool
+        For PAL experiments, indicates if record-only sessions should be
+        combined, or if only PAL1 sessions should be used for training
+    pal_mutiplier: float
+        Scaling factor for PAL events (required if using PAL weighting
+        scheme)
+    scheme: str
+        Sample weighting scheme to use (options: EQUAL, PAL, FR). See
+        get_sample_weights for details
 
     Returns
     -------
@@ -125,13 +127,13 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
     # won't be necessary. Or, if we can remove bad events before passing to
     # compute powers, then we won't have to catch the events
     powers, task_events = compute_normalized_powers(events,
-                                                     kwargs['start_time'],
-                                                     kwargs['end_time'],
-                                                     kwargs['buf'],
-                                                     kwargs['freqs'],
-                                                     kwargs['log_powers'],
-                                                     kwargs['filt_order'],
-                                                     kwargs['width'])
+                                                    kwargs['start_time'],
+                                                    kwargs['end_time'],
+                                                    kwargs['buf'],
+                                                    kwargs['freqs'],
+                                                    kwargs['log_powers'],
+                                                    kwargs['filt_order'],
+                                                    kwargs['width'])
     reduced_powers = reduce_powers(powers, used_pair_mask, len(kwargs['freqs']))
 
     sample_weights = get_sample_weights(task_events, **kwargs)
