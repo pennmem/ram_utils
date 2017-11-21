@@ -97,17 +97,16 @@ class TestEvents:
         return
 
 
-    @pytest.mark.parametrize('retrieval', [True, False])
-    def test_select_word_events(self, retrieval):
-        word_events = select_word_events(self.test_data,
-                                         retrieval)
+    @pytest.mark.parametrize('encoding_only', [True, False])
+    def test_select_word_events(self, encoding_only):
+        word_events = select_word_events(self.test_data, encoding_only)
 
         # No valid retrieval events will be found because time between events
         # is explicitly made to be 1ms
-        if retrieval:
-            assert len(word_events) == (self.n_word + self.n_rec_base)
-        else:
+        if encoding_only:
             assert len(word_events) == self.n_word
+        else:
+            assert len(word_events) == (self.n_word + self.n_rec_base + self.n_rec_word)
 
         return
 
@@ -181,5 +180,42 @@ class TestEvents:
     def test_select_vocalization_events(self):
         vocalization_events = select_vocalization_events(self.test_data)
         assert len(vocalization_events) == self.n_rec_word
+        return
+
+    # Four possible partitions. Be sure to check all
+    def test_partition_events(self):
+        dtypes = [
+            ('experiment', '|S256'),
+            ('type', '|S256')
+        ]
+        test_fr_encoding = np.array(['FR1', 'WORD'], dtype=dtypes).view(
+            np.recarray)
+        test_fr_retrieval = np.array(['FR1', 'REC_EVENT'],
+                                     dtype=dtypes).view(np.recarray)
+        test_pal_encoding = np.array(['PAL1', 'WORD'],
+                                     dtype=dtypes).view(np.recarray)
+        test_pal_retrieval = np.array(['PAL1', 'REC_EVENT'],
+                                      dtype=dtypes).view(np.recarray)
+
+        for subset in [test_fr_encoding, test_fr_retrieval,
+                       test_pal_encoding, test_pal_retrieval]:
+            # TODO add assertion here
+            pass
+
+
+        return
+
+    @pytest.mark.parametrize("experiment, encoding_only, combine_events", [
+        ("FR6", False, True),
+        ("FR6", True, True),
+        ("PAL6", True, True),
+        ("PAL6", True, False),
+        ("PAL6", False, True),
+        ("PAL6", False, False)
+    ])
+    def test_preprocess_events(self, experiment, encoding_only, combine_events):
+        return
+
+    def test_regression_event_processing(self):
         return
 
