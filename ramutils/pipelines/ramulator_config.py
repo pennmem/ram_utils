@@ -13,7 +13,7 @@ def make_stim_params(subject, anodes, cathodes, root='/'):
     Parameters
     ----------
     subject : str
-    andoes : List[str] anodes
+    anodes : List[str] anodes
         anode labels
     cathodes : List[str]
         cathode labels
@@ -87,9 +87,15 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
             Type of penalty to use for regularized model (ex: L2)
         solver: str
             Solver to use when fitting the model (ex: liblinear)
+        encoding_only: bool
+            Indicator for if encoding-only classifier should be used, i.e. do
+            not train on retrieval events
         encoding_multiplier: float
             Scaling factor for encoding events (required if using FR sample
             weighting schme)
+        combine_events: bool
+            For PAL experiments, indicates if record-only sessions should be
+            combined, or if only PAL1 sessions should be used for training
         pal_mutiplier: float
             Scaling factor for PAL events (required if using PAL weighting
             scheme)
@@ -104,47 +110,28 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
     """
     stim_params = make_stim_params(subject, anodes, cathodes, paths.root)
 
-    # FIXME: update logic to work with PAL, AmplitudeDetermination
-    if "FR" not in experiment:
-        raise RuntimeError("Only FR-like experiments supported now.")
-
-    encoding_events, retrieval_events = preprocess_fr_events(subject,
-                                                             paths.root).compute()
-
     ec_pairs = generate_pairs_from_electrode_config(subject, paths)
     excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
     used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
     final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
 
+    events = preprocess_events(subject,
+                               experiment,
+                               encoding_only=kwargs['encoding_only'],
+                               combine_events=kwargs['combine_events'],
+                               root=paths.root)
+
     # FIXME: If PTSA is updated to not remove events behind this scenes, this
     # won't be necessary. Or, if we can remove bad events before passing to
     # compute powers, then we won't have to catch the events
-    encoding_powers, good_encoding_events = compute_powers(encoding_events,
-                                                           kwargs['start_time'],
-                                                           kwargs['end_time'],
-                                                           kwargs['buf'],
-                                                           kwargs['freqs'],
-                                                           kwargs['log_powers'],
-                                                           kwargs['filt_order'],
-                                                           kwargs['width'])
-
-    retrieval_powers, good_retrieval_events = compute_powers(retrieval_events,
-                                                             kwargs['start_time'],
-                                                             kwargs['end_time'],
-                                                             kwargs['buf'],
-                                                             kwargs['freqs'],
-                                                             kwargs['log_powers'],
-                                                             kwargs['filt_order'],
-                                                             kwargs['width'])
-    normalized_encoding_powers = normalize_powers_by_session(
-        encoding_powers, good_encoding_events)
-    normalized_retrieval_powers = normalize_powers_by_session(
-        retrieval_powers, good_retrieval_events)
-
-    task_events = combine_events([good_encoding_events, good_retrieval_events])
-    powers = combine_encoding_retrieval_powers(task_events,
-                                               normalized_encoding_powers,
-                                               normalized_retrieval_powers)
+    powers, task_events = compute_normalized_powers(events,
+                                                     kwargs['start_time'],
+                                                     kwargs['end_time'],
+                                                     kwargs['buf'],
+                                                     kwargs['freqs'],
+                                                     kwargs['log_powers'],
+                                                     kwargs['filt_order'],
+                                                     kwargs['width'])
     reduced_powers = reduce_powers(powers, used_pair_mask, len(kwargs['freqs']))
 
     sample_weights = get_sample_weights(task_events, **kwargs)
@@ -159,6 +146,7 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
     cross_validation_results = perform_cross_validation(classifier,
                                                         reduced_powers,
                                                         task_events,
+                                                        kwargs['n_perm'],
                                                         **kwargs)
 
     container = serialize_classifier(classifier,

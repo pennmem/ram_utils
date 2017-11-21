@@ -6,6 +6,8 @@ from glob import glob
 from scipy.stats.mstats import zscore
 from classiflib.container import ClassifierContainer
 
+from ramutils.events import get_encoding_mask, get_all_retrieval_events_mask
+
 
 def reload_classifier(subject, task, session, mount_point='/'):
     """Loads the actual classifier used by Ramulator for a particular session
@@ -38,9 +40,12 @@ def reload_classifier(subject, task, session, mount_point='/'):
     # getting things started in the first place).
     config_path = os.path.join(base_path, 'config_files')
     if 'retrained_classifier' in os.listdir(config_path):
-        classifier_path = glob(os.path.join(config_path, 'retrained_classifier', '*classifier*.zip'))[0]
+        classifier_path = glob(os.path.join(config_path,
+                                            'retrained_classifier',
+                                            '*classifier*.zip'))[0]
     else:
-        classifier_path = glob(os.path.join(config_path, '*classifier*.zip'))[0]
+        classifier_path = glob(os.path.join(config_path,
+                                            '*classifier*.zip'))[0]
     classifier_container = ClassifierContainer.load(classifier_path)
 
     return classifier_container
@@ -107,7 +112,9 @@ def get_sample_weights(events, **kwargs):
         weights = get_fr_sample_weights(events, kwargs['encoding_multiplier'])
 
     elif scheme == 'PAL':
-        weights = get_pal_sample_weights(events, kwargs['pal_multiplier'])
+        weights = get_pal_sample_weights(events,
+                                         kwargs['encoding_multiplier'],
+                                         kwargs['pal_multiplier'])
 
     else:
         weights = get_equal_weights(events)
@@ -137,11 +144,11 @@ def determine_weighting_scheme_from_events(events):
 
     if any([experiment.find("PAL") != -1 for experiment in experiments]):
         scheme = "PAL"
-        event_types_to_check = ['STUDY_PAIR', 'WORD', 'REC_EVENT']
+        event_types_to_check = ['WORD', 'REC_EVENT']
 
     elif any([experiment.find("FR") != -1 for experiment in experiments]):
-        scheme = "FR"
-        event_types_to_check = ['WORD', 'REC_BASE', 'REC_WORD']
+        scheme = 'FR'
+        event_types_to_check = ['WORD', 'REC_EVENT']
 
     else:
         scheme = 'EQUAL'
@@ -164,17 +171,45 @@ def get_equal_weights(events):
 
 
 def get_fr_sample_weights(events, encoding_multiplier):
-    """ Create sample weights based on FR scheme """
-    enc_mask = (events.type == 'WORD')
-    retrieval_mask = ((events.type == 'REC_BASE') | (events.type == 'REC_WORD'))
+    """ Create sample weights based on FR scheme.
+
+    Parameters
+    ----------
+    events: np.recarrary
+        All encoding and retrieval events for consideration in weighting
+    encoding_multiplier: float
+        Factor determining how much more encoding samples should be weighted
+        than retrieval
+
+    Returns
+    -------
+    weights: np.ndarray
+        Sample-level weights
+
+    Notes
+    -----
+    This function asssumes that the given events are in 'normalized' form,
+    i.e. they have already been cleaned and homogenized. By the time events
+    are passed to this function, intrusions should have already been removed
+    and there should only be 'REC_EVENT' event types for the retrieval
+    period. Baseline retrievals are non-recalled REC_EVENTs and actual
+    retrievals are recalled REC_EVENTs
+
+    """
+    enc_mask = get_encoding_mask(events)
+    retrieval_mask = get_all_retrieval_events_mask(events)
 
     n_enc_0 = events[enc_mask & (events.recalled == 0)].shape[0]
     n_enc_1 = events[enc_mask & (events.recalled == 1)].shape[0]
 
-    n_ret_0 = events[events.type == 'REC_BASE'].shape[0]
-    n_ret_1 = events[events.type == 'REC_WORD'].shape[0]
+    n_ret_0 = events[(events.type == 'REC_EVENT') &
+                     (events.recalled == 0)].shape[0]
+    n_ret_1 = events[(events.type == 'REC_EVENT') &
+                     (events.recalled == 1)].shape[0]
 
-    n_vec = np.array([1.0/n_enc_0, 1.0/n_enc_1, 1.0/n_ret_0, 1.0/n_ret_1 ], dtype=np.float)
+    n_vec = np.array([1.0/n_enc_0, 1.0/n_enc_1, 1.0/n_ret_0, 1.0/n_ret_1 ],
+                     dtype=np.float)
+
     n_vec /= np.mean(n_vec)
 
     n_vec[:2] *= encoding_multiplier
@@ -186,8 +221,8 @@ def get_fr_sample_weights(events, encoding_multiplier):
 
     weights[enc_mask & (events.recalled == 0)] = n_vec[0]
     weights[enc_mask & (events.recalled == 1)] = n_vec[1]
-    weights[retrieval_mask & (events.type == 'REC_BASE')] = n_vec[2]
-    weights[retrieval_mask & (events.type == 'REC_WORD')] = n_vec[3]
+    weights[retrieval_mask & (events.recalled == 0)] = n_vec[2]
+    weights[retrieval_mask & (events.recalled == 1)] = n_vec[3]
 
     return weights
 
@@ -205,25 +240,35 @@ def get_pal_sample_weights(events, encoding_multiplier, pal_multiplier):
     -------
     weights: np.ndarray
 
+    Notes
+    -----
+    By the time events are passed to this function, they should be cleaned
+    and normalized (see documentation for event utility functions for details).
+    Specifically, the 'recalled' field must exist, which mirrors the
+    'correct' field in the raw events
+
     """
 
-    enc_mask = (events.type == 'WORD')
-    retrieval_mask = (events.type == 'REC_EVENT')
-
-    pal_mask = (events.exp_name == 'PAL1')
+    enc_mask = get_encoding_mask(events)
+    retrieval_mask = get_all_retrieval_events_mask(events)
+    pal_mask = (events.experiment == 'PAL1')
     fr_mask = ~pal_mask
 
-    pal_n_enc_0 = events[pal_mask & enc_mask & (events.correct == 0)].shape[0]
-    pal_n_enc_1 = events[pal_mask & enc_mask & (events.correct == 1)].shape[0]
+    pal_n_enc_0 = events[pal_mask & enc_mask & (events.recalled == 0)].shape[0]
+    pal_n_enc_1 = events[pal_mask & enc_mask & (events.recalled == 1)].shape[0]
 
-    pal_n_ret_0 = events[pal_mask & retrieval_mask & (events.correct == 0)].shape[0]
-    pal_n_ret_1 = events[pal_mask & retrieval_mask & (events.correct == 1)].shape[0]
+    pal_n_ret_0 = events[pal_mask & retrieval_mask &
+                         (events.recalled == 0)].shape[0]
+    pal_n_ret_1 = events[pal_mask & retrieval_mask &
+                         (events.recalled == 1)].shape[0]
 
-    fr_n_enc_0 = events[fr_mask & enc_mask & (events.correct == 0)].shape[0]
-    fr_n_enc_1 = events[fr_mask & enc_mask & (events.correct == 1)].shape[0]
+    fr_n_enc_0 = events[fr_mask & enc_mask & (events.recalled == 0)].shape[0]
+    fr_n_enc_1 = events[fr_mask & enc_mask & (events.recalled == 1)].shape[0]
 
-    fr_n_ret_0 = events[fr_mask & retrieval_mask & (events.correct == 0)].shape[0]
-    fr_n_ret_1 = events[fr_mask & retrieval_mask & (events.correct == 1)].shape[0]
+    fr_n_ret_0 = events[fr_mask & retrieval_mask &
+                        (events.recalled == 0)].shape[0]
+    fr_n_ret_1 = events[fr_mask & retrieval_mask &
+                        (events.recalled == 1)].shape[0]
 
     ev_count_list = [pal_n_enc_0, pal_n_enc_1, pal_n_ret_0, pal_n_ret_1,
                      fr_n_enc_0, fr_n_enc_1, fr_n_ret_0, fr_n_ret_1]
@@ -245,14 +290,14 @@ def get_pal_sample_weights(events, encoding_multiplier, pal_multiplier):
 
     weights = np.ones(events.shape[0], dtype=np.float)
 
-    weights[pal_mask & enc_mask & (events.correct == 0)] = n_vec[0]
-    weights[pal_mask & enc_mask & (events.correct == 1)] = n_vec[1]
-    weights[pal_mask & retrieval_mask & (events.correct == 0)] = n_vec[2]
-    weights[pal_mask & retrieval_mask & (events.correct == 1)] = n_vec[3]
+    weights[pal_mask & enc_mask & (events.recalled == 0)] = n_vec[0]
+    weights[pal_mask & enc_mask & (events.recalled == 1)] = n_vec[1]
+    weights[pal_mask & retrieval_mask & (events.recalled == 0)] = n_vec[2]
+    weights[pal_mask & retrieval_mask & (events.recalled == 1)] = n_vec[3]
 
-    weights[fr_mask & enc_mask & (events.correct == 0)] = n_vec[4]
-    weights[fr_mask & enc_mask & (events.correct == 1)] = n_vec[5]
-    weights[fr_mask & retrieval_mask & (events.correct == 0)] = n_vec[6]
-    weights[fr_mask & retrieval_mask & (events.correct == 1)] = n_vec[7]
+    weights[fr_mask & enc_mask & (events.recalled == 0)] = n_vec[4]
+    weights[fr_mask & enc_mask & (events.recalled == 1)] = n_vec[5]
+    weights[fr_mask & retrieval_mask & (events.recalled == 0)] = n_vec[6]
+    weights[fr_mask & retrieval_mask & (events.recalled == 1)] = n_vec[7]
 
     return weights
