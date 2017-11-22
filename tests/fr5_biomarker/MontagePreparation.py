@@ -109,8 +109,19 @@ class MontagePreparation(RamTask):
             bipolar_dict = json.load(f_pairs)[subject]['pairs']
             self.pass_object('bipolar_dict', bipolar_dict)
 
+        tmp = subject.split('_')
+        subj_code = tmp[0]
+        montage = 0 if len(tmp) == 1 else int(tmp[1])
+
+        jr = JsonIndexReader(os.path.join(self.pipeline.mount_point,'protocols','r1.json'))
+        contacts = json.load(open(list(jr.aggregate_values('contacts',subject=subj_code,montage=montage))[0]))[subject]['contacts']
+
         bipolar_data_stim_only = {bp_tag:bp_data for bp_tag,bp_data in bipolar_dict.iteritems() if bp_data['is_stim_only']}
         bipolar_data = {bp_tag:bp_data for bp_tag,bp_data in bipolar_dict.iteritems() if not bp_data['is_stim_only']}
+
+        if self.pipeline.args.anodes:
+            self.pipeline.args.anode_nums = [contacts[c]['channel'] for c in self.pipeline.args.anodes]
+            self.pipeline.args.cathode_nums = [contacts[c]['channel'] for c in self.pipeline.args.cathodes]
 
         bp_tags = []
         bp_tal_structs = []
