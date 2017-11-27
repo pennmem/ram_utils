@@ -105,7 +105,7 @@ def _make_experiment_specific_data_section(experiment, stim_params,
             "stim_frequency": 200
         }
 
-        if 'PS4' in experiment:
+        if 'PS4' in experiment or experiment == 'AmplitudeDetermination':
             stub.update({
                 'min_stim_amplitude': params[key]['min_stim_amplitude'],
                 'max_stim_amplitude': params[key]['max_stim_amplitude']
@@ -122,11 +122,14 @@ def _make_experiment_specific_data_section(experiment, stim_params,
         "classifier_file": "config_files/{}".format(classifier_file),
         "classifier_version": classifier_version,
         "random_stim_prob": False,
-        "save_debug_output": True,
-        "stim_channels": {
-            label: make_stim_channel_section(stim_params, label)
-            for label in stim_params
-        }
+        "save_debug_output": True
+    }
+
+    # Why oh why must everything be a special snowflake?
+    key = 'stim_electrode_pairs' if experiment == 'AmplitudeDetermination' else 'stim_channels'
+    esd[key] = {
+        label: make_stim_channel_section(stim_params, label)
+        for label in stim_params
     }
 
     return esd
@@ -264,6 +267,9 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
     :rtype: str
 
     """
+    if container is None and experiment != 'AmplitudeDetermination':
+        raise RuntimeError("container must not be None")
+
     subject = subject.split('_')[0]
 
     stim_dict = {
