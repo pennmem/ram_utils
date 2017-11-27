@@ -52,7 +52,10 @@ class TestEvents:
         assert len(events) > 0
 
         if sessions is None:
-            assert n_sessions == 2 # 2 sessions of FR and catFR
+            if experiment == 'FR1':
+                assert n_sessions == 2
+            elif experiment == 'catFR1':
+                assert n_sessions == 4
         else:
             assert n_sessions == 1
 
@@ -72,7 +75,7 @@ class TestEvents:
 
         combined_events = concatenate_events_across_experiments([fr_events,
                                                                  catfr_events])
-        assert combined_events.shape == (6053,)
+        assert combined_events.shape == (8363,)
 
         unique_sessions = np.unique(combined_events.session)
         assert [sess_num in unique_sessions for sess_num in [0, 1, 100, 101]]
@@ -230,7 +233,6 @@ class TestEvents:
     def test_preprocess_events(self, experiment, encoding_only, combine_events):
         return
 
-    @pytest.mark.skip(reason='rhino')
     @pytest.mark.parametrize("subject, parameters, experiment", [
         ("R1354E", FRParameters, "FR6"), # catFR and FR
         ("R1350D", FRParameters, "FR6"), # FR only
@@ -248,7 +250,7 @@ class TestEvents:
                                        parameters['empty_epoch_duration'],
                                        parameters['pre_event_buf'],
                                        parameters['post_event_buf'],
-                                       root='/Volumes/RHINO/')
+                                       root=datafile(''))
         assert len(old_events) == len(new_events)
 
         return
