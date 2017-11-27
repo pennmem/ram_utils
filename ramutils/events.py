@@ -1,7 +1,7 @@
 """
 
     A collection of utility functions for loading, cleaning, normalizing, and
-    combining events. There are also a smattering of other helpfer function for
+    combining events. There are also a smattering of other helper function for
     selecting specific types of events. In general, the following steps must be
     taken to go from raw (on-disk) events to events that can be analyzed:
 
@@ -871,9 +871,10 @@ def partition_events(events):
     pal_retrieval = events[(retrieval_mask & pal_mask)]
 
     # Only add partitions with actual events
-    final_partitions = []
-    for partition in [fr_encoding, fr_retrieval, pal_encoding, pal_retrieval]:
-        if len(partition) > 0:
-            final_partitions.append(partition)
-
+    final_partitions = {
+        'fr_encoding': fr_encoding,
+        'fr_retrieval': fr_retrieval,
+        'pal_encoding': pal_encoding,
+        'pal_retrieval': pal_retrieval
+    }
     return final_partitions

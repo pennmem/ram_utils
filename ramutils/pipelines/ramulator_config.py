@@ -105,13 +105,7 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
     # won't be necessary. Or, if we can remove bad events before passing to
     # compute powers, then we won't have to catch the events
     powers, task_events = compute_normalized_powers(events,
-                                                    kwargs['encoding_start_time'],
-                                                    kwargs['encoding_end_time'],
-                                                    kwargs['encoding_buf'],
-                                                    kwargs['freqs'],
-                                                    kwargs['log_powers'],
-                                                    kwargs['filt_order'],
-                                                    kwargs['width'])
+                                                    **kwargs)
     reduced_powers = reduce_powers(powers, used_pair_mask, len(kwargs['freqs']))
 
     sample_weights = get_sample_weights(task_events, **kwargs)
@@ -143,7 +137,8 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
                                             stim_params,
                                             paths,
                                             ec_pairs,
-                                            excluded_pairs)
+                                            excluded_pairs,
+                                            params=exp_params)
 
     if vispath is not None:
         config_path.visualize(filename=vispath)

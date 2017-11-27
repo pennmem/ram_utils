@@ -1,15 +1,11 @@
 """ Helper functions for computing powers from a set of EEG signals """
 
-import time
 import numpy as np
-
-from ptsa.data.readers import EEGReader
 from ptsa.data.filters import (
     MonopolarToBipolarMapper,
-    MorletWaveletFilterCpp,
-    MorletWaveletFilter,
-    ButterworthFilter
+    MorletWaveletFilterCpp
 )
+from ptsa.data.readers import EEGReader
 from scipy.stats import zscore
 
 try:
@@ -19,32 +15,8 @@ except ImportError:
 
 from ramutils.log import get_logger
 from ramutils.utils import timer
-from ramutils.events import partition_events, concatenate_events_for_single_experiment
 
 logger = get_logger()
-
-
-def compute_normalized_powers(events, start_time, end_time, buffer_time, freqs,
-                              log_powers, filt_order=4, width=5,
-                              bipolar_pairs=None):
-    """ Compute powers by session, encoding/retrieval, and FR vs. PAL """
-
-    event_partitions = partition_events(events)
-    power_partitions = []
-    cleaned_event_partitions = []
-    for event_subset in event_partitions:
-        # FIXME: start, end, buffer times all depend on the event subset
-        powers, cleaned_events = compute_powers(event_subset, start_time,
-                                                end_time, buffer_time, freqs,
-                                                log_powers, filt_order, width)
-        cleaned_event_partitions.append(cleaned_events)
-        power_partitions.append(powers)
-
-    cleaned_events = concatenate_events_for_single_experiment(
-        cleaned_event_partitions)
-    combined_powers = np.concatenate(power_partitions)
-
-    return combined_powers, cleaned_events
 
 
 def compute_single_session_powers(session, all_events, start_time, end_time,
