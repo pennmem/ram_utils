@@ -4,6 +4,7 @@ Ramulator.
 """
 
 from datetime import datetime
+import functools
 import os.path as osp
 
 from ramutils.cli import make_parser, ValidationError, configure_caching
@@ -23,10 +24,10 @@ parser.add_argument('--electrode-config-file', '-e', required=True, type=str,
                     help='path to Odin electrode config csv file')
 parser.add_argument('--anodes', nargs='+', help='stim anode labels')
 parser.add_argument('--cathodes', nargs='+', help='stim cathode labels')
-parser.add_argument('--min-amplitudes', nargs='+', help='minimum stim amplitudes')
-parser.add_argument('--max-amplitudes', nargs='+', help='maximum stim amplitudes')
-parser.add_argument('--target-amplitudes', '-a', nargs='+', help='target stim amplitudes')
-parser.add_argument('--pulse-frequencies', '-f', nargs='+', type=float,
+parser.add_argument('--min-amplitudes', nargs='+', type=float, help='minimum stim amplitudes')
+parser.add_argument('--max-amplitudes', nargs='+', type=float, help='maximum stim amplitudes')
+parser.add_argument('--target-amplitudes', '-a', type=float, nargs='+', help='target stim amplitudes')
+parser.add_argument('--pulse-frequencies', '-f', type=float, nargs='+',
                     help='stim pulse frequencies (one to use same value)')
 
 logger = get_logger()
@@ -60,7 +61,7 @@ def validate_stim_settings(args):
 
 def main(input_args=None):
     from ramutils.parameters import FilePaths, FRParameters
-    from ramutils.pipelines.ramulator_config import make_ramulator_config
+    from ramutils.pipelines.ramulator_config import make_stim_params, make_ramulator_config
 
     args = parser.parse_args(input_args)
     validate_stim_settings(args)
@@ -112,10 +113,21 @@ def main(input_args=None):
     else:
         raise RuntimeError("FIXME: support more than FR")
 
+    # Construct stim parameters
+    # FIXME: explicitly check given arguments to provide more helpful error messages when given malformed args
+    if args.min_amplitudes is not None:
+        make_stim_params = functools.partial(make_stim_params,
+                                             min_amplitudes=args.min_amplitudes,
+                                             max_amplitudes=args.max_amplitudes)
+    else:
+        make_stim_params = functools.partial(make_stim_params,
+                                             target_amplitudes=args.target_amplitudes)
+    stim_params = make_stim_params(args.subject, args.anodes, args.cathodes, root=paths.root)
+
     # Generate!
     with timer():
-        make_ramulator_config(args.subject, args.experiment, paths,
-                              args.anodes, args.cathodes, params, args.vispath)
+        make_ramulator_config(args.subject, args.experiment, paths, stim_params,
+                              params, args.vispath)
 
 
 if __name__ == "__main__":
@@ -127,18 +139,27 @@ if __name__ == "__main__":
     #     "--root", "~/mnt/rhino", "--dest", "scratch/ramutils2/demo", "--force-rerun"
     # ])
 
+    main([
+        "-s", "R1364C", "-x", "AmplitudeDetermination",
+        "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
+        "--anodes", "AMY7", "--cathodes", "AMY8",
+        "--min-amplitudes", "0.1", "--max-amplitudes", "1.0",
+        "--root", "~/mnt/rhino", "--dest", "scratch/ramutils2/demo", "--force-rerun"
+    ])
+
     # main([
-    #     "-s", "R1364C", "-x", "AmplitudeDetermination",
+    #     "-s", "R1364C", "-x", "PS4_FR5",
     #     "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
-    #     "--anodes", "AMY7", "--cathodes", "AMY8",
-    #     "--min-amplitudes", "0.1", "--max-amplitudes", "1.0",
+    #     "--anodes", "AMY7", "TOJ7", "--cathodes", "AMY8", "TOJ8",
+    #     "--min-amplitudes", "0.1", "0.1", "--max-amplitudes", "1.0", "0.5",
     #     "--root", "~/mnt/rhino", "--dest", "scratch/ramutils2/demo", "--force-rerun"
     # ])
 
-    main([
-        "-s", "R1364C", "-x", "PS4_FR5",
-        "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
-        "--anodes", "AMY7", "TOJ7", "--cathodes", "AMY8", "TOJ8",
-        "--min-amplitudes", "0.1", "0.1", "--max-amplitudes", "1.0", "0.5",
-        "--root", "~/mnt/rhino", "--dest", "scratch/ramutils2/demo", "--force-rerun"
-    ])
+    # main([
+    #     "-s", "R1364C", "-x", "PS4_FR6",
+    #     "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
+    #     "--anodes", "AMY7", "TOJ7", "--cathodes", "AMY8", "TOJ8",
+    #     "--target-amplitudes", "0.5", "0.75",
+    #     "--root", "~/mnt/rhino", "--dest", "scratch/ramutils2/demo", "--force-rerun"
+    # ])
+
