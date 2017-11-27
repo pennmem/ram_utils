@@ -50,8 +50,9 @@ class FilePaths(Schema):
 
 
 class ExperimentParameters(Schema):
-    """Common parameters used in an experiment. Default values apply to the FR
-    class of experiments.
+    """
+        Common parameters used in an experiment. Default values apply to the FR
+        class of experiments.
 
     """
     width = Int(5, desc='wavelet width')
@@ -67,19 +68,39 @@ class ExperimentParameters(Schema):
     n_perm = Int(200, desc='number of permutations to use for cross-validation')
     solver = String('liblinear', desc='algorithm to use in optimization process')
 
+    baseline_removal_start_time = Int(1000, desc="The amount of time to "
+                                                   "skip at the beginning of "
+                                                   "the sessions [ms]")
+    retrieval_time = Int(29000, desc="The amount of time within the recall "
+                                       "period to consider")
+    empty_epoch_duration = Int(500, desc="The length of desired empty "
+                                           "epochs [ms]")
+    pre_event_buf = Int(2000, desc="The time before each event to exclude ["
+                                    "ms]")
+    post_event_buf = Int(1000, desc="The time after each event to exclude ["
+                                     "ms]")
+    inter_response_time = Int(1000, desc="Duration between events required "
+                                           "for a recall event to have "
+                                           "occured after some sort of "
+                                           "cognitive process [ms]")
+
+
 
 class FRParameters(ExperimentParameters):
     """Free recall experiment parameters relevant for classification."""
-    start_time = Float(0., desc="encoding start time [s]")
-    end_time = Float(1.366, desc="encoding end time [s]")
-    buf = Float(1.365, desc="encoding buffer time [s]")
+    encoding_start_time = Float(0., desc="encoding start time [s]")
+    encoding_end_time = Float(1.366, desc="encoding end time [s]")
+    encoding_buf = Float(1.365, desc="encoding buffer time [s]")
 
     retrieval_start_time = Float(-0.525, desc="retrieval start time [s]")
     retrieval_end_time = Float(0, desc="retrieval end time [s]")
     retrieval_buf = Float(0.524, desc="retrieval buffer time [s]")
 
+    encoding_only = Bool(False, desc="use encoding-only classifier")
     encoding_multiplier = Float(2.5, desc="weighting factor for encoding "
                                           "samples")
+    combine_events = Bool(True, desc="combine record-only events for "
+                                     "classifier training")
 
 
 class PALParameters(FRParameters):
