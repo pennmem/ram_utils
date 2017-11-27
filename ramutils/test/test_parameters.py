@@ -17,7 +17,7 @@ class TestFilePaths:
         assert paths.root == kwargs['root']
 
         rjoin = functools.partial(os.path.join, paths.root)
-        assert paths['dest'] == rjoin(kwargs['dest'])
-        assert paths['electrode_config_file'] == rjoin(kwargs['electrode_config_file'])
-        assert paths['pairs'] == rjoin(kwargs['pairs'])
-        assert paths['excluded_pairs'] == rjoin(kwargs['excluded_pairs'])
+        assert paths.dest == rjoin(kwargs['dest'].lstrip('/'))
+        assert paths.electrode_config_file == rjoin(kwargs['electrode_config_file'].lstrip('/'))
+        assert paths.pairs == rjoin(kwargs['pairs'].lstrip('/'))
+        assert paths.excluded_pairs == rjoin(kwargs['excluded_pairs'].lstrip('/'))
