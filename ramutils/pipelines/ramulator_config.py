@@ -37,7 +37,7 @@ def make_stim_params(subject, anodes, cathodes, root='/'):
         cathode_idx = jacksheet[jacksheet.label == cathode].index[0]
         stim_params.append(
             StimParameters(
-                label='-'.join([anode, cathode]),
+                label='_'.join([anode, cathode]),
                 anode=anode_idx,
                 cathode=cathode_idx
             )
@@ -46,12 +46,9 @@ def make_stim_params(subject, anodes, cathodes, root='/'):
     return stim_params
 
 
-#FIXME: I don't like that make_ramulator_config has to know about the paths
-# object. I'd prefer the paths object and this function to be decoupled similar
-# to how this function no longer needs to know about the ExperimentParams object
 def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
-                          vispath=None, **kwargs):
-    """Generate configuration files for a Ramulator experiment.
+                          exp_params=None, vispath=None):
+    """ Generate configuration files for a Ramulator experiment
 
     Parameters
     ----------
@@ -64,51 +61,14 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
         List of stim anode contact labels
     cathodes : List[str]
         List of stim cathode contact labels
+    exp_params : ExperimentParameters
+        Parameters for the experiment.
     vispath : str
         Path to save task graph visualization to if given.
-
-    Keyword Arguments
-    -----------------
-    start_time: float
-        Start of period in the EEG to consider for each event
-    end_time: float
-        End of the period to consider
-    buffer_time: float
-        Buffer time
-    freqs: array_like
-        List of frequencies to use when applying Wavelet Filter
-    log_powers: bool
-        Whether to take the logarithm of the powers
-    filt_order: Int
-        Filter order to use in Butterworth filter
-    width: Int
-        Wavelet width to use in Wavelet Filter
-    penalty_param: Float
-        Penalty parameter to use
-    penalty_type: str
-        Type of penalty to use for regularized model (ex: L2)
-    solver: str
-        Solver to use when fitting the model (ex: liblinear)
-    encoding_only: bool
-        Indicator for if encoding-only classifier should be used, i.e. do
-        not train on retrieval events
-    encoding_multiplier: float
-        Scaling factor for encoding events (required if using FR sample
-        weighting schme)
-    combine_events: bool
-        For PAL experiments, indicates if record-only sessions should be
-        combined, or if only PAL1 sessions should be used for training
-    pal_mutiplier: float
-        Scaling factor for PAL events (required if using PAL weighting
-        scheme)
-    scheme: str
-        Sample weighting scheme to use (options: EQUAL, PAL, FR). See
-        get_sample_weights for details
 
     Returns
     -------
     The path to the generated configuration zip file.
-
     """
     stim_params = make_stim_params(subject, anodes, cathodes, paths.root)
 
@@ -117,6 +77,19 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
     used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
     final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
 
+    # Special case handling of Amplitude determination
+    if experiment == "AmplitudeDetermination":
+        container = None
+        config_path = generate_ramulator_config(subject,
+                                                experiment,
+                                                container,
+                                                stim_params,
+                                                paths,
+                                                ec_pairs,
+                                                excluded_pairs)
+        return config_path.compute()
+
+    kwargs = exp_params.to_dict()
     events = preprocess_events(subject,
                                experiment,
                                kwargs['baseline_removal_start_time'],
