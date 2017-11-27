@@ -151,13 +151,13 @@ if __name__ == "__main__":
     #     "--root", root, "--dest", "scratch/ramutils2/demo", "--force-rerun"
     # ])
 
-    main([
-        "-s", "R1365N", "-x", "PAL5",
-        "-e", "scratch/system3_configs/ODIN_configs/R1365N/R1365N_16NOV2017L0M0STIM.csv",
-        "--anodes", "LAD12", "--cathodes", "LAD13",
-        "--target-amplitudes", "0.5",
-        "--root", root, "--dest", "scratch/ramutils2/demo", "--force-rerun"
-    ])
+    # main([
+    #     "-s", "R1365N", "-x", "PAL5",
+    #     "-e", "scratch/system3_configs/ODIN_configs/R1365N/R1365N_16NOV2017L0M0STIM.csv",
+    #     "--anodes", "LAD12", "--cathodes", "LAD13",
+    #     "--target-amplitudes", "0.5",
+    #     "--root", root, "--dest", "scratch/ramutils2/demo", "--force-rerun"
+    # ])
 
     # main([
     #     "-s", "R1364C", "-x", "PS4_FR5",
@@ -167,11 +167,11 @@ if __name__ == "__main__":
     #     "--root", root, "--dest", "scratch/ramutils2/demo", "--force-rerun"
     # ])
 
-    # main([
-    #     "-s", "R1364C", "-x", "FR6",
-    #     "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
-    #     "--anodes", "AMY7", "TOJ7", "--cathodes", "AMY8", "TOJ8",
-    #     "--target-amplitudes", "0.5", "0.75",
-    #     "--root", root, "--dest", "scratch/ramutils2/demo", "--force-rerun"
-    # ])
+    main([
+        "-s", "R1364C", "-x", "FR6",
+        "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
+        "--anodes", "AMY7", "TOJ7", "--cathodes", "AMY8", "TOJ8",
+        "--target-amplitudes", "0.5", "0.75",
+        "--root", root, "--dest", "scratch/ramutils2/demo", "--force-rerun"
+    ])
 
