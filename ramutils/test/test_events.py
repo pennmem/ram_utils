@@ -3,8 +3,10 @@ import random
 import pytest
 
 from pkg_resources import resource_filename
+from sklearn.externals import joblib
 
 from ramutils.events import *
+from ramutils.parameters import FRParameters, PALParameters
 
 datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
 
@@ -17,15 +19,15 @@ class TestEvents:
         cls.n_word, cls.n_rec_word, cls.n_rec_base = (
             [random.randint(1, 10) for _ in range(3)])
 
-        data = [(0, -1, 'WORD', 1000 + t, 0, 0) for t in range(cls.n_word)]
-        data += [(0, 0, 'REC_WORD', 1000 + t + cls.n_word, 0, -1) for t in
-                 range(
-            cls.n_rec_word)]
-        data += [(0, 0, 'REC_BASE', 1000 + t + cls.n_word + cls.n_rec_word, 0,
-                 0) for t in
-                 range(cls.n_rec_base)]
+        data = [('FR1', 0, -1, 'WORD', 1000 + t, 0, 0) for t in range(
+            cls.n_word)]
+        data += [('FR1', 0, 0, 'REC_WORD', 1000 + t + cls.n_word, 0, -1) for
+                 t in range(cls.n_rec_word)]
+        data += [('FR1', 0, 0, 'REC_BASE', 1000 + t + cls.n_word +
+                  cls.n_rec_word, 0, 0) for t in range(cls.n_rec_base)]
 
         dtype = [
+            ('experiment', '|S256'),
             ('session', '<i8'),
             ('list',  '<i8'),
             ('type', '|S256'),
@@ -50,7 +52,10 @@ class TestEvents:
         assert len(events) > 0
 
         if sessions is None:
-            assert n_sessions == 2 # 2 sessions of FR and catFR
+            if experiment == 'FR1':
+                assert n_sessions == 2
+            elif experiment == 'catFR1':
+                assert n_sessions == 4
         else:
             assert n_sessions == 1
 
@@ -70,7 +75,7 @@ class TestEvents:
 
         combined_events = concatenate_events_across_experiments([fr_events,
                                                                  catfr_events])
-        assert combined_events.shape == (6053,)
+        assert combined_events.shape == (8363,)
 
         unique_sessions = np.unique(combined_events.session)
         assert [sess_num in unique_sessions for sess_num in [0, 1, 100, 101]]
@@ -117,6 +122,18 @@ class TestEvents:
         return
 
     def test_remove_incomplete_lists(self):
+        return
+
+    def test_extract_sample_rate(self):
+        return
+
+    def test_update_pal_retrieval_events(self):
+        return
+
+    def test_get_pal_retrieval_events_mask(self):
+        return
+
+    def test_get_fr_retrieval_events_mask(self):
         return
 
     def test_remove_negative_offsets(self):
@@ -216,6 +233,25 @@ class TestEvents:
     def test_preprocess_events(self, experiment, encoding_only, combine_events):
         return
 
-    def test_regression_event_processing(self):
+    @pytest.mark.parametrize("subject, parameters, experiment", [
+        ("R1354E", FRParameters, "FR6"), # catFR and FR
+        ("R1350D", FRParameters, "FR6"), # FR only
+        ("R1348J", FRParameters, "FR6"), # catFR only
+        ("R1353N", PALParameters, "PAL6") # PAL only
+    ])
+    def test_regression_event_processing(self, subject, parameters, experiment):
+        parameters = parameters().to_dict()
+
+        old_events = joblib.load(datafile('{}_events.pkl'.format(subject)))
+        new_events = preprocess_events(subject,
+                                       experiment,
+                                       parameters['baseline_removal_start_time'],
+                                       parameters['retrieval_time'],
+                                       parameters['empty_epoch_duration'],
+                                       parameters['pre_event_buf'],
+                                       parameters['post_event_buf'],
+                                       root=datafile(''))
+        assert len(old_events) == len(new_events)
+
         return
 

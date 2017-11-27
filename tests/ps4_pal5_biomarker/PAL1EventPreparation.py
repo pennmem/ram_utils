@@ -164,99 +164,18 @@ class PAL1EventPreparation(RamTask):
         incorrect_has_response_mask = (rec_evs.RT != -999) & (rec_evs.correct == 0)
         incorrect_no_response_mask = rec_evs.RT == -999
 
-        incorrect_has_response = rec_evs[incorrect_has_response_mask]
-        incorrect_no_response = rec_evs[incorrect_no_response_mask]
-        correct_mask = rec_evs.correct == 1
+        correct_mask = (rec_evs.correct == 1)
 
-        # test
-        tot_events = sum(incorrect_no_response_mask)+sum(incorrect_has_response_mask) + sum(rec_evs.correct==1)
-        np.testing.assert_equal(tot_events,len(rec_evs))
-
-
-
-        # correct_response_times = rec_evs[incorrect_has_response_mask | correct_mask].RT
-
-        correct_response_times = rec_evs[ correct_mask].RT # todo fixed based on Jim's suggestion
-
-        # response_time_rand_indices = np.random.randint(0, len(correct_response_times), sum(incorrect_no_response_mask))
-
-        # rec_evs.RT[incorrect_no_response_mask] = correct_response_times[response_time_rand_indices]
-        rec_evs.RT[incorrect_no_response_mask] = 2500 # todo remove from production code
-
+        correct_response_times = rec_evs[correct_mask].RT
+        response_time_rand_indices = np.random.randint(0,
+                                                       len(correct_response_times),
+                                                       sum(incorrect_no_response_mask))
+        rec_evs.RT[incorrect_no_response_mask] = correct_response_times[response_time_rand_indices]
         rec_evs.type = 'REC_EVENT'
-
-        # rec_evs.eegoffset = rec_evs.eegoffset + rec_evs.RT
-
-        rec_evs.eegoffset = rec_evs.eegoffset + (rec_evs.RT*self.samplerate/1000.0).astype(np.int64)
-
-
+        rec_evs.eegoffset = rec_evs.eegoffset + (
+            rec_evs.RT * (self.samplerate/1000.0)).astype(np.int64)
 
         return rec_evs
-
-
-        #         new_rows.append(new_row)
-        #
-        # rec_evs
-
-        # starts_shift = ends[:-1]
-        # ends_shift = starts[1:]
-        #
-        # counter_outside_voc_evs = 0
-        # for start, end in zip(starts_shift, ends_shift):
-        #     outside_voc_evs = rec_evs[(rec_evs.eegoffset > start) & (rec_evs.eegoffset < end)]
-        #
-        #     num_outside_voc_evs = len(outside_voc_evs)
-        #     counter_outside_voc_evs += num_outside_voc_evs
-        # print 'counter_outside_voc_evs=', counter_outside_voc_evs
-
-    # def process_trivial_session_rec_events(self, evs):
-    #     """
-    #
-    #     :param evs:
-    #     :return:
-    #     """
-    #
-    #     ends = evs[evs.type == 'REC_END'].eegoffset
-    #     starts = evs[evs.type == 'REC_START'].eegoffset
-    #     rec_evs = evs[(evs.type == 'REC_EVENT')]
-    #
-    #     first_response_time = []
-    #     counter = 0
-    #     for start, end in zip(starts, ends):
-    #
-    #         mask = (rec_evs.eegoffset >= start) & (rec_evs.eegoffset <= end)
-    #         voc_evs = rec_evs[mask]
-    #
-    #         # print 'number of rec_events so far=', len(rec_evs[rec_evs.eegoffset <= end])
-    #
-    #         num_voc_events = len(voc_evs)
-    #         # print 'num_voc_events=', num_voc_events
-    #         # if num_voc_events == 1:
-    #         #     first_response_time.append(voc_evs[0].eegoffset - start)
-    #
-    #         if num_voc_events > 1:
-    #             # getting rid of all but first rec event
-    #
-    #             rec_evs.keep_event[np.nonzero(mask)[0][1:]] = 0
-    #
-    #             # print 'GOT MULTI REC'
-    #             # print voc_evs
-    #
-    #         if num_voc_events != 0:
-    #             first_response_time.append(voc_evs[0].eegoffset - start)
-    #
-    #         # if num_voc_events == 0:
-    #         #     print 'NO REC_EVENT'
-    #
-    #         counter += num_voc_events
-    #         # print 'counter=', counter
-    #         # print
-    #
-    #     # print 'counter=', counter
-    #
-    #     rec_evs = rec_evs[rec_evs.keep_event == 1]
-    #
-    #     return rec_evs
 
 
     def get_sample_rate(self,evs):
