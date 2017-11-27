@@ -15,7 +15,7 @@ from ramutils.utils import timer
 # Supported experiments
 # FIXME: ensure PAL support
 experiments = ['AmplitudeDetermination'] + EXPERIMENTS['ps'] + \
-              [exp for exp in EXPERIMENTS['closed_loop'] if 'PAL' not in exp]
+              [exp for exp in EXPERIMENTS['closed_loop']]
 
 parser = make_parser("Generate experiment configs for Ramulator", experiments)
 parser.add_argument('--localization', '-l', default=0, type=int, help='localization number')
@@ -60,7 +60,7 @@ def validate_stim_settings(args):
 
 
 def main(input_args=None):
-    from ramutils.parameters import FilePaths, FRParameters
+    from ramutils.parameters import FilePaths, FRParameters, PALParameters
     from ramutils.pipelines.ramulator_config import make_stim_params, make_ramulator_config
 
     args = parser.parse_args(input_args)
@@ -110,8 +110,10 @@ def main(input_args=None):
         params = None
     elif "FR" in args.experiment:
         params = FRParameters()
+    elif "PAL" in args.experiment:
+        params = PALParameters()
     else:
-        raise RuntimeError("FIXME: support more than FR")
+        raise RuntimeError("Somehow we got an unsupported experiment")
 
     # Construct stim parameters
     # FIXME: explicitly check given arguments to provide more helpful error messages when given malformed args
@@ -131,20 +133,30 @@ def main(input_args=None):
 
 
 if __name__ == "__main__":
+    root = "~/mnt/rhino"
+
     # main([
     #     "-s", "R1364C", "-x", "CatFR5",
     #     "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
     #     "--anodes", "AMY7", "--cathodes", "AMY8",
     #     "--target-amplitudes", "0.5",
-    #     "--root", "~/mnt/rhino", "--dest", "scratch/ramutils2/demo", "--force-rerun"
+    #     "--root", root, "--dest", "scratch/ramutils2/demo", "--force-rerun"
+    # ])
+
+    # main([
+    #     "-s", "R1364C", "-x", "AmplitudeDetermination",
+    #     "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
+    #     "--anodes", "AMY7", "--cathodes", "AMY8",
+    #     "--min-amplitudes", "0.1", "--max-amplitudes", "1.0",
+    #     "--root", root, "--dest", "scratch/ramutils2/demo", "--force-rerun"
     # ])
 
     main([
-        "-s", "R1364C", "-x", "AmplitudeDetermination",
-        "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
-        "--anodes", "AMY7", "--cathodes", "AMY8",
-        "--min-amplitudes", "0.1", "--max-amplitudes", "1.0",
-        "--root", "~/mnt/rhino", "--dest", "scratch/ramutils2/demo", "--force-rerun"
+        "-s", "R1365N", "-x", "PAL5",
+        "-e", "scratch/system3_configs/ODIN_configs/R1365N/R1365N_16NOV2017L0M0STIM.csv",
+        "--anodes", "LAD12", "--cathodes", "LAD13",
+        "--target-amplitudes", "0.5",
+        "--root", root, "--dest", "scratch/ramutils2/demo", "--force-rerun"
     ])
 
     # main([
@@ -152,14 +164,14 @@ if __name__ == "__main__":
     #     "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
     #     "--anodes", "AMY7", "TOJ7", "--cathodes", "AMY8", "TOJ8",
     #     "--min-amplitudes", "0.1", "0.1", "--max-amplitudes", "1.0", "0.5",
-    #     "--root", "~/mnt/rhino", "--dest", "scratch/ramutils2/demo", "--force-rerun"
+    #     "--root", root, "--dest", "scratch/ramutils2/demo", "--force-rerun"
     # ])
 
     # main([
-    #     "-s", "R1364C", "-x", "PS4_FR6",
+    #     "-s", "R1364C", "-x", "FR6",
     #     "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
     #     "--anodes", "AMY7", "TOJ7", "--cathodes", "AMY8", "TOJ8",
     #     "--target-amplitudes", "0.5", "0.75",
-    #     "--root", "~/mnt/rhino", "--dest", "scratch/ramutils2/demo", "--force-rerun"
+    #     "--root", root, "--dest", "scratch/ramutils2/demo", "--force-rerun"
     # ])
 
