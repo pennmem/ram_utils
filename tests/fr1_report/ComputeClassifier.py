@@ -4,7 +4,6 @@ import warnings
 import hashlib
 
 import numpy as np
-from scipy.stats.mstats import zscore
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.externals import joblib
@@ -14,7 +13,8 @@ from ptsa.data.readers.IndexReader import JsonIndexReader
 
 from ReportTasks.RamTaskMethods import run_lolo_xval,run_loso_xval,permuted_loso_AUCs,permuted_lolo_AUCs,ModelOutput
 from ReportUtils import ReportRamTask
-from ramutils.classifier.utils import normalize_powers_by_session, get_sample_weights
+from ramutils.classifier.weighting import get_sample_weights
+from ramutils.eeg.powers import normalize_powers_by_session
 
 
 class ComputeClassifier(ReportRamTask):
