@@ -4,14 +4,86 @@ import numpy as np
 from random import shuffle
 from sklearn.metrics import roc_auc_score
 
-from ramutils.classifier.utils import get_sample_weights
+from ramutils.classifier import ModelOutput
+from ramutils.classifier.weighting import get_sample_weights
+from ramutils.log import get_logger
+
+try:
+    from typing import Dict, Union, Tuple
+except ImportError:
+    pass
+
+logger = get_logger()
 
 __all__ = [
+    'perform_cross_validation',
     'permuted_lolo_AUCs',
     'run_lolo_xval',
     'permuted_loso_AUCs',
     'run_loso_xval'
 ]
+
+
+def perform_cross_validation(classifier, pow_mat, events, n_permutations,
+                             **kwargs):
+    """Perform LOSO or LOLO cross validation on a classifier.
+
+    Parameters
+    ----------
+    classifier : sklearn model object
+    pow_mat : np.ndarray
+    events : np.recarray
+    n_permutations: int
+    kwargs: dict
+        Extra keyword arguments that are passed to get_sample_weights. See
+        that function for more details
+
+    Returns
+    -------
+    xval : dict
+        Results of cross validation.
+
+    """
+    recalls = events.recalled
+
+    # Stores cross validation output. Keys are sessions or 'all' for all session
+    # cross validation.
+    xval = {}  # type: Dict[Union[str, int], ModelOutput]
+    sessions = np.unique(events.session)
+
+    # Run leave-one-session-out cross validation when we have > 1 session
+    if len(sessions) > 1:
+        perm_AUCs = permuted_loso_AUCs(classifier, pow_mat, events,
+                                       n_permutations, **kwargs)
+        probs, xval = run_loso_xval(classifier, pow_mat, events,
+                                    recalls, xval, **kwargs)
+
+        # Store model output statistics
+        output = ModelOutput(true_labels=recalls, probs=probs)
+        output.compute_metrics()
+        xval['all'] = output
+
+    # ... otherwise run leave-one-list-out cross validation
+    else:
+        logger.info("Performing LOLO cross validation")
+        session = sessions[0]
+        perm_AUCs = permuted_lolo_AUCs(classifier, pow_mat, events,
+                                       n_permutations, **kwargs)
+        probs = run_lolo_xval(classifier, pow_mat, events, recalls, **kwargs)
+
+        # Store model output statistics
+        output = ModelOutput(true_labels=recalls, probs=probs)
+        output.compute_metrics()
+        xval['all'] = xval[session] = output
+
+    pvalue = np.count_nonzero((perm_AUCs >= xval['all'].auc)) / float(len(
+        perm_AUCs))
+    logger.info("Permutation test p-value = %f", pvalue)
+
+    recall_prob = classifier.predict_proba(pow_mat)[:, 1]
+    insample_auc = roc_auc_score(recalls, recall_prob)
+    logger.info("in-sample AUC = %f", insample_auc)
+    return xval
 
 
 def permuted_lolo_AUCs(classifier, powers, events, n_permutations, **kwargs):
@@ -93,7 +165,7 @@ def run_lolo_xval(classifier, powers, events, recalls, **kwargs):
 
 
 def permuted_loso_AUCs(classifier, powers, events, n_permutations, **kwargs):
-    """ Perform leave one session out cross validation
+    """ Perform permuted leave one session out cross validation
 
     Parameters
     ----------
@@ -118,24 +190,28 @@ def permuted_loso_AUCs(classifier, powers, events, n_permutations, **kwargs):
     recalls = events.recalled
     permuted_recalls = np.array(recalls)
     AUCs = np.empty(shape=n_permutations, dtype=np.float)
+    sessions = np.unique(events.session)
+    xval = {}
 
     for i in range(n_permutations):
         try:
-            for sess in np.unique(events.session):
-                sel = (events.session == sess)
-                sess_permuted_recalls = permuted_recalls[sel]
-                shuffle(sess_permuted_recalls)
-                permuted_recalls[sel] = sess_permuted_recalls
+            # Shuffle recall outcomes within session
+            for session in sessions:
+                in_session_mask = (events.session == session)
+                session_permuted_recalls = permuted_recalls[in_session_mask]
+                shuffle(session_permuted_recalls)
+                permuted_recalls[in_session_mask] = session_permuted_recalls
 
-            probs = run_loso_xval(classifier, powers, events, recalls, **kwargs)
-            AUCs[i] = roc_auc_score(recalls, probs)
+            probs, _ = run_loso_xval(classifier, powers, events,
+                                     permuted_recalls, xval, **kwargs)
+            AUCs[i] = roc_auc_score(permuted_recalls, probs)
         except ValueError:
             AUCs[i] = np.nan
 
     return AUCs
 
 
-def run_loso_xval(classifier, powers, events, recalls, **kwargs):
+def run_loso_xval(classifier, powers, events, recalls, xval, **kwargs):
     """Perform single iteration of leave-one-session-out cross validation
 
     Parameters
@@ -147,6 +223,8 @@ def run_loso_xval(classifier, powers, events, recalls, **kwargs):
     events : np.recarray
     recalls: array_like
         List of recall/not-recalled boolean values for each event
+    xval: dict_like
+        Object for storing results of cross validation
     kwargs: dict
         Optional keyword arguments. These are passed to get_sample_weights.
         See that function for more details.
@@ -172,9 +250,17 @@ def run_loso_xval(classifier, powers, events, recalls, **kwargs):
 
         # testing data
         outsample_mask = ~insample_mask
+        outsample_recalls = recalls[outsample_mask]
         outsample_pow_mat = powers[outsample_mask]
 
         outsample_probs = classifier.predict_proba(outsample_pow_mat)[:, 1]
         probs[outsample_mask] = outsample_probs
 
-    return probs
+        output = ModelOutput(true_labels=outsample_recalls,
+                             probs=outsample_probs)
+        output.compute_metrics()
+        xval[sess] = output
+
+    return probs, xval
+
+
