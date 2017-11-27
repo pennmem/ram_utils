@@ -9,9 +9,16 @@ __all__ = [
 
 
 @task()
-def preprocess_events(subject, experiment, combine_events=True,
-                      encoding_only=False, root='/'):
-    processed_events = preprocess_events_core(subject, experiment,
+def preprocess_events(subject, experiment, start_time, end_time, duration,
+                      pre, post, combine_events=True, encoding_only=False,
+                      root='/'):
+    processed_events = preprocess_events_core(subject,
+                                              experiment,
+                                              start_time,
+                                              end_time,
+                                              duration,
+                                              pre,
+                                              post,
                                               combine_events=combine_events,
                                               encoding_only=encoding_only,
                                               root=root)

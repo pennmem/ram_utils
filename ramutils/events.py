@@ -15,13 +15,15 @@
 import os
 import numpy as np
 
+from itertools import groupby
 from numpy.lib.recfunctions import rename_fields
 
-from ptsa.data.readers import BaseEventReader, JsonIndexReader
+from ptsa.data.readers import BaseEventReader, JsonIndexReader, EEGReader
 from ramutils.utils import extract_subject_montage
 
 
-def preprocess_events(subject, experiment, combine_events=True,
+def preprocess_events(subject, experiment, start_time,
+                      end_time, duration, pre, post, combine_events=True,
                       encoding_only=False, root='/'):
     """
         High-level pre-processing function for combining/cleaning record only
@@ -33,6 +35,11 @@ def preprocess_events(subject, experiment, combine_events=True,
         Subject ID.
     experiment: str
         Experiment that events are being combined for
+    start_time: int
+    end_time: int
+    duration: int
+    pre: int
+    post: int
     combine_events: bool
         Indicates if all record-only sessions should be combined for
         classifier training.
@@ -46,6 +53,12 @@ def preprocess_events(subject, experiment, combine_events=True,
     -------
     np.recarray
         Full set of cleaned task events
+
+    Notes
+    -----
+    See insert_baseline_events for details on start_time, end_time, duration,
+    pre, and post parameters
+
     """
     if ("FR" not in experiment) and ("PAL" not in experiment):
         raise RuntimeError("Only PAL, FR, and catFR experiments are currently"
@@ -57,15 +70,24 @@ def preprocess_events(subject, experiment, combine_events=True,
         pal_events = normalize_pal_events(pal_events)
 
     if ("FR" in experiment) or combine_events:
-        # How to handle the case where no FR sessions are present
         fr_events = load_events(subject, 'FR1', rootdir=root)
-        fr_events = clean_events("FR1", fr_events, start_time=1000,
-                                 end_time=29000)
+        fr_events = clean_events("FR1",
+                                 fr_events,
+                                 start_time=start_time,
+                                 end_time=end_time,
+                                 duration=duration,
+                                 pre=pre,
+                                 post=post)
         fr_events = normalize_fr_events(fr_events)
 
         catfr_events = load_events(subject, 'catFR1', rootdir=root)
-        catfr_events = clean_events("catFR1", catfr_events, start_time=1000,
-                                    end_time=29000)
+        catfr_events = clean_events("catFR1",
+                                    catfr_events,
+                                    start_time=start_time,
+                                    end_time=end_time,
+                                    pre=pre,
+                                    post=post,
+                                    duration=duration)
         catfr_events = normalize_fr_events(catfr_events)
 
         # Free recall events are always combined
@@ -135,12 +157,16 @@ def load_events(subject, experiment, sessions=None, rootdir='/'):
         empty_recarray = initialize_empty_event_reccarray()
         return empty_recarray
 
-    events = np.concatenate([BaseEventReader(filename=f).read() for f in
-                             event_files]).view(np.recarray)
+    # TODO: Make this less ugly to look at
+    events = np.concatenate([
+        BaseEventReader(filename=f, eliminate_events_with_no_eeg=True).read()
+        for f in event_files]).view(np.recarray)
+
     return events
 
 
-def clean_events(experiment, events, start_time=None, end_time=None):
+def clean_events(experiment, events, start_time=None, end_time=None,
+                 duration=None, pre=None, post=None):
     """
         Peform basic cleaning operations on events such as removing
         incomplete sessions, negative offset events, and incomplete lists.
@@ -152,6 +178,9 @@ def clean_events(experiment, events, start_time=None, end_time=None):
     events: np.recarray of events
     start_time:
     end_time:
+    duration:
+    pre:
+    post:
 
     Returns
     -------
@@ -171,11 +200,18 @@ def clean_events(experiment, events, start_time=None, end_time=None):
     if "FR" in experiment:
         events = insert_baseline_retrieval_events(events,
                                                   start_time,
-                                                  end_time)
+                                                  end_time,
+                                                  duration,
+                                                  pre,
+                                                  post)
 
         events = remove_intrusions(events)
+        events = update_recall_outcome_for_retrieval_events(events)
 
-    events = update_recall_outcome_for_retrieval_events(events)
+    if "PAL" in experiment:
+        events = subset_pal_events(events)
+        events = update_pal_retrieval_events(events)
+        events = remove_nonresponses(events)
 
     return events
 
@@ -220,21 +256,65 @@ def remove_negative_offsets(events):
 
 
 def remove_incomplete_lists(events):
-    """ Remove incomplete lists for every session in the given events """
+    """
+        Remove incomplete lists for every session in the given events. Note,
+        there are two ways that this is done in the reporting code, so it is an
+        outstanding item to determine which method is better
+
+    """
+    # TODO: This needs to be cleaned up and tested
     sessions = np.unique(events.session)
     final_event_list = []
     for session in sessions:
         sess_events = events[(events.session == session)]
 
-        try:
-            last_list = sess_events[sess_events.type == 'REC_END'][-1]['list']
-            final_event_list.append(sess_events[sess_events.list <= last_list])
-        except IndexError:
-            final_event_list.append(sess_events)
+        # partition events into math and task
+        math_mask = np.in1d(sess_events.type, ['START', 'STOP', 'PROB'])
+        task_events = sess_events[~math_mask]
+        math_events = sess_events[math_mask]
+        final_sess_events = task_events
+        final_sess_events.sort(order=['session','list','mstime'])
+
+        # Remove all task events for lists that don't have a "REC_END" event
+        events_by_list = (np.array([l for l in list_group]) for listno,
+                                                                list_group in
+                          groupby(final_sess_events, lambda x: x.list))
+        list_has_end = [any([l['type'] == 'REC_END' for l in list_group]) or
+                        listno == -999 for listno, list_group in groupby(
+            final_sess_events, lambda x:x.list)]
+        final_sess_events = np.concatenate([e for (e, a) in zip(
+            events_by_list, list_has_end) if a])
+
+        # Re-combine math and task events
+        final_sess_events = np.concatenate([final_sess_events,
+                                            math_events]).view(np.recarray)
+        final_sess_events.sort(order=['session', 'list', 'mstime'])
+        final_event_list.append(final_sess_events)
+
+        # METHOD #2 (perhaps less accurate?)
+        # try:
+        #     last_list = sess_events[sess_events.type == 'REC_END'][-1]['list']
+        #     final_event_list.append(sess_events[sess_events.list <= last_list])
+        # except IndexError:
+        #     final_event_list.append(sess_events)
 
     final_events = concatenate_events_for_single_experiment(final_event_list)
 
     return final_events
+
+
+def remove_nonresponses(events):
+    """ Selects only events that were listed as recalled or not recalled """
+    events = events[(events.correct == 0) | (events.correct == 1)]
+    return events
+
+
+def subset_pal_events(events):
+    """ Only a subset of event types are needed for PAL experiments """
+    events = events[(events.type == 'STUDY_PAIR') |
+                    (events.type == 'TEST_PROBE') |
+                    (events.type == 'PROBE_START')]
+    return events
 
 
 def update_recall_outcome_for_retrieval_events(events):
@@ -259,6 +339,42 @@ def update_recall_outcome_for_retrieval_events(events):
     events[events.type == 'REC_WORD'].recalled = 1
     events[events.type == 'REC_BASE'].recalled = 0
     return events
+
+
+def update_pal_retrieval_events(events):
+    """
+        Create surrogate responses for retrieval period based on PS4/PAL5
+        design doc. Surrogate responses are created by identifying trials without
+        any responses. For these trials, a new response time is created based on
+        a random draw from the set of response times from actual responses
+    """
+
+    # Identify the sample rate
+    samplerate = 1000 #extract_sample_rate(events)
+
+    # Separate retrieval and non-retrieval events
+    retrieval_mask = get_pal_retrieval_events_mask(events)
+    retrieval_events = events[retrieval_mask]
+    nonretrieval_events = events[~retrieval_mask]
+
+    incorrect_no_response_mask = (retrieval_events.RT == -999)
+    correct_mask = (retrieval_events.correct == 1)
+
+    correct_response_times = retrieval_events[correct_mask].RT
+    response_time_rand_indices = np.random.randint(0,
+                                                   len(correct_response_times),
+                                                   sum(incorrect_no_response_mask))
+    retrieval_events.RT[incorrect_no_response_mask] = correct_response_times[
+        response_time_rand_indices]
+    retrieval_events.type = 'REC_EVENT'
+    retrieval_events.eegoffset = retrieval_events.eegoffset + (
+        retrieval_events.RT * (samplerate/1000.0)).astype(np.int64)
+
+    # Staple everything back together
+    cleaned_events = concatenate_events_for_single_experiment([
+        retrieval_events, nonretrieval_events])
+
+    return cleaned_events
 
 
 def combine_retrieval_events(events):
@@ -330,7 +446,8 @@ def initialize_empty_event_reccarray():
     return empty_recarray
 
 
-def insert_baseline_retrieval_events(events, start_time, end_time):
+def insert_baseline_retrieval_events(events, start_time, end_time, duration,
+                                     pre, post):
     """
         Match recall events to matching baseline periods of failure to recall.
         This is required for all free recall events, but is not necessary for
@@ -348,6 +465,17 @@ def insert_baseline_retrieval_events(events, start_time, end_time):
         The amount of time to skip at the beginning of the session (ms)
     end_time : int
         The amount of time within the recall period to consider (ms)
+    duration: int
+        The length of desired empty epochs
+    pre: int
+        The time before each event to exclude
+    post: int
+        The time after each event to exclude
+
+    Returns
+    -------
+    np.reccarray
+        Events with REC_BASE event types inserted
 
     """
 
@@ -380,16 +508,15 @@ def insert_baseline_retrieval_events(events, start_time, end_time):
             voc_events.list == lst).any() else []
                  for lst in rec_lists]
 
-        # FIXME: Parameterize these values rather than hard-coding them
         epochs = find_free_time_periods(times,
-                                        500,
-                                        2000,
-                                        1000,
+                                        duration,
+                                        pre,
+                                        post,
                                         start=start_times,
                                         end=end_times)
 
         # FIXME: Wow... could this be any more confusing? Pull out into a
-        # separate function
+        # separate function. Times relative to recall start
         rel_times = [(t - i)[(t - i > start_time) & (t - i < end_time)] for
                      (t, i) in
                      zip([rec_events[rec_events.list == lst].mstime for lst in
@@ -402,6 +529,7 @@ def insert_baseline_retrieval_events(events, start_time, end_time):
             is_match = np.empty(epochs.shape, dtype=np.bool)
             is_match[...] = False
             for t in rec_times_list:
+                # TODO: possibly parametrize this
                 is_match_tmp = np.abs((rel_epochs - t)) < 3000
                 is_match_tmp[i, ...] = False
                 good_locs = np.where(is_match_tmp & (~full_match_accum))
@@ -557,7 +685,7 @@ def remove_intrusions(events):
 
     """
     encoding_events_mask = get_encoding_mask(events)
-    retrieval_event_mask = get_retrieval_events_mask(events)
+    retrieval_event_mask = get_fr_retrieval_events_mask(events)
     baseline_retrieval_event_mask = get_baseline_retrieval_mask(events)
 
     mask = (encoding_events_mask |
@@ -591,6 +719,14 @@ def select_word_events(events, encoding_only=True):
     events = filtered_events.view(np.recarray)
 
     return events
+
+
+def extract_sample_rate(events):
+    """ Extract the samplerate used for the given set of events"""
+    eeg_reader = EEGReader(events=events, start_time=0.0, end_time=1.0)
+    eeg = eeg_reader.read()
+    samplerate = float(eeg['samplerate'])
+    return samplerate
 
 
 def get_time_between_events(events):
@@ -648,28 +784,49 @@ def get_baseline_retrieval_mask(events):
 
 
 def select_retrieval_events(events):
-    """ Select retrieval events """
-    retrieval_events_mask = get_retrieval_events_mask(events)
-    retrieval_events = events[retrieval_events_mask]
+    """
+        Select retrieval events. Uses the experiment field in the events to
+        determine how selection should be done since selection differes for PAL
+        and FR/catFR
+
+    Parameters
+    ----------
+    events: np.recarray
+        Events to mask
+
+    """
+    experiments = np.unique(events.experiment)
+    if len(experiments) > 1:
+        raise RuntimeError("Retrieval event selection only supports "
+                           "single-experiment datasets")
+    experiment = experiments[0]
+
+    if "FR" in experiment:
+        mask = get_fr_retrieval_events_mask(events)
+
+    elif "PAL"in experiment:
+        mask = get_pal_retrieval_events_mask(events)
+
+    retrieval_events = events[mask]
+
     return retrieval_events
 
 
-def get_retrieval_events_mask(events):
-    """
-        Create boolean mask identifying retrieval events that were not
-        intrusions and occured at least 1 second after the previous event.
-        The idea here is that if retrieval takes less than 1 seond, there is
-        likely not cognitive recall process going on, so we don't want to
-        include these events as information to a classifier that uses both
-        encoding and retrieval events in training
-    """
+def get_fr_retrieval_events_mask(events):
+    """ Identify actual retrieval events for FR/catFR experiments"""
     # FIXME: Parametrize the inter-event threshold
-    # TODO: Why don't we actually study this 1000ms threshold to optimize it
-    # or find out if it even matters?
+    # TODO: Why don't we actually study this 1000ms threshold to optimize it?
     inter_event_times = get_time_between_events(events)
     retrieval_mask = ((events.type == 'REC_WORD') &
                       (events.intrusion == 0) &
                       (inter_event_times > 1000))
+    return retrieval_mask
+
+
+def get_pal_retrieval_events_mask(events):
+    """ Identify retrieval events for PAL experiments """
+    retrieval_mask = ((events.type == 'TEST_PROBE') |
+                      (events.type == 'PROBE_START'))
     return retrieval_mask
 
 
