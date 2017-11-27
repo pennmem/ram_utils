@@ -1,15 +1,13 @@
-import os
 import hashlib
-import numpy as np
+import os
 
+import numpy as np
+from ReportUtils import ReportRamTask
+from ptsa.data.readers.IndexReader import JsonIndexReader
 from scipy.stats.mstats import zscore
 from sklearn.externals import joblib
 
-from ReportUtils import ReportRamTask
-from ramutils.eeg.powers import compute_powers
-from ptsa.data.readers import EEGReader
-from ptsa.data.readers.IndexReader import JsonIndexReader
-
+from ramutils.powers import compute_powers
 
 
 class ComputeFR6Powers(ReportRamTask):

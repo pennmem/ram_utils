@@ -1,20 +1,18 @@
-import os
-from random import shuffle
-import warnings
 import hashlib
+import os
+import warnings
+from random import shuffle
 
 import numpy as np
-
-from sklearn.linear_model import LogisticRegression
-from sklearn.externals import joblib
-from sklearn.metrics import roc_auc_score
-
-from ptsa.data.readers.IndexReader import JsonIndexReader
-
 from ReportTasks.RamTaskMethods import run_lolo_xval,run_loso_xval,permuted_loso_AUCs,permuted_lolo_AUCs,ModelOutput
 from ReportUtils import ReportRamTask
+from ptsa.data.readers.IndexReader import JsonIndexReader
+from sklearn.externals import joblib
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import roc_auc_score
+
 from ramutils.classifier.weighting import get_sample_weights
-from ramutils.eeg.powers import normalize_powers_by_session
+from ramutils.powers import normalize_powers_by_session
 
 
 class ComputeClassifier(ReportRamTask):

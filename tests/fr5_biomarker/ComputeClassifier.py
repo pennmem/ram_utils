@@ -1,22 +1,21 @@
 import hashlib
+import os
 import warnings
+from random import shuffle
 
-from ramutils.pipeline import RamTask
-
+import numpy as np
 from ReportTasks.RamTaskMethods import (
     run_lolo_xval, run_loso_xval, permuted_loso_AUCs, permuted_lolo_AUCs,
     ModelOutput
 )
-import os
-import numpy as np
-from scipy.stats.mstats import zscore
+from ptsa.data.readers.IndexReader import JsonIndexReader
+from sklearn.externals import joblib
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, roc_curve
-from random import shuffle
-from sklearn.externals import joblib
-from ptsa.data.readers.IndexReader import JsonIndexReader
+
 from ramutils.classifier.weighting import get_sample_weights
-from ramutils.eeg.powers import normalize_powers_by_session
+from ramutils.pipeline import RamTask
+from ramutils.powers import normalize_powers_by_session
 
 try:
     from typing import Dict
