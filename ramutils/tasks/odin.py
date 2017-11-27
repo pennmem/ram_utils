@@ -200,8 +200,8 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
                                                        stim_params,
                                                        classifier_file,
                                                        classifier_version),
+            'experiment_specs': _make_experiment_specs_section(experiment),
         },
-        'experiment_specs': _make_experiment_specs_section(experiment),
 
         # FIXME: are these the right defaults?
         'artifact_detection': {
