@@ -3,6 +3,7 @@ Ramulator.
 
 """
 
+from datetime import datetime
 import os.path as osp
 
 from ramutils.cli import make_parser, ValidationError, configure_caching
@@ -64,6 +65,29 @@ def main(input_args=None):
     args = parser.parse_args(input_args)
     validate_stim_settings(args)
 
+    # Write options to log file for reference
+    # n.b., this relies on using the default naming for variables passed via
+    # argparse; i.e., don't use the dest kwarg when defining options!
+    output = []
+    for arg in vars(args):
+        value = getattr(args, arg)
+        if value is None:
+            continue
+
+        if isinstance(value, list):
+            value = ' '.join([str(v) for v in value])
+        elif isinstance(value, bool):
+            value = ''
+
+        clarg = arg.replace('_', '-')
+        output.append('--{} {}'.format(clarg, value))
+
+    with open(osp.expanduser('~/.ramutils_expconf.log'), 'a') as f:
+        f.write(datetime.now().strftime('[%Y-%m-%dT%H:%M:%S]\n'))
+        f.write("ramulator-conf \\\n")
+        f.write('\\\n'.join(output))  # add backslashes to allow copy-paste
+        f.write('\n\n')
+
     paths = FilePaths(
         root=osp.expanduser(args.root),
         electrode_config_file=osp.expanduser(args.electrode_config_file),
@@ -95,18 +119,18 @@ def main(input_args=None):
 
 
 if __name__ == "__main__":
-    # main([
-    #     "-s", "R1364C", "-x", "CatFR5",
-    #     "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
-    #     "--anodes", "AMY7", "--cathodes", "AMY8",
-    #     "--target-amplitudes", "0.5",
-    #     "--root", "~/mnt/rhino", "--dest", "scratch/ramutils2/demo", "--force-rerun"
-    # ])
-
     main([
-        "-s", "R1364C", "-x", "AmplitudeDetermination",
+        "-s", "R1364C", "-x", "CatFR5",
         "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
         "--anodes", "AMY7", "--cathodes", "AMY8",
-        "--min-amplitudes", "0.1", "--max-amplitudes", "1.0",
+        "--target-amplitudes", "0.5",
         "--root", "~/mnt/rhino", "--dest", "scratch/ramutils2/demo", "--force-rerun"
     ])
+
+    # main([
+    #     "-s", "R1364C", "-x", "AmplitudeDetermination",
+    #     "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
+    #     "--anodes", "AMY7", "--cathodes", "AMY8",
+    #     "--min-amplitudes", "0.1", "--max-amplitudes", "1.0",
+    #     "--root", "~/mnt/rhino", "--dest", "scratch/ramutils2/demo", "--force-rerun"
+    # ])
