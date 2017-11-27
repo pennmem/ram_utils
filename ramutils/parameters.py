@@ -102,7 +102,7 @@ class FRParameters(ExperimentParameters):
     encoding_buf = Float(1.365, desc="encoding buffer time [s]")
 
     retrieval_start_time = Float(-0.525, desc="retrieval start time [s]")
-    retrieval_end_time = Float(0, desc="retrieval end time [s]")
+    retrieval_end_time = Float(0., desc="retrieval end time [s]")
     retrieval_buf = Float(0.524, desc="retrieval buffer time [s]")
 
     encoding_only = Bool(False, desc="use encoding-only classifier")
