@@ -1,18 +1,17 @@
-import os
 import hashlib
+import os
 import warnings
-import numpy as np
+from random import shuffle
 
+import numpy as np
+from ptsa.data.readers.IndexReader import JsonIndexReader
+from sklearn.externals import joblib
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, roc_curve
-from random import shuffle
-from sklearn.externals import joblib
 
-from ptsa.data.readers.IndexReader import JsonIndexReader
 from ramutils.classifier.weighting import get_sample_weights
-from ramutils.eeg.powers import normalize_powers_by_session
-
 from ramutils.pipeline import RamTask
+from ramutils.powers import normalize_powers_by_session
 
 
 class ModelOutput(object):
