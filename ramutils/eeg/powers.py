@@ -10,6 +10,7 @@ from ptsa.data.filters import (
     MorletWaveletFilter,
     ButterworthFilter
 )
+from scipy.stats import zscore
 
 try:
     from typing import List
@@ -32,6 +33,7 @@ def compute_normalized_powers(events, start_time, end_time, buffer_time, freqs,
     power_partitions = []
     cleaned_event_partitions = []
     for event_subset in event_partitions:
+        # FIXME: start, end, buffer times all depend on the event subset
         powers, cleaned_events = compute_powers(event_subset, start_time,
                                                 end_time, buffer_time, freqs,
                                                 log_powers, filt_order, width)
@@ -217,3 +219,30 @@ def reduce_powers(powers, mask, n_frequencies):
     reduced_powers = reduced_powers.reshape((len(reduced_powers), -1))
 
     return reduced_powers
+
+
+def normalize_powers_by_session(pow_mat, events):
+    """ z-score powers within session. Utility function used by legacy reports
+
+    Parameters
+    ----------
+    pow_mat: np.ndarray
+        Power matrix, i.e. the data matrix for the classifier (features)
+    events: pd.DataFrame
+        Behavioral events data
+
+    Returns
+    -------
+    pow_mat: np.ndarray
+        Normalized power matrix (features)
+
+    """
+
+    sessions = np.unique(events.session)
+    for sess in sessions:
+        sess_event_mask = (events.session == sess)
+        pow_mat[sess_event_mask] = zscore(pow_mat[sess_event_mask],
+                                          axis=0,
+                                          ddof=1)
+
+    return pow_mat

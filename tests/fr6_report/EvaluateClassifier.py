@@ -11,7 +11,8 @@ from ReportUtils import  ReportRamTask
 from ptsa.data.readers.IndexReader import JsonIndexReader
 from ptsa.data.readers import EEGReader
 from ReportTasks.RamTaskMethods import ModelOutput
-from ramutils.classifier.utils import reload_classifier, get_sample_weights
+from ramutils.classifier.utils import reload_classifier
+from ramutils.classifier.weighting import get_sample_weights
 from ramutils.classifier.cross_validation import permuted_lolo_AUCs, permuted_loso_AUCs
 
 
