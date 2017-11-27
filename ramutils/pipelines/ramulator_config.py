@@ -8,7 +8,8 @@ from ramutils.parameters import StimParameters
 from ramutils.tasks import *
 
 
-def make_stim_params(subject, anodes, cathodes, root='/'):
+def make_stim_params(subject, anodes, cathodes, min_amplitudes=None,
+                     max_amplitudes=None, target_amplitudes=None,  root='/'):
     """Construct :class:`StimParameters` objects from anode and cathode labels
     for a specific subject.
 
@@ -19,6 +20,12 @@ def make_stim_params(subject, anodes, cathodes, root='/'):
         anode labels
     cathodes : List[str]
         cathode labels
+    min_amplitudes : List[float]
+        Minimum stim amplitudes (when applicable)
+    max_amplitudes : List[float]
+        Maximum stim amplitudes (when applicable)
+    target_amplitudes : List[float]
+        Target stim amplitudes (when applicable)
     root : str
         root directory to search for jacksheet
 
@@ -45,14 +52,18 @@ def make_stim_params(subject, anodes, cathodes, root='/'):
             cathode=cathode_idx
         )
 
-        # FIXME: update min, max, target amplitudes
+        if min_amplitudes is not None:
+            params.min_amplitude = min_amplitudes[i]
+            params.max_amplitude = max_amplitudes[i]
+        else:
+            params.target_amplitude = target_amplitudes[i]
 
         stim_params.append(params)
 
     return stim_params
 
 
-def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
+def make_ramulator_config(subject, experiment, paths, stim_params,
                           exp_params=None, vispath=None):
     """ Generate configuration files for a Ramulator experiment
 
@@ -63,10 +74,8 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
     experiment : str
         Experiment to generate configuration file for
     paths : FilePaths
-    anodes : List[str]
-        List of stim anode contact labels
-    cathodes : List[str]
-        List of stim cathode contact labels
+    stim_params : List[StimParams]
+        Stimulation parameters for this experiment.
     exp_params : ExperimentParameters
         Parameters for the experiment.
     vispath : str
@@ -76,14 +85,8 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
     -------
     The path to the generated configuration zip file.
     """
-    stim_params = make_stim_params(subject, anodes, cathodes, paths.root)
-
     if len(stim_params) > 1 and experiment not in EXPERIMENTS['multistim']:
         raise MultistimNotAllowedException
-
-    # this will be None for amp. det. experiments
-    if exp_params is not None:
-        kwargs = exp_params.to_dict()
 
     ec_pairs = generate_pairs_from_electrode_config(subject, paths)
     excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
