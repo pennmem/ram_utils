@@ -230,6 +230,7 @@ class TestEvents:
     def test_preprocess_events(self, experiment, encoding_only, combine_events):
         return
 
+    @pytest.mark.skip(reason='rhino')
     @pytest.mark.parametrize("subject, parameters, experiment", [
         ("R1354E", FRParameters, "FR6"), # catFR and FR
         ("R1350D", FRParameters, "FR6"), # FR only
