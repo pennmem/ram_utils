@@ -39,7 +39,7 @@ def validate_stim_settings(args):
         if not len(args.anodes) == len(args.cathodes):
             raise ValidationError("Number of anodes doesn't match number of cathodes")
 
-        if args.experiment != "AmplitudeDetermination":
+        if args.experiment != "AmplitudeDetermination" and 'PS4' not in args.experiment:
             if args.target_amplitudes is None:
                 raise RuntimeError("--target-amplitudes is required")
             valid = len(args.anodes) == len(args.target_amplitudes)
@@ -119,13 +119,13 @@ def main(input_args=None):
 
 
 if __name__ == "__main__":
-    main([
-        "-s", "R1364C", "-x", "CatFR5",
-        "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
-        "--anodes", "AMY7", "--cathodes", "AMY8",
-        "--target-amplitudes", "0.5",
-        "--root", "~/mnt/rhino", "--dest", "scratch/ramutils2/demo", "--force-rerun"
-    ])
+    # main([
+    #     "-s", "R1364C", "-x", "CatFR5",
+    #     "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
+    #     "--anodes", "AMY7", "--cathodes", "AMY8",
+    #     "--target-amplitudes", "0.5",
+    #     "--root", "~/mnt/rhino", "--dest", "scratch/ramutils2/demo", "--force-rerun"
+    # ])
 
     # main([
     #     "-s", "R1364C", "-x", "AmplitudeDetermination",
@@ -134,3 +134,11 @@ if __name__ == "__main__":
     #     "--min-amplitudes", "0.1", "--max-amplitudes", "1.0",
     #     "--root", "~/mnt/rhino", "--dest", "scratch/ramutils2/demo", "--force-rerun"
     # ])
+
+    main([
+        "-s", "R1364C", "-x", "PS4_FR5",
+        "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
+        "--anodes", "AMY7", "TOJ7", "--cathodes", "AMY8", "TOJ8",
+        "--min-amplitudes", "0.1", "0.1", "--max-amplitudes", "1.0", "0.5",
+        "--root", "~/mnt/rhino", "--dest", "scratch/ramutils2/demo", "--force-rerun"
+    ])
