@@ -201,15 +201,15 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
                                                        classifier_file,
                                                        classifier_version),
             'experiment_specs': _make_experiment_specs_section(experiment),
-        },
 
-        # FIXME: are these the right defaults?
-        'artifact_detection': {
-            "allow_artifact_detection": True,
-            "artifact_detection_number_of_stims_per_channel": 15,
-            "artifact_detection_sample_time_length": 500,
-            "artifact_detection_inter_stim_interval": 2000,
-            "allow_artifact_detection_during_session": False
+            # FIXME: are these the right defaults?
+            'artifact_detection': {
+                "allow_artifact_detection": True,
+                "artifact_detection_number_of_stims_per_channel": 15,
+                "artifact_detection_sample_time_length": 500,
+                "artifact_detection_inter_stim_interval": 2000,
+                "allow_artifact_detection_during_session": False
+            }
         },
 
         "biomarker_threshold": 0.5,
