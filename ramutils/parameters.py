@@ -95,7 +95,6 @@ class ExperimentParameters(Schema):
                                            "cognitive process [ms]")
 
 
-
 class FRParameters(ExperimentParameters):
     """Free recall experiment parameters relevant for classification."""
     encoding_start_time = Float(0., desc="encoding start time [s]")
