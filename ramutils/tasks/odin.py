@@ -119,7 +119,7 @@ def _make_experiment_specific_data_section(experiment, stim_params,
 
     esd = {
         "allow_classifier_generalization": True,
-        "classifier_file": classifier_file,
+        "classifier_file": "config_files/{}".format(classifier_file),
         "classifier_version": classifier_version,
         "random_stim_prob": False,
         "save_debug_output": True,
