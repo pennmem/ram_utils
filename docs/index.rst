@@ -5,6 +5,7 @@ RAM reporting pipeline
     :maxdepth: 2
     :caption: Contents:
 
+    cli
     pipeline
     timeseries
     classifier
