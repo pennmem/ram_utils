@@ -37,14 +37,17 @@ def make_stim_params(subject, anodes, cathodes, root='/'):
         cathode = cathodes[i]
         anode_idx = jacksheet[jacksheet.label == anode].index[0]
         cathode_idx = jacksheet[jacksheet.label == cathode].index[0]
-        stim_params.append(
-            StimParameters(
-                # FIXME: figure out better way to generate labels (read config file?)
-                label='_'.join([anode, cathode]),
-                anode=anode_idx,
-                cathode=cathode_idx
-            )
+
+        params = StimParameters(
+            # FIXME: figure out better way to generate labels (read config file?)
+            label='_'.join([anode, cathode]),
+            anode=anode_idx,
+            cathode=cathode_idx
         )
+
+        # FIXME: update min, max, target amplitudes
+
+        stim_params.append(params)
 
     return stim_params
 
@@ -140,14 +143,17 @@ def make_ramulator_config(subject, experiment, paths, anodes, cathodes,
                                          cross_validation_results,
                                          subject)
 
-        config_path = generate_ramulator_config(subject,
-                                                experiment,
-                                                container,
-                                                stim_params,
-                                                paths,
-                                                ec_pairs,
-                                                excluded_pairs,
-                                                exp_params)
+    else:
+        container = None
+
+    config_path = generate_ramulator_config(subject,
+                                            experiment,
+                                            container,
+                                            stim_params,
+                                            paths,
+                                            ec_pairs,
+                                            excluded_pairs,
+                                            exp_params)
 
     if vispath is not None:
         config_path.visualize(filename=vispath)
