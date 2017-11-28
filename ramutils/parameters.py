@@ -121,7 +121,7 @@ class PALParameters(FRParameters):
 
     pal_start_time = Float(0.3, desc="encoding start time for PAL [s]")
     pal_end_time = Float(2.00, desc="encoding end time for PAL [s]")
-    pal_buf = Float(1.2)
+    pal_buf_time = Float(1.2)
 
     pal_retrieval_start_time = Float(-0.625, desc="retrieval start time for "
                                                   "PAL [s]")
