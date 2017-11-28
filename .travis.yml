@@ -33,5 +33,5 @@ install:
   - pip install codecov
   - python setup.py install
 script:
-  - python -m pytest -m "not rhino"
+  - python -m pytest -m "not rhino" --cov
   - codecov
