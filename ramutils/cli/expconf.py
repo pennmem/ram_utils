@@ -18,8 +18,8 @@ experiments = ['AmplitudeDetermination'] + EXPERIMENTS['ps'] + \
               [exp for exp in EXPERIMENTS['closed_loop']]
 
 parser = make_parser("Generate experiment configs for Ramulator", experiments)
-parser.add_argument('--localization', '-l', default=0, type=int, help='localization number')
-parser.add_argument('--montage', '-m', default=0, type=int, help='montage number')
+parser.add_argument('--localization', '-l', default=0, type=int, help='localization number (default: 0)')
+parser.add_argument('--montage', '-m', default=0, type=int, help='montage number (default: 0)')
 parser.add_argument('--electrode-config-file', '-e', required=True, type=str,
                     help='path to Odin electrode config csv file')
 parser.add_argument('--anodes', '-a', nargs='+', help='stim anode labels')
