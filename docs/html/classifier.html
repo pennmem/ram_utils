@@ -1,0 +1,369 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Classifier training, cross validation, and utilities &#8212; Ramutils 2.0.dev0 documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.0.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Modeling effects of stim" href="models.html" />
+    <link rel="prev" title="Timeseries data processing" href="timeseries.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="models.html" title="Modeling effects of stim"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="timeseries.html" title="Timeseries data processing"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.dev0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="classifier-training-cross-validation-and-utilities">
+<h1>Classifier training, cross validation, and utilities<a class="headerlink" href="#classifier-training-cross-validation-and-utilities" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-ramutils.classifier.cross_validation">
+<span id="reference"></span><h2>Reference<a class="headerlink" href="#module-ramutils.classifier.cross_validation" title="Permalink to this headline">¶</a></h2>
+<p>Collection of cross-validation functions</p>
+<dl class="function">
+<dt id="ramutils.classifier.cross_validation.perform_cross_validation">
+<code class="descclassname">ramutils.classifier.cross_validation.</code><code class="descname">perform_cross_validation</code><span class="sig-paren">(</span><em>classifier</em>, <em>pow_mat</em>, <em>events</em>, <em>n_permutations</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/cross_validation.html#perform_cross_validation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.cross_validation.perform_cross_validation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform LOSO or LOLO cross validation on a classifier.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>classifier</strong> (<em>sklearn model object</em>) – </li>
+<li><strong>pow_mat</strong> (<em>np.ndarray</em>) – </li>
+<li><strong>events</strong> (<em>np.recarray</em>) – </li>
+<li><strong>n_permutations</strong> (<em>int</em>) – </li>
+<li><strong>kwargs</strong> (<em>dict</em>) – Extra keyword arguments that are passed to get_sample_weights. See
+that function for more details</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>xval</strong> – Results of cross validation.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.classifier.cross_validation.permuted_lolo_AUCs">
+<code class="descclassname">ramutils.classifier.cross_validation.</code><code class="descname">permuted_lolo_AUCs</code><span class="sig-paren">(</span><em>classifier</em>, <em>powers</em>, <em>events</em>, <em>n_permutations</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/cross_validation.html#permuted_lolo_AUCs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.cross_validation.permuted_lolo_AUCs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Permuted leave-one-list-out cross validation</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>classifier</strong> – sklearn model object, usually logistic regression classifier</li>
+<li><strong>powers</strong> (<em>np.ndarray</em>) – power matrix</li>
+<li><strong>events</strong> (<em>recarray</em>) – </li>
+<li><strong>n_permutations</strong> (<em>int</em>) – number of permutation trials</li>
+<li><strong>kwargs</strong> (<em>dict</em>) – Optional keyword arguments. These are passed to get_sample_weights.
+See that function for more details.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>AUCs</strong> – List of AUCs from performing leave-one-list-out cross validation
+n_permutations times</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.classifier.cross_validation.run_lolo_xval">
+<code class="descclassname">ramutils.classifier.cross_validation.</code><code class="descname">run_lolo_xval</code><span class="sig-paren">(</span><em>classifier</em>, <em>powers</em>, <em>events</em>, <em>recalls</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/cross_validation.html#run_lolo_xval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.cross_validation.run_lolo_xval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform a single iteration of leave-one-list-out cross validation</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>classifier</strong> (<em>sklearn model object</em>) – </li>
+<li><strong>powers</strong> (<em>mean powers to use as features</em>) – </li>
+<li><strong>events</strong> (<em>set of events for the session</em>) – </li>
+<li><strong>recalls</strong> (<em>vector of recall outcomes</em>) – </li>
+<li><strong>kwargs</strong> (<em>dict</em>) – Optional keyword arguments. These are passed to get_sample_weights.
+See that function for more details.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>probs</strong> – Predicted probabilities for all lists</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.array</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.classifier.cross_validation.permuted_loso_AUCs">
+<code class="descclassname">ramutils.classifier.cross_validation.</code><code class="descname">permuted_loso_AUCs</code><span class="sig-paren">(</span><em>classifier</em>, <em>powers</em>, <em>events</em>, <em>n_permutations</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/cross_validation.html#permuted_loso_AUCs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.cross_validation.permuted_loso_AUCs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform permuted leave one session out cross validation</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>classifier</strong> – sklearn model object, usually logistic regression classifier</li>
+<li><strong>powers</strong> (<em>np.ndarray</em>) – power matrix</li>
+<li><strong>events</strong> (<em>recarray</em>) – </li>
+<li><strong>n_permutations</strong> (<em>int</em>) – number of permutation trials</li>
+<li><strong>kwargs</strong> (<em>dict</em>) – Optional keyword arguments. These are passed to get_sample_weights.
+See that function for more details.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>AUCs</strong> – List of AUCs from performing leave-one-list-out cross validation
+n_permutations times</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.classifier.cross_validation.run_loso_xval">
+<code class="descclassname">ramutils.classifier.cross_validation.</code><code class="descname">run_loso_xval</code><span class="sig-paren">(</span><em>classifier</em>, <em>powers</em>, <em>events</em>, <em>recalls</em>, <em>xval</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/cross_validation.html#run_loso_xval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.cross_validation.run_loso_xval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform single iteration of leave-one-session-out cross validation</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>classifier</strong> – sklearn model object, usually logistic regression classifier</li>
+<li><strong>powers</strong> (<em>np.ndarray</em>) – power matrix</li>
+<li><strong>events</strong> (<em>np.recarray</em>) – </li>
+<li><strong>recalls</strong> (<em>array_like</em>) – List of recall/not-recalled boolean values for each event</li>
+<li><strong>xval</strong> (<em>dict_like</em>) – Object for storing results of cross validation</li>
+<li><strong>kwargs</strong> (<em>dict</em>) – Optional keyword arguments. These are passed to get_sample_weights.
+See that function for more details.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>probs</strong> – Predicted probabilities for all sessions</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.array</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<span class="target" id="module-ramutils.classifier.model"></span><dl class="class">
+<dt id="ramutils.classifier.model.ModelOutput">
+<em class="property">class </em><code class="descclassname">ramutils.classifier.model.</code><code class="descname">ModelOutput</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/model.html#ModelOutput"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.model.ModelOutput" title="Permalink to this definition">¶</a></dt>
+<dd><p>Statistics and scores for the output of the logistic regression
+classifier.</p>
+<p>In order to compute tercile stats and the ROC curve/AUC score, the
+<code class="xref py py-attr docutils literal"><span class="pre">true_labels</span></code> and <code class="xref py py-attr docutils literal"><span class="pre">probs</span></code> attributes must be set first.</p>
+<dl class="method">
+<dt id="ramutils.classifier.model.ModelOutput.compute_metrics">
+<code class="descname">compute_metrics</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/model.html#ModelOutput.compute_metrics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.model.ModelOutput.compute_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shorthand for calling both <a class="reference internal" href="#ramutils.classifier.model.ModelOutput.compute_roc" title="ramutils.classifier.model.ModelOutput.compute_roc"><code class="xref py py-meth docutils literal"><span class="pre">compute_roc()</span></code></a> and
+<a class="reference internal" href="#ramutils.classifier.model.ModelOutput.compute_tercile_stats" title="ramutils.classifier.model.ModelOutput.compute_tercile_stats"><code class="xref py py-meth docutils literal"><span class="pre">compute_tercile_stats()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ramutils.classifier.model.ModelOutput.compute_roc">
+<code class="descname">compute_roc</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/model.html#ModelOutput.compute_roc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.model.ModelOutput.compute_roc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the ROC curve.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><strong>RuntimeError</strong> – when true_labels or probs aren’t set yet</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ramutils.classifier.model.ModelOutput.compute_tercile_stats">
+<code class="descname">compute_tercile_stats</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/model.html#ModelOutput.compute_tercile_stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.model.ModelOutput.compute_tercile_stats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute tercile stats.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><strong>RuntimeError</strong> – when true_labels or probs aren’t set yet</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-ramutils.classifier.utils"></span><p>Utility functions used during classifier training</p>
+<dl class="function">
+<dt id="ramutils.classifier.utils.reload_classifier">
+<code class="descclassname">ramutils.classifier.utils.</code><code class="descname">reload_classifier</code><span class="sig-paren">(</span><em>subject</em>, <em>task</em>, <em>session</em>, <em>mount_point='/'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/utils.html#reload_classifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.utils.reload_classifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads the actual classifier used by Ramulator for a particular session</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>subject</strong> (<em>str</em>) – Subject ID</li>
+<li><strong>task</strong> (<em>str</em>) – ex: FR5, FR6, PAL1, etc</li>
+<li><strong>session</strong> (<em>int</em>) – Session number</li>
+<li><strong>mount_point</strong> (<em>str</em><em>, </em><em>default '/'</em>) – Mount point for RHINO</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>classifier_container</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">classiflib.container.ClassifierContainer</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.classifier.utils.train_classifier">
+<code class="descclassname">ramutils.classifier.utils.</code><code class="descname">train_classifier</code><span class="sig-paren">(</span><em>pow_mat</em>, <em>events</em>, <em>sample_weights</em>, <em>penalty_param</em>, <em>penalty_type</em>, <em>solver</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/utils.html#train_classifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.utils.train_classifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Train a classifier.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pow_mat</strong> (<em>np.ndarray</em>) – </li>
+<li><strong>events</strong> (<em>np.recarray</em>) – </li>
+<li><strong>sample_weights</strong> (<em>np.ndarray</em>) – </li>
+<li><strong>penalty_param</strong> (<em>Float</em>) – Penalty parameter to use</li>
+<li><strong>penalty_type</strong> (<em>str</em>) – Type of penalty to use for regularized model (ex: L2)</li>
+<li><strong>solver</strong> (<em>str</em>) – Solver to use when fitting the model (ex: liblinear)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>classifier</strong> – Trained classifier</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">LogisticRegression</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Classifier training, cross validation, and utilities</a><ul>
+<li><a class="reference internal" href="#module-ramutils.classifier.cross_validation">Reference</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="timeseries.html"
+                        title="previous chapter">Timeseries data processing</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="models.html"
+                        title="next chapter">Modeling effects of stim</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/classifier.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="models.html" title="Modeling effects of stim"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="timeseries.html" title="Timeseries data processing"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.dev0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>
