@@ -9,7 +9,6 @@ dependencies:
 - graphviz=2.38.0
 - h5py=2.7.0
 - hdf5=1.10.1
-- matplotlib=1.5.1
 - mock=2.0.0
 - numpy=1.13.3
 - pandas=0.20.3
