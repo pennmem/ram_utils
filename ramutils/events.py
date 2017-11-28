@@ -291,7 +291,8 @@ def remove_incomplete_lists(events):
         final_sess_events.sort(order=['session', 'list', 'mstime'])
         final_event_list.append(final_sess_events)
 
-        # METHOD #2 (perhaps less accurate?)
+        # METHOD #2 (perhaps less accurate?) We need to figure out which one
+        # should be used. Don't delete for now
         # try:
         #     last_list = sess_events[sess_events.type == 'REC_END'][-1]['list']
         #     final_event_list.append(sess_events[sess_events.list <= last_list])

@@ -115,12 +115,16 @@ class TestEvents:
         return
 
     def test_find_free_time_periods(self):
+        # TODO: This is a more complicated algorithm to test
         return
 
     def test_insert_baseline_retrieval_events(self):
+        # TODO: This is another somehwat complicated algorithm to test
         return
 
     def test_remove_incomplete_lists(self):
+        # TODO: There are two ways to do this. In addition to unit tests,
+        # we need to identify the most robust way of doing this procedure
         return
 
     @pytest.mark.skip(reason='rhino')
