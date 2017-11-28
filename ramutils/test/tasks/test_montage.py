@@ -46,7 +46,7 @@ class TestMontage:
         memory.clear(warn=False)
 
     def test_load_pairs(self):
-        filename = datafile('R1328E_pairs.json')
+        filename = datafile('/input/configs/R1328E_pairs.json')
         pairs = load_pairs_from_json(filename).compute()
 
         with open(filename) as f:

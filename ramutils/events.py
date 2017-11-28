@@ -723,7 +723,7 @@ def select_word_events(events, encoding_only=True):
 
 def extract_sample_rate(events):
     """ Extract the samplerate used for the given set of events"""
-    eeg_reader = EEGReader(events=events, start_time=0.0, end_time=1.0)
+    eeg_reader = EEGReader(events=events[:2], start_time=0.0, end_time=1.0)
     eeg = eeg_reader.read()
     samplerate = float(eeg['samplerate'])
     return samplerate
