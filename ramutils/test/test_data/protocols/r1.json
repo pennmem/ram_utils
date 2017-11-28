@@ -175,6 +175,36 @@
               }
             }
           }
+        },
+          "R1016M": {
+          "experiments": {
+            "PAL1": {
+              "sessions": {
+                "0": {
+                  "all_events": "protocols/R1016M_PAL1_0.json",
+                  "localization": "0",
+                  "montage": "0",
+                  "subject_alias": "R1016M"
+                }
+              }
+            },
+            "catFR1": {
+              "sessions": {
+                 "0": {
+                  "all_events": "protocols/R1016M_catFR1_0.json",
+                  "localization": "0",
+                  "montage": "0",
+                  "subject_alias": "r1016m"
+                },
+                 "1": {
+                  "all_events": "protocols/R1016M_catFR1_1.json",
+                  "localization": "0",
+                  "montage": "0",
+                  "subject_alias": "R1016M"
+                }
+              }
+            }
+          }
         }
       }
     }

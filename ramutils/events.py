@@ -288,7 +288,8 @@ def remove_incomplete_lists(events):
         final_sess_events.sort(order=['session', 'list', 'mstime'])
         final_event_list.append(final_sess_events)
 
-        # METHOD #2 (perhaps less accurate?)
+        # METHOD #2 (perhaps less accurate?) We need to figure out which one
+        # should be used. Don't delete for now
         # try:
         #     last_list = sess_events[sess_events.type == 'REC_END'][-1]['list']
         #     final_event_list.append(sess_events[sess_events.list <= last_list])
@@ -717,7 +718,7 @@ def select_word_events(events, encoding_only=True):
 
 def extract_sample_rate(events):
     """ Extract the samplerate used for the given set of events"""
-    eeg_reader = EEGReader(events=events, start_time=0.0, end_time=1.0)
+    eeg_reader = EEGReader(events=events[:2], start_time=0.0, end_time=1.0)
     eeg = eeg_reader.read()
     samplerate = float(eeg['samplerate'])
     return samplerate
