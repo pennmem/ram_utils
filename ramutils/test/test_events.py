@@ -127,7 +127,7 @@ class TestEvents:
         # we need to identify the most robust way of doing this procedure
         return
 
-    @pytest.mark.skip(reason='rhino')
+    @pytest.mark.rhino
     def test_extract_sample_rate(self):
         return
 

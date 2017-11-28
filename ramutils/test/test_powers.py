@@ -15,7 +15,7 @@ datafile = functools.partial(resource_filename,
 RHINO_AVAIL = os.environ.get('RHINO_AVAIL')
 
 
-@pytest.mark.skipif(RHINO_AVAIL == 'False', reason='rhino')
+@pytest.mark.rhino
 def test_compute_single_session_powers():
     # Cases: EEG from monopolar, mixed mode, and bipolar. EEG with removed bad
     # data and without. Log powers true and false
@@ -38,7 +38,7 @@ def test_compute_single_session_powers():
     return
 
 
-@pytest.mark.skipif(RHINO_AVAIL == 'False', reason='rhino')
+@pytest.mark.rhino
 @pytest.mark.parametrize("event_file", [
     'R1348J_task_events.npy',
     'R1350D_task_events.npy'
@@ -117,8 +117,8 @@ def test_normalize_powers_by_session():
     return
 
 
-@pytest.mark.skipif(RHINO_AVAIL == 'False', reason='rhino')
-@pytest.mark.skip(reason='slow')
+@pytest.mark.rhino
+@pytest.mark.slow
 @pytest.mark.parametrize("events, exp_powers, parameters", [
     ('R1353N_task_events.npy', 'R1353N_normalized_powers.npy', PALParameters),
     ('R1354E_task_events.npy', 'R1354E_normalized_powers.npy', FRParameters),
