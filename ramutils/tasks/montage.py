@@ -102,10 +102,10 @@ def get_bipolar_pairs(bp_tal_structs):
 
 @task()
 def generate_pairs_for_classifier(pairs, excluded_pairs):
-    """ Create recarray of electrode pairs for the classifier container
+    """Create recarray of electrode pairs for the classifier container
 
     :param pairs: JSON-format object containing all electrode pairs in the
-    montage
+        montage
     :param excluded_pairs: array-like containing pairs excluded from the montage
     :returns: recarray containing all pairs minus excluded pairs
     :rtype: np.recarray
@@ -135,7 +135,7 @@ def get_used_pair_mask(all_pairs, excluded_pairs):
     :param all_pairs: standard json-format pairs object
     :param excluded_pairs: list containing pairs to exclude
     :return: np.array containing a mask to identify excluded pairs from all
-    pairs
+        pairs
 
     """
     all_pairs = extract_pairs_dict(all_pairs).keys()

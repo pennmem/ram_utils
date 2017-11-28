@@ -1,0 +1,261 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Serializable data structures &#8212; Ramutils 2.0.dev0 documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.0.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Classifier training, cross validation, and utilities" href="classifier.html" />
+    <link rel="prev" title="ramutils" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="classifier.html" title="Classifier training, cross validation, and utilities"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="ramutils"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.dev0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="serializable-data-structures">
+<h1>Serializable data structures<a class="headerlink" href="#serializable-data-structures" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="defining-data-classes">
+<h2>Defining data classes<a class="headerlink" href="#defining-data-classes" title="Permalink to this headline">¶</a></h2>
+<p>Data can be defined in a serializable manner using the
+<a class="reference internal" href="#ramutils.schema.Schema" title="ramutils.schema.Schema"><code class="xref py py-class docutils literal"><span class="pre">ramutils.schema.Schema</span></code></a> base class which adds serialization methods to
+data classes that are defined using the <code class="xref py py-mod docutils literal"><span class="pre">traits</span></code> package. To ensure
+serializability, use the <code class="docutils literal"><span class="pre">Array</span></code> type whenever possible.</p>
+<dl class="class">
+<dt id="ramutils.schema.Schema">
+<em class="property">class </em><code class="descclassname">ramutils.schema.</code><code class="descname">Schema</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/schema.html#Schema"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.schema.Schema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for defining serializable schema/data classes.</p>
+<dl class="classmethod">
+<dt id="ramutils.schema.Schema.from_hdf">
+<em class="property">classmethod </em><code class="descname">from_hdf</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/schema.html#Schema.from_hdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.schema.Schema.from_hdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deserialize from HDF5.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<em>str</em>) – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Deserialized instance</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="ramutils.schema.Schema.from_json">
+<em class="property">classmethod </em><code class="descname">from_json</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/schema.html#Schema.from_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.schema.Schema.from_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deserialize from a JSON string or file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>or file data</strong> (<em>str</em>) – </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ramutils.schema.Schema.to_dict">
+<code class="descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/schema.html#Schema.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.schema.Schema.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all visible traits as a dictionary. This is useful if some
+of the attributes need to be passed to functions as kwargs and you
+do not want the fuction to need to know about Schema objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ramutils.schema.Schema.to_hdf">
+<code class="descname">to_hdf</code><span class="sig-paren">(</span><em>filename</em>, <em>mode='w'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/schema.html#Schema.to_hdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.schema.Schema.to_hdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serialize schema to HDF5.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filename</strong> (<em>str</em>) – </li>
+<li><strong>mode</strong> (<em>str</em>) – Default: <code class="docutils literal"><span class="pre">'w'</span></code></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ramutils.schema.Schema.to_json">
+<code class="descname">to_json</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/schema.html#Schema.to_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.schema.Schema.to_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serialize as a JSON string.</p>
+<p class="rubric">Notes</p>
+<p>This uses a custom JSON encoder to handle numpy arrays but could
+conceivably lose precision. If this is important, please consider
+serializing in HDF5 format instead.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="experimental-parameters">
+<h2>Experimental parameters<a class="headerlink" href="#experimental-parameters" title="Permalink to this headline">¶</a></h2>
+<p>Experimental parameters (e.g., timing windows) are defined as
+<a class="reference internal" href="#ramutils.schema.Schema" title="ramutils.schema.Schema"><code class="xref py py-class docutils literal"><span class="pre">ramutils.schema.Schema</span></code></a> subclasses so that the parameters used when
+training a classifier can be easily saved.</p>
+<span class="target" id="module-ramutils.parameters"></span><p>Common experimental/model parameters.</p>
+<dl class="class">
+<dt id="ramutils.parameters.ExperimentParameters">
+<em class="property">class </em><code class="descclassname">ramutils.parameters.</code><code class="descname">ExperimentParameters</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/parameters.html#ExperimentParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.parameters.ExperimentParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Common parameters used in an experiment. Default values apply to the FR
+class of experiments.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ramutils.parameters.FRParameters">
+<em class="property">class </em><code class="descclassname">ramutils.parameters.</code><code class="descname">FRParameters</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/parameters.html#FRParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.parameters.FRParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Free recall experiment parameters relevant for classification.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ramutils.parameters.FilePaths">
+<em class="property">class </em><code class="descclassname">ramutils.parameters.</code><code class="descname">FilePaths</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/parameters.html#FilePaths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.parameters.FilePaths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Paths to files that frequently get passed around to many tasks.</p>
+<p>All paths given relative to the root path but are converted to absolute
+paths on creation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>root</strong> (<em>str</em>) – Rhino mount point.</li>
+<li><strong>dest</strong> (<em>str</em>) – Directory to write files to.</li>
+<li><strong>electrode_config_file</strong> (<em>str</em>) – Path to Odin electrode configuration CSV file.</li>
+<li><strong>pairs</strong> (<em>str</em>) – Path to <code class="docutils literal"><span class="pre">pairs.json</span></code>.</li>
+<li><strong>excluded_pairs</strong> (<em>str</em>) – Path to <code class="docutils literal"><span class="pre">excluded_pairs.json</span></code>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="ramutils.parameters.PALParameters">
+<em class="property">class </em><code class="descclassname">ramutils.parameters.</code><code class="descname">PALParameters</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/parameters.html#PALParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.parameters.PALParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Paired associates experiment parameters relevant for classification.
+It inhertis all of the same parameters as FR experiments and adds a
+few more</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ramutils.parameters.StimParameters">
+<em class="property">class </em><code class="descclassname">ramutils.parameters.</code><code class="descname">StimParameters</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/parameters.html#StimParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.parameters.StimParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Single-channel stimulation parameters.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Serializable data structures</a><ul>
+<li><a class="reference internal" href="#defining-data-classes">Defining data classes</a></li>
+<li><a class="reference internal" href="#experimental-parameters">Experimental parameters</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">ramutils</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="classifier.html"
+                        title="next chapter">Classifier training, cross validation, and utilities</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/data.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="classifier.html" title="Classifier training, cross validation, and utilities"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="ramutils"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.dev0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

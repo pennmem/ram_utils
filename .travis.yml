@@ -24,13 +24,14 @@ install:
   - conda update -q conda
   - conda info -a
   - conda env create --file test_env.yaml
-  - source activate rampy
+  - source activate ramutils
   - pip install git+https://github.com/pennmem/classiflib.git  # FIXME: conda package
   - pip install git+https://github.com/pennmem/bptools.git  # FIXME: conda package
 #  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy pandas
 #  - source activate test-environment
 #  - pip install -r requirements.txt
+  - pip install codecov
   - python setup.py install
 script:
-  - python -m pytest
-#  - codecov
+  - python -m pytest -m "not rhino" --cov
+  - codecov

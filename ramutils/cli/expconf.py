@@ -139,7 +139,7 @@ def main(input_args=None):
                               params, args.vispath)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: nocover
     root = "~/mnt/rhino"
 
     # main([
