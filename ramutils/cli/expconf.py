@@ -22,11 +22,11 @@ parser.add_argument('--localization', '-l', default=0, type=int, help='localizat
 parser.add_argument('--montage', '-m', default=0, type=int, help='montage number')
 parser.add_argument('--electrode-config-file', '-e', required=True, type=str,
                     help='path to Odin electrode config csv file')
-parser.add_argument('--anodes', nargs='+', help='stim anode labels')
-parser.add_argument('--cathodes', nargs='+', help='stim cathode labels')
+parser.add_argument('--anodes', '-a', nargs='+', help='stim anode labels')
+parser.add_argument('--cathodes', '-c', nargs='+', help='stim cathode labels')
 parser.add_argument('--min-amplitudes', nargs='+', type=float, help='minimum stim amplitudes')
 parser.add_argument('--max-amplitudes', nargs='+', type=float, help='maximum stim amplitudes')
-parser.add_argument('--target-amplitudes', '-a', type=float, nargs='+', help='target stim amplitudes')
+parser.add_argument('--target-amplitudes', '-t', type=float, nargs='+', help='target stim amplitudes')
 
 # This is currently fixed so there is no need for an option
 # parser.add_argument('--pulse-frequencies', '-f', type=float, nargs='+',
