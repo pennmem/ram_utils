@@ -1,0 +1,170 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ramutils.classifier.model &#8212; Ramutils 2.0.dev0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Ramutils 2.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ramutils.classifier.model</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">traits.api</span> <span class="k">import</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Array</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">roc_curve</span><span class="p">,</span> <span class="n">roc_auc_score</span>
+
+<span class="kn">from</span> <span class="nn">ramutils.schema</span> <span class="k">import</span> <span class="n">Schema</span>
+
+
+<div class="viewcode-block" id="ModelOutput"><a class="viewcode-back" href="../../../classifier.html#ramutils.classifier.model.ModelOutput">[docs]</a><span class="k">class</span> <span class="nc">ModelOutput</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Statistics and scores for the output of the logistic regression</span>
+<span class="sd">    classifier.</span>
+
+<span class="sd">    In order to compute tercile stats and the ROC curve/AUC score, the</span>
+<span class="sd">    :attr:`true_labels` and :attr:`probs` attributes must be set first.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">true_labels</span> <span class="o">=</span> <span class="n">Array</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;true binary labels&#39;</span><span class="p">)</span>
+    <span class="n">probs</span> <span class="o">=</span> <span class="n">Array</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="n">auc</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;AUC score&#39;</span><span class="p">)</span>
+    <span class="n">fpr</span> <span class="o">=</span> <span class="n">Array</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;false positive rate&#39;</span><span class="p">)</span>
+    <span class="n">tpr</span> <span class="o">=</span> <span class="n">Array</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;true positive rate&#39;</span><span class="p">)</span>
+    <span class="n">thresholds</span> <span class="o">=</span> <span class="n">Array</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;decreasing thresholds on the decision function&#39;</span><span class="p">)</span>
+    <span class="n">jstat_thresh</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;jstat threshold&#39;</span><span class="p">)</span>
+    <span class="n">jstat_quantile</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;jstat quantile&#39;</span><span class="p">)</span>
+
+    <span class="c1"># TODO: descriptions</span>
+    <span class="n">low_pc_diff_from_mean</span> <span class="o">=</span> <span class="n">Float</span><span class="p">()</span>
+    <span class="n">mid_pc_diff_from_mean</span> <span class="o">=</span> <span class="n">Float</span><span class="p">()</span>
+    <span class="n">high_pc_diff_from_mean</span> <span class="o">=</span> <span class="n">Float</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_check_ready</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">true_labels</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">probs</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;true_labels and probs must be set first&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ModelOutput.compute_metrics"><a class="viewcode-back" href="../../../classifier.html#ramutils.classifier.model.ModelOutput.compute_metrics">[docs]</a>    <span class="k">def</span> <span class="nf">compute_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Shorthand for calling both :meth:`compute_roc` and</span>
+<span class="sd">        :meth:`compute_tercile_stats`.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compute_roc</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compute_tercile_stats</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ModelOutput.compute_roc"><a class="viewcode-back" href="../../../classifier.html#ramutils.classifier.model.ModelOutput.compute_roc">[docs]</a>    <span class="k">def</span> <span class="nf">compute_roc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compute the ROC curve.</span>
+
+<span class="sd">        :raises RuntimeError: when true_labels or probs aren&#39;t set yet</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_ready</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">auc</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">true_labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">probs</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fpr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tpr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">thresholds</span> <span class="o">=</span> <span class="n">roc_curve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">true_labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">probs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">jstat_quantile</span> <span class="o">=</span> <span class="mf">0.5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">jstat_thresh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">probs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ModelOutput.compute_tercile_stats"><a class="viewcode-back" href="../../../classifier.html#ramutils.classifier.model.ModelOutput.compute_tercile_stats">[docs]</a>    <span class="k">def</span> <span class="nf">compute_tercile_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compute tercile stats.</span>
+
+<span class="sd">        :raises RuntimeError: when true_labels or probs aren&#39;t set yet</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_ready</span><span class="p">()</span>
+
+        <span class="n">thresh_low</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">probs</span><span class="p">,</span> <span class="mf">100.0</span> <span class="o">/</span> <span class="mf">3.0</span><span class="p">)</span>
+        <span class="n">thresh_high</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">probs</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="mf">100.0</span> <span class="o">/</span> <span class="mf">3.0</span><span class="p">)</span>
+
+        <span class="n">low_terc_sel</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">probs</span> <span class="o">&lt;=</span> <span class="n">thresh_low</span><span class="p">)</span>
+        <span class="n">high_terc_sel</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">probs</span> <span class="o">&gt;=</span> <span class="n">thresh_high</span><span class="p">)</span>
+        <span class="n">mid_terc_sel</span> <span class="o">=</span> <span class="o">~</span><span class="p">(</span><span class="n">low_terc_sel</span> <span class="o">|</span> <span class="n">high_terc_sel</span><span class="p">)</span>
+
+        <span class="n">low_terc_recall_rate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">true_labels</span><span class="p">[</span><span class="n">low_terc_sel</span><span class="p">])</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">low_terc_sel</span><span class="p">))</span>
+        <span class="n">mid_terc_recall_rate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">true_labels</span><span class="p">[</span><span class="n">mid_terc_sel</span><span class="p">])</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mid_terc_sel</span><span class="p">))</span>
+        <span class="n">high_terc_recall_rate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">true_labels</span><span class="p">[</span><span class="n">high_terc_sel</span><span class="p">])</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">high_terc_sel</span><span class="p">))</span>
+
+        <span class="n">recall_rate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">true_labels</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">true_labels</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">low_pc_diff_from_mean</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">low_terc_recall_rate</span> <span class="o">-</span> <span class="n">recall_rate</span><span class="p">)</span> <span class="o">/</span> <span class="n">recall_rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mid_pc_diff_from_mean</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">mid_terc_recall_rate</span> <span class="o">-</span> <span class="n">recall_rate</span><span class="p">)</span> <span class="o">/</span> <span class="n">recall_rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">high_pc_diff_from_mean</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">high_terc_recall_rate</span> <span class="o">-</span> <span class="n">recall_rate</span><span class="p">)</span> <span class="o">/</span> <span class="n">recall_rate</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Ramutils 2.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

@@ -1,5 +1,5 @@
-RAM reporting pipeline
-======================
+ramutils
+========
 
 .. toctree::
     :maxdepth: 2
