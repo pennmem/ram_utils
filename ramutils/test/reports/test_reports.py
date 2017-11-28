@@ -28,7 +28,7 @@ def cleanup():
     return
 
 
-@pytest.mark.skip(reason="rhino")
+@pytest.mark.rhino
 @pytest.mark.parametrize("subject",[
     ("R1308T"),
     ("R1275D"),
@@ -43,7 +43,7 @@ def test_fr1_report(subject):
     return
 
 
-@pytest.mark.skip(reason="rhino")
+@pytest.mark.rhino
 @pytest.mark.parametrize("subject",[
     ("R1308T"),
     ("R1275D"),
@@ -58,7 +58,7 @@ def test_fr5_report(subject):
     return
 
 
-@pytest.mark.skip(reason="rhino")
+@pytest.mark.rhino
 @pytest.mark.parametrize("subject, n_channels, anode, cathode, pulse_frequency, pulse_duration, target_amplitude, anode_num, cathode_num",[
     ("R1308T", "128", "LB6", "LB7", "200", "500", "250", "11", "12"),
 ]
@@ -92,7 +92,7 @@ def test_fr5_biomarker(subject, n_channels, anode, cathode, pulse_frequency, pul
     return
 
 
-@pytest.mark.skip(reason="rhino")
+@pytest.mark.rhino
 @pytest.mark.parametrize("subject,experiment,electrode_config_file,pulse_frequency,target_amplitude,anode, cathode,min_amplitudes,max_amplitudes",[
         ("R1350D", "FR5", TEST_DATA + "R1350D_18OCT2017L0M0NOSTIM.csv",
          "200", "1.0", "LAD6", "LAD7", "0.1", "0.5"),
@@ -135,7 +135,7 @@ def test_fr5_util_system_3(subject, experiment, electrode_config_file,
     return
 
 
-@pytest.mark.skip(reason="rhino")
+@pytest.mark.rhino
 @pytest.mark.parametrize("subject",[
     ("R1333N"),
 ]
@@ -153,7 +153,7 @@ def test_pal1_report(subject):
     return
 
 
-@pytest.mark.skip(reason="rhino")
+@pytest.mark.rhino
 @pytest.mark.parametrize("subject, classifier",[
     ("R1312N", "pal"),
 ]
@@ -172,12 +172,12 @@ def test_pal5_report(subject, classifier):
     return
 
 
-@pytest.mark.skip(reason="rhino")
+@pytest.mark.rhino
 def test_pal5_biomarker():
     return
 
 
-@pytest.mark.skip(reason="rhino")
+@pytest.mark.rhino
 @pytest.mark.parametrize("subject,experiment,electrode_config_file,pulse_frequency,min_amplitudes,max_amplitudes,anodes,cathodes",[
          ("R1333N", "PAL5", TEST_DATA + "R1333N_28AUG2017L0M0STIM.csv",
           "200", ["0.25","0.25"], ["1.0", "1.0"], ["LPLT5", "LAHD21"], ["LPLT6", "LAHD22"]),
@@ -214,7 +214,7 @@ def test_pal5_util_system_3(subject, experiment, electrode_config_file,
 
 # PAL5 has a different argument parsing scheme that prevents us from testing the
 # way that the fr5 util can be tested
-@pytest.mark.skip(reason="rhino")
+@pytest.mark.rhino
 def test_pal5_util_system_3():
     os.chdir(CODE_DIR + "/tests/pal5_biomarker/system3/")
     command = "python pal5_util_system_3.py"
@@ -222,7 +222,7 @@ def test_pal5_util_system_3():
     return
 
 
-@pytest.mark.skip(reason="rhino")
+@pytest.mark.rhino
 @pytest.mark.parametrize("subject",[
     ("R1328E"),
 ]
@@ -240,12 +240,12 @@ def test_thr1_report(subject):
     return
 
 
-@pytest.mark.skip(reason="rhino")
+@pytest.mark.rhino
 def test_thr3_report():
     return
 
 
-@pytest.mark.skip(reason="rhino")
+@pytest.mark.rhino
 @pytest.mark.parametrize("subject",[
     ("R1342M"),
 ]
@@ -263,7 +263,7 @@ def test_joint_fr1_catfr1_report(subject):
     return
 
 
-@pytest.mark.skip(reason="rhino")
+@pytest.mark.rhino
 @pytest.mark.parametrize("subject",[
     ("R1293P"),
 ]
@@ -283,7 +283,7 @@ def test_fr_stim_report(subject):
 
 # Note: The special mount-point for this test is temporary until we have actual
 # FR6 data to use.
-@pytest.mark.skip(reason="rhino")
+@pytest.mark.rhino
 @pytest.mark.parametrize("subject, mount_point",[
     ("R1350D","/scratch/zduey/testing/fr6_mock/"),
 ]
