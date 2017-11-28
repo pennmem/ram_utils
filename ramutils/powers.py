@@ -21,7 +21,7 @@ logger = get_logger()
 
 def compute_single_session_powers(session, all_events, start_time, end_time,
                                   buffer_time, freqs, log_powers,
-                                  filt_order, width, bipolar_pairs):
+                                  filt_order, width, normalize, bipolar_pairs):
     """Compute powers for a single session """
     # PTSA will sometimes modify events when reading the eeg, so we ultimately
     # need to return the updated events. In case no events are removed, return
@@ -72,6 +72,8 @@ def compute_single_session_powers(session, all_events, start_time, end_time,
                                                 output='power',
                                                 width=width,
                                                 cpus=25)  # FIXME: why 25?
+        # At this point, pow mat has dimensions: frequency, bipolar_pairs,
+        # events, time
         sess_pow_mat, phase_mat = wavelet_filter.filter()
 
     sess_pow_mat = sess_pow_mat.remove_buffer(buffer_time).data + np.finfo(
@@ -79,13 +81,21 @@ def compute_single_session_powers(session, all_events, start_time, end_time,
 
     if log_powers:
         np.log10(sess_pow_mat, sess_pow_mat)
+
+    # Re-ordering dimensions to be events, frequencies, electrodes with the
+    # mean calculated over the time dimension
     sess_pow_mat = np.nanmean(sess_pow_mat.transpose(2, 1, 0, 3), -1)
+    sess_pow_mat = sess_pow_mat.reshape((len(session_events), -1))
+
+    if normalize:
+        sess_pow_mat = zscore(sess_pow_mat, axis=0, ddof=1)
 
     return sess_pow_mat, updated_events
 
 
 def compute_powers(events, start_time, end_time, buffer_time, freqs,
-                   log_powers, filt_order=4, width=5, bipolar_pairs=None):
+                   log_powers, filt_order=4, width=5,
+                   normalize=True, bipolar_pairs=None):
     """
         Compute powers (or log powers) using a Morlet wavelet filter and
         Butterworth Filter to get rid of line noise
@@ -109,6 +119,9 @@ def compute_powers(events, start_time, end_time, buffer_time, freqs,
         Filter order to use in Butterworth filter
     width: Int
         Wavelet width to use in Wavelet Filter
+    normalize: bool
+        Whether power matrix should be zscored using mean and std. dev by
+        electrode (row)
     bipolar_pairs: array_like
         List of bipolar pairs to use if converting a monopolar EEG recording to
         bipolar recording
@@ -155,11 +168,10 @@ def compute_powers(events, start_time, end_time, buffer_time, freqs,
                                                                    log_powers,
                                                                    filt_order,
                                                                    width,
+                                                                   normalize,
                                                                    bipolar_pairs)
             pow_mat = powers if pow_mat is None else np.concatenate((pow_mat,
                                                                      powers))
-
-        pow_mat = pow_mat.reshape((len(events), -1))
 
     return pow_mat, events
 
@@ -207,6 +219,11 @@ def normalize_powers_by_session(pow_mat, events):
     -------
     pow_mat: np.ndarray
         Normalized power matrix (features)
+
+    Notes
+    -----
+    This function can be removed once the legacy reporting pipeline is fully
+    replaced since those are the only places where it is currently used
 
     """
 
