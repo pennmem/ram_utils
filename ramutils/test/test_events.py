@@ -251,12 +251,15 @@ class TestEvents:
 
     @pytest.mark.parametrize("subject, experiment, parameters, encoding_only, "
                              "combine_events", [
-        ("R1354E", "FR6", FRParameters, False, True),
+        ("R1348J", "FR6", FRParameters, False, True),
+        ("R1350D", "FR6", FRParameters, False, True),
+        ("R1353N", "PAL6", PALParameters, False, True),
         ("R1354E", "FR6", FRParameters, True, True),
+        ("R1354E", "FR6", FRParameters, False, True),
         ("R1016M", "PAL6", PALParameters, True, True),
         ("R1016M", "PAL6", PALParameters, True, False),
         ("R1016M", "PAL6", PALParameters, False, True),
-        ("R1016M", "PAL6", PALParameters, False, False)
+        ("R1016M", "PAL6", PALParameters, False, False),
     ])
     def test_preprocess_events(self, subject, experiment, parameters,
                                encoding_only, combine_events):
