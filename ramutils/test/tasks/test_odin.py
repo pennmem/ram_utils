@@ -49,17 +49,18 @@ def test_generate_ramulator_config(experiment):
     ec_conf_prefix = 'R1354E_26OCT2017L0M0STIM'
     paths = FilePaths(
         root=root,
-        electrode_config_file='R1354E_26OCT2017L0M0STIM' + '.csv',
+        electrode_config_file='/input/configs/R1354E_26OCT2017L0M0STIM' +
+                              '.csv',
 
         # Since we're not actually reading the pairs files in this test, we
         # don't have to worry about the fact that the subjects aren't the same.
         # All we are really doing in this test is verifying that stuff is saved.
-        pairs='R1328E_pairs.json',
+        pairs='/input/configs/R1328E_pairs.json',
         dest='output'
     )
 
     getpath = functools.partial(resource_filename, 'ramutils.test.test_data')
-    with open(getpath('R1328E_excluded_pairs.json'), 'r') as f:
+    with open(getpath('/input/configs/R1328E_excluded_pairs.json'), 'r') as f:
         excluded_pairs = json.load(f)
 
     if "FR" in experiment:
