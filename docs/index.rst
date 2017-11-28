@@ -29,3 +29,4 @@ Contents
     models
     pipeline
     cli
+    misc
