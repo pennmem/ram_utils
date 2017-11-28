@@ -1,5 +1,11 @@
-RAM reporting and other utilities
-=================================
+ramutils
+========
+
+.. image:: https://travis-ci.org/pennmem/ram_utils.svg?branch=master
+    :target: https://travis-ci.org/pennmem/ram_utils
+
+.. image:: https://codecov.io/gh/pennmem/ram_utils/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/pennmem/ram_utils
 
 **Note**: This repo is undergoing a massive cleanup. Things will be
 gradually either moved into separate repositories (where common code can
