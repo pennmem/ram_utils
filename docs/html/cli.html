@@ -1,0 +1,183 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Command-line usage &#8212; Ramutils 2.0.dev0 documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.0.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Pipelines" href="pipeline.html" />
+    <link rel="prev" title="RAM reporting pipeline" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pipeline.html" title="Pipelines"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="RAM reporting pipeline"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.dev0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="command-line-usage">
+<h1>Command-line usage<a class="headerlink" href="#command-line-usage" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">For generating configuration files in production, always use the
+<code class="docutils literal"><span class="pre">RAM_clinical</span></code> account on rhino.</p>
+</div>
+<div class="section" id="ramulator-configuration-generation">
+<h2>Ramulator configuration generation<a class="headerlink" href="#ramulator-configuration-generation" title="Permalink to this headline">¶</a></h2>
+<p>All stim experiments can have configuration files generated via the unified
+<code class="docutils literal"><span class="pre">ramulator-conf</span></code> script:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">ramulator</span><span class="o">-</span><span class="n">conf</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">root</span> <span class="n">ROOT</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">dest</span> <span class="n">DEST</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">cachedir</span> <span class="n">CACHEDIR</span><span class="p">]</span>
+                  <span class="o">--</span><span class="n">subject</span> <span class="n">SUBJECT</span> <span class="p">[</span><span class="o">--</span><span class="n">force</span><span class="o">-</span><span class="n">rerun</span><span class="p">]</span> <span class="o">--</span><span class="n">experiment</span>
+                  <span class="p">{</span><span class="n">AmplitudeDetermination</span><span class="p">,</span><span class="n">PS4_FR5</span><span class="p">,</span><span class="n">PS4_CatFR5</span><span class="p">,</span><span class="n">FR3</span><span class="p">,</span><span class="n">CatFR3</span><span class="p">,</span><span class="n">PAL3</span><span class="p">,</span><span class="n">FR5</span><span class="p">,</span><span class="n">CatFR5</span><span class="p">,</span><span class="n">PAL5</span><span class="p">,</span><span class="n">FR6</span><span class="p">,</span><span class="n">CatFR6</span><span class="p">}</span>
+                  <span class="p">[</span><span class="o">--</span><span class="n">vispath</span> <span class="n">VISPATH</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">localization</span> <span class="n">LOCALIZATION</span><span class="p">]</span>
+                  <span class="p">[</span><span class="o">--</span><span class="n">montage</span> <span class="n">MONTAGE</span><span class="p">]</span> <span class="o">--</span><span class="n">electrode</span><span class="o">-</span><span class="n">config</span><span class="o">-</span><span class="n">file</span>
+                  <span class="n">ELECTRODE_CONFIG_FILE</span> <span class="p">[</span><span class="o">--</span><span class="n">anodes</span> <span class="n">ANODES</span> <span class="p">[</span><span class="n">ANODES</span> <span class="o">...</span><span class="p">]]</span>
+                  <span class="p">[</span><span class="o">--</span><span class="n">cathodes</span> <span class="n">CATHODES</span> <span class="p">[</span><span class="n">CATHODES</span> <span class="o">...</span><span class="p">]]</span>
+                  <span class="p">[</span><span class="o">--</span><span class="nb">min</span><span class="o">-</span><span class="n">amplitudes</span> <span class="n">MIN_AMPLITUDES</span> <span class="p">[</span><span class="n">MIN_AMPLITUDES</span> <span class="o">...</span><span class="p">]]</span>
+                  <span class="p">[</span><span class="o">--</span><span class="nb">max</span><span class="o">-</span><span class="n">amplitudes</span> <span class="n">MAX_AMPLITUDES</span> <span class="p">[</span><span class="n">MAX_AMPLITUDES</span> <span class="o">...</span><span class="p">]]</span>
+                  <span class="p">[</span><span class="o">--</span><span class="n">target</span><span class="o">-</span><span class="n">amplitudes</span> <span class="n">TARGET_AMPLITUDES</span> <span class="p">[</span><span class="n">TARGET_AMPLITUDES</span> <span class="o">...</span><span class="p">]]</span>
+                  <span class="p">[</span><span class="o">--</span><span class="n">pulse</span><span class="o">-</span><span class="n">frequencies</span> <span class="n">PULSE_FREQUENCIES</span> <span class="p">[</span><span class="n">PULSE_FREQUENCIES</span> <span class="o">...</span><span class="p">]]</span>
+
+<span class="n">Generate</span> <span class="n">experiment</span> <span class="n">configs</span> <span class="k">for</span> <span class="n">Ramulator</span>
+
+<span class="n">optional</span> <span class="n">arguments</span><span class="p">:</span>
+  <span class="o">-</span><span class="n">h</span><span class="p">,</span> <span class="o">--</span><span class="n">help</span>            <span class="n">show</span> <span class="n">this</span> <span class="n">help</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span>
+  <span class="o">--</span><span class="n">root</span> <span class="n">ROOT</span>           <span class="n">path</span> <span class="n">to</span> <span class="n">rhino</span> <span class="n">root</span>
+  <span class="o">--</span><span class="n">dest</span> <span class="n">DEST</span><span class="p">,</span> <span class="o">-</span><span class="n">d</span> <span class="n">DEST</span>  <span class="n">directory</span> <span class="n">to</span> <span class="n">write</span> <span class="n">output</span> <span class="n">to</span>
+  <span class="o">--</span><span class="n">cachedir</span> <span class="n">CACHEDIR</span><span class="p">,</span> <span class="o">-</span><span class="n">c</span> <span class="n">CACHEDIR</span>
+                        <span class="n">absolute</span> <span class="n">path</span> <span class="k">for</span> <span class="n">caching</span> <span class="nb">dir</span>
+  <span class="o">--</span><span class="n">subject</span> <span class="n">SUBJECT</span><span class="p">,</span> <span class="o">-</span><span class="n">s</span> <span class="n">SUBJECT</span>
+                        <span class="n">subject</span> <span class="n">ID</span>
+  <span class="o">--</span><span class="n">force</span><span class="o">-</span><span class="n">rerun</span>         <span class="n">force</span> <span class="n">re</span><span class="o">-</span><span class="n">running</span> <span class="nb">all</span> <span class="n">tasks</span>
+  <span class="o">--</span><span class="n">experiment</span> <span class="p">{</span><span class="n">AmplitudeDetermination</span><span class="p">,</span><span class="n">PS4_FR5</span><span class="p">,</span><span class="n">PS4_CatFR5</span><span class="p">,</span><span class="n">FR3</span><span class="p">,</span><span class="n">CatFR3</span><span class="p">,</span><span class="n">PAL3</span><span class="p">,</span><span class="n">FR5</span><span class="p">,</span><span class="n">CatFR5</span><span class="p">,</span><span class="n">PAL5</span><span class="p">,</span><span class="n">FR6</span><span class="p">,</span><span class="n">CatFR6</span><span class="p">},</span> <span class="o">-</span><span class="n">x</span> <span class="p">{</span><span class="n">AmplitudeDetermination</span><span class="p">,</span><span class="n">PS4_FR5</span><span class="p">,</span><span class="n">PS4_CatFR5</span><span class="p">,</span><span class="n">FR3</span><span class="p">,</span><span class="n">CatFR3</span><span class="p">,</span><span class="n">PAL3</span><span class="p">,</span><span class="n">FR5</span><span class="p">,</span><span class="n">CatFR5</span><span class="p">,</span><span class="n">PAL5</span><span class="p">,</span><span class="n">FR6</span><span class="p">,</span><span class="n">CatFR6</span><span class="p">}</span>
+                        <span class="n">experiment</span>
+  <span class="o">--</span><span class="n">vispath</span> <span class="n">VISPATH</span>     <span class="n">path</span> <span class="n">to</span> <span class="n">save</span> <span class="n">task</span> <span class="n">graph</span> <span class="n">visualization</span> <span class="n">to</span>
+  <span class="o">--</span><span class="n">localization</span> <span class="n">LOCALIZATION</span><span class="p">,</span> <span class="o">-</span><span class="n">l</span> <span class="n">LOCALIZATION</span>
+                        <span class="n">localization</span> <span class="n">number</span>
+  <span class="o">--</span><span class="n">montage</span> <span class="n">MONTAGE</span><span class="p">,</span> <span class="o">-</span><span class="n">m</span> <span class="n">MONTAGE</span>
+                        <span class="n">montage</span> <span class="n">number</span>
+  <span class="o">--</span><span class="n">electrode</span><span class="o">-</span><span class="n">config</span><span class="o">-</span><span class="n">file</span> <span class="n">ELECTRODE_CONFIG_FILE</span><span class="p">,</span> <span class="o">-</span><span class="n">e</span> <span class="n">ELECTRODE_CONFIG_FILE</span>
+                        <span class="n">path</span> <span class="n">to</span> <span class="n">Odin</span> <span class="n">electrode</span> <span class="n">config</span> <span class="n">csv</span> <span class="n">file</span>
+  <span class="o">--</span><span class="n">anodes</span> <span class="n">ANODES</span> <span class="p">[</span><span class="n">ANODES</span> <span class="o">...</span><span class="p">]</span>
+                        <span class="n">stim</span> <span class="n">anode</span> <span class="n">labels</span>
+  <span class="o">--</span><span class="n">cathodes</span> <span class="n">CATHODES</span> <span class="p">[</span><span class="n">CATHODES</span> <span class="o">...</span><span class="p">]</span>
+                        <span class="n">stim</span> <span class="n">cathode</span> <span class="n">labels</span>
+  <span class="o">--</span><span class="nb">min</span><span class="o">-</span><span class="n">amplitudes</span> <span class="n">MIN_AMPLITUDES</span> <span class="p">[</span><span class="n">MIN_AMPLITUDES</span> <span class="o">...</span><span class="p">]</span>
+                        <span class="n">minimum</span> <span class="n">stim</span> <span class="n">amplitudes</span>
+  <span class="o">--</span><span class="nb">max</span><span class="o">-</span><span class="n">amplitudes</span> <span class="n">MAX_AMPLITUDES</span> <span class="p">[</span><span class="n">MAX_AMPLITUDES</span> <span class="o">...</span><span class="p">]</span>
+                        <span class="n">maximum</span> <span class="n">stim</span> <span class="n">amplitudes</span>
+  <span class="o">--</span><span class="n">target</span><span class="o">-</span><span class="n">amplitudes</span> <span class="n">TARGET_AMPLITUDES</span> <span class="p">[</span><span class="n">TARGET_AMPLITUDES</span> <span class="o">...</span><span class="p">],</span> <span class="o">-</span><span class="n">a</span> <span class="n">TARGET_AMPLITUDES</span> <span class="p">[</span><span class="n">TARGET_AMPLITUDES</span> <span class="o">...</span><span class="p">]</span>
+                        <span class="n">target</span> <span class="n">stim</span> <span class="n">amplitudes</span>
+  <span class="o">--</span><span class="n">clear</span><span class="o">-</span><span class="n">log</span>           <span class="n">clear</span> <span class="n">the</span> <span class="n">log</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">All paths are relative to the root path <em>except</em> for <code class="docutils literal"><span class="pre">cachedir</span></code>. This is
+treated differently due to an issue on macOS and sshfs-mounted filesystems.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Command-line usage</a><ul>
+<li><a class="reference internal" href="#ramulator-configuration-generation">Ramulator configuration generation</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">RAM reporting pipeline</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="pipeline.html"
+                        title="next chapter">Pipelines</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/cli.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pipeline.html" title="Pipelines"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="RAM reporting pipeline"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.dev0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>
