@@ -1,0 +1,177 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ramutils.tasks.classifier &#8212; Ramutils 2.0.dev0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Ramutils 2.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ramutils.tasks.classifier</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">classiflib</span> <span class="k">import</span> <span class="n">ClassifierContainer</span>
+
+<span class="kn">from</span> <span class="nn">ramutils.classifier</span> <span class="k">import</span> <span class="n">ModelOutput</span>
+<span class="kn">from</span> <span class="nn">ramutils.classifier.utils</span> <span class="k">import</span> <span class="n">train_classifier</span> <span class="k">as</span> <span class="n">train_classifier_core</span>
+<span class="kn">from</span> <span class="nn">ramutils.classifier.cross_validation</span> <span class="k">import</span> <span class="n">perform_cross_validation</span> <span class="k">as</span> \
+    <span class="n">perform_cross_validation_core</span>
+<span class="kn">from</span> <span class="nn">ramutils.classifier.weighting</span> <span class="k">import</span> \
+    <span class="n">get_sample_weights</span> <span class="k">as</span> <span class="n">get_sample_weights_core</span>
+<span class="kn">from</span> <span class="nn">ramutils.log</span> <span class="k">import</span> <span class="n">get_logger</span>
+<span class="kn">from</span> <span class="nn">ramutils.tasks</span> <span class="k">import</span> <span class="n">task</span>
+
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">()</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;get_sample_weights&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;train_classifier&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;perform_cross_validation&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;serialize_classifier&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<span class="nd">@task</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">get_sample_weights</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">sample_weights</span> <span class="o">=</span> <span class="n">get_sample_weights_core</span><span class="p">(</span><span class="n">events</span><span class="p">,</span>
+                                             <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sample_weights</span>
+
+
+<span class="nd">@task</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">train_classifier</span><span class="p">(</span><span class="n">pow_mat</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">sample_weights</span><span class="p">,</span> <span class="n">penalty_param</span><span class="p">,</span>
+                     <span class="n">penalty_type</span><span class="p">,</span> <span class="n">solver</span><span class="p">):</span>
+    <span class="n">classifier</span> <span class="o">=</span> <span class="n">train_classifier_core</span><span class="p">(</span><span class="n">pow_mat</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">sample_weights</span><span class="p">,</span>
+                                       <span class="n">penalty_param</span><span class="p">,</span> <span class="n">penalty_type</span><span class="p">,</span> <span class="n">solver</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">classifier</span>
+
+
+<span class="nd">@task</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">perform_cross_validation</span><span class="p">(</span><span class="n">classifier</span><span class="p">,</span> <span class="n">pow_mat</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">n_permutations</span><span class="p">,</span>
+                             <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">xval</span> <span class="o">=</span> <span class="n">perform_cross_validation_core</span><span class="p">(</span><span class="n">classifier</span><span class="p">,</span> <span class="n">pow_mat</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span>
+                                         <span class="n">n_permutations</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">xval</span>
+
+
+<div class="viewcode-block" id="serialize_classifier"><a class="viewcode-back" href="../../../pipeline.html#ramutils.tasks.classifier.serialize_classifier">[docs]</a><span class="nd">@task</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">serialize_classifier</span><span class="p">(</span><span class="n">classifier</span><span class="p">,</span> <span class="n">pairs</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">sample_weights</span><span class="p">,</span>
+                         <span class="n">xval_output</span><span class="p">,</span> <span class="n">subject</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; Serialize classifier into a container object</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    classifier: sklearn Estimator</span>
+<span class="sd">        Model used during training</span>
+<span class="sd">    pairs: array_like</span>
+<span class="sd">        bipolar pairs used for training</span>
+<span class="sd">    features: np.ndarray</span>
+<span class="sd">        Normalized power matrix used as features to the classifier</span>
+<span class="sd">    events: np.recarray</span>
+<span class="sd">        Set of events used for training</span>
+<span class="sd">    sample_weights: array_like</span>
+<span class="sd">        Weights used for each of the event</span>
+<span class="sd">    xval_output: ModelOutput</span>
+<span class="sd">        Object used for calculating and storing cross-validation-related metrics</span>
+<span class="sd">    subject: str</span>
+<span class="sd">        Subject identifier</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ClassififerContainer</span>
+<span class="sd">        Object representing all meta-data associated with training a classifier</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">container</span> <span class="o">=</span> <span class="n">ClassifierContainer</span><span class="p">(</span>
+        <span class="n">classifier</span><span class="o">=</span><span class="n">classifier</span><span class="p">,</span>
+        <span class="n">pairs</span><span class="o">=</span><span class="n">pairs</span><span class="p">,</span>
+        <span class="n">features</span><span class="o">=</span><span class="n">features</span><span class="p">,</span>
+        <span class="n">events</span><span class="o">=</span><span class="n">events</span><span class="p">,</span>
+        <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weights</span><span class="p">,</span>
+        <span class="n">classifier_info</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;auc&#39;</span><span class="p">:</span> <span class="n">xval_output</span><span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">auc</span><span class="p">,</span>
+            <span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="n">subject</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">container</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Ramutils 2.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

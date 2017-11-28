@@ -25,9 +25,8 @@ from ramutils.utils import extract_subject_montage
 def preprocess_events(subject, experiment, start_time,
                       end_time, duration, pre, post, combine_events=True,
                       encoding_only=False, root='/'):
-    """
-        High-level pre-processing function for combining/cleaning record only
-        events to be used in config generation and reports
+    """High-level pre-processing function for combining/cleaning record only
+    events to be used in config generation and reports
 
     Parameters
     ----------
@@ -167,10 +166,9 @@ def load_events(subject, experiment, sessions=None, rootdir='/'):
 
 def clean_events(experiment, events, start_time=None, end_time=None,
                  duration=None, pre=None, post=None):
-    """
-        Peform basic cleaning operations on events such as removing
-        incomplete sessions, negative offset events, and incomplete lists.
-        For FR events, baseline events needs to be found.
+    """Peform basic cleaning operations on events such as removing incomplete
+    sessions, negative offset events, and incomplete lists. For FR events,
+    baseline events needs to be found.
 
     Parameters
     ----------
@@ -222,9 +220,8 @@ def normalize_fr_events(events):
 
 
 def normalize_pal_events(events):
-    """
-        Perform any normalization to PAL event so make the homogeneous enough
-        so that it is trivial to combine with other experiment events
+    """Perform any normalization to PAL event so make the homogeneous enough so
+    that it is trivial to combine with other experiment events.
 
     """
     events = rename_correct_to_recalled(events)
@@ -233,7 +230,8 @@ def normalize_pal_events(events):
 
 
 def rename_correct_to_recalled(events):
-    """
+    """Normalizes PAL "recall" event names to match those of FR experiments.
+
     Parameters
     ----------
     events: np.recarray
@@ -256,10 +254,9 @@ def remove_negative_offsets(events):
 
 
 def remove_incomplete_lists(events):
-    """
-        Remove incomplete lists for every session in the given events. Note,
-        there are two ways that this is done in the reporting code, so it is an
-        outstanding item to determine which method is better
+    """Remove incomplete lists for every session in the given events. Note,
+    there are two ways that this is done in the reporting code, so it is an
+    outstanding item to determine which method is better
 
     """
     # TODO: This needs to be cleaned up and tested
@@ -319,20 +316,19 @@ def subset_pal_events(events):
 
 
 def update_recall_outcome_for_retrieval_events(events):
-    """
-        Manually override the recall outcomes for baseline retrieval and word
-        retrieval events. All baseline retrieval events should be marked as not
-        recalled and all word events in the recall period should be marked as
-        recalled. This assumes that intrusions have already been removed from
-        the given set of events. It exists merely to serve as an extra check on
-        what should already be true in the raw events data
+    """Manually override the recall outcomes for baseline retrieval and word
+    retrieval events. All baseline retrieval events should be marked as not
+    recalled and all word events in the recall period should be marked as
+    recalled. This assumes that intrusions have already been removed from the
+    given set of events. It exists merely to serve as an extra check on what
+    should already be true in the raw events data.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     events: np.recarray
 
-    Returns:
-    --------
+    Returns
+    -------
     np.recarray
         Events containing updated recall outcomes for retrieval events
 
@@ -343,13 +339,12 @@ def update_recall_outcome_for_retrieval_events(events):
 
 
 def update_pal_retrieval_events(events):
-    """
-        Create surrogate responses for retrieval period based on PS4/PAL5
-        design doc. Surrogate responses are created by identifying trials without
-        any responses. For these trials, a new response time is created based on
-        a random draw from the set of response times from actual responses
-    """
+    """Create surrogate responses for retrieval period based on PS4/PAL5 design
+    doc. Surrogate responses are created by identifying trials without any
+    responses. For these trials, a new response time is created based on a
+    random draw from the set of response times from actual responses.
 
+    """
     # Identify the sample rate
     samplerate = 1000 #extract_sample_rate(events)
 
@@ -390,11 +385,11 @@ def combine_retrieval_events(events):
 
 
 def coerce_study_pair_to_word_event(events):
-    """
-        Update STUDY_PAIR events to be WORD events. These are the same event
-        type, but PAL calls them STUDY_PAIR and FR/catFR call them WORD. In the
-        future, it may make more sense to make an update to event creation
-        instead of coercing the even types here
+    """Update STUDY_PAIR events to be WORD events. These are the same event
+    type, but PAL calls them STUDY_PAIR and FR/catFR call them WORD. In the
+    future, it may make more sense to make an update to event creation instead
+    of coercing the event types here.
+
     """
     events.type[(events.type == 'STUDY_PAIR')] = 'WORD'
     return events
@@ -407,12 +402,11 @@ def remove_practice_lists(events):
 
 
 def remove_bad_events(events):
-    """
-        Remove events whose offset values would result in trying to read data
-        that is out of bounds in the EEG file. Currently, this is done
-        automatically in PTSA when you load the EEG, but to avoid having to
-        catch updated events when reading the EEG, it should be done ahead of
-        time.
+    """Remove events whose offset values would result in trying to read data
+    that is out of bounds in the EEG file. Currently, this is done automatically
+    in PTSA when you load the EEG, but to avoid having to catch updated events
+    when reading the EEG, it should be done ahead of time.
+
     """
     raise NotImplementedError
 
@@ -428,8 +422,10 @@ def select_column_subset(events):
 
 
 def initialize_empty_event_reccarray():
-    """ Utility function for generating a recarray that looks normalized,
-    but is empty """
+    """Utility function for generating a recarray that looks normalized,
+    but is empty.
+
+    """
     empty_recarray = np.recarray((0, ), dtype=[('serialpos', int),
                                                ('session', int),
                                                ('subject', unicode),
@@ -449,14 +445,13 @@ def initialize_empty_event_reccarray():
 
 def insert_baseline_retrieval_events(events, start_time, end_time, duration,
                                      pre, post):
-    """
-        Match recall events to matching baseline periods of failure to recall.
-        This is required for all free recall events, but is not necessary for
-        PAL events, which have a natural baseline/comparison group. Baseline
-        events all begin at least 1000 ms after a vocalization, and end
-        at least 1000 ms before a vocalization. Each recall event is matched,
-        wherever possible, to a valid baseline period from a different list
-        within 3 seconds relative to the onset of the recall period.
+    """Match recall events to matching baseline periods of failure to recall.
+    This is required for all free recall events, but is not necessary for
+    PAL events, which have a natural baseline/comparison group. Baseline
+    events all begin at least 1000 ms after a vocalization, and end
+    at least 1000 ms before a vocalization. Each recall event is matched,
+    wherever possible, to a valid baseline period from a different list
+    within 3 seconds relative to the onset of the recall period.
 
     Parameters
     ----------
@@ -569,8 +564,8 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
 
 def find_free_time_periods(times, duration, pre, post, start=None, end=None):
     """
-        Given a list of event times, find epochs between them when nothing is
-        happening.
+    Given a list of event times, find epochs between them when nothing is
+    happening.
 
     Parameters
     ----------
@@ -620,17 +615,17 @@ def find_free_time_periods(times, duration, pre, post, start=None, end=None):
 
 def concatenate_events_across_experiments(event_list):
     """
-        Concatenate events across different experiment types. To make session
-        numbers unique, 100 is added to the second set of events in event_list,
-        200 to the next set of events, and so on.
+    Concatenate events across different experiment types. To make session
+    numbers unique, 100 is added to the second set of events in event_list,
+    200 to the next set of events, and so on.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     event_list: iterable
         An iterable containing events to be concatenated
 
-    Returns:
-    --------
+    Returns
+    -------
     np.recarray
         The combined set of events
 
@@ -680,7 +675,6 @@ def concatenate_events_for_single_experiment(event_list):
 
 def remove_intrusions(events):
     """
-
     Select all encoding events that were part of the encoding period or
     were non-intrusion retrieval events.
 
@@ -701,8 +695,8 @@ def remove_intrusions(events):
 def select_word_events(events, encoding_only=True):
     """ Filter out any non-word events
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     events: np.recarray
     encoding_only: bool
         Flag for whether retrieval events should be included
@@ -786,9 +780,9 @@ def get_baseline_retrieval_mask(events):
 
 def select_retrieval_events(events):
     """
-        Select retrieval events. Uses the experiment field in the events to
-        determine how selection should be done since selection differes for PAL
-        and FR/catFR
+    Select retrieval events. Uses the experiment field in the events to
+    determine how selection should be done since selection differes for PAL
+    and FR/catFR
 
     Parameters
     ----------
@@ -848,16 +842,16 @@ def get_all_retrieval_events_mask(events):
 
 def partition_events(events):
     """
-        Split a given set of events into partitions by experiment class (
-        FR/PAL) and encoding/retrieval
+    Split a given set of events into partitions by experiment class (
+    FR/PAL) and encoding/retrieval
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     events: np.recarray
         Set of events to partition
 
-    Returns:
-    --------
+    Returns
+    -------
     list
         A list containing all identified partitions to the data
 

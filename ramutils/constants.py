@@ -1,3 +1,11 @@
+"""Constants that may be used throughout :mod:`ramutils`. Constants that are
+defined here include:
+
+* ``EXPERIMENTS`` - a dictionary of all experiments that can be processed by
+  :mod:`ramutils`
+
+"""
+
 EXPERIMENTS = {
     'record_only': [
         'FR1',
