@@ -336,7 +336,8 @@
         <span class="n">final_sess_events</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="s1">&#39;mstime&#39;</span><span class="p">])</span>
         <span class="n">final_event_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">final_sess_events</span><span class="p">)</span>
 
-        <span class="c1"># METHOD #2 (perhaps less accurate?)</span>
+        <span class="c1"># METHOD #2 (perhaps less accurate?) We need to figure out which one</span>
+        <span class="c1"># should be used. Don&#39;t delete for now</span>
         <span class="c1"># try:</span>
         <span class="c1">#     last_list = sess_events[sess_events.type == &#39;REC_END&#39;][-1][&#39;list&#39;]</span>
         <span class="c1">#     final_event_list.append(sess_events[sess_events.list &lt;= last_list])</span>
@@ -765,7 +766,7 @@
 
 <div class="viewcode-block" id="extract_sample_rate"><a class="viewcode-back" href="../../events.html#ramutils.events.extract_sample_rate">[docs]</a><span class="k">def</span> <span class="nf">extract_sample_rate</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Extract the samplerate used for the given set of events&quot;&quot;&quot;</span>
-    <span class="n">eeg_reader</span> <span class="o">=</span> <span class="n">EEGReader</span><span class="p">(</span><span class="n">events</span><span class="o">=</span><span class="n">events</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">eeg_reader</span> <span class="o">=</span> <span class="n">EEGReader</span><span class="p">(</span><span class="n">events</span><span class="o">=</span><span class="n">events</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">start_time</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
     <span class="n">eeg</span> <span class="o">=</span> <span class="n">eeg_reader</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
     <span class="n">samplerate</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">eeg</span><span class="p">[</span><span class="s1">&#39;samplerate&#39;</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">samplerate</span></div>
