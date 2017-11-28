@@ -24,7 +24,8 @@ Contents
 .. toctree::
     :maxdepth: 2
 
-    cli
-    pipeline
     classifier
+    events
     models
+    pipeline
+    cli
