@@ -197,7 +197,7 @@ documented below.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>pairs</strong> (<em>dict</em>) – Full pairs.json as a dict</li>
-<li><strong>stim_params</strong> (<em>List</em><em>[</em><em>StimParameters</em><em>]</em>) – </li>
+<li><strong>stim_params</strong> (<em>List</em><em>[</em><a class="reference internal" href="data.html#ramutils.parameters.StimParameters" title="ramutils.parameters.StimParameters"><em>StimParameters</em></a><em>]</em>) – </li>
 <li><strong>return_excluded</strong> (<em>bool</em>) – </li>
 </ul>
 </td>
@@ -290,7 +290,7 @@ pairs</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>subject</strong> (<em>str</em>) – Subject ID</li>
-<li><strong>paths</strong> (<em>FilePaths</em>) – </li>
+<li><strong>paths</strong> (<a class="reference internal" href="data.html#ramutils.parameters.FilePaths" title="ramutils.parameters.FilePaths"><em>FilePaths</em></a>) – </li>
 </ul>
 </td>
 </tr>
@@ -327,11 +327,11 @@ paths are assumed to be absolute.</p>
 <li><strong>subject</strong> (<em>str</em>) – </li>
 <li><strong>experiment</strong> (<em>str</em>) – </li>
 <li><strong>container</strong> (<em>ClassifierContainer</em>) – serialized classifier</li>
-<li><strong>stim_params</strong> (<em>List</em><em>[</em><em>StimParameters</em><em>]</em>) – list of stimulation parameters</li>
-<li><strong>paths</strong> (<em>FilePaths</em>) – </li>
+<li><strong>stim_params</strong> (<em>List</em><em>[</em><a class="reference internal" href="data.html#ramutils.parameters.StimParameters" title="ramutils.parameters.StimParameters"><em>StimParameters</em></a><em>]</em>) – list of stimulation parameters</li>
+<li><strong>paths</strong> (<a class="reference internal" href="data.html#ramutils.parameters.FilePaths" title="ramutils.parameters.FilePaths"><em>FilePaths</em></a>) – </li>
 <li><strong>excluded_pairs</strong> (<em>dict</em>) – Pairs excluded from the classifier (pairs that
 contain a stim contact and possibly some others)</li>
-<li><strong>params</strong> (<em>ExperimentParameters</em>) – All parameters used in training the
+<li><strong>params</strong> (<a class="reference internal" href="data.html#ramutils.parameters.ExperimentParameters" title="ramutils.parameters.ExperimentParameters"><em>ExperimentParameters</em></a>) – All parameters used in training the
 classifier. This is partially redundant with some data stored in the
 <code class="docutils literal"><span class="pre">container</span></code> object.</li>
 </ul>
