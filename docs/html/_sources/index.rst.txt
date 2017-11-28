@@ -7,6 +7,5 @@ ramutils
 
     cli
     pipeline
-    timeseries
     classifier
     models
