@@ -56,8 +56,8 @@
 <h1>Pipelines<a class="headerlink" href="#pipelines" title="Permalink to this headline">¶</a></h1>
 <p>Experiment configuration file generation and post-experiment reporting is done
 via a series of tasks that are built up into a pipeline using <a class="reference external" href="http://dask.pydata.org/en/latest/index.html">dask</a>.</p>
-<div class="section" id="tasks">
-<h2>Tasks<a class="headerlink" href="#tasks" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="defining-tasks">
+<h2>Defining tasks<a class="headerlink" href="#defining-tasks" title="Permalink to this headline">¶</a></h2>
 <p>Tasks are created by using the <a class="reference internal" href="#ramutils.tasks.task" title="ramutils.tasks.task"><code class="xref py py-func docutils literal"><span class="pre">ramutils.tasks.task()</span></code></a> decorator or wrapping
 a function with <a class="reference internal" href="#ramutils.tasks.make_task" title="ramutils.tasks.make_task"><code class="xref py py-func docutils literal"><span class="pre">ramutils.tasks.make_task()</span></code></a>. These simply apply the
 <code class="xref py py-func docutils literal"><span class="pre">dask.delayed()</span></code> and (optionally) <code class="docutils literal"><span class="pre">joblib</span></code> caching decorators. The former
@@ -65,8 +65,6 @@ is important for adding the ability to parallelize a pipeline (for tasks that
 can run independently) while the latter allows for resuming a pipeline when
 something goes wrong or if only changing one parameter which does not affect all
 tasks.</p>
-<div class="section" id="defining-tasks">
-<h3>Defining tasks<a class="headerlink" href="#defining-tasks" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="ramutils.tasks.task">
 <code class="descclassname">ramutils.tasks.</code><code class="descname">task</code><span class="sig-paren">(</span><em>cache=True</em>, <em>log_args=False</em>, <em>nout=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/_wrapper.html#task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.task" title="Permalink to this definition">¶</a></dt>
@@ -108,7 +106,6 @@ the <code class="xref py py-func docutils literal"><span class="pre">task()</spa
 </table>
 </dd></dl>
 
-</div>
 </div>
 <div class="section" id="reference">
 <h2>Reference<a class="headerlink" href="#reference" title="Permalink to this headline">¶</a></h2>
@@ -404,10 +401,7 @@ results.</p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Pipelines</a><ul>
-<li><a class="reference internal" href="#tasks">Tasks</a><ul>
 <li><a class="reference internal" href="#defining-tasks">Defining tasks</a></li>
-</ul>
-</li>
 <li><a class="reference internal" href="#reference">Reference</a><ul>
 <li><a class="reference internal" href="#module-ramutils.tasks.classifier">Classifier tasks</a></li>
 <li><a class="reference internal" href="#module-ramutils.tasks.events">Events tasks</a></li>

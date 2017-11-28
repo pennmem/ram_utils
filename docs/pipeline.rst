@@ -6,8 +6,8 @@ via a series of tasks that are built up into a pipeline using dask_.
 
 .. _dask: http://dask.pydata.org/en/latest/index.html
 
-Tasks
------
+Defining tasks
+--------------
 
 Tasks are created by using the :func:`ramutils.tasks.task` decorator or wrapping
 a function with :func:`ramutils.tasks.make_task`. These simply apply the
@@ -16,9 +16,6 @@ is important for adding the ability to parallelize a pipeline (for tasks that
 can run independently) while the latter allows for resuming a pipeline when
 something goes wrong or if only changing one parameter which does not affect all
 tasks.
-
-Defining tasks
-^^^^^^^^^^^^^^
 
 .. autofunction:: ramutils.tasks.task
 
