@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>RAM reporting pipeline &#8212; Ramutils 2.0.dev0 documentation</title>
+    <title>Pipelines &#8212; Ramutils 2.0.dev0 documentation</title>
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -24,7 +24,8 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Command-line usage" href="cli.html" /> 
+    <link rel="next" title="Timeseries data processing" href="timeseries.html" />
+    <link rel="prev" title="Command-line usage" href="cli.html" /> 
   </head>
   <body>
     <div class="related" role="navigation" aria-label="related navigation">
@@ -37,9 +38,12 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="cli.html" title="Command-line usage"
+          <a href="timeseries.html" title="Timeseries data processing"
              accesskey="N">next</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">Ramutils 2.0.dev0 documentation</a> &#187;</li> 
+        <li class="right" >
+          <a href="cli.html" title="Command-line usage"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.dev0 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -48,30 +52,17 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="ram-reporting-pipeline">
-<h1>RAM reporting pipeline<a class="headerlink" href="#ram-reporting-pipeline" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line usage</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="cli.html#ramulator-configuration-generation">Ramulator configuration generation</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipelines</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="pipeline.html#building-a-pipeline">Building a pipeline</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pipeline.html#tasks">Tasks</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="timeseries.html">Timeseries data processing</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="timeseries.html#reference">Reference</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="classifier.html">Classifier training, cross validation, and utilities</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="classifier.html#module-ramutils.classifier.cross_validation">Reference</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="models.html">Modeling effects of stim</a></li>
-</ul>
+  <div class="section" id="pipelines">
+<h1>Pipelines<a class="headerlink" href="#pipelines" title="Permalink to this headline">¶</a></h1>
+<p>Experiment configuration file generation and post-experiment reporting is done
+via a series of tasks that are built up into a pipeline using <a class="reference external" href="http://dask.pydata.org/en/latest/index.html">dask</a>.</p>
+<div class="section" id="building-a-pipeline">
+<h2>Building a pipeline<a class="headerlink" href="#building-a-pipeline" title="Permalink to this headline">¶</a></h2>
+<p>TODO: Demo of how to build a pipeline from component tasks.</p>
+</div>
+<div class="section" id="tasks">
+<h2>Tasks<a class="headerlink" href="#tasks" title="Permalink to this headline">¶</a></h2>
+<p>TODO</p>
 </div>
 </div>
 
@@ -81,13 +72,25 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h4>Next topic</h4>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Pipelines</a><ul>
+<li><a class="reference internal" href="#building-a-pipeline">Building a pipeline</a></li>
+<li><a class="reference internal" href="#tasks">Tasks</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
   <p class="topless"><a href="cli.html"
-                        title="next chapter">Command-line usage</a></p>
+                        title="previous chapter">Command-line usage</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="timeseries.html"
+                        title="next chapter">Timeseries data processing</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/index.rst.txt"
+      <li><a href="_sources/pipeline.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -115,9 +118,12 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="cli.html" title="Command-line usage"
+          <a href="timeseries.html" title="Timeseries data processing"
              >next</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">Ramutils 2.0.dev0 documentation</a> &#187;</li> 
+        <li class="right" >
+          <a href="cli.html" title="Command-line usage"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.dev0 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
