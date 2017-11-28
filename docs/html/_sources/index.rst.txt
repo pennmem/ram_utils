@@ -18,6 +18,14 @@ Install in the new environment::
     $ source activate ramutils
     (ramutils) $ python setup.py install
 
+Install remaining requirements::
+
+    (ramutils) $ pip install git+https://github.com/pennmem/classiflib.git
+    (ramutils) $ pip install git+https://github.com/pennmem/bptools.git
+
+.. note:: In the future, these packages should be installed automatically with
+          conda.
+
 Contents
 --------
 
