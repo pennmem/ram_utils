@@ -32,6 +32,9 @@ parser.add_argument('--target-amplitudes', '-a', type=float, nargs='+', help='ta
 # parser.add_argument('--pulse-frequencies', '-f', type=float, nargs='+',
 #                     help='stim pulse frequencies (one to use same value)')
 
+parser.add_argument('--clear-log', action='store_true', default=False,
+                    help='clear the log')
+
 logger = get_logger()
 
 
@@ -86,7 +89,8 @@ def main(input_args=None):
         clarg = arg.replace('_', '-')
         output.append('--{} {}'.format(clarg, value))
 
-    with open(osp.expanduser('~/.ramutils_expconf.log'), 'a') as f:
+    mode = 'w' if args.clear_log else 'a'
+    with open(osp.expanduser('~/.ramutils_expconf.log'), mode) as f:
         f.write(datetime.now().strftime('[%Y-%m-%dT%H:%M:%S]\n'))
         f.write("ramulator-conf \\\n")
         f.write('\\\n'.join(output))  # add backslashes to allow copy-paste
