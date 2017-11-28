@@ -294,8 +294,8 @@ class TestEvents:
     def test_regression_event_processing(self, subject, parameters, experiment):
         parameters = parameters().to_dict()
 
-        old_events = joblib.load(datafile('/input/events/{}_events.pkl'.format(
-            subject)))
+        old_events = np.load(datafile('/input/events/{}_task_events.npy'.format(
+            subject))).view(np.recarray)
         new_events = preprocess_events(subject,
                                        experiment,
                                        parameters['baseline_removal_start_time'],
