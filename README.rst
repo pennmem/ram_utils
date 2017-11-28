@@ -37,6 +37,9 @@ To update the account to a new release:
 2. ``git checkout <release tag>``
 3. ``maint/conda_update.sh``
 
+.. note:: ``conda_udpate.sh`` script will fail if the ``ramutils`` environment
+          does not already exist. You can create a dummy environment in this
+          case with ``conda create -n ramutils -y``.
 
 Ramulator experiment config generation
 --------------------------------------
