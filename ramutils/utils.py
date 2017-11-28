@@ -41,8 +41,8 @@ def reindent_json(json_file, indent=2):
 def safe_divide(a, b):
     """ Attempts to perform a/b and catches zero division errors to prevent crashing
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     a: float
         Numerator
     b: float
@@ -71,14 +71,14 @@ def touch(path):
 def save_array_to_hdf5(output, data_name, data, overwrite=False):
     """Save an array of data to hdf5
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     output: (str) Path to hdf5 output file
     data_name: (str) Name of the dataset
     data: (np.ndarray) Data array
 
-    Notes:
-    ------
+    Notes
+    -----
     Primarily useful for debugging purposes. Could be used to save underlying
     data for report plots.
 
