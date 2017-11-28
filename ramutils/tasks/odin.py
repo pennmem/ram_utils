@@ -82,6 +82,99 @@ def generate_pairs_from_electrode_config(subject, paths):
         return pairs_from_ec
 
 
+def _make_experiment_specific_data_section(experiment, stim_params,
+                                           classifier_file,
+                                           classifier_version=CLASSIFIER_VERSION):
+    """Return a dict containing the config section ``experiment_specific_data``.
+
+    Parameters
+    ----------
+    experiment : str
+    stim_params : dict
+    classifier_file : str
+    classifier_version : str
+
+    Returns
+    -------
+    dict representation of the ``experiment_specific_data`` section.
+
+    """
+    def make_stim_channel_section(params, key):
+        stub = {
+            "stim_duration": 500,
+            "stim_frequency": 200
+        }
+
+        if 'PS4' in experiment or experiment == 'AmplitudeDetermination':
+            stub.update({
+                'min_stim_amplitude': params[key]['min_stim_amplitude'],
+                'max_stim_amplitude': params[key]['max_stim_amplitude']
+            })
+        else:
+            stub.update({
+                'stim_amplitude': params[key]['stim_amplitude']
+            })
+
+        return stub
+
+    esd = {
+        "allow_classifier_generalization": True,
+        "classifier_file": "config_files/{}".format(classifier_file),
+        "classifier_version": classifier_version,
+        "random_stim_prob": False,
+        "save_debug_output": True
+    }
+
+    # Why oh why must everything be a special snowflake?
+    key = 'stim_electrode_pairs' if experiment == 'AmplitudeDetermination' else 'stim_channels'
+    esd[key] = {
+        label: make_stim_channel_section(stim_params, label)
+        for label in stim_params
+    }
+
+    return esd
+
+
+def _make_experiment_specs_section(experiment):
+    """Generate the ``experiment_specs`` config section.
+
+    Parameters
+    ----------
+    experiment : str
+
+    Returns
+    -------
+    ``experiment_specs`` dict
+
+    """
+    # FIXME: values below shouldn't be hardcoded
+    specs = {
+        "version": "3.0.0",
+        "experiment_type": experiment,
+        "biomarker_sample_start_time_offset": 0,
+        "biomarker_sample_time_length": 1366,
+        "buffer_time": 1365,
+        "stim_duration": 500,
+        "freq_min": 6,
+        "freq_max": 180,
+        "num_freqs": 8,
+        "num_items": 300,
+    }
+
+    # FIXME: values below shouldn't be hardcoded
+    if 'PS4' in experiment:
+        specs.update({
+            "retrieval_biomarker_sample_start_time_offset": 0,
+            "retrieval_biomarker_sample_time_length": 525,
+            "retrieval_buffer_time": 524,
+            "post_stim_biomarker_sample_time_length": 500,
+            "post_stim_buffer_time": 499,
+            "post_stim_wait_time": 100,
+        })
+
+    return specs
+
+
 def _make_ramulator_config_json(subject, experiment, electrode_config_file,
                                 stim_params, classifier_file=None,
                                 classifier_version=None):
@@ -101,65 +194,27 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
     str
 
     """
-    config = OrderedDict()
-    config['subject'] = subject
-    config['experiment'] = OrderedDict()
-    config['experiment']['type'] = experiment
+    config = {
+        'subject': subject,
+        'experiment': {
+            'type': experiment,
+            'experiment_specific_data':
+                _make_experiment_specific_data_section(experiment,
+                                                       stim_params,
+                                                       classifier_file,
+                                                       classifier_version),
+            'experiment_specs': _make_experiment_specs_section(experiment),
 
-    # experiment_specific_data section
-    esd = OrderedDict()
+            # FIXME: are these the right defaults?
+            'artifact_detection': {
+                "allow_artifact_detection": True,
+                "artifact_detection_number_of_stims_per_channel": 15,
+                "artifact_detection_sample_time_length": 500,
+                "artifact_detection_inter_stim_interval": 2000,
+                "allow_artifact_detection_during_session": False
+            }
+        },
 
-    if experiment != 'AmplitudeDetermiation':
-        esd['classifier_file'] = os.path.join('config_files', classifier_file)
-        esd['classifier_version'] = classifier_version
-
-    if experiment == 'AmplitudeDetermination':
-        esd['stim_electrode_pairs'] = [label for label in stim_params]
-    else:
-        esd['stim_channels'] = {}
-        for i, label in enumerate(stim_params):
-            if 'PS4' in experiment:
-                esd['stim_channels'][label] = {
-                    'min_stim_amplitude': stim_params[label]['min_stim_amplitude'],
-                    'max_stim_amplitude': stim_params[label]['max_stim_amplitude']
-                }
-            else:
-                esd['stim_channels'][label] = {
-                    'stim_amplitude': stim_params[label]['stim_amplitude']
-                }
-            esd['stim_channels'][label]['stim_frequency'] = stim_params[label]['stim_frequency']
-            esd['stim_channels'][label]['stim_duration'] = stim_params[label]['stim_duration']
-
-    # esd['random_stim_prob'] = False
-    # esd['save_debug_output'] = True
-    config['experiment']['experiment_specific_data'] = esd
-
-    # FIXME: values below shouldn't be hardcoded
-    config['experiment']['experiment_specs'] = {
-        "version": "3.0.0",
-        "experiment_type": experiment,
-        "biomarker_sample_start_time_offset": 0,
-        "biomarker_sample_time_length": 1366,
-        "buffer_time": 1365,
-        "stim_duration": 500,
-        "freq_min": 6,
-        "freq_max": 180,
-        "num_freqs": 8,
-        "num_items": 300,
-    }
-
-    # FIXME: values below shouldn't be hardcoded
-    if 'PS4' in experiment:
-        config['experiment_specs'].update({
-            "retrieval_biomarker_sample_start_time_offset": 0,
-            "retrieval_biomarker_sample_time_length": 525,
-            "retrieval_buffer_time": 524,
-            "post_stim_biomarker_sample_time_length": 500,
-            "post_stim_buffer_time": 499,
-            "post_stim_wait_time": 100,
-        })
-
-    config.update({
         "biomarker_threshold": 0.5,
         "electrode_config_file": "config_files/{}".format(electrode_config_file),
         "montage_file": "config_files/pairs.json",
@@ -167,6 +222,7 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
         "global_settings": {
             "data_dir": "SET_AUTOMATICALLY_AT_A_RUNTIME",
             "experiment_config_filename": "SET_AUTOMATICALLY_AT_A_RUNTIME",
+            "extended_blanking": True,  # FIXME: make a parameter
             "plot_fps": 5,
             "plot_window_length": 20000,
             "plot_update_style": "Sweeping",
@@ -175,7 +231,7 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
             "odin_lib_debug_level": 0,
             "connect_to_task_laptop": True if experiment != 'AmplitudeDetermination' else False
         }
-    })
+    }
 
     return json.dumps(config, indent=2, sort_keys=True)
 
@@ -211,6 +267,9 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
     :rtype: str
 
     """
+    if container is None and experiment != 'AmplitudeDetermination':
+        raise RuntimeError("container must not be None")
+
     subject = subject.split('_')[0]
 
     stim_dict = {
