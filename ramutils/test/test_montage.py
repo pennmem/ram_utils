@@ -1,15 +1,14 @@
-import json
-import pytest
 import functools
-import numpy as np
+import json
 
+import numpy as np
+import pytest
+from classiflib import dtypes
 from pkg_resources import resource_filename
 
-from classiflib import dtypes
-from ramutils.tasks.montage import *
-from ramutils.tasks import memory
+from ramutils.montage import *
 from ramutils.parameters import StimParameters
-
+from ramutils.tasks import memory
 
 datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
 
@@ -44,19 +43,6 @@ class TestMontage:
     @classmethod
     def teardown_class(cls):
         memory.clear(warn=False)
-
-    def test_load_pairs(self):
-        filename = datafile('/input/configs/R1328E_pairs.json')
-        pairs = load_pairs_from_json(filename).compute()
-
-        with open(filename) as f:
-            data = json.load(f)
-
-        assert 'R1328E' in data
-        assert 'R1328E' in pairs
-        assert 'pairs' in data['R1328E']
-        assert 'pairs' in pairs['R1328E']
-        return
 
     def test_extract_pairs_dict(self):
         no_pairs_str = "{}"
