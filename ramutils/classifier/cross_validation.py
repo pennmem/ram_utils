@@ -17,10 +17,10 @@ logger = get_logger()
 
 __all__ = [
     'perform_cross_validation',
-    'permuted_lolo_AUCs',
-    'run_lolo_xval',
-    'permuted_loso_AUCs',
-    'run_loso_xval'
+    'permuted_lolo_cross_validation',
+    'perform_lolo_cross_validation',
+    'permuted_loso_cross_validation',
+    'perform_loso_cross_validation'
 ]
 
 
@@ -53,10 +53,10 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
 
     # Run leave-one-session-out cross validation when we have > 1 session
     if len(sessions) > 1:
-        perm_AUCs = permuted_loso_AUCs(classifier, pow_mat, events,
-                                       n_permutations, **kwargs)
-        probs, xval = run_loso_xval(classifier, pow_mat, events,
-                                    recalls, xval, **kwargs)
+        perm_AUCs = permuted_loso_cross_validation(classifier, pow_mat, events,
+                                                   n_permutations, **kwargs)
+        probs, xval = perform_loso_cross_validation(classifier, pow_mat, events,
+                                                    recalls, xval, **kwargs)
 
         # Store model output statistics
         auc = roc_auc_score(recalls, probs)
@@ -66,9 +66,9 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
     else:
         logger.info("Performing LOLO cross validation")
         session = sessions[0]
-        perm_AUCs = permuted_lolo_AUCs(classifier, pow_mat, events,
-                                       n_permutations, **kwargs)
-        probs = run_lolo_xval(classifier, pow_mat, events, recalls, **kwargs)
+        perm_AUCs = permuted_lolo_cross_validation(classifier, pow_mat, events,
+                                                   n_permutations, **kwargs)
+        probs = perform_lolo_cross_validation(classifier, pow_mat, events, recalls, **kwargs)
 
         # Store model output statistics
         auc = roc_auc_score(recalls, probs)
@@ -84,7 +84,7 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
     return xval
 
 
-def permuted_lolo_AUCs(classifier, powers, events, n_permutations, **kwargs):
+def permuted_lolo_cross_validation(classifier, powers, events, n_permutations, **kwargs):
     """Permuted leave-one-list-out cross validation
 
     Parameters
@@ -109,7 +109,7 @@ def permuted_lolo_AUCs(classifier, powers, events, n_permutations, **kwargs):
     """
     recalls = events.recalled
     permuted_recalls = np.array(recalls)
-    AUCs = np.empty(shape=n_permutations, dtype=np.float)
+    auc_results = np.empty(shape=n_permutations, dtype=np.float)
     sessions = np.unique(events.session)
     for i in range(n_permutations):
         for sess in sessions:
@@ -121,13 +121,13 @@ def permuted_lolo_AUCs(classifier, powers, events, n_permutations, **kwargs):
                 shuffle(list_permuted_recalls)
                 permuted_recalls[sel] = list_permuted_recalls
 
-        probs = run_lolo_xval(classifier, powers, events, recalls, **kwargs)
-        AUCs[i] = roc_auc_score(permuted_recalls, probs)
+        probs = perform_lolo_cross_validation(classifier, powers, events, recalls, **kwargs)
+        auc_results[i] = roc_auc_score(permuted_recalls, probs)
 
-    return AUCs
+    return auc_results
 
 
-def run_lolo_xval(classifier, powers, events, recalls, **kwargs):
+def perform_lolo_cross_validation(classifier, powers, events, recalls, **kwargs):
     """Perform a single iteration of leave-one-list-out cross validation
 
     Parameters
@@ -162,7 +162,7 @@ def run_lolo_xval(classifier, powers, events, recalls, **kwargs):
     return probs
 
 
-def permuted_loso_AUCs(classifier, powers, events, n_permutations, **kwargs):
+def permuted_loso_cross_validation(classifier, powers, events, n_permutations, **kwargs):
     """ Perform permuted leave one session out cross validation
 
     Parameters
@@ -187,7 +187,7 @@ def permuted_loso_AUCs(classifier, powers, events, n_permutations, **kwargs):
     """
     recalls = events.recalled
     permuted_recalls = np.array(recalls)
-    AUCs = np.empty(shape=n_permutations, dtype=np.float)
+    auc_results = np.empty(shape=n_permutations, dtype=np.float)
     sessions = np.unique(events.session)
     xval = {}
 
@@ -201,16 +201,16 @@ def permuted_loso_AUCs(classifier, powers, events, n_permutations, **kwargs):
                 permuted_recalls[in_session_mask] = session_permuted_recalls
 
             # We don't need to capture the auc by session for each permutation
-            probs, _ = run_loso_xval(classifier, powers, events,
-                                     permuted_recalls, xval, **kwargs)
-            AUCs[i] = roc_auc_score(permuted_recalls, probs)
+            probs, _ = perform_loso_cross_validation(classifier, powers, events,
+                                                     permuted_recalls, xval, **kwargs)
+            auc_results[i] = roc_auc_score(permuted_recalls, probs)
         except ValueError:
-            AUCs[i] = np.nan
+            auc_results[i] = np.nan
 
-    return AUCs
+    return auc_results
 
 
-def run_loso_xval(classifier, powers, events, recalls, xval, **kwargs):
+def perform_loso_cross_validation(classifier, powers, events, recalls, xval, **kwargs):
     """Perform single iteration of leave-one-session-out cross validation
 
     Parameters
