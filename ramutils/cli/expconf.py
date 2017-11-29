@@ -150,13 +150,13 @@ if __name__ == "__main__":  # pragma: nocover
     #     "--root", root, "--dest", "scratch/ramutils2/demo", "--force-rerun"
     # ])
 
-    # main([
-    #     "-s", "R1364C", "-x", "AmplitudeDetermination",
-    #     "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
-    #     "--anodes", "AMY7", "--cathodes", "AMY8",
-    #     "--min-amplitudes", "0.1", "--max-amplitudes", "1.0",
-    #     "--root", root, "--dest", "scratch/ramutils2/demo", "--force-rerun"
-    # ])
+    main([
+        "-s", "R1364C", "-x", "AmplitudeDetermination",
+        "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
+        "--anodes", "AMY7", "--cathodes", "AMY8",
+        "--min-amplitudes", "0.1", "--max-amplitudes", "1.0",
+        "--root", root, "--dest", "scratch/ramutils2/demo", "--force-rerun"
+    ])
 
     # main([
     #     "-s", "R1365N", "-x", "PAL5",
@@ -174,11 +174,11 @@ if __name__ == "__main__":  # pragma: nocover
     #     "--root", root, "--dest", "scratch/ramutils2/demo", "--force-rerun"
     # ])
 
-    main([
-        "-s", "R1364C", "-x", "FR6",
-        "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
-        "--anodes", "AMY7", "TOJ7", "--cathodes", "AMY8", "TOJ8",
-        "--target-amplitudes", "0.5", "0.75",
-        "--root", root, "--dest", "scratch/ramutils2/demo", "--force-rerun"
-    ])
+    # main([
+    #     "-s", "R1364C", "-x", "FR6",
+    #     "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
+    #     "--anodes", "AMY7", "TOJ7", "--cathodes", "AMY8", "TOJ8",
+    #     "--target-amplitudes", "0.5", "0.75",
+    #     "--root", root, "--dest", "scratch/ramutils2/demo", "--force-rerun"
+    # ])
 

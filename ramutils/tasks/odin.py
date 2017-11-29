@@ -1,6 +1,7 @@
 """Tasks specific to the Medtronic Odin ENS."""
 
 from collections import OrderedDict
+from datetime import datetime
 import functools
 import json
 import os.path
@@ -340,7 +341,13 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
             warnings.warn("No ExperimentParameters object passed; "
                           "classifier may not be 100% reproducible", UserWarning)
 
-    zip_prefix = os.path.join(dest, '{}_{}'.format(subject, experiment))
+    filename_tmpl = '{subject:s}_{experiment:s}_{pairs:s}_{date:s}'
+    zip_prefix = os.path.join(dest, filename_tmpl.format(
+        subject=subject,
+        experiment=experiment,
+        pairs="_".join([pair.label.replace("_", "-") for pair in stim_params]),
+        date=datetime.now().strftime('%d%b%Y').upper()
+    ))
     zip_path = zip_prefix + '.zip'
     shutil.make_archive(zip_prefix, 'zip', root_dir=config_dir_root)
     logger.info("Created experiment_config zip file: %s", zip_path)
