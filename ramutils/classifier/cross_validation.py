@@ -59,9 +59,8 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
                                     recalls, xval, **kwargs)
 
         # Store model output statistics
-        output = ModelOutput(true_labels=recalls, probs=probs)
-        output.compute_metrics()
-        xval['all'] = output
+        auc = roc_auc_score(recalls, probs)
+        xval['all'] = auc
 
     # ... otherwise run leave-one-list-out cross validation
     else:
@@ -72,11 +71,10 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
         probs = run_lolo_xval(classifier, pow_mat, events, recalls, **kwargs)
 
         # Store model output statistics
-        output = ModelOutput(true_labels=recalls, probs=probs)
-        output.compute_metrics()
-        xval['all'] = xval[session] = output
+        auc = roc_auc_score(recalls, probs)
+        xval['all'] = xval[session] = auc
 
-    pvalue = np.count_nonzero((perm_AUCs >= xval['all'].auc)) / float(len(
+    pvalue = np.count_nonzero((perm_AUCs >= xval['all'])) / float(len(
         perm_AUCs))
     logger.info("Permutation test p-value = %f", pvalue)
 
@@ -202,6 +200,7 @@ def permuted_loso_AUCs(classifier, powers, events, n_permutations, **kwargs):
                 shuffle(session_permuted_recalls)
                 permuted_recalls[in_session_mask] = session_permuted_recalls
 
+            # We don't need to capture the auc by session for each permutation
             probs, _ = run_loso_xval(classifier, powers, events,
                                      permuted_recalls, xval, **kwargs)
             AUCs[i] = roc_auc_score(permuted_recalls, probs)
@@ -224,7 +223,7 @@ def run_loso_xval(classifier, powers, events, recalls, xval, **kwargs):
     recalls: array_like
         List of recall/not-recalled boolean values for each event
     xval: dict_like
-        Object for storing results of cross validation
+        Object for storing aucs from cross validation
     kwargs: dict
         Optional keyword arguments. These are passed to get_sample_weights.
         See that function for more details.
@@ -256,10 +255,8 @@ def run_loso_xval(classifier, powers, events, recalls, xval, **kwargs):
         outsample_probs = classifier.predict_proba(outsample_pow_mat)[:, 1]
         probs[outsample_mask] = outsample_probs
 
-        output = ModelOutput(true_labels=outsample_recalls,
-                             probs=outsample_probs)
-        output.compute_metrics()
-        xval[sess] = output
+        auc = roc_auc_score(outsample_recalls, outsample_probs)
+        xval[sess] = auc
 
     return probs, xval
 

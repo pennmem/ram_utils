@@ -53,7 +53,7 @@ def test_perform_cross_validation_regression(subject, params):
         np.recarray)
     xval_output = perform_cross_validation(classifier, powers, events, 10,
                                            **params)
-    assert np.isclose(xval_output['all'].auc, expected_output[subject])
+    assert np.isclose(xval_output['all'], expected_output[subject])
     return
 
 
