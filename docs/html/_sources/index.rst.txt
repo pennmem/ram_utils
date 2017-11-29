@@ -11,7 +11,7 @@ Clone the repository::
 
 Create a conda environment with all prerequisites::
 
-    $ conda env create --file test_env.yml -n ramutils
+    $ conda env create --file conda_environment.yaml -n ramutils
 
 Install in the new environment::
 
