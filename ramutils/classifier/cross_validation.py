@@ -4,7 +4,6 @@ import numpy as np
 from random import shuffle
 from sklearn.metrics import roc_auc_score
 
-from ramutils.classifier import ModelOutput
 from ramutils.classifier.weighting import get_sample_weights
 from ramutils.log import get_logger
 
@@ -48,7 +47,7 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
 
     # Stores cross validation output. Keys are sessions or 'all' for all session
     # cross validation.
-    xval = {}  # type: Dict[Union[str, int], ModelOutput]
+    xval = {}
     sessions = np.unique(events.session)
 
     # Run leave-one-session-out cross validation when we have > 1 session

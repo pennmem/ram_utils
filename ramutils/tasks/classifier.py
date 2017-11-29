@@ -3,7 +3,6 @@ from __future__ import division
 import numpy as np
 from classiflib import ClassifierContainer
 
-from ramutils.classifier import ModelOutput
 from ramutils.classifier.utils import train_classifier as train_classifier_core
 from ramutils.classifier.cross_validation import perform_cross_validation as \
     perform_cross_validation_core
