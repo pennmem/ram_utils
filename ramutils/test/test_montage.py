@@ -1,14 +1,11 @@
 import functools
 import json
 
-import numpy as np
 import pytest
-from classiflib import dtypes
 from pkg_resources import resource_filename
 
 from ramutils.montage import *
 from ramutils.parameters import StimParameters
-from ramutils.tasks import memory
 
 datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
 
@@ -40,10 +37,6 @@ class TestMontage:
                                           cathode=10)
                            ]
 
-    @classmethod
-    def teardown_class(cls):
-        memory.clear(warn=False)
-
     def test_extract_pairs_dict(self):
         no_pairs_str = "{}"
         no_pairs = json.loads(no_pairs_str)
@@ -57,18 +50,18 @@ class TestMontage:
         return
 
     @pytest.mark.parametrize("return_excluded, expected", [
-        (True,["LAD1-LAD2"]),
+        (True, ["LAD1-LAD2"]),
         (False, ["LAD3-LAD4"]),
     ])
     def test_reduce_pairs(self, return_excluded, expected):
         reduced_pairs = reduce_pairs(self.test_pairs, self.stim_params,
-                                     return_excluded=return_excluded).compute()
+                                     return_excluded=return_excluded)
         assert (reduced_pairs.keys() == expected)
         return
 
     def test_generate_pairs_for_classifier(self):
         pairs_for_classifier = generate_pairs_for_classifier(self.test_pairs,
-                                                             []).compute()
+                                                             [])
         assert all(pairs_for_classifier == self.test_pairs_recarray)
 
         return
@@ -76,12 +69,25 @@ class TestMontage:
     @pytest.mark.parametrize('excluded_pairs, expected', [
         ([], [True, True]),
         (['LAD1-LAD2'], [False, True]),
+        (['LAD3-LAD4'], [True, False]),
         (['LAD1-LAD2', 'LAD3-LAD4'], [False, False])
     ])
     def test_get_used_pair_mask(self, excluded_pairs, expected):
-        pair_mask = get_used_pair_mask(self.test_pairs,
-                                       excluded_pairs).compute()
-        assert all(pair_mask == expected)
+        # Constructed test pairs are not an Ordered Dict, so this should
+        # raise a flag
+        with pytest.raises(RuntimeError):
+            pair_mask = get_used_pair_mask(self.test_pairs,
+                                           excluded_pairs)
+
+        ordered_pairs = OrderedDict()
+        ordered_pairs['LAD1-LAD2'] = 'test'
+        ordered_pairs['LAD3-LAD4'] = 'test'
+
+        mock_pairs = OrderedDict({'test_subject': {'pairs': ordered_pairs}})
+
+        pair_mask = get_used_pair_mask(mock_pairs, excluded_pairs)
+        for i in range(len(pair_mask)):
+            assert expected[i] == pair_mask[i]
 
         return
 
