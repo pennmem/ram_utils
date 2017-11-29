@@ -93,7 +93,7 @@ def main(input_args=None):
     with open(osp.expanduser('~/.ramutils_expconf.log'), mode) as f:
         f.write(datetime.now().strftime('[%Y-%m-%dT%H:%M:%S]\n'))
         f.write("ramulator-conf \\\n")
-        f.write('\\\n'.join(output))  # add backslashes to allow copy-paste
+        f.write('\\ \n'.join(output))  # add backslashes to allow copy-paste
         f.write('\n\n')
 
     paths = FilePaths(
