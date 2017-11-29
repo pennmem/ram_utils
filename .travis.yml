@@ -23,6 +23,10 @@ install:
   - conda info -a
   - conda env create --file conda_environment.yaml
   - source activate ramutils
+  - python --version
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      pip install futures
+    fi
   - pip install git+https://github.com/pennmem/classiflib.git  # FIXME: conda package
   - pip install git+https://github.com/pennmem/bptools.git  # FIXME: conda package
 #  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy pandas
