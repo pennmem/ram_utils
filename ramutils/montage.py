@@ -86,14 +86,15 @@ def get_used_pair_mask(all_pairs, excluded_pairs):
         identify if the contact should be excluded
 
     """
-    if type(all_pairs) != OrderedDict:
+    extracted_pairs = extract_pairs_dict(all_pairs)
+    if type(extracted_pairs) != OrderedDict:
         raise RuntimeError("all pairs must be an orderd dict so that the "
                            "ordering can be correctly preserved when creating "
                            "the mask")
 
-    all_pairs = extract_pairs_dict(all_pairs).keys()
+    pair_list = extracted_pairs.keys()
     mask = [False if (label in excluded_pairs) else True for
-            label in all_pairs]
+            label in pair_list]
 
     return mask
 
