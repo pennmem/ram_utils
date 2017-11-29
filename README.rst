@@ -7,11 +7,6 @@ ramutils
 .. image:: https://codecov.io/gh/pennmem/ram_utils/branch/master/graph/badge.svg
   :target: https://codecov.io/gh/pennmem/ram_utils
 
-**Note**: This repo is undergoing a massive cleanup. Things will be
-gradually either moved into separate repositories (where common code can
-be shared in with other projects) or into a single, top-level
-``ramutils`` package.
-
 Usage with the RAM_clinical account
 -----------------------------------
 
