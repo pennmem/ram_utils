@@ -23,7 +23,7 @@ install:
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
   - conda info -a
-  - conda env create --file test_env.yaml
+  - conda env create --file conda_environment.yaml
   - source activate ramutils
   - pip install git+https://github.com/pennmem/classiflib.git  # FIXME: conda package
   - pip install git+https://github.com/pennmem/bptools.git  # FIXME: conda package
