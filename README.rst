@@ -12,12 +12,34 @@ gradually either moved into separate repositories (where common code can
 be shared in with other projects) or into a single, top-level
 ``ramutils`` package.
 
-Installation
-------------
+Usage with the RAM_clinical account
+-----------------------------------
 
-Install with ``setup.py``::
+For generating Ramulator configuration files, the ``RAM_clinical`` account on
+``rhino2`` should be used. This account provides a managed conda environment
+and should only be updated by a responsible person from the Systems Development
+team.
 
-    python setup.py install
+The general workflow for users is the following:
+
+1. Login to rhino using your normal account
+2. Use ``sudo`` to open a shell with the ``RAM_clinical`` user: ``sudo -s -u RAM_clinical``
+3. Use ``qlogin`` to open an interactive session on an availabel node: ``qlogin``
+4. Activate the ``ramutils`` environment: ``source activate ramutils``
+5. Run the provided command line scripts
+
+Info for account maintainers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To update the account to a new release:
+
+1. ``git fetch``
+2. ``git checkout <release tag>``
+3. ``maint/conda_update.sh``
+
+.. note:: ``conda_udpate.sh`` script will fail if the ``ramutils`` environment
+          does not already exist. You can create a dummy environment in this
+          case with ``conda create -n ramutils -y``.
 
 Ramulator experiment config generation
 --------------------------------------
