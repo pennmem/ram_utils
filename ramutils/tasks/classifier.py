@@ -81,7 +81,7 @@ def serialize_classifier(classifier, pairs, features, events, sample_weights,
         events=events,
         sample_weight=sample_weights,
         classifier_info={
-            'auc': xval_output['all'].auc,
+            'auc': xval_output['all'],
             'subject': subject
         }
     )
