@@ -1,5 +1,4 @@
 import pytest
-import joblib
 import functools
 import numpy as np
 
@@ -7,6 +6,7 @@ from ramutils.parameters import FRParameters, PALParameters
 from ramutils.classifier.cross_validation import *
 
 from pkg_resources import resource_filename
+from sklearn.externals import joblib
 
 
 datafile = functools.partial(resource_filename,
