@@ -49,6 +49,7 @@
 <span></span><span class="sd">&quot;&quot;&quot;Tasks specific to the Medtronic Odin ENS.&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
 <span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">os.path</span>
@@ -388,7 +389,13 @@
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;No ExperimentParameters object passed; &quot;</span>
                           <span class="s2">&quot;classifier may not be 100</span><span class="si">% r</span><span class="s2">eproducible&quot;</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">)</span>
 
-    <span class="n">zip_prefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">))</span>
+    <span class="n">filename_tmpl</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{subject:s}</span><span class="s1">_</span><span class="si">{experiment:s}</span><span class="s1">_</span><span class="si">{pairs:s}</span><span class="s1">_</span><span class="si">{date:s}</span><span class="s1">&#39;</span>
+    <span class="n">zip_prefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">filename_tmpl</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
+        <span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">,</span>
+        <span class="n">pairs</span><span class="o">=</span><span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">pair</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">stim_params</span><span class="p">]),</span>
+        <span class="n">date</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">%b%Y&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="p">))</span>
     <span class="n">zip_path</span> <span class="o">=</span> <span class="n">zip_prefix</span> <span class="o">+</span> <span class="s1">&#39;.zip&#39;</span>
     <span class="n">shutil</span><span class="o">.</span><span class="n">make_archive</span><span class="p">(</span><span class="n">zip_prefix</span><span class="p">,</span> <span class="s1">&#39;zip&#39;</span><span class="p">,</span> <span class="n">root_dir</span><span class="o">=</span><span class="n">config_dir_root</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Created experiment_config zip file: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">zip_path</span><span class="p">)</span>
