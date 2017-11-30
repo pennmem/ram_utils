@@ -3,7 +3,6 @@ from __future__ import division
 import numpy as np
 from classiflib import ClassifierContainer
 
-from ramutils.classifier import ModelOutput
 from ramutils.classifier.utils import train_classifier as train_classifier_core
 from ramutils.classifier.cross_validation import perform_cross_validation as \
     perform_cross_validation_core
@@ -82,7 +81,7 @@ def serialize_classifier(classifier, pairs, features, events, sample_weights,
         events=events,
         sample_weight=sample_weights,
         classifier_info={
-            'auc': xval_output['all'].auc,
+            'auc': xval_output['all'],
             'subject': subject
         }
     )

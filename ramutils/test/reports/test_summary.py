@@ -1,6 +1,8 @@
 import functools
 import numpy as np
 from pkg_resources import resource_filename
+import warnings
+
 import pytest
 
 from numpy.testing import assert_almost_equal
@@ -72,6 +74,15 @@ class TestSummary:
 
 
 class TestMathSummary:
+    @classmethod
+    def setup_class(cls):
+        # ignore UserWarnings from summary.populate calls
+        warnings.filterwarnings('ignore', UserWarning, module='ramutils.reports.summary')
+
+    @classmethod
+    def teardown_class(cls):
+        warnings.resetwarnings()
+
     @staticmethod
     def all_summaries(events):
         summaries = []

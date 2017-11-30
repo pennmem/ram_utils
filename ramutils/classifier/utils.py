@@ -9,7 +9,7 @@ from sklearn.linear_model.logistic import LogisticRegression
 from classiflib.container import ClassifierContainer
 
 
-def reload_classifier(subject, task, session, mount_point='/'):
+def reload_classifier(subject, task, session, mount_point='/', base_path=None):
     """Loads the actual classifier used by Ramulator for a particular session
 
     Parameters
@@ -22,15 +22,20 @@ def reload_classifier(subject, task, session, mount_point='/'):
         Session number
     mount_point: str, default '/'
         Mount point for RHINO
+    base_path: str
+        Location of where the classifier files can be found. If None, default
+        is to look in the expected location on RHINO
 
     Returns
     -------
     classifier_container: classiflib.container.ClassifierContainer
 
     """
-    base_path = os.path.join(mount_point, 'data', 'eeg', subject, 'behavioral',
-                             task, 'session_{}'.format(str(session)),
-                             'host_pc')
+    if base_path is None:
+        base_path = os.path.join(mount_point, 'data', 'eeg', subject,
+                                 'behavioral', task,
+                                 'session_{}'.format(str(session)),
+                                 'host_pc')
 
     # FIXME: this needs a data quality check to confirm that all classifiers in
     # a session are the same!
