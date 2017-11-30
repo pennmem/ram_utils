@@ -27,10 +27,10 @@ class TestEvents:
                   cls.n_rec_word, 0, 0) for t in range(cls.n_rec_base)]
 
         dtype = [
-            ('experiment', '|S256'),
+            ('experiment', '|U256'),
             ('session', '<i8'),
             ('list',  '<i8'),
-            ('type', '|S256'),
+            ('type', '|U256'),
             ('mstime', '<i8'),
             ('intrusion', '<i8'),
             ('eegoffset', '<i8')
