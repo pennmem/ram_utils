@@ -559,7 +559,7 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
 
         all_events.append(merged_events)
 
-    return np.recarray(np.concatenate(all_events))
+    return np.concatenate(all_events).view(np.recarray).copy()
 
 
 def find_free_time_periods(times, duration, pre, post, start=None, end=None):
@@ -667,10 +667,10 @@ def concatenate_events_for_single_experiment(event_list):
     if sum(event_sizes) == 0:
         empty_events = initialize_empty_event_reccarray()
         return empty_events
-    final_events = np.recarray(np.concatenate(event_list))
+    final_events = np.concatenate(event_list).view(np.recarray)
     final_events.sort(order=['session', 'list', 'mstime'])
 
-    return final_events
+    return final_events.copy()
 
 
 def remove_intrusions(events):
@@ -688,8 +688,8 @@ def remove_intrusions(events):
             baseline_retrieval_event_mask)
 
     filtered_events = events[mask]
-    events = np.recarray(filtered_events)
-    return events
+    events = filtered_events.view(np.recarray)
+    return events.copy()
 
 
 def select_word_events(events, encoding_only=True):
@@ -711,9 +711,9 @@ def select_word_events(events, encoding_only=True):
         mask = (encoding_events_mask | retrieval_event_mask)
 
     filtered_events = events[mask]
-    events = np.recarray(filtered_events)
+    events = filtered_events.view(np.recarray)
 
-    return events
+    return events.copy()
 
 
 def extract_sample_rate(events):
@@ -796,10 +796,10 @@ def select_retrieval_events(events):
                            "single-experiment datasets")
     experiment = experiments[0]
 
-    if "FR" in experiment:
+    if b"FR" in experiment:
         mask = get_fr_retrieval_events_mask(events)
 
-    elif "PAL"in experiment:
+    elif b"PAL"in experiment:
         mask = get_pal_retrieval_events_mask(events)
 
     retrieval_events = events[mask]
