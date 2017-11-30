@@ -157,9 +157,12 @@ def load_events(subject, experiment, sessions=None, rootdir='/'):
         return empty_recarray
 
     # TODO: Make this less ugly to look at
-    events = np.concatenate([
-        BaseEventReader(filename=f, eliminate_events_with_no_eeg=True).read()
-        for f in event_files]).view(np.recarray)
+    events = np.rec.array(
+        np.concatenate([
+            BaseEventReader(filename=f, eliminate_events_with_no_eeg=True).read()
+            for f in event_files
+        ])
+    )
 
     return events
 
@@ -283,8 +286,7 @@ def remove_incomplete_lists(events):
             events_by_list, list_has_end) if a])
 
         # Re-combine math and task events
-        final_sess_events = np.concatenate([final_sess_events,
-                                            math_events]).view(np.recarray)
+        final_sess_events = np.rec.array(np.concatenate([final_sess_events, math_events]))
         final_sess_events.sort(order=['session', 'list', 'mstime'])
         final_event_list.append(final_sess_events)
 
@@ -537,16 +539,14 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
                     full_match_accum[choice_inds] = True
 
         matching_epochs = epochs[full_match_accum]
-        new_events = np.zeros(len(matching_epochs),
-                              dtype=sess_events.dtype).view(np.recarray)
+        new_events = np.rec.array(np.zeros(len(matching_epochs), dtype=sess_events.dtype))
 
         for i, _ in enumerate(new_events):
             new_events[i].mstime = matching_epochs[i]
             new_events[i].type = 'REC_BASE'
 
         new_events.recalled = 0
-        merged_events = np.concatenate((sess_events, new_events)).view(
-            np.recarray)
+        merged_events = np.rec.array(np.concatenate((sess_events, new_events)))
         merged_events.sort(order='mstime')
 
         for (i, event) in enumerate(merged_events):
@@ -559,7 +559,7 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
 
         all_events.append(merged_events)
 
-    return np.concatenate(all_events).view(np.recarray).copy()
+    return np.rec.array(np.concatenate(all_events))
 
 
 def find_free_time_periods(times, duration, pre, post, start=None, end=None):
@@ -667,10 +667,10 @@ def concatenate_events_for_single_experiment(event_list):
     if sum(event_sizes) == 0:
         empty_events = initialize_empty_event_reccarray()
         return empty_events
-    final_events = np.concatenate(event_list).view(np.recarray)
+    final_events = np.rec.array(np.concatenate(event_list))
     final_events.sort(order=['session', 'list', 'mstime'])
 
-    return final_events.copy()
+    return final_events
 
 
 def remove_intrusions(events):
@@ -688,8 +688,8 @@ def remove_intrusions(events):
             baseline_retrieval_event_mask)
 
     filtered_events = events[mask]
-    events = filtered_events.view(np.recarray)
-    return events.copy()
+    events = np.rec.array(filtered_events)
+    return events
 
 
 def select_word_events(events, encoding_only=True):
@@ -711,9 +711,9 @@ def select_word_events(events, encoding_only=True):
         mask = (encoding_events_mask | retrieval_event_mask)
 
     filtered_events = events[mask]
-    events = filtered_events.view(np.recarray)
+    events = np.rec.array(filtered_events)
 
-    return events.copy()
+    return events
 
 
 def extract_sample_rate(events):
