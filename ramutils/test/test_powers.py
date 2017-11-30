@@ -124,13 +124,12 @@ def test_normalize_powers_by_session():
     ('R1350D_task_events_rhino.npy', 'R1350D_normalized_powers.npy', FRParameters),
 ])
 def test_regression_compute_normalized_powers(events, exp_powers, parameters):
-    # Cases: Same as event partitions since powers are calculated independently
-    # for each partition
     parameters = parameters().to_dict()
     orig_powers = np.load(datafile('/powers/' + exp_powers))
     events = np.load(datafile('/events/' + events)).view(np.recarray)
     new_powers, updated_events = compute_normalized_powers(events,
                                                   **parameters).compute()
+
     assert np.allclose(orig_powers, new_powers)
     memory.clear(warn=False)  # Clean up if the assertion passes
 
