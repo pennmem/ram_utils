@@ -7,6 +7,9 @@ ramutils
 .. image:: https://codecov.io/gh/pennmem/ram_utils/branch/master/graph/badge.svg
   :target: https://codecov.io/gh/pennmem/ram_utils
 
+.. image:: https://img.shields.io/badge/docs-here-blue.svg
+    :target: https://pennmem.github.io/ram_utils/html/index.html
+
 Usage with the RAM_clinical account
 -----------------------------------
 

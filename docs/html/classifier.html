@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Classifier training, cross validation, and utilities &#8212; Ramutils 2.0.dev0 documentation</title>
+    <title>Classifier training, cross validation, and utilities &#8212; Ramutils 2.0.0 documentation</title>
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '2.0.dev0',
+        VERSION:     '2.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="data.html" title="Serializable data structures"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.dev0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.0 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -86,8 +86,8 @@ that function for more details</li>
 </dd></dl>
 
 <dl class="function">
-<dt id="ramutils.classifier.cross_validation.permuted_lolo_AUCs">
-<code class="descclassname">ramutils.classifier.cross_validation.</code><code class="descname">permuted_lolo_AUCs</code><span class="sig-paren">(</span><em>classifier</em>, <em>powers</em>, <em>events</em>, <em>n_permutations</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/cross_validation.html#permuted_lolo_AUCs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.cross_validation.permuted_lolo_AUCs" title="Permalink to this definition">¶</a></dt>
+<dt id="ramutils.classifier.cross_validation.permuted_lolo_cross_validation">
+<code class="descclassname">ramutils.classifier.cross_validation.</code><code class="descname">permuted_lolo_cross_validation</code><span class="sig-paren">(</span><em>classifier</em>, <em>powers</em>, <em>events</em>, <em>n_permutations</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/cross_validation.html#permuted_lolo_cross_validation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.cross_validation.permuted_lolo_cross_validation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Permuted leave-one-list-out cross validation</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -115,8 +115,8 @@ n_permutations times</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ramutils.classifier.cross_validation.run_lolo_xval">
-<code class="descclassname">ramutils.classifier.cross_validation.</code><code class="descname">run_lolo_xval</code><span class="sig-paren">(</span><em>classifier</em>, <em>powers</em>, <em>events</em>, <em>recalls</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/cross_validation.html#run_lolo_xval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.cross_validation.run_lolo_xval" title="Permalink to this definition">¶</a></dt>
+<dt id="ramutils.classifier.cross_validation.perform_lolo_cross_validation">
+<code class="descclassname">ramutils.classifier.cross_validation.</code><code class="descname">perform_lolo_cross_validation</code><span class="sig-paren">(</span><em>classifier</em>, <em>powers</em>, <em>events</em>, <em>recalls</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/cross_validation.html#perform_lolo_cross_validation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.cross_validation.perform_lolo_cross_validation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform a single iteration of leave-one-list-out cross validation</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -143,8 +143,8 @@ See that function for more details.</li>
 </dd></dl>
 
 <dl class="function">
-<dt id="ramutils.classifier.cross_validation.permuted_loso_AUCs">
-<code class="descclassname">ramutils.classifier.cross_validation.</code><code class="descname">permuted_loso_AUCs</code><span class="sig-paren">(</span><em>classifier</em>, <em>powers</em>, <em>events</em>, <em>n_permutations</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/cross_validation.html#permuted_loso_AUCs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.cross_validation.permuted_loso_AUCs" title="Permalink to this definition">¶</a></dt>
+<dt id="ramutils.classifier.cross_validation.permuted_loso_cross_validation">
+<code class="descclassname">ramutils.classifier.cross_validation.</code><code class="descname">permuted_loso_cross_validation</code><span class="sig-paren">(</span><em>classifier</em>, <em>powers</em>, <em>events</em>, <em>n_permutations</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/cross_validation.html#permuted_loso_cross_validation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.cross_validation.permuted_loso_cross_validation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform permuted leave one session out cross validation</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -172,8 +172,8 @@ n_permutations times</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ramutils.classifier.cross_validation.run_loso_xval">
-<code class="descclassname">ramutils.classifier.cross_validation.</code><code class="descname">run_loso_xval</code><span class="sig-paren">(</span><em>classifier</em>, <em>powers</em>, <em>events</em>, <em>recalls</em>, <em>xval</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/cross_validation.html#run_loso_xval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.cross_validation.run_loso_xval" title="Permalink to this definition">¶</a></dt>
+<dt id="ramutils.classifier.cross_validation.perform_loso_cross_validation">
+<code class="descclassname">ramutils.classifier.cross_validation.</code><code class="descname">perform_loso_cross_validation</code><span class="sig-paren">(</span><em>classifier</em>, <em>powers</em>, <em>events</em>, <em>recalls</em>, <em>xval</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/cross_validation.html#perform_loso_cross_validation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.cross_validation.perform_loso_cross_validation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform single iteration of leave-one-session-out cross validation</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -184,7 +184,7 @@ n_permutations times</p>
 <li><strong>powers</strong> (<em>np.ndarray</em>) – power matrix</li>
 <li><strong>events</strong> (<em>np.recarray</em>) – </li>
 <li><strong>recalls</strong> (<em>array_like</em>) – List of recall/not-recalled boolean values for each event</li>
-<li><strong>xval</strong> (<em>dict_like</em>) – Object for storing results of cross validation</li>
+<li><strong>xval</strong> (<em>dict_like</em>) – Object for storing aucs from cross validation</li>
 <li><strong>kwargs</strong> (<em>dict</em>) – Optional keyword arguments. These are passed to get_sample_weights.
 See that function for more details.</li>
 </ul>
@@ -202,21 +202,21 @@ See that function for more details.</li>
 
 <span class="target" id="module-ramutils.classifier.model"></span><dl class="class">
 <dt id="ramutils.classifier.model.ModelOutput">
-<em class="property">class </em><code class="descclassname">ramutils.classifier.model.</code><code class="descname">ModelOutput</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/model.html#ModelOutput"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.model.ModelOutput" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">ramutils.classifier.model.</code><code class="descname">ModelOutput</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ramutils.classifier.model.ModelOutput" title="Permalink to this definition">¶</a></dt>
 <dd><p>Statistics and scores for the output of the logistic regression
 classifier.</p>
 <p>In order to compute tercile stats and the ROC curve/AUC score, the
 <code class="xref py py-attr docutils literal"><span class="pre">true_labels</span></code> and <code class="xref py py-attr docutils literal"><span class="pre">probs</span></code> attributes must be set first.</p>
 <dl class="method">
 <dt id="ramutils.classifier.model.ModelOutput.compute_metrics">
-<code class="descname">compute_metrics</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/model.html#ModelOutput.compute_metrics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.model.ModelOutput.compute_metrics" title="Permalink to this definition">¶</a></dt>
+<code class="descname">compute_metrics</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ramutils.classifier.model.ModelOutput.compute_metrics" title="Permalink to this definition">¶</a></dt>
 <dd><p>Shorthand for calling both <a class="reference internal" href="#ramutils.classifier.model.ModelOutput.compute_roc" title="ramutils.classifier.model.ModelOutput.compute_roc"><code class="xref py py-meth docutils literal"><span class="pre">compute_roc()</span></code></a> and
 <a class="reference internal" href="#ramutils.classifier.model.ModelOutput.compute_tercile_stats" title="ramutils.classifier.model.ModelOutput.compute_tercile_stats"><code class="xref py py-meth docutils literal"><span class="pre">compute_tercile_stats()</span></code></a>.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ramutils.classifier.model.ModelOutput.compute_roc">
-<code class="descname">compute_roc</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/model.html#ModelOutput.compute_roc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.model.ModelOutput.compute_roc" title="Permalink to this definition">¶</a></dt>
+<code class="descname">compute_roc</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ramutils.classifier.model.ModelOutput.compute_roc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the ROC curve.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -230,7 +230,7 @@ classifier.</p>
 
 <dl class="method">
 <dt id="ramutils.classifier.model.ModelOutput.compute_tercile_stats">
-<code class="descname">compute_tercile_stats</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/model.html#ModelOutput.compute_tercile_stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.model.ModelOutput.compute_tercile_stats" title="Permalink to this definition">¶</a></dt>
+<code class="descname">compute_tercile_stats</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ramutils.classifier.model.ModelOutput.compute_tercile_stats" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute tercile stats.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -247,7 +247,7 @@ classifier.</p>
 <span class="target" id="module-ramutils.classifier.utils"></span><p>Utility functions used during classifier training</p>
 <dl class="function">
 <dt id="ramutils.classifier.utils.reload_classifier">
-<code class="descclassname">ramutils.classifier.utils.</code><code class="descname">reload_classifier</code><span class="sig-paren">(</span><em>subject</em>, <em>task</em>, <em>session</em>, <em>mount_point='/'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/utils.html#reload_classifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.utils.reload_classifier" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ramutils.classifier.utils.</code><code class="descname">reload_classifier</code><span class="sig-paren">(</span><em>subject</em>, <em>task</em>, <em>session</em>, <em>mount_point='/'</em>, <em>base_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/utils.html#reload_classifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.utils.reload_classifier" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loads the actual classifier used by Ramulator for a particular session</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -258,6 +258,8 @@ classifier.</p>
 <li><strong>task</strong> (<em>str</em>) – ex: FR5, FR6, PAL1, etc</li>
 <li><strong>session</strong> (<em>int</em>) – Session number</li>
 <li><strong>mount_point</strong> (<em>str</em><em>, </em><em>default '/'</em>) – Mount point for RHINO</li>
+<li><strong>base_path</strong> (<em>str</em>) – Location of where the classifier files can be found. If None, default
+is to look in the expected location on RHINO</li>
 </ul>
 </td>
 </tr>
@@ -358,7 +360,7 @@ classifier.</p>
         <li class="right" >
           <a href="data.html" title="Serializable data structures"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.dev0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.0 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

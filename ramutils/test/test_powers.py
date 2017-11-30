@@ -12,14 +12,13 @@ from ramutils.parameters import FRParameters, PALParameters
 
 datafile = functools.partial(resource_filename,
                              'ramutils.test.test_data.input')
-RHINO_AVAIL = os.environ.get('RHINO_AVAIL')
 
 
 @pytest.mark.rhino
 def test_compute_single_session_powers():
     # Cases: EEG from monopolar, mixed mode, and bipolar. EEG with removed bad
     # data and without. Log powers true and false
-    events = np.load(datafile('/events/R1348J_task_events.npy')).view(
+    events = np.load(datafile('/events/R1348J_task_events_rhino.npy')).view(
         np.recarray)[:5]
     params = FRParameters().to_dict()
     powers, events = compute_single_session_powers(1,
@@ -40,8 +39,8 @@ def test_compute_single_session_powers():
 
 @pytest.mark.rhino
 @pytest.mark.parametrize("event_file", [
-    'R1348J_task_events.npy',
-    'R1350D_task_events.npy'
+    'R1348J_task_events_rhino.npy',
+    'R1350D_task_events_rhino.npy'
 ])
 def test_compute_powers(event_file):
     # Cases: Bipolar_pairs == none and not none. Single session/multi.
@@ -84,7 +83,7 @@ def test_reduce_powers():
     n_events = 500
     sample_pow_mat = np.random.rand(n_events, n_electrodes, n_frequencies)
 
-    # Case 1: Select 0 electrodes
+    # Case 1: Select 0 electrode
     no_electrodes_mask = np.zeros(100, dtype=bool)
     reduced_pow_mat = reduce_powers(sample_pow_mat, no_electrodes_mask,
                                     n_frequencies)
@@ -120,18 +119,17 @@ def test_normalize_powers_by_session():
 @pytest.mark.rhino
 @pytest.mark.slow
 @pytest.mark.parametrize("events, exp_powers, parameters", [
-    ('R1353N_task_events.npy', 'R1353N_normalized_powers.npy', PALParameters),
-    ('R1354E_task_events.npy', 'R1354E_normalized_powers.npy', FRParameters),
-    ('R1350D_task_events.npy', 'R1350D_normalized_powers.npy', FRParameters),
+    ('R1353N_task_events_rhino.npy', 'R1353N_normalized_powers.npy', PALParameters),
+    ('R1354E_task_events_rhino.npy', 'R1354E_normalized_powers.npy', FRParameters),
+    ('R1350D_task_events_rhino.npy', 'R1350D_normalized_powers.npy', FRParameters),
 ])
 def test_regression_compute_normalized_powers(events, exp_powers, parameters):
-    # Cases: Same as event partitions since powers are calculated independently
-    # for each partition
     parameters = parameters().to_dict()
     orig_powers = np.load(datafile('/powers/' + exp_powers))
     events = np.load(datafile('/events/' + events)).view(np.recarray)
     new_powers, updated_events = compute_normalized_powers(events,
                                                   **parameters).compute()
+
     assert np.allclose(orig_powers, new_powers)
     memory.clear(warn=False)  # Clean up if the assertion passes
 
