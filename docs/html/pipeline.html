@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Pipelines &#8212; Ramutils 2.0.dev0 documentation</title>
+    <title>Pipelines &#8212; Ramutils 2.0.0 documentation</title>
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '2.0.dev0',
+        VERSION:     '2.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="models.html" title="Modeling effects of stim"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.dev0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.0 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -168,114 +168,6 @@ documented below.</p>
 </div>
 <div class="section" id="module-ramutils.tasks.montage">
 <span id="montage-tasks"></span><h3>Montage tasks<a class="headerlink" href="#module-ramutils.tasks.montage" title="Permalink to this headline">¶</a></h3>
-<dl class="function">
-<dt id="ramutils.tasks.montage.load_pairs_from_json">
-<code class="descclassname">ramutils.tasks.montage.</code><code class="descname">load_pairs_from_json</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/montage.html#load_pairs_from_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.montage.load_pairs_from_json" title="Permalink to this definition">¶</a></dt>
-<dd><p>Load pairs.json.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<em>str</em>) – Path to pairs.json</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">pairs.json as a dict of bipolar pairs</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="ramutils.tasks.montage.reduce_pairs">
-<code class="descclassname">ramutils.tasks.montage.</code><code class="descname">reduce_pairs</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/montage.html#reduce_pairs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.montage.reduce_pairs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove stim pairs from the pairs.json dict.</p>
-<p>FIXME: do these need to be sorted by channel_1?</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>pairs</strong> (<em>dict</em>) – Full pairs.json as a dict</li>
-<li><strong>stim_params</strong> (<em>List</em><em>[</em><a class="reference internal" href="data.html#ramutils.parameters.StimParameters" title="ramutils.parameters.StimParameters"><em>StimParameters</em></a><em>]</em>) – </li>
-<li><strong>return_excluded</strong> (<em>bool</em>) – </li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">excluded pairs if not return_excluded else reduced pairs</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="ramutils.tasks.montage.generate_pairs_for_classifier">
-<code class="descclassname">ramutils.tasks.montage.</code><code class="descname">generate_pairs_for_classifier</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/montage.html#generate_pairs_for_classifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.montage.generate_pairs_for_classifier" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create recarray of electrode pairs for the classifier container</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>pairs</strong> – JSON-format object containing all electrode pairs in the
-montage</li>
-<li><strong>excluded_pairs</strong> – array-like containing pairs excluded from the montage</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">recarray containing all pairs minus excluded pairs</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.recarray</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="ramutils.tasks.montage.get_used_pair_mask">
-<code class="descclassname">ramutils.tasks.montage.</code><code class="descname">get_used_pair_mask</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/montage.html#get_used_pair_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.montage.get_used_pair_mask" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get a mask of whether to include a pair in all_pairs based on
-excluded pairs</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>all_pairs</strong> – standard json-format pairs object</li>
-<li><strong>excluded_pairs</strong> – list containing pairs to exclude</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">np.array containing a mask to identify excluded pairs from all
-pairs</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="ramutils.tasks.montage.extract_pairs_dict">
-<code class="descclassname">ramutils.tasks.montage.</code><code class="descname">extract_pairs_dict</code><span class="sig-paren">(</span><em>pairs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/montage.html#extract_pairs_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.montage.extract_pairs_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Extract a dictionary of pairs from the standard json structure</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pairs</strong> – raw json pairs structure</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dict containing just the pairs data</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
 </div>
 <div class="section" id="module-ramutils.tasks.odin">
 <span id="odin-ramulator-tasks"></span><h3>Odin/Ramulator tasks<a class="headerlink" href="#module-ramutils.tasks.odin" title="Permalink to this headline">¶</a></h3>
@@ -458,7 +350,7 @@ results.</p>
         <li class="right" >
           <a href="models.html" title="Modeling effects of stim"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.dev0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.0 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
