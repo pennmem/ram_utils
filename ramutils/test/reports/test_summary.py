@@ -77,7 +77,7 @@ class TestMathSummary:
     @classmethod
     def setup_class(cls):
         # ignore UserWarnings from summary.populate calls
-        warnings.filterwarnings('ignore', UserWarning, module='ramutils.reports.summary')
+        warnings.filterwarnings('ignore', category=UserWarning)
 
     @classmethod
     def teardown_class(cls):
