@@ -7,6 +7,7 @@ from datetime import datetime
 import functools
 import os.path as osp
 
+from ramutils import conf
 from ramutils.cli import make_parser, ValidationError, configure_caching
 from ramutils.constants import EXPERIMENTS
 from ramutils.log import get_logger
@@ -87,7 +88,7 @@ def main(input_args=None):
             value = ''
 
         clarg = arg.replace('_', '-')
-        output.append('--{} {}'.format(clarg, value))
+        output.append(' --{} {} '.format(clarg, value))
 
     mode = 'w' if args.clear_log else 'a'
     with open(osp.expanduser('~/.ramutils_expconf.log'), mode) as f:
@@ -97,13 +98,14 @@ def main(input_args=None):
         f.write('\n\n')
 
     paths = FilePaths(
-        root=osp.expanduser(args.root),
+        root=(conf.PATHS['root'] if args.root is None
+              else osp.expanduser(args.root)),
         electrode_config_file=osp.expanduser(args.electrode_config_file),
         dest=args.dest
     )
 
     # FIXME: figure out why MacOS won't work with sshfs-relative paths only here
-    cachedir = osp.join(args.cachedir, 'cache')
+    cachedir = conf.PATHS['cachedir'] if args.cachedir is None else osp.join(args.cachedir, 'cache')
     logger.info("Using %s as cache dir", cachedir)
     configure_caching(cachedir, args.force_rerun)
 
