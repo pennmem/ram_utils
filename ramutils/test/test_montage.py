@@ -56,7 +56,7 @@ class TestMontage:
     def test_reduce_pairs(self, return_excluded, expected):
         reduced_pairs = reduce_pairs(self.test_pairs, self.stim_params,
                                      return_excluded=return_excluded)
-        assert (reduced_pairs.keys() == expected)
+        assert (list(reduced_pairs.keys()) == expected)
         return
 
     def test_generate_pairs_for_classifier(self):

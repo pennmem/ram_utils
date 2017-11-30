@@ -27,10 +27,10 @@ class TestEvents:
                   cls.n_rec_word, 0, 0) for t in range(cls.n_rec_base)]
 
         dtype = [
-            ('experiment', '|S256'),
+            ('experiment', '|U256'),
             ('session', '<i8'),
             ('list',  '<i8'),
-            ('type', '|S256'),
+            ('type', '|U256'),
             ('mstime', '<i8'),
             ('intrusion', '<i8'),
             ('eegoffset', '<i8')
@@ -176,7 +176,7 @@ class TestEvents:
         # rases a runtime error
         data = [('WORD', t * 1001, 0, 0) for t in range(5)]
         dtype = [
-            ('type', '|S256'),
+            ('type', '|U256'),
             ('mstime', '<i8'),
             ('intrusion', '<i8'),
             ('eegoffset', '<i8')
@@ -210,8 +210,8 @@ class TestEvents:
     # Four possible partitions. Be sure to check all
     def test_partition_events(self):
         dtypes = [
-            ('experiment', '|S256'),
-            ('type', '|S256')
+            ('experiment', '|U256'),
+            ('type', '|U256')
         ]
         test_fr_encoding = np.array([('FR1', 'WORD')], dtype=dtypes).view(
             np.recarray)
