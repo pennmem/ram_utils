@@ -426,20 +426,20 @@ def initialize_empty_event_reccarray():
     but is empty.
 
     """
-    empty_recarray = np.recarray((0, ), dtype=[('serialpos', int),
-                                               ('session', int),
-                                               ('subject', unicode),
-                                               ('rectime', int),
-                                               ('experiment', unicode),
-                                               ('mstime', int),
-                                               ('type', unicode),
-                                               ('eegoffset', int),
-                                               ('recalled', int),
-                                               ('intrusion', int),
-                                               ('montage', int),
-                                               ('list', int),
-                                               ('eegfile', unicode),
-                                               ('msoffset', int)])
+    empty_recarray = np.recarray((0, ), dtype=[('serialpos', '<i8'),
+                                               ('session', '<i8'),
+                                               ('subject', '|U6'),
+                                               ('rectime', '<i8'),
+                                               ('experiment', '|U256'),
+                                               ('mstime', '<i8'),
+                                               ('type', '|U256'),
+                                               ('eegoffset', '<i8'),
+                                               ('recalled', '<i8'),
+                                               ('intrusion', '<i8'),
+                                               ('montage', '<i8'),
+                                               ('list', '<i8'),
+                                               ('eegfile', '|U256'),
+                                               ('msoffset', '<i8')])
     return empty_recarray
 
 
