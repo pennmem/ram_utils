@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>ramutils &#8212; Ramutils 2.0.dev0 documentation</title>
+    <title>ramutils &#8212; Ramutils 2.0.0 documentation</title>
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '2.0.dev0',
+        VERSION:     '2.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -23,7 +23,8 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Serializable data structures" href="data.html" /> 
   </head>
   <body>
     <div class="related" role="navigation" aria-label="related navigation">
@@ -32,7 +33,13 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="nav-item nav-item-0"><a href="#">Ramutils 2.0.dev0 documentation</a> &#187;</li> 
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="data.html" title="Serializable data structures"
+             accesskey="N">next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">Ramutils 2.0.0 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -43,7 +50,65 @@
             
   <div class="section" id="ramutils">
 <h1>ramutils<a class="headerlink" href="#ramutils" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>Clone the repository:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ git clone https://github.com/pennmem/ram_utils.git
+$ cd ram_utils
+</pre></div>
+</div>
+<p>Create a conda environment with all prerequisites:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ conda env create --file conda_environment.yaml -n ramutils
+</pre></div>
+</div>
+<p>Install in the new environment:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ source activate ramutils
+(ramutils) $ python setup.py install
+</pre></div>
+</div>
+<p>Install remaining requirements:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>(ramutils) $ pip install git+https://github.com/pennmem/classiflib.git
+(ramutils) $ pip install git+https://github.com/pennmem/bptools.git
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">In the future, these packages should be installed automatically with
+conda.</p>
+</div>
+</div>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Serializable data structures</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="data.html#defining-data-classes">Defining data classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html#experimental-parameters">Experimental parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="classifier.html">Classifier training, cross validation, and utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="classifier.html#module-ramutils.classifier.cross_validation">Reference</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="events.html">Event processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Modeling effects of stim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipelines</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#defining-tasks">Defining tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#reference">Reference</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cli.html#ramulator-configuration-generation">Ramulator configuration generation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="misc.html">Miscellaneous utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="misc.html#module-ramutils.exc">Common exception types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="misc.html#module-ramutils.log">Logging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="misc.html#everything-else">Everything else</a></li>
+</ul>
+</li>
+</ul>
+</div>
 </div>
 </div>
 
@@ -53,6 +118,18 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ramutils</a><ul>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#contents">Contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Next topic</h4>
+  <p class="topless"><a href="data.html"
+                        title="next chapter">Serializable data structures</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -80,7 +157,13 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
-        <li class="nav-item nav-item-0"><a href="#">Ramutils 2.0.dev0 documentation</a> &#187;</li> 
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="data.html" title="Serializable data structures"
+             >next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">Ramutils 2.0.0 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

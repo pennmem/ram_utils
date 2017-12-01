@@ -1,74 +1,81 @@
 import numpy as np
 
-from ramutils.eeg.powers import compute_powers as compute_powers_core
-from ramutils.classifier.utils import normalize_powers_by_session as \
-    normalize_powers_by_session_core
-from ramutils.tasks.events import get_encoding_mask, get_all_retrieval_events_mask
+from ramutils.events import partition_events, \
+    concatenate_events_for_single_experiment
 from ramutils.log import get_logger
+from ramutils.powers import compute_powers
+from ramutils.powers import reduce_powers as reduce_powers_core
 from ramutils.tasks import task
 
 logger = get_logger()
 
 __all__ = [
-    'compute_powers',
-    'combine_encoding_retrieval_powers',
-    'normalize_powers_by_session',
-    'reduce_powers',
+    'compute_normalized_powers',
+    'reduce_powers'
 ]
-
-
-@task(nout=2)
-def compute_powers(events, **kwargs):
-    """
-
-    :param np.recarray events:
-    :param ExperimentParams params:
-    :return: powers, updated_events
-
-    """
-    powers, updated_events = compute_powers_core(events,
-                                                 kwargs['start_time'],
-                                                 kwargs['end_time'],
-                                                 kwargs['buf'],
-                                                 kwargs['freqs'],
-                                                 kwargs['log_powers'])
-    return powers, updated_events
-
-
-@task()
-def combine_encoding_retrieval_powers(events, encoding_powers,
-                                      retrieval_powers):
-    encoding_mask = get_encoding_mask(events)
-    retrieval_mask = get_all_retrieval_events_mask(events)
-
-    powers = np.zeros((len(events), encoding_powers.shape[-1]))
-    powers[encoding_mask, ...] = encoding_powers
-    powers[retrieval_mask, ...] = retrieval_powers
-    return powers
-
-
-@task()
-def normalize_powers_by_session(pow_mat, events):
-    normalized_pow_mat = normalize_powers_by_session_core(pow_mat, events)
-    return  normalized_pow_mat
 
 
 @task()
 def reduce_powers(powers, mask, n_frequencies):
-    """ Select a subset of electrodes from the power matrix based on mask
+    reduced_powers = reduce_powers_core(powers, mask, n_frequencies)
+    return reduced_powers
 
-    :param powers:
-    :param mask:
-    :param n_frequencies:
-    :return:
+
+@task(nout=2)
+def compute_normalized_powers(events, **kwargs):
+    """ Compute powers by session, encoding/retrieval, and FR vs. PAL
+
+    Notes
+    -----
+    There are different start times, end time, and buffer times for each
+    subset type, so those are passed in as kwargs and looked up prior to
+    calling the more general compute_powers function
 
     """
 
-    # Reshape into 3-dimensional array (n_events, n_electrodes, n_frequencies)
-    reduced_powers = powers.reshape((len(powers), -1, n_frequencies))
-    reduced_powers = reduced_powers[:, mask, :]
+    event_partitions = partition_events(events)
+    power_partitions = []
+    cleaned_event_partitions = []
+    for subset_name, event_subset in event_partitions.items():
+        if len(event_subset) == 0:
+            continue
 
-    # Reshape back to 2D representation so it can be used as a feature matrix
-    reduced_powers = reduced_powers.reshape((len(reduced_powers), -1))
+        if subset_name == 'fr_encoding':
+            start_time = kwargs['encoding_start_time']
+            end_time = kwargs['encoding_end_time']
+            buffer_time = kwargs['encoding_buf']
 
-    return reduced_powers
+        elif subset_name == 'fr_retrieval':
+            start_time = kwargs['retrieval_start_time']
+            end_time = kwargs['retrieval_end_time']
+            buffer_time = kwargs['retrieval_buf']
+
+        elif subset_name == 'pal_encoding':
+            start_time = kwargs['pal_start_time']
+            end_time = kwargs['pal_end_time']
+            buffer_time = kwargs['pal_buf_time']
+
+        elif subset_name == 'pal_retrieval':
+            start_time = kwargs['pal_retrieval_start_time']
+            end_time = kwargs['pal_retrieval_end_time']
+            buffer_time = kwargs['pal_retrieval_buf']
+
+        else:
+            raise RuntimeError("Unexpected event subset was encountered")
+
+        powers, cleaned_events = compute_powers(event_subset,
+                                                start_time,
+                                                end_time,
+                                                buffer_time,
+                                                kwargs['freqs'],
+                                                kwargs['log_powers'],
+                                                filt_order=kwargs['filt_order'],
+                                                width=kwargs['width'])
+        cleaned_event_partitions.append(cleaned_events)
+        power_partitions.append(powers)
+
+    cleaned_events = concatenate_events_for_single_experiment(
+        cleaned_event_partitions)
+    combined_powers = np.concatenate(power_partitions)
+
+    return combined_powers, cleaned_events

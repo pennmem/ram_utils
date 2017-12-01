@@ -1,22 +1,23 @@
 """Tasks specific to the Medtronic Odin ENS."""
 
 from collections import OrderedDict
+from datetime import datetime
 import functools
 import json
 import os.path
 from tempfile import gettempdir
 import shutil
+import warnings
 
 try:
     from typing import List
 except ImportError:
     pass
 
-from tornado.template import Template
-
 from bptools.transform import SeriesTransformation
 from classiflib import ClassifierContainer
 
+from ramutils.constants import EXPERIMENTS
 from ramutils.log import get_logger
 from ramutils.tasks import task
 from ramutils.utils import reindent_json
@@ -82,9 +83,164 @@ def generate_pairs_from_electrode_config(subject, paths):
         return pairs_from_ec
 
 
+def _make_experiment_specific_data_section(experiment, stim_params,
+                                           classifier_file,
+                                           classifier_version=CLASSIFIER_VERSION):
+    """Return a dict containing the config section ``experiment_specific_data``.
+
+    Parameters
+    ----------
+    experiment : str
+    stim_params : dict
+    classifier_file : str
+    classifier_version : str
+
+    Returns
+    -------
+    dict representation of the ``experiment_specific_data`` section.
+
+    """
+    def make_stim_channel_section(params, key):
+        stub = {
+            "stim_duration": 500,
+            "stim_frequency": 200
+        }
+
+        if 'PS4' in experiment or experiment == 'AmplitudeDetermination':
+            stub.update({
+                'min_stim_amplitude': params[key]['min_stim_amplitude'],
+                'max_stim_amplitude': params[key]['max_stim_amplitude']
+            })
+        else:
+            stub.update({
+                'stim_amplitude': params[key]['stim_amplitude']
+            })
+
+        return stub
+
+    esd = {
+        "allow_classifier_generalization": True,
+        "classifier_file": "config_files/{}".format(classifier_file),
+        "classifier_version": classifier_version,
+        "random_stim_prob": False,
+        "save_debug_output": True
+    }
+
+    # Why oh why must everything be a special snowflake?
+    key = 'stim_electrode_pairs' if experiment == 'AmplitudeDetermination' else 'stim_channels'
+    esd[key] = {
+        label: make_stim_channel_section(stim_params, label)
+        for label in stim_params
+    }
+
+    return esd
+
+
+def _make_experiment_specs_section(experiment):
+    """Generate the ``experiment_specs`` config section.
+
+    Parameters
+    ----------
+    experiment : str
+
+    Returns
+    -------
+    ``experiment_specs`` dict
+
+    """
+    # FIXME: values below shouldn't be hardcoded
+    specs = {
+        "version": "3.0.0",
+        "experiment_type": experiment,
+        "biomarker_sample_start_time_offset": 0,
+        "biomarker_sample_time_length": 1366,
+        "buffer_time": 1365,
+        "stim_duration": 500,
+        "freq_min": 6,
+        "freq_max": 180,
+        "num_freqs": 8,
+        "num_items": 300,
+    }
+
+    # FIXME: values below shouldn't be hardcoded
+    if 'PS4' in experiment:
+        specs.update({
+            "retrieval_biomarker_sample_start_time_offset": 0,
+            "retrieval_biomarker_sample_time_length": 525,
+            "retrieval_buffer_time": 524,
+            "post_stim_biomarker_sample_time_length": 500,
+            "post_stim_buffer_time": 499,
+            "post_stim_wait_time": 100,
+        })
+
+    return specs
+
+
+def _make_ramulator_config_json(subject, experiment, electrode_config_file,
+                                stim_params, classifier_file=None,
+                                classifier_version=None):
+    """Create the Ramulator ``experiment_config.json`` file.
+
+    Parameters
+    ----------
+    subject : str
+    experiment : str
+    electrode_config_file : str
+    stim_params : dict
+    classifier_file : str
+    classifier_version : str
+
+    Returns
+    -------
+    str
+
+    """
+    config = {
+        'subject': subject,
+        'experiment': {
+            'type': experiment,
+            'experiment_specific_data':
+                _make_experiment_specific_data_section(experiment,
+                                                       stim_params,
+                                                       classifier_file,
+                                                       classifier_version),
+            'experiment_specs': _make_experiment_specs_section(experiment),
+
+            # FIXME: are these the right defaults?
+            'artifact_detection': {
+                "allow_artifact_detection": True,
+                "artifact_detection_number_of_stims_per_channel": 15,
+                "artifact_detection_sample_time_length": 500,
+                "artifact_detection_inter_stim_interval": 2000,
+                "allow_artifact_detection_during_session": False
+            }
+        },
+
+        "biomarker_threshold": 0.5,
+        "electrode_config_file": "config_files/{}".format(electrode_config_file),
+        "montage_file": "config_files/pairs.json",
+        "excluded_montage_file": "config_files/excluded_pairs.json",
+        "global_settings": {
+            "data_dir": "SET_AUTOMATICALLY_AT_A_RUNTIME",
+            "experiment_config_filename": "SET_AUTOMATICALLY_AT_A_RUNTIME",
+            "extended_blanking": True,  # FIXME: make a parameter
+            "plot_fps": 5,
+            "plot_window_length": 20000,
+            "plot_update_style": "Sweeping",
+            "max_session_length": 120,
+            "sampling_rate": 1000,
+            "odin_lib_debug_level": 0,
+            "connect_to_task_laptop": True if experiment != 'AmplitudeDetermination' else False
+        }
+    }
+
+    return json.dumps(config, indent=2, sort_keys=True)
+
+
 @task(cache=False)
 def generate_ramulator_config(subject, experiment, container, stim_params,
-                              paths, pairs=None, excluded_pairs=None):
+                              paths, pairs=None, excluded_pairs=None,
+                              params=None):
     """Create configuration files for Ramulator.
 
     Note that the current template format will not work for FR5 experiments
@@ -105,10 +261,16 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
     :param FilePaths paths:
     :param dict excluded_pairs: Pairs excluded from the classifier (pairs that
         contain a stim contact and possibly some others)
+    :param ExperimentParameters params: All parameters used in training the
+        classifier. This is partially redundant with some data stored in the
+        ``container`` object.
     :returns: path to generated configuration zip file
     :rtype: str
 
     """
+    if container is None and experiment != 'AmplitudeDetermination':
+        raise RuntimeError("container must not be None")
+
     subject = subject.split('_')[0]
 
     stim_dict = {
@@ -122,7 +284,7 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
         for stim_param in stim_params
     }
 
-    dest = paths['dest']
+    dest = paths.dest
     config_dir_root = os.path.join(dest, subject, experiment)
     config_files_dir = os.path.join(config_dir_root, 'config_files')
     try:
@@ -134,20 +296,9 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
     classifier_path = os.path.join(config_files_dir, '{}-classifier.zip'.format(subject))
     ec_prefix, _ = os.path.splitext(paths.electrode_config_file)
 
-    template_filename = os.path.join(
-        os.path.dirname(__file__), 'templates', 'ramulator_config.json')
-
-    with open(template_filename, 'r') as f:
-        experiment_config_template = Template(f.read())
-
-    experiment_config_content = experiment_config_template.generate(
-        subject=subject,
-        experiment=experiment,
-        classifier_file='config_files/{}'.format(os.path.basename(classifier_path)),
-        classifier_version=CLASSIFIER_VERSION,
-        stim_params_dict=stim_dict,
-        electrode_config_file='config_files/{}'.format(os.path.basename(ec_prefix + '.bin')),
-        biomarker_threshold=0.5
+    experiment_config_content = _make_ramulator_config_json(
+        subject, experiment, os.path.basename(ec_prefix + '.bin'), stim_dict,
+        os.path.basename(classifier_path), CLASSIFIER_VERSION
     )
 
     with open(os.path.join(config_dir_root, 'experiment_config.json'), 'w') as f:
@@ -156,7 +307,8 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
             tmpfile.write(experiment_config_content)
         f.write(reindent_json(tmp_path))
 
-    container.save(classifier_path, overwrite=True)
+    if experiment != 'AmplitudeDetermination':
+        container.save(classifier_path, overwrite=True)
 
     # Save some typing below...
     conffile = functools.partial(os.path.join, config_files_dir)
@@ -181,7 +333,21 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
     shutil.copy(csv, conffile(os.path.basename(csv)))
     shutil.copy(bin, conffile(os.path.basename(bin)))
 
-    zip_prefix = os.path.join(dest, '{}_{}'.format(subject, experiment))
+    # Serialize experiment parameters
+    if params is not None:
+        params.to_hdf(os.path.join(config_dir_root, 'exp_params.h5'))
+    else:
+        if experiment not in ['AmplitudeDetermination'] + EXPERIMENTS['record_only']:
+            warnings.warn("No ExperimentParameters object passed; "
+                          "classifier may not be 100% reproducible", UserWarning)
+
+    filename_tmpl = '{subject:s}_{experiment:s}_{pairs:s}_{date:s}'
+    zip_prefix = os.path.join(dest, filename_tmpl.format(
+        subject=subject,
+        experiment=experiment,
+        pairs="_".join([pair.label.replace("_", "-") for pair in stim_params]),
+        date=datetime.now().strftime('%d%b%Y').upper()
+    ))
     zip_path = zip_prefix + '.zip'
     shutil.make_archive(zip_prefix, 'zip', root_dir=config_dir_root)
     logger.info("Created experiment_config zip file: %s", zip_path)

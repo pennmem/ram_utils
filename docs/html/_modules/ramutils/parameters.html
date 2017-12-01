@@ -1,0 +1,222 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ramutils.parameters &#8212; Ramutils 2.0.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '2.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Ramutils 2.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ramutils.parameters</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Common experimental/model parameters.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">traits.api</span> <span class="k">import</span> <span class="n">Int</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Bool</span><span class="p">,</span> <span class="n">Array</span><span class="p">,</span> <span class="n">String</span>
+<span class="kn">from</span> <span class="nn">ramutils.schema</span> <span class="k">import</span> <span class="n">Schema</span>
+
+
+<div class="viewcode-block" id="StimParameters"><a class="viewcode-back" href="../../data.html#ramutils.parameters.StimParameters">[docs]</a><span class="k">class</span> <span class="nc">StimParameters</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Single-channel stimulation parameters.&quot;&quot;&quot;</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">String</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;stim channel label&quot;</span><span class="p">)</span>
+    <span class="n">anode</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;stim anode contact number&quot;</span><span class="p">)</span>
+    <span class="n">cathode</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;stim cathode contact number&quot;</span><span class="p">)</span>
+    <span class="n">frequency</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="mf">200.</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;stim pulse frequency [Hz]&quot;</span><span class="p">)</span>
+    <span class="n">duration</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="mf">500.</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;stim duration [ms]&quot;</span><span class="p">)</span>
+
+    <span class="c1"># used in fixed-amplitidue experiments</span>
+    <span class="n">target_amplitude</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;stim amplitude [mA]&quot;</span><span class="p">)</span>
+
+    <span class="c1"># used in variable-amplitude experiments</span>
+    <span class="n">min_amplitude</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;minimum allowable stim amplitude [mA]&quot;</span><span class="p">)</span>
+    <span class="n">max_amplitude</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;maximum allowable stim amplitude [mA]&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FilePaths"><a class="viewcode-back" href="../../data.html#ramutils.parameters.FilePaths">[docs]</a><span class="k">class</span> <span class="nc">FilePaths</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Paths to files that frequently get passed around to many tasks.</span>
+
+<span class="sd">    All paths given relative to the root path but are converted to absolute</span>
+<span class="sd">    paths on creation.</span>
+
+<span class="sd">    Keyword arguments</span>
+<span class="sd">    -----------------</span>
+<span class="sd">    root : str</span>
+<span class="sd">        Rhino mount point.</span>
+<span class="sd">    dest : str</span>
+<span class="sd">        Directory to write files to.</span>
+<span class="sd">    electrode_config_file : str</span>
+<span class="sd">        Path to Odin electrode configuration CSV file.</span>
+<span class="sd">    pairs : str</span>
+<span class="sd">        Path to ``pairs.json``.</span>
+<span class="sd">    excluded_pairs : str</span>
+<span class="sd">        Path to ``excluded_pairs.json``.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># root is the only required kwarg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;root&#39;</span><span class="p">])</span>
+
+        <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">makepath</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">))</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">p</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dest</span> <span class="o">=</span> <span class="n">makepath</span><span class="p">(</span><span class="s1">&#39;dest&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">electrode_config_file</span> <span class="o">=</span> <span class="n">makepath</span><span class="p">(</span><span class="s1">&#39;electrode_config_file&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pairs</span> <span class="o">=</span> <span class="n">makepath</span><span class="p">(</span><span class="s1">&#39;pairs&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">excluded_pairs</span> <span class="o">=</span> <span class="n">makepath</span><span class="p">(</span><span class="s1">&#39;excluded_pairs&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ExperimentParameters"><a class="viewcode-back" href="../../data.html#ramutils.parameters.ExperimentParameters">[docs]</a><span class="k">class</span> <span class="nc">ExperimentParameters</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Common parameters used in an experiment. Default values apply to the FR</span>
+<span class="sd">        class of experiments.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">width</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;wavelet width&#39;</span><span class="p">)</span>
+    <span class="n">freqs</span> <span class="o">=</span> <span class="n">Array</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mi">6</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mi">180</span><span class="p">),</span> <span class="mi">8</span><span class="p">),</span>
+                  <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;frequencies to compute powers for&#39;</span><span class="p">)</span>
+
+    <span class="n">log_powers</span> <span class="o">=</span> <span class="n">Bool</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># FIXME: do we really need this?</span>
+
+    <span class="n">filt_order</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Butterworth filter order&quot;</span><span class="p">)</span>
+
+    <span class="n">penalty_type</span> <span class="o">=</span> <span class="n">String</span><span class="p">(</span><span class="s1">&#39;l2&#39;</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;logistic regression penalty type&#39;</span><span class="p">)</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="mf">7.2e-4</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;inverse of regularization strength&#39;</span><span class="p">)</span>
+    <span class="n">n_perm</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;number of permutations to use for cross-validation&#39;</span><span class="p">)</span>
+    <span class="n">solver</span> <span class="o">=</span> <span class="n">String</span><span class="p">(</span><span class="s1">&#39;liblinear&#39;</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;algorithm to use in optimization process&#39;</span><span class="p">)</span>
+
+    <span class="n">baseline_removal_start_time</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;The amount of time to &quot;</span>
+                                                   <span class="s2">&quot;skip at the beginning of &quot;</span>
+                                                   <span class="s2">&quot;the sessions [ms]&quot;</span><span class="p">)</span>
+    <span class="n">retrieval_time</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">29000</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;The amount of time within the recall &quot;</span>
+                                       <span class="s2">&quot;period to consider&quot;</span><span class="p">)</span>
+    <span class="n">empty_epoch_duration</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;The length of desired empty &quot;</span>
+                                           <span class="s2">&quot;epochs [ms]&quot;</span><span class="p">)</span>
+    <span class="n">pre_event_buf</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">2000</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;The time before each event to exclude [&quot;</span>
+                                    <span class="s2">&quot;ms]&quot;</span><span class="p">)</span>
+    <span class="n">post_event_buf</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;The time after each event to exclude [&quot;</span>
+                                     <span class="s2">&quot;ms]&quot;</span><span class="p">)</span>
+    <span class="n">inter_response_time</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Duration between events required &quot;</span>
+                                           <span class="s2">&quot;for a recall event to have &quot;</span>
+                                           <span class="s2">&quot;occured after some sort of &quot;</span>
+                                           <span class="s2">&quot;cognitive process [ms]&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FRParameters"><a class="viewcode-back" href="../../data.html#ramutils.parameters.FRParameters">[docs]</a><span class="k">class</span> <span class="nc">FRParameters</span><span class="p">(</span><span class="n">ExperimentParameters</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Free recall experiment parameters relevant for classification.&quot;&quot;&quot;</span>
+    <span class="n">encoding_start_time</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;encoding start time [s]&quot;</span><span class="p">)</span>
+    <span class="n">encoding_end_time</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="mf">1.366</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;encoding end time [s]&quot;</span><span class="p">)</span>
+    <span class="n">encoding_buf</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="mf">1.365</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;encoding buffer time [s]&quot;</span><span class="p">)</span>
+
+    <span class="n">retrieval_start_time</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="o">-</span><span class="mf">0.525</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;retrieval start time [s]&quot;</span><span class="p">)</span>
+    <span class="n">retrieval_end_time</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;retrieval end time [s]&quot;</span><span class="p">)</span>
+    <span class="n">retrieval_buf</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="mf">0.524</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;retrieval buffer time [s]&quot;</span><span class="p">)</span>
+
+    <span class="n">encoding_only</span> <span class="o">=</span> <span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;use encoding-only classifier&quot;</span><span class="p">)</span>
+    <span class="n">encoding_multiplier</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;weighting factor for encoding &quot;</span>
+                                          <span class="s2">&quot;samples&quot;</span><span class="p">)</span>
+    <span class="n">combine_events</span> <span class="o">=</span> <span class="n">Bool</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;combine record-only events for &quot;</span>
+                                     <span class="s2">&quot;classifier training&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PALParameters"><a class="viewcode-back" href="../../data.html#ramutils.parameters.PALParameters">[docs]</a><span class="k">class</span> <span class="nc">PALParameters</span><span class="p">(</span><span class="n">FRParameters</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Paired associates experiment parameters relevant for classification.</span>
+<span class="sd">        It inhertis all of the same parameters as FR experiments and adds a</span>
+<span class="sd">        few more</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">pal_start_time</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;encoding start time for PAL [s]&quot;</span><span class="p">)</span>
+    <span class="n">pal_end_time</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="mf">2.00</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;encoding end time for PAL [s]&quot;</span><span class="p">)</span>
+    <span class="n">pal_buf_time</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="mf">1.2</span><span class="p">)</span>
+
+    <span class="n">pal_retrieval_start_time</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="o">-</span><span class="mf">0.625</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;retrieval start time for &quot;</span>
+                                                  <span class="s2">&quot;PAL [s]&quot;</span><span class="p">)</span>
+    <span class="n">pal_retrieval_end_time</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;retrieval end time for PAL [s]&quot;</span><span class="p">)</span>
+    <span class="n">pal_retrieval_buf</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="mf">0.524</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;retrieval buffer for PAL [s]&quot;</span><span class="p">)</span>
+
+    <span class="n">encoding_multiplier</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="mf">7.2</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;weighting factor for encoding &quot;</span>
+                                          <span class="s2">&quot;samples in PAL&quot;</span><span class="p">)</span>
+    <span class="n">pal_multiplier</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="mf">1.93</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;weighting factor for PAL samples&quot;</span><span class="p">)</span></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Ramutils 2.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

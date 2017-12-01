@@ -1,0 +1,287 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ramutils.models.hmm &#8212; Ramutils 2.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Ramutils 2.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ramutils.models.hmm</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pymc3</span> <span class="k">as</span> <span class="nn">pm</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+
+<div class="viewcode-block" id="HierarchicalModel"><a class="viewcode-back" href="../../../models.html#ramutils.models.hmm.HierarchicalModel">[docs]</a><span class="k">class</span> <span class="nc">HierarchicalModel</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Class for running pymc3 models based on the experiment type and subject &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">item_comparison</span><span class="o">=</span><span class="s1">&#39;list&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data: pd.DataFrame</span>
+<span class="sd">            Pandas DataFrame containing the data to be used for model fitting.</span>
+<span class="sd">            Typically, this should be the fr-stim-table produced in the automated</span>
+<span class="sd">            reports</span>
+<span class="sd">        subject: str</span>
+<span class="sd">            Subject identifier</span>
+<span class="sd">        experiment: str</span>
+<span class="sd">            Task name. Used to determine which model to use with fit() is called</span>
+<span class="sd">        item_comparison: str, default &#39;list&#39;</span>
+<span class="sd">            Controls the type of comparison used in the model. The default is &#39;list&#39;</span>
+<span class="sd">            indicating stim list vs. non-stim list. Other options are &#39;stim&#39; and</span>
+<span class="sd">            &#39;post_stim&#39; indicating that stim items vs. low-biomarker non stim items</span>
+<span class="sd">            should be compared and post stim items vs. low biomarker non stim items,</span>
+<span class="sd">            respectively.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Currently models are identical for each experiment type. Ideally, the model</span>
+<span class="sd">        will be experiment-specific in the future, so a factory method fit() is</span>
+<span class="sd">        used to dispatch the appropriate private method based on the experiment</span>
+<span class="sd">        type.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subject</span> <span class="o">=</span> <span class="n">subject</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span> <span class="o">=</span> <span class="n">experiment</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">item_comparison</span> <span class="o">=</span> <span class="n">item_comparison</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>  <span class="c1"># data prep needs to happen before other object attributes are set</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_sessions</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_serialpos</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">serialpos</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_lists</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">list_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serialpos_idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">serialpos</span><span class="o">.</span><span class="n">values</span>
+
+        <span class="n">level_treatment_map</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;list&#39;</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">is_stim_list</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+            <span class="s1">&#39;stim&#39;</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">is_stim_item</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+            <span class="s1">&#39;post_stim&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">is_post_stim_item</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">treatment_vals</span> <span class="o">=</span> <span class="n">level_treatment_map</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">item_comparison</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_baseline_model</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trace</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span>
+
+<div class="viewcode-block" id="HierarchicalModel.fit"><a class="viewcode-back" href="../../../models.html#ramutils.models.hmm.HierarchicalModel.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">draws</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">tune</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Fit a hierarchical model for the given subject and experiment</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        trace (pymc3.backends.base.MultiTrace)</span>
+<span class="sd">            A MultiTrace object that contains the samples</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">method_str</span> <span class="o">=</span> <span class="s2">&quot;_fit_</span><span class="si">{}</span><span class="s2">_model&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="p">)</span>
+        <span class="n">dispatch_method</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method_str</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dispatch_method</span><span class="p">(</span><span class="n">draws</span><span class="p">,</span> <span class="n">tune</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_prepare_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Set the data attribute for the model after some cleaning based on the</span>
+<span class="sd">            requested model level from initialization</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">raw_data</span><span class="p">[</span><span class="n">raw_data</span><span class="o">.</span><span class="n">list</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">]</span>
+
+        <span class="c1"># serialpos, list, session all need to be 0-indexed for the vectorized</span>
+        <span class="c1"># implementation of the model to work</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;session&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;session&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;session&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;serialpos&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;serialpos&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;serialpos&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+
+        <span class="c1"># Turn list into a % session completed variable to that subjects who complete only partial</span>
+        <span class="c1"># sessions can still be compared to full sessions</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;list&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;list&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;list&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()))</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;list&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()))</span>
+
+        <span class="n">serialpos_dummies</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">serialpos</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="p">,</span> <span class="n">serialpos_dummies</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;low_biomarker&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;prob&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;thresh&quot;</span><span class="p">])</span>
+
+        <span class="n">stim_or_low_bio_df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[((</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;is_stim_item&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">True</span><span class="p">)</span> <span class="o">|</span>
+                                 <span class="p">((</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;low_biomarker&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">True</span><span class="p">)</span> <span class="o">&amp;</span>
+                                 <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;is_stim_item&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">False</span><span class="p">)))]</span>
+
+        <span class="n">post_stim_or_low_bio_df</span>  <span class="o">=</span> <span class="n">df</span><span class="p">[((</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;is_post_stim_item&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">True</span><span class="p">)</span> <span class="o">|</span>
+                                       <span class="p">((</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;low_biomarker&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">True</span><span class="p">)</span> <span class="o">&amp;</span>
+                                       <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;is_post_stim_item&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">False</span><span class="p">)))]</span>
+
+        <span class="n">level_data_map</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;list&quot;</span><span class="p">:</span> <span class="n">df</span><span class="p">,</span>
+                          <span class="s2">&quot;stim&quot;</span><span class="p">:</span> <span class="n">stim_or_low_bio_df</span><span class="p">,</span>
+                          <span class="s2">&quot;post_stim&quot;</span><span class="p">:</span> <span class="n">post_stim_or_low_bio_df</span><span class="p">}</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">level_data_map</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">item_comparison</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">_build_baseline_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span> <span class="k">as</span> <span class="n">model</span><span class="p">:</span>
+            <span class="c1"># Treat list as a continuous variable</span>
+            <span class="n">listpos_coef</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;listnum&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># Treat serial position as a factor variable</span>
+            <span class="n">serialpos_coef</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;serialpos&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
+
+            <span class="c1"># Random intercept hyperpriors</span>
+            <span class="n">mu_alpha</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;avg_recall&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">sigma_alpha</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfNormal</span><span class="p">(</span><span class="s1">&#39;std_recall&#39;</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># Random slope hyperpriors</span>
+            <span class="n">mu_beta</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;Stim Effect (Across Sessions)&#39;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">sigma_beta</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfNormal</span><span class="p">(</span><span class="s1">&#39;std_stim_effect&#39;</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># Model the recall probability offset by session (session specific intercept)</span>
+            <span class="n">alpha_offset</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;session_avg_recall_offset&quot;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_sessions</span><span class="p">)</span>
+            <span class="n">alpha</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Deterministic</span><span class="p">(</span><span class="s2">&quot;session_avg_recall&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">mu_alpha</span> <span class="o">+</span> <span class="n">alpha_offset</span> <span class="o">*</span> <span class="n">sigma_alpha</span><span class="p">))</span>
+
+            <span class="c1"># Model the stim effect offset by session (session specific slope)</span>
+            <span class="n">beta_offset</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;session_stim_effect_offset&quot;</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_sessions</span><span class="p">)</span>
+            <span class="n">beta</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Deterministic</span><span class="p">(</span><span class="s2">&quot;Stim Effect (Session Level)&quot;</span><span class="p">,</span> <span class="n">mu_beta</span> <span class="o">+</span> <span class="n">beta_offset</span> <span class="o">*</span> <span class="n">sigma_beta</span><span class="p">)</span>
+
+            <span class="c1"># Expected value</span>
+            <span class="n">recall_est</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">invlogit</span><span class="p">(</span><span class="n">alpha</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">values</span><span class="p">]</span> <span class="o">+</span>
+                                     <span class="n">serialpos_coef</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span>
+                                     <span class="n">serialpos_coef</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span>
+                                     <span class="n">serialpos_coef</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span>
+                                     <span class="n">serialpos_coef</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span>
+                                     <span class="n">serialpos_coef</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span>
+                                     <span class="n">serialpos_coef</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">+</span>
+                                     <span class="n">serialpos_coef</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">+</span>
+                                     <span class="n">serialpos_coef</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">+</span>
+                                     <span class="n">serialpos_coef</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">+</span>
+                                     <span class="n">serialpos_coef</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">+</span>
+                                     <span class="n">serialpos_coef</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span> <span class="o">+</span>
+                                     <span class="n">listpos_coef</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">values</span> <span class="o">+</span>
+                                     <span class="n">beta</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">values</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">is_stim_list</span><span class="p">)</span>
+
+            <span class="c1"># single_subject_data likelihood</span>
+            <span class="n">y_like</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Bernoulli</span><span class="p">(</span><span class="s1">&#39;y_like&#39;</span><span class="p">,</span> <span class="n">recall_est</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">recalled</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">model</span>
+
+    <span class="k">def</span> <span class="nf">_fit_FR3_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">draws</span><span class="p">,</span> <span class="n">tune</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trace</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">draws</span><span class="o">=</span><span class="n">draws</span><span class="p">,</span> <span class="n">tune</span><span class="o">=</span><span class="n">tune</span><span class="p">)[</span><span class="n">tune</span><span class="p">:]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span>
+
+    <span class="k">def</span> <span class="nf">_fit_FR5_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">draws</span><span class="p">,</span> <span class="n">tune</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_FR3_model</span><span class="p">(</span><span class="n">draws</span><span class="p">,</span> <span class="n">tune</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_fit_catFR3_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">draws</span><span class="p">,</span> <span class="n">tune</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_FR3_model</span><span class="p">(</span><span class="n">draws</span><span class="p">,</span> <span class="n">tune</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_fit_catFR5_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">draws</span><span class="p">,</span> <span class="n">tune</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_FR3_model</span><span class="p">(</span><span class="n">draws</span><span class="p">,</span> <span class="n">tune</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="HierarchicalModelPlots"><a class="viewcode-back" href="../../../models.html#ramutils.models.hmm.HierarchicalModelPlots">[docs]</a><span class="k">class</span> <span class="nc">HierarchicalModelPlots</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Custom plots for hierarchical models to estimate the effect of stim &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trace</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trace</span>  <span class="o">=</span> <span class="n">trace</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stimvars</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Stim Effect (Across Sessions)&quot;</span><span class="p">,</span> <span class="s2">&quot;Stim Effect (Session Level)&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="HierarchicalModelPlots.traceplot"><a class="viewcode-back" href="../../../models.html#ramutils.models.hmm.HierarchicalModelPlots.traceplot">[docs]</a>    <span class="k">def</span> <span class="nf">traceplot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Generate a custom traceplot based on the trace from the fit model &quot;&quot;&quot;</span>
+
+        <span class="n">line_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stimvars</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stimvars</span><span class="p">)))</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">traceplot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">,</span> <span class="n">lines</span><span class="o">=</span><span class="n">line_dict</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ax</span></div>
+
+<div class="viewcode-block" id="HierarchicalModelPlots.forestplot"><a class="viewcode-back" href="../../../models.html#ramutils.models.hmm.HierarchicalModelPlots.forestplot">[docs]</a>    <span class="k">def</span> <span class="nf">forestplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Generate a custom forestplot using the trace from the fit model &quot;&quot;&quot;</span>
+        <span class="n">session_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">get_values</span><span class="p">(</span><span class="s2">&quot;Stim Effect (Session Level)&quot;</span><span class="p">,</span> <span class="n">chains</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">chains</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">num_sessions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">session_values</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">session_titles</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;Session&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_sessions</span><span class="p">)]</span>
+        <span class="n">ylabels</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Agg&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">session_titles</span>
+
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">forestplot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">,</span>
+                           <span class="n">varnames</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stimvars</span><span class="p">,</span>
+                           <span class="n">main</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+                           <span class="n">xtitle</span><span class="o">=</span><span class="s2">&quot;Estimated Coefficient for the Effect of Stimulation&quot;</span><span class="p">,</span>
+                           <span class="n">ylabels</span> <span class="o">=</span> <span class="n">ylabels</span><span class="p">,</span>
+                           <span class="n">quartiles</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                           <span class="n">linewidth</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                           <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#136ba5&#39;</span><span class="p">,</span>
+                           <span class="n">markersize</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+                           <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ax</span></div></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Ramutils 2.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

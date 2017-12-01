@@ -13,3 +13,10 @@ class UnsupportedExperimentError(Exception):
     supported.
 
     """
+
+
+class MultistimNotAllowedException(Exception):
+    """Raised when attempting to define multiple stim sites for an experiment
+    which doesn't support it.
+
+    """

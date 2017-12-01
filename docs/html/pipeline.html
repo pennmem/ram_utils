@@ -1,0 +1,361 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Pipelines &#8212; Ramutils 2.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Command-line usage" href="cli.html" />
+    <link rel="prev" title="Modeling effects of stim" href="models.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cli.html" title="Command-line usage"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="models.html" title="Modeling effects of stim"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="pipelines">
+<h1>Pipelines<a class="headerlink" href="#pipelines" title="Permalink to this headline">¶</a></h1>
+<p>Experiment configuration file generation and post-experiment reporting is done
+via a series of tasks that are built up into a pipeline using <a class="reference external" href="http://dask.pydata.org/en/latest/index.html">dask</a>.</p>
+<div class="section" id="defining-tasks">
+<h2>Defining tasks<a class="headerlink" href="#defining-tasks" title="Permalink to this headline">¶</a></h2>
+<p>Tasks are created by using the <a class="reference internal" href="#ramutils.tasks.task" title="ramutils.tasks.task"><code class="xref py py-func docutils literal"><span class="pre">ramutils.tasks.task()</span></code></a> decorator or wrapping
+a function with <a class="reference internal" href="#ramutils.tasks.make_task" title="ramutils.tasks.make_task"><code class="xref py py-func docutils literal"><span class="pre">ramutils.tasks.make_task()</span></code></a>. These simply apply the
+<code class="xref py py-func docutils literal"><span class="pre">dask.delayed()</span></code> and (optionally) <code class="docutils literal"><span class="pre">joblib</span></code> caching decorators. The former
+is important for adding the ability to parallelize a pipeline (for tasks that
+can run independently) while the latter allows for resuming a pipeline when
+something goes wrong or if only changing one parameter which does not affect all
+tasks.</p>
+<dl class="function">
+<dt id="ramutils.tasks.task">
+<code class="descclassname">ramutils.tasks.</code><code class="descname">task</code><span class="sig-paren">(</span><em>cache=True</em>, <em>log_args=False</em>, <em>nout=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/_wrapper.html#task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.task" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator to define a task.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>cache</strong> (<em>bool</em>) – Cache the task result (default: True)</li>
+<li><strong>log_args</strong> (<em>bool</em>) – Log arguments the task is called with (default: False)</li>
+<li><strong>nout</strong> (<em>int</em>) – Number of return values of the wrapped function. Must be specified if
+more than 1.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.tasks.make_task">
+<code class="descclassname">ramutils.tasks.</code><code class="descname">make_task</code><span class="sig-paren">(</span><em>func</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/_wrapper.html#make_task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.make_task" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrap a function in a task.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>func</strong> (<em>callable</em>) – Function to wrap</li>
+<li><strong>args</strong> – Arguments for the function</li>
+<li><strong>kwargs</strong> – Keyword arugments for the function plus keyword arguments accepted by
+the <code class="xref py py-func docutils literal"><span class="pre">task()</span></code> decorator.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="reference">
+<h2>Reference<a class="headerlink" href="#reference" title="Permalink to this headline">¶</a></h2>
+<p>Common tasks come predefined in the <code class="xref py py-mod docutils literal"><span class="pre">ramutils.tasks</span></code> package and are
+documented below.</p>
+<div class="section" id="module-ramutils.tasks.classifier">
+<span id="classifier-tasks"></span><h3>Classifier tasks<a class="headerlink" href="#module-ramutils.tasks.classifier" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="ramutils.tasks.classifier.serialize_classifier">
+<code class="descclassname">ramutils.tasks.classifier.</code><code class="descname">serialize_classifier</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/classifier.html#serialize_classifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.classifier.serialize_classifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serialize classifier into a container object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>classifier</strong> (<em>sklearn Estimator</em>) – Model used during training</li>
+<li><strong>pairs</strong> (<em>array_like</em>) – bipolar pairs used for training</li>
+<li><strong>features</strong> (<em>np.ndarray</em>) – Normalized power matrix used as features to the classifier</li>
+<li><strong>events</strong> (<em>np.recarray</em>) – Set of events used for training</li>
+<li><strong>sample_weights</strong> (<em>array_like</em>) – Weights used for each of the event</li>
+<li><strong>xval_output</strong> (<a class="reference internal" href="classifier.html#ramutils.classifier.model.ModelOutput" title="ramutils.classifier.model.ModelOutput"><em>ModelOutput</em></a>) – Object used for calculating and storing cross-validation-related metrics</li>
+<li><strong>subject</strong> (<em>str</em>) – Subject identifier</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Object representing all meta-data associated with training a classifier</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ClassififerContainer</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ramutils.tasks.events">
+<span id="events-tasks"></span><h3>Events tasks<a class="headerlink" href="#module-ramutils.tasks.events" title="Permalink to this headline">¶</a></h3>
+<p>Partial pipelines for processing events that is used by full pipelines.</p>
+</div>
+<div class="section" id="module-ramutils.tasks.misc">
+<span id="miscellaneous-tasks"></span><h3>Miscellaneous tasks<a class="headerlink" href="#module-ramutils.tasks.misc" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="ramutils.tasks.misc.read_index">
+<code class="descclassname">ramutils.tasks.misc.</code><code class="descname">read_index</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/misc.html#read_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.misc.read_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the JSON index reader.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>mount_point</strong> (<em>str</em>) – Root directory to search for.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">JsonIndexReader</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ramutils.tasks.montage">
+<span id="montage-tasks"></span><h3>Montage tasks<a class="headerlink" href="#module-ramutils.tasks.montage" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="module-ramutils.tasks.odin">
+<span id="odin-ramulator-tasks"></span><h3>Odin/Ramulator tasks<a class="headerlink" href="#module-ramutils.tasks.odin" title="Permalink to this headline">¶</a></h3>
+<p>Tasks specific to the Medtronic Odin ENS.</p>
+<dl class="function">
+<dt id="ramutils.tasks.odin.generate_pairs_from_electrode_config">
+<code class="descclassname">ramutils.tasks.odin.</code><code class="descname">generate_pairs_from_electrode_config</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/odin.html#generate_pairs_from_electrode_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.odin.generate_pairs_from_electrode_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load and verify the validity of the Odin electrode configuration file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>subject</strong> (<em>str</em>) – Subject ID</li>
+<li><strong>paths</strong> (<a class="reference internal" href="data.html#ramutils.parameters.FilePaths" title="ramutils.parameters.FilePaths"><em>FilePaths</em></a>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">minimal pairs.json based on the electrode configuration</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">dict</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><strong>RuntimeError</strong> – if the csv or bin file are not found</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.tasks.odin.generate_ramulator_config">
+<code class="descclassname">ramutils.tasks.odin.</code><code class="descname">generate_ramulator_config</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/odin.html#generate_ramulator_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.odin.generate_ramulator_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create configuration files for Ramulator.</p>
+<p>Note that the current template format will not work for FR5 experiments
+since the config format is not the same.</p>
+<p>In hardware bipolar mode, the neurorad pipeline generates a <code class="docutils literal"><span class="pre">pairs.json</span></code>
+file that differs from the electrode configured pairs. It is up to the user
+of the pipeline to ensure that the path to the correct <code class="docutils literal"><span class="pre">pairs.json</span></code> is
+supplied (although Ramulator does not use it in this case).</p>
+<p>The destination path is assumed to be relative to the root path. All other
+paths are assumed to be absolute.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>subject</strong> (<em>str</em>) – </li>
+<li><strong>experiment</strong> (<em>str</em>) – </li>
+<li><strong>container</strong> (<em>ClassifierContainer</em>) – serialized classifier</li>
+<li><strong>stim_params</strong> (<em>List</em><em>[</em><a class="reference internal" href="data.html#ramutils.parameters.StimParameters" title="ramutils.parameters.StimParameters"><em>StimParameters</em></a><em>]</em>) – list of stimulation parameters</li>
+<li><strong>paths</strong> (<a class="reference internal" href="data.html#ramutils.parameters.FilePaths" title="ramutils.parameters.FilePaths"><em>FilePaths</em></a>) – </li>
+<li><strong>excluded_pairs</strong> (<em>dict</em>) – Pairs excluded from the classifier (pairs that
+contain a stim contact and possibly some others)</li>
+<li><strong>params</strong> (<a class="reference internal" href="data.html#ramutils.parameters.ExperimentParameters" title="ramutils.parameters.ExperimentParameters"><em>ExperimentParameters</em></a>) – All parameters used in training the
+classifier. This is partially redundant with some data stored in the
+<code class="docutils literal"><span class="pre">container</span></code> object.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">path to generated configuration zip file</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ramutils.tasks.powers">
+<span id="power-computation-tasks"></span><h3>Power computation tasks<a class="headerlink" href="#module-ramutils.tasks.powers" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="ramutils.tasks.powers.compute_normalized_powers">
+<code class="descclassname">ramutils.tasks.powers.</code><code class="descname">compute_normalized_powers</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/powers.html#compute_normalized_powers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.powers.compute_normalized_powers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute powers by session, encoding/retrieval, and FR vs. PAL</p>
+<p class="rubric">Notes</p>
+<p>There are different start times, end time, and buffer times for each
+subset type, so those are passed in as kwargs and looked up prior to
+calling the more general compute_powers function</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ramutils.tasks.summary">
+<span id="report-summary-tasks"></span><h3>Report summary tasks<a class="headerlink" href="#module-ramutils.tasks.summary" title="Permalink to this headline">¶</a></h3>
+<p>Tasks related to summarizing an experiment. Used primarily in reporting
+results.</p>
+<dl class="function">
+<dt id="ramutils.tasks.summary.summarize_session">
+<code class="descclassname">ramutils.tasks.summary.</code><code class="descname">summarize_session</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/summary.html#summarize_session"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.summary.summarize_session" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a summary of a single experiment session.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>events</strong> (<em>np.recarray</em>) – Events from a single</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>summary</strong> – Summary object for the proper experiment type.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">SessionSummary</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">TooManySessionsError</span></code> – If the events span more than one session.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>The experiment type is inferred from the events.</p>
+<p>FIXME: make work with all experiments</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Pipelines</a><ul>
+<li><a class="reference internal" href="#defining-tasks">Defining tasks</a></li>
+<li><a class="reference internal" href="#reference">Reference</a><ul>
+<li><a class="reference internal" href="#module-ramutils.tasks.classifier">Classifier tasks</a></li>
+<li><a class="reference internal" href="#module-ramutils.tasks.events">Events tasks</a></li>
+<li><a class="reference internal" href="#module-ramutils.tasks.misc">Miscellaneous tasks</a></li>
+<li><a class="reference internal" href="#module-ramutils.tasks.montage">Montage tasks</a></li>
+<li><a class="reference internal" href="#module-ramutils.tasks.odin">Odin/Ramulator tasks</a></li>
+<li><a class="reference internal" href="#module-ramutils.tasks.powers">Power computation tasks</a></li>
+<li><a class="reference internal" href="#module-ramutils.tasks.summary">Report summary tasks</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="models.html"
+                        title="previous chapter">Modeling effects of stim</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="cli.html"
+                        title="next chapter">Command-line usage</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/pipeline.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cli.html" title="Command-line usage"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="models.html" title="Modeling effects of stim"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>
