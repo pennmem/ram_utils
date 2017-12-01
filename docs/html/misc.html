@@ -1,0 +1,308 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Miscellaneous utilities &#8212; Ramutils 2.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Command-line usage" href="cli.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cli.html" title="Command-line usage"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="miscellaneous-utilities">
+<h1>Miscellaneous utilities<a class="headerlink" href="#miscellaneous-utilities" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-ramutils.exc">
+<span id="common-exception-types"></span><h2>Common exception types<a class="headerlink" href="#module-ramutils.exc" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="ramutils.exc.MultistimNotAllowedException">
+<em class="property">exception </em><code class="descclassname">ramutils.exc.</code><code class="descname">MultistimNotAllowedException</code><a class="reference internal" href="_modules/ramutils/exc.html#MultistimNotAllowedException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.exc.MultistimNotAllowedException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when attempting to define multiple stim sites for an experiment
+which doesn’t support it.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="ramutils.exc.TooManyExperimentsError">
+<em class="property">exception </em><code class="descclassname">ramutils.exc.</code><code class="descname">TooManyExperimentsError</code><a class="reference internal" href="_modules/ramutils/exc.html#TooManyExperimentsError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.exc.TooManyExperimentsError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when too many experiments are included with events.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="ramutils.exc.TooManySessionsError">
+<em class="property">exception </em><code class="descclassname">ramutils.exc.</code><code class="descname">TooManySessionsError</code><a class="reference internal" href="_modules/ramutils/exc.html#TooManySessionsError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.exc.TooManySessionsError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when too many sessions’ worth of data are passed as an argument.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="ramutils.exc.UnsupportedExperimentError">
+<em class="property">exception </em><code class="descclassname">ramutils.exc.</code><code class="descname">UnsupportedExperimentError</code><a class="reference internal" href="_modules/ramutils/exc.html#UnsupportedExperimentError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.exc.UnsupportedExperimentError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when trying to do something with an experiment that is not yet
+supported.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ramutils.log">
+<span id="logging"></span><h2>Logging<a class="headerlink" href="#module-ramutils.log" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ramutils.log.get_logger">
+<code class="descclassname">ramutils.log.</code><code class="descname">get_logger</code><span class="sig-paren">(</span><em>name='ramutils'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/log.html#get_logger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.log.get_logger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a configured logger to be used throughout the ramutils package.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<em>str</em>) – Name for the logger (default: <code class="docutils literal"><span class="pre">'ramutils'</span></code>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="everything-else">
+<h2>Everything else<a class="headerlink" href="#everything-else" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-ramutils.constants">
+<span id="constants"></span><h3>Constants<a class="headerlink" href="#module-ramutils.constants" title="Permalink to this headline">¶</a></h3>
+<p>Constants that may be used throughout <code class="xref py py-mod docutils literal"><span class="pre">ramutils</span></code>. Constants that are
+defined here include:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">EXPERIMENTS</span></code> - a dictionary of all experiments that can be processed by
+<code class="xref py py-mod docutils literal"><span class="pre">ramutils</span></code></li>
+</ul>
+</div>
+<div class="section" id="module-ramutils.utils">
+<span id="utility-functions"></span><h3>Utility functions<a class="headerlink" href="#module-ramutils.utils" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="ramutils.utils.combine_tag_names">
+<code class="descclassname">ramutils.utils.</code><code class="descname">combine_tag_names</code><span class="sig-paren">(</span><em>tag_name_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/utils.html#combine_tag_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.utils.combine_tag_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate sensible output from a list of tuples containing anode and
+cathode contact names.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.utils.extract_subject_montage">
+<code class="descclassname">ramutils.utils.</code><code class="descname">extract_subject_montage</code><span class="sig-paren">(</span><em>subject_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/utils.html#extract_subject_montage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.utils.extract_subject_montage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract the subject ID and montage number from the subject ID</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>subject_id</strong> (<em>str</em>) – Subject identifier</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li><em>str</em> – Subject identifier with montage information removed</li>
+<li><em>int</em> – Montage number</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.utils.reindent_json">
+<code class="descclassname">ramutils.utils.</code><code class="descname">reindent_json</code><span class="sig-paren">(</span><em>json_file</em>, <em>indent=2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/utils.html#reindent_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.utils.reindent_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Re-indent JSON data preserving order. Useful for removing extraneous
+whitespace leftover from templates generation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>json_file</strong> (<em>str</em><em> or </em><em>file-like</em>) – Path to JSON file or a file-like object containing JSON data.</li>
+<li><strong>indent</strong> (<em>int</em>) – Indent width</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>reindented</strong> – Re-indented JSON string</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.utils.safe_divide">
+<code class="descclassname">ramutils.utils.</code><code class="descname">safe_divide</code><span class="sig-paren">(</span><em>a</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/utils.html#safe_divide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.utils.safe_divide" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempts to perform a/b and catches zero division errors to prevent crashing</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> (<em>float</em>) – Numerator</li>
+<li><strong>b</strong> (<em>float</em>) – Denominator</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>result</strong> – 0 if denominator is 0, else a/b</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.utils.sanitize_comma_sep_list">
+<code class="descclassname">ramutils.utils.</code><code class="descname">sanitize_comma_sep_list</code><span class="sig-paren">(</span><em>input_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/utils.html#sanitize_comma_sep_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.utils.sanitize_comma_sep_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clean up a string with comma-separated values to remove 0 elements.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.utils.save_array_to_hdf5">
+<code class="descclassname">ramutils.utils.</code><code class="descname">save_array_to_hdf5</code><span class="sig-paren">(</span><em>output</em>, <em>data_name</em>, <em>data</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/utils.html#save_array_to_hdf5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.utils.save_array_to_hdf5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save an array of data to hdf5</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>output</strong> (<em>(</em><em>str</em><em>) </em><em>Path to hdf5 output file</em>) – </li>
+<li><strong>data_name</strong> (<em>(</em><em>str</em><em>) </em><em>Name of the dataset</em>) – </li>
+<li><strong>data</strong> (<em>(</em><em>np.ndarray</em><em>) </em><em>Data array</em>) – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Primarily useful for debugging purposes. Could be used to save underlying
+data for report plots.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.utils.timer">
+<code class="descclassname">ramutils.utils.</code><code class="descname">timer</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/utils.html#timer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.utils.timer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Context manager to log the elapsed time of a code block.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>message</strong> (<em>str</em>) – Percent-formatted string to display the elapsed time</li>
+<li><strong>logger</strong> (<em>str</em>) – Name of logger to use</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.utils.touch">
+<code class="descclassname">ramutils.utils.</code><code class="descname">touch</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/utils.html#touch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.utils.touch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mimics the unix <code class="docutils literal"><span class="pre">touch</span></code> command.</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Miscellaneous utilities</a><ul>
+<li><a class="reference internal" href="#module-ramutils.exc">Common exception types</a></li>
+<li><a class="reference internal" href="#module-ramutils.log">Logging</a></li>
+<li><a class="reference internal" href="#everything-else">Everything else</a><ul>
+<li><a class="reference internal" href="#module-ramutils.constants">Constants</a></li>
+<li><a class="reference internal" href="#module-ramutils.utils">Utility functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="cli.html"
+                        title="previous chapter">Command-line usage</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/misc.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="cli.html" title="Command-line usage"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

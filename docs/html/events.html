@@ -1,0 +1,579 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Event processing &#8212; Ramutils 2.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Modeling effects of stim" href="models.html" />
+    <link rel="prev" title="Classifier training, cross validation, and utilities" href="classifier.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="models.html" title="Modeling effects of stim"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="classifier.html" title="Classifier training, cross validation, and utilities"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ramutils.events">
+<span id="event-processing"></span><h1>Event processing<a class="headerlink" href="#module-ramutils.events" title="Permalink to this headline">¶</a></h1>
+<p>A collection of utility functions for loading, cleaning, normalizing, and
+combining events. There are also a smattering of other helper function for
+selecting specific types of events. In general, the following steps must be
+taken to go from raw (on-disk) events to events that can be analyzed:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>Load: Load events from disk into memory</li>
+<li>Clean: Perform standard sets of cleaning operations</li>
+<li>Normalize: Modify fields and values so that events from different
+experiment can be easily combined</li>
+</ol>
+</div></blockquote>
+<dl class="function">
+<dt id="ramutils.events.clean_events">
+<code class="descclassname">ramutils.events.</code><code class="descname">clean_events</code><span class="sig-paren">(</span><em>experiment</em>, <em>events</em>, <em>start_time=None</em>, <em>end_time=None</em>, <em>duration=None</em>, <em>pre=None</em>, <em>post=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#clean_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.clean_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Peform basic cleaning operations on events such as removing incomplete
+sessions, negative offset events, and incomplete lists. For FR events,
+baseline events needs to be found.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>experiment</strong> (<em>str</em>) – </li>
+<li><strong>events</strong> (<em>np.recarray of events</em>) – </li>
+<li><strong>start_time</strong> – </li>
+<li><strong>end_time</strong> – </li>
+<li><strong>duration</strong> – </li>
+<li><strong>pre</strong> – </li>
+<li><strong>post</strong> – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Cleaned set of events</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.recarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>This function should be called on an experiment by experiment basis and
+should not be used to clean cross-experiment datasets</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.coerce_study_pair_to_word_event">
+<code class="descclassname">ramutils.events.</code><code class="descname">coerce_study_pair_to_word_event</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#coerce_study_pair_to_word_event"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.coerce_study_pair_to_word_event" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update STUDY_PAIR events to be WORD events. These are the same event
+type, but PAL calls them STUDY_PAIR and FR/catFR call them WORD. In the
+future, it may make more sense to make an update to event creation instead
+of coercing the event types here.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.combine_retrieval_events">
+<code class="descclassname">ramutils.events.</code><code class="descname">combine_retrieval_events</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#combine_retrieval_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.combine_retrieval_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine baseline retrieval and actual retrieval events into a single
+event type.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.concatenate_events_across_experiments">
+<code class="descclassname">ramutils.events.</code><code class="descname">concatenate_events_across_experiments</code><span class="sig-paren">(</span><em>event_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#concatenate_events_across_experiments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.concatenate_events_across_experiments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concatenate events across different experiment types. To make session
+numbers unique, 100 is added to the second set of events in event_list,
+200 to the next set of events, and so on.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_list</strong> (<em>iterable</em>) – An iterable containing events to be concatenated</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The combined set of events</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">np.recarray</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.concatenate_events_for_single_experiment">
+<code class="descclassname">ramutils.events.</code><code class="descname">concatenate_events_for_single_experiment</code><span class="sig-paren">(</span><em>event_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#concatenate_events_for_single_experiment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.concatenate_events_for_single_experiment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine events that are part of the same experiment</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_list</strong> – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The flattened set of events</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">np.recarray</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.extract_sample_rate">
+<code class="descclassname">ramutils.events.</code><code class="descname">extract_sample_rate</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#extract_sample_rate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.extract_sample_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract the samplerate used for the given set of events</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.find_free_time_periods">
+<code class="descclassname">ramutils.events.</code><code class="descname">find_free_time_periods</code><span class="sig-paren">(</span><em>times</em>, <em>duration</em>, <em>pre</em>, <em>post</em>, <em>start=None</em>, <em>end=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#find_free_time_periods"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.find_free_time_periods" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a list of event times, find epochs between them when nothing is
+happening.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>times</strong> (<em>list</em><em> or </em><em>np.ndarray</em>) – An iterable of 1-d numpy arrays, each of which indicates event times</li>
+<li><strong>duration</strong> (<em>int</em>) – The length of the desired empty epochs</li>
+<li><strong>pre</strong> (<em>int</em>) – the time before each event to exclude</li>
+<li><strong>post</strong> (<em>int</em>) – The time after each event to exclude</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>epoch_array</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.get_all_retrieval_events_mask">
+<code class="descclassname">ramutils.events.</code><code class="descname">get_all_retrieval_events_mask</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#get_all_retrieval_events_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.get_all_retrieval_events_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a boolean bask for any retrieval event</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.get_baseline_retrieval_mask">
+<code class="descclassname">ramutils.events.</code><code class="descname">get_baseline_retrieval_mask</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#get_baseline_retrieval_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.get_baseline_retrieval_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a boolean mask for baseline retrieval events</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.get_encoding_mask">
+<code class="descclassname">ramutils.events.</code><code class="descname">get_encoding_mask</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#get_encoding_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.get_encoding_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create encoding event mask</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.get_fr_retrieval_events_mask">
+<code class="descclassname">ramutils.events.</code><code class="descname">get_fr_retrieval_events_mask</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#get_fr_retrieval_events_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.get_fr_retrieval_events_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identify actual retrieval events for FR/catFR experiments</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.get_pal_retrieval_events_mask">
+<code class="descclassname">ramutils.events.</code><code class="descname">get_pal_retrieval_events_mask</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#get_pal_retrieval_events_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.get_pal_retrieval_events_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identify retrieval events for PAL experiments</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.get_time_between_events">
+<code class="descclassname">ramutils.events.</code><code class="descname">get_time_between_events</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#get_time_between_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.get_time_between_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the time between successive events</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.get_vocalization_mask">
+<code class="descclassname">ramutils.events.</code><code class="descname">get_vocalization_mask</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#get_vocalization_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.get_vocalization_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create mask for vocalization events</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.initialize_empty_event_reccarray">
+<code class="descclassname">ramutils.events.</code><code class="descname">initialize_empty_event_reccarray</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#initialize_empty_event_reccarray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.initialize_empty_event_reccarray" title="Permalink to this definition">¶</a></dt>
+<dd><p>Utility function for generating a recarray that looks normalized,
+but is empty.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.insert_baseline_retrieval_events">
+<code class="descclassname">ramutils.events.</code><code class="descname">insert_baseline_retrieval_events</code><span class="sig-paren">(</span><em>events</em>, <em>start_time</em>, <em>end_time</em>, <em>duration</em>, <em>pre</em>, <em>post</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#insert_baseline_retrieval_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.insert_baseline_retrieval_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match recall events to matching baseline periods of failure to recall.
+This is required for all free recall events, but is not necessary for
+PAL events, which have a natural baseline/comparison group. Baseline
+events all begin at least 1000 ms after a vocalization, and end
+at least 1000 ms before a vocalization. Each recall event is matched,
+wherever possible, to a valid baseline period from a different list
+within 3 seconds relative to the onset of the recall period.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>events</strong> (<em>np.recarray</em>) – The event structure in which to incorporate these baseline periods</li>
+<li><strong>start_time</strong> (<em>int</em>) – The amount of time to skip at the beginning of the session (ms)</li>
+<li><strong>end_time</strong> (<em>int</em>) – The amount of time within the recall period to consider (ms)</li>
+<li><strong>duration</strong> (<em>int</em>) – The length of desired empty epochs</li>
+<li><strong>pre</strong> (<em>int</em>) – The time before each event to exclude</li>
+<li><strong>post</strong> (<em>int</em>) – The time after each event to exclude</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Events with REC_BASE event types inserted</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.reccarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.load_events">
+<code class="descclassname">ramutils.events.</code><code class="descname">load_events</code><span class="sig-paren">(</span><em>subject</em>, <em>experiment</em>, <em>sessions=None</em>, <em>rootdir='/'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#load_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.load_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load events for a specific subject and experiment. If no events are
+found, an empty recarray with the correct datatypes are returned</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>subject</strong> (<em>str</em>) – </li>
+<li><strong>experiment</strong> (<em>str</em>) – </li>
+<li><strong>sessions</strong> (<em>iterable</em><em> or </em><em>None</em>) – </li>
+<li><strong>rootdir</strong> (<em>str</em>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A numpy recarray containing all events for the requested subject,
+experiment, and session(s)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.recarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.normalize_pal_events">
+<code class="descclassname">ramutils.events.</code><code class="descname">normalize_pal_events</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#normalize_pal_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.normalize_pal_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform any normalization to PAL event so make the homogeneous enough so
+that it is trivial to combine with other experiment events.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.partition_events">
+<code class="descclassname">ramutils.events.</code><code class="descname">partition_events</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#partition_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.partition_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split a given set of events into partitions by experiment class (
+FR/PAL) and encoding/retrieval</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>events</strong> (<em>np.recarray</em>) – Set of events to partition</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A list containing all identified partitions to the data</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.preprocess_events">
+<code class="descclassname">ramutils.events.</code><code class="descname">preprocess_events</code><span class="sig-paren">(</span><em>subject</em>, <em>experiment</em>, <em>start_time</em>, <em>end_time</em>, <em>duration</em>, <em>pre</em>, <em>post</em>, <em>combine_events=True</em>, <em>encoding_only=False</em>, <em>root='/'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#preprocess_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.preprocess_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>High-level pre-processing function for combining/cleaning record only
+events to be used in config generation and reports</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>subject</strong> (<em>str</em>) – Subject ID.</li>
+<li><strong>experiment</strong> (<em>str</em>) – Experiment that events are being combined for</li>
+<li><strong>start_time</strong> (<em>int</em>) – </li>
+<li><strong>end_time</strong> (<em>int</em>) – </li>
+<li><strong>duration</strong> (<em>int</em>) – </li>
+<li><strong>pre</strong> (<em>int</em>) – </li>
+<li><strong>post</strong> (<em>int</em>) – </li>
+<li><strong>combine_events</strong> (<em>bool</em>) – Indicates if all record-only sessions should be combined for
+classifier training.</li>
+<li><strong>encoding_only</strong> (<em>bool</em>) – Flag for if only encoding events should be used (default is False,
+i.e. encoding and retrieval events will be returned)</li>
+<li><strong>root</strong> (<em>str</em>) – Base path for finding event files etc.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Full set of cleaned task events</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.recarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>See insert_baseline_events for details on start_time, end_time, duration,
+pre, and post parameters</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.remove_bad_events">
+<code class="descclassname">ramutils.events.</code><code class="descname">remove_bad_events</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#remove_bad_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.remove_bad_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove events whose offset values would result in trying to read data
+that is out of bounds in the EEG file. Currently, this is done automatically
+in PTSA when you load the EEG, but to avoid having to catch updated events
+when reading the EEG, it should be done ahead of time.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.remove_incomplete_lists">
+<code class="descclassname">ramutils.events.</code><code class="descname">remove_incomplete_lists</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#remove_incomplete_lists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.remove_incomplete_lists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove incomplete lists for every session in the given events. Note,
+there are two ways that this is done in the reporting code, so it is an
+outstanding item to determine which method is better</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.remove_intrusions">
+<code class="descclassname">ramutils.events.</code><code class="descname">remove_intrusions</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#remove_intrusions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.remove_intrusions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select all encoding events that were part of the encoding period or
+were non-intrusion retrieval events.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.remove_negative_offsets">
+<code class="descclassname">ramutils.events.</code><code class="descname">remove_negative_offsets</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#remove_negative_offsets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.remove_negative_offsets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove events with a negative eegoffset</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.remove_nonresponses">
+<code class="descclassname">ramutils.events.</code><code class="descname">remove_nonresponses</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#remove_nonresponses"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.remove_nonresponses" title="Permalink to this definition">¶</a></dt>
+<dd><p>Selects only events that were listed as recalled or not recalled</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.remove_practice_lists">
+<code class="descclassname">ramutils.events.</code><code class="descname">remove_practice_lists</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#remove_practice_lists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.remove_practice_lists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove practice lists from the set of events</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.rename_correct_to_recalled">
+<code class="descclassname">ramutils.events.</code><code class="descname">rename_correct_to_recalled</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#rename_correct_to_recalled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.rename_correct_to_recalled" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalizes PAL “recall” event names to match those of FR experiments.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>events</strong> (<em>np.recarray</em>) – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Events with a ‘recalled’ field added to mirror the ‘correct’ field</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">np.recarray</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.select_all_retrieval_events">
+<code class="descclassname">ramutils.events.</code><code class="descname">select_all_retrieval_events</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#select_all_retrieval_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.select_all_retrieval_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select both baseline and actual retrieval events</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.select_baseline_retrieval_events">
+<code class="descclassname">ramutils.events.</code><code class="descname">select_baseline_retrieval_events</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#select_baseline_retrieval_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.select_baseline_retrieval_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select baseline retrieval events</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.select_encoding_events">
+<code class="descclassname">ramutils.events.</code><code class="descname">select_encoding_events</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#select_encoding_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.select_encoding_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select only encoding events</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.select_retrieval_events">
+<code class="descclassname">ramutils.events.</code><code class="descname">select_retrieval_events</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#select_retrieval_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.select_retrieval_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select retrieval events. Uses the experiment field in the events to
+determine how selection should be done since selection differes for PAL
+and FR/catFR</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>events</strong> (<em>np.recarray</em>) – Events to mask</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.select_vocalization_events">
+<code class="descclassname">ramutils.events.</code><code class="descname">select_vocalization_events</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#select_vocalization_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.select_vocalization_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select all vocalization events</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.select_word_events">
+<code class="descclassname">ramutils.events.</code><code class="descname">select_word_events</code><span class="sig-paren">(</span><em>events</em>, <em>encoding_only=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#select_word_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.select_word_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter out any non-word events</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>events</strong> (<em>np.recarray</em>) – </li>
+<li><strong>encoding_only</strong> (<em>bool</em>) – Flag for whether retrieval events should be included</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.subset_pal_events">
+<code class="descclassname">ramutils.events.</code><code class="descname">subset_pal_events</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#subset_pal_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.subset_pal_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Only a subset of event types are needed for PAL experiments</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.update_pal_retrieval_events">
+<code class="descclassname">ramutils.events.</code><code class="descname">update_pal_retrieval_events</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#update_pal_retrieval_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.update_pal_retrieval_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create surrogate responses for retrieval period based on PS4/PAL5 design
+doc. Surrogate responses are created by identifying trials without any
+responses. For these trials, a new response time is created based on a
+random draw from the set of response times from actual responses.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.update_recall_outcome_for_retrieval_events">
+<code class="descclassname">ramutils.events.</code><code class="descname">update_recall_outcome_for_retrieval_events</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#update_recall_outcome_for_retrieval_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.update_recall_outcome_for_retrieval_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Manually override the recall outcomes for baseline retrieval and word
+retrieval events. All baseline retrieval events should be marked as not
+recalled and all word events in the recall period should be marked as
+recalled. This assumes that intrusions have already been removed from the
+given set of events. It exists merely to serve as an extra check on what
+should already be true in the raw events data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>events</strong> (<em>np.recarray</em>) – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Events containing updated recall outcomes for retrieval events</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">np.recarray</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="classifier.html"
+                        title="previous chapter">Classifier training, cross validation, and utilities</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="models.html"
+                        title="next chapter">Modeling effects of stim</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/events.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="models.html" title="Modeling effects of stim"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="classifier.html" title="Classifier training, cross validation, and utilities"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

@@ -5,7 +5,7 @@ import os.path
 from pkg_resources import resource_filename
 
 from ramutils.parameters import FilePaths, FRParameters
-from ramutils.pipelines.ramulator_config import make_ramulator_config
+from ramutils.pipelines.ramulator_config import make_ramulator_config, make_stim_params
 
 from ramutils.tasks import memory
 
@@ -23,14 +23,16 @@ pairs_path = os.path.join(
     'neuroradiology', 'current_processed', 'pairs.json')
 
 paths = FilePaths(
-    root="/Volumes/RHINO/",
-    electrode_config_file=getpath('R1354E_26OCT2017L0M0STIM.csv'),
+    root='/Volumes/RHINO/',
+    electrode_config_file='/scratch/system3_configs/ODIN_configs/R1354E'
+                          '/R1354E_26OCT2017L0M0STIM.csv',
     pairs=pairs_path,
-    dest='scratch/zduey/' # This will fail if there is a leading /
+    dest='scratch/zduey/sample_fr6_biomarkers'
 )
 
 params = FRParameters()
-params = params.to_dict()
 
-make_ramulator_config(subject, "FR6", paths, anodes=['1LD9', '5LD7'],
-                      cathodes=['1LD10', '5LD8'], **params)
+stim_params = make_stim_params(subject, ['1LD9', '5LD7'], ['1LD10', '5LD8'],
+                               target_amplitudes=[1.0,1.0],
+                               root=paths.root)
+make_ramulator_config(subject, "FR6", paths, stim_params, exp_params=params)

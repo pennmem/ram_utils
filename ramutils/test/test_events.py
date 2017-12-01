@@ -3,8 +3,10 @@ import random
 import pytest
 
 from pkg_resources import resource_filename
+from sklearn.externals import joblib
 
 from ramutils.events import *
+from ramutils.parameters import FRParameters, PALParameters
 
 datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
 
@@ -17,18 +19,18 @@ class TestEvents:
         cls.n_word, cls.n_rec_word, cls.n_rec_base = (
             [random.randint(1, 10) for _ in range(3)])
 
-        data = [(0, -1, 'WORD', 1000 + t, 0, 0) for t in range(cls.n_word)]
-        data += [(0, 0, 'REC_WORD', 1000 + t + cls.n_word, 0, -1) for t in
-                 range(
-            cls.n_rec_word)]
-        data += [(0, 0, 'REC_BASE', 1000 + t + cls.n_word + cls.n_rec_word, 0,
-                 0) for t in
-                 range(cls.n_rec_base)]
+        data = [('FR1', 0, -1, 'WORD', 1000 + t, 0, 0) for t in range(
+            cls.n_word)]
+        data += [('FR1', 0, 0, 'REC_WORD', 1000 + t + cls.n_word, 0, -1) for
+                 t in range(cls.n_rec_word)]
+        data += [('FR1', 0, 0, 'REC_BASE', 1000 + t + cls.n_word +
+                  cls.n_rec_word, 0, 0) for t in range(cls.n_rec_base)]
 
         dtype = [
+            ('experiment', '|U256'),
             ('session', '<i8'),
             ('list',  '<i8'),
-            ('type', '|S256'),
+            ('type', '|U256'),
             ('mstime', '<i8'),
             ('intrusion', '<i8'),
             ('eegoffset', '<i8')
@@ -50,7 +52,10 @@ class TestEvents:
         assert len(events) > 0
 
         if sessions is None:
-            assert n_sessions == 2 # 2 sessions of FR and catFR
+            if experiment == 'FR1':
+                assert n_sessions == 2
+            elif experiment == 'catFR1':
+                assert n_sessions == 4
         else:
             assert n_sessions == 1
 
@@ -70,7 +75,7 @@ class TestEvents:
 
         combined_events = concatenate_events_across_experiments([fr_events,
                                                                  catfr_events])
-        assert combined_events.shape == (6053,)
+        assert combined_events.shape == (8363,)
 
         unique_sessions = np.unique(combined_events.session)
         assert [sess_num in unique_sessions for sess_num in [0, 1, 100, 101]]
@@ -96,28 +101,47 @@ class TestEvents:
 
         return
 
-
-    @pytest.mark.parametrize('retrieval', [True, False])
-    def test_select_word_events(self, retrieval):
-        word_events = select_word_events(self.test_data,
-                                         retrieval)
+    @pytest.mark.parametrize('encoding_only', [True, False])
+    def test_select_word_events(self, encoding_only):
+        word_events = select_word_events(self.test_data, encoding_only)
 
         # No valid retrieval events will be found because time between events
         # is explicitly made to be 1ms
-        if retrieval:
-            assert len(word_events) == (self.n_word + self.n_rec_base)
-        else:
+        if encoding_only:
             assert len(word_events) == self.n_word
+        else:
+            assert len(word_events) == (self.n_word + self.n_rec_base + self.n_rec_word)
 
         return
 
     def test_find_free_time_periods(self):
+        # TODO: This is a more complicated algorithm to test
         return
 
     def test_insert_baseline_retrieval_events(self):
+        # TODO: This is another somehwat complicated algorithm to test
         return
 
     def test_remove_incomplete_lists(self):
+        # TODO: There are two ways to do this. In addition to unit tests,
+        # we need to identify the most robust way of doing this procedure
+        return
+
+    @pytest.mark.rhino
+    def test_extract_sample_rate(self):
+        return
+
+    def test_update_pal_retrieval_events(self):
+        # Requires creating some sample PAL events
+        return
+
+    def test_get_pal_retrieval_events_mask(self):
+        # Need some sample PAL events for this test
+        return
+
+    def test_get_fr_retrieval_events_mask(self):
+        retrieval_event_mask = get_fr_retrieval_events_mask(self.test_data)
+        assert max(retrieval_event_mask) == False
         return
 
     def test_remove_negative_offsets(self):
@@ -152,7 +176,7 @@ class TestEvents:
         # rases a runtime error
         data = [('WORD', t * 1001, 0, 0) for t in range(5)]
         dtype = [
-            ('type', '|S256'),
+            ('type', '|U256'),
             ('mstime', '<i8'),
             ('intrusion', '<i8'),
             ('eegoffset', '<i8')
@@ -181,5 +205,109 @@ class TestEvents:
     def test_select_vocalization_events(self):
         vocalization_events = select_vocalization_events(self.test_data)
         assert len(vocalization_events) == self.n_rec_word
+        return
+
+    # Four possible partitions. Be sure to check all
+    def test_partition_events(self):
+        dtypes = [
+            ('experiment', '|U256'),
+            ('type', '|U256')
+        ]
+        test_fr_encoding = np.array([('FR1', 'WORD')], dtype=dtypes).view(
+            np.recarray)
+        test_fr_retrieval = np.array([('FR1', 'REC_EVENT')],
+                                     dtype=dtypes).view(np.recarray)
+        test_pal_encoding = np.array([('PAL1', 'WORD')],
+                                     dtype=dtypes).view(np.recarray)
+        test_pal_retrieval = np.array([('PAL1', 'REC_EVENT')],
+                                      dtype=dtypes).view(np.recarray)
+
+        for subset in [test_fr_encoding, test_fr_retrieval,
+                       test_pal_encoding, test_pal_retrieval]:
+            partitions = partition_events(subset)
+            combined_event_length = sum([len(v) for k, v in partitions.items()])
+            assert combined_event_length == 1
+
+        encoding_retrieval_partitions = partition_events(np.concatenate([
+            test_fr_encoding, test_fr_retrieval]).view(np.recarray))
+        assert sum([len(v) for k, v in encoding_retrieval_partitions.items()]) == 2
+
+        pal_fr_partitions = partition_events(np.concatenate([
+            test_fr_encoding, test_pal_encoding]).view(np.recarray))
+        assert sum([len(v) for k, v in pal_fr_partitions.items()]) == 2
+
+        pal_fr_encoding_retrieval_partitions = partition_events(
+            np.concatenate([test_fr_encoding, test_fr_retrieval,
+                            test_pal_encoding]).view(np.recarray))
+        assert sum([len(v) for k, v in pal_fr_encoding_retrieval_partitions.items()]) == 3
+
+        all_partitions = partition_events(np.concatenate([test_fr_encoding,
+                                                          test_fr_retrieval,
+                                                          test_pal_encoding,
+                                                          test_pal_retrieval]).view(np.recarray))
+        assert sum([len(v) for k, v in all_partitions.items()]) == 4
+
+        return
+
+    @pytest.mark.parametrize("subject, experiment, parameters, encoding_only, "
+                             "combine_events", [
+        ("R1348J", "FR6", FRParameters, False, True),
+        ("R1350D", "FR6", FRParameters, False, True),
+        ("R1353N", "PAL6", PALParameters, False, True),
+        ("R1354E", "FR6", FRParameters, True, True),
+        ("R1354E", "FR6", FRParameters, False, True),
+        ("R1016M", "PAL6", PALParameters, True, True),
+        ("R1016M", "PAL6", PALParameters, True, False),
+        ("R1016M", "PAL6", PALParameters, False, True),
+        ("R1016M", "PAL6", PALParameters, False, False),
+    ])
+    def test_preprocess_events(self, subject, experiment, parameters,
+                               encoding_only, combine_events):
+        parameters = parameters().to_dict()
+        events = preprocess_events(subject,
+                                   experiment,
+                                   parameters['baseline_removal_start_time'],
+                                   parameters['retrieval_time'],
+                                   parameters['empty_epoch_duration'],
+                                   parameters['pre_event_buf'],
+                                   parameters['post_event_buf'],
+                                   encoding_only=encoding_only,
+                                   combine_events=combine_events,
+                                   root=datafile(''))
+        assert len(events) > 0
+
+        if encoding_only:
+            assert "REC_EVENT" not in np.unique(events.type)
+        else:
+            assert "REC_EVENT" in np.unique(events.type)
+
+        if combine_events and subject == "R1016M":
+            # There are some experiment fields that are blank, so checking
+            # that there are two unique experiment types would fail
+            assert len(np.unique(events.experiment)) > 1
+
+        return
+
+    @pytest.mark.parametrize("subject, parameters, experiment", [
+        ("R1354E", FRParameters, "FR6"),  # catFR and FR
+        ("R1350D", FRParameters, "FR6"),  # FR only
+        ("R1348J", FRParameters, "FR6"),  # catFR only
+        ("R1353N", PALParameters, "PAL6")  # PAL only
+    ])
+    def test_regression_event_processing(self, subject, parameters, experiment):
+        parameters = parameters().to_dict()
+
+        old_events = np.load(datafile('/input/events/{}_task_events.npy'.format(
+            subject))).view(np.recarray)
+        new_events = preprocess_events(subject,
+                                       experiment,
+                                       parameters['baseline_removal_start_time'],
+                                       parameters['retrieval_time'],
+                                       parameters['empty_epoch_duration'],
+                                       parameters['pre_event_buf'],
+                                       parameters['post_event_buf'],
+                                       root=datafile(''))
+        assert len(old_events) == len(new_events)
+
         return
 

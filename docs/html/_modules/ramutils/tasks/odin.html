@@ -1,0 +1,442 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ramutils.tasks.odin &#8212; Ramutils 2.0.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Ramutils 2.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ramutils.tasks.odin</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Tasks specific to the Medtronic Odin ENS.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">from</span> <span class="nn">tempfile</span> <span class="k">import</span> <span class="n">gettempdir</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">List</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="kn">from</span> <span class="nn">bptools.transform</span> <span class="k">import</span> <span class="n">SeriesTransformation</span>
+<span class="kn">from</span> <span class="nn">classiflib</span> <span class="k">import</span> <span class="n">ClassifierContainer</span>
+
+<span class="kn">from</span> <span class="nn">ramutils.constants</span> <span class="k">import</span> <span class="n">EXPERIMENTS</span>
+<span class="kn">from</span> <span class="nn">ramutils.log</span> <span class="k">import</span> <span class="n">get_logger</span>
+<span class="kn">from</span> <span class="nn">ramutils.tasks</span> <span class="k">import</span> <span class="n">task</span>
+<span class="kn">from</span> <span class="nn">ramutils.utils</span> <span class="k">import</span> <span class="n">reindent_json</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;generate_pairs_from_electrode_config&#39;</span><span class="p">,</span> <span class="s1">&#39;generate_ramulator_config&#39;</span><span class="p">]</span>
+
+<span class="n">CLASSIFIER_VERSION</span> <span class="o">=</span> <span class="s2">&quot;1.0.2&quot;</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">()</span>
+
+
+<span class="c1"># FIXME: logic for generating pairs should be in bptools</span>
+<div class="viewcode-block" id="generate_pairs_from_electrode_config"><a class="viewcode-back" href="../../../pipeline.html#ramutils.tasks.odin.generate_pairs_from_electrode_config">[docs]</a><span class="nd">@task</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">generate_pairs_from_electrode_config</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">paths</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Load and verify the validity of the Odin electrode configuration file.</span>
+
+<span class="sd">    :param str subject: Subject ID</span>
+<span class="sd">    :param FilePaths paths:</span>
+<span class="sd">    :returns: minimal pairs.json based on the electrode configuration</span>
+<span class="sd">    :rtype: dict</span>
+<span class="sd">    :raises RuntimeError: if the csv or bin file are not found</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">prefix</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">paths</span><span class="o">.</span><span class="n">electrode_config_file</span><span class="p">)</span>
+    <span class="n">csv_filename</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span>
+    <span class="n">bin_filename</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="s1">&#39;.bin&#39;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">csv_filename</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> not found!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">csv_filename</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">bin_filename</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> not found!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bin_filename</span><span class="p">))</span>
+
+    <span class="c1"># Create SeriesTransformation object to determine if this is monopolar,</span>
+    <span class="c1"># mixed-mode, or bipolar</span>
+    <span class="c1"># FIXME: load excluded pairs</span>
+    <span class="n">xform</span> <span class="o">=</span> <span class="n">SeriesTransformation</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">csv_filename</span><span class="p">,</span> <span class="n">paths</span><span class="o">.</span><span class="n">pairs</span><span class="p">)</span>
+
+    <span class="c1"># Odin electrode configuration</span>
+    <span class="n">ec</span> <span class="o">=</span> <span class="n">xform</span><span class="o">.</span><span class="n">elec_conf</span>
+
+    <span class="c1"># This will mimic pairs.json (but only with labels).</span>
+    <span class="n">pairs_dict</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+
+    <span class="c1"># FIXME: move the following logic into bptools</span>
+    <span class="c1"># Hardware bipolar mode</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">xform</span><span class="o">.</span><span class="n">monopolar_possible</span><span class="p">():</span>
+        <span class="n">contacts</span> <span class="o">=</span> <span class="n">ec</span><span class="o">.</span><span class="n">contacts_as_recarray</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">ec</span><span class="o">.</span><span class="n">sense_channels</span><span class="p">:</span>
+            <span class="n">anode</span><span class="p">,</span> <span class="n">cathode</span> <span class="o">=</span> <span class="n">ch</span><span class="o">.</span><span class="n">contact</span><span class="p">,</span> <span class="n">ch</span><span class="o">.</span><span class="n">ref</span>
+            <span class="n">aname</span> <span class="o">=</span> <span class="n">contacts</span><span class="p">[</span><span class="n">contacts</span><span class="o">.</span><span class="n">jack_box_num</span> <span class="o">==</span> <span class="n">anode</span><span class="p">]</span><span class="o">.</span><span class="n">contact_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">cname</span> <span class="o">=</span> <span class="n">contacts</span><span class="p">[</span><span class="n">contacts</span><span class="o">.</span><span class="n">jack_box_num</span> <span class="o">==</span> <span class="n">cathode</span><span class="p">]</span><span class="o">.</span><span class="n">contact_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">-</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">aname</span><span class="p">,</span> <span class="n">cname</span><span class="p">)</span>
+            <span class="n">pairs_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;channel_1&#39;</span><span class="p">:</span> <span class="n">anode</span><span class="p">,</span>
+                <span class="s1">&#39;channel_2&#39;</span><span class="p">:</span> <span class="n">cathode</span>
+            <span class="p">}</span>
+
+        <span class="c1"># Note this is different from neurorad pipeline pairs.json because</span>
+        <span class="c1"># the electrode configuration trumps it</span>
+        <span class="n">pairs_from_ec</span> <span class="o">=</span> <span class="p">{</span><span class="n">subject</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;pairs&#39;</span><span class="p">:</span> <span class="n">pairs_dict</span><span class="p">}}</span>
+
+        <span class="k">return</span> <span class="n">pairs_from_ec</span></div>
+
+
+<span class="k">def</span> <span class="nf">_make_experiment_specific_data_section</span><span class="p">(</span><span class="n">experiment</span><span class="p">,</span> <span class="n">stim_params</span><span class="p">,</span>
+                                           <span class="n">classifier_file</span><span class="p">,</span>
+                                           <span class="n">classifier_version</span><span class="o">=</span><span class="n">CLASSIFIER_VERSION</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return a dict containing the config section ``experiment_specific_data``.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    experiment : str</span>
+<span class="sd">    stim_params : dict</span>
+<span class="sd">    classifier_file : str</span>
+<span class="sd">    classifier_version : str</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict representation of the ``experiment_specific_data`` section.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">make_stim_channel_section</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="n">stub</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;stim_duration&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>
+            <span class="s2">&quot;stim_frequency&quot;</span><span class="p">:</span> <span class="mi">200</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="s1">&#39;PS4&#39;</span> <span class="ow">in</span> <span class="n">experiment</span> <span class="ow">or</span> <span class="n">experiment</span> <span class="o">==</span> <span class="s1">&#39;AmplitudeDetermination&#39;</span><span class="p">:</span>
+            <span class="n">stub</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+                <span class="s1">&#39;min_stim_amplitude&#39;</span><span class="p">:</span> <span class="n">params</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;min_stim_amplitude&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;max_stim_amplitude&#39;</span><span class="p">:</span> <span class="n">params</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;max_stim_amplitude&#39;</span><span class="p">]</span>
+            <span class="p">})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">stub</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+                <span class="s1">&#39;stim_amplitude&#39;</span><span class="p">:</span> <span class="n">params</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;stim_amplitude&#39;</span><span class="p">]</span>
+            <span class="p">})</span>
+
+        <span class="k">return</span> <span class="n">stub</span>
+
+    <span class="n">esd</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;allow_classifier_generalization&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">&quot;classifier_file&quot;</span><span class="p">:</span> <span class="s2">&quot;config_files/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">classifier_file</span><span class="p">),</span>
+        <span class="s2">&quot;classifier_version&quot;</span><span class="p">:</span> <span class="n">classifier_version</span><span class="p">,</span>
+        <span class="s2">&quot;random_stim_prob&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">&quot;save_debug_output&quot;</span><span class="p">:</span> <span class="kc">True</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Why oh why must everything be a special snowflake?</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;stim_electrode_pairs&#39;</span> <span class="k">if</span> <span class="n">experiment</span> <span class="o">==</span> <span class="s1">&#39;AmplitudeDetermination&#39;</span> <span class="k">else</span> <span class="s1">&#39;stim_channels&#39;</span>
+    <span class="n">esd</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">label</span><span class="p">:</span> <span class="n">make_stim_channel_section</span><span class="p">(</span><span class="n">stim_params</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">stim_params</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">esd</span>
+
+
+<span class="k">def</span> <span class="nf">_make_experiment_specs_section</span><span class="p">(</span><span class="n">experiment</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate the ``experiment_specs`` config section.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    experiment : str</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ``experiment_specs`` dict</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># FIXME: values below shouldn&#39;t be hardcoded</span>
+    <span class="n">specs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;3.0.0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;experiment_type&quot;</span><span class="p">:</span> <span class="n">experiment</span><span class="p">,</span>
+        <span class="s2">&quot;biomarker_sample_start_time_offset&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s2">&quot;biomarker_sample_time_length&quot;</span><span class="p">:</span> <span class="mi">1366</span><span class="p">,</span>
+        <span class="s2">&quot;buffer_time&quot;</span><span class="p">:</span> <span class="mi">1365</span><span class="p">,</span>
+        <span class="s2">&quot;stim_duration&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>
+        <span class="s2">&quot;freq_min&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+        <span class="s2">&quot;freq_max&quot;</span><span class="p">:</span> <span class="mi">180</span><span class="p">,</span>
+        <span class="s2">&quot;num_freqs&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+        <span class="s2">&quot;num_items&quot;</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="c1"># FIXME: values below shouldn&#39;t be hardcoded</span>
+    <span class="k">if</span> <span class="s1">&#39;PS4&#39;</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">:</span>
+        <span class="n">specs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+            <span class="s2">&quot;retrieval_biomarker_sample_start_time_offset&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;retrieval_biomarker_sample_time_length&quot;</span><span class="p">:</span> <span class="mi">525</span><span class="p">,</span>
+            <span class="s2">&quot;retrieval_buffer_time&quot;</span><span class="p">:</span> <span class="mi">524</span><span class="p">,</span>
+            <span class="s2">&quot;post_stim_biomarker_sample_time_length&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>
+            <span class="s2">&quot;post_stim_buffer_time&quot;</span><span class="p">:</span> <span class="mi">499</span><span class="p">,</span>
+            <span class="s2">&quot;post_stim_wait_time&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">specs</span>
+
+
+<span class="k">def</span> <span class="nf">_make_ramulator_config_json</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">electrode_config_file</span><span class="p">,</span>
+                                <span class="n">stim_params</span><span class="p">,</span> <span class="n">classifier_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">classifier_version</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create the Ramulator ``experiment_config.json`` file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    subject : str</span>
+<span class="sd">    experiment : str</span>
+<span class="sd">    electrode_config_file : str</span>
+<span class="sd">    stim_params : dict</span>
+<span class="sd">    classifier_file : str</span>
+<span class="sd">    classifier_version : str</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    str</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="n">subject</span><span class="p">,</span>
+        <span class="s1">&#39;experiment&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">experiment</span><span class="p">,</span>
+            <span class="s1">&#39;experiment_specific_data&#39;</span><span class="p">:</span>
+                <span class="n">_make_experiment_specific_data_section</span><span class="p">(</span><span class="n">experiment</span><span class="p">,</span>
+                                                       <span class="n">stim_params</span><span class="p">,</span>
+                                                       <span class="n">classifier_file</span><span class="p">,</span>
+                                                       <span class="n">classifier_version</span><span class="p">),</span>
+            <span class="s1">&#39;experiment_specs&#39;</span><span class="p">:</span> <span class="n">_make_experiment_specs_section</span><span class="p">(</span><span class="n">experiment</span><span class="p">),</span>
+
+            <span class="c1"># FIXME: are these the right defaults?</span>
+            <span class="s1">&#39;artifact_detection&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;allow_artifact_detection&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s2">&quot;artifact_detection_number_of_stims_per_channel&quot;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span>
+                <span class="s2">&quot;artifact_detection_sample_time_length&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>
+                <span class="s2">&quot;artifact_detection_inter_stim_interval&quot;</span><span class="p">:</span> <span class="mi">2000</span><span class="p">,</span>
+                <span class="s2">&quot;allow_artifact_detection_during_session&quot;</span><span class="p">:</span> <span class="kc">False</span>
+            <span class="p">}</span>
+        <span class="p">},</span>
+
+        <span class="s2">&quot;biomarker_threshold&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="s2">&quot;electrode_config_file&quot;</span><span class="p">:</span> <span class="s2">&quot;config_files/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">electrode_config_file</span><span class="p">),</span>
+        <span class="s2">&quot;montage_file&quot;</span><span class="p">:</span> <span class="s2">&quot;config_files/pairs.json&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;excluded_montage_file&quot;</span><span class="p">:</span> <span class="s2">&quot;config_files/excluded_pairs.json&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;global_settings&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;data_dir&quot;</span><span class="p">:</span> <span class="s2">&quot;SET_AUTOMATICALLY_AT_A_RUNTIME&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;experiment_config_filename&quot;</span><span class="p">:</span> <span class="s2">&quot;SET_AUTOMATICALLY_AT_A_RUNTIME&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;extended_blanking&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># FIXME: make a parameter</span>
+            <span class="s2">&quot;plot_fps&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+            <span class="s2">&quot;plot_window_length&quot;</span><span class="p">:</span> <span class="mi">20000</span><span class="p">,</span>
+            <span class="s2">&quot;plot_update_style&quot;</span><span class="p">:</span> <span class="s2">&quot;Sweeping&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;max_session_length&quot;</span><span class="p">:</span> <span class="mi">120</span><span class="p">,</span>
+            <span class="s2">&quot;sampling_rate&quot;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
+            <span class="s2">&quot;odin_lib_debug_level&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;connect_to_task_laptop&quot;</span><span class="p">:</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">experiment</span> <span class="o">!=</span> <span class="s1">&#39;AmplitudeDetermination&#39;</span> <span class="k">else</span> <span class="kc">False</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="generate_ramulator_config"><a class="viewcode-back" href="../../../pipeline.html#ramutils.tasks.odin.generate_ramulator_config">[docs]</a><span class="nd">@task</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">generate_ramulator_config</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">container</span><span class="p">,</span> <span class="n">stim_params</span><span class="p">,</span>
+                              <span class="n">paths</span><span class="p">,</span> <span class="n">pairs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                              <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create configuration files for Ramulator.</span>
+
+<span class="sd">    Note that the current template format will not work for FR5 experiments</span>
+<span class="sd">    since the config format is not the same.</span>
+
+<span class="sd">    In hardware bipolar mode, the neurorad pipeline generates a ``pairs.json``</span>
+<span class="sd">    file that differs from the electrode configured pairs. It is up to the user</span>
+<span class="sd">    of the pipeline to ensure that the path to the correct ``pairs.json`` is</span>
+<span class="sd">    supplied (although Ramulator does not use it in this case).</span>
+
+<span class="sd">    The destination path is assumed to be relative to the root path. All other</span>
+<span class="sd">    paths are assumed to be absolute.</span>
+
+<span class="sd">    :param str subject:</span>
+<span class="sd">    :param str experiment:</span>
+<span class="sd">    :param ClassifierContainer container: serialized classifier</span>
+<span class="sd">    :param List[StimParameters] stim_params: list of stimulation parameters</span>
+<span class="sd">    :param FilePaths paths:</span>
+<span class="sd">    :param dict excluded_pairs: Pairs excluded from the classifier (pairs that</span>
+<span class="sd">        contain a stim contact and possibly some others)</span>
+<span class="sd">    :param ExperimentParameters params: All parameters used in training the</span>
+<span class="sd">        classifier. This is partially redundant with some data stored in the</span>
+<span class="sd">        ``container`` object.</span>
+<span class="sd">    :returns: path to generated configuration zip file</span>
+<span class="sd">    :rtype: str</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">container</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">experiment</span> <span class="o">!=</span> <span class="s1">&#39;AmplitudeDetermination&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;container must not be None&quot;</span><span class="p">)</span>
+
+    <span class="n">subject</span> <span class="o">=</span> <span class="n">subject</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">stim_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">stim_param</span><span class="o">.</span><span class="n">label</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;min_stim_amplitude&quot;</span><span class="p">:</span> <span class="n">stim_param</span><span class="o">.</span><span class="n">min_amplitude</span><span class="p">,</span>
+            <span class="s2">&quot;max_stim_amplitude&quot;</span><span class="p">:</span> <span class="n">stim_param</span><span class="o">.</span><span class="n">max_amplitude</span><span class="p">,</span>
+            <span class="s2">&quot;stim_frequency&quot;</span><span class="p">:</span> <span class="n">stim_param</span><span class="o">.</span><span class="n">frequency</span><span class="p">,</span>
+            <span class="s2">&quot;stim_duration&quot;</span><span class="p">:</span> <span class="n">stim_param</span><span class="o">.</span><span class="n">duration</span><span class="p">,</span>
+            <span class="s2">&quot;stim_amplitude&quot;</span><span class="p">:</span> <span class="n">stim_param</span><span class="o">.</span><span class="n">target_amplitude</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">stim_param</span> <span class="ow">in</span> <span class="n">stim_params</span>
+    <span class="p">}</span>
+
+    <span class="n">dest</span> <span class="o">=</span> <span class="n">paths</span><span class="o">.</span><span class="n">dest</span>
+    <span class="n">config_dir_root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">)</span>
+    <span class="n">config_files_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config_dir_root</span><span class="p">,</span> <span class="s1">&#39;config_files&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">config_files_dir</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="o">!=</span> <span class="mi">17</span><span class="p">:</span>  <span class="c1"># File exists</span>
+            <span class="k">raise</span>
+
+    <span class="n">classifier_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config_files_dir</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">-classifier.zip&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">subject</span><span class="p">))</span>
+    <span class="n">ec_prefix</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">paths</span><span class="o">.</span><span class="n">electrode_config_file</span><span class="p">)</span>
+
+    <span class="n">experiment_config_content</span> <span class="o">=</span> <span class="n">_make_ramulator_config_json</span><span class="p">(</span>
+        <span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">ec_prefix</span> <span class="o">+</span> <span class="s1">&#39;.bin&#39;</span><span class="p">),</span> <span class="n">stim_dict</span><span class="p">,</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">classifier_path</span><span class="p">),</span> <span class="n">CLASSIFIER_VERSION</span>
+    <span class="p">)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config_dir_root</span><span class="p">,</span> <span class="s1">&#39;experiment_config.json&#39;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">tmp_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">gettempdir</span><span class="p">(),</span> <span class="s2">&quot;experiment_config.json&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tmpfile</span><span class="p">:</span>
+            <span class="n">tmpfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">experiment_config_content</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">reindent_json</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">experiment</span> <span class="o">!=</span> <span class="s1">&#39;AmplitudeDetermination&#39;</span><span class="p">:</span>
+        <span class="n">container</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">classifier_path</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Save some typing below...</span>
+    <span class="n">conffile</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">,</span> <span class="n">config_files_dir</span><span class="p">)</span>
+
+    <span class="c1"># Write pairs.json and excluded_pairs.json to the config directory. We can</span>
+    <span class="c1"># give pairs.json as a parameter (generally when read from the electrode</span>
+    <span class="c1"># config file) or as a path (when using the neurorad pipeline&#39;s pairs.json).</span>
+    <span class="k">if</span> <span class="n">pairs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">conffile</span><span class="p">(</span><span class="s1">&#39;pairs.json&#39;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">pairs</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">paths</span><span class="o">.</span><span class="n">pairs</span><span class="p">,</span> <span class="n">conffile</span><span class="p">(</span><span class="s1">&#39;pairs.json&#39;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">excluded_pairs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Make format of excluded pairs more standard</span>
+        <span class="n">excluded_pairs</span> <span class="o">=</span> <span class="p">{</span><span class="n">subject</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;pairs&#39;</span><span class="p">:</span> <span class="n">excluded_pairs</span><span class="p">}}</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">conffile</span><span class="p">(</span><span class="s1">&#39;excluded_pairs.json&#39;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">excluded_pairs</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+
+    <span class="c1"># Copy electrode config files</span>
+    <span class="n">csv</span> <span class="o">=</span> <span class="n">paths</span><span class="o">.</span><span class="n">electrode_config_file</span>
+    <span class="nb">bin</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;.bin&#39;</span><span class="p">)</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">csv</span><span class="p">,</span> <span class="n">conffile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">csv</span><span class="p">)))</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="nb">bin</span><span class="p">,</span> <span class="n">conffile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="nb">bin</span><span class="p">)))</span>
+
+    <span class="c1"># Serialize experiment parameters</span>
+    <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">params</span><span class="o">.</span><span class="n">to_hdf</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config_dir_root</span><span class="p">,</span> <span class="s1">&#39;exp_params.h5&#39;</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">experiment</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;AmplitudeDetermination&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">EXPERIMENTS</span><span class="p">[</span><span class="s1">&#39;record_only&#39;</span><span class="p">]:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;No ExperimentParameters object passed; &quot;</span>
+                          <span class="s2">&quot;classifier may not be 100</span><span class="si">% r</span><span class="s2">eproducible&quot;</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">)</span>
+
+    <span class="n">filename_tmpl</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{subject:s}</span><span class="s1">_</span><span class="si">{experiment:s}</span><span class="s1">_</span><span class="si">{pairs:s}</span><span class="s1">_</span><span class="si">{date:s}</span><span class="s1">&#39;</span>
+    <span class="n">zip_prefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">filename_tmpl</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
+        <span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">,</span>
+        <span class="n">pairs</span><span class="o">=</span><span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">pair</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">stim_params</span><span class="p">]),</span>
+        <span class="n">date</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">%b%Y&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="p">))</span>
+    <span class="n">zip_path</span> <span class="o">=</span> <span class="n">zip_prefix</span> <span class="o">+</span> <span class="s1">&#39;.zip&#39;</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">make_archive</span><span class="p">(</span><span class="n">zip_prefix</span><span class="p">,</span> <span class="s1">&#39;zip&#39;</span><span class="p">,</span> <span class="n">root_dir</span><span class="o">=</span><span class="n">config_dir_root</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Created experiment_config zip file: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">zip_path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">zip_path</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Ramutils 2.0.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>
