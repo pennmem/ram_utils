@@ -1,11 +1,24 @@
 <div class="plot roc-curve">
-  <h2>Classifier generalization to {{ experiment }}</h2>
+  <h2>Classifier performance</h2>
   <figure>
-    <!-- FIXME: make this part a function to reuse -->
-    <img src='data:image/svg+xml;utf8,{{ roc_image }}'>
-    <!-- FIXME: tercile plot to the right -->
+    <div id="classifier-performance-plot-placeholder"></div>
     <figcaption>
-      ROC curve for the subject {{ subject }}.
+      <b>(Left)</b> ROC curve for subject {{ subject }}. <b>(Right)</b> Subject
+      recall performance represented as percentage devation from the (subject)
+      mean, separated by tercile of the classifier encoding efficiency estimate
+      for each encoded word.
     </figcaption>
   </figure>
+
+  <script>
+    window.addEventListener('load', () => {
+      // FIXME
+      // let rocData = JSON.parse('{{ plot_data["roc"] }}');
+      let rocData = {
+        x: [0, 0.1, 0.5, 1.0],
+        y: [0, 0.1, 0.6, 1.0]
+      };
+      ramutils.plots.classifierPerformance(rocData.x, rocData.y, -28, -1, 31);
+    });
+  </script>
 </div>
