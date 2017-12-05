@@ -61,7 +61,6 @@ def main():
         MathSummary.create(BaseEventReader(filename=f).read())
         for f in agg('math_events')
     ]
-    print(len(session_summaries), len(math_summaries))
 
     generator = ReportGenerator(session_summaries, math_summaries)
     report = generator.generate()
