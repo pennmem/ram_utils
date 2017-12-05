@@ -32,6 +32,22 @@ class Summary(Schema):
         if self._events is None:
             self._events = new_events
 
+    def populate(self, events):
+        raise NotImplementedError
+
+    @classmethod
+    def create(cls, events):
+        """Create a new summary object from events.
+
+        Parameters
+        ----------
+        events : np.recarray
+
+        """
+        instance = cls()
+        instance.populate(events)
+        return instance
+
 
 class SessionSummary(Summary):
     """Base class for single-session objects."""
