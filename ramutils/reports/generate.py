@@ -75,7 +75,7 @@ class ReportGenerator(object):
     @property
     def experiments(self):
         """Returns a list of experiments found in the session summaries."""
-        return [np.unique(summary.experiment) for summary in self.session_summaries]
+        return [np.unique(summary.events.experiment) for summary in self.session_summaries]
 
     def generate(self):
         """Central method to generate any report. The report to run is
