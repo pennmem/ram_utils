@@ -3,7 +3,6 @@ import random
 import pytest
 
 from pkg_resources import resource_filename
-from sklearn.externals import joblib
 
 from ramutils.events import *
 from ramutils.parameters import FRParameters, PALParameters
@@ -19,12 +18,12 @@ class TestEvents:
         cls.n_word, cls.n_rec_word, cls.n_rec_base = (
             [random.randint(1, 10) for _ in range(3)])
 
-        data = [('FR1', 0, -1, 'WORD', 1000 + t, 0, 0) for t in range(
+        data = [('FR1', 0, -1, 'WORD', 1000 + t, 0, 0, True) for t in range(
             cls.n_word)]
-        data += [('FR1', 0, 0, 'REC_WORD', 1000 + t + cls.n_word, 0, -1) for
+        data += [('FR1', 0, 0, 'REC_WORD', 1000 + t + cls.n_word, 0, -1, False) for
                  t in range(cls.n_rec_word)]
         data += [('FR1', 0, 0, 'REC_BASE', 1000 + t + cls.n_word +
-                  cls.n_rec_word, 0, 0) for t in range(cls.n_rec_base)]
+                  cls.n_rec_word, 0, 0, False) for t in range(cls.n_rec_base)]
 
         dtype = [
             ('experiment', '|U256'),
@@ -33,7 +32,8 @@ class TestEvents:
             ('type', '|U256'),
             ('mstime', '<i8'),
             ('intrusion', '<i8'),
-            ('eegoffset', '<i8')
+            ('eegoffset', '<i8'),
+            ('recalled', '?')
         ]
 
         cls.test_data = np.array(data, dtype=dtype).view(np.recarray)
@@ -207,6 +207,12 @@ class TestEvents:
         assert len(vocalization_events) == self.n_rec_word
         return
 
+    def test_get_recall_events_mask(self):
+        recall_mask = get_recall_events_mask(self.test_data)
+        assert sum(recall_mask) == self.n_word
+        assert sum(recall_mask) != self.n_rec_base
+        return
+
     # Four possible partitions. Be sure to check all
     def test_partition_events(self):
         dtypes = [
@@ -249,6 +255,7 @@ class TestEvents:
 
         return
 
+    # TODO: Add a case that checks the sessions parameter can be used
     @pytest.mark.parametrize("subject, experiment, parameters, encoding_only, "
                              "combine_events", [
         ("R1348J", "FR6", FRParameters, False, True),
