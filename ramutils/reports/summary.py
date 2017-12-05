@@ -8,8 +8,7 @@ import pandas as pd
 import pytz
 
 from traits.api import Array, ArrayOrNone
-
-from ramutils.schema import Schema
+from traitschema import Schema
 
 __all__ = [
     'SessionSummary',
