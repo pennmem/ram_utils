@@ -107,5 +107,12 @@ class ReportGenerator(object):
                     'y1': FRSessionSummary.serialpos_probabilities(self.session_summaries, False),
                     'y2': FRSessionSummary.serialpos_probabilities(self.session_summaries, True),
                 })
+            },
+
+            # FIXME: real values
+            classifier={
+                'auc': '{:.2f}%'.format(61.35),
+                'p_value': '&le; 0.001',
+                'output_median': 0.499,
             }
         )
