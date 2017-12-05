@@ -31,7 +31,7 @@ def test_generate_pairs_from_electrode_config():
                       electrode_config_file='/input/configs/R1354E_26OCT2017L0M0STIM.csv',
                       pairs='/input/montage/R1354E_pairs.json')
     config_pairs = generate_pairs_from_electrode_config('R1354E', paths).compute()
-    assert config_pairs['R1354E']['pairs'].keys() > 0
+    assert len(config_pairs['R1354E']['pairs'].keys()) > 0
     with open(datafile('/input/configs/R1354E_pairs_from_ec.json'), 'w') as f:
         json_pairs = json.dumps(config_pairs)
         f.write(json_pairs)
