@@ -1,12 +1,13 @@
 """ Helper functions for computing powers from a set of EEG signals """
 
 import numpy as np
+import pandas as pd
 from ptsa.data.filters import (
     MonopolarToBipolarMapper,
     MorletWaveletFilterCpp
 )
 from ptsa.data.readers import EEGReader
-from scipy.stats import zscore
+from scipy.stats import zscore, ttest_ind
 
 try:
     from typing import List
@@ -15,6 +16,7 @@ except ImportError:
 
 from ramutils.log import get_logger
 from ramutils.utils import timer
+from ramutils.events import get_recall_events_mask
 
 logger = get_logger()
 
@@ -235,3 +237,37 @@ def normalize_powers_by_session(pow_mat, events):
                                           ddof=1)
 
     return pow_mat
+
+
+def reshape_powers_to_3d(powers, n_frequencies):
+    """ Make power matrix a 3D structure: n_events x n_electrodes x n_frequencies """
+    reshaped_powers = powers.reshape((len(powers), -1, n_frequencies))
+    return reshaped_powers
+
+
+def reshape_powers_to_2d(powers):
+    """ Make power matrix a 2D structure n_events x (n_electrodes x n_frequencies) """
+    reshaped_powers = powers.reshape((len(powers), -1))
+    return reshaped_powers
+
+
+def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events, frequencies, hfa_cutoff=65):
+    """ Calculate tstats and pvalues from a ttest comparing HFA activity of recalled versus non-recalled items"""
+    powers_3d = reshape_powers_to_3d(normalized_powers, len(frequencies))
+    hfa_mask = [True if freq > hfa_cutoff else False for freq in frequencies]
+    hfa_powers = powers_3d[:, :, hfa_mask]
+
+    # Average powers across frequencies. New shape is n_events x n_electrodes
+    hfa_powers = np.nanmean(hfa_powers, axis=-1)
+
+    recall_mask = get_recall_events_mask(events)
+    recalled_pow_mat = hfa_powers[recall_mask, :]
+    non_recalled_pow_mat = hfa_powers[~recall_mask, :]
+
+    tstats, pvals = ttest_ind(recalled_pow_mat, non_recalled_pow_mat, axis=0)
+
+    pairs_metadata_table['t-stat'] = tstats
+    pairs_metadata_table['pvals'] = pvals
+
+    return pairs_metadata_table
+
