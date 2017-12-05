@@ -1,11 +1,10 @@
 """Pipeline for creating reports."""
 
 
-from ramutils.constants import EXPERIMENTS
 from ramutils.tasks import *
 
 
-def make_report(subject, experiment, paths, stim_params=[], classifier=None,
+def make_report(subject, experiment, paths, stim_params=None, classifier_container=None,
                 exp_params=None, sessions=None, vispath=None):
     """Run a report.
 
@@ -18,7 +17,7 @@ def make_report(subject, experiment, paths, stim_params=[], classifier=None,
     paths : FilePaths
     stim_params : List[StimParameters]
         Stimulation parameters (empty list for non-stim experiments).
-    classifier : ClassifierContainer
+    classifier_container : ClassifierContainer
         For experiments that ran with a classifier, the container detailing the
         classifier that was actually used. When not given, a new classifier will
         be trained to (hopefully) recreate what was actually used.
@@ -42,35 +41,73 @@ def make_report(subject, experiment, paths, stim_params=[], classifier=None,
     report rather than the report itself.
 
     """
-    if "FR" in experiment:
-        encoding_events, retrieval_events = preprocess_fr_events(subject)
-    else:
-        raise RuntimeError("only FR supported so far")
+    # If classifier container is provided, load as much as possible from that
 
-    # FIXME: can this be centralized?
+    # Note: All of these pairs variables are of type OrderedDict, which is
+    # crucial for preserving the initial order of the electrodes in the
+    # config file
     ec_pairs = generate_pairs_from_electrode_config(subject, paths)
-    excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
-    used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
-    final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
+    pairs_metadata_table = generate_montage_metadata_table(subject, ec_pairs, root=paths.root)
+    #excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
+    #used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
+    #final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
 
-    if classifier is None:
-        # TODO: Load classifier if possible
-        pass  # TODO: compute powers, train classifier
+    if classifier_container is not None:
+        # Load task events, reduced powers, trained classifier, etc all from the given serialized classifier container
+        classifier = classifier_container.classifier
+        events = classifier_container.events
 
-    # TODO: Compute powers
+    kwargs = exp_params.to_dict()
+    events = preprocess_events(subject,
+                               experiment,
+                               kwargs['baseline_removal_start_time'],
+                               kwargs['retrieval_time'],
+                               kwargs['empty_epoch_duration'],
+                               kwargs['pre_event_buf'],
+                               kwargs['post_event_buf'],
+                               encoding_only=kwargs['encoding_only'],
+                               combine_events=kwargs['combine_events'],
+                               root=paths.root)
 
-    if experiment in (EXPERIMENTS['closed_loop'] + EXPERIMENTS['ps']):
-        # FIXME: get stim events and add to events?
-        events = encoding_events
+    # FIXME: If PTSA is updated to not remove events behind this scenes, this
+    # won't be necessary. Or, if we can remove bad events before passing to
+    # compute powers, then we won't have to catch the events
+    powers, task_events = compute_normalized_powers(events,
+                                                    **kwargs)
+
+    delta_hfa_table = calculate_delta_hfa_table(pairs_metadata_table,
+                                                powers,
+                                                events,
+                                                kwargs['freqs'],
+                                                hfa_cutoff=kwargs['hfa_cutoff'])
+
+    #reduced_powers = reduce_powers(powers, used_pair_mask, len(kwargs['freqs']))
+
+    #sample_weights = get_sample_weights(task_events, **kwargs)
+
+    #classifier = train_classifier(reduced_powers,
+    #                              task_events,
+    #                             sample_weights,
+    #                              kwargs['C'],
+    #                              kwargs['penalty_type'],
+    #                              kwargs['solver'])
+
+    #cross_validation_results = perform_cross_validation(classifier,
+    #                                                    reduced_powers,
+    #                                                    task_events,
+    #                                                    kwargs['n_perm'],
+    #                                                    **kwargs)
+
+
 
     # generate summaries for each session
     # FIXME: encoding events or all events?
-    session_summaries = [
-        summarize_session(events[events.session == session])
-        for session in sessions
-    ]
-
-    # TODO: generate plots, generate tex, generate PDF
+    # session_summaries = [
+    #     summarize_session(events[events.session == session])
+    #     for session in sessions
+    # ]
 
     if vispath is not None:
-        pass  # TODO
+        pass
+
+    return delta_hfa_table.compute()
