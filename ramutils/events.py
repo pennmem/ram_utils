@@ -23,8 +23,8 @@ from ramutils.utils import extract_subject_montage
 
 
 def preprocess_events(subject, experiment, start_time,
-                      end_time, duration, pre, post, combine_events=True,
-                      encoding_only=False, root='/'):
+                      end_time, duration, pre, post, sessions=None,
+                      combine_events=True, encoding_only=False, root='/'):
     """High-level pre-processing function for combining/cleaning record only
     events to be used in config generation and reports
 
@@ -39,6 +39,8 @@ def preprocess_events(subject, experiment, start_time,
     duration: int
     pre: int
     post: int
+    sessions: list
+        Subset of sessions to use
     combine_events: bool
         Indicates if all record-only sessions should be combined for
         classifier training.
@@ -64,12 +66,12 @@ def preprocess_events(subject, experiment, start_time,
                            "implemented")
 
     if "PAL" in experiment:
-        pal_events = load_events(subject, "PAL1", rootdir=root)
+        pal_events = load_events(subject, "PAL1", sessions=sessions, rootdir=root)
         pal_events = clean_events("PAL1", pal_events)
         pal_events = normalize_pal_events(pal_events)
 
     if ("FR" in experiment) or combine_events:
-        fr_events = load_events(subject, 'FR1', rootdir=root)
+        fr_events = load_events(subject, 'FR1', sessions=sessions, rootdir=root)
         fr_events = clean_events("FR1",
                                  fr_events,
                                  start_time=start_time,
@@ -79,7 +81,7 @@ def preprocess_events(subject, experiment, start_time,
                                  post=post)
         fr_events = normalize_fr_events(fr_events)
 
-        catfr_events = load_events(subject, 'catFR1', rootdir=root)
+        catfr_events = load_events(subject, 'catFR1', sessions=sessions, rootdir=root)
         catfr_events = clean_events("catFR1",
                                     catfr_events,
                                     start_time=start_time,
@@ -194,6 +196,7 @@ def clean_events(experiment, events, start_time=None, end_time=None,
     events = remove_negative_offsets(events)
     events = remove_practice_lists(events)
     events = remove_incomplete_lists(events)
+    # TODO: Adde remove_repitions() function to get rid of any recall events that are just a repeated recall
 
     if "FR" in experiment:
         events = insert_baseline_retrieval_events(events,
@@ -838,6 +841,12 @@ def get_all_retrieval_events_mask(events):
                           (events.type == 'REC_BASE') |
                           (events.type == 'REC_EVENT'))
     return all_retrieval_mask
+
+
+def get_recall_events_mask(events):
+    """ Create a boolean mask for any recall events """
+    recall_mask = (events.recalled == 1)
+    return recall_mask
 
 
 def partition_events(events):
