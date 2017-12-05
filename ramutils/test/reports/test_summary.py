@@ -5,13 +5,13 @@ import warnings
 
 import pytest
 
-from numpy.testing import assert_almost_equal
+from numpy.testing import assert_equal, assert_almost_equal
 
 from ptsa.data.readers import BaseEventReader
 from traits.api import ListInt, ListFloat, ListBool
 
 from ramutils.reports.summary import (
-    SessionSummary, StimSessionSessionSummary, MathSummary,
+    Summary, SessionSummary, StimSessionSessionSummary, MathSummary,
     FRSessionSummary, FRStimSessionSummary
 )
 
@@ -71,6 +71,15 @@ class TestSummary:
         assert dt.minute == 8
         assert dt.second == 25
         assert dt.utcoffset().total_seconds() == 0
+
+    def test_populate(self):
+        with pytest.raises(NotImplementedError):
+            summary = Summary()
+            summary.populate(None)
+
+    def test_create(self, fr5_events):
+        summary = SessionSummary.create(fr5_events)
+        assert_equal(summary.events, fr5_events)
 
 
 class TestMathSummary:
