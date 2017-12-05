@@ -5,13 +5,15 @@ from ramutils.events import partition_events, \
 from ramutils.log import get_logger
 from ramutils.powers import compute_powers
 from ramutils.powers import reduce_powers as reduce_powers_core
+from ramutils.powers import calculate_delta_hfa_table as calculate_delta_hfa_table_core
 from ramutils.tasks import task
 
 logger = get_logger()
 
 __all__ = [
     'compute_normalized_powers',
-    'reduce_powers'
+    'reduce_powers',
+    'calculate_delta_hfa_table'
 ]
 
 
@@ -79,3 +81,13 @@ def compute_normalized_powers(events, **kwargs):
     combined_powers = np.concatenate(power_partitions)
 
     return combined_powers, cleaned_events
+
+
+@task()
+def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events,
+                              frequencies, hfa_cutoff=65):
+    return calculate_delta_hfa_table_core(pairs_metadata_table,
+                                          normalized_powers,
+                                          events,
+                                          frequencies,
+                                          hfa_cutoff=hfa_cutoff)
