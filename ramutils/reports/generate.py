@@ -1,5 +1,6 @@
 import json
 import os.path as osp
+import random
 
 from jinja2 import Environment, PackageLoader
 import numpy as np
@@ -96,6 +97,19 @@ class ReportGenerator(object):
         """
         template = self._env.get_template("fr1.html")
 
+        # FIXME: real values
+        sme_table = sorted([
+            {
+                'type': random.choice(['D', 'G', 'S']),
+                'contacts': [random.randint(1, 256) for _ in range(2)],
+                'labels': "{}-{}".format("label1", "label2"),
+                'atlas_loc': random.choice(['Left', 'Right']) + ' ' + random.choice(['MTL', 'supramarginal', 'fusiform']),
+                'p_value': random.uniform(0.0001, 0.1),
+                't_stat': random.uniform(-7, 7)
+            }
+            for _ in range(24)
+        ], key=lambda x: x['p_value'])
+
         return template.render(
             subject=self.subject,
             experiment='FR1',
@@ -114,5 +128,7 @@ class ReportGenerator(object):
                 'auc': '{:.2f}%'.format(61.35),
                 'p_value': '&le; 0.001',
                 'output_median': 0.499,
-            }
+            },
+
+            sme_table=sme_table,
         )
