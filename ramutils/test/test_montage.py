@@ -91,4 +91,43 @@ class TestMontage:
 
         return
 
+    @pytest.mark.parametrize('subject', [
+        'R1354E',
+    ])
+    def test_load_pairs_from_json(self, subject):
+        test_pairs = load_pairs_from_json(subject, rootdir=datafile(''))
+        assert len(test_pairs.keys()) > 0
+        assert '11LD1-11LD2' in test_pairs
+        return
+
+    @pytest.mark.parametrize('subject', [
+        'R1354E'
+    ])
+    def test_build_montage_metadata_table(self, subject):
+        with open(datafile('/input/configs/{}_pairs_from_ec.json'.format(subject))) as f:
+            pairs_from_ec = json.load(f)
+
+        metadata_table = build_montage_metadata_table(subject, pairs_from_ec, root=datafile(''))
+        assert len(metadata_table) == len(pairs_from_ec[subject]['pairs'].keys())
+
+        return
+
+    @pytest.mark.parametrize('subject', [
+        'R1354E'
+    ])
+    def test_build_montage_metadata_table_regression(self, subject):
+        with open(datafile('/input/configs/{}_pairs_from_ec.json'.format(subject))) as f:
+            pairs_from_ec = json.load(f)
+
+        metadata_table = build_montage_metadata_table(subject, pairs_from_ec, root=datafile(''))
+        old_metadata_table = pd.read_csv(datafile('/input/montage/{}_montage_metadata.csv'.format(subject)))
+
+        # Check correspondence my merging
+        merged = metadata_table.merge(old_metadata_table, how='outer', indicator=True)
+        assert 'left_only' not in merged._merge
+        assert 'right_only' not in merged._merge
+
+        return
+
+
 
