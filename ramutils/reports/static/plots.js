@@ -211,20 +211,17 @@ var ramutils = (function (mod, Plotly) {
         {
           x: preStim,
           type: 'histogram',
-          opacity: 0.6,
           name: 'Pre-stim'
         },
         {
           x: postStim,
           type: 'histogram',
-          opacity: 0.6,
           name: 'Post-stim'
         },
         {
           x: delta,
           type: 'histogram',
-          opacity: 0.6,
-          name: 'Post- minus pre-stim'
+          name: 'Post minus pre'
         }
       ];
 
