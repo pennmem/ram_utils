@@ -22,9 +22,8 @@ from ptsa.data.readers import BaseEventReader, JsonIndexReader, EEGReader
 from ramutils.utils import extract_subject_montage
 
 
-def preprocess_events(subject, experiment, start_time,
-                      end_time, duration, pre, post, sessions=None,
-                      combine_events=True, encoding_only=False, root='/'):
+def preprocess_events(subject, experiment, start_time, end_time, duration, pre, post, sessions=None,
+                      combine_events=True, root='/'):
     """High-level pre-processing function for combining/cleaning record only
     events to be used in config generation and reports
 
@@ -44,9 +43,6 @@ def preprocess_events(subject, experiment, start_time,
     combine_events: bool
         Indicates if all record-only sessions should be combined for
         classifier training.
-    encoding_only: bool
-        Flag for if only encoding events should be used (default is False,
-        i.e. encoding and retrieval events will be returned)
     root: str
         Base path for finding event files etc.
 
@@ -70,7 +66,7 @@ def preprocess_events(subject, experiment, start_time,
         pal_events = clean_events("PAL1", pal_events)
         pal_events = normalize_pal_events(pal_events)
 
-    if ("FR" in experiment) or combine_events:
+    if (("FR" in experiment) and ("cat" not in experiment)) or combine_events:
         fr_events = load_events(subject, 'FR1', sessions=sessions, rootdir=root)
         fr_events = clean_events("FR1",
                                  fr_events,
@@ -81,6 +77,7 @@ def preprocess_events(subject, experiment, start_time,
                                  post=post)
         fr_events = normalize_fr_events(fr_events)
 
+    if ("cat" in experiment) or combine_events:
         catfr_events = load_events(subject, 'catFR1', sessions=sessions, rootdir=root)
         catfr_events = clean_events("catFR1",
                                     catfr_events,
@@ -91,24 +88,25 @@ def preprocess_events(subject, experiment, start_time,
                                     duration=duration)
         catfr_events = normalize_fr_events(catfr_events)
 
-        # Free recall events are always combined
-        free_recall_events = concatenate_events_across_experiments(
+    if combine_events:
+        all_events = concatenate_events_across_experiments(
             [fr_events, catfr_events])
 
+    # Deal with PAL event combination
     if ("PAL" in experiment) and combine_events:
-        all_events = concatenate_events_across_experiments([
-            free_recall_events, pal_events])
-
+        # Update all events to include pal events
+        all_events = concatenate_events_across_experiments([all_events, pal_events])
     elif ("PAL" in experiment) and not combine_events:
         all_events = pal_events
 
-    else:
-        all_events = free_recall_events
+    # Deal with FR/catFR event combination
+    if "cat" in experiment and not combine_events:
+        all_events = catfr_events
 
-    final_events = select_word_events(all_events,
-                                      encoding_only=encoding_only)
+    elif 'FR' in experiment and not combine_events:
+        all_events = fr_events
 
-    return final_events
+    return all_events
 
 
 def load_events(subject, experiment, sessions=None, rootdir='/'):
