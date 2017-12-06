@@ -1,0 +1,19 @@
+<div>
+  <h2>Stim and recall analysis</h2>
+  <figure>
+    <div id="stim-recall-placeholder"></div>
+    <figcaption>
+        Number of stims and recalled items per list.
+        Blue circles represent the number of recalled items from non-stim lists.
+        Orange circles represent the number of recalled items from stim lists.
+        Bars represent the number of stims per list.
+    </figcaption>
+  </figure>
+</div>
+
+<script>
+  window.addEventListener('load', () => {
+    const data = JSON.parse('{{ plot_data["recall_summary"] }}');
+    ramutils.plots.plotRecallSummary(data.nonstim, data.stim, data.stim_events);
+  });
+</script>
