@@ -1,21 +1,35 @@
-<table>
-  <thead>
-    <tr>
-      <td>Session</td>
-      <td>Date</td>
-      <td>Length [min]</td>
-      <td>Number of lists</td>
-      <td>Recall percentage</td>
-    </tr>
-  </thead>
-  <tbody>
-    {% for summary in summaries %}
+<div>
+  <h2>Session summary</h2>
+
+  <h3>Individual sessions</h3>
+  <table class="table table-striped table-hover">
+    <thead>
       <tr>
-        <td>{{ summary.session_number }}</td>
-        <td>{{ summary.session_datetime.strftime('%Y-%m-%d') }}</td>
-        <td>{{ summary.num_lists }}</td>
-        <td>{{ summary.percent_recalled }}</td>
+        <th>Session</th>
+        <th>Date</th>
+        <th>Length [min]</th>
+        <th>Number of lists</th>
+        <th>Recall percentage</th>
       </tr>
-    {% endfor %}
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      {% for summary in summaries %}
+        <tr>
+          <td>{{ summary.session_number }}</td>
+          <td>{{ summary.session_datetime.strftime('%Y-%m-%d') }}</td>
+          <td>{{ "{:.2f}".format(summary.session_length/60.0) }}</td>
+          <td>{{ summary.num_lists }}</td>
+          <td>{{ "{:.2f}".format(summary.percent_recalled) }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h3>All sessions</h3>
+  <ul>
+    <li>{{ random.randint(300, 3000) }} words</li>
+    <li>{{ random.randint(100, 300) }} correct ({{ '{:.2f}%'.format(random.random()*100) }})</li>
+    <li>{{ random.randint(10, 100) }} <span title="prior list intrusions">PLI</span></li>
+    <li>{{ random.randint(10, 100) }} <span title="extra list intrusions">ELI</span></li>
+  </ul>
+</div>

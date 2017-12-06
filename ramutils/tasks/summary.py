@@ -56,7 +56,7 @@ def summarize_session(events):
 
     # FIXME: recall_probs
     if experiment in ['FR1']:
-        summary = FRSessionSessionSummary()
+        summary = FRSessionSummary()
         summary.populate(events)
 
     # FIXME: recall_probs, ps4

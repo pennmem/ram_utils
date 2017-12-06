@@ -1,0 +1,43 @@
+<div>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">RAM Reports</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-ram" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbar-ram">
+      <ul class="navbar-nav mr-auto" id="navbar-section-links">
+        <li class="nav-item">
+          <a class="nav-link active" href="#">{{ subject }}</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="#">{{ experiment }}</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+</div>
+
+<script>
+  // Adding entries to the navbar for each h2 tag
+  // FIXME: is there a better server-side way to do this?
+  window.addEventListener('load', () => {
+    const sections = document.querySelectorAll('h2');
+    let linkList = document.querySelector("#navbar-section-links");
+
+    sections.forEach((node) => {
+      const name = node.innerHTML;
+      const id = name.toLowerCase().split(' ').join('-');
+      node.id = id;
+
+      let listElem = document.createElement('li');
+      let link = document.createElement('a');
+      listElem.classList = ['nav-item'];
+      link.classList = ['nav-link'];
+      link.href = '#' + node.id;
+      link.innerHTML = name;
+      listElem.appendChild(link);
+      linkList.appendChild(listElem);
+    });
+  });
+</script>
