@@ -1,0 +1,17 @@
+<div>
+  <h2>Data quality metrics</h2>
+  <figure>
+    <div id="classifier-output-placeholder"></div>
+    <figcaption>
+      Classifier output distributions before and after stimulation and the
+      difference between these.
+    </figcaption>
+  </figure>
+</div>
+
+<script>
+  window.addEventListener('load', () => {
+    const classifierOutput = JSON.parse('{{ plot_data["classifier_output"] }}');
+    ramutils.plots.plotClassifierOutputDistros(classifierOutput['pre_stim'], classifierOutput['post_stim']);
+  });
+</script>

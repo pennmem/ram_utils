@@ -210,6 +210,10 @@ class ReportGenerator(object):
                 'recall_difference': json.dumps({
                     'stim': random.uniform(-60, 60),
                     'post_stim': random.uniform(-60, 60)
-                })
-            }
+                }),
+                'classifier_output': json.dumps({
+                    'pre_stim': np.random.random((40,)).tolist(),
+                    'post_stim': np.random.random((40,)).tolist()
+                }),
+            },
         )
