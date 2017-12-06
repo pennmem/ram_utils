@@ -62,6 +62,9 @@ class ReportGenerator(object):
         # Give access to some static methods
         self._env.globals['MathSummary'] = MathSummary
 
+        # For debugging/mockups
+        self._env.globals['random'] = random
+
         # Give access to Javascript sources. When we switch to a non-static
         # reporting format, this will be handled by the web server's static file
         # serving.
