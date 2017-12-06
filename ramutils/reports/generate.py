@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 import os.path as osp
 import random
@@ -61,6 +62,7 @@ class ReportGenerator(object):
 
         # Give access to some static methods
         self._env.globals['MathSummary'] = MathSummary
+        self._env.globals['datetime'] = datetime
 
         # For debugging/mockups
         self._env.globals['random'] = random
