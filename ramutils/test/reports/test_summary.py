@@ -5,14 +5,14 @@ import warnings
 
 import pytest
 
-from numpy.testing import assert_almost_equal
+from numpy.testing import assert_equal, assert_almost_equal
 
 from ptsa.data.readers import BaseEventReader
 from traits.api import ListInt, ListFloat, ListBool
 
 from ramutils.reports.summary import (
-    SessionSummary, StimSessionSessionSummary, MathSummary,
-    FRSessionSessionSummary, FRStimSessionSummary
+    Summary, SessionSummary, StimSessionSessionSummary, MathSummary,
+    FRSessionSummary, FRStimSessionSummary
 )
 
 datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
@@ -71,6 +71,15 @@ class TestSummary:
         assert dt.minute == 8
         assert dt.second == 25
         assert dt.utcoffset().total_seconds() == 0
+
+    def test_populate(self):
+        with pytest.raises(NotImplementedError):
+            summary = Summary()
+            summary.populate(None)
+
+    def test_create(self, fr5_events):
+        summary = SessionSummary.create(fr5_events)
+        assert_equal(summary.events, fr5_events)
 
 
 class TestMathSummary:
@@ -155,13 +164,13 @@ class TestMathSummary:
 class TestFRSessionSummary:
     @classmethod
     def setup_class(cls):
-        cls.summary = FRSessionSessionSummary()
+        cls.summary = FRSessionSummary()
         events = fr5_events()
         probs = np.random.random(len(events))
         cls.summary.populate(events, probs)
 
     def test_no_probs_given(self, fr5_events):
-        summary = FRSessionSessionSummary()
+        summary = FRSessionSummary()
         summary.populate(fr5_events)
         assert all(summary.prob == -999)
 
@@ -170,6 +179,16 @@ class TestFRSessionSummary:
 
     def test_percent_recalled(self):
         assert self.summary.percent_recalled == 16
+
+    @pytest.mark.parametrize('first', [True, False])
+    def test_serialpos_probabilities(self, first):
+        if first:
+            expected = [0.2, 0.12, 0.08, 0.08, 0.08, 0.0, 0.08, 0.04, 0.08, 0.0, 0.0, 0.04]
+        else:
+            expected = [0.2, 0.16, 0.08, 0.16, 0.16, 0.12, 0.28, 0.2, 0.08, 0.16, 0.24, 0.08]
+
+        probs = FRSessionSummary.serialpos_probabilities([self.summary], first)
+        assert_almost_equal(probs, expected, decimal=2)
 
 
 class TestStimSessionSummary:
