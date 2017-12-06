@@ -3,23 +3,6 @@
  */
 
 var ramutils = (function (mod, Plotly) {
-  /**
-   * Make the axes options object.
-   * @param {String} xlabel
-   * @param {String} ylabel
-   * @return {Object}
-   */
-  mod.makeAxesOptions = function (xlabel, ylabel) {
-    return {
-      xaxis: {
-        title: xlabel
-      },
-      yaxis: {
-        title: ylabel
-      }
-    };
-  },
-
   mod.plots = {
     /**
      * Plots serial position curves.
@@ -49,11 +32,64 @@ var ramutils = (function (mod, Plotly) {
         });
       }
 
-      const layout = mod.makeAxesOptions('Serial position', 'Probability');
-      layout.xaxis.range = [0.9, 12.1];
-      layout.yaxis.range = [0, 1];
+      const layout = {
+        xaxis: {
+          title: 'Serial position',
+          range: [0.9, 12.1]
+        },
+        yaxis: {
+          title: 'Probability',
+          range: [0, 1]
+        }
+      };
 
       Plotly.plot('serialpos-plot-placeholder', data, layout);
+    },
+
+    /**
+     * Plot a summary of recall of stimed/non-stimed items.
+     * @param {Object} nonStimRecalls
+     * @param {Object} stimRecalls
+     * @param {Object} stimEvents
+     */
+    plotRecallSummary: function (nonStimRecalls, stimRecalls, stimEvents) {
+      const data = [
+        {
+          x: nonStimRecalls.listno,
+          y: nonStimRecalls.recalled,
+          mode: 'markers',
+          type: 'scatter',
+          marker: {size: 12},
+          name: 'Non-stim recalls'
+        },
+        {
+          x: stimRecalls.listno,
+          y: stimRecalls.recalled,
+          mode: 'markers',
+          type: 'scatter',
+          marker: {size: 12},
+          name: 'Stim recalls'
+        },
+        {
+          x: stimEvents.listno,
+          y: stimEvents.count,
+          type: 'bar',
+          name: 'Stim events'
+        }
+      ];
+
+      const layout = {
+        xaxis: {
+          title: 'List number',
+          range: [1, Math.max(...nonStimRecalls.listno.concat(stimRecalls.listno)) + 0.5]
+        },
+        yaxis: {
+          title: 'Number of items',
+          range: [0, 12.1]
+        }
+      };
+
+      Plotly.plot('stim-recall-placeholder', data, layout);
     },
 
     /**

@@ -188,6 +188,20 @@ class ReportGenerator(object):
                         'First recall (non-stim)': np.random.random((12,)).tolist(),
                         'First recall (stim)': np.random.random((12,)).tolist()
                     }
+                }),
+                'recall_summary': json.dumps({
+                    'nonstim': {
+                        'listno': [4, 8, 11],
+                        'recalled': [1, 0, 3]
+                    },
+                    'stim': {
+                        'listno': [5, 6, 7, 9, 10, 12, 13],
+                        'recalled': [1, 1, 2, 1, 3, 1, 1]
+                    },
+                    'stim_events': {
+                        'listno': [5, 6, 7, 9, 10, 12, 13],
+                        'count': [random.randint(1, 12) for _ in range(7)]
+                    }
                 })
             }
         )
