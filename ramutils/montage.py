@@ -101,6 +101,9 @@ def reduce_pairs(pairs, stim_params, return_excluded=False):
         pairs with stim pairs removed, or removed pairs if return_excluded is True
 
     """
+    if stim_params is None:
+        stim_params = []
+
     pairs = extract_pairs_dict(pairs)
     contacts = [(p.anode, p.cathode) for p in stim_params]
     reduced_pairs = OrderedDict()

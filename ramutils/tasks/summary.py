@@ -47,7 +47,8 @@ def summarize_session(events):
     if len(sessions) != 1:
         raise TooManySessionsError("events should be pre-filtered to be from a single session")
 
-    experiments = np.unique(events.experiment)
+    # Experiment field can be blank, so handle this edge case here assuming data might not be clean
+    experiments = np.unique(events[events.experiment != ''].experiment)
     if len(experiments) != 1:
         raise TooManyExperimentsError("events should only come from one experiment")
 
@@ -56,7 +57,7 @@ def summarize_session(events):
 
     # FIXME: recall_probs
     if experiment in ['FR1']:
-        summary = FRSessionSessionSummary()
+        summary = FRSessionSummary()
         summary.populate(events)
 
     # FIXME: recall_probs, ps4
