@@ -16,14 +16,24 @@
       Probability of stimulation as a function of serial position.
     </figcaption>
   </figure>
+
+  <figure>
+    <div id="recall-difference-placeholder"></div>
+    <figcaption>
+      Change in recall performance for stimulated and post-stimulated items.
+      The control group (non-stim) comprises all low biomarker state items from non-stim lists.
+    </figcaption>
+  </figure>
 </div>
 
 <script>
   window.addEventListener('load', () => {
-    const summmary = JSON.parse('{{ plot_data["recall_summary"] }}');
-    const probability = JSON.parse('{{ plot_data["stim_probability"] }}');
+    const summary = JSON.parse('{{ plot_data["recall_summary"] }}');
+    const probs = JSON.parse('{{ plot_data["stim_probability"] }}');
+    const recallDifference = JSON.parse('{{ plot_data["recall_difference"] }}');
 
-    ramutils.plots.plotRecallSummary(summmary.nonstim, summmary.stim, summmary.stim_events);
-    ramutils.plots.plotStimProbability(probability['serialpos'], probability['probability']);
+    ramutils.plots.plotRecallSummary(summary['nonstim'], summary['stim'], summary['stim_events']);
+    ramutils.plots.plotStimProbability(probs['serialpos'], probs['probability']);
+    ramutils.plots.plotRecallDifference(recallDifference['stim'], recallDifference['post_stim']);
   });
 </script>
