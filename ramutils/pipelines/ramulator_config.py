@@ -109,16 +109,11 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
         return config_path.compute()
 
     kwargs = exp_params.to_dict()
-    events = preprocess_events(subject,
-                               experiment,
-                               kwargs['baseline_removal_start_time'],
-                               kwargs['retrieval_time'],
-                               kwargs['empty_epoch_duration'],
-                               kwargs['pre_event_buf'],
-                               kwargs['post_event_buf'],
-                               encoding_only=kwargs['encoding_only'],
-                               combine_events=kwargs['combine_events'],
-                               root=paths.root)
+    all_events = preprocess_events(subject, experiment, kwargs['baseline_removal_start_time'], kwargs['retrieval_time'],
+                                   kwargs['empty_epoch_duration'], kwargs['pre_event_buf'], kwargs['post_event_buf'],
+                                   combine_events=kwargs['combine_events'], root=paths.root)
+
+    events = select_word_events(all_events, encoding_only=kwargs['encoding_only'])
 
     # FIXME: If PTSA is updated to not remove events behind this scenes, this
     # won't be necessary. Or, if we can remove bad events before passing to
