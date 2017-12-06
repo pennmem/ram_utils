@@ -23,7 +23,7 @@ install:
   - conda info -a
   - conda create -n ramutils python=$TRAVIS_PYTHON_VERSION dask h5py matplotlib numpy pandas pytables pytest pytest-cov scikit-learn scipy statsmodels traits
   - source activate ramutils
-  - conda install -y -c pennmem ptsa classiflib bptools
+  - conda install -y -c pennmem ptsa classiflib bptools traitschema
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
       conda install -y mock futures;
     fi

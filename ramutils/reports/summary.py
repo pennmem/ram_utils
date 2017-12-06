@@ -9,12 +9,12 @@ import pytz
 
 from traits.api import Array, ArrayOrNone, Float
 from sklearn.metrics import roc_auc_score, roc_curve
-
-from ramutils.schema import Schema
+from traitschema import Schema
 
 __all__ = [
     'ClassifierSummary',
     'SessionSummary',
+    'StimSessionSummary',
     'FRSessionSummary',
     'FRStimSessionSummary',
     'FR5SessionSummary',
@@ -149,6 +149,22 @@ class Summary(Schema):
         if self._events is None:
             self._events = new_events
 
+    def populate(self, events):
+        raise NotImplementedError
+
+    @classmethod
+    def create(cls, events):
+        """Create a new summary object from events.
+
+        Parameters
+        ----------
+        events : np.recarray
+
+        """
+        instance = cls()
+        instance.populate(events)
+        return instance
+
 
 class SessionSummary(Summary):
     """Base class for single-session objects."""
@@ -201,11 +217,21 @@ class SessionSummary(Summary):
 
         """
         if not hasattr(self, '_df') or recreate:
+            # these attributes won't be included
+            ignore = [
+                'events',  # we don't need events in the dataframe
+                'rejected', 'region',  # FIXME: don't ignore
+            ]
+
+            # also ignore phase for events that predate it
+            if 'phase' in self.visible_traits():
+                if len(self.phase) == 0:
+                    ignore += ['phase']
+
             columns = {
                 trait: getattr(self, trait)
                 for trait in self.visible_traits()
-                if trait not in ['events',  # we don't need events in the dataframe
-                                 'rejected', 'region']  # FIXME
+                if trait not in ignore
             }
             self._df = pd.DataFrame(columns)
         return self._df
@@ -358,9 +384,45 @@ class FRSessionSummary(SessionSummary):
         # FIXME: is length of events always equal to number of items?
         return 100 * len(self.events[self.events.recalled == True]) / len(self.events)
 
+    @staticmethod
+    def serialpos_probabilities(summaries, first=False):
+        """Computes the mean recall probability by word serial position.
+
+        Parameters
+        ----------
+        summaries : List[Summary]
+            Summaries of sessions.
+        first : bool
+            When True, return probabilities that each serial position is the
+            first recalled word. Otherwise, return the probability of recall
+            for each word by serial position.
+
+        Returns
+        -------
+        List[float]
+
+        """
+        columns = ['serialpos', 'list', 'recalled']
+        events = pd.concat([pd.DataFrame(s.events[columns]) for s in summaries])
+
+        if first:
+            firstpos = np.zeros(len(events.serialpos.unique()), dtype=np.float)
+            for listno in events.list.unique():
+                try:
+                    nonzero = events[(events.list == listno) & (events.recalled == 1)].serialpos.iloc[0]
+                except IndexError:  # no items recalled this list
+                    continue
+                thispos = np.zeros(firstpos.shape, firstpos.dtype)
+                thispos[nonzero - 1] = 1
+                firstpos += thispos
+            return (firstpos / events.list.max()).tolist()
+        else:
+            group = events.groupby('serialpos')
+            return group.recalled.mean().tolist()
+
 
 # FIXME
-# class CatFRSessionSummary(FRSessionSessionSummary):
+# class CatFRSessionSummary(FRSessionSummary):
 #     """Extends standard FR session summaries for categorized free recall
 #     experiments.
 #

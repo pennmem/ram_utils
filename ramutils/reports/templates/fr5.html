@@ -1,12 +1,11 @@
 {% extends 'base.html' %}
 {% block title %}
-  {{ subject }} RAM FR1 Report
+  {{ subject }} RAM FR5 Report
 {% endblock %}
 
 {% block report %}
 {% include 'session_summary.html' %}
 {% include 'math_summary.html' %}
 {% include 'serialpos_curve.html' %}
-{% include 'sme.html' %}
 {% include 'classifier.html' %}
 {% endblock %}
