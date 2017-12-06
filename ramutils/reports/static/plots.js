@@ -194,6 +194,47 @@ var ramutils = (function (mod, Plotly) {
       };
 
       Plotly.plot('classifier-performance-plot-placeholder', data, layout);
+    },
+
+    /**
+     * Plot classifier output distributions.
+     * @param {Array} preStim - classifier output pre-stim
+     * @param {Array} postStim - classifier output post-stim
+     */
+    plotClassifierOutputDistros: function (preStim, postStim) {
+      let delta = [];
+      for (let i in preStim) {
+        delta.push(postStim[i] - preStim[i]);
+      }
+
+      const data = [
+        {
+          x: preStim,
+          type: 'histogram',
+          opacity: 0.6,
+          name: 'Pre-stim'
+        },
+        {
+          x: postStim,
+          type: 'histogram',
+          opacity: 0.6,
+          name: 'Post-stim'
+        },
+        {
+          x: delta,
+          type: 'histogram',
+          opacity: 0.6,
+          name: 'Post- minus pre-stim'
+        }
+      ];
+
+      const layout = {
+        // barmode: 'overlay',
+        xaxis: {title: 'Classifier output'},
+        yaxis: {title: 'Frequency'}
+      };
+
+      Plotly.plot('classifier-output-placeholder', data, layout);
     }
   };
 
