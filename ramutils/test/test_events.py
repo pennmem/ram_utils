@@ -271,16 +271,10 @@ class TestEvents:
     def test_preprocess_events(self, subject, experiment, parameters,
                                encoding_only, combine_events):
         parameters = parameters().to_dict()
-        events = preprocess_events(subject,
-                                   experiment,
-                                   parameters['baseline_removal_start_time'],
-                                   parameters['retrieval_time'],
-                                   parameters['empty_epoch_duration'],
-                                   parameters['pre_event_buf'],
-                                   parameters['post_event_buf'],
-                                   encoding_only=encoding_only,
-                                   combine_events=combine_events,
-                                   root=datafile(''))
+        events = preprocess_events(subject, experiment, parameters['baseline_removal_start_time'],
+                                   parameters['retrieval_time'], parameters['empty_epoch_duration'],
+                                   parameters['pre_event_buf'], parameters['post_event_buf'],
+                                   combine_events=combine_events, root=datafile(''))
         assert len(events) > 0
 
         if encoding_only:
@@ -306,14 +300,9 @@ class TestEvents:
 
         old_events = np.load(datafile('/input/events/{}_task_events.npy'.format(
             subject))).view(np.recarray)
-        new_events = preprocess_events(subject,
-                                       experiment,
-                                       parameters['baseline_removal_start_time'],
-                                       parameters['retrieval_time'],
-                                       parameters['empty_epoch_duration'],
-                                       parameters['pre_event_buf'],
-                                       parameters['post_event_buf'],
-                                       root=datafile(''))
+        new_events = preprocess_events(subject, experiment, parameters['baseline_removal_start_time'],
+                                       parameters['retrieval_time'], parameters['empty_epoch_duration'],
+                                       parameters['pre_event_buf'], parameters['post_event_buf'], root=datafile(''))
         assert len(old_events) == len(new_events)
 
         return

@@ -3,7 +3,7 @@
 import os.path
 import numpy as np
 from traits.api import Int, Float, Bool, Array, String
-from ramutils.schema import Schema
+from traitschema import Schema
 
 
 class StimParameters(Schema):

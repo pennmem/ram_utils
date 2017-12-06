@@ -1,0 +1,15 @@
+<div class="plot serialpos-curve">
+  <h2>Serial position curves</h2>
+  <figure>
+    <figcaption>
+      Probabilities as a function of serial position.
+    </figcaption>
+    <div id="serialpos-plot-placeholder"></div>
+    <script>
+      window.addEventListener('load', () => {
+        let data = JSON.parse('{{ plot_data["serialpos"] }}');
+        ramutils.plots.serialpos(data.x, data.y1, data.y2);
+      });
+    </script>
+  </figure>
+</div>
