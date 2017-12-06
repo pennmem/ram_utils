@@ -117,8 +117,10 @@ class ReportGenerator(object):
         """
         if (np.array(self.experiments) == 'FR1').all():
             return self.generate_fr1_report()
+        elif (np.array(self.experiments) == 'FR5').all():
+            return self.generate_fr5_report()
         else:
-            raise NotImplementedError("Only FR1 reports are supported so far")
+            raise NotImplementedError("Unsupported report type")
 
     def _render(self, experiment, **kwargs):
         """Convenience method to wrap common keyword arguments passed to the
@@ -163,4 +165,29 @@ class ReportGenerator(object):
                 })
             },
             sme_table=self._make_sme_table(),
+        )
+
+    def generate_fr5_report(self):
+        """Generate an FR5 report.
+
+        Returns
+        -------
+        Rendered FR5 report as a string.
+
+        """
+        return self._render(
+            'FR5',
+            plot_data={  # FIXME: real data
+                'serialpos': json.dumps({
+                    'serialpos': list(range(1, 13)),
+                    'overall': {
+                        'Overall (non-stim)': np.random.random((12,)).tolist(),
+                        'Overall (stim)': np.random.random((12,)).tolist()
+                    },
+                    'first': {
+                        'First recall (non-stim)': np.random.random((12,)).tolist(),
+                        'First recall (stim)': np.random.random((12,)).tolist()
+                    }
+                })
+            }
         )
