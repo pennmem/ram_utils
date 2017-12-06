@@ -1,0 +1,30 @@
+<div class="plot roc-curve">
+  <h2>Classifier performance</h2>
+  <figure>
+    <div id="classifier-performance-plot-placeholder"></div>
+    <figcaption>
+      <b>(Left)</b> ROC curve for subject {{ subject }}. <b>(Right)</b> Subject
+      recall performance represented as percentage devation from the (subject)
+      mean, separated by tercile of the classifier encoding efficiency estimate
+      for each encoded word.
+    </figcaption>
+  </figure>
+
+  <ul>
+    <li>Area under curve: {{ classifier['auc'] }}</li>
+    <li>Permutation test p-value: {{ classifier['p_value'] }}</li>
+    <li>Median of classifier output: {{ classifier['output_median'] }}</li>
+  </ul>
+
+  <script>
+    window.addEventListener('load', () => {
+      // FIXME
+      // let rocData = JSON.parse('{{ plot_data["roc"] }}');
+      let rocData = {
+        x: [0, 0.1, 0.5, 1.0],
+        y: [0, 0.1, 0.6, 1.0]
+      };
+      ramutils.plots.classifierPerformance(rocData.x, rocData.y, -28, -1, 31);
+    });
+  </script>
+</div>
