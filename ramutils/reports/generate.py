@@ -206,6 +206,10 @@ class ReportGenerator(object):
                 'stim_probability': json.dumps({
                     'serialpos': list(range(1, 13)),
                     'probability': np.random.random((12,)).tolist()
+                }),
+                'recall_difference': json.dumps({
+                    'stim': random.uniform(-60, 60),
+                    'post_stim': random.uniform(-60, 60)
                 })
             }
         )

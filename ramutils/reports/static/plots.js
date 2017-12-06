@@ -120,6 +120,27 @@ var ramutils = (function (mod, Plotly) {
     },
 
     /**
+     * Plot overall recall difference for stim/post-stim items.
+     */
+    plotRecallDifference: function (stimPercent, postStimPercent) {
+      const data = [{
+        x: ['stim', 'post-stim'],
+        y: [stimPercent, postStimPercent],
+        type: 'bar'
+      }];
+
+      const layout = {
+        xaxis: {title: 'Items'},
+        yaxis: {
+          title: 'Recall difference [%]',
+          range: [-65, 65]
+        }
+      };
+
+      Plotly.plot('recall-difference-placeholder', data, layout);
+    },
+
+    /**
      * Classifier performance plots: ROC curve and tercile plot.
      * @param {Array} fpr - False positive rate
      * @param {Array} tpr - True positive rate
