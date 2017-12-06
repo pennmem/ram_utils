@@ -80,28 +80,13 @@ class ReportGenerator(object):
         """Returns a list of experiments found in the session summaries."""
         return [np.unique(summary.events.experiment) for summary in self.session_summaries]
 
-    def generate(self):
-        """Central method to generate any report. The report to run is
-        determined by the experiments found in :attr:`session_summary`.
+    def _make_sme_table(self):
+        """Create data for the SME table for record-only experiments.
+
+        FIXME: real data
 
         """
-        if (np.array(self.experiments) == 'FR1').all():
-            return self.generate_fr1_report()
-        else:
-            raise NotImplementedError("Only FR1 reports are supported so far")
-
-    def generate_fr1_report(self):
-        """Generate an FR1 report.
-
-        Returns
-        -------
-        Rendered FR1 report as a string.
-
-        """
-        template = self._env.get_template("fr1.html")
-
-        # FIXME: real values
-        sme_table = sorted([
+        return sorted([
             {
                 'type': random.choice(['D', 'G', 'S']),
                 'contacts': [random.randint(1, 256) for _ in range(2)],
@@ -113,11 +98,59 @@ class ReportGenerator(object):
             for _ in range(24)
         ], key=lambda x: x['p_value'])
 
+    def _make_classifier_data(self):
+        """Create JSON object for classifier data.
+
+        FIXME: real data
+
+        """
+        return {
+            'auc': '{:.2f}%'.format(61.35),
+            'p_value': '&le; 0.001',
+            'output_median': 0.499,
+        }
+
+    def generate(self):
+        """Central method to generate any report. The report to run is
+        determined by the experiments found in :attr:`session_summary`.
+
+        """
+        if (np.array(self.experiments) == 'FR1').all():
+            return self.generate_fr1_report()
+        else:
+            raise NotImplementedError("Only FR1 reports are supported so far")
+
+    def _render(self, experiment, **kwargs):
+        """Convenience method to wrap common keyword arguments passed to the
+        template renderer.
+
+        Parameters
+        ----------
+        experiment : str
+        kwargs : dict
+            Additional keyword arguments that are passed to the render method.
+
+        """
+        template = self._env.get_template(experiment.lower() + '.html')
         return template.render(
             subject=self.subject,
-            experiment='FR1',
+            experiment=experiment,
             summaries=self.session_summaries,
             math_summaries=self.math_summaries,
+            classifier=self._make_classifier_data(),
+            **kwargs
+        )
+
+    def generate_fr1_report(self):
+        """Generate an FR1 report.
+
+        Returns
+        -------
+        Rendered FR1 report as a string.
+
+        """
+        return self._render(
+            'FR1',
             plot_data={
                 'serialpos': json.dumps({
                     'serialpos': list(range(1, 13)),
@@ -129,13 +162,5 @@ class ReportGenerator(object):
                     }
                 })
             },
-
-            # FIXME: real values
-            classifier={
-                'auc': '{:.2f}%'.format(61.35),
-                'p_value': '&le; 0.001',
-                'output_median': 0.499,
-            },
-
-            sme_table=sme_table,
+            sme_table=self._make_sme_table(),
         )
