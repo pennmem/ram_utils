@@ -27,9 +27,9 @@
 
   <h3>All sessions</h3>
   <ul>
-    <li>{{ 'FIXME' }} words</li>
-    <li>{{ 'FIXME' }} correct ({{ 'fixme%' }})</li>
-    <li>{{ 'FIXME' }} PLI ({{ 'fixme%' }})</li>
-    <li>{{ 'FIXME' }} ELI ({{ 'fixme%' }})</li>
+    <li>{{ random.randint(300, 3000) }} words</li>
+    <li>{{ random.randint(100, 300) }} correct ({{ '{:.2f}%'.format(random.random()*100) }})</li>
+    <li>{{ random.randint(10, 100) }} <span title="prior list intrusions">PLI</span></li>
+    <li>{{ random.randint(10, 100) }} <span title="extra list intrusions">ELI</span></li>
   </ul>
 </div>
