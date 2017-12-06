@@ -276,11 +276,7 @@ class TestEvents:
                                    parameters['pre_event_buf'], parameters['post_event_buf'],
                                    combine_events=combine_events, root=datafile(''))
         assert len(events) > 0
-
-        if encoding_only:
-            assert "REC_EVENT" not in np.unique(events.type)
-        else:
-            assert "REC_EVENT" in np.unique(events.type)
+        assert "REC_EVENT" in np.unique(events.type)
 
         if combine_events and subject == "R1016M":
             # There are some experiment fields that are blank, so checking
