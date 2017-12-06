@@ -202,6 +202,10 @@ class ReportGenerator(object):
                         'listno': [5, 6, 7, 9, 10, 12, 13],
                         'count': [random.randint(1, 12) for _ in range(7)]
                     }
+                }),
+                'stim_probability': json.dumps({
+                    'serialpos': list(range(1, 13)),
+                    'probability': np.random.random((12,)).tolist()
                 })
             }
         )

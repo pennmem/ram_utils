@@ -93,6 +93,33 @@ var ramutils = (function (mod, Plotly) {
     },
 
     /**
+     * Plot probability of stimulation versus serial position.
+     * @param {Array} serialpos - serial position
+     * @param {Array} prob - probabilities
+     */
+    plotStimProbability: function (serialpos, prob) {
+      const data = [{
+        x: serialpos,
+        y: prob,
+        mode: 'lines+markers',
+        name: 'Probability'
+      }];
+
+      const layout = {
+        xaxis: {
+          title: 'Serial position',
+          range: [0.5, 12.5]
+        },
+        yaxis: {
+          title: 'Probability of stimulation',
+          range: [0, 1]
+        }
+      };
+
+      Plotly.plot('stim-probability-placeholder', data, layout);
+    },
+
+    /**
      * Classifier performance plots: ROC curve and tercile plot.
      * @param {Array} fpr - False positive rate
      * @param {Array} tpr - True positive rate

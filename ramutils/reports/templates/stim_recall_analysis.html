@@ -3,17 +3,27 @@
   <figure>
     <div id="stim-recall-placeholder"></div>
     <figcaption>
-        Number of stims and recalled items per list.
-        Blue circles represent the number of recalled items from non-stim lists.
-        Orange circles represent the number of recalled items from stim lists.
-        Bars represent the number of stims per list.
+      Number of stims and recalled items per list.
+      Blue circles represent the number of recalled items from non-stim lists.
+      Orange circles represent the number of recalled items from stim lists.
+      Bars represent the number of stims per list.
+    </figcaption>
+  </figure>
+
+  <figure>
+    <div id="stim-probability-placeholder"></div>
+    <figcaption>
+      Probability of stimulation as a function of serial position.
     </figcaption>
   </figure>
 </div>
 
 <script>
   window.addEventListener('load', () => {
-    const data = JSON.parse('{{ plot_data["recall_summary"] }}');
-    ramutils.plots.plotRecallSummary(data.nonstim, data.stim, data.stim_events);
+    const summmary = JSON.parse('{{ plot_data["recall_summary"] }}');
+    const probability = JSON.parse('{{ plot_data["stim_probability"] }}');
+
+    ramutils.plots.plotRecallSummary(summmary.nonstim, summmary.stim, summmary.stim_events);
+    ramutils.plots.plotStimProbability(probability['serialpos'], probability['probability']);
   });
 </script>
