@@ -120,7 +120,7 @@ class ReportGenerator(object):
             math_summaries=self.math_summaries,
             plot_data={
                 'serialpos': json.dumps({
-                    'x': range(1, 13),
+                    'x': list(range(1, 13)),
                     'y1': FRSessionSummary.serialpos_probabilities(self.session_summaries, False),
                     'y2': FRSessionSummary.serialpos_probabilities(self.session_summaries, True),
                 })
