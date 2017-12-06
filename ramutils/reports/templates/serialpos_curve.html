@@ -8,7 +8,7 @@
     <script>
       window.addEventListener('load', () => {
         let data = JSON.parse('{{ plot_data["serialpos"] }}');
-        ramutils.plots.serialpos(data.x, data.y1, data.y2);
+        ramutils.plots.serialpos(data.serialpos, data.overall, data.first);
       });
     </script>
   </figure>

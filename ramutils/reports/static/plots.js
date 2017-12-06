@@ -24,28 +24,33 @@ var ramutils = (function (mod, Plotly) {
     /**
      * Plots serial position curves.
      * @param {Array} serialPos - Serial positions (x-axis)
-     * @param {Array} overallProbs - Overall probabilities per serial position
-     * @param {Array} firstProbs - Probability of first recall per serial position
+     * @param {Object} overallProbs - Overall probabilities per serial position
+     * @param {Object} firstProbs - Probability of first recall per serial position
      */
     serialpos: function (serialPos, overallProbs, firstProbs) {
       const mode = "lines+markers";
-      const data = [
-        {
+      let data = [];
+
+      for (let name in overallProbs) {
+        data.push({
           x: serialPos,
-          y: overallProbs,
+          y: overallProbs[name],
           mode: mode,
-          name: "Overall"
-        },
-        {
+          name: name
+        });
+      }
+
+      for (let name in firstProbs) {
+        data.push({
           x: serialPos,
-          y: firstProbs,
+          y: firstProbs[name],
           mode: mode,
-          name: "First recall"
-        }
-      ];
+          name: name
+        });
+      }
 
       const layout = mod.makeAxesOptions('Serial position', 'Probability');
-      layout.xaxis.range = [1, 12];
+      layout.xaxis.range = [0.9, 12.1];
       layout.yaxis.range = [0, 1];
 
       Plotly.plot('serialpos-plot-placeholder', data, layout);
