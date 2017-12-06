@@ -20,8 +20,9 @@
   <body>
     {% include 'navbar.html' %}
     <div class="container">
-      <div>
+      <div style="padding-bottom: 1em;">
         <h1>{{ subject }} RAM {{ experiment }} report</h1>
+        <span>Report generated: {{ datetime.now().strftime('%Y-%m-%d') }}</span>
       </div>
       <div>
         {% block report %}{% endblock %}
