@@ -10,7 +10,7 @@ var ramutils = (function (mod, Plotly) {
      * @param {Object} overallProbs - Overall probabilities per serial position
      * @param {Object} firstProbs - Probability of first recall per serial position
      */
-    serialpos: function (serialPos, overallProbs, firstProbs) {
+    plotSerialpos: function (serialPos, overallProbs, firstProbs) {
       const mode = "lines+markers";
       let data = [];
 
@@ -148,7 +148,7 @@ var ramutils = (function (mod, Plotly) {
      * @param {Number} middle
      * @param {Number} high
      */
-    classifierPerformance: function (fpr, tpr, low, middle, high) {
+    plotClassifierPerformance: function (fpr, tpr, low, middle, high) {
       const data = [
         {
           x: fpr,
