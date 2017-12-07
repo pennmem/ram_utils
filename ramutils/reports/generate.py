@@ -60,6 +60,9 @@ class ReportGenerator(object):
             loader=PackageLoader('ramutils.reports', 'templates'),
         )
 
+        # Filter to indicate that p-values are small
+        self._env.filters['pvalue'] = lambda p: '{:.3f}'.format(p) if p > 0.001 else '&le; 0.001'
+
         # Give access to some static methods
         self._env.globals['MathSummary'] = MathSummary
         self._env.globals['datetime'] = datetime
@@ -112,8 +115,8 @@ class ReportGenerator(object):
 
         """
         return {
-            'auc': '{:.2f}%'.format(61.35),
-            'p_value': '&le; 0.001',
+            'auc': 61.35,
+            'p_value': 0.0003,
             'output_median': 0.499,
         }
 
