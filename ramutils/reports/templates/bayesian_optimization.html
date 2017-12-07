@@ -15,10 +15,10 @@
       {% for pair, data in bayesian_optimization_results['channels'].items() %}
         <tr>
           <td>{{ pair }}</td>
-          <td>{{ data['amplitude'] }}</td>
-          <td>{{ data['delta_classifier'] }}</td>
-          <td>{{ data['error'] }}</td>
-          <td>{{ data['snr'] }}</td>
+          <td>{{ '{:.2f}'.format(data['amplitude']) }}</td>
+          <td>{{ '{:.3f}'.format(data['delta_classifier']) }}</td>
+          <td>{{ '{:.3f}'.format(data['error']) }}</td>
+          <td>{{ '{:.3f}'.format(data['snr']) }}</td>
         </tr>
       {% endfor %}
     </tbody>
@@ -27,8 +27,8 @@
   <ul>
     <li>Estimated best location: {{ bayesian_optimization_results['best_loc'] }}</li>
     <li>Estimated best amplitude: {{ bayesian_optimization_results['best_ampl'] }} mA</li>
-    <li>Between-location p-value: {{ bayesian_optimization_results['p_values']['between'] }}</li>
-    <li>p-value against sham: {{ bayesian_optimization_results['p_values']['sham'] }}</li>
+    <li>Between-location p-value: {{ bayesian_optimization_results['p_values']['between']|pvalue }}</li>
+    <li>p-value against sham: {{ bayesian_optimization_results['p_values']['sham']|pvalue }}</li>
   </ul>
 
   {% if bayesian_optimization_results['tie'] %}
