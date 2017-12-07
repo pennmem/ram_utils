@@ -12,7 +12,7 @@
       <th>SNR</th>
     </thead>
     <tbody>
-      {% for pair, data in bayesian_optimization_results['channels'] %}
+      {% for pair, data in bayesian_optimization_results['channels'].items() %}
         <tr>
           <td>{{ pair }}</td>
           <td>{{ data['amplitude'] }}</td>
