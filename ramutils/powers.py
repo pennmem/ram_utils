@@ -266,8 +266,8 @@ def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events, f
 
     tstats, pvals = ttest_ind(recalled_pow_mat, non_recalled_pow_mat, axis=0)
 
-    pairs_metadata_table['t-stat'] = tstats
-    pairs_metadata_table['pvals'] = pvals
+    pairs_metadata_table['t_stat'] = tstats
+    pairs_metadata_table['p_value'] = pvals
 
     return pairs_metadata_table
 
