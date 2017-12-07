@@ -10,7 +10,7 @@ __all__ = [
     'load_events',
     'clean_events',
     'concatenate_events_across_experiments',
-    'select_word_events'
+    'select_word_events',
 ]
 
 

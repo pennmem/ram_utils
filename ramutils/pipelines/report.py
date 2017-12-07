@@ -118,17 +118,12 @@ def make_report(subject, experiment, paths, joint_report=False, stim_params=None
                                                         kwargs['n_perm'],
                                                         **kwargs)
 
-    if sessions is None:
-        session_summaries = [
-            summarize_session(final_task_events[final_task_events.session == session])
-            for session in sessions]
-    else:
-        session_summaries = summarize_session(final_task_events)
+    session_summaries = summarize_sessions(final_task_events)
+    math_summaries = summarize_math(all_events)
+
+    report = build_static_report(session_summaries, math_summaries, cross_validation_results, delta_hfa_table)
 
     if vispath is not None:
         pass
-
-    math_summaries = summarize_math(all_events)
-    report = build_static_report([session_summaries], [math_summaries], cross_validation_results, delta_hfa_table)
 
     return report.compute()
