@@ -1,0 +1,15 @@
+.sme-positive {
+  color: red;
+}
+
+.sme-negative {
+  color: blue;
+}
+
+figcaption {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  color: #868e96;
+  text-align: left;
+  caption-side: bottom;
+}
