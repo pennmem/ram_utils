@@ -18,6 +18,7 @@ __all__ = [
     'FRSessionSummary',
     'FRStimSessionSummary',
     'FR5SessionSummary',
+    'MathSummary'
 ]
 
 
