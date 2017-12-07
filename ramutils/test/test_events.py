@@ -217,7 +217,6 @@ class TestEvents:
     def test_get_recall_events_mask(self):
         recall_mask = get_recall_events_mask(self.test_data)
         assert sum(recall_mask) == self.n_word
-        assert sum(recall_mask) != self.n_rec_base
         return
 
     # Four possible partitions. Be sure to check all
