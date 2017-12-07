@@ -88,6 +88,10 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
     if len(stim_params) > 1 and experiment not in EXPERIMENTS['multistim']:
         raise MultistimNotAllowedException
 
+    if ("FR" not in experiment) and ("PAL" not in experiment):
+        raise RuntimeError("Only PAL, FR, and catFR experiments are currently"
+                           "implemented")
+
     # Note: All of these pairs variables are of type OrderedDict, which is
     # crucial for preserving the initial order of the electrodes in the
     # config file
@@ -109,23 +113,55 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
         return config_path.compute()
 
     kwargs = exp_params.to_dict()
-    all_events = preprocess_events(subject, experiment, kwargs['baseline_removal_start_time'], kwargs['retrieval_time'],
-                                   kwargs['empty_epoch_duration'], kwargs['pre_event_buf'], kwargs['post_event_buf'],
-                                   combine_events=kwargs['combine_events'], root=paths.root)
 
-    events = select_word_events(all_events, encoding_only=kwargs['encoding_only'])
+    if "PAL" in experiment:
+        pal_events = load_events(subject, "PAL1", rootdir=paths.root)
+        cleaned_pal_events = clean_events(pal_events)
+
+    if ("FR" in experiment) or kwargs['combine_events']:
+        fr_events = load_events(subject, 'FR1', rootdir=paths.root)
+        cleaned_fr_events = clean_events(fr_events,
+                                         start_time=kwargs['baseline_removal_start_time'],
+                                         end_time=kwargs['retrieval_time'],
+                                         duration=kwargs['empty_epoch_duration'],
+                                         pre=kwargs['pre_event_buf'],
+                                         post=kwargs['post_event_buf'])
+
+        catfr_events = load_events(subject, 'catFR1', rootdir=paths.root)
+        cleaned_catfr_events = clean_events(catfr_events,
+                                            start_time=kwargs['start_time'],
+                                            end_time=kwargs['end_time'],
+                                            pre=kwargs['pre'],
+                                            post=kwargs['post'],
+                                            duration=kwargs['duration'])
+
+        # Free recall events are always combined
+        free_recall_events = concatenate_events_across_experiments(
+            [cleaned_fr_events, cleaned_catfr_events])
+
+    if ("PAL" in experiment) and kwargs['combine_events']:
+        all_task_events = concatenate_events_across_experiments([
+            free_recall_events, pal_events])
+
+    elif ("PAL" in experiment) and not kwargs['combine_events']:
+        all_task_events = pal_events
+
+    else:
+        all_task_events = free_recall_events
+
+    all_task_events = select_word_events(all_task_events, encoding_only=kwargs['encoding_only'])
+
 
     # FIXME: If PTSA is updated to not remove events behind this scenes, this
     # won't be necessary. Or, if we can remove bad events before passing to
     # compute powers, then we won't have to catch the events
-    powers, task_events = compute_normalized_powers(events,
-                                                    **kwargs)
+    powers, final_task_events = compute_normalized_powers(all_task_events, **kwargs)
     reduced_powers = reduce_powers(powers, used_pair_mask, len(kwargs['freqs']))
 
-    sample_weights = get_sample_weights(task_events, **kwargs)
+    sample_weights = get_sample_weights(all_task_events, **kwargs)
 
     classifier = train_classifier(reduced_powers,
-                                  task_events,
+                                  final_task_events,
                                   sample_weights,
                                   kwargs['C'],
                                   kwargs['penalty_type'],
@@ -133,14 +169,14 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
 
     cross_validation_results = perform_cross_validation(classifier,
                                                         reduced_powers,
-                                                        task_events,
+                                                        final_task_events,
                                                         kwargs['n_perm'],
                                                         **kwargs)
 
     container = serialize_classifier(classifier,
                                      final_pairs,
                                      reduced_powers,
-                                     task_events,
+                                     final_task_events,
                                      sample_weights,
                                      cross_validation_results,
                                      subject)
