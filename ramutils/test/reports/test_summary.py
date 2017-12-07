@@ -7,12 +7,11 @@ import pytest
 
 from numpy.testing import assert_equal, assert_almost_equal
 
-from ptsa.data.readers import BaseEventReader
 from traits.api import ListInt, ListFloat, ListBool
 
 from ramutils.reports.summary import (
-    Summary, SessionSummary, StimSessionSessionSummary, MathSummary,
-    FRSessionSummary, FRStimSessionSummary
+    SessionSummary, StimSessionSummary, MathSummary,
+    FRSessionSummary, FRStimSessionSummary, ClassifierSummary, Summary
 )
 
 datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
@@ -195,7 +194,7 @@ class TestStimSessionSummary:
     @pytest.mark.parametrize('is_ps4_session', [True, False])
     def test_populate(self, fr5_events, is_ps4_session):
         """Basic tests that data was populated correctly from events."""
-        summary = StimSessionSessionSummary()
+        summary = StimSessionSummary()
         summary.populate(fr5_events, is_ps4_session)
         df = summary.to_dataframe()
 
@@ -210,4 +209,49 @@ class TestFRStimSessionSummary:
         summary = FRStimSessionSummary()
         summary.populate(fr5_events)
         assert summary.num_nonstim_lists == 2
+
+
+class TestClassifierSummary:
+    @classmethod
+    def setup_class(cls):
+        cls.recalls = np.random.random_integers(0, 1, 100)
+        cls.predicted_probabilities = np.random.normal(.5, .03, size=100)
+        cls.permuation_aucs = np.random.normal(.5, .01, size=200)
+        cls.summary = ClassifierSummary()
+
+    def test_populate(self):
+        summary = ClassifierSummary()
+        summary.populate(self.recalls, self.predicted_probabilities, self.permuation_aucs)
+        assert np.array_equal(self.recalls, summary.true_outcomes)
+        assert np.array_equal(self.predicted_probabilities, summary.predicted_probabilities)
+        assert np.array_equal(self.permuation_aucs, summary.permuted_auc_values)
+
+        return
+
+    def test_auc(self):
+        summary = ClassifierSummary()
+        summary.populate(self.recalls, self.predicted_probabilities, self.permuation_aucs)
+        return
+
+    def test_pvalue(self):
+        pass
+
+    def test_false_positive_rate(self):
+        pass
+
+    def test_true_positive_rate(self):
+        pass
+
+    def test_thresholds(self):
+        pass
+
+    def test_median_classifier_output(self):
+        pass
+
+    def test_low_tercile_diff_from_mean(self):
+        pass
+
+    def test_high_tercile_diff_from_mean(self):
+        pass
+
 
