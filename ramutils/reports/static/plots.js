@@ -252,39 +252,37 @@ var ramutils = (function (mod, Plotly) {
         let data = [];
 
         for (let i = 0; i < 2; i++) {
+          const xaxis = i == 0 ? 'x' : 'x2';
           data.push(
             {
               x: amplitude,
               y: encoding[labels[i]],
               mode: 'markers',
-              name: 'Encoding'
+              name: 'Encoding',
+              xaxis: xaxis
             },
             {
               x: amplitude,
               y: distract[labels[i]],
               mode: 'markers',
-              name: 'Distract'
+              name: 'Distract',
+              xaxis: xaxis
             },
             {
               x: amplitude,
               y: retrieval[labels[i]],
               mode: 'markers',
-              name: 'Retrieval'
+              name: 'Retrieval',
+              xaxis: xaxis
             },
             {
               x: amplitude,
               y: sham[labels[i]],
               mode: 'markers',
-              name: 'Sham'
+              name: 'Sham',
+              xaxis: xaxis
             }
           );
-
-          if (i == 1) {
-            for (member of data) {
-              member.xaxis = 'x2';
-              member.yaxis = 'y2';
-            }
-          }
         }
 
         return data;
@@ -295,14 +293,16 @@ var ramutils = (function (mod, Plotly) {
           {
             x: amplitude,
             y: postStim[labels[0]],
-            mode: 'markers'
+            mode: 'markers',
+            name: labels[0]
           },
           {
             x: amplitude,
             y: postStim[labels[1]],
             mode: 'markers',
             xaxis: 'x2',
-            yaxis: 'y2'
+            // yaxis: 'y2',
+            name: labels[1]
           }
         ];
       })();
