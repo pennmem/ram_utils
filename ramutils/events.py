@@ -646,6 +646,12 @@ def extract_experiment_from_events(events):
     return experiments
 
 
+def extract_sessions(events):
+    """ Return a list of sessions contained within the events structure"""
+    sessions = np.unique(events.session)
+    return sessions
+
+
 def validate_single_experiment(events):
     """ Raises an error if more than one experiment is present in the events"""
     experiments = extract_experiment_from_events(events)
