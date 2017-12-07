@@ -244,6 +244,15 @@ class ReportGenerator(object):
                     'between': random.uniform(0.001, 0.05),
                     'sham': random.uniform(0.1, 0.5)
                 },
-                'tie': random.choice([True, False])
+                'tie': random.choice([True, False]),
+                'channels': {
+                    channel: {
+                        'amplitude': random.uniform(0.1, 0.5),
+                        'delta_classifier': random.random(),
+                        'error': random.uniform(0.001, 1),
+                        'snr': random.uniform(0.5, 2.0)
+                    }
+                    for channel in ['LAD1_LAD2', 'LA11_LA12']
+                }
             }
         )
