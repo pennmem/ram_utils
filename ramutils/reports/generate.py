@@ -72,6 +72,8 @@ class ReportGenerator(object):
         # serving.
         self._env.globals['js'] = {}
         for filename in resource_listdir('ramutils.reports', 'static'):
+            if not filename.endswith('.js'):
+                continue
             script = resource_string('ramutils.reports.static', filename)
             self._env.globals['js'][filename.split('.')[0]] = script
 

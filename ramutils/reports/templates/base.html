@@ -15,7 +15,9 @@
       }
     </style>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <script>{{ js['plots'] }}</script>
+    {% for script in js.values() %}
+      <script>{{ script }}</script>
+    {% endfor %}
   </head>
   <body>
     {% include 'navbar.html' %}
