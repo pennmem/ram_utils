@@ -182,6 +182,15 @@ class ReportGenerator(object):
         Rendered FR5 report as a string.
 
         """
+        fake_ps4_data = {
+            key: {
+                'CH1': np.random.random((100,)).tolist(),
+                'CH2': np.random.random((100,)).tolist()
+            }
+            for key in ['encoding', 'distract', 'retrieval', 'sham', 'post_stim']
+        }
+        fake_ps4_data['amplitude'] = np.linspace(0, 1, 100).tolist()
+
         return self._render(
             'FR5',
             plot_data={  # FIXME: real data
@@ -222,5 +231,19 @@ class ReportGenerator(object):
                     'pre_stim': np.random.random((40,)).tolist(),
                     'post_stim': np.random.random((40,)).tolist()
                 }),
+
+                # FIXME: only in PS4
+                'ps4': json.dumps(fake_ps4_data),
             },
+
+            # FIXME: only in PS4
+            bayesian_optimization_results={
+                'best_loc': 'LAD1_LAD2',
+                'best_ampl': 13.5,
+                'p_values': {
+                    'between': random.uniform(0.001, 0.05),
+                    'sham': random.uniform(0.1, 0.5)
+                },
+                'tie': random.choice([True, False])
+            }
         )
