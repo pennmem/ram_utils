@@ -99,8 +99,8 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
 
     Returns
     -------
-    xval : dict
-        Results of cross validation.
+    classifier_summary : ClassifierSummary
+        Results of cross validation as a summary object
 
     """
     recalls = events.recalled
