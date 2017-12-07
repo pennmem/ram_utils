@@ -67,15 +67,18 @@ class ReportGenerator(object):
         # For debugging/mockups
         self._env.globals['random'] = random
 
-        # Give access to Javascript sources. When we switch to a non-static
-        # reporting format, this will be handled by the web server's static file
-        # serving.
+        # Give access to Javascript and CSS sources. When we switch to a
+        # non-static reporting format, this will be handled by the web server's
+        # static file serving.
         self._env.globals['js'] = {}
+        self._env.globals['css'] = {}
         for filename in resource_listdir('ramutils.reports', 'static'):
-            if not filename.endswith('.js'):
-                continue
-            script = resource_string('ramutils.reports.static', filename)
-            self._env.globals['js'][filename.split('.')[0]] = script
+            if filename.endswith('.js'):
+                script = resource_string('ramutils.reports.static', filename)
+                self._env.globals['js'][filename.split('.')[0]] = script
+            elif filename.endswith('.css'):
+                css = resource_string('ramutils.reports.static', filename)
+                self._env.globals['css'][filename.split('.')[0]] = css
 
         self.dest = osp.realpath(osp.expanduser(dest))
 
