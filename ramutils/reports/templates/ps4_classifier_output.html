@@ -1,0 +1,24 @@
+<div>
+  <figure>
+    <div id="ps4-delta-classifier-placeholder"></div>
+    <figcaption>
+      Classifier response as a function of amplitude.
+    </figcaption>
+  </figure>
+  <figure>
+    <div id="ps4-post-classifier-placeholder"></div>
+    <figcaption>
+      Post-stimulation classifier output as a function of amplitude.
+    </figcaption>
+  </figure>
+
+  <script>
+    window.addEventListener(() => {
+      let data = JSON.parse('{{ plot_data["ps4"] }}');
+      ramutils.plots.plotPS4ClassifierOutput(
+        data['amplitude'], data['encoding'], data['distract'],
+        data['retrieval'], data['sham'], data['post_stim']
+      );
+    });
+  </script>
+</div>

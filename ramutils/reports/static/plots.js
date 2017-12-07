@@ -232,6 +232,97 @@ var ramutils = (function (mod, Plotly) {
       };
 
       Plotly.plot('classifier-output-placeholder', data, layout);
+    },
+
+    /**
+     * Plot classifier output as a function of amplitude for each stim site in
+     * PS4. Each parameter (other than amplitude) should have keys that match
+     * the stim channel labels.
+     * @param {Array} amplitude
+     * @param {Object} encoding
+     * @param {Object} distract
+     * @param {Object} retrieval
+     * @param {Object} sham
+     * @param {Object} postStim
+     */
+    plotPS4ClassifierOutput: function(amplitude, encoding, distract, retrieval, sham, postStim) {
+      const labels = Object.keys(encoding);
+
+      const deltaClassifierData = (() => {
+        let data = [];
+
+        for (let i = 0; i < 2; i++) {
+          data.push(
+            {
+              x: amplitude,
+              y: encoding[labels[i]],
+              mode: 'markers',
+              name: 'Encoding'
+            },
+            {
+              x: amplitude,
+              y: distract[labels[i]],
+              mode: 'markers',
+              name: 'Distract'
+            },
+            {
+              x: amplitude,
+              y: retrieval[labels[i]],
+              mode: 'markers',
+              name: 'Retrieval'
+            },
+            {
+              x: amplitude,
+              y: sham[labels[i]],
+              mode: 'markers',
+              name: 'Sham'
+            }
+          );
+
+          if (i == 1) {
+            for (member of data) {
+              member.xaxis = 'x2';
+              member.yaxis = 'y2';
+            }
+          }
+        }
+
+        return data;
+      })();
+
+      const postData = (() => {
+        return [
+          {
+            x: amplitude,
+            y: postStim[labels[0]],
+            mode: 'markers'
+          },
+          {
+            x: amplitude,
+            y: postStim[labels[1]],
+            mode: 'markers',
+            xaxis: 'x2',
+            yaxis: 'y2'
+          }
+        ];
+      })();
+
+      const layout = {
+        xaxis: {
+          title: "Amplitude [mA]",
+          domain: [0, 0.45]
+        },
+        xaxis2: {
+          title: "Amplitude [mA]",
+          domain: [0.55, 1]
+        },
+        yaxis: {
+          title: "Delta classifier (post minus pre)"
+        }
+      };
+
+      Plotly.plot('ps4-delta-classifier-placeholder', deltaClassifierData, layout);
+      Plotly.plot('ps4-post-classifier-placeholder', postData, layout);
     }
   };
 
