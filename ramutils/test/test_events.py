@@ -69,6 +69,13 @@ class TestEvents:
         assert combined_events.shape == (2*len(fr_events),)
         return
 
+    def test_extract_experiment(self):
+        experiment = extract_experiment_from_events(self.test_data)
+        assert len(experiment) == 1
+        assert 'FR1' in experiment
+        assert 'catFR1' not in experiment
+        return
+
     def test_concatenate_events_across_experiments(self):
         fr_events = load_events(self.subject, 'FR1', rootdir=self.rootdir)
         catfr_events = load_events(self.subject, 'catFR1', rootdir=self.rootdir)
@@ -119,7 +126,7 @@ class TestEvents:
         return
 
     def test_insert_baseline_retrieval_events(self):
-        # TODO: This is another somehwat complicated algorithm to test
+        # TODO: This is another somewhat complicated algorithm to test
         return
 
     def test_remove_incomplete_lists(self):

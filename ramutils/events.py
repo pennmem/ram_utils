@@ -20,93 +20,7 @@ from numpy.lib.recfunctions import rename_fields
 
 from ptsa.data.readers import BaseEventReader, JsonIndexReader, EEGReader
 from ramutils.utils import extract_subject_montage
-
-
-def preprocess_events(subject, experiment, start_time, end_time, duration, pre, post, sessions=None,
-                      combine_events=True, root='/'):
-    """High-level pre-processing function for combining/cleaning record only
-    events to be used in config generation and reports
-
-    Parameters
-    ----------
-    subject : str
-        Subject ID.
-    experiment: str
-        Experiment that events are being combined for
-    start_time: int
-    end_time: int
-    duration: int
-    pre: int
-    post: int
-    sessions: list
-        Subset of sessions to use
-    combine_events: bool
-        Indicates if all record-only sessions should be combined for
-        classifier training.
-    root: str
-        Base path for finding event files etc.
-
-    Returns
-    -------
-    np.recarray
-        Full set of cleaned task events
-
-    Notes
-    -----
-    See insert_baseline_events for details on start_time, end_time, duration,
-    pre, and post parameters
-
-    """
-    if ("FR" not in experiment) and ("PAL" not in experiment):
-        raise RuntimeError("Only PAL, FR, and catFR experiments are currently"
-                           "implemented")
-
-    if "PAL" in experiment:
-        pal_events = load_events(subject, "PAL1", sessions=sessions, rootdir=root)
-        pal_events = clean_events("PAL1", pal_events)
-        pal_events = normalize_pal_events(pal_events)
-
-    if (("FR" in experiment) and ("cat" not in experiment)) or combine_events:
-        fr_events = load_events(subject, 'FR1', sessions=sessions, rootdir=root)
-        fr_events = clean_events("FR1",
-                                 fr_events,
-                                 start_time=start_time,
-                                 end_time=end_time,
-                                 duration=duration,
-                                 pre=pre,
-                                 post=post)
-        fr_events = normalize_fr_events(fr_events)
-
-    if ("cat" in experiment) or combine_events:
-        catfr_events = load_events(subject, 'catFR1', sessions=sessions, rootdir=root)
-        catfr_events = clean_events("catFR1",
-                                    catfr_events,
-                                    start_time=start_time,
-                                    end_time=end_time,
-                                    pre=pre,
-                                    post=post,
-                                    duration=duration)
-        catfr_events = normalize_fr_events(catfr_events)
-
-    if combine_events:
-        all_events = concatenate_events_across_experiments(
-            [fr_events, catfr_events])
-
-    # Deal with PAL event combination
-    if ("PAL" in experiment) and combine_events:
-        # Update all events to include pal events
-        all_events = concatenate_events_across_experiments([all_events, pal_events])
-    elif ("PAL" in experiment) and not combine_events:
-        all_events = pal_events
-
-    # Deal with FR/catFR event combination
-    if "cat" in experiment and not combine_events:
-        all_events = catfr_events
-
-    elif 'FR' in experiment and not combine_events:
-        all_events = fr_events
-
-    return all_events
+from ramutils.exc import *
 
 
 def load_events(subject, experiment, sessions=None, rootdir='/'):
@@ -164,16 +78,17 @@ def load_events(subject, experiment, sessions=None, rootdir='/'):
     return events
 
 
-def clean_events(experiment, events, start_time=None, end_time=None,
-                 duration=None, pre=None, post=None):
-    """Peform basic cleaning operations on events such as removing incomplete
-    sessions, negative offset events, and incomplete lists. For FR events,
-    baseline events needs to be found.
+def clean_events(events, start_time=None, end_time=None, duration=None, pre=None, post=None):
+    """
+        Peform basic cleaning operations on events such as removing incomplete
+        sessions, negative offset events, and incomplete lists. For FR events,
+        baseline events needs to be found. Events are then normalized so that
+        cross-experiment events can be merged.
 
     Parameters
     ----------
-    experiment: str
-    events: np.recarray of events
+    events: np.recarray
+        Raw events
     start_time:
     end_time:
     duration:
@@ -191,10 +106,15 @@ def clean_events(experiment, events, start_time=None, end_time=None,
     should not be used to clean cross-experiment datasets
 
     """
+    experiments = extract_experiment_from_events(events)
+    if len(experiments) != 1:
+        raise RuntimeError('Event cleaning can only happen on single-experiment datasets')
+    experiment = experiments[0]
+
     events = remove_negative_offsets(events)
     events = remove_practice_lists(events)
     events = remove_incomplete_lists(events)
-    # TODO: Adde remove_repitions() function to get rid of any recall events that are just a repeated recall
+    # TODO: Add remove_repetitions() function to get rid of any recall events that are just a repeated recall
 
     if "FR" in experiment:
         events = insert_baseline_retrieval_events(events,
@@ -206,11 +126,13 @@ def clean_events(experiment, events, start_time=None, end_time=None,
 
         events = remove_intrusions(events)
         events = update_recall_outcome_for_retrieval_events(events)
+        events = normalize_fr_events(events)
 
     if "PAL" in experiment:
         events = subset_pal_events(events)
         events = update_pal_retrieval_events(events)
         events = remove_nonresponses(events)
+        events = normalize_pal_events(events)
 
     return events
 
@@ -717,12 +639,48 @@ def select_word_events(events, encoding_only=True):
     return events
 
 
+def extract_experiment_from_events(events):
+    """ Given a set of events, return a list of unique experiments contained within """
+    # Experiment field can be blank, so make sure to not include that in the final list
+    experiments = np.unique(events[events.experiment != ''].experiment).tolist()
+    return experiments
+
+
+def validate_single_experiment(events):
+    """ Raises an error if more than one experiment is present in the events"""
+    experiments = extract_experiment_from_events(events)
+    if len(experiments) > 1:
+        raise TooManyExperimentsError('Expected single experiment in events')
+    return
+
+
+def validate_single_session(events):
+    """ Raises an error if more than one session is present in the events """
+    sessions = np.unique(events.session)
+    if len(sessions) > 1:
+        raise TooManySessionsError("Expected single session events")
+    return
+
+
 def extract_sample_rate(events):
     """ Extract the samplerate used for the given set of events"""
     eeg_reader = EEGReader(events=events[:2], start_time=0.0, end_time=1.0)
     eeg = eeg_reader.read()
     samplerate = float(eeg['samplerate'])
     return samplerate
+
+
+def select_math_events(events):
+    """ Select math events from a set of events """
+    math_event_mask = get_math_events_mask(events)
+    math_events = events[math_event_mask]
+    return math_events
+
+
+def get_math_events_mask(events):
+    """ Get a boolean array identifying math events """
+    math_event_mask = (events.type == 'PROB')
+    return math_event_mask
 
 
 def get_time_between_events(events):
