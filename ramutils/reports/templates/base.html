@@ -5,23 +5,20 @@
     <meta charset="UTF-8">
     <title>{% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
-    <style>
-      .sme-positive {
-        color: red;
-      }
-
-      .sme-negative {
-        color: blue;
-      }
-    </style>
+    {% for stylesheet in css.values() %}
+      <style>{{ stylesheet }}</style>
+    {% endfor %}
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <script>{{ js['plots'] }}</script>
+    {% for script in js.values() %}
+      <script>{{ script }}</script>
+    {% endfor %}
   </head>
   <body>
     {% include 'navbar.html' %}
     <div class="container">
-      <div>
+      <div style="padding-bottom: 1em;">
         <h1>{{ subject }} RAM {{ experiment }} report</h1>
+        <span>Report generated: {{ datetime.now().strftime('%Y-%m-%d') }}</span>
       </div>
       <div>
         {% block report %}{% endblock %}
