@@ -11,8 +11,8 @@
   </figure>
 
   <ul>
-    <li>Area under curve: {{ classifier['auc'] }}</li>
-    <li>Permutation test p-value: {{ classifier['p_value'] }}</li>
+    <li>Area under curve: {{ '{:.2f}%'.format(classifier['auc']) }}</li>
+    <li>Permutation test p-value: {{ classifier['p_value']|pvalue }}</li>
     <li>Median of classifier output: {{ classifier['output_median'] }}</li>
   </ul>
 
@@ -24,7 +24,7 @@
         x: [0, 0.1, 0.5, 1.0],
         y: [0, 0.1, 0.6, 1.0]
       };
-      ramutils.plots.classifierPerformance(rocData.x, rocData.y, -28, -1, 31);
+      ramutils.plots.plotClassifierPerformance(rocData.x, rocData.y, -28, -1, 31);
     });
   </script>
 </div>

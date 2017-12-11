@@ -7,15 +7,133 @@ import numpy as np
 import pandas as pd
 import pytz
 
-from traits.api import Array, ArrayOrNone
+from traits.api import Array, ArrayOrNone, Float
+from sklearn.metrics import roc_auc_score, roc_curve
 from traitschema import Schema
 
 __all__ = [
+    'ClassifierSummary',
     'SessionSummary',
+    'StimSessionSummary',
     'FRSessionSummary',
     'FRStimSessionSummary',
     'FR5SessionSummary',
+    'MathSummary'
 ]
+
+
+class ClassifierSummary(Schema):
+    """ Classifier Summary Object """
+    _predicted_probabilities = ArrayOrNone(desc='predicted recall probabilities')
+    _true_outcomes = ArrayOrNone(desc='actual results for recall vs. non-recall')
+    _permuted_auc_values = ArrayOrNone(desc='permuted AUCs')
+
+    recall_rate = Float(desc='overall recall rate')
+    low_terc_recall_rate = Float(desc='recall rate when predicted probability of recall was in lowest tercile')
+    mid_terc_recall_rate = Float(desc='recall reate when predicted probability of recall was in middle tercile')
+    high_terc_recall_rate = Float(desc='recall rate when predicted probability of recall was in highest tercile')
+
+    @property
+    def predicted_probabilities(self):
+        return self._predicted_probabilities
+
+    @predicted_probabilities.setter
+    def predicted_probabilities(self, new_predicted_probabilities):
+        if self._predicted_probabilities is None:
+            self._predicted_probabilities = new_predicted_probabilities
+
+    @property
+    def true_outcomes(self):
+        return self._true_outcomes
+
+    @true_outcomes.setter
+    def true_outcomes(self, new_true_outcomes):
+        if self._true_outcomes is None:
+            self._true_outcomes = new_true_outcomes
+
+    @property
+    def permuted_auc_values(self):
+        return self._permuted_auc_values
+
+    @permuted_auc_values.setter
+    def permuted_auc_values(self, new_permuted_auc_values):
+        if self._permuted_auc_values is None:
+            self._permuted_auc_values = new_permuted_auc_values
+
+    @property
+    def auc(self):
+        auc = roc_auc_score(self.true_outcomes, self.predicted_probabilities)
+        return auc
+
+    @property
+    def pvalue(self):
+        pvalue = np.count_nonzero((self.permuted_auc_values >= self.auc)) / float(len(self.permuted_auc_values))
+        return pvalue
+
+    @property
+    def false_positive_rate(self):
+        fpr, _, _ = roc_curve(self.true_outcomes, self.predicted_probabilities)
+        return fpr
+
+    @property
+    def true_positive_rate(self):
+        _, tpr, _ = roc_curve(self.true_outcomes, self.predicted_probabilities)
+        return tpr
+
+    @property
+    def thresholds(self):
+        _, _, thresholds = roc_curve(self.true_outcomes, self.predicted_probabilities)
+        return thresholds
+
+    @property
+    def median_classifier_output(self):
+        return np.median(self.predicted_probabilities)
+
+    @property
+    def low_tercile_diff_from_mean(self):
+        return 100.0 * (self.low_terc_recall_rate - self.recall_rate) / self.recall_rate
+
+    @property
+    def mid_tercile_diff_from_mean(self):
+        return 100.0 * (self.mid_terc_recall_rate - self.recall_rate) / self.recall_rate
+
+    @property
+    def high_tercile_diff_from_mean(self):
+        return 100.0 * (self.high_terc_recall_rate - self.recall_rate) / self.recall_rate
+
+    def populate(self, true_outcomes, predicted_probabilities, permuted_auc_values):
+        """ Populate classifier performance metrics
+
+        Parameters
+        ----------
+        true_outcomes: array_like
+            Boolean array for if a word was recalled or not
+        predicted_probabilities: array_like
+            Outputs from the trained classifier for each word event
+        permuted_auc_values: array_like
+            AUC values from performing a permutation test on classifier
+        """
+        self.true_outcomes = true_outcomes
+        self.predicted_probabilities = predicted_probabilities
+        self.permuted_auc_values = permuted_auc_values
+
+        thresh_low = np.percentile(predicted_probabilities, 100.0 / 3.0)
+        thresh_high = np.percentile(predicted_probabilities, 2.0 * 100.0 / 3.0)
+
+        low_tercile_mask = (predicted_probabilities <= thresh_low)
+        high_tercile_mask = (predicted_probabilities >= thresh_high)
+        mid_tercile_mask = ~(low_tercile_mask | high_tercile_mask)
+
+        self.low_terc_recall_rate = np.sum(true_outcomes[low_tercile_mask]) / float(np.sum(
+            low_tercile_mask))
+        self.mid_terc_recall_rate = np.sum(true_outcomes[mid_tercile_mask]) / float(np.sum(
+            mid_tercile_mask))
+        self.high_terc_recall_rate = np.sum(true_outcomes[high_tercile_mask]) / float(
+            np.sum(high_tercile_mask))
+
+        self.recall_rate = np.sum(true_outcomes) / float(true_outcomes.size)
+
+        return
 
 
 class Summary(Schema):
@@ -314,7 +432,7 @@ class FRSessionSummary(SessionSummary):
 #     irt_between_cat = Float(desc='average inter-response time between categories')
 
 
-class StimSessionSessionSummary(SessionSummary):
+class StimSessionSummary(SessionSummary):
     """SessionSummary data specific to sessions with stimulation."""
     is_stim_list = Array(dtype=np.bool, desc='item is from a stim list')
     is_post_stim_item = Array(dtype=np.bool, desc='stimulation occurred on the previous item')
@@ -355,11 +473,11 @@ class StimSessionSessionSummary(SessionSummary):
         self.duration = [e.stim_params.stim_duration for e in events]
 
 
-class FRStimSessionSummary(FRSessionSummary, StimSessionSessionSummary):
+class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
     """SessionSummary for FR sessions with stim."""
     def populate(self, events, recall_probs=None, is_ps4_session=False):
         FRSessionSummary.populate(self, events, recall_probs)
-        StimSessionSessionSummary.populate(self, events, is_ps4_session)
+        StimSessionSummary.populate(self, events, is_ps4_session)
 
     @property
     def num_nonstim_lists(self):
