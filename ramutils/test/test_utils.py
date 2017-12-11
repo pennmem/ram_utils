@@ -24,7 +24,8 @@ def test_extract_experiment_series(experiment, expected):
 
 
 @pytest.mark.parametrize("tag_list, expected_output", [
-    ([("LAD8,LAHCD7", "LAD9,LAHCD8"), ("LAD8", "LAD9"), ("LAHCD7", "LAHCD8")], ["LAD8-LAD9:LAHCD7-LAHCD8", "LAD8-LAD9", "LAHCD7-LAHCD8"]),
+    ([("LAD8,LAHCD7", "LAD9,LAHCD8"), ("LAD8", "LAD9"), ("LAHCD7", "LAHCD8")],
+     ["LAD8-LAD9:LAHCD7-LAHCD8", "LAD8-LAD9", "LAHCD7-LAHCD8"]),
 ])
 def test_combine_tag_names(tag_list, expected_output):
     result = combine_tag_names(tag_list)
