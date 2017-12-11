@@ -170,3 +170,12 @@ def extract_subject_montage(subject_id):
     montage = 0 if len(tokens) == 1 else int(tokens[1])
     subject = tokens[0]
     return subject, montage
+
+
+def extract_experiment_series(experiment):
+    experiment = str(experiment)
+    if experiment == 'PS2.1':
+        return '2.1'
+
+    # Assume series is the last value
+    return experiment[-1]
