@@ -73,16 +73,19 @@ class ClassifierSummary(Schema):
     @property
     def false_positive_rate(self):
         fpr, _, _ = roc_curve(self.true_outcomes, self.predicted_probabilities)
+        fpr = fpr.tolist()
         return fpr
 
     @property
     def true_positive_rate(self):
         _, tpr, _ = roc_curve(self.true_outcomes, self.predicted_probabilities)
+        tpr = tpr.tolist()
         return tpr
 
     @property
     def thresholds(self):
         _, _, thresholds = roc_curve(self.true_outcomes, self.predicted_probabilities)
+        thresholds = thresholds.tolist()
         return thresholds
 
     @property
