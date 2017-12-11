@@ -39,6 +39,8 @@ def make_stim_params(subject, anodes, cathodes, min_amplitudes=None,
 
     stim_params = []
 
+    # TODO: Fail smarter if the label cannot be found
+    #  in the jacksheet
     for i in range(len(anodes)):
         anode = anodes[i]
         cathode = cathodes[i]
@@ -114,48 +116,13 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
 
     kwargs = exp_params.to_dict()
 
-    if "PAL" in experiment:
-        pal_events = load_events(subject, "PAL1", rootdir=paths.root)
-        cleaned_pal_events = clean_events(pal_events)
-
-    if ("FR" in experiment) or kwargs['combine_events']:
-        fr_events = load_events(subject, 'FR1', rootdir=paths.root)
-        cleaned_fr_events = clean_events(fr_events,
-                                         start_time=kwargs['baseline_removal_start_time'],
-                                         end_time=kwargs['retrieval_time'],
-                                         duration=kwargs['empty_epoch_duration'],
-                                         pre=kwargs['pre_event_buf'],
-                                         post=kwargs['post_event_buf'])
-
-        catfr_events = load_events(subject, 'catFR1', rootdir=paths.root)
-        cleaned_catfr_events = clean_events(catfr_events,
-                                            start_time=kwargs['start_time'],
-                                            end_time=kwargs['end_time'],
-                                            pre=kwargs['pre'],
-                                            post=kwargs['post'],
-                                            duration=kwargs['duration'])
-
-        # Free recall events are always combined
-        free_recall_events = concatenate_events_across_experiments(
-            [cleaned_fr_events, cleaned_catfr_events])
-
-    if ("PAL" in experiment) and kwargs['combine_events']:
-        all_task_events = concatenate_events_across_experiments([
-            free_recall_events, pal_events])
-
-    elif ("PAL" in experiment) and not kwargs['combine_events']:
-        all_task_events = pal_events
-
-    else:
-        all_task_events = free_recall_events
-
-    all_task_events = select_word_events(all_task_events, encoding_only=kwargs['encoding_only'])
-
+    all_task_events = build_training_data(subject, experiment, paths, **kwargs)
 
     # FIXME: If PTSA is updated to not remove events behind this scenes, this
     # won't be necessary. Or, if we can remove bad events before passing to
     # compute powers, then we won't have to catch the events
-    powers, final_task_events = compute_normalized_powers(all_task_events, **kwargs)
+    powers, final_task_events = compute_normalized_powers(all_task_events,
+                                                          **kwargs)
     reduced_powers = reduce_powers(powers, used_pair_mask, len(kwargs['freqs']))
 
     sample_weights = get_sample_weights(all_task_events, **kwargs)

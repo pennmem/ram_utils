@@ -1,43 +1,107 @@
 """Partial pipelines for processing events that is used by full pipelines."""
 
-from ramutils.events import select_word_events as select_word_events_core
-from ramutils.events import concatenate_events_across_experiments as concatenate_events_across_experiments_core
-from ramutils.events import load_events as load_events_core
-from ramutils.events import clean_events as clean_events_core
+from ramutils.events import load_events, clean_events, select_word_events, \
+    concatenate_events_across_experiments
 from ramutils.tasks import task
 
 __all__ = [
-    'load_events',
-    'clean_events',
-    'concatenate_events_across_experiments',
-    'select_word_events',
+    'build_test_data',
+    'build_training_data'
 ]
 
 
 @task()
-def load_events(subject, experiment, sessions=None, rootdir='/'):
-    events = load_events_core(subject, experiment, sessions=sessions, rootdir=rootdir)
-    return events
+def build_training_data(subject, experiment, paths, sessions=None, **kwargs):
+    """ Construct the set of events needed for classifier training """
+    if "PAL" in experiment:
+        pal_events = load_events(subject, "PAL1", sessions=sessions,
+                                 rootdir=paths.root)
+        cleaned_pal_events = clean_events(pal_events)
+
+    if ("FR" in experiment) or kwargs['combine_events']:
+        fr_events = load_events(subject, 'FR1', sessions=sessions,
+                                rootdir=paths.root)
+        cleaned_fr_events = clean_events(fr_events,
+                                         start_time=kwargs['baseline_removal_start_time'],
+                                         end_time=kwargs['retrieval_time'],
+                                         duration=kwargs['empty_epoch_duration'],
+                                         pre=kwargs['pre_event_buf'],
+                                         post=kwargs['post_event_buf'])
+
+        catfr_events = load_events(subject, 'catFR1',
+                                   sessions=sessions, rootdir=paths.root)
+        cleaned_catfr_events = clean_events(catfr_events,
+                                            start_time=kwargs['baseline_removal_start_time'],
+                                            end_time=kwargs['retrieval_end_time'],
+                                            pre=kwargs['pre_event_buf'],
+                                            post=kwargs['post_event_buf'],
+                                            duration=kwargs['empty_epoch_duration'])
+
+        # Free recall events are always combined
+        free_recall_events = concatenate_events_across_experiments(
+            [cleaned_fr_events, cleaned_catfr_events])
+
+    if ("PAL" in experiment) and kwargs['combine_events']:
+        all_task_events = concatenate_events_across_experiments([
+            free_recall_events, cleaned_pal_events])
+
+    elif ("PAL" in experiment) and not kwargs['combine_events']:
+        all_task_events = cleaned_pal_events
+
+    else:
+        all_task_events = free_recall_events
+
+    all_task_events = select_word_events(all_task_events,
+                                         encoding_only=kwargs['encoding_only'])
+    return all_task_events
 
 
-@task()
-def clean_events(events, start_time=None, end_time=None, duration=None, pre=None, post=None):
-    cleaned_events = clean_events_core(events,
-                                       start_time=start_time,
-                                       end_time=end_time,
-                                       duration=duration,
-                                       pre=pre,
-                                       post=post)
-    return cleaned_events
+@task(nout=2)
+def build_test_data(subject, experiment, paths, joint_report, sessions=None,
+                    **kwargs):
+    """
+        Construct the set of events to be used for post-hoc classifier
+        evaluation, i.e. the test data
 
+    """
+    if joint_report and 'FR' in experiment:
+        fr_events = load_events(subject, experiment,
+                                sessions=sessions, rootdir=paths.root)
+        cleaned_fr_events = clean_events(fr_events,
+                                         start_time=kwargs['baseline_removal_start_time'],
+                                         end_time=kwargs['retrieval_time'],
+                                         duration=kwargs['empty_epoch_duration'],
+                                         pre=kwargs['pre_event_buf'],
+                                         post=kwargs['post_event_buf'])
 
-@task()
-def concatenate_events_across_experiments(event_list):
-    events = concatenate_events_across_experiments_core(event_list)
-    return events
+        catfr_events = load_events(subject, experiment, sessions=sessions,
+                                   rootdir=paths.root)
+        cleaned_catfr_events = clean_events(catfr_events,
+                                            start_time=kwargs['baseline_removal_start_time'],
+                                            end_time=kwargs['retrieval_time'],
+                                            duration=kwargs['empty_epoch_duration'],
+                                            pre=kwargs['pre_event_buf'],
+                                            post=kwargs['post_event_buf'])
 
+        all_events = concatenate_events_across_experiments([fr_events,
+                                                            catfr_events])
+        task_events = concatenate_events_across_experiments(
+            [cleaned_fr_events, cleaned_catfr_events])
 
-@task()
-def select_word_events(all_events, encoding_only=True):
-    all_events = select_word_events_core(all_events, encoding_only=encoding_only)
-    return all_events
+    elif not joint_report and 'FR' in experiment:
+        all_events = load_events(subject, experiment, sessions=sessions,
+                                 rootdir=paths.root)
+        task_events = clean_events(all_events,
+                                   start_time=kwargs['baseline_removal_start_time'],
+                                   end_time=kwargs['retrieval_time'],
+                                   duration=kwargs['empty_epoch_duration'],
+                                   pre=kwargs['pre_event_buf'],
+                                   post=kwargs['post_event_buf'])
+
+    else:
+        all_events = load_events(subject, experiment, sessions=sessions,
+                                 rootdir=paths.root)
+        task_events = clean_events(all_events)
+
+    return all_events, task_events
+
