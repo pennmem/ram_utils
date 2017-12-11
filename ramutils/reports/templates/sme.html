@@ -35,10 +35,10 @@
         <tr class="sme-no-effect">
         {% endif %}
           <td>{{ row['type'] }}</td>
-          <td>{{ row['contacts'][0] }}</td>
-          <td>{{ row['contacts'][1] }}</td>
-          <td>{{ row['labels'] }}</td>
-          <td>{{ row['atlas_loc'] }}</td>
+          <td>{{ row['channel_1'] }}</td>
+          <td>{{ row['channel_2'] }}</td>
+          <td>{{ row['label'] }}</td>
+          <td>{{ row['location'] }}</td>
           {% if row['p_value'] < 0.001 %}
             <td>&lt; 0.001</td>
           {% else %}
