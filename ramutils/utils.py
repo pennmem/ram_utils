@@ -173,9 +173,42 @@ def extract_subject_montage(subject_id):
 
 
 def extract_experiment_series(experiment):
+    """ Extract the experiment series number from experiment name
+
+    Parameters
+    ----------
+    experiment: str
+        Name of the experiment
+
+    Returns
+    -------
+    str
+        Series number in string format (to accommodate PS2.1)
+
+    """
     experiment = str(experiment)
     if experiment == 'PS2.1':
         return '2.1'
 
     # Assume series is the last value
     return experiment[-1]
+
+
+def is_stim_experiment(experiment):
+    """ Returns whether or not the given experiment is a stim experiment
+
+    Parameters
+    ----------
+    experiment: str
+        Name of the experiment
+
+    Returns
+    -------
+    bool
+        Indicator for if the given experiment is a stimulation experiment
+
+    """
+    experiment_series = extract_experiment_series(experiment)
+    if experiment_series != '1':
+        return True
+    return False
