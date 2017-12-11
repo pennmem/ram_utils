@@ -93,8 +93,3 @@ def summarize_math(events):
     summary.populate(events)
 
     return summary
-
-
-
-
-
