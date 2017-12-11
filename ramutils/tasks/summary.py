@@ -6,6 +6,7 @@ results.
 import numpy as np
 
 from ._wrapper import task
+from ramutils.events import validate_single_experiment, validate_single_session, select_math_events, extract_experiment_from_events
 from ramutils.exc import *
 from ramutils.log import get_logger
 from ramutils.reports.summary import *
@@ -14,6 +15,7 @@ logger = get_logger()
 
 __all__ = [
     'summarize_session',
+    'summarize_math'
 ]
 
 
@@ -43,16 +45,11 @@ def summarize_session(events):
     FIXME: make work with all experiments
 
     """
-    sessions = np.unique(events.session)
-    if len(sessions) != 1:
-        raise TooManySessionsError("events should be pre-filtered to be from a single session")
-
-    experiments = np.unique(events.experiment)
-    if len(experiments) != 1:
-        raise TooManyExperimentsError("events should only come from one experiment")
+    validate_single_session(events)
+    validate_single_experiment(events)
 
     # session = sessions[0]
-    experiment = experiments[0]
+    experiment = extract_experiment_from_events(events)[0]
 
     # FIXME: recall_probs
     if experiment in ['FR1']:
@@ -67,5 +64,32 @@ def summarize_session(events):
     # FIXME: other experiments
     else:
         raise UnsupportedExperimentError("Unsupported experiment: {}".format(experiment))
+
+    return summary
+
+
+@task()
+def summarize_math(events):
+    """ Generate a summary math event summary of a single experiment session
+
+    Parameters
+    ----------
+    events: np.recarray
+        Events from single experiment session
+
+    Returns
+    -------
+    summary: MathSummary
+        Math summary object
+
+    """
+    validate_single_experiment(events)
+    validate_single_session(events)
+
+    math_events = select_math_events(events)
+    if len(math_events) == 0:
+        raise RuntimeError("Not math events found when trying to summarize math distractor period")
+    summary = MathSummary()
+    summary.populate(events)
 
     return summary

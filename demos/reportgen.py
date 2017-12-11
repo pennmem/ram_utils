@@ -7,14 +7,14 @@ import numpy as np
 from ptsa.data.readers import BaseEventReader, JsonIndexReader
 
 # from ramutils.constants import EXPERIMENTS
-from ramutils.events import preprocess_events
+# from ramutils.events import preprocess_events
 from ramutils.parameters import FRParameters
 from ramutils.reports.generate import ReportGenerator
 from ramutils.reports.summary import FRSessionSummary, MathSummary
 
 parser = ArgumentParser(description='generate sample reports')
 parser.add_argument('--subject', '-s', required=True, help='subject ID')
-parser.add_argument('--experiment', '-x', choices=['FR1'], required=True,
+parser.add_argument('--experiment', '-x', choices=['FR1', 'FR5'], required=True,
                     help='experiment type', )
 parser.add_argument('--root', '-r', default='/', help='data root path')
 parser.add_argument('filename', type=str, default=None, help='HTML output filename')
@@ -43,10 +43,10 @@ def main():
     #                            root=args.root)
     # print(events.dtype)
 
-    if args.experiment == 'FR1':
+    if args.experiment.startswith('FR'):
         cls = FRSessionSummary
     else:
-        raise NotImplementedError("Only FR1 right now")
+        raise NotImplementedError("Only FR right now")
 
     # session_summaries = [cls.create(events[events.session == session])
     #                      for session in np.unique(events.session)][:4]  # cutting off because too many sessions compared to math events for R1111M
