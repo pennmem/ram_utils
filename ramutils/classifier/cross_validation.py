@@ -129,6 +129,8 @@ def permuted_loso_cross_validation(classifier, powers, events, n_permutations, *
     sessions = np.unique(events.session)
 
     for i in range(n_permutations):
+        # FIXME: Should this really be a try/except? What causes a valid
+        # ValueError here?
         try:
             # Shuffle recall outcomes within session
             for session in sessions:
@@ -138,7 +140,8 @@ def permuted_loso_cross_validation(classifier, powers, events, n_permutations, *
                 permuted_recalls[in_session_mask] = session_permuted_recalls
 
             # We don't need to capture the auc by session for each permutation
-            probs, _ = perform_loso_cross_validation(classifier, powers, events, permuted_recalls, **kwargs)
+            probs = perform_loso_cross_validation(classifier, powers, events,
+                                                  permuted_recalls, **kwargs)
             auc_results[i] = roc_auc_score(permuted_recalls, probs)
         except ValueError:
             auc_results[i] = np.nan
@@ -147,7 +150,7 @@ def permuted_loso_cross_validation(classifier, powers, events, n_permutations, *
 
 
 def perform_loso_cross_validation(classifier, powers, events, recalls, **kwargs):
-    """Perform single iteration of leave-one-session-out cross validation
+    """ Perform single iteration of leave-one-session-out cross validation
 
     Parameters
     ----------

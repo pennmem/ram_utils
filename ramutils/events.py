@@ -16,7 +16,7 @@ import os
 import numpy as np
 
 from itertools import groupby
-from numpy.lib.recfunctions import rename_fields
+from numpy.lib.recfunctions import rename_fields, rec_append_fields
 
 from ptsa.data.readers import BaseEventReader, JsonIndexReader, EEGReader
 from ramutils.utils import extract_subject_montage
@@ -78,7 +78,8 @@ def load_events(subject, experiment, sessions=None, rootdir='/'):
     return events
 
 
-def clean_events(events, start_time=None, end_time=None, duration=None, pre=None, post=None):
+def clean_events(events, start_time=None, end_time=None, duration=None,
+                 pre=None, post=None):
     """
         Peform basic cleaning operations on events such as removing incomplete
         sessions, negative offset events, and incomplete lists. For FR events,
@@ -107,14 +108,16 @@ def clean_events(events, start_time=None, end_time=None, duration=None, pre=None
 
     """
     experiments = extract_experiment_from_events(events)
-    if len(experiments) != 1:
-        raise RuntimeError('Event cleaning can only happen on single-experiment datasets')
+    if len(experiments) > 1:
+        raise RuntimeError('Event cleaning can only happen on single-experiment'
+                           ' datasets')
     experiment = experiments[0]
 
     events = remove_negative_offsets(events)
     events = remove_practice_lists(events)
     events = remove_incomplete_lists(events)
-    # TODO: Add remove_repetitions() function to get rid of any recall events that are just a repeated recall
+    # TODO: Add remove_repetitions() function to get rid of any recall events
+    # that are just a repeated recall
 
     if "FR" in experiment:
         events = insert_baseline_retrieval_events(events,
@@ -149,6 +152,7 @@ def normalize_pal_events(events):
     """
     events = rename_correct_to_recalled(events)
     events = coerce_study_pair_to_word_event(events)
+    events = add_field(events, 'item_name', 'X')
     return events
 
 
@@ -167,6 +171,12 @@ def rename_correct_to_recalled(events):
     """
     events = rename_fields(events, {'correct': 'recalled'})
 
+    return events
+
+
+def add_field(events, field_name, default_val):
+    data = np.array([default_val] * len(events))
+    events = rec_append_fields(events, field_name, data)
     return events
 
 
@@ -338,7 +348,7 @@ def select_column_subset(events):
     columns = [
         'serialpos', 'session', 'subject', 'rectime', 'experiment',
         'mstime', 'type', 'eegoffset', 'recalled', 'intrusion',
-        'montage', 'list', 'eegfile', 'msoffset'
+        'montage', 'list', 'eegfile', 'msoffset', 'item_name'
     ]
     events = events[columns]
     return events
@@ -362,7 +372,8 @@ def initialize_empty_event_reccarray():
                                                ('montage', int),
                                                ('list', int),
                                                ('eegfile', object),
-                                               ('msoffset', int)])
+                                               ('msoffset', int),
+                                               ('item_name', object)])
     return empty_recarray
 
 
@@ -640,9 +651,18 @@ def select_word_events(events, encoding_only=True):
 
 
 def extract_experiment_from_events(events):
-    """ Given a set of events, return a list of unique experiments contained within """
-    # Experiment field can be blank, so make sure to not include that in the final list
+    """ Given a set of events, return a list of unique experiments contained
+        within
+
+    """
+    # Experiment field can be blank, so make sure to not include that in the
+    # final list
     experiments = np.unique(events[events.experiment != ''].experiment).tolist()
+
+    # Handle the case of empty events being passed
+    if len(events) == 0:
+        experiments = ['']
+
     return experiments
 
 
@@ -687,6 +707,17 @@ def get_math_events_mask(events):
     """ Get a boolean array identifying math events """
     math_event_mask = (events.type == 'PROB')
     return math_event_mask
+
+
+def get_nonstim_events_mask(events):
+    """ Get a mask of any non-stim WORD events
+
+    Notes
+    -----
+    These events are what is used in post-hoc classifier evaluation
+    """
+    non_stim_mask = (events.type == 'WORD') & (events.phase != 'STIM')
+    return non_stim_mask
 
 
 def get_time_between_events(events):
