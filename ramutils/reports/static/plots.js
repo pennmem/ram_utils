@@ -158,13 +158,22 @@ var ramutils = (function (mod, Plotly) {
           name: 'ROC'
         },
         {
+          x: [0, 1],
+          y: [0, 1],
+          mode: 'lines',
+          line: {
+            color: 'black',
+            dash: 'dot'
+          }
+        },
+        {
           x: ['low', 'middle', 'high'],
           y: [low, middle, high],
           xaxis: 'x2',
           yaxis: 'y2',
           type: 'bar',
           name: 'Tercile'
-        }
+        },
       ];
 
       const layout = {

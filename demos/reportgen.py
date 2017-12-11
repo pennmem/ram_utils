@@ -7,7 +7,7 @@ import numpy as np
 from ptsa.data.readers import BaseEventReader, JsonIndexReader
 
 # from ramutils.constants import EXPERIMENTS
-from ramutils.events import preprocess_events
+# from ramutils.events import preprocess_events
 from ramutils.parameters import FRParameters
 from ramutils.reports.generate import ReportGenerator
 from ramutils.reports.summary import FRSessionSummary, MathSummary
