@@ -73,7 +73,7 @@ def summarize_sessions(events, joint=False):
         summary.populate(events[events.session == session])
         summaries.append(summary)
 
-    return summary
+    return summaries
 
 
 @task()

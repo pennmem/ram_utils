@@ -6,12 +6,18 @@
     </button>
 
     <div class="collapse navbar-collapse" id="navbar-ram">
-      <ul class="navbar-nav mr-auto" id="navbar-section-links">
+      <ul class="navbar-nav mr-auto">
         <li class="nav-item">
           <a class="nav-link active" href="#">{{ subject }}</a>
         </li>
         <li class="nav-item">
           <a class="nav-link active" href="#">{{ experiment }}</a>
+        </li>
+        <li class="nav-item dropdown active">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Sections
+          </a>
+          <div id="navbar-section-links" class="dropdown-menu" aria-labelledby="navbarDropdown"></div>
         </li>
       </ul>
     </div>
@@ -30,14 +36,11 @@
       const id = name.toLowerCase().split(' ').join('-');
       node.id = id;
 
-      let listElem = document.createElement('li');
       let link = document.createElement('a');
-      listElem.classList = ['nav-item'];
-      link.classList = ['nav-link'];
+      link.classList = ['dropdown-item'];
       link.href = '#' + node.id;
       link.innerHTML = name;
-      listElem.appendChild(link);
-      linkList.appendChild(listElem);
+      linkList.appendChild(link);
     });
   });
 </script>

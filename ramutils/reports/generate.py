@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 import os.path as osp
 import random
@@ -59,19 +60,28 @@ class ReportGenerator(object):
             loader=PackageLoader('ramutils.reports', 'templates'),
         )
 
+        # Filter to indicate that p-values are small
+        self._env.filters['pvalue'] = lambda p: '{:.3f}'.format(p) if p > 0.001 else '&le; 0.001'
+
         # Give access to some static methods
         self._env.globals['MathSummary'] = MathSummary
+        self._env.globals['datetime'] = datetime
 
         # For debugging/mockups
         self._env.globals['random'] = random
 
-        # Give access to Javascript sources. When we switch to a non-static
-        # reporting format, this will be handled by the web server's static file
-        # serving.
+        # Give access to Javascript and CSS sources. When we switch to a
+        # non-static reporting format, this will be handled by the web server's
+        # static file serving.
         self._env.globals['js'] = {}
+        self._env.globals['css'] = {}
         for filename in resource_listdir('ramutils.reports', 'static'):
-            script = resource_string('ramutils.reports.static', filename)
-            self._env.globals['js'][filename.split('.')[0]] = script
+            if filename.endswith('.js'):
+                script = resource_string('ramutils.reports.static', filename)
+                self._env.globals['js'][filename.split('.')[0]] = script
+            elif filename.endswith('.css'):
+                css = resource_string('ramutils.reports.static', filename)
+                self._env.globals['css'][filename.split('.')[0]] = css
 
         self.dest = osp.realpath(osp.expanduser(dest))
 
@@ -80,28 +90,13 @@ class ReportGenerator(object):
         """Returns a list of experiments found in the session summaries."""
         return [np.unique(summary.events.experiment) for summary in self.session_summaries]
 
-    def generate(self):
-        """Central method to generate any report. The report to run is
-        determined by the experiments found in :attr:`session_summary`.
+    def _make_sme_table(self):
+        """Create data for the SME table for record-only experiments.
+
+        FIXME: real data
 
         """
-        if (np.array(self.experiments) == 'FR1').all():
-            return self.generate_fr1_report()
-        else:
-            raise NotImplementedError("Only FR1 reports are supported so far")
-
-    def generate_fr1_report(self):
-        """Generate an FR1 report.
-
-        Returns
-        -------
-        Rendered FR1 report as a string.
-
-        """
-        template = self._env.get_template("fr1.html")
-
-        # FIXME: real values
-        sme_table = sorted([
+        return sorted([
             {
                 'type': random.choice(['D', 'G', 'S']),
                 'contacts': [random.randint(1, 256) for _ in range(2)],
@@ -113,25 +108,154 @@ class ReportGenerator(object):
             for _ in range(24)
         ], key=lambda x: x['p_value'])
 
+    def _make_classifier_data(self):
+        """Create JSON object for classifier data.
+
+        FIXME: real data
+
+        """
+        return {
+            'auc': 61.35,
+            'p_value': 0.0003,
+            'output_median': 0.499,
+        }
+
+    def generate(self):
+        """Central method to generate any report. The report to run is
+        determined by the experiments found in :attr:`session_summary`.
+
+        """
+        if (np.array(self.experiments) == 'FR1').all():
+            return self.generate_fr1_report()
+        elif (np.array(self.experiments) == 'FR5').all():
+            return self.generate_fr5_report()
+        else:
+            raise NotImplementedError("Unsupported report type")
+
+    def _render(self, experiment, **kwargs):
+        """Convenience method to wrap common keyword arguments passed to the
+        template renderer.
+
+        Parameters
+        ----------
+        experiment : str
+        kwargs : dict
+            Additional keyword arguments that are passed to the render method.
+
+        """
+        template = self._env.get_template(experiment.lower() + '.html')
         return template.render(
             subject=self.subject,
-            experiment='FR1',
+            experiment=experiment,
             summaries=self.session_summaries,
             math_summaries=self.math_summaries,
+            classifier=self._make_classifier_data(),
+            **kwargs
+        )
+
+    def generate_fr1_report(self):
+        """Generate an FR1 report.
+
+        Returns
+        -------
+        Rendered FR1 report as a string.
+
+        """
+        return self._render(
+            'FR1',
             plot_data={
                 'serialpos': json.dumps({
-                    'x': list(range(1, 13)),
-                    'y1': FRSessionSummary.serialpos_probabilities(self.session_summaries, False),
-                    'y2': FRSessionSummary.serialpos_probabilities(self.session_summaries, True),
+                    'serialpos': list(range(1, 13)),
+                    'overall': {
+                        'Overall': FRSessionSummary.serialpos_probabilities(self.session_summaries, False),
+                    },
+                    'first': {
+                        'First recall': FRSessionSummary.serialpos_probabilities(self.session_summaries, True),
+                    }
                 })
             },
+            sme_table=self._make_sme_table(),
+        )
 
-            # FIXME: real values
-            classifier={
-                'auc': '{:.2f}%'.format(61.35),
-                'p_value': '&le; 0.001',
-                'output_median': 0.499,
+    def generate_fr5_report(self):
+        """Generate an FR5 report.
+
+        Returns
+        -------
+        Rendered FR5 report as a string.
+
+        """
+        fake_ps4_data = {
+            key: {
+                'CH1': np.random.random((100,)).tolist(),
+                'CH2': np.random.random((100,)).tolist()
+            }
+            for key in ['encoding', 'distract', 'retrieval', 'sham', 'post_stim']
+        }
+        fake_ps4_data['amplitude'] = np.linspace(0, 1, 100).tolist()
+
+        return self._render(
+            'FR5',
+            plot_data={  # FIXME: real data
+                'serialpos': json.dumps({
+                    'serialpos': list(range(1, 13)),
+                    'overall': {
+                        'Overall (non-stim)': np.random.random((12,)).tolist(),
+                        'Overall (stim)': np.random.random((12,)).tolist()
+                    },
+                    'first': {
+                        'First recall (non-stim)': np.random.random((12,)).tolist(),
+                        'First recall (stim)': np.random.random((12,)).tolist()
+                    }
+                }),
+                'recall_summary': json.dumps({
+                    'nonstim': {
+                        'listno': [4, 8, 11],
+                        'recalled': [1, 0, 3]
+                    },
+                    'stim': {
+                        'listno': [5, 6, 7, 9, 10, 12, 13],
+                        'recalled': [1, 1, 2, 1, 3, 1, 1]
+                    },
+                    'stim_events': {
+                        'listno': [5, 6, 7, 9, 10, 12, 13],
+                        'count': [random.randint(1, 12) for _ in range(7)]
+                    }
+                }),
+                'stim_probability': json.dumps({
+                    'serialpos': list(range(1, 13)),
+                    'probability': np.random.random((12,)).tolist()
+                }),
+                'recall_difference': json.dumps({
+                    'stim': random.uniform(-60, 60),
+                    'post_stim': random.uniform(-60, 60)
+                }),
+                'classifier_output': json.dumps({
+                    'pre_stim': np.random.random((40,)).tolist(),
+                    'post_stim': np.random.random((40,)).tolist()
+                }),
+
+                # FIXME: only in PS4
+                'ps4': json.dumps(fake_ps4_data),
             },
 
-            sme_table=sme_table,
+            # FIXME: only in PS4
+            bayesian_optimization_results={
+                'best_loc': 'LAD1_LAD2',
+                'best_ampl': 13.5,
+                'p_values': {
+                    'between': random.uniform(0.001, 0.05),
+                    'sham': random.uniform(0.1, 0.5)
+                },
+                'tie': random.choice([True, False]),
+                'channels': {
+                    channel: {
+                        'amplitude': random.uniform(0.1, 0.5),
+                        'delta_classifier': random.random(),
+                        'error': random.uniform(0.001, 1),
+                        'snr': random.uniform(0.5, 2.0)
+                    }
+                    for channel in ['LAD1_LAD2', 'LA11_LA12']
+                }
+            }
         )
