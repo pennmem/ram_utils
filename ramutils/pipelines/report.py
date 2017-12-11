@@ -64,9 +64,13 @@ def make_report(subject, experiment, paths, joint_report=False,
     delta_hfa_table = []
     if not stim_report:
         final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
-        # This logic follow ramultor config generation almost exactly and can
-        # probably be refactored to follow DRY principle
-        all_task_events = build_training_data(subject, experiment, paths,
+        # This logic is very similar to what is done in config generation except
+        # that events are not combined by default
+        kwargs['combine_events'] = False
+        all_task_events = build_training_data(subject,
+                                              experiment,
+                                              paths,
+                                              sessions=sessions,
                                               **kwargs)
         powers, final_task_events = compute_normalized_powers(all_task_events,
                                                               **kwargs)
@@ -174,7 +178,8 @@ def make_report(subject, experiment, paths, joint_report=False,
                                            joint=joint_report)
     math_summaries = summarize_math(all_events, joint=joint_report)
     report = build_static_report(session_summaries, math_summaries,
-                                 classifier_summaries, delta_hfa_table)
+                                 delta_hfa_table, classifier_summaries,
+                                 paths.dest)
 
     if vispath is not None:
         report.visualize(filename=vispath)

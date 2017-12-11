@@ -18,7 +18,7 @@ def build_training_data(subject, experiment, paths, sessions=None, **kwargs):
                                  rootdir=paths.root)
         cleaned_pal_events = clean_events(pal_events)
 
-    if ("FR" in experiment) or kwargs['combine_events']:
+    if ("FR" in experiment) and kwargs['combine_events']:
         fr_events = load_events(subject, 'FR1', sessions=sessions,
                                 rootdir=paths.root)
         cleaned_fr_events = clean_events(fr_events,
@@ -37,9 +37,18 @@ def build_training_data(subject, experiment, paths, sessions=None, **kwargs):
                                             post=kwargs['post_event_buf'],
                                             duration=kwargs['empty_epoch_duration'])
 
-        # Free recall events are always combined
         free_recall_events = concatenate_events_across_experiments(
             [cleaned_fr_events, cleaned_catfr_events])
+
+    elif "FR" in experiment and not kwargs['combine_events']:
+        free_recall_events = load_events(subject, experiment, sessions=sessions,
+                                         rootdir=paths.root)
+        free_recall_events = clean_events(free_recall_events,
+                                          start_time=kwargs['baseline_removal_start_time'],
+                                          end_time=kwargs['retrieval_time'],
+                                          duration=kwargs['empty_epoch_duration'],
+                                          pre=kwargs['pre_event_buf'],
+                                          post=kwargs['post_event_buf'])
 
     if ("PAL" in experiment) and kwargs['combine_events']:
         all_task_events = concatenate_events_across_experiments([
