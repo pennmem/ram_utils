@@ -22,6 +22,6 @@ dependencies:
 - statsmodels=0.8.0
 - traitlets=4.3.2
 - traits=4.6.0
-- traitschema=1.0.0
+- traitschema=1.1.0
 - xarray=0.9.6
 - ptsa=1.1.3
