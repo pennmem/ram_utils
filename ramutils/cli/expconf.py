@@ -141,6 +141,7 @@ def main(input_args=None):
 
 if __name__ == "__main__":  # pragma: nocover
     root = "~/mnt/rhino"
+    dest = "scratch/ramutils2/demo"
 
     # main([
     #     "-s", "R1364C", "-x", "CatFR5",
@@ -150,12 +151,20 @@ if __name__ == "__main__":  # pragma: nocover
     #     "--root", root, "--dest", "scratch/ramutils2/demo", "--force-rerun"
     # ])
 
+    # main([
+    #     "-s", "R1364C", "-x", "AmplitudeDetermination",
+    #     "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
+    #     "--anodes", "AMY7", "--cathodes", "AMY8",
+    #     "--min-amplitudes", "0.1", "--max-amplitudes", "1.0",
+    #     "--root", root, "--dest", dest, "--force-rerun"
+    # ])
+
     main([
-        "-s", "R1364C", "-x", "AmplitudeDetermination",
-        "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
-        "--anodes", "AMY7", "--cathodes", "AMY8",
-        "--min-amplitudes", "0.1", "--max-amplitudes", "1.0",
-        "--root", root, "--dest", "scratch/ramutils2/demo", "--force-rerun"
+        "-s", "R1374T", "-x", "CatFR5",
+        "-e", "scratch/system3_configs/ODIN_configs/R1374T/R1374T_12DEC2017L0M0STIM.csv",
+        "--anodes", "LA7", "--cathodes", "LA8",
+        "--target-amplitudes", "0.5",
+        "--root", root, "--dest", dest, "--force-rerun"
     ])
 
     # main([
