@@ -200,11 +200,15 @@ def extract_pairs_dict(pairs):
         Dictionary of pairs that will preserve ordering
 
     """
+    keys = pairs.keys()
     # Handle empty dictionary case
-    if len(pairs.keys()) == 0:
+    if len(keys) == 0:
         return pairs
 
-    subject = list(pairs.keys())[0]
+    # Remove 'version' information. TODO: Make this more flexible
+    if 'version' in keys:
+        keys.remove('version')
+    subject = keys[0]
     pairs = pairs[subject]['pairs']
 
     return pairs
