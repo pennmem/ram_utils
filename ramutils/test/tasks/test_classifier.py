@@ -22,7 +22,7 @@ def test_perform_cross_validation_regression(subject, params):
     # Note: These expected outputs will change if *any* of the inputs change,
     #  i.e. classifier, powers, events, or parameters
     expected_output = {
-        'R1350D': 0.51938422009,
+        'R1350D': 0.5193842200,
         'R1353N': 0.57048671214,
         'R1354E': 0.48615333774,
     }
