@@ -59,14 +59,18 @@ def make_report(subject, experiment, paths, joint_report=False,
     # used by the stim reports. Non-stim reports create a different set of
     # events
     all_events, task_events = build_test_data(subject, experiment, paths,
-                                              joint_report, sessions,
+                                              joint_report, sessions=sessions,
                                               **kwargs)
     delta_hfa_table = []
     if not stim_report:
         final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
         # This logic is very similar to what is done in config generation except
         # that events are not combined by default
-        kwargs['combine_events'] = False
+        if not joint_report:
+            kwargs['combine_events'] = False
+        # TODO: This segment of classifier training needs to be run twice:
+        # once with joint classifier and once with encoding only so they can
+        # be compared in the report
         all_task_events = build_training_data(subject,
                                               experiment,
                                               paths,
@@ -174,12 +178,13 @@ def make_report(subject, experiment, paths, joint_report=False,
         # TODO: Add stimulation evaluation task that uses the HMM code
 
     # TODO: Add task that saves out all necessary underlying data
-    session_summaries = summarize_sessions(final_task_events,
+    session_summaries = summarize_sessions(all_events,
+                                           final_task_events,
                                            joint=joint_report)
     math_summaries = summarize_math(all_events, joint=joint_report)
-    report = build_static_report(session_summaries, math_summaries,
-                                 delta_hfa_table, classifier_summaries,
-                                 paths.dest)
+    report = build_static_report(subject, experiment, session_summaries,
+                                 math_summaries, delta_hfa_table,
+                                 classifier_summaries, paths.dest)
 
     if vispath is not None:
         report.visualize(filename=vispath)

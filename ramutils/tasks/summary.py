@@ -22,13 +22,18 @@ __all__ = [
 
 
 @task()
-def summarize_sessions(events, joint=False):
+def summarize_sessions(all_events, task_events, joint=False):
     """Generate a summary of by unique session/experiment
 
     Parameters
     ----------
-    events : np.recarray
-        Events
+    all_events: np.recarray
+        Full set of events
+    task_events : np.recarray
+        Event subset used for classifier training
+    joint: Bool
+        Indicator for if a joint report is being created. This will disable
+        checks for single-experiment events
 
     Returns
     -------
@@ -49,17 +54,17 @@ def summarize_sessions(events, joint=False):
     """
 
     if not joint:
-        validate_single_experiment(events)
+        validate_single_experiment(task_events)
 
     # Since this takes 'cleaned' task events, we know the session numbers
     # have been made unique if cross-experiment events are given
-    sessions = extract_sessions(events)
+    sessions = extract_sessions(task_events)
 
     summaries = []
     for session in sessions:
-        experiment = extract_experiment_from_events(events)[0]
+        experiment = extract_experiment_from_events(task_events)[0]
         # FIXME: recall_probs
-        if experiment in ['FR1']:
+        if experiment in ['FR1', 'catFR1']:
             summary = FRSessionSummary()
 
         # FIXME: recall_probs, ps4
@@ -70,7 +75,8 @@ def summarize_sessions(events, joint=False):
         else:
             raise UnsupportedExperimentError("Unsupported experiment: {}".format(experiment))
 
-        summary.populate(events[events.session == session])
+        summary.populate(task_events[task_events.session == session],
+                         raw_events=all_events[all_events.session == session])
         summaries.append(summary)
 
     return summaries

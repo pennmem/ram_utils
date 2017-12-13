@@ -141,7 +141,8 @@ class ClassifierSummary(Schema):
 
 class Summary(Schema):
     """Base class for all summary objects."""
-    _events = ArrayOrNone(desc='all events from a session')
+    _events = ArrayOrNone(desc='task events from a session')
+    _raw_events = ArrayOrNone(desc='all events from a session')
     phase = Array(desc='list phase type (stim, non-stim, etc.)')
 
     @property
@@ -153,25 +154,36 @@ class Summary(Schema):
         if self._events is None:
             self._events = new_events
 
-    def populate(self, events):
+    @property
+    def raw_events(self):
+        return self._raw_events
+
+    @raw_events.setter
+    def raw_events(self, new_events):
+        if self._raw_events is None:
+            self._raw_events = new_events
+
+    def populate(self, events, raw_events=None):
         raise NotImplementedError
 
     @classmethod
-    def create(cls, events):
+    def create(cls, events, raw_events=None):
         """Create a new summary object from events.
 
         Parameters
         ----------
         events : np.recarray
+        raw_events: np.recarray
 
         """
         instance = cls()
-        instance.populate(events)
+        instance.populate(events, raw_events=raw_events)
         return instance
 
 
 class SessionSummary(Summary):
     """Base class for single-session objects."""
+    #FIXME: Isn't this redundant?
     @property
     def events(self):
         return self._events
@@ -223,7 +235,8 @@ class SessionSummary(Summary):
         if not hasattr(self, '_df') or recreate:
             # these attributes won't be included
             ignore = [
-                'events',  # we don't need events in the dataframe
+                '_events',  # we don't need events in the dataframe
+                '_raw_events',
                 'rejected', 'region',  # FIXME: don't ignore
             ]
 
@@ -240,9 +253,10 @@ class SessionSummary(Summary):
             self._df = pd.DataFrame(columns)
         return self._df
 
-    def populate(self, events):
+    def populate(self, events, raw_events=None):
         """Populate attributes and store events."""
         self.events = events
+        self.raw_events = raw_events
         try:
             self.phase = events.phase
         except AttributeError:
@@ -356,19 +370,20 @@ class FRSessionSummary(SessionSummary):
 
     prob = Array(dtype=np.float64, desc='predicted probability of recall')
 
-    def populate(self, events, recall_probs=None):
+    def populate(self, events, raw_events=None, recall_probs=None):
         """Populate data from events.
 
         Parameters
         ----------
         events : np.recarray
+        raw_events: np.recarray
         recall_probs : np.ndarray
             Predicted probabilities of recall per item. If not given, assumed
             there is no relevant classifier and values of -999 are used to
             indicate this.
 
         """
-        SessionSummary.populate(self, events)
+        SessionSummary.populate(self, events, raw_events=raw_events)
         self.item = events.item_name
         self.session = events.session
         self.listno = events.list
@@ -376,6 +391,26 @@ class FRSessionSummary(SessionSummary):
         self.recalled = events.recalled
         self.thresh = [0.5] * len(events)
         self.prob = recall_probs if recall_probs is not None else [-999] * len(events)
+
+    @property
+    def num_words(self):
+        """ Number of words in the session """
+        return len(self.events[self.events.type == 'WORD'])
+
+    @property
+    def num_correct(self):
+        """ Number of correctly-recalled words """
+        return np.sum(self.events[self.events.type == 'WORD'].recalled)
+
+    @property
+    def num_prior_list_intrusions(self):
+        """ Calculates the number of prior list intrusions """
+        return np.sum((self.raw_events.intrusion > 0))
+
+    @property
+    def num_extra_list_intrusions(self):
+        """ Calculates the number of extra-list intrusions """
+        return np.sum((self.raw_events.intrusion == -1))
 
     @property
     def num_lists(self):
@@ -386,7 +421,7 @@ class FRSessionSummary(SessionSummary):
     def percent_recalled(self):
         """Calculates the percentage correctly recalled words."""
         # FIXME: is length of events always equal to number of items?
-        return 100 * len(self.events[self.events.recalled == True]) / len(self.events)
+        return 100 * self.num_correct / self.num_words
 
     @staticmethod
     def serialpos_probabilities(summaries, first=False):
@@ -406,8 +441,9 @@ class FRSessionSummary(SessionSummary):
         List[float]
 
         """
-        columns = ['serialpos', 'list', 'recalled']
+        columns = ['serialpos', 'list', 'recalled', 'type']
         events = pd.concat([pd.DataFrame(s.events[columns]) for s in summaries])
+        events = events[events.type == 'WORD']
 
         if first:
             firstpos = np.zeros(len(events.serialpos.unique()), dtype=np.float)
@@ -449,17 +485,18 @@ class StimSessionSummary(SessionSummary):
     amplitude = Array(dtype=np.float64, desc='stim amplitude [mA]')
     duration = Array(dtype=np.float64, desc='stim duration [ms]')
 
-    def populate(self, events, is_ps4_session=False):
+    def populate(self, events, raw_events=None, is_ps4_session=False):
         """Populate stim data from events.
 
         Parameters
         ----------
         events : np.recarray
+        raw_events: np.recarray
         is_ps4_session : bool
             Whether or not this experiment is also a PS4 session.
 
         """
-        SessionSummary.populate(self, events)
+        SessionSummary.populate(self, events, raw_events=raw_events)
 
         self.is_stim_list = [e.phase == 'STIM' for e in events]
         self.is_stim_item = events.is_stim
@@ -478,9 +515,15 @@ class StimSessionSummary(SessionSummary):
 
 class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
     """SessionSummary for FR sessions with stim."""
-    def populate(self, events, recall_probs=None, is_ps4_session=False):
-        FRSessionSummary.populate(self, events, recall_probs)
-        StimSessionSummary.populate(self, events, is_ps4_session)
+    def populate(self, events, raw_events=None, recall_probs=None,
+                 is_ps4_session=False):
+        FRSessionSummary.populate(self,
+                                  events,
+                                  raw_events=raw_events,
+                                  recall_probs=recall_probs)
+        StimSessionSummary.populate(self, events,
+                                    raw_events=raw_events,
+                                    is_ps4_session=is_ps4_session)
 
     @property
     def num_nonstim_lists(self):
@@ -512,6 +555,10 @@ class FR5SessionSummary(FRStimSessionSummary):
     recognized = Array(dtype=int, desc='item in recognition subtask recognized')
     rejected = Array(dtype=int, desc='lure item in recognition subtask rejected')
 
-    def populate(self, events, recall_probs=None, is_ps4_session=False):
-        FRStimSessionSummary.populate(self, events, recall_probs, is_ps4_session)
+    def populate(self, events, raw_events=None, recall_probs=None,
+                 is_ps4_session=False):
+        FRStimSessionSummary.populate(self, events,
+                                      raw_events=raw_events,
+                                      recall_probs=recall_probs,
+                                      is_ps4_session=is_ps4_session)
         self.recognized = events.recognized
