@@ -12,7 +12,7 @@ from ramutils.classifier.utils import reload_classifier
 from ramutils.classifier.weighting import \
     get_sample_weights as get_sample_weights_core
 from ramutils.reports.summary import ClassifierSummary
-from ramutils.events import extract_sessions, get_nonstim_events_mask
+from ramutils.events import extract_sessions, get_nonstim_events_mask, get_encoding_mask
 from ramutils.montage import compare_recorded_with_all_pairs
 from ramutils.powers import reduce_powers
 from ramutils.log import get_logger
@@ -111,6 +111,8 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
 
     """
     recalls = events.recalled
+    encoding_event_mask = get_encoding_mask(events)
+    encoding_recalls = recalls[encoding_event_mask]
 
     classifier_summary = ClassifierSummary()
     sessions = extract_sessions(events)
@@ -125,7 +127,8 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
                                                              **kwargs)
         probs = perform_loso_cross_validation(classifier, pow_mat, events,
                                               recalls, **kwargs)
-        classifier_summary.populate(recalls, probs, permuted_auc_values)
+        classifier_summary.populate(encoding_recalls, probs,
+                                    permuted_auc_values)
 
     else:
         logger.info("Performing LOLO cross validation")

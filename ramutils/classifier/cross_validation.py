@@ -5,6 +5,7 @@ from random import shuffle
 from sklearn.metrics import roc_auc_score
 
 from ramutils.classifier.weighting import get_sample_weights
+from ramutils.events import get_encoding_mask, select_encoding_events
 from ramutils.log import get_logger
 
 try:
@@ -45,6 +46,7 @@ def permuted_lolo_cross_validation(classifier, powers, events, n_permutations, *
         n_permutations times
 
     """
+    # TODO: Evaluation should only be on encoding events
     recalls = events.recalled
     permuted_recalls = np.array(recalls)
     auc_results = np.empty(shape=n_permutations, dtype=np.float)
@@ -84,6 +86,7 @@ def perform_lolo_cross_validation(classifier, powers, events, recalls, **kwargs)
         Predicted probabilities for all lists
 
     """
+    # TODO: Evaluation should be only on encoding events
     probs = np.empty_like(recalls, dtype=np.float)
     lists = np.unique(events.list)
 
@@ -124,27 +127,29 @@ def permuted_loso_cross_validation(classifier, powers, events, n_permutations, *
 
     """
     recalls = events.recalled
-    permuted_recalls = np.array(recalls)
-    auc_results = np.empty(shape=n_permutations, dtype=np.float)
     sessions = np.unique(events.session)
 
-    for i in range(n_permutations):
-        # FIXME: Should this really be a try/except? What causes a valid
-        # ValueError here?
-        try:
-            # Shuffle recall outcomes within session
-            for session in sessions:
-                in_session_mask = (events.session == session)
-                session_permuted_recalls = permuted_recalls[in_session_mask]
-                shuffle(session_permuted_recalls)
-                permuted_recalls[in_session_mask] = session_permuted_recalls
+    encoding_mask = get_encoding_mask(events)
 
-            # We don't need to capture the auc by session for each permutation
-            probs = perform_loso_cross_validation(classifier, powers, events,
-                                                  permuted_recalls, **kwargs)
-            auc_results[i] = roc_auc_score(permuted_recalls, probs)
-        except ValueError:
-            auc_results[i] = np.nan
+    probs = np.empty_like(recalls[encoding_mask], dtype=np.float)
+    permuted_recalls = np.array(recalls)
+    auc_results = np.empty(shape=n_permutations, dtype=np.float)
+
+    for i in range(n_permutations):
+        # Shuffle recall outcomes within session
+        for session in sessions:
+            in_session_mask = (events.session == session)
+            session_permuted_recalls = permuted_recalls[in_session_mask]
+            shuffle(session_permuted_recalls)
+            permuted_recalls[in_session_mask] = session_permuted_recalls
+
+        # The probabilities returned here will be only for encoding events
+        probs = perform_loso_cross_validation(classifier, powers, events,
+                                              permuted_recalls, **kwargs)
+
+        # Evaluation should happen only on encoding events
+        encoding_recalls = permuted_recalls[encoding_mask]
+        auc_results[i] = roc_auc_score(encoding_recalls, probs)
 
     return auc_results
 
@@ -171,8 +176,12 @@ def perform_loso_cross_validation(classifier, powers, events, recalls, **kwargs)
         Predicted probabilities for all sessions
 
     """
-    probs = np.empty_like(recalls, dtype=np.float)
     sessions = np.unique(events.session)
+    encoding_mask = get_encoding_mask(events)
+    encoding_events = select_encoding_events(events)
+
+    # Predicted probabilities should be assessed only on encoding words
+    probs = np.empty_like(recalls[encoding_mask], dtype=np.float)
 
     for sess_idx, sess in enumerate(sessions):
         # training data
@@ -184,12 +193,14 @@ def perform_loso_cross_validation(classifier, powers, events, recalls, **kwargs)
         classifier.fit(insample_pow_mat, insample_recalls,
                        insample_samples_weights)
 
-        # testing data
-        outsample_mask = ~insample_mask
+        # testing data -- Only look at encoding events
+        outsample_mask = ~insample_mask & encoding_mask
         outsample_pow_mat = powers[outsample_mask]
 
         outsample_probs = classifier.predict_proba(outsample_pow_mat)[:, 1]
-        probs[outsample_mask] = outsample_probs
+
+        outsample_encoding_event_mask = (encoding_events.session == sess)
+        probs[outsample_encoding_event_mask] = outsample_probs
 
     return probs
 
