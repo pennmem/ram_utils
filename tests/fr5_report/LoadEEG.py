@@ -41,9 +41,14 @@ class LoadPostStimEEG(ReportRamTask):
 
         channels = self.get_passed_object('monopolar_channels')
         pairs = self.get_passed_object('bipolar_pairs')
-        eeg = EEGReader(events=events,channels=channels,
-                        start_time=self.params.post_stim_start_time,
-                        end_time=self.params.post_stim_end_time+0.25,).read()
+        try:
+            eeg = EEGReader(events=events,channels=channels,
+                            start_time=self.params.post_stim_start_time,
+                            end_time=self.params.post_stim_end_time+0.25,).read()
+        except IndexError:
+            eeg = EEGReader(events=events, channels=np.array([]),
+                            start_time=self.params.post_stim_start_time,
+                            end_time=self.params.post_stim_end_time + 0.25, ).read()
         samplerate = eeg['samplerate']
         eeg = eeg.filtered([58.,62.])
         eeg['samplerate']=samplerate
