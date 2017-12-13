@@ -128,7 +128,7 @@ def test_regression_compute_normalized_powers(events, exp_powers, parameters):
     orig_powers = np.load(datafile('/powers/' + exp_powers))
     events = np.load(datafile('/events/' + events)).view(np.recarray)
     new_powers, updated_events = compute_normalized_powers(events,
-                                                  **parameters).compute()
+                                                           **parameters).compute()
 
     assert np.allclose(orig_powers, new_powers)
     memory.clear(warn=False)  # Clean up if the assertion passes
