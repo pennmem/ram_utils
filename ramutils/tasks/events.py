@@ -3,6 +3,7 @@
 from ramutils.events import load_events, clean_events, select_word_events, \
     concatenate_events_across_experiments
 from ramutils.tasks import task
+from ramutils.utils import extract_experiment_series
 
 __all__ = [
     'build_test_data',
@@ -32,7 +33,7 @@ def build_training_data(subject, experiment, paths, sessions=None, **kwargs):
                                    sessions=sessions, rootdir=paths.root)
         cleaned_catfr_events = clean_events(catfr_events,
                                             start_time=kwargs['baseline_removal_start_time'],
-                                            end_time=kwargs['retrieval_end_time'],
+                                            end_time=kwargs['retrieval_time'],
                                             pre=kwargs['pre_event_buf'],
                                             post=kwargs['post_event_buf'],
                                             duration=kwargs['empty_epoch_duration'])
@@ -73,8 +74,9 @@ def build_test_data(subject, experiment, paths, joint_report, sessions=None,
         evaluation, i.e. the test data
 
     """
+    series_num = extract_experiment_series(experiment)
     if joint_report and 'FR' in experiment:
-        fr_events = load_events(subject, experiment,
+        fr_events = load_events(subject, 'FR' + series_num,
                                 sessions=sessions, rootdir=paths.root)
         cleaned_fr_events = clean_events(fr_events,
                                          start_time=kwargs['baseline_removal_start_time'],
@@ -83,7 +85,8 @@ def build_test_data(subject, experiment, paths, joint_report, sessions=None,
                                          pre=kwargs['pre_event_buf'],
                                          post=kwargs['post_event_buf'])
 
-        catfr_events = load_events(subject, experiment, sessions=sessions,
+        catfr_events = load_events(subject, 'catFR' + series_num,
+                                   sessions=sessions,
                                    rootdir=paths.root)
         cleaned_catfr_events = clean_events(catfr_events,
                                             start_time=kwargs['baseline_removal_start_time'],
