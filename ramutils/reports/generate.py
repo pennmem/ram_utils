@@ -94,8 +94,10 @@ class ReportGenerator(object):
     @property
     def experiments(self):
         """Returns a list of experiments found in the session summaries."""
-        return [np.unique(extract_experiment_from_events(summary.events)) for
-                summary in self.session_summaries]
+        unique_events = [np.unique(extract_experiment_from_events(
+            summary.events)) for summary in self.session_summaries]
+        unique_events = np.array(unique_events).flatten()
+        return  unique_events
 
     def _make_sme_table(self):
         """ Create data for the SME table for record-only experiments. """
@@ -116,12 +118,21 @@ class ReportGenerator(object):
             'output_median': self.classifier_summary.median_classifier_output,
         }
 
+    def _make_combined_summary(self):
+        """ Aggregate behavioral summary data across given sessions """
+        return {
+            'n_words': sum([summary.num_words for summary in self.session_summaries]),
+            'n_correct': sum([summary.num_correct for summary in self.session_summaries]),
+            'n_pli': sum([summary.num_prior_list_intrusions for summary in self.session_summaries]),
+            'n_eli': sum([summary.num_extra_list_intrusions for summary in self.session_summaries])
+        }
+
     def generate(self):
         """Central method to generate any report. The report to run is
         determined by the experiments found in :attr:`session_summary`.
 
         """
-        if (np.array(self.experiments) == 'FR1').all():
+        if all(['FR' in exp for exp in self.experiments]):
             return self.generate_fr1_report()
         elif (np.array(self.experiments) == 'FR5').all():
             return self.generate_fr5_report()
@@ -145,6 +156,7 @@ class ReportGenerator(object):
             experiment=experiment,
             summaries=self.session_summaries,
             math_summaries=self.math_summaries,
+            combined_summary=self._make_combined_summary(),
             classifier=self._make_classifier_data(),
             **kwargs
         )
