@@ -348,7 +348,7 @@ def select_column_subset(events):
     columns = [
         'serialpos', 'session', 'subject', 'rectime', 'experiment',
         'mstime', 'type', 'eegoffset', 'recalled', 'intrusion',
-        'montage', 'list', 'eegfile', 'msoffset', 'item_name'
+        'montage', 'list', 'eegfile', 'msoffset', 'item_name', 'iscorrect'
     ]
     events = events[columns]
     return events
@@ -373,7 +373,8 @@ def initialize_empty_event_reccarray():
                                                ('list', int),
                                                ('eegfile', object),
                                                ('msoffset', int),
-                                               ('item_name', object)])
+                                               ('item_name', object),
+                                               ('iscorrect', int)])
     return empty_recarray
 
 
@@ -875,3 +876,28 @@ def partition_events(events):
         'pal_retrieval': pal_retrieval
     }
     return final_partitions
+
+
+def get_partition_masks(events):
+    """
+        Return a set of masks corresponding to the partitions present in the
+        events
+
+    """
+    retrieval_mask = get_all_retrieval_events_mask(events)
+    pal_mask = (events.experiment == "PAL1")
+
+    fr_encoding = (~retrieval_mask & ~pal_mask)
+    fr_retrieval = (retrieval_mask & ~pal_mask)
+    pal_encoding = (~retrieval_mask & pal_mask)
+    pal_retrieval = (retrieval_mask & pal_mask)
+
+    # Only add partitions with actual events
+    partition_masks = {
+        'fr_encoding': fr_encoding,
+        'fr_retrieval': fr_retrieval,
+        'pal_encoding': pal_encoding,
+        'pal_retrieval': pal_retrieval
+    }
+
+    return partition_masks
