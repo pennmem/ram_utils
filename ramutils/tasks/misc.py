@@ -16,7 +16,8 @@ from ramutils.utils import is_stim_experiment as is_stim_experiment_core
 
 __all__ = [
     'read_index',
-    'is_stim_experiment'
+    'is_stim_experiment',
+    'store_results'
 ]
 
 
@@ -38,6 +39,7 @@ def is_stim_experiment(experiment):
     return is_stim
 
 
+@task()
 def store_results(data, url):
     """Put computed data into storage.
 
