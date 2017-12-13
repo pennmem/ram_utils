@@ -1,7 +1,7 @@
 import numpy as np
 
 from ramutils.events import partition_events, \
-    concatenate_events_for_single_experiment
+    concatenate_events_for_single_experiment, get_partition_masks
 from ramutils.log import get_logger
 from ramutils.powers import compute_powers
 from ramutils.powers import reduce_powers as reduce_powers_core
@@ -36,8 +36,9 @@ def compute_normalized_powers(events, **kwargs):
     """
 
     event_partitions = partition_events(events)
-    power_partitions = []
     cleaned_event_partitions = []
+    power_partitions = {}
+
     for subset_name, event_subset in event_partitions.items():
         if len(event_subset) == 0:
             continue
@@ -74,13 +75,20 @@ def compute_normalized_powers(events, **kwargs):
                                                 filt_order=kwargs['filt_order'],
                                                 width=kwargs['width'])
         cleaned_event_partitions.append(cleaned_events)
-        power_partitions.append(powers)
+        power_partitions[subset_name] = powers
 
     cleaned_events = concatenate_events_for_single_experiment(
         cleaned_event_partitions)
-    combined_powers = np.concatenate(power_partitions)
 
-    return combined_powers, cleaned_events
+    partition_masks = get_partition_masks(cleaned_events)
+
+    n_features = powers.shape[1]
+    normalized_powers = np.empty((len(cleaned_events), n_features))
+    for subset_name, power_subset in power_partitions.items():
+        partition_event_mask = partition_masks[subset_name]
+        normalized_powers[partition_event_mask, :] = power_subset
+
+    return normalized_powers, cleaned_events
 
 
 @task()
