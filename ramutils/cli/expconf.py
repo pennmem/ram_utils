@@ -13,9 +13,11 @@ from ramutils.log import get_logger
 from ramutils.utils import timer
 
 # Supported experiments
-# FIXME: ensure PAL support
-experiments = ['AmplitudeDetermination'] + EXPERIMENTS['ps'] + \
-              [exp for exp in EXPERIMENTS['closed_loop']]
+experiments = (
+    ['AmplitudeDetermination'] + EXPERIMENTS['ps'] +
+    [exp for exp in EXPERIMENTS['closed_loop']] +
+    EXPERIMENTS['record_only']
+)
 
 parser = make_parser("Generate experiment configs for Ramulator", experiments)
 parser.add_argument('--localization', '-l', default=0, type=int, help='localization number (default: 0)')
@@ -40,7 +42,7 @@ logger = get_logger()
 def validate_stim_settings(args):
     """Check stim settings have the right number of arguments."""
     # FIXME: check that stim channels as defined actually exist
-    if args.experiment not in ['FR1', 'catFR1']:
+    if args.experiment not in EXPERIMENTS['record_only']:
         if not len(args.anodes) == len(args.cathodes):
             raise ValidationError("Number of anodes doesn't match number of cathodes")
 
@@ -121,15 +123,18 @@ def main(input_args=None):
         raise RuntimeError("Somehow we got an unsupported experiment")
 
     # Construct stim parameters
-    # FIXME: explicitly check given arguments to provide more helpful error messages when given malformed args
-    if args.min_amplitudes is not None:
-        make_stim_params = functools.partial(make_stim_params,
-                                             min_amplitudes=args.min_amplitudes,
-                                             max_amplitudes=args.max_amplitudes)
+    if args.experiment not in EXPERIMENTS['record_only']:
+        # FIXME: explicitly check given arguments to provide more helpful error messages when given malformed args
+        if args.min_amplitudes is not None:
+            make_stim_params = functools.partial(make_stim_params,
+                                                 min_amplitudes=args.min_amplitudes,
+                                                 max_amplitudes=args.max_amplitudes)
+        else:
+            make_stim_params = functools.partial(make_stim_params,
+                                                 target_amplitudes=args.target_amplitudes)
+        stim_params = make_stim_params(args.subject, args.anodes, args.cathodes, root=paths.root)
     else:
-        make_stim_params = functools.partial(make_stim_params,
-                                             target_amplitudes=args.target_amplitudes)
-    stim_params = make_stim_params(args.subject, args.anodes, args.cathodes, root=paths.root)
+        stim_params = []
 
     # Generate!
     with timer():
@@ -141,6 +146,11 @@ def main(input_args=None):
 if __name__ == "__main__":  # pragma: nocover
     root = "~/mnt/rhino"
     dest = "scratch/ramutils2/demo"
+
+    main([
+        "-s", "R1347D", "-x", "CatFR1",
+        "--root", root, "--dest", dest, "--force-rerun"
+    ])
 
     # main([
     #     "-s", "R1364C", "-x", "CatFR5",
@@ -156,12 +166,12 @@ if __name__ == "__main__":  # pragma: nocover
     #     "--root", root, "--dest", dest, "--force-rerun"
     # ])
 
-    main([
-        "-s", "R1374T", "-x", "CatFR5",
-        "--anodes", "LA7", "--cathodes", "LA8",
-        "--target-amplitudes", "0.5",
-        "--root", root, "--dest", dest, "--force-rerun"
-    ])
+    # main([
+    #     "-s", "R1374T", "-x", "CatFR5",
+    #     "--anodes", "LA7", "--cathodes", "LA8",
+    #     "--target-amplitudes", "0.5",
+    #     "--root", root, "--dest", dest, "--force-rerun"
+    # ])
 
     # main([
     #     "-s", "R1365N", "-x", "PAL5",
