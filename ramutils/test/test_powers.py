@@ -161,8 +161,8 @@ def test_calculate_delta_hfa_table_regression(events, powers, exp_table, paramet
     hfa_table = calculate_delta_hfa_table(config_pairs, powers, events, parameters['freqs'])
     old_hfa_table = pd.read_csv(datafile('/powers/' + exp_table))
 
-    assert np.allclose(old_hfa_table['t-stat'].values, hfa_table['t_stat'].values)
-    assert np.allclose(old_hfa_table['pvals'].values, hfa_table['p_value'].values)
+    assert np.allclose(old_hfa_table['t_stat'].values, hfa_table['t_stat'].values)
+    assert np.allclose(old_hfa_table['p_value'].values, hfa_table['p_value'].values)
 
     return
 
