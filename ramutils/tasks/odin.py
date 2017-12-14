@@ -106,6 +106,9 @@ def _make_experiment_specific_data_section(experiment, stim_params,
     dict representation of the ``experiment_specific_data`` section.
 
     """
+    if experiment in EXPERIMENTS['record_only']:
+        return {}
+
     def make_stim_channel_section(params, key):
         stub = {
             "stim_duration": 500,
@@ -154,6 +157,9 @@ def _make_experiment_specs_section(experiment):
     ``experiment_specs`` dict
 
     """
+    if experiment in EXPERIMENTS['record_only']:
+        return {}
+
     # FIXME: values below shouldn't be hardcoded
     specs = {
         "version": "3.0.0",
@@ -184,7 +190,7 @@ def _make_experiment_specs_section(experiment):
 
 def _make_ramulator_config_json(subject, experiment, electrode_config_file,
                                 stim_params, classifier_file=None,
-                                classifier_version=None):
+                                classifier_version=None, extended_blanking=True):
     """Create the Ramulator ``experiment_config.json`` file.
 
     Parameters
@@ -195,10 +201,18 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
     stim_params : dict
     classifier_file : str
     classifier_version : str
+    extended_blanking : bool
 
     Returns
     -------
     str
+
+    Notes
+    -----
+    Not all settings are actually used in all experiments. For example, there
+    are several stim-specific settings that we always write here even for
+    record-only experiments. When not used, they are simply ignored by
+    Ramulator.
 
     """
     config = {
@@ -218,8 +232,8 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
                 "artifact_detection_number_of_stims_per_channel": 15,
                 "artifact_detection_sample_time_length": 500,
                 "artifact_detection_inter_stim_interval": 2000,
-                "allow_artifact_detection_during_session": False
-            }
+                "allow_artifact_detection_during_session": False,
+            },
         },
 
         "biomarker_threshold": 0.5,
@@ -229,7 +243,7 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
         "global_settings": {
             "data_dir": "SET_AUTOMATICALLY_AT_A_RUNTIME",
             "experiment_config_filename": "SET_AUTOMATICALLY_AT_A_RUNTIME",
-            "extended_blanking": True,  # FIXME: make a parameter
+            "extended_blanking": extended_blanking,
             "plot_fps": 5,
             "plot_window_length": 20000,
             "plot_update_style": "Sweeping",
@@ -246,19 +260,13 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
 @task(cache=False)
 def generate_ramulator_config(subject, experiment, container, stim_params,
                               paths, pairs=None, excluded_pairs=None,
-                              params=None):
+                              params=None, extended_blanking=True):
     """Create configuration files for Ramulator.
-
-    Note that the current template format will not work for FR5 experiments
-    since the config format is not the same.
 
     In hardware bipolar mode, the neurorad pipeline generates a ``pairs.json``
     file that differs from the electrode configured pairs. It is up to the user
     of the pipeline to ensure that the path to the correct ``pairs.json`` is
     supplied (although Ramulator does not use it in this case).
-
-    The destination path is assumed to be relative to the root path. All other
-    paths are assumed to be absolute.
 
     Parameters
     ----------
@@ -275,6 +283,8 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
     params : ExperimentParameters
         All parameters used in training the classifier. This is partially
         redundant with some data stored in the ``container`` object.
+    extended_blanking : bool
+        Whether or not to enable the ENS extended blanking (default: True).
 
     Returns
     -------
@@ -314,7 +324,8 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
 
     experiment_config_content = _make_ramulator_config_json(
         subject, experiment, os.path.basename(ec_prefix + '.bin'), stim_dict,
-        os.path.basename(classifier_path), CLASSIFIER_VERSION
+        os.path.basename(classifier_path), CLASSIFIER_VERSION,
+        extended_blanking=extended_blanking,
     )
 
     with open(os.path.join(config_dir_root, 'experiment_config.json'), 'w') as f:

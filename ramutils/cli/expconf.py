@@ -25,6 +25,7 @@ parser.add_argument('--cathodes', '-c', nargs='+', help='stim cathode labels')
 parser.add_argument('--min-amplitudes', nargs='+', type=float, help='minimum stim amplitudes')
 parser.add_argument('--max-amplitudes', nargs='+', type=float, help='maximum stim amplitudes')
 parser.add_argument('--target-amplitudes', '-t', type=float, nargs='+', help='target stim amplitudes')
+parser.add_argument('--no-extended-blanking', action='store_true', help='disable extended blanking')
 
 # This is currently fixed so there is no need for an option
 # parser.add_argument('--pulse-frequencies', '-f', type=float, nargs='+',
@@ -133,7 +134,8 @@ def main(input_args=None):
     # Generate!
     with timer():
         make_ramulator_config(args.subject, args.experiment, paths, stim_params,
-                              params, args.vispath)
+                              params, args.vispath,
+                              extended_blanking=(not args.no_extended_blanking))
 
 
 if __name__ == "__main__":  # pragma: nocover

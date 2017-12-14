@@ -66,7 +66,7 @@ def make_stim_params(subject, anodes, cathodes, min_amplitudes=None,
 
 
 def make_ramulator_config(subject, experiment, paths, stim_params,
-                          exp_params=None, vispath=None):
+                          exp_params=None, vispath=None, extended_blanking=True):
     """ Generate configuration files for a Ramulator experiment
 
     Parameters
@@ -82,6 +82,8 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
         Parameters for the experiment.
     vispath : str
         Path to save task graph visualization to if given.
+    extended_blanking : bool
+        Whether to enable extended blanking on the ENS (default: True).
 
     Returns
     -------
@@ -111,7 +113,8 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
                                                 stim_params,
                                                 paths,
                                                 ec_pairs,
-                                                excluded_pairs)
+                                                excluded_pairs,
+                                                extended_blanking)
         return config_path.compute()
 
     kwargs = exp_params.to_dict()
@@ -155,7 +158,8 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
                                             paths,
                                             ec_pairs,
                                             excluded_pairs,
-                                            params=exp_params)
+                                            params=exp_params,
+                                            extended_blanking=extended_blanking)
 
     if vispath is not None:
         config_path.visualize(filename=vispath)
