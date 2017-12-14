@@ -260,21 +260,31 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
     The destination path is assumed to be relative to the root path. All other
     paths are assumed to be absolute.
 
-    :param str subject:
-    :param str experiment:
-    :param ClassifierContainer container: serialized classifier
-    :param List[StimParameters] stim_params: list of stimulation parameters
-    :param FilePaths paths:
-    :param dict excluded_pairs: Pairs excluded from the classifier (pairs that
-        contain a stim contact and possibly some others)
-    :param ExperimentParameters params: All parameters used in training the
-        classifier. This is partially redundant with some data stored in the
-        ``container`` object.
-    :returns: path to generated configuration zip file
-    :rtype: str
+    Parameters
+    ----------
+    subject : str
+    experiment : str
+    container : ClassifierContainer
+        serialized classifier
+    stim_params : List[StimParameters]
+        list of stimulation parameters
+    paths : FilePaths
+    excluded_pairs : dict
+        Pairs excluded from the classifier (pairs that contain a stim contact
+        and possibly some others)
+    params : ExperimentParameters
+        All parameters used in training the classifier. This is partially
+        redundant with some data stored in the ``container`` object.
+
+    Returns
+    -------
+    zip_path : str
+        Path to generated configuration zip file
 
     """
-    if container is None and experiment != 'AmplitudeDetermination':
+    no_classifier_experiments = ['AmplitudeDetermination'] + EXPERIMENTS['record_only']
+
+    if container is None and experiment not in no_classifier_experiments:
         raise RuntimeError("container must not be None")
 
     subject = subject.split('_')[0]
@@ -313,7 +323,7 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
             tmpfile.write(experiment_config_content)
         f.write(reindent_json(tmp_path))
 
-    if experiment != 'AmplitudeDetermination':
+    if container is not None:
         container.save(classifier_path, overwrite=True)
 
     # Save some typing below...
@@ -343,7 +353,7 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
     if params is not None:
         params.to_hdf(os.path.join(config_dir_root, 'exp_params.h5'))
     else:
-        if experiment not in ['AmplitudeDetermination'] + EXPERIMENTS['record_only']:
+        if experiment not in no_classifier_experiments:
             warnings.warn("No ExperimentParameters object passed; "
                           "classifier may not be 100% reproducible", UserWarning)
 
