@@ -14,10 +14,12 @@ try:
 except ImportError:
     pass
 
+from bptools.odin import ElectrodeConfig
 from bptools.transform import SeriesTransformation
 from classiflib import ClassifierContainer
 
 from ramutils.constants import EXPERIMENTS
+from ramutils.exc import MissingFileError
 from ramutils.log import get_logger
 from ramutils.tasks import task
 from ramutils.utils import reindent_json
@@ -29,16 +31,86 @@ CLASSIFIER_VERSION = "1.0.2"
 logger = get_logger()
 
 
+@task(cache=False)
+def generate_electrode_config(subject, paths, anodes=None, cathodes=None,
+                              localization=0, montage=0):
+    """Generate electrode configuration files (CSV and binary).
+
+    Parameters
+    ----------
+    subject : str
+        Subject ID
+    paths : FilePaths
+    anodes : List[str]
+        List of stim anode labels.
+    cathodes : List[str]
+        List of stim cathode labels.
+    localization : int
+        Localization number (default: 0)
+    montage : int
+        Montage number (default: 0)
+
+    Returns
+    -------
+    csv_path : str
+        Path to saved CSV config file.
+
+    Notes
+    -----
+    At present, this will only allow for generating hardware-bipolar electrode
+    config files.
+
+    """
+    docs_dir = os.path.join(paths.root, 'data', 'eeg', subject, 'docs')
+    jacksheet_filename = os.path.join(docs_dir, 'jacksheet.txt')
+    area_filename = os.path.join(docs_dir, 'area.txt')
+
+    if not os.path.exists(area_filename):
+        raise MissingFileError("No surface area file (area.txt) found next to jacksheet.txt!")
+
+    ec = ElectrodeConfig.from_jacksheet(jacksheet_filename, subject, area=area_filename)
+
+    if anodes is not None:
+        assert cathodes is not None
+        assert len(cathodes) == len(anodes)
+        for labels in zip(anodes, cathodes):
+            ec.add_stim_channel(*labels)
+
+    date = datetime.now().strftime('%d%b%Y').upper()
+    prefix = '{subject:s}_{date:s}L{localization:d}M{montage:d}{stim:s}'.format(
+        subject=subject, date=date, localization=localization, montage=montage,
+        stim=('STIM' if anodes is not None else 'NOSTIM')
+    )
+    csv_path = os.path.join(paths.dest, prefix + '.csv')
+    bin_path = csv_path.replace('.csv', '.bin')
+
+    ec.to_csv(csv_path)
+    logger.info("Wrote CSV electrode config: %s", csv_path)
+    ec.to_bin(bin_path)
+    logger.info("Wrote binary electrode config: %s", bin_path)
+
+    return csv_path
+
+
 # FIXME: logic for generating pairs should be in bptools
 @task()
 def generate_pairs_from_electrode_config(subject, paths):
     """Load and verify the validity of the Odin electrode configuration file.
 
-    :param str subject: Subject ID
-    :param FilePaths paths:
-    :returns: minimal pairs.json based on the electrode configuration
-    :rtype: dict
-    :raises RuntimeError: if the csv or bin file are not found
+    Parameters
+    ----------
+    subject : str
+        Subject ID
+
+    Returns
+    -------
+    pairs_from_ec : dict
+        Minimal pairs.json based on the electrode configuration
+
+    Raises
+    ------
+    RuntimeError
+        If the csv or bin file are not found
 
     """
     prefix, _ = os.path.splitext(paths.electrode_config_file)
@@ -84,7 +156,8 @@ def generate_pairs_from_electrode_config(subject, paths):
 
     logger.warning('Pairs not generated because hardware bipolar mode was '
                    'not detected')
-    # TODO: This should be abple to return a dictionary of recorded electrodes
+
+    # TODO: This should be able to return a dictionary of recorded electrodes
     # for monopolar recordings
     return
 
