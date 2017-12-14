@@ -1,0 +1,23 @@
+bptools=1.2.1
+classiflib=0.1.2
+dask=0.15.3
+graphviz=2.38.0
+h5py=2.7.0
+hdf5=1.10.1
+numpy=1.13.3
+pandas=0.20.3
+pytest=3.2.1
+pytest-cov=2.5.1
+pywavelets=0.5.2
+scikit-learn=0.19.1
+scipy=1.0.0
+statsmodels=0.8.0
+traitlets=4.3.2
+traits=4.6.0
+traitschema=1.1.0
+xarray=0.9.6
+ptsa=1.1.4
+
+# sphinx=1.6.3
+# sphinxcontrib=1.0
+# sphinxcontrib-websupport=1.0.1
