@@ -1,0 +1,39 @@
+<div>
+  <h2>Stim and recall analysis</h2>
+  <figure>
+    <div id="stim-recall-placeholder"></div>
+    <figcaption>
+      Number of stims and recalled items per list.
+      Blue circles represent the number of recalled items from non-stim lists.
+      Orange circles represent the number of recalled items from stim lists.
+      Bars represent the number of stims per list.
+    </figcaption>
+  </figure>
+
+  <figure>
+    <div id="stim-probability-placeholder"></div>
+    <figcaption>
+      Probability of stimulation as a function of serial position.
+    </figcaption>
+  </figure>
+
+  <figure>
+    <div id="recall-difference-placeholder"></div>
+    <figcaption>
+      Change in recall performance for stimulated and post-stimulated items.
+      The control group (non-stim) comprises all low biomarker state items from non-stim lists.
+    </figcaption>
+  </figure>
+</div>
+
+<script>
+  window.addEventListener('load', () => {
+    const summary = JSON.parse('{{ plot_data["recall_summary"] }}');
+    const probs = JSON.parse('{{ plot_data["stim_probability"] }}');
+    const recallDifference = JSON.parse('{{ plot_data["recall_difference"] }}');
+
+    ramutils.plots.plotRecallSummary(summary['nonstim'], summary['stim'], summary['stim_events']);
+    ramutils.plots.plotStimProbability(probs['serialpos'], probs['probability']);
+    ramutils.plots.plotRecallDifference(recallDifference['stim'], recallDifference['post_stim']);
+  });
+</script>
