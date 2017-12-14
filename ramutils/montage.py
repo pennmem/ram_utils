@@ -173,7 +173,7 @@ def compare_recorded_with_all_pairs(all_pairs, classifier_pairs):
     used_pairs = np.array([(int(a), int(b)) for a, b in used_pairs])
 
     recorded_pairs = []
-    subject = all_pairs.keys()[0]
+    subject = list(all_pairs.keys())[0]
     for pair in all_pairs[subject]['pairs'].keys():
         channel_1 = all_pairs[subject]['pairs'][pair]['channel_1']
         channel_2 = all_pairs[subject]['pairs'][pair]['channel_2']
