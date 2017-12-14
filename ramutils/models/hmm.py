@@ -191,10 +191,12 @@ class HierarchicalModelPlots:
                            xtitle="Estimated Coefficient for the Effect of Stimulation",
                            ylabels = ylabels,
                            quartiles=False,
-                           linewidth=5,
-                           color='#136ba5',
-                           markersize=6,
-                           fontsize=12)
+                           plot_kwargs= dict(
+                               linewidth=5,
+                               color='#136ba5',
+                               markersize=6,
+                               fontsize=12)
+                           )
 
         return ax
 
