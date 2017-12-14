@@ -37,6 +37,8 @@ def reload_classifier(subject, task, session, mount_point='/', base_path=None):
                                  'session_{}'.format(str(session)),
                                  'host_pc')
 
+    # FIXME: I don't think these paths are correct, there is another timestamped
+    # folder usually present within host_pc before you get to config_files
     # FIXME: this needs a data quality check to confirm that all classifiers in
     # a session are the same!
     # We take the final timestamped directory because in principle retrained
