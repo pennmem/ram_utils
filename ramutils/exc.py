@@ -20,3 +20,7 @@ class MultistimNotAllowedException(Exception):
     which doesn't support it.
 
     """
+
+
+class MissingFileError(Exception):
+    """Raised when a required file doesn't appear to exist."""

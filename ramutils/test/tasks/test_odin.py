@@ -3,7 +3,9 @@ from __future__ import print_function
 from collections import namedtuple
 import functools
 import json
+import os
 import os.path as osp
+import shutil
 from zipfile import ZipFile
 
 from pkg_resources import resource_string, resource_filename
@@ -13,7 +15,10 @@ import pytest
 from classiflib import ClassifierContainer
 
 from ramutils.parameters import StimParameters, FilePaths, FRParameters
-from ramutils.tasks.odin import generate_ramulator_config, generate_pairs_from_electrode_config
+from ramutils.tasks.odin import (
+    generate_ramulator_config, generate_electrode_config,
+    generate_pairs_from_electrode_config
+)
 from ramutils.test import Mock, patch
 import ramutils.test.test_data
 from ramutils.utils import touch
@@ -24,6 +29,34 @@ datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
 
 def jsondata(s):
     return json.loads(resource_string('ramutils.test.test_data', s))
+
+
+@pytest.mark.only
+def test_generate_electrode_config(tmpdir):
+    # Make rhino-like directory structure
+    subject = 'R1347D'
+    docs_dir = str(
+        tmpdir.join('data')
+              .join('eeg')
+              .join(subject)
+              .join('docs')
+    )
+    dest = str(tmpdir.join('scratch'))
+
+    os.makedirs(docs_dir)
+    os.makedirs(dest)
+
+    with open(osp.join(docs_dir, 'jacksheet.txt'), 'wb') as f:
+        f.write(resource_string('ramutils.test.test_data', '{}_jacksheet.txt'.format(subject)))
+
+    with open(osp.join(docs_dir, 'area.txt'), 'wb') as f:
+        f.write(resource_string('ramutils.test.test_data', '{}_area.txt'.format(subject)))
+
+    paths = FilePaths(root=str(tmpdir), dest=dest)
+    anodes = None
+    cathodes = None
+
+    path = generate_electrode_config(subject, paths, anodes, cathodes).compute()
 
 
 def test_generate_pairs_from_electrode_config():
