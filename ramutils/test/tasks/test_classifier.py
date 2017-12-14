@@ -22,9 +22,9 @@ def test_perform_cross_validation_regression(subject, params):
     # Note: These expected outputs will change if *any* of the inputs change,
     #  i.e. classifier, powers, events, or parameters
     expected_output = {
-        'R1350D': 0.5193842200,
-        'R1353N': 0.57048671214,
-        'R1354E': 0.48615333774,
+        'R1350D': 0.5442,
+        'R1353N': 0.8948,
+        'R1354E': 0.6276,
     }
     params = params().to_dict()
     classifier = joblib.load(
@@ -35,7 +35,8 @@ def test_perform_cross_validation_regression(subject, params):
         datafile('/events/{}_task_events.npy'.format(subject))).view(
         np.recarray)
     classifier_summary = perform_cross_validation(classifier, powers, events, 10 ,**params).compute()
-    assert np.isclose(classifier_summary.auc, expected_output[subject])
+    assert np.isclose(classifier_summary.auc, expected_output[subject],
+                      rtol=1e-3)
     return
 
 
@@ -48,9 +49,9 @@ def test_perform_lolo_cross_validation_regression(subject, params):
     # Note: These expected outputs will change if *any* of the inputs change,
     #  i.e. classifier, powers, events, or parameters
     expected_output = {
-        'R1350D': 0.478864,
-        'R1353N': 0.448384,
-        'R1354E': 0.538714,
+        'R1350D': 0.5859,
+        'R1353N': 0.7399,
+        'R1354E': 0.545,
     }
     params = params().to_dict()
     classifier = joblib.load(
@@ -68,6 +69,7 @@ def test_perform_lolo_cross_validation_regression(subject, params):
     events = events[events.session == test_session]
     powers = powers[sess_mask, :]
     classifier_summary = perform_cross_validation(classifier, powers, events, 10, **params).compute()
-    assert np.isclose(classifier_summary.auc, expected_output[subject])
+    assert np.isclose(classifier_summary.auc, expected_output[subject],
+                      rtol=1e-3)
 
     return
