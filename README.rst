@@ -10,6 +10,14 @@ ramutils
 .. image:: https://img.shields.io/badge/docs-here-blue.svg
     :target: https://pennmem.github.io/ram_utils/html/index.html
 
+Bootstrapping a conda environment
+---------------------------------
+
+.. code-block:: shell-session
+
+    conda create -n environment_name
+    conda install -c pennmem --file=requirements.txt
+
 Usage with the RAM_clinical account
 -----------------------------------
 
