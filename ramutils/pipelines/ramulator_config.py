@@ -102,8 +102,8 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
     used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
     final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
 
-    # Special case handling of Amplitude determination
-    if experiment == "AmplitudeDetermination":
+    # Special case handling of amplitude determination and record-only tasks
+    if experiment in ["AmplitudeDetermination"] + EXPERIMENTS['record_only']:
         container = None
         config_path = generate_ramulator_config(subject,
                                                 experiment,
