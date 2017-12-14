@@ -43,13 +43,14 @@ def permuted_lolo_cross_validation(classifier, powers, events, n_permutations, *
     -------
     AUCs: list
         List of AUCs from performing leave-one-list-out cross validation
-        n_permutations times
+        n_permutations times where the AUC is based on encoding events only
 
     """
-    # TODO: Evaluation should only be on encoding events
     recalls = events.recalled
     permuted_recalls = np.array(recalls)
     auc_results = np.empty(shape=n_permutations, dtype=np.float)
+    encoding_mask = get_encoding_mask(events)
+
     sessions = np.unique(events.session)
     for i in range(n_permutations):
         for sess in sessions:
@@ -61,8 +62,12 @@ def permuted_lolo_cross_validation(classifier, powers, events, n_permutations, *
                 shuffle(list_permuted_recalls)
                 permuted_recalls[sel] = list_permuted_recalls
 
-        probs = perform_lolo_cross_validation(classifier, powers, events, recalls, **kwargs)
-        auc_results[i] = roc_auc_score(permuted_recalls, probs)
+        # The probabilities returned here are only for encoding events
+        probs = perform_lolo_cross_validation(classifier, powers, events,
+                                              recalls, **kwargs)
+
+        encoding_recalls = permuted_recalls[encoding_mask]
+        auc_results[i] = roc_auc_score(encoding_recalls, probs)
 
     return auc_results
 
@@ -83,11 +88,14 @@ def perform_lolo_cross_validation(classifier, powers, events, recalls, **kwargs)
     Returns
     -------
     probs: np.array
-        Predicted probabilities for all lists
+        Predicted probabilities for encoding events across all lists
 
     """
     # TODO: Evaluation should be only on encoding events
-    probs = np.empty_like(recalls, dtype=np.float)
+    encoding_mask = get_encoding_mask(events)
+    encoding_events = select_encoding_events(events)
+
+    probs = np.empty_like(recalls[encoding_mask], dtype=np.float)
     lists = np.unique(events.list)
 
     for lst in lists:
@@ -96,9 +104,13 @@ def perform_lolo_cross_validation(classifier, powers, events, recalls, **kwargs)
         insample_recalls = recalls[insample_mask]
         insample_weights = get_sample_weights(events[insample_mask], **kwargs)
         classifier.fit(insample_pow_mat, insample_recalls, insample_weights)
-        outsample_mask = ~insample_mask
+
+        # Out of sample predictions need to be on encoding only
+        outsample_mask = ~insample_mask & encoding_mask
         outsample_pow_mat = powers[outsample_mask]
-        probs[outsample_mask] = classifier.predict_proba(outsample_pow_mat)[:, 1]
+
+        outsample_encoding_event_mask = (encoding_events.list == lst)
+        probs[outsample_encoding_event_mask] = classifier.predict_proba(outsample_pow_mat)[:, 1]
 
     return probs
 
@@ -123,7 +135,7 @@ def permuted_loso_cross_validation(classifier, powers, events, n_permutations, *
     -------
     AUCs: list
         List of AUCs from performing leave-one-list-out cross validation
-        n_permutations times
+        n_permutations times where the AUCs are based on encoding events only
 
     """
     recalls = events.recalled
@@ -173,7 +185,7 @@ def perform_loso_cross_validation(classifier, powers, events, recalls, **kwargs)
     Returns
     -------
     probs: np.array
-        Predicted probabilities for all sessions
+        Predicted probabilities for encoding events across all sessions
 
     """
     sessions = np.unique(events.session)
