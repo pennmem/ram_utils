@@ -20,8 +20,6 @@ experiments = ['AmplitudeDetermination'] + EXPERIMENTS['ps'] + \
 parser = make_parser("Generate experiment configs for Ramulator", experiments)
 parser.add_argument('--localization', '-l', default=0, type=int, help='localization number (default: 0)')
 parser.add_argument('--montage', '-m', default=0, type=int, help='montage number (default: 0)')
-parser.add_argument('--electrode-config-file', '-e', required=True, type=str,
-                    help='path to Odin electrode config csv file')
 parser.add_argument('--anodes', '-a', nargs='+', help='stim anode labels')
 parser.add_argument('--cathodes', '-c', nargs='+', help='stim cathode labels')
 parser.add_argument('--min-amplitudes', nargs='+', type=float, help='minimum stim amplitudes')
@@ -98,7 +96,6 @@ def main(input_args=None):
 
     paths = FilePaths(
         root=osp.expanduser(args.root),
-        electrode_config_file=osp.expanduser(args.electrode_config_file),
         dest=args.dest
     )
 
@@ -145,7 +142,6 @@ if __name__ == "__main__":  # pragma: nocover
 
     # main([
     #     "-s", "R1364C", "-x", "CatFR5",
-    #     "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
     #     "--anodes", "AMY7", "--cathodes", "AMY8",
     #     "--target-amplitudes", "0.5",
     #     "--root", root, "--dest", "scratch/ramutils2/demo", "--force-rerun"
@@ -153,7 +149,6 @@ if __name__ == "__main__":  # pragma: nocover
 
     # main([
     #     "-s", "R1364C", "-x", "AmplitudeDetermination",
-    #     "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
     #     "--anodes", "AMY7", "--cathodes", "AMY8",
     #     "--min-amplitudes", "0.1", "--max-amplitudes", "1.0",
     #     "--root", root, "--dest", dest, "--force-rerun"
@@ -161,7 +156,6 @@ if __name__ == "__main__":  # pragma: nocover
 
     main([
         "-s", "R1374T", "-x", "CatFR5",
-        "-e", "scratch/system3_configs/ODIN_configs/R1374T/R1374T_12DEC2017L0M0STIM.csv",
         "--anodes", "LA7", "--cathodes", "LA8",
         "--target-amplitudes", "0.5",
         "--root", root, "--dest", dest, "--force-rerun"
@@ -169,7 +163,6 @@ if __name__ == "__main__":  # pragma: nocover
 
     # main([
     #     "-s", "R1365N", "-x", "PAL5",
-    #     "-e", "scratch/system3_configs/ODIN_configs/R1365N/R1365N_16NOV2017L0M0STIM.csv",
     #     "--anodes", "LAD12", "--cathodes", "LAD13",
     #     "--target-amplitudes", "0.5",
     #     "--root", root, "--dest", "scratch/ramutils2/demo", "--force-rerun"
@@ -177,7 +170,6 @@ if __name__ == "__main__":  # pragma: nocover
 
     # main([
     #     "-s", "R1364C", "-x", "PS4_FR5",
-    #     "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
     #     "--anodes", "AMY7", "TOJ7", "--cathodes", "AMY8", "TOJ8",
     #     "--min-amplitudes", "0.1", "0.1", "--max-amplitudes", "1.0", "0.5",
     #     "--root", root, "--dest", "scratch/ramutils2/demo", "--force-rerun"
@@ -185,7 +177,6 @@ if __name__ == "__main__":  # pragma: nocover
 
     # main([
     #     "-s", "R1364C", "-x", "FR6",
-    #     "-e", "scratch/system3_configs/ODIN_configs/R1364C/R1364C_06NOV2017L0M0STIM.csv",
     #     "--anodes", "AMY7", "TOJ7", "--cathodes", "AMY8", "TOJ8",
     #     "--target-amplitudes", "0.5", "0.75",
     #     "--root", root, "--dest", "scratch/ramutils2/demo", "--force-rerun"
