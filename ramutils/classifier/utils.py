@@ -7,6 +7,7 @@ from glob import glob
 from sklearn.linear_model.logistic import LogisticRegression
 
 from classiflib.container import ClassifierContainer
+from ramutils.exc import UnableToReloadClassifierException
 
 
 def reload_classifier(subject, task, session, mount_point='/', base_path=None):
@@ -37,15 +38,22 @@ def reload_classifier(subject, task, session, mount_point='/', base_path=None):
                                  'session_{}'.format(str(session)),
                                  'host_pc')
 
-    # FIXME: I don't think these paths are correct, there is another timestamped
-    # folder usually present within host_pc before you get to config_files
+    timestamped_dirs = glob(base_path + "/*")
+    if len(timestamped_dirs) != 1:
+        raise UnableToReloadClassifierException(
+            'There should be 1 and only 1 timestamped '
+            'directory at {}'.format(base_path))
+
+    timestamped_path = timestamped_dirs[0]
+    print(timestamped_path)
+
     # FIXME: this needs a data quality check to confirm that all classifiers in
     # a session are the same!
     # We take the final timestamped directory because in principle retrained
     # classifiers can be different depending on artifact detection. In
     # reality, stim sessions should never be restarted (apart from issues
     # getting things started in the first place).
-    config_path = os.path.join(base_path, 'config_files')
+    config_path = os.path.join(timestamped_path, 'config_files')
     if 'retrained_classifier' in os.listdir(config_path):
         classifier_path = glob(os.path.join(config_path,
                                             'retrained_classifier',
