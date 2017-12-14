@@ -3,7 +3,7 @@
 import os.path
 import numpy as np
 from traits.api import Int, Float, Bool, Array, String
-from ramutils.schema import Schema
+from traitschema import Schema
 
 
 class StimParameters(Schema):
@@ -68,6 +68,7 @@ class ExperimentParameters(Schema):
     width = Int(5, desc='wavelet width')
     freqs = Array(value=np.logspace(np.log10(6), np.log10(180), 8),
                   desc='frequencies to compute powers for')
+    hfa_cutoff = Int(65, desc="Lowers frequency that will be considered a 'high frequency'")
 
     log_powers = Bool(True)  # FIXME: do we really need this?
 

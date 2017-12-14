@@ -14,25 +14,26 @@ memory.cachedir = "/Users/zduey/tmp/"
 
 getpath = functools.partial(resource_filename, 'ramutils.test.test_data')
 
-subject = 'R1354E'
+
+subject = 'R1374T'
 rhino = os.path.expanduser('/Volumes/rhino')
 pairs_path = os.path.join(
-    rhino, 'protocols', 'r1', 'subjects', subject,
+    'protocols', 'r1', 'subjects', subject,
     'localizations', str(0),
     'montages', str(0),
     'neuroradiology', 'current_processed', 'pairs.json')
 
 paths = FilePaths(
     root='/Volumes/RHINO/',
-    electrode_config_file='/scratch/system3_configs/ODIN_configs/R1354E'
-                          '/R1354E_26OCT2017L0M0STIM.csv',
+    electrode_config_file='/scratch/system3_configs/ODIN_configs/R1374T'
+                          '/R1374T_12DEC2017L0M0STIM.csv',
     pairs=pairs_path,
-    dest='scratch/zduey/sample_fr6_biomarkers'
+    dest='scratch/zduey/sample_catFR5_biomarkers/'
 )
 
 params = FRParameters()
-
-stim_params = make_stim_params(subject, ['1LD9', '5LD7'], ['1LD10', '5LD8'],
-                               target_amplitudes=[1.0,1.0],
+stim_params = make_stim_params(subject, ['RB6'], ['RB7'],
+                               target_amplitudes=[0.5, 0.5],
                                root=paths.root)
-make_ramulator_config(subject, "FR6", paths, stim_params, exp_params=params)
+make_ramulator_config(subject, "catFR5", paths, stim_params, exp_params=params)
+

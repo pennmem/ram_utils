@@ -1,5 +1,6 @@
 <div>
-  <table class="table">
+  <h3 id="math-distractor">Math distractor</h3>
+  <table class="table table-striped table-hover">
     <tr>
       <th scope="row">Total problems</th>
       <td>{{ MathSummary.total_num_problems(math_summaries) }}</td>
@@ -10,8 +11,11 @@
     </tr>
     <tr>
       <th scope="row">Percent correct</th>
-      <td>{{ MathSummary.total_percent_correct(math_summaries) }}</td>
+      <td>{{ '{:.2f}'.format(MathSummary.total_percent_correct(math_summaries)) }}</td>
     </tr>
-    {# FIXME: number of problems per list #}
+    <tr>
+      <th scope="row">Problems per list</th>
+      <td>{{ '{:.2f}'.format(MathSummary.total_problems_per_list(math_summaries)) }}</td>
+    </tr>
   </table>
 </div>

@@ -1,12 +1,12 @@
-import os
 import pytest
 import functools
 import numpy as np
+import pandas as pd
 
 from pkg_resources import resource_filename
 
 from ramutils.powers import reduce_powers, compute_single_session_powers, \
-    compute_powers
+    compute_powers, reshape_powers_to_2d, reshape_powers_to_3d, calculate_delta_hfa_table
 from ramutils.tasks import compute_normalized_powers, memory
 from ramutils.parameters import FRParameters, PALParameters
 
@@ -128,10 +128,41 @@ def test_regression_compute_normalized_powers(events, exp_powers, parameters):
     orig_powers = np.load(datafile('/powers/' + exp_powers))
     events = np.load(datafile('/events/' + events)).view(np.recarray)
     new_powers, updated_events = compute_normalized_powers(events,
-                                                  **parameters).compute()
+                                                           **parameters).compute()
 
     assert np.allclose(orig_powers, new_powers)
     memory.clear(warn=False)  # Clean up if the assertion passes
+
+    return
+
+
+def test_reshape_powers_to_3d():
+    test_powers = np.random.random(size=(10, 150))
+    reshaped_powers = reshape_powers_to_3d(test_powers, 10)
+    assert reshaped_powers.shape == (10, 15, 10)
+    return
+
+
+def test_reshape_powers_to_2d():
+    test_powers = np.random.random(size=(10, 15, 10))
+    reshaped_powers = reshape_powers_to_2d(test_powers)
+    assert reshaped_powers.shape == (10, 150)
+    return
+
+
+@pytest.mark.parametrize("events, powers, exp_table, parameters", [
+    ('R1354E_task_events_rhino.npy', 'R1354E_normalized_powers.npy', 'R1354E_hfa_ttest_table.csv', FRParameters)
+])
+def test_calculate_delta_hfa_table_regression(events, powers, exp_table, parameters):
+    parameters = parameters().to_dict()
+    powers = np.load(datafile('/powers/' + powers))
+    events = np.load(datafile('/events/' + events)).view(np.recarray)
+    config_pairs = pd.read_csv(datafile('/montage/R1354E_montage_metadata.csv'), index_col=0)
+    hfa_table = calculate_delta_hfa_table(config_pairs, powers, events, parameters['freqs'])
+    old_hfa_table = pd.read_csv(datafile('/powers/' + exp_table))
+
+    assert np.allclose(old_hfa_table['t-stat'].values, hfa_table['t_stat'].values)
+    assert np.allclose(old_hfa_table['pvals'].values, hfa_table['p_value'].values)
 
     return
 

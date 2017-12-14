@@ -12,3 +12,4 @@ from .odin import *
 from .powers import *
 from .summary import *
 from .montage import *
+from .reports import *
