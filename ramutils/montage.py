@@ -200,7 +200,7 @@ def extract_pairs_dict(pairs):
         Dictionary of pairs that will preserve ordering
 
     """
-    keys = pairs.keys()
+    keys = list(pairs.keys())
     # Handle empty dictionary case
     if len(keys) == 0:
         return pairs
