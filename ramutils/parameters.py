@@ -34,8 +34,6 @@ class FilePaths(object):
         Rhino mount point.
     dest : str
         Directory to write files to.
-    electrode_config_file : str
-        Path to Odin electrode configuration CSV file.
     pairs : str
         Path to ``pairs.json``.
     excluded_pairs : str
@@ -54,7 +52,6 @@ class FilePaths(object):
             return os.path.join(self.root, p.lstrip('/')) if p is not None else p
 
         self.dest = makepath('dest')
-        self.electrode_config_file = makepath('electrode_config_file')
         self.pairs = makepath('pairs')
         self.excluded_pairs = makepath('excluded_pairs')
 
