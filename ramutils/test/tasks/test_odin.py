@@ -41,7 +41,7 @@ def test_generate_electrode_config(tmpdir):
               .join(subject)
               .join('docs')
     )
-    dest = str(tmpdir.join('scratch'))
+    dest = 'scratch'
 
     os.makedirs(docs_dir)
     os.makedirs(dest)
