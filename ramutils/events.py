@@ -14,6 +14,7 @@
 
 import os
 import numpy as np
+import pandas as pd
 
 from itertools import groupby
 from numpy.lib.recfunctions import rename_fields, rec_append_fields
@@ -152,6 +153,7 @@ def normalize_pal_events(events):
     """
     events = rename_correct_to_recalled(events)
     events = coerce_study_pair_to_word_event(events)
+    events = select_pal_column_subset(events)
     events = add_field(events, 'item_name', 'X')
     return events
 
@@ -175,8 +177,18 @@ def rename_correct_to_recalled(events):
 
 
 def add_field(events, field_name, default_val):
-    data = np.array([default_val] * len(events))
-    events = rec_append_fields(events, field_name, data)
+    """ Add field to the recarray
+
+    Notes
+    -----
+    Converting to a dataframe, adding the field, and reconverting to a
+    recarray because the rec_append_fields function in numpy doesn't seem to
+    work
+
+    """
+    events_df = pd.DataFrame(events)
+    events_df[field_name] = default_val
+    events = events_df.to_records(index=False).view(np.recarray)
     return events
 
 
@@ -353,6 +365,16 @@ def select_column_subset(events):
     events = events[columns]
     return events
 
+
+def select_pal_column_subset(events):
+    columns = [
+        'serialpos', 'session', 'subject', 'rectime', 'experiment',
+        'mstime', 'type', 'eegoffset', 'recalled', 'intrusion',
+        'montage', 'list', 'eegfile', 'msoffset', 'iscorrect'
+    ]
+
+    events = events[columns]
+    return events
 
 def initialize_empty_event_reccarray():
     """Utility function for generating a recarray that looks normalized,
