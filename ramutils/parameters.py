@@ -8,7 +8,8 @@ from traitschema import Schema
 
 class StimParameters(Schema):
     """Single-channel stimulation parameters."""
-    label = String(desc="stim channel label")
+    anode_label = String(desc="stim anode label")
+    cathode_label = String(desc="stim cathode label")
     anode = Int(desc="stim anode contact number")
     cathode = Int(desc="stim cathode contact number")
     frequency = Float(200., desc="stim pulse frequency [Hz]")
@@ -20,6 +21,10 @@ class StimParameters(Schema):
     # used in variable-amplitude experiments
     min_amplitude = Float(0.1, desc="minimum allowable stim amplitude [mA]")
     max_amplitude = Float(2.0, desc="maximum allowable stim amplitude [mA]")
+
+    @property
+    def label(self):
+        return "_".join([self.anode_label, self.cathode_label])
 
 
 class FilePaths(object):

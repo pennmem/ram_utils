@@ -140,7 +140,9 @@ def main(input_args=None):
     with timer():
         make_ramulator_config(args.subject, args.experiment, paths, stim_params,
                               params, args.vispath,
-                              extended_blanking=(not args.no_extended_blanking))
+                              extended_blanking=(not args.no_extended_blanking),
+                              localization=args.localization,
+                              montage=args.montage)
 
 
 if __name__ == "__main__":  # pragma: nocover

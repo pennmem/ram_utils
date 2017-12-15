@@ -31,7 +31,7 @@ def make_stim_params(subject, anodes, cathodes, min_amplitudes=None,
 
     Returns
     -------
-    stim_params : List[StimParams]
+    stim_params : List[StimParameters]
 
     """
     path = os.path.join(root, 'data', 'eeg', subject, 'docs', 'jacksheet.txt')
@@ -48,8 +48,8 @@ def make_stim_params(subject, anodes, cathodes, min_amplitudes=None,
         cathode_idx = jacksheet[jacksheet.label == cathode].index[0]
 
         params = StimParameters(
-            # FIXME: figure out better way to generate labels (read config file?)
-            label='_'.join([anode, cathode]),
+            anode_label=anode,
+            cathode_label=cathode,
             anode=anode_idx,
             cathode=cathode_idx
         )
@@ -66,7 +66,8 @@ def make_stim_params(subject, anodes, cathodes, min_amplitudes=None,
 
 
 def make_ramulator_config(subject, experiment, paths, stim_params,
-                          exp_params=None, vispath=None, extended_blanking=True):
+                          exp_params=None, vispath=None, extended_blanking=True,
+                          localization=0, montage=0):
     """ Generate configuration files for a Ramulator experiment
 
     Parameters
@@ -76,7 +77,7 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
     experiment : str
         Experiment to generate configuration file for
     paths : FilePaths
-    stim_params : List[StimParams]
+    stim_params : List[StimParameters]
         Stimulation parameters for this experiment.
     exp_params : ExperimentParameters
         Parameters for the experiment.
@@ -84,6 +85,10 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
         Path to save task graph visualization to if given.
     extended_blanking : bool
         Whether to enable extended blanking on the ENS (default: True).
+    localization : int
+        Localization number
+    Montage : int
+        Montage number
 
     Returns
     -------
@@ -92,7 +97,11 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
     if len(stim_params) > 1 and experiment not in EXPERIMENTS['multistim']:
         raise MultistimNotAllowedException
 
-    paths = generate_electrode_config(subject, paths)
+    anodes = [c.anode_label for c in stim_params]
+    cathodes = [c.cathode_label for c in stim_params]
+
+    paths = generate_electrode_config(subject, paths, anodes, cathodes,
+                                      localization, montage)
 
     # Note: All of these pairs variables are of type OrderedDict, which is
     # crucial for preserving the initial order of the electrodes in the
