@@ -8,6 +8,7 @@ import numpy as np
 from pkg_resources import resource_listdir, resource_string
 
 from ramutils.reports.summary import FRSessionSummary, MathSummary
+from ramutils.events import extract_experiment_from_events
 
 
 class ReportGenerator(object):
@@ -20,6 +21,8 @@ class ReportGenerator(object):
         the included summaries.
     math_summaries : List[MathSummary]
         List of math distractor summaries.
+    sme_table: pd.DataFrame
+        Subsequent memory effect table
     dest : str
         Directory to write output to.
 
@@ -42,9 +45,12 @@ class ReportGenerator(object):
     * FR1
 
     """
-    def __init__(self, session_summaries, math_summaries, dest='.'):
+    def __init__(self, session_summaries, math_summaries,
+                 sme_table, classifier_summary, dest='.'):
         self.session_summaries = session_summaries
         self.math_summaries = math_summaries
+        self.sme_table = sme_table
+        self.classifier_summary = classifier_summary
 
         if len(session_summaries) != len(math_summaries):
             raise ValueError("Summaries contain different numbers of sessions")
@@ -88,25 +94,17 @@ class ReportGenerator(object):
     @property
     def experiments(self):
         """Returns a list of experiments found in the session summaries."""
-        return [np.unique(summary.events.experiment) for summary in self.session_summaries]
+        unique_events = [np.unique(extract_experiment_from_events(
+            summary.events)) for summary in self.session_summaries]
+        unique_events = np.array(unique_events).flatten()
+        return  unique_events
 
     def _make_sme_table(self):
-        """Create data for the SME table for record-only experiments.
-
-        FIXME: real data
-
-        """
-        return sorted([
-            {
-                'type': random.choice(['D', 'G', 'S']),
-                'contacts': [random.randint(1, 256) for _ in range(2)],
-                'labels': "{}-{}".format("label1", "label2"),
-                'atlas_loc': random.choice(['Left', 'Right']) + ' ' + random.choice(['MTL', 'supramarginal', 'fusiform']),
-                'p_value': random.uniform(0.0001, 0.1),
-                't_stat': random.uniform(-7, 7)
-            }
-            for _ in range(24)
-        ], key=lambda x: x['p_value'])
+        """ Create data for the SME table for record-only experiments. """
+        sme_table = (self.sme_table.sort_values(by='p_value',
+                                                ascending=True)
+                         .to_dict(orient='records'))
+        return sme_table
 
     def _make_classifier_data(self):
         """Create JSON object for classifier data.
@@ -115,9 +113,18 @@ class ReportGenerator(object):
 
         """
         return {
-            'auc': 61.35,
-            'p_value': 0.0003,
-            'output_median': 0.499,
+            'auc': self.classifier_summary.auc,
+            'p_value': self.classifier_summary.pvalue,
+            'output_median': self.classifier_summary.median_classifier_output,
+        }
+
+    def _make_combined_summary(self):
+        """ Aggregate behavioral summary data across given sessions """
+        return {
+            'n_words': sum([summary.num_words for summary in self.session_summaries]),
+            'n_correct': sum([summary.num_correct for summary in self.session_summaries]),
+            'n_pli': sum([summary.num_prior_list_intrusions for summary in self.session_summaries]),
+            'n_eli': sum([summary.num_extra_list_intrusions for summary in self.session_summaries])
         }
 
     def generate(self):
@@ -125,7 +132,7 @@ class ReportGenerator(object):
         determined by the experiments found in :attr:`session_summary`.
 
         """
-        if (np.array(self.experiments) == 'FR1').all():
+        if all(['FR' in exp for exp in self.experiments]):
             return self.generate_fr1_report()
         elif (np.array(self.experiments) == 'FR5').all():
             return self.generate_fr5_report()
@@ -149,6 +156,7 @@ class ReportGenerator(object):
             experiment=experiment,
             summaries=self.session_summaries,
             math_summaries=self.math_summaries,
+            combined_summary=self._make_combined_summary(),
             classifier=self._make_classifier_data(),
             **kwargs
         )
@@ -172,6 +180,15 @@ class ReportGenerator(object):
                     'first': {
                         'First recall': FRSessionSummary.serialpos_probabilities(self.session_summaries, True),
                     }
+                }),
+                'roc': json.dumps({
+                    'fpr': self.classifier_summary.false_positive_rate,
+                    'tpr': self.classifier_summary.true_positive_rate
+                }),
+                'tercile': json.dumps({
+                    'low': self.classifier_summary.low_tercile_diff_from_mean,
+                    'mid': self.classifier_summary.mid_tercile_diff_from_mean,
+                    'high': self.classifier_summary.high_tercile_diff_from_mean
                 })
             },
             sme_table=self._make_sme_table(),

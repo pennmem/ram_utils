@@ -11,6 +11,14 @@ from ptsa.data.readers import JsonIndexReader
 from traitschema import Schema
 
 from ._wrapper import task
+from ramutils.utils import is_stim_experiment as is_stim_experiment_core
+
+
+__all__ = [
+    'read_index',
+    'is_stim_experiment',
+    'store_results'
+]
 
 
 @task()
@@ -26,6 +34,12 @@ def read_index(mount_point='/'):
 
 
 @task(cache=False)
+def is_stim_experiment(experiment):
+    is_stim = is_stim_experiment_core(experiment)
+    return is_stim
+
+
+@task()
 def store_results(data, url):
     """Put computed data into storage.
 

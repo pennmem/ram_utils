@@ -20,3 +20,10 @@ class MultistimNotAllowedException(Exception):
     which doesn't support it.
 
     """
+
+
+class UnableToReloadClassifierException(Exception):
+    """
+        Raised when processing cannot load or use the actual classifier from
+        a session
+    """

@@ -15,10 +15,17 @@ datafile = functools.partial(resource_filename,
     'R1365N'
 ])
 def test_reload_classifier(subject):
-    container = reload_classifier(subject, 'task', '0', base_path=datafile(
+    container = reload_classifier(subject, 'task', 0, base_path=datafile(
         '/classifiers/{}/'.format(subject)))
     assert container.classifier is not None
+    return
 
+
+@pytest.mark.rhino
+def test_reload_classifier_rhino():
+    container = reload_classifier('R1347D', 'FR6', 0,
+                                  mount_point='/Volumes/RHINO/')
+    assert container.classifier is not None
     return
 
 

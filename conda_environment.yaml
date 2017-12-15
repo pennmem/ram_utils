@@ -24,4 +24,4 @@ dependencies:
 - traits=4.6.0
 - traitschema=1.0.0
 - xarray=0.9.6
-- ptsa=1.1.3
+- ptsa=1.1.4

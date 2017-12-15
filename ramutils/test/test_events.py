@@ -219,6 +219,11 @@ class TestEvents:
         assert sum(recall_mask) == self.n_word
         return
 
+    def test_append_field(self):
+        appended_data = add_field(self.test_data, 'item_name', 'X')
+        assert 'item_name' in appended_data.dtype.names
+        return
+
     # Four possible partitions. Be sure to check all
     def test_partition_events(self):
         dtypes = [

@@ -1,3 +1,4 @@
+import pytest
 import numpy as np
 from pkg_resources import resource_filename
 
@@ -5,6 +6,7 @@ from ramutils.reports.generate import ReportGenerator
 from ramutils.reports.summary import FRSessionSummary, MathSummary
 
 
+@pytest.mark.skip(reason='not part of release')
 def test_generate_fr1_report():
     """Test that generating the FR1 report runs. It still requires a human to
     check that data is correct.
