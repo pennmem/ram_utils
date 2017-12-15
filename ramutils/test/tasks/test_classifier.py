@@ -41,7 +41,6 @@ class TestCrossValidation:
                           rtol=1e-3)
         return
 
-
     @pytest.mark.parametrize('subject, params', [
         ('R1350D', FRParameters),  # multi-session FR
         ('R1353N', PALParameters),  # pal
