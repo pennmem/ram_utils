@@ -92,10 +92,6 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
     if len(stim_params) > 1 and experiment not in EXPERIMENTS['multistim']:
         raise MultistimNotAllowedException
 
-    if ("FR" not in experiment) and ("PAL" not in experiment):
-        raise RuntimeError("Only PAL, FR, and catFR experiments are currently"
-                           "implemented")
-
     # Note: All of these pairs variables are of type OrderedDict, which is
     # crucial for preserving the initial order of the electrodes in the
     # config file
@@ -117,6 +113,9 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
                                                 extended_blanking)
         return config_path.compute()
 
+    if ("FR" not in experiment) and ("PAL" not in experiment):
+        raise RuntimeError("Only PAL, FR, and catFR experiments are currently"
+                           "implemented")
     kwargs = exp_params.to_dict()
 
     all_task_events = build_training_data(subject, experiment, paths, **kwargs)

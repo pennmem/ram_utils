@@ -22,5 +22,12 @@ class MultistimNotAllowedException(Exception):
     """
 
 
+class UnableToReloadClassifierException(Exception):
+    """
+        Raised when processing cannot load or use the actual classifier from
+        a session
+    """
+
+
 class MissingFileError(Exception):
     """Raised when a required file doesn't appear to exist."""

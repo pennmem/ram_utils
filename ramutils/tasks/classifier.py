@@ -140,8 +140,8 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
         probs = perform_lolo_cross_validation(classifier, pow_mat, events,
                                               recalls, **kwargs)
 
-        # Store model output statistics
-        classifier_summary.populate(recalls, probs, permuted_auc_values)
+        classifier_summary.populate(encoding_recalls, probs,
+                                    permuted_auc_values)
 
     logger.info("Permutation test p-value = %f", classifier_summary.pvalue)
     recall_prob = classifier.predict_proba(pow_mat)[:, 1]
