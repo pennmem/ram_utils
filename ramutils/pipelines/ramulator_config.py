@@ -39,6 +39,8 @@ def make_stim_params(subject, anodes, cathodes, min_amplitudes=None,
 
     stim_params = []
 
+    # TODO: Fail smarter if the label cannot be found
+    #  in the jacksheet
     for i in range(len(anodes)):
         anode = anodes[i]
         cathode = cathodes[i]
@@ -108,29 +110,24 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
                                                 excluded_pairs)
         return config_path.compute()
 
+    if ("FR" not in experiment) and ("PAL" not in experiment):
+        raise RuntimeError("Only PAL, FR, and catFR experiments are currently"
+                           "implemented")
     kwargs = exp_params.to_dict()
-    events = preprocess_events(subject,
-                               experiment,
-                               kwargs['baseline_removal_start_time'],
-                               kwargs['retrieval_time'],
-                               kwargs['empty_epoch_duration'],
-                               kwargs['pre_event_buf'],
-                               kwargs['post_event_buf'],
-                               encoding_only=kwargs['encoding_only'],
-                               combine_events=kwargs['combine_events'],
-                               root=paths.root)
+
+    all_task_events = build_training_data(subject, experiment, paths, **kwargs)
 
     # FIXME: If PTSA is updated to not remove events behind this scenes, this
     # won't be necessary. Or, if we can remove bad events before passing to
     # compute powers, then we won't have to catch the events
-    powers, task_events = compute_normalized_powers(events,
-                                                    **kwargs)
+    powers, final_task_events = compute_normalized_powers(all_task_events,
+                                                          **kwargs)
     reduced_powers = reduce_powers(powers, used_pair_mask, len(kwargs['freqs']))
 
-    sample_weights = get_sample_weights(task_events, **kwargs)
+    sample_weights = get_sample_weights(all_task_events, **kwargs)
 
     classifier = train_classifier(reduced_powers,
-                                  task_events,
+                                  final_task_events,
                                   sample_weights,
                                   kwargs['C'],
                                   kwargs['penalty_type'],
@@ -138,14 +135,14 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
 
     cross_validation_results = perform_cross_validation(classifier,
                                                         reduced_powers,
-                                                        task_events,
+                                                        final_task_events,
                                                         kwargs['n_perm'],
                                                         **kwargs)
 
     container = serialize_classifier(classifier,
                                      final_pairs,
                                      reduced_powers,
-                                     task_events,
+                                     final_task_events,
                                      sample_weights,
                                      cross_validation_results,
                                      subject)

@@ -1,0 +1,43 @@
+<div>
+  <h2>Bayesian optimization</h2>
+  <table class="table table-striped table-hover">
+    <caption>
+      Bayesian optimization results.
+    </caption>
+    <thead>
+      <th>Stim pair</th>
+      <th>Best amplitude [mA]</th>
+      <th>Predicted delta classifier</th>
+      <th>SE</th>
+      <th>SNR</th>
+    </thead>
+    <tbody>
+      {% for pair, data in bayesian_optimization_results['channels'].items() %}
+        <tr>
+          <td>{{ pair }}</td>
+          <td>{{ '{:.2f}'.format(data['amplitude']) }}</td>
+          <td>{{ '{:.3f}'.format(data['delta_classifier']) }}</td>
+          <td>{{ '{:.3f}'.format(data['error']) }}</td>
+          <td>{{ '{:.3f}'.format(data['snr']) }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <ul>
+    <li>Estimated best location: {{ bayesian_optimization_results['best_loc'] }}</li>
+    <li>Estimated best amplitude: {{ bayesian_optimization_results['best_ampl'] }} mA</li>
+    <li>Between-location p-value: {{ bayesian_optimization_results['p_values']['between']|pvalue }}</li>
+    <li>p-value against sham: {{ bayesian_optimization_results['p_values']['sham']|pvalue }}</li>
+  </ul>
+
+  {% if bayesian_optimization_results['tie'] %}
+    <div class="alert alert-warning">
+      Result is tied. The location with the lower standard error was selected.
+    </div>
+  {% else %}
+    <div class="alert alert-success">
+      An optimal location was found!
+    </div>
+  {% endif %}
+</div>

@@ -31,6 +31,9 @@ def get_sample_weights(events, **kwargs):
     if 'scheme' not in kwargs:
         scheme = determine_weighting_scheme_from_events(events)
 
+    else:
+        scheme = kwargs['scheme']
+
     if scheme not in ['PAL', 'FR', 'EQUAL']:
         raise NotImplementedError("The requested weighting scheme has not "
                                   "been implemented.")

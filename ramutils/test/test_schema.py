@@ -5,8 +5,7 @@ from numpy.testing import assert_equal
 import h5py
 
 from traits.api import Array, String
-
-from ramutils.schema import Schema
+from traitschema import Schema
 
 
 class SomeSchema(Schema):

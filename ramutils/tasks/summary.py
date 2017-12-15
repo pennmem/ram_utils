@@ -6,6 +6,8 @@ results.
 import numpy as np
 
 from ._wrapper import task
+from ramutils.events import validate_single_experiment, validate_single_session, select_math_events, \
+    extract_experiment_from_events, extract_sessions
 from ramutils.exc import *
 from ramutils.log import get_logger
 from ramutils.reports.summary import *
@@ -13,27 +15,34 @@ from ramutils.reports.summary import *
 logger = get_logger()
 
 __all__ = [
-    'summarize_session',
+    'summarize_sessions',
+    'summarize_math',
+    'summarize_stim_sessions'
 ]
 
 
 @task()
-def summarize_session(events):
-    """Generate a summary of a single experiment session.
+def summarize_sessions(all_events, task_events, joint=False):
+    """Generate a summary of by unique session/experiment
 
     Parameters
     ----------
-    events : np.recarray
-        Events from a single
+    all_events: np.recarray
+        Full set of events
+    task_events : np.recarray
+        Event subset used for classifier training
+    joint: Bool
+        Indicator for if a joint report is being created. This will disable
+        checks for single-experiment events
 
     Returns
     -------
-    summary : SessionSummary
-        Summary object for the proper experiment type.
+    summary : list
+        List of SessionSummary objects for the proper experiment type.
 
     Raises
     ------
-    TooManySessionsError
+    TooManyExperimentsError
         If the events span more than one session.
 
     Notes
@@ -43,29 +52,77 @@ def summarize_session(events):
     FIXME: make work with all experiments
 
     """
-    sessions = np.unique(events.session)
-    if len(sessions) != 1:
-        raise TooManySessionsError("events should be pre-filtered to be from a single session")
 
-    experiments = np.unique(events.experiment)
-    if len(experiments) != 1:
-        raise TooManyExperimentsError("events should only come from one experiment")
+    if not joint:
+        validate_single_experiment(task_events)
 
-    # session = sessions[0]
-    experiment = experiments[0]
+    # Since this takes 'cleaned' task events, we know the session numbers
+    # have been made unique if cross-experiment events are given
+    sessions = extract_sessions(task_events)
 
-    # FIXME: recall_probs
-    if experiment in ['FR1']:
-        summary = FRSessionSessionSummary()
-        summary.populate(events)
+    summaries = []
+    for session in sessions:
+        experiment = extract_experiment_from_events(task_events)[0]
+        # FIXME: recall_probs
+        if experiment in ['FR1', 'catFR1']:
+            summary = FRSessionSummary()
 
-    # FIXME: recall_probs, ps4
-    elif experiment in ['FR5']:
-        summary = FR5SessionSummary()
-        summary.populate(events)
+        # FIXME: recall_probs, ps4
+        elif experiment in ['FR5']:
+            summary = FR5SessionSummary()
 
-    # FIXME: other experiments
-    else:
-        raise UnsupportedExperimentError("Unsupported experiment: {}".format(experiment))
+        # FIXME: other experiments
+        else:
+            raise UnsupportedExperimentError("Unsupported experiment: {}".format(experiment))
 
-    return summary
+        summary.populate(task_events[task_events.session == session],
+                         raw_events=all_events[all_events.session == session])
+        summaries.append(summary)
+
+    return summaries
+
+
+@task()
+def summarize_math(events, joint=False):
+    """ Generate a summary math event summary of a single experiment session
+
+    Parameters
+    ----------
+    events: np.recarray
+        Events from single experiment session
+    joint: Bool
+        Indicates if the given events are part of a joint event, and therefore
+        multiple experiments should be allowed
+
+    Returns
+    -------
+    summary: list
+        List of MathSummary objects
+
+    """
+    if not joint:
+        validate_single_experiment(events)
+
+    math_events = select_math_events(events)
+    if len(math_events) == 0:
+        raise RuntimeError("No math events found when trying to summarize math "
+                           "distractor period")
+
+    sessions = extract_sessions(math_events)
+    summaries = []
+    for session in sessions:
+        summary = MathSummary()
+        summary.populate(math_events[math_events.session == session])
+        summaries.append(summary)
+
+    return summaries
+
+
+@task()
+def summarize_stim_sessions():
+    return
+
+
+
+
+
