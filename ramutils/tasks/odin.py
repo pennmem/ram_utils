@@ -37,13 +37,14 @@ logger = get_logger()
 
 @task(cache=False)
 def generate_electrode_config(subject, paths, anodes=None, cathodes=None,
-                              localization=0, montage=0):
+                              localization=0, montage=0,
+                              default_surface_area=0.010):
     """Generate electrode configuration files (CSV and binary).
 
     Parameters
     ----------
     subject : str
-        Subject ID
+        Subjebct ID
     paths : FilePaths
     anodes : List[str]
         List of stim anode labels.
@@ -53,6 +54,9 @@ def generate_electrode_config(subject, paths, anodes=None, cathodes=None,
         Localization number (default: 0)
     montage : int
         Montage number (default: 0)
+    default_surface_area : float
+        Default surface area to set all electrodes to in mm^2. Only used if no
+        area file can be found.
 
     Returns
     -------
@@ -68,12 +72,18 @@ def generate_electrode_config(subject, paths, anodes=None, cathodes=None,
     """
     docs_dir = os.path.join(paths.root, 'data', 'eeg', subject, 'docs')
     jacksheet_filename = os.path.join(docs_dir, 'jacksheet.txt')
-    area_filename = os.path.join(docs_dir, 'area.txt')
+    area = os.path.join(docs_dir, 'area.txt')
 
-    if not os.path.exists(area_filename):
-        raise MissingFileError("No surface area file (area.txt) found next to jacksheet.txt!")
+    if not os.path.exists(area):
+        if paths.area_file is not None:
+            area = paths.area_file
+        else:
+            logger.warning("No area file found. "
+                           "Using default value of %f for all electrodes!",
+                           default_surface_area)
+            area = default_surface_area
 
-    ec = ElectrodeConfig.from_jacksheet(jacksheet_filename, subject, area=area_filename)
+    ec = ElectrodeConfig.from_jacksheet(jacksheet_filename, subject, area=area)
 
     if anodes is not None:
         assert cathodes is not None

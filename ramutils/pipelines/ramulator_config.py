@@ -67,7 +67,7 @@ def make_stim_params(subject, anodes, cathodes, min_amplitudes=None,
 
 def make_ramulator_config(subject, experiment, paths, stim_params,
                           exp_params=None, vispath=None, extended_blanking=True,
-                          localization=0, montage=0):
+                          localization=0, montage=0, default_surface_area=0.010):
     """ Generate configuration files for a Ramulator experiment
 
     Parameters
@@ -87,12 +87,16 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
         Whether to enable extended blanking on the ENS (default: True).
     localization : int
         Localization number
-    Montage : int
+    montage : int
         Montage number
+    default_surface_area : float
+        Default surface area to set all electrodes to in mm^2. Only used if no
+        area file can be found.
 
     Returns
     -------
     The path to the generated configuration zip file.
+
     """
     if len(stim_params) > 1 and experiment not in EXPERIMENTS['multistim']:
         raise MultistimNotAllowedException

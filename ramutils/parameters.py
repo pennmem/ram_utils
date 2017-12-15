@@ -45,6 +45,10 @@ class FilePaths(object):
         Path to ``excluded_pairs.json``.
     electrode_config_file : str
         Path to electrode config file.
+    area_file : str
+        Path to surface area file. When generating Odin configuration files and
+        not defined, the default behavior is to look in the same directory as
+        the jacksheet for a file named ``area.txt``.
 
     """
     def __init__(self, **kwargs):
@@ -62,6 +66,7 @@ class FilePaths(object):
         self.pairs = makepath('pairs')
         self.excluded_pairs = makepath('excluded_pairs')
         self.electrode_config_file = makepath('electrode_config_file')
+        self.area_file = makepath('area_file')
 
 
 class ExperimentParameters(Schema):

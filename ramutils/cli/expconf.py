@@ -33,6 +33,14 @@ parser.add_argument('--no-extended-blanking', action='store_true', help='disable
 # parser.add_argument('--pulse-frequencies', '-f', type=float, nargs='+',
 #                     help='stim pulse frequencies (one to use same value)')
 
+# if we don't find area.txt in the same place as the jacksheet, then look
+# at the --area-file option or use a default value
+area_group = parser.add_mutually_exclusive_group(required=False)
+area_group.add_argument('--default-area', '-A', type=float,
+                        help='default surface area to use for all contacts')
+area_group.add_argument('--area-file', type=str,
+                        help='path to area.txt file relative to root')
+
 parser.add_argument('--clear-log', action='store_true', default=False,
                     help='clear the log')
 
@@ -136,13 +144,21 @@ def main(input_args=None):
     else:
         stim_params = []
 
+    # Override area file path if necessary...
+    if args.area_file is not None:
+        paths.area_file = osp.join(paths.root, args.area_file)
+
+    # ... or set default surface area
+    default_surface_area = 0.010 if args.default_area is not None else args.default_area
+
     # Generate!
     with timer():
         make_ramulator_config(args.subject, args.experiment, paths, stim_params,
                               params, args.vispath,
                               extended_blanking=(not args.no_extended_blanking),
                               localization=args.localization,
-                              montage=args.montage)
+                              montage=args.montage,
+                              default_surface_area=default_surface_area)
 
 
 if __name__ == "__main__":  # pragma: nocover
@@ -150,7 +166,7 @@ if __name__ == "__main__":  # pragma: nocover
     dest = "scratch/ramutils2/demo"
 
     main([
-        "-s", "R1347D", "-x", "CatFR1",
+        "-s", "R1347D", "-x", "CatFR1", "-A", "0.5",
         "--root", root, "--dest", dest, "--force-rerun"
     ])
 
