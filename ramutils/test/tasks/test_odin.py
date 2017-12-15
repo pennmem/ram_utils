@@ -87,7 +87,8 @@ def test_generate_ramulator_config(experiment):
 
     stim_params = [
         StimParameters(
-            label=pair.label,
+            anode_label=pair.label.split('-')[0],
+            cathode_label=pair.label.split('-')[1],
             anode=pair.anode,
             cathode=pair.cathode
         )
