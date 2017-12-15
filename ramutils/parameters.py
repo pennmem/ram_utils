@@ -38,6 +38,8 @@ class FilePaths(object):
         Path to ``pairs.json``.
     excluded_pairs : str
         Path to ``excluded_pairs.json``.
+    electrode_config_file : str
+        Path to electrode config file.
 
     """
     def __init__(self, **kwargs):
@@ -54,6 +56,7 @@ class FilePaths(object):
         self.dest = makepath('dest')
         self.pairs = makepath('pairs')
         self.excluded_pairs = makepath('excluded_pairs')
+        self.electrode_config_file = makepath('electrode_config_file')
 
 
 class ExperimentParameters(Schema):
