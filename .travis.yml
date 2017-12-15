@@ -32,4 +32,5 @@ install:
   - python setup.py install
 script:
   - python -m pytest -m "not rhino" --cov
+after_success:
   - codecov
