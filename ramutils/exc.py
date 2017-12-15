@@ -31,3 +31,7 @@ class UnableToReloadClassifierException(Exception):
 
 class MissingFileError(Exception):
     """Raised when a required file doesn't appear to exist."""
+
+
+class CommandLineError(Exception):
+    """Raised when there are CLI-related errors."""
