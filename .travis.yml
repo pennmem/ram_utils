@@ -1,9 +1,7 @@
 language: python
 python:
   - "2.7"
-# FIXME: enable modern Python support
-#  - "3.5"
-#  - "3.6"
+  - "3.6"
 notifications:
   email: false
 
@@ -23,13 +21,13 @@ install:
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
   - conda info -a
-  - conda env create --file conda_environment.yaml
+  - conda create -n ramutils python=$TRAVIS_PYTHON_VERSION dask h5py matplotlib numpy pandas pytables pytest pytest-cov scikit-learn scipy statsmodels traits
   - source activate ramutils
-  - pip install git+https://github.com/pennmem/classiflib.git  # FIXME: conda package
-  - pip install git+https://github.com/pennmem/bptools.git  # FIXME: conda package
-#  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy pandas
-#  - source activate test-environment
-#  - pip install -r requirements.txt
+  - conda install -y -c pennmem ptsa classiflib bptools traitschema
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      conda install -y mock futures;
+    fi
+  - python --version
   - pip install codecov
   - python setup.py install
 script:

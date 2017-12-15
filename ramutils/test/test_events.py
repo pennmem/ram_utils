@@ -3,7 +3,6 @@ import random
 import pytest
 
 from pkg_resources import resource_filename
-from sklearn.externals import joblib
 
 from ramutils.events import *
 from ramutils.parameters import FRParameters, PALParameters
@@ -19,21 +18,22 @@ class TestEvents:
         cls.n_word, cls.n_rec_word, cls.n_rec_base = (
             [random.randint(1, 10) for _ in range(3)])
 
-        data = [('FR1', 0, -1, 'WORD', 1000 + t, 0, 0) for t in range(
+        data = [('FR1', 0, -1, 'WORD', 1000 + t, 0, 0, True) for t in range(
             cls.n_word)]
-        data += [('FR1', 0, 0, 'REC_WORD', 1000 + t + cls.n_word, 0, -1) for
+        data += [('FR1', 0, 0, 'REC_WORD', 1000 + t + cls.n_word, 0, -1, False) for
                  t in range(cls.n_rec_word)]
         data += [('FR1', 0, 0, 'REC_BASE', 1000 + t + cls.n_word +
-                  cls.n_rec_word, 0, 0) for t in range(cls.n_rec_base)]
+                  cls.n_rec_word, 0, 0, False) for t in range(cls.n_rec_base)]
 
         dtype = [
-            ('experiment', '|S256'),
+            ('experiment', '|U256'),
             ('session', '<i8'),
             ('list',  '<i8'),
-            ('type', '|S256'),
+            ('type', '|U256'),
             ('mstime', '<i8'),
             ('intrusion', '<i8'),
-            ('eegoffset', '<i8')
+            ('eegoffset', '<i8'),
+            ('recalled', '?')
         ]
 
         cls.test_data = np.array(data, dtype=dtype).view(np.recarray)
@@ -67,6 +67,13 @@ class TestEvents:
         combined_events = concatenate_events_for_single_experiment([fr_events,
                                                                     fr_events])
         assert combined_events.shape == (2*len(fr_events),)
+        return
+
+    def test_extract_experiment(self):
+        experiment = extract_experiment_from_events(self.test_data)
+        assert len(experiment) == 1
+        assert 'FR1' in experiment
+        assert 'catFR1' not in experiment
         return
 
     def test_concatenate_events_across_experiments(self):
@@ -119,7 +126,7 @@ class TestEvents:
         return
 
     def test_insert_baseline_retrieval_events(self):
-        # TODO: This is another somehwat complicated algorithm to test
+        # TODO: This is another somewhat complicated algorithm to test
         return
 
     def test_remove_incomplete_lists(self):
@@ -176,7 +183,7 @@ class TestEvents:
         # rases a runtime error
         data = [('WORD', t * 1001, 0, 0) for t in range(5)]
         dtype = [
-            ('type', '|S256'),
+            ('type', '|U256'),
             ('mstime', '<i8'),
             ('intrusion', '<i8'),
             ('eegoffset', '<i8')
@@ -207,11 +214,21 @@ class TestEvents:
         assert len(vocalization_events) == self.n_rec_word
         return
 
+    def test_get_recall_events_mask(self):
+        recall_mask = get_recall_events_mask(self.test_data)
+        assert sum(recall_mask) == self.n_word
+        return
+
+    def test_append_field(self):
+        appended_data = add_field(self.test_data, 'item_name', 'X')
+        assert 'item_name' in appended_data.dtype.names
+        return
+
     # Four possible partitions. Be sure to check all
     def test_partition_events(self):
         dtypes = [
-            ('experiment', '|S256'),
-            ('type', '|S256')
+            ('experiment', '|U256'),
+            ('type', '|U256')
         ]
         test_fr_encoding = np.array([('FR1', 'WORD')], dtype=dtypes).view(
             np.recarray)
@@ -246,68 +263,6 @@ class TestEvents:
                                                           test_pal_encoding,
                                                           test_pal_retrieval]).view(np.recarray))
         assert sum([len(v) for k, v in all_partitions.items()]) == 4
-
-        return
-
-    @pytest.mark.parametrize("subject, experiment, parameters, encoding_only, "
-                             "combine_events", [
-        ("R1348J", "FR6", FRParameters, False, True),
-        ("R1350D", "FR6", FRParameters, False, True),
-        ("R1353N", "PAL6", PALParameters, False, True),
-        ("R1354E", "FR6", FRParameters, True, True),
-        ("R1354E", "FR6", FRParameters, False, True),
-        ("R1016M", "PAL6", PALParameters, True, True),
-        ("R1016M", "PAL6", PALParameters, True, False),
-        ("R1016M", "PAL6", PALParameters, False, True),
-        ("R1016M", "PAL6", PALParameters, False, False),
-    ])
-    def test_preprocess_events(self, subject, experiment, parameters,
-                               encoding_only, combine_events):
-        parameters = parameters().to_dict()
-        events = preprocess_events(subject,
-                                   experiment,
-                                   parameters['baseline_removal_start_time'],
-                                   parameters['retrieval_time'],
-                                   parameters['empty_epoch_duration'],
-                                   parameters['pre_event_buf'],
-                                   parameters['post_event_buf'],
-                                   encoding_only=encoding_only,
-                                   combine_events=combine_events,
-                                   root=datafile(''))
-        assert len(events) > 0
-
-        if encoding_only:
-            assert "REC_EVENT" not in np.unique(events.type)
-        else:
-            assert "REC_EVENT" in np.unique(events.type)
-
-        if combine_events and subject == "R1016M":
-            # There are some experiment fields that are blank, so checking
-            # that there are two unique experiment types would fail
-            assert len(np.unique(events.experiment)) > 1
-
-        return
-
-    @pytest.mark.parametrize("subject, parameters, experiment", [
-        ("R1354E", FRParameters, "FR6"),  # catFR and FR
-        ("R1350D", FRParameters, "FR6"),  # FR only
-        ("R1348J", FRParameters, "FR6"),  # catFR only
-        ("R1353N", PALParameters, "PAL6")  # PAL only
-    ])
-    def test_regression_event_processing(self, subject, parameters, experiment):
-        parameters = parameters().to_dict()
-
-        old_events = np.load(datafile('/input/events/{}_task_events.npy'.format(
-            subject))).view(np.recarray)
-        new_events = preprocess_events(subject,
-                                       experiment,
-                                       parameters['baseline_removal_start_time'],
-                                       parameters['retrieval_time'],
-                                       parameters['empty_epoch_duration'],
-                                       parameters['pre_event_buf'],
-                                       parameters['post_event_buf'],
-                                       root=datafile(''))
-        assert len(old_events) == len(new_events)
 
         return
 
