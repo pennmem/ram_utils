@@ -55,6 +55,7 @@ def test_generate_electrode_config(tmpdir):
     cathodes = None
 
     path = generate_electrode_config(subject, paths, anodes, cathodes).compute()
+    assert isinstance(path, FilePaths)
 
 
 def test_generate_pairs_from_electrode_config():

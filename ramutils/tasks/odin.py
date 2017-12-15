@@ -24,7 +24,11 @@ from ramutils.log import get_logger
 from ramutils.tasks import task
 from ramutils.utils import reindent_json
 
-__all__ = ['generate_pairs_from_electrode_config', 'generate_ramulator_config']
+__all__ = [
+    'generate_electrode_config',
+    'generate_pairs_from_electrode_config',
+    'generate_ramulator_config',
+]
 
 CLASSIFIER_VERSION = "1.0.2"
 
@@ -52,8 +56,9 @@ def generate_electrode_config(subject, paths, anodes=None, cathodes=None,
 
     Returns
     -------
-    csv_path : str
-        Path to saved CSV config file.
+    paths : FilePaths
+        Updated :class:`FilePaths` object with path to the electrode config file
+        defined.
 
     Notes
     -----
@@ -89,7 +94,8 @@ def generate_electrode_config(subject, paths, anodes=None, cathodes=None,
     ec.to_bin(bin_path)
     logger.info("Wrote binary electrode config: %s", bin_path)
 
-    return csv_path
+    paths.electrode_config_file = csv_path
+    return paths
 
 
 # FIXME: logic for generating pairs should be in bptools
