@@ -3,9 +3,7 @@ from __future__ import print_function
 from collections import namedtuple
 import functools
 import json
-import os
 import os.path as osp
-import shutil
 from zipfile import ZipFile
 
 from pkg_resources import resource_string, resource_filename
@@ -21,7 +19,7 @@ from ramutils.tasks.odin import (
 )
 from ramutils.test import Mock, patch
 import ramutils.test.test_data
-from ramutils.utils import touch
+from ramutils.utils import touch, mkdir_p
 
 
 datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
@@ -43,8 +41,8 @@ def test_generate_electrode_config(tmpdir):
     )
     dest = 'scratch'
 
-    os.makedirs(docs_dir)
-    os.makedirs(dest)
+    mkdir_p(docs_dir)
+    mkdir_p(str(tmpdir.join(dest)))
 
     with open(osp.join(docs_dir, 'jacksheet.txt'), 'wb') as f:
         f.write(resource_string('ramutils.test.test_data', '{}_jacksheet.txt'.format(subject)))
