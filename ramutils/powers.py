@@ -240,19 +240,29 @@ def normalize_powers_by_session(pow_mat, events):
 
 
 def reshape_powers_to_3d(powers, n_frequencies):
-    """ Make power matrix a 3D structure: n_events x n_electrodes x n_frequencies """
+    """
+        Make power matrix a 3D structure:
+        n_events x n_electrodes x n_frequencies
+    """
     reshaped_powers = powers.reshape((len(powers), -1, n_frequencies))
     return reshaped_powers
 
 
 def reshape_powers_to_2d(powers):
-    """ Make power matrix a 2D structure n_events x (n_electrodes x n_frequencies) """
+    """
+        Make power matrix a 2D structure
+        n_events x (n_electrodes x n_frequencies)
+    """
     reshaped_powers = powers.reshape((len(powers), -1))
     return reshaped_powers
 
 
-def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events, frequencies, hfa_cutoff=65):
-    """ Calculate tstats and pvalues from a ttest comparing HFA activity of recalled versus non-recalled items"""
+def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events,
+                              frequencies, hfa_cutoff=65):
+    """
+        Calculate tstats and pvalues from a ttest comparing HFA activity of
+        recalled versus non-recalled items
+    """
     powers_3d = reshape_powers_to_3d(normalized_powers, len(frequencies))
     hfa_mask = [True if freq > hfa_cutoff else False for freq in frequencies]
     hfa_powers = powers_3d[:, :, hfa_mask]

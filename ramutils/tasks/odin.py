@@ -82,6 +82,12 @@ def generate_pairs_from_electrode_config(subject, paths):
 
         return pairs_from_ec
 
+    logger.warning('Pairs not generated because hardware bipolar mode was '
+                   'not detected')
+    # TODO: This should be abple to return a dictionary of recorded electrodes
+    # for monopolar recordings
+    return
+
 
 def _make_experiment_specific_data_section(experiment, stim_params,
                                            classifier_file,

@@ -30,7 +30,8 @@ class TestMontage:
         cls.test_pairs_recarray = np.rec.fromrecords([
             ("9", "10", "LAD1", "LAD2"),
             ("11", "12", "LAD3", "LAD4")
-        ], dtype=dtypes.pairs)
+        ], dtype=dtypes.pairs, names=['contact0', 'contact1', 'label0',
+                                      'label1'])
 
         cls.stim_params = [StimParameters(label='LAD1-LAD2',
                                           anode=9,
@@ -91,6 +92,28 @@ class TestMontage:
 
         return
 
+    def test_compare_recorded_with_all_pairs(self):
+        ordered_pairs = OrderedDict()
+        ordered_pairs['LAD1-LAD2'] = {'channel_1': 9, 'channel_2': 10}
+        ordered_pairs['LAD3-LAD4'] = {'channel_1': 11, 'channel_2': 12}
+        mock_pairs = OrderedDict({'test_subject': {'pairs': ordered_pairs}})
+
+        mask = compare_recorded_with_all_pairs(mock_pairs,
+                                               self.test_pairs_recarray)
+        assert sum(mask) == 2
+
+        ordered_pairs = OrderedDict()
+        ordered_pairs['LAD1-LAD2'] = {'channel_1': 9, 'channel_2': 10}
+        ordered_pairs['LAD3-LAD4'] = {'channel_1': 11, 'channel_2': 12}
+        ordered_pairs['LAD4-LAD5'] = {'channel_1': 13, 'channel_2': 14}
+        mock_pairs = OrderedDict({'test_subject': {'pairs': ordered_pairs}})
+
+        mask = compare_recorded_with_all_pairs(mock_pairs,
+                                               self.test_pairs_recarray)
+        assert sum(mask) == 2
+
+        return
+
     @pytest.mark.parametrize('subject', [
         'R1354E',
     ])
@@ -107,7 +130,8 @@ class TestMontage:
         with open(datafile('/input/configs/{}_pairs_from_ec.json'.format(subject))) as f:
             pairs_from_ec = json.load(f)
 
-        metadata_table = build_montage_metadata_table(subject, pairs_from_ec, root=datafile(''))
+        metadata_table = build_montage_metadata_table(subject, pairs_from_ec,
+                                                      root=datafile(''))
         assert len(metadata_table) == len(pairs_from_ec[subject]['pairs'].keys())
 
         return

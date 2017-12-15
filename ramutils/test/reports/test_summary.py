@@ -195,7 +195,7 @@ class TestStimSessionSummary:
     def test_populate(self, fr5_events, is_ps4_session):
         """Basic tests that data was populated correctly from events."""
         summary = StimSessionSummary()
-        summary.populate(fr5_events, is_ps4_session)
+        summary.populate(fr5_events, is_ps4_session=is_ps4_session)
         df = summary.to_dataframe()
 
         assert len(df[df.phase == 'BASELINE']) == 36
