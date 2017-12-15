@@ -92,6 +92,8 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
     if len(stim_params) > 1 and experiment not in EXPERIMENTS['multistim']:
         raise MultistimNotAllowedException
 
+    paths = generate_electrode_config(subject, paths)
+
     # Note: All of these pairs variables are of type OrderedDict, which is
     # crucial for preserving the initial order of the electrodes in the
     # config file
