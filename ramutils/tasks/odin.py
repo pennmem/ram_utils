@@ -81,7 +81,7 @@ def generate_electrode_config(subject, paths, anodes=None, cathodes=None,
         subject=subject, date=date, localization=localization, montage=montage,
         stim=('STIM' if anodes is not None else 'NOSTIM')
     )
-    csv_path = os.path.join(paths.dest, prefix + '.csv')
+    csv_path = os.path.join(paths.root, paths.dest, prefix + '.csv')
     bin_path = csv_path.replace('.csv', '.bin')
 
     ec.to_csv(csv_path)
