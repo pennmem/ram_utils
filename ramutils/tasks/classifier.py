@@ -246,8 +246,7 @@ def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
 
         # Manually pass in the weighting scheme here, otherwise the cross
         # validation procedures will try to determine it for you
-        classifier_copy = copy.deepcopy(classifier)
-        permuted_auc_values = permuted_lolo_cross_validation(classifier_copy,
+        permuted_auc_values = permuted_lolo_cross_validation(classifier,
                                                              reduced_session_powers,
                                                              session_events,
                                                              n_permutations,
@@ -272,9 +271,11 @@ def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
                                                          scheme='EQUAL',
                                                          **kwargs)
 
+    # TODO: Add cross-session summary once we have a way to identify/tag
+    # summary objects
     # cross_session_summary.populate(non_stim_recalls, all_predicted_probs,
     #                                permuted_auc_values)
     # classifier_summaries.append(cross_session_summary)
-    logger.info("Combined AUC: {}".format(cross_session_summary.auc))
+    # logger.info("Combined AUC: {}".format(cross_session_summary.auc))
 
     return classifier_summaries
