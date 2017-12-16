@@ -170,7 +170,7 @@ def compare_recorded_with_all_pairs(all_pairs, classifier_pairs):
 
     """
     used_pairs = classifier_pairs[["contact0", "contact1"]]
-    used_pairs = np.array([(int(a), int(b)) for a, b in used_pairs])
+    used_pairs = [(int(a), int(b)) for a, b in used_pairs]
 
     recorded_pairs = []
     subject = list(all_pairs.keys())[0]
@@ -180,9 +180,10 @@ def compare_recorded_with_all_pairs(all_pairs, classifier_pairs):
         pair_nums = (int(channel_1), int(channel_2))
         recorded_pairs.append(pair_nums)
 
-    recorded_pairs = np.array(recorded_pairs)
-    pair_mask = np.isin(recorded_pairs, used_pairs)
-    pair_mask = np.apply_along_axis(max, 1, pair_mask)
+    pair_mask = [True] * len(recorded_pairs)
+    for i, pair in enumerate(recorded_pairs):
+        if pair not in used_pairs:
+            pair_mask[i] = False
 
     return pair_mask
 
