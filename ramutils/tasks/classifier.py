@@ -1,5 +1,6 @@
 from __future__ import division
 
+import copy
 import numpy as np
 from classiflib import ClassifierContainer
 from sklearn.metrics import roc_auc_score
@@ -152,7 +153,7 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
 
 
 @task()
-def reload_used_classifiers(subject, experiment, sessions, root):
+def reload_used_classifiers(subject, experiment, events, root):
     """ Reload the actual classifiers used in each session of an experiment
 
     Parameters
@@ -169,6 +170,7 @@ def reload_used_classifiers(subject, experiment, sessions, root):
 
     """
     used_classifiers = []
+    sessions = extract_sessions(events)
     for session in sessions:
         try:
             classifier = reload_classifier(subject, experiment, session, root)
@@ -208,17 +210,25 @@ def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
                            'sessions have missing classifiers')
     recalls = events.recalled
 
+    # This takes care of sub-setting events to encoding non-stim events
     non_stim_mask = get_nonstim_events_mask(events)
+    non_stim_recalls = recalls[non_stim_mask]
 
     classifier_summaries = []
+    predicted_probs = []
     for i, session in enumerate(sessions):
         classifier_summary = ClassifierSummary()
 
+        # Be sure to work with a copy of the classifier object because it will
+        # be re-fit as part of the lolo cross validation and if you pass
+        # a reference, the AUCs will be wacky
         if classifiers[i] is None:
             classifier_container = retrained_classifier
+            logger.info("Using the retrained classifier for session {}".format(session))
 
         else:
             classifier_container = classifiers[i]
+            logger.info("Using actual classifier for session {}".format(session))
 
         classifier = classifier_container.classifier
         recorded_pairs = classifier_container.pairs
@@ -227,30 +237,44 @@ def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
 
         session_mask = (events.session == session)
         session_events = events[(session_mask & non_stim_mask)]
-        session_recalls = recalls[(session_mask & non_stim_mask)]
+        session_recalls = recalls[session_mask & non_stim_mask]
 
         session_powers = powers[(session_mask & non_stim_mask)]
-        session_powers = reduce_powers(session_powers, used_mask,
-                                       len(kwargs['freqs']))
+        reduced_session_powers = reduce_powers(session_powers,
+                                               used_mask,
+                                               len(kwargs['freqs']))
 
         # Manually pass in the weighting scheme here, otherwise the cross
         # validation procedures will try to determine it for you
-        permuted_auc_values = permuted_lolo_cross_validation(classifier,
-                                                             session_powers,
+        classifier_copy = copy.deepcopy(classifier)
+        permuted_auc_values = permuted_lolo_cross_validation(classifier_copy,
+                                                             reduced_session_powers,
                                                              session_events,
                                                              n_permutations,
                                                              scheme='EQUAL',
                                                              **kwargs)
 
-        probs = perform_lolo_cross_validation(classifier,
-                                              session_powers,
-                                              session_events,
-                                              session_recalls,
-                                              scheme='EQUAL',
-                                              **kwargs)
-
-        # Store model output statistics
-        classifier_summary.populate(session_recalls, probs, permuted_auc_values)
+        session_probs = classifier.predict_proba(reduced_session_powers)[:, 1]
+        predicted_probs.append(session_probs)
+        classifier_summary.populate(session_recalls, session_probs,
+                                    permuted_auc_values)
         classifier_summaries.append(classifier_summary)
+        logger.info('AUC for session {}: {}'.format(session,
+                                                    classifier_summary.auc))
+
+    all_predicted_probs = np.array(predicted_probs).flatten()
+
+    cross_session_summary = ClassifierSummary()
+    permuted_auc_values = permuted_loso_cross_validation(retrained_classifier.classifier,
+                                                         powers,
+                                                         events,
+                                                         n_permutations,
+                                                         scheme='EQUAL',
+                                                         **kwargs)
+
+    # cross_session_summary.populate(non_stim_recalls, all_predicted_probs,
+    #                                permuted_auc_values)
+    # classifier_summaries.append(cross_session_summary)
+    logger.info("Combined AUC: {}".format(cross_session_summary.auc))
 
     return classifier_summaries
