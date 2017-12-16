@@ -45,6 +45,14 @@ def permuted_lolo_cross_validation(classifier, powers, events, n_permutations, *
         List of AUCs from performing leave-one-list-out cross validation
         n_permutations times where the AUC is based on encoding events only
 
+    Notes
+    -----
+    Be careful when passing a classifier object to this function since it's
+    .fit() method will be called. If you use the classifier object after
+    calling this function, the internal state may have changed. To avoid this
+    problem, make a copy of the classifier object and pass the copy to this
+    function.
+
     """
     recalls = events.recalled
     permuted_recalls = np.array(recalls)
@@ -90,6 +98,13 @@ def perform_lolo_cross_validation(classifier, powers, events, recalls, **kwargs)
     probs: np.array
         Predicted probabilities for encoding events across all lists
 
+    Notes
+    -----
+    Be careful when passing a classifier object to this function since it's
+    .fit() method will be called. If you use the classifier object after
+    calling this function, the internal state may have changed. To avoid this
+    problem, make a copy of the classifier object and pass the copy to this
+    function.
     """
     # TODO: Evaluation should be only on encoding events
     encoding_mask = get_encoding_mask(events)
@@ -137,13 +152,19 @@ def permuted_loso_cross_validation(classifier, powers, events, n_permutations, *
         List of AUCs from performing leave-one-list-out cross validation
         n_permutations times where the AUCs are based on encoding events only
 
+    Notes
+    -----
+    Be careful when passing a classifier object to this function since it's
+    .fit() method will be called. If you use the classifier object after
+    calling this function, the internal state may have changed. To avoid this
+    problem, make a copy of the classifier object and pass the copy to this
+    function.
     """
     recalls = events.recalled
     sessions = np.unique(events.session)
 
     encoding_mask = get_encoding_mask(events)
 
-    probs = np.empty_like(recalls[encoding_mask], dtype=np.float)
     permuted_recalls = np.array(recalls)
     auc_results = np.empty(shape=n_permutations, dtype=np.float)
 
@@ -187,6 +208,13 @@ def perform_loso_cross_validation(classifier, powers, events, recalls, **kwargs)
     probs: np.array
         Predicted probabilities for encoding events across all sessions
 
+    Notes
+    -----
+    Be careful when passing a classifier object to this function since it's
+    .fit() method will be called. If you use the classifier object after
+    calling this function, the internal state may have changed. To avoid this
+    problem, make a copy of the classifier object and pass the copy to this
+    function.
     """
     sessions = np.unique(events.session)
     encoding_mask = get_encoding_mask(events)
