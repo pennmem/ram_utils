@@ -360,7 +360,8 @@ def select_column_subset(events):
     columns = [
         'serialpos', 'session', 'subject', 'rectime', 'experiment',
         'mstime', 'type', 'eegoffset', 'recalled', 'intrusion',
-        'montage', 'list', 'eegfile', 'msoffset', 'item_name', 'iscorrect'
+        'montage', 'list', 'eegfile', 'msoffset', 'item_name', 'iscorrect',
+        'phase'
     ]
     events = events[columns]
     return events
@@ -370,7 +371,7 @@ def select_pal_column_subset(events):
     columns = [
         'serialpos', 'session', 'subject', 'rectime', 'experiment',
         'mstime', 'type', 'eegoffset', 'recalled', 'intrusion',
-        'montage', 'list', 'eegfile', 'msoffset', 'iscorrect'
+        'montage', 'list', 'eegfile', 'msoffset', 'iscorrect', 'phase'
     ]
 
     events = events[columns]
