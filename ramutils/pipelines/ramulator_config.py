@@ -172,7 +172,7 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
                                             paths,
                                             ec_pairs,
                                             excluded_pairs,
-                                            params=exp_params,
+                                            exp_params=exp_params,
                                             extended_blanking=extended_blanking)
 
     if vispath is not None:

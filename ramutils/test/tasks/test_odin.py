@@ -123,7 +123,7 @@ def test_generate_ramulator_config(experiment):
         path = generate_ramulator_config(subject, experiment, container,
                                          stim_params, paths,
                                          excluded_pairs=excluded_pairs,
-                                         params=exp_params).compute()
+                                         exp_params=exp_params).compute()
 
     with ZipFile(path) as zf:
         members = zf.namelist()
