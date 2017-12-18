@@ -165,16 +165,9 @@ if __name__ == "__main__":  # pragma: nocover
     root = "~/mnt/rhino"
     dest = "scratch/ramutils2/demo"
 
-    main([
-        "-s", "R1347D", "-x", "CatFR1", "-A", "0.5",
-        "--root", root, "--dest", dest, "--force-rerun"
-    ])
-
     # main([
-    #     "-s", "R1364C", "-x", "CatFR5",
-    #     "--anodes", "AMY7", "--cathodes", "AMY8",
-    #     "--target-amplitudes", "0.5",
-    #     "--root", root, "--dest", "scratch/ramutils2/demo", "--force-rerun"
+    #     "-s", "R1347D", "-x", "CatFR1", "-A", "0.5",
+    #     "--root", root, "--dest", dest, "--force-rerun"
     # ])
 
     # main([
@@ -184,12 +177,12 @@ if __name__ == "__main__":  # pragma: nocover
     #     "--root", root, "--dest", dest, "--force-rerun"
     # ])
 
-    # main([
-    #     "-s", "R1374T", "-x", "CatFR5",
-    #     "--anodes", "LA7", "--cathodes", "LA8",
-    #     "--target-amplitudes", "0.5",
-    #     "--root", root, "--dest", dest, "--force-rerun"
-    # ])
+    main([
+        "-s", "R1374T", "-x", "CatFR5",
+        "--anodes", "LA7", "--cathodes", "LA8",
+        "--target-amplitudes", "0.5",
+        "--root", root, "--dest", dest, "--force-rerun"
+    ])
 
     # main([
     #     "-s", "R1365N", "-x", "PAL5",

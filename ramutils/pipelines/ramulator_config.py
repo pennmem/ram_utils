@@ -105,7 +105,8 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
     cathodes = [c.cathode_label for c in stim_params]
 
     paths = generate_electrode_config(subject, paths, anodes, cathodes,
-                                      localization, montage)
+                                      localization, montage,
+                                      default_surface_area)
 
     # Note: All of these pairs variables are of type OrderedDict, which is
     # crucial for preserving the initial order of the electrodes in the
