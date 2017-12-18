@@ -22,6 +22,7 @@ experiments = (
 parser = make_parser("Generate experiment configs for Ramulator", experiments)
 parser.add_argument('--localization', '-l', default=0, type=int, help='localization number (default: 0)')
 parser.add_argument('--montage', '-m', default=0, type=int, help='montage number (default: 0)')
+parser.add_argument('--electrode-config-file', '-e', type=str, help='path to existing electrode config CSV file')
 parser.add_argument('--anodes', '-a', nargs='+', help='stim anode labels')
 parser.add_argument('--cathodes', '-c', nargs='+', help='stim cathode labels')
 parser.add_argument('--min-amplitudes', nargs='+', type=float, help='minimum stim amplitudes')
@@ -105,10 +106,16 @@ def main(input_args=None):
         f.write('\\ \n'.join(output))  # add backslashes to allow copy-paste
         f.write('\n\n')
 
-    paths = FilePaths(
-        root=osp.expanduser(args.root),
-        dest=args.dest
-    )
+    paths_kwargs = {
+        'root': osp.expanduser(args.root),
+        'dest': args.dest,
+    }
+
+    # Override generating electrode config files if we specify -e
+    if args.electrode_config_file is not None:
+        paths_kwargs['electrode_config_file'] = args.electrode_config_file
+
+    paths = FilePaths(**paths_kwargs)
 
     # FIXME: figure out why MacOS won't work with sshfs-relative paths only here
     cachedir = osp.join(args.cachedir, 'cache')
@@ -181,6 +188,7 @@ if __name__ == "__main__":  # pragma: nocover
         "-s", "R1374T", "-x", "CatFR5",
         "--anodes", "LA7", "--cathodes", "LA8",
         "--target-amplitudes", "0.5",
+        "-e", "data/eeg/R1374T/behavioral/FR1/session_0/host_pc/20171207_163732/config_files/R1374T_06DEC2017L0M0NOSTIM.csv",
         "--root", root, "--dest", dest, "--force-rerun"
     ])
 
