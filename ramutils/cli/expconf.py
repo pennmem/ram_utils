@@ -122,11 +122,11 @@ def main(input_args=None):
 
     # Determine params based on experiment type
     if args.experiment == 'AmplitudeDetermination':
-        params = None
+        exp_params = None
     elif "FR" in args.experiment:
-        params = FRParameters()
+        exp_params = FRParameters()
     elif "PAL" in args.experiment:
-        params = PALParameters()
+        exp_params = PALParameters()
     else:
         raise RuntimeError("Somehow we got an unsupported experiment")
 
@@ -154,7 +154,7 @@ def main(input_args=None):
     # Generate!
     with timer():
         make_ramulator_config(args.subject, args.experiment, paths, stim_params,
-                              params, args.vispath,
+                              exp_params, args.vispath,
                               extended_blanking=(not args.no_extended_blanking),
                               localization=args.localization,
                               montage=args.montage,

@@ -349,7 +349,7 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
 @task(cache=False)
 def generate_ramulator_config(subject, experiment, container, stim_params,
                               paths, pairs=None, excluded_pairs=None,
-                              params=None, extended_blanking=True):
+                              exp_params=None, extended_blanking=True):
     """Create configuration files for Ramulator.
 
     In hardware bipolar mode, the neurorad pipeline generates a ``pairs.json``
@@ -369,7 +369,7 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
     excluded_pairs : dict
         Pairs excluded from the classifier (pairs that contain a stim contact
         and possibly some others)
-    params : ExperimentParameters
+    exp_params : ExperimentParameters
         All parameters used in training the classifier. This is partially
         redundant with some data stored in the ``container`` object.
     extended_blanking : bool
@@ -450,8 +450,8 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
     shutil.copy(bin, conffile(os.path.basename(bin)))
 
     # Serialize experiment parameters
-    if params is not None:
-        params.to_hdf(os.path.join(config_dir_root, 'exp_params.h5'))
+    if exp_params is not None:
+        exp_params.to_hdf(os.path.join(config_dir_root, 'exp_params.h5'))
     else:
         if experiment not in no_classifier_experiments:
             warnings.warn("No ExperimentParameters object passed; "
