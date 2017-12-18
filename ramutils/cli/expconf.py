@@ -149,7 +149,7 @@ def main(input_args=None):
         paths.area_file = osp.join(paths.root, args.area_file)
 
     # ... or set default surface area
-    default_surface_area = 0.010 if args.default_area is not None else args.default_area
+    default_surface_area = 0.010 if args.default_area is None else args.default_area
 
     # Generate!
     with timer():
