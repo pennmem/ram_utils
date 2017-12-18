@@ -19,7 +19,8 @@ def build_training_data(subject, experiment, paths, sessions=None, **kwargs):
                                  rootdir=paths.root)
         cleaned_pal_events = clean_events(pal_events)
 
-    if ("FR" in experiment) or kwargs['combine_events']:
+    if (("FR" in experiment) and kwargs['combine_events']) or \
+            ("PAL" in experiment and kwargs['combined_events']):
         fr_events = load_events(subject, 'FR1', sessions=sessions,
                                 rootdir=paths.root)
         cleaned_fr_events = clean_events(fr_events,
