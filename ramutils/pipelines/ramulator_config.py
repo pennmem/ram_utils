@@ -118,14 +118,14 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
     # Special case handling of amplitude determination and record-only tasks
     if experiment in ["AmplitudeDetermination"] + EXPERIMENTS['record_only']:
         container = None
-        config_path = generate_ramulator_config(subject,
-                                                experiment,
-                                                container,
-                                                stim_params,
-                                                paths,
-                                                ec_pairs,
-                                                excluded_pairs,
-                                                extended_blanking)
+        config_path = generate_ramulator_config(subject=subject,
+                                                experiment=experiment,
+                                                container=container,
+                                                stim_params=stim_params,
+                                                paths=paths,
+                                                pairs=ec_pairs,
+                                                excluded_pairs=excluded_pairs,
+                                                extended_blanking=extended_blanking)
         return config_path.compute()
 
     if ("FR" not in experiment) and ("PAL" not in experiment):
@@ -165,13 +165,13 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
                                      cross_validation_results,
                                      subject)
 
-    config_path = generate_ramulator_config(subject,
-                                            experiment,
-                                            container,
-                                            stim_params,
-                                            paths,
-                                            ec_pairs,
-                                            excluded_pairs,
+    config_path = generate_ramulator_config(subject=subject,
+                                            experiment=experiment,
+                                            container=container,
+                                            stim_params=stim_params,
+                                            paths=paths,
+                                            pairs=ec_pairs,
+                                            excluded_pairs=excluded_pairs,
                                             exp_params=exp_params,
                                             extended_blanking=extended_blanking)
 

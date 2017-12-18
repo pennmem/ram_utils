@@ -361,7 +361,7 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
     ----------
     subject : str
     experiment : str
-    container : ClassifierContainer
+    container : ClassifierContainer or None
         serialized classifier
     stim_params : List[StimParameters]
         list of stimulation parameters
