@@ -31,7 +31,7 @@ def make_stim_params(subject, anodes, cathodes, min_amplitudes=None,
 
     Returns
     -------
-    stim_params : List[StimParams]
+    stim_params : List[StimParameters]
 
     """
     path = os.path.join(root, 'data', 'eeg', subject, 'docs', 'jacksheet.txt')
@@ -48,8 +48,8 @@ def make_stim_params(subject, anodes, cathodes, min_amplitudes=None,
         cathode_idx = jacksheet[jacksheet.label == cathode].index[0]
 
         params = StimParameters(
-            # FIXME: figure out better way to generate labels (read config file?)
-            label='_'.join([anode, cathode]),
+            anode_label=anode,
+            cathode_label=cathode,
             anode=anode_idx,
             cathode=cathode_idx
         )
@@ -66,7 +66,8 @@ def make_stim_params(subject, anodes, cathodes, min_amplitudes=None,
 
 
 def make_ramulator_config(subject, experiment, paths, stim_params,
-                          exp_params=None, vispath=None):
+                          exp_params=None, vispath=None, extended_blanking=True,
+                          localization=0, montage=0, default_surface_area=0.010):
     """ Generate configuration files for a Ramulator experiment
 
     Parameters
@@ -76,19 +77,36 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
     experiment : str
         Experiment to generate configuration file for
     paths : FilePaths
-    stim_params : List[StimParams]
+    stim_params : List[StimParameters]
         Stimulation parameters for this experiment.
     exp_params : ExperimentParameters
         Parameters for the experiment.
     vispath : str
         Path to save task graph visualization to if given.
+    extended_blanking : bool
+        Whether to enable extended blanking on the ENS (default: True).
+    localization : int
+        Localization number
+    montage : int
+        Montage number
+    default_surface_area : float
+        Default surface area to set all electrodes to in mm^2. Only used if no
+        area file can be found.
 
     Returns
     -------
     The path to the generated configuration zip file.
+
     """
     if len(stim_params) > 1 and experiment not in EXPERIMENTS['multistim']:
         raise MultistimNotAllowedException
+
+    anodes = [c.anode_label for c in stim_params]
+    cathodes = [c.cathode_label for c in stim_params]
+
+    paths = generate_electrode_config(subject, paths, anodes, cathodes,
+                                      localization, montage,
+                                      default_surface_area)
 
     # Note: All of these pairs variables are of type OrderedDict, which is
     # crucial for preserving the initial order of the electrodes in the
@@ -98,16 +116,17 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
     used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
     final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
 
-    # Special case handling of Amplitude determination
-    if experiment == "AmplitudeDetermination":
+    # Special case handling of amplitude determination and record-only tasks
+    if experiment in ["AmplitudeDetermination"] + EXPERIMENTS['record_only']:
         container = None
-        config_path = generate_ramulator_config(subject,
-                                                experiment,
-                                                container,
-                                                stim_params,
-                                                paths,
-                                                ec_pairs,
-                                                excluded_pairs)
+        config_path = generate_ramulator_config(subject=subject,
+                                                experiment=experiment,
+                                                container=container,
+                                                stim_params=stim_params,
+                                                paths=paths,
+                                                pairs=ec_pairs,
+                                                excluded_pairs=excluded_pairs,
+                                                extended_blanking=extended_blanking)
         return config_path.compute()
 
     if ("FR" not in experiment) and ("PAL" not in experiment):
@@ -147,14 +166,15 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
                                      cross_validation_results,
                                      subject)
 
-    config_path = generate_ramulator_config(subject,
-                                            experiment,
-                                            container,
-                                            stim_params,
-                                            paths,
-                                            ec_pairs,
-                                            excluded_pairs,
-                                            params=exp_params)
+    config_path = generate_ramulator_config(subject=subject,
+                                            experiment=experiment,
+                                            container=container,
+                                            stim_params=stim_params,
+                                            paths=paths,
+                                            pairs=ec_pairs,
+                                            excluded_pairs=excluded_pairs,
+                                            exp_params=exp_params,
+                                            extended_blanking=extended_blanking)
 
     if vispath is not None:
         config_path.visualize(filename=vispath)

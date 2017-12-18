@@ -33,7 +33,8 @@ class TestMontage:
         ], dtype=dtypes.pairs, names=['contact0', 'contact1', 'label0',
                                       'label1'])
 
-        cls.stim_params = [StimParameters(label='LAD1-LAD2',
+        cls.stim_params = [StimParameters(anode_label='LAD1',
+                                          cathode_label='LAD2',
                                           anode=9,
                                           cathode=10)
                            ]
@@ -123,6 +124,7 @@ class TestMontage:
         assert '11LD1-11LD2' in test_pairs
         return
 
+    @pytest.mark.skip(reason="data file doesn't include all necessary fields")
     @pytest.mark.parametrize('subject', [
         'R1354E'
     ])
@@ -136,6 +138,7 @@ class TestMontage:
 
         return
 
+    @pytest.mark.skip(reason="data file doesn't include all necessary fields")
     @pytest.mark.parametrize('subject', [
         'R1354E'
     ])
@@ -152,6 +155,3 @@ class TestMontage:
         assert 'right_only' not in merged._merge
 
         return
-
-
-

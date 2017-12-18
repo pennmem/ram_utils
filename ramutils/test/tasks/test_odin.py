@@ -13,10 +13,13 @@ import pytest
 from classiflib import ClassifierContainer
 
 from ramutils.parameters import StimParameters, FilePaths, FRParameters
-from ramutils.tasks.odin import generate_ramulator_config, generate_pairs_from_electrode_config
+from ramutils.tasks.odin import (
+    generate_ramulator_config, generate_electrode_config,
+    generate_pairs_from_electrode_config
+)
 from ramutils.test import Mock, patch
 import ramutils.test.test_data
-from ramutils.utils import touch
+from ramutils.utils import touch, mkdir_p
 
 
 datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
@@ -24,6 +27,35 @@ datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
 
 def jsondata(s):
     return json.loads(resource_string('ramutils.test.test_data', s))
+
+
+@pytest.mark.only
+def test_generate_electrode_config(tmpdir):
+    # Make rhino-like directory structure
+    subject = 'R1347D'
+    docs_dir = str(
+        tmpdir.join('data')
+              .join('eeg')
+              .join(subject)
+              .join('docs')
+    )
+    dest = 'scratch'
+
+    mkdir_p(docs_dir)
+    mkdir_p(str(tmpdir.join(dest)))
+
+    with open(osp.join(docs_dir, 'jacksheet.txt'), 'wb') as f:
+        f.write(resource_string('ramutils.test.test_data', '{}_jacksheet.txt'.format(subject)))
+
+    with open(osp.join(docs_dir, 'area.txt'), 'wb') as f:
+        f.write(resource_string('ramutils.test.test_data', '{}_area.txt'.format(subject)))
+
+    paths = FilePaths(root=str(tmpdir), dest=dest)
+    anodes = None
+    cathodes = None
+
+    path = generate_electrode_config(subject, paths, anodes, cathodes).compute()
+    assert isinstance(path, FilePaths)
 
 
 def test_generate_pairs_from_electrode_config():
@@ -55,7 +87,8 @@ def test_generate_ramulator_config(experiment):
 
     stim_params = [
         StimParameters(
-            label=pair.label,
+            anode_label=pair.label.split('-')[0],
+            cathode_label=pair.label.split('-')[1],
             anode=pair.anode,
             cathode=pair.cathode
         )
@@ -90,7 +123,7 @@ def test_generate_ramulator_config(experiment):
         path = generate_ramulator_config(subject, experiment, container,
                                          stim_params, paths,
                                          excluded_pairs=excluded_pairs,
-                                         params=exp_params).compute()
+                                         exp_params=exp_params).compute()
 
     with ZipFile(path) as zf:
         members = zf.namelist()
