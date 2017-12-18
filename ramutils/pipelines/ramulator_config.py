@@ -104,9 +104,13 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
     anodes = [c.anode_label for c in stim_params]
     cathodes = [c.cathode_label for c in stim_params]
 
-    paths = generate_electrode_config(subject, paths, anodes, cathodes,
-                                      localization, montage,
-                                      default_surface_area)
+    # If the electrode config path is defined, load it instead of creating a new
+    # one. This is useful if we want to make comparisons with old referencing
+    # schemes that are not currently implemented in bptools.
+    if paths.electrode_config_file is None:
+        paths = generate_electrode_config(subject, paths, anodes, cathodes,
+                                          localization, montage,
+                                          default_surface_area)
 
     # Note: All of these pairs variables are of type OrderedDict, which is
     # crucial for preserving the initial order of the electrodes in the
