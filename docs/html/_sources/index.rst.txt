@@ -11,7 +11,7 @@ Clone the repository::
 
 Create a conda environment with all prerequisites::
 
-    $ conda env create -y -n ramutils
+    $ conda create -y -n ramutils
 
 Install dependencies::
 
