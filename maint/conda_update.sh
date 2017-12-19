@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
-set -e
 conda env remove -n ramutils -y
-conda env create --file conda_environment.yaml
+set -e
+conda create -y -n ramutils python=3
 source activate ramutils
-pip install git+https://github.com/pennmem/classiflib.git
-pip install git+https://github.com/pennmem/bptools.git
+conda install -y -c pennmem --file=requirements.txt
 python setup.py install

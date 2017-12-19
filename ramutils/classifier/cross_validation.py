@@ -2,6 +2,7 @@
 import numpy as np
 
 from random import shuffle
+from copy import deepcopy
 from sklearn.metrics import roc_auc_score
 
 from ramutils.classifier.weighting import get_sample_weights
@@ -90,8 +91,15 @@ def perform_lolo_cross_validation(classifier, powers, events, recalls, **kwargs)
     probs: np.array
         Predicted probabilities for encoding events across all lists
 
+    Notes
+    -----
+    Be careful when passing a classifier object to this function since it's
+    .fit() method will be called. If you use the classifier object after
+    calling this function, the internal state may have changed. To avoid this
+    problem, make a copy of the classifier object and pass the copy to this
+    function.
     """
-    # TODO: Evaluation should be only on encoding events
+    classifier_copy = deepcopy(classifier)
     encoding_mask = get_encoding_mask(events)
     encoding_events = select_encoding_events(events)
 
@@ -103,14 +111,19 @@ def perform_lolo_cross_validation(classifier, powers, events, recalls, **kwargs)
         insample_pow_mat = powers[insample_mask]
         insample_recalls = recalls[insample_mask]
         insample_weights = get_sample_weights(events[insample_mask], **kwargs)
-        classifier.fit(insample_pow_mat, insample_recalls, insample_weights)
+
+        # We don't want to call fit on the passed classifier because this will
+        # have side-effects for the user/program that calls this function
+        classifier_copy.fit(insample_pow_mat, insample_recalls,
+                            insample_weights)
 
         # Out of sample predictions need to be on encoding only
         outsample_mask = ~insample_mask & encoding_mask
         outsample_pow_mat = powers[outsample_mask]
 
         outsample_encoding_event_mask = (encoding_events.list == lst)
-        probs[outsample_encoding_event_mask] = classifier.predict_proba(outsample_pow_mat)[:, 1]
+        probs[outsample_encoding_event_mask] = classifier_copy.predict_proba(
+            outsample_pow_mat)[:, 1]
 
     return probs
 
@@ -143,7 +156,6 @@ def permuted_loso_cross_validation(classifier, powers, events, n_permutations, *
 
     encoding_mask = get_encoding_mask(events)
 
-    probs = np.empty_like(recalls[encoding_mask], dtype=np.float)
     permuted_recalls = np.array(recalls)
     auc_results = np.empty(shape=n_permutations, dtype=np.float)
 
@@ -188,6 +200,7 @@ def perform_loso_cross_validation(classifier, powers, events, recalls, **kwargs)
         Predicted probabilities for encoding events across all sessions
 
     """
+    classifier_copy = deepcopy(classifier)
     sessions = np.unique(events.session)
     encoding_mask = get_encoding_mask(events)
     encoding_events = select_encoding_events(events)
@@ -202,14 +215,14 @@ def perform_loso_cross_validation(classifier, powers, events, recalls, **kwargs)
         insample_recalls = recalls[insample_mask]
         insample_samples_weights = get_sample_weights(events[insample_mask],
                                                       **kwargs)
-        classifier.fit(insample_pow_mat, insample_recalls,
-                       insample_samples_weights)
+        classifier_copy.fit(insample_pow_mat, insample_recalls,
+                            insample_samples_weights)
 
         # testing data -- Only look at encoding events
         outsample_mask = ~insample_mask & encoding_mask
         outsample_pow_mat = powers[outsample_mask]
 
-        outsample_probs = classifier.predict_proba(outsample_pow_mat)[:, 1]
+        outsample_probs = classifier_copy.predict_proba(outsample_pow_mat)[:, 1]
 
         outsample_encoding_event_mask = (encoding_events.session == sess)
         probs[outsample_encoding_event_mask] = outsample_probs

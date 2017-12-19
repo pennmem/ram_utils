@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pytz
 
-from traits.api import Array, ArrayOrNone, Float
+from traits.api import Array, ArrayOrNone, Float, String, DictStrAny
 from sklearn.metrics import roc_auc_score, roc_curve
 from traitschema import Schema
 
@@ -27,11 +27,23 @@ class ClassifierSummary(Schema):
     _predicted_probabilities = ArrayOrNone(desc='predicted recall probabilities')
     _true_outcomes = ArrayOrNone(desc='actual results for recall vs. non-recall')
     _permuted_auc_values = ArrayOrNone(desc='permuted AUCs')
+    _metadata = DictStrAny(desc='Dictionary containing additional metadata')
 
+    subject = String(desc='subject')
+    experiment = String(desc='experiment')
+    sessions = Array(desc='sessions summarized by the object')
     recall_rate = Float(desc='overall recall rate')
     low_terc_recall_rate = Float(desc='recall rate when predicted probability of recall was in lowest tercile')
     mid_terc_recall_rate = Float(desc='recall reate when predicted probability of recall was in middle tercile')
     high_terc_recall_rate = Float(desc='recall rate when predicted probability of recall was in highest tercile')
+
+    @property
+    def metadata(self):
+        return self._metadata
+
+    @metadata.setter
+    def metadata(self, new_metadata):
+        self._metadata = new_metadata
 
     @property
     def predicted_probabilities(self):
@@ -104,21 +116,37 @@ class ClassifierSummary(Schema):
     def high_tercile_diff_from_mean(self):
         return 100.0 * (self.high_terc_recall_rate - self.recall_rate) / self.recall_rate
 
-    def populate(self, true_outcomes, predicted_probabilities, permuted_auc_values):
+    def populate(self, subject, experiment, session, true_outcomes,
+                 predicted_probabilities, permuted_auc_values, **kwargs):
         """ Populate classifier performance metrics
 
         Parameters
         ----------
+        subject: string
+            Subject identifier
+        experiment: string
+            Name of the experiment
+        session: string
+            Session number
         true_outcomes: array_like
             Boolean array for if a word was recalled or not
         predicted_probabilities: array_like
             Outputs from the trained classifier for each word event
         permuted_auc_values: array_like
             AUC values from performing a permutation test on classifier
+
+        Keyword Arguments
+        -----------------
+        Any kwargs passed to populate will be stored in the metadata field of
+        the classifier summary object
         """
+        self.subject = subject
+        self.experiment = experiment
+        self.session = session
         self.true_outcomes = true_outcomes
         self.predicted_probabilities = predicted_probabilities
         self.permuted_auc_values = permuted_auc_values
+        self.metadata = kwargs
 
         thresh_low = np.percentile(predicted_probabilities, 100.0 / 3.0)
         thresh_high = np.percentile(predicted_probabilities, 2.0 * 100.0 / 3.0)

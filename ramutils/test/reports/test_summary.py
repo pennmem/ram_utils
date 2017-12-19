@@ -84,7 +84,7 @@ class TestSummary:
 class TestMathSummary:
     @classmethod
     def setup_class(cls):
-        # ignore UserWarnings from summary.populate calls
+        # ignore UserWarnings from summaries.populate calls
         warnings.filterwarnings('ignore', category=UserWarning)
 
     @classmethod
@@ -214,6 +214,9 @@ class TestFRStimSessionSummary:
 class TestClassifierSummary:
     @classmethod
     def setup_class(cls):
+        cls.subject = 'TEST_SUBJECT'
+        cls.experiment = 'TEST'
+        cls.sessions = ['NA']
         cls.recalls = np.random.random_integers(0, 1, 100)
         cls.predicted_probabilities = np.random.normal(.5, .03, size=100)
         cls.permuation_aucs = np.random.normal(.5, .01, size=200)
@@ -221,16 +224,24 @@ class TestClassifierSummary:
 
     def test_populate(self):
         summary = ClassifierSummary()
-        summary.populate(self.recalls, self.predicted_probabilities, self.permuation_aucs)
+        summary.populate(self.subject, self.experiment,
+                         self.sessions, self.recalls,
+                         self.predicted_probabilities, self.permuation_aucs,
+                         encoding_only=False)
         assert np.array_equal(self.recalls, summary.true_outcomes)
         assert np.array_equal(self.predicted_probabilities, summary.predicted_probabilities)
         assert np.array_equal(self.permuation_aucs, summary.permuted_auc_values)
+        assert 'encoding_only' in summary.metadata
+        assert summary.metadata['encoding_only'] is False
 
         return
 
     def test_auc(self):
         summary = ClassifierSummary()
-        summary.populate(self.recalls, self.predicted_probabilities, self.permuation_aucs)
+        summary.populate(self.subject, self.experiment,
+                         self.sessions, self.recalls,
+                         self.predicted_probabilities,
+                         self.permuation_aucs)
         return
 
     def test_pvalue(self):

@@ -33,7 +33,8 @@ class TestMontage:
         ], dtype=dtypes.pairs, names=['contact0', 'contact1', 'label0',
                                       'label1'])
 
-        cls.stim_params = [StimParameters(label='LAD1-LAD2',
+        cls.stim_params = [StimParameters(anode_label='LAD1',
+                                          cathode_label='LAD2',
                                           anode=9,
                                           cathode=10)
                            ]
@@ -152,6 +153,3 @@ class TestMontage:
         assert 'right_only' not in merged._merge
 
         return
-
-
-

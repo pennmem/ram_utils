@@ -10,6 +10,14 @@ ramutils
 .. image:: https://img.shields.io/badge/docs-here-blue.svg
     :target: https://pennmem.github.io/ram_utils/html/index.html
 
+Bootstrapping a conda environment
+---------------------------------
+
+.. code-block:: shell-session
+
+    conda create -y -n environment_name python=3
+    conda install -c pennmem --file=requirements.txt
+
 Usage with the RAM_clinical account
 -----------------------------------
 
@@ -35,10 +43,6 @@ To update the account to a new release:
 2. ``git checkout <release tag>``
 3. ``maint/conda_update.sh``
 
-.. note:: ``conda_udpate.sh`` script will fail if the ``ramutils`` environment
-          does not already exist. You can create a dummy environment in this
-          case with ``conda create -n ramutils -y``.
-
 Ramulator experiment config generation
 --------------------------------------
 
@@ -47,14 +51,17 @@ generated via the ``ramulator-conf`` script::
 
     usage: ramulator-conf [-h] [--root ROOT] [--dest DEST] [--cachedir CACHEDIR]
                           --subject SUBJECT [--force-rerun] --experiment
-                          {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6}
+                          {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,FR1,CatFR1,PAL1}
                           [--vispath VISPATH] [--localization LOCALIZATION]
-                          [--montage MONTAGE] --electrode-config-file
-                          ELECTRODE_CONFIG_FILE [--anodes ANODES [ANODES ...]]
+                          [--montage MONTAGE]
+                          [--electrode-config-file ELECTRODE_CONFIG_FILE]
+                          [--anodes ANODES [ANODES ...]]
                           [--cathodes CATHODES [CATHODES ...]]
                           [--min-amplitudes MIN_AMPLITUDES [MIN_AMPLITUDES ...]]
                           [--max-amplitudes MAX_AMPLITUDES [MAX_AMPLITUDES ...]]
                           [--target-amplitudes TARGET_AMPLITUDES [TARGET_AMPLITUDES ...]]
+                          [--no-extended-blanking]
+                          [--default-area DEFAULT_AREA | --area-file AREA_FILE]
                           [--clear-log]
 
     Generate experiment configs for Ramulator
@@ -68,7 +75,7 @@ generated via the ``ramulator-conf`` script::
       --subject SUBJECT, -s SUBJECT
                             subject ID
       --force-rerun         force re-running all tasks
-      --experiment {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6}, -x {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6}
+      --experiment {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,FR1,CatFR1,PAL1}, -x {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,FR1,CatFR1,PAL1}
                             experiment
       --vispath VISPATH     path to save task graph visualization to
       --localization LOCALIZATION, -l LOCALIZATION
@@ -76,7 +83,7 @@ generated via the ``ramulator-conf`` script::
       --montage MONTAGE, -m MONTAGE
                             montage number (default: 0)
       --electrode-config-file ELECTRODE_CONFIG_FILE, -e ELECTRODE_CONFIG_FILE
-                            path to Odin electrode config csv file
+                            path to existing electrode config CSV file
       --anodes ANODES [ANODES ...], -a ANODES [ANODES ...]
                             stim anode labels
       --cathodes CATHODES [CATHODES ...], -c CATHODES [CATHODES ...]
@@ -87,4 +94,10 @@ generated via the ``ramulator-conf`` script::
                             maximum stim amplitudes
       --target-amplitudes TARGET_AMPLITUDES [TARGET_AMPLITUDES ...], -t TARGET_AMPLITUDES [TARGET_AMPLITUDES ...]
                             target stim amplitudes
+      --no-extended-blanking
+                            disable extended blanking
+      --default-area DEFAULT_AREA, -A DEFAULT_AREA
+                            default surface area to use for all contacts
+      --area-file AREA_FILE
+                            path to area.txt file relative to root
       --clear-log           clear the log

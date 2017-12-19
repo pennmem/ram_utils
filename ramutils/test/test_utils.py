@@ -1,5 +1,5 @@
 import pytest
-from ramutils.utils import  *
+from ramutils.utils import *
 
 
 @pytest.mark.parametrize("experiment, expected", [
@@ -39,3 +39,22 @@ def test_combine_tag_names(tag_list, expected_output):
 def test_join_tag_tuple(tag_tuple, expected_output):
     result = join_tag_tuple(tag_tuple)
     assert result == expected_output
+
+
+def test_mkdir_p(tmpdir):
+    dirs = [
+        "something/without/preceding/slash",
+        "/something/with/preceding/slash",
+        "something/with/trailing/slash",
+        "/",
+    ]
+    for path in dirs:
+        mkdir_p(path)
+
+
+def test_bytes_to_str():
+    string = u'string'
+    bstring = b'bytestring'
+
+    assert bytes_to_str(string) == string
+    assert bytes_to_str(bstring) == u'bytestring'

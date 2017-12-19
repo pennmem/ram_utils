@@ -8,6 +8,7 @@ from ptsa.data.filters import (
 )
 from ptsa.data.readers import EEGReader
 from scipy.stats import zscore, ttest_ind
+from statsmodels.sandbox.stats.multicomp import multipletests
 
 try:
     from typing import List
@@ -275,9 +276,13 @@ def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events,
     non_recalled_pow_mat = hfa_powers[~recall_mask, :]
 
     tstats, pvals = ttest_ind(recalled_pow_mat, non_recalled_pow_mat, axis=0)
+    sig_mask, pvals, _ , _ = multipletests(pvals, method='fdr_bh')
 
     pairs_metadata_table['t_stat'] = tstats
     pairs_metadata_table['p_value'] = pvals
+
+    # Pairs that do not have a label do not need to have the stats displayed
+    pairs_metadata_table = pairs_metadata_table.dropna(subset=['label'])
 
     return pairs_metadata_table
 

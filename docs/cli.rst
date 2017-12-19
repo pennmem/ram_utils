@@ -9,19 +9,22 @@ Command-line usage
 Ramulator configuration generation
 ----------------------------------
 
-All stim experiments can have configuration files generated via the unified
-``ramulator-conf`` script::
+Ramulator experiment configuration files for stimulation experiments are
+generated via the ``ramulator-conf`` script::
 
     usage: ramulator-conf [-h] [--root ROOT] [--dest DEST] [--cachedir CACHEDIR]
                           --subject SUBJECT [--force-rerun] --experiment
-                          {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6}
+                          {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,FR1,CatFR1,PAL1}
                           [--vispath VISPATH] [--localization LOCALIZATION]
-                          [--montage MONTAGE] --electrode-config-file
-                          ELECTRODE_CONFIG_FILE [--anodes ANODES [ANODES ...]]
+                          [--montage MONTAGE]
+                          [--electrode-config-file ELECTRODE_CONFIG_FILE]
+                          [--anodes ANODES [ANODES ...]]
                           [--cathodes CATHODES [CATHODES ...]]
                           [--min-amplitudes MIN_AMPLITUDES [MIN_AMPLITUDES ...]]
                           [--max-amplitudes MAX_AMPLITUDES [MAX_AMPLITUDES ...]]
                           [--target-amplitudes TARGET_AMPLITUDES [TARGET_AMPLITUDES ...]]
+                          [--no-extended-blanking]
+                          [--default-area DEFAULT_AREA | --area-file AREA_FILE]
                           [--clear-log]
 
     Generate experiment configs for Ramulator
@@ -35,7 +38,7 @@ All stim experiments can have configuration files generated via the unified
       --subject SUBJECT, -s SUBJECT
                             subject ID
       --force-rerun         force re-running all tasks
-      --experiment {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6}, -x {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6}
+      --experiment {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,FR1,CatFR1,PAL1}, -x {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,FR1,CatFR1,PAL1}
                             experiment
       --vispath VISPATH     path to save task graph visualization to
       --localization LOCALIZATION, -l LOCALIZATION
@@ -43,7 +46,7 @@ All stim experiments can have configuration files generated via the unified
       --montage MONTAGE, -m MONTAGE
                             montage number (default: 0)
       --electrode-config-file ELECTRODE_CONFIG_FILE, -e ELECTRODE_CONFIG_FILE
-                            path to Odin electrode config csv file
+                            path to existing electrode config CSV file
       --anodes ANODES [ANODES ...], -a ANODES [ANODES ...]
                             stim anode labels
       --cathodes CATHODES [CATHODES ...], -c CATHODES [CATHODES ...]
@@ -54,6 +57,12 @@ All stim experiments can have configuration files generated via the unified
                             maximum stim amplitudes
       --target-amplitudes TARGET_AMPLITUDES [TARGET_AMPLITUDES ...], -t TARGET_AMPLITUDES [TARGET_AMPLITUDES ...]
                             target stim amplitudes
+      --no-extended-blanking
+                            disable extended blanking
+      --default-area DEFAULT_AREA, -A DEFAULT_AREA
+                            default surface area to use for all contacts
+      --area-file AREA_FILE
+                            path to area.txt file relative to root
       --clear-log           clear the log
 
 .. note::
@@ -66,3 +75,42 @@ other words, if using stim channels ``LAD8_LAD9``, ``LAH1_LAH2`` with amplitudes
 0.5 mA, the relevant options would be given as::
 
     --anodes LAD8 LAH1 --cathodes LAD9 LAH2 --target-amplitudes 0.5 0.5
+
+Specifying surface areas
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Surface areas for contacts are defined in an ``area.txt`` file which by default
+should live in the same directory as ``jacksheet.txt`` (for example,
+``/data/eeg/R1374T/docs`` on ``rhino``). The format for this file is::
+
+    <lead label 1> <surface area in mm**2>
+    <lead label 2> <surface area in mm**2>
+    <...>
+
+where "lead labels" are the label for a contact preceding the contact number.
+This assumes that contacts are labeled in such a way that a label is unique for
+a given sized contact. In other words, for combined macro/micro contacts, the
+macro contacts **must** be labeled differently than the micro contacts. An
+example ``area.txt`` file for subject R1347D would look like::
+
+    ROFD 6.1839
+    LOFD 6.1839
+    RAD 6.1839
+    LAD 6.1839
+    RAHCD 6.1839
+    LAHCD 6.1839
+    RPHCD 6.1839
+    LPHCD 6.1839
+    RID 6.1839
+    LID 6.1839
+    RMCD 6.1839
+    LMCD 6.1839
+    RPTD 6.1839
+    LPTD 6.1839
+    RACD 6.1839
+    LACD 6.1839
+
+.. note::
+
+    Alternatively in this case, the ``--default-surface-area`` (or ``-A``)
+    option could be used since all contacts share the same surface area.

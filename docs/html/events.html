@@ -1,56 +1,165 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Event processing &#8212; Ramutils 2.0.0 documentation</title>
-    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '2.0.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Modeling effects of stim" href="models.html" />
-    <link rel="prev" title="Classifier training, cross validation, and utilities" href="classifier.html" /> 
-  </head>
-  <body>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="models.html" title="Modeling effects of stim"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="classifier.html" title="Classifier training, cross validation, and utilities"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.0 documentation</a> &#187;</li> 
-      </ul>
-    </div>  
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Event processing &mdash; Ramutils 2.0.2rc0 documentation</title>
+  
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Ramutils 2.0.2rc0 documentation" href="index.html"/>
+        <link rel="next" title="Modeling effects of stim" href="models.html"/>
+        <link rel="prev" title="Classifier training, cross validation, and utilities" href="classifier.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Ramutils
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="data.html">Serializable data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classifier.html">Classifier training, cross validation, and utilities</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Event processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Modeling effects of stim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="misc.html">Miscellaneous utilities</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Ramutils</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Event processing</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/events.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
             
   <div class="section" id="module-ramutils.events">
 <span id="event-processing"></span><h1>Event processing<a class="headerlink" href="#module-ramutils.events" title="Permalink to this headline">¶</a></h1>
@@ -67,18 +176,29 @@ experiment can be easily combined</li>
 </ol>
 </div></blockquote>
 <dl class="function">
+<dt id="ramutils.events.add_field">
+<code class="descclassname">ramutils.events.</code><code class="descname">add_field</code><span class="sig-paren">(</span><em>events</em>, <em>field_name</em>, <em>default_val</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#add_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.add_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add field to the recarray</p>
+<p class="rubric">Notes</p>
+<p>Converting to a dataframe, adding the field, and reconverting to a
+recarray because the rec_append_fields function in numpy doesn’t seem to
+work</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="ramutils.events.clean_events">
-<code class="descclassname">ramutils.events.</code><code class="descname">clean_events</code><span class="sig-paren">(</span><em>experiment</em>, <em>events</em>, <em>start_time=None</em>, <em>end_time=None</em>, <em>duration=None</em>, <em>pre=None</em>, <em>post=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#clean_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.clean_events" title="Permalink to this definition">¶</a></dt>
-<dd><p>Peform basic cleaning operations on events such as removing incomplete
+<code class="descclassname">ramutils.events.</code><code class="descname">clean_events</code><span class="sig-paren">(</span><em>events</em>, <em>start_time=None</em>, <em>end_time=None</em>, <em>duration=None</em>, <em>pre=None</em>, <em>post=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#clean_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.clean_events" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Peform basic cleaning operations on events such as removing incomplete
 sessions, negative offset events, and incomplete lists. For FR events,
-baseline events needs to be found.</p>
+baseline events needs to be found. Events are then normalized so that
+cross-experiment events can be merged.</div></blockquote>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>experiment</strong> (<em>str</em>) – </li>
-<li><strong>events</strong> (<em>np.recarray of events</em>) – </li>
+<li><strong>events</strong> (<em>np.recarray</em>) – Raw events</li>
 <li><strong>start_time</strong> – </li>
 <li><strong>end_time</strong> – </li>
 <li><strong>duration</strong> – </li>
@@ -155,9 +275,22 @@ numbers unique, 100 is added to the second set of events in event_list,
 </dd></dl>
 
 <dl class="function">
+<dt id="ramutils.events.extract_experiment_from_events">
+<code class="descclassname">ramutils.events.</code><code class="descname">extract_experiment_from_events</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#extract_experiment_from_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.extract_experiment_from_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a set of events, return a list of unique experiments contained
+within</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="ramutils.events.extract_sample_rate">
 <code class="descclassname">ramutils.events.</code><code class="descname">extract_sample_rate</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#extract_sample_rate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.extract_sample_rate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extract the samplerate used for the given set of events</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.extract_sessions">
+<code class="descclassname">ramutils.events.</code><code class="descname">extract_sessions</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#extract_sessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.extract_sessions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of sessions contained within the events structure</p>
 </dd></dl>
 
 <dl class="function">
@@ -212,9 +345,36 @@ happening.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="ramutils.events.get_math_events_mask">
+<code class="descclassname">ramutils.events.</code><code class="descname">get_math_events_mask</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#get_math_events_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.get_math_events_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a boolean array identifying math events</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.get_nonstim_events_mask">
+<code class="descclassname">ramutils.events.</code><code class="descname">get_nonstim_events_mask</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#get_nonstim_events_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.get_nonstim_events_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a mask of any non-stim WORD events</p>
+<p class="rubric">Notes</p>
+<p>These events are what is used in post-hoc classifier evaluation</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="ramutils.events.get_pal_retrieval_events_mask">
 <code class="descclassname">ramutils.events.</code><code class="descname">get_pal_retrieval_events_mask</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#get_pal_retrieval_events_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.get_pal_retrieval_events_mask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Identify retrieval events for PAL experiments</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.get_partition_masks">
+<code class="descclassname">ramutils.events.</code><code class="descname">get_partition_masks</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#get_partition_masks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.get_partition_masks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a set of masks corresponding to the partitions present in the
+events</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.get_recall_events_mask">
+<code class="descclassname">ramutils.events.</code><code class="descname">get_recall_events_mask</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#get_recall_events_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.get_recall_events_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a boolean mask for any recall events</p>
 </dd></dl>
 
 <dl class="function">
@@ -325,44 +485,6 @@ FR/PAL) and encoding/retrieval</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ramutils.events.preprocess_events">
-<code class="descclassname">ramutils.events.</code><code class="descname">preprocess_events</code><span class="sig-paren">(</span><em>subject</em>, <em>experiment</em>, <em>start_time</em>, <em>end_time</em>, <em>duration</em>, <em>pre</em>, <em>post</em>, <em>combine_events=True</em>, <em>encoding_only=False</em>, <em>root='/'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#preprocess_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.preprocess_events" title="Permalink to this definition">¶</a></dt>
-<dd><p>High-level pre-processing function for combining/cleaning record only
-events to be used in config generation and reports</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>subject</strong> (<em>str</em>) – Subject ID.</li>
-<li><strong>experiment</strong> (<em>str</em>) – Experiment that events are being combined for</li>
-<li><strong>start_time</strong> (<em>int</em>) – </li>
-<li><strong>end_time</strong> (<em>int</em>) – </li>
-<li><strong>duration</strong> (<em>int</em>) – </li>
-<li><strong>pre</strong> (<em>int</em>) – </li>
-<li><strong>post</strong> (<em>int</em>) – </li>
-<li><strong>combine_events</strong> (<em>bool</em>) – Indicates if all record-only sessions should be combined for
-classifier training.</li>
-<li><strong>encoding_only</strong> (<em>bool</em>) – Flag for if only encoding events should be used (default is False,
-i.e. encoding and retrieval events will be returned)</li>
-<li><strong>root</strong> (<em>str</em>) – Base path for finding event files etc.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Full set of cleaned task events</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.recarray</p>
-</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Notes</p>
-<p>See insert_baseline_events for details on start_time, end_time, duration,
-pre, and post parameters</p>
-</dd></dl>
-
-<dl class="function">
 <dt id="ramutils.events.remove_bad_events">
 <code class="descclassname">ramutils.events.</code><code class="descname">remove_bad_events</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#remove_bad_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.remove_bad_events" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove events whose offset values would result in trying to read data
@@ -438,6 +560,12 @@ were non-intrusion retrieval events.</p>
 <dt id="ramutils.events.select_encoding_events">
 <code class="descclassname">ramutils.events.</code><code class="descname">select_encoding_events</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#select_encoding_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.select_encoding_events" title="Permalink to this definition">¶</a></dt>
 <dd><p>Select only encoding events</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.select_math_events">
+<code class="descclassname">ramutils.events.</code><code class="descname">select_math_events</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#select_math_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.select_math_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select math events from a set of events</p>
 </dd></dl>
 
 <dl class="function">
@@ -518,62 +646,91 @@ should already be true in the raw events data.</p>
 </table>
 </dd></dl>
 
+<dl class="function">
+<dt id="ramutils.events.validate_single_experiment">
+<code class="descclassname">ramutils.events.</code><code class="descname">validate_single_experiment</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#validate_single_experiment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.validate_single_experiment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raises an error if more than one experiment is present in the events</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.validate_single_session">
+<code class="descclassname">ramutils.events.</code><code class="descname">validate_single_session</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#validate_single_session"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.validate_single_session" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raises an error if more than one session is present in the events</p>
+</dd></dl>
+
 </div>
 
 
+           </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="models.html" class="btn btn-neutral float-right" title="Modeling effects of stim" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="classifier.html" class="btn btn-neutral" title="Classifier training, cross validation, and utilities" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="classifier.html"
-                        title="previous chapter">Classifier training, cross validation, and utilities</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="models.html"
-                        title="next chapter">Modeling effects of stim</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/events.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="models.html" title="Modeling effects of stim"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="classifier.html" title="Classifier training, cross validation, and utilities"
-             >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.0 documentation</a> &#187;</li> 
-      </ul>
-    </div>
-    <div class="footer" role="contentinfo">
-        &#169; Copyright 2017.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
-    </div>
-  </body>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'2.0.2rc0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
 </html>
