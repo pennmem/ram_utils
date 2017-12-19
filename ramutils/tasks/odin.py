@@ -38,7 +38,7 @@ logger = get_logger()
 @task(cache=False)
 def generate_electrode_config(subject, paths, anodes=None, cathodes=None,
                               localization=0, montage=0,
-                              default_surface_area=0.010):
+                              default_surface_area=0.001):
     """Generate electrode configuration files (CSV and binary).
 
     Parameters
