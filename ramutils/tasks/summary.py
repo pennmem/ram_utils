@@ -123,12 +123,14 @@ def summarize_math(events, joint=False):
 
 @task()
 def summarize_stim_sessions(all_events, task_events,
-                            encoding_classifier_summaries):
+                            encoding_classifier_summaries,
+                            pairs_data):
     """ Construct stim session summaries """
     sessions = extract_sessions(task_events)
     stim_table_events = select_stim_table_events(all_events)
+    location_data = pairs_data[['label', 'location']]
+    location_data = location_data.dropna()
 
-    # TODO: No need to enumerate once summaries have more metadata
     stim_session_summaries = []
     for i, session in enumerate(sessions):
         # Identify stim and post stim items
@@ -144,27 +146,37 @@ def summarize_stim_sessions(all_events, task_events,
         subject, experiment, session = extract_event_metadata(task_events)
         stim_df = pd.DataFrame(columns=['subject', 'experiment', 'session',
                                         'list', 'item_name','serialpos',
-                                        'phase', 'is_stim_list',
-                                        'is_post_stim_item', 'it_stim_item',
+                                        'phase', 'is_stim_item', 'stim_list',
+                                        'is_post_stim_item',
                                         'recalled', 'thresh',
                                         'classifier_output'])
 
-        stim_df['subject'] = subject
-        stim_df['experiment'] = experiment
         stim_df['session'] = all_session_task_events.session
         stim_df['list'] = all_session_task_events.list
         stim_df['item_name'] = all_session_task_events.item_name
         stim_df['serialpos'] = all_session_task_events.serialpos
         stim_df['phase'] = all_session_task_events.phase
-        stim_df['is_stim_list'] = stim_item_mask
-        stim_df['is_post_stim_list'] = post_stim_item_mask
+        stim_df['is_stim_item'] = stim_item_mask
+        stim_df['is_post_stim_item'] = post_stim_item_mask
+        stim_df['stim_list'] = all_session_task_events.stim_list
         stim_df['recalled'] = all_session_task_events.recalled
-        stim_df['thresh'] = 0.5 # FIXME: Should this be hardcoded?
+        stim_df['thresh'] = 0.5
         stim_df['classifier_output'] = predicted_probabilities
+        stim_df['subject'] = subject
+        stim_df['experiment'] = experiment
 
         # Add in the stim params
         stim_df = stim_df.merge(stim_param_df, on=['session', 'list',
                                                    'item_name'], how='left')
+
+        # Add region from pairs_data. TODO: This won't scale to multi-site stim
+        stim_df['label'] = (stim_df['stimAnodeTag'] + "-" +
+                            stim_df['stimCathodeTag'])
+        stim_df = stim_df.merge(location_data, how='left', on=['label'])
+        del stim_df['label']
+
+        # TODO: Add some sort of data quality check here potentially. Do the
+        # observed stim items match what we expect from classifier output?
 
         # TODO: Return the StimSessionSummary objects instead of dataframes
         # once from_datafram is implemented
