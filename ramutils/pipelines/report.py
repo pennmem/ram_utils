@@ -95,6 +95,7 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                         reduced_powers,
                                                         final_task_events,
                                                         kwargs['n_perm'],
+                                                        tag='Joint Classifier',
                                                         **kwargs)
 
         # FIXME: We don't technically need this right now, but in the future,
@@ -184,7 +185,7 @@ def make_report(subject, experiment, paths, joint_report=False,
     math_summaries = summarize_math(all_events, joint=joint_report)
 
     if not stim_report:
-        results = classifier_summaries
+        results = [classifier_summaries]
     else:
         results = post_hoc_results['session_summaries']
 

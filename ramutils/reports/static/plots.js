@@ -148,15 +148,8 @@ var ramutils = (function (mod, Plotly) {
      * @param {Number} middle
      * @param {Number} high
      */
-    plotClassifierPerformance: function (fpr, tpr, low, middle, high) {
-      const data = [
-        {
-          x: fpr,
-          y: tpr,
-          type: 'scatter',
-          mode: 'lines',
-          name: 'ROC'
-        },
+    plotClassifierPerformance: function (fpr, tpr, low, middle, high, tags) {
+      let data = [
         {
           x: [0, 1],
           y: [0, 1],
@@ -164,19 +157,33 @@ var ramutils = (function (mod, Plotly) {
           line: {
             color: 'black',
             dash: 'dot'
-          }
-        },
-        {
-          x: ['low', 'middle', 'high'],
-          y: [low, middle, high],
-          xaxis: 'x2',
-          yaxis: 'y2',
-          type: 'bar',
-          name: 'Tercile'
+          },
+          showlegend: false
         },
       ];
 
-      const layout = {
+      for (i = 0; i < fpr.length; i++) {
+        const tag = tags[i];
+        const roc_curve = {
+          x: fpr[i],
+          y: tpr[i],
+          type: 'scatter',
+          mode: 'lines',
+          name: `${tag} ROC Curve`
+        };
+        const tercile = {
+          x: ['low', 'middle', 'high'],
+          y: [low[i], middle[i], high[i]],
+          xaxis: 'x2',
+          yaxis: 'y2',
+          type: 'bar',
+          name: `${tag} Tercile`
+        };
+        data.push(roc_curve);
+        data.push(tercile);
+      }
+
+     const layout = {
         xaxis: {
           title: 'False positive rate',
           domain: [0, 0.45],
@@ -195,7 +202,7 @@ var ramutils = (function (mod, Plotly) {
           anchor: 'x2'
         },
 
-        showlegend: false,
+        showlegend: true,
 
         // FIXME: responsive and square aspect ratio?
         width: 1000,
