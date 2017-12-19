@@ -177,7 +177,8 @@ def reload_used_classifiers(subject, experiment, events, root):
     Notes
     -----
     If a classifier is not found or is unable to be reloaded (legacy storage
-    format, or other issues), then None is inserted instead.
+    format, or other issues), then the list of ClassifierContainer objects
+    will have None as the entry for that session.
 
     """
     used_classifiers = []
@@ -233,9 +234,13 @@ def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
     -----
     Different channels could be excluded based on results of artifact detection
     and stim parameters. Extract the used pairs from the serialized classifier
-    that was used/retrained in order to correct assess the classifier. The
+    that was used/retrained in order to correctly assess the classifier. The
     default behavior is to use the retrained classifier for any sessions
-    where the actual classifier was not found or is unusable.
+    where the actual classifier was not found or was unable to be loaded.
+    Legacy-formatted classifiers are not supported for re-loading. In cases
+    where a stim session was restarted, the default behavior is to use the
+    original classifier (i.e. the classifier before artifact detection) rather
+    than trying to guess which classifier to load.
 
     """
     sessions = extract_sessions(events)
