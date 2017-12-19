@@ -8,7 +8,8 @@ from traitschema import Schema
 
 class StimParameters(Schema):
     """Single-channel stimulation parameters."""
-    label = String(desc="stim channel label")
+    anode_label = String(desc="stim anode label")
+    cathode_label = String(desc="stim cathode label")
     anode = Int(desc="stim anode contact number")
     cathode = Int(desc="stim cathode contact number")
     frequency = Float(200., desc="stim pulse frequency [Hz]")
@@ -20,6 +21,10 @@ class StimParameters(Schema):
     # used in variable-amplitude experiments
     min_amplitude = Float(0.1, desc="minimum allowable stim amplitude [mA]")
     max_amplitude = Float(2.0, desc="maximum allowable stim amplitude [mA]")
+
+    @property
+    def label(self):
+        return "_".join([self.anode_label, self.cathode_label])
 
 
 class FilePaths(object):
@@ -34,12 +39,16 @@ class FilePaths(object):
         Rhino mount point.
     dest : str
         Directory to write files to.
-    electrode_config_file : str
-        Path to Odin electrode configuration CSV file.
     pairs : str
         Path to ``pairs.json``.
     excluded_pairs : str
         Path to ``excluded_pairs.json``.
+    electrode_config_file : str
+        Path to electrode config file.
+    area_file : str
+        Path to surface area file. When generating Odin configuration files and
+        not defined, the default behavior is to look in the same directory as
+        the jacksheet for a file named ``area.txt``.
 
     """
     def __init__(self, **kwargs):
@@ -54,9 +63,10 @@ class FilePaths(object):
             return os.path.join(self.root, p.lstrip('/')) if p is not None else p
 
         self.dest = makepath('dest')
-        self.electrode_config_file = makepath('electrode_config_file')
         self.pairs = makepath('pairs')
         self.excluded_pairs = makepath('excluded_pairs')
+        self.electrode_config_file = makepath('electrode_config_file')
+        self.area_file = makepath('area_file')
 
 
 class ExperimentParameters(Schema):

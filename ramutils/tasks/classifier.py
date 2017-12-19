@@ -12,7 +12,8 @@ from ramutils.classifier.utils import reload_classifier
 from ramutils.classifier.weighting import \
     get_sample_weights as get_sample_weights_core
 from ramutils.reports.summary import ClassifierSummary
-from ramutils.events import extract_sessions, get_nonstim_events_mask, get_encoding_mask
+from ramutils.events import extract_sessions, get_nonstim_events_mask, \
+    get_encoding_mask, extract_event_metadata
 from ramutils.montage import compare_recorded_with_all_pairs
 from ramutils.powers import reduce_powers
 from ramutils.log import get_logger
@@ -115,7 +116,7 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
     encoding_recalls = recalls[encoding_event_mask]
 
     classifier_summary = ClassifierSummary()
-    sessions = extract_sessions(events)
+    subject, experiment, sessions = extract_event_metadata(events)
 
     # Run leave-one-session-out cross validation when we have > 1 session,
     # otherwise leave-one-list-out
@@ -127,7 +128,8 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
                                                              **kwargs)
         probs = perform_loso_cross_validation(classifier, pow_mat, events,
                                               recalls, **kwargs)
-        classifier_summary.populate(encoding_recalls, probs,
+        classifier_summary.populate(subject, experiment,
+                                    sessions, encoding_recalls, probs,
                                     permuted_auc_values)
 
     else:
@@ -140,7 +142,8 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
         probs = perform_lolo_cross_validation(classifier, pow_mat, events,
                                               recalls, **kwargs)
 
-        classifier_summary.populate(encoding_recalls, probs,
+        classifier_summary.populate(subject, experiment,
+                                    sessions, encoding_recalls, probs,
                                     permuted_auc_values)
 
     logger.info("Permutation test p-value = %f", classifier_summary.pvalue)
@@ -152,23 +155,34 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
 
 
 @task()
-def reload_used_classifiers(subject, experiment, sessions, root):
+def reload_used_classifiers(subject, experiment, events, root):
     """ Reload the actual classifiers used in each session of an experiment
 
     Parameters
     ----------
     subject: str
+        Subject identifier
     experiment: str
+        Name of the experiment
     sessions: list
+        List of sessions to try reloading a classifier
     root: str
+        Base path of where to find RHINO files
 
     Returns
     -------
     list
         List of ClassifierContainer objects of length n_sessions
 
+    Notes
+    -----
+    If a classifier is not found or is unable to be reloaded (legacy storage
+    format, or other issues), then the list of ClassifierContainer objects
+    will have None as the entry for that session.
+
     """
     used_classifiers = []
+    sessions = extract_sessions(events)
     for session in sessions:
         try:
             classifier = reload_classifier(subject, experiment, session, root)
@@ -188,13 +202,45 @@ def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
                                    **kwargs):
     """ Evaluate a trained classifier
 
+    Parameters
+    ----------
+    events: np.recarray
+        Task events associated with the stim sessesion to be evaluated
+    powers: np.ndarray
+        Normalized mean powers
+    all_pairs: OrderedDict
+        All pairs based on recorded electrodes combine from config file
+    classifiers: List
+        List of classifiers corresponding to each session
+    n_permutations: int
+        Number of permutations to use for cross validation
+    retrained_classifier: classiflib.container.ClassifierContainer
+        classifier container object based on a retrained classifier
+    kwargs
+
+    Returns
+    -------
+    dict
+        A dictionary of summary objects that are needed in subsequent parts
+        of the processing pipeline. The dictionary will be in the following
+        format:
+            {'cross_session_summary': MultiSessionClassifierSummary,
+             'session_summaries': List of ClassifierSummary objects,
+             'session_summaries_stim_table': List of ClassifierSummary
+             objects built using all encoding events
+            }
+
     Notes
     -----
     Different channels could be excluded based on results of artifact detection
     and stim parameters. Extract the used pairs from the serialized classifier
-    that was used/retrained in order to correct assess the classifier. The
+    that was used/retrained in order to correctly assess the classifier. The
     default behavior is to use the retrained classifier for any sessions
-    where the actual classifier was not found or is unusable
+    where the actual classifier was not found or was unable to be loaded.
+    Legacy-formatted classifiers are not supported for re-loading. In cases
+    where a stim session was restarted, the default behavior is to use the
+    original classifier (i.e. the classifier before artifact detection) rather
+    than trying to guess which classifier to load.
 
     """
     sessions = extract_sessions(events)
@@ -208,17 +254,29 @@ def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
                            'sessions have missing classifiers')
     recalls = events.recalled
 
+    # Masks for encoding events
+    encoding_mask = get_encoding_mask(events)
+
+    # This takes care of sub-setting events to encoding non-stim events
     non_stim_mask = get_nonstim_events_mask(events)
+    non_stim_recalls = recalls[non_stim_mask]
 
     classifier_summaries = []
+    encoding_classifier_summaries = []
+    predicted_probs = []
     for i, session in enumerate(sessions):
         classifier_summary = ClassifierSummary()
 
+        # Be sure to work with a copy of the classifier object because it will
+        # be re-fit as part of the lolo cross validation and if you pass
+        # a reference, the AUCs will be wacky
         if classifiers[i] is None:
             classifier_container = retrained_classifier
+            logger.info("Using the retrained classifier for session {}".format(session))
 
         else:
             classifier_container = classifiers[i]
+            logger.info("Using actual classifier for session {}".format(session))
 
         classifier = classifier_container.classifier
         recorded_pairs = classifier_container.pairs
@@ -227,30 +285,70 @@ def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
 
         session_mask = (events.session == session)
         session_events = events[(session_mask & non_stim_mask)]
-        session_recalls = recalls[(session_mask & non_stim_mask)]
+        session_recalls = recalls[session_mask & non_stim_mask]
 
         session_powers = powers[(session_mask & non_stim_mask)]
-        session_powers = reduce_powers(session_powers, used_mask,
-                                       len(kwargs['freqs']))
+        reduced_session_powers = reduce_powers(session_powers,
+                                               used_mask,
+                                               len(kwargs['freqs']))
 
         # Manually pass in the weighting scheme here, otherwise the cross
         # validation procedures will try to determine it for you
         permuted_auc_values = permuted_lolo_cross_validation(classifier,
-                                                             session_powers,
+                                                             reduced_session_powers,
                                                              session_events,
                                                              n_permutations,
                                                              scheme='EQUAL',
                                                              **kwargs)
 
-        probs = perform_lolo_cross_validation(classifier,
-                                              session_powers,
-                                              session_events,
-                                              session_recalls,
-                                              scheme='EQUAL',
-                                              **kwargs)
+        session_probs = classifier.predict_proba(reduced_session_powers)[:, 1]
+        predicted_probs.append(session_probs)
 
-        # Store model output statistics
-        classifier_summary.populate(session_recalls, probs, permuted_auc_values)
+        subject, experiment, sessions = extract_event_metadata(session_events)
+        classifier_summary.populate(subject, experiment, sessions,
+                                    session_recalls, session_probs,
+                                    permuted_auc_values)
         classifier_summaries.append(classifier_summary)
+        logger.info('AUC for session {}: {}'.format(session,
+                                                    classifier_summary.auc))
 
-    return classifier_summaries
+        # Get a classifier summary for all encoding events
+        session_encoding_powers = powers[(session_mask & encoding_mask)]
+        reduced_session_encoding_powers = reduce_powers(
+            session_encoding_powers, used_mask, len(kwargs['freqs']))
+
+        session_encoding_probs = classifier.predict_proba(
+            reduced_session_encoding_powers)[:, 1]
+
+        session_encoding_recalls = recalls[session_mask & encoding_mask]
+
+        encoding_classifier_summary = ClassifierSummary()
+        encoding_classifier_summary.populate(subject, experiment, sessions,
+                                             session_encoding_recalls,
+                                             session_encoding_probs,
+                                             None)
+        encoding_classifier_summaries.append(encoding_classifier_summary)
+
+    all_predicted_probs = np.array(predicted_probs).flatten()
+    permuted_auc_values = permuted_loso_cross_validation(retrained_classifier.classifier,
+                                                         powers,
+                                                         events,
+                                                         n_permutations,
+                                                         scheme='EQUAL',
+                                                         **kwargs)
+
+    subject, experiment, sessions = extract_event_metadata(events)
+    cross_session_summary = ClassifierSummary()
+    cross_session_summary.populate(subject, experiment, sessions,
+                                   non_stim_recalls, all_predicted_probs,
+                                   permuted_auc_values)
+    classifier_summaries.append(cross_session_summary)
+    logger.info("Combined AUC: {}".format(cross_session_summary.auc))
+
+    result_dict = {
+        'cross_session_summary': cross_session_summary,
+        'session_summaries': classifier_summaries,
+        'session_summaries_stim_table': encoding_classifier_summaries
+    }
+
+    return result_dict

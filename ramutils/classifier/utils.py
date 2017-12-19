@@ -91,7 +91,8 @@ def train_classifier(pow_mat, events, sample_weights, penalty_param,
     recalls = events.recalled
     classifier = LogisticRegression(C=penalty_param,
                                     penalty=penalty_type,
-                                    solver=solver)
+                                    solver=solver,
+                                    class_weight='balanced')
     classifier.fit(pow_mat, recalls, sample_weights)
     return classifier
 

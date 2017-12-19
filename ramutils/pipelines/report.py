@@ -51,6 +51,7 @@ def make_report(subject, experiment, paths, joint_report=False,
 
     ec_pairs = generate_pairs_from_electrode_config(subject, paths)
     excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
+    final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
     used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
     pairs_metadata_table = generate_montage_metadata_table(subject, ec_pairs,
                                                            root=paths.root)
@@ -61,9 +62,9 @@ def make_report(subject, experiment, paths, joint_report=False,
     all_events, task_events = build_test_data(subject, experiment, paths,
                                               joint_report, sessions=sessions,
                                               **kwargs)
+
     delta_hfa_table = []
     if not stim_report:
-        final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
         # This logic is very similar to what is done in config generation except
         # that events are not combined by default
         if not joint_report:
@@ -122,15 +123,12 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                               **kwargs)
         used_classifiers = reload_used_classifiers(subject,
                                                    experiment,
-                                                   sessions,
+                                                   final_task_events,
                                                    paths.root).compute()
         # Retraining occurs on-demand or if any session-specific classifiers
         # failed to load
         retrained_classifier = None
         if retrain or any([classifier is None for classifier in used_classifiers]):
-            final_pairs = generate_pairs_for_classifier(ec_pairs,
-                                                        excluded_pairs)
-
             # Intentionally not passing 'sessions' so that training takes place
             # on the full set of record only events
             training_events = build_training_data(subject, experiment, paths,
@@ -164,17 +162,19 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                         training_classifier_summaries,
                                                         subject)
 
-        classifier_summaries = post_hoc_classifier_evaluation(final_task_events,
-                                                              powers,
-                                                              ec_pairs,
-                                                              used_classifiers,
-                                                              kwargs['n_perm'],
-                                                              retrained_classifier,
-                                                              **kwargs)
+        post_hoc_results = post_hoc_classifier_evaluation(final_task_events,
+                                                          powers,
+                                                          ec_pairs,
+                                                          used_classifiers,
+                                                          kwargs['n_perm'],
+                                                          retrained_classifier,
+                                                          **kwargs)
 
-        stim_session_summaries = summarize_stim_sessions()
+        stim_session_summaries = summarize_stim_sessions(
+            all_events, final_task_events,
+            post_hoc_results['session_summaries_stim_table'],
+            pairs_metadata_table).compute() # TODO: Remove this forced
 
-        # TODO: Add build_stim_table task
         # TODO: Add stimulation evaluation task that uses the HMM code
 
     # TODO: Add task that saves out all necessary underlying data
@@ -182,9 +182,15 @@ def make_report(subject, experiment, paths, joint_report=False,
                                            final_task_events,
                                            joint=joint_report)
     math_summaries = summarize_math(all_events, joint=joint_report)
+
+    if not stim_report:
+        results = classifier_summaries
+    else:
+        results = post_hoc_results['session_summaries']
+
     report = build_static_report(subject, experiment, session_summaries,
                                  math_summaries, delta_hfa_table,
-                                 classifier_summaries, paths.dest)
+                                 results, paths.dest)
 
     if vispath is not None:
         report.visualize(filename=vispath)

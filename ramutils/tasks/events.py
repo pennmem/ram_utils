@@ -19,7 +19,8 @@ def build_training_data(subject, experiment, paths, sessions=None, **kwargs):
                                  rootdir=paths.root)
         cleaned_pal_events = clean_events(pal_events)
 
-    if ("FR" in experiment) or kwargs['combine_events']:
+    if (("FR" in experiment) and kwargs['combine_events']) or \
+            ("PAL" in experiment and kwargs['combined_events']):
         fr_events = load_events(subject, 'FR1', sessions=sessions,
                                 rootdir=paths.root)
         cleaned_fr_events = clean_events(fr_events,
@@ -98,7 +99,7 @@ def build_test_data(subject, experiment, paths, joint_report, sessions=None,
         all_events = concatenate_events_across_experiments([fr_events,
                                                             catfr_events])
         task_events = concatenate_events_across_experiments(
-            [cleaned_fr_events, cleaned_catfr_events])
+            [cleaned_fr_events, cleaned_catfr_events], stim=True)
 
     elif not joint_report and 'FR' in experiment:
         all_events = load_events(subject, experiment, sessions=sessions,
