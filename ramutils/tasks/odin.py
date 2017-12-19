@@ -14,19 +14,98 @@ try:
 except ImportError:
     pass
 
+from bptools.odin import ElectrodeConfig
 from bptools.transform import SeriesTransformation
 from classiflib import ClassifierContainer
 
 from ramutils.constants import EXPERIMENTS
+from ramutils.exc import MissingFileError
 from ramutils.log import get_logger
 from ramutils.tasks import task
-from ramutils.utils import reindent_json
+from ramutils.utils import bytes_to_str, reindent_json
 
-__all__ = ['generate_pairs_from_electrode_config', 'generate_ramulator_config']
+__all__ = [
+    'generate_electrode_config',
+    'generate_pairs_from_electrode_config',
+    'generate_ramulator_config',
+]
 
 CLASSIFIER_VERSION = "1.0.2"
 
 logger = get_logger()
+
+
+@task(cache=False)
+def generate_electrode_config(subject, paths, anodes=None, cathodes=None,
+                              localization=0, montage=0,
+                              default_surface_area=0.010):
+    """Generate electrode configuration files (CSV and binary).
+
+    Parameters
+    ----------
+    subject : str
+        Subjebct ID
+    paths : FilePaths
+    anodes : List[str]
+        List of stim anode labels.
+    cathodes : List[str]
+        List of stim cathode labels.
+    localization : int
+        Localization number (default: 0)
+    montage : int
+        Montage number (default: 0)
+    default_surface_area : float
+        Default surface area to set all electrodes to in mm^2. Only used if no
+        area file can be found.
+
+    Returns
+    -------
+    paths : FilePaths
+        Updated :class:`FilePaths` object with path to the electrode config file
+        defined.
+
+    Notes
+    -----
+    At present, this will only allow for generating hardware-bipolar electrode
+    config files.
+
+    """
+    docs_dir = os.path.join(paths.root, 'data', 'eeg', subject, 'docs')
+    jacksheet_filename = os.path.join(docs_dir, 'jacksheet.txt')
+    area = os.path.join(docs_dir, 'area.txt')
+
+    if not os.path.exists(area):
+        if paths.area_file is not None:
+            area = paths.area_file
+        else:
+            logger.warning("No area file found. "
+                           "Using default value of %f for all electrodes!",
+                           default_surface_area)
+            area = default_surface_area
+
+    ec = ElectrodeConfig.from_jacksheet(jacksheet_filename, subject, area=area)
+
+    if anodes is not None:
+        assert cathodes is not None
+        assert len(cathodes) == len(anodes)
+        for labels in zip(anodes, cathodes):
+            ec.add_stim_channel(*labels)
+
+    date = datetime.now().strftime('%d%b%Y').upper()
+    prefix = '{subject:s}_{date:s}L{localization:d}M{montage:d}{stim:s}'.format(
+        subject=subject, date=date, localization=localization, montage=montage,
+        stim=('STIM' if anodes is not None else 'NOSTIM')
+    )
+    csv_path = os.path.join(paths.root, paths.dest, prefix + '.csv')
+    bin_path = csv_path.replace('.csv', '.bin')
+
+    ec.to_csv(csv_path)
+    logger.info("Wrote CSV electrode config: %s", csv_path)
+    ec.to_bin(bin_path)
+    logger.info("Wrote binary electrode config: %s", bin_path)
+
+    paths.electrode_config_file = csv_path
+    return paths
 
 
 # FIXME: logic for generating pairs should be in bptools
@@ -34,11 +113,20 @@ logger = get_logger()
 def generate_pairs_from_electrode_config(subject, paths):
     """Load and verify the validity of the Odin electrode configuration file.
 
-    :param str subject: Subject ID
-    :param FilePaths paths:
-    :returns: minimal pairs.json based on the electrode configuration
-    :rtype: dict
-    :raises RuntimeError: if the csv or bin file are not found
+    Parameters
+    ----------
+    subject : str
+        Subject ID
+
+    Returns
+    -------
+    pairs_from_ec : dict
+        Minimal pairs.json based on the electrode configuration
+
+    Raises
+    ------
+    RuntimeError
+        If the csv or bin file are not found
 
     """
     prefix, _ = os.path.splitext(paths.electrode_config_file)
@@ -68,8 +156,8 @@ def generate_pairs_from_electrode_config(subject, paths):
 
         for ch in ec.sense_channels:
             anode, cathode = ch.contact, ch.ref
-            aname = contacts[contacts.jack_box_num == anode].contact_name[0]
-            cname = contacts[contacts.jack_box_num == cathode].contact_name[0]
+            aname = bytes_to_str(contacts[contacts.jack_box_num == anode].contact_name[0])
+            cname = bytes_to_str(contacts[contacts.jack_box_num == cathode].contact_name[0])
             name = '{}-{}'.format(aname, cname)
             pairs_dict[name] = {
                 'channel_1': anode,
@@ -84,7 +172,8 @@ def generate_pairs_from_electrode_config(subject, paths):
 
     logger.warning('Pairs not generated because hardware bipolar mode was '
                    'not detected')
-    # TODO: This should be abple to return a dictionary of recorded electrodes
+
+    # TODO: This should be able to return a dictionary of recorded electrodes
     # for monopolar recordings
     return
 
@@ -106,6 +195,9 @@ def _make_experiment_specific_data_section(experiment, stim_params,
     dict representation of the ``experiment_specific_data`` section.
 
     """
+    if experiment in EXPERIMENTS['record_only']:
+        return {}
+
     def make_stim_channel_section(params, key):
         stub = {
             "stim_duration": 500,
@@ -154,6 +246,9 @@ def _make_experiment_specs_section(experiment):
     ``experiment_specs`` dict
 
     """
+    if experiment in EXPERIMENTS['record_only']:
+        return {}
+
     # FIXME: values below shouldn't be hardcoded
     specs = {
         "version": "3.0.0",
@@ -184,7 +279,7 @@ def _make_experiment_specs_section(experiment):
 
 def _make_ramulator_config_json(subject, experiment, electrode_config_file,
                                 stim_params, classifier_file=None,
-                                classifier_version=None):
+                                classifier_version=None, extended_blanking=True):
     """Create the Ramulator ``experiment_config.json`` file.
 
     Parameters
@@ -195,10 +290,18 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
     stim_params : dict
     classifier_file : str
     classifier_version : str
+    extended_blanking : bool
 
     Returns
     -------
     str
+
+    Notes
+    -----
+    Not all settings are actually used in all experiments. For example, there
+    are several stim-specific settings that we always write here even for
+    record-only experiments. When not used, they are simply ignored by
+    Ramulator.
 
     """
     config = {
@@ -218,8 +321,8 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
                 "artifact_detection_number_of_stims_per_channel": 15,
                 "artifact_detection_sample_time_length": 500,
                 "artifact_detection_inter_stim_interval": 2000,
-                "allow_artifact_detection_during_session": False
-            }
+                "allow_artifact_detection_during_session": False,
+            },
         },
 
         "biomarker_threshold": 0.5,
@@ -229,7 +332,7 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
         "global_settings": {
             "data_dir": "SET_AUTOMATICALLY_AT_A_RUNTIME",
             "experiment_config_filename": "SET_AUTOMATICALLY_AT_A_RUNTIME",
-            "extended_blanking": True,  # FIXME: make a parameter
+            "extended_blanking": extended_blanking,
             "plot_fps": 5,
             "plot_window_length": 20000,
             "plot_update_style": "Sweeping",
@@ -246,35 +349,41 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
 @task(cache=False)
 def generate_ramulator_config(subject, experiment, container, stim_params,
                               paths, pairs=None, excluded_pairs=None,
-                              params=None):
+                              exp_params=None, extended_blanking=True):
     """Create configuration files for Ramulator.
-
-    Note that the current template format will not work for FR5 experiments
-    since the config format is not the same.
 
     In hardware bipolar mode, the neurorad pipeline generates a ``pairs.json``
     file that differs from the electrode configured pairs. It is up to the user
     of the pipeline to ensure that the path to the correct ``pairs.json`` is
     supplied (although Ramulator does not use it in this case).
 
-    The destination path is assumed to be relative to the root path. All other
-    paths are assumed to be absolute.
+    Parameters
+    ----------
+    subject : str
+    experiment : str
+    container : ClassifierContainer or None
+        serialized classifier
+    stim_params : List[StimParameters]
+        list of stimulation parameters
+    paths : FilePaths
+    excluded_pairs : dict
+        Pairs excluded from the classifier (pairs that contain a stim contact
+        and possibly some others)
+    exp_params : ExperimentParameters
+        All parameters used in training the classifier. This is partially
+        redundant with some data stored in the ``container`` object.
+    extended_blanking : bool
+        Whether or not to enable the ENS extended blanking (default: True).
 
-    :param str subject:
-    :param str experiment:
-    :param ClassifierContainer container: serialized classifier
-    :param List[StimParameters] stim_params: list of stimulation parameters
-    :param FilePaths paths:
-    :param dict excluded_pairs: Pairs excluded from the classifier (pairs that
-        contain a stim contact and possibly some others)
-    :param ExperimentParameters params: All parameters used in training the
-        classifier. This is partially redundant with some data stored in the
-        ``container`` object.
-    :returns: path to generated configuration zip file
-    :rtype: str
+    Returns
+    -------
+    zip_path : str
+        Path to generated configuration zip file
 
     """
-    if container is None and experiment != 'AmplitudeDetermination':
+    no_classifier_experiments = ['AmplitudeDetermination'] + EXPERIMENTS['record_only']
+
+    if container is None and experiment not in no_classifier_experiments:
         raise RuntimeError("container must not be None")
 
     subject = subject.split('_')[0]
@@ -290,8 +399,13 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
         for stim_param in stim_params
     }
 
+    # Put all files in a "clean" directory in the destination path. This just
+    # creates a timestamped folder so that we don't end up bundling up files
+    # that were around from a previous experiment config generation run.
     dest = paths.dest
-    config_dir_root = os.path.join(dest, subject, experiment)
+    clean_dir = datetime.now().strftime('%Y%m%d_%H%m%S')
+
+    config_dir_root = os.path.join(dest, clean_dir, subject, experiment)
     config_files_dir = os.path.join(config_dir_root, 'config_files')
     try:
         os.makedirs(config_files_dir)
@@ -304,7 +418,8 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
 
     experiment_config_content = _make_ramulator_config_json(
         subject, experiment, os.path.basename(ec_prefix + '.bin'), stim_dict,
-        os.path.basename(classifier_path), CLASSIFIER_VERSION
+        os.path.basename(classifier_path), CLASSIFIER_VERSION,
+        extended_blanking=extended_blanking,
     )
 
     with open(os.path.join(config_dir_root, 'experiment_config.json'), 'w') as f:
@@ -313,7 +428,7 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
             tmpfile.write(experiment_config_content)
         f.write(reindent_json(tmp_path))
 
-    if experiment != 'AmplitudeDetermination':
+    if container is not None:
         container.save(classifier_path, overwrite=True)
 
     # Save some typing below...
@@ -340,18 +455,19 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
     shutil.copy(bin, conffile(os.path.basename(bin)))
 
     # Serialize experiment parameters
-    if params is not None:
-        params.to_hdf(os.path.join(config_dir_root, 'exp_params.h5'))
+    if exp_params is not None:
+        exp_params.to_hdf(os.path.join(config_dir_root, 'exp_params.h5'))
     else:
-        if experiment not in ['AmplitudeDetermination'] + EXPERIMENTS['record_only']:
+        if experiment not in no_classifier_experiments:
             warnings.warn("No ExperimentParameters object passed; "
                           "classifier may not be 100% reproducible", UserWarning)
 
     filename_tmpl = '{subject:s}_{experiment:s}_{pairs:s}_{date:s}'
+    pair_str = "_".join([pair.label.replace("_", "-") for pair in stim_params]) if len(stim_params) else ''
     zip_prefix = os.path.join(dest, filename_tmpl.format(
         subject=subject,
         experiment=experiment,
-        pairs="_".join([pair.label.replace("_", "-") for pair in stim_params]),
+        pairs=pair_str,
         date=datetime.now().strftime('%d%b%Y').upper()
     ))
     zip_path = zip_prefix + '.zip'

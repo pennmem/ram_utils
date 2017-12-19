@@ -270,7 +270,7 @@ def extract_atlas_location(bp_data):
         if (loc_tag is not None) and (loc_tag!='') and (loc_tag!='None'):
             return loc_tag
 
-    if (bp_data['type_1']=='D') and ('wb' in atlases):
+    if (bp_data['type_1'] == 'D') and ('wb' in atlases):
         wb_loc = atlases['wb']['region']
         if (wb_loc is not None) and (wb_loc!='') and (wb_loc!='None'):
             return wb_loc
