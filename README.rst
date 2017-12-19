@@ -10,6 +10,14 @@ ramutils
 .. image:: https://img.shields.io/badge/docs-here-blue.svg
     :target: https://pennmem.github.io/ram_utils/html/index.html
 
+Bootstrapping a conda environment
+---------------------------------
+
+.. code-block:: shell-session
+
+    conda create -n environment_name
+    conda install -c pennmem --file=requirements.txt
+
 Usage with the RAM_clinical account
 -----------------------------------
 
@@ -34,10 +42,6 @@ To update the account to a new release:
 1. ``git fetch``
 2. ``git checkout <release tag>``
 3. ``maint/conda_update.sh``
-
-.. note:: ``conda_udpate.sh`` script will fail if the ``ramutils`` environment
-          does not already exist. You can create a dummy environment in this
-          case with ``conda create -n ramutils -y``.
 
 Ramulator experiment config generation
 --------------------------------------
