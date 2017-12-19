@@ -50,3 +50,11 @@ def test_mkdir_p(tmpdir):
     ]
     for path in dirs:
         mkdir_p(path)
+
+
+def test_bytes_to_str():
+    string = u'string'
+    bstring = b'bytestring'
+
+    assert bytes_to_str(string) == string
+    assert bytes_to_str(bstring) == u'bytestring'
