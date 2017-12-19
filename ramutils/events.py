@@ -683,7 +683,7 @@ def extract_event_metadata(events):
     event structure """
     subject = extract_subject(events)
     experiments = extract_experiment_from_events(events)
-    experiment = ",".join(experiments)
+    experiment = ",".join(experimentst )
     sessions = extract_sessions(events)
     return subject, experiment, sessions
 
