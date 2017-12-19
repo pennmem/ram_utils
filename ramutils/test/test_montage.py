@@ -124,7 +124,6 @@ class TestMontage:
         assert '11LD1-11LD2' in test_pairs
         return
 
-    @pytest.mark.skip(reason="data file doesn't include all necessary fields")
     @pytest.mark.parametrize('subject', [
         'R1354E'
     ])
@@ -138,7 +137,6 @@ class TestMontage:
 
         return
 
-    @pytest.mark.skip(reason="data file doesn't include all necessary fields")
     @pytest.mark.parametrize('subject', [
         'R1354E'
     ])
