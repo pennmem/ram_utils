@@ -172,7 +172,8 @@ def make_report(subject, experiment, paths, joint_report=False,
 
         stim_session_summaries = summarize_stim_sessions(
             all_events, final_task_events,
-            post_hoc_results['session_summaries_stim_table']).compute()
+            post_hoc_results['session_summaries_stim_table'],
+            pairs_metadata_table).compute() # TODO: Remove this forced
 
         # TODO: Add stimulation evaluation task that uses the HMM code
 
