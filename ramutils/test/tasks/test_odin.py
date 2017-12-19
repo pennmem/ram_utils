@@ -3,6 +3,7 @@ from __future__ import print_function
 from collections import namedtuple
 import functools
 import json
+import os
 import os.path as osp
 from zipfile import ZipFile
 
@@ -75,12 +76,22 @@ def test_generate_ramulator_config(experiment):
     subject = 'R1354E'
 
     root = osp.join(osp.dirname(ramutils.test.test_data.__file__))
-
-    classifier_path = osp.join(root, 'output', subject, experiment,
-                               'config_files',
-                               '{}-classifier.zip'.format(subject))
-
     container = Mock(ClassifierContainer)
+
+    # Since we're putting configs in a timestamped directory, we need to find it
+    # before we can save the mocked classifier
+    def save_classifier():
+        output_dir = osp.join(root, 'output')
+        subdirs = [
+            osp.join(output_dir, d)
+            for d in os.listdir(output_dir)
+            if osp.isdir(osp.join(output_dir, d))
+        ]
+        timestamped_dir = max(subdirs, key=osp.getmtime)
+        classifier_path = osp.join(output_dir, timestamped_dir, subject,
+                                   experiment, 'config_files',
+                                   '{}-classifier.zip'.format(subject))
+        touch(classifier_path)
 
     Pairs = namedtuple('Pairs', 'label,anode,cathode')
     pairs = [Pairs('1Ld1-1Ld2', 1, 2), Pairs('1Ld3-1Ld4', 3, 4)]
@@ -119,11 +130,12 @@ def test_generate_ramulator_config(experiment):
     else:
         raise RuntimeError("invalid experiment")
 
-    with patch.object(container, 'save', side_effect=lambda *args, **kwargs: touch(classifier_path)):
+    with patch.object(container, 'save', side_effect=lambda *_, **__: save_classifier()):
         path = generate_ramulator_config(subject, experiment, container,
                                          stim_params, paths,
                                          excluded_pairs=excluded_pairs,
                                          exp_params=exp_params).compute()
+        container.save.assert_called_once()
 
     with ZipFile(path) as zf:
         members = zf.namelist()
