@@ -46,11 +46,11 @@ class ReportGenerator(object):
 
     """
     def __init__(self, session_summaries, math_summaries,
-                 sme_table, classifier_summary, dest='.'):
+                 sme_table, classifier_summaries, dest='.'):
         self.session_summaries = session_summaries
         self.math_summaries = math_summaries
         self.sme_table = sme_table
-        self.classifier_summary = classifier_summary
+        self.classifiers = classifier_summaries
 
         if len(session_summaries) != len(math_summaries):
             raise ValueError("Summaries contain different numbers of sessions")
@@ -107,11 +107,7 @@ class ReportGenerator(object):
         return sme_table
 
     def _make_classifier_data(self):
-        """Create JSON object for classifier data.
-
-        FIXME: real data
-
-        """
+        """Create JSON object for classifier data """
         return {
             'auc': self.classifier_summary.auc,
             'p_value': self.classifier_summary.pvalue,
@@ -157,7 +153,7 @@ class ReportGenerator(object):
             summaries=self.session_summaries,
             math_summaries=self.math_summaries,
             combined_summary=self._make_combined_summary(),
-            classifier=self._make_classifier_data(),
+            classifiers=self.classifiers,
             **kwargs
         )
 
@@ -182,14 +178,16 @@ class ReportGenerator(object):
                     }
                 }),
                 'roc': json.dumps({
-                    'fpr': self.classifier_summary.false_positive_rate,
-                    'tpr': self.classifier_summary.true_positive_rate
+                    'fpr': [classifier.false_positive_rate for classifier in self.classifiers],
+                    'tpr': [classifier.true_positive_rate for classifier in self.classifiers],
                 }),
                 'tercile': json.dumps({
-                    'low': self.classifier_summary.low_tercile_diff_from_mean,
-                    'mid': self.classifier_summary.mid_tercile_diff_from_mean,
-                    'high': self.classifier_summary.high_tercile_diff_from_mean
-                })
+                    'low': [classifier.low_tercile_diff_from_mean for classifier in self.classifiers],
+                    'mid': [classifier.mid_tercile_diff_from_mean for classifier in self.classifiers],
+                    'high': [classifier.high_tercile_diff_from_mean for classifier in self.classifiers]
+                }),
+                'tags': json.dumps([classifier.metadata['tag'] for classifier
+                                    in self.classifiers])
             },
             sme_table=self._make_sme_table(),
         )

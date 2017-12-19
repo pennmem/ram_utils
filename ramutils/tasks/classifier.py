@@ -91,7 +91,7 @@ def serialize_classifier(classifier, pairs, features, events, sample_weights,
 
 
 @task()
-def perform_cross_validation(classifier, pow_mat, events, n_permutations,
+def perform_cross_validation(classifier, pow_mat, events, n_permutations, tag,
                              **kwargs):
     """Perform LOSO or LOLO cross validation on a classifier.
 
@@ -101,6 +101,8 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
     pow_mat : np.ndarray
     events : np.recarray
     n_permutations: int
+    tag: str
+        Tag to assign the resulting classifier summary
     kwargs: dict
         Extra keyword arguments that are passed to get_sample_weights. See
         that function for more details
@@ -130,7 +132,7 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
                                               recalls, **kwargs)
         classifier_summary.populate(subject, experiment,
                                     sessions, encoding_recalls, probs,
-                                    permuted_auc_values)
+                                    permuted_auc_values, tag=tag)
 
     else:
         logger.info("Performing LOLO cross validation")
@@ -144,7 +146,7 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
 
         classifier_summary.populate(subject, experiment,
                                     sessions, encoding_recalls, probs,
-                                    permuted_auc_values)
+                                    permuted_auc_values, tag=tag)
 
     logger.info("Permutation test p-value = %f", classifier_summary.pvalue)
     recall_prob = classifier.predict_proba(pow_mat)[:, 1]
