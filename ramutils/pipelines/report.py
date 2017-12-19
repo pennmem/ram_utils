@@ -182,10 +182,15 @@ def make_report(subject, experiment, paths, joint_report=False,
                                            final_task_events,
                                            joint=joint_report)
     math_summaries = summarize_math(all_events, joint=joint_report)
+
+    if not stim_report:
+        results = classifier_summaries
+    else:
+        results = post_hoc_results['session_summaries']
+
     report = build_static_report(subject, experiment, session_summaries,
                                  math_summaries, delta_hfa_table,
-                                 post_hoc_results['session_summaries'],
-                                 paths.dest)
+                                 results, paths.dest)
 
     if vispath is not None:
         report.visualize(filename=vispath)
