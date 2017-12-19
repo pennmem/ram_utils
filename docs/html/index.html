@@ -170,23 +170,22 @@ $ cd ram_utils
 </pre></div>
 </div>
 <p>Create a conda environment with all prerequisites:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>$ conda env create --file conda_environment.yaml -n ramutils
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ conda env create -y -n ramutils
 </pre></div>
 </div>
-<p>Install in the new environment:</p>
+<p>Install dependencies:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span>$ source activate ramutils
-(ramutils) $ python setup.py install
+(ramutils) $ conda install -y -c pennmem --file=requirements.txt
 </pre></div>
 </div>
-<p>Install remaining requirements:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>(ramutils) $ pip install git+https://github.com/pennmem/classiflib.git
-(ramutils) $ pip install git+https://github.com/pennmem/bptools.git
+<p>Install <code class="docutils literal"><span class="pre">ramutils</span></code>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>(ramutils) $ python setup.py install
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">In the future, these packages should be installed automatically with
-conda.</p>
+<p class="last">Future releases should be installable via a conda package with dependencies
+specified there.</p>
 </div>
 </div>
 <div class="section" id="contents">
