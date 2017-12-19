@@ -679,13 +679,11 @@ def select_word_events(events, encoding_only=True):
 
 
 def extract_event_metadata(events):
-    """ Extract the subject, experiment, and session(s) associated with an
+    """ Extract the subject, experiment(s), and session(s) associated with an
     event structure """
     subject = extract_subject(events)
-    experiment = extract_experiment_from_events(events)
-    if len(experiment) != 1:
-        raise RuntimeError("Expected single experiment in events")
-    experiment = experiment[0]
+    experiments = extract_experiment_from_events(events)
+    experiment = ",".join(experiments)
     sessions = extract_sessions(events)
     return subject, experiment, sessions
 
