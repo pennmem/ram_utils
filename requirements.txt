@@ -25,5 +25,6 @@ ptsa=1.1.4
 
 # Required only for building docs:
 sphinx=1.6.3
+sphinx_rtd_theme=0.2.4
 sphinxcontrib=1.0
 sphinxcontrib-websupport=1.0.1
