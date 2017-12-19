@@ -114,3 +114,12 @@ example ``area.txt`` file for subject R1347D would look like::
 
     Alternatively in this case, the ``--default-surface-area`` (or ``-A``)
     option could be used since all contacts share the same surface area.
+
+The logic for determining what to use for surface areas is as follows:
+
+* Use the file specified with the ``--area-file`` option if given
+* If not found, use the default surface area (0.001 if not specified, otherwise
+  the value specified with the ``--default-surface-area`` option)
+* If no ``--area-file`` option is given, try to load ``area.txt`` from the docs
+  directory
+* If no area file is found, use the default surface area as described above
