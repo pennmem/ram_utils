@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 
 from itertools import groupby
-from numpy.lib.recfunctions import rename_fields, rec_append_fields
+from numpy.lib.recfunctions import rename_fields
 
 from ptsa.data.readers import BaseEventReader, JsonIndexReader, EEGReader
 from ramutils.utils import extract_subject_montage
@@ -54,7 +54,8 @@ def load_events(subject, experiment, sessions=None, rootdir='/'):
         sessions_to_load = json_reader.aggregate_values('sessions',
                                                         subject=subject_id,
                                                         experiment=experiment)
-
+    # TODO: There should be better behavior if an event file cannot be found
+    #  for a requested session
     event_files = sorted([json_reader.get_value('all_events',
                                                 subject=subject,
                                                 montage=montage,
@@ -153,7 +154,7 @@ def normalize_pal_events(events):
     """
     events = rename_correct_to_recalled(events)
     events = coerce_study_pair_to_word_event(events)
-    events = select_pal_column_subset(events)
+    events = select_column_subset(events, pal=True)
     events = add_field(events, 'item_name', 'X')
     return events
 
@@ -356,26 +357,24 @@ def remove_bad_events(events):
     raise NotImplementedError
 
 
-def select_column_subset(events):
+def select_column_subset(events, pal=False, stim=False):
+    """ Select only the necessary subset of the fields """
     columns = [
         'serialpos', 'session', 'subject', 'rectime', 'experiment',
         'mstime', 'type', 'eegoffset', 'recalled', 'intrusion',
         'montage', 'list', 'eegfile', 'msoffset', 'item_name', 'iscorrect',
         'phase'
     ]
-    events = events[columns]
-    return events
 
+    if pal:
+        columns.remove('item_name')
 
-def select_pal_column_subset(events):
-    columns = [
-        'serialpos', 'session', 'subject', 'rectime', 'experiment',
-        'mstime', 'type', 'eegoffset', 'recalled', 'intrusion',
-        'montage', 'list', 'eegfile', 'msoffset', 'iscorrect', 'phase'
-    ]
+    if stim:
+        columns.append('stim_params')
 
     events = events[columns]
     return events
+
 
 def initialize_empty_event_reccarray():
     """Utility function for generating a recarray that looks normalized,
@@ -571,7 +570,7 @@ def find_free_time_periods(times, duration, pre, post, start=None, end=None):
     return epoch_array
 
 
-def concatenate_events_across_experiments(event_list):
+def concatenate_events_across_experiments(event_list, pal=False, stim=False):
     """
     Concatenate events across different experiment types. To make session
     numbers unique, 100 is added to the second set of events in event_list,
@@ -581,6 +580,12 @@ def concatenate_events_across_experiments(event_list):
     ----------
     event_list: iterable
         An iterable containing events to be concatenated
+    pal: Bool
+        Indicator for if PAL sessions are included in event_list. This will
+        alter which columns are kept for merging events
+    stim: Bool
+        Indicator for if event_list contains stim sessions. If True,
+        then stim_params field will be kept
 
     Returns
     -------
@@ -595,8 +600,7 @@ def concatenate_events_across_experiments(event_list):
         if len(events) == 0:
             continue # we don't want to be incrementing if we dont have to
         events.session += session_offset
-        # This won't be necessary if using DataFrames
-        events = select_column_subset(events)
+        events = select_column_subset(events, pal=pal, stim=stim)
         final_event_list.append(events)
         session_offset += 100
 
@@ -674,10 +678,30 @@ def select_word_events(events, encoding_only=True):
     return events
 
 
+def extract_event_metadata(events):
+    """ Extract the subject, experiment, and session(s) associated with an
+    event structure """
+    subject = extract_subject(events)
+    experiment = extract_experiment_from_events(events)
+    if len(experiment) != 1:
+        raise RuntimeError("Expected single experiment in events")
+    experiment = experiment[0]
+    sessions = extract_sessions(events)
+    return subject, experiment, sessions
+
+
+def extract_subject(events):
+    """ Extract subject identifier from events """
+    subjects = np.unique(events[events.subject != ''].subject).tolist()
+    if len(subjects) != 1:
+        raise RuntimeError('There should only be one subject in an event '
+                           'recarray')
+    return subjects[0]
+
+
 def extract_experiment_from_events(events):
     """ Given a set of events, return a list of unique experiments contained
         within
-
     """
     # Experiment field can be blank, so make sure to not include that in the
     # final list
@@ -696,8 +720,183 @@ def extract_sessions(events):
     return sessions
 
 
+def extract_lists(events):
+    """ Return a list of lists contained within the events structure """
+    lists = np.unique(events.list)
+    return lists
+
+
+def select_session_events(events, session):
+    """ Select events corresponding to a particular session """
+    sessions = extract_sessions(events)
+    if session not in sessions:
+        raise RuntimeError('Session {} not in event structure'.format(session))
+
+    session_event_mask = get_session_mask(events, session)
+    session_events = events[session_event_mask]
+
+    return session_events
+
+
+def get_session_mask(events, session):
+    """ Return a mask for if an event belongs to the given session """
+    session_mask = (events.session == session)
+    return session_mask
+
+
+def select_stim_table_events(events):
+    """ Return the events needed to build stim session summary """
+    events = remove_practice_lists(events)
+    mask = get_stim_table_event_mask(events)
+    stim_table_events = events[mask]
+    return stim_table_events
+
+
+def get_stim_table_event_mask(events):
+    """
+        Return a mask of events to be included for building stim session
+        summaries
+    """
+    stim_table_phases = ['STIM', 'NON-STIM', 'BASELINE', 'PRACTICE']
+    event_type_mask = [event.phase in stim_table_phases for event in events]
+
+    return event_type_mask
+
+
+def get_stim_list_mask(events):
+    """ Return boolean mask identifying stim lists
+
+    Notes
+    -----
+    Not all items in a stim list will be stimulated. Stimulation will depend
+    on the biomarker at the time of encoding
+
+    """
+    stim_list_mask = (events.phase == 'STIM')
+    return stim_list_mask
+
+
+def extract_stim_information(all_events, task_events):
+    """ Identify stim items, post stim items, and stimulation parameters
+
+    Parameters
+    ----------
+    all_events: np.recarray
+        All events
+    task_events: np.recarray
+        Task events used for classifier training/evaluation
+
+    Returns
+    -------
+    is_stim_item: list
+        Boolean array matching the length of task events indicating if a
+        word was stimulated
+    is_post_stim_item: list
+        Boolean array matching the length of task_events indicating if a word
+        occured after a stimulated word
+    stim_df: pd.DataFrame
+        Stim parameters used for each stimulation event
+
+
+    Notes
+    -----
+    This is a rather convoluted set of logic. The goal is to match all word
+    encoding events with their associated STIM_ON events, which occur as
+    separate entries in the json event structures.
+
+    """
+    n_events = len(task_events)
+    is_stim_item = np.zeros(n_events, dtype=np.bool)
+    is_post_stim_item = np.zeros(n_events, dtype=np.bool)
+
+    stim_param_data = {
+        'item_name': [],
+        'session': [],
+        'list': [],
+        'amplitude': [],
+        'pulse_freq': [],
+        'stim_duration': [],
+        'stimAnodeTag': [],
+        'stimCathodeTag': [],
+    }
+
+    lists = extract_lists(all_events)
+    for lst in lists:
+        lst_events = all_events[all_events.list == lst]
+        lst_stim_words = np.zeros(len(lst_events[lst_events.type == 'WORD']))
+        lst_post_stim_words = np.zeros(len(lst_events[lst_events.type == 'WORD']))
+
+        # j will track word (task) events, while i tracks all events
+        j = 0
+        for i, event in enumerate(lst_events):
+            if event.type == 'WORD':
+                # Messy logic to find stim items
+                if ((lst_events[i + 1].type == 'STIM_ON')
+                        or (lst_events[i + 1].type == 'WORD_OFF' and
+                            (lst_events[i + 2].type == 'STIM_ON' or (
+                                    lst_events[i + 2].type == 'DISTRACT_START'
+                                    and lst_events[i + 3].type == 'STIM_ON')))):
+                    lst_stim_words[j] = True
+                    # Identify which post 'WORD' event was the 'STIM_ON'
+                    # event and use the stored stim params for that event to
+                    # update the stim table
+                    for offset in range(1, 4):
+                        if lst_events[i + offset].type == 'STIM_ON':
+                            # Assign stim params
+                            loc = i + offset
+
+                            # Single-site stimulation will have stim_param
+                            # field as a record, while multi-site will be
+                            # ndarray. Coerce everything to ndarray for
+                            # consitency
+                            stim_params = lst_events[loc].stim_params
+                            if type(stim_params) != np.ndarray:
+                                stim_params = np.array([stim_params])
+
+                            stim_param_data['item_name'].append(lst_events[loc].item_name)
+                            stim_param_data['session'].append(lst_events[loc].session)
+                            stim_param_data['list'].append(lst_events[loc].list)
+                            stim_param_data['amplitude'].append(",".join([str(stim_params[k].amplitude) for k in range(len(stim_params))]))
+                            stim_param_data['pulse_freq'].append(",".join([str(stim_params[k].pulse_freq) for k in range(len(stim_params))]))
+                            stim_param_data['stim_duration'].append(",".join([str(stim_params[k].stim_duration) for k in range(len(stim_params))]))
+                            stim_param_data['stimAnodeTag'].append(",".join([str(stim_params[k].anode_label) for k in range(len(stim_params))]))
+                            stim_param_data['stimCathodeTag'].append(",".join([str(stim_params[k].cathode_label) for k in range(len(stim_params))]))
+                            break
+
+                # Messy logic to find post stim items
+                if ((lst_events[i - 1].type == 'STIM_OFF')
+                        or (lst_events[i + 1].type == 'STIM_OFF')
+                        or (lst_events[i - 2].type == 'STIM_OFF' and
+                            lst_events[i - 1].type == 'WORD_OFF')):
+                    lst_post_stim_words[j] = True
+                j += 1
+
+        # FYI: It should always be the case that the number of word events
+        # from all_events.json is equal to the number of events from
+        # task_events.json. However, when reading the eeg as part of
+        # computing powers, the PTSA EEGReader can elect to remove some
+        # events. If it happens to remove a 'WORD' event, then these two
+        # values could differ.
+        lst_mask = (task_events.list == lst)
+        if sum(lst_mask) != len(lst_stim_words):
+            new_mask = np.in1d(lst_events[lst_events.type == 'WORD'].item_name,
+                               task_events[lst_mask].item_name)
+
+            lst_stim_words = lst_stim_words[new_mask]
+            lst_post_stim_words = lst_post_stim_words[new_mask]
+            # TODO: Do we need to do this correction for the stim param data
+            # as well?
+
+        is_stim_item[lst_mask] = lst_stim_words
+        is_post_stim_item[lst_mask] = lst_post_stim_words
+
+    stim_df = pd.DataFrame.from_dict(stim_param_data)
+
+    return is_stim_item, is_post_stim_item, stim_df
+
+
 def validate_single_experiment(events):
-    """ Raises an error if more than one experiment is present in the events"""
+    """ Raises an error if more than one experiment is present in the events """
     experiments = extract_experiment_from_events(events)
     if len(experiments) > 1:
         raise TooManyExperimentsError('Expected single experiment in events')
@@ -713,7 +912,7 @@ def validate_single_session(events):
 
 
 def extract_sample_rate(events):
-    """ Extract the samplerate used for the given set of events"""
+    """ Extract the samplerate used for the given set of events """
     eeg_reader = EEGReader(events=events[:2], start_time=0.0, end_time=1.0)
     eeg = eeg_reader.read()
     samplerate = float(eeg['samplerate'])
