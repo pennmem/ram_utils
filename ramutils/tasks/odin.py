@@ -22,7 +22,7 @@ from ramutils.constants import EXPERIMENTS
 from ramutils.exc import MissingFileError
 from ramutils.log import get_logger
 from ramutils.tasks import task
-from ramutils.utils import reindent_json
+from ramutils.utils import bytes_to_str, reindent_json
 
 __all__ = [
     'generate_electrode_config',
@@ -156,8 +156,8 @@ def generate_pairs_from_electrode_config(subject, paths):
 
         for ch in ec.sense_channels:
             anode, cathode = ch.contact, ch.ref
-            aname = contacts[contacts.jack_box_num == anode].contact_name[0]
-            cname = contacts[contacts.jack_box_num == cathode].contact_name[0]
+            aname = bytes_to_str(contacts[contacts.jack_box_num == anode].contact_name[0])
+            cname = bytes_to_str(contacts[contacts.jack_box_num == cathode].contact_name[0])
             name = '{}-{}'.format(aname, cname)
             pairs_dict[name] = {
                 'channel_1': anode,
@@ -399,8 +399,13 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
         for stim_param in stim_params
     }
 
+    # Put all files in a "clean" directory in the destination path. This just
+    # creates a timestamped folder so that we don't end up bundling up files
+    # that were around from a previous experiment config generation run.
     dest = paths.dest
-    config_dir_root = os.path.join(dest, subject, experiment)
+    clean_dir = datetime.now().strftime('%Y%m%d_%H%m%S')
+
+    config_dir_root = os.path.join(dest, clean_dir, subject, experiment)
     config_files_dir = os.path.join(config_dir_root, 'config_files')
     try:
         os.makedirs(config_files_dir)

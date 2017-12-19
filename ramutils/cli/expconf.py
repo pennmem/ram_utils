@@ -188,7 +188,7 @@ if __name__ == "__main__":  # pragma: nocover
         "-s", "R1374T", "-x", "CatFR5",
         "--anodes", "LA7", "--cathodes", "LA8",
         "--target-amplitudes", "0.5",
-        "-e", "data/eeg/R1374T/behavioral/FR1/session_0/host_pc/20171207_163732/config_files/R1374T_06DEC2017L0M0NOSTIM.csv",
+        "-e", "/data/eeg/R1374T/behavioral/catFR5/session_0/host_pc/20171212_163330/config_files/R1374T_12DEC2017L0M0STIM.csv",
         "--root", root, "--dest", dest, "--force-rerun"
     ])
 
