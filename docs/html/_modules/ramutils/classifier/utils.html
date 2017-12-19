@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>ramutils.classifier.utils &#8212; Ramutils 2.0.0 documentation</title>
+    <title>ramutils.classifier.utils &#8212; Ramutils 2.0.2rc0 documentation</title>
     <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '2.0.0',
+        VERSION:     '2.0.2rc0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Ramutils 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Ramutils 2.0.2rc0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -55,6 +55,7 @@
 <span class="kn">from</span> <span class="nn">sklearn.linear_model.logistic</span> <span class="k">import</span> <span class="n">LogisticRegression</span>
 
 <span class="kn">from</span> <span class="nn">classiflib.container</span> <span class="k">import</span> <span class="n">ClassifierContainer</span>
+<span class="kn">from</span> <span class="nn">ramutils.exc</span> <span class="k">import</span> <span class="n">UnableToReloadClassifierException</span>
 
 
 <div class="viewcode-block" id="reload_classifier"><a class="viewcode-back" href="../../../classifier.html#ramutils.classifier.utils.reload_classifier">[docs]</a><span class="k">def</span> <span class="nf">reload_classifier</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">mount_point</span><span class="o">=</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="n">base_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -85,13 +86,22 @@
                                  <span class="s1">&#39;session_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">session</span><span class="p">)),</span>
                                  <span class="s1">&#39;host_pc&#39;</span><span class="p">)</span>
 
+    <span class="n">timestamped_dirs</span> <span class="o">=</span> <span class="n">glob</span><span class="p">(</span><span class="n">base_path</span> <span class="o">+</span> <span class="s2">&quot;/*&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timestamped_dirs</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">UnableToReloadClassifierException</span><span class="p">(</span>
+            <span class="s1">&#39;There should be 1 and only 1 timestamped &#39;</span>
+            <span class="s1">&#39;directory at </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">base_path</span><span class="p">))</span>
+
+    <span class="n">timestamped_path</span> <span class="o">=</span> <span class="n">timestamped_dirs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">timestamped_path</span><span class="p">)</span>
+
     <span class="c1"># FIXME: this needs a data quality check to confirm that all classifiers in</span>
     <span class="c1"># a session are the same!</span>
     <span class="c1"># We take the final timestamped directory because in principle retrained</span>
     <span class="c1"># classifiers can be different depending on artifact detection. In</span>
     <span class="c1"># reality, stim sessions should never be restarted (apart from issues</span>
     <span class="c1"># getting things started in the first place).</span>
-    <span class="n">config_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span> <span class="s1">&#39;config_files&#39;</span><span class="p">)</span>
+    <span class="n">config_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">timestamped_path</span><span class="p">,</span> <span class="s1">&#39;config_files&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="s1">&#39;retrained_classifier&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">config_path</span><span class="p">):</span>
         <span class="n">classifier_path</span> <span class="o">=</span> <span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config_path</span><span class="p">,</span>
                                             <span class="s1">&#39;retrained_classifier&#39;</span><span class="p">,</span>
@@ -129,7 +139,8 @@
     <span class="n">recalls</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">recalled</span>
     <span class="n">classifier</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">C</span><span class="o">=</span><span class="n">penalty_param</span><span class="p">,</span>
                                     <span class="n">penalty</span><span class="o">=</span><span class="n">penalty_type</span><span class="p">,</span>
-                                    <span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">)</span>
+                                    <span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">,</span>
+                                    <span class="n">class_weight</span><span class="o">=</span><span class="s1">&#39;balanced&#39;</span><span class="p">)</span>
     <span class="n">classifier</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">pow_mat</span><span class="p">,</span> <span class="n">recalls</span><span class="p">,</span> <span class="n">sample_weights</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">classifier</span></div>
 
@@ -164,7 +175,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Ramutils 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Ramutils 2.0.2rc0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Serializable data structures &#8212; Ramutils 2.0.0 documentation</title>
+    <title>Serializable data structures &#8212; Ramutils 2.0.2rc0 documentation</title>
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '2.0.0',
+        VERSION:     '2.0.2rc0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="index.html" title="ramutils"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.2rc0 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -57,86 +57,14 @@
 <div class="section" id="defining-data-classes">
 <h2>Defining data classes<a class="headerlink" href="#defining-data-classes" title="Permalink to this headline">¶</a></h2>
 <p>Data can be defined in a serializable manner using the
-<a class="reference internal" href="#ramutils.schema.Schema" title="ramutils.schema.Schema"><code class="xref py py-class docutils literal"><span class="pre">ramutils.schema.Schema</span></code></a> base class which adds serialization methods to
+<code class="xref py py-class docutils literal"><span class="pre">traitschema.Schema</span></code> base class which adds serialization methods to
 data classes that are defined using the <code class="xref py py-mod docutils literal"><span class="pre">traits</span></code> package. To ensure
 serializability, use the <code class="docutils literal"><span class="pre">Array</span></code> type whenever possible.</p>
-<dl class="class">
-<dt id="ramutils.schema.Schema">
-<em class="property">class </em><code class="descclassname">ramutils.schema.</code><code class="descname">Schema</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/schema.html#Schema"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.schema.Schema" title="Permalink to this definition">¶</a></dt>
-<dd><p>Base class for defining serializable schema/data classes.</p>
-<dl class="classmethod">
-<dt id="ramutils.schema.Schema.from_hdf">
-<em class="property">classmethod </em><code class="descname">from_hdf</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/schema.html#Schema.from_hdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.schema.Schema.from_hdf" title="Permalink to this definition">¶</a></dt>
-<dd><p>Deserialize from HDF5.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<em>str</em>) – </td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Deserialized instance</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="classmethod">
-<dt id="ramutils.schema.Schema.from_json">
-<em class="property">classmethod </em><code class="descname">from_json</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/schema.html#Schema.from_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.schema.Schema.from_json" title="Permalink to this definition">¶</a></dt>
-<dd><p>Deserialize from a JSON string or file.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>or file data</strong> (<em>str</em>) – </td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="ramutils.schema.Schema.to_dict">
-<code class="descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/schema.html#Schema.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.schema.Schema.to_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return all visible traits as a dictionary. This is useful if some
-of the attributes need to be passed to functions as kwargs and you
-do not want the fuction to need to know about Schema objects</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ramutils.schema.Schema.to_hdf">
-<code class="descname">to_hdf</code><span class="sig-paren">(</span><em>filename</em>, <em>mode='w'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/schema.html#Schema.to_hdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.schema.Schema.to_hdf" title="Permalink to this definition">¶</a></dt>
-<dd><p>Serialize schema to HDF5.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>filename</strong> (<em>str</em>) – </li>
-<li><strong>mode</strong> (<em>str</em>) – Default: <code class="docutils literal"><span class="pre">'w'</span></code></li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="ramutils.schema.Schema.to_json">
-<code class="descname">to_json</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/schema.html#Schema.to_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.schema.Schema.to_json" title="Permalink to this definition">¶</a></dt>
-<dd><p>Serialize as a JSON string.</p>
-<p class="rubric">Notes</p>
-<p>This uses a custom JSON encoder to handle numpy arrays but could
-conceivably lose precision. If this is important, please consider
-serializing in HDF5 format instead.</p>
-</dd></dl>
-
-</dd></dl>
-
 </div>
 <div class="section" id="experimental-parameters">
 <h2>Experimental parameters<a class="headerlink" href="#experimental-parameters" title="Permalink to this headline">¶</a></h2>
 <p>Experimental parameters (e.g., timing windows) are defined as
-<a class="reference internal" href="#ramutils.schema.Schema" title="ramutils.schema.Schema"><code class="xref py py-class docutils literal"><span class="pre">ramutils.schema.Schema</span></code></a> subclasses so that the parameters used when
+<code class="xref py py-class docutils literal"><span class="pre">traitschema.Schema</span></code> subclasses so that the parameters used when
 training a classifier can be easily saved.</p>
 <span class="target" id="module-ramutils.parameters"></span><p>Common experimental/model parameters.</p>
 <dl class="class">
@@ -166,9 +94,12 @@ paths on creation.</p>
 <tr class="field-odd field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
 <li><strong>root</strong> (<em>str</em>) – Rhino mount point.</li>
 <li><strong>dest</strong> (<em>str</em>) – Directory to write files to.</li>
-<li><strong>electrode_config_file</strong> (<em>str</em>) – Path to Odin electrode configuration CSV file.</li>
 <li><strong>pairs</strong> (<em>str</em>) – Path to <code class="docutils literal"><span class="pre">pairs.json</span></code>.</li>
 <li><strong>excluded_pairs</strong> (<em>str</em>) – Path to <code class="docutils literal"><span class="pre">excluded_pairs.json</span></code>.</li>
+<li><strong>electrode_config_file</strong> (<em>str</em>) – Path to electrode config file.</li>
+<li><strong>area_file</strong> (<em>str</em>) – Path to surface area file. When generating Odin configuration files and
+not defined, the default behavior is to look in the same directory as
+the jacksheet for a file named <code class="docutils literal"><span class="pre">area.txt</span></code>.</li>
 </ul>
 </td>
 </tr>
@@ -250,7 +181,7 @@ few more</p>
         <li class="right" >
           <a href="index.html" title="ramutils"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.2rc0 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

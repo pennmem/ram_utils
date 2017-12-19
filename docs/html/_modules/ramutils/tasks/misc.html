@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>ramutils.tasks.misc &#8212; Ramutils 2.0.0 documentation</title>
+    <title>ramutils.tasks.misc &#8212; Ramutils 2.0.2rc0 documentation</title>
     <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '2.0.0',
+        VERSION:     '2.0.2rc0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Ramutils 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Ramutils 2.0.2rc0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -47,8 +47,26 @@
             
   <h1>Source code for ramutils.tasks.misc</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="k">import</span> <span class="n">urlparse</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">urlparse</span> <span class="k">import</span> <span class="n">urlparse</span>
+
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">ptsa.data.readers</span> <span class="k">import</span> <span class="n">JsonIndexReader</span>
+<span class="kn">from</span> <span class="nn">traitschema</span> <span class="k">import</span> <span class="n">Schema</span>
+
 <span class="kn">from</span> <span class="nn">._wrapper</span> <span class="k">import</span> <span class="n">task</span>
+<span class="kn">from</span> <span class="nn">ramutils.utils</span> <span class="k">import</span> <span class="n">is_stim_experiment</span> <span class="k">as</span> <span class="n">is_stim_experiment_core</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;read_index&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;is_stim_experiment&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;store_results&#39;</span>
+<span class="p">]</span>
 
 
 <div class="viewcode-block" id="read_index"><a class="viewcode-back" href="../../../pipeline.html#ramutils.tasks.misc.read_index">[docs]</a><span class="nd">@task</span><span class="p">()</span>
@@ -61,6 +79,49 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">mount_point</span><span class="p">,</span> <span class="s1">&#39;protocols&#39;</span><span class="p">,</span> <span class="s1">&#39;r1.json&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">JsonIndexReader</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+
+
+<span class="nd">@task</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">is_stim_experiment</span><span class="p">(</span><span class="n">experiment</span><span class="p">):</span>
+    <span class="n">is_stim</span> <span class="o">=</span> <span class="n">is_stim_experiment_core</span><span class="p">(</span><span class="n">experiment</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">is_stim</span>
+
+
+<div class="viewcode-block" id="store_results"><a class="viewcode-back" href="../../../pipeline.html#ramutils.tasks.misc.store_results">[docs]</a><span class="nd">@task</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">store_results</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Put computed data into storage.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data</span>
+<span class="sd">        Data to store. Valid types include :class:`traitschema.Schema` instances</span>
+<span class="sd">        and Numpy arrays.</span>
+<span class="sd">    url : str</span>
+<span class="sd">        URI spec or file path for storing data.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The ``url`` parameter is intended to accept generic URIs for the future</span>
+<span class="sd">    ability to store to other backends, meaning that the scheme component (the</span>
+<span class="sd">    piece before ``://``) indicates how and where to store the data. By default,</span>
+<span class="sd">    if ``url`` looks like a path, this function will assume it is just writing</span>
+<span class="sd">    to disk. In other words, ``/tmp/output`` is equivalent to</span>
+<span class="sd">    ``file:///tmp/output``.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">url</span><span class="o">.</span><span class="n">scheme</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]:</span>
+        <span class="k">assert</span> <span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.h5&#39;</span><span class="p">),</span> <span class="s2">&quot;data must be saved as HDF5 files&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">to_hdf</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hfile</span><span class="p">:</span>
+                <span class="n">hfile</span><span class="p">[</span><span class="s1">&#39;/data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Data must be a numpy array or a Schema instance&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Only file storage is implemented.&quot;</span><span class="p">)</span></div>
 </pre></div>
 
           </div>
@@ -91,7 +152,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Ramutils 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Ramutils 2.0.2rc0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>

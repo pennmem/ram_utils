@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>ramutils.events &#8212; Ramutils 2.0.0 documentation</title>
+    <title>ramutils.events &#8212; Ramutils 2.0.2rc0 documentation</title>
     <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '2.0.0',
+        VERSION:     '2.0.2rc0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">Ramutils 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Ramutils 2.0.2rc0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -62,99 +62,14 @@
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">groupby</span>
-<span class="kn">from</span> <span class="nn">numpy.lib.recfunctions</span> <span class="k">import</span> <span class="n">rename_fields</span>
+<span class="kn">from</span> <span class="nn">numpy.lib.recfunctions</span> <span class="k">import</span> <span class="n">rename_fields</span><span class="p">,</span> <span class="n">rec_append_fields</span>
 
 <span class="kn">from</span> <span class="nn">ptsa.data.readers</span> <span class="k">import</span> <span class="n">BaseEventReader</span><span class="p">,</span> <span class="n">JsonIndexReader</span><span class="p">,</span> <span class="n">EEGReader</span>
 <span class="kn">from</span> <span class="nn">ramutils.utils</span> <span class="k">import</span> <span class="n">extract_subject_montage</span>
-
-
-<div class="viewcode-block" id="preprocess_events"><a class="viewcode-back" href="../../events.html#ramutils.events.preprocess_events">[docs]</a><span class="k">def</span> <span class="nf">preprocess_events</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span>
-                      <span class="n">end_time</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">pre</span><span class="p">,</span> <span class="n">post</span><span class="p">,</span> <span class="n">combine_events</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                      <span class="n">encoding_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;High-level pre-processing function for combining/cleaning record only</span>
-<span class="sd">    events to be used in config generation and reports</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    subject : str</span>
-<span class="sd">        Subject ID.</span>
-<span class="sd">    experiment: str</span>
-<span class="sd">        Experiment that events are being combined for</span>
-<span class="sd">    start_time: int</span>
-<span class="sd">    end_time: int</span>
-<span class="sd">    duration: int</span>
-<span class="sd">    pre: int</span>
-<span class="sd">    post: int</span>
-<span class="sd">    combine_events: bool</span>
-<span class="sd">        Indicates if all record-only sessions should be combined for</span>
-<span class="sd">        classifier training.</span>
-<span class="sd">    encoding_only: bool</span>
-<span class="sd">        Flag for if only encoding events should be used (default is False,</span>
-<span class="sd">        i.e. encoding and retrieval events will be returned)</span>
-<span class="sd">    root: str</span>
-<span class="sd">        Base path for finding event files etc.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    np.recarray</span>
-<span class="sd">        Full set of cleaned task events</span>
-
-<span class="sd">    Notes</span>
-<span class="sd">    -----</span>
-<span class="sd">    See insert_baseline_events for details on start_time, end_time, duration,</span>
-<span class="sd">    pre, and post parameters</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;FR&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s2">&quot;PAL&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Only PAL, FR, and catFR experiments are currently&quot;</span>
-                           <span class="s2">&quot;implemented&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="s2">&quot;PAL&quot;</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">:</span>
-        <span class="n">pal_events</span> <span class="o">=</span> <span class="n">load_events</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="s2">&quot;PAL1&quot;</span><span class="p">,</span> <span class="n">rootdir</span><span class="o">=</span><span class="n">root</span><span class="p">)</span>
-        <span class="n">pal_events</span> <span class="o">=</span> <span class="n">clean_events</span><span class="p">(</span><span class="s2">&quot;PAL1&quot;</span><span class="p">,</span> <span class="n">pal_events</span><span class="p">)</span>
-        <span class="n">pal_events</span> <span class="o">=</span> <span class="n">normalize_pal_events</span><span class="p">(</span><span class="n">pal_events</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;FR&quot;</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">)</span> <span class="ow">or</span> <span class="n">combine_events</span><span class="p">:</span>
-        <span class="n">fr_events</span> <span class="o">=</span> <span class="n">load_events</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="s1">&#39;FR1&#39;</span><span class="p">,</span> <span class="n">rootdir</span><span class="o">=</span><span class="n">root</span><span class="p">)</span>
-        <span class="n">fr_events</span> <span class="o">=</span> <span class="n">clean_events</span><span class="p">(</span><span class="s2">&quot;FR1&quot;</span><span class="p">,</span>
-                                 <span class="n">fr_events</span><span class="p">,</span>
-                                 <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span>
-                                 <span class="n">end_time</span><span class="o">=</span><span class="n">end_time</span><span class="p">,</span>
-                                 <span class="n">duration</span><span class="o">=</span><span class="n">duration</span><span class="p">,</span>
-                                 <span class="n">pre</span><span class="o">=</span><span class="n">pre</span><span class="p">,</span>
-                                 <span class="n">post</span><span class="o">=</span><span class="n">post</span><span class="p">)</span>
-        <span class="n">fr_events</span> <span class="o">=</span> <span class="n">normalize_fr_events</span><span class="p">(</span><span class="n">fr_events</span><span class="p">)</span>
-
-        <span class="n">catfr_events</span> <span class="o">=</span> <span class="n">load_events</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="s1">&#39;catFR1&#39;</span><span class="p">,</span> <span class="n">rootdir</span><span class="o">=</span><span class="n">root</span><span class="p">)</span>
-        <span class="n">catfr_events</span> <span class="o">=</span> <span class="n">clean_events</span><span class="p">(</span><span class="s2">&quot;catFR1&quot;</span><span class="p">,</span>
-                                    <span class="n">catfr_events</span><span class="p">,</span>
-                                    <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span>
-                                    <span class="n">end_time</span><span class="o">=</span><span class="n">end_time</span><span class="p">,</span>
-                                    <span class="n">pre</span><span class="o">=</span><span class="n">pre</span><span class="p">,</span>
-                                    <span class="n">post</span><span class="o">=</span><span class="n">post</span><span class="p">,</span>
-                                    <span class="n">duration</span><span class="o">=</span><span class="n">duration</span><span class="p">)</span>
-        <span class="n">catfr_events</span> <span class="o">=</span> <span class="n">normalize_fr_events</span><span class="p">(</span><span class="n">catfr_events</span><span class="p">)</span>
-
-        <span class="c1"># Free recall events are always combined</span>
-        <span class="n">free_recall_events</span> <span class="o">=</span> <span class="n">concatenate_events_across_experiments</span><span class="p">(</span>
-            <span class="p">[</span><span class="n">fr_events</span><span class="p">,</span> <span class="n">catfr_events</span><span class="p">])</span>
-
-    <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;PAL&quot;</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">)</span> <span class="ow">and</span> <span class="n">combine_events</span><span class="p">:</span>
-        <span class="n">all_events</span> <span class="o">=</span> <span class="n">concatenate_events_across_experiments</span><span class="p">([</span>
-            <span class="n">free_recall_events</span><span class="p">,</span> <span class="n">pal_events</span><span class="p">])</span>
-
-    <span class="k">elif</span> <span class="p">(</span><span class="s2">&quot;PAL&quot;</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">combine_events</span><span class="p">:</span>
-        <span class="n">all_events</span> <span class="o">=</span> <span class="n">pal_events</span>
-
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">all_events</span> <span class="o">=</span> <span class="n">free_recall_events</span>
-
-    <span class="n">final_events</span> <span class="o">=</span> <span class="n">select_word_events</span><span class="p">(</span><span class="n">all_events</span><span class="p">,</span>
-                                      <span class="n">encoding_only</span><span class="o">=</span><span class="n">encoding_only</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">final_events</span></div>
+<span class="kn">from</span> <span class="nn">ramutils.exc</span> <span class="k">import</span> <span class="o">*</span>
 
 
 <div class="viewcode-block" id="load_events"><a class="viewcode-back" href="../../events.html#ramutils.events.load_events">[docs]</a><span class="k">def</span> <span class="nf">load_events</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">sessions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rootdir</span><span class="o">=</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
@@ -212,16 +127,18 @@
     <span class="k">return</span> <span class="n">events</span></div>
 
 
-<div class="viewcode-block" id="clean_events"><a class="viewcode-back" href="../../events.html#ramutils.events.clean_events">[docs]</a><span class="k">def</span> <span class="nf">clean_events</span><span class="p">(</span><span class="n">experiment</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">duration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pre</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">post</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Peform basic cleaning operations on events such as removing incomplete</span>
-<span class="sd">    sessions, negative offset events, and incomplete lists. For FR events,</span>
-<span class="sd">    baseline events needs to be found.</span>
+<div class="viewcode-block" id="clean_events"><a class="viewcode-back" href="../../events.html#ramutils.events.clean_events">[docs]</a><span class="k">def</span> <span class="nf">clean_events</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">pre</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">post</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Peform basic cleaning operations on events such as removing incomplete</span>
+<span class="sd">        sessions, negative offset events, and incomplete lists. For FR events,</span>
+<span class="sd">        baseline events needs to be found. Events are then normalized so that</span>
+<span class="sd">        cross-experiment events can be merged.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    experiment: str</span>
-<span class="sd">    events: np.recarray of events</span>
+<span class="sd">    events: np.recarray</span>
+<span class="sd">        Raw events</span>
 <span class="sd">    start_time:</span>
 <span class="sd">    end_time:</span>
 <span class="sd">    duration:</span>
@@ -239,9 +156,17 @@
 <span class="sd">    should not be used to clean cross-experiment datasets</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">experiments</span> <span class="o">=</span> <span class="n">extract_experiment_from_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Event cleaning can only happen on single-experiment&#39;</span>
+                           <span class="s1">&#39; datasets&#39;</span><span class="p">)</span>
+    <span class="n">experiment</span> <span class="o">=</span> <span class="n">experiments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
     <span class="n">events</span> <span class="o">=</span> <span class="n">remove_negative_offsets</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
     <span class="n">events</span> <span class="o">=</span> <span class="n">remove_practice_lists</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
     <span class="n">events</span> <span class="o">=</span> <span class="n">remove_incomplete_lists</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+    <span class="c1"># TODO: Add remove_repetitions() function to get rid of any recall events</span>
+    <span class="c1"># that are just a repeated recall</span>
 
     <span class="k">if</span> <span class="s2">&quot;FR&quot;</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">:</span>
         <span class="n">events</span> <span class="o">=</span> <span class="n">insert_baseline_retrieval_events</span><span class="p">(</span><span class="n">events</span><span class="p">,</span>
@@ -253,11 +178,13 @@
 
         <span class="n">events</span> <span class="o">=</span> <span class="n">remove_intrusions</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
         <span class="n">events</span> <span class="o">=</span> <span class="n">update_recall_outcome_for_retrieval_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+        <span class="n">events</span> <span class="o">=</span> <span class="n">normalize_fr_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="s2">&quot;PAL&quot;</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">:</span>
         <span class="n">events</span> <span class="o">=</span> <span class="n">subset_pal_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
         <span class="n">events</span> <span class="o">=</span> <span class="n">update_pal_retrieval_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
         <span class="n">events</span> <span class="o">=</span> <span class="n">remove_nonresponses</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+        <span class="n">events</span> <span class="o">=</span> <span class="n">normalize_pal_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">events</span></div>
 
@@ -274,6 +201,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">events</span> <span class="o">=</span> <span class="n">rename_correct_to_recalled</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
     <span class="n">events</span> <span class="o">=</span> <span class="n">coerce_study_pair_to_word_event</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="n">select_pal_column_subset</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="n">add_field</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="s1">&#39;item_name&#39;</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">events</span></div>
 
 
@@ -292,6 +221,22 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">events</span> <span class="o">=</span> <span class="n">rename_fields</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;correct&#39;</span><span class="p">:</span> <span class="s1">&#39;recalled&#39;</span><span class="p">})</span>
 
+    <span class="k">return</span> <span class="n">events</span></div>
+
+
+<div class="viewcode-block" id="add_field"><a class="viewcode-back" href="../../events.html#ramutils.events.add_field">[docs]</a><span class="k">def</span> <span class="nf">add_field</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">default_val</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Add field to the recarray</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Converting to a dataframe, adding the field, and reconverting to a</span>
+<span class="sd">    recarray because the rec_append_fields function in numpy doesn&#39;t seem to</span>
+<span class="sd">    work</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">events_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+    <span class="n">events_df</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_val</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="n">events_df</span><span class="o">.</span><span class="n">to_records</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">recarray</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">events</span></div>
 
 
@@ -463,11 +408,22 @@
     <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s1">&#39;serialpos&#39;</span><span class="p">,</span> <span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;rectime&#39;</span><span class="p">,</span> <span class="s1">&#39;experiment&#39;</span><span class="p">,</span>
         <span class="s1">&#39;mstime&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;eegoffset&#39;</span><span class="p">,</span> <span class="s1">&#39;recalled&#39;</span><span class="p">,</span> <span class="s1">&#39;intrusion&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;montage&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="s1">&#39;eegfile&#39;</span><span class="p">,</span> <span class="s1">&#39;msoffset&#39;</span>
+        <span class="s1">&#39;montage&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="s1">&#39;eegfile&#39;</span><span class="p">,</span> <span class="s1">&#39;msoffset&#39;</span><span class="p">,</span> <span class="s1">&#39;item_name&#39;</span><span class="p">,</span> <span class="s1">&#39;iscorrect&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;phase&#39;</span>
     <span class="p">]</span>
     <span class="n">events</span> <span class="o">=</span> <span class="n">events</span><span class="p">[</span><span class="n">columns</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">events</span>
 
+
+<span class="k">def</span> <span class="nf">select_pal_column_subset</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;serialpos&#39;</span><span class="p">,</span> <span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;rectime&#39;</span><span class="p">,</span> <span class="s1">&#39;experiment&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;mstime&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;eegoffset&#39;</span><span class="p">,</span> <span class="s1">&#39;recalled&#39;</span><span class="p">,</span> <span class="s1">&#39;intrusion&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;montage&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="s1">&#39;eegfile&#39;</span><span class="p">,</span> <span class="s1">&#39;msoffset&#39;</span><span class="p">,</span> <span class="s1">&#39;iscorrect&#39;</span><span class="p">,</span> <span class="s1">&#39;phase&#39;</span>
+    <span class="p">]</span>
+
+    <span class="n">events</span> <span class="o">=</span> <span class="n">events</span><span class="p">[</span><span class="n">columns</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">events</span>
 
 <div class="viewcode-block" id="initialize_empty_event_reccarray"><a class="viewcode-back" href="../../events.html#ramutils.events.initialize_empty_event_reccarray">[docs]</a><span class="k">def</span> <span class="nf">initialize_empty_event_reccarray</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Utility function for generating a recarray that looks normalized,</span>
@@ -476,18 +432,20 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">empty_recarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">recarray</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;serialpos&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
                                                <span class="p">(</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="n">unicode</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">),</span>
                                                <span class="p">(</span><span class="s1">&#39;rectime&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;experiment&#39;</span><span class="p">,</span> <span class="n">unicode</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;experiment&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">),</span>
                                                <span class="p">(</span><span class="s1">&#39;mstime&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="n">unicode</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">),</span>
                                                <span class="p">(</span><span class="s1">&#39;eegoffset&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
                                                <span class="p">(</span><span class="s1">&#39;recalled&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
                                                <span class="p">(</span><span class="s1">&#39;intrusion&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
                                                <span class="p">(</span><span class="s1">&#39;montage&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
                                                <span class="p">(</span><span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;eegfile&#39;</span><span class="p">,</span> <span class="n">unicode</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;msoffset&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)])</span>
+                                               <span class="p">(</span><span class="s1">&#39;eegfile&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;msoffset&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;item_name&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;iscorrect&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)])</span>
     <span class="k">return</span> <span class="n">empty_recarray</span></div>
 
 
@@ -764,12 +722,74 @@
     <span class="k">return</span> <span class="n">events</span></div>
 
 
+<div class="viewcode-block" id="extract_experiment_from_events"><a class="viewcode-back" href="../../events.html#ramutils.events.extract_experiment_from_events">[docs]</a><span class="k">def</span> <span class="nf">extract_experiment_from_events</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Given a set of events, return a list of unique experiments contained</span>
+<span class="sd">        within</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Experiment field can be blank, so make sure to not include that in the</span>
+    <span class="c1"># final list</span>
+    <span class="n">experiments</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">events</span><span class="p">[</span><span class="n">events</span><span class="o">.</span><span class="n">experiment</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">experiment</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+    <span class="c1"># Handle the case of empty events being passed</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">events</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">experiments</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">experiments</span></div>
+
+
+<div class="viewcode-block" id="extract_sessions"><a class="viewcode-back" href="../../events.html#ramutils.events.extract_sessions">[docs]</a><span class="k">def</span> <span class="nf">extract_sessions</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Return a list of sessions contained within the events structure&quot;&quot;&quot;</span>
+    <span class="n">sessions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">session</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sessions</span></div>
+
+
+<div class="viewcode-block" id="validate_single_experiment"><a class="viewcode-back" href="../../events.html#ramutils.events.validate_single_experiment">[docs]</a><span class="k">def</span> <span class="nf">validate_single_experiment</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Raises an error if more than one experiment is present in the events&quot;&quot;&quot;</span>
+    <span class="n">experiments</span> <span class="o">=</span> <span class="n">extract_experiment_from_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">TooManyExperimentsError</span><span class="p">(</span><span class="s1">&#39;Expected single experiment in events&#39;</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="validate_single_session"><a class="viewcode-back" href="../../events.html#ramutils.events.validate_single_session">[docs]</a><span class="k">def</span> <span class="nf">validate_single_session</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Raises an error if more than one session is present in the events &quot;&quot;&quot;</span>
+    <span class="n">sessions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">session</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sessions</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">TooManySessionsError</span><span class="p">(</span><span class="s2">&quot;Expected single session events&quot;</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
 <div class="viewcode-block" id="extract_sample_rate"><a class="viewcode-back" href="../../events.html#ramutils.events.extract_sample_rate">[docs]</a><span class="k">def</span> <span class="nf">extract_sample_rate</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Extract the samplerate used for the given set of events&quot;&quot;&quot;</span>
     <span class="n">eeg_reader</span> <span class="o">=</span> <span class="n">EEGReader</span><span class="p">(</span><span class="n">events</span><span class="o">=</span><span class="n">events</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">start_time</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
     <span class="n">eeg</span> <span class="o">=</span> <span class="n">eeg_reader</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
     <span class="n">samplerate</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">eeg</span><span class="p">[</span><span class="s1">&#39;samplerate&#39;</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">samplerate</span></div>
+
+
+<div class="viewcode-block" id="select_math_events"><a class="viewcode-back" href="../../events.html#ramutils.events.select_math_events">[docs]</a><span class="k">def</span> <span class="nf">select_math_events</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Select math events from a set of events &quot;&quot;&quot;</span>
+    <span class="n">math_event_mask</span> <span class="o">=</span> <span class="n">get_math_events_mask</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+    <span class="n">math_events</span> <span class="o">=</span> <span class="n">events</span><span class="p">[</span><span class="n">math_event_mask</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">math_events</span></div>
+
+
+<div class="viewcode-block" id="get_math_events_mask"><a class="viewcode-back" href="../../events.html#ramutils.events.get_math_events_mask">[docs]</a><span class="k">def</span> <span class="nf">get_math_events_mask</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Get a boolean array identifying math events &quot;&quot;&quot;</span>
+    <span class="n">math_event_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;PROB&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">math_event_mask</span></div>
+
+
+<div class="viewcode-block" id="get_nonstim_events_mask"><a class="viewcode-back" href="../../events.html#ramutils.events.get_nonstim_events_mask">[docs]</a><span class="k">def</span> <span class="nf">get_nonstim_events_mask</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Get a mask of any non-stim WORD events</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    These events are what is used in post-hoc classifier evaluation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">non_stim_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;WORD&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">phase</span> <span class="o">!=</span> <span class="s1">&#39;STIM&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">non_stim_mask</span></div>
 
 
 <div class="viewcode-block" id="get_time_between_events"><a class="viewcode-back" href="../../events.html#ramutils.events.get_time_between_events">[docs]</a><span class="k">def</span> <span class="nf">get_time_between_events</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
@@ -888,6 +908,12 @@
     <span class="k">return</span> <span class="n">all_retrieval_mask</span></div>
 
 
+<div class="viewcode-block" id="get_recall_events_mask"><a class="viewcode-back" href="../../events.html#ramutils.events.get_recall_events_mask">[docs]</a><span class="k">def</span> <span class="nf">get_recall_events_mask</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Create a boolean mask for any recall events &quot;&quot;&quot;</span>
+    <span class="n">recall_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">recalled</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">recall_mask</span></div>
+
+
 <div class="viewcode-block" id="partition_events"><a class="viewcode-back" href="../../events.html#ramutils.events.partition_events">[docs]</a><span class="k">def</span> <span class="nf">partition_events</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Split a given set of events into partitions by experiment class (</span>
@@ -921,6 +947,31 @@
         <span class="s1">&#39;pal_retrieval&#39;</span><span class="p">:</span> <span class="n">pal_retrieval</span>
     <span class="p">}</span>
     <span class="k">return</span> <span class="n">final_partitions</span></div>
+
+
+<div class="viewcode-block" id="get_partition_masks"><a class="viewcode-back" href="../../events.html#ramutils.events.get_partition_masks">[docs]</a><span class="k">def</span> <span class="nf">get_partition_masks</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a set of masks corresponding to the partitions present in the</span>
+<span class="sd">        events</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">retrieval_mask</span> <span class="o">=</span> <span class="n">get_all_retrieval_events_mask</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+    <span class="n">pal_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">experiment</span> <span class="o">==</span> <span class="s2">&quot;PAL1&quot;</span><span class="p">)</span>
+
+    <span class="n">fr_encoding</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">retrieval_mask</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">pal_mask</span><span class="p">)</span>
+    <span class="n">fr_retrieval</span> <span class="o">=</span> <span class="p">(</span><span class="n">retrieval_mask</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">pal_mask</span><span class="p">)</span>
+    <span class="n">pal_encoding</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">retrieval_mask</span> <span class="o">&amp;</span> <span class="n">pal_mask</span><span class="p">)</span>
+    <span class="n">pal_retrieval</span> <span class="o">=</span> <span class="p">(</span><span class="n">retrieval_mask</span> <span class="o">&amp;</span> <span class="n">pal_mask</span><span class="p">)</span>
+
+    <span class="c1"># Only add partitions with actual events</span>
+    <span class="n">partition_masks</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;fr_encoding&#39;</span><span class="p">:</span> <span class="n">fr_encoding</span><span class="p">,</span>
+        <span class="s1">&#39;fr_retrieval&#39;</span><span class="p">:</span> <span class="n">fr_retrieval</span><span class="p">,</span>
+        <span class="s1">&#39;pal_encoding&#39;</span><span class="p">:</span> <span class="n">pal_encoding</span><span class="p">,</span>
+        <span class="s1">&#39;pal_retrieval&#39;</span><span class="p">:</span> <span class="n">pal_retrieval</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">partition_masks</span></div>
 </pre></div>
 
           </div>
@@ -951,7 +1002,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">Ramutils 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Ramutils 2.0.2rc0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
