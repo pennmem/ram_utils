@@ -25,7 +25,7 @@ def make_report(subject, experiment, paths, joint_report=False,
     exp_params : ExperimentParameters
         When given, overrides the inferred default parameters to use for an
         experiment.
-    sessions : list
+    sessions : list or None
         For reports that span sessions, sessions to read data from.
         When not given, all available sessions are used for reports.
     vispath : str
