@@ -4,10 +4,13 @@ results.
 """
 
 import numpy as np
+import pandas as pd
 
 from ._wrapper import task
-from ramutils.events import validate_single_experiment, validate_single_session, select_math_events, \
-    extract_experiment_from_events, extract_sessions
+from ramutils.events import validate_single_experiment, select_math_events, \
+    extract_experiment_from_events, extract_sessions, select_session_events, \
+    select_stim_table_events, extract_stim_information, \
+    select_encoding_events, extract_event_metadata
 from ramutils.exc import *
 from ramutils.log import get_logger
 from ramutils.reports.summary import *
@@ -68,7 +71,7 @@ def summarize_sessions(all_events, task_events, joint=False):
             summary = FRSessionSummary()
 
         # FIXME: recall_probs, ps4
-        elif experiment in ['FR5']:
+        elif experiment in ['FR5', 'catFR5']:
             summary = FR5SessionSummary()
 
         # FIXME: other experiments
@@ -119,8 +122,57 @@ def summarize_math(events, joint=False):
 
 
 @task()
-def summarize_stim_sessions():
-    return
+def summarize_stim_sessions(all_events, task_events,
+                            encoding_classifier_summaries):
+    """ Construct stim session summaries """
+    sessions = extract_sessions(task_events)
+    stim_table_events = select_stim_table_events(all_events)
+
+    # TODO: No need to enumerate once summaries have more metadata
+    stim_session_summaries = []
+    for i, session in enumerate(sessions):
+        # Identify stim and post stim items
+        all_session_events = select_session_events(stim_table_events, session)
+        all_session_task_events = select_session_events(task_events, session)
+        all_session_task_events = select_encoding_events(all_session_task_events)
+
+        stim_item_mask, post_stim_item_mask, stim_param_df = \
+            extract_stim_information(all_session_events,
+                                     all_session_task_events)
+
+        predicted_probabilities = encoding_classifier_summaries[i].predicted_probabilities
+        subject, experiment, session = extract_event_metadata(task_events)
+        stim_df = pd.DataFrame(columns=['subject', 'experiment', 'session',
+                                        'list', 'item_name','serialpos',
+                                        'phase', 'is_stim_list',
+                                        'is_post_stim_item', 'it_stim_item',
+                                        'recalled', 'thresh',
+                                        'classifier_output'])
+
+        stim_df['subject'] = subject
+        stim_df['experiment'] = experiment
+        stim_df['session'] = all_session_task_events.session
+        stim_df['list'] = all_session_task_events.list
+        stim_df['item_name'] = all_session_task_events.item_name
+        stim_df['serialpos'] = all_session_task_events.serialpos
+        stim_df['phase'] = all_session_task_events.phase
+        stim_df['is_stim_list'] = stim_item_mask
+        stim_df['is_post_stim_list'] = post_stim_item_mask
+        stim_df['recalled'] = all_session_task_events.recalled
+        stim_df['thresh'] = 0.5 # FIXME: Should this be hardcoded?
+        stim_df['classifier_output'] = predicted_probabilities
+
+        # Add in the stim params
+        stim_df = stim_df.merge(stim_param_df, on=['session', 'list',
+                                                   'item_name'], how='left')
+
+        # TODO: Return the StimSessionSummary objects instead of dataframes
+        # once from_datafram is implemented
+        # stim_session_summary = StimSessionSummary()
+        # stim_session_summary.from_dataframe(stim_df)
+        stim_session_summaries.append(stim_df)
+
+    return stim_session_summaries
 
 
 
