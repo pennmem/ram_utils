@@ -62,6 +62,7 @@ def make_report(subject, experiment, paths, joint_report=False,
     all_events, task_events = build_test_data(subject, experiment, paths,
                                               joint_report, sessions=sessions,
                                               **kwargs)
+
     delta_hfa_table = []
     if not stim_report:
         # This logic is very similar to what is done in config generation except
@@ -161,17 +162,18 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                         training_classifier_summaries,
                                                         subject)
 
-        classifier_summaries = post_hoc_classifier_evaluation(final_task_events,
-                                                              powers,
-                                                              ec_pairs,
-                                                              used_classifiers,
-                                                              kwargs['n_perm'],
-                                                              retrained_classifier,
-                                                              **kwargs)
+        post_hoc_results = post_hoc_classifier_evaluation(final_task_events,
+                                                          powers,
+                                                          ec_pairs,
+                                                          used_classifiers,
+                                                          kwargs['n_perm'],
+                                                          retrained_classifier,
+                                                          **kwargs)
 
-        stim_session_summaries = summarize_stim_sessions()
+        stim_session_summaries = summarize_stim_sessions(
+            all_events, final_task_events,
+            post_hoc_results['session_summaries_stim_table']).compute()
 
-        # TODO: Add build_stim_table task
         # TODO: Add stimulation evaluation task that uses the HMM code
 
     # TODO: Add task that saves out all necessary underlying data
@@ -181,7 +183,8 @@ def make_report(subject, experiment, paths, joint_report=False,
     math_summaries = summarize_math(all_events, joint=joint_report)
     report = build_static_report(subject, experiment, session_summaries,
                                  math_summaries, delta_hfa_table,
-                                 classifier_summaries, paths.dest)
+                                 post_hoc_results['session_summaries'],
+                                 paths.dest)
 
     if vispath is not None:
         report.visualize(filename=vispath)

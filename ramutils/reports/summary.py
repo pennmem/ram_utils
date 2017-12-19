@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pytz
 
-from traits.api import Array, ArrayOrNone, Float
+from traits.api import Array, ArrayOrNone, Float, String
 from sklearn.metrics import roc_auc_score, roc_curve
 from traitschema import Schema
 
@@ -28,6 +28,9 @@ class ClassifierSummary(Schema):
     _true_outcomes = ArrayOrNone(desc='actual results for recall vs. non-recall')
     _permuted_auc_values = ArrayOrNone(desc='permuted AUCs')
 
+    subject = String(desc='subject')
+    experiment = String(desc='experiment')
+    sessions = Array(desc='sessions summarized by the object')
     recall_rate = Float(desc='overall recall rate')
     low_terc_recall_rate = Float(desc='recall rate when predicted probability of recall was in lowest tercile')
     mid_terc_recall_rate = Float(desc='recall reate when predicted probability of recall was in middle tercile')
@@ -104,11 +107,18 @@ class ClassifierSummary(Schema):
     def high_tercile_diff_from_mean(self):
         return 100.0 * (self.high_terc_recall_rate - self.recall_rate) / self.recall_rate
 
-    def populate(self, true_outcomes, predicted_probabilities, permuted_auc_values):
+    def populate(self, subject, experiment, session, true_outcomes,
+                 predicted_probabilities, permuted_auc_values):
         """ Populate classifier performance metrics
 
         Parameters
         ----------
+        subject: string
+            Subject identifier
+        experiment: string
+            Name of the experiment
+        session: string
+            Session number
         true_outcomes: array_like
             Boolean array for if a word was recalled or not
         predicted_probabilities: array_like
@@ -116,6 +126,9 @@ class ClassifierSummary(Schema):
         permuted_auc_values: array_like
             AUC values from performing a permutation test on classifier
         """
+        self.subject = subject
+        self.experiment = experiment
+        self.session = session
         self.true_outcomes = true_outcomes
         self.predicted_probabilities = predicted_probabilities
         self.permuted_auc_values = permuted_auc_values
