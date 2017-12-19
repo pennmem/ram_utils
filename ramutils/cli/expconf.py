@@ -38,7 +38,7 @@ parser.add_argument('--no-extended-blanking', action='store_true', help='disable
 # at the --area-file option or use a default value
 area_group = parser.add_mutually_exclusive_group(required=False)
 area_group.add_argument('--default-area', '-A', type=float,
-                        help='default surface area to use for all contacts')
+                        help='default surface area to use for all contacts (default: 0.001)')
 area_group.add_argument('--area-file', type=str,
                         help='path to area.txt file relative to root')
 
@@ -156,7 +156,7 @@ def main(input_args=None):
         paths.area_file = osp.join(paths.root, args.area_file)
 
     # ... or set default surface area
-    default_surface_area = 0.010 if args.default_area is None else args.default_area
+    default_surface_area = 0.001 if args.default_area is None else args.default_area
 
     # Generate!
     with timer():

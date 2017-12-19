@@ -67,7 +67,7 @@ def make_stim_params(subject, anodes, cathodes, min_amplitudes=None,
 
 def make_ramulator_config(subject, experiment, paths, stim_params,
                           exp_params=None, vispath=None, extended_blanking=True,
-                          localization=0, montage=0, default_surface_area=0.010):
+                          localization=0, montage=0, default_surface_area=0.001):
     """ Generate configuration files for a Ramulator experiment
 
     Parameters
