@@ -99,7 +99,7 @@ def build_test_data(subject, experiment, paths, joint_report, sessions=None,
         all_events = concatenate_events_across_experiments([fr_events,
                                                             catfr_events])
         task_events = concatenate_events_across_experiments(
-            [cleaned_fr_events, cleaned_catfr_events])
+            [cleaned_fr_events, cleaned_catfr_events], stim=True)
 
     elif not joint_report and 'FR' in experiment:
         all_events = load_events(subject, experiment, sessions=sessions,
