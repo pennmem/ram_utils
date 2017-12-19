@@ -22,6 +22,7 @@ Other changes:
 * A default value for contact surface areas can be specified in lieu of an area
   file
 * The minimum required version of PTSA was bumped up to 1.1.4
+* Extended blanking can be toggled with a command-line option
 * The script for updating the conda environment was improved
 
 

@@ -6,13 +6,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Index &#8212; Ramutils 2.0.0 documentation</title>
+    <title>Index &#8212; Ramutils 2.0.2rc0 documentation</title>
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '2.0.0',
+        VERSION:     '2.0.2rc0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -36,7 +36,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.2rc0 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -49,7 +49,9 @@
 <h1 id="index">Index</h1>
 
 <div class="genindex-jumpbox">
- <a href="#C"><strong>C</strong></a>
+ <a href="#A"><strong>A</strong></a>
+ | <a href="#B"><strong>B</strong></a>
+ | <a href="#C"><strong>C</strong></a>
  | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
@@ -63,8 +65,31 @@
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
+ | <a href="#V"><strong>V</strong></a>
  
 </div>
+<h2 id="A">A</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="events.html#ramutils.events.add_field">add_field() (in module ramutils.events)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="B">B</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pipeline.html#ramutils.tasks.events.build_test_data">build_test_data() (in module ramutils.tasks.events)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pipeline.html#ramutils.tasks.events.build_training_data">build_training_data() (in module ramutils.tasks.events)</a>
+</li>
+      <li><a href="misc.html#ramutils.utils.bytes_to_str">bytes_to_str() (in module ramutils.utils)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -76,15 +101,11 @@
 </li>
       <li><a href="misc.html#ramutils.utils.combine_tag_names">combine_tag_names() (in module ramutils.utils)</a>
 </li>
-      <li><a href="classifier.html#ramutils.classifier.model.ModelOutput.compute_metrics">compute_metrics() (ramutils.classifier.model.ModelOutput method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="misc.html#ramutils.exc.CommandLineError">CommandLineError</a>
+</li>
       <li><a href="pipeline.html#ramutils.tasks.powers.compute_normalized_powers">compute_normalized_powers() (in module ramutils.tasks.powers)</a>
-</li>
-      <li><a href="classifier.html#ramutils.classifier.model.ModelOutput.compute_roc">compute_roc() (ramutils.classifier.model.ModelOutput method)</a>
-</li>
-      <li><a href="classifier.html#ramutils.classifier.model.ModelOutput.compute_tercile_stats">compute_tercile_stats() (ramutils.classifier.model.ModelOutput method)</a>
 </li>
       <li><a href="events.html#ramutils.events.concatenate_events_across_experiments">concatenate_events_across_experiments() (in module ramutils.events)</a>
 </li>
@@ -98,9 +119,15 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="data.html#ramutils.parameters.ExperimentParameters">ExperimentParameters (class in ramutils.parameters)</a>
 </li>
+      <li><a href="events.html#ramutils.events.extract_experiment_from_events">extract_experiment_from_events() (in module ramutils.events)</a>
+</li>
+      <li><a href="misc.html#ramutils.utils.extract_experiment_series">extract_experiment_series() (in module ramutils.utils)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="events.html#ramutils.events.extract_sample_rate">extract_sample_rate() (in module ramutils.events)</a>
+</li>
+      <li><a href="events.html#ramutils.events.extract_sessions">extract_sessions() (in module ramutils.events)</a>
 </li>
       <li><a href="misc.html#ramutils.utils.extract_subject_montage">extract_subject_montage() (in module ramutils.utils)</a>
 </li>
@@ -114,15 +141,11 @@
 </li>
       <li><a href="events.html#ramutils.events.find_free_time_periods">find_free_time_periods() (in module ramutils.events)</a>
 </li>
-      <li><a href="models.html#ramutils.models.hmm.HierarchicalModel.fit">fit() (ramutils.models.hmm.HierarchicalModel method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="models.html#ramutils.models.hmm.HierarchicalModel.fit">fit() (ramutils.models.hmm.HierarchicalModel method)</a>
+</li>
       <li><a href="models.html#ramutils.models.hmm.HierarchicalModelPlots.forestplot">forestplot() (ramutils.models.hmm.HierarchicalModelPlots method)</a>
-</li>
-      <li><a href="data.html#ramutils.schema.Schema.from_hdf">from_hdf() (ramutils.schema.Schema class method)</a>
-</li>
-      <li><a href="data.html#ramutils.schema.Schema.from_json">from_json() (ramutils.schema.Schema class method)</a>
 </li>
       <li><a href="data.html#ramutils.parameters.FRParameters">FRParameters (class in ramutils.parameters)</a>
 </li>
@@ -132,6 +155,8 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pipeline.html#ramutils.tasks.odin.generate_electrode_config">generate_electrode_config() (in module ramutils.tasks.odin)</a>
+</li>
       <li><a href="pipeline.html#ramutils.tasks.odin.generate_pairs_from_electrode_config">generate_pairs_from_electrode_config() (in module ramutils.tasks.odin)</a>
 </li>
       <li><a href="pipeline.html#ramutils.tasks.odin.generate_ramulator_config">generate_ramulator_config() (in module ramutils.tasks.odin)</a>
@@ -142,13 +167,21 @@
 </li>
       <li><a href="events.html#ramutils.events.get_encoding_mask">get_encoding_mask() (in module ramutils.events)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="events.html#ramutils.events.get_fr_retrieval_events_mask">get_fr_retrieval_events_mask() (in module ramutils.events)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="misc.html#ramutils.log.get_logger">get_logger() (in module ramutils.log)</a>
 </li>
+      <li><a href="events.html#ramutils.events.get_math_events_mask">get_math_events_mask() (in module ramutils.events)</a>
+</li>
+      <li><a href="events.html#ramutils.events.get_nonstim_events_mask">get_nonstim_events_mask() (in module ramutils.events)</a>
+</li>
       <li><a href="events.html#ramutils.events.get_pal_retrieval_events_mask">get_pal_retrieval_events_mask() (in module ramutils.events)</a>
+</li>
+      <li><a href="events.html#ramutils.events.get_partition_masks">get_partition_masks() (in module ramutils.events)</a>
+</li>
+      <li><a href="events.html#ramutils.events.get_recall_events_mask">get_recall_events_mask() (in module ramutils.events)</a>
 </li>
       <li><a href="events.html#ramutils.events.get_time_between_events">get_time_between_events() (in module ramutils.events)</a>
 </li>
@@ -178,6 +211,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="events.html#ramutils.events.insert_baseline_retrieval_events">insert_baseline_retrieval_events() (in module ramutils.events)</a>
 </li>
+      <li><a href="misc.html#ramutils.utils.is_stim_experiment">is_stim_experiment() (in module ramutils.utils)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -194,9 +229,11 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pipeline.html#ramutils.tasks.make_task">make_task() (in module ramutils.tasks)</a>
 </li>
+      <li><a href="misc.html#ramutils.exc.MissingFileError">MissingFileError</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="classifier.html#ramutils.classifier.model.ModelOutput">ModelOutput (class in ramutils.classifier.model)</a>
+      <li><a href="misc.html#ramutils.utils.mkdir_p">mkdir_p() (in module ramutils.utils)</a>
 </li>
       <li><a href="misc.html#ramutils.exc.MultistimNotAllowedException">MultistimNotAllowedException</a>
 </li>
@@ -218,7 +255,7 @@
 </li>
       <li><a href="events.html#ramutils.events.partition_events">partition_events() (in module ramutils.events)</a>
 </li>
-      <li><a href="classifier.html#ramutils.classifier.cross_validation.perform_cross_validation">perform_cross_validation() (in module ramutils.classifier.cross_validation)</a>
+      <li><a href="pipeline.html#ramutils.tasks.classifier.perform_cross_validation">perform_cross_validation() (in module ramutils.tasks.classifier)</a>
 </li>
       <li><a href="classifier.html#ramutils.classifier.cross_validation.perform_lolo_cross_validation">perform_lolo_cross_validation() (in module ramutils.classifier.cross_validation)</a>
 </li>
@@ -230,7 +267,7 @@
 </li>
       <li><a href="classifier.html#ramutils.classifier.cross_validation.permuted_loso_cross_validation">permuted_loso_cross_validation() (in module ramutils.classifier.cross_validation)</a>
 </li>
-      <li><a href="events.html#ramutils.events.preprocess_events">preprocess_events() (in module ramutils.events)</a>
+      <li><a href="pipeline.html#ramutils.tasks.classifier.post_hoc_classifier_evaluation">post_hoc_classifier_evaluation() (in module ramutils.tasks.classifier)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -239,8 +276,6 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="classifier.html#module-ramutils.classifier.cross_validation">ramutils.classifier.cross_validation (module)</a>
-</li>
-      <li><a href="classifier.html#module-ramutils.classifier.model">ramutils.classifier.model (module)</a>
 </li>
       <li><a href="classifier.html#module-ramutils.classifier.utils">ramutils.classifier.utils (module)</a>
 </li>
@@ -264,10 +299,10 @@
 </li>
       <li><a href="pipeline.html#module-ramutils.tasks.montage">ramutils.tasks.montage (module)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pipeline.html#module-ramutils.tasks.odin">ramutils.tasks.odin (module)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pipeline.html#module-ramutils.tasks.powers">ramutils.tasks.powers (module)</a>
 </li>
       <li><a href="pipeline.html#module-ramutils.tasks.summary">ramutils.tasks.summary (module)</a>
@@ -279,6 +314,8 @@
       <li><a href="misc.html#ramutils.utils.reindent_json">reindent_json() (in module ramutils.utils)</a>
 </li>
       <li><a href="classifier.html#ramutils.classifier.utils.reload_classifier">reload_classifier() (in module ramutils.classifier.utils)</a>
+</li>
+      <li><a href="pipeline.html#ramutils.tasks.classifier.reload_used_classifiers">reload_used_classifiers() (in module ramutils.tasks.classifier)</a>
 </li>
       <li><a href="events.html#ramutils.events.remove_bad_events">remove_bad_events() (in module ramutils.events)</a>
 </li>
@@ -306,18 +343,18 @@
 </li>
       <li><a href="misc.html#ramutils.utils.save_array_to_hdf5">save_array_to_hdf5() (in module ramutils.utils)</a>
 </li>
-      <li><a href="data.html#ramutils.schema.Schema">Schema (class in ramutils.schema)</a>
-</li>
       <li><a href="events.html#ramutils.events.select_all_retrieval_events">select_all_retrieval_events() (in module ramutils.events)</a>
 </li>
       <li><a href="events.html#ramutils.events.select_baseline_retrieval_events">select_baseline_retrieval_events() (in module ramutils.events)</a>
 </li>
       <li><a href="events.html#ramutils.events.select_encoding_events">select_encoding_events() (in module ramutils.events)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="events.html#ramutils.events.select_math_events">select_math_events() (in module ramutils.events)</a>
+</li>
       <li><a href="events.html#ramutils.events.select_retrieval_events">select_retrieval_events() (in module ramutils.events)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="events.html#ramutils.events.select_vocalization_events">select_vocalization_events() (in module ramutils.events)</a>
 </li>
       <li><a href="events.html#ramutils.events.select_word_events">select_word_events() (in module ramutils.events)</a>
@@ -326,9 +363,13 @@
 </li>
       <li><a href="data.html#ramutils.parameters.StimParameters">StimParameters (class in ramutils.parameters)</a>
 </li>
+      <li><a href="pipeline.html#ramutils.tasks.misc.store_results">store_results() (in module ramutils.tasks.misc)</a>
+</li>
       <li><a href="events.html#ramutils.events.subset_pal_events">subset_pal_events() (in module ramutils.events)</a>
 </li>
-      <li><a href="pipeline.html#ramutils.tasks.summary.summarize_session">summarize_session() (in module ramutils.tasks.summary)</a>
+      <li><a href="pipeline.html#ramutils.tasks.summary.summarize_math">summarize_math() (in module ramutils.tasks.summary)</a>
+</li>
+      <li><a href="pipeline.html#ramutils.tasks.summary.summarize_sessions">summarize_sessions() (in module ramutils.tasks.summary)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -340,16 +381,10 @@
 </li>
       <li><a href="misc.html#ramutils.utils.timer">timer() (in module ramutils.utils)</a>
 </li>
-      <li><a href="data.html#ramutils.schema.Schema.to_dict">to_dict() (ramutils.schema.Schema method)</a>
-</li>
-      <li><a href="data.html#ramutils.schema.Schema.to_hdf">to_hdf() (ramutils.schema.Schema method)</a>
-</li>
-      <li><a href="data.html#ramutils.schema.Schema.to_json">to_json() (ramutils.schema.Schema method)</a>
+      <li><a href="misc.html#ramutils.exc.TooManyExperimentsError">TooManyExperimentsError</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="misc.html#ramutils.exc.TooManyExperimentsError">TooManyExperimentsError</a>
-</li>
       <li><a href="misc.html#ramutils.exc.TooManySessionsError">TooManySessionsError</a>
 </li>
       <li><a href="misc.html#ramutils.utils.touch">touch() (in module ramutils.utils)</a>
@@ -364,6 +399,8 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="misc.html#ramutils.exc.UnableToReloadClassifierException">UnableToReloadClassifierException</a>
+</li>
       <li><a href="misc.html#ramutils.exc.UnsupportedExperimentError">UnsupportedExperimentError</a>
 </li>
   </ul></td>
@@ -371,6 +408,18 @@
       <li><a href="events.html#ramutils.events.update_pal_retrieval_events">update_pal_retrieval_events() (in module ramutils.events)</a>
 </li>
       <li><a href="events.html#ramutils.events.update_recall_outcome_for_retrieval_events">update_recall_outcome_for_retrieval_events() (in module ramutils.events)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="V">V</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="events.html#ramutils.events.validate_single_experiment">validate_single_experiment() (in module ramutils.events)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="events.html#ramutils.events.validate_single_session">validate_single_session() (in module ramutils.events)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -408,7 +457,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.2rc0 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

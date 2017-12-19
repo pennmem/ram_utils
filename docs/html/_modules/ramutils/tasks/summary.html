@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>ramutils.tasks.summary &#8212; Ramutils 2.0.0 documentation</title>
+    <title>ramutils.tasks.summary &#8212; Ramutils 2.0.2rc0 documentation</title>
     <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '2.0.0',
+        VERSION:     '2.0.2rc0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Ramutils 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Ramutils 2.0.2rc0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
@@ -54,6 +54,8 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">._wrapper</span> <span class="k">import</span> <span class="n">task</span>
+<span class="kn">from</span> <span class="nn">ramutils.events</span> <span class="k">import</span> <span class="n">validate_single_experiment</span><span class="p">,</span> <span class="n">validate_single_session</span><span class="p">,</span> <span class="n">select_math_events</span><span class="p">,</span> \
+    <span class="n">extract_experiment_from_events</span><span class="p">,</span> <span class="n">extract_sessions</span>
 <span class="kn">from</span> <span class="nn">ramutils.exc</span> <span class="k">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">ramutils.log</span> <span class="k">import</span> <span class="n">get_logger</span>
 <span class="kn">from</span> <span class="nn">ramutils.reports.summary</span> <span class="k">import</span> <span class="o">*</span>
@@ -61,27 +63,34 @@
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">()</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;summarize_session&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;summarize_sessions&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;summarize_math&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;summarize_stim_sessions&#39;</span>
 <span class="p">]</span>
 
 
-<div class="viewcode-block" id="summarize_session"><a class="viewcode-back" href="../../../pipeline.html#ramutils.tasks.summary.summarize_session">[docs]</a><span class="nd">@task</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">summarize_session</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Generate a summary of a single experiment session.</span>
+<div class="viewcode-block" id="summarize_sessions"><a class="viewcode-back" href="../../../pipeline.html#ramutils.tasks.summary.summarize_sessions">[docs]</a><span class="nd">@task</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">summarize_sessions</span><span class="p">(</span><span class="n">all_events</span><span class="p">,</span> <span class="n">task_events</span><span class="p">,</span> <span class="n">joint</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate a summary of by unique session/experiment</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    events : np.recarray</span>
-<span class="sd">        Events from a single</span>
+<span class="sd">    all_events: np.recarray</span>
+<span class="sd">        Full set of events</span>
+<span class="sd">    task_events : np.recarray</span>
+<span class="sd">        Event subset used for classifier training</span>
+<span class="sd">    joint: Bool</span>
+<span class="sd">        Indicator for if a joint report is being created. This will disable</span>
+<span class="sd">        checks for single-experiment events</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    summary : SessionSummary</span>
-<span class="sd">        Summary object for the proper experiment type.</span>
+<span class="sd">    summary : list</span>
+<span class="sd">        List of SessionSummary objects for the proper experiment type.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
-<span class="sd">    TooManySessionsError</span>
+<span class="sd">    TooManyExperimentsError</span>
 <span class="sd">        If the events span more than one session.</span>
 
 <span class="sd">    Notes</span>
@@ -91,32 +100,80 @@
 <span class="sd">    FIXME: make work with all experiments</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">sessions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">session</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sessions</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">TooManySessionsError</span><span class="p">(</span><span class="s2">&quot;events should be pre-filtered to be from a single session&quot;</span><span class="p">)</span>
 
-    <span class="n">experiments</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">experiment</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">TooManyExperimentsError</span><span class="p">(</span><span class="s2">&quot;events should only come from one experiment&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">joint</span><span class="p">:</span>
+        <span class="n">validate_single_experiment</span><span class="p">(</span><span class="n">task_events</span><span class="p">)</span>
 
-    <span class="c1"># session = sessions[0]</span>
-    <span class="n">experiment</span> <span class="o">=</span> <span class="n">experiments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c1"># Since this takes &#39;cleaned&#39; task events, we know the session numbers</span>
+    <span class="c1"># have been made unique if cross-experiment events are given</span>
+    <span class="n">sessions</span> <span class="o">=</span> <span class="n">extract_sessions</span><span class="p">(</span><span class="n">task_events</span><span class="p">)</span>
 
-    <span class="c1"># FIXME: recall_probs</span>
-    <span class="k">if</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;FR1&#39;</span><span class="p">]:</span>
-        <span class="n">summary</span> <span class="o">=</span> <span class="n">FRSessionSessionSummary</span><span class="p">()</span>
-        <span class="n">summary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+    <span class="n">summaries</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">sessions</span><span class="p">:</span>
+        <span class="n">experiment</span> <span class="o">=</span> <span class="n">extract_experiment_from_events</span><span class="p">(</span><span class="n">task_events</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># FIXME: recall_probs</span>
+        <span class="k">if</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;FR1&#39;</span><span class="p">,</span> <span class="s1">&#39;catFR1&#39;</span><span class="p">]:</span>
+            <span class="n">summary</span> <span class="o">=</span> <span class="n">FRSessionSummary</span><span class="p">()</span>
 
-    <span class="c1"># FIXME: recall_probs, ps4</span>
-    <span class="k">elif</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;FR5&#39;</span><span class="p">]:</span>
-        <span class="n">summary</span> <span class="o">=</span> <span class="n">FR5SessionSummary</span><span class="p">()</span>
-        <span class="n">summary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+        <span class="c1"># FIXME: recall_probs, ps4</span>
+        <span class="k">elif</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;FR5&#39;</span><span class="p">]:</span>
+            <span class="n">summary</span> <span class="o">=</span> <span class="n">FR5SessionSummary</span><span class="p">()</span>
 
-    <span class="c1"># FIXME: other experiments</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">UnsupportedExperimentError</span><span class="p">(</span><span class="s2">&quot;Unsupported experiment: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">experiment</span><span class="p">))</span>
+        <span class="c1"># FIXME: other experiments</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">UnsupportedExperimentError</span><span class="p">(</span><span class="s2">&quot;Unsupported experiment: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">experiment</span><span class="p">))</span>
 
-    <span class="k">return</span> <span class="n">summary</span></div>
+        <span class="n">summary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="n">task_events</span><span class="p">[</span><span class="n">task_events</span><span class="o">.</span><span class="n">session</span> <span class="o">==</span> <span class="n">session</span><span class="p">],</span>
+                         <span class="n">raw_events</span><span class="o">=</span><span class="n">all_events</span><span class="p">[</span><span class="n">all_events</span><span class="o">.</span><span class="n">session</span> <span class="o">==</span> <span class="n">session</span><span class="p">])</span>
+        <span class="n">summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">summaries</span></div>
+
+
+<div class="viewcode-block" id="summarize_math"><a class="viewcode-back" href="../../../pipeline.html#ramutils.tasks.summary.summarize_math">[docs]</a><span class="nd">@task</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">summarize_math</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">joint</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Generate a summary math event summary of a single experiment session</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    events: np.recarray</span>
+<span class="sd">        Events from single experiment session</span>
+<span class="sd">    joint: Bool</span>
+<span class="sd">        Indicates if the given events are part of a joint event, and therefore</span>
+<span class="sd">        multiple experiments should be allowed</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    summary: list</span>
+<span class="sd">        List of MathSummary objects</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">joint</span><span class="p">:</span>
+        <span class="n">validate_single_experiment</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+
+    <span class="n">math_events</span> <span class="o">=</span> <span class="n">select_math_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">math_events</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;No math events found when trying to summarize math &quot;</span>
+                           <span class="s2">&quot;distractor period&quot;</span><span class="p">)</span>
+
+    <span class="n">sessions</span> <span class="o">=</span> <span class="n">extract_sessions</span><span class="p">(</span><span class="n">math_events</span><span class="p">)</span>
+    <span class="n">summaries</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">sessions</span><span class="p">:</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="n">MathSummary</span><span class="p">()</span>
+        <span class="n">summary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="n">math_events</span><span class="p">[</span><span class="n">math_events</span><span class="o">.</span><span class="n">session</span> <span class="o">==</span> <span class="n">session</span><span class="p">])</span>
+        <span class="n">summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">summaries</span></div>
+
+
+<span class="nd">@task</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">summarize_stim_sessions</span><span class="p">():</span>
+    <span class="k">return</span>
+
+
+
+
+
 </pre></div>
 
           </div>
@@ -147,7 +204,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Ramutils 2.0.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Ramutils 2.0.2rc0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
