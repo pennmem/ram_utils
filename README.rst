@@ -15,7 +15,7 @@ Bootstrapping a conda environment
 
 .. code-block:: shell-session
 
-    conda create -n environment_name
+    conda create -y -n environment_name python=3
     conda install -c pennmem --file=requirements.txt
 
 Usage with the RAM_clinical account
