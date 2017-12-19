@@ -69,14 +69,15 @@ def make_report(subject, experiment, paths, joint_report=False,
         # that events are not combined by default
         if not joint_report:
             kwargs['combine_events'] = False
-        # TODO: This segment of classifier training needs to be run twice:
-        # once with joint classifier and once with encoding only so they can
-        # be compared in the report
+
+        # Run again but for joint classifier
+        kwargs['encoding_only'] = False
         all_task_events = build_training_data(subject,
                                               experiment,
                                               paths,
                                               sessions=sessions,
                                               **kwargs)
+
         powers, final_task_events = compute_normalized_powers(all_task_events,
                                                               **kwargs)
         reduced_powers = reduce_powers(powers, used_pair_mask,
@@ -91,25 +92,35 @@ def make_report(subject, experiment, paths, joint_report=False,
                                       kwargs['penalty_type'],
                                       kwargs['solver'])
 
-        classifier_summaries = perform_cross_validation(classifier,
-                                                        reduced_powers,
-                                                        final_task_events,
-                                                        kwargs['n_perm'],
-                                                        tag='Joint Classifier',
-                                                        **kwargs)
+        joint_classifier_summary = perform_cross_validation(classifier,
+                                                            reduced_powers,
+                                                            final_task_events,
+                                                            kwargs['n_perm'],
+                                                            tag='Joint Classifier',
+                                                            **kwargs)
 
-        # FIXME: We don't technically need this right now, but in the future,
-        # this object will be saved out somewhere for easier reloading,
-        # so go ahead and create it
-        classifier = serialize_classifier(classifier,
-                                          final_pairs,
-                                          reduced_powers,
-                                          final_task_events,
-                                          sample_weights,
-                                          classifier_summaries,
-                                          subject)
+        # Subset events, powers, etc to get encoding-only classifier summary
+        kwargs['scheme'] = 'EQUAL'
+        encoding_only_mask = get_word_event_mask(all_task_events, True)
+        final_encoding_task_events = subset_events(final_task_events,
+                                                   encoding_only_mask)
+        encoding_reduced_powers = subset_powers(powers, encoding_only_mask)
 
-        # Everything else is specific to the reports and does not follow the
+        encoding_sample_weights = get_sample_weights(final_encoding_task_events,
+                                                     **kwargs)
+
+        encoding_classifier = train_classifier(encoding_reduced_powers,
+                                               final_encoding_task_events,
+                                               encoding_sample_weights,
+                                               kwargs['C'],
+                                               kwargs['penalty_type'],
+                                               kwargs['solver'])
+
+        encoding_classifier_summary = perform_cross_validation(
+            encoding_classifier, encoding_reduced_powers,
+            final_encoding_task_events, kwargs['n_perm'],
+            tag='Encoding Classifier', **kwargs)
+
         delta_hfa_table = calculate_delta_hfa_table(pairs_metadata_table,
                                                     powers,
                                                     final_task_events,
@@ -185,7 +196,7 @@ def make_report(subject, experiment, paths, joint_report=False,
     math_summaries = summarize_math(all_events, joint=joint_report)
 
     if not stim_report:
-        results = [classifier_summaries]
+        results = [encoding_classifier_summary, joint_classifier_summary]
     else:
         results = post_hoc_results['session_summaries']
 
