@@ -84,7 +84,7 @@ class TestSummary:
 class TestMathSummary:
     @classmethod
     def setup_class(cls):
-        # ignore UserWarnings from summary.populate calls
+        # ignore UserWarnings from summaries.populate calls
         warnings.filterwarnings('ignore', category=UserWarning)
 
     @classmethod
@@ -226,10 +226,13 @@ class TestClassifierSummary:
         summary = ClassifierSummary()
         summary.populate(self.subject, self.experiment,
                          self.sessions, self.recalls,
-                         self.predicted_probabilities, self.permuation_aucs)
+                         self.predicted_probabilities, self.permuation_aucs,
+                         encoding_only=False)
         assert np.array_equal(self.recalls, summary.true_outcomes)
         assert np.array_equal(self.predicted_probabilities, summary.predicted_probabilities)
         assert np.array_equal(self.permuation_aucs, summary.permuted_auc_values)
+        assert 'encoding_only' in summary.metadata
+        assert summary.metadata['encoding_only'] is False
 
         return
 
