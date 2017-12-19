@@ -1,6 +1,31 @@
 Changes
 =======
 
+Version 2.0.2rc0
+----------------
+
+**Preview release**
+
+This version of ramutils enhances Ramulator config generation. Odin ENS
+electrode configuration files (both CSV and binary) can now be created by the
+pipeline. This eliminates several steps from the workflow for configuring an
+experiment. To specify surface areas for contacts, a ``area.txt`` file must
+either exist in the same directory as ``jacksheet.txt`` or a path to it can
+be specified as a command-line option. See the full documentation for details.
+
+Other changes:
+
+* Record-only experiment configurations (FR1, CatFR1, PAL1) can now be generated
+  with the CLI
+* Electrode config files can be specified as a command-line option to override
+  generating them
+* A default value for contact surface areas can be specified in lieu of an area
+  file
+* The minimum required version of PTSA was bumped up to 1.1.4
+* Extended blanking can be toggled with a command-line option
+* The script for updating the conda environment was improved
+
+
 Version 2.0.1
 -------------
 
