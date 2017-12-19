@@ -2,13 +2,27 @@
 
 from ramutils.events import load_events, clean_events, select_word_events, \
     concatenate_events_across_experiments
+from ramutils.events import get_word_event_mask as get_word_event_mask_core
 from ramutils.tasks import task
 from ramutils.utils import extract_experiment_series
 
 __all__ = [
+    'get_word_event_mask',
+    'subset_events',
     'build_test_data',
     'build_training_data'
 ]
+
+
+@task(cache=False)
+def get_word_event_mask(events, encoding_only):
+    return get_word_event_mask_core(events, encoding_only)
+
+
+@task(cache=False)
+def subset_events(events, mask):
+    events_subset = events[mask]
+    return events_subset
 
 
 @task()

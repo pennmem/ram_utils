@@ -664,6 +664,16 @@ def select_word_events(events, encoding_only=True):
         Flag for whether retrieval events should be included
 
     """
+    mask = get_word_event_mask(events, encoding_only=encoding_only)
+    filtered_events = events[mask]
+    events = filtered_events.view(np.recarray)
+
+    return events
+
+
+def get_word_event_mask(events, encoding_only):
+    """ Get a mask identify word events. If encoding_only, then retrieval
+    events will not be counted """
     encoding_events_mask = get_encoding_mask(events)
     retrieval_event_mask = get_all_retrieval_events_mask(events)
 
@@ -672,10 +682,7 @@ def select_word_events(events, encoding_only=True):
     else:
         mask = (encoding_events_mask | retrieval_event_mask)
 
-    filtered_events = events[mask]
-    events = filtered_events.view(np.recarray)
-
-    return events
+    return mask
 
 
 def extract_event_metadata(events):
@@ -743,7 +750,7 @@ def get_session_mask(events, session):
 
 
 def select_stim_table_events(events):
-    """ Return the events needed to build stim session summary """
+    """ Return the events needed to build stim session summaries """
     events = remove_practice_lists(events)
     mask = get_stim_table_event_mask(events)
     stim_table_events = events[mask]
@@ -850,6 +857,11 @@ def extract_stim_information(all_events, task_events):
                             stim_params = lst_events[loc].stim_params
                             if type(stim_params) != np.ndarray:
                                 stim_params = np.array([stim_params])
+
+                            # TODO: Add location field to stim params by
+                            # looking up the contacts in the pairs metadata
+                            # table, which would need to be passed to this
+                            # function
 
                             stim_param_data['item_name'].append(lst_events[loc].item_name)
                             stim_param_data['session'].append(lst_events[loc].session)

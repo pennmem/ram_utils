@@ -13,6 +13,7 @@ logger = get_logger()
 __all__ = [
     'compute_normalized_powers',
     'reduce_powers',
+    'subset_powers',
     'calculate_delta_hfa_table'
 ]
 
@@ -21,6 +22,12 @@ __all__ = [
 def reduce_powers(powers, mask, n_frequencies):
     reduced_powers = reduce_powers_core(powers, mask, n_frequencies)
     return reduced_powers
+
+
+@task(cache=False)
+def subset_powers(powers, mask):
+    condensed_powers = powers[mask, :]
+    return condensed_powers
 
 
 @task(nout=2)
