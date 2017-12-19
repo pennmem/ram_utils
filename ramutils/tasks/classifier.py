@@ -116,7 +116,7 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
     encoding_recalls = recalls[encoding_event_mask]
 
     classifier_summary = ClassifierSummary()
-    sessions = extract_sessions(events)
+    subject, experiment, sessions = extract_event_metadata(events)
 
     # Run leave-one-session-out cross validation when we have > 1 session,
     # otherwise leave-one-list-out
@@ -128,7 +128,8 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
                                                              **kwargs)
         probs = perform_loso_cross_validation(classifier, pow_mat, events,
                                               recalls, **kwargs)
-        classifier_summary.populate(encoding_recalls, probs,
+        classifier_summary.populate(subject, experiment,
+                                    sessions, encoding_recalls, probs,
                                     permuted_auc_values)
 
     else:
@@ -141,7 +142,8 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
         probs = perform_lolo_cross_validation(classifier, pow_mat, events,
                                               recalls, **kwargs)
 
-        classifier_summary.populate(encoding_recalls, probs,
+        classifier_summary.populate(subject, experiment,
+                                    sessions, encoding_recalls, probs,
                                     permuted_auc_values)
 
     logger.info("Permutation test p-value = %f", classifier_summary.pvalue)
