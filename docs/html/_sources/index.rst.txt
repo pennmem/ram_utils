@@ -11,20 +11,22 @@ Clone the repository::
 
 Create a conda environment with all prerequisites::
 
-    $ conda env create --file conda_environment.yaml -n ramutils
+    $ conda env create -y -n ramutils
 
-Install in the new environment::
+Install dependencies::
 
     $ source activate ramutils
+    (ramutils) $ conda install -y -c pennmem --file=requirements.txt
+
+Install ``ramutils``::
+
     (ramutils) $ python setup.py install
 
-Install remaining requirements::
 
-    (ramutils) $ pip install git+https://github.com/pennmem/classiflib.git
-    (ramutils) $ pip install git+https://github.com/pennmem/bptools.git
+.. note::
 
-.. note:: In the future, these packages should be installed automatically with
-          conda.
+    Future releases should be installable via a conda package with dependencies
+    specified there.
 
 Contents
 --------

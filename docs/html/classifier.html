@@ -1,90 +1,174 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Classifier training, cross validation, and utilities &#8212; Ramutils 2.0.0 documentation</title>
-    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '2.0.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Event processing" href="events.html" />
-    <link rel="prev" title="Serializable data structures" href="data.html" /> 
-  </head>
-  <body>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="events.html" title="Event processing"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="data.html" title="Serializable data structures"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.0 documentation</a> &#187;</li> 
-      </ul>
-    </div>  
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Classifier training, cross validation, and utilities &mdash; Ramutils 2.0.2rc0 documentation</title>
+  
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Ramutils 2.0.2rc0 documentation" href="index.html"/>
+        <link rel="next" title="Event processing" href="events.html"/>
+        <link rel="prev" title="Serializable data structures" href="data.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Ramutils
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="data.html">Serializable data structures</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Classifier training, cross validation, and utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-ramutils.classifier.cross_validation">Reference</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="events.html">Event processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Modeling effects of stim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="misc.html">Miscellaneous utilities</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Ramutils</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Classifier training, cross validation, and utilities</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/classifier.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
             
   <div class="section" id="classifier-training-cross-validation-and-utilities">
 <h1>Classifier training, cross validation, and utilities<a class="headerlink" href="#classifier-training-cross-validation-and-utilities" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="module-ramutils.classifier.cross_validation">
 <span id="reference"></span><h2>Reference<a class="headerlink" href="#module-ramutils.classifier.cross_validation" title="Permalink to this headline">¶</a></h2>
 <p>Collection of cross-validation functions</p>
-<dl class="function">
-<dt id="ramutils.classifier.cross_validation.perform_cross_validation">
-<code class="descclassname">ramutils.classifier.cross_validation.</code><code class="descname">perform_cross_validation</code><span class="sig-paren">(</span><em>classifier</em>, <em>pow_mat</em>, <em>events</em>, <em>n_permutations</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/cross_validation.html#perform_cross_validation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.cross_validation.perform_cross_validation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Perform LOSO or LOLO cross validation on a classifier.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>classifier</strong> (<em>sklearn model object</em>) – </li>
-<li><strong>pow_mat</strong> (<em>np.ndarray</em>) – </li>
-<li><strong>events</strong> (<em>np.recarray</em>) – </li>
-<li><strong>n_permutations</strong> (<em>int</em>) – </li>
-<li><strong>kwargs</strong> (<em>dict</em>) – Extra keyword arguments that are passed to get_sample_weights. See
-that function for more details</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>xval</strong> – Results of cross validation.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
 <dl class="function">
 <dt id="ramutils.classifier.cross_validation.permuted_lolo_cross_validation">
 <code class="descclassname">ramutils.classifier.cross_validation.</code><code class="descname">permuted_lolo_cross_validation</code><span class="sig-paren">(</span><em>classifier</em>, <em>powers</em>, <em>events</em>, <em>n_permutations</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/cross_validation.html#permuted_lolo_cross_validation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.cross_validation.permuted_lolo_cross_validation" title="Permalink to this definition">¶</a></dt>
@@ -104,7 +188,7 @@ See that function for more details.</li>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>AUCs</strong> – List of AUCs from performing leave-one-list-out cross validation
-n_permutations times</p>
+n_permutations times where the AUC is based on encoding events only</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
@@ -132,7 +216,7 @@ See that function for more details.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>probs</strong> – Predicted probabilities for all lists</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>probs</strong> – Predicted probabilities for encoding events across all lists</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.array</p>
@@ -140,6 +224,12 @@ See that function for more details.</li>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Notes</p>
+<p>Be careful when passing a classifier object to this function since it’s
+.fit() method will be called. If you use the classifier object after
+calling this function, the internal state may have changed. To avoid this
+problem, make a copy of the classifier object and pass the copy to this
+function.</p>
 </dd></dl>
 
 <dl class="function">
@@ -161,7 +251,7 @@ See that function for more details.</li>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>AUCs</strong> – List of AUCs from performing leave-one-list-out cross validation
-n_permutations times</p>
+n_permutations times where the AUCs are based on encoding events only</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
@@ -173,7 +263,7 @@ n_permutations times</p>
 
 <dl class="function">
 <dt id="ramutils.classifier.cross_validation.perform_loso_cross_validation">
-<code class="descclassname">ramutils.classifier.cross_validation.</code><code class="descname">perform_loso_cross_validation</code><span class="sig-paren">(</span><em>classifier</em>, <em>powers</em>, <em>events</em>, <em>recalls</em>, <em>xval</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/cross_validation.html#perform_loso_cross_validation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.cross_validation.perform_loso_cross_validation" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ramutils.classifier.cross_validation.</code><code class="descname">perform_loso_cross_validation</code><span class="sig-paren">(</span><em>classifier</em>, <em>powers</em>, <em>events</em>, <em>recalls</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/cross_validation.html#perform_loso_cross_validation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.cross_validation.perform_loso_cross_validation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform single iteration of leave-one-session-out cross validation</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -184,13 +274,12 @@ n_permutations times</p>
 <li><strong>powers</strong> (<em>np.ndarray</em>) – power matrix</li>
 <li><strong>events</strong> (<em>np.recarray</em>) – </li>
 <li><strong>recalls</strong> (<em>array_like</em>) – List of recall/not-recalled boolean values for each event</li>
-<li><strong>xval</strong> (<em>dict_like</em>) – Object for storing aucs from cross validation</li>
 <li><strong>kwargs</strong> (<em>dict</em>) – Optional keyword arguments. These are passed to get_sample_weights.
 See that function for more details.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>probs</strong> – Predicted probabilities for all sessions</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>probs</strong> – Predicted probabilities for encoding events across all sessions</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.array</p>
@@ -198,50 +287,6 @@ See that function for more details.</li>
 </tr>
 </tbody>
 </table>
-</dd></dl>
-
-<span class="target" id="module-ramutils.classifier.model"></span><dl class="class">
-<dt id="ramutils.classifier.model.ModelOutput">
-<em class="property">class </em><code class="descclassname">ramutils.classifier.model.</code><code class="descname">ModelOutput</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#ramutils.classifier.model.ModelOutput" title="Permalink to this definition">¶</a></dt>
-<dd><p>Statistics and scores for the output of the logistic regression
-classifier.</p>
-<p>In order to compute tercile stats and the ROC curve/AUC score, the
-<code class="xref py py-attr docutils literal"><span class="pre">true_labels</span></code> and <code class="xref py py-attr docutils literal"><span class="pre">probs</span></code> attributes must be set first.</p>
-<dl class="method">
-<dt id="ramutils.classifier.model.ModelOutput.compute_metrics">
-<code class="descname">compute_metrics</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ramutils.classifier.model.ModelOutput.compute_metrics" title="Permalink to this definition">¶</a></dt>
-<dd><p>Shorthand for calling both <a class="reference internal" href="#ramutils.classifier.model.ModelOutput.compute_roc" title="ramutils.classifier.model.ModelOutput.compute_roc"><code class="xref py py-meth docutils literal"><span class="pre">compute_roc()</span></code></a> and
-<a class="reference internal" href="#ramutils.classifier.model.ModelOutput.compute_tercile_stats" title="ramutils.classifier.model.ModelOutput.compute_tercile_stats"><code class="xref py py-meth docutils literal"><span class="pre">compute_tercile_stats()</span></code></a>.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ramutils.classifier.model.ModelOutput.compute_roc">
-<code class="descname">compute_roc</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ramutils.classifier.model.ModelOutput.compute_roc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute the ROC curve.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><strong>RuntimeError</strong> – when true_labels or probs aren’t set yet</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="ramutils.classifier.model.ModelOutput.compute_tercile_stats">
-<code class="descname">compute_tercile_stats</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ramutils.classifier.model.ModelOutput.compute_tercile_stats" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute tercile stats.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><strong>RuntimeError</strong> – when true_labels or probs aren’t set yet</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
 </dd></dl>
 
 <span class="target" id="module-ramutils.classifier.utils"></span><p>Utility functions used during classifier training</p>
@@ -305,67 +350,76 @@ is to look in the expected location on RHINO</li>
 </div>
 
 
+           </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Classifier training, cross validation, and utilities</a><ul>
-<li><a class="reference internal" href="#module-ramutils.classifier.cross_validation">Reference</a></li>
-</ul>
-</li>
-</ul>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="events.html" class="btn btn-neutral float-right" title="Event processing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="data.html" class="btn btn-neutral" title="Serializable data structures" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="data.html"
-                        title="previous chapter">Serializable data structures</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="events.html"
-                        title="next chapter">Event processing</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/classifier.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="events.html" title="Event processing"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="data.html" title="Serializable data structures"
-             >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">Ramutils 2.0.0 documentation</a> &#187;</li> 
-      </ul>
-    </div>
-    <div class="footer" role="contentinfo">
-        &#169; Copyright 2017.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
-    </div>
-  </body>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'2.0.2rc0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
 </html>
