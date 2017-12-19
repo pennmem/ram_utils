@@ -23,7 +23,7 @@ def test_perform_cross_validation_regression(subject, params):
     #  i.e. classifier, powers, events, or parameters
     expected_output = {
         'R1350D': 0.5442,
-        'R1353N': 0.8948,
+        'R1353N': 0.8948, # Joint report
         'R1354E': 0.6276,
     }
     params = params().to_dict()
@@ -34,7 +34,8 @@ def test_perform_cross_validation_regression(subject, params):
     events = np.load(
         datafile('/events/{}_task_events.npy'.format(subject))).view(
         np.recarray)
-    classifier_summary = perform_cross_validation(classifier, powers, events, 10 ,**params).compute()
+    classifier_summary = perform_cross_validation(classifier, powers, events,
+                                                  10, **params).compute()
     assert np.isclose(classifier_summary.auc, expected_output[subject],
                       rtol=1e-3)
     return
