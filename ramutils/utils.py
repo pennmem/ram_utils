@@ -111,13 +111,6 @@ def timer(message="Elapsed time: %.3f s", logger=None):
     log.info(message, tf - ti)
 
 
-if __name__ == "__main__":
-    import time
-
-    with timer("Slept for a total of %f s"):
-        time.sleep(1)
-
-
 def combine_tag_names(tag_name_list):
     """Generate sensible output from a list of tuples containing anode and
     cathode contact names.
@@ -212,3 +205,39 @@ def is_stim_experiment(experiment):
     if experiment_series != '1':
         return True
     return False
+
+
+def mkdir_p(dirs, mode=0o0777):
+    """Mimic the shell command ``mkdir -p``.
+
+    Parameters
+    ----------
+    dirs : str
+    mode : int
+
+    """
+    try:
+        os.makedirs(dirs, mode)
+    except:
+        pass
+
+
+def bytes_to_str(istring, encoding='utf-8'):
+    """Converts bytes to str in a version-neutral way.
+
+    Parameters
+    ----------
+    istring : bytes or str
+        Input string
+    encoding : str
+        Encoding to use when decoding (default: 'utf-8').
+
+    Returns
+    -------
+    string : str
+
+    """
+    if hasattr(istring, 'decode'):
+        return istring.decode(encoding=encoding)
+    else:
+        return istring

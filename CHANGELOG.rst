@@ -1,6 +1,34 @@
 Changes
 =======
 
+Version 2.0.1
+-------------
+
+**2017-12-14**
+
+Version 2.0.1 is a patch to v2.0.0 containing one major bug fix, one minor bug
+fix, and other code refactoring that does not alter the behavior of the code.
+
+Summary of changes:
+
+Major Fix: An implicit assumption in the reporting and config generation
+pipelines is that the events used to train/evaluate the classifier are in the
+same order (sorted by session, list, time) as the rows of the power matrix
+(input to the classifier). As part of normalizing the features, the
+normalization is done separately for encoding and retrieval events. In v2.0.0,
+normalized features were concatenated together without maintaining the original
+order. This led to the event order being different from the rows of the power
+matrix, resulting in poor classifiers.
+
+Minor Fix: Classifiers trained on encoding and retrieval events should only be
+evaluated on out of sample encoding events. In v2.0.0 evaluation was being done
+on out of sample encoding and retrieval events.
+
+Reports should continue to be generated with the legacy ramutils code. Other
+updates in this patch release include changes that have been made while moving
+towards the v2.1 release.
+
+
 Version 2.0.0
 -------------
 
