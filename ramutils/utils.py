@@ -220,3 +220,24 @@ def mkdir_p(dirs, mode=0o0777):
         os.makedirs(dirs, mode)
     except:
         pass
+
+
+def bytes_to_str(istring, encoding='utf-8'):
+    """Converts bytes to str in a version-neutral way.
+
+    Parameters
+    ----------
+    istring : bytes or str
+        Input string
+    encoding : str
+        Encoding to use when decoding (default: 'utf-8').
+
+    Returns
+    -------
+    string : str
+
+    """
+    if hasattr(istring, 'decode'):
+        return istring.decode(encoding=encoding)
+    else:
+        return istring
