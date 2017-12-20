@@ -367,7 +367,7 @@ class MathSummary(SessionSummary):
         """
         probs = MathSummary.total_num_problems(summaries)
         correct = MathSummary.total_num_correct(summaries)
-        return 100 * correct, probs
+        return 100 * correct / probs
 
     @staticmethod
     def total_problems_per_list(summaries):

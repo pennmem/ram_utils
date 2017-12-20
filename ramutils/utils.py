@@ -62,14 +62,14 @@ def safe_divide(a, b=None):
             try:
                 return a(*args, **kwargs)
             except ZeroDivisionError:
-                get_logger(__name__).warning("ZeroDivisionError; returning 0 instead")
+                get_logger().warning("ZeroDivisionError; returning 0 instead")
                 return 0
         return wrapper
     else:
         try:
             result = a / b
         except ZeroDivisionError:
-            get_logger(__name__).warning("ZeroDivisionError; returning 0 instead")
+            get_logger().warning("ZeroDivisionError; returning 0 instead")
             result = 0
 
         return result
