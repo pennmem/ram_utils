@@ -36,7 +36,10 @@ class TestCrossValidation:
         events = np.load(
             datafile('/events/{}_task_events.npy'.format(subject))).view(
             np.recarray)
-        classifier_summary = perform_cross_validation(classifier, powers, events, 10 ,**params).compute()
+        classifier_summary = perform_cross_validation(classifier, powers,
+                                                      events, 10 ,
+                                                      tag='test',
+                                                      **params).compute()
         assert np.isclose(classifier_summary.auc, expected_output[subject],
                           rtol=1e-3)
         return
@@ -69,7 +72,11 @@ class TestCrossValidation:
         sess_mask = (events.session == test_session)
         events = events[events.session == test_session]
         powers = powers[sess_mask, :]
-        classifier_summary = perform_cross_validation(classifier, powers, events, 10, **params).compute()
+        classifier_summary = perform_cross_validation(classifier,
+                                                      powers,
+                                                      events, 10,
+                                                      tag='test',
+                                                      **params).compute()
         assert np.isclose(classifier_summary.auc, expected_output[subject],
                           rtol=1e-3)
 
