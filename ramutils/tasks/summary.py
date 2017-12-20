@@ -25,7 +25,8 @@ __all__ = [
 
 
 @task()
-def summarize_sessions(all_events, task_events, joint=False):
+def summarize_sessions(all_events, task_events, joint=False,
+                       repetition_ratio_dict={}):
     """Generate a summary of by unique session/experiment
 
     Parameters
@@ -37,6 +38,8 @@ def summarize_sessions(all_events, task_events, joint=False):
     joint: Bool
         Indicator for if a joint report is being created. This will disable
         checks for single-experiment events
+    repetition_ratio_dict: Dict
+        Mapping between subject ID and repetition ratio data
 
     Returns
     -------
@@ -66,10 +69,20 @@ def summarize_sessions(all_events, task_events, joint=False):
     summaries = []
     for session in sessions:
         experiment = extract_experiment_from_events(task_events)[0]
-        # FIXME: recall_probs
-        if experiment in ['FR1', 'catFR1']:
-            summary = FRSessionSummary()
+        session_task_events = task_events[task_events.session == session]
+        session_all_events = all_events[all_events.session == session]
 
+        # FIXME: recall_probs
+        if experiment in ['FR1']:
+            summary = FRSessionSummary()
+            summary.populate(session_task_events,
+                             raw_events=session_all_events)
+        elif experiment in ['catFR1']:
+            summary = CatFRSessionSummary()
+            summary.populate(task_events[task_events.session == session],
+                             raw_events=all_events[all_events.session ==
+                                                   session],
+                             repetition_ratio_dict=repetition_ratio_dict)
         # FIXME: recall_probs, ps4
         elif experiment in ['FR5', 'catFR5']:
             summary = FR5SessionSummary()
@@ -78,8 +91,6 @@ def summarize_sessions(all_events, task_events, joint=False):
         else:
             raise UnsupportedExperimentError("Unsupported experiment: {}".format(experiment))
 
-        summary.populate(task_events[task_events.session == session],
-                         raw_events=all_events[all_events.session == session])
         summaries.append(summary)
 
     return summaries

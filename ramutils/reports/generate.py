@@ -8,7 +8,7 @@ import numpy as np
 from pkg_resources import resource_listdir, resource_string
 
 from ramutils.reports.summary import FRSessionSummary, MathSummary
-from ramutils.events import extract_experiment_from_events
+from ramutils.events import extract_experiment_from_events, extract_subject
 
 
 class ReportGenerator(object):
@@ -55,7 +55,7 @@ class ReportGenerator(object):
         if len(session_summaries) != len(math_summaries):
             raise ValueError("Summaries contain different numbers of sessions")
 
-        self.subject = session_summaries[0].events.subject[0]
+        self.subject = extract_subject(self.session_summaries[0].events)
         for i in range(len(session_summaries)):
             s_subj = session_summaries[i].events.subject == self.subject
             m_subj = math_summaries[i].events.subject == self.subject

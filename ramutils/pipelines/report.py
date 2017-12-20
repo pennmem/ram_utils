@@ -2,6 +2,7 @@
 
 from glob import glob
 import json
+import pandas as pd
 import os.path as osp
 from tempfile import gettempdir
 
@@ -137,8 +138,14 @@ def make_report(subject, experiment, paths, joint_report=False,
                                               joint_report, sessions=sessions,
                                               **kwargs)
 
-    delta_hfa_table = []
+    delta_hfa_table = pd.DataFrame(columns=['type', 'contact0',
+                                            'contact1','label',
+                                            'p_value', 'tstat'])
+    repetition_ratio_dict = {}
     if not stim_report:
+        if joint_report or (experiment == 'catFR1'):
+            repetition_ratio_dict = get_repetition_ratio_dict(paths)
+
         # This logic is very similar to what is done in config generation except
         # that events are not combined by default
         if not joint_report:
@@ -238,7 +245,7 @@ def make_report(subject, experiment, paths, joint_report=False,
 
             training_classifier_summaries = perform_cross_validation(
                 retrained_classifier, training_reduced_powers, training_events,
-                kwargs['n_perm'], **kwargs)
+                kwargs['n_perm'], tag='Original Classifier', **kwargs)
 
             retrained_classifier = serialize_classifier(retrained_classifier,
                                                         final_pairs,
@@ -266,7 +273,9 @@ def make_report(subject, experiment, paths, joint_report=False,
     # TODO: Add task that saves out all necessary underlying data
     session_summaries = summarize_sessions(all_events,
                                            final_task_events,
-                                           joint=joint_report)
+                                           joint=joint_report,
+                                           repetition_ratio_dict=repetition_ratio_dict)
+
     math_summaries = summarize_math(all_events, joint=joint_report)
 
     if not stim_report:
