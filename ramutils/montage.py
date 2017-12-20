@@ -83,17 +83,12 @@ def generate_pairs_for_classifier(pairs, excluded_pairs):
 def reduce_pairs(pairs, stim_params, return_excluded=False):
     """Remove stim pairs from the pairs.json dict.
 
-    :param dict pairs: Full pairs.json as a dict
-    :param List[StimParameters] stim_params:
-    :param bool return_excluded:
-    :returns: excluded pairs if not return_excluded else reduced pairs
-    :rtype: dict
-
     Parameters
     ----------
-    pairs: OrderedDict
-    stim_params:
-    return_excluded:  bool
+    pairs : OrderedDict
+        Full pairs.json as a dict
+    stim_params : List[StimParameters]
+    return_excluded :  bool
         Whether excluded pairs should be returned instead of reduced pairs
 
     Returns
