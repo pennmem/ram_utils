@@ -1,15 +1,77 @@
 """ Set of utility functions for working with electrode-related data """
 
-import os
+from collections import OrderedDict
 import json
+import os
+import os.path
+
 import numpy as np
 import pandas as pd
 
-from collections import OrderedDict
+from bptools.jacksheet import read_jacksheet
+from bptools.util import standardize_label
 from classiflib import dtypes
 from ptsa.data.readers import JsonIndexReader
-from bptools.util import standardize_label
+
+from ramutils.parameters import StimParameters
 from ramutils.utils import extract_subject_montage
+
+
+def make_stim_params(subject, anodes, cathodes, min_amplitudes=None,
+                     max_amplitudes=None, target_amplitudes=None,  root='/'):
+    """Construct :class:`StimParameters` objects from anode and cathode labels
+    for a specific subject.
+
+    Parameters
+    ----------
+    subject : str
+    anodes : List[str]
+        anode labels
+    cathodes : List[str]
+        cathode labels
+    min_amplitudes : List[float]
+        Minimum stim amplitudes (when applicable)
+    max_amplitudes : List[float]
+        Maximum stim amplitudes (when applicable)
+    target_amplitudes : List[float]
+        Target stim amplitudes (when applicable)
+    root : str
+        root directory to search for jacksheet
+
+    Returns
+    -------
+    stim_params : List[StimParameters]
+
+    """
+    path = os.path.join(root, 'data', 'eeg', subject, 'docs', 'jacksheet.txt')
+    jacksheet = read_jacksheet(path)
+
+    stim_params = []
+
+    # TODO: Fail smarter if the label cannot be found
+    #  in the jacksheet
+    for i in range(len(anodes)):
+        anode = anodes[i]
+        cathode = cathodes[i]
+        anode_idx = jacksheet[jacksheet.label == anode].index[0]
+        cathode_idx = jacksheet[jacksheet.label == cathode].index[0]
+
+        params = StimParameters(
+            anode_label=anode,
+            cathode_label=cathode,
+            anode=anode_idx,
+            cathode=cathode_idx
+        )
+
+        if min_amplitudes is not None:
+            params.min_amplitude = min_amplitudes[i]
+            params.max_amplitude = max_amplitudes[i]
+        else:
+            params.target_amplitude = target_amplitudes[i]
+
+        stim_params.append(params)
+
+    return stim_params
 
 
 def build_montage_metadata_table(subject, all_pairs, root='/'):
