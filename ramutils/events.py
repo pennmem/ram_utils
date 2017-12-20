@@ -24,7 +24,8 @@ from ramutils.utils import extract_subject_montage
 from ramutils.exc import *
 
 
-def load_events(subject, experiment, sessions=None, rootdir='/'):
+def load_events(subject, experiment, file_type='all_events',
+                sessions=None, rootdir='/'):
     """ Load events for a specific subject and experiment. If no events are
     found, an empty recarray with the correct datatypes are returned
 
@@ -32,6 +33,9 @@ def load_events(subject, experiment, sessions=None, rootdir='/'):
     ----------
     subject: str
     experiment: str
+    file_type: str
+        The name of the event file to load, i.e. all_events, task_events,
+        math_events, ps4_events. Default is 'all_events'
     sessions: iterable or None
     rootdir: str
 
@@ -54,11 +58,11 @@ def load_events(subject, experiment, sessions=None, rootdir='/'):
         sessions_to_load = json_reader.aggregate_values('sessions',
                                                         subject=subject_id,
                                                         experiment=experiment)
+
     # TODO: There should be better behavior if an event file cannot be found
     #  for a requested session
-    event_files = sorted([json_reader.get_value('all_events',
+    event_files = sorted([json_reader.get_value(file_type,
                                                 subject=subject,
-                                                montage=montage,
                                                 experiment=experiment,
                                                 session=session)
                           for session in sorted(sessions_to_load)])
@@ -139,6 +143,15 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
         events = remove_nonresponses(events)
         events = normalize_pal_events(events)
 
+    events = update_subject(events)
+
+    return events
+
+
+def update_subject(events):
+    """ Ensure subject field is populated for all events """
+    subject = extract_subject(events)
+    events.subject = subject
     return events
 
 
@@ -630,7 +643,8 @@ def concatenate_events_for_single_experiment(event_list):
         empty_events = initialize_empty_event_reccarray()
         return empty_events
     final_events = np.concatenate(event_list).view(np.recarray)
-    final_events.sort(order=['session', 'list', 'mstime'])
+    final_events.sort(order=['subject', 'experiment', 'session', 'list',
+                             'mstime'])
 
     return final_events
 
@@ -1133,3 +1147,54 @@ def get_partition_masks(events):
     }
 
     return partition_masks
+
+
+def get_repetition_ratio_dict(rootdir="/"):
+    all_repetition_rates = {}
+    all_catfr1_subjects = find_subjects("catFR1", rootdir=rootdir)
+    for subject in all_catfr1_subjects:
+        events = load_events(subject, "catFR1", file_type='task_events',
+                             rootdir=rootdir)
+
+        recall_events = events[events.recalled == 1]
+        sessions = np.unique(recall_events.session)
+        lists = np.unique(recall_events.list)
+
+        # Initialize single subject repetition rates of shape n_sessions X
+        # n_lists
+        repetition_rates = np.empty([len(sessions), len(lists)])
+
+        for i, r in enumerate(repetition_rates.flat):
+            repetition_rates.flat[i] = np.nan
+
+        for i, session in enumerate(sessions):
+            sess_recalls = recall_events[recall_events.session == session]
+            lists = np.unique(sess_recalls.list)
+            repetition_rates[i][:len(lists)] = [
+                calculate_repetition_ratio(sess_recalls[sess_recalls.list ==
+                                                        l]) for l in lists]
+        all_repetition_rates[subject] = repetition_rates.copy()
+
+    return all_repetition_rates
+
+
+def find_subjects(experiment, rootdir="/"):
+    """ Identify subjects who completed a given experiment """
+    json_reader = JsonIndexReader(os.path.join(rootdir,
+                                               "protocols",
+                                               "r1.json"))
+    subjects = json_reader.subjects(experiment=experiment)
+    return subjects
+
+
+def calculate_repetition_ratio(recall_events):
+    """
+        Determine the repetition ratio for a given list based on the recalled
+        events for that list
+    """
+    is_repetition = np.diff(recall_events.category_num) == 0
+    repetition_ratio = np.sum(is_repetition)/float(len(recall_events) - 1)
+
+    return repetition_ratio
+
+

@@ -9,10 +9,7 @@ from numpy.testing import assert_equal, assert_almost_equal
 
 from traits.api import ListInt, ListFloat, ListBool
 
-from ramutils.reports.summary import (
-    SessionSummary, StimSessionSummary, MathSummary,
-    FRSessionSummary, FRStimSessionSummary, ClassifierSummary, Summary
-)
+from ramutils.reports.summary import *
 
 datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
 
@@ -188,6 +185,19 @@ class TestFRSessionSummary:
 
         probs = FRSessionSummary.serialpos_probabilities([self.summary], first)
         assert_almost_equal(probs, expected, decimal=2)
+
+
+class TestCatFRSessionSummary:
+    @classmethod
+    def setup_class(cls):
+        cls.summary = CatFRSessionSummary()
+        events = fr5_events()
+        probs = np.random.random(len(events))
+        cls.summary.populate(events, probs)
+
+    def test_to_dataframe(self):
+        df = self.summary.to_dataframe()
+        assert len(df) == len(self.summary.events)
 
 
 class TestStimSessionSummary:
