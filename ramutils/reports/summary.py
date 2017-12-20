@@ -7,9 +7,11 @@ import numpy as np
 import pandas as pd
 import pytz
 
-from traits.api import Array, ArrayOrNone, Float, String, DictStrAny
 from sklearn.metrics import roc_auc_score, roc_curve
+from traits.api import Array, ArrayOrNone, Float, String, DictStrAny
 from traitschema import Schema
+
+from ramutils.utils import safe_divide
 
 __all__ = [
     'ClassifierSummary',
@@ -364,7 +366,7 @@ class MathSummary(SessionSummary):
         """
         probs = MathSummary.total_num_problems(summaries)
         correct = MathSummary.total_num_correct(summaries)
-        return 100 * correct / probs
+        return safe_divide(100 * correct, probs)
 
     @staticmethod
     def total_problems_per_list(summaries):

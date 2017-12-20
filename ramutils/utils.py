@@ -57,6 +57,7 @@ def safe_divide(a, b):
     try:
         result = a / b
     except ZeroDivisionError:
+        get_logger(__name__).warning("ZeroDivisionError; returning 0 instead")
         result = 0
 
     return result
