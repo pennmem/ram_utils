@@ -22,6 +22,8 @@ parser.add_argument("--retrain", "-R", action="store_true",
                     help="retrain classifier rather than loading from disk")
 parser.add_argument('--excluded-contacts', '-E', nargs='+',
                     help='contacts to exclude from classifier')
+parser.add_argument('--joint-report', '-j', action='store_true', default=False,
+                    help='include CatFR/FR for FR reports (default: off)')
 
 logger = get_logger("reports")
 
@@ -65,6 +67,7 @@ def main(input_args=None):
         subject=args.subject,
         experiment=args.experiment,
         paths=paths,
+        joint_report=args.joint_report,
         retrain=args.retrain,
         stim_params=stim_params,
         exp_params=exp_params,
