@@ -9,7 +9,7 @@ import os.path as osp
 
 from ramutils.cli import make_parser, ValidationError, configure_caching
 from ramutils.constants import EXPERIMENTS
-from ramutils.log import get_logger
+from ramutils.log import get_logger, get_warning_accumulator
 from ramutils.utils import timer
 
 # Supported experiments
@@ -79,6 +79,8 @@ def main(input_args=None):
     from ramutils.montage import make_stim_params
     from ramutils.parameters import FilePaths, FRParameters, PALParameters
     from ramutils.pipelines.ramulator_config import make_ramulator_config
+
+    warning_accumulator = get_warning_accumulator()
 
     args = parser.parse_args(input_args)
     validate_stim_settings(args)
@@ -167,6 +169,10 @@ def main(input_args=None):
                               localization=args.localization,
                               montage=args.montage,
                               default_surface_area=default_surface_area)
+
+    warnings = warning_accumulator.format_all()
+    if warnings is not None:
+        print(warnings)
 
 
 if __name__ == "__main__":  # pragma: nocover

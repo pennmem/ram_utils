@@ -54,7 +54,7 @@ class WarningAccumulator(logging.Handler):
                 self._warnings = []
 
         if len(lines):
-            return "ACCUMULATED WARNINGS\n--------------------" + '\n'.join(lines)
+            return "ACCUMULATED WARNINGS\n--------------------\n" + '\n'.join(lines)
         else:
             return None
 
