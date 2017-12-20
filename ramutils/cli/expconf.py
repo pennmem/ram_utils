@@ -76,8 +76,9 @@ def validate_stim_settings(args):
 
 
 def main(input_args=None):
+    from ramutils.montage import make_stim_params
     from ramutils.parameters import FilePaths, FRParameters, PALParameters
-    from ramutils.pipelines.ramulator_config import make_stim_params, make_ramulator_config
+    from ramutils.pipelines.ramulator_config import make_ramulator_config
 
     args = parser.parse_args(input_args)
     validate_stim_settings(args)
