@@ -59,6 +59,25 @@ class WarningAccumulator(logging.Handler):
             return None
 
 
+def get_warning_accumulator():
+    """Creates a new :class:`WarningAccumulator` if necessary and adds it to
+    the root logger.
+
+    Returns
+    -------
+    handler : WarningAccumulator
+
+    """
+    root_logger = logging.getLogger()
+    for handler in root_logger.handlers:
+        if isinstance(handler, WarningAccumulator):
+            return handler
+
+    handler = WarningAccumulator()
+    root_logger.addHandler(handler)
+    return handler
+
+
 def get_logger(name='ramutils'):
     """Returns a configured logger to be used throughout the ramutils package.
 
