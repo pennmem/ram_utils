@@ -15,7 +15,7 @@ Bootstrapping a conda environment
 
 .. code-block:: shell-session
 
-    conda create -n environment_name
+    conda create -y -n environment_name python=3
     conda install -c pennmem --file=requirements.txt
 
 Usage with the RAM_clinical account
@@ -51,14 +51,17 @@ generated via the ``ramulator-conf`` script::
 
     usage: ramulator-conf [-h] [--root ROOT] [--dest DEST] [--cachedir CACHEDIR]
                           --subject SUBJECT [--force-rerun] --experiment
-                          {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6}
+                          {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,FR1,CatFR1,PAL1}
                           [--vispath VISPATH] [--localization LOCALIZATION]
-                          [--montage MONTAGE] --electrode-config-file
-                          ELECTRODE_CONFIG_FILE [--anodes ANODES [ANODES ...]]
+                          [--montage MONTAGE]
+                          [--electrode-config-file ELECTRODE_CONFIG_FILE]
+                          [--anodes ANODES [ANODES ...]]
                           [--cathodes CATHODES [CATHODES ...]]
                           [--min-amplitudes MIN_AMPLITUDES [MIN_AMPLITUDES ...]]
                           [--max-amplitudes MAX_AMPLITUDES [MAX_AMPLITUDES ...]]
                           [--target-amplitudes TARGET_AMPLITUDES [TARGET_AMPLITUDES ...]]
+                          [--no-extended-blanking]
+                          [--default-area DEFAULT_AREA | --area-file AREA_FILE]
                           [--clear-log]
 
     Generate experiment configs for Ramulator
@@ -72,7 +75,7 @@ generated via the ``ramulator-conf`` script::
       --subject SUBJECT, -s SUBJECT
                             subject ID
       --force-rerun         force re-running all tasks
-      --experiment {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6}, -x {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6}
+      --experiment {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,FR1,CatFR1,PAL1}, -x {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,FR1,CatFR1,PAL1}
                             experiment
       --vispath VISPATH     path to save task graph visualization to
       --localization LOCALIZATION, -l LOCALIZATION
@@ -80,7 +83,7 @@ generated via the ``ramulator-conf`` script::
       --montage MONTAGE, -m MONTAGE
                             montage number (default: 0)
       --electrode-config-file ELECTRODE_CONFIG_FILE, -e ELECTRODE_CONFIG_FILE
-                            path to Odin electrode config csv file
+                            path to existing electrode config CSV file
       --anodes ANODES [ANODES ...], -a ANODES [ANODES ...]
                             stim anode labels
       --cathodes CATHODES [CATHODES ...], -c CATHODES [CATHODES ...]
@@ -91,4 +94,45 @@ generated via the ``ramulator-conf`` script::
                             maximum stim amplitudes
       --target-amplitudes TARGET_AMPLITUDES [TARGET_AMPLITUDES ...], -t TARGET_AMPLITUDES [TARGET_AMPLITUDES ...]
                             target stim amplitudes
+      --no-extended-blanking
+                            disable extended blanking
+      --default-area DEFAULT_AREA, -A DEFAULT_AREA
+                            default surface area to use for all contacts
+      --area-file AREA_FILE
+                            path to area.txt file relative to root
       --clear-log           clear the log
+
+Report generation
+-----------------
+
+.. warning:: The new reporting pipeline is not fully tested yet, so the old
+             version in the ``new_ptsa`` branch may need to be used.
+
+Generating reports on the command line::
+
+    usage: ram-report [-h] [--root ROOT] [--dest DEST] [--cachedir CACHEDIR]
+                      --subject SUBJECT [--force-rerun] --experiment
+                      {FR1,CatFR1,PAL1,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR6,CatFR6}
+                      [--vispath VISPATH] [--sessions SESSIONS [SESSIONS ...]]
+                      [--retrain]
+                      [--excluded-contacts EXCLUDED_CONTACTS [EXCLUDED_CONTACTS ...]]
+
+    Generate a report
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      --root ROOT           path to rhino root (default: /)
+      --dest DEST, -d DEST  directory to write output to (default:
+                            scratch/ramutils)
+      --cachedir CACHEDIR   absolute path for caching dir
+      --subject SUBJECT, -s SUBJECT
+                            subject ID
+      --force-rerun         force re-running all tasks
+      --experiment {FR1,CatFR1,PAL1,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR6,CatFR6}, -x {FR1,CatFR1,PAL1,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR6,CatFR6}
+                            experiment
+      --vispath VISPATH     path to save task graph visualization to
+      --sessions SESSIONS [SESSIONS ...], -S SESSIONS [SESSIONS ...]
+                            sessions to read data from (default: use all)
+      --retrain, -R         retrain classifier rather than loading from disk
+      --excluded-contacts EXCLUDED_CONTACTS [EXCLUDED_CONTACTS ...], -E EXCLUDED_CONTACTS [EXCLUDED_CONTACTS ...]
+                            contacts to exclude from classifier

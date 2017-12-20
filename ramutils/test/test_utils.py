@@ -58,3 +58,16 @@ def test_bytes_to_str():
 
     assert bytes_to_str(string) == string
     assert bytes_to_str(bstring) == u'bytestring'
+
+
+def test_safe_divide():
+    assert safe_divide(1, 0) == 0.
+    assert safe_divide(1.0, 0) == 0.
+
+
+def test_safe_divide_decorator():
+    @safe_divide
+    def division():
+        return 1/0
+
+    assert division() == 0.
