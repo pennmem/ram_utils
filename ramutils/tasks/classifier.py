@@ -91,8 +91,8 @@ def serialize_classifier(classifier, pairs, features, events, sample_weights,
 
 
 @task()
-def perform_cross_validation(classifier, pow_mat, events, n_permutations, tag,
-                             **kwargs):
+def perform_cross_validation(classifier, pow_mat, events, n_permutations,
+                             tag='classifier', **kwargs):
     """Perform LOSO or LOLO cross validation on a classifier.
 
     Parameters
@@ -102,7 +102,8 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations, tag,
     events : np.recarray
     n_permutations: int
     tag: str
-        Tag to assign the resulting classifier summary
+        Tag to assign the resulting classifier summary (default:
+        ``'classifier'``)
     kwargs: dict
         Extra keyword arguments that are passed to get_sample_weights. See
         that function for more details
