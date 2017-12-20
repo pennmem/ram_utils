@@ -80,7 +80,7 @@ if __name__ == "__main__":
 
     main([
         '--root', root, '--dest', dest,
-        '-s', 'R1325C',
+        '-s', 'R1345D',
         '-x', 'FR1',
         '--force-rerun',
     ])
