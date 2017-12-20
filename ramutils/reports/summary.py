@@ -352,6 +352,7 @@ class MathSummary(SessionSummary):
         return sum(summary.num_correct for summary in summaries)
 
     @staticmethod
+    @safe_divide
     def total_percent_correct(summaries):
         """Get the percent correct problems for multiple sessions.
 
@@ -366,7 +367,7 @@ class MathSummary(SessionSummary):
         """
         probs = MathSummary.total_num_problems(summaries)
         correct = MathSummary.total_num_correct(summaries)
-        return safe_divide(100 * correct, probs)
+        return 100 * correct, probs
 
     @staticmethod
     def total_problems_per_list(summaries):

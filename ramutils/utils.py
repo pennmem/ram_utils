@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from contextlib import contextmanager
+from functools import wraps
 import json
 import os
 from timeit import default_timer
@@ -38,15 +39,16 @@ def reindent_json(json_file, indent=2):
     return json.dumps(data, indent=indent)
 
 
-def safe_divide(a, b):
-    """ Attempts to perform a/b and catches zero division errors to prevent crashing
+def safe_divide(a, b=None):
+    """Attempts to perform a/b and catches zero division errors to prevent
+    crashing.
 
     Parameters
     ----------
-    a: float
-        Numerator
-    b: float
-        Denominator
+    a : float or callable
+        Numerator or the function to wrap when used as a decorator.
+    b : float or None
+        Denominator or None when used as a decorator.
 
     Returns
     -------
@@ -54,13 +56,23 @@ def safe_divide(a, b):
         0 if denominator is 0, else a/b
 
     """
-    try:
-        result = a / b
-    except ZeroDivisionError:
-        get_logger(__name__).warning("ZeroDivisionError; returning 0 instead")
-        result = 0
+    if callable(a):
+        @wraps(a)
+        def wrapper(*args, **kwargs):
+            try:
+                return a(*args, **kwargs)
+            except ZeroDivisionError:
+                get_logger(__name__).warning("ZeroDivisionError; returning 0 instead")
+                return 0
+        return wrapper
+    else:
+        try:
+            result = a / b
+        except ZeroDivisionError:
+            get_logger(__name__).warning("ZeroDivisionError; returning 0 instead")
+            result = 0
 
-    return result
+        return result
 
 
 def touch(path):
