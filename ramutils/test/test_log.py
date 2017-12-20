@@ -2,20 +2,26 @@ import logging
 
 import pytest
 
-from ramutils.log import WarningAccumulator, get_logger
+from ramutils.log import WarningAccumulator, get_logger, get_warning_accumulator
+
+
+@pytest.fixture
+def logger():
+    logger = logging.getLogger()
+    yield logger
+    logger.handlers.clear()
 
 
 @pytest.mark.parametrize('flush', [True, False])
-def test_warning_accumulator(flush):
-    root = logging.getLogger()
+def test_warning_accumulator(flush, logger):
     handler = WarningAccumulator()
-    root.addHandler(handler)
+    logger.addHandler(handler)
 
     lines = handler.format_all(flush)
     assert lines is None
 
     for n in range(10):
-        root.warning("warning %d", n)
+        logger.warning("warning %d", n)
 
     lines = handler.format_all(flush)
     assert isinstance(lines, str)
@@ -26,3 +32,13 @@ def test_warning_accumulator(flush):
         assert len(handler._warnings) == 0
     else:
         assert len(handler._warnings) == 10
+
+
+def test_get_warning_accumulator(logger):
+    assert len(logger.handlers) == 0
+
+    handler = get_warning_accumulator()
+    assert isinstance(handler, WarningAccumulator)
+    assert len(logger.handlers) == 1
+
+    assert get_warning_accumulator() == handler
