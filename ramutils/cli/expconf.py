@@ -179,10 +179,10 @@ if __name__ == "__main__":  # pragma: nocover
     root = "~/mnt/rhino"
     dest = "scratch/ramutils2/demo"
 
-    # main([
-    #     "-s", "R1347D", "-x", "CatFR1", "-A", "0.5",
-    #     "--root", root, "--dest", dest, "--force-rerun"
-    # ])
+    main([
+        "-s", "R1347D", "-x", "CatFR1", "-A", "0.5",
+        "--root", root, "--dest", dest, "--force-rerun"
+    ])
 
     # main([
     #     "-s", "R1364C", "-x", "AmplitudeDetermination",
@@ -191,13 +191,13 @@ if __name__ == "__main__":  # pragma: nocover
     #     "--root", root, "--dest", dest, "--force-rerun"
     # ])
 
-    main([
-        "-s", "R1374T", "-x", "CatFR5",
-        "--anodes", "LA7", "--cathodes", "LA8",
-        "--target-amplitudes", "0.5",
-        "-e", "/data/eeg/R1374T/behavioral/catFR5/session_0/host_pc/20171212_163330/config_files/R1374T_12DEC2017L0M0STIM.csv",
-        "--root", root, "--dest", dest, "--force-rerun"
-    ])
+    # main([
+    #     "-s", "R1374T", "-x", "CatFR5",
+    #     "--anodes", "LA7", "--cathodes", "LA8",
+    #     "--target-amplitudes", "0.5",
+    #     "-e", "/data/eeg/R1374T/behavioral/catFR5/session_0/host_pc/20171212_163330/config_files/R1374T_12DEC2017L0M0STIM.csv",
+    #     "--root", root, "--dest", dest, "--force-rerun"
+    # ])
 
     # main([
     #     "-s", "R1365N", "-x", "PAL5",
