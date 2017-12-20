@@ -9,7 +9,7 @@ from ramutils.log import WarningAccumulator, get_logger, get_warning_accumulator
 def logger():
     logger = logging.getLogger()
     yield logger
-    logger.handlers.clear()
+    logger.handlers = []
 
 
 @pytest.mark.parametrize('flush', [True, False])
