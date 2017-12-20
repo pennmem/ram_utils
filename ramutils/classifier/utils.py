@@ -40,12 +40,14 @@ def reload_classifier(subject, task, session, mount_point='/', base_path=None):
 
     timestamped_dirs = glob(base_path + "/*")
     if len(timestamped_dirs) != 1:
-        raise UnableToReloadClassifierException(
-            'There should be 1 and only 1 timestamped '
-            'directory at {}'.format(base_path))
+        # Return the original classifier
+        config_path = os.path.join(timestamped_dirs[0], 'config_files')
+        classifier_path = glob(os.path.join(config_path,
+                                            '*classifier*.zip'))[0]
+        orig_classifier_container = ClassifierContainer.load(classifier_path)
+        return orig_classifier_container
 
     timestamped_path = timestamped_dirs[0]
-    print(timestamped_path)
 
     # FIXME: this needs a data quality check to confirm that all classifiers in
     # a session are the same!
