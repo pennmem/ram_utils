@@ -7,15 +7,17 @@ import numpy as np
 import pandas as pd
 import pytz
 
-from traits.api import Array, ArrayOrNone, Float, String, DictStrAny
+from traits.api import Array, ArrayOrNone, Float, String, DictStrAny, Dict
 from sklearn.metrics import roc_auc_score, roc_curve
 from traitschema import Schema
 
 __all__ = [
+    'Summary',
     'ClassifierSummary',
     'SessionSummary',
     'StimSessionSummary',
     'FRSessionSummary',
+    'CatFRSessionSummary',
     'FRStimSessionSummary',
     'FR5SessionSummary',
     'MathSummary'
@@ -265,7 +267,12 @@ class SessionSummary(Summary):
             ignore = [
                 '_events',  # we don't need events in the dataframe
                 '_raw_events',
-                'rejected', 'region',  # FIXME: don't ignore
+                '_repetition_ratios',
+                '_metadata',
+                'irt_within_cat',
+                'irt_between_cat',
+                'rejected',
+                'region',  # FIXME: don't ignore
             ]
 
             # also ignore phase for events that predate it
@@ -489,14 +496,54 @@ class FRSessionSummary(SessionSummary):
             return group.recalled.mean().tolist()
 
 
-# FIXME
-# class CatFRSessionSummary(FRSessionSummary):
-#     """Extends standard FR session summaries for categorized free recall
-#     experiments.
-#
-#     """
-#     irt_within_cat = Float(desc='average inter-response time within categories')
-#     irt_between_cat = Float(desc='average inter-response time between categories')
+class CatFRSessionSummary(FRSessionSummary):
+    """
+        Extends standard FR session summaries for categorized free recall
+        experiments.
+    """
+    _repetition_ratios = Dict(desc='Repetition ratio by subject')
+
+    irt_within_cat = Array(desc='average inter-response time within categories')
+    irt_between_cat = Array(desc='average inter-response time between categories')
+
+    def populate(self, events, raw_events=None, recall_probs=None,
+                 repetition_ratio_dict={}):
+        FRSessionSummary.populate(self, events, raw_events=raw_events,
+                                  recall_probs=recall_probs)
+        self.repetition_ratios = repetition_ratio_dict
+
+        # Calculate between and within IRTs based on events
+        catfr_events = events[events.experiment == 'catFR1']
+        cat_recalled_events = catfr_events[catfr_events.recalled == 1]
+        irt_within_cat = []
+        irt_between_cat = []
+        for session in np.unique(catfr_events.session):
+            cat_sess_recalls = cat_recalled_events[cat_recalled_events.session == session]
+            for list in np.unique(cat_sess_recalls.list):
+                cat_sess_list_recalls = cat_sess_recalls[cat_sess_recalls.list == list]
+                irts = np.diff(cat_sess_list_recalls.mstime)
+                within = np.diff(cat_sess_list_recalls.category_num) == 0
+                irt_within_cat.extend(irts[within])
+                irt_between_cat.extend(irts[within == False])
+
+        self.irt_within_cat = irt_within_cat
+        self.irt_between_cat = irt_between_cat
+
+    @property
+    def repetition_ratios(self):
+        return self._repetition_ratios
+
+    @repetition_ratios.setter
+    def repetition_ratios(self, new_repetition_ratios):
+        self._repetition_ratios = new_repetition_ratios
+
+    @property
+    def irt_within_category(self):
+        return self.irt_within_cat
+
+    @property
+    def irt_between_category(self):
+        return self.irt_between_cat
 
 
 class StimSessionSummary(SessionSummary):

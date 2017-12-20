@@ -5,7 +5,7 @@ import pytest
 from pkg_resources import resource_filename
 
 from ramutils.events import *
-from ramutils.parameters import FRParameters, PALParameters
+from sklearn.externals import joblib
 
 datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
 
@@ -45,7 +45,7 @@ class TestEvents:
         ('R1354E', 'catFR1', [1])
     ])
     def test_load_events(self, subject, experiment, sessions):
-        events = load_events(subject, experiment, sessions,
+        events = load_events(subject, experiment, sessions=sessions,
                              rootdir=self.rootdir)
         n_sessions = len(np.unique(events.session))
 
@@ -214,6 +214,15 @@ class TestEvents:
         assert len(vocalization_events) == self.n_rec_word
         return
 
+    def test_select_session_events(self):
+        return
+
+    def test_get_session_mask(self):
+        return
+
+    def test_extract_lists(self):
+        return
+
     def test_get_recall_events_mask(self):
         recall_mask = get_recall_events_mask(self.test_data)
         assert sum(recall_mask) == self.n_word
@@ -265,4 +274,27 @@ class TestEvents:
         assert sum([len(v) for k, v in all_partitions.items()]) == 4
 
         return
+
+    def test_extract_stim_and_post_stim_masks(self):
+        # TODO: Fill in with comparison to legacy outputs
+        return
+
+    @pytest.mark.rhino
+    @pytest.mark.slow
+    def test_get_repetition_ratios_dict(self):
+        # Note: If data for any subject stored in the cached repetition
+        # ratios changes, this could result in the test failing. It would be
+        # better to just calculate the dict for a few subjects whose data we
+        # have cached in the test data directory
+        current_repetitions_dict = get_repetition_ratio_dict(
+            rootdir='/Volumes/RHINO')
+
+        cached_reptitions_dict = joblib.load(datafile(
+            '/input/events/repetition_ratios.pkl'))
+
+        for subject, ratios in cached_reptitions_dict.items():
+            if subject in current_repetitions_dict.keys():
+                current = np.nan_to_num(current_repetitions_dict[subject])
+                old = np.nan_to_num(ratios)
+                assert np.allclose(current, old)
 
