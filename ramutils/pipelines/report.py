@@ -7,6 +7,7 @@ from tempfile import gettempdir
 
 import h5py
 
+from ramutils.montage import load_pairs_from_json
 from ramutils.tasks import *
 from ramutils.utils import touch
 
@@ -47,10 +48,6 @@ def get_pairs(subject, experiment, sessions, paths, localization=0, montage=0):
     eeg_dir = osp.join(protocols_dir, 'experiments', experiment,
                        'sessions', str(session), 'ephys', 'current_processed',
                        'noreref')
-    localizations_dir = osp.join(protocols_dir,
-                                 'localizations', str(localization),
-                                 'montages', str(montage),
-                                 'neuroradiology', 'current_processed')
 
     files = glob(osp.join(eeg_dir, "*.h5"))
 
@@ -75,8 +72,7 @@ def get_pairs(subject, experiment, sessions, paths, localization=0, montage=0):
     # No HDF5 file exists, meaning this was a monopolar recording... read
     # pairs.json instead
     else:
-        with open(osp.join(localizations_dir, 'pairs.json'), 'r') as f:
-            all_pairs = json.loads(f.read())
+        all_pairs = load_pairs_from_json(subject, paths.root)
 
     return all_pairs
 
