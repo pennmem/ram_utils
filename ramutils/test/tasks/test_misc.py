@@ -6,7 +6,7 @@ from numpy.testing import assert_equal
 from traits.api import Array
 from traitschema import Schema
 
-from ramutils.tasks.misc import store_results
+from ramutils.tasks.misc import store_results, load_results
 
 
 class MySchema(Schema):
@@ -50,3 +50,16 @@ def test_store_results(scheme, datatype, tmpdir):
     # Invalid scheme
     with pytest.raises(NotImplementedError):
         store_results(data, 'sqlite:///path.sqlite').compute()
+
+
+@pytest.mark.parametrize('scheme', ['', 'file:///'])
+def test_load_results(scheme, tmpdir):
+    data = MySchema(x=np.array([1]), y=np.array([2]))
+    path = str(tmpdir.join('out.h5'))
+    data.to_hdf(path)
+    url = "{:s}{:s}".format(scheme, path)
+
+    results = load_results(url).compute()
+
+    assert results.x == data.x
+    assert results.y == data.y
