@@ -3,6 +3,8 @@
 from ramutils.events import load_events, clean_events, select_word_events, \
     concatenate_events_across_experiments
 from ramutils.events import get_word_event_mask as get_word_event_mask_core
+from ramutils.events import get_repetition_ratio_dict as \
+    get_repetition_ratio_dict_core
 from ramutils.tasks import task
 from ramutils.utils import extract_experiment_series
 
@@ -10,7 +12,8 @@ __all__ = [
     'get_word_event_mask',
     'subset_events',
     'build_test_data',
-    'build_training_data'
+    'build_training_data',
+    'get_repetition_ratio_dict'
 ]
 
 
@@ -132,3 +135,7 @@ def build_test_data(subject, experiment, paths, joint_report, sessions=None,
 
     return all_events, task_events
 
+
+@task()
+def get_repetition_ratio_dict(paths):
+    return get_repetition_ratio_dict_core(rootdir=paths.root)
