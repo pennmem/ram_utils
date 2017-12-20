@@ -8,6 +8,7 @@ from tempfile import gettempdir
 import h5py
 
 from ramutils.tasks import *
+from ramutils.utils import touch
 
 
 # FIXME: make this a task
@@ -50,21 +51,30 @@ def get_pairs(subject, experiment, sessions, paths, localization=0, montage=0):
                                  'localizations', str(localization),
                                  'montages', str(montage),
                                  'neuroradiology', 'current_processed')
-    try:
-        # Read HDF5 file to get pairs
-        filename = glob(osp.join(eeg_dir, "*.h5"))[0]
+
+    files = glob(osp.join(eeg_dir, "*.h5"))
+
+    # Read HDF5 file to get pairs
+    if len(files):
+        filename = files[0]
+
         with h5py.File(filename, 'r') as hfile:
             config_str = hfile['/config_files/electrode_config'].value
 
         config_path = osp.join(gettempdir(), 'electrode_config.csv')
-        with open(config_path, 'w') as f:
+        with open(config_path, 'wb') as f:
             f.write(config_str)
         paths.electrode_config_file = config_path
 
+        # generate_pairs_from_electrode_config panics if the .bin file isn't
+        # found, so we have to make sure it's there
+        touch(config_path.replace('.csv', '.bin'))
+
         all_pairs = generate_pairs_from_electrode_config(subject, paths)
-    except IndexError:
-        # No HDF5 file exists, meaning this was a monopolar recording... read
-        # pairs.json instead
+
+    # No HDF5 file exists, meaning this was a monopolar recording... read
+    # pairs.json instead
+    else:
         with open(osp.join(localizations_dir, 'pairs.json'), 'r') as f:
             all_pairs = json.loads(f.read())
 
