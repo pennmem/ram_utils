@@ -76,10 +76,10 @@ def main(input_args=None):
 
 if __name__ == "__main__":
     root = '~/mnt/rhino'
-    dest = 'scratch/ramutils/demo'
+    dest = 'scratch/ramutils2/demo'
 
     main([
         '--root', root, '--dest', dest,
         '-s', 'R1345D',
-        '-x', 'FR1',
+        '-x', 'FR1'
     ])
