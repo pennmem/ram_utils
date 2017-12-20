@@ -91,7 +91,9 @@ class ComputeFR5Powers(ReportRamTask):
 
         for session in sessions:
             sess_stims = stim_off_events.session==session
+            sess_words = (events.session == session)
             post_stim_powers[sess_stims] = zscore(post_stim_powers[sess_stims])
+            self.pow_mat[sess_words] = zscore(self.pow_mat[sess_words])
 
         self.pass_object('fr_stim_pow_mat', self.pow_mat)
         self.pass_object('samplerate', self.samplerate)
