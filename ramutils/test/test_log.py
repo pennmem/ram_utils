@@ -25,7 +25,7 @@ def test_warning_accumulator(flush, logger):
 
     lines = handler.format_all(flush)
     assert isinstance(lines, str)
-    for i, line in enumerate(lines.split('\n')[1:]):
+    for i, line in enumerate(lines.split('\n')[2:]):
         assert "warning {}".format(int(i)) in line
 
     if flush:
