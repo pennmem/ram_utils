@@ -186,13 +186,7 @@ def reload_used_classifiers(subject, experiment, events, root):
     used_classifiers = []
     sessions = extract_sessions(events)
     for session in sessions:
-        try:
-            classifier = reload_classifier(subject, experiment, session, root)
-        except Exception:
-            logger.warning('Unable to load classifier for {}, '
-                           '{}, session {}'.format(subject, experiment,
-                                                   session))
-            classifier = None
+        classifier = reload_classifier(subject, experiment, session, root)
         used_classifiers.append(classifier)
 
     return used_classifiers
@@ -309,7 +303,7 @@ def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
         subject, experiment, sessions = extract_event_metadata(session_events)
         classifier_summary.populate(subject, experiment, sessions,
                                     session_recalls, session_probs,
-                                    permuted_auc_values)
+                                    permuted_auc_values, tag=session)
         classifier_summaries.append(classifier_summary)
         logger.info('AUC for session {}: {}'.format(session,
                                                     classifier_summary.auc))
@@ -332,18 +326,16 @@ def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
         encoding_classifier_summaries.append(encoding_classifier_summary)
 
     all_predicted_probs = np.array(predicted_probs).flatten()
-    permuted_auc_values = permuted_loso_cross_validation(retrained_classifier.classifier,
-                                                         powers,
-                                                         events,
-                                                         n_permutations,
-                                                         scheme='EQUAL',
-                                                         **kwargs)
+    if len(sessions) > 1:
+        permuted_auc_values = permuted_loso_cross_validation(
+          retrained_classifier.classifier, powers, events, n_permutations,
+            scheme='EQUAL', **kwargs)
 
     subject, experiment, sessions = extract_event_metadata(events)
     cross_session_summary = ClassifierSummary()
     cross_session_summary.populate(subject, experiment, sessions,
                                    non_stim_recalls, all_predicted_probs,
-                                   permuted_auc_values)
+                                   permuted_auc_values, tag='Combined Sessions')
     classifier_summaries.append(cross_session_summary)
     logger.info("Combined AUC: {}".format(cross_session_summary.auc))
 
