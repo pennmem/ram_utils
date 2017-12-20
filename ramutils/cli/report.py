@@ -3,7 +3,9 @@
 import os.path as osp
 
 from ramutils.cli import make_parser, configure_caching
+from ramutils.exc import UnsupportedExperimentError
 from ramutils.log import get_logger
+from ramutils.parameters import FilePaths, FRParameters
 from ramutils.pipelines.report import make_report
 
 parser = make_parser("Generate a report")
@@ -16,8 +18,6 @@ logger = get_logger("reports")
 
 
 def main(input_args=None):
-    from ramutils.parameters import FilePaths
-
     args = parser.parse_args(input_args)
 
     configure_caching(args.dest, args.force_rerun)
@@ -36,8 +36,12 @@ def main(input_args=None):
     else:
         sessions = None
 
-    # FIXME: Select experiment parameters from command-line option
-    exp_params = None
+    if 'FR' in args.experiment:
+        exp_params = FRParameters
+    elif 'PAL' in args.experiment:
+        raise NotImplementedError("PAL experiments are not supported yet")
+    else:
+        raise UnsupportedExperimentError("Unsupported experiment: " + args.experiment)
 
     # Generate report!
     path = make_report(
