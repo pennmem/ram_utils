@@ -6,14 +6,16 @@ chosen for stimulation.
 
 """
 
+from __future__ import print_function
 import os.path as osp
 
 from ramutils.cli import make_parser, configure_caching
 from ramutils.exc import UnsupportedExperimentError
-from ramutils.log import get_logger
+from ramutils.log import get_logger, get_warning_accumulator
 from ramutils.montage import make_stim_params
-from ramutils.parameters import FilePaths, FRParameters, StimParameters
+from ramutils.parameters import FilePaths, FRParameters
 from ramutils.pipelines.report import make_report
+from ramutils.utils import timer
 
 parser = make_parser("Generate a report")
 parser.add_argument('--sessions', '-S', nargs='+',
@@ -30,8 +32,9 @@ logger = get_logger("reports")
 
 def main(input_args=None):
     args = parser.parse_args(input_args)
-
-    configure_caching(args.dest, args.force_rerun)
+    cachedir = osp.join(args.cachedir, 'cache')
+    configure_caching(cachedir, args.force_rerun)
+    warning_accumulator = get_warning_accumulator()
 
     paths = FilePaths(
         root=osp.expanduser(args.root),
@@ -63,18 +66,23 @@ def main(input_args=None):
 
     # Generate report!
     # FIXME: stim_params should be called something different/just be a list of contacts to exclude
-    path = make_report(
-        subject=args.subject,
-        experiment=args.experiment,
-        paths=paths,
-        joint_report=args.joint_report,
-        retrain=args.retrain,
-        stim_params=stim_params,
-        exp_params=exp_params,
-        sessions=sessions,
-        vispath=args.vispath,
-    )
-    logger.info("Wrote report to %s", path)
+    with timer():
+        path = make_report(
+            subject=args.subject,
+            experiment=args.experiment,
+            paths=paths,
+            joint_report=args.joint_report,
+            retrain=args.retrain,
+            stim_params=stim_params,
+            exp_params=exp_params,
+            sessions=sessions,
+            vispath=args.vispath,
+        )
+        logger.info("Wrote report to %s\n", path)
+
+    warnings = warning_accumulator.format_all()
+    if warnings is not None:
+        print(warnings)
 
 
 if __name__ == "__main__":
