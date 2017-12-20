@@ -5,7 +5,6 @@ from datetime import datetime
 import functools
 import json
 import os.path
-from tempfile import gettempdir
 import shutil
 import warnings
 
@@ -19,10 +18,9 @@ from bptools.transform import SeriesTransformation
 from classiflib import ClassifierContainer
 
 from ramutils.constants import EXPERIMENTS
-from ramutils.exc import MissingFileError
 from ramutils.log import get_logger
 from ramutils.tasks import task
-from ramutils.utils import bytes_to_str, reindent_json
+from ramutils.utils import bytes_to_str
 
 __all__ = [
     'generate_electrode_config',
@@ -423,10 +421,7 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
     )
 
     with open(os.path.join(config_dir_root, 'experiment_config.json'), 'w') as f:
-        tmp_path = os.path.join(gettempdir(), "experiment_config.json")
-        with open(tmp_path, 'w') as tmpfile:
-            tmpfile.write(experiment_config_content)
-        f.write(reindent_json(tmp_path))
+        f.write(experiment_config_content)
 
     if container is not None:
         container.save(classifier_path, overwrite=True)
