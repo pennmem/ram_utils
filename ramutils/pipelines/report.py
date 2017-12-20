@@ -1,7 +1,80 @@
 """Pipeline for creating reports."""
 
+from glob import glob
+import json
+import os.path as osp
+from tempfile import gettempdir
 
+import h5py
+
+from ramutils.montage import load_pairs_from_json
 from ramutils.tasks import *
+from ramutils.utils import touch
+
+
+# FIXME: make this a task
+def get_pairs(subject, experiment, sessions, paths, localization=0, montage=0):
+    """Determine how we should figure out what pairs to use.
+
+    Option 1: In the case of hardware bipolar recordings with the ENS, EEG
+    data is stored in the HDF5 file which contains the Odin electrode config
+    data so we can use this.
+
+    Option 2: For monopolar recordings, we can just read the pairs.json from
+    localization.
+
+    Parameters
+    ----------
+    subject : str
+        Subject ID
+    experiment : str
+        Experiment type
+    sessions : list or None
+        List of sessions
+    paths : FilePaths
+    localization : int
+        Localization number
+    montage : int
+        Montage number
+
+    Returns
+    -------
+    all_pairs : dict
+        All pairs used in the experiment.
+
+    """
+    session = 0 if sessions is None else sessions[0]
+    protocols_dir = osp.join(paths.root, 'protocols', 'r1', 'subjects', subject)
+    eeg_dir = osp.join(protocols_dir, 'experiments', experiment,
+                       'sessions', str(session), 'ephys', 'current_processed',
+                       'noreref')
+
+    files = glob(osp.join(eeg_dir, "*.h5"))
+
+    # Read HDF5 file to get pairs
+    if len(files):
+        filename = files[0]
+
+        with h5py.File(filename, 'r') as hfile:
+            config_str = hfile['/config_files/electrode_config'].value
+
+        config_path = osp.join(gettempdir(), 'electrode_config.csv')
+        with open(config_path, 'wb') as f:
+            f.write(config_str)
+        paths.electrode_config_file = config_path
+
+        # generate_pairs_from_electrode_config panics if the .bin file isn't
+        # found, so we have to make sure it's there
+        touch(config_path.replace('.csv', '.bin'))
+
+        all_pairs = generate_pairs_from_electrode_config(subject, paths)
+
+    # No HDF5 file exists, meaning this was a monopolar recording... read
+    # pairs.json instead
+    else:
+        all_pairs = load_pairs_from_json(subject, paths.root)
+
+    return all_pairs
 
 
 def make_report(subject, experiment, paths, joint_report=False,
@@ -25,7 +98,7 @@ def make_report(subject, experiment, paths, joint_report=False,
     exp_params : ExperimentParameters
         When given, overrides the inferred default parameters to use for an
         experiment.
-    sessions : list
+    sessions : list or None
         For reports that span sessions, sessions to read data from.
         When not given, all available sessions are used for reports.
     vispath : str
@@ -49,7 +122,8 @@ def make_report(subject, experiment, paths, joint_report=False,
 
     stim_report = is_stim_experiment(experiment).compute()
 
-    ec_pairs = generate_pairs_from_electrode_config(subject, paths)
+    # FIXME: allow using different localization, montage numbers
+    ec_pairs = get_pairs(subject, experiment, sessions, paths, 0, 0)
     excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
     final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
     used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)

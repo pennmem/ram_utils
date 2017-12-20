@@ -13,3 +13,7 @@ figcaption {
   text-align: left;
   caption-side: bottom;
 }
+
+#navbar-spacer {
+  padding-top: 5em;
+}

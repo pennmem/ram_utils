@@ -7,9 +7,11 @@ import numpy as np
 import pandas as pd
 import pytz
 
-from traits.api import Array, ArrayOrNone, Float, String, DictStrAny
 from sklearn.metrics import roc_auc_score, roc_curve
+from traits.api import Array, ArrayOrNone, Float, String, DictStrAny
 from traitschema import Schema
+
+from ramutils.utils import safe_divide
 
 __all__ = [
     'ClassifierSummary',
@@ -350,6 +352,7 @@ class MathSummary(SessionSummary):
         return sum(summary.num_correct for summary in summaries)
 
     @staticmethod
+    @safe_divide
     def total_percent_correct(summaries):
         """Get the percent correct problems for multiple sessions.
 
