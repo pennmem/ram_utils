@@ -4,17 +4,22 @@ from collections import OrderedDict
 import json
 import os
 import os.path
+from glob import glob
+from os import path as osp
+from tempfile import gettempdir
 
+import h5py
 import numpy as np
 import pandas as pd
 
 from bptools.jacksheet import read_jacksheet
+from bptools.transform import SeriesTransformation
 from bptools.util import standardize_label
 from classiflib import dtypes
 from ptsa.data.readers import JsonIndexReader
 
 from ramutils.parameters import StimParameters
-from ramutils.utils import extract_subject_montage
+from ramutils.utils import extract_subject_montage, touch, bytes_to_str
 
 
 def make_stim_params(subject, anodes, cathodes, min_amplitudes=None,
@@ -272,29 +277,36 @@ def extract_pairs_dict(pairs):
     return pairs
 
 
-def load_pairs_from_json(subject, rootdir='/'):
+def load_pairs_from_json(subject, localization=0, montage=0, rootdir='/'):
     """ Load montage information from pairs.json file
 
     Parameters
     ----------
     subject: str
         Subject ID
+    localization: int
+        Localization number
+    montage: int
+        Montage number
     rootdir: str
         Mount point for RHINO
 
     Returns
     -------
     dict
-        Dictionary containing metadata for all pairs in the given subjects' montage
+        Dictionary containing metadata for all pairs in the given subjects'
+        montage
 
     """
-    subject_id, montage = extract_subject_montage(subject)
+    subject_id, _ = extract_subject_montage(subject)
 
     json_reader = JsonIndexReader(os.path.join(rootdir,
                                                "protocols",
                                                "r1.json"))
-    all_pairs_paths = json_reader.aggregate_values('pairs', subject=subject_id,
-                                                   montage=montage)
+    all_pairs_paths = json_reader.aggregate_values('pairs',
+                                                   subject=subject_id,
+                                                   localization=str(localization),
+                                                   montage=str(montage))
 
     # For simplicity, just load the first file since they *should* all be the
     # same
@@ -338,3 +350,130 @@ def extract_atlas_location(bp_data):
             return ('Left ' if atlases['ind']['x']<0.0 else 'Right ') + ind_loc
 
     return '--'
+
+
+def get_pairs(subject, experiment, localization=0, montage=0, root='/'):
+    """Determine how we should figure out what pairs to use.
+
+    Option 1: In the case of hardware bipolar recordings with the ENS, EEG
+    data is stored in the HDF5 file which contains the Odin electrode config
+    data so we can use this.
+
+    Option 2: For monopolar recordings, we can just read the pairs.json from
+    localization.
+
+    Parameters
+    ----------
+    subject : str
+        Subject ID
+    experiment : str
+        Experiment type
+    root : str
+        Location of RHINO
+    localization : int
+        Localization number
+    montage : int
+        Montage number
+
+    Returns
+    -------
+    all_pairs : dict
+        All pairs used in the experiment.
+
+    """
+    # Use * for session so we don't have to assume session numbers start at 0
+    eeg_dir = osp.join(root, 'protocols', 'r1', 'subjects', 'experiments',
+                       experiment, 'sessions', '*', 'ephys',
+                       'current_processed', 'noreref', '*.h5')
+    files = glob(eeg_dir)
+
+    # Read HDF5 file to get pairs
+    if len(files) > 0:
+        filename = files[0]
+
+        with h5py.File(filename, 'r') as hfile:
+            config_str = hfile['/config_files/electrode_config'].value
+
+        config_path = osp.join(gettempdir(), 'electrode_config.csv')
+        with open(config_path, 'wb') as f:
+            f.write(config_str)
+        root.electrode_config_file = config_path
+
+        # generate_pairs_from_electrode_config panics if the .bin file isn't
+        # found, so we have to make sure it's there
+        touch(config_path.replace('.csv', '.bin'))
+
+        all_pairs = generate_pairs_from_electrode_config(subject, root)
+
+    # No HDF5 file exists, meaning this was a monopolar recording... read
+    # pairs.json instead
+    else:
+        all_pairs = load_pairs_from_json(subject,
+                                         localization=localization,
+                                         montage=montage,
+                                         rootdir=root)
+
+    return all_pairs
+
+
+def generate_pairs_from_electrode_config(subject, paths):
+    """Load and verify the validity of the Odin electrode configuration file.
+
+    Parameters
+    ----------
+    subject : str
+        Subject ID
+
+    Returns
+    -------
+    pairs_from_ec : dict
+        Minimal pairs.json based on the electrode configuration
+
+    Raises
+    ------
+    RuntimeError
+        If the csv or bin file are not found
+
+    """
+    prefix, _ = os.path.splitext(paths.electrode_config_file)
+    csv_filename = prefix + '.csv'
+    bin_filename = prefix + '.bin'
+
+    if not os.path.exists(csv_filename):
+        raise RuntimeError("{} not found!".format(csv_filename))
+    if not os.path.exists(bin_filename):
+        raise RuntimeError("{} not found!".format(bin_filename))
+
+    # Create SeriesTransformation object to determine if this is monopolar,
+    # mixed-mode, or bipolar
+    # FIXME: load excluded pairs
+    xform = SeriesTransformation.create(csv_filename, paths.pairs)
+
+    # Odin electrode configuration
+    ec = xform.elec_conf
+
+    # This will mimic pairs.json (but only with labels).
+    pairs_dict = OrderedDict()
+
+    # FIXME: move the following logic into bptools
+    # Hardware bipolar mode
+    pairs_from_ec = {}
+    if not xform.monopolar_possible():
+        contacts = ec.contacts_as_recarray()
+
+        for ch in ec.sense_channels:
+            anode, cathode = ch.contact, ch.ref
+            aname = bytes_to_str(contacts[contacts.jack_box_num == anode].contact_name[0])
+            cname = bytes_to_str(contacts[contacts.jack_box_num == cathode].contact_name[0])
+            name = '{}-{}'.format(aname, cname)
+            pairs_dict[name] = {
+                'channel_1': anode,
+                'channel_2': cathode
+            }
+
+        # Note this is different from neurorad pipeline pairs.json because
+        # the electrode configuration trumps it
+        pairs_from_ec = {subject: {'pairs': pairs_dict}}
+
+    return pairs_from_ec
+

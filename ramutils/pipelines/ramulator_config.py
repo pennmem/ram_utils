@@ -1,5 +1,6 @@
 from ramutils.constants import EXPERIMENTS
 from ramutils.exc import MultistimNotAllowedException
+from ramutils.montage import generate_pairs_from_electrode_config
 from ramutils.tasks import *
 
 

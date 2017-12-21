@@ -15,9 +15,9 @@ from classiflib import ClassifierContainer
 
 from ramutils.parameters import StimParameters, FilePaths, FRParameters
 from ramutils.tasks.odin import (
-    generate_ramulator_config, generate_electrode_config,
-    generate_pairs_from_electrode_config
+    generate_ramulator_config, generate_electrode_config
 )
+from ramutils.montage import generate_pairs_from_electrode_config
 from ramutils.test import Mock, patch
 import ramutils.test.test_data
 from ramutils.utils import touch, mkdir_p
@@ -57,18 +57,6 @@ def test_generate_electrode_config(tmpdir):
 
     path = generate_electrode_config(subject, paths, anodes, cathodes).compute()
     assert isinstance(path, FilePaths)
-
-
-def test_generate_pairs_from_electrode_config():
-    paths = FilePaths(root=datafile(''),
-                      electrode_config_file='/input/configs/R1354E_26OCT2017L0M0STIM.csv',
-                      pairs='/input/montage/R1354E_pairs.json')
-    config_pairs = generate_pairs_from_electrode_config('R1354E', paths).compute()
-    assert len(config_pairs['R1354E']['pairs'].keys()) > 0
-    with open(datafile('/input/configs/R1354E_pairs_from_ec.json'), 'w') as f:
-        json_pairs = json.dumps(config_pairs)
-        f.write(json_pairs)
-    return
 
 
 @pytest.mark.parametrize('experiment', ['AmplitudeDetermination', 'FR6'])
