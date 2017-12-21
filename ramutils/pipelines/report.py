@@ -77,7 +77,6 @@ def make_report(subject, experiment, paths, joint_report=False,
         if not joint_report:
             kwargs['combine_events'] = False
 
-        # Run again but for joint classifier
         kwargs['encoding_only'] = False
         all_task_events = build_training_data(subject,
                                               experiment,
