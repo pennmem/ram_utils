@@ -1,58 +1,175 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>ramutils.classifier.cross_validation &#8212; Ramutils 2.0.0 documentation</title>
-    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     '2.0.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="index" title="Index" href="../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../search.html" /> 
-  </head>
-  <body>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../../../genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="../../../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Ramutils 2.0.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
-      </ul>
-    </div>  
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ramutils.classifier.cross_validation &mdash; Ramutils 2.0.2rc0 documentation</title>
+  
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="Ramutils 2.0.2rc0 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Ramutils
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../data.html">Serializable data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../classifier.html">Classifier training, cross validation, and utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../events.html">Event processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../models.html">Modeling effects of stim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html">Pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli.html">Command-line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc.html">Miscellaneous utilities</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Ramutils</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>ramutils.classifier.cross_validation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
             
   <h1>Source code for ramutils.classifier.cross_validation</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot; Collection of cross-validation functions &quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">random</span> <span class="k">import</span> <span class="n">shuffle</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">roc_auc_score</span>
 
 <span class="kn">from</span> <span class="nn">ramutils.classifier.weighting</span> <span class="k">import</span> <span class="n">get_sample_weights</span>
+<span class="kn">from</span> <span class="nn">ramutils.events</span> <span class="k">import</span> <span class="n">get_encoding_mask</span><span class="p">,</span> <span class="n">select_encoding_events</span>
 <span class="kn">from</span> <span class="nn">ramutils.log</span> <span class="k">import</span> <span class="n">get_logger</span>
 
 <span class="k">try</span><span class="p">:</span>
@@ -63,72 +180,11 @@
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">()</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;perform_cross_validation&#39;</span><span class="p">,</span>
     <span class="s1">&#39;permuted_lolo_cross_validation&#39;</span><span class="p">,</span>
     <span class="s1">&#39;perform_lolo_cross_validation&#39;</span><span class="p">,</span>
     <span class="s1">&#39;permuted_loso_cross_validation&#39;</span><span class="p">,</span>
     <span class="s1">&#39;perform_loso_cross_validation&#39;</span>
 <span class="p">]</span>
-
-
-<div class="viewcode-block" id="perform_cross_validation"><a class="viewcode-back" href="../../../classifier.html#ramutils.classifier.cross_validation.perform_cross_validation">[docs]</a><span class="k">def</span> <span class="nf">perform_cross_validation</span><span class="p">(</span><span class="n">classifier</span><span class="p">,</span> <span class="n">pow_mat</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">n_permutations</span><span class="p">,</span>
-                             <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Perform LOSO or LOLO cross validation on a classifier.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    classifier : sklearn model object</span>
-<span class="sd">    pow_mat : np.ndarray</span>
-<span class="sd">    events : np.recarray</span>
-<span class="sd">    n_permutations: int</span>
-<span class="sd">    kwargs: dict</span>
-<span class="sd">        Extra keyword arguments that are passed to get_sample_weights. See</span>
-<span class="sd">        that function for more details</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    xval : dict</span>
-<span class="sd">        Results of cross validation.</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">recalls</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">recalled</span>
-
-    <span class="c1"># Stores cross validation output. Keys are sessions or &#39;all&#39; for all session</span>
-    <span class="c1"># cross validation.</span>
-    <span class="n">xval</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">sessions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">session</span><span class="p">)</span>
-
-    <span class="c1"># Run leave-one-session-out cross validation when we have &gt; 1 session</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sessions</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">perm_AUCs</span> <span class="o">=</span> <span class="n">permuted_loso_cross_validation</span><span class="p">(</span><span class="n">classifier</span><span class="p">,</span> <span class="n">pow_mat</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span>
-                                                   <span class="n">n_permutations</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">probs</span><span class="p">,</span> <span class="n">xval</span> <span class="o">=</span> <span class="n">perform_loso_cross_validation</span><span class="p">(</span><span class="n">classifier</span><span class="p">,</span> <span class="n">pow_mat</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span>
-                                                    <span class="n">recalls</span><span class="p">,</span> <span class="n">xval</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-        <span class="c1"># Store model output statistics</span>
-        <span class="n">auc</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">recalls</span><span class="p">,</span> <span class="n">probs</span><span class="p">)</span>
-        <span class="n">xval</span><span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">auc</span>
-
-    <span class="c1"># ... otherwise run leave-one-list-out cross validation</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Performing LOLO cross validation&quot;</span><span class="p">)</span>
-        <span class="n">session</span> <span class="o">=</span> <span class="n">sessions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">perm_AUCs</span> <span class="o">=</span> <span class="n">permuted_lolo_cross_validation</span><span class="p">(</span><span class="n">classifier</span><span class="p">,</span> <span class="n">pow_mat</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span>
-                                                   <span class="n">n_permutations</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">probs</span> <span class="o">=</span> <span class="n">perform_lolo_cross_validation</span><span class="p">(</span><span class="n">classifier</span><span class="p">,</span> <span class="n">pow_mat</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">recalls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-        <span class="c1"># Store model output statistics</span>
-        <span class="n">auc</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">recalls</span><span class="p">,</span> <span class="n">probs</span><span class="p">)</span>
-        <span class="n">xval</span><span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">xval</span><span class="p">[</span><span class="n">session</span><span class="p">]</span> <span class="o">=</span> <span class="n">auc</span>
-
-    <span class="n">pvalue</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">((</span><span class="n">perm_AUCs</span> <span class="o">&gt;=</span> <span class="n">xval</span><span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">]))</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span>
-        <span class="n">perm_AUCs</span><span class="p">))</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Permutation test p-value = </span><span class="si">%f</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">pvalue</span><span class="p">)</span>
-
-    <span class="n">recall_prob</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">pow_mat</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
-    <span class="n">insample_auc</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">recalls</span><span class="p">,</span> <span class="n">recall_prob</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;in-sample AUC = </span><span class="si">%f</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">insample_auc</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">xval</span></div>
 
 
 <div class="viewcode-block" id="permuted_lolo_cross_validation"><a class="viewcode-back" href="../../../classifier.html#ramutils.classifier.cross_validation.permuted_lolo_cross_validation">[docs]</a><span class="k">def</span> <span class="nf">permuted_lolo_cross_validation</span><span class="p">(</span><span class="n">classifier</span><span class="p">,</span> <span class="n">powers</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">n_permutations</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -151,12 +207,14 @@
 <span class="sd">    -------</span>
 <span class="sd">    AUCs: list</span>
 <span class="sd">        List of AUCs from performing leave-one-list-out cross validation</span>
-<span class="sd">        n_permutations times</span>
+<span class="sd">        n_permutations times where the AUC is based on encoding events only</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">recalls</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">recalled</span>
     <span class="n">permuted_recalls</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">recalls</span><span class="p">)</span>
     <span class="n">auc_results</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">n_permutations</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+    <span class="n">encoding_mask</span> <span class="o">=</span> <span class="n">get_encoding_mask</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+
     <span class="n">sessions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">session</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_permutations</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">sess</span> <span class="ow">in</span> <span class="n">sessions</span><span class="p">:</span>
@@ -168,8 +226,12 @@
                 <span class="n">shuffle</span><span class="p">(</span><span class="n">list_permuted_recalls</span><span class="p">)</span>
                 <span class="n">permuted_recalls</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span> <span class="o">=</span> <span class="n">list_permuted_recalls</span>
 
-        <span class="n">probs</span> <span class="o">=</span> <span class="n">perform_lolo_cross_validation</span><span class="p">(</span><span class="n">classifier</span><span class="p">,</span> <span class="n">powers</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">recalls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">auc_results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">permuted_recalls</span><span class="p">,</span> <span class="n">probs</span><span class="p">)</span>
+        <span class="c1"># The probabilities returned here are only for encoding events</span>
+        <span class="n">probs</span> <span class="o">=</span> <span class="n">perform_lolo_cross_validation</span><span class="p">(</span><span class="n">classifier</span><span class="p">,</span> <span class="n">powers</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span>
+                                              <span class="n">recalls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="n">encoding_recalls</span> <span class="o">=</span> <span class="n">permuted_recalls</span><span class="p">[</span><span class="n">encoding_mask</span><span class="p">]</span>
+        <span class="n">auc_results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">encoding_recalls</span><span class="p">,</span> <span class="n">probs</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">auc_results</span></div>
 
@@ -190,10 +252,21 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    probs: np.array</span>
-<span class="sd">        Predicted probabilities for all lists</span>
+<span class="sd">        Predicted probabilities for encoding events across all lists</span>
 
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Be careful when passing a classifier object to this function since it&#39;s</span>
+<span class="sd">    .fit() method will be called. If you use the classifier object after</span>
+<span class="sd">    calling this function, the internal state may have changed. To avoid this</span>
+<span class="sd">    problem, make a copy of the classifier object and pass the copy to this</span>
+<span class="sd">    function.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">recalls</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+    <span class="n">classifier_copy</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">classifier</span><span class="p">)</span>
+    <span class="n">encoding_mask</span> <span class="o">=</span> <span class="n">get_encoding_mask</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+    <span class="n">encoding_events</span> <span class="o">=</span> <span class="n">select_encoding_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+
+    <span class="n">probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">recalls</span><span class="p">[</span><span class="n">encoding_mask</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
     <span class="n">lists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">list</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">lst</span> <span class="ow">in</span> <span class="n">lists</span><span class="p">:</span>
@@ -201,10 +274,19 @@
         <span class="n">insample_pow_mat</span> <span class="o">=</span> <span class="n">powers</span><span class="p">[</span><span class="n">insample_mask</span><span class="p">]</span>
         <span class="n">insample_recalls</span> <span class="o">=</span> <span class="n">recalls</span><span class="p">[</span><span class="n">insample_mask</span><span class="p">]</span>
         <span class="n">insample_weights</span> <span class="o">=</span> <span class="n">get_sample_weights</span><span class="p">(</span><span class="n">events</span><span class="p">[</span><span class="n">insample_mask</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">classifier</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">insample_pow_mat</span><span class="p">,</span> <span class="n">insample_recalls</span><span class="p">,</span> <span class="n">insample_weights</span><span class="p">)</span>
-        <span class="n">outsample_mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">insample_mask</span>
+
+        <span class="c1"># We don&#39;t want to call fit on the passed classifier because this will</span>
+        <span class="c1"># have side-effects for the user/program that calls this function</span>
+        <span class="n">classifier_copy</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">insample_pow_mat</span><span class="p">,</span> <span class="n">insample_recalls</span><span class="p">,</span>
+                            <span class="n">insample_weights</span><span class="p">)</span>
+
+        <span class="c1"># Out of sample predictions need to be on encoding only</span>
+        <span class="n">outsample_mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">insample_mask</span> <span class="o">&amp;</span> <span class="n">encoding_mask</span>
         <span class="n">outsample_pow_mat</span> <span class="o">=</span> <span class="n">powers</span><span class="p">[</span><span class="n">outsample_mask</span><span class="p">]</span>
-        <span class="n">probs</span><span class="p">[</span><span class="n">outsample_mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">outsample_pow_mat</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">outsample_encoding_event_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">encoding_events</span><span class="o">.</span><span class="n">list</span> <span class="o">==</span> <span class="n">lst</span><span class="p">)</span>
+        <span class="n">probs</span><span class="p">[</span><span class="n">outsample_encoding_event_mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">classifier_copy</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span>
+            <span class="n">outsample_pow_mat</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">probs</span></div>
 
@@ -229,36 +311,38 @@
 <span class="sd">    -------</span>
 <span class="sd">    AUCs: list</span>
 <span class="sd">        List of AUCs from performing leave-one-list-out cross validation</span>
-<span class="sd">        n_permutations times</span>
+<span class="sd">        n_permutations times where the AUCs are based on encoding events only</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">recalls</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">recalled</span>
+    <span class="n">sessions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">session</span><span class="p">)</span>
+
+    <span class="n">encoding_mask</span> <span class="o">=</span> <span class="n">get_encoding_mask</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+
     <span class="n">permuted_recalls</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">recalls</span><span class="p">)</span>
     <span class="n">auc_results</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">n_permutations</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
-    <span class="n">sessions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">session</span><span class="p">)</span>
-    <span class="n">xval</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_permutations</span><span class="p">):</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># Shuffle recall outcomes within session</span>
-            <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">sessions</span><span class="p">:</span>
-                <span class="n">in_session_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">session</span> <span class="o">==</span> <span class="n">session</span><span class="p">)</span>
-                <span class="n">session_permuted_recalls</span> <span class="o">=</span> <span class="n">permuted_recalls</span><span class="p">[</span><span class="n">in_session_mask</span><span class="p">]</span>
-                <span class="n">shuffle</span><span class="p">(</span><span class="n">session_permuted_recalls</span><span class="p">)</span>
-                <span class="n">permuted_recalls</span><span class="p">[</span><span class="n">in_session_mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">session_permuted_recalls</span>
+        <span class="c1"># Shuffle recall outcomes within session</span>
+        <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">sessions</span><span class="p">:</span>
+            <span class="n">in_session_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">session</span> <span class="o">==</span> <span class="n">session</span><span class="p">)</span>
+            <span class="n">session_permuted_recalls</span> <span class="o">=</span> <span class="n">permuted_recalls</span><span class="p">[</span><span class="n">in_session_mask</span><span class="p">]</span>
+            <span class="n">shuffle</span><span class="p">(</span><span class="n">session_permuted_recalls</span><span class="p">)</span>
+            <span class="n">permuted_recalls</span><span class="p">[</span><span class="n">in_session_mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">session_permuted_recalls</span>
 
-            <span class="c1"># We don&#39;t need to capture the auc by session for each permutation</span>
-            <span class="n">probs</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">perform_loso_cross_validation</span><span class="p">(</span><span class="n">classifier</span><span class="p">,</span> <span class="n">powers</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span>
-                                                     <span class="n">permuted_recalls</span><span class="p">,</span> <span class="n">xval</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="n">auc_results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">permuted_recalls</span><span class="p">,</span> <span class="n">probs</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="n">auc_results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="c1"># The probabilities returned here will be only for encoding events</span>
+        <span class="n">probs</span> <span class="o">=</span> <span class="n">perform_loso_cross_validation</span><span class="p">(</span><span class="n">classifier</span><span class="p">,</span> <span class="n">powers</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span>
+                                              <span class="n">permuted_recalls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Evaluation should happen only on encoding events</span>
+        <span class="n">encoding_recalls</span> <span class="o">=</span> <span class="n">permuted_recalls</span><span class="p">[</span><span class="n">encoding_mask</span><span class="p">]</span>
+        <span class="n">auc_results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">encoding_recalls</span><span class="p">,</span> <span class="n">probs</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">auc_results</span></div>
 
 
-<div class="viewcode-block" id="perform_loso_cross_validation"><a class="viewcode-back" href="../../../classifier.html#ramutils.classifier.cross_validation.perform_loso_cross_validation">[docs]</a><span class="k">def</span> <span class="nf">perform_loso_cross_validation</span><span class="p">(</span><span class="n">classifier</span><span class="p">,</span> <span class="n">powers</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">recalls</span><span class="p">,</span> <span class="n">xval</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Perform single iteration of leave-one-session-out cross validation</span>
+<div class="viewcode-block" id="perform_loso_cross_validation"><a class="viewcode-back" href="../../../classifier.html#ramutils.classifier.cross_validation.perform_loso_cross_validation">[docs]</a><span class="k">def</span> <span class="nf">perform_loso_cross_validation</span><span class="p">(</span><span class="n">classifier</span><span class="p">,</span> <span class="n">powers</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">recalls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Perform single iteration of leave-one-session-out cross validation</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -269,8 +353,6 @@
 <span class="sd">    events : np.recarray</span>
 <span class="sd">    recalls: array_like</span>
 <span class="sd">        List of recall/not-recalled boolean values for each event</span>
-<span class="sd">    xval: dict_like</span>
-<span class="sd">        Object for storing aucs from cross validation</span>
 <span class="sd">    kwargs: dict</span>
 <span class="sd">        Optional keyword arguments. These are passed to get_sample_weights.</span>
 <span class="sd">        See that function for more details.</span>
@@ -278,11 +360,16 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    probs: np.array</span>
-<span class="sd">        Predicted probabilities for all sessions</span>
+<span class="sd">        Predicted probabilities for encoding events across all sessions</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">recalls</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+    <span class="n">classifier_copy</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">classifier</span><span class="p">)</span>
     <span class="n">sessions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">session</span><span class="p">)</span>
+    <span class="n">encoding_mask</span> <span class="o">=</span> <span class="n">get_encoding_mask</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+    <span class="n">encoding_events</span> <span class="o">=</span> <span class="n">select_encoding_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+
+    <span class="c1"># Predicted probabilities should be assessed only on encoding words</span>
+    <span class="n">probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">recalls</span><span class="p">[</span><span class="n">encoding_mask</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">sess_idx</span><span class="p">,</span> <span class="n">sess</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sessions</span><span class="p">):</span>
         <span class="c1"># training data</span>
@@ -291,60 +378,84 @@
         <span class="n">insample_recalls</span> <span class="o">=</span> <span class="n">recalls</span><span class="p">[</span><span class="n">insample_mask</span><span class="p">]</span>
         <span class="n">insample_samples_weights</span> <span class="o">=</span> <span class="n">get_sample_weights</span><span class="p">(</span><span class="n">events</span><span class="p">[</span><span class="n">insample_mask</span><span class="p">],</span>
                                                       <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">classifier</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">insample_pow_mat</span><span class="p">,</span> <span class="n">insample_recalls</span><span class="p">,</span>
-                       <span class="n">insample_samples_weights</span><span class="p">)</span>
+        <span class="n">classifier_copy</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">insample_pow_mat</span><span class="p">,</span> <span class="n">insample_recalls</span><span class="p">,</span>
+                            <span class="n">insample_samples_weights</span><span class="p">)</span>
 
-        <span class="c1"># testing data</span>
-        <span class="n">outsample_mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">insample_mask</span>
-        <span class="n">outsample_recalls</span> <span class="o">=</span> <span class="n">recalls</span><span class="p">[</span><span class="n">outsample_mask</span><span class="p">]</span>
+        <span class="c1"># testing data -- Only look at encoding events</span>
+        <span class="n">outsample_mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">insample_mask</span> <span class="o">&amp;</span> <span class="n">encoding_mask</span>
         <span class="n">outsample_pow_mat</span> <span class="o">=</span> <span class="n">powers</span><span class="p">[</span><span class="n">outsample_mask</span><span class="p">]</span>
 
-        <span class="n">outsample_probs</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">outsample_pow_mat</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
-        <span class="n">probs</span><span class="p">[</span><span class="n">outsample_mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">outsample_probs</span>
+        <span class="n">outsample_probs</span> <span class="o">=</span> <span class="n">classifier_copy</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">outsample_pow_mat</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
 
-        <span class="n">auc</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">outsample_recalls</span><span class="p">,</span> <span class="n">outsample_probs</span><span class="p">)</span>
-        <span class="n">xval</span><span class="p">[</span><span class="n">sess</span><span class="p">]</span> <span class="o">=</span> <span class="n">auc</span>
+        <span class="n">outsample_encoding_event_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">encoding_events</span><span class="o">.</span><span class="n">session</span> <span class="o">==</span> <span class="n">sess</span><span class="p">)</span>
+        <span class="n">probs</span><span class="p">[</span><span class="n">outsample_encoding_event_mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">outsample_probs</span>
 
-    <span class="k">return</span> <span class="n">probs</span><span class="p">,</span> <span class="n">xval</span></div>
+    <span class="k">return</span> <span class="n">probs</span></div>
 
 
 </pre></div>
 
+           </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <form class="search" action="../../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../../../genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="../../../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Ramutils 2.0.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
-      </ul>
-    </div>
-    <div class="footer" role="contentinfo">
-        &#169; Copyright 2017.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
-    </div>
-  </body>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'2.0.2rc0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
 </html>
