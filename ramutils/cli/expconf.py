@@ -75,7 +75,7 @@ def validate_stim_settings(args):
         #     raise ValidationError("Number of pulse frequencies doesn't match number of stim contacts")
 
 
-def main(input_args=None):
+def create_expoconf(input_args=None):
     from ramutils.montage import make_stim_params
     from ramutils.parameters import FilePaths, FRParameters, PALParameters
     from ramutils.pipelines.ramulator_config import make_ramulator_config
@@ -100,6 +100,7 @@ def main(input_args=None):
         clarg = arg.replace('_', '-')
         output.append('--{} {}'.format(clarg, value))
 
+    mode = 'w' if args.clear_log else 'a'
     mode = 'w' if args.clear_log else 'a'
     with open(osp.expanduser('~/.ramutils_expconf.log'), mode) as f:
         f.write(datetime.now().strftime('[%Y-%m-%dT%H:%M:%S]\n'))
@@ -185,7 +186,7 @@ if __name__ == "__main__":  # pragma: nocover
     #     "--root", root, "--dest", dest, "--force-rerun"
     # ])
 
-    main([
+    create_expoconf([
         "-s", "R1374T", "-x", "CatFR5",
         "--anodes", "LA7", "--cathodes", "LA8",
         "--target-amplitudes", "0.5",

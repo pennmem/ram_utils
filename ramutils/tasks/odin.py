@@ -1,6 +1,5 @@
 """Tasks specific to the Medtronic Odin ENS."""
 
-from collections import OrderedDict
 from datetime import datetime
 import functools
 import json
@@ -15,18 +14,15 @@ except ImportError:
     pass
 
 from bptools.odin import ElectrodeConfig
-from bptools.transform import SeriesTransformation
 from classiflib import ClassifierContainer
 
 from ramutils.constants import EXPERIMENTS
-from ramutils.exc import MissingFileError
 from ramutils.log import get_logger
 from ramutils.tasks import task
-from ramutils.utils import bytes_to_str, reindent_json
+from ramutils.utils import reindent_json
 
 __all__ = [
     'generate_electrode_config',
-    'generate_pairs_from_electrode_config',
     'generate_ramulator_config',
 ]
 
@@ -106,76 +102,6 @@ def generate_electrode_config(subject, paths, anodes=None, cathodes=None,
 
     paths.electrode_config_file = csv_path
     return paths
-
-
-# FIXME: logic for generating pairs should be in bptools
-@task()
-def generate_pairs_from_electrode_config(subject, paths):
-    """Load and verify the validity of the Odin electrode configuration file.
-
-    Parameters
-    ----------
-    subject : str
-        Subject ID
-
-    Returns
-    -------
-    pairs_from_ec : dict
-        Minimal pairs.json based on the electrode configuration
-
-    Raises
-    ------
-    RuntimeError
-        If the csv or bin file are not found
-
-    """
-    prefix, _ = os.path.splitext(paths.electrode_config_file)
-    csv_filename = prefix + '.csv'
-    bin_filename = prefix + '.bin'
-
-    if not os.path.exists(csv_filename):
-        raise RuntimeError("{} not found!".format(csv_filename))
-    if not os.path.exists(bin_filename):
-        raise RuntimeError("{} not found!".format(bin_filename))
-
-    # Create SeriesTransformation object to determine if this is monopolar,
-    # mixed-mode, or bipolar
-    # FIXME: load excluded pairs
-    xform = SeriesTransformation.create(csv_filename, paths.pairs)
-
-    # Odin electrode configuration
-    ec = xform.elec_conf
-
-    # This will mimic pairs.json (but only with labels).
-    pairs_dict = OrderedDict()
-
-    # FIXME: move the following logic into bptools
-    # Hardware bipolar mode
-    if not xform.monopolar_possible():
-        contacts = ec.contacts_as_recarray()
-
-        for ch in ec.sense_channels:
-            anode, cathode = ch.contact, ch.ref
-            aname = bytes_to_str(contacts[contacts.jack_box_num == anode].contact_name[0])
-            cname = bytes_to_str(contacts[contacts.jack_box_num == cathode].contact_name[0])
-            name = '{}-{}'.format(aname, cname)
-            pairs_dict[name] = {
-                'channel_1': anode,
-                'channel_2': cathode
-            }
-
-        # Note this is different from neurorad pipeline pairs.json because
-        # the electrode configuration trumps it
-        pairs_from_ec = {subject: {'pairs': pairs_dict}}
-
-        return pairs_from_ec
-
-    logger.warning('Pairs not generated because hardware bipolar mode was '
-                   'not detected')
-
-    # TODO: This should be able to return a dictionary of recorded electrodes
-    # for monopolar recordings
-    return
 
 
 def _make_experiment_specific_data_section(experiment, stim_params,

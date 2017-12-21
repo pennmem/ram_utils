@@ -1,11 +1,10 @@
-import functools
-import json
-
 import pytest
+import functools
+
 from pkg_resources import resource_filename
 
 from ramutils.montage import *
-from ramutils.parameters import StimParameters
+from ramutils.parameters import StimParameters, FilePaths
 
 datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
 
@@ -122,6 +121,20 @@ class TestMontage:
         test_pairs = load_pairs_from_json(subject, rootdir=datafile(''))
         assert len(test_pairs.keys()) > 0
         assert '11LD1-11LD2' in test_pairs
+
+        test_pairs = load_pairs_from_json(subject,
+                                          localization=0,
+                                          rootdir=datafile(''))
+        assert len(test_pairs.keys()) > 0
+        assert '11LD1-11LD2' in test_pairs
+
+        test_pairs = load_pairs_from_json(subject,
+                                          localization=0,
+                                          montage=0,
+                                          rootdir=datafile(''))
+        assert len(test_pairs.keys()) > 0
+        assert '11LD1-11LD2' in test_pairs
+
         return
 
     @pytest.mark.parametrize('subject', [
@@ -152,4 +165,23 @@ class TestMontage:
         assert 'left_only' not in merged._merge
         assert 'right_only' not in merged._merge
 
+        return
+
+    @pytest.mark.rhino
+    @pytest.mark.parametrize('subject, experiment', [
+        ('R1375C', 'catFR1')
+    ])
+    def test_get_pairs(self, subject, experiment, rhino_root):
+        pairs = get_pairs(subject, experiment, root=rhino_root)
+        assert len(pairs.keys()) > 0
+
+        return
+
+    def test_generate_pairs_from_electrode_config(self):
+        paths = FilePaths(root=datafile(''),
+                          electrode_config_file='/input/configs/R1354E_26OCT2017L0M0STIM.csv',
+                          pairs='/input/montage/R1354E_pairs.json')
+        config_pairs = generate_pairs_from_electrode_config('R1354E',
+                                                            paths)
+        assert len(config_pairs['R1354E']['pairs'].keys()) > 0
         return
