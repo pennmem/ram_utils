@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Event processing &mdash; Ramutils 2.0.2rc0 documentation</title>
+  <title>Event processing &mdash; Ramutils 2.0.2 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Ramutils 2.0.2rc0 documentation" href="index.html"/>
+    <link rel="top" title="Ramutils 2.0.2 documentation" href="index.html"/>
         <link rel="next" title="Modeling effects of stim" href="models.html"/>
         <link rel="prev" title="Classifier training, cross validation, and utilities" href="classifier.html"/> 
 
@@ -186,6 +186,13 @@ work</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="ramutils.events.calculate_repetition_ratio">
+<code class="descclassname">ramutils.events.</code><code class="descname">calculate_repetition_ratio</code><span class="sig-paren">(</span><em>recall_events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#calculate_repetition_ratio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.calculate_repetition_ratio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine the repetition ratio for a given list based on the recalled
+events for that list</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="ramutils.events.clean_events">
 <code class="descclassname">ramutils.events.</code><code class="descname">clean_events</code><span class="sig-paren">(</span><em>events</em>, <em>start_time=None</em>, <em>end_time=None</em>, <em>duration=None</em>, <em>pre=None</em>, <em>post=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#clean_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.clean_events" title="Permalink to this definition">¶</a></dt>
 <dd><blockquote>
@@ -238,7 +245,7 @@ event type.</p>
 
 <dl class="function">
 <dt id="ramutils.events.concatenate_events_across_experiments">
-<code class="descclassname">ramutils.events.</code><code class="descname">concatenate_events_across_experiments</code><span class="sig-paren">(</span><em>event_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#concatenate_events_across_experiments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.concatenate_events_across_experiments" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ramutils.events.</code><code class="descname">concatenate_events_across_experiments</code><span class="sig-paren">(</span><em>event_list</em>, <em>pal=False</em>, <em>stim=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#concatenate_events_across_experiments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.concatenate_events_across_experiments" title="Permalink to this definition">¶</a></dt>
 <dd><p>Concatenate events across different experiment types. To make session
 numbers unique, 100 is added to the second set of events in event_list,
 200 to the next set of events, and so on.</p>
@@ -246,11 +253,20 @@ numbers unique, 100 is added to the second set of events in event_list,
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_list</strong> (<em>iterable</em>) – An iterable containing events to be concatenated</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>event_list</strong> (<em>iterable</em>) – An iterable containing events to be concatenated</li>
+<li><strong>pal</strong> (<em>Bool</em>) – Indicator for if PAL sessions are included in event_list. This will
+alter which columns are kept for merging events</li>
+<li><strong>stim</strong> (<em>Bool</em>) – Indicator for if event_list contains stim sessions. If True,
+then stim_params field will be kept</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The combined set of events</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The combined set of events</p>
+</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">np.recarray</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.recarray</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -275,10 +291,23 @@ numbers unique, 100 is added to the second set of events in event_list,
 </dd></dl>
 
 <dl class="function">
+<dt id="ramutils.events.extract_event_metadata">
+<code class="descclassname">ramutils.events.</code><code class="descname">extract_event_metadata</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#extract_event_metadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.extract_event_metadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract the subject, experiment(s), and session(s) associated with an
+event structure</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="ramutils.events.extract_experiment_from_events">
 <code class="descclassname">ramutils.events.</code><code class="descname">extract_experiment_from_events</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#extract_experiment_from_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.extract_experiment_from_events" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a set of events, return a list of unique experiments contained
 within</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.extract_lists">
+<code class="descclassname">ramutils.events.</code><code class="descname">extract_lists</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#extract_lists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.extract_lists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of lists contained within the events structure</p>
 </dd></dl>
 
 <dl class="function">
@@ -291,6 +320,44 @@ within</p>
 <dt id="ramutils.events.extract_sessions">
 <code class="descclassname">ramutils.events.</code><code class="descname">extract_sessions</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#extract_sessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.extract_sessions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a list of sessions contained within the events structure</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.extract_stim_information">
+<code class="descclassname">ramutils.events.</code><code class="descname">extract_stim_information</code><span class="sig-paren">(</span><em>all_events</em>, <em>task_events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#extract_stim_information"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.extract_stim_information" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identify stim items, post stim items, and stimulation parameters</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>all_events</strong> (<em>np.recarray</em>) – All events</li>
+<li><strong>task_events</strong> (<em>np.recarray</em>) – Task events used for classifier training/evaluation</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>is_stim_item</strong> (<em>list</em>) – Boolean array matching the length of task events indicating if a
+word was stimulated</li>
+<li><strong>is_post_stim_item</strong> (<em>list</em>) – Boolean array matching the length of task_events indicating if a word
+occured after a stimulated word</li>
+<li><strong>stim_df</strong> (<em>pd.DataFrame</em>) – Stim parameters used for each stimulation event</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>This is a rather convoluted set of logic. The goal is to match all word
+encoding events with their associated STIM_ON events, which occur as
+separate entries in the json event structures.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.extract_subject">
+<code class="descclassname">ramutils.events.</code><code class="descname">extract_subject</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#extract_subject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.extract_subject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract subject identifier from events</p>
 </dd></dl>
 
 <dl class="function">
@@ -318,6 +385,12 @@ happening.</p>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.find_subjects">
+<code class="descclassname">ramutils.events.</code><code class="descname">find_subjects</code><span class="sig-paren">(</span><em>experiment</em>, <em>rootdir='/'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#find_subjects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.find_subjects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identify subjects who completed a given experiment</p>
 </dd></dl>
 
 <dl class="function">
@@ -378,6 +451,28 @@ events</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="ramutils.events.get_session_mask">
+<code class="descclassname">ramutils.events.</code><code class="descname">get_session_mask</code><span class="sig-paren">(</span><em>events</em>, <em>session</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#get_session_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.get_session_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a mask for if an event belongs to the given session</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.get_stim_list_mask">
+<code class="descclassname">ramutils.events.</code><code class="descname">get_stim_list_mask</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#get_stim_list_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.get_stim_list_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return boolean mask identifying stim lists</p>
+<p class="rubric">Notes</p>
+<p>Not all items in a stim list will be stimulated. Stimulation will depend
+on the biomarker at the time of encoding</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.get_stim_table_event_mask">
+<code class="descclassname">ramutils.events.</code><code class="descname">get_stim_table_event_mask</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#get_stim_table_event_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.get_stim_table_event_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a mask of events to be included for building stim session
+summaries</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="ramutils.events.get_time_between_events">
 <code class="descclassname">ramutils.events.</code><code class="descname">get_time_between_events</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#get_time_between_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.get_time_between_events" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the time between successive events</p>
@@ -387,6 +482,13 @@ events</p>
 <dt id="ramutils.events.get_vocalization_mask">
 <code class="descclassname">ramutils.events.</code><code class="descname">get_vocalization_mask</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#get_vocalization_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.get_vocalization_mask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create mask for vocalization events</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.get_word_event_mask">
+<code class="descclassname">ramutils.events.</code><code class="descname">get_word_event_mask</code><span class="sig-paren">(</span><em>events</em>, <em>encoding_only</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#get_word_event_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.get_word_event_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a mask identify word events. If encoding_only, then retrieval
+events will not be counted</p>
 </dd></dl>
 
 <dl class="function">
@@ -432,7 +534,7 @@ within 3 seconds relative to the onset of the recall period.</p>
 
 <dl class="function">
 <dt id="ramutils.events.load_events">
-<code class="descclassname">ramutils.events.</code><code class="descname">load_events</code><span class="sig-paren">(</span><em>subject</em>, <em>experiment</em>, <em>sessions=None</em>, <em>rootdir='/'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#load_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.load_events" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ramutils.events.</code><code class="descname">load_events</code><span class="sig-paren">(</span><em>subject</em>, <em>experiment</em>, <em>file_type='all_events'</em>, <em>sessions=None</em>, <em>rootdir='/'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#load_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.load_events" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load events for a specific subject and experiment. If no events are
 found, an empty recarray with the correct datatypes are returned</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -442,6 +544,8 @@ found, an empty recarray with the correct datatypes are returned</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>subject</strong> (<em>str</em>) – </li>
 <li><strong>experiment</strong> (<em>str</em>) – </li>
+<li><strong>file_type</strong> (<em>str</em>) – The name of the event file to load, i.e. all_events, task_events,
+math_events, ps4_events. Default is ‘all_events’</li>
 <li><strong>sessions</strong> (<em>iterable</em><em> or </em><em>None</em>) – </li>
 <li><strong>rootdir</strong> (<em>str</em>) – </li>
 </ul>
@@ -557,6 +661,12 @@ were non-intrusion retrieval events.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="ramutils.events.select_column_subset">
+<code class="descclassname">ramutils.events.</code><code class="descname">select_column_subset</code><span class="sig-paren">(</span><em>events</em>, <em>pal=False</em>, <em>stim=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#select_column_subset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.select_column_subset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select only the necessary subset of the fields</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="ramutils.events.select_encoding_events">
 <code class="descclassname">ramutils.events.</code><code class="descname">select_encoding_events</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#select_encoding_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.select_encoding_events" title="Permalink to this definition">¶</a></dt>
 <dd><p>Select only encoding events</p>
@@ -582,6 +692,18 @@ and FR/catFR</p>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.select_session_events">
+<code class="descclassname">ramutils.events.</code><code class="descname">select_session_events</code><span class="sig-paren">(</span><em>events</em>, <em>session</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#select_session_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.select_session_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select events corresponding to a particular session</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.select_stim_table_events">
+<code class="descclassname">ramutils.events.</code><code class="descname">select_stim_table_events</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#select_stim_table_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.select_stim_table_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the events needed to build stim session summaries</p>
 </dd></dl>
 
 <dl class="function">
@@ -647,6 +769,12 @@ should already be true in the raw events data.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="ramutils.events.update_subject">
+<code class="descclassname">ramutils.events.</code><code class="descname">update_subject</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#update_subject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.update_subject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ensure subject field is populated for all events</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="ramutils.events.validate_single_experiment">
 <code class="descclassname">ramutils.events.</code><code class="descname">validate_single_experiment</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#validate_single_experiment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.validate_single_experiment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raises an error if more than one experiment is present in the events</p>
@@ -704,7 +832,7 @@ should already be true in the raw events data.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.0.2rc0',
+            VERSION:'2.0.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
