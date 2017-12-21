@@ -12,13 +12,13 @@ from ramutils.cli import make_parser, configure_caching
 from ramutils.exc import UnsupportedExperimentError
 from ramutils.log import get_logger
 from ramutils.montage import make_stim_params
-from ramutils.parameters import FilePaths, FRParameters, StimParameters
+from ramutils.parameters import FilePaths, FRParameters
 from ramutils.pipelines.report import make_report
 
 parser = make_parser("Generate a report")
 parser.add_argument('--sessions', '-S', nargs='+',
                     help='sessions to read data from (default: use all)')
-parser.add_argument("--retrain", "-R", action="store_true",
+parser.add_argument("--retrain", "-R", action="store_true", default=False,
                     help="retrain classifier rather than loading from disk")
 parser.add_argument('--excluded-contacts', '-E', nargs='+',
                     help='contacts to exclude from classifier')
@@ -28,7 +28,7 @@ parser.add_argument('--joint-report', '-j', action='store_true', default=False,
 logger = get_logger("reports")
 
 
-def main(input_args=None):
+def create_report(input_args=None):
     args = parser.parse_args(input_args)
 
     configure_caching(args.dest, args.force_rerun)
@@ -81,7 +81,7 @@ if __name__ == "__main__":
     root = '~/mnt/rhino'
     dest = 'scratch/ramutils2/demo'
 
-    main([
+    create_report([
         '--root', root, '--dest', dest,
         '-s', 'R1345D',
         '-x', 'FR1'
