@@ -170,26 +170,26 @@ def main(input_args=None):
                               montage=args.montage,
                               default_surface_area=default_surface_area)
 
-    warnings = warning_accumulator.format_all()
+    warnings = '\n' + warning_accumulator.format_all()
     if warnings is not None:
-        print(warnings)
+        logger.info(warnings)
 
 
 if __name__ == "__main__":  # pragma: nocover
     root = "~/mnt/rhino"
     dest = "scratch/ramutils2/demo"
 
-    main([
-        "-s", "R1347D", "-x", "CatFR1", "-A", "0.5",
-        "--root", root, "--dest", dest, "--force-rerun"
-    ])
-
     # main([
-    #     "-s", "R1364C", "-x", "AmplitudeDetermination",
-    #     "--anodes", "AMY7", "--cathodes", "AMY8",
-    #     "--min-amplitudes", "0.1", "--max-amplitudes", "1.0",
+    #     "-s", "R1347D", "-x", "CatFR1", "-A", "0.5",
     #     "--root", root, "--dest", dest, "--force-rerun"
     # ])
+
+    main([
+        "-s", "R1364C", "-x", "AmplitudeDetermination",
+        "--anodes", "AMY7", "--cathodes", "AMY8",
+        "--min-amplitudes", "0.1", "--max-amplitudes", "1.0",
+        "--root", root, "--dest", dest, "--force-rerun"
+    ])
 
     # main([
     #     "-s", "R1374T", "-x", "CatFR5",
