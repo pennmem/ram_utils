@@ -2,7 +2,6 @@
 
 import pandas as pd
 
-from ramutils.montage import get_pairs
 from ramutils.tasks import *
 
 
@@ -52,7 +51,7 @@ def make_report(subject, experiment, paths, joint_report=False,
     stim_report = is_stim_experiment(experiment).compute()
 
     # FIXME: allow using different localization, montage numbers
-    ec_pairs = get_pairs(subject, experiment, 0, 0, paths)
+    ec_pairs = get_pairs(subject, experiment, paths)
     excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
     final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
     used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)

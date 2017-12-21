@@ -33,10 +33,9 @@ def generate_montage_metadata_table(subject, all_pairs, root):
 
 
 @task()
-def get_pairs(subject, experiment, sessions, paths, localization=0, montage=0):
-    return get_pairs_core(subject, experiment, sessions,
-                          localization=localization, montage=montage,
-                          root=paths.root)
+def get_pairs(subject, experiment, paths, localization=0, montage=0):
+    return get_pairs_core(subject, experiment, paths, localization=localization,
+                          montage=montage)
 
 
 

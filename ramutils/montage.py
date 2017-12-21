@@ -277,13 +277,16 @@ def extract_pairs_dict(pairs):
     return pairs
 
 
-def load_pairs_from_json(subject, localization=0, montage=0, rootdir='/'):
+def load_pairs_from_json(subject, just_pairs=True, localization=0, montage=0,
+                         rootdir='/'):
     """ Load montage information from pairs.json file
 
     Parameters
     ----------
     subject: str
         Subject ID
+    just_pairs: Bool
+        If True, strip out any other metadata contained in the json file
     localization: int
         Localization number
     montage: int
@@ -313,7 +316,9 @@ def load_pairs_from_json(subject, localization=0, montage=0, rootdir='/'):
     bp_path = os.path.join(rootdir, list(all_pairs_paths)[0])
     with open(bp_path, 'r') as f:
         pair_data = json.load(f)
-    pair_data = extract_pairs_dict(pair_data)
+
+    if just_pairs:
+        pair_data = extract_pairs_dict(pair_data)
 
     return pair_data
 
@@ -352,7 +357,7 @@ def extract_atlas_location(bp_data):
     return '--'
 
 
-def get_pairs(subject, experiment, localization=0, montage=0, root='/'):
+def get_pairs(subject, experiment, paths, localization=0, montage=0):
     """Determine how we should figure out what pairs to use.
 
     Option 1: In the case of hardware bipolar recordings with the ENS, EEG
@@ -368,8 +373,8 @@ def get_pairs(subject, experiment, localization=0, montage=0, root='/'):
         Subject ID
     experiment : str
         Experiment type
-    root : str
-        Location of RHINO
+    paths : FilePaths
+        Object for storing important file paths
     localization : int
         Localization number
     montage : int
@@ -382,9 +387,9 @@ def get_pairs(subject, experiment, localization=0, montage=0, root='/'):
 
     """
     # Use * for session so we don't have to assume session numbers start at 0
-    eeg_dir = osp.join(root, 'protocols', 'r1', 'subjects', 'experiments',
-                       experiment, 'sessions', '*', 'ephys',
-                       'current_processed', 'noreref', '*.h5')
+    eeg_dir = osp.join(paths.root, 'protocols', 'r1', 'subjects',
+                       subject, 'experiments', experiment, 'sessions', '*',
+                       'ephys', 'current_processed', 'noreref', '*.h5')
     files = glob(eeg_dir)
 
     # Read HDF5 file to get pairs
@@ -397,21 +402,22 @@ def get_pairs(subject, experiment, localization=0, montage=0, root='/'):
         config_path = osp.join(gettempdir(), 'electrode_config.csv')
         with open(config_path, 'wb') as f:
             f.write(config_str)
-        root.electrode_config_file = config_path
+        paths.electrode_config_file = config_path
 
         # generate_pairs_from_electrode_config panics if the .bin file isn't
         # found, so we have to make sure it's there
         touch(config_path.replace('.csv', '.bin'))
 
-        all_pairs = generate_pairs_from_electrode_config(subject, root)
+        all_pairs = generate_pairs_from_electrode_config(subject, paths)
 
     # No HDF5 file exists, meaning this was a monopolar recording... read
     # pairs.json instead
     else:
+        # TODO: Make sure this is the same format as what comes from config
         all_pairs = load_pairs_from_json(subject,
                                          localization=localization,
                                          montage=montage,
-                                         rootdir=root)
+                                         rootdir=paths.root)
 
     return all_pairs
 
