@@ -1,13 +1,12 @@
-from collections import defaultdict
 from contextlib import contextmanager
 from copy import deepcopy
 import os
-from socket import gethostname
 
 import pytest
 
 from ramutils.cli import *
 from ramutils.cli.expconf import *
+from ramutils.cli.report import *
 
 
 def test_make_parser():
@@ -101,6 +100,7 @@ class TestExpConf:
     @pytest.mark.rhino
     @pytest.mark.slow
     @pytest.mark.trylast
+    @pytest.mark.output
     @pytest.mark.parametrize(
         'experiment,subject,postfix,anodes,cathodes',
         [
@@ -111,15 +111,8 @@ class TestExpConf:
             ('PAL5', 'R1365N', '16NOV2017L0M0STIM', ['LAD12'], ['LAD13'])
         ]
     )
-    def test_main(self, experiment, subject, postfix, anodes, cathodes):
-        rhino_root = defaultdict(lambda: '/Volumes/RHINO')
-
-        # If you put your rhino mount point somewhere other than /Volumes/RHINO,
-        # put it here.
-        rhino_root['krieger'] = os.path.expanduser('~/mnt/rhino')
-        rhino_root['rhino2'] = '/'
-
-        root = rhino_root[gethostname().split('.')[0]]
+    def test_create_expconf(self, experiment, subject, postfix, anodes,
+                            cathodes, rhino_root, output_dest):
 
         args = [
             "-s", subject, "-x", experiment,
@@ -127,7 +120,7 @@ class TestExpConf:
             "scratch/system3_configs/ODIN_configs/{subject:s}/{subject:s}_{postfix:s}.csv".format(
                 subject=subject, postfix=postfix),
             "--target-amplitudes", "0.5", "0.75",
-            "--root", root, "--dest", "scratch/ramutils2/tests", "--force-rerun"
+            "--root", rhino_root, "--dest", output_dest, "--force-rerun"
         ]
 
         args += ["--anodes"] + anodes
@@ -139,4 +132,4 @@ class TestExpConf:
             args += ['--min-amplitudes'] + ['0.1'] * len(anodes)
             args += ['--max-amplitudes'] + ['1.0'] * len(anodes)
 
-        main(args)
+        create_expoconf(args)

@@ -21,7 +21,8 @@ memory.clear(warn=False)
     ('R1354E', 'catFR1', False, [0]),
     ('R1354E', 'FR1', True, None),
 ])
-def test_make_fr1_report(subject, experiment, joint_report, sessions):
+def test_make_fr1_report(subject, experiment, joint_report, sessions,
+                         rhino_root, output_dest):
     params = FRParameters()
     rhino = os.path.expanduser('/Volumes/rhino')
     pairs_path = os.path.join(rhino, 'protocols', 'r1', 'subjects', subject,
@@ -29,12 +30,12 @@ def test_make_fr1_report(subject, experiment, joint_report, sessions):
                               'neuroradiology', 'current_processed',
                               'pairs.json')
 
-    paths = FilePaths(root=rhino,
+    paths = FilePaths(root=rhino_root,
                       electrode_config_file='/scratch/system3_configs/'
                                             'ODIN_configs/R1354E/'
                                             'R1354E_26OCT2017L0M0STIM.csv',
                       pairs=pairs_path,
-                      dest='scratch/zduey/samplefr1_reports'
+                      dest=output_dest
                       )
 
     report = make_report(subject, experiment, paths,
