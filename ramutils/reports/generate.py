@@ -1,8 +1,10 @@
 from datetime import datetime
 import json
 import os.path as osp
+import numpy as np
 import random
 
+from itertools import compress
 from jinja2 import Environment, PackageLoader
 import numpy as np
 from pkg_resources import resource_listdir, resource_string
@@ -51,6 +53,10 @@ class ReportGenerator(object):
         self.math_summaries = math_summaries
         self.sme_table = sme_table
         self.classifiers = classifier_summaries
+
+        catfr_summary_mask = [summary.experiment == 'catFR1' for summary in
+                              self.session_summaries]
+        self.catfr_summaries = list(compress(self.session_summaries, catfr_summary_mask))
 
         if len(session_summaries) != len(math_summaries):
             raise ValueError("Summaries contain different numbers of sessions")
@@ -123,13 +129,53 @@ class ReportGenerator(object):
             'n_eli': sum([summary.num_extra_list_intrusions for summary in self.session_summaries])
         }
 
+    def _make_fr_plot_data(self, joint=False):
+        plot_data={
+            'serialpos': json.dumps({
+                'serialpos': list(range(1, 13)),
+                'overall': {
+                    'Overall': FRSessionSummary.serialpos_probabilities(self.session_summaries, False),
+                },
+                'first': {
+                    'First recall': FRSessionSummary.serialpos_probabilities(self.session_summaries, True),
+                }
+            }),
+            'roc': json.dumps({
+                'fpr': [classifier.false_positive_rate for classifier in self.classifiers],
+                'tpr': [classifier.true_positive_rate for classifier in self.classifiers],
+            }),
+            'tercile': json.dumps({
+                'low': [classifier.low_tercile_diff_from_mean for classifier in self.classifiers],
+                'mid': [classifier.mid_tercile_diff_from_mean for classifier in self.classifiers],
+                'high': [classifier.high_tercile_diff_from_mean for classifier in self.classifiers]
+            }),
+            'tags': json.dumps([classifier.metadata['tag'] for classifier
+                                in self.classifiers])
+        }
+        if joint:
+            plot_data['category'] = json.dumps({
+                'irt_between_cat': np.nanmean(np.concatenate(
+                    [summary.irt_between_category for summary in
+                     self.catfr_summaries])),
+                'irt_within_cat': np.nanmean(np.concatenate(
+                    [summary.irt_within_category for summary in
+                     self.catfr_summaries])),
+                'repetition_ratios': self.catfr_summaries[
+                    0].repetition_ratios.tolist(),
+                'subject_ratio': self.catfr_summaries[0].subject_ratio
+            })
+        return plot_data
+
     def generate(self):
         """Central method to generate any report. The report to run is
         determined by the experiments found in :attr:`session_summary`.
 
         """
         if all(['FR' in exp for exp in self.experiments]):
-            return self.generate_fr1_report()
+            joint = False
+            if any(['catFR' in exp for exp in self.experiments]):
+                joint=True
+            return self.generate_fr_report(joint=joint)
         elif (np.array(self.experiments) == 'FR5').all():
             return self.generate_fr5_report()
         else:
@@ -157,7 +203,7 @@ class ReportGenerator(object):
             **kwargs
         )
 
-    def generate_fr1_report(self):
+    def generate_fr_report(self, joint):
         """Generate an FR1 report.
 
         Returns
@@ -167,29 +213,9 @@ class ReportGenerator(object):
         """
         return self._render(
             'FR1',
-            plot_data={
-                'serialpos': json.dumps({
-                    'serialpos': list(range(1, 13)),
-                    'overall': {
-                        'Overall': FRSessionSummary.serialpos_probabilities(self.session_summaries, False),
-                    },
-                    'first': {
-                        'First recall': FRSessionSummary.serialpos_probabilities(self.session_summaries, True),
-                    }
-                }),
-                'roc': json.dumps({
-                    'fpr': [classifier.false_positive_rate for classifier in self.classifiers],
-                    'tpr': [classifier.true_positive_rate for classifier in self.classifiers],
-                }),
-                'tercile': json.dumps({
-                    'low': [classifier.low_tercile_diff_from_mean for classifier in self.classifiers],
-                    'mid': [classifier.mid_tercile_diff_from_mean for classifier in self.classifiers],
-                    'high': [classifier.high_tercile_diff_from_mean for classifier in self.classifiers]
-                }),
-                'tags': json.dumps([classifier.metadata['tag'] for classifier
-                                    in self.classifiers])
-            },
+            plot_data=self._make_fr_plot_data(joint=joint),
             sme_table=self._make_sme_table(),
+            joint=joint
         )
 
     def generate_fr5_report(self):

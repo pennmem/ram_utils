@@ -46,6 +46,57 @@ var ramutils = (function (mod, Plotly) {
       Plotly.plot('serialpos-plot-placeholder', data, layout);
     },
 
+    plotCategoricalFreeRecallSummary: function (irt_within_cat, irt_between_cat, repetition_ratios, subject_ratio) {
+      const data = [
+        {
+          x: ['Within Cat', 'Between Cat'],
+          y: [irt_within_cat, irt_between_cat],
+          width: [0.5, 0.5],
+          type: 'bar',
+        },
+        {
+          x: repetition_ratios,
+          type: 'histogram',
+          xaxis: 'x2',
+          yaxis: 'y2'
+        },
+        {
+          x: [subject_ratio, subject_ratio],
+          y: [0, 30],
+          type: 'scatter',
+          mode: 'lines',
+          line: {
+            color: 'black',
+            dash: 'dot'
+          },
+          xaxis: 'x2',
+          yaxis: 'y2'
+        }
+      ];
+
+      const layout = {
+        xaxis: {
+          domain: [0, .45]
+        },
+        yaxis: {
+          title: 'IRT [msec]'
+        },
+        xaxis2: {
+          domain: [.55, 1]
+        },
+        yaxis2: {
+          title: '# of Subjects',
+          anchor: 'x2'
+        },
+        width: 1000,
+        height: 500,
+        showlegend: false
+      };
+
+      Plotly.plot('catfr-placeholder', data, layout);
+
+    },
+
     /**
      * Plot a summary of recall of stimed/non-stimed items.
      * @param {Object} nonStimRecalls
