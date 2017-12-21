@@ -80,9 +80,9 @@ def main(input_args=None):
         )
         logger.info("Wrote report to %s\n", path)
 
-    warnings = warning_accumulator.format_all()
+    warnings = '\n' + warning_accumulator.format_all()
     if warnings is not None:
-        print(warnings)
+        logger.info(warnings)
 
 
 if __name__ == "__main__":
