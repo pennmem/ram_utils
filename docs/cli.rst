@@ -114,3 +114,18 @@ example ``area.txt`` file for subject R1347D would look like::
 
     Alternatively in this case, the ``--default-surface-area`` (or ``-A``)
     option could be used since all contacts share the same surface area.
+
+Troubleshooting
+~~~~~~~~~~~~~~~
+
+**Dimensions in powers don't seem to match**
+
+Sometimes, there might be an error such as this:
+
+    IndexError: boolean index did not match indexed array along dimension 1;
+    dimension is 170 but corresponding boolean dimension is 168
+
+This is likely caused by trying to autogenerate an electrode config file which
+doesn't match with what was actually used in experiments. The workaround is to
+explicitly pass an electrode config file that is generated manually with the
+``--electrode-config-file`` option.
