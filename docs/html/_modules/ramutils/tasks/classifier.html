@@ -1,61 +1,184 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>ramutils.tasks.classifier &#8212; Ramutils 2.0.0 documentation</title>
-    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     '2.0.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
-    <script type="text/javascript" src="../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="index" title="Index" href="../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../search.html" /> 
-  </head>
-  <body>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../../../genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="../../../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Ramutils 2.0.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
-      </ul>
-    </div>  
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ramutils.tasks.classifier &mdash; Ramutils 2.0.2rc0 documentation</title>
+  
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="Ramutils 2.0.2rc0 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Ramutils
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../data.html">Serializable data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../classifier.html">Classifier training, cross validation, and utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../events.html">Event processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../models.html">Modeling effects of stim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html">Pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli.html">Command-line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc.html">Miscellaneous utilities</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Ramutils</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>ramutils.tasks.classifier</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
             
   <h1>Source code for ramutils.tasks.classifier</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
 
+<span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">classiflib</span> <span class="k">import</span> <span class="n">ClassifierContainer</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">roc_auc_score</span>
 
+<span class="kn">from</span> <span class="nn">ramutils.classifier.cross_validation</span> <span class="k">import</span> <span class="n">permuted_loso_cross_validation</span><span class="p">,</span> \
+    <span class="n">perform_loso_cross_validation</span><span class="p">,</span> <span class="n">logger</span><span class="p">,</span> \
+    <span class="n">permuted_lolo_cross_validation</span><span class="p">,</span> <span class="n">perform_lolo_cross_validation</span>
 <span class="kn">from</span> <span class="nn">ramutils.classifier.utils</span> <span class="k">import</span> <span class="n">train_classifier</span> <span class="k">as</span> <span class="n">train_classifier_core</span>
-<span class="kn">from</span> <span class="nn">ramutils.classifier.cross_validation</span> <span class="k">import</span> <span class="n">perform_cross_validation</span> <span class="k">as</span> \
-    <span class="n">perform_cross_validation_core</span>
+<span class="kn">from</span> <span class="nn">ramutils.classifier.utils</span> <span class="k">import</span> <span class="n">reload_classifier</span>
 <span class="kn">from</span> <span class="nn">ramutils.classifier.weighting</span> <span class="k">import</span> \
     <span class="n">get_sample_weights</span> <span class="k">as</span> <span class="n">get_sample_weights_core</span>
+<span class="kn">from</span> <span class="nn">ramutils.reports.summary</span> <span class="k">import</span> <span class="n">ClassifierSummary</span>
+<span class="kn">from</span> <span class="nn">ramutils.events</span> <span class="k">import</span> <span class="n">extract_sessions</span><span class="p">,</span> <span class="n">get_nonstim_events_mask</span><span class="p">,</span> <span class="n">get_encoding_mask</span>
+<span class="kn">from</span> <span class="nn">ramutils.montage</span> <span class="k">import</span> <span class="n">compare_recorded_with_all_pairs</span>
+<span class="kn">from</span> <span class="nn">ramutils.powers</span> <span class="k">import</span> <span class="n">reduce_powers</span>
 <span class="kn">from</span> <span class="nn">ramutils.log</span> <span class="k">import</span> <span class="n">get_logger</span>
 <span class="kn">from</span> <span class="nn">ramutils.tasks</span> <span class="k">import</span> <span class="n">task</span>
 
@@ -67,6 +190,8 @@
     <span class="s1">&#39;train_classifier&#39;</span><span class="p">,</span>
     <span class="s1">&#39;perform_cross_validation&#39;</span><span class="p">,</span>
     <span class="s1">&#39;serialize_classifier&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;post_hoc_classifier_evaluation&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;reload_used_classifiers&#39;</span>
 <span class="p">]</span>
 
 
@@ -85,17 +210,9 @@
     <span class="k">return</span> <span class="n">classifier</span>
 
 
-<span class="nd">@task</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">perform_cross_validation</span><span class="p">(</span><span class="n">classifier</span><span class="p">,</span> <span class="n">pow_mat</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">n_permutations</span><span class="p">,</span>
-                             <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="n">xval</span> <span class="o">=</span> <span class="n">perform_cross_validation_core</span><span class="p">(</span><span class="n">classifier</span><span class="p">,</span> <span class="n">pow_mat</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span>
-                                         <span class="n">n_permutations</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">xval</span>
-
-
 <div class="viewcode-block" id="serialize_classifier"><a class="viewcode-back" href="../../../pipeline.html#ramutils.tasks.classifier.serialize_classifier">[docs]</a><span class="nd">@task</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">serialize_classifier</span><span class="p">(</span><span class="n">classifier</span><span class="p">,</span> <span class="n">pairs</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">sample_weights</span><span class="p">,</span>
-                         <span class="n">xval_output</span><span class="p">,</span> <span class="n">subject</span><span class="p">):</span>
+                         <span class="n">classifier_summary</span><span class="p">,</span> <span class="n">subject</span><span class="p">):</span>
 
     <span class="sd">&quot;&quot;&quot; Serialize classifier into a container object</span>
 
@@ -111,7 +228,7 @@
 <span class="sd">        Set of events used for training</span>
 <span class="sd">    sample_weights: array_like</span>
 <span class="sd">        Weights used for each of the event</span>
-<span class="sd">    xval_output: ModelOutput</span>
+<span class="sd">    classifier_summary: ClassifierSummary</span>
 <span class="sd">        Object used for calculating and storing cross-validation-related metrics</span>
 <span class="sd">    subject: str</span>
 <span class="sd">        Subject identifier</span>
@@ -129,48 +246,265 @@
         <span class="n">events</span><span class="o">=</span><span class="n">events</span><span class="p">,</span>
         <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weights</span><span class="p">,</span>
         <span class="n">classifier_info</span><span class="o">=</span><span class="p">{</span>
-            <span class="s1">&#39;auc&#39;</span><span class="p">:</span> <span class="n">xval_output</span><span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;auc&#39;</span><span class="p">:</span> <span class="n">classifier_summary</span><span class="o">.</span><span class="n">auc</span><span class="p">,</span>
             <span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="n">subject</span>
         <span class="p">}</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">container</span></div>
+
+
+<div class="viewcode-block" id="perform_cross_validation"><a class="viewcode-back" href="../../../pipeline.html#ramutils.tasks.classifier.perform_cross_validation">[docs]</a><span class="nd">@task</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">perform_cross_validation</span><span class="p">(</span><span class="n">classifier</span><span class="p">,</span> <span class="n">pow_mat</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">n_permutations</span><span class="p">,</span>
+                             <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Perform LOSO or LOLO cross validation on a classifier.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    classifier : sklearn model object</span>
+<span class="sd">    pow_mat : np.ndarray</span>
+<span class="sd">    events : np.recarray</span>
+<span class="sd">    n_permutations: int</span>
+<span class="sd">    kwargs: dict</span>
+<span class="sd">        Extra keyword arguments that are passed to get_sample_weights. See</span>
+<span class="sd">        that function for more details</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    classifier_summary : ClassifierSummary</span>
+<span class="sd">        Results of cross validation as a summary object</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">recalls</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">recalled</span>
+    <span class="n">encoding_event_mask</span> <span class="o">=</span> <span class="n">get_encoding_mask</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+    <span class="n">encoding_recalls</span> <span class="o">=</span> <span class="n">recalls</span><span class="p">[</span><span class="n">encoding_event_mask</span><span class="p">]</span>
+
+    <span class="n">classifier_summary</span> <span class="o">=</span> <span class="n">ClassifierSummary</span><span class="p">()</span>
+    <span class="n">sessions</span> <span class="o">=</span> <span class="n">extract_sessions</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+
+    <span class="c1"># Run leave-one-session-out cross validation when we have &gt; 1 session,</span>
+    <span class="c1"># otherwise leave-one-list-out</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sessions</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">permuted_auc_values</span> <span class="o">=</span> <span class="n">permuted_loso_cross_validation</span><span class="p">(</span><span class="n">classifier</span><span class="p">,</span>
+                                                             <span class="n">pow_mat</span><span class="p">,</span>
+                                                             <span class="n">events</span><span class="p">,</span>
+                                                             <span class="n">n_permutations</span><span class="p">,</span>
+                                                             <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">probs</span> <span class="o">=</span> <span class="n">perform_loso_cross_validation</span><span class="p">(</span><span class="n">classifier</span><span class="p">,</span> <span class="n">pow_mat</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span>
+                                              <span class="n">recalls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">classifier_summary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="n">encoding_recalls</span><span class="p">,</span> <span class="n">probs</span><span class="p">,</span>
+                                    <span class="n">permuted_auc_values</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Performing LOLO cross validation&quot;</span><span class="p">)</span>
+        <span class="n">permuted_auc_values</span> <span class="o">=</span> <span class="n">permuted_lolo_cross_validation</span><span class="p">(</span><span class="n">classifier</span><span class="p">,</span>
+                                                             <span class="n">pow_mat</span><span class="p">,</span>
+                                                             <span class="n">events</span><span class="p">,</span>
+                                                             <span class="n">n_permutations</span><span class="p">,</span>
+                                                             <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">probs</span> <span class="o">=</span> <span class="n">perform_lolo_cross_validation</span><span class="p">(</span><span class="n">classifier</span><span class="p">,</span> <span class="n">pow_mat</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span>
+                                              <span class="n">recalls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="n">classifier_summary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="n">encoding_recalls</span><span class="p">,</span> <span class="n">probs</span><span class="p">,</span>
+                                    <span class="n">permuted_auc_values</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Permutation test p-value = </span><span class="si">%f</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">classifier_summary</span><span class="o">.</span><span class="n">pvalue</span><span class="p">)</span>
+    <span class="n">recall_prob</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">pow_mat</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">insample_auc</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">recalls</span><span class="p">,</span> <span class="n">recall_prob</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;in-sample AUC = </span><span class="si">%f</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">insample_auc</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">classifier_summary</span></div>
+
+
+<div class="viewcode-block" id="reload_used_classifiers"><a class="viewcode-back" href="../../../pipeline.html#ramutils.tasks.classifier.reload_used_classifiers">[docs]</a><span class="nd">@task</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">reload_used_classifiers</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Reload the actual classifiers used in each session of an experiment</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    subject: str</span>
+<span class="sd">    experiment: str</span>
+<span class="sd">    sessions: list</span>
+<span class="sd">    root: str</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list</span>
+<span class="sd">        List of ClassifierContainer objects of length n_sessions</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">used_classifiers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">sessions</span> <span class="o">=</span> <span class="n">extract_sessions</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">sessions</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">classifier</span> <span class="o">=</span> <span class="n">reload_classifier</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">root</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Unable to load classifier for </span><span class="si">{}</span><span class="s1">, &#39;</span>
+                           <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">, session </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span>
+                                                   <span class="n">session</span><span class="p">))</span>
+            <span class="n">classifier</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">used_classifiers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">classifier</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">used_classifiers</span></div>
+
+
+<div class="viewcode-block" id="post_hoc_classifier_evaluation"><a class="viewcode-back" href="../../../pipeline.html#ramutils.tasks.classifier.post_hoc_classifier_evaluation">[docs]</a><span class="nd">@task</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">post_hoc_classifier_evaluation</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">powers</span><span class="p">,</span> <span class="n">all_pairs</span><span class="p">,</span> <span class="n">classifiers</span><span class="p">,</span>
+                                   <span class="n">n_permutations</span><span class="p">,</span> <span class="n">retrained_classifier</span><span class="p">,</span>
+                                   <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Evaluate a trained classifier</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Different channels could be excluded based on results of artifact detection</span>
+<span class="sd">    and stim parameters. Extract the used pairs from the serialized classifier</span>
+<span class="sd">    that was used/retrained in order to correct assess the classifier. The</span>
+<span class="sd">    default behavior is to use the retrained classifier for any sessions</span>
+<span class="sd">    where the actual classifier was not found or is unusable</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sessions</span> <span class="o">=</span> <span class="n">extract_sessions</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sessions</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">classifiers</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;The number of sessions for evaluation must match &#39;</span>
+                           <span class="s1">&#39;the number of classifiers&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nb">any</span><span class="p">([</span><span class="n">classifier</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">classifier</span> <span class="ow">in</span> <span class="n">classifiers</span><span class="p">])</span> <span class="ow">and</span>
+            <span class="n">retrained_classifier</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;A retrained classifier must be passed if any &#39;</span>
+                           <span class="s1">&#39;sessions have missing classifiers&#39;</span><span class="p">)</span>
+    <span class="n">recalls</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">recalled</span>
+
+    <span class="c1"># This takes care of sub-setting events to encoding non-stim events</span>
+    <span class="n">non_stim_mask</span> <span class="o">=</span> <span class="n">get_nonstim_events_mask</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+    <span class="n">non_stim_recalls</span> <span class="o">=</span> <span class="n">recalls</span><span class="p">[</span><span class="n">non_stim_mask</span><span class="p">]</span>
+
+    <span class="n">classifier_summaries</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">predicted_probs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">session</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sessions</span><span class="p">):</span>
+        <span class="n">classifier_summary</span> <span class="o">=</span> <span class="n">ClassifierSummary</span><span class="p">()</span>
+
+        <span class="c1"># Be sure to work with a copy of the classifier object because it will</span>
+        <span class="c1"># be re-fit as part of the lolo cross validation and if you pass</span>
+        <span class="c1"># a reference, the AUCs will be wacky</span>
+        <span class="k">if</span> <span class="n">classifiers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">classifier_container</span> <span class="o">=</span> <span class="n">retrained_classifier</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Using the retrained classifier for session </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">session</span><span class="p">))</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">classifier_container</span> <span class="o">=</span> <span class="n">classifiers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Using actual classifier for session </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">session</span><span class="p">))</span>
+
+        <span class="n">classifier</span> <span class="o">=</span> <span class="n">classifier_container</span><span class="o">.</span><span class="n">classifier</span>
+        <span class="n">recorded_pairs</span> <span class="o">=</span> <span class="n">classifier_container</span><span class="o">.</span><span class="n">pairs</span>
+
+        <span class="n">used_mask</span> <span class="o">=</span> <span class="n">compare_recorded_with_all_pairs</span><span class="p">(</span><span class="n">all_pairs</span><span class="p">,</span> <span class="n">recorded_pairs</span><span class="p">)</span>
+
+        <span class="n">session_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">session</span> <span class="o">==</span> <span class="n">session</span><span class="p">)</span>
+        <span class="n">session_events</span> <span class="o">=</span> <span class="n">events</span><span class="p">[(</span><span class="n">session_mask</span> <span class="o">&amp;</span> <span class="n">non_stim_mask</span><span class="p">)]</span>
+        <span class="n">session_recalls</span> <span class="o">=</span> <span class="n">recalls</span><span class="p">[</span><span class="n">session_mask</span> <span class="o">&amp;</span> <span class="n">non_stim_mask</span><span class="p">]</span>
+
+        <span class="n">session_powers</span> <span class="o">=</span> <span class="n">powers</span><span class="p">[(</span><span class="n">session_mask</span> <span class="o">&amp;</span> <span class="n">non_stim_mask</span><span class="p">)]</span>
+        <span class="n">reduced_session_powers</span> <span class="o">=</span> <span class="n">reduce_powers</span><span class="p">(</span><span class="n">session_powers</span><span class="p">,</span>
+                                               <span class="n">used_mask</span><span class="p">,</span>
+                                               <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;freqs&#39;</span><span class="p">]))</span>
+
+        <span class="c1"># Manually pass in the weighting scheme here, otherwise the cross</span>
+        <span class="c1"># validation procedures will try to determine it for you</span>
+        <span class="n">permuted_auc_values</span> <span class="o">=</span> <span class="n">permuted_lolo_cross_validation</span><span class="p">(</span><span class="n">classifier</span><span class="p">,</span>
+                                                             <span class="n">reduced_session_powers</span><span class="p">,</span>
+                                                             <span class="n">session_events</span><span class="p">,</span>
+                                                             <span class="n">n_permutations</span><span class="p">,</span>
+                                                             <span class="n">scheme</span><span class="o">=</span><span class="s1">&#39;EQUAL&#39;</span><span class="p">,</span>
+                                                             <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="n">session_probs</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">reduced_session_powers</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">predicted_probs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">session_probs</span><span class="p">)</span>
+        <span class="n">classifier_summary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="n">session_recalls</span><span class="p">,</span> <span class="n">session_probs</span><span class="p">,</span>
+                                    <span class="n">permuted_auc_values</span><span class="p">)</span>
+        <span class="n">classifier_summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">classifier_summary</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;AUC for session </span><span class="si">{}</span><span class="s1">: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">session</span><span class="p">,</span>
+                                                    <span class="n">classifier_summary</span><span class="o">.</span><span class="n">auc</span><span class="p">))</span>
+
+    <span class="n">all_predicted_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">predicted_probs</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+    <span class="n">cross_session_summary</span> <span class="o">=</span> <span class="n">ClassifierSummary</span><span class="p">()</span>
+    <span class="n">permuted_auc_values</span> <span class="o">=</span> <span class="n">permuted_loso_cross_validation</span><span class="p">(</span><span class="n">retrained_classifier</span><span class="o">.</span><span class="n">classifier</span><span class="p">,</span>
+                                                         <span class="n">powers</span><span class="p">,</span>
+                                                         <span class="n">events</span><span class="p">,</span>
+                                                         <span class="n">n_permutations</span><span class="p">,</span>
+                                                         <span class="n">scheme</span><span class="o">=</span><span class="s1">&#39;EQUAL&#39;</span><span class="p">,</span>
+                                                         <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="c1"># TODO: Add cross-session summary once we have a way to identify/tag</span>
+    <span class="c1"># summary objects</span>
+    <span class="c1"># cross_session_summary.populate(non_stim_recalls, all_predicted_probs,</span>
+    <span class="c1">#                                permuted_auc_values)</span>
+    <span class="c1"># classifier_summaries.append(cross_session_summary)</span>
+    <span class="c1"># logger.info(&quot;Combined AUC: {}&quot;.format(cross_session_summary.auc))</span>
+
+    <span class="k">return</span> <span class="n">classifier_summaries</span></div>
 </pre></div>
 
+           </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <form class="search" action="../../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../../../genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="../../../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">Ramutils 2.0.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
-      </ul>
-    </div>
-    <div class="footer" role="contentinfo">
-        &#169; Copyright 2017.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
-    </div>
-  </body>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'2.0.2rc0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
 </html>

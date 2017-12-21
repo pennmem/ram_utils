@@ -89,10 +89,10 @@ class ReportGenerator(object):
         self._env.globals['css'] = {}
         for filename in resource_listdir('ramutils.reports', 'static'):
             if filename.endswith('.js'):
-                script = resource_string('ramutils.reports.static', filename)
+                script = resource_string('ramutils.reports.static', filename).decode()
                 self._env.globals['js'][filename.split('.')[0]] = script
             elif filename.endswith('.css'):
-                css = resource_string('ramutils.reports.static', filename)
+                css = resource_string('ramutils.reports.static', filename).decode()
                 self._env.globals['css'][filename.split('.')[0]] = css
 
         self.dest = osp.realpath(osp.expanduser(dest))

@@ -7,11 +7,17 @@ import numpy as np
 import pandas as pd
 import pytz
 
-from ramutils.events import extract_event_metadata, extract_subject, \
-    extract_experiment_from_events, extract_sessions
-from traits.api import Array, ArrayOrNone, Float, String, DictStrAny, Dict, Int
-from sklearn.metrics import roc_auc_score, roc_curve
+from ramutils.utils import safe_divide
+from ramutils.events import extract_subject, extract_experiment_from_events, \
+    extract_sessions
+
 from traitschema import Schema
+from traits.api import Array, ArrayOrNone, Float, String, DictStrAny, Dict
+
+from sklearn.metrics import roc_auc_score, roc_curve
+
+
+
 
 __all__ = [
     'Summary',
@@ -372,6 +378,7 @@ class MathSummary(SessionSummary):
         return sum(summary.num_correct for summary in summaries)
 
     @staticmethod
+    @safe_divide
     def total_percent_correct(summaries):
         """Get the percent correct problems for multiple sessions.
 
