@@ -457,8 +457,8 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
             warnings.warn("No ExperimentParameters object passed; "
                           "classifier may not be 100% reproducible", UserWarning)
 
-    filename_tmpl = '{subject:s}_{experiment:s}_{pairs:s}_{date:s}'
-    pair_str = "_".join([pair.label.replace("_", "-") for pair in stim_params]) if len(stim_params) else ''
+    filename_tmpl = '{subject:s}_{experiment:s}{pairs:s}{date:s}'
+    pair_str = '_' + "_".join([pair.label for pair in stim_params]) + '_' if len(stim_params) else '_'
     zip_prefix = os.path.join(dest, filename_tmpl.format(
         subject=subject,
         experiment=experiment,
