@@ -32,8 +32,7 @@ logger = get_logger("reports")
 
 def main(input_args=None):
     args = parser.parse_args(input_args)
-    cachedir = osp.join(args.cachedir, 'cache')
-    configure_caching(cachedir, args.force_rerun)
+    configure_caching(args.cachedir, args.force_rerun)
     warning_accumulator = get_warning_accumulator()
 
     paths = FilePaths(
