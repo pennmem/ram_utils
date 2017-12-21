@@ -99,6 +99,7 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
                                                         reduced_powers,
                                                         final_task_events,
                                                         kwargs['n_perm'],
+                                                        'Trained Classifier',
                                                         **kwargs)
 
     container = serialize_classifier(classifier,
