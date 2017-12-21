@@ -121,9 +121,8 @@ def main(input_args=None):
     paths = FilePaths(**paths_kwargs)
 
     # FIXME: figure out why MacOS won't work with sshfs-relative paths only here
-    cachedir = osp.join(args.cachedir, 'cache')
-    logger.info("Using %s as cache dir", cachedir)
-    configure_caching(cachedir, args.force_rerun)
+    logger.info("Using %s as cache dir", args.cachedir)
+    configure_caching(args.cachedir, args.force_rerun)
 
     paths.pairs = osp.join(paths.root, 'protocols', 'subjects', args.subject,
                            'localizations', str(args.localization),
@@ -184,20 +183,20 @@ if __name__ == "__main__":  # pragma: nocover
     #     "--root", root, "--dest", dest, "--force-rerun"
     # ])
 
-    main([
-        "-s", "R1364C", "-x", "AmplitudeDetermination",
-        "--anodes", "AMY7", "--cathodes", "AMY8",
-        "--min-amplitudes", "0.1", "--max-amplitudes", "1.0",
-        "--root", root, "--dest", dest, "--force-rerun"
-    ])
-
     # main([
-    #     "-s", "R1374T", "-x", "CatFR5",
-    #     "--anodes", "LA7", "--cathodes", "LA8",
-    #     "--target-amplitudes", "0.5",
-    #     "-e", "/data/eeg/R1374T/behavioral/catFR5/session_0/host_pc/20171212_163330/config_files/R1374T_12DEC2017L0M0STIM.csv",
+    #     "-s", "R1364C", "-x", "AmplitudeDetermination",
+    #     "--anodes", "AMY7", "--cathodes", "AMY8",
+    #     "--min-amplitudes", "0.1", "--max-amplitudes", "1.0",
     #     "--root", root, "--dest", dest, "--force-rerun"
     # ])
+
+    main([
+        "-s", "R1374T", "-x", "CatFR5",
+        "--anodes", "LA7", "--cathodes", "LA8",
+        "--target-amplitudes", "0.5",
+        "-e", "/data/eeg/R1374T/behavioral/catFR5/session_0/host_pc/20171212_163330/config_files/R1374T_12DEC2017L0M0STIM.csv",
+        "--root", root, "--dest", dest, "--force-rerun"
+    ])
 
     # main([
     #     "-s", "R1365N", "-x", "PAL5",
