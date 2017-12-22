@@ -18,6 +18,7 @@ class EventPreparation(ReportRamTask):
         events = [BaseEventReader(filename=f).read() for f in jr.aggregate_values('ps4_events',subject=subject,montage=montage,
                                                                                   experiment=self.pipeline.task)]
         events = np.concatenate(events).view(np.recarray)
+        events = events[events.list>=-1]
         self.pass_object('ps_events',events)
 
 
