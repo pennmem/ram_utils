@@ -11,4 +11,4 @@ Results:
 \item Tie: <TIE>.  \emph{\small{(In case of a tie, the location with the lower standard error is chosen)}}
 \item p-value against sham: <SHAM_PVAL>
 \end{itemize}
-\end{centering}
+

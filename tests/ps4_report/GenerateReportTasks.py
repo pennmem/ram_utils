@@ -126,13 +126,13 @@ class GenerateTex(ReportRamTask):
         session_tex  = ''
         for session in session_summaries:
             session_summary = session_summaries[session]
-            result_table = pd.DataFrame(columns=['Best Amplitude','Predicted change in classifier (post-pre)','SE','SNR'])
+            result_table = pd.DataFrame(columns=['Best Amplitude (mA)','Predicted change in classifier (post-pre)','SE','SNR'])
             for location in sorted(session_summary.info_by_location):
                 loc_info = session_summary.info_by_location[location]
                 result_table.loc[location] = ['{:2.4}'.format(x) for x in [
                     loc_info.best_amplitude,loc_info.best_delta_classifier,loc_info.sem,loc_info.snr
                 ]]
-            result_table.loc['SHAM'] = [np.nan,'{:2.4}'.format(session_summary.sham_dc),'{:2.4}'.format(session_summary.sham_sem),np.nan]
+            result_table.loc['SHAM'] = [np.nan, '{:2.4}'.format(session_summary.sham_dc),'{:2.4f}'.format(session_summary.sham_sem),np.nan]
             result_string = '{\\begin{center}\\textit{ Statistical comparisons not available at this time.}\\end{center}}'
             if loc_info.best_amplitude != -999:
 
@@ -142,9 +142,9 @@ class GenerateTex(ReportRamTask):
                                                                '<BEST_LOCATION>': str(
                                                                    session_summary.best_location).replace('_', '-'),
                                                                '<AMPLITUDE>': session_summary.best_amplitude,
-                                                               '<PVAL>': '{:.3}'.format(session_summary.pval),
+                                                               '<PVAL>': '{:.3}'.format(session_summary.pval).capitalize(),
                                                                '<TIE>': 'True' if session_summary.tie else 'False',
-                                                               '<SHAM_PVAL>': '{:.3}'.format(session_summary.pval_vs_sham),
+                                                               '<SHAM_PVAL>': '{:.3}'.format(session_summary.pval_vs_sham).capitalize(),
 
                                                            })
 
