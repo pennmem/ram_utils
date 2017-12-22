@@ -133,17 +133,26 @@ class GenerateTex(ReportRamTask):
                     loc_info.best_amplitude,loc_info.best_delta_classifier,loc_info.sem,loc_info.snr
                 ]]
             result_table.loc['SHAM'] = [np.nan,'{:2.4}'.format(session_summary.sham_dc),'{:2.4}'.format(session_summary.sham_sem),np.nan]
+            result_string = '{\\begin{center}\\textit{ Statistical comparisons not available at this time.}\\end{center}}'
+            if loc_info.best_amplitude != -999:
+
+                result_string = replace_template_to_string('results_template.tex.tpl',
+                                                           {
+                                                               '<CONTEST_TABLE>': result_table.to_latex(),
+                                                               '<BEST_LOCATION>': str(
+                                                                   session_summary.best_location).replace('_', '-'),
+                                                               '<AMPLITUDE>': session_summary.best_amplitude,
+                                                               '<PVAL>': '{:.3}'.format(session_summary.pval),
+                                                               '<TIE>': 'True' if session_summary.tie else 'False',
+                                                               '<SHAM_PVAL>': '{:.3}'.format(session_summary.pval_vs_sham),
+
+                                                           })
 
             session_tex += replace_template_to_string('ps4_session.tex.tpl',{
                 '<SESSION>':session,
                 '<PS_PLOT_FILE>':session_summary.dc_plot_filename,
                 '<PS_BIOMARKER_PLOT_FILE>':session_summary.biomarker_plot_filename,
-                '<CONTEST_TABLE>':result_table.to_latex(),
-                '<BEST_LOCATION>':str(session_summary.best_location).replace('_','-'),
-                '<AMPLITUDE>':session_summary.best_amplitude,
-                '<PVAL>':'{:.3}'.format(session_summary.pval),
-                '<TIE>': 'True' if session_summary.tie else 'False',
-                '<SHAM_PVAL>':'{:.3}'.format(session_summary.pval_vs_sham),
+                '<RESULTS>': result_string,
             })
 
         report_filename = '%s_PS4_%s_report.tex'%(subject,task)
