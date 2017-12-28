@@ -31,11 +31,13 @@ def make_parser(description, allowed_experiments=sum([exps for exps in EXPERIMEN
         os.path.join(tempfile.gettempdir(), 'ramutils')
 
     """
+    default_cache_dir = os.path.expanduser(os.path.join('~', '.ramutils', 'cache'))
+
     parser = ArgumentParser(description=description)
     parser.add_argument('--root', default='/', help='path to rhino root (default: /)')
     parser.add_argument('--dest', '-d', default='scratch/ramutils',
                         help='directory to write output to (default: scratch/ramutils)')
-    parser.add_argument('--cachedir', default=os.path.join(tempfile.gettempdir(), 'ramutils'),
+    parser.add_argument('--cachedir', default=default_cache_dir,
                         help='absolute path for caching dir')
     parser.add_argument('--subject', '-s', required=True, type=str, help='subject ID')
     parser.add_argument('--force-rerun', action='store_true', help='force re-running all tasks')

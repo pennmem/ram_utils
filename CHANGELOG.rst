@@ -1,10 +1,10 @@
 Changes
 =======
 
-Version 2.0.2rc0
-----------------
+Version 2.0.2
+-------------
 
-**Preview release**
+**2017-12-21**
 
 This version of ramutils enhances Ramulator config generation. Odin ENS
 electrode configuration files (both CSV and binary) can now be created by the
@@ -24,6 +24,8 @@ Other changes:
 * The minimum required version of PTSA was bumped up to 1.1.4
 * Extended blanking can be toggled with a command-line option
 * The script for updating the conda environment was improved
+* Previews of the new reports (which will officially be rolled out in version
+  2.1) are also included
 
 
 Version 2.0.1

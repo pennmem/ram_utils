@@ -4,7 +4,6 @@ from datetime import datetime
 import functools
 import json
 import os.path
-from tempfile import gettempdir
 import shutil
 import warnings
 
@@ -19,7 +18,7 @@ from classiflib import ClassifierContainer
 from ramutils.constants import EXPERIMENTS
 from ramutils.log import get_logger
 from ramutils.tasks import task
-from ramutils.utils import reindent_json
+from ramutils.utils import reindent_json, bytes_to_str
 
 __all__ = [
     'generate_electrode_config',
@@ -34,7 +33,7 @@ logger = get_logger()
 @task(cache=False)
 def generate_electrode_config(subject, paths, anodes=None, cathodes=None,
                               localization=0, montage=0,
-                              default_surface_area=0.010):
+                              default_surface_area=0.001):
     """Generate electrode configuration files (CSV and binary).
 
     Parameters
@@ -349,10 +348,7 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
     )
 
     with open(os.path.join(config_dir_root, 'experiment_config.json'), 'w') as f:
-        tmp_path = os.path.join(gettempdir(), "experiment_config.json")
-        with open(tmp_path, 'w') as tmpfile:
-            tmpfile.write(experiment_config_content)
-        f.write(reindent_json(tmp_path))
+        f.write(experiment_config_content)
 
     if container is not None:
         container.save(classifier_path, overwrite=True)
@@ -388,8 +384,8 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
             warnings.warn("No ExperimentParameters object passed; "
                           "classifier may not be 100% reproducible", UserWarning)
 
-    filename_tmpl = '{subject:s}_{experiment:s}_{pairs:s}_{date:s}'
-    pair_str = "_".join([pair.label.replace("_", "-") for pair in stim_params]) if len(stim_params) else ''
+    filename_tmpl = '{subject:s}_{experiment:s}{pairs:s}{date:s}'
+    pair_str = '_' + "_".join([pair.label for pair in stim_params]) + '_' if len(stim_params) else '_'
     zip_prefix = os.path.join(dest, filename_tmpl.format(
         subject=subject,
         experiment=experiment,

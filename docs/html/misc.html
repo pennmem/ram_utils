@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Miscellaneous utilities &mdash; Ramutils 2.0.2rc0 documentation</title>
+  <title>Miscellaneous utilities &mdash; Ramutils 2.0.2 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Ramutils 2.0.2rc0 documentation" href="index.html"/>
+    <link rel="top" title="Ramutils 2.0.2 documentation" href="index.html"/>
         <link rel="prev" title="Command-line usage" href="cli.html"/> 
 
   
@@ -221,6 +221,33 @@ supported.</p>
 </div>
 <div class="section" id="module-ramutils.log">
 <span id="logging"></span><h2>Logging<a class="headerlink" href="#module-ramutils.log" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ramutils.log.WarningAccumulator">
+<em class="property">class </em><code class="descclassname">ramutils.log.</code><code class="descname">WarningAccumulator</code><a class="reference internal" href="_modules/ramutils/log.html#WarningAccumulator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.log.WarningAccumulator" title="Permalink to this definition">¶</a></dt>
+<dd><p>A special log handler to accumulate all logged warnings to prominently
+display them at the end.</p>
+<dl class="method">
+<dt id="ramutils.log.WarningAccumulator.format_all">
+<code class="descname">format_all</code><span class="sig-paren">(</span><em>flush=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/log.html#WarningAccumulator.format_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.log.WarningAccumulator.format_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Formats all accumulated warnings.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>flush</strong> (<em>bool</em>) – When True (the default), remove all accumulated warnings after
+formatting.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A string of all formatted warnings or None if no warnings were
+accumulated.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str or None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="function">
 <dt id="ramutils.log.get_logger">
 <code class="descclassname">ramutils.log.</code><code class="descname">get_logger</code><span class="sig-paren">(</span><em>name='ramutils'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/log.html#get_logger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.log.get_logger" title="Permalink to this definition">¶</a></dt>
@@ -230,6 +257,23 @@ supported.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<em>str</em>) – Name for the logger (default: <code class="docutils literal"><span class="pre">'ramutils'</span></code>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.log.get_warning_accumulator">
+<code class="descclassname">ramutils.log.</code><code class="descname">get_warning_accumulator</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/log.html#get_warning_accumulator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.log.get_warning_accumulator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new <a class="reference internal" href="#ramutils.log.WarningAccumulator" title="ramutils.log.WarningAccumulator"><code class="xref py py-class docutils literal"><span class="pre">WarningAccumulator</span></code></a> if necessary and adds it to
+the root logger.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>handler</strong></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#ramutils.log.WarningAccumulator" title="ramutils.log.WarningAccumulator">WarningAccumulator</a></td>
 </tr>
 </tbody>
 </table>
@@ -381,15 +425,16 @@ whitespace leftover from templates generation.</p>
 
 <dl class="function">
 <dt id="ramutils.utils.safe_divide">
-<code class="descclassname">ramutils.utils.</code><code class="descname">safe_divide</code><span class="sig-paren">(</span><em>a</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/utils.html#safe_divide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.utils.safe_divide" title="Permalink to this definition">¶</a></dt>
-<dd><p>Attempts to perform a/b and catches zero division errors to prevent crashing</p>
+<code class="descclassname">ramutils.utils.</code><code class="descname">safe_divide</code><span class="sig-paren">(</span><em>a</em>, <em>b=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/utils.html#safe_divide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.utils.safe_divide" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempts to perform a/b and catches zero division errors to prevent
+crashing.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>a</strong> (<em>float</em>) – Numerator</li>
-<li><strong>b</strong> (<em>float</em>) – Denominator</li>
+<li><strong>a</strong> (<em>float</em><em> or </em><em>callable</em>) – Numerator or the function to wrap when used as a decorator.</li>
+<li><strong>b</strong> (<em>float</em><em> or </em><em>None</em>) – Denominator or None when used as a decorator.</li>
 </ul>
 </td>
 </tr>
@@ -501,7 +546,7 @@ data for report plots.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.0.2rc0',
+            VERSION:'2.0.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
