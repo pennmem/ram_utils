@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ramutils.tasks.powers &mdash; Ramutils 2.0.2rc0 documentation</title>
+  <title>ramutils.tasks.powers &mdash; Ramutils 2.0.2 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="Ramutils 2.0.2rc0 documentation" href="../../../index.html"/>
+    <link rel="top" title="Ramutils 2.0.2 documentation" href="../../../index.html"/>
         <link rel="up" title="Module code" href="../../index.html"/> 
 
   
@@ -176,6 +176,7 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;compute_normalized_powers&#39;</span><span class="p">,</span>
     <span class="s1">&#39;reduce_powers&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;subset_powers&#39;</span><span class="p">,</span>
     <span class="s1">&#39;calculate_delta_hfa_table&#39;</span>
 <span class="p">]</span>
 
@@ -184,6 +185,12 @@
 <span class="k">def</span> <span class="nf">reduce_powers</span><span class="p">(</span><span class="n">powers</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">n_frequencies</span><span class="p">):</span>
     <span class="n">reduced_powers</span> <span class="o">=</span> <span class="n">reduce_powers_core</span><span class="p">(</span><span class="n">powers</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">n_frequencies</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">reduced_powers</span>
+
+
+<span class="nd">@task</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">subset_powers</span><span class="p">(</span><span class="n">powers</span><span class="p">,</span> <span class="n">mask</span><span class="p">):</span>
+    <span class="n">condensed_powers</span> <span class="o">=</span> <span class="n">powers</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="k">return</span> <span class="n">condensed_powers</span>
 
 
 <div class="viewcode-block" id="compute_normalized_powers"><a class="viewcode-back" href="../../../pipeline.html#ramutils.tasks.powers.compute_normalized_powers">[docs]</a><span class="nd">@task</span><span class="p">(</span><span class="n">nout</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
@@ -298,7 +305,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'2.0.2rc0',
+            VERSION:'2.0.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
