@@ -174,7 +174,7 @@ class ReportGenerator(object):
         if all(['FR' in exp for exp in self.experiments]):
             joint = False
             if any(['catFR' in exp for exp in self.experiments]):
-                joint=True
+                joint = True
             return self.generate_fr_report(joint=joint)
         elif (np.array(self.experiments) == 'FR5').all():
             return self.generate_fr5_report()
