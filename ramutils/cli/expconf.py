@@ -9,7 +9,7 @@ import os.path as osp
 
 from ramutils.cli import make_parser, ValidationError, configure_caching
 from ramutils.constants import EXPERIMENTS
-from ramutils.log import get_logger
+from ramutils.log import get_logger, get_warning_accumulator
 from ramutils.utils import timer
 
 # Supported experiments
@@ -38,7 +38,7 @@ parser.add_argument('--no-extended-blanking', action='store_true', help='disable
 # at the --area-file option or use a default value
 area_group = parser.add_mutually_exclusive_group(required=False)
 area_group.add_argument('--default-area', '-A', type=float,
-                        help='default surface area to use for all contacts')
+                        help='default surface area to use for all contacts (default: 0.001)')
 area_group.add_argument('--area-file', type=str,
                         help='path to area.txt file relative to root')
 
@@ -80,6 +80,8 @@ def create_expoconf(input_args=None):
     from ramutils.parameters import FilePaths, FRParameters, PALParameters
     from ramutils.pipelines.ramulator_config import make_ramulator_config
 
+    warning_accumulator = get_warning_accumulator()
+
     args = parser.parse_args(input_args)
     validate_stim_settings(args)
 
@@ -120,9 +122,8 @@ def create_expoconf(input_args=None):
     paths = FilePaths(**paths_kwargs)
 
     # FIXME: figure out why MacOS won't work with sshfs-relative paths only here
-    cachedir = osp.join(args.cachedir, 'cache')
-    logger.info("Using %s as cache dir", cachedir)
-    configure_caching(cachedir, args.force_rerun)
+    logger.info("Using %s as cache dir", args.cachedir)
+    configure_caching(args.cachedir, args.force_rerun)
 
     paths.pairs = osp.join(paths.root, 'protocols', 'subjects', args.subject,
                            'localizations', str(args.localization),
@@ -158,7 +159,7 @@ def create_expoconf(input_args=None):
         paths.area_file = osp.join(paths.root, args.area_file)
 
     # ... or set default surface area
-    default_surface_area = 0.010 if args.default_area is None else args.default_area
+    default_surface_area = 0.001 if args.default_area is None else args.default_area
 
     # Generate!
     with timer():
@@ -168,6 +169,10 @@ def create_expoconf(input_args=None):
                               localization=args.localization,
                               montage=args.montage,
                               default_surface_area=default_surface_area)
+
+    warnings = '\n' + warning_accumulator.format_all()
+    if warnings is not None:
+        logger.info(warnings)
 
 
 if __name__ == "__main__":  # pragma: nocover
