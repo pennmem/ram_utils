@@ -1,0 +1,20 @@
+<div>
+  <h2>Categorical Free Recall Summary</h2>
+  <figure>
+    <div id="catfr-placeholder"></div>
+    <figcaption>
+      <b>(Left)</b> Average inter-response times for transitions within and between categories. <b>(Right)</b>
+      Distribution of repetition ratios across subjects. Dotted line represents the repetition ratios for the current subject
+    </figcaption>
+  </figure>
+</div>
+
+<script>
+  window.addEventListener('load', () => {
+    const categorical_info = JSON.parse('{{ plot_data["category"] }}');
+    ramutils.plots.plotCategoricalFreeRecallSummary(categorical_info['irt_within_cat'],
+                                                    categorical_info['irt_between_cat'],
+                                                    categorical_info['repetition_ratios'],
+                                                    categorical_info['subject_ratio']);
+  });
+</script>

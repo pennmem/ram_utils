@@ -7,13 +7,17 @@ import numpy as np
 import pandas as pd
 import pytz
 
+from ramutils.utils import safe_divide
+from ramutils.events import extract_subject, extract_experiment_from_events, \
+    extract_sessions
+
 from traitschema import Schema
 from traits.api import Array, ArrayOrNone, Float, String, DictStrAny, Dict
 
 from sklearn.metrics import roc_auc_score, roc_curve
 
 
-from ramutils.utils import safe_divide
+
 
 __all__ = [
     'Summary',
@@ -175,8 +179,8 @@ class ClassifierSummary(Schema):
 
 class Summary(Schema):
     """Base class for all summary objects."""
-    _events = ArrayOrNone(desc='task events from a session')
-    _raw_events = ArrayOrNone(desc='all events from a session')
+    _events = ArrayOrNone(desc='task events')
+    _raw_events = ArrayOrNone(desc='all events')
     phase = Array(desc='list phase type (stim, non-stim, etc.)')
 
     @property
@@ -217,7 +221,20 @@ class Summary(Schema):
 
 class SessionSummary(Summary):
     """Base class for single-session objects."""
-    #FIXME: Isn't this redundant?
+    @property
+    def session(self):
+        sessions = extract_sessions(self.events)
+        return sessions[0]
+
+    @property
+    def subject(self):
+        return extract_subject(self.events)
+
+    @property
+    def experiment(self):
+        experiments = extract_experiment_from_events(self.events)
+        return experiments[0]
+
     @property
     def events(self):
         return self._events
@@ -536,7 +553,8 @@ class CatFRSessionSummary(FRSessionSummary):
 
     @property
     def repetition_ratios(self):
-        return self._repetition_ratios
+        return np.hstack([np.nanmean(v) for k, v in
+                          self._repetition_ratios.items()])
 
     @repetition_ratios.setter
     def repetition_ratios(self, new_repetition_ratios):
@@ -549,6 +567,10 @@ class CatFRSessionSummary(FRSessionSummary):
     @property
     def irt_between_category(self):
         return self.irt_between_cat
+
+    @property
+    def subject_ratio(self):
+        return np.nanmean(self._repetition_ratios[self.subject])
 
 
 class StimSessionSummary(SessionSummary):

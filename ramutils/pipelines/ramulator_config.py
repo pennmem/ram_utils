@@ -1,5 +1,6 @@
 from ramutils.constants import EXPERIMENTS
 from ramutils.exc import MultistimNotAllowedException
+from ramutils.montage import generate_pairs_from_electrode_config
 from ramutils.tasks import *
 
 
@@ -98,6 +99,7 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
                                                         reduced_powers,
                                                         final_task_events,
                                                         kwargs['n_perm'],
+                                                        'Trained Classifier',
                                                         **kwargs)
 
     container = serialize_classifier(classifier,
