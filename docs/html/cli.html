@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Command-line usage &mdash; Ramutils 2.0.2rc0 documentation</title>
+  <title>Command-line usage &mdash; Ramutils 2.0.2 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Ramutils 2.0.2rc0 documentation" href="index.html"/>
+    <link rel="top" title="Ramutils 2.0.2 documentation" href="index.html"/>
         <link rel="next" title="Miscellaneous utilities" href="misc.html"/>
         <link rel="prev" title="Pipelines" href="pipeline.html"/> 
 
@@ -99,6 +99,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Command-line usage</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#ramulator-configuration-generation">Ramulator configuration generation</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#specifying-surface-areas">Specifying surface areas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
 </ul>
 </li>
 </ul>
@@ -281,6 +282,27 @@ example <code class="docutils literal"><span class="pre">area.txt</span></code> 
 <p class="last">Alternatively in this case, the <code class="docutils literal"><span class="pre">--default-surface-area</span></code> (or <code class="docutils literal"><span class="pre">-A</span></code>)
 option could be used since all contacts share the same surface area.</p>
 </div>
+<p>The logic for determining what to use for surface areas is as follows:</p>
+<ul class="simple">
+<li>Use the file specified with the <code class="docutils literal"><span class="pre">--area-file</span></code> option if given</li>
+<li>If not found, use the default surface area (0.001 if not specified, otherwise
+the value specified with the <code class="docutils literal"><span class="pre">--default-surface-area</span></code> option)</li>
+<li>If no <code class="docutils literal"><span class="pre">--area-file</span></code> option is given, try to load <code class="docutils literal"><span class="pre">area.txt</span></code> from the docs
+directory</li>
+<li>If no area file is found, use the default surface area as described above</li>
+</ul>
+</div>
+<div class="section" id="troubleshooting">
+<h3>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h3>
+<p><strong>Dimensions in powers don’t seem to match</strong></p>
+<p>Sometimes, there might be an error such as this:</p>
+<blockquote>
+<div>IndexError: boolean index did not match indexed array along dimension 1;
+dimension is 170 but corresponding boolean dimension is 168</div></blockquote>
+<p>This is likely caused by trying to autogenerate an electrode config file which
+doesn’t match with what was actually used in experiments. The workaround is to
+explicitly pass an electrode config file that is generated manually with the
+<code class="docutils literal"><span class="pre">--electrode-config-file</span></code> option.</p>
 </div>
 </div>
 </div>
@@ -329,7 +351,7 @@ option could be used since all contacts share the same surface area.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.0.2rc0',
+            VERSION:'2.0.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
