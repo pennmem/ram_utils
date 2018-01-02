@@ -45,6 +45,11 @@ def make_report(subject, experiment, paths, joint_report=False,
     """
     kwargs = exp_params.to_dict()
 
+    # Lower case 'c' is expected for reading events. The reader should probably
+    # just be case insensitive
+    if 'Cat' in experiment:
+        experiment = experiment.replace('Cat', 'cat')
+
     # TODO: Add method that will check if the necessary underlying data already
     # exists to avoid re-running
 
