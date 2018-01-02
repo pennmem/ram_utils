@@ -18,7 +18,7 @@ def test_warning_accumulator(flush, logger):
     logger.addHandler(handler)
 
     lines = handler.format_all(flush)
-    assert lines is None
+    assert lines is ''
 
     for n in range(10):
         logger.warning("warning %d", n)
