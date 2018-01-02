@@ -75,7 +75,7 @@ def validate_stim_settings(args):
         #     raise ValidationError("Number of pulse frequencies doesn't match number of stim contacts")
 
 
-def create_expoconf(input_args=None):
+def create_expconf(input_args=None):
     from ramutils.montage import make_stim_params
     from ramutils.parameters import FilePaths, FRParameters, PALParameters
     from ramutils.pipelines.ramulator_config import make_ramulator_config
@@ -173,50 +173,3 @@ def create_expoconf(input_args=None):
     warnings = '\n' + warning_accumulator.format_all()
     if warnings is not None:
         logger.info(warnings)
-
-
-if __name__ == "__main__":  # pragma: nocover
-    root = "~/mnt/rhino"
-    dest = "scratch/ramutils2/demo"
-
-    # main([
-    #     "-s", "R1347D", "-x", "CatFR1", "-A", "0.5",
-    #     "--root", root, "--dest", dest, "--force-rerun"
-    # ])
-
-    # main([
-    #     "-s", "R1364C", "-x", "AmplitudeDetermination",
-    #     "--anodes", "AMY7", "--cathodes", "AMY8",
-    #     "--min-amplitudes", "0.1", "--max-amplitudes", "1.0",
-    #     "--root", root, "--dest", dest, "--force-rerun"
-    # ])
-
-    create_expoconf([
-        "-s", "R1374T", "-x", "CatFR5",
-        "--anodes", "LA7", "--cathodes", "LA8",
-        "--target-amplitudes", "0.5",
-        "-e", "/data/eeg/R1374T/behavioral/catFR5/session_0/host_pc/20171212_163330/config_files/R1374T_12DEC2017L0M0STIM.csv",
-        "--root", root, "--dest", dest, "--force-rerun"
-    ])
-
-    # main([
-    #     "-s", "R1365N", "-x", "PAL5",
-    #     "--anodes", "LAD12", "--cathodes", "LAD13",
-    #     "--target-amplitudes", "0.5",
-    #     "--root", root, "--dest", "scratch/ramutils2/demo", "--force-rerun"
-    # ])
-
-    # main([
-    #     "-s", "R1364C", "-x", "PS4_FR5",
-    #     "--anodes", "AMY7", "TOJ7", "--cathodes", "AMY8", "TOJ8",
-    #     "--min-amplitudes", "0.1", "0.1", "--max-amplitudes", "1.0", "0.5",
-    #     "--root", root, "--dest", "scratch/ramutils2/demo", "--force-rerun"
-    # ])
-
-    # main([
-    #     "-s", "R1364C", "-x", "FR6",
-    #     "--anodes", "AMY7", "TOJ7", "--cathodes", "AMY8", "TOJ8",
-    #     "--target-amplitudes", "0.5", "0.75",
-    #     "--root", root, "--dest", "scratch/ramutils2/demo", "--force-rerun"
-    # ])
-
