@@ -149,6 +149,9 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
         events = remove_nonresponses(events)
         events = normalize_pal_events(events)
 
+    else:
+        stim_params = initialize_empty_stim_reccarray()
+
     events = update_subject(events)
 
     if return_stim_events:
