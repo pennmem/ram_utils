@@ -22,9 +22,9 @@ def test_reload_classifier(subject):
 
 
 @pytest.mark.rhino
-def test_reload_classifier_rhino():
+def test_reload_classifier_rhino(rhino_root):
     container = reload_classifier('R1347D', 'FR6', 0,
-                                  mount_point='/Volumes/RHINO/')
+                                  mount_point=rhino_root)
     assert container.classifier is not None
     return
 
