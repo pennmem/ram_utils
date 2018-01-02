@@ -133,12 +133,12 @@ def summarize_math(events, joint=False):
 
 
 @task()
-def summarize_stim_sessions(all_events, task_events,
+def summarize_stim_sessions(task_events, stim_params,
                             encoding_classifier_summaries,
                             pairs_data):
     """ Construct stim session summaries """
     sessions = extract_sessions(task_events)
-    stim_table_events = select_stim_table_events(all_events)
+    stim_table_events = select_stim_table_events(stim_params)
     location_data = pairs_data[['label', 'location']]
     location_data = location_data.dropna()
 
@@ -154,9 +154,10 @@ def summarize_stim_sessions(all_events, task_events,
                                      all_session_task_events)
 
         predicted_probabilities = encoding_classifier_summaries[i].predicted_probabilities
-        subject, experiment, session = extract_event_metadata(task_events)
+        subject, experiment, session = extract_event_metadata(
+            all_session_task_events)
         stim_df = pd.DataFrame(columns=['subject', 'experiment', 'session',
-                                        'list', 'item_name','serialpos',
+                                        'list', 'item_name', 'serialpos',
                                         'phase', 'is_stim_item', 'stim_list',
                                         'is_post_stim_item',
                                         'recalled', 'thresh',
