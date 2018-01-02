@@ -85,7 +85,7 @@ def load_events(subject, experiment, file_type='all_events',
 
 
 def clean_events(events, start_time=None, end_time=None, duration=None,
-                 pre=None, post=None):
+                 pre=None, post=None, return_stim_events=False):
     """
         Peform basic cleaning operations on events such as removing incomplete
         sessions, negative offset events, and incomplete lists. For FR events,
@@ -101,6 +101,9 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
     duration:
     pre:
     post:
+    return_stim_events: bool
+        Indicator for if stim parameters should be returned in addition to the
+        cleaned events
 
     Returns
     -------
@@ -111,6 +114,7 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
     -----
     This function should be called on an experiment by experiment basis and
     should not be used to clean cross-experiment datasets
+    :param return_stim_events:
 
     """
     experiments = extract_experiment_from_events(events)
@@ -124,6 +128,7 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
     events = remove_incomplete_lists(events)
     # TODO: Add remove_repetitions() function to get rid of any recall events
     # that are just a repeated recall
+    events, stim_params = separate_stim_events(events)
 
     if "FR" in experiment:
         events = insert_baseline_retrieval_events(events,
@@ -145,6 +150,9 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
 
     events = update_subject(events)
 
+    if return_stim_events:
+        return events, stim_params
+
     return events
 
 
@@ -157,19 +165,65 @@ def update_subject(events):
 
 def normalize_fr_events(events):
     events = combine_retrieval_events(events)
+    if 'category_num' not in events.dtype.names:
+        # Subset first otherwise stim params will be there
+        # and this will prevent add_field from working
+        events = select_column_subset(events)
+        events = add_field(events, 'category_num', 999)
+
+    events = select_column_subset(events, cat=True)
+
+    # Convert to dataframe and back. This will ensure that string types match
+    # if events from another experiment where a field was added are combined
+    # with these events. The alternative is to have a function that explicitly
+    # converts the dtypes of all string fields
+    events_df = pd.DataFrame(events)
+    events = events_df.to_records(index=False).view(np.recarray)
+
+    # to_records converts the field names to unicode, which will break the
+    # pickling of these events, so turn them back into strings
+    events.dtype.names = [str(name) for name in events.dtype.names]
     return events
 
 
 def normalize_pal_events(events):
-    """Perform any normalization to PAL event so make the homogeneous enough so
-    that it is trivial to combine with other experiment events.
-
+    """
+        Perform any normalization to PAL event so make the homogeneous enough so
+        that it is trivial to combine with other experiment events.
     """
     events = rename_correct_to_recalled(events)
     events = coerce_study_pair_to_word_event(events)
     events = select_column_subset(events, pal=True)
     events = add_field(events, 'item_name', 'X')
+    events = add_field(events, 'category_num', 999)
     return events
+
+
+def separate_stim_events(events):
+    """ Separate stim params contained within events structure from the 1-D
+        events. The returned events and stim_params are both 1-dimensional
+
+    Parameters
+    ----------
+    events: np.recarray
+        Event structure
+
+    Return
+    ------
+    events: np.reccary
+        1D event structure with stim params removed
+    stim_params: np.recarray
+        2D stim params strsucture
+
+    """
+    stim_params = events[['subject', 'experiment', 'session', 'list',
+                          'stim_list', 'mstime', 'item_name', 'serialpos',
+                          'recalled', 'type', 'phase', 'stim_params']]
+    all_fields = list(events.dtype.names)
+    all_fields.remove('stim_params')
+    events = events[all_fields]
+
+    return events, stim_params
 
 
 def rename_correct_to_recalled(events):
@@ -203,6 +257,10 @@ def add_field(events, field_name, default_val):
     events_df = pd.DataFrame(events)
     events_df[field_name] = default_val
     events = events_df.to_records(index=False).view(np.recarray)
+
+    # to_records converts field names to unicode, which breaks pickling these
+    # events
+    events.dtype.names = [str(name) for name in events.dtype.names]
     return events
 
 
@@ -229,7 +287,7 @@ def remove_incomplete_lists(events):
         task_events = sess_events[~math_mask]
         math_events = sess_events[math_mask]
         final_sess_events = task_events
-        final_sess_events.sort(order=['session','list','mstime'])
+        final_sess_events.sort(order=['session', 'list', 'mstime'])
 
         # Remove all task events for lists that don't have a "REC_END" event
         events_by_list = (np.array([l for l in list_group]) for listno,
@@ -370,22 +428,28 @@ def remove_bad_events(events):
     raise NotImplementedError
 
 
-def select_column_subset(events, pal=False, stim=False):
+def select_column_subset(events, pal=False, stim=False, cat=False):
     """ Select only the necessary subset of the fields """
     columns = [
         'serialpos', 'session', 'subject', 'rectime', 'experiment',
         'mstime', 'type', 'eegoffset', 'recalled', 'intrusion',
-        'montage', 'list', 'eegfile', 'msoffset', 'item_name', 'iscorrect',
-        'phase'
+        'montage', 'list', 'stim_list', 'eegfile', 'msoffset', 'item_name',
+        'iscorrect', 'phase'
     ]
+
+    if cat:
+        columns.append('category_num')
 
     if pal:
         columns.remove('item_name')
 
     if stim:
-        columns.append('stim_params')
+        columns = ['subject', 'experiment', 'session', 'list',
+                   'stim_list', 'mstime', 'item_name', 'serialpos', 'type',
+                   'phase', 'stim_params', 'recalled']
 
     events = events[columns]
+
     return events
 
 
@@ -583,7 +647,8 @@ def find_free_time_periods(times, duration, pre, post, start=None, end=None):
     return epoch_array
 
 
-def concatenate_events_across_experiments(event_list, pal=False, stim=False):
+def concatenate_events_across_experiments(event_list, pal=False, stim=False,
+                                          cat=False):
     """
     Concatenate events across different experiment types. To make session
     numbers unique, 100 is added to the second set of events in event_list,
@@ -613,7 +678,7 @@ def concatenate_events_across_experiments(event_list, pal=False, stim=False):
         if len(events) == 0:
             continue # we don't want to be incrementing if we dont have to
         events.session += session_offset
-        events = select_column_subset(events, pal=pal, stim=stim)
+        events = select_column_subset(events, pal=pal, stim=stim, cat=cat)
         final_event_list.append(events)
         session_offset += 100
 
@@ -801,7 +866,7 @@ def extract_stim_information(all_events, task_events):
     Parameters
     ----------
     all_events: np.recarray
-        All events
+        All events with stim_params field
     task_events: np.recarray
         Task events used for classifier training/evaluation
 
@@ -867,7 +932,7 @@ def extract_stim_information(all_events, task_events):
                             # Single-site stimulation will have stim_param
                             # field as a record, while multi-site will be
                             # ndarray. Coerce everything to ndarray for
-                            # consitency
+                            # consistency
                             stim_params = lst_events[loc].stim_params
                             if type(stim_params) != np.ndarray:
                                 stim_params = np.array([stim_params])
@@ -1196,5 +1261,3 @@ def calculate_repetition_ratio(recall_events):
     repetition_ratio = np.sum(is_repetition)/float(len(recall_events) - 1)
 
     return repetition_ratio
-
-

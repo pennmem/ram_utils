@@ -50,7 +50,7 @@ def make_report(subject, experiment, paths, joint_report=False,
 
     stim_report = is_stim_experiment(experiment).compute()
 
-    # FIXME: allow using different localization, montage numbers
+    # TODO: allow using different localization, montage numbers
     ec_pairs = get_pairs(subject, experiment, paths)
     excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
     final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
@@ -60,13 +60,14 @@ def make_report(subject, experiment, paths, joint_report=False,
 
     # all_events are used for producing math summaries. Task events are only
     # used by the stim reports. Non-stim reports create a different set of
-    # events
-    all_events, task_events = build_test_data(subject, experiment, paths,
-                                              joint_report, sessions=sessions,
-                                              **kwargs)
+    # events. Stim params are used in building the stim session summaries
+    all_events, task_events, stim_params = build_test_data(subject, experiment,
+                                                           paths, joint_report,
+                                                           sessions=sessions,
+                                                           **kwargs)
 
     delta_hfa_table = pd.DataFrame(columns=['type', 'contact0',
-                                            'contact1','label',
+                                            'contact1', 'label',
                                             'p_value', 'tstat'])
     repetition_ratio_dict = {}
     if not stim_report:
@@ -190,7 +191,7 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                           **kwargs)
 
         stim_session_summaries = summarize_stim_sessions(
-            all_events, final_task_events,
+            final_task_events, stim_params,
             post_hoc_results['session_summaries_stim_table'],
             pairs_metadata_table).compute() # TODO: Remove this forced
 

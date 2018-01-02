@@ -48,16 +48,17 @@ def build_training_data(subject, experiment, paths, sessions=None, **kwargs):
                                          post=kwargs['post_event_buf'])
 
         catfr_events = load_events(subject, 'catFR1',
-                                   sessions=sessions, rootdir=paths.root)
+                                   sessions=sessions,
+                                   rootdir=paths.root)
         cleaned_catfr_events = clean_events(catfr_events,
                                             start_time=kwargs['baseline_removal_start_time'],
                                             end_time=kwargs['retrieval_time'],
+                                            duration=kwargs['empty_epoch_duration'],
                                             pre=kwargs['pre_event_buf'],
-                                            post=kwargs['post_event_buf'],
-                                            duration=kwargs['empty_epoch_duration'])
+                                            post=kwargs['post_event_buf'])
 
         free_recall_events = concatenate_events_across_experiments(
-            [cleaned_fr_events, cleaned_catfr_events])
+            [cleaned_fr_events, cleaned_catfr_events], cat=True)
 
     elif "FR" in experiment and not kwargs['combine_events']:
         free_recall_events = load_events(subject, experiment, sessions=sessions,
@@ -84,56 +85,61 @@ def build_training_data(subject, experiment, paths, sessions=None, **kwargs):
     return all_task_events
 
 
-@task(nout=2)
+@task(nout=3)
 def build_test_data(subject, experiment, paths, joint_report, sessions=None,
                     **kwargs):
     """
         Construct the set of events to be used for post-hoc classifier
         evaluation, i.e. the test data
-
     """
     series_num = extract_experiment_series(experiment)
     if joint_report and 'FR' in experiment:
         fr_events = load_events(subject, 'FR' + series_num,
-                                sessions=sessions, rootdir=paths.root)
-        cleaned_fr_events = clean_events(fr_events,
-                                         start_time=kwargs['baseline_removal_start_time'],
-                                         end_time=kwargs['retrieval_time'],
-                                         duration=kwargs['empty_epoch_duration'],
-                                         pre=kwargs['pre_event_buf'],
-                                         post=kwargs['post_event_buf'])
+                                sessions=sessions,
+                                rootdir=paths.root)
+        cleaned_fr_events, fr_stim_params = clean_events(
+            fr_events, start_time=kwargs['baseline_removal_start_time'],
+            end_time=kwargs['retrieval_time'],
+            duration=kwargs['empty_epoch_duration'],
+            pre=kwargs['pre_event_buf'], post=kwargs['post_event_buf'],
+            return_stim_events=True)
 
         catfr_events = load_events(subject, 'catFR' + series_num,
                                    sessions=sessions,
                                    rootdir=paths.root)
-        cleaned_catfr_events = clean_events(catfr_events,
-                                            start_time=kwargs['baseline_removal_start_time'],
-                                            end_time=kwargs['retrieval_time'],
-                                            duration=kwargs['empty_epoch_duration'],
-                                            pre=kwargs['pre_event_buf'],
-                                            post=kwargs['post_event_buf'])
+        cleaned_catfr_events, catfr_stim_params = clean_events(
+            catfr_events, start_time=kwargs['baseline_removal_start_time'],
+            end_time=kwargs['retrieval_time'],
+            duration=kwargs['empty_epoch_duration'],
+            pre=kwargs['pre_event_buf'], post=kwargs['post_event_buf'],
+            return_stim_events=True)
 
         all_events = concatenate_events_across_experiments([fr_events,
                                                             catfr_events])
         task_events = concatenate_events_across_experiments(
-            [cleaned_fr_events, cleaned_catfr_events], stim=True)
+            [cleaned_fr_events, cleaned_catfr_events], cat=True)
+
+        stim_params = concatenate_events_across_experiments([fr_stim_params,
+                                                             catfr_stim_params],
+                                                            stim=True)
 
     elif not joint_report and 'FR' in experiment:
         all_events = load_events(subject, experiment, sessions=sessions,
                                  rootdir=paths.root)
-        task_events = clean_events(all_events,
-                                   start_time=kwargs['baseline_removal_start_time'],
-                                   end_time=kwargs['retrieval_time'],
-                                   duration=kwargs['empty_epoch_duration'],
-                                   pre=kwargs['pre_event_buf'],
-                                   post=kwargs['post_event_buf'])
+        task_events, stim_params = clean_events(
+            all_events, start_time=kwargs['baseline_removal_start_time'],
+            end_time=kwargs['retrieval_time'],
+            duration=kwargs['empty_epoch_duration'],
+            pre=kwargs['pre_event_buf'], post=kwargs['post_event_buf'],
+            return_stim_events=True)
 
     else:
         all_events = load_events(subject, experiment, sessions=sessions,
                                  rootdir=paths.root)
-        task_events = clean_events(all_events)
+        task_events, stim_params = clean_events(all_events,
+                                                return_stim_events=True)
 
-    return all_events, task_events
+    return all_events, task_events, stim_params
 
 
 @task()
