@@ -116,6 +116,7 @@ Generating reports on the command line::
                       [--vispath VISPATH] [--sessions SESSIONS [SESSIONS ...]]
                       [--retrain]
                       [--excluded-contacts EXCLUDED_CONTACTS [EXCLUDED_CONTACTS ...]]
+                      [--joint-report]
 
     Generate a report
 
@@ -136,6 +137,7 @@ Generating reports on the command line::
       --retrain, -R         retrain classifier rather than loading from disk
       --excluded-contacts EXCLUDED_CONTACTS [EXCLUDED_CONTACTS ...], -E EXCLUDED_CONTACTS [EXCLUDED_CONTACTS ...]
                             contacts to exclude from classifier
+      --joint-report, -j    include CatFR/FR for FR reports (default: off)
 
 Testing
 -------
