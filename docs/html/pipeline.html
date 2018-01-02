@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Pipelines &mdash; Ramutils 2.0.2rc0 documentation</title>
+  <title>Pipelines &mdash; Ramutils 2.0.2 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Ramutils 2.0.2rc0 documentation" href="index.html"/>
+    <link rel="top" title="Ramutils 2.0.2 documentation" href="index.html"/>
         <link rel="next" title="Command-line usage" href="cli.html"/>
         <link rel="prev" title="Modeling effects of stim" href="models.html"/> 
 
@@ -237,7 +237,7 @@ documented below.</p>
 <span id="classifier-tasks"></span><h3>Classifier tasks<a class="headerlink" href="#module-ramutils.tasks.classifier" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="ramutils.tasks.classifier.perform_cross_validation">
-<code class="descclassname">ramutils.tasks.classifier.</code><code class="descname">perform_cross_validation</code><span class="sig-paren">(</span><em>classifier</em>, <em>pow_mat</em>, <em>events</em>, <em>n_permutations</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/classifier.html#perform_cross_validation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.classifier.perform_cross_validation" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ramutils.tasks.classifier.</code><code class="descname">perform_cross_validation</code><span class="sig-paren">(</span><em>classifier</em>, <em>pow_mat</em>, <em>events</em>, <em>n_permutations</em>, <em>tag='classifier'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/classifier.html#perform_cross_validation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.classifier.perform_cross_validation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform LOSO or LOLO cross validation on a classifier.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -248,6 +248,8 @@ documented below.</p>
 <li><strong>pow_mat</strong> (<em>np.ndarray</em>) – </li>
 <li><strong>events</strong> (<em>np.recarray</em>) – </li>
 <li><strong>n_permutations</strong> (<em>int</em>) – </li>
+<li><strong>tag</strong> (<em>str</em>) – Tag to assign the resulting classifier summary (default:
+<code class="docutils literal"><span class="pre">'classifier'</span></code>)</li>
 <li><strong>kwargs</strong> (<em>dict</em>) – Extra keyword arguments that are passed to get_sample_weights. See
 that function for more details</li>
 </ul>
@@ -296,12 +298,52 @@ that function for more details</li>
 <dt id="ramutils.tasks.classifier.post_hoc_classifier_evaluation">
 <code class="descclassname">ramutils.tasks.classifier.</code><code class="descname">post_hoc_classifier_evaluation</code><span class="sig-paren">(</span><em>events</em>, <em>powers</em>, <em>all_pairs</em>, <em>classifiers</em>, <em>n_permutations</em>, <em>retrained_classifier</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/classifier.html#post_hoc_classifier_evaluation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.classifier.post_hoc_classifier_evaluation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate a trained classifier</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>events</strong> (<em>np.recarray</em>) – Task events associated with the stim sessesion to be evaluated</li>
+<li><strong>powers</strong> (<em>np.ndarray</em>) – Normalized mean powers</li>
+<li><strong>all_pairs</strong> (<em>OrderedDict</em>) – All pairs based on recorded electrodes combine from config file</li>
+<li><strong>classifiers</strong> (<em>List</em>) – List of classifiers corresponding to each session</li>
+<li><strong>n_permutations</strong> (<em>int</em>) – Number of permutations to use for cross validation</li>
+<li><strong>retrained_classifier</strong> (<em>classiflib.container.ClassifierContainer</em>) – classifier container object based on a retrained classifier</li>
+<li><strong>kwargs</strong> – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>A dictionary of summary objects that are needed in subsequent parts
+of the processing pipeline. The dictionary will be in the following
+format:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>{‘cross_session_summary’: MultiSessionClassifierSummary,</dt>
+<dd><p class="first last">’session_summaries’: List of ClassifierSummary objects,
+‘session_summaries_stim_table’: List of ClassifierSummary
+objects built using all encoding events</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
 <p class="rubric">Notes</p>
 <p>Different channels could be excluded based on results of artifact detection
 and stim parameters. Extract the used pairs from the serialized classifier
-that was used/retrained in order to correct assess the classifier. The
+that was used/retrained in order to correctly assess the classifier. The
 default behavior is to use the retrained classifier for any sessions
-where the actual classifier was not found or is unusable</p>
+where the actual classifier was not found or was unable to be loaded.
+Legacy-formatted classifiers are not supported for re-loading. In cases
+where a stim session was restarted, the default behavior is to use the
+original classifier (i.e. the classifier before artifact detection) rather
+than trying to guess which classifier to load.</p>
 </dd></dl>
 
 <dl class="function">
@@ -313,10 +355,10 @@ where the actual classifier was not found or is unusable</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>subject</strong> (<em>str</em>) – </li>
-<li><strong>experiment</strong> (<em>str</em>) – </li>
-<li><strong>sessions</strong> (<em>list</em>) – </li>
-<li><strong>root</strong> (<em>str</em>) – </li>
+<li><strong>subject</strong> (<em>str</em>) – Subject identifier</li>
+<li><strong>experiment</strong> (<em>str</em>) – Name of the experiment</li>
+<li><strong>sessions</strong> (<em>list</em>) – List of sessions to try reloading a classifier</li>
+<li><strong>root</strong> (<em>str</em>) – Base path of where to find RHINO files</li>
 </ul>
 </td>
 </tr>
@@ -328,6 +370,10 @@ where the actual classifier was not found or is unusable</p>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Notes</p>
+<p>If a classifier is not found or is unable to be reloaded (legacy storage
+format, or other issues), then the list of ClassifierContainer objects
+will have None as the entry for that session.</p>
 </dd></dl>
 
 </div>
@@ -401,7 +447,7 @@ to disk. In other words, <code class="docutils literal"><span class="pre">/tmp/o
 <p>Tasks specific to the Medtronic Odin ENS.</p>
 <dl class="function">
 <dt id="ramutils.tasks.odin.generate_electrode_config">
-<code class="descclassname">ramutils.tasks.odin.</code><code class="descname">generate_electrode_config</code><span class="sig-paren">(</span><em>subject</em>, <em>paths</em>, <em>anodes=None</em>, <em>cathodes=None</em>, <em>localization=0</em>, <em>montage=0</em>, <em>default_surface_area=0.01</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/odin.html#generate_electrode_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.odin.generate_electrode_config" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ramutils.tasks.odin.</code><code class="descname">generate_electrode_config</code><span class="sig-paren">(</span><em>subject</em>, <em>paths</em>, <em>anodes=None</em>, <em>cathodes=None</em>, <em>localization=0</em>, <em>montage=0</em>, <em>default_surface_area=0.001</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/odin.html#generate_electrode_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.odin.generate_electrode_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate electrode configuration files (CSV and binary).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -509,7 +555,7 @@ calling the more general compute_powers function</p>
 results.</p>
 <dl class="function">
 <dt id="ramutils.tasks.summary.summarize_sessions">
-<code class="descclassname">ramutils.tasks.summary.</code><code class="descname">summarize_sessions</code><span class="sig-paren">(</span><em>all_events</em>, <em>task_events</em>, <em>joint=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/summary.html#summarize_sessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.summary.summarize_sessions" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ramutils.tasks.summary.</code><code class="descname">summarize_sessions</code><span class="sig-paren">(</span><em>all_events</em>, <em>task_events</em>, <em>joint=False</em>, <em>repetition_ratio_dict={}</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/summary.html#summarize_sessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.summary.summarize_sessions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a summary of by unique session/experiment</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -520,6 +566,7 @@ results.</p>
 <li><strong>task_events</strong> (<em>np.recarray</em>) – Event subset used for classifier training</li>
 <li><strong>joint</strong> (<em>Bool</em>) – Indicator for if a joint report is being created. This will disable
 checks for single-experiment events</li>
+<li><strong>repetition_ratio_dict</strong> (<em>Dict</em>) – Mapping between subject ID and repetition ratio data</li>
 </ul>
 </td>
 </tr>
@@ -562,6 +609,12 @@ multiple experiments should be allowed</li>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.tasks.summary.summarize_stim_sessions">
+<code class="descclassname">ramutils.tasks.summary.</code><code class="descname">summarize_stim_sessions</code><span class="sig-paren">(</span><em>all_events</em>, <em>task_events</em>, <em>encoding_classifier_summaries</em>, <em>pairs_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/summary.html#summarize_stim_sessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.summary.summarize_stim_sessions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct stim session summaries</p>
 </dd></dl>
 
 </div>
@@ -612,7 +665,7 @@ multiple experiments should be allowed</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.0.2rc0',
+            VERSION:'2.0.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
