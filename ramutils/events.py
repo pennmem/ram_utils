@@ -450,6 +450,9 @@ def select_column_subset(events, pal=False, stim=False, cat=False):
 def get_required_columns(pal=False, stim=False, cat=False):
     """ Return baseline mandatory columns based on experiment type """
 
+    if cat and pal:
+        raise RuntimeError("Either 'cat' or 'pal' can be chosen, but not both")
+
     columns = [
         'serialpos', 'session', 'subject', 'rectime', 'experiment',
         'mstime', 'type', 'eegoffset', 'recalled', 'intrusion',
