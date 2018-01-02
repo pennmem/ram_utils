@@ -68,9 +68,9 @@ def summarize_sessions(all_events, task_events, joint=False,
 
     summaries = []
     for session in sessions:
-        experiment = extract_experiment_from_events(task_events)[0]
         session_task_events = task_events[task_events.session == session]
         session_all_events = all_events[all_events.session == session]
+        experiment = extract_experiment_from_events(session_task_events)[0]
 
         # FIXME: recall_probs
         if experiment in ['FR1']:
@@ -79,9 +79,8 @@ def summarize_sessions(all_events, task_events, joint=False,
                              raw_events=session_all_events)
         elif experiment in ['catFR1']:
             summary = CatFRSessionSummary()
-            summary.populate(task_events[task_events.session == session],
-                             raw_events=all_events[all_events.session ==
-                                                   session],
+            summary.populate(session_task_events,
+                             raw_events=session_all_events,
                              repetition_ratio_dict=repetition_ratio_dict)
         # FIXME: recall_probs, ps4
         elif experiment in ['FR5', 'catFR5']:
