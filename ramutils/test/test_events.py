@@ -281,13 +281,13 @@ class TestEvents:
 
     @pytest.mark.rhino
     @pytest.mark.slow
-    def test_get_repetition_ratios_dict(self):
+    def test_get_repetition_ratios_dict(self, rhino_root):
         # Note: If data for any subject stored in the cached repetition
         # ratios changes, this could result in the test failing. It would be
         # better to just calculate the dict for a few subjects whose data we
         # have cached in the test data directory
         current_repetitions_dict = get_repetition_ratio_dict(
-            rootdir='/Volumes/RHINO')
+            rootdir=rhino_root)
 
         cached_reptitions_dict = joblib.load(datafile(
             '/input/events/repetition_ratios.pkl'))
