@@ -141,9 +141,9 @@ class TestCreateReports:
     @pytest.mark.output
     @pytest.mark.parametrize('subject, experiment, sessions, joint', [
         ('R1345D', 'FR1', None, False),
-        ('R1374T', 'FR1', None, False),
-        ('R1374T', 'FR1', [0], False),
-        ('R1374T', 'FR1', None, True)
+        ('R1374T', 'CatFR1', None, False),
+        ('R1374T', 'CatFR1', [0], False),
+        ('R1374T', 'CatFR1', None, True)
     ])
     def test_create_open_loop_report(self, subject, experiment, sessions, joint,
                                      rhino_root, output_dest):
