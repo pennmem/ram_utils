@@ -67,7 +67,7 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                            **kwargs)
 
     delta_hfa_table = pd.DataFrame(columns=['type', 'contact0',
-                                            'contact1','label',
+                                            'contact1', 'label',
                                             'p_value', 'tstat'])
     repetition_ratio_dict = {}
     if not stim_report:
@@ -191,7 +191,7 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                           **kwargs)
 
         stim_session_summaries = summarize_stim_sessions(
-            all_events, final_task_events, stim_params,
+            final_task_events, stim_params,
             post_hoc_results['session_summaries_stim_table'],
             pairs_metadata_table).compute() # TODO: Remove this forced
 

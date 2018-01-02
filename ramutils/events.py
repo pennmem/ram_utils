@@ -171,6 +171,18 @@ def normalize_fr_events(events):
         events = select_column_subset(events)
         events = add_field(events, 'category_num', 999)
 
+    events = select_column_subset(events, cat=True)
+
+    # Convert to dataframe and back. This will ensure that string types match
+    # if events from another experiment where a field was added are combined
+    # with these events. The alternative is to have a function that explicitly
+    # converts the dtypes of all string fields
+    events_df = pd.DataFrame(events)
+    events = events_df.to_records(index=False).view(np.recarray)
+
+    # to_records converts the field names to unicode, which will break the
+    # pickling of these events, so turn them back into strings
+    events.dtype.names = [str(name) for name in events.dtype.names]
     return events
 
 
@@ -204,10 +216,11 @@ def separate_stim_events(events):
         2D stim params strsucture
 
     """
-    stim_params = events[['subject', 'experiment', 'session', 'list', 'mstime',
-                          'stim_params']]
-    all_fields = events.dtype.names.tolist()
-    all_fields.remove("stim_params")
+    stim_params = events[['subject', 'experiment', 'session', 'list',
+                          'stim_list', 'mstime', 'item_name', 'serialpos',
+                          'recalled', 'type', 'phase', 'stim_params']]
+    all_fields = list(events.dtype.names)
+    all_fields.remove('stim_params')
     events = events[all_fields]
 
     return events, stim_params
@@ -244,6 +257,10 @@ def add_field(events, field_name, default_val):
     events_df = pd.DataFrame(events)
     events_df[field_name] = default_val
     events = events_df.to_records(index=False).view(np.recarray)
+
+    # to_records converts field names to unicode, which breaks pickling these
+    # events
+    events.dtype.names = [str(name) for name in events.dtype.names]
     return events
 
 
@@ -270,7 +287,7 @@ def remove_incomplete_lists(events):
         task_events = sess_events[~math_mask]
         math_events = sess_events[math_mask]
         final_sess_events = task_events
-        final_sess_events.sort(order=['session','list','mstime'])
+        final_sess_events.sort(order=['session', 'list', 'mstime'])
 
         # Remove all task events for lists that don't have a "REC_END" event
         events_by_list = (np.array([l for l in list_group]) for listno,
@@ -416,8 +433,8 @@ def select_column_subset(events, pal=False, stim=False, cat=False):
     columns = [
         'serialpos', 'session', 'subject', 'rectime', 'experiment',
         'mstime', 'type', 'eegoffset', 'recalled', 'intrusion',
-        'montage', 'list', 'eegfile', 'msoffset', 'item_name', 'iscorrect',
-        'phase'
+        'montage', 'list', 'stim_list', 'eegfile', 'msoffset', 'item_name',
+        'iscorrect', 'phase'
     ]
 
     if cat:
@@ -427,7 +444,9 @@ def select_column_subset(events, pal=False, stim=False, cat=False):
         columns.remove('item_name')
 
     if stim:
-        columns.append('stim_params')
+        columns = ['subject', 'experiment', 'session', 'list',
+                   'stim_list', 'mstime', 'item_name', 'serialpos', 'type',
+                   'phase', 'stim_params', 'recalled']
 
     events = events[columns]
 
@@ -847,7 +866,7 @@ def extract_stim_information(all_events, task_events):
     Parameters
     ----------
     all_events: np.recarray
-        All events
+        All events with stim_params field
     task_events: np.recarray
         Task events used for classifier training/evaluation
 
@@ -913,7 +932,7 @@ def extract_stim_information(all_events, task_events):
                             # Single-site stimulation will have stim_param
                             # field as a record, while multi-site will be
                             # ndarray. Coerce everything to ndarray for
-                            # consitency
+                            # consistency
                             stim_params = lst_events[loc].stim_params
                             if type(stim_params) != np.ndarray:
                                 stim_params = np.array([stim_params])
