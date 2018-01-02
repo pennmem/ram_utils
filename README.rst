@@ -136,3 +136,12 @@ Generating reports on the command line::
       --retrain, -R         retrain classifier rather than loading from disk
       --excluded-contacts EXCLUDED_CONTACTS [EXCLUDED_CONTACTS ...], -E EXCLUDED_CONTACTS [EXCLUDED_CONTACTS ...]
                             contacts to exclude from classifier
+
+Testing
+-------
+Automated unit tests are run with every push to the remote repository or pull request. Longer running tests requiring
+local files can and should be run frequently, but require to additional argument to be passed to pytest:
+
+--rhino-root: The mount point for RHINO
+--output-dest: Where output from blackbox tests will be saved
+
