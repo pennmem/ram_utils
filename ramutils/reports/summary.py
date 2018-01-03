@@ -579,6 +579,7 @@ class StimSessionSummary(SessionSummary):
     is_post_stim_item = Array(dtype=np.bool, desc='stimulation occurred on the previous item')
     is_stim_item = Array(dtype=np.bool, desc='stimulation occurred on this item')
     is_ps4_session = Array(dtype=np.bool, desc='list is part of a PS4 session')
+    prob_recall = Array(dtype=np.float, desc='probability of recalling a word')
 
     stim_anode_tag = Array(desc='stim anode label')
     stim_cathode_tag = Array(desc='stim cathode label')
@@ -609,8 +610,9 @@ class StimSessionSummary(SessionSummary):
         self.is_stim_item = events.is_stim_item
         self.is_post_stim_item = events.is_post_stim_item
         self.is_ps4_session = [is_ps4_session] * len(events)
-        self.region = events.location
+        self.prob_recall = events.classifier_output
 
+        self.region = events.location
         self.stim_anode_tag = events.stimAnodeTag
         self.stim_cathode_tag = events.stimCathodeTag
         self.pulse_frequency = events.pulse_freq
@@ -649,6 +651,69 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
             if df[df.listno == listno].is_stim_list.all():
                 count += 1
         return count
+
+    @property
+    def stim_events_by_list(self):
+        df = self.to_dataframe()
+        n_stim_events = df.groupby('listno').is_stim_item.sum().tolist()
+        return n_stim_events
+
+    @property
+    def prob_stim_by_serialpos(self):
+        df = self.to_dataframe()
+        return df.groupby('serialpos').prob_recall.mean().tolist()
+
+    def lists(self, stim=None):
+        df = self.to_dataframe()
+        if stim is None:
+            lists = df.listno.unique().tolist()
+
+        else:
+            lists = df[df.is_stim_item == stim].listno.unique().tolist()
+
+        return lists
+
+    def recalls_by_list(self, stim_items_only=False):
+        df = self.to_dataframe()
+        recalls_by_list = df[df.is_stim_item == stim_items_only].groupby(
+            'listno').recalled.sum().tolist()
+        return recalls_by_list
+
+    def prob_first_recall_by_serialpos(self, stim=False):
+        df = self.to_dataframe()
+        events = df[df.is_stim_item == stim]
+
+        firstpos = np.zeros(len(events.serialpos.unique()), dtype=np.float)
+        for listno in events.listno.unique():
+            try:
+                nonzero = events[(events.listno == listno) &
+                                 (events.recalled == 1)].serialpos.iloc[0]
+            except IndexError:  # no items recalled this list
+                continue
+            thispos = np.zeros(firstpos.shape, firstpos.dtype)
+            thispos[nonzero - 1] = 1
+            firstpos += thispos
+        return (firstpos / events.listno.max()).tolist()
+
+    def prob_recall_by_serialpos(self, stim_items_only=False):
+        df = self.to_dataframe()
+        group = df[df.is_stim_item == stim_items_only].groupby('serialpos')
+        return group.recalled.mean().tolist()
+
+    def delta_recall(self, post_stim_items=False):
+        df = self.to_dataframe()
+        nonstim_low_bio_recall = df[(df.prob_recall < 0.5) &
+                                    (df.is_stim_list == False)].recalled.mean()
+        if post_stim_items:
+            recall_stim = df[df.is_post_stim_item == True].recalled.mean()
+
+        else:
+            recall_stim = df[df.is_stim_item == True].recalled.mean()
+
+        delta_recall = 100 * (recall_stim - nonstim_low_bio_recall)
+
+        return delta_recall
+
 
 
 class FR5SessionSummary(FRStimSessionSummary):
