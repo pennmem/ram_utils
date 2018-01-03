@@ -16,7 +16,7 @@ def find_max(xp, yp, model, bounds, n_samp=100):
     model.fit(xp, yp)
     evaluated_loss = model.predict(xp)
     opt_loc = np.argmax(evaluated_loss)
-    x_max = xp[opt_loc]
+    x_max = xp[opt_loc].reshape(1,1)
     y_max = model.predict(x_max)
 
     kernel = model.kernel_.k1
