@@ -132,4 +132,34 @@ class TestExpConf:
             args += ['--min-amplitudes'] + ['0.1'] * len(anodes)
             args += ['--max-amplitudes'] + ['1.0'] * len(anodes)
 
-        create_expoconf(args)
+        create_expconf(args)
+
+
+class TestCreateReports:
+    @pytest.mark.rhino
+    @pytest.mark.slow
+    @pytest.mark.output
+    @pytest.mark.parametrize('subject, experiment, sessions, joint', [
+        ('R1345D', 'FR1', None, False),
+        ('R1374T', 'CatFR1', None, False),
+        ('R1374T', 'CatFR1', [0], False),
+        ('R1374T', 'CatFR1', None, True)
+    ])
+    def test_create_open_loop_report(self, subject, experiment, sessions, joint,
+                                     rhino_root, output_dest):
+        args = [
+            '--root', rhino_root,
+            '--dest', output_dest,
+            '-s', subject,
+            '-x', experiment,
+        ]
+
+        if joint:
+            args += ['-j']
+
+        if sessions is not None:
+            args += ['-S'] + sessions
+
+        create_report(args)
+
+        return

@@ -45,6 +45,11 @@ def make_report(subject, experiment, paths, joint_report=False,
     """
     kwargs = exp_params.to_dict()
 
+    # Lower case 'c' is expected for reading events. The reader should probably
+    # just be case insensitive
+    if 'Cat' in experiment:
+        experiment = experiment.replace('Cat', 'cat')
+
     # TODO: Add method that will check if the necessary underlying data already
     # exists to avoid re-running
 
@@ -193,7 +198,7 @@ def make_report(subject, experiment, paths, joint_report=False,
         stim_session_summaries = summarize_stim_sessions(
             final_task_events, stim_params,
             post_hoc_results['session_summaries_stim_table'],
-            pairs_metadata_table).compute() # TODO: Remove this forced
+            pairs_metadata_table)
 
         # TODO: Add stimulation evaluation task that uses the HMM code
 

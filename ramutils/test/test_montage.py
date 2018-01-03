@@ -169,10 +169,12 @@ class TestMontage:
 
     @pytest.mark.rhino
     @pytest.mark.parametrize('subject, experiment', [
-        ('R1375C', 'catFR1')
+        ('R1375C', 'catFR1'), # Will use electrode config
+        ('R1320D', 'catFR1') # Will fall back to pairs.json
     ])
     def test_get_pairs(self, subject, experiment, rhino_root):
-        pairs = get_pairs(subject, experiment, root=rhino_root)
+        paths = FilePaths(root=rhino_root)
+        pairs = get_pairs(subject, experiment, paths)
         assert len(pairs.keys()) > 0
 
         return

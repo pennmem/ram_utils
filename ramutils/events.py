@@ -41,7 +41,7 @@ def load_events(subject, experiment, file_type='all_events',
 
     Returns
     -------
-    np.recarray
+    np.rec.array
         A numpy recarray containing all events for the requested subject,
         experiment, and session(s)
 
@@ -77,9 +77,9 @@ def load_events(subject, experiment, file_type='all_events',
         return empty_recarray
 
     # TODO: Make this less ugly to look at
-    events = np.concatenate([
+    events = np.rec.array(np.concatenate([
         BaseEventReader(filename=f, eliminate_events_with_no_eeg=True).read()
-        for f in event_files]).view(np.recarray)
+        for f in event_files]))
 
     return events
 
@@ -128,9 +128,9 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
     events = remove_incomplete_lists(events)
     # TODO: Add remove_repetitions() function to get rid of any recall events
     # that are just a repeated recall
-    events, stim_params = separate_stim_events(events)
 
     if "FR" in experiment:
+        events, stim_params = separate_stim_events(events)
         events = insert_baseline_retrieval_events(events,
                                                   start_time,
                                                   end_time,
@@ -143,10 +143,14 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
         events = normalize_fr_events(events)
 
     if "PAL" in experiment:
+        events, stim_params = separate_stim_events(events, pal=True)
         events = subset_pal_events(events)
         events = update_pal_retrieval_events(events)
         events = remove_nonresponses(events)
         events = normalize_pal_events(events)
+
+    else:
+        stim_params = initialize_empty_stim_reccarray()
 
     events = update_subject(events)
 
@@ -178,7 +182,7 @@ def normalize_fr_events(events):
     # with these events. The alternative is to have a function that explicitly
     # converts the dtypes of all string fields
     events_df = pd.DataFrame(events)
-    events = events_df.to_records(index=False).view(np.recarray)
+    events = np.rec.array(events_df.to_records(index=False))
 
     # to_records converts the field names to unicode, which will break the
     # pickling of these events, so turn them back into strings
@@ -191,20 +195,23 @@ def normalize_pal_events(events):
         Perform any normalization to PAL event so make the homogeneous enough so
         that it is trivial to combine with other experiment events.
     """
+    events = select_column_subset(events, pal=True)
     events = rename_correct_to_recalled(events)
     events = coerce_study_pair_to_word_event(events)
-    events = select_column_subset(events, pal=True)
     events = add_field(events, 'item_name', 'X')
     events = add_field(events, 'category_num', 999)
     return events
 
 
-def separate_stim_events(events):
+def separate_stim_events(events, pal=False, stim=False, cat=False):
     """ Separate stim params contained within events structure from the 1-D
         events. The returned events and stim_params are both 1-dimensional
 
     Parameters
     ----------
+    pal
+    stim
+    cat
     events: np.recarray
         Event structure
 
@@ -216,9 +223,13 @@ def separate_stim_events(events):
         2D stim params strsucture
 
     """
-    stim_params = events[['subject', 'experiment', 'session', 'list',
-                          'stim_list', 'mstime', 'item_name', 'serialpos',
-                          'recalled', 'type', 'phase', 'stim_params']]
+    # Short-circuit if no stim params field (non stim experiment) or no events
+    if (len(events) == 0) or ('stim_params' not in events.dtype.names):
+        stim_params = initialize_empty_stim_reccarray()
+        return events, stim_params
+
+    stim_cols = get_required_columns(pal=pal, stim=stim, cat=cat)
+    stim_params = events[stim_cols]
     all_fields = list(events.dtype.names)
     all_fields.remove('stim_params')
     events = events[all_fields]
@@ -256,7 +267,7 @@ def add_field(events, field_name, default_val):
     """
     events_df = pd.DataFrame(events)
     events_df[field_name] = default_val
-    events = events_df.to_records(index=False).view(np.recarray)
+    events = np.rec.array(events_df.to_records(index=False))
 
     # to_records converts field names to unicode, which breaks pickling these
     # events
@@ -300,8 +311,8 @@ def remove_incomplete_lists(events):
             events_by_list, list_has_end) if a])
 
         # Re-combine math and task events
-        final_sess_events = np.concatenate([final_sess_events,
-                                            math_events]).view(np.recarray)
+        final_sess_events = np.rec.array(np.concatenate([final_sess_events,
+                                            math_events]))
         final_sess_events.sort(order=['session', 'list', 'mstime'])
         final_event_list.append(final_sess_events)
 
@@ -430,6 +441,18 @@ def remove_bad_events(events):
 
 def select_column_subset(events, pal=False, stim=False, cat=False):
     """ Select only the necessary subset of the fields """
+    columns = get_required_columns(pal=pal, stim=stim, cat=cat)
+    events = events[columns]
+
+    return events
+
+
+def get_required_columns(pal=False, stim=False, cat=False):
+    """ Return baseline mandatory columns based on experiment type """
+
+    if cat and pal:
+        raise RuntimeError("Either 'cat' or 'pal' can be chosen, but not both")
+
     columns = [
         'serialpos', 'session', 'subject', 'rectime', 'experiment',
         'mstime', 'type', 'eegoffset', 'recalled', 'intrusion',
@@ -440,17 +463,16 @@ def select_column_subset(events, pal=False, stim=False, cat=False):
     if cat:
         columns.append('category_num')
 
-    if pal:
-        columns.remove('item_name')
-
     if stim:
         columns = ['subject', 'experiment', 'session', 'list',
                    'stim_list', 'mstime', 'item_name', 'serialpos', 'type',
                    'phase', 'stim_params', 'recalled']
+    if pal:
+        columns.remove('item_name')
+        columns.remove('recalled')
+        columns.append('correct')
 
-    events = events[columns]
-
-    return events
+    return columns
 
 
 def initialize_empty_event_reccarray():
@@ -470,10 +492,29 @@ def initialize_empty_event_reccarray():
                                                ('intrusion', int),
                                                ('montage', int),
                                                ('list', int),
+                                               ('stim_list', int),
+                                               ('phase', object),
                                                ('eegfile', object),
                                                ('msoffset', int),
                                                ('item_name', object),
                                                ('iscorrect', int)])
+    return empty_recarray
+
+
+def initialize_empty_stim_reccarray():
+    """ Generate empty recarray that mirrors fields in stim_params """
+    empty_recarray = np.recarray((0, ), dtype=[('serialpos', int),
+                                               ('session', int),
+                                               ('subject', object),
+                                               ('experiment', object),
+                                               ('mstime', int),
+                                               ('type', object),
+                                               ('recalled', int),
+                                               ('list', int),
+                                               ('stim_list', int),
+                                               ('phase', object),
+                                               ('item_name', object),
+                                               ('stim_params', object)])
     return empty_recarray
 
 
@@ -571,16 +612,16 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
                     full_match_accum[choice_inds] = True
 
         matching_epochs = epochs[full_match_accum]
-        new_events = np.zeros(len(matching_epochs),
-                              dtype=sess_events.dtype).view(np.recarray)
+        new_events = np.rec.array(np.zeros(len(matching_epochs),
+                                          dtype=sess_events.dtype))
 
         for i, _ in enumerate(new_events):
             new_events[i].mstime = matching_epochs[i]
             new_events[i].type = 'REC_BASE'
 
         new_events.recalled = 0
-        merged_events = np.concatenate((sess_events, new_events)).view(
-            np.recarray)
+        merged_events = np.rec.array(np.concatenate((sess_events,
+                                                    new_events)))
         merged_events.sort(order='mstime')
 
         for (i, event) in enumerate(merged_events):
@@ -593,7 +634,7 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
 
         all_events.append(merged_events)
 
-    return np.concatenate(all_events).view(np.recarray)
+    return np.rec.array(np.concatenate(all_events))
 
 
 def find_free_time_periods(times, duration, pre, post, start=None, end=None):
@@ -707,7 +748,7 @@ def concatenate_events_for_single_experiment(event_list):
     if sum(event_sizes) == 0:
         empty_events = initialize_empty_event_reccarray()
         return empty_events
-    final_events = np.concatenate(event_list).view(np.recarray)
+    final_events = np.rec.array(np.concatenate(event_list))
     final_events.sort(order=['subject', 'experiment', 'session', 'list',
                              'mstime'])
 
@@ -729,7 +770,7 @@ def remove_intrusions(events):
             baseline_retrieval_event_mask)
 
     filtered_events = events[mask]
-    events = filtered_events.view(np.recarray)
+    events = np.rec.array(filtered_events)
     return events
 
 
@@ -745,7 +786,7 @@ def select_word_events(events, encoding_only=True):
     """
     mask = get_word_event_mask(events, encoding_only=encoding_only)
     filtered_events = events[mask]
-    events = filtered_events.view(np.recarray)
+    events = np.rec.array(filtered_events)
 
     return events
 
@@ -776,11 +817,17 @@ def extract_event_metadata(events):
 
 def extract_subject(events):
     """ Extract subject identifier from events """
-    subjects = np.unique(events[events.subject != ''].subject).tolist()
-    if len(subjects) != 1:
+    subjects = np.unique(events[events.subject != u''].subject).tolist()
+    if len(subjects) > 1:
         raise RuntimeError('There should only be one subject in an event '
                            'recarray')
-    return subjects[0]
+    if len(subjects) == 0:
+        subject = ''
+
+    else:
+        subject = subjects[0]
+
+    return subject
 
 
 def extract_experiment_from_events(events):

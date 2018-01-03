@@ -82,14 +82,3 @@ def create_report(input_args=None):
     warnings = '\n' + warning_accumulator.format_all()
     if warnings is not None:
         logger.info(warnings)
-
-
-if __name__ == "__main__":
-    root = '~/mnt/rhino'
-    dest = 'scratch/ramutils2/demo'
-
-    create_report([
-        '--root', root, '--dest', dest,
-        '-s', 'R1345D',
-        '-x', 'FR1'
-    ])

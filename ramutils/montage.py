@@ -413,8 +413,8 @@ def get_pairs(subject, experiment, paths, localization=0, montage=0):
     # No HDF5 file exists, meaning this was a monopolar recording... read
     # pairs.json instead
     else:
-        # TODO: Make sure this is the same format as what comes from config
         all_pairs = load_pairs_from_json(subject,
+                                         just_pairs=False,
                                          localization=localization,
                                          montage=montage,
                                          rootdir=paths.root)
