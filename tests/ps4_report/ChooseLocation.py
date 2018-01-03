@@ -16,8 +16,8 @@ def find_max(xp, yp, model, bounds, n_samp=100):
     model.fit(xp, yp)
     evaluated_loss = model.predict(xp)
     opt_loc = np.argmax(evaluated_loss)
-    x_max = xp[opt_loc].reshape(1,1)
-    y_max = model.predict(x_max)
+    x_max = xp[opt_loc]
+    y_max = model.predict(x_max.reshape(1,1))
 
     kernel = model.kernel_.k1
     sigma_noise = model.kernel_.k2.noise_level
@@ -58,6 +58,10 @@ def choose_location(dataset_loc_0, loc_name_0, dataset_loc_1, loc_name_1, bounds
     # set up kernels
     kernel_matern = Matern() + WhiteKernel(noise_level=1)
     model = gp.GaussianProcessRegressor(kernel=kernel_matern, alpha=alpha, n_restarts_optimizer=5, normalize_y=True)
+
+    if dataset_loc_1 is None or not loc_name_1:
+        dataset_loc_1 = np.zeros((0,2))
+        loc_name_1 = ''
 
     xp_loc = [np.array(map(lambda x: [x], dataset_loc_0[:, 0])), np.array(map(lambda x: [x], dataset_loc_1[:, 0]))]
     yp_loc = [np.array(map(lambda x: [x], dataset_loc_0[:, 1])), np.array(map(lambda x: [x], dataset_loc_1[:, 1]))]

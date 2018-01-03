@@ -1,5 +1,6 @@
 from ptsa.data.readers import EEGReader,IndexReader
 from ptsa.data.filters import MonopolarToBipolarMapper
+from ptsa.data.TimeSeriesX import TimeSeriesX
 import numpy as np
 from ReportUtils import ReportRamTask
 from sklearn.externals import joblib
@@ -27,7 +28,7 @@ class LoadEEG(ReportRamTask):
         for fname in bp_paths:
             with open(fname,'rb') as f: hash_md5.update(f.read())
 
-        event_files = sorted(list(json_reader.aggregate_values('all_events', subject=subj_code, montage=montage, experiment=task)))
+        event_files = sorted(list(json_reader.aggregate_values('task_events', subject=subj_code, montage=montage, experiment=task)))
         for fname in event_files:
             with open(fname,'rb') as f: hash_md5.update(f.read())
 
@@ -47,12 +48,16 @@ class LoadEEG(ReportRamTask):
         except IndexError:
             eeg = EEGReader(events= post_stim_events,channels=np.array([]),start_time=self.params.start_time,
                             end_time = self.params.end_time).read()
-        eeg = eeg.filtered([58.,62.])
-        if 'channels' in eeg.dims:
-            eeg = MonopolarToBipolarMapper(time_series=eeg,bipolar_pairs=pairs).filter()
-        eeg = eeg.mean(dim='events').data
-        eeg[np.abs(eeg)<5]=np.nan
+        except Exception:
+            print('Could not load EEG')
+            eeg = np.array([])
 
+        if isinstance(eeg,TimeSeriesX):
+            eeg = eeg.filtered([58.,62.])
+            if 'channels' in eeg.dims:
+                eeg = MonopolarToBipolarMapper(time_series=eeg,bipolar_pairs=pairs).filter()
+            eeg = eeg.mean(dim='events').data
+            eeg[np.abs(eeg)<5]=np.nan
 
         self.pass_object('eeg',eeg)
         joblib.dump(eeg,self.get_path_to_resource_in_workspace(self.pipeline.subject+'-eeg.pkl'))

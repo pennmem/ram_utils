@@ -95,13 +95,15 @@ class GeneratePlots(ReportRamTask):
             plt.close()
 
         post_stim_eeg = self.get_passed_object('eeg')
+
         plt.figure(figsize=(9,5.5))
-        plt.imshow(post_stim_eeg,cmap='bwr',aspect='auto',origin='lower')
-        cbar = plt.colorbar()
-        plt.clim([-500,500])
+        if len(post_stim_eeg):
+            plt.imshow(post_stim_eeg,cmap='bwr',aspect='auto',origin='lower')
+            cbar = plt.colorbar()
+            plt.clim([-500,500])
+            cbar.set_label('Avg voltage ($\mu$V)')
         plt.xlabel('Time (ms)')
         plt.ylabel('Channel (bipolar reference)')
-        cbar.set_label('Avg voltage ($\mu$V)')
 
         figname = self.get_path_to_resource_in_workspace(join('reports',self.pipeline.subject+'-post-stim-eeg.pdf'))
         plt.savefig(figname)
@@ -129,10 +131,10 @@ class GenerateTex(ReportRamTask):
             result_table = pd.DataFrame(columns=['Best Amplitude (mA)','Predicted change in classifier (post-pre)','SE','SNR'])
             for location in sorted(session_summary.info_by_location):
                 loc_info = session_summary.info_by_location[location]
-                result_table.loc[location] = ['{:2.4}'.format(x) for x in [
+                result_table.loc[location] = ['{:2.4f}'.format(x) for x in [
                     loc_info.best_amplitude,loc_info.best_delta_classifier,loc_info.sem,loc_info.snr
                 ]]
-            result_table.loc['SHAM'] = [np.nan, '{:2.4}'.format(session_summary.sham_dc),'{:2.4f}'.format(session_summary.sham_sem),np.nan]
+            result_table.loc['SHAM'] = [np.nan, '{:2.4f}'.format(session_summary.sham_dc),'{:2.4f}'.format(session_summary.sham_sem),np.nan]
             result_string = '{\\begin{center}\\textit{ Statistical comparisons not available at this time.}\\end{center}}'
             if loc_info.best_amplitude != -999:
 

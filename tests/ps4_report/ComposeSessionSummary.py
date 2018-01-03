@@ -70,9 +70,12 @@ class ComposeSessionSummary(ReportRamTask):
                 (locations, loc_datasets) = zip(*[('_'.join(name),table.loc[:,['amplitude','delta_classifier']].values) for (name,table) in opt_events.groupby(('anode_label','cathode_label'))])
 
                 # TODO: include sham delta classifiers when we need to reconstruct results
-                decision,loc_info = ChooseLocation.choose_location(loc_datasets[0],locations[0],loc_datasets[1],locations[1],
-                                                                np.array([(ld.min(),ld.max()) for ld in loc_datasets]),
-                                                                None)
+                if len(locations)>1:
+                    decision,loc_info = ChooseLocation.choose_location(loc_datasets[0],locations[0],loc_datasets[1],locations[1],
+                                                                    np.array([(ld.min(),ld.max()) for ld in loc_datasets]),
+                                                                    None)
+                else:
+                    continue
                 for i,k in enumerate(loc_info):
                     loc_info[k]['amplitude'] = loc_info[k]['amplitude']/1000
                     decision['loc%s'%(i+1)] = loc_info[k]
@@ -100,10 +103,10 @@ class ComposeSessionSummary(ReportRamTask):
                         location_summary.post_stim_biomarkers[phase]=post_stim_phase_events.biomarker_value
                         location_summary.post_stim_amplitudes[phase] = post_stim_phase_events.amplitude.values/1000.
                         if len(loc_decision_info):
-                            location_summary.best_amplitude = loc_decision_info['amplitude']
-                            location_summary.best_delta_classifier = loc_decision_info['delta_classifier']
-                            location_summary.sem = loc_decision_info['sem']
-                            location_summary.snr = loc_decision_info['snr']
+                            location_summary.best_amplitude = float(loc_decision_info['amplitude'])
+                            location_summary.best_delta_classifier = float(loc_decision_info['delta_classifier'])
+                            location_summary.sem = float(loc_decision_info['sem'])
+                            location_summary.snr = float(loc_decision_info['snr'])
 
                     session_summary.info_by_location[loc_tag] = location_summary
 
