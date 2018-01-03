@@ -123,8 +123,6 @@ def summarize_nonstim_sessions(all_events, task_events, joint=False,
     return summaries
 
 
-
-
 @task()
 def summarize_stim_sessions(all_events, task_events, stim_params,
                             encoding_classifier_summaries,

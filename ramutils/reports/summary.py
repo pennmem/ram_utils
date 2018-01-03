@@ -676,7 +676,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
     def recalls_by_list(self, stim_items_only=False):
         df = self.to_dataframe()
         recalls_by_list = df[df.is_stim_item == stim_items_only].groupby(
-            'listno').recalled.sum().tolist()
+            'listno').recalled.sum().astype(int).tolist()
         return recalls_by_list
 
     def prob_first_recall_by_serialpos(self, stim=False):
