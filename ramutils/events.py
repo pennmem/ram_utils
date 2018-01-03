@@ -142,7 +142,7 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
         events = update_recall_outcome_for_retrieval_events(events)
         events = normalize_fr_events(events)
 
-    if "PAL" in experiment:
+    elif "PAL" in experiment:
         events, stim_params = separate_stim_events(events, pal=True)
         events = subset_pal_events(events)
         events = update_pal_retrieval_events(events)
@@ -203,7 +203,7 @@ def normalize_pal_events(events):
     return events
 
 
-def separate_stim_events(events, pal=False, stim=False, cat=False):
+def separate_stim_events(events, pal=False, stim=True, cat=False):
     """ Separate stim params contained within events structure from the 1-D
         events. The returned events and stim_params are both 1-dimensional
 
