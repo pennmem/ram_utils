@@ -587,6 +587,11 @@ class StimSessionSummary(SessionSummary):
     amplitude = Array(dtype=np.float64, desc='stim amplitude [mA]')
     duration = Array(dtype=np.float64, desc='stim duration [ms]')
 
+    def populate_from_dataframe(self, df, raw_events=None, is_ps4_session=False):
+        events = df.to_records(index=False)
+        self.populate(events, raw_events=raw_events,
+                      is_ps4_session=is_ps4_session)
+
     def populate(self, events, raw_events=None, is_ps4_session=False):
         """Populate stim data from events.
 
@@ -600,23 +605,21 @@ class StimSessionSummary(SessionSummary):
         """
         SessionSummary.populate(self, events, raw_events=raw_events)
 
-        self.is_stim_list = [e.phase == 'STIM' for e in events]
-        self.is_stim_item = events.is_stim
-        self.is_post_stim_item = [False] + [events.is_stim[i - 1] for i in range(1, len(events))]
+        self.is_stim_list = events.stim_list
+        self.is_stim_item = events.is_stim_item
+        self.is_post_stim_item = events.is_post_stim_item
         self.is_ps4_session = [is_ps4_session] * len(events)
+        self.region = events.location
 
-        # FIXME: region
-
-        # FIXME: amplitudes, etc. should be CSV for multistim
-        self.stim_anode_tag = [e.stim_params.anode_label for e in events]
-        self.stim_cathode_tag = [e.stim_params.cathode_label for e in events]
-        self.pulse_frequency = [e.stim_params.pulse_freq for e in events]
-        self.amplitude = [e.stim_params.amplitude for e in events]
-        self.duration = [e.stim_params.stim_duration for e in events]
+        self.stim_anode_tag = events.stimAnodeTag
+        self.stim_cathode_tag = events.stimCathodeTag
+        self.pulse_frequency = events.pulse_freq
+        self.amplitude = events.amplitude
+        self.duration = events.stim_duration
 
 
 class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
-    """SessionSummary for FR sessions with stim."""
+    """ SessionSummary for FR sessions with stim """
     def populate(self, events, raw_events=None, recall_probs=None,
                  is_ps4_session=False):
         FRSessionSummary.populate(self,

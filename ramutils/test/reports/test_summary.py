@@ -1,5 +1,6 @@
 import functools
 import numpy as np
+import pandas as pd
 from pkg_resources import resource_filename
 import warnings
 
@@ -274,5 +275,33 @@ class TestClassifierSummary:
 
     def test_high_tercile_diff_from_mean(self):
         pass
+
+
+class TestStimSessionSummary:
+    @classmethod
+    def setup_class(cls):
+        cls.sample_summary_table = pd.read_csv(datafile(
+            "/input/summaries/sample_stim_session_summary.csv"))
+
+    def test_from_dataframe(self):
+        stim_summary = StimSessionSummary()
+        stim_summary.populate_from_dataframe(self.sample_summary_table)
+        assert len(stim_summary.events) == 300
+
+
+class TestFRStimSessionSummary:
+    @classmethod
+    def setup_class(cls):
+        cls.sample_summary_table = pd.read_csv(datafile(
+            "/input/summaries/sample_stim_session_summary.csv"))
+        cls.sample_events = cls.sample_summary_table.to_records(index=False)
+        cls.sample_summary = FRStimSessionSummary()
+        cls.sample_summary.populate(cls.sample_events)
+
+    def test_num_nonstim_lists(self):
+        assert self.sample_summary.num_nonstim_lists == 9
+
+    def test_num_stim_lists(self):
+        assert self.sample_summary.num_stim_lists == 16
 
 
