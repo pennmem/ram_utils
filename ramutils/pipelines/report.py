@@ -142,6 +142,10 @@ def make_report(subject, experiment, paths, joint_report=False,
 
         # TODO: Modal Controllability Table calculation here
         # TODO: Optimal stim target table based on prior stim results table here
+        session_summaries = summarize_nonstim_sessions(all_events,
+                                                       final_task_events,
+                                                       joint=joint_report,
+                                                       repetition_ratio_dict=repetition_ratio_dict)
 
     if stim_report:
         powers, final_task_events = compute_normalized_powers(task_events,
@@ -195,18 +199,14 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                           retrained_classifier,
                                                           **kwargs)
 
-        stim_session_summaries = summarize_stim_sessions(
-            final_task_events, stim_params,
+        session_summaries = summarize_stim_sessions(
+            all_events, final_task_events, stim_params,
             post_hoc_results['session_summaries_stim_table'],
             pairs_metadata_table)
 
         # TODO: Add stimulation evaluation task that uses the HMM code
 
     # TODO: Add task that saves out all necessary underlying data
-    session_summaries = summarize_sessions(all_events,
-                                           final_task_events,
-                                           joint=joint_report,
-                                           repetition_ratio_dict=repetition_ratio_dict)
 
     math_summaries = summarize_math(all_events, joint=joint_report)
 
