@@ -72,5 +72,8 @@ class TestEvents:
                                          joint_report=joint_report,
                                          sessions=sessions,
                                          **extra_kwargs).compute()
-        np.save(expected, current_events)
+
+        expected_events = np.load(expected)
+        assert len(expected_events) == len(current_events)
+
         return
