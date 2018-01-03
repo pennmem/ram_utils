@@ -193,7 +193,7 @@ def summarize_stim_sessions(all_events, task_events, stim_params,
             raise UnsupportedExperimentError('Only FR5 and catFR5 currently '
                                              'implemented')
 
-        stim_session_summaries.append(stim_df)
+        stim_session_summaries.append(stim_session_summary)
 
     return stim_session_summaries
 
