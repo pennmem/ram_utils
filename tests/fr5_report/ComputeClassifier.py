@@ -269,7 +269,7 @@ class ComputeClassifier(RamTask):
 
         self.lr_classifier = LogisticRegression(C=self.params.C,
                                                 penalty=self.params.penalty_type,
-                                                solver='liblinear',
+                                                solver='newton-cg',
                                                 fit_intercept=True)
 
         event_sessions = events.session
