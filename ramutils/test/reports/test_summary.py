@@ -362,9 +362,6 @@ class TestFRStimSessionSummary:
     def test_stim_parameters(self):
         stim_params = self.sample_summary.stim_parameters
         assert len(stim_params) == 1
-        params = stim_params[0]
-        assert params['stim_anode_tag'] == 'LA7'
-        assert params['stim_cathode_tag'] == 'LA8'
 
     def test_recall_test_results(self):
         test_results = self.sample_summary.recall_test_results
