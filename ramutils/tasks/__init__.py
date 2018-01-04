@@ -13,3 +13,4 @@ from .powers import *
 from .summary import *
 from .montage import *
 from .reports import *
+from .behavioral_analysis import *

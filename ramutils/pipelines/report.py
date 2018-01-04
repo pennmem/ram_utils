@@ -204,7 +204,10 @@ def make_report(subject, experiment, paths, joint_report=False,
             post_hoc_results['session_summaries_stim_table'],
             pairs_metadata_table)
 
-        # TODO: Add stimulation evaluation task that uses the HMM code
+        # TODO: Commented out until we have a clean way to plot results from
+        # the traces
+        # behavioral_results = estimate_effects_of_stim(subject, experiment,
+        #     session_summaries).compute()
 
     # TODO: Add task that saves out all necessary underlying data
 
