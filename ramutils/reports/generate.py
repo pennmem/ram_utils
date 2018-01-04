@@ -11,6 +11,7 @@ from pkg_resources import resource_listdir, resource_string
 
 from ramutils.reports.summary import FRSessionSummary, MathSummary
 from ramutils.events import extract_experiment_from_events, extract_subject
+from ramutils.utils import extract_experiment_series
 
 
 class ReportGenerator(object):
@@ -171,11 +172,16 @@ class ReportGenerator(object):
         determined by the experiments found in :attr:`session_summary`.
 
         """
-        if all(['FR' in exp for exp in self.experiments]):
+        series = extract_experiment_series(self.experiments[0])
+        if series == '5':
+            return self.generate_fr5_report()
+
+        elif all(['FR' in exp for exp in self.experiments]):
             joint = False
             if any(['catFR' in exp for exp in self.experiments]):
                 joint = True
             return self.generate_fr_report(joint=joint)
+
         elif (np.array(self.experiments) == 'FR5').all():
             return self.generate_fr5_report()
         else:
@@ -204,7 +210,7 @@ class ReportGenerator(object):
         )
 
     def generate_fr_report(self, joint):
-        """Generate an FR1 report.
+        """ Generate an FR1 report
 
         Returns
         -------
@@ -219,11 +225,83 @@ class ReportGenerator(object):
         )
 
     def generate_fr5_report(self):
-        """Generate an FR5 report.
+        """ Generate an FR5 report
 
         Returns
         -------
         Rendered FR5 report as a string.
+
+        """
+        return self._render(
+            'FR5',
+            stim_params=self.session_summaries[0].stim_parameters,
+            recall_tests = self.session_summaries[0].recall_test_results,
+            plot_data={  # FIXME: real data
+                'roc': json.dumps({
+                    'fpr': [classifier.false_positive_rate for classifier in self.classifiers],
+                    'tpr': [classifier.true_positive_rate for classifier in self.classifiers],
+                }),
+                'tercile': json.dumps({
+                    'low': [classifier.low_tercile_diff_from_mean for classifier in self.classifiers],
+                    'mid': [classifier.mid_tercile_diff_from_mean for classifier in self.classifiers],
+                    'high': [classifier.high_tercile_diff_from_mean for classifier in self.classifiers]
+                }),
+                'tags': json.dumps([classifier.metadata['tag'] for classifier
+                                    in self.classifiers]),
+                'serialpos': json.dumps({
+                    'serialpos': list(range(1, 13)),
+                    'overall': {
+                        'Overall (non-stim)': self.session_summaries[
+                            0].prob_recall_by_serialpos(stim_items_only=False),
+                        'Overall (stim)': self.session_summaries[
+                            0].prob_recall_by_serialpos(stim_items_only=True)
+                    },
+                    'first': {
+                        'First recall (non-stim)': self.session_summaries[
+                            0].prob_first_recall_by_serialpos(stim=False),
+                        'First recall (stim)': self.session_summaries[
+                            0].prob_first_recall_by_serialpos(stim=True)
+                    }
+                }),
+                'recall_summary': json.dumps({
+                    'nonstim': {
+                        'listno': self.session_summaries[0].lists(stim=False),
+                        'recalled': self.session_summaries[
+                            0].recalls_by_list(stim_items_only=False)
+                    },
+                    'stim': {
+                        'listno': self.session_summaries[0].lists(stim=True),
+                        'recalled': self.session_summaries[
+                            0].recalls_by_list(stim_items_only=True)
+                    },
+                    'stim_events': {
+                        'listno': self.session_summaries[0].lists(),
+                        'count': self.session_summaries[0].stim_events_by_list
+                    }
+                }),
+                'stim_probability': json.dumps({
+                    'serialpos': list(range(1, 13)),
+                    'probability': self.session_summaries[
+                        0].prob_stim_by_serialpos
+                }),
+                'recall_difference': json.dumps({
+                    'stim': self.session_summaries[0].delta_recall(),
+                    'post_stim': self.session_summaries[0].delta_recall(
+                        post_stim_items=True)
+                }),
+                'classifier_output': json.dumps({
+                    'pre_stim': list(self.session_summaries[0].prob_recall),
+                    'post_stim': list(self.session_summaries[0].post_stim_prob_recall)
+                }),
+            }
+        )
+
+    def generate_ps4_report(self):
+        """ Generate a PS4 report.
+
+        Returns
+        -------
+        Rendered PS4 report as a string
 
         """
         fake_ps4_data = {
@@ -234,53 +312,11 @@ class ReportGenerator(object):
             for key in ['encoding', 'distract', 'retrieval', 'sham', 'post_stim']
         }
         fake_ps4_data['amplitude'] = np.linspace(0, 1, 100).tolist()
-
         return self._render(
-            'FR5',
+            'PS4',
             plot_data={  # FIXME: real data
-                'serialpos': json.dumps({
-                    'serialpos': list(range(1, 13)),
-                    'overall': {
-                        'Overall (non-stim)': np.random.random((12,)).tolist(),
-                        'Overall (stim)': np.random.random((12,)).tolist()
-                    },
-                    'first': {
-                        'First recall (non-stim)': np.random.random((12,)).tolist(),
-                        'First recall (stim)': np.random.random((12,)).tolist()
-                    }
-                }),
-                'recall_summary': json.dumps({
-                    'nonstim': {
-                        'listno': [4, 8, 11],
-                        'recalled': [1, 0, 3]
-                    },
-                    'stim': {
-                        'listno': [5, 6, 7, 9, 10, 12, 13],
-                        'recalled': [1, 1, 2, 1, 3, 1, 1]
-                    },
-                    'stim_events': {
-                        'listno': [5, 6, 7, 9, 10, 12, 13],
-                        'count': [random.randint(1, 12) for _ in range(7)]
-                    }
-                }),
-                'stim_probability': json.dumps({
-                    'serialpos': list(range(1, 13)),
-                    'probability': np.random.random((12,)).tolist()
-                }),
-                'recall_difference': json.dumps({
-                    'stim': random.uniform(-60, 60),
-                    'post_stim': random.uniform(-60, 60)
-                }),
-                'classifier_output': json.dumps({
-                    'pre_stim': np.random.random((40,)).tolist(),
-                    'post_stim': np.random.random((40,)).tolist()
-                }),
-
-                # FIXME: only in PS4
                 'ps4': json.dumps(fake_ps4_data),
             },
-
-            # FIXME: only in PS4
             bayesian_optimization_results={
                 'best_loc': 'LAD1_LAD2',
                 'best_ampl': 13.5,

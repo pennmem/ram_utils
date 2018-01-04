@@ -132,7 +132,7 @@ var ramutils = (function (mod, Plotly) {
       const layout = {
         xaxis: {
           title: 'List number',
-          range: [1, Math.max(...nonStimRecalls.listno.concat(stimRecalls.listno)) + 0.5]
+          range: [0, Math.max(...stimEvents.listno) + 0.5]
         },
         yaxis: {
           title: 'Number of items',
@@ -184,7 +184,7 @@ var ramutils = (function (mod, Plotly) {
         xaxis: {title: 'Items'},
         yaxis: {
           title: 'Recall difference [%]',
-          range: [-65, 65]
+          range: [Math.min(stimPercent, postStimPercent, -4) - 1, Math.max(stimPercent, postStimPercent, 0) + 1]
         }
       };
 

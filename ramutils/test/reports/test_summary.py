@@ -304,4 +304,68 @@ class TestFRStimSessionSummary:
     def test_num_stim_lists(self):
         assert self.sample_summary.num_stim_lists == 16
 
+    def test_lists(self):
+        lists = self.sample_summary.lists()
+        assert min(lists) == 1
+        assert max(lists) == 25
+
+        stim_lists = self.sample_summary.lists(stim=True)
+        assert len(stim_lists) == 16
+
+    def test_stim_events_by_list(self):
+        stim_events_by_list = self.sample_summary.stim_events_by_list
+        assert min(stim_events_by_list) == 0
+        assert max(stim_events_by_list) == 9
+
+    def test_prob_stim_by_serialpos(self):
+        prob_stim_by_serialpos = self.sample_summary.prob_stim_by_serialpos
+        assert min(prob_stim_by_serialpos) > .46
+        assert max(prob_stim_by_serialpos) > .52
+        return
+
+    def test_recalls_by_list(self):
+        stim_recalls_by_list = self.sample_summary.recalls_by_list(
+            stim_items_only=True)
+        assert sum(stim_recalls_by_list) == 17
+
+        nonstim_recalls_by_list = self.sample_summary.recalls_by_list(
+            stim_items_only=False)
+        assert sum(nonstim_recalls_by_list) == 38
+
+    def test_prob_first_recall_by_serialpos(self):
+        prob_first_recall_nonstim = self.sample_summary.prob_first_recall_by_serialpos(stim=False)
+        assert max(prob_first_recall_nonstim) < 0.57
+
+        prob_first_recall_stim = self.sample_summary.prob_first_recall_by_serialpos(stim=True)
+        assert max(prob_first_recall_stim) < 0.13
+
+    def test_prob_recall_by_serialpos(self):
+        recall_by_serialpos = self.sample_summary.prob_recall_by_serialpos(
+            stim_items_only=False)
+        assert max(recall_by_serialpos) > 0.29
+        assert min(recall_by_serialpos) < 0.53
+
+        recall_by_serialpos = self.sample_summary.prob_recall_by_serialpos(
+            stim_items_only=True)
+        assert max(recall_by_serialpos) > 0.66
+        assert min(recall_by_serialpos) == 0
+
+    def test_delta_recall(self):
+        delta_recall_stim = self.sample_summary.delta_recall(
+            post_stim_items=False)
+        assert np.isclose(delta_recall_stim, 9.704164)
+
+        delta_recall_post_stim = self.sample_summary.delta_recall(
+            post_stim_items=True)
+        assert np.isclose(delta_recall_post_stim, 5.953408)
+
+    def test_stim_parameters(self):
+        stim_params = self.sample_summary.stim_parameters
+        assert len(stim_params) == 1
+
+    def test_recall_test_results(self):
+        test_results = self.sample_summary.recall_test_results
+        # TODO: Manually check these values to ensure accuracy and add
+        # assertions
+
 

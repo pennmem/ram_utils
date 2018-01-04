@@ -23,9 +23,9 @@
     {% for classifier in classifiers %}
       <tr>
         <td>{{ classifier.metadata['tag'] }}</td>
-        <td>{{ classifier.auc }}</td>
-        <td>{{ classifier.pvalue }}</td>
-        <td>{{ classifier.median_classifier_output }}</td>
+        <td>{{ "{:.3f}".format(classifier.auc) }}</td>
+        <td>{{ "{:.3f}".format(classifier.pvalue) }}</td>
+        <td>{{ "{:.3f}".format(classifier.median_classifier_output) }}</td>
       </tr>
     {% endfor %}
     </tbody>

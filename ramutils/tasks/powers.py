@@ -70,6 +70,11 @@ def compute_normalized_powers(events, **kwargs):
             end_time = kwargs['pal_retrieval_end_time']
             buffer_time = kwargs['pal_retrieval_buf']
 
+        elif subset_name == 'post_stim':
+            start_time = kwargs['post_stim_start_time']
+            end_time = kwargs['post_stim_end_time']
+            buffer_time = kwargs['post_stim_buf']
+
         else:
             raise RuntimeError("Unexpected event subset was encountered")
 

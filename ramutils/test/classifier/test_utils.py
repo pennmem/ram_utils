@@ -12,12 +12,17 @@ datafile = functools.partial(resource_filename,
 
 @pytest.mark.parametrize('subject', [
     'R1354E',
-    'R1365N'
+    'R1365N',
+    'R1345D'
 ])
 def test_reload_classifier(subject):
     container = reload_classifier(subject, 'task', 0, base_path=datafile(
         '/classifiers/{}/'.format(subject)))
-    assert container.classifier is not None
+
+    if subject != 'R1345D':
+        assert container.classifier is not None
+    else:
+        assert container is None
     return
 
 

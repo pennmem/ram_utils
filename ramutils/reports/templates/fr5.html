@@ -4,12 +4,9 @@
 {% endblock %}
 
 {% block report %}
+{% include 'stim_summary.html' %}
 {% include 'session_summary.html' %}
 {% include 'math_summary.html' %}
-
-<!-- FIXME: these should go in PS4-specific report -->
-{% include 'ps4_classifier_output.html' %}
-{% include 'bayesian_optimization.html' %}
 
 {% include 'serialpos_curve.html' %}
 {% include 'classifier.html' %}

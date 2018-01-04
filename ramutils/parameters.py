@@ -116,6 +116,10 @@ class FRParameters(ExperimentParameters):
     retrieval_end_time = Float(0., desc="retrieval end time [s]")
     retrieval_buf = Float(0.524, desc="retrieval buffer time [s]")
 
+    post_stim_start_time = Float(0.030, desc="post stim period start time [s]")
+    post_stim_end_time = Float(0.555, desc="post stim period end time [s]")
+    post_stim_buf = Float(0.524, desc="post stim period buffer time [s]")
+
     encoding_only = Bool(False, desc="use encoding-only classifier")
     encoding_multiplier = Float(2.5, desc="weighting factor for encoding "
                                           "samples")
