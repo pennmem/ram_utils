@@ -161,5 +161,26 @@ class TestCreateReports:
             args += ['-S'] + sessions
 
         create_report(args)
+        return
 
+    @pytest.mark.rhino
+    @pytest.mark.output
+    @pytest.mark.parametrize('subject, experiment, sessions', [
+        ('R1374T', 'CatFR5', [0]),
+        ('R1345D', 'FR5', [0])
+    ])
+    def test_create_stim_session_report(self, subject, experiment, sessions,
+                                        rhino_root, output_dest):
+
+        args = [
+            '--root', rhino_root,
+            '--dest', output_dest,
+            '-s', subject,
+            '-x', experiment
+        ]
+
+        if sessions is not None:
+            args += ['-S'] + sessions
+
+        create_report(args)
         return
