@@ -48,7 +48,7 @@ def reload_classifier(subject, task, session, mount_point='/', base_path=None):
         # No container was found, likely because it is the old .pkl version
         if len(classifier_path) == 0:
             return None
-
+        classifier_path = classifier_path[0]
         orig_classifier_container = ClassifierContainer.load(classifier_path)
         return orig_classifier_container
 
