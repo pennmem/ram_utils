@@ -2,8 +2,6 @@ from __future__ import division
 
 import pandas as pd
 
-from sklearn.externals import joblib
-
 from ramutils.hmm import HierarchicalModel
 from ramutils.log import get_logger
 from ramutils.tasks import task
