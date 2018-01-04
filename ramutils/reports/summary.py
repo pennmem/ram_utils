@@ -15,7 +15,7 @@ from traitschema import Schema
 from traits.api import Array, ArrayOrNone, Float, String, DictStrAny, Dict
 
 from sklearn.metrics import roc_auc_score, roc_curve
-
+from statsmodels.stats.proportion import proportions_chisquare
 
 
 
@@ -679,6 +679,67 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
                                'region', 'amplitude', 'duration',
                                'pulse_frequency']].drop_duplicates().dropna()
         return unique_stim_info.T.to_dict().values()
+
+    @property
+    def recall_test_results(self):
+        df = self.to_dataframe()
+        results = []
+
+        # Stim lists vs. non-stim lists
+        n_correct_stim_list_recalls = df[df.is_stim_list == True].recalled.sum()
+        n_correct_nonstim_list_recalls = df[df.is_stim_list ==
+                                            False].recalled.sum()
+        n_stim_list_words = df[df.is_stim_list == True].recalled.count()
+        n_nonstim_list_words = df[df.is_stim_list == False].recalled.count()
+        tstat_list, pval_list, _ = proportions_chisquare([
+            n_correct_stim_list_recalls, n_correct_nonstim_list_recalls],
+            [n_stim_list_words, n_nonstim_list_words])
+
+        results.append({"comparison": "Stim Lists vs. Non-stim Lists",
+                        "stim": (n_correct_stim_list_recalls,
+                                 n_stim_list_words),
+                        "non-stim": (n_correct_nonstim_list_recalls, n_nonstim_list_words),
+                        "t-stat": tstat_list,
+                        "p-value": pval_list})
+
+        # stim items vs. non-stim low biomarker items
+        n_correct_stim_item_recalls = df[df.is_stim_item == True].recalled.sum()
+        n_correct_nonstim_item_recalls = df[(df.is_stim_item == False) &
+                                            (df.prob_recall < 0.5)].recalled.sum()
+
+        n_stim_items = df[df.is_stim_item == True].recalled.count()
+        n_nonstim_items = df[(df.is_stim_item == False) &
+                             (df.prob_recall < 0.5)].recalled.count()
+
+        tstat_list, pval_list, _ = proportions_chisquare(
+            [n_correct_stim_item_recalls, n_correct_nonstim_item_recalls],
+            [n_stim_items, n_nonstim_items])
+
+        results.append({
+            "comparison": "Stim Items vs. Low Biomarker Non-stim Items",
+            "stim": (n_correct_stim_item_recalls, n_stim_items),
+            "non-stim": (n_correct_nonstim_item_recalls, n_nonstim_items),
+            "t-stat": tstat_list,
+            "p-value": pval_list})
+
+        # post stim items vs. non-stim low biomarker items
+        n_correct_post_stim_item_recalls = df[df.is_post_stim_item ==
+                                              True].recalled.sum()
+
+        n_post_stim_items = df[df.is_post_stim_item == True].recalled.count()
+
+        tstat_list, pval_list, _ = proportions_chisquare(
+            [n_correct_post_stim_item_recalls, n_correct_nonstim_item_recalls],
+            [n_post_stim_items, n_nonstim_items])
+
+        results.append({
+            "comparison": "Post-stim Items vs. Low Biomarker Non-stim Items",
+            "stim": (n_correct_post_stim_item_recalls, n_post_stim_items),
+            "non-stim": (n_correct_nonstim_item_recalls, n_nonstim_items),
+            "t-stat": tstat_list,
+            "p-value": pval_list})
+
+        return results
 
     def recalls_by_list(self, stim_items_only=False):
         df = self.to_dataframe()

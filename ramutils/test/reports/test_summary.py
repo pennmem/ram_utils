@@ -366,4 +366,9 @@ class TestFRStimSessionSummary:
         assert params['stim_anode_tag'] == 'LA7'
         assert params['stim_cathode_tag'] == 'LA8'
 
+    def test_recall_test_results(self):
+        test_results = self.sample_summary.recall_test_results
+        # TODO: Manually check these values to ensure accuracy and add
+        # assertions
+
 
