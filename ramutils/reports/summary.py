@@ -804,10 +804,11 @@ class FR5SessionSummary(FRStimSessionSummary):
     recognized = Array(dtype=int, desc='item in recognition subtask recognized')
     rejected = Array(dtype=int, desc='lure item in recognition subtask rejected')
 
-    def populate(self, events, raw_events=None, recall_probs=None,
-                 is_ps4_session=False):
+    def populate(self, events, post_stim_prob_recall=None, raw_events=None,
+                 recall_probs=None, is_ps4_session=False):
         FRStimSessionSummary.populate(self, events,
                                       raw_events=raw_events,
+                                      post_stim_prob_recall=post_stim_prob_recall,
                                       recall_probs=recall_probs,
                                       is_ps4_session=is_ps4_session)
         self.recognized = events.recognized
