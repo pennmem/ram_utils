@@ -43,7 +43,12 @@ def reload_classifier(subject, task, session, mount_point='/', base_path=None):
         # Return the original classifier
         config_path = os.path.join(timestamped_dirs[0], 'config_files')
         classifier_path = glob(os.path.join(config_path,
-                                            '*classifier*.zip'))[0]
+                                            '*classifier*.zip'))
+
+        # No container was found, likely because it is the old .pkl version
+        if len(classifier_path) == 0:
+            return None
+
         orig_classifier_container = ClassifierContainer.load(classifier_path)
         return orig_classifier_container
 
@@ -62,7 +67,10 @@ def reload_classifier(subject, task, session, mount_point='/', base_path=None):
                                             '*classifier*.zip'))[0]
     else:
         classifier_path = glob(os.path.join(config_path,
-                                            '*classifier*.zip'))[0]
+                                            '*classifier*.zip'))
+        if len(classifier_path) == 0:
+            return None
+        classifier_path = classifier_path[0]
     classifier_container = ClassifierContainer.load(classifier_path)
 
     return classifier_container
