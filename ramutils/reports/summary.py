@@ -293,7 +293,6 @@ class SessionSummary(Summary):
                 'irt_within_cat',
                 'irt_between_cat',
                 'rejected',
-                'region',  # FIXME: don't ignore
             ]
 
             # also ignore phase for events that predate it
@@ -673,6 +672,14 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
 
         return lists
 
+    @property
+    def stim_parameters(self):
+        df = self.to_dataframe()
+        unique_stim_info = df[['stim_anode_tag', 'stim_cathode_tag',
+                               'region', 'amplitude', 'duration',
+                               'pulse_frequency']].drop_duplicates().dropna()
+        return unique_stim_info.T.to_dict().values()
+
     def recalls_by_list(self, stim_items_only=False):
         df = self.to_dataframe()
         recalls_by_list = df[df.is_stim_item == stim_items_only].groupby(
@@ -713,7 +720,6 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         delta_recall = 100 * (recall_stim - nonstim_low_bio_recall)
 
         return delta_recall
-
 
 
 class FR5SessionSummary(FRStimSessionSummary):

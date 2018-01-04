@@ -359,3 +359,11 @@ class TestFRStimSessionSummary:
             post_stim_items=True)
         assert np.isclose(delta_recall_post_stim, 5.953408)
 
+    def test_stim_parameters(self):
+        stim_params = self.sample_summary.stim_parameters
+        assert len(stim_params) == 1
+        params = stim_params[0]
+        assert params['stim_anode_tag'] == 'LA7'
+        assert params['stim_cathode_tag'] == 'LA8'
+
+

@@ -234,6 +234,7 @@ class ReportGenerator(object):
         """
         return self._render(
             'FR5',
+            stim_params=self.session_summaries[0].stim_parameters,
             plot_data={  # FIXME: real data
                 'roc': json.dumps({
                     'fpr': [classifier.false_positive_rate for classifier in self.classifiers],
