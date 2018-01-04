@@ -293,6 +293,7 @@ class SessionSummary(Summary):
                 'irt_within_cat',
                 'irt_between_cat',
                 'rejected',
+                'post_stim_prob_recall'
             ]
 
             # also ignore phase for events that predate it
@@ -579,6 +580,8 @@ class StimSessionSummary(SessionSummary):
     is_stim_item = Array(dtype=np.bool, desc='stimulation occurred on this item')
     is_ps4_session = Array(dtype=np.bool, desc='list is part of a PS4 session')
     prob_recall = Array(dtype=np.float, desc='probability of recalling a word')
+    post_stim_prob_recall = Array(dtype=np.float, desc='classifier output in '
+                                                       'post stim period')
 
     stim_anode_tag = Array(desc='stim anode label')
     stim_cathode_tag = Array(desc='stim cathode label')
@@ -587,17 +590,24 @@ class StimSessionSummary(SessionSummary):
     amplitude = Array(dtype=np.float64, desc='stim amplitude [mA]')
     duration = Array(dtype=np.float64, desc='stim duration [ms]')
 
-    def populate_from_dataframe(self, df, raw_events=None, is_ps4_session=False):
+    def populate_from_dataframe(self, df, post_stim_prob_recall=None,
+                                raw_events=None, is_ps4_session=False):
         events = df.to_records(index=False)
-        self.populate(events, raw_events=raw_events,
+        self.populate(events,
+                      post_stim_prob_recall=post_stim_prob_recall,
+                      raw_events=raw_events,
                       is_ps4_session=is_ps4_session)
 
-    def populate(self, events, raw_events=None, is_ps4_session=False):
-        """Populate stim data from events.
+    def populate(self, events, post_stim_prob_recall=None,
+                 raw_events=None,
+                 is_ps4_session=False):
+        """ Populate stim data from events.
 
         Parameters
         ----------
         events : np.recarray
+        post_stim_prob_recall: np.array
+            Classifier outputs during post stim period
         raw_events: np.recarray
         is_ps4_session : bool
             Whether or not this experiment is also a PS4 session.
@@ -610,6 +620,7 @@ class StimSessionSummary(SessionSummary):
         self.is_post_stim_item = events.is_post_stim_item
         self.is_ps4_session = [is_ps4_session] * len(events)
         self.prob_recall = events.classifier_output
+        self.post_stim_prob_recall = post_stim_prob_recall
 
         self.region = events.location
         self.stim_anode_tag = events.stimAnodeTag
@@ -621,13 +632,14 @@ class StimSessionSummary(SessionSummary):
 
 class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
     """ SessionSummary for FR sessions with stim """
-    def populate(self, events, raw_events=None, recall_probs=None,
-                 is_ps4_session=False):
+    def populate(self, events, post_stim_prob_recall=None, raw_events=None,
+                 recall_probs=None, is_ps4_session=False):
         FRSessionSummary.populate(self,
                                   events,
                                   raw_events=raw_events,
                                   recall_probs=recall_probs)
         StimSessionSummary.populate(self, events,
+                                    post_stim_prob_recall=post_stim_prob_recall,
                                     raw_events=raw_events,
                                     is_ps4_session=is_ps4_session)
 

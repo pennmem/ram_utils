@@ -291,8 +291,7 @@ class ReportGenerator(object):
                 }),
                 'classifier_output': json.dumps({
                     'pre_stim': list(self.session_summaries[0].prob_recall),
-                    # FIXME: REAL DATA
-                    'post_stim': np.random.normal(0.5, 0.05, size=300).tolist()
+                    'post_stim': list(self.session_summaries[0].post_stim_prob_recall)
                 }),
             }
         )

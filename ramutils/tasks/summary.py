@@ -126,6 +126,7 @@ def summarize_nonstim_sessions(all_events, task_events, joint=False,
 @task()
 def summarize_stim_sessions(all_events, task_events, stim_params,
                             encoding_classifier_summaries,
+                            post_stim_predicted_probs,
                             pairs_data):
     """ Construct stim session summaries """
     sessions = extract_sessions(task_events)
@@ -186,7 +187,8 @@ def summarize_stim_sessions(all_events, task_events, stim_params,
         if experiment in ['FR5', 'catFR5']:
             stim_session_summary = FRStimSessionSummary()
             stim_session_summary.populate_from_dataframe(
-                stim_df, raw_events=all_session_events)
+                stim_df, raw_events=all_session_events,
+                post_stim_prob_recall=post_stim_predicted_probs[i])
         else:
             raise UnsupportedExperimentError('Only FR5 and catFR5 currently '
                                              'implemented')

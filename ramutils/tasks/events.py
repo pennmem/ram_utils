@@ -5,6 +5,8 @@ from ramutils.events import load_events, clean_events, select_word_events, \
 from ramutils.events import get_word_event_mask as get_word_event_mask_core
 from ramutils.events import get_repetition_ratio_dict as \
     get_repetition_ratio_dict_core
+from ramutils.events import get_post_stim_events_mask as \
+    get_post_stim_events_mask_core
 from ramutils.tasks import task
 from ramutils.utils import extract_experiment_series
 
@@ -13,13 +15,19 @@ __all__ = [
     'subset_events',
     'build_test_data',
     'build_training_data',
-    'get_repetition_ratio_dict'
+    'get_repetition_ratio_dict',
+    'get_post_stim_events_mask',
 ]
 
 
 @task(cache=False)
 def get_word_event_mask(events, encoding_only):
     return get_word_event_mask_core(events, encoding_only)
+
+
+@task(cache=False)
+def get_post_stim_events_mask(events):
+    return get_post_stim_events_mask_core(events)
 
 
 @task(cache=False)

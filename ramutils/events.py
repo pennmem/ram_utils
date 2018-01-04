@@ -1201,6 +1201,11 @@ def get_recall_events_mask(events):
     return recall_mask
 
 
+def get_post_stim_events_mask(events):
+    post_stim_events_mask = (events.type == 'STIM_OFF')
+    return post_stim_events_mask
+
+
 def partition_events(events):
     """
     Split a given set of events into partitions by experiment class (
@@ -1220,18 +1225,21 @@ def partition_events(events):
 
     retrieval_mask = get_all_retrieval_events_mask(events)
     pal_mask = (events.experiment == "PAL1")
+    post_stim_mask = get_post_stim_events_mask(events)
 
-    fr_encoding = events[(~retrieval_mask & ~pal_mask)]
+    fr_encoding = events[(~retrieval_mask & ~pal_mask & ~post_stim_mask)]
     fr_retrieval = events[(retrieval_mask & ~pal_mask)]
     pal_encoding = events[(~retrieval_mask & pal_mask)]
     pal_retrieval = events[(retrieval_mask & pal_mask)]
+    post_stim = events[post_stim_mask]
 
     # Only add partitions with actual events
     final_partitions = {
         'fr_encoding': fr_encoding,
         'fr_retrieval': fr_retrieval,
         'pal_encoding': pal_encoding,
-        'pal_retrieval': pal_retrieval
+        'pal_retrieval': pal_retrieval,
+        'post_stim': post_stim
     }
     return final_partitions
 
@@ -1244,18 +1252,21 @@ def get_partition_masks(events):
     """
     retrieval_mask = get_all_retrieval_events_mask(events)
     pal_mask = (events.experiment == "PAL1")
+    post_stim_mask = get_post_stim_events_mask(events)
 
     fr_encoding = (~retrieval_mask & ~pal_mask)
     fr_retrieval = (retrieval_mask & ~pal_mask)
     pal_encoding = (~retrieval_mask & pal_mask)
     pal_retrieval = (retrieval_mask & pal_mask)
+    post_stim = post_stim_mask
 
     # Only add partitions with actual events
     partition_masks = {
         'fr_encoding': fr_encoding,
         'fr_retrieval': fr_retrieval,
         'pal_encoding': pal_encoding,
-        'pal_retrieval': pal_retrieval
+        'pal_retrieval': pal_retrieval,
+        'post_stim': post_stim
     }
 
     return partition_masks

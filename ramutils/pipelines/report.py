@@ -148,6 +148,12 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                        repetition_ratio_dict=repetition_ratio_dict)
 
     if stim_report:
+        # We need post stim period events/powers
+        post_stim_mask = get_post_stim_events_mask(all_events)
+        post_stim_events = subset_events(all_events, post_stim_mask)
+        post_stim_powers, final_post_stim_events = compute_normalized_powers(
+           post_stim_events, **kwargs)
+
         powers, final_task_events = compute_normalized_powers(task_events,
                                                               **kwargs)
         used_classifiers = reload_used_classifiers(subject,
@@ -193,6 +199,8 @@ def make_report(subject, experiment, paths, joint_report=False,
 
         post_hoc_results = post_hoc_classifier_evaluation(final_task_events,
                                                           powers,
+                                                          final_post_stim_events,
+                                                          post_stim_powers,
                                                           ec_pairs,
                                                           used_classifiers,
                                                           kwargs['n_perm'],
@@ -202,6 +210,7 @@ def make_report(subject, experiment, paths, joint_report=False,
         session_summaries = summarize_stim_sessions(
             all_events, final_task_events, stim_params,
             post_hoc_results['session_summaries_stim_table'],
+            post_hoc_results['post_stim_predicted_probs'],
             pairs_metadata_table)
 
         # TODO: Commented out until we have a clean way to plot results from
