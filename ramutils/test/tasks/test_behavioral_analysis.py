@@ -11,7 +11,9 @@ datafile = functools.partial(resource_filename,
                              'ramutils.test.test_data.input')
 
 
-@pytest.mark.slow
+# Not really a rhino test, but it is so slow that we don't want it running
+# all the time
+@pytest.mark.rhino
 def test_estimate_effects_of_stim():
     sample_df = pd.read_csv(datafile(
         "/summaries/sample_stim_session_summary.csv"))
