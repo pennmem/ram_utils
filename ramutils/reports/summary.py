@@ -580,8 +580,8 @@ class StimSessionSummary(SessionSummary):
     is_stim_item = Array(dtype=np.bool, desc='stimulation occurred on this item')
     is_ps4_session = Array(dtype=np.bool, desc='list is part of a PS4 session')
     prob_recall = Array(dtype=np.float, desc='probability of recalling a word')
-    post_stim_prob_recall = Array(dtype=np.float, desc='classifier output in '
-                                                       'post stim period')
+    post_stim_prob_recall = ArrayOrNone(dtype=np.float,
+                                        desc='classifier output in post stim period')
 
     stim_anode_tag = Array(desc='stim anode label')
     stim_cathode_tag = Array(desc='stim cathode label')
