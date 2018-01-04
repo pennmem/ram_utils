@@ -1,0 +1,27 @@
+<div class="plot stim-params">
+  <h2>Stimulation Parameter Summary</h2>
+  <table class="table table-striped table-hover">
+    <thead>
+    <tr>
+      <th>Anode</th>
+      <th>Cathode</th>
+      <th>Region</th>
+      <th>Amplitude</th>
+      <th>Duration</th>
+      <th>Pulse Frequency</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for stim_param in stim_params %}
+      <tr>
+        <td>{{ stim_param['stim_anode_tag'] }}</td>
+        <td>{{ stim_param['stim_cathode_tag'] }}</td>
+        <td>{{ stim_param['region'] }}</td>
+        <td>{{ stim_param['amplitude'] }}</td>
+        <td>{{ stim_param['duration'] }}</td>
+        <td>{{ stim_param['pulse_frequency'] }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+ </div>
