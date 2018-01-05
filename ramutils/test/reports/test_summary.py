@@ -11,7 +11,7 @@ from numpy.testing import assert_equal, assert_almost_equal
 from traits.api import ListInt, ListFloat, ListBool
 
 from ramutils.reports.summary import *
-
+from ramutils.tasks.events import build_ps_data
 datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
 
 
@@ -372,12 +372,13 @@ class TestFRStimSessionSummary:
         # assertions
 
 
+@pytest.mark.rhino
 class TestPSSessionSummary:
     @classmethod
     def setup_class(cls):
-        sample_events_file = datafile(
-            "/input/events/R1374T_sample_ps_events.npy")
-        cls.sample_events = np.rec.array(np.load(sample_events_file))
+        # Events file is too large to store in repo, so build it from scratch
+        cls.sample_events = build_ps_data('R1374T', 'catFR5', 'ps4_events',
+                                          None, '/Volumes/RHINO/').compute()
         cls.sample_summary = PSSessionSummary()
 
     def test_populate(self):
