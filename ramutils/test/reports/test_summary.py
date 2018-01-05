@@ -372,3 +372,38 @@ class TestFRStimSessionSummary:
         # assertions
 
 
+class TestPSSessionSummary:
+    @classmethod
+    def setup_class(cls):
+        sample_events_file = datafile(
+            "/input/events/R1374T_sample_ps_events.npy")
+        cls.sample_events = np.rec.array(np.load(sample_events_file))
+        cls.sample_summary = PSSessionSummary()
+
+    def test_populate(self):
+        self.sample_summary.populate(self.sample_events)
+        assert len(self.sample_summary.events) == 3068
+
+    def test_to_dataframe(self):
+        self.sample_summary.populate(self.sample_events)
+        df = self.sample_summary.to_dataframe()
+        assert len(df) == 3068
+
+    def test_decision(self):
+        self.sample_summary.populate(self.sample_events)
+        decision = self.sample_summary.decision
+        assert decision['best_amplitude'] == 0.998
+        assert decision['best_location'] == 'LA7_LA8'
+        assert np.isclose(decision['pval'], 0.00608, 1e-3)
+
+    def test_location_summary(self):
+        self.sample_summary.populate(self.sample_events)
+        location_summaries = self.sample_summary.location_summary
+        assert np.isclose(location_summaries['LA7_LA8'][
+                              'best_delta_classifier'], 0.030218, 1e-3)
+        assert np.isclose(location_summaries['LC6_LC7'][
+                              'best_delta_classifier'], 0.01033, 1e-3)
+
+
+
+

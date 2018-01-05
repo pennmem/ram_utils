@@ -218,6 +218,11 @@ def make_report(subject, experiment, paths, joint_report=False,
         # behavioral_results = estimate_effects_of_stim(subject, experiment,
         #     session_summaries).compute()
 
+    elif stim_report and 'PS' in experiment:
+        ps_events = build_ps_data(subject, experiment, 'ps4_events',
+                                  sessions, paths.root)
+        session_summaries = summarize_ps_sessions(ps_events)
+
     # TODO: Add task that saves out all necessary underlying data
 
     math_summaries = summarize_math(all_events, joint=joint_report)
