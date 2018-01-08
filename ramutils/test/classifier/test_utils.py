@@ -1,6 +1,7 @@
 import pytest
 import functools
 import numpy as np
+from sklearn.externals import joblib
 
 from pkg_resources import resource_filename
 from ramutils.classifier.utils import reload_classifier, train_classifier
