@@ -167,7 +167,8 @@ class TestCreateReports:
     @pytest.mark.output
     @pytest.mark.parametrize('subject, experiment, sessions', [
         ('R1374T', 'CatFR5', [0]),
-        ('R1345D', 'FR5', [0])
+        ('R1345D', 'FR5', [0]),
+        ('R1374T', 'PS4_CatFR5', None)
     ])
     def test_create_stim_session_report(self, subject, experiment, sessions,
                                         rhino_root, output_dest):
