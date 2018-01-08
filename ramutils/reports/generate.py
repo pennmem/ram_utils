@@ -23,9 +23,10 @@ class ReportGenerator(object):
         List of session summaries. The type of report to run is inferred from
         the included summaries.
     math_summaries : List[MathSummary]
-        List of math distractor summaries.
+        List of math distractor summaries. Can be an empty list for PS stim
+        sessions
     sme_table: pd.DataFrame
-        Subsequent memory effect table
+        Subsequent memory effect table. Can be empty for any stim report
     dest : str
         Directory to write output to.
 
@@ -45,7 +46,7 @@ class ReportGenerator(object):
 
     Supported reports:
 
-    * FR1
+    * FR1, catFR1, FR5, catFR5, PS4
 
     """
     def __init__(self, session_summaries, math_summaries,
@@ -58,17 +59,18 @@ class ReportGenerator(object):
         catfr_summary_mask = [summary.experiment == 'catFR1' for summary in
                               self.session_summaries]
         self.catfr_summaries = list(compress(self.session_summaries, catfr_summary_mask))
-
-        # FIXME: PS4 has no math summaries, so this check won't work
-        # if len(session_summaries) != len(math_summaries):
-        #     raise ValueError("Summaries contain different numbers of sessions")
-        #
         self.subject = extract_subject(self.session_summaries[0].events)
-        # for i in range(len(session_summaries)):
-        #     s_subj = session_summaries[i].events.subject == self.subject
-        #     m_subj = math_summaries[i].events.subject == self.subject
-        #     if not (all(s_subj) or all(m_subj)):
-        #         raise ValueError("Subjects should all match")
+
+        # PS has not math summaries, so only check for non-PS experiments
+        if all(['PS' not in exp for exp in self.experiments]):
+            if len(session_summaries) != len(math_summaries):
+                raise ValueError("Summaries contain different numbers of sessions")
+
+            for i in range(len(session_summaries)):
+                s_subj = session_summaries[i].events.subject == self.subject
+                m_subj = math_summaries[i].events.subject == self.subject
+                if not (all(s_subj) or all(m_subj)):
+                    raise ValueError("Subjects should all match")
 
         self._env = Environment(
             loader=PackageLoader('ramutils.reports', 'templates'),
@@ -102,10 +104,10 @@ class ReportGenerator(object):
     @property
     def experiments(self):
         """Returns a list of experiments found in the session summaries."""
-        unique_events = [np.unique(extract_experiment_from_events(
+        unique_experiments = [np.unique(extract_experiment_from_events(
             summary.events)) for summary in self.session_summaries]
-        unique_events = np.array(unique_events).flatten()
-        return  unique_events
+        unique_experiments = np.array(unique_experiments).flatten()
+        return unique_experiments
 
     def _make_sme_table(self):
         """ Create data for the SME table for record-only experiments. """

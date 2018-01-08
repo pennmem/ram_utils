@@ -66,7 +66,10 @@ def make_report(subject, experiment, paths, joint_report=False,
     if 'PS' not in experiment:
         # all_events are used for producing math summaries. Task events are only
         # used by the stim reports. Non-stim reports create a different set of
-        # events. Stim params are used in building the stim session summaries
+        # events. Stim params are used in building the stim session
+        # summaries. PS experiments do not have an all_events.json file,
+        # which is what these subsets are built from, so PS has it's own
+        # build_*_data function
         all_events, task_events, stim_params = build_test_data(subject,
                                                                experiment,
                                                                paths,

@@ -341,7 +341,7 @@ var ramutils = (function (mod, Plotly) {
               name: 'Retrieval',
               xaxis: xaxis,
             }
-            // Add back once we actually produce sham data results
+            // TODO: Add back once we actually produce sham data results
 //            {
 //              x: data_dict[labels[i]]['sham']['amplitude'],
 //              y: data_dict[labels[i]]['sham']['delta_classifier'],
@@ -381,7 +381,7 @@ var ramutils = (function (mod, Plotly) {
               name: 'Retrieval',
               xaxis: xaxis
             }
-            // Add back once we actually produce sham data results
+            // TODO: Add back once we actually produce sham data results
 //            {
 //              x: data_dict[labels[i]]['sham']['amplitude'],
 //              y: data_dict[labels[i]]['sham']['delta_classifier'],
