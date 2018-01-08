@@ -305,73 +305,93 @@ var ramutils = (function (mod, Plotly) {
      * Plot classifier output as a function of amplitude for each stim site in
      * PS4. Each parameter (other than amplitude) should have keys that match
      * the stim channel labels.
-     * @param {Array} amplitude
      * @param {Object} encoding
      * @param {Object} distract
      * @param {Object} retrieval
      * @param {Object} sham
      * @param {Object} postStim
      */
-    plotPS4ClassifierOutput: function(amplitude, encoding, distract, retrieval, sham, postStim) {
-      const labels = Object.keys(encoding);
+    plotPS4ClassifierOutput: function(data_dict) {
+      const labels = Object.keys(data_dict);
 
       const deltaClassifierData = (() => {
         let data = [];
 
-        for (let i = 0; i < 2; i++) {
+        for (let i = 0; i < labels.length; i++) {
           const xaxis = i == 0 ? 'x' : 'x2';
           data.push(
             {
-              x: amplitude,
-              y: encoding[labels[i]],
+              x: data_dict[labels[i]]['amplitude']['ENCODING'],
+              y: data_dict[labels[i]]['delta_classifier']['ENCODING'],
               mode: 'markers',
               name: 'Encoding',
-              xaxis: xaxis
+              xaxis: xaxis,
             },
             {
-              x: amplitude,
-              y: distract[labels[i]],
+              x: data_dict[labels[i]]['amplitude']['DISTRACT'],
+              y: data_dict[labels[i]]['delta_classifier']['DISTRACT'],
               mode: 'markers',
               name: 'Distract',
-              xaxis: xaxis
+              xaxis: xaxis,
             },
             {
-              x: amplitude,
-              y: retrieval[labels[i]],
+              x: data_dict[labels[i]]['amplitude']['RETRIEVAL'],
+              y: data_dict[labels[i]]['delta_classifier']['RETRIEVAL'],
               mode: 'markers',
               name: 'Retrieval',
-              xaxis: xaxis
-            },
-            {
-              x: amplitude,
-              y: sham[labels[i]],
-              mode: 'markers',
-              name: 'Sham',
-              xaxis: xaxis
+              xaxis: xaxis,
             }
+            // Add back once we actually produce sham data results
+//            {
+//              x: data_dict[labels[i]]['sham']['amplitude'],
+//              y: data_dict[labels[i]]['sham']['delta_classifier'],
+//              mode: 'markers',
+//              name: 'Sham',
+//              xaxis: xaxis
+//            }
           );
         }
 
         return data;
       })();
 
-      const postData = (() => {
-        return [
-          {
-            x: amplitude,
-            y: postStim[labels[0]],
-            mode: 'markers',
-            name: labels[0]
-          },
-          {
-            x: amplitude,
-            y: postStim[labels[1]],
-            mode: 'markers',
-            xaxis: 'x2',
-            // yaxis: 'y2',
-            name: labels[1]
-          }
-        ];
+      const postStimClassifierData = (() => {
+        let post_data = [];
+        for (let i = 0; i < labels.length; i++) {
+          const xaxis = i == 0 ? 'x' : 'x2';
+          post_data.push(
+            {
+              x: data_dict[labels[i]]['post_stim_amplitude']['ENCODING'],
+              y: data_dict[labels[i]]['post_stim_biomarker']['ENCODING'],
+              mode: 'markers',
+              name: 'Encoding',
+              xaxis: xaxis
+            },
+            {
+              x: data_dict[labels[i]]['post_stim_amplitude']['DISTRACT'],
+              y: data_dict[labels[i]]['post_stim_biomarker']['DISTRACT'],
+              mode: 'markers',
+              name: 'Distract',
+              xaxis: xaxis
+            },
+            {
+              x: data_dict[labels[i]]['post_stim_amplitude']['RETRIEVAL'],
+              y: data_dict[labels[i]]['post_stim_biomarker']['RETRIEVAL'],
+              mode: 'markers',
+              name: 'Retrieval',
+              xaxis: xaxis
+            }
+            // Add back once we actually produce sham data results
+//            {
+//              x: data_dict[labels[i]]['sham']['amplitude'],
+//              y: data_dict[labels[i]]['sham']['delta_classifier'],
+//              mode: 'markers',
+//              name: 'Sham',
+//              xaxis: xaxis
+//            }
+          );
+        }
+        return post_data
       })();
 
       const layout = {
@@ -389,7 +409,7 @@ var ramutils = (function (mod, Plotly) {
       };
 
       Plotly.plot('ps4-delta-classifier-placeholder', deltaClassifierData, layout);
-      Plotly.plot('ps4-post-classifier-placeholder', postData, layout);
+      Plotly.plot('ps4-post-classifier-placeholder', postStimClassifierData, layout);
     }
   };
 

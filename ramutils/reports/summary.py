@@ -912,10 +912,10 @@ class PSSessionSummary(SessionSummary):
 
         for location, loc_events in events_by_location:
             location_summary = {
-               'amplitudes': {},
-               'delta_classifiers': {},
-               'post_stim_biomarkers': {},
-               'post_stim_amplitudes': {},
+               'amplitude': {},
+               'delta_classifier': {},
+               'post_stim_biomarker': {},
+               'post_stim_amplitude': {},
                'best_amplitude': '',
                'best_delta_classifier': '',
                'sem': '',
@@ -940,14 +940,15 @@ class PSSessionSummary(SessionSummary):
                     else:
                         loc_decision_info = decision['loc2']
 
-                    location_summary['amplitudes'][phase] \
-                        = phase_opt_events.amplitude.values/1000.
-                    location_summary['delta_classifiers'][phase] = \
-                        phase_opt_events.delta_classifier.values
-                    location_summary['post_stim_biomarkers'][
-                        phase] = post_stim_phase_events.biomarker_value
-                    location_summary['post_stim_amplitudes'][phase] = \
-                        post_stim_phase_events.amplitude.values/1000.
+                    location_summary['amplitude'][phase] \
+                        = (phase_opt_events.amplitude.values / 1000.).tolist()
+                    location_summary['delta_classifier'][phase] = \
+                        phase_opt_events.delta_classifier.values.tolist()
+                    location_summary['post_stim_biomarker'][
+                        phase] = post_stim_phase_events.biomarker_value.tolist()
+                    location_summary['post_stim_amplitude'][phase] = \
+                        (post_stim_phase_events.amplitude.values /
+                         1000.).tolist()
 
                     if len(loc_decision_info) > 0:
                         location_summary['best_amplitude'] = float(

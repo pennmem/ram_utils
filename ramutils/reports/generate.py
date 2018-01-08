@@ -59,15 +59,16 @@ class ReportGenerator(object):
                               self.session_summaries]
         self.catfr_summaries = list(compress(self.session_summaries, catfr_summary_mask))
 
-        if len(session_summaries) != len(math_summaries):
-            raise ValueError("Summaries contain different numbers of sessions")
-
+        # FIXME: PS4 has no math summaries, so this check won't work
+        # if len(session_summaries) != len(math_summaries):
+        #     raise ValueError("Summaries contain different numbers of sessions")
+        #
         self.subject = extract_subject(self.session_summaries[0].events)
-        for i in range(len(session_summaries)):
-            s_subj = session_summaries[i].events.subject == self.subject
-            m_subj = math_summaries[i].events.subject == self.subject
-            if not (all(s_subj) or all(m_subj)):
-                raise ValueError("Subjects should all match")
+        # for i in range(len(session_summaries)):
+        #     s_subj = session_summaries[i].events.subject == self.subject
+        #     m_subj = math_summaries[i].events.subject == self.subject
+        #     if not (all(s_subj) or all(m_subj)):
+        #         raise ValueError("Subjects should all match")
 
         self._env = Environment(
             loader=PackageLoader('ramutils.reports', 'templates'),
@@ -173,7 +174,10 @@ class ReportGenerator(object):
 
         """
         series = extract_experiment_series(self.experiments[0])
-        if series == '5':
+        if all(['PS' in exp for exp in self.experiments]) and series == '5':
+            return self.generate_ps4_report()
+
+        elif series == '5':
             return self.generate_fr5_report()
 
         elif all(['FR' in exp for exp in self.experiments]):
@@ -184,6 +188,7 @@ class ReportGenerator(object):
 
         elif (np.array(self.experiments) == 'FR5').all():
             return self.generate_fr5_report()
+
         else:
             raise NotImplementedError("Unsupported report type")
 
@@ -204,8 +209,6 @@ class ReportGenerator(object):
             experiment=experiment,
             summaries=self.session_summaries,
             math_summaries=self.math_summaries,
-            combined_summary=self._make_combined_summary(),
-            classifiers=self.classifiers,
             **kwargs
         )
 
@@ -219,6 +222,8 @@ class ReportGenerator(object):
         """
         return self._render(
             'FR1',
+            combined_summary=self._make_combined_summary(),
+            classifiers=self.classifiers,
             plot_data=self._make_fr_plot_data(joint=joint),
             sme_table=self._make_sme_table(),
             joint=joint
@@ -234,9 +239,11 @@ class ReportGenerator(object):
         """
         return self._render(
             'FR5',
+            combined_summary=self._make_combined_summary(),
+            classifiers=self.classifiers,
             stim_params=self.session_summaries[0].stim_parameters,
-            recall_tests = self.session_summaries[0].recall_test_results,
-            plot_data={  # FIXME: real data
+            recall_tests=self.session_summaries[0].recall_test_results,
+            plot_data={
                 'roc': json.dumps({
                     'fpr': [classifier.false_positive_rate for classifier in self.classifiers],
                     'tpr': [classifier.true_positive_rate for classifier in self.classifiers],
@@ -304,35 +311,30 @@ class ReportGenerator(object):
         Rendered PS4 report as a string
 
         """
-        fake_ps4_data = {
-            key: {
-                'CH1': np.random.random((100,)).tolist(),
-                'CH2': np.random.random((100,)).tolist()
-            }
-            for key in ['encoding', 'distract', 'retrieval', 'sham', 'post_stim']
-        }
-        fake_ps4_data['amplitude'] = np.linspace(0, 1, 100).tolist()
+        location_summary_data = self.session_summaries[0].location_summary
+        decision_summary = self.session_summaries[0].decision
+
         return self._render(
             'PS4',
-            plot_data={  # FIXME: real data
-                'ps4': json.dumps(fake_ps4_data),
+            plot_data={
+                'ps4': json.dumps(location_summary_data),
             },
             bayesian_optimization_results={
-                'best_loc': 'LAD1_LAD2',
-                'best_ampl': 13.5,
+                'best_loc': decision_summary['best_location'],
+                'best_ampl': decision_summary['best_amplitude'],
                 'p_values': {
-                    'between': random.uniform(0.001, 0.05),
-                    'sham': random.uniform(0.1, 0.5)
+                    'between': decision_summary['pval'],
+                    'sham': decision_summary['pval_vs_sham']
                 },
-                'tie': random.choice([True, False]),
+                'tie': decision_summary['tie'],
                 'channels': {
                     channel: {
-                        'amplitude': random.uniform(0.1, 0.5),
-                        'delta_classifier': random.random(),
-                        'error': random.uniform(0.001, 1),
-                        'snr': random.uniform(0.5, 2.0)
+                        'amplitude': location_summary_data[channel]['best_amplitude'],
+                        'delta_classifier': location_summary_data[channel]['best_delta_classifier'],
+                        'error': location_summary_data[channel]['sem'],
+                        'snr': location_summary_data[channel]['snr']
                     }
-                    for channel in ['LAD1_LAD2', 'LA11_LA12']
+                    for channel in list(location_summary_data.keys())
                 }
             }
         )

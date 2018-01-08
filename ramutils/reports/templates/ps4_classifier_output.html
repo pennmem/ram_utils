@@ -16,10 +16,7 @@
   <script>
     window.addEventListener('load', () => {
       let data = JSON.parse('{{ plot_data["ps4"] }}');
-      ramutils.plots.plotPS4ClassifierOutput(
-        data['amplitude'], data['encoding'], data['distract'],
-        data['retrieval'], data['sham'], data['post_stim']
-      );
+      ramutils.plots.plotPS4ClassifierOutput(data);
     });
   </script>
 </div>
