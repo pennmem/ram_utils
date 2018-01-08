@@ -692,7 +692,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         unique_stim_info = df[['stim_anode_tag', 'stim_cathode_tag',
                                'region', 'amplitude', 'duration',
                                'pulse_frequency']].drop_duplicates().dropna()
-        return unique_stim_info.T.to_dict().values()
+        return list(unique_stim_info.T.to_dict().values())
 
     @property
     def recall_test_results(self):
