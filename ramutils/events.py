@@ -634,6 +634,7 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
 
         for (i, event) in enumerate(merged_events):
             if event.type == 'REC_BASE':
+                merged_events[i].experiment = merged_events[i - 1].experiment
                 merged_events[i].session = merged_events[i - 1].session
                 merged_events[i].list = merged_events[i - 1].list
                 merged_events[i].eegfile = merged_events[i - 1].eegfile
@@ -757,7 +758,7 @@ def concatenate_events_for_single_experiment(event_list):
         empty_events = initialize_empty_event_reccarray()
         return empty_events
     final_events = np.rec.array(np.concatenate(event_list))
-    final_events.sort(order=['subject', 'experiment', 'session', 'list',
+    final_events.sort(order=['subject', 'session', 'list',
                              'mstime'])
 
     return final_events
