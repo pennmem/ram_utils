@@ -10,12 +10,12 @@ from __future__ import print_function
 import os.path as osp
 
 from ramutils.cli import make_parser, configure_caching
-from ramutils.exc import UnsupportedExperimentError
+from ramutils.exc import UnsupportedExperimentError, TooManySessionsError
 from ramutils.log import get_logger, get_warning_accumulator
 from ramutils.montage import make_stim_params
 from ramutils.parameters import FilePaths, FRParameters
 from ramutils.pipelines.report import make_report
-from ramutils.utils import timer
+from ramutils.utils import timer, is_stim_experiment
 
 parser = make_parser("Generate a report")
 parser.add_argument('--sessions', '-S', nargs='+',
@@ -51,7 +51,11 @@ def create_report(input_args=None):
         stim_params = []
 
     # Extract sessions
+    stim_experiment = is_stim_experiment(args.experiment)
     if args.sessions is not None:
+        if stim_experiment and len(args.sessions) != 1:
+            raise TooManySessionsError("Stim reports must be built one "
+                                       "session at a time")
         sessions = [int(session) for session in args.sessions]
     else:
         sessions = None
