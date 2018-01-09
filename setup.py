@@ -31,8 +31,8 @@ setup(
     setup_requires=setup_requirements,
     entry_points={
         'console_scripts': [
-            'ramulator-conf=ramutils.cli.expconf:main',
-            'ram-report=ramutils.cli.report:main'
+            'ramulator-conf=ramutils.cli.expconf:create_expconf',
+            'ram-report=ramutils.cli.report:create_report'
         ]
     }
 )
