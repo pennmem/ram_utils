@@ -19,6 +19,26 @@ class TestEvents:
         memory.clear(warn=False)
 
     @pytest.mark.rhino
+    @pytest.mark.parametrize('subject, experiment, params', [
+        ('R1354E', 'FR1', FRParameters),
+        ('R1350D', 'FR1', FRParameters),
+        ('R1353N', 'PAL1', PALParameters),
+        ('R1348J', 'catFR1', FRParameters)
+    ])
+    def test_training_legacy_regression(self, subject, experiment, params, rhino_root):
+        expected = datafile("/{}_task_events_rhino.npy".format(subject))
+        expected_events = np.rec.array(np.load(expected))
+
+        paths = FilePaths(root=rhino_root)
+        extra_kwargs = params().to_dict()
+        actual_events = build_training_data(subject, experiment, paths,
+                                            **extra_kwargs).compute()
+        assert len(actual_events) == len(expected_events)
+        assert np.array_equal(actual_events.recalled,
+                              expected_events.recalled)
+
+
+    @pytest.mark.rhino
     @pytest.mark.parametrize('subject, experiment, params, combine_events', [
         ('R1350D', 'FR1', FRParameters, True),  # multi-session FR
         ('R1353N', 'PAL1', PALParameters, True),  # pal
@@ -40,8 +60,9 @@ class TestEvents:
         current_events = build_training_data(subject, experiment, paths,
                                              **extra_kwargs).compute()
 
-        expected_events = np.load(expected)
+        expected_events = np.rec.array(np.load(expected))
         assert len(current_events) == len(expected_events)
+        assert np.array_equal(current_events.recalled, expected_events.recalled)
 
         return
 
@@ -68,13 +89,13 @@ class TestEvents:
         paths = FilePaths(root=rhino_root)
         extra_kwargs = params().to_dict()
 
-        current_events = build_test_data(subject, experiment, paths,
-                                         joint_report=joint_report,
-                                         sessions=sessions,
-                                         **extra_kwargs).compute()
+        all_events, task_events, stim_params = build_test_data(
+            subject, experiment, paths, joint_report=joint_report,
+            sessions=sessions, **extra_kwargs).compute()
 
-        expected_events = np.load(expected)
-        assert len(expected_events) == len(current_events)
+        expected_events = np.rec.array(np.load(expected))
+        assert len(expected_events) == len(task_events)
+        assert np.array_equal(task_events.recalled, expected_events.recalled)
 
     @pytest.mark.rhino
     def test_build_ps_events(self, rhino_root):

@@ -6,7 +6,6 @@ from pkg_resources import resource_filename
 
 from ramutils.parameters import FilePaths, FRParameters
 from ramutils.pipelines.report import make_report
-from ramutils.pipelines.ramulator_config import make_stim_params
 
 from ramutils.tasks import memory
 
@@ -15,7 +14,7 @@ memory.cachedir = "/Users/zduey/tmp/"
 
 getpath = functools.partial(resource_filename, 'ramutils.test.test_data')
 
-subject = 'R1374T'
+subject = 'R1354E'
 rhino = os.path.expanduser('/Volumes/rhino')
 pairs_path = os.path.join(
     'protocols', 'r1', 'subjects', subject,
@@ -25,12 +24,12 @@ pairs_path = os.path.join(
 
 paths = FilePaths(
     root='/Volumes/RHINO/',
-    electrode_config_file='/scratch/system3_configs/ODIN_configs/R1374T'
-                          '/R1374T_12DEC2017L0M0STIM.csv',
+    electrode_config_file='/scratch/system3_configs/ODIN_configs/R1354E'
+                          '/R1354E_1NOV2017L0M0STIM.csv',
     pairs=pairs_path,
     dest='scratch/zduey/samplefr1_reports'
 )
 
 params = FRParameters()
-make_report(subject, "catFR1", paths, exp_params=params, stim_params=None,
+make_report(subject, "FR1", paths, exp_params=params, stim_params=None,
             joint_report=True)

@@ -48,14 +48,14 @@ def compute_single_session_powers(session, all_events, start_time, end_time,
     if eeg_reader.removed_bad_data():
         logger.warning('PTSA EEG reader elected to remove some bad events')
         # TODO: Use the event utility functions here
-        updated_events = np.concatenate(
+        updated_events = np.rec.array(np.concatenate(
             (all_events[all_events.session != session],
-             eeg['events'].data.view(np.recarray))).view(np.recarray)
+             np.rec.array(eeg['events'].data))))
         event_fields = updated_events.dtype.names
         order = tuple(f for f in ['session', 'list', 'mstime'] if f in event_fields)
         ev_order = np.argsort(updated_events, order=order)
         updated_events = updated_events[ev_order]
-        updated_events = updated_events.view(np.recarray)
+        updated_events = np.rec.array(updated_events)
 
     eeg = eeg.add_mirror_buffer(buffer_time)
 
@@ -146,17 +146,17 @@ def compute_powers(events, start_time, end_time, buffer_time, freqs,
     if (bipolar_pairs is not None) and \
             (not isinstance(bipolar_pairs, np.recarray)):
         # it expects to receive a list
-        bipolar_pairs = np.array(bipolar_pairs,
-                                 dtype=[('ch0', 'S3'),
-                                        ('ch1', 'S3')]).view(np.recarray)
+        bipolar_pairs = np.rec.array(np.array(bipolar_pairs,
+                                              dtype=[('ch0', 'S3'),
+                                                     ('ch1', 'S3')]))
 
     elif (bipolar_pairs is not None) and \
             (isinstance(bipolar_pairs, np.recarray)):
         # to get the same treatment if we get recarray , we will convert it to
         # a list and then back to recarray with correct dtype
-        bipolar_pairs = np.array(list(bipolar_pairs),
-                                 dtype=[('ch0', 'S3'),
-                                        ('ch1', 'S3')]).view(np.recarray)
+        bipolar_pairs = np.rec.array(np.array(list(bipolar_pairs),
+                                              dtype=[('ch0', 'S3'),
+                                                     ('ch1', 'S3')]))
     sessions = np.unique(events.session)
     pow_mat = None
 

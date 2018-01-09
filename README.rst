@@ -105,9 +105,6 @@ generated via the ``ramulator-conf`` script::
 Report generation
 -----------------
 
-.. warning:: The new reporting pipeline is not fully tested yet, so the old
-             version in the ``new_ptsa`` branch may need to be used.
-
 Generating reports on the command line::
 
     usage: ram-report [-h] [--root ROOT] [--dest DEST] [--cachedir CACHEDIR]
@@ -141,6 +138,7 @@ Generating reports on the command line::
 
 Testing
 -------
+
 Automated unit tests are run with every push to the remote repository or pull request. Longer running tests requiring
 local files can and should be run frequently, but require to additional argument to be passed to pytest:
 

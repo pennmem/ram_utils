@@ -19,7 +19,7 @@ datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
 def fr5_events():
     """FR5 events for R1345D."""
     filename = datafile('fr5-events.npz')
-    events = np.load(filename)['events'].view(np.recarray)
+    events = np.rec.array(np.load(filename)['events'])
     return events[events.session == 0]
 
 
@@ -27,7 +27,7 @@ def fr5_events():
 def math_events():
     """Math events for all FR1 sessions of R1111M."""
     filename = datafile('R1111M_math_events.npz')
-    events = np.load(filename)['events'].view(np.recarray)
+    events = np.rec.array(np.load(filename)['events'])
     return events
 
 
