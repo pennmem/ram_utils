@@ -857,6 +857,7 @@ def extract_experiment_from_events(events):
 def extract_sessions(events):
     """ Return a list of sessions contained within the events structure"""
     sessions = np.unique(events.session)
+    sessions = [int(sess) for sess in sessions]
     return sessions
 
 
