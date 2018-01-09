@@ -253,6 +253,7 @@ class TestEvents:
             partitions = partition_events(subset)
             combined_event_length = sum([len(v) for k, v in partitions.items()])
             assert combined_event_length == 1
+            assert len(partitions['post_stim']) == 0
 
         encoding_retrieval_partitions = partition_events(np.concatenate([
             test_fr_encoding, test_fr_retrieval]).view(np.recarray))

@@ -76,4 +76,8 @@ class TestEvents:
         expected_events = np.load(expected)
         assert len(expected_events) == len(current_events)
 
-        return
+    @pytest.mark.rhino
+    def test_build_ps_events(self, rhino_root):
+        actual = build_ps_data('R1374T', 'catFR5', 'ps4_events', None,
+                               rhino_root).compute()
+        assert len(actual) == 3068

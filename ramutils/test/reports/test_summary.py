@@ -11,7 +11,7 @@ from numpy.testing import assert_equal, assert_almost_equal
 from traits.api import ListInt, ListFloat, ListBool
 
 from ramutils.reports.summary import *
-
+from ramutils.tasks.events import build_ps_data
 datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
 
 
@@ -367,5 +367,41 @@ class TestFRStimSessionSummary:
         test_results = self.sample_summary.recall_test_results
         # TODO: Manually check these values to ensure accuracy and add
         # assertions
+
+
+@pytest.mark.rhino
+class TestPSSessionSummary:
+    @classmethod
+    def setup_class(cls):
+        # Events file is too large to store in repo, so build it from scratch
+        cls.sample_events = build_ps_data('R1374T', 'catFR5', 'ps4_events',
+                                          None, '/Volumes/RHINO/').compute()
+        cls.sample_summary = PSSessionSummary()
+
+    def test_populate(self):
+        self.sample_summary.populate(self.sample_events)
+        assert len(self.sample_summary.events) == 3068
+
+    def test_to_dataframe(self):
+        self.sample_summary.populate(self.sample_events)
+        df = self.sample_summary.to_dataframe()
+        assert len(df) == 3068
+
+    def test_decision(self):
+        self.sample_summary.populate(self.sample_events)
+        decision = self.sample_summary.decision
+        assert decision['best_amplitude'] == 0.998
+        assert decision['best_location'] == 'LA7_LA8'
+        assert np.isclose(decision['pval'], 0.00608, 1e-3)
+
+    def test_location_summary(self):
+        self.sample_summary.populate(self.sample_events)
+        location_summaries = self.sample_summary.location_summary
+        assert np.isclose(location_summaries['LA7_LA8'][
+                              'best_delta_classifier'], 0.030218, 1e-3)
+        assert np.isclose(location_summaries['LC6_LC7'][
+                              'best_delta_classifier'], 0.01033, 1e-3)
+
+
 
 

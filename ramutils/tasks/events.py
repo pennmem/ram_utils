@@ -7,6 +7,7 @@ from ramutils.events import get_repetition_ratio_dict as \
     get_repetition_ratio_dict_core
 from ramutils.events import get_post_stim_events_mask as \
     get_post_stim_events_mask_core
+from ramutils.events import remove_practice_lists
 from ramutils.tasks import task
 from ramutils.utils import extract_experiment_series
 
@@ -17,6 +18,7 @@ __all__ = [
     'build_training_data',
     'get_repetition_ratio_dict',
     'get_post_stim_events_mask',
+    'build_ps_data'
 ]
 
 
@@ -153,3 +155,15 @@ def build_test_data(subject, experiment, paths, joint_report, sessions=None,
 @task()
 def get_repetition_ratio_dict(paths):
     return get_repetition_ratio_dict_core(rootdir=paths.root)
+
+
+@task()
+def build_ps_data(subject, experiment, file_type, sessions, rootdir):
+    updated_experiment = experiment.replace("PS4_", "")
+    ps_events = load_events(subject, updated_experiment, file_type=file_type,
+                            sessions=sessions, rootdir=rootdir)
+    # The practice list is needed in order assess sham stim event, so this
+    # may need to change in the future
+    ps_events = remove_practice_lists(ps_events)
+    return ps_events
+

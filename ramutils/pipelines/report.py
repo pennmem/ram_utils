@@ -63,13 +63,19 @@ def make_report(subject, experiment, paths, joint_report=False,
     pairs_metadata_table = generate_montage_metadata_table(subject, ec_pairs,
                                                            root=paths.root)
 
-    # all_events are used for producing math summaries. Task events are only
-    # used by the stim reports. Non-stim reports create a different set of
-    # events. Stim params are used in building the stim session summaries
-    all_events, task_events, stim_params = build_test_data(subject, experiment,
-                                                           paths, joint_report,
-                                                           sessions=sessions,
-                                                           **kwargs)
+    if 'PS' not in experiment:
+        # all_events are used for producing math summaries. Task events are only
+        # used by the stim reports. Non-stim reports create a different set of
+        # events. Stim params are used in building the stim session
+        # summaries. PS experiments do not have an all_events.json file,
+        # which is what these subsets are built from, so PS has it's own
+        # build_*_data function
+        all_events, task_events, stim_params = build_test_data(subject,
+                                                               experiment,
+                                                               paths,
+                                                               joint_report,
+                                                               sessions=sessions,
+                                                               **kwargs)
 
     delta_hfa_table = pd.DataFrame(columns=['type', 'contact0',
                                             'contact1', 'label',
@@ -146,8 +152,9 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                        final_task_events,
                                                        joint=joint_report,
                                                        repetition_ratio_dict=repetition_ratio_dict)
+        math_summaries = summarize_math(all_events, joint=joint_report)
 
-    if stim_report:
+    if stim_report and 'PS' not in experiment:
         # We need post stim period events/powers
         post_stim_mask = get_post_stim_events_mask(all_events)
         post_stim_events = subset_events(all_events, post_stim_mask)
@@ -212,19 +219,25 @@ def make_report(subject, experiment, paths, joint_report=False,
             post_hoc_results['session_summaries_stim_table'],
             post_hoc_results['post_stim_predicted_probs'],
             pairs_metadata_table)
+        math_summaries = summarize_math(all_events, joint=joint_report)
 
         # TODO: Commented out until we have a clean way to plot results from
         # the traces
         # behavioral_results = estimate_effects_of_stim(subject, experiment,
         #     session_summaries).compute()
 
-    # TODO: Add task that saves out all necessary underlying data
+    elif stim_report and 'PS' in experiment:
+        ps_events = build_ps_data(subject, experiment, 'ps4_events',
+                                  sessions, paths.root)
+        session_summaries = summarize_ps_sessions(ps_events)
+        math_summaries = [] # No math summaries for PS4
+        results = []
 
-    math_summaries = summarize_math(all_events, joint=joint_report)
+    # TODO: Add task that saves out all necessary underlying data
 
     if not stim_report:
         results = [encoding_classifier_summary, joint_classifier_summary]
-    else:
+    elif stim_report and 'PS' not in experiment:
         results = post_hoc_results['session_summaries']
 
     report = build_static_report(subject, experiment, session_summaries,

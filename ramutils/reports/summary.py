@@ -10,6 +10,7 @@ import pytz
 from ramutils.utils import safe_divide
 from ramutils.events import extract_subject, extract_experiment_from_events, \
     extract_sessions
+from ramutils.bayesian_optimization import choose_location
 
 from traitschema import Schema
 from traits.api import Array, ArrayOrNone, Float, String, DictStrAny, Dict
@@ -28,6 +29,7 @@ __all__ = [
     'CatFRSessionSummary',
     'FRStimSessionSummary',
     'FR5SessionSummary',
+    'PSSessionSummary',
     'MathSummary'
 ]
 
@@ -690,7 +692,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         unique_stim_info = df[['stim_anode_tag', 'stim_cathode_tag',
                                'region', 'amplitude', 'duration',
                                'pulse_frequency']].drop_duplicates().dropna()
-        return unique_stim_info.T.to_dict().values()
+        return list(unique_stim_info.T.to_dict().values())
 
     @property
     def recall_test_results(self):
@@ -812,3 +814,149 @@ class FR5SessionSummary(FRStimSessionSummary):
                                       recall_probs=recall_probs,
                                       is_ps4_session=is_ps4_session)
         self.recognized = events.recognized
+
+
+class PSSessionSummary(SessionSummary):
+    """ Parameter Search experiment summary """
+
+    def populate(self, events, **kwargs):
+        """ Populate stim data from events.
+
+        Parameters
+        ----------
+        events : np.recarray
+        """
+        SessionSummary.populate(self, events)
+        return
+
+    @property
+    def decision(self):
+        """ Return a dictionary containing decision information """
+        decision_dict = {
+            'sham_dc': '',
+            'sham_sem': '',
+            'best_location': '',
+            'best_amplitdue': '',
+            'pval': '',
+            'tstat': '',
+            'tie': '',
+            'tstat_vs_sham': '',
+            'pval_vs_sham': '',
+            'loc1': {},
+            'loc2': {},
+        }
+
+        # FIXME: Find a way to use self.dataframe() instead
+        events_df = pd.DataFrame.from_records([e for e in self.events],
+                                              columns=self.events.dtype.names)
+
+        decision = events_df.loc[events_df.type == 'OPTIMIZATION_DECISION']
+        # If a session completes with convergence, there will be an
+        # optimization decision event at the end. Otherwise, we need to
+        # manually calculate one
+        if len(decision) > 0:
+            decision_dict['sham_dc'] = decision.sham.delta_classifier[0]
+            decision_dict['sham_sem'] = decision.sham.sem[0]
+            decision_dict['best_location'] = decision.decision.best_location[0]
+            decision_dict['best_amplitude'] = (
+                decision.loc1 if decision.loc1.loc_name == decision_dict[
+                    'best_location'] else decision.loc2).amplitude[0]
+            decision_dict['pval'] = decision.decision.p_val[0]
+            decision_dict['tstat'] = decision.decision.t_stat[0]
+            decision_dict['tie'] = decision.decision.tie[0]
+            decision_dict['tstat_vs_sham'] = decision.sham.t_stat[0]
+            decision_dict['pval_vs_sham'] = decision.sham.p_val[0]
+            decision_dict['loc1'] = decision.loc1
+            decision_dict['loc2'] = decision.loc2
+
+        else:
+            opt_events = events_df.loc[events_df.type == 'OPTIMIZATION']
+            # This should win an award for least-readable line of python code
+            (locations, loc_datasets) = zip(*[('_'.join(name),
+                                               table.loc[:, ['amplitude',
+                                                             'delta_classifier']].values) for (name, table) in opt_events.groupby(('anode_label', 'cathode_label'))])
+
+            # TODO: include sham delta classifiers when we need to reconstruct
+            # results
+            if len(locations) > 1:
+                decision, loc_info = choose_location(loc_datasets[0],
+                                                     locations[0],
+                                                     loc_datasets[1],
+                                                     locations[1],
+                                                     np.array([(ld.min(),
+                                                                ld.max()) for ld in loc_datasets]),
+                                                     None)
+            else:
+                return decision_dict # no decision reached
+
+            for i, k in enumerate(loc_info):
+                loc_info[k]['amplitude'] = loc_info[k]['amplitude'] / 1000
+                decision_dict['loc%s' % (i+1)] = loc_info[k]
+
+            decision_dict['tie'] = decision['Tie']
+            decision_dict['best_location'] = decision['best_location_name']
+            decision_dict['best_amplitude'] = loc_info[
+                 decision_dict['best_location']]['amplitude']
+            decision_dict['pval'] = decision['p_val']
+            decision_dict['tstat'] = decision['t_stat']
+
+        return decision_dict
+
+    @property
+    def location_summary(self):
+        location_summaries = {}
+        # FIXME: Also update the dataframe creation here
+        events_df = pd.DataFrame.from_records([e for e in self.events],
+                                              columns=self.events.dtype.names)
+        events_by_location = events_df.groupby(['anode_label', 'cathode_label'])
+
+        for location, loc_events in events_by_location:
+            location_summary = {
+               'amplitude': {},
+               'delta_classifier': {},
+               'post_stim_biomarker': {},
+               'post_stim_amplitude': {},
+               'best_amplitude': '',
+               'best_delta_classifier': '',
+               'sem': '',
+               'snr': ''
+            }
+
+            if location[0] and location[1]:
+                loc_tag = '%s_%s' % (location[0], location[1])
+
+                opt_events = (loc_events.loc[loc_events.type == 'OPTIMIZATION']
+                                        .groupby('list_phase'))
+
+                for i, (phase, phase_opt_events) in enumerate(opt_events):
+                    post_stim_phase_events = loc_events.loc[
+                        (events_df.list_phase == phase) &
+                        (events_df.type == 'BIOMARKER') &
+                        (events_df.position == 'POST')]
+
+                    decision = self.decision
+                    if decision['loc1']['loc_name'] == loc_tag:
+                        loc_decision_info = decision['loc1']
+                    else:
+                        loc_decision_info = decision['loc2']
+
+                    location_summary['amplitude'][phase] \
+                        = (phase_opt_events.amplitude.values / 1000.).tolist()
+                    location_summary['delta_classifier'][phase] = \
+                        phase_opt_events.delta_classifier.values.tolist()
+                    location_summary['post_stim_biomarker'][
+                        phase] = post_stim_phase_events.biomarker_value.tolist()
+                    location_summary['post_stim_amplitude'][phase] = \
+                        (post_stim_phase_events.amplitude.values /
+                         1000.).tolist()
+
+                    if len(loc_decision_info) > 0:
+                        location_summary['best_amplitude'] = float(
+                            loc_decision_info['amplitude'])
+                        location_summary['best_delta_classifier'] = float(
+                            loc_decision_info['delta_classifier'])
+                        location_summary['sem'] = float(loc_decision_info['sem'])
+                        location_summary['snr'] = float(loc_decision_info['snr'])
+                location_summaries[loc_tag] = location_summary
+
+        return location_summaries

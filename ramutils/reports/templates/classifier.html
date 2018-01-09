@@ -24,7 +24,11 @@
       <tr>
         <td>{{ classifier.metadata['tag'] }}</td>
         <td>{{ "{:.3f}".format(classifier.auc) }}</td>
-        <td>{{ "{:.3f}".format(classifier.pvalue) }}</td>
+        {% if classifier.pvalue < 0.001 %}
+          <td>&lt; 0.001</td>
+        {% else %}
+          <td>{{ '{:.3f}'.format(classifier.pvalue) }}</td>
+        {% endif %}
         <td>{{ "{:.3f}".format(classifier.median_classifier_output) }}</td>
       </tr>
     {% endfor %}

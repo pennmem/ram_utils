@@ -20,7 +20,8 @@ logger = get_logger()
 __all__ = [
     'summarize_nonstim_sessions',
     'summarize_math',
-    'summarize_stim_sessions'
+    'summarize_stim_sessions',
+    'summarize_ps_sessions'
 ]
 
 
@@ -196,6 +197,26 @@ def summarize_stim_sessions(all_events, task_events, stim_params,
         stim_session_summaries.append(stim_session_summary)
 
     return stim_session_summaries
+
+
+@task()
+def summarize_ps_sessions(ps_events):
+    """ Task for generating summaries of PS session
+
+    Parameters:
+    -----------
+    ps_events:
+    """
+    session_summaries = []
+    sessions = extract_sessions(ps_events)
+    for session in sessions:
+        session_events = select_session_events(ps_events, session)
+        summary = PSSessionSummary()
+        summary.populate(session_events)
+        session_summaries.append(summary)
+
+    return session_summaries
+
 
 
 

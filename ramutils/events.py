@@ -54,18 +54,26 @@ def load_events(subject, experiment, file_type='all_events',
 
     sessions_to_load = sessions
     if sessions is None:
-        # Find all sessions for the requested experiment
+        # Find all sessions for the requested experiment.
+        # TODO: PS sessions should not be included when loading FR5/catFR5
         sessions_to_load = json_reader.aggregate_values('sessions',
                                                         subject=subject_id,
                                                         experiment=experiment)
 
-    # TODO: There should be better behavior if an event file cannot be found
-    #  for a requested session
-    event_files = sorted([json_reader.get_value(file_type,
-                                                subject=subject,
-                                                experiment=experiment,
-                                                session=session)
-                          for session in sorted(sessions_to_load)])
+    event_files = []
+    for session in sorted(sessions_to_load):
+        try:
+            event_file = json_reader.get_value(file_type,
+                                               subject=subject,
+                                               experiment=experiment,
+                                               session=session)
+            event_files.append(event_file)
+
+        # If an event file cannot be found for a session, skip that session
+        except ValueError:
+            continue
+
+    event_files = sorted(event_files)
 
     # Update the paths based on the given root directory. This makes it easier
     # to run tests and use a mounted file system

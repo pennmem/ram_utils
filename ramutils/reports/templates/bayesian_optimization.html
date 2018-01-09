@@ -27,8 +27,8 @@
   <ul>
     <li>Estimated best location: {{ bayesian_optimization_results['best_loc'] }}</li>
     <li>Estimated best amplitude: {{ bayesian_optimization_results['best_ampl'] }} mA</li>
-    <li>Between-location p-value: {{ bayesian_optimization_results['p_values']['between']|pvalue }}</li>
-    <li>p-value against sham: {{ bayesian_optimization_results['p_values']['sham']|pvalue }}</li>
+    <li>Between-location p-value: {{ bayesian_optimization_results['p_values']['between']}}</li>
+    <li>p-value against sham: {{ bayesian_optimization_results['p_values']['sham']}}</li>
   </ul>
 
   {% if bayesian_optimization_results['tie'] %}
