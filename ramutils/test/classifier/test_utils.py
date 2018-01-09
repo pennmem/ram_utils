@@ -1,6 +1,7 @@
 import pytest
 import functools
 import numpy as np
+from sklearn.externals import joblib
 
 from pkg_resources import resource_filename
 from ramutils.classifier.utils import reload_classifier, train_classifier
@@ -40,8 +41,8 @@ def test_reload_classifier_rhino(rhino_root):
     'R1354E'
 ])
 def test_train_classifier(subject):
-    events = np.load(datafile('/events/{}_task_events.npy'.format(
-        subject))).view(np.recarray)
+    events = np.rec.array(np.load(datafile('/events/{}_task_events.npy'.format(
+        subject))))
     powers = np.load(datafile('/powers/{}_normalized_powers.npy'.format(
         subject)))
     weights = np.load(datafile('/weights/{}_sample_weights.npy'.format(

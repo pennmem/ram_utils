@@ -36,7 +36,7 @@ class TestEvents:
             ('recalled', '?')
         ]
 
-        cls.test_data = np.array(data, dtype=dtype).view(np.recarray)
+        cls.test_data = np.rec.array(np.array(data, dtype=dtype))
 
     @pytest.mark.parametrize("subject, experiment, sessions", [
         ('R1354E', 'FR1', None),
@@ -188,8 +188,7 @@ class TestEvents:
             ('intrusion', '<i8'),
             ('eegoffset', '<i8')
         ]
-        no_baseline_retrieval_events = np.array(data, dtype=dtype).view(
-            np.recarray)
+        no_baseline_retrieval_events = np.rec.array(np.array(data, dtype=dtype))
         try:
             baseline_retrieval_events = select_baseline_retrieval_events(no_baseline_retrieval_events)
         except RuntimeError:
@@ -239,14 +238,13 @@ class TestEvents:
             ('experiment', '|U256'),
             ('type', '|U256')
         ]
-        test_fr_encoding = np.array([('FR1', 'WORD')], dtype=dtypes).view(
-            np.recarray)
-        test_fr_retrieval = np.array([('FR1', 'REC_EVENT')],
-                                     dtype=dtypes).view(np.recarray)
-        test_pal_encoding = np.array([('PAL1', 'WORD')],
-                                     dtype=dtypes).view(np.recarray)
-        test_pal_retrieval = np.array([('PAL1', 'REC_EVENT')],
-                                      dtype=dtypes).view(np.recarray)
+        test_fr_encoding = np.rec.array(np.array([('FR1', 'WORD')], dtype=dtypes))
+        test_fr_retrieval = np.rec.array(np.array([('FR1', 'REC_EVENT')],
+                                                  dtype=dtypes))
+        test_pal_encoding = np.rec.array(np.array([('PAL1', 'WORD')],
+                                                  dtype=dtypes))
+        test_pal_retrieval = np.rec.array(np.array([('PAL1', 'REC_EVENT')],
+                                                   dtype=dtypes))
 
         for subset in [test_fr_encoding, test_fr_retrieval,
                        test_pal_encoding, test_pal_retrieval]:
@@ -255,23 +253,22 @@ class TestEvents:
             assert combined_event_length == 1
             assert len(partitions['post_stim']) == 0
 
-        encoding_retrieval_partitions = partition_events(np.concatenate([
-            test_fr_encoding, test_fr_retrieval]).view(np.recarray))
+        encoding_retrieval_partitions = partition_events(
+            np.rec.array(np.concatenate([test_fr_encoding, test_fr_retrieval])))
         assert sum([len(v) for k, v in encoding_retrieval_partitions.items()]) == 2
 
-        pal_fr_partitions = partition_events(np.concatenate([
-            test_fr_encoding, test_pal_encoding]).view(np.recarray))
+        pal_fr_partitions = partition_events(np.rec.array(np.concatenate([
+            test_fr_encoding, test_pal_encoding])))
         assert sum([len(v) for k, v in pal_fr_partitions.items()]) == 2
 
         pal_fr_encoding_retrieval_partitions = partition_events(
-            np.concatenate([test_fr_encoding, test_fr_retrieval,
-                            test_pal_encoding]).view(np.recarray))
+            np.rec.array(np.concatenate([test_fr_encoding, test_fr_retrieval,
+                                         test_pal_encoding])))
         assert sum([len(v) for k, v in pal_fr_encoding_retrieval_partitions.items()]) == 3
 
-        all_partitions = partition_events(np.concatenate([test_fr_encoding,
-                                                          test_fr_retrieval,
-                                                          test_pal_encoding,
-                                                          test_pal_retrieval]).view(np.recarray))
+        all_partitions = partition_events(np.rec.array(np.concatenate([
+            test_fr_encoding, test_fr_retrieval, test_pal_encoding,
+            test_pal_retrieval])))
         assert sum([len(v) for k, v in all_partitions.items()]) == 4
 
         return

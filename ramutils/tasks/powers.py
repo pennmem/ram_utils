@@ -94,6 +94,9 @@ def compute_normalized_powers(events, **kwargs):
 
     partition_masks = get_partition_masks(cleaned_events)
 
+    # Ensure that the rows of the power matrix match the order of the events.
+    # This works by creating masks for each of the event types from the
+    # sorted events structure
     n_features = powers.shape[1]
     normalized_powers = np.empty((len(cleaned_events), n_features))
     for subset_name, power_subset in power_partitions.items():
