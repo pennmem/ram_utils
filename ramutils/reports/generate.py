@@ -326,6 +326,7 @@ class ReportGenerator(object):
         return self._render(
             'PS4',
             stim=True,
+            converged=decision_summary['converged'],
             plot_data={
                 'ps4': json.dumps(location_summary_data),
             },
