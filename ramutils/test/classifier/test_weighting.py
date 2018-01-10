@@ -41,6 +41,21 @@ def test_get_equal_weights(event_file):
 
 @pytest.mark.parametrize("event_file", [
     'R1350D_task_events.npy',
+])
+def test_force_specific_weighting(event_file):
+    events = np.rec.array(np.load(datafile('/events/' + event_file)))
+    weights = get_sample_weights(events, scheme='EQUAL')
+    assert len(weights) == len(events)
+    assert np.allclose(weights, 1)
+
+    with pytest.raises(NotImplementedError):
+        weights = get_sample_weights(events, scheme='NOT_IMPLEMENTED')
+
+    return
+
+
+@pytest.mark.parametrize("event_file", [
+    'R1350D_task_events.npy',
     'R1348J_task_events.npy',
     'R1354E_task_events.npy'
 ])
