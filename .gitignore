@@ -11,6 +11,7 @@ scratch/
 *.synctex.gz
 *.swp
 *.png
+*.zip
 
 # Build artifacts
 build/
@@ -28,6 +29,10 @@ mydask.png
 # Coverage
 .coverage
 htmlcov/
+
+# HTML-based test result report
+report.html
+assets/
 
 # OS generated files #
 ######################
