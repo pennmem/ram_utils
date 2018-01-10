@@ -269,6 +269,10 @@ class SessionSummary(Summary):
         timestamp = self.events.mstime.max() / 1000.
         return datetime.fromtimestamp(timestamp, pytz.utc)
 
+    @property
+    def num_lists(self):
+        return len(np.unique(self.events.list))
+
     def to_dataframe(self, recreate=False):
         """Convert the summary to a :class:`pd.DataFrame` for easier
         manipulation.
@@ -327,6 +331,12 @@ class MathSummary(SessionSummary):
     be all events (which include math events) or just math events.
 
     """
+
+    @property
+    def events(self):
+        """ For Math events, explicitly exclude practice lists """
+        return self._events[self._events.list > -1]
+
     @property
     def num_problems(self):
         """Returns the total number of problems solved by the subject."""
@@ -346,8 +356,7 @@ class MathSummary(SessionSummary):
     @property
     def problems_per_list(self):
         """Returns the mean number of problems per list."""
-        n_lists = len(np.unique(self.events.list))
-        return self.num_problems / n_lists
+        return self.num_problems / self.num_lists
 
     @staticmethod
     def total_num_problems(summaries):
@@ -362,7 +371,7 @@ class MathSummary(SessionSummary):
         : int
 
         """
-        return sum(summary.num_problems for summary in summaries)
+        return sum([summary.num_problems for summary in summaries])
 
     @staticmethod
     def total_num_correct(summaries):
@@ -378,7 +387,7 @@ class MathSummary(SessionSummary):
         : int
 
         """
-        return sum(summary.num_correct for summary in summaries)
+        return sum([summary.num_correct for summary in summaries])
 
     @staticmethod
     @safe_divide
@@ -413,8 +422,7 @@ class MathSummary(SessionSummary):
         float
 
         """
-        n_lists = sum(len(np.unique(summary.events[summary.events.list]))
-                      for summary in summaries)
+        n_lists = sum([summary.num_lists for summary in summaries])
         return MathSummary.total_num_problems(summaries) / n_lists
 
 
@@ -453,6 +461,14 @@ class FRSessionSummary(SessionSummary):
         self.prob = recall_probs if recall_probs is not None else [-999] * len(events)
 
     @property
+    def intrusion_events(self):
+        intr_events = self.raw_events[(self.raw_events.list > -1) &
+                                      (self.raw_events.type == 'REC_WORD') &
+                                      (self.raw_events.intrusion != -999) &
+                                      (self.raw_events.intrusion != 0)]
+        return intr_events
+
+    @property
     def num_words(self):
         """ Number of words in the session """
         return len(self.events[self.events.type == 'WORD'])
@@ -465,12 +481,13 @@ class FRSessionSummary(SessionSummary):
     @property
     def num_prior_list_intrusions(self):
         """ Calculates the number of prior list intrusions """
-        return np.sum((self.raw_events.intrusion > 0))
+
+        return np.sum((self.intrusion_events.intrusion > 0))
 
     @property
     def num_extra_list_intrusions(self):
         """ Calculates the number of extra-list intrusions """
-        return np.sum((self.raw_events.intrusion == -1))
+        return np.sum((self.intrusion_events.intrusion == -1))
 
     @property
     def num_lists(self):
@@ -834,6 +851,7 @@ class PSSessionSummary(SessionSummary):
     def decision(self):
         """ Return a dictionary containing decision information """
         decision_dict = {
+            'converged': True,
             'sham_dc': '',
             'sham_sem': '',
             'best_location': '',
@@ -871,6 +889,7 @@ class PSSessionSummary(SessionSummary):
             decision_dict['loc2'] = decision.loc2
 
         else:
+            decision_dict['converged'] = False
             opt_events = events_df.loc[events_df.type == 'OPTIMIZATION']
             # This should win an award for least-readable line of python code
             (locations, loc_datasets) = zip(*[('_'.join(name),
