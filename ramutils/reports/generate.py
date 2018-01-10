@@ -2,13 +2,13 @@ from datetime import datetime
 import json
 import os.path as osp
 import random
-from git import Repo
 
 from itertools import compress
 from jinja2 import Environment, PackageLoader
 import numpy as np
 from pkg_resources import resource_listdir, resource_string
 
+from ramutils import __version__
 from ramutils.reports.summary import FRSessionSummary, MathSummary
 from ramutils.events import extract_experiment_from_events, extract_subject
 from ramutils.utils import extract_experiment_series
@@ -110,10 +110,8 @@ class ReportGenerator(object):
         return unique_experiments
 
     @property
-    def commit_hash(self):
-        repo = Repo(search_parent_directories=True)
-        sha = repo.head.object.hexsha
-        return sha
+    def version(self):
+        return __version__
 
     def _make_sme_table(self):
         """ Create data for the SME table for record-only experiments. """
@@ -213,7 +211,7 @@ class ReportGenerator(object):
         """
         template = self._env.get_template(experiment.lower() + '.html')
         return template.render(
-            commit_hash=self.commit_hash,
+            version=self.version,
             subject=self.subject,
             experiment=experiment,
             summaries=self.session_summaries,
