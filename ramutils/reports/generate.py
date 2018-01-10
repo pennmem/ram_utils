@@ -1,8 +1,8 @@
 from datetime import datetime
 import json
 import os.path as osp
-import numpy as np
 import random
+from git import Repo
 
 from itertools import compress
 from jinja2 import Environment, PackageLoader
@@ -109,6 +109,12 @@ class ReportGenerator(object):
         unique_experiments = np.array(unique_experiments).flatten()
         return unique_experiments
 
+    @property
+    def commit_hash(self):
+        repo = Repo(search_parent_directories=True)
+        sha = repo.head.object.hexsha
+        return sha
+
     def _make_sme_table(self):
         """ Create data for the SME table for record-only experiments. """
         sme_table = (self.sme_table.sort_values(by='p_value',
@@ -207,6 +213,7 @@ class ReportGenerator(object):
         """
         template = self._env.get_template(experiment.lower() + '.html')
         return template.render(
+            commit_hash=self.commit_hash,
             subject=self.subject,
             experiment=experiment,
             summaries=self.session_summaries,
