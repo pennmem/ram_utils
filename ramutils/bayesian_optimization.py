@@ -41,10 +41,10 @@ def choose_location(dataset_loc_0, loc_name_0, dataset_loc_1, loc_name_1,
         dataset_loc_1 = np.zeros((0,2))
         loc_name_1 = ''
 
-    xp_loc = [np.array(map(lambda x: [x], dataset_loc_0[:, 0])),
-              np.array(map(lambda x: [x], dataset_loc_1[:, 0]))]
-    yp_loc = [np.array(map(lambda x: [x], dataset_loc_0[:, 1])),
-              np.array(map(lambda x: [x], dataset_loc_1[:, 1]))]
+    xp_loc = [np.array([np.array([x]) for x in dataset_loc_0[:, 0]]),
+              np.array([np.array([x]) for x in dataset_loc_1[:, 0]])]
+    yp_loc = [np.array([np.array([x]) for x in dataset_loc_0[:, 1]]),
+              np.array([np.array([x]) for x in dataset_loc_1[:, 1]])]
 
     x_max_loc = [None] * 2
     y_max_loc = [None] * 2
