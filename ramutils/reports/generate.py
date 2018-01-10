@@ -231,6 +231,7 @@ class ReportGenerator(object):
         """
         return self._render(
             'FR1',
+            stim=False,
             combined_summary=self._make_combined_summary(),
             classifiers=self.classifiers,
             plot_data=self._make_fr_plot_data(joint=joint),
@@ -248,6 +249,7 @@ class ReportGenerator(object):
         """
         return self._render(
             'FR5',
+            stim=True,
             combined_summary=self._make_combined_summary(),
             classifiers=self.classifiers,
             stim_params=self.session_summaries[0].stim_parameters,
@@ -325,6 +327,7 @@ class ReportGenerator(object):
 
         return self._render(
             'PS4',
+            stim=True,
             plot_data={
                 'ps4': json.dumps(location_summary_data),
             },

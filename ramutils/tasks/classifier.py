@@ -273,12 +273,14 @@ def post_hoc_classifier_evaluation(events, powers, post_stim_events,
     post_stim_predicted_probs = []
     for i, session in enumerate(sessions):
         classifier_summary = ClassifierSummary()
-
+        reloaded = True
         # Be sure to work with a copy of the classifier object because it will
         # be re-fit as part of the lolo cross validation and if you pass
         # a reference, the AUCs will be wacky
+
         if classifiers[i] is None:
             classifier_container = retrained_classifier
+            reloaded = False
             logger.info("Using the retrained classifier for session {}".format(session))
 
         else:
@@ -326,7 +328,8 @@ def post_hoc_classifier_evaluation(events, powers, post_stim_events,
         subject, experiment, sessions = extract_event_metadata(session_events)
         classifier_summary.populate(subject, experiment, sessions,
                                     session_recalls, session_probs,
-                                    permuted_auc_values, tag=session)
+                                    permuted_auc_values, tag=session,
+                                    reloaded=reloaded)
         classifier_summaries.append(classifier_summary)
         logger.info('AUC for session {}: {}'.format(session,
                                                     classifier_summary.auc))
@@ -360,7 +363,8 @@ def post_hoc_classifier_evaluation(events, powers, post_stim_events,
     cross_session_summary = ClassifierSummary()
     cross_session_summary.populate(subject, experiment, sessions,
                                    non_stim_recalls, all_predicted_probs,
-                                   permuted_auc_values, tag='Combined Sessions')
+                                   permuted_auc_values, tag='Combined Sessions',
+                                   reloaded='N/A')
     classifier_summaries.append(cross_session_summary)
     logger.info("Combined AUC: {}".format(cross_session_summary.auc))
 
