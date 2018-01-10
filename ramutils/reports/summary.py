@@ -330,7 +330,8 @@ class MathSummary(SessionSummary):
     @property
     def num_problems(self):
         """Returns the total number of problems solved by the subject."""
-        return len(self.events[self.events.type == 'PROB'])
+        return len(self.events[(self.events.type == 'PROB') |
+                               (self.events.type == b'PROB')])
 
     @property
     def num_correct(self):

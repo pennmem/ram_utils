@@ -14,9 +14,9 @@
     <thead>
     <tr>
       <td>Classifier</td>
-      {{% if stim %}}
+      {% if stim %}
       <td>Reloaded</td>
-      {{% endif %}}
+      {% endif %}
       <td>AUC</td>
       <td>Permutation P-Value</td>
       <td>Median Classifier Output</td>
@@ -26,9 +26,9 @@
     {% for classifier in classifiers %}
       <tr>
         <td>{{ classifier.metadata['tag'] }}</td>
-        {{% if stim % }}
+        {% if stim %}
         <td>{{ classifier.metadata['reloaded'] }}</td>
-        {{% endif % }}
+        {% endif %}
         <td>{{ "{:.3f}".format(classifier.auc) }}</td>
         {% if classifier.pvalue < 0.001 %}
           <td>&lt; 0.001</td>
