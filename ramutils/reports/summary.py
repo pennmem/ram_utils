@@ -337,6 +337,11 @@ class MathSummary(SessionSummary):
         """ For Math events, explicitly exclude practice lists """
         return self._events[self._events.list > -1]
 
+    @events.setter
+    def events(self, new_events):
+        if self._events is None:
+            self._events = new_events
+
     @property
     def num_problems(self):
         """Returns the total number of problems solved by the subject."""
