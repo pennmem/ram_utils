@@ -1,25 +1,25 @@
 <div class="plot roc-curve">
-  <h2>Classifier performance</h2>
+  <h2>Classifier Performance</h2>
   <figure>
     <div id="classifier-performance-plot-placeholder"></div>
     <figcaption>
-      <b>(Left)</b> ROC curve for subject {{ subject }}. <b>(Right)</b> Subject
+      <b>(Left)</b> ROC curve.<b>(Right)</b> Subject
       recall performance represented as percentage deviation from the (subject)
       mean, separated by tercile of the classifier encoding efficiency estimate
       for each encoded word.
     </figcaption>
   </figure>
 
-  <table class="table">
+  <table class="table table-striped table-hover">
     <thead>
     <tr>
-      <td>Classifier</td>
+      <th>Classifier</td>
       {% if stim %}
-      <td>Reloaded</td>
+      <th>Reloaded</td>
       {% endif %}
-      <td>AUC</td>
-      <td>Permutation P-Value</td>
-      <td>Median Classifier Output</td>
+      <th>AUC</td>
+      <th>Permutation P-Value</td>
+      <th>Median Classifier Output</th>
     </tr>
     </thead>
     <tbody>

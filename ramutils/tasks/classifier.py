@@ -328,7 +328,8 @@ def post_hoc_classifier_evaluation(events, powers, post_stim_events,
         subject, experiment, sessions = extract_event_metadata(session_events)
         classifier_summary.populate(subject, experiment, sessions,
                                     session_recalls, session_probs,
-                                    permuted_auc_values, tag=session,
+                                    permuted_auc_values,
+                                    tag='Session ' + str(session),
                                     reloaded=reloaded)
         classifier_summaries.append(classifier_summary)
         logger.info('AUC for session {}: {}'.format(session,

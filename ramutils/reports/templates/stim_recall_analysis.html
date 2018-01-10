@@ -1,5 +1,5 @@
 <div>
-  <h2>Stim and recall analysis</h2>
+  <h2>Memory Modulation Analysis</h2>
 
   <table class="table table-striped table-hover">
     <thead>
@@ -15,8 +15,8 @@
     {% for test in recall_tests %}
       <tr>
         <td>{{ test['comparison'] }}</td>
-        <td>{{ test['stim'][0] }}/{{ test['stim'][1] }} ({{ "{:.2f}".format(100 * (test['stim'][0] / test['stim'][1])) }}%)</td>
-        <td>{{ test['non-stim'][0] }}/{{ test['non-stim'][1] }} ({{ "{:.2f}".format(100 * (test['non-stim'][0] / test['non-stim'][1])) }}%)</td>
+        <td>{{ test['stim'][0] }}/{{ test['stim'][1] }} ({{ "{:.1f}".format(100 * (test['stim'][0] / test['stim'][1])) }}%)</td>
+        <td>{{ test['non-stim'][0] }}/{{ test['non-stim'][1] }} ({{ "{:.1f}".format(100 * (test['non-stim'][0] / test['non-stim'][1])) }}%)</td>
         <td>{{ "{:.2f}".format(test['t-stat']) }}</td>
         <td>{{ "{:.3f}".format(test['p-value']) }}</td>
       </tr>
@@ -27,7 +27,6 @@
   <figure>
     <div id="stim-recall-placeholder"></div>
     <figcaption>
-      Number of stims and recalled items per list.
       Blue circles represent the number of recalled items from non-stim lists.
       Orange circles represent the number of recalled items from stim lists.
       Bars represent the number of stims per list.
@@ -36,16 +35,12 @@
 
   <figure>
     <div id="stim-probability-placeholder"></div>
-    <figcaption>
-      Probability of stimulation as a function of serial position.
-    </figcaption>
   </figure>
 
   <figure>
     <div id="recall-difference-placeholder"></div>
     <figcaption>
-      Change in recall performance for stimulated and post-stimulated items.
-      The control group (non-stim) comprises all low biomarker state items from non-stim lists.
+      The control group (not stimulated) comprises all low biomarker state items from non-stim lists.
     </figcaption>
   </figure>
 </div>

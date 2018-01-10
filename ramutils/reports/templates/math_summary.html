@@ -11,10 +11,10 @@
     </tr>
     <tr>
       <th scope="row">Percent correct</th>
-      <td>{{ '{:.2f}'.format(MathSummary.total_percent_correct(math_summaries)) }}</td>
+      <td>{{ '{:.1f}%'.format(MathSummary.total_percent_correct(math_summaries)) }}</td>
     </tr>
     <tr>
-      <th scope="row">Problems per list</th>
+      <th scope="row">Average Number of Problems per list</th>
       <td>{{ '{:.2f}'.format(MathSummary.total_problems_per_list(math_summaries)) }}</td>
     </tr>
   </table>

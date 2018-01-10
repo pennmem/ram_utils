@@ -33,6 +33,7 @@ var ramutils = (function (mod, Plotly) {
       }
 
       const layout = {
+        title: "Probability of Recall as a Function of Serial Position",
         xaxis: {
           title: 'Serial position',
           range: [0.9, 12.1]
@@ -130,6 +131,7 @@ var ramutils = (function (mod, Plotly) {
       ];
 
       const layout = {
+        title: 'Number of Items Stimulated and Number of Items Recalled',
         xaxis: {
           title: 'List number',
           range: [0, Math.max(...stimEvents.listno) + 0.5]
@@ -157,6 +159,7 @@ var ramutils = (function (mod, Plotly) {
       }];
 
       const layout = {
+        title: "Probability of Stimulation as a Function of Serial Position",
         xaxis: {
           title: 'Serial position',
           range: [0.5, 12.5]
@@ -181,6 +184,7 @@ var ramutils = (function (mod, Plotly) {
       }];
 
       const layout = {
+        title: "Change in Recall Performance for Stimulated and Post-Stimulation Items",
         xaxis: {title: 'Items'},
         yaxis: {
           title: 'Recall difference [%]',
@@ -220,7 +224,8 @@ var ramutils = (function (mod, Plotly) {
           y: tpr[i],
           type: 'scatter',
           mode: 'lines',
-          name: `${tag} ROC Curve`
+          name: `${tag} ROC Curve`,
+          legendgroup: 1
         };
         const tercile = {
           x: ['low', 'middle', 'high'],
@@ -228,7 +233,8 @@ var ramutils = (function (mod, Plotly) {
           xaxis: 'x2',
           yaxis: 'y2',
           type: 'bar',
-          name: `${tag} Tercile`
+          name: `${tag} Tercile`,
+          legendgroup: 2
         };
         data.push(roc_curve);
         data.push(tercile);
@@ -394,13 +400,14 @@ var ramutils = (function (mod, Plotly) {
         return post_data
       })();
 
-      const layout = {
+      const layout_top = {
+        title: "Classifier Response as a Function of Amplitude",
         xaxis: {
-          title: "Amplitude [mA]",
+          title: `Amplitude [mA] (${labels[0]})`,
           domain: [0, 0.45]
         },
         xaxis2: {
-          title: "Amplitude [mA]",
+          title: `Amplitude [mA] (${labels[1]})`,
           domain: [0.55, 1]
         },
         yaxis: {
@@ -408,8 +415,22 @@ var ramutils = (function (mod, Plotly) {
         }
       };
 
-      Plotly.plot('ps4-delta-classifier-placeholder', deltaClassifierData, layout);
-      Plotly.plot('ps4-post-classifier-placeholder', postStimClassifierData, layout);
+      const layout_bottom = {
+        xaxis: {
+          title: `Amplitude [mA] (${labels[0]})`,
+          domain: [0, 0.45]
+        },
+        xaxis2: {
+          title: `Amplitude [mA] (${labels[1]})`,
+          domain: [0.55, 1]
+        },
+        yaxis: {
+          title: "Classifier Output"
+        }
+      };
+
+      Plotly.plot('ps4-delta-classifier-placeholder', deltaClassifierData, layout_top);
+      Plotly.plot('ps4-post-classifier-placeholder', postStimClassifierData, layout_bottom);
     }
   };
 

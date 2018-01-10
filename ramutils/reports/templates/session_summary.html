@@ -19,7 +19,7 @@
           <td>{{ summary.session_datetime.strftime('%Y-%m-%d') }}</td>
           <td>{{ "{:.2f}".format(summary.session_length/60.0) }}</td>
           <td>{{ summary.num_lists }}</td>
-          <td>{{ "{:.2f}".format(summary.percent_recalled) }}</td>
+          <td>{{ "{:.1f}%".format(summary.percent_recalled) }}</td>
         </tr>
       {% endfor %}
     </tbody>
@@ -28,7 +28,7 @@
   <h3>All sessions</h3>
   <ul>
     <li>{{ combined_summary['n_words'] }} words</li>
-    <li>{{ combined_summary['n_correct'] }} correct ({{ '{:.2f}%'.format(100 * combined_summary['n_correct'] / combined_summary['n_words']) }})</li>
+    <li>{{ combined_summary['n_correct'] }} correct ({{ '{:.1f}%'.format(100 * combined_summary['n_correct'] / combined_summary['n_words']) }})</li>
     <li>{{ combined_summary['n_pli'] }} <span title="prior list intrusions">PLI</span></li>
     <li>{{ combined_summary['n_eli'] }} <span title="extra list intrusions">ELI</span></li>
   </ul>
