@@ -117,6 +117,16 @@ class ClassifierSummary(Schema):
         return np.median(self.predicted_probabilities)
 
     @property
+    def confidence_interval_median_classifier_output(self):
+        sorted_probs = sorted(self.predicted_probabilities)
+        n = len(self.predicted_probabilities)
+        low_idx = int(round((n / 2.0) - ((1.96 * n**.5) / 2.0)))
+        high_idx = int(round(1 + (n / 2.0) + ((1.96 * n**.5) / 2.0)))
+        low_val = sorted_probs[low_idx]
+        high_val = sorted_probs[high_idx]
+        return low_val, high_val
+
+    @property
     def low_tercile_diff_from_mean(self):
         return 100.0 * (self.low_terc_recall_rate - self.recall_rate) / self.recall_rate
 
