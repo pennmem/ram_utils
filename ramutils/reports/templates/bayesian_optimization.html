@@ -25,7 +25,8 @@
     <li>Estimated best location: {{ bayesian_optimization_results['best_loc'] }}</li>
     <li>Estimated best amplitude: {{ bayesian_optimization_results['best_ampl'] }} mA</li>
     <li>Between-location p-value: {{ '{:.3f}'.format(bayesian_optimization_results['p_values']['between'])}}</li>
-    <li>p-value against sham: {{ bayesian_optimization_results['p_values']['sham']}}</li>
+    <!--TODO: Add back once we have sham stim events to analyze-->
+    <!--<li>p-value against sham: {{ bayesian_optimization_results['p_values']['sham']}}</li>-->
   </ul>
 
   {% if converged %}
