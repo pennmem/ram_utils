@@ -725,6 +725,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         unique_stim_info = df[['stim_anode_tag', 'stim_cathode_tag',
                                'region', 'amplitude', 'duration',
                                'pulse_frequency']].drop_duplicates().dropna()
+        unique_stim_info['amplitude'] = unique_stim_info['amplitude'].astype(float) / 1000.0
         return list(unique_stim_info.T.to_dict().values())
 
     @property
