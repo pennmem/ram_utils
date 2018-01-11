@@ -710,13 +710,12 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         return df.groupby('serialpos').prob_recall.mean().tolist()
 
     def lists(self, stim=None):
+        """ Get a list of eith stim lists or non-stim lists """
         df = self.to_dataframe()
-        if stim is None:
-            lists = df.listno.unique().tolist()
-
+        if stim is not None:
+            lists = df[df.is_stim_list == stim].listno.unique().tolist()
         else:
-            lists = df[df.is_stim_item == stim].listno.unique().tolist()
-
+            lists = df.listno.unique().tolist()
         return lists
 
     @property
@@ -789,9 +788,9 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
 
         return results
 
-    def recalls_by_list(self, stim_items_only=False):
+    def recalls_by_list(self, stim_list_only=False):
         df = self.to_dataframe()
-        recalls_by_list = df[df.is_stim_item == stim_items_only].groupby(
+        recalls_by_list = df[df.is_stim_list == stim_list_only].groupby(
             'listno').recalled.sum().astype(int).tolist()
         return recalls_by_list
 

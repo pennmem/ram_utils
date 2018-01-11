@@ -283,12 +283,12 @@ class ReportGenerator(object):
                     'nonstim': {
                         'listno': self.session_summaries[0].lists(stim=False),
                         'recalled': self.session_summaries[
-                            0].recalls_by_list(stim_items_only=False)
+                            0].recalls_by_list(stim_list_only=False)
                     },
                     'stim': {
                         'listno': self.session_summaries[0].lists(stim=True),
                         'recalled': self.session_summaries[
-                            0].recalls_by_list(stim_items_only=True)
+                            0].recalls_by_list(stim_list_only=True)
                     },
                     'stim_events': {
                         'listno': self.session_summaries[0].lists(),

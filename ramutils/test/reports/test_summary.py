@@ -325,12 +325,12 @@ class TestFRStimSessionSummary:
 
     def test_recalls_by_list(self):
         stim_recalls_by_list = self.sample_summary.recalls_by_list(
-            stim_items_only=True)
-        assert sum(stim_recalls_by_list) == 17
+            stim_list_only=True)
+        assert sum(stim_recalls_by_list) == 43
 
         nonstim_recalls_by_list = self.sample_summary.recalls_by_list(
-            stim_items_only=False)
-        assert sum(nonstim_recalls_by_list) == 38
+            stim_list_only=False)
+        assert sum(nonstim_recalls_by_list) == 12
 
     def test_prob_first_recall_by_serialpos(self):
         prob_first_recall_nonstim = self.sample_summary.prob_first_recall_by_serialpos(stim=False)
