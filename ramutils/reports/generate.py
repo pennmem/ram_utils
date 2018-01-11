@@ -1,7 +1,6 @@
 from datetime import datetime
 import json
 import os.path as osp
-import numpy as np
 import random
 
 from itertools import compress
@@ -9,6 +8,7 @@ from jinja2 import Environment, PackageLoader
 import numpy as np
 from pkg_resources import resource_listdir, resource_string
 
+from ramutils import __version__
 from ramutils.reports.summary import FRSessionSummary, MathSummary
 from ramutils.events import extract_experiment_from_events, extract_subject
 from ramutils.utils import extract_experiment_series
@@ -109,6 +109,10 @@ class ReportGenerator(object):
         unique_experiments = np.array(unique_experiments).flatten()
         return unique_experiments
 
+    @property
+    def version(self):
+        return __version__
+
     def _make_sme_table(self):
         """ Create data for the SME table for record-only experiments. """
         sme_table = (self.sme_table.sort_values(by='p_value',
@@ -207,6 +211,7 @@ class ReportGenerator(object):
         """
         template = self._env.get_template(experiment.lower() + '.html')
         return template.render(
+            version=self.version,
             subject=self.subject,
             experiment=experiment,
             summaries=self.session_summaries,
@@ -224,6 +229,7 @@ class ReportGenerator(object):
         """
         return self._render(
             'FR1',
+            stim=False,
             combined_summary=self._make_combined_summary(),
             classifiers=self.classifiers,
             plot_data=self._make_fr_plot_data(joint=joint),
@@ -241,6 +247,7 @@ class ReportGenerator(object):
         """
         return self._render(
             'FR5',
+            stim=True,
             combined_summary=self._make_combined_summary(),
             classifiers=self.classifiers,
             stim_params=self.session_summaries[0].stim_parameters,
@@ -276,12 +283,12 @@ class ReportGenerator(object):
                     'nonstim': {
                         'listno': self.session_summaries[0].lists(stim=False),
                         'recalled': self.session_summaries[
-                            0].recalls_by_list(stim_items_only=False)
+                            0].recalls_by_list(stim_list_only=False)
                     },
                     'stim': {
                         'listno': self.session_summaries[0].lists(stim=True),
                         'recalled': self.session_summaries[
-                            0].recalls_by_list(stim_items_only=True)
+                            0].recalls_by_list(stim_list_only=True)
                     },
                     'stim_events': {
                         'listno': self.session_summaries[0].lists(),
@@ -299,7 +306,7 @@ class ReportGenerator(object):
                         post_stim_items=True)
                 }),
                 'classifier_output': json.dumps({
-                    'pre_stim': list(self.session_summaries[0].prob_recall),
+                    'pre_stim': list(self.session_summaries[0].pre_stim_prob_recall),
                     'post_stim': list(self.session_summaries[0].post_stim_prob_recall)
                 }),
             }
@@ -318,6 +325,8 @@ class ReportGenerator(object):
 
         return self._render(
             'PS4',
+            stim=True,
+            converged=decision_summary['converged'],
             plot_data={
                 'ps4': json.dumps(location_summary_data),
             },

@@ -6,9 +6,9 @@
       <th>Anode</th>
       <th>Cathode</th>
       <th>Region</th>
-      <th>Amplitude</th>
-      <th>Duration</th>
-      <th>Pulse Frequency</th>
+      <th>Amplitude [mA]</th>
+      <th>Duration [ms]</th>
+      <th>Pulse Frequency [Hz]</th>
     </tr>
     </thead>
     <tbody>
@@ -17,9 +17,9 @@
         <td>{{ stim_param['stim_anode_tag'] }}</td>
         <td>{{ stim_param['stim_cathode_tag'] }}</td>
         <td>{{ stim_param['region'] }}</td>
-        <td>{{ stim_param['amplitude'] }}</td>
-        <td>{{ stim_param['duration'] }}</td>
-        <td>{{ stim_param['pulse_frequency'] }}</td>
+        <td>{{ '{:.1f}'.format(stim_param['amplitude']) }}</td>
+        <td>{{ '{:.0f}'.format(stim_param['duration']) }}</td>
+        <td>{{ '{:.0f}'.format(stim_param['pulse_frequency']) }}</td>
       </tr>
     {% endfor %}
     </tbody>

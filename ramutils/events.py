@@ -450,7 +450,8 @@ def remove_bad_events(events):
 def select_column_subset(events, pal=False, stim=False, cat=False):
     """ Select only the necessary subset of the fields """
     columns = get_required_columns(pal=pal, stim=stim, cat=cat)
-    events = events[columns]
+    # Explicitly ask for a copy since a view is returned in numpy 1.13 and later
+    events = events[columns].copy()
 
     return events
 
@@ -857,6 +858,7 @@ def extract_experiment_from_events(events):
 def extract_sessions(events):
     """ Return a list of sessions contained within the events structure"""
     sessions = np.unique(events.session)
+    sessions = [int(sess) for sess in sessions]
     return sessions
 
 

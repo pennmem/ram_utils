@@ -140,9 +140,12 @@ class TestCreateReports:
     @pytest.mark.slow
     @pytest.mark.output
     @pytest.mark.parametrize('subject, experiment, sessions, joint', [
+        ('R1354E', 'FR1', [0], False),
+        ('R1354E', 'FR1', [0, 1], False),
+        ('R1354E', 'CatFR1', [0], False),
+        ('R1354E', 'FR1', None, True),
         ('R1345D', 'FR1', None, False),
         ('R1374T', 'CatFR1', None, False),
-        ('R1374T', 'CatFR1', [0], False),
         ('R1374T', 'CatFR1', None, True)
     ])
     def test_create_open_loop_report(self, subject, experiment, sessions, joint,
@@ -158,7 +161,7 @@ class TestCreateReports:
             args += ['-j']
 
         if sessions is not None:
-            args += ['-S'] + sessions
+            args += ['-S'] + [str(session) for session in sessions]
 
         create_report(args)
         return

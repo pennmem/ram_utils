@@ -1,10 +1,11 @@
 <div class="plot serialpos-curve">
-  <h2>Serial position curves</h2>
+  <h2>Serial Position</h2>
   <figure>
-    <figcaption>
-      Probabilities as a function of serial position.
-    </figcaption>
     <div id="serialpos-plot-placeholder"></div>
+    <figcaption>
+      'stim' and 'non-stim' refer to stim lists and non-stim lists. 'First recall' indicates the plot is based only on
+      the serial position of the first recalled word. 'Overall' means that the recall order is not taken into account.
+    </figcaption>
     <script>
       window.addEventListener('load', () => {
         let data = JSON.parse('{{ plot_data["serialpos"] }}');

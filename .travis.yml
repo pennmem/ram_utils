@@ -23,7 +23,7 @@ install:
   - conda info -a
   - conda create -n ramutils python=$TRAVIS_PYTHON_VERSION
   - source activate ramutils
-  - conda install -y -c pennmem --file=requirements.txt
+  - conda install -y -c pennmem -c conda-forge --file=requirements.txt
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
       conda install -y mock futures;
     fi

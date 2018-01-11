@@ -1,28 +1,35 @@
 <div class="plot roc-curve">
-  <h2>Classifier performance</h2>
+  <h2>Classifier Performance</h2>
   <figure>
     <div id="classifier-performance-plot-placeholder"></div>
     <figcaption>
-      <b>(Left)</b> ROC curve for subject {{ subject }}. <b>(Right)</b> Subject
+      <b>(Left)</b> ROC curve.<b>(Right)</b> Subject
       recall performance represented as percentage deviation from the (subject)
       mean, separated by tercile of the classifier encoding efficiency estimate
       for each encoded word.
     </figcaption>
   </figure>
 
-  <table class="table">
+  <table class="table table-striped table-hover">
     <thead>
     <tr>
-      <td>Classifier</td>
-      <td>AUC</td>
-      <td>Permutation P-Value</td>
-      <td>Median Classifier Output</td>
+      <th>Classifier</td>
+      {% if stim %}
+      <th>Reloaded</td>
+      {% endif %}
+      <th>AUC</td>
+      <th>Permutation P-Value</td>
+      <th>Median Classifier Output</th>
+      <th>95% CI for Median Classifier Output</th>
     </tr>
     </thead>
     <tbody>
     {% for classifier in classifiers %}
       <tr>
         <td>{{ classifier.metadata['tag'] }}</td>
+        {% if stim %}
+        <td>{{ classifier.metadata['reloaded'] }}</td>
+        {% endif %}
         <td>{{ "{:.3f}".format(classifier.auc) }}</td>
         {% if classifier.pvalue < 0.001 %}
           <td>&lt; 0.001</td>
@@ -30,9 +37,26 @@
           <td>{{ '{:.3f}'.format(classifier.pvalue) }}</td>
         {% endif %}
         <td>{{ "{:.3f}".format(classifier.median_classifier_output) }}</td>
+        <td>{{ "[{:.3f}, {:.3f}]".format(classifier.confidence_interval_median_classifier_output[0], classifier.confidence_interval_median_classifier_output[1]) }}</td>
       </tr>
     {% endfor %}
     </tbody>
+    {% if stim %}
+      <caption>
+        Reloaded indicates that the classifier assessed in the report is the same classifier that was used during the session.
+        All sessions will attempt to use the actual classifier, but will fall back to a retrained classifier in cases where
+        the classifier was unable to be reloaded. 95% confidence intervals for the median classifier output are approximate
+        and based on the procedure described
+        <a href="http://www.ucl.ac.uk/ich/short-courses-events/about-stats-courses/stats-rm/Chapter_8_Content/confidence_interval_single_median">here.</a>
+      </caption>
+    {% else %}
+      <caption>
+        A classifier type of 'encoding is trained on encoding-period events only, while a 'joint' classifier uses events
+        from both the encoding period and the retrieval period for training. 95% confidence intervals for the median
+        classifier output are approximate and based on the procedure described
+        <a href="http://www.ucl.ac.uk/ich/short-courses-events/about-stats-courses/stats-rm/Chapter_8_Content/confidence_interval_single_median">here.</a>
+      </caption>
+    {% endif %}
   </table>
   <script>
     window.addEventListener('load', () => {

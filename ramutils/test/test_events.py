@@ -291,7 +291,9 @@ class TestEvents:
             '/input/events/repetition_ratios.pkl'))
 
         for subject, ratios in cached_reptitions_dict.items():
-            if subject in current_repetitions_dict.keys():
+            # Only check a few older subjects so we know new data hasn't been
+            # added that will affect the test
+            if subject in ['R1204T', 'R1343M', 'R1330D']:
                 current = np.nan_to_num(current_repetitions_dict[subject])
                 old = np.nan_to_num(ratios)
                 assert np.allclose(current, old)

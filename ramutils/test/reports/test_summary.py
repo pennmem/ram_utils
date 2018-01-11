@@ -106,7 +106,7 @@ class TestMathSummary:
             summary.populate(events)
             probs += summary.num_problems
 
-        assert probs == 308
+        assert probs == 286
 
     def test_num_correct(self, math_events):
         correct = 0
@@ -116,7 +116,7 @@ class TestMathSummary:
             summary.populate(events)
             correct += summary.num_correct
 
-        assert correct == 268
+        assert correct == 260
 
     def test_percent_correct(self, math_events):
         percents = []
@@ -126,7 +126,7 @@ class TestMathSummary:
             summary.populate(events)
             percents.append(summary.percent_correct)
 
-        assert_almost_equal(percents, [94, 76, 90, 85], decimal=0)
+        assert_almost_equal(percents, [95, 92, 91, 87], decimal=0)
 
     def test_problems_per_list(self, math_events):
         ppl = []
@@ -136,26 +136,26 @@ class TestMathSummary:
             summary.populate(events)
             ppl.append(summary.problems_per_list)
 
-        assert_almost_equal(ppl, [3.28, 3.47, 3, 4.24], decimal=2)
+        assert_almost_equal(ppl, [3.33, 3.0, 2.96, 4.2], decimal=2)
 
     def test_total_num_problems(self, math_events):
         summaries = self.all_summaries(math_events)
-        assert MathSummary.total_num_problems(summaries) == 308
+        assert MathSummary.total_num_problems(summaries) == 286
 
     def test_total_num_correct(self, math_events):
         summaries = self.all_summaries(math_events)
-        assert MathSummary.total_num_correct(summaries) == 268
+        assert MathSummary.total_num_correct(summaries) == 260
 
     def test_total_percent_correct(self, math_events):
         summaries = self.all_summaries(math_events)
-        assert np.floor(MathSummary.total_percent_correct(summaries)) == 87
+        assert np.floor(MathSummary.total_percent_correct(summaries)) == 90
 
     def test_total_problems_per_list(self, math_events):
         summaries = self.all_summaries(math_events)
 
         # FIXME: the existing R1111M FR1 report says this should be 3.62
         assert_almost_equal([MathSummary.total_problems_per_list(summaries)],
-                            [3.46], decimal=2)
+                            [3.36], decimal=2)
 
 
 class TestFRSessionSummary:
@@ -325,12 +325,12 @@ class TestFRStimSessionSummary:
 
     def test_recalls_by_list(self):
         stim_recalls_by_list = self.sample_summary.recalls_by_list(
-            stim_items_only=True)
-        assert sum(stim_recalls_by_list) == 17
+            stim_list_only=True)
+        assert sum(stim_recalls_by_list) == 43
 
         nonstim_recalls_by_list = self.sample_summary.recalls_by_list(
-            stim_items_only=False)
-        assert sum(nonstim_recalls_by_list) == 38
+            stim_list_only=False)
+        assert sum(nonstim_recalls_by_list) == 12
 
     def test_prob_first_recall_by_serialpos(self):
         prob_first_recall_nonstim = self.sample_summary.prob_first_recall_by_serialpos(stim=False)

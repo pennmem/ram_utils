@@ -1,9 +1,6 @@
 <div>
   <h2>Bayesian optimization</h2>
   <table class="table table-striped table-hover">
-    <caption>
-      Bayesian optimization results.
-    </caption>
     <thead>
       <th>Stim pair</th>
       <th>Best amplitude [mA]</th>
@@ -27,17 +24,23 @@
   <ul>
     <li>Estimated best location: {{ bayesian_optimization_results['best_loc'] }}</li>
     <li>Estimated best amplitude: {{ bayesian_optimization_results['best_ampl'] }} mA</li>
-    <li>Between-location p-value: {{ bayesian_optimization_results['p_values']['between']}}</li>
-    <li>p-value against sham: {{ bayesian_optimization_results['p_values']['sham']}}</li>
+    <li>Between-location p-value: {{ '{:.3f}'.format(bayesian_optimization_results['p_values']['between'])}}</li>
+    <!--TODO: Add back once we have sham stim events to analyze-->
+    <!--<li>p-value against sham: {{ bayesian_optimization_results['p_values']['sham']}}</li>-->
   </ul>
 
-  {% if bayesian_optimization_results['tie'] %}
-    <div class="alert alert-warning">
-      Result is tied. The location with the lower standard error was selected.
+  {% if converged %}
+     <div class="alert alert-success">
+      An optimal location was found!
     </div>
   {% else %}
-    <div class="alert alert-success">
-      An optimal location was found!
+    <div class="alert alert-danger">
+      Optimization algorithm did not converge in-session. Results based on post-hoc assessment.
+    </div>
+  {% endif %}
+  {% if bayesian_optimization_results['tie'] %}
+    <div class="alert alert-warning">
+      The result is tied. The location with the lower standard error was selected.
     </div>
   {% endif %}
 </div>

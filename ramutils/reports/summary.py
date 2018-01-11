@@ -117,6 +117,16 @@ class ClassifierSummary(Schema):
         return np.median(self.predicted_probabilities)
 
     @property
+    def confidence_interval_median_classifier_output(self):
+        sorted_probs = sorted(self.predicted_probabilities)
+        n = len(self.predicted_probabilities)
+        low_idx = int(round((n / 2.0) - ((1.96 * n**.5) / 2.0)))
+        high_idx = int(round(1 + (n / 2.0) + ((1.96 * n**.5) / 2.0)))
+        low_val = sorted_probs[low_idx]
+        high_val = sorted_probs[high_idx]
+        return low_val, high_val
+
+    @property
     def low_tercile_diff_from_mean(self):
         return 100.0 * (self.low_terc_recall_rate - self.recall_rate) / self.recall_rate
 
@@ -269,6 +279,10 @@ class SessionSummary(Summary):
         timestamp = self.events.mstime.max() / 1000.
         return datetime.fromtimestamp(timestamp, pytz.utc)
 
+    @property
+    def num_lists(self):
+        return len(np.unique(self.events.list))
+
     def to_dataframe(self, recreate=False):
         """Convert the summary to a :class:`pd.DataFrame` for easier
         manipulation.
@@ -327,10 +341,22 @@ class MathSummary(SessionSummary):
     be all events (which include math events) or just math events.
 
     """
+
+    @property
+    def events(self):
+        """ For Math events, explicitly exclude practice lists """
+        return self._events[self._events.list > -1]
+
+    @events.setter
+    def events(self, new_events):
+        if self._events is None:
+            self._events = new_events
+
     @property
     def num_problems(self):
         """Returns the total number of problems solved by the subject."""
-        return len(self.events[self.events.type == b'PROB'])
+        return len(self.events[(self.events.type == 'PROB') |
+                               (self.events.type == b'PROB')])
 
     @property
     def num_correct(self):
@@ -345,8 +371,7 @@ class MathSummary(SessionSummary):
     @property
     def problems_per_list(self):
         """Returns the mean number of problems per list."""
-        n_lists = len(np.unique(self.events.list))
-        return self.num_problems / n_lists
+        return self.num_problems / self.num_lists
 
     @staticmethod
     def total_num_problems(summaries):
@@ -361,7 +386,7 @@ class MathSummary(SessionSummary):
         : int
 
         """
-        return sum(summary.num_problems for summary in summaries)
+        return sum([summary.num_problems for summary in summaries])
 
     @staticmethod
     def total_num_correct(summaries):
@@ -377,7 +402,7 @@ class MathSummary(SessionSummary):
         : int
 
         """
-        return sum(summary.num_correct for summary in summaries)
+        return sum([summary.num_correct for summary in summaries])
 
     @staticmethod
     @safe_divide
@@ -412,8 +437,7 @@ class MathSummary(SessionSummary):
         float
 
         """
-        n_lists = sum(len(np.unique(summary.events[summary.events.list]))
-                      for summary in summaries)
+        n_lists = sum([summary.num_lists for summary in summaries])
         return MathSummary.total_num_problems(summaries) / n_lists
 
 
@@ -452,6 +476,14 @@ class FRSessionSummary(SessionSummary):
         self.prob = recall_probs if recall_probs is not None else [-999] * len(events)
 
     @property
+    def intrusion_events(self):
+        intr_events = self.raw_events[(self.raw_events.list > -1) &
+                                      (self.raw_events.type == 'REC_WORD') &
+                                      (self.raw_events.intrusion != -999) &
+                                      (self.raw_events.intrusion != 0)]
+        return intr_events
+
+    @property
     def num_words(self):
         """ Number of words in the session """
         return len(self.events[self.events.type == 'WORD'])
@@ -464,12 +496,13 @@ class FRSessionSummary(SessionSummary):
     @property
     def num_prior_list_intrusions(self):
         """ Calculates the number of prior list intrusions """
-        return np.sum((self.raw_events.intrusion > 0))
+
+        return np.sum((self.intrusion_events.intrusion > 0))
 
     @property
     def num_extra_list_intrusions(self):
         """ Calculates the number of extra-list intrusions """
-        return np.sum((self.raw_events.intrusion == -1))
+        return np.sum((self.intrusion_events.intrusion == -1))
 
     @property
     def num_lists(self):
@@ -646,6 +679,12 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
                                     is_ps4_session=is_ps4_session)
 
     @property
+    def pre_stim_prob_recall(self):
+        df = self.to_dataframe()
+        pre_stim_probs = df[df.is_stim_item == True].prob_recall.values.tolist()
+        return pre_stim_probs
+
+    @property
     def num_nonstim_lists(self):
         """Returns the number of non-stim lists."""
         df = self.to_dataframe()
@@ -677,13 +716,12 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         return df.groupby('serialpos').prob_recall.mean().tolist()
 
     def lists(self, stim=None):
+        """ Get a list of eith stim lists or non-stim lists """
         df = self.to_dataframe()
-        if stim is None:
-            lists = df.listno.unique().tolist()
-
+        if stim is not None:
+            lists = df[df.is_stim_list == stim].listno.unique().tolist()
         else:
-            lists = df[df.is_stim_item == stim].listno.unique().tolist()
-
+            lists = df.listno.unique().tolist()
         return lists
 
     @property
@@ -692,6 +730,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         unique_stim_info = df[['stim_anode_tag', 'stim_cathode_tag',
                                'region', 'amplitude', 'duration',
                                'pulse_frequency']].drop_duplicates().dropna()
+        unique_stim_info['amplitude'] = unique_stim_info['amplitude'].astype(float) / 1000.0
         return list(unique_stim_info.T.to_dict().values())
 
     @property
@@ -755,9 +794,9 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
 
         return results
 
-    def recalls_by_list(self, stim_items_only=False):
+    def recalls_by_list(self, stim_list_only=False):
         df = self.to_dataframe()
-        recalls_by_list = df[df.is_stim_item == stim_items_only].groupby(
+        recalls_by_list = df[df.is_stim_list == stim_list_only].groupby(
             'listno').recalled.sum().astype(int).tolist()
         return recalls_by_list
 
@@ -833,6 +872,7 @@ class PSSessionSummary(SessionSummary):
     def decision(self):
         """ Return a dictionary containing decision information """
         decision_dict = {
+            'converged': True,
             'sham_dc': '',
             'sham_sem': '',
             'best_location': '',
@@ -870,6 +910,7 @@ class PSSessionSummary(SessionSummary):
             decision_dict['loc2'] = decision.loc2
 
         else:
+            decision_dict['converged'] = False
             opt_events = events_df.loc[events_df.type == 'OPTIMIZATION']
             # This should win an award for least-readable line of python code
             (locations, loc_datasets) = zip(*[('_'.join(name),
