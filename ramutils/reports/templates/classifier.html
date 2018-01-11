@@ -41,13 +41,22 @@
       </tr>
     {% endfor %}
     </tbody>
-    <caption>
-      Reloaded indicates that the classifier assessed in the report is the same classifier that was used during the session.
-      All sessions will attempt to use the actual classifier, but will fall back to a retrained classifier in cases where
-      the classifier was unable to be reloaded. 95% confidence intervals for the median classifier output are approximate
-      and based on the procedure described
-      <a href="http://www.ucl.ac.uk/ich/short-courses-events/about-stats-courses/stats-rm/Chapter_8_Content/confidence_interval_single_median">here.</a>
-    </caption>
+    {% if stim %}
+      <caption>
+        Reloaded indicates that the classifier assessed in the report is the same classifier that was used during the session.
+        All sessions will attempt to use the actual classifier, but will fall back to a retrained classifier in cases where
+        the classifier was unable to be reloaded. 95% confidence intervals for the median classifier output are approximate
+        and based on the procedure described
+        <a href="http://www.ucl.ac.uk/ich/short-courses-events/about-stats-courses/stats-rm/Chapter_8_Content/confidence_interval_single_median">here.</a>
+      </caption>
+    {% else %}
+      <caption>
+        A classifier type of 'encoding is trained on encoding-period events only, while a 'joint' classifier uses events
+        from both the encoding period and the retrieval period for training. 95% confidence intervals for the median
+        classifier output are approximate and based on the procedure described
+        <a href="http://www.ucl.ac.uk/ich/short-courses-events/about-stats-courses/stats-rm/Chapter_8_Content/confidence_interval_single_median">here.</a>
+      </caption>
+    {% endif %}
   </table>
   <script>
     window.addEventListener('load', () => {
