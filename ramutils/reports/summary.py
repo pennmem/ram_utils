@@ -679,6 +679,12 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
                                     is_ps4_session=is_ps4_session)
 
     @property
+    def pre_stim_prob_recall(self):
+        df = self.to_dataframe()
+        pre_stim_probs = df[df.is_stim_item == True].prob_recall.values.tolist()
+        return pre_stim_probs
+
+    @property
     def num_nonstim_lists(self):
         """Returns the number of non-stim lists."""
         df = self.to_dataframe()

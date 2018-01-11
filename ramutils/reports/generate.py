@@ -306,7 +306,7 @@ class ReportGenerator(object):
                         post_stim_items=True)
                 }),
                 'classifier_output': json.dumps({
-                    'pre_stim': list(self.session_summaries[0].prob_recall),
+                    'pre_stim': list(self.session_summaries[0].pre_stim_prob_recall),
                     'post_stim': list(self.session_summaries[0].post_stim_prob_recall)
                 }),
             }
