@@ -19,7 +19,7 @@
     <div class="container">
       <div style="padding-bottom: 1em;">
         <h1>{{ subject }} RAM {{ experiment }} report</h1>
-        <span>Report generated: {{ datetime.now().strftime('%Y-%m-%d') }} with code version {{ version }}</span>
+        <span>Report generated: {{ datetime.now().strftime('%Y-%m-%d %H:%M') }} with code version {{ version }}</span>
       </div>
       <div>
         {% block report %}{% endblock %}
