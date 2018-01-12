@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 import os.path
-import tempfile
 
+from ramutils import __version__
 from ramutils.constants import EXPERIMENTS
 
 
@@ -45,6 +45,8 @@ def make_parser(description, allowed_experiments=sum([exps for exps in EXPERIMEN
                         choices=allowed_experiments, help='experiment')
     parser.add_argument('--vispath', default=None, type=str,
                         help='path to save task graph visualization to')
+    parser.add_argument('--version', action='version',
+                        version='ramutils version {}'.format(__version__))
     return parser
 
 

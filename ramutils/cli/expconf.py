@@ -173,3 +173,7 @@ def create_expconf(input_args=None):
     warnings = '\n' + warning_accumulator.format_all()
     if warnings is not None:
         logger.info(warnings)
+
+
+if __name__ == "__main__":
+    create_expconf()
