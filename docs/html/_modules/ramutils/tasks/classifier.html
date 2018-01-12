@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ramutils.tasks.classifier &mdash; Ramutils 2.0.2 documentation</title>
+  <title>ramutils.tasks.classifier &mdash; Ramutils 2.1.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="Ramutils 2.0.2 documentation" href="../../../index.html"/>
+    <link rel="top" title="Ramutils 2.1.0 documentation" href="../../../index.html"/>
         <link rel="up" title="Module code" href="../../index.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                2.0
+                2.1
               </div>
             
           
@@ -93,7 +93,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../data.html">Serializable data structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../classifier.html">Classifier training, cross validation, and utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../events.html">Event processing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../models.html">Modeling effects of stim</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html">Pipelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../cli.html">Command-line usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../misc.html">Miscellaneous utilities</a></li>
@@ -357,7 +356,8 @@
 
 
 <div class="viewcode-block" id="post_hoc_classifier_evaluation"><a class="viewcode-back" href="../../../pipeline.html#ramutils.tasks.classifier.post_hoc_classifier_evaluation">[docs]</a><span class="nd">@task</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">post_hoc_classifier_evaluation</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">powers</span><span class="p">,</span> <span class="n">all_pairs</span><span class="p">,</span> <span class="n">classifiers</span><span class="p">,</span>
+<span class="k">def</span> <span class="nf">post_hoc_classifier_evaluation</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">powers</span><span class="p">,</span> <span class="n">post_stim_events</span><span class="p">,</span>
+                                   <span class="n">post_stim_powers</span><span class="p">,</span> <span class="n">all_pairs</span><span class="p">,</span> <span class="n">classifiers</span><span class="p">,</span>
                                    <span class="n">n_permutations</span><span class="p">,</span> <span class="n">retrained_classifier</span><span class="p">,</span>
                                    <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Evaluate a trained classifier</span>
@@ -368,6 +368,11 @@
 <span class="sd">        Task events associated with the stim sessesion to be evaluated</span>
 <span class="sd">    powers: np.ndarray</span>
 <span class="sd">        Normalized mean powers</span>
+<span class="sd">    post_stim_events: np.recarray</span>
+<span class="sd">        Post-stimulation events associated with the stim sessesion to be</span>
+<span class="sd">        evaluated</span>
+<span class="sd">    post_stim_powers: np.ndarray</span>
+<span class="sd">        Normalized mean powers for post_stim period events</span>
 <span class="sd">    all_pairs: OrderedDict</span>
 <span class="sd">        All pairs based on recorded electrodes combine from config file</span>
 <span class="sd">    classifiers: List</span>
@@ -383,11 +388,13 @@
 <span class="sd">    dict</span>
 <span class="sd">        A dictionary of summary objects that are needed in subsequent parts</span>
 <span class="sd">        of the processing pipeline. The dictionary will be in the following</span>
-<span class="sd">        format:</span>
-<span class="sd">            {&#39;cross_session_summary&#39;: MultiSessionClassifierSummary,</span>
-<span class="sd">             &#39;session_summaries&#39;: List of ClassifierSummary objects,</span>
-<span class="sd">             &#39;session_summaries_stim_table&#39;: List of ClassifierSummary</span>
-<span class="sd">             objects built using all encoding events</span>
+<span class="sd">        format::</span>
+
+<span class="sd">            {</span>
+<span class="sd">                &#39;cross_session_summary&#39;: MultiSessionClassifierSummary,</span>
+<span class="sd">                &#39;session_summaries&#39;: List of ClassifierSummary objects,</span>
+<span class="sd">                &#39;session_summaries_stim_table&#39;: List of ClassifierSummary objects built using all encoding events,</span>
+<span class="sd">                &#39;post_stim_predicted_probs&#39;: Classifier output during post stim period</span>
 <span class="sd">            }</span>
 
 <span class="sd">    Notes</span>
@@ -413,6 +420,7 @@
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;A retrained classifier must be passed if any &#39;</span>
                            <span class="s1">&#39;sessions have missing classifiers&#39;</span><span class="p">)</span>
     <span class="n">recalls</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">recalled</span>
+    <span class="n">post_stim_recalls</span> <span class="o">=</span> <span class="n">post_stim_events</span><span class="o">.</span><span class="n">recalled</span>
 
     <span class="c1"># Masks for encoding events</span>
     <span class="n">encoding_mask</span> <span class="o">=</span> <span class="n">get_encoding_mask</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
@@ -424,14 +432,17 @@
     <span class="n">classifier_summaries</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">encoding_classifier_summaries</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">predicted_probs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">post_stim_predicted_probs</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">session</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sessions</span><span class="p">):</span>
         <span class="n">classifier_summary</span> <span class="o">=</span> <span class="n">ClassifierSummary</span><span class="p">()</span>
-
+        <span class="n">reloaded</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="c1"># Be sure to work with a copy of the classifier object because it will</span>
         <span class="c1"># be re-fit as part of the lolo cross validation and if you pass</span>
         <span class="c1"># a reference, the AUCs will be wacky</span>
+
         <span class="k">if</span> <span class="n">classifiers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">classifier_container</span> <span class="o">=</span> <span class="n">retrained_classifier</span>
+            <span class="n">reloaded</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Using the retrained classifier for session </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">session</span><span class="p">))</span>
 
         <span class="k">else</span><span class="p">:</span>
@@ -464,10 +475,24 @@
         <span class="n">session_probs</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">reduced_session_powers</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
         <span class="n">predicted_probs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">session_probs</span><span class="p">)</span>
 
+        <span class="c1"># Calculate classifier outputs during the post stim period. This is</span>
+        <span class="c1"># used downstream in the reports to see if stimulation affected the</span>
+        <span class="c1"># biomarker</span>
+        <span class="n">post_stim_session_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">post_stim_events</span><span class="o">.</span><span class="n">session</span> <span class="o">==</span> <span class="n">session</span><span class="p">)</span>
+        <span class="n">post_stim_session_powers</span> <span class="o">=</span> <span class="n">post_stim_powers</span><span class="p">[</span><span class="n">post_stim_session_mask</span><span class="p">]</span>
+        <span class="n">post_stim_reduced_session_powers</span> <span class="o">=</span> <span class="n">reduce_powers</span><span class="p">(</span><span class="n">post_stim_session_powers</span><span class="p">,</span>
+                                                         <span class="n">used_mask</span><span class="p">,</span>
+                                                         <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;freqs&#39;</span><span class="p">]))</span>
+        <span class="n">post_stim_probs</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span>
+            <span class="n">post_stim_reduced_session_powers</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">post_stim_predicted_probs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">post_stim_probs</span><span class="p">)</span>
+
         <span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">sessions</span> <span class="o">=</span> <span class="n">extract_event_metadata</span><span class="p">(</span><span class="n">session_events</span><span class="p">)</span>
         <span class="n">classifier_summary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">sessions</span><span class="p">,</span>
                                     <span class="n">session_recalls</span><span class="p">,</span> <span class="n">session_probs</span><span class="p">,</span>
-                                    <span class="n">permuted_auc_values</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="n">session</span><span class="p">)</span>
+                                    <span class="n">permuted_auc_values</span><span class="p">,</span>
+                                    <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;Session &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">session</span><span class="p">),</span>
+                                    <span class="n">reloaded</span><span class="o">=</span><span class="n">reloaded</span><span class="p">)</span>
         <span class="n">classifier_summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">classifier_summary</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;AUC for session </span><span class="si">{}</span><span class="s1">: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">session</span><span class="p">,</span>
                                                     <span class="n">classifier_summary</span><span class="o">.</span><span class="n">auc</span><span class="p">))</span>
@@ -489,7 +514,9 @@
                                              <span class="kc">None</span><span class="p">)</span>
         <span class="n">encoding_classifier_summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">encoding_classifier_summary</span><span class="p">)</span>
 
+    <span class="c1"># Combine session-specific predicted probabilities into 1D array</span>
     <span class="n">all_predicted_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">predicted_probs</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sessions</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">permuted_auc_values</span> <span class="o">=</span> <span class="n">permuted_loso_cross_validation</span><span class="p">(</span>
           <span class="n">retrained_classifier</span><span class="o">.</span><span class="n">classifier</span><span class="p">,</span> <span class="n">powers</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">n_permutations</span><span class="p">,</span>
@@ -499,14 +526,16 @@
     <span class="n">cross_session_summary</span> <span class="o">=</span> <span class="n">ClassifierSummary</span><span class="p">()</span>
     <span class="n">cross_session_summary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">sessions</span><span class="p">,</span>
                                    <span class="n">non_stim_recalls</span><span class="p">,</span> <span class="n">all_predicted_probs</span><span class="p">,</span>
-                                   <span class="n">permuted_auc_values</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;Combined Sessions&#39;</span><span class="p">)</span>
+                                   <span class="n">permuted_auc_values</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;Combined Sessions&#39;</span><span class="p">,</span>
+                                   <span class="n">reloaded</span><span class="o">=</span><span class="s1">&#39;N/A&#39;</span><span class="p">)</span>
     <span class="n">classifier_summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cross_session_summary</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Combined AUC: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cross_session_summary</span><span class="o">.</span><span class="n">auc</span><span class="p">))</span>
 
     <span class="n">result_dict</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;cross_session_summary&#39;</span><span class="p">:</span> <span class="n">cross_session_summary</span><span class="p">,</span>
         <span class="s1">&#39;session_summaries&#39;</span><span class="p">:</span> <span class="n">classifier_summaries</span><span class="p">,</span>
-        <span class="s1">&#39;session_summaries_stim_table&#39;</span><span class="p">:</span> <span class="n">encoding_classifier_summaries</span>
+        <span class="s1">&#39;session_summaries_stim_table&#39;</span><span class="p">:</span> <span class="n">encoding_classifier_summaries</span><span class="p">,</span>
+        <span class="s1">&#39;post_stim_predicted_probs&#39;</span><span class="p">:</span> <span class="n">post_stim_predicted_probs</span>
     <span class="p">}</span>
 
     <span class="k">return</span> <span class="n">result_dict</span></div>
@@ -546,7 +575,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'2.0.2',
+            VERSION:'2.1.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

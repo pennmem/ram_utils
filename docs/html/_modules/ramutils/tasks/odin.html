@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ramutils.tasks.odin &mdash; Ramutils 2.0.2 documentation</title>
+  <title>ramutils.tasks.odin &mdash; Ramutils 2.1.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="Ramutils 2.0.2 documentation" href="../../../index.html"/>
+    <link rel="top" title="Ramutils 2.1.0 documentation" href="../../../index.html"/>
         <link rel="up" title="Module code" href="../../index.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                2.0
+                2.1
               </div>
             
           
@@ -93,7 +93,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../data.html">Serializable data structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../classifier.html">Classifier training, cross validation, and utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../events.html">Event processing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../models.html">Modeling effects of stim</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html">Pipelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../cli.html">Command-line usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../misc.html">Miscellaneous utilities</a></li>
@@ -163,7 +162,6 @@
   <h1>Source code for ramutils.tasks.odin</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Tasks specific to the Medtronic Odin ENS.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
 <span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">import</span> <span class="nn">json</span>
@@ -177,17 +175,15 @@
     <span class="k">pass</span>
 
 <span class="kn">from</span> <span class="nn">bptools.odin</span> <span class="k">import</span> <span class="n">ElectrodeConfig</span>
-<span class="kn">from</span> <span class="nn">bptools.transform</span> <span class="k">import</span> <span class="n">SeriesTransformation</span>
 <span class="kn">from</span> <span class="nn">classiflib</span> <span class="k">import</span> <span class="n">ClassifierContainer</span>
 
 <span class="kn">from</span> <span class="nn">ramutils.constants</span> <span class="k">import</span> <span class="n">EXPERIMENTS</span>
 <span class="kn">from</span> <span class="nn">ramutils.log</span> <span class="k">import</span> <span class="n">get_logger</span>
 <span class="kn">from</span> <span class="nn">ramutils.tasks</span> <span class="k">import</span> <span class="n">task</span>
-<span class="kn">from</span> <span class="nn">ramutils.utils</span> <span class="k">import</span> <span class="n">bytes_to_str</span>
+<span class="kn">from</span> <span class="nn">ramutils.utils</span> <span class="k">import</span> <span class="n">reindent_json</span><span class="p">,</span> <span class="n">bytes_to_str</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;generate_electrode_config&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;generate_pairs_from_electrode_config&#39;</span><span class="p">,</span>
     <span class="s1">&#39;generate_ramulator_config&#39;</span><span class="p">,</span>
 <span class="p">]</span>
 
@@ -267,76 +263,6 @@
 
     <span class="n">paths</span><span class="o">.</span><span class="n">electrode_config_file</span> <span class="o">=</span> <span class="n">csv_path</span>
     <span class="k">return</span> <span class="n">paths</span></div>
-
-
-<span class="c1"># FIXME: logic for generating pairs should be in bptools</span>
-<div class="viewcode-block" id="generate_pairs_from_electrode_config"><a class="viewcode-back" href="../../../pipeline.html#ramutils.tasks.odin.generate_pairs_from_electrode_config">[docs]</a><span class="nd">@task</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">generate_pairs_from_electrode_config</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">paths</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Load and verify the validity of the Odin electrode configuration file.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    subject : str</span>
-<span class="sd">        Subject ID</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    pairs_from_ec : dict</span>
-<span class="sd">        Minimal pairs.json based on the electrode configuration</span>
-
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    RuntimeError</span>
-<span class="sd">        If the csv or bin file are not found</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">prefix</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">paths</span><span class="o">.</span><span class="n">electrode_config_file</span><span class="p">)</span>
-    <span class="n">csv_filename</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span>
-    <span class="n">bin_filename</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="s1">&#39;.bin&#39;</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">csv_filename</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> not found!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">csv_filename</span><span class="p">))</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">bin_filename</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> not found!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bin_filename</span><span class="p">))</span>
-
-    <span class="c1"># Create SeriesTransformation object to determine if this is monopolar,</span>
-    <span class="c1"># mixed-mode, or bipolar</span>
-    <span class="c1"># FIXME: load excluded pairs</span>
-    <span class="n">xform</span> <span class="o">=</span> <span class="n">SeriesTransformation</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">csv_filename</span><span class="p">,</span> <span class="n">paths</span><span class="o">.</span><span class="n">pairs</span><span class="p">)</span>
-
-    <span class="c1"># Odin electrode configuration</span>
-    <span class="n">ec</span> <span class="o">=</span> <span class="n">xform</span><span class="o">.</span><span class="n">elec_conf</span>
-
-    <span class="c1"># This will mimic pairs.json (but only with labels).</span>
-    <span class="n">pairs_dict</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
-
-    <span class="c1"># FIXME: move the following logic into bptools</span>
-    <span class="c1"># Hardware bipolar mode</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">xform</span><span class="o">.</span><span class="n">monopolar_possible</span><span class="p">():</span>
-        <span class="n">contacts</span> <span class="o">=</span> <span class="n">ec</span><span class="o">.</span><span class="n">contacts_as_recarray</span><span class="p">()</span>
-
-        <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">ec</span><span class="o">.</span><span class="n">sense_channels</span><span class="p">:</span>
-            <span class="n">anode</span><span class="p">,</span> <span class="n">cathode</span> <span class="o">=</span> <span class="n">ch</span><span class="o">.</span><span class="n">contact</span><span class="p">,</span> <span class="n">ch</span><span class="o">.</span><span class="n">ref</span>
-            <span class="n">aname</span> <span class="o">=</span> <span class="n">bytes_to_str</span><span class="p">(</span><span class="n">contacts</span><span class="p">[</span><span class="n">contacts</span><span class="o">.</span><span class="n">jack_box_num</span> <span class="o">==</span> <span class="n">anode</span><span class="p">]</span><span class="o">.</span><span class="n">contact_name</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">cname</span> <span class="o">=</span> <span class="n">bytes_to_str</span><span class="p">(</span><span class="n">contacts</span><span class="p">[</span><span class="n">contacts</span><span class="o">.</span><span class="n">jack_box_num</span> <span class="o">==</span> <span class="n">cathode</span><span class="p">]</span><span class="o">.</span><span class="n">contact_name</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">-</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">aname</span><span class="p">,</span> <span class="n">cname</span><span class="p">)</span>
-            <span class="n">pairs_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s1">&#39;channel_1&#39;</span><span class="p">:</span> <span class="n">anode</span><span class="p">,</span>
-                <span class="s1">&#39;channel_2&#39;</span><span class="p">:</span> <span class="n">cathode</span>
-            <span class="p">}</span>
-
-        <span class="c1"># Note this is different from neurorad pipeline pairs.json because</span>
-        <span class="c1"># the electrode configuration trumps it</span>
-        <span class="n">pairs_from_ec</span> <span class="o">=</span> <span class="p">{</span><span class="n">subject</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;pairs&#39;</span><span class="p">:</span> <span class="n">pairs_dict</span><span class="p">}}</span>
-
-        <span class="k">return</span> <span class="n">pairs_from_ec</span>
-
-    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Pairs not generated because hardware bipolar mode was &#39;</span>
-                   <span class="s1">&#39;not detected&#39;</span><span class="p">)</span>
-
-    <span class="c1"># TODO: This should be able to return a dictionary of recorded electrodes</span>
-    <span class="c1"># for monopolar recordings</span>
-    <span class="k">return</span></div>
 
 
 <span class="k">def</span> <span class="nf">_make_experiment_specific_data_section</span><span class="p">(</span><span class="n">experiment</span><span class="p">,</span> <span class="n">stim_params</span><span class="p">,</span>
@@ -668,7 +594,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'2.0.2',
+            VERSION:'2.1.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

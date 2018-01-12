@@ -226,13 +226,13 @@ def post_hoc_classifier_evaluation(events, powers, post_stim_events,
     dict
         A dictionary of summary objects that are needed in subsequent parts
         of the processing pipeline. The dictionary will be in the following
-        format:
-            {'cross_session_summary': MultiSessionClassifierSummary,
-             'session_summaries': List of ClassifierSummary objects,
-             'session_summaries_stim_table': List of ClassifierSummary
-             objects built using all encoding events,
-             'post_stim_predicted_probs': Classifier output during post stim
-             period
+        format::
+
+            {
+                'cross_session_summary': MultiSessionClassifierSummary,
+                'session_summaries': List of ClassifierSummary objects,
+                'session_summaries_stim_table': List of ClassifierSummary objects built using all encoding events,
+                'post_stim_predicted_probs': Classifier output during post stim period
             }
 
     Notes

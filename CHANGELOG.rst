@@ -1,6 +1,17 @@
 Changes
 =======
 
+Version 2.1.0
+-------------
+
+**2018-01-11**
+
+Version 2.1 of ramutils includes report generation using the new dask-based
+pipeline framework for the following experiments: FR1, CatFR1, FR5, CatFR5,
+PS4_FR5, PS4_CatFR5. Reports are now rendered as static HTML files rather than
+PDF and are created using the Jinja templating engine.
+
+
 Version 2.0.2
 -------------
 

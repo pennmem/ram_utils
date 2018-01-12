@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Command-line usage &mdash; Ramutils 2.0.2 documentation</title>
+  <title>Command-line usage &mdash; Ramutils 2.1.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Ramutils 2.0.2 documentation" href="index.html"/>
+    <link rel="top" title="Ramutils 2.1.0 documentation" href="index.html"/>
         <link rel="next" title="Miscellaneous utilities" href="misc.html"/>
         <link rel="prev" title="Pipelines" href="pipeline.html"/> 
 
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                2.0
+                2.1
               </div>
             
           
@@ -94,7 +94,6 @@
 <li class="toctree-l1"><a class="reference internal" href="data.html">Serializable data structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="classifier.html">Classifier training, cross validation, and utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="events.html">Event processing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="models.html">Modeling effects of stim</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipelines</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Command-line usage</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#ramulator-configuration-generation">Ramulator configuration generation</a><ul>
@@ -102,6 +101,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#report-generation">Report generation</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="misc.html">Miscellaneous utilities</a></li>
@@ -227,7 +227,8 @@ generated via the <code class="docutils literal"><span class="pre">ramulator-con
   <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">extended</span><span class="o">-</span><span class="n">blanking</span>
                         <span class="n">disable</span> <span class="n">extended</span> <span class="n">blanking</span>
   <span class="o">--</span><span class="n">default</span><span class="o">-</span><span class="n">area</span> <span class="n">DEFAULT_AREA</span><span class="p">,</span> <span class="o">-</span><span class="n">A</span> <span class="n">DEFAULT_AREA</span>
-                        <span class="n">default</span> <span class="n">surface</span> <span class="n">area</span> <span class="n">to</span> <span class="n">use</span> <span class="k">for</span> <span class="nb">all</span> <span class="n">contacts</span>
+                        <span class="n">default</span> <span class="n">surface</span> <span class="n">area</span> <span class="n">to</span> <span class="n">use</span> <span class="k">for</span> <span class="nb">all</span> <span class="n">contacts</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span>
+                        <span class="mf">0.001</span><span class="p">)</span>
   <span class="o">--</span><span class="n">area</span><span class="o">-</span><span class="n">file</span> <span class="n">AREA_FILE</span>
                         <span class="n">path</span> <span class="n">to</span> <span class="n">area</span><span class="o">.</span><span class="n">txt</span> <span class="n">file</span> <span class="n">relative</span> <span class="n">to</span> <span class="n">root</span>
   <span class="o">--</span><span class="n">clear</span><span class="o">-</span><span class="n">log</span>           <span class="n">clear</span> <span class="n">the</span> <span class="n">log</span>
@@ -305,6 +306,40 @@ explicitly pass an electrode config file that is generated manually with the
 <code class="docutils literal"><span class="pre">--electrode-config-file</span></code> option.</p>
 </div>
 </div>
+<div class="section" id="report-generation">
+<h2>Report generation<a class="headerlink" href="#report-generation" title="Permalink to this headline">¶</a></h2>
+<p>Reports are generated with the <code class="docutils literal"><span class="pre">ram-report</span></code> command-line script:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">ram</span><span class="o">-</span><span class="n">report</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">root</span> <span class="n">ROOT</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">dest</span> <span class="n">DEST</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">cachedir</span> <span class="n">CACHEDIR</span><span class="p">]</span>
+                  <span class="o">--</span><span class="n">subject</span> <span class="n">SUBJECT</span> <span class="p">[</span><span class="o">--</span><span class="n">force</span><span class="o">-</span><span class="n">rerun</span><span class="p">]</span> <span class="o">--</span><span class="n">experiment</span>
+                  <span class="p">{</span><span class="n">FR1</span><span class="p">,</span><span class="n">CatFR1</span><span class="p">,</span><span class="n">PAL1</span><span class="p">,</span><span class="n">PS4_FR5</span><span class="p">,</span><span class="n">PS4_CatFR5</span><span class="p">,</span><span class="n">FR3</span><span class="p">,</span><span class="n">CatFR3</span><span class="p">,</span><span class="n">PAL3</span><span class="p">,</span><span class="n">FR5</span><span class="p">,</span><span class="n">CatFR5</span><span class="p">,</span><span class="n">PAL5</span><span class="p">,</span><span class="n">FR6</span><span class="p">,</span><span class="n">CatFR6</span><span class="p">,</span><span class="n">AmplitudeDetermination</span><span class="p">,</span><span class="n">PS4_FR5</span><span class="p">,</span><span class="n">PS4_CatFR5</span><span class="p">,</span><span class="n">FR6</span><span class="p">,</span><span class="n">CatFR6</span><span class="p">}</span>
+                  <span class="p">[</span><span class="o">--</span><span class="n">vispath</span> <span class="n">VISPATH</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">sessions</span> <span class="n">SESSIONS</span> <span class="p">[</span><span class="n">SESSIONS</span> <span class="o">...</span><span class="p">]]</span>
+                  <span class="p">[</span><span class="o">--</span><span class="n">retrain</span><span class="p">]</span>
+                  <span class="p">[</span><span class="o">--</span><span class="n">excluded</span><span class="o">-</span><span class="n">contacts</span> <span class="n">EXCLUDED_CONTACTS</span> <span class="p">[</span><span class="n">EXCLUDED_CONTACTS</span> <span class="o">...</span><span class="p">]]</span>
+                  <span class="p">[</span><span class="o">--</span><span class="n">joint</span><span class="o">-</span><span class="n">report</span><span class="p">]</span>
+
+<span class="n">Generate</span> <span class="n">a</span> <span class="n">report</span>
+
+<span class="n">optional</span> <span class="n">arguments</span><span class="p">:</span>
+  <span class="o">-</span><span class="n">h</span><span class="p">,</span> <span class="o">--</span><span class="n">help</span>            <span class="n">show</span> <span class="n">this</span> <span class="n">help</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span>
+  <span class="o">--</span><span class="n">root</span> <span class="n">ROOT</span>           <span class="n">path</span> <span class="n">to</span> <span class="n">rhino</span> <span class="n">root</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="o">/</span><span class="p">)</span>
+  <span class="o">--</span><span class="n">dest</span> <span class="n">DEST</span><span class="p">,</span> <span class="o">-</span><span class="n">d</span> <span class="n">DEST</span>  <span class="n">directory</span> <span class="n">to</span> <span class="n">write</span> <span class="n">output</span> <span class="n">to</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span>
+                        <span class="n">scratch</span><span class="o">/</span><span class="n">ramutils</span><span class="p">)</span>
+  <span class="o">--</span><span class="n">cachedir</span> <span class="n">CACHEDIR</span>   <span class="n">absolute</span> <span class="n">path</span> <span class="k">for</span> <span class="n">caching</span> <span class="nb">dir</span>
+  <span class="o">--</span><span class="n">subject</span> <span class="n">SUBJECT</span><span class="p">,</span> <span class="o">-</span><span class="n">s</span> <span class="n">SUBJECT</span>
+                        <span class="n">subject</span> <span class="n">ID</span>
+  <span class="o">--</span><span class="n">force</span><span class="o">-</span><span class="n">rerun</span>         <span class="n">force</span> <span class="n">re</span><span class="o">-</span><span class="n">running</span> <span class="nb">all</span> <span class="n">tasks</span>
+  <span class="o">--</span><span class="n">experiment</span> <span class="p">{</span><span class="n">FR1</span><span class="p">,</span><span class="n">CatFR1</span><span class="p">,</span><span class="n">PAL1</span><span class="p">,</span><span class="n">PS4_FR5</span><span class="p">,</span><span class="n">PS4_CatFR5</span><span class="p">,</span><span class="n">FR3</span><span class="p">,</span><span class="n">CatFR3</span><span class="p">,</span><span class="n">PAL3</span><span class="p">,</span><span class="n">FR5</span><span class="p">,</span><span class="n">CatFR5</span><span class="p">,</span><span class="n">PAL5</span><span class="p">,</span><span class="n">FR6</span><span class="p">,</span><span class="n">CatFR6</span><span class="p">,</span><span class="n">AmplitudeDetermination</span><span class="p">,</span><span class="n">PS4_FR5</span><span class="p">,</span><span class="n">PS4_CatFR5</span><span class="p">,</span><span class="n">FR6</span><span class="p">,</span><span class="n">CatFR6</span><span class="p">},</span> <span class="o">-</span><span class="n">x</span> <span class="p">{</span><span class="n">FR1</span><span class="p">,</span><span class="n">CatFR1</span><span class="p">,</span><span class="n">PAL1</span><span class="p">,</span><span class="n">PS4_FR5</span><span class="p">,</span><span class="n">PS4_CatFR5</span><span class="p">,</span><span class="n">FR3</span><span class="p">,</span><span class="n">CatFR3</span><span class="p">,</span><span class="n">PAL3</span><span class="p">,</span><span class="n">FR5</span><span class="p">,</span><span class="n">CatFR5</span><span class="p">,</span><span class="n">PAL5</span><span class="p">,</span><span class="n">FR6</span><span class="p">,</span><span class="n">CatFR6</span><span class="p">,</span><span class="n">AmplitudeDetermination</span><span class="p">,</span><span class="n">PS4_FR5</span><span class="p">,</span><span class="n">PS4_CatFR5</span><span class="p">,</span><span class="n">FR6</span><span class="p">,</span><span class="n">CatFR6</span><span class="p">}</span>
+                        <span class="n">experiment</span>
+  <span class="o">--</span><span class="n">vispath</span> <span class="n">VISPATH</span>     <span class="n">path</span> <span class="n">to</span> <span class="n">save</span> <span class="n">task</span> <span class="n">graph</span> <span class="n">visualization</span> <span class="n">to</span>
+  <span class="o">--</span><span class="n">sessions</span> <span class="n">SESSIONS</span> <span class="p">[</span><span class="n">SESSIONS</span> <span class="o">...</span><span class="p">],</span> <span class="o">-</span><span class="n">S</span> <span class="n">SESSIONS</span> <span class="p">[</span><span class="n">SESSIONS</span> <span class="o">...</span><span class="p">]</span>
+                        <span class="n">sessions</span> <span class="n">to</span> <span class="n">read</span> <span class="n">data</span> <span class="kn">from</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="n">use</span> <span class="nb">all</span><span class="p">)</span>
+  <span class="o">--</span><span class="n">retrain</span><span class="p">,</span> <span class="o">-</span><span class="n">R</span>         <span class="n">retrain</span> <span class="n">classifier</span> <span class="n">rather</span> <span class="n">than</span> <span class="n">loading</span> <span class="kn">from</span> <span class="nn">disk</span>
+  <span class="o">--</span><span class="n">excluded</span><span class="o">-</span><span class="n">contacts</span> <span class="n">EXCLUDED_CONTACTS</span> <span class="p">[</span><span class="n">EXCLUDED_CONTACTS</span> <span class="o">...</span><span class="p">],</span> <span class="o">-</span><span class="n">E</span> <span class="n">EXCLUDED_CONTACTS</span> <span class="p">[</span><span class="n">EXCLUDED_CONTACTS</span> <span class="o">...</span><span class="p">]</span>
+                        <span class="n">contacts</span> <span class="n">to</span> <span class="n">exclude</span> <span class="kn">from</span> <span class="nn">classifier</span>
+  <span class="o">--</span><span class="n">joint</span><span class="o">-</span><span class="n">report</span><span class="p">,</span> <span class="o">-</span><span class="n">j</span>    <span class="n">include</span> <span class="n">CatFR</span><span class="o">/</span><span class="n">FR</span> <span class="k">for</span> <span class="n">FR</span> <span class="n">reports</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="n">off</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -351,7 +386,7 @@ explicitly pass an electrode config file that is generated manually with the
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.0.2',
+            VERSION:'2.1.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

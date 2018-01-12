@@ -60,7 +60,8 @@ generated via the ``ramulator-conf`` script::
       --no-extended-blanking
                             disable extended blanking
       --default-area DEFAULT_AREA, -A DEFAULT_AREA
-                            default surface area to use for all contacts
+                            default surface area to use for all contacts (default:
+                            0.001)
       --area-file AREA_FILE
                             path to area.txt file relative to root
       --clear-log           clear the log
@@ -138,3 +139,38 @@ This is likely caused by trying to autogenerate an electrode config file which
 doesn't match with what was actually used in experiments. The workaround is to
 explicitly pass an electrode config file that is generated manually with the
 ``--electrode-config-file`` option.
+
+
+Report generation
+-----------------
+
+Reports are generated with the ``ram-report`` command-line script::
+
+    usage: ram-report [-h] [--root ROOT] [--dest DEST] [--cachedir CACHEDIR]
+                      --subject SUBJECT [--force-rerun] --experiment
+                      {FR1,CatFR1,PAL1,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR6,CatFR6}
+                      [--vispath VISPATH] [--sessions SESSIONS [SESSIONS ...]]
+                      [--retrain]
+                      [--excluded-contacts EXCLUDED_CONTACTS [EXCLUDED_CONTACTS ...]]
+                      [--joint-report]
+
+    Generate a report
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      --root ROOT           path to rhino root (default: /)
+      --dest DEST, -d DEST  directory to write output to (default:
+                            scratch/ramutils)
+      --cachedir CACHEDIR   absolute path for caching dir
+      --subject SUBJECT, -s SUBJECT
+                            subject ID
+      --force-rerun         force re-running all tasks
+      --experiment {FR1,CatFR1,PAL1,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR6,CatFR6}, -x {FR1,CatFR1,PAL1,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR6,CatFR6}
+                            experiment
+      --vispath VISPATH     path to save task graph visualization to
+      --sessions SESSIONS [SESSIONS ...], -S SESSIONS [SESSIONS ...]
+                            sessions to read data from (default: use all)
+      --retrain, -R         retrain classifier rather than loading from disk
+      --excluded-contacts EXCLUDED_CONTACTS [EXCLUDED_CONTACTS ...], -E EXCLUDED_CONTACTS [EXCLUDED_CONTACTS ...]
+                            contacts to exclude from classifier
+      --joint-report, -j    include CatFR/FR for FR reports (default: off)

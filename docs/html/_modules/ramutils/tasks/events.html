@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ramutils.tasks.events &mdash; Ramutils 2.0.2 documentation</title>
+  <title>ramutils.tasks.events &mdash; Ramutils 2.1.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="Ramutils 2.0.2 documentation" href="../../../index.html"/>
+    <link rel="top" title="Ramutils 2.1.0 documentation" href="../../../index.html"/>
         <link rel="up" title="Module code" href="../../index.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                2.0
+                2.1
               </div>
             
           
@@ -93,7 +93,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../data.html">Serializable data structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../classifier.html">Classifier training, cross validation, and utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../events.html">Event processing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../models.html">Modeling effects of stim</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html">Pipelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../cli.html">Command-line usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../misc.html">Miscellaneous utilities</a></li>
@@ -168,6 +167,9 @@
 <span class="kn">from</span> <span class="nn">ramutils.events</span> <span class="k">import</span> <span class="n">get_word_event_mask</span> <span class="k">as</span> <span class="n">get_word_event_mask_core</span>
 <span class="kn">from</span> <span class="nn">ramutils.events</span> <span class="k">import</span> <span class="n">get_repetition_ratio_dict</span> <span class="k">as</span> \
     <span class="n">get_repetition_ratio_dict_core</span>
+<span class="kn">from</span> <span class="nn">ramutils.events</span> <span class="k">import</span> <span class="n">get_post_stim_events_mask</span> <span class="k">as</span> \
+    <span class="n">get_post_stim_events_mask_core</span>
+<span class="kn">from</span> <span class="nn">ramutils.events</span> <span class="k">import</span> <span class="n">remove_practice_lists</span>
 <span class="kn">from</span> <span class="nn">ramutils.tasks</span> <span class="k">import</span> <span class="n">task</span>
 <span class="kn">from</span> <span class="nn">ramutils.utils</span> <span class="k">import</span> <span class="n">extract_experiment_series</span>
 
@@ -176,13 +178,20 @@
     <span class="s1">&#39;subset_events&#39;</span><span class="p">,</span>
     <span class="s1">&#39;build_test_data&#39;</span><span class="p">,</span>
     <span class="s1">&#39;build_training_data&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;get_repetition_ratio_dict&#39;</span>
+    <span class="s1">&#39;get_repetition_ratio_dict&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;get_post_stim_events_mask&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;build_ps_data&#39;</span>
 <span class="p">]</span>
 
 
 <span class="nd">@task</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_word_event_mask</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">encoding_only</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">get_word_event_mask_core</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">encoding_only</span><span class="p">)</span>
+
+
+<span class="nd">@task</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">get_post_stim_events_mask</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">get_post_stim_events_mask_core</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
 
 
 <span class="nd">@task</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -200,7 +209,7 @@
         <span class="n">cleaned_pal_events</span> <span class="o">=</span> <span class="n">clean_events</span><span class="p">(</span><span class="n">pal_events</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="p">((</span><span class="s2">&quot;FR&quot;</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">)</span> <span class="ow">and</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;combine_events&#39;</span><span class="p">])</span> <span class="ow">or</span> \
-            <span class="p">(</span><span class="s2">&quot;PAL&quot;</span> <span class="ow">in</span> <span class="n">experiment</span> <span class="ow">and</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;combined_events&#39;</span><span class="p">]):</span>
+            <span class="p">(</span><span class="s2">&quot;PAL&quot;</span> <span class="ow">in</span> <span class="n">experiment</span> <span class="ow">and</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;combine_events&#39;</span><span class="p">]):</span>
         <span class="n">fr_events</span> <span class="o">=</span> <span class="n">load_events</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="s1">&#39;FR1&#39;</span><span class="p">,</span> <span class="n">sessions</span><span class="o">=</span><span class="n">sessions</span><span class="p">,</span>
                                 <span class="n">rootdir</span><span class="o">=</span><span class="n">paths</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
         <span class="n">cleaned_fr_events</span> <span class="o">=</span> <span class="n">clean_events</span><span class="p">(</span><span class="n">fr_events</span><span class="p">,</span>
@@ -211,16 +220,17 @@
                                          <span class="n">post</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;post_event_buf&#39;</span><span class="p">])</span>
 
         <span class="n">catfr_events</span> <span class="o">=</span> <span class="n">load_events</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="s1">&#39;catFR1&#39;</span><span class="p">,</span>
-                                   <span class="n">sessions</span><span class="o">=</span><span class="n">sessions</span><span class="p">,</span> <span class="n">rootdir</span><span class="o">=</span><span class="n">paths</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+                                   <span class="n">sessions</span><span class="o">=</span><span class="n">sessions</span><span class="p">,</span>
+                                   <span class="n">rootdir</span><span class="o">=</span><span class="n">paths</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
         <span class="n">cleaned_catfr_events</span> <span class="o">=</span> <span class="n">clean_events</span><span class="p">(</span><span class="n">catfr_events</span><span class="p">,</span>
                                             <span class="n">start_time</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;baseline_removal_start_time&#39;</span><span class="p">],</span>
                                             <span class="n">end_time</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;retrieval_time&#39;</span><span class="p">],</span>
+                                            <span class="n">duration</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;empty_epoch_duration&#39;</span><span class="p">],</span>
                                             <span class="n">pre</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;pre_event_buf&#39;</span><span class="p">],</span>
-                                            <span class="n">post</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;post_event_buf&#39;</span><span class="p">],</span>
-                                            <span class="n">duration</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;empty_epoch_duration&#39;</span><span class="p">])</span>
+                                            <span class="n">post</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;post_event_buf&#39;</span><span class="p">])</span>
 
         <span class="n">free_recall_events</span> <span class="o">=</span> <span class="n">concatenate_events_across_experiments</span><span class="p">(</span>
-            <span class="p">[</span><span class="n">cleaned_fr_events</span><span class="p">,</span> <span class="n">cleaned_catfr_events</span><span class="p">])</span>
+            <span class="p">[</span><span class="n">cleaned_fr_events</span><span class="p">,</span> <span class="n">cleaned_catfr_events</span><span class="p">],</span> <span class="n">cat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="s2">&quot;FR&quot;</span> <span class="ow">in</span> <span class="n">experiment</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;combine_events&#39;</span><span class="p">]:</span>
         <span class="n">free_recall_events</span> <span class="o">=</span> <span class="n">load_events</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">sessions</span><span class="o">=</span><span class="n">sessions</span><span class="p">,</span>
@@ -247,61 +257,78 @@
     <span class="k">return</span> <span class="n">all_task_events</span></div>
 
 
-<div class="viewcode-block" id="build_test_data"><a class="viewcode-back" href="../../../pipeline.html#ramutils.tasks.events.build_test_data">[docs]</a><span class="nd">@task</span><span class="p">(</span><span class="n">nout</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<div class="viewcode-block" id="build_test_data"><a class="viewcode-back" href="../../../pipeline.html#ramutils.tasks.events.build_test_data">[docs]</a><span class="nd">@task</span><span class="p">(</span><span class="n">nout</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">build_test_data</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">paths</span><span class="p">,</span> <span class="n">joint_report</span><span class="p">,</span> <span class="n">sessions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                     <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Construct the set of events to be used for post-hoc classifier</span>
 <span class="sd">        evaluation, i.e. the test data</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">series_num</span> <span class="o">=</span> <span class="n">extract_experiment_series</span><span class="p">(</span><span class="n">experiment</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">joint_report</span> <span class="ow">and</span> <span class="s1">&#39;FR&#39;</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">:</span>
         <span class="n">fr_events</span> <span class="o">=</span> <span class="n">load_events</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="s1">&#39;FR&#39;</span> <span class="o">+</span> <span class="n">series_num</span><span class="p">,</span>
-                                <span class="n">sessions</span><span class="o">=</span><span class="n">sessions</span><span class="p">,</span> <span class="n">rootdir</span><span class="o">=</span><span class="n">paths</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
-        <span class="n">cleaned_fr_events</span> <span class="o">=</span> <span class="n">clean_events</span><span class="p">(</span><span class="n">fr_events</span><span class="p">,</span>
-                                         <span class="n">start_time</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;baseline_removal_start_time&#39;</span><span class="p">],</span>
-                                         <span class="n">end_time</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;retrieval_time&#39;</span><span class="p">],</span>
-                                         <span class="n">duration</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;empty_epoch_duration&#39;</span><span class="p">],</span>
-                                         <span class="n">pre</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;pre_event_buf&#39;</span><span class="p">],</span>
-                                         <span class="n">post</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;post_event_buf&#39;</span><span class="p">])</span>
+                                <span class="n">sessions</span><span class="o">=</span><span class="n">sessions</span><span class="p">,</span>
+                                <span class="n">rootdir</span><span class="o">=</span><span class="n">paths</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+        <span class="n">cleaned_fr_events</span><span class="p">,</span> <span class="n">fr_stim_params</span> <span class="o">=</span> <span class="n">clean_events</span><span class="p">(</span>
+            <span class="n">fr_events</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;baseline_removal_start_time&#39;</span><span class="p">],</span>
+            <span class="n">end_time</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;retrieval_time&#39;</span><span class="p">],</span>
+            <span class="n">duration</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;empty_epoch_duration&#39;</span><span class="p">],</span>
+            <span class="n">pre</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;pre_event_buf&#39;</span><span class="p">],</span> <span class="n">post</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;post_event_buf&#39;</span><span class="p">],</span>
+            <span class="n">return_stim_events</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="n">catfr_events</span> <span class="o">=</span> <span class="n">load_events</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="s1">&#39;catFR&#39;</span> <span class="o">+</span> <span class="n">series_num</span><span class="p">,</span>
                                    <span class="n">sessions</span><span class="o">=</span><span class="n">sessions</span><span class="p">,</span>
                                    <span class="n">rootdir</span><span class="o">=</span><span class="n">paths</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
-        <span class="n">cleaned_catfr_events</span> <span class="o">=</span> <span class="n">clean_events</span><span class="p">(</span><span class="n">catfr_events</span><span class="p">,</span>
-                                            <span class="n">start_time</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;baseline_removal_start_time&#39;</span><span class="p">],</span>
-                                            <span class="n">end_time</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;retrieval_time&#39;</span><span class="p">],</span>
-                                            <span class="n">duration</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;empty_epoch_duration&#39;</span><span class="p">],</span>
-                                            <span class="n">pre</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;pre_event_buf&#39;</span><span class="p">],</span>
-                                            <span class="n">post</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;post_event_buf&#39;</span><span class="p">])</span>
+        <span class="n">cleaned_catfr_events</span><span class="p">,</span> <span class="n">catfr_stim_params</span> <span class="o">=</span> <span class="n">clean_events</span><span class="p">(</span>
+            <span class="n">catfr_events</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;baseline_removal_start_time&#39;</span><span class="p">],</span>
+            <span class="n">end_time</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;retrieval_time&#39;</span><span class="p">],</span>
+            <span class="n">duration</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;empty_epoch_duration&#39;</span><span class="p">],</span>
+            <span class="n">pre</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;pre_event_buf&#39;</span><span class="p">],</span> <span class="n">post</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;post_event_buf&#39;</span><span class="p">],</span>
+            <span class="n">return_stim_events</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="n">all_events</span> <span class="o">=</span> <span class="n">concatenate_events_across_experiments</span><span class="p">([</span><span class="n">fr_events</span><span class="p">,</span>
                                                             <span class="n">catfr_events</span><span class="p">])</span>
         <span class="n">task_events</span> <span class="o">=</span> <span class="n">concatenate_events_across_experiments</span><span class="p">(</span>
-            <span class="p">[</span><span class="n">cleaned_fr_events</span><span class="p">,</span> <span class="n">cleaned_catfr_events</span><span class="p">],</span> <span class="n">stim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="p">[</span><span class="n">cleaned_fr_events</span><span class="p">,</span> <span class="n">cleaned_catfr_events</span><span class="p">],</span> <span class="n">cat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">stim_params</span> <span class="o">=</span> <span class="n">concatenate_events_across_experiments</span><span class="p">([</span><span class="n">fr_stim_params</span><span class="p">,</span>
+                                                             <span class="n">catfr_stim_params</span><span class="p">],</span>
+                                                            <span class="n">stim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="ow">not</span> <span class="n">joint_report</span> <span class="ow">and</span> <span class="s1">&#39;FR&#39;</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">:</span>
         <span class="n">all_events</span> <span class="o">=</span> <span class="n">load_events</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">sessions</span><span class="o">=</span><span class="n">sessions</span><span class="p">,</span>
                                  <span class="n">rootdir</span><span class="o">=</span><span class="n">paths</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
-        <span class="n">task_events</span> <span class="o">=</span> <span class="n">clean_events</span><span class="p">(</span><span class="n">all_events</span><span class="p">,</span>
-                                   <span class="n">start_time</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;baseline_removal_start_time&#39;</span><span class="p">],</span>
-                                   <span class="n">end_time</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;retrieval_time&#39;</span><span class="p">],</span>
-                                   <span class="n">duration</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;empty_epoch_duration&#39;</span><span class="p">],</span>
-                                   <span class="n">pre</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;pre_event_buf&#39;</span><span class="p">],</span>
-                                   <span class="n">post</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;post_event_buf&#39;</span><span class="p">])</span>
+        <span class="n">task_events</span><span class="p">,</span> <span class="n">stim_params</span> <span class="o">=</span> <span class="n">clean_events</span><span class="p">(</span>
+            <span class="n">all_events</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;baseline_removal_start_time&#39;</span><span class="p">],</span>
+            <span class="n">end_time</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;retrieval_time&#39;</span><span class="p">],</span>
+            <span class="n">duration</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;empty_epoch_duration&#39;</span><span class="p">],</span>
+            <span class="n">pre</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;pre_event_buf&#39;</span><span class="p">],</span> <span class="n">post</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;post_event_buf&#39;</span><span class="p">],</span>
+            <span class="n">return_stim_events</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="n">all_events</span> <span class="o">=</span> <span class="n">load_events</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">sessions</span><span class="o">=</span><span class="n">sessions</span><span class="p">,</span>
                                  <span class="n">rootdir</span><span class="o">=</span><span class="n">paths</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
-        <span class="n">task_events</span> <span class="o">=</span> <span class="n">clean_events</span><span class="p">(</span><span class="n">all_events</span><span class="p">)</span>
+        <span class="n">task_events</span><span class="p">,</span> <span class="n">stim_params</span> <span class="o">=</span> <span class="n">clean_events</span><span class="p">(</span><span class="n">all_events</span><span class="p">,</span>
+                                                <span class="n">return_stim_events</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">all_events</span><span class="p">,</span> <span class="n">task_events</span></div>
+    <span class="k">return</span> <span class="n">all_events</span><span class="p">,</span> <span class="n">task_events</span><span class="p">,</span> <span class="n">stim_params</span></div>
 
 
 <span class="nd">@task</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">get_repetition_ratio_dict</span><span class="p">(</span><span class="n">paths</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">get_repetition_ratio_dict_core</span><span class="p">(</span><span class="n">rootdir</span><span class="o">=</span><span class="n">paths</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+
+
+<span class="nd">@task</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">build_ps_data</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">file_type</span><span class="p">,</span> <span class="n">sessions</span><span class="p">,</span> <span class="n">rootdir</span><span class="p">):</span>
+    <span class="n">updated_experiment</span> <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;PS4_&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">ps_events</span> <span class="o">=</span> <span class="n">load_events</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">updated_experiment</span><span class="p">,</span> <span class="n">file_type</span><span class="o">=</span><span class="n">file_type</span><span class="p">,</span>
+                            <span class="n">sessions</span><span class="o">=</span><span class="n">sessions</span><span class="p">,</span> <span class="n">rootdir</span><span class="o">=</span><span class="n">rootdir</span><span class="p">)</span>
+    <span class="c1"># The practice list is needed in order assess sham stim event, so this</span>
+    <span class="c1"># may need to change in the future</span>
+    <span class="n">ps_events</span> <span class="o">=</span> <span class="n">remove_practice_lists</span><span class="p">(</span><span class="n">ps_events</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ps_events</span>
+
 </pre></div>
 
            </div>
@@ -338,7 +365,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'2.0.2',
+            VERSION:'2.1.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
