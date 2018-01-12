@@ -37,7 +37,6 @@ Contents
     data
     classifier
     events
-    models
     pipeline
     cli
     misc

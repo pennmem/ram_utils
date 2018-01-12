@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Pipelines &mdash; Ramutils 2.0.2 documentation</title>
+  <title>Pipelines &mdash; Ramutils 2.1.0 documentation</title>
   
 
   
@@ -35,9 +35,9 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Ramutils 2.0.2 documentation" href="index.html"/>
+    <link rel="top" title="Ramutils 2.1.0 documentation" href="index.html"/>
         <link rel="next" title="Command-line usage" href="cli.html"/>
-        <link rel="prev" title="Modeling effects of stim" href="models.html"/> 
+        <link rel="prev" title="Event processing" href="events.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                2.0
+                2.1
               </div>
             
           
@@ -94,7 +94,6 @@
 <li class="toctree-l1"><a class="reference internal" href="data.html">Serializable data structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="classifier.html">Classifier training, cross validation, and utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="events.html">Event processing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="models.html">Modeling effects of stim</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Pipelines</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#defining-tasks">Defining tasks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#reference">Reference</a><ul>
@@ -296,7 +295,7 @@ that function for more details</li>
 
 <dl class="function">
 <dt id="ramutils.tasks.classifier.post_hoc_classifier_evaluation">
-<code class="descclassname">ramutils.tasks.classifier.</code><code class="descname">post_hoc_classifier_evaluation</code><span class="sig-paren">(</span><em>events</em>, <em>powers</em>, <em>all_pairs</em>, <em>classifiers</em>, <em>n_permutations</em>, <em>retrained_classifier</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/classifier.html#post_hoc_classifier_evaluation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.classifier.post_hoc_classifier_evaluation" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ramutils.tasks.classifier.</code><code class="descname">post_hoc_classifier_evaluation</code><span class="sig-paren">(</span><em>events</em>, <em>powers</em>, <em>post_stim_events</em>, <em>post_stim_powers</em>, <em>all_pairs</em>, <em>classifiers</em>, <em>n_permutations</em>, <em>retrained_classifier</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/classifier.html#post_hoc_classifier_evaluation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.classifier.post_hoc_classifier_evaluation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate a trained classifier</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -305,6 +304,9 @@ that function for more details</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>events</strong> (<em>np.recarray</em>) – Task events associated with the stim sessesion to be evaluated</li>
 <li><strong>powers</strong> (<em>np.ndarray</em>) – Normalized mean powers</li>
+<li><strong>post_stim_events</strong> (<em>np.recarray</em>) – Post-stimulation events associated with the stim sessesion to be
+evaluated</li>
+<li><strong>post_stim_powers</strong> (<em>np.ndarray</em>) – Normalized mean powers for post_stim period events</li>
 <li><strong>all_pairs</strong> (<em>OrderedDict</em>) – All pairs based on recorded electrodes combine from config file</li>
 <li><strong>classifiers</strong> (<em>List</em>) – List of classifiers corresponding to each session</li>
 <li><strong>n_permutations</strong> (<em>int</em>) – Number of permutations to use for cross validation</li>
@@ -316,16 +318,14 @@ that function for more details</li>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>A dictionary of summary objects that are needed in subsequent parts
 of the processing pipeline. The dictionary will be in the following
 format:</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>{‘cross_session_summary’: MultiSessionClassifierSummary,</dt>
-<dd><p class="first last">’session_summaries’: List of ClassifierSummary objects,
-‘session_summaries_stim_table’: List of ClassifierSummary
-objects built using all encoding events</p>
-</dd>
-</dl>
-<p>}</p>
-</div></blockquote>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s1">&#39;cross_session_summary&#39;</span><span class="p">:</span> <span class="n">MultiSessionClassifierSummary</span><span class="p">,</span>
+    <span class="s1">&#39;session_summaries&#39;</span><span class="p">:</span> <span class="n">List</span> <span class="n">of</span> <span class="n">ClassifierSummary</span> <span class="n">objects</span><span class="p">,</span>
+    <span class="s1">&#39;session_summaries_stim_table&#39;</span><span class="p">:</span> <span class="n">List</span> <span class="n">of</span> <span class="n">ClassifierSummary</span> <span class="n">objects</span> <span class="n">built</span> <span class="n">using</span> <span class="nb">all</span> <span class="n">encoding</span> <span class="n">events</span><span class="p">,</span>
+    <span class="s1">&#39;post_stim_predicted_probs&#39;</span><span class="p">:</span> <span class="n">Classifier</span> <span class="n">output</span> <span class="n">during</span> <span class="n">post</span> <span class="n">stim</span> <span class="n">period</span>
+<span class="p">}</span>
+</pre></div>
+</div>
 </p>
 </td>
 </tr>
@@ -480,26 +480,6 @@ config files.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ramutils.tasks.odin.generate_pairs_from_electrode_config">
-<code class="descclassname">ramutils.tasks.odin.</code><code class="descname">generate_pairs_from_electrode_config</code><span class="sig-paren">(</span><em>subject</em>, <em>paths</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/odin.html#generate_pairs_from_electrode_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.odin.generate_pairs_from_electrode_config" title="Permalink to this definition">¶</a></dt>
-<dd><p>Load and verify the validity of the Odin electrode configuration file.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>subject</strong> (<em>str</em>) – Subject ID</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>pairs_from_ec</strong> – Minimal pairs.json based on the electrode configuration</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">RuntimeError</span></code> – If the csv or bin file are not found</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
 <dt id="ramutils.tasks.odin.generate_ramulator_config">
 <code class="descclassname">ramutils.tasks.odin.</code><code class="descname">generate_ramulator_config</code><span class="sig-paren">(</span><em>subject</em>, <em>experiment</em>, <em>container</em>, <em>stim_params</em>, <em>paths</em>, <em>pairs=None</em>, <em>excluded_pairs=None</em>, <em>exp_params=None</em>, <em>extended_blanking=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/odin.html#generate_ramulator_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.odin.generate_ramulator_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create configuration files for Ramulator.</p>
@@ -554,9 +534,9 @@ calling the more general compute_powers function</p>
 <p>Tasks related to summarizing an experiment. Used primarily in reporting
 results.</p>
 <dl class="function">
-<dt id="ramutils.tasks.summary.summarize_sessions">
-<code class="descclassname">ramutils.tasks.summary.</code><code class="descname">summarize_sessions</code><span class="sig-paren">(</span><em>all_events</em>, <em>task_events</em>, <em>joint=False</em>, <em>repetition_ratio_dict={}</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/summary.html#summarize_sessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.summary.summarize_sessions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate a summary of by unique session/experiment</p>
+<dt id="ramutils.tasks.summary.summarize_nonstim_sessions">
+<code class="descclassname">ramutils.tasks.summary.</code><code class="descname">summarize_nonstim_sessions</code><span class="sig-paren">(</span><em>all_events</em>, <em>task_events</em>, <em>joint=False</em>, <em>repetition_ratio_dict={}</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/summary.html#summarize_nonstim_sessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.summary.summarize_nonstim_sessions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a summary by unique session/experiment</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -583,7 +563,6 @@ checks for single-experiment events</li>
 </table>
 <p class="rubric">Notes</p>
 <p>The experiment type is inferred from the events.</p>
-<p>FIXME: make work with all experiments</p>
 </dd></dl>
 
 <dl class="function">
@@ -613,8 +592,22 @@ multiple experiments should be allowed</li>
 
 <dl class="function">
 <dt id="ramutils.tasks.summary.summarize_stim_sessions">
-<code class="descclassname">ramutils.tasks.summary.</code><code class="descname">summarize_stim_sessions</code><span class="sig-paren">(</span><em>all_events</em>, <em>task_events</em>, <em>encoding_classifier_summaries</em>, <em>pairs_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/summary.html#summarize_stim_sessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.summary.summarize_stim_sessions" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ramutils.tasks.summary.</code><code class="descname">summarize_stim_sessions</code><span class="sig-paren">(</span><em>all_events</em>, <em>task_events</em>, <em>stim_params</em>, <em>encoding_classifier_summaries</em>, <em>post_stim_predicted_probs</em>, <em>pairs_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/summary.html#summarize_stim_sessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.summary.summarize_stim_sessions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct stim session summaries</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.tasks.summary.summarize_ps_sessions">
+<code class="descclassname">ramutils.tasks.summary.</code><code class="descname">summarize_ps_sessions</code><span class="sig-paren">(</span><em>ps_events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/summary.html#summarize_ps_sessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.summary.summarize_ps_sessions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Task for generating summaries of PS session</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ps_events</strong> – </td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -634,7 +627,7 @@ multiple experiments should be allowed</li>
         <a href="cli.html" class="btn btn-neutral float-right" title="Command-line usage" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="models.html" class="btn btn-neutral" title="Modeling effects of stim" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="events.html" class="btn btn-neutral" title="Event processing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -665,7 +658,7 @@ multiple experiments should be allowed</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.0.2',
+            VERSION:'2.1.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

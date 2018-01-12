@@ -203,9 +203,10 @@ def summarize_stim_sessions(all_events, task_events, stim_params,
 def summarize_ps_sessions(ps_events):
     """ Task for generating summaries of PS session
 
-    Parameters:
-    -----------
-    ps_events:
+    Parameters
+    ----------
+    ps_events
+
     """
     session_summaries = []
     sessions = extract_sessions(ps_events)

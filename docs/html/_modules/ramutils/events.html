@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ramutils.events &mdash; Ramutils 2.0.2 documentation</title>
+  <title>ramutils.events &mdash; Ramutils 2.1.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Ramutils 2.0.2 documentation" href="../../index.html"/>
+    <link rel="top" title="Ramutils 2.1.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                2.0
+                2.1
               </div>
             
           
@@ -93,7 +93,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../data.html">Serializable data structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../classifier.html">Classifier training, cross validation, and utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../events.html">Event processing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../models.html">Modeling effects of stim</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pipeline.html">Pipelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cli.html">Command-line usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../misc.html">Miscellaneous utilities</a></li>
@@ -204,7 +203,7 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    np.recarray</span>
+<span class="sd">    np.rec.array</span>
 <span class="sd">        A numpy recarray containing all events for the requested subject,</span>
 <span class="sd">        experiment, and session(s)</span>
 
@@ -217,18 +216,26 @@
 
     <span class="n">sessions_to_load</span> <span class="o">=</span> <span class="n">sessions</span>
     <span class="k">if</span> <span class="n">sessions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="c1"># Find all sessions for the requested experiment</span>
+        <span class="c1"># Find all sessions for the requested experiment.</span>
+        <span class="c1"># TODO: PS sessions should not be included when loading FR5/catFR5</span>
         <span class="n">sessions_to_load</span> <span class="o">=</span> <span class="n">json_reader</span><span class="o">.</span><span class="n">aggregate_values</span><span class="p">(</span><span class="s1">&#39;sessions&#39;</span><span class="p">,</span>
                                                         <span class="n">subject</span><span class="o">=</span><span class="n">subject_id</span><span class="p">,</span>
                                                         <span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">)</span>
 
-    <span class="c1"># TODO: There should be better behavior if an event file cannot be found</span>
-    <span class="c1">#  for a requested session</span>
-    <span class="n">event_files</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">json_reader</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">file_type</span><span class="p">,</span>
-                                                <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
-                                                <span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">,</span>
-                                                <span class="n">session</span><span class="o">=</span><span class="n">session</span><span class="p">)</span>
-                          <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">sessions_to_load</span><span class="p">)])</span>
+    <span class="n">event_files</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">sessions_to_load</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">event_file</span> <span class="o">=</span> <span class="n">json_reader</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="n">file_type</span><span class="p">,</span>
+                                               <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
+                                               <span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">,</span>
+                                               <span class="n">session</span><span class="o">=</span><span class="n">session</span><span class="p">)</span>
+            <span class="n">event_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event_file</span><span class="p">)</span>
+
+        <span class="c1"># If an event file cannot be found for a session, skip that session</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+    <span class="n">event_files</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">event_files</span><span class="p">)</span>
 
     <span class="c1"># Update the paths based on the given root directory. This makes it easier</span>
     <span class="c1"># to run tests and use a mounted file system</span>
@@ -240,15 +247,15 @@
         <span class="k">return</span> <span class="n">empty_recarray</span>
 
     <span class="c1"># TODO: Make this less ugly to look at</span>
-    <span class="n">events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span>
         <span class="n">BaseEventReader</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">eliminate_events_with_no_eeg</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">event_files</span><span class="p">])</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">recarray</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">event_files</span><span class="p">]))</span>
 
     <span class="k">return</span> <span class="n">events</span></div>
 
 
 <div class="viewcode-block" id="clean_events"><a class="viewcode-back" href="../../events.html#ramutils.events.clean_events">[docs]</a><span class="k">def</span> <span class="nf">clean_events</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">pre</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">post</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                 <span class="n">pre</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">post</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_stim_events</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Peform basic cleaning operations on events such as removing incomplete</span>
 <span class="sd">        sessions, negative offset events, and incomplete lists. For FR events,</span>
@@ -264,6 +271,9 @@
 <span class="sd">    duration:</span>
 <span class="sd">    pre:</span>
 <span class="sd">    post:</span>
+<span class="sd">    return_stim_events: bool</span>
+<span class="sd">        Indicator for if stim parameters should be returned in addition to the</span>
+<span class="sd">        cleaned events</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -274,6 +284,7 @@
 <span class="sd">    -----</span>
 <span class="sd">    This function should be called on an experiment by experiment basis and</span>
 <span class="sd">    should not be used to clean cross-experiment datasets</span>
+<span class="sd">    :param return_stim_events:</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">experiments</span> <span class="o">=</span> <span class="n">extract_experiment_from_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
@@ -289,6 +300,7 @@
     <span class="c1"># that are just a repeated recall</span>
 
     <span class="k">if</span> <span class="s2">&quot;FR&quot;</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">:</span>
+        <span class="n">events</span><span class="p">,</span> <span class="n">stim_params</span> <span class="o">=</span> <span class="n">separate_stim_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
         <span class="n">events</span> <span class="o">=</span> <span class="n">insert_baseline_retrieval_events</span><span class="p">(</span><span class="n">events</span><span class="p">,</span>
                                                   <span class="n">start_time</span><span class="p">,</span>
                                                   <span class="n">end_time</span><span class="p">,</span>
@@ -300,13 +312,20 @@
         <span class="n">events</span> <span class="o">=</span> <span class="n">update_recall_outcome_for_retrieval_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
         <span class="n">events</span> <span class="o">=</span> <span class="n">normalize_fr_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="s2">&quot;PAL&quot;</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="s2">&quot;PAL&quot;</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">:</span>
+        <span class="n">events</span><span class="p">,</span> <span class="n">stim_params</span> <span class="o">=</span> <span class="n">separate_stim_events</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">pal</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">events</span> <span class="o">=</span> <span class="n">subset_pal_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
         <span class="n">events</span> <span class="o">=</span> <span class="n">update_pal_retrieval_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
         <span class="n">events</span> <span class="o">=</span> <span class="n">remove_nonresponses</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
         <span class="n">events</span> <span class="o">=</span> <span class="n">normalize_pal_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
 
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">stim_params</span> <span class="o">=</span> <span class="n">initialize_empty_stim_reccarray</span><span class="p">()</span>
+
     <span class="n">events</span> <span class="o">=</span> <span class="n">update_subject</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">return_stim_events</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">events</span><span class="p">,</span> <span class="n">stim_params</span>
 
     <span class="k">return</span> <span class="n">events</span></div>
 
@@ -320,19 +339,72 @@
 
 <span class="k">def</span> <span class="nf">normalize_fr_events</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
     <span class="n">events</span> <span class="o">=</span> <span class="n">combine_retrieval_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s1">&#39;category_num&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">events</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
+        <span class="c1"># Subset first otherwise stim params will be there</span>
+        <span class="c1"># and this will prevent add_field from working</span>
+        <span class="n">events</span> <span class="o">=</span> <span class="n">select_column_subset</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+        <span class="n">events</span> <span class="o">=</span> <span class="n">add_field</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="s1">&#39;category_num&#39;</span><span class="p">,</span> <span class="mi">999</span><span class="p">)</span>
+
+    <span class="n">events</span> <span class="o">=</span> <span class="n">select_column_subset</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">cat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Convert to dataframe and back. This will ensure that string types match</span>
+    <span class="c1"># if events from another experiment where a field was added are combined</span>
+    <span class="c1"># with these events. The alternative is to have a function that explicitly</span>
+    <span class="c1"># converts the dtypes of all string fields</span>
+    <span class="n">events_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">events_df</span><span class="o">.</span><span class="n">to_records</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+
+    <span class="c1"># to_records converts the field names to unicode, which will break the</span>
+    <span class="c1"># pickling of these events, so turn them back into strings</span>
+    <span class="n">events</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">events</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">events</span>
 
 
 <div class="viewcode-block" id="normalize_pal_events"><a class="viewcode-back" href="../../events.html#ramutils.events.normalize_pal_events">[docs]</a><span class="k">def</span> <span class="nf">normalize_pal_events</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Perform any normalization to PAL event so make the homogeneous enough so</span>
-<span class="sd">    that it is trivial to combine with other experiment events.</span>
-
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform any normalization to PAL event so make the homogeneous enough so</span>
+<span class="sd">        that it is trivial to combine with other experiment events.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="n">select_column_subset</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">pal</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">events</span> <span class="o">=</span> <span class="n">rename_correct_to_recalled</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
     <span class="n">events</span> <span class="o">=</span> <span class="n">coerce_study_pair_to_word_event</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
-    <span class="n">events</span> <span class="o">=</span> <span class="n">select_column_subset</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">pal</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">events</span> <span class="o">=</span> <span class="n">add_field</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="s1">&#39;item_name&#39;</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">)</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="n">add_field</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="s1">&#39;category_num&#39;</span><span class="p">,</span> <span class="mi">999</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">events</span></div>
+
+
+<div class="viewcode-block" id="separate_stim_events"><a class="viewcode-back" href="../../events.html#ramutils.events.separate_stim_events">[docs]</a><span class="k">def</span> <span class="nf">separate_stim_events</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">pal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">stim</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cat</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Separate stim params contained within events structure from the 1-D</span>
+<span class="sd">        events. The returned events and stim_params are both 1-dimensional</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pal</span>
+<span class="sd">    stim</span>
+<span class="sd">    cat</span>
+<span class="sd">    events: np.recarray</span>
+<span class="sd">        Event structure</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    events: np.reccary</span>
+<span class="sd">        1D event structure with stim params removed</span>
+<span class="sd">    stim_params: np.recarray</span>
+<span class="sd">        2D stim params strsucture</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Short-circuit if no stim params field (non stim experiment) or no events</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">events</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;stim_params&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">events</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span><span class="p">):</span>
+        <span class="n">stim_params</span> <span class="o">=</span> <span class="n">initialize_empty_stim_reccarray</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">events</span><span class="p">,</span> <span class="n">stim_params</span>
+
+    <span class="n">stim_cols</span> <span class="o">=</span> <span class="n">get_required_columns</span><span class="p">(</span><span class="n">pal</span><span class="o">=</span><span class="n">pal</span><span class="p">,</span> <span class="n">stim</span><span class="o">=</span><span class="n">stim</span><span class="p">,</span> <span class="n">cat</span><span class="o">=</span><span class="n">cat</span><span class="p">)</span>
+    <span class="n">stim_params</span> <span class="o">=</span> <span class="n">events</span><span class="p">[</span><span class="n">stim_cols</span><span class="p">]</span>
+    <span class="n">all_fields</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+    <span class="n">all_fields</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;stim_params&#39;</span><span class="p">)</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="n">events</span><span class="p">[</span><span class="n">all_fields</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">events</span><span class="p">,</span> <span class="n">stim_params</span></div>
 
 
 <div class="viewcode-block" id="rename_correct_to_recalled"><a class="viewcode-back" href="../../events.html#ramutils.events.rename_correct_to_recalled">[docs]</a><span class="k">def</span> <span class="nf">rename_correct_to_recalled</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
@@ -365,7 +437,11 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">events_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
     <span class="n">events_df</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_val</span>
-    <span class="n">events</span> <span class="o">=</span> <span class="n">events_df</span><span class="o">.</span><span class="n">to_records</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">recarray</span><span class="p">)</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">events_df</span><span class="o">.</span><span class="n">to_records</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+
+    <span class="c1"># to_records converts field names to unicode, which breaks pickling these</span>
+    <span class="c1"># events</span>
+    <span class="n">events</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">events</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">events</span></div>
 
 
@@ -392,7 +468,7 @@
         <span class="n">task_events</span> <span class="o">=</span> <span class="n">sess_events</span><span class="p">[</span><span class="o">~</span><span class="n">math_mask</span><span class="p">]</span>
         <span class="n">math_events</span> <span class="o">=</span> <span class="n">sess_events</span><span class="p">[</span><span class="n">math_mask</span><span class="p">]</span>
         <span class="n">final_sess_events</span> <span class="o">=</span> <span class="n">task_events</span>
-        <span class="n">final_sess_events</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;session&#39;</span><span class="p">,</span><span class="s1">&#39;list&#39;</span><span class="p">,</span><span class="s1">&#39;mstime&#39;</span><span class="p">])</span>
+        <span class="n">final_sess_events</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="s1">&#39;mstime&#39;</span><span class="p">])</span>
 
         <span class="c1"># Remove all task events for lists that don&#39;t have a &quot;REC_END&quot; event</span>
         <span class="n">events_by_list</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">list_group</span><span class="p">])</span> <span class="k">for</span> <span class="n">listno</span><span class="p">,</span>
@@ -405,8 +481,8 @@
             <span class="n">events_by_list</span><span class="p">,</span> <span class="n">list_has_end</span><span class="p">)</span> <span class="k">if</span> <span class="n">a</span><span class="p">])</span>
 
         <span class="c1"># Re-combine math and task events</span>
-        <span class="n">final_sess_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">final_sess_events</span><span class="p">,</span>
-                                            <span class="n">math_events</span><span class="p">])</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">recarray</span><span class="p">)</span>
+        <span class="n">final_sess_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">final_sess_events</span><span class="p">,</span>
+                                            <span class="n">math_events</span><span class="p">]))</span>
         <span class="n">final_sess_events</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="s1">&#39;mstime&#39;</span><span class="p">])</span>
         <span class="n">final_event_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">final_sess_events</span><span class="p">)</span>
 
@@ -533,23 +609,41 @@
     <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 
-<div class="viewcode-block" id="select_column_subset"><a class="viewcode-back" href="../../events.html#ramutils.events.select_column_subset">[docs]</a><span class="k">def</span> <span class="nf">select_column_subset</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">pal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">stim</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="select_column_subset"><a class="viewcode-back" href="../../events.html#ramutils.events.select_column_subset">[docs]</a><span class="k">def</span> <span class="nf">select_column_subset</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">pal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">stim</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cat</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Select only the necessary subset of the fields &quot;&quot;&quot;</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="n">get_required_columns</span><span class="p">(</span><span class="n">pal</span><span class="o">=</span><span class="n">pal</span><span class="p">,</span> <span class="n">stim</span><span class="o">=</span><span class="n">stim</span><span class="p">,</span> <span class="n">cat</span><span class="o">=</span><span class="n">cat</span><span class="p">)</span>
+    <span class="c1"># Explicitly ask for a copy since a view is returned in numpy 1.13 and later</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="n">events</span><span class="p">[</span><span class="n">columns</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">events</span></div>
+
+
+<div class="viewcode-block" id="get_required_columns"><a class="viewcode-back" href="../../events.html#ramutils.events.get_required_columns">[docs]</a><span class="k">def</span> <span class="nf">get_required_columns</span><span class="p">(</span><span class="n">pal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">stim</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cat</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Return baseline mandatory columns based on experiment type &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">cat</span> <span class="ow">and</span> <span class="n">pal</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Either &#39;cat&#39; or &#39;pal&#39; can be chosen, but not both&quot;</span><span class="p">)</span>
+
     <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span>
         <span class="s1">&#39;serialpos&#39;</span><span class="p">,</span> <span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;rectime&#39;</span><span class="p">,</span> <span class="s1">&#39;experiment&#39;</span><span class="p">,</span>
         <span class="s1">&#39;mstime&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;eegoffset&#39;</span><span class="p">,</span> <span class="s1">&#39;recalled&#39;</span><span class="p">,</span> <span class="s1">&#39;intrusion&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;montage&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="s1">&#39;eegfile&#39;</span><span class="p">,</span> <span class="s1">&#39;msoffset&#39;</span><span class="p">,</span> <span class="s1">&#39;item_name&#39;</span><span class="p">,</span> <span class="s1">&#39;iscorrect&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;phase&#39;</span>
+        <span class="s1">&#39;montage&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="s1">&#39;stim_list&#39;</span><span class="p">,</span> <span class="s1">&#39;eegfile&#39;</span><span class="p">,</span> <span class="s1">&#39;msoffset&#39;</span><span class="p">,</span> <span class="s1">&#39;item_name&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;iscorrect&#39;</span><span class="p">,</span> <span class="s1">&#39;phase&#39;</span>
     <span class="p">]</span>
 
-    <span class="k">if</span> <span class="n">pal</span><span class="p">:</span>
-        <span class="n">columns</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;item_name&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cat</span><span class="p">:</span>
+        <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;category_num&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">stim</span><span class="p">:</span>
-        <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;stim_params&#39;</span><span class="p">)</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;experiment&#39;</span><span class="p">,</span> <span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;stim_list&#39;</span><span class="p">,</span> <span class="s1">&#39;mstime&#39;</span><span class="p">,</span> <span class="s1">&#39;item_name&#39;</span><span class="p">,</span> <span class="s1">&#39;serialpos&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;phase&#39;</span><span class="p">,</span> <span class="s1">&#39;stim_params&#39;</span><span class="p">,</span> <span class="s1">&#39;recalled&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">pal</span><span class="p">:</span>
+        <span class="n">columns</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;item_name&#39;</span><span class="p">)</span>
+        <span class="n">columns</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;recalled&#39;</span><span class="p">)</span>
+        <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;correct&#39;</span><span class="p">)</span>
 
-    <span class="n">events</span> <span class="o">=</span> <span class="n">events</span><span class="p">[</span><span class="n">columns</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">events</span></div>
+    <span class="k">return</span> <span class="n">columns</span></div>
 
 
 <div class="viewcode-block" id="initialize_empty_event_reccarray"><a class="viewcode-back" href="../../events.html#ramutils.events.initialize_empty_event_reccarray">[docs]</a><span class="k">def</span> <span class="nf">initialize_empty_event_reccarray</span><span class="p">():</span>
@@ -569,10 +663,29 @@
                                                <span class="p">(</span><span class="s1">&#39;intrusion&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
                                                <span class="p">(</span><span class="s1">&#39;montage&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
                                                <span class="p">(</span><span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;stim_list&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;phase&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">),</span>
                                                <span class="p">(</span><span class="s1">&#39;eegfile&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">),</span>
                                                <span class="p">(</span><span class="s1">&#39;msoffset&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
                                                <span class="p">(</span><span class="s1">&#39;item_name&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">),</span>
                                                <span class="p">(</span><span class="s1">&#39;iscorrect&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)])</span>
+    <span class="k">return</span> <span class="n">empty_recarray</span></div>
+
+
+<div class="viewcode-block" id="initialize_empty_stim_reccarray"><a class="viewcode-back" href="../../events.html#ramutils.events.initialize_empty_stim_reccarray">[docs]</a><span class="k">def</span> <span class="nf">initialize_empty_stim_reccarray</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Generate empty recarray that mirrors fields in stim_params &quot;&quot;&quot;</span>
+    <span class="n">empty_recarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">recarray</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;serialpos&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;experiment&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;mstime&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;recalled&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;stim_list&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;phase&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;item_name&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;stim_params&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">)])</span>
     <span class="k">return</span> <span class="n">empty_recarray</span></div>
 
 
@@ -670,20 +783,21 @@
                     <span class="n">full_match_accum</span><span class="p">[</span><span class="n">choice_inds</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="n">matching_epochs</span> <span class="o">=</span> <span class="n">epochs</span><span class="p">[</span><span class="n">full_match_accum</span><span class="p">]</span>
-        <span class="n">new_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">matching_epochs</span><span class="p">),</span>
-                              <span class="n">dtype</span><span class="o">=</span><span class="n">sess_events</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">recarray</span><span class="p">)</span>
+        <span class="n">new_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">matching_epochs</span><span class="p">),</span>
+                                          <span class="n">dtype</span><span class="o">=</span><span class="n">sess_events</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
 
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">new_events</span><span class="p">):</span>
             <span class="n">new_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">mstime</span> <span class="o">=</span> <span class="n">matching_epochs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="n">new_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s1">&#39;REC_BASE&#39;</span>
 
         <span class="n">new_events</span><span class="o">.</span><span class="n">recalled</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">merged_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">sess_events</span><span class="p">,</span> <span class="n">new_events</span><span class="p">))</span><span class="o">.</span><span class="n">view</span><span class="p">(</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">recarray</span><span class="p">)</span>
+        <span class="n">merged_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">sess_events</span><span class="p">,</span>
+                                                    <span class="n">new_events</span><span class="p">)))</span>
         <span class="n">merged_events</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;mstime&#39;</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">merged_events</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;REC_BASE&#39;</span><span class="p">:</span>
+                <span class="n">merged_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">experiment</span> <span class="o">=</span> <span class="n">merged_events</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">experiment</span>
                 <span class="n">merged_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">merged_events</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">session</span>
                 <span class="n">merged_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">list</span> <span class="o">=</span> <span class="n">merged_events</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">list</span>
                 <span class="n">merged_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">eegfile</span> <span class="o">=</span> <span class="n">merged_events</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">eegfile</span>
@@ -692,7 +806,7 @@
 
         <span class="n">all_events</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">merged_events</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">all_events</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">recarray</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">all_events</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="find_free_time_periods"><a class="viewcode-back" href="../../events.html#ramutils.events.find_free_time_periods">[docs]</a><span class="k">def</span> <span class="nf">find_free_time_periods</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">pre</span><span class="p">,</span> <span class="n">post</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -746,7 +860,8 @@
     <span class="k">return</span> <span class="n">epoch_array</span></div>
 
 
-<div class="viewcode-block" id="concatenate_events_across_experiments"><a class="viewcode-back" href="../../events.html#ramutils.events.concatenate_events_across_experiments">[docs]</a><span class="k">def</span> <span class="nf">concatenate_events_across_experiments</span><span class="p">(</span><span class="n">event_list</span><span class="p">,</span> <span class="n">pal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">stim</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="concatenate_events_across_experiments"><a class="viewcode-back" href="../../events.html#ramutils.events.concatenate_events_across_experiments">[docs]</a><span class="k">def</span> <span class="nf">concatenate_events_across_experiments</span><span class="p">(</span><span class="n">event_list</span><span class="p">,</span> <span class="n">pal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">stim</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                          <span class="n">cat</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Concatenate events across different experiment types. To make session</span>
 <span class="sd">    numbers unique, 100 is added to the second set of events in event_list,</span>
@@ -776,7 +891,7 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">events</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">continue</span> <span class="c1"># we don&#39;t want to be incrementing if we dont have to</span>
         <span class="n">events</span><span class="o">.</span><span class="n">session</span> <span class="o">+=</span> <span class="n">session_offset</span>
-        <span class="n">events</span> <span class="o">=</span> <span class="n">select_column_subset</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">pal</span><span class="o">=</span><span class="n">pal</span><span class="p">,</span> <span class="n">stim</span><span class="o">=</span><span class="n">stim</span><span class="p">)</span>
+        <span class="n">events</span> <span class="o">=</span> <span class="n">select_column_subset</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">pal</span><span class="o">=</span><span class="n">pal</span><span class="p">,</span> <span class="n">stim</span><span class="o">=</span><span class="n">stim</span><span class="p">,</span> <span class="n">cat</span><span class="o">=</span><span class="n">cat</span><span class="p">)</span>
         <span class="n">final_event_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
         <span class="n">session_offset</span> <span class="o">+=</span> <span class="mi">100</span>
 
@@ -805,8 +920,8 @@
     <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">event_sizes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">empty_events</span> <span class="o">=</span> <span class="n">initialize_empty_event_reccarray</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">empty_events</span>
-    <span class="n">final_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">event_list</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">recarray</span><span class="p">)</span>
-    <span class="n">final_events</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;experiment&#39;</span><span class="p">,</span> <span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span>
+    <span class="n">final_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">event_list</span><span class="p">))</span>
+    <span class="n">final_events</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span>
                              <span class="s1">&#39;mstime&#39;</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">final_events</span></div>
@@ -827,7 +942,7 @@
             <span class="n">baseline_retrieval_event_mask</span><span class="p">)</span>
 
     <span class="n">filtered_events</span> <span class="o">=</span> <span class="n">events</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
-    <span class="n">events</span> <span class="o">=</span> <span class="n">filtered_events</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">recarray</span><span class="p">)</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">filtered_events</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">events</span></div>
 
 
@@ -843,7 +958,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">mask</span> <span class="o">=</span> <span class="n">get_word_event_mask</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">encoding_only</span><span class="o">=</span><span class="n">encoding_only</span><span class="p">)</span>
     <span class="n">filtered_events</span> <span class="o">=</span> <span class="n">events</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
-    <span class="n">events</span> <span class="o">=</span> <span class="n">filtered_events</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">recarray</span><span class="p">)</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">filtered_events</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">events</span></div>
 
@@ -874,11 +989,17 @@
 
 <div class="viewcode-block" id="extract_subject"><a class="viewcode-back" href="../../events.html#ramutils.events.extract_subject">[docs]</a><span class="k">def</span> <span class="nf">extract_subject</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Extract subject identifier from events &quot;&quot;&quot;</span>
-    <span class="n">subjects</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">events</span><span class="p">[</span><span class="n">events</span><span class="o">.</span><span class="n">subject</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">subject</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subjects</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="n">subjects</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">events</span><span class="p">[</span><span class="n">events</span><span class="o">.</span><span class="n">subject</span> <span class="o">!=</span> <span class="sa">u</span><span class="s1">&#39;&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">subject</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subjects</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;There should only be one subject in an event &#39;</span>
                            <span class="s1">&#39;recarray&#39;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">subjects</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subjects</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">subject</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">subject</span> <span class="o">=</span> <span class="n">subjects</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">subject</span></div>
 
 
 <div class="viewcode-block" id="extract_experiment_from_events"><a class="viewcode-back" href="../../events.html#ramutils.events.extract_experiment_from_events">[docs]</a><span class="k">def</span> <span class="nf">extract_experiment_from_events</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
@@ -899,6 +1020,7 @@
 <div class="viewcode-block" id="extract_sessions"><a class="viewcode-back" href="../../events.html#ramutils.events.extract_sessions">[docs]</a><span class="k">def</span> <span class="nf">extract_sessions</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Return a list of sessions contained within the events structure&quot;&quot;&quot;</span>
     <span class="n">sessions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">session</span><span class="p">)</span>
+    <span class="n">sessions</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">sess</span><span class="p">)</span> <span class="k">for</span> <span class="n">sess</span> <span class="ow">in</span> <span class="n">sessions</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">sessions</span></div>
 
 
@@ -964,7 +1086,7 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    all_events: np.recarray</span>
-<span class="sd">        All events</span>
+<span class="sd">        All events with stim_params field</span>
 <span class="sd">    task_events: np.recarray</span>
 <span class="sd">        Task events used for classifier training/evaluation</span>
 
@@ -1030,7 +1152,7 @@
                             <span class="c1"># Single-site stimulation will have stim_param</span>
                             <span class="c1"># field as a record, while multi-site will be</span>
                             <span class="c1"># ndarray. Coerce everything to ndarray for</span>
-                            <span class="c1"># consitency</span>
+                            <span class="c1"># consistency</span>
                             <span class="n">stim_params</span> <span class="o">=</span> <span class="n">lst_events</span><span class="p">[</span><span class="n">loc</span><span class="p">]</span><span class="o">.</span><span class="n">stim_params</span>
                             <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">stim_params</span><span class="p">)</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
                                 <span class="n">stim_params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">stim_params</span><span class="p">])</span>
@@ -1252,6 +1374,11 @@
     <span class="k">return</span> <span class="n">recall_mask</span></div>
 
 
+<span class="k">def</span> <span class="nf">get_post_stim_events_mask</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
+    <span class="n">post_stim_events_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;STIM_OFF&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">post_stim_events_mask</span>
+
+
 <div class="viewcode-block" id="partition_events"><a class="viewcode-back" href="../../events.html#ramutils.events.partition_events">[docs]</a><span class="k">def</span> <span class="nf">partition_events</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Split a given set of events into partitions by experiment class (</span>
@@ -1271,18 +1398,21 @@
 
     <span class="n">retrieval_mask</span> <span class="o">=</span> <span class="n">get_all_retrieval_events_mask</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
     <span class="n">pal_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">experiment</span> <span class="o">==</span> <span class="s2">&quot;PAL1&quot;</span><span class="p">)</span>
+    <span class="n">post_stim_mask</span> <span class="o">=</span> <span class="n">get_post_stim_events_mask</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
 
-    <span class="n">fr_encoding</span> <span class="o">=</span> <span class="n">events</span><span class="p">[(</span><span class="o">~</span><span class="n">retrieval_mask</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">pal_mask</span><span class="p">)]</span>
+    <span class="n">fr_encoding</span> <span class="o">=</span> <span class="n">events</span><span class="p">[(</span><span class="o">~</span><span class="n">retrieval_mask</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">pal_mask</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">post_stim_mask</span><span class="p">)]</span>
     <span class="n">fr_retrieval</span> <span class="o">=</span> <span class="n">events</span><span class="p">[(</span><span class="n">retrieval_mask</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">pal_mask</span><span class="p">)]</span>
     <span class="n">pal_encoding</span> <span class="o">=</span> <span class="n">events</span><span class="p">[(</span><span class="o">~</span><span class="n">retrieval_mask</span> <span class="o">&amp;</span> <span class="n">pal_mask</span><span class="p">)]</span>
     <span class="n">pal_retrieval</span> <span class="o">=</span> <span class="n">events</span><span class="p">[(</span><span class="n">retrieval_mask</span> <span class="o">&amp;</span> <span class="n">pal_mask</span><span class="p">)]</span>
+    <span class="n">post_stim</span> <span class="o">=</span> <span class="n">events</span><span class="p">[</span><span class="n">post_stim_mask</span><span class="p">]</span>
 
     <span class="c1"># Only add partitions with actual events</span>
     <span class="n">final_partitions</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;fr_encoding&#39;</span><span class="p">:</span> <span class="n">fr_encoding</span><span class="p">,</span>
         <span class="s1">&#39;fr_retrieval&#39;</span><span class="p">:</span> <span class="n">fr_retrieval</span><span class="p">,</span>
         <span class="s1">&#39;pal_encoding&#39;</span><span class="p">:</span> <span class="n">pal_encoding</span><span class="p">,</span>
-        <span class="s1">&#39;pal_retrieval&#39;</span><span class="p">:</span> <span class="n">pal_retrieval</span>
+        <span class="s1">&#39;pal_retrieval&#39;</span><span class="p">:</span> <span class="n">pal_retrieval</span><span class="p">,</span>
+        <span class="s1">&#39;post_stim&#39;</span><span class="p">:</span> <span class="n">post_stim</span>
     <span class="p">}</span>
     <span class="k">return</span> <span class="n">final_partitions</span></div>
 
@@ -1295,18 +1425,21 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">retrieval_mask</span> <span class="o">=</span> <span class="n">get_all_retrieval_events_mask</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
     <span class="n">pal_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">experiment</span> <span class="o">==</span> <span class="s2">&quot;PAL1&quot;</span><span class="p">)</span>
+    <span class="n">post_stim_mask</span> <span class="o">=</span> <span class="n">get_post_stim_events_mask</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
 
     <span class="n">fr_encoding</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">retrieval_mask</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">pal_mask</span><span class="p">)</span>
     <span class="n">fr_retrieval</span> <span class="o">=</span> <span class="p">(</span><span class="n">retrieval_mask</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">pal_mask</span><span class="p">)</span>
     <span class="n">pal_encoding</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">retrieval_mask</span> <span class="o">&amp;</span> <span class="n">pal_mask</span><span class="p">)</span>
     <span class="n">pal_retrieval</span> <span class="o">=</span> <span class="p">(</span><span class="n">retrieval_mask</span> <span class="o">&amp;</span> <span class="n">pal_mask</span><span class="p">)</span>
+    <span class="n">post_stim</span> <span class="o">=</span> <span class="n">post_stim_mask</span>
 
     <span class="c1"># Only add partitions with actual events</span>
     <span class="n">partition_masks</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;fr_encoding&#39;</span><span class="p">:</span> <span class="n">fr_encoding</span><span class="p">,</span>
         <span class="s1">&#39;fr_retrieval&#39;</span><span class="p">:</span> <span class="n">fr_retrieval</span><span class="p">,</span>
         <span class="s1">&#39;pal_encoding&#39;</span><span class="p">:</span> <span class="n">pal_encoding</span><span class="p">,</span>
-        <span class="s1">&#39;pal_retrieval&#39;</span><span class="p">:</span> <span class="n">pal_retrieval</span>
+        <span class="s1">&#39;pal_retrieval&#39;</span><span class="p">:</span> <span class="n">pal_retrieval</span><span class="p">,</span>
+        <span class="s1">&#39;post_stim&#39;</span><span class="p">:</span> <span class="n">post_stim</span>
     <span class="p">}</span>
 
     <span class="k">return</span> <span class="n">partition_masks</span></div>
@@ -1359,8 +1492,6 @@
     <span class="n">repetition_ratio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">is_repetition</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">recall_events</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">repetition_ratio</span></div>
-
-
 </pre></div>
 
            </div>
@@ -1397,7 +1528,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'2.0.2',
+            VERSION:'2.1.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

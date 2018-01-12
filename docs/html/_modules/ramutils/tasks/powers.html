@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ramutils.tasks.powers &mdash; Ramutils 2.0.2 documentation</title>
+  <title>ramutils.tasks.powers &mdash; Ramutils 2.1.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="Ramutils 2.0.2 documentation" href="../../../index.html"/>
+    <link rel="top" title="Ramutils 2.1.0 documentation" href="../../../index.html"/>
         <link rel="up" title="Module code" href="../../index.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                2.0
+                2.1
               </div>
             
           
@@ -93,7 +93,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../data.html">Serializable data structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../classifier.html">Classifier training, cross validation, and utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../events.html">Event processing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../models.html">Modeling effects of stim</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html">Pipelines</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../cli.html">Command-line usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../misc.html">Miscellaneous utilities</a></li>
@@ -233,6 +232,11 @@
             <span class="n">end_time</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;pal_retrieval_end_time&#39;</span><span class="p">]</span>
             <span class="n">buffer_time</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;pal_retrieval_buf&#39;</span><span class="p">]</span>
 
+        <span class="k">elif</span> <span class="n">subset_name</span> <span class="o">==</span> <span class="s1">&#39;post_stim&#39;</span><span class="p">:</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;post_stim_start_time&#39;</span><span class="p">]</span>
+            <span class="n">end_time</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;post_stim_end_time&#39;</span><span class="p">]</span>
+            <span class="n">buffer_time</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;post_stim_buf&#39;</span><span class="p">]</span>
+
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Unexpected event subset was encountered&quot;</span><span class="p">)</span>
 
@@ -252,6 +256,9 @@
 
     <span class="n">partition_masks</span> <span class="o">=</span> <span class="n">get_partition_masks</span><span class="p">(</span><span class="n">cleaned_events</span><span class="p">)</span>
 
+    <span class="c1"># Ensure that the rows of the power matrix match the order of the events.</span>
+    <span class="c1"># This works by creating masks for each of the event types from the</span>
+    <span class="c1"># sorted events structure</span>
     <span class="n">n_features</span> <span class="o">=</span> <span class="n">powers</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">normalized_powers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">cleaned_events</span><span class="p">),</span> <span class="n">n_features</span><span class="p">))</span>
     <span class="k">for</span> <span class="n">subset_name</span><span class="p">,</span> <span class="n">power_subset</span> <span class="ow">in</span> <span class="n">power_partitions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -305,7 +312,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'2.0.2',
+            VERSION:'2.1.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
