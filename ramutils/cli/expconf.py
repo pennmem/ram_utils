@@ -177,3 +177,12 @@ def create_expconf(input_args=None):
 
 if __name__ == "__main__":
     create_expconf()
+
+    # create_expconf([
+    #     '-s', 'R1385E',
+    #     '-x', 'FR1',
+    #     '--root', '~/mnt/rhino',
+    #     '-d', 'scratch/depalati',
+    #     '--area-file', 'data10/RAM/subjects/R1385E/docs/area.txt',
+    #     '--force-rerun'
+    # ])
