@@ -477,8 +477,7 @@ class FRSessionSummary(SessionSummary):
 
     @property
     def intrusion_events(self):
-        intr_events = self.raw_events[(self.raw_events.list > -1) &
-                                      (self.raw_events.type == 'REC_WORD') &
+        intr_events = self.raw_events[(self.raw_events.type == 'REC_WORD') &
                                       (self.raw_events.intrusion != -999) &
                                       (self.raw_events.intrusion != 0)]
         return intr_events
