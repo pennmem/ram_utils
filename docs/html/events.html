@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Event processing &mdash; Ramutils 2.1.0 documentation</title>
+  <title>Event processing &mdash; Ramutils 2.1.1 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Ramutils 2.1.0 documentation" href="index.html"/>
+    <link rel="top" title="Ramutils 2.1.1 documentation" href="index.html"/>
         <link rel="next" title="Pipelines" href="pipeline.html"/>
         <link rel="prev" title="Classifier training, cross validation, and utilities" href="classifier.html"/> 
 
@@ -176,12 +176,19 @@ experiment can be easily combined</li>
 </div></blockquote>
 <dl class="function">
 <dt id="ramutils.events.add_field">
-<code class="descclassname">ramutils.events.</code><code class="descname">add_field</code><span class="sig-paren">(</span><em>events</em>, <em>field_name</em>, <em>default_val</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#add_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.add_field" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ramutils.events.</code><code class="descname">add_field</code><span class="sig-paren">(</span><em>events</em>, <em>field_name</em>, <em>default_val</em>, <em>dtype</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#add_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.add_field" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add field to the recarray</p>
 <p class="rubric">Notes</p>
 <p>Converting to a dataframe, adding the field, and reconverting to a
 recarray because the rec_append_fields function in numpy doesn’t seem to
 work</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.build_dtype_list">
+<code class="descclassname">ramutils.events.</code><code class="descname">build_dtype_list</code><span class="sig-paren">(</span><em>dtypes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#build_dtype_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.build_dtype_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a numpy.dtype object, return a list of tuples in the form
+(field_name, field_type_string)</p>
 </dd></dl>
 
 <dl class="function">
@@ -290,6 +297,12 @@ then stim_params field will be kept</li>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.dataframe_to_recarray">
+<code class="descclassname">ramutils.events.</code><code class="descname">dataframe_to_recarray</code><span class="sig-paren">(</span><em>dataframe</em>, <em>dtypes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#dataframe_to_recarray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.dataframe_to_recarray" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert from dataframe to recarray maintaining the original datatypes</p>
 </dd></dl>
 
 <dl class="function">
@@ -876,7 +889,7 @@ should already be true in the raw events data.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.0',
+            VERSION:'2.1.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

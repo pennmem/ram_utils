@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ramutils.events &mdash; Ramutils 2.1.0 documentation</title>
+  <title>ramutils.events &mdash; Ramutils 2.1.1 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Ramutils 2.1.0 documentation" href="../../index.html"/>
+    <link rel="top" title="Ramutils 2.1.1 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -343,20 +343,9 @@
         <span class="c1"># Subset first otherwise stim params will be there</span>
         <span class="c1"># and this will prevent add_field from working</span>
         <span class="n">events</span> <span class="o">=</span> <span class="n">select_column_subset</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
-        <span class="n">events</span> <span class="o">=</span> <span class="n">add_field</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="s1">&#39;category_num&#39;</span><span class="p">,</span> <span class="mi">999</span><span class="p">)</span>
+        <span class="n">events</span> <span class="o">=</span> <span class="n">add_field</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="s1">&#39;category_num&#39;</span><span class="p">,</span> <span class="mi">999</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">)</span>
 
     <span class="n">events</span> <span class="o">=</span> <span class="n">select_column_subset</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">cat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-    <span class="c1"># Convert to dataframe and back. This will ensure that string types match</span>
-    <span class="c1"># if events from another experiment where a field was added are combined</span>
-    <span class="c1"># with these events. The alternative is to have a function that explicitly</span>
-    <span class="c1"># converts the dtypes of all string fields</span>
-    <span class="n">events_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
-    <span class="n">events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">events_df</span><span class="o">.</span><span class="n">to_records</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
-
-    <span class="c1"># to_records converts the field names to unicode, which will break the</span>
-    <span class="c1"># pickling of these events, so turn them back into strings</span>
-    <span class="n">events</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">events</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">events</span>
 
 
@@ -368,8 +357,8 @@
     <span class="n">events</span> <span class="o">=</span> <span class="n">select_column_subset</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">pal</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">events</span> <span class="o">=</span> <span class="n">rename_correct_to_recalled</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
     <span class="n">events</span> <span class="o">=</span> <span class="n">coerce_study_pair_to_word_event</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
-    <span class="n">events</span> <span class="o">=</span> <span class="n">add_field</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="s1">&#39;item_name&#39;</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">)</span>
-    <span class="n">events</span> <span class="o">=</span> <span class="n">add_field</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="s1">&#39;category_num&#39;</span><span class="p">,</span> <span class="mi">999</span><span class="p">)</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="n">add_field</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="s1">&#39;item_name&#39;</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">)</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="n">add_field</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="s1">&#39;category_num&#39;</span><span class="p">,</span> <span class="mi">999</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">events</span></div>
 
 
@@ -425,7 +414,7 @@
     <span class="k">return</span> <span class="n">events</span></div>
 
 
-<div class="viewcode-block" id="add_field"><a class="viewcode-back" href="../../events.html#ramutils.events.add_field">[docs]</a><span class="k">def</span> <span class="nf">add_field</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">default_val</span><span class="p">):</span>
+<div class="viewcode-block" id="add_field"><a class="viewcode-back" href="../../events.html#ramutils.events.add_field">[docs]</a><span class="k">def</span> <span class="nf">add_field</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">default_val</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Add field to the recarray</span>
 
 <span class="sd">    Notes</span>
@@ -437,10 +426,33 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">events_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
     <span class="n">events_df</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_val</span>
-    <span class="n">events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">events_df</span><span class="o">.</span><span class="n">to_records</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+    <span class="n">orig_dtypes</span> <span class="o">=</span> <span class="n">build_dtype_list</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 
-    <span class="c1"># to_records converts field names to unicode, which breaks pickling these</span>
-    <span class="c1"># events</span>
+    <span class="c1"># Add the given field and type to dtype list</span>
+    <span class="n">orig_dtypes</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">field_name</span><span class="p">,</span> <span class="n">dtype</span><span class="p">))</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="n">dataframe_to_recarray</span><span class="p">(</span><span class="n">events_df</span><span class="p">,</span> <span class="n">orig_dtypes</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">events</span></div>
+
+
+<div class="viewcode-block" id="build_dtype_list"><a class="viewcode-back" href="../../events.html#ramutils.events.build_dtype_list">[docs]</a><span class="k">def</span> <span class="nf">build_dtype_list</span><span class="p">(</span><span class="n">dtypes</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given a numpy.dtype object, return a list of tuples in the form</span>
+<span class="sd">        (field_name, field_type_string)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="n">dtypes</span><span class="o">.</span><span class="n">names</span>
+    <span class="n">dtype_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dtypes</span><span class="p">)):</span>
+        <span class="n">dtype_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">dtypes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">dtype_list</span></div>
+
+
+<div class="viewcode-block" id="dataframe_to_recarray"><a class="viewcode-back" href="../../events.html#ramutils.events.dataframe_to_recarray">[docs]</a><span class="k">def</span> <span class="nf">dataframe_to_recarray</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span> <span class="n">dtypes</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert from dataframe to recarray maintaining the original datatypes</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">to_records</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtypes</span><span class="p">)</span>
     <span class="n">events</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">events</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">events</span></div>
 
@@ -651,41 +663,41 @@
 <span class="sd">    but is empty.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">empty_recarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">recarray</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;serialpos&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;rectime&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;experiment&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;mstime&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;eegoffset&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;recalled&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;intrusion&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;montage&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;stim_list&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;phase&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;eegfile&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;msoffset&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;item_name&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;iscorrect&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">)])</span>
+    <span class="n">empty_recarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">recarray</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;serialpos&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;rectime&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;experiment&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;mstime&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;eegoffset&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;recalled&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;intrusion&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;montage&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;stim_list&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;phase&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;eegfile&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;msoffset&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;item_name&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;iscorrect&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">)])</span>
     <span class="k">return</span> <span class="n">empty_recarray</span></div>
 
 
 <div class="viewcode-block" id="initialize_empty_stim_reccarray"><a class="viewcode-back" href="../../events.html#ramutils.events.initialize_empty_stim_reccarray">[docs]</a><span class="k">def</span> <span class="nf">initialize_empty_stim_reccarray</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot; Generate empty recarray that mirrors fields in stim_params &quot;&quot;&quot;</span>
-    <span class="n">empty_recarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">recarray</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;serialpos&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;experiment&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;mstime&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;recalled&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;stim_list&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;phase&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;item_name&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">),</span>
-                                               <span class="p">(</span><span class="s1">&#39;stim_params&#39;</span><span class="p">,</span> <span class="nb">object</span><span class="p">)])</span>
+    <span class="n">empty_recarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">recarray</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;serialpos&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;experiment&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;mstime&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;recalled&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;stim_list&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;phase&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;item_name&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;stim_params&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">)])</span>
     <span class="k">return</span> <span class="n">empty_recarray</span></div>
 
 
@@ -1528,7 +1540,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'2.1.0',
+            VERSION:'2.1.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
