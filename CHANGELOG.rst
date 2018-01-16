@@ -4,10 +4,14 @@ Changes
 Version 2.1.1
 -------------
 
-Unreleased
+**2018-01-16**
 
+* Added ``--version`` command-line option (#97)
 * Fixed a bug with Ramulator config generation where one step in the pipeline
   was not a task (#100)
+* Fixed issue where recarray dtypes were erroneously converted to ``'O'`` type
+  meaning they were not portable across Python versions (#101)
+
 
 
 Version 2.1.0
