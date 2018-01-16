@@ -1,6 +1,15 @@
 Changes
 =======
 
+Version 2.1.1
+-------------
+
+Unreleased
+
+* Fixed a bug with Ramulator config generation where one step in the pipeline
+  was not a task (#100)
+
+
 Version 2.1.0
 -------------
 
