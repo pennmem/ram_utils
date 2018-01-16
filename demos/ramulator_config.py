@@ -5,7 +5,8 @@ import os.path
 from pkg_resources import resource_filename
 
 from ramutils.parameters import FilePaths, FRParameters
-from ramutils.pipelines.ramulator_config import make_ramulator_config, make_stim_params
+from ramutils.pipelines.ramulator_config import make_ramulator_config
+from ramutils.montage import make_stim_params
 
 from ramutils.tasks import memory
 

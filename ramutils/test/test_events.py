@@ -228,8 +228,9 @@ class TestEvents:
         return
 
     def test_append_field(self):
-        appended_data = add_field(self.test_data, 'item_name', 'X')
+        appended_data = add_field(self.test_data, 'item_name', 'X', '<U256')
         assert 'item_name' in appended_data.dtype.names
+        assert appended_data['item_name'].dtype.str == '<U256'
         return
 
     # Four possible partitions. Be sure to check all

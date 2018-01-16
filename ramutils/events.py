@@ -181,20 +181,9 @@ def normalize_fr_events(events):
         # Subset first otherwise stim params will be there
         # and this will prevent add_field from working
         events = select_column_subset(events)
-        events = add_field(events, 'category_num', 999)
+        events = add_field(events, 'category_num', 999, '<i8')
 
     events = select_column_subset(events, cat=True)
-
-    # Convert to dataframe and back. This will ensure that string types match
-    # if events from another experiment where a field was added are combined
-    # with these events. The alternative is to have a function that explicitly
-    # converts the dtypes of all string fields
-    events_df = pd.DataFrame(events)
-    events = np.rec.array(events_df.to_records(index=False))
-
-    # to_records converts the field names to unicode, which will break the
-    # pickling of these events, so turn them back into strings
-    events.dtype.names = [str(name) for name in events.dtype.names]
     return events
 
 
@@ -206,8 +195,8 @@ def normalize_pal_events(events):
     events = select_column_subset(events, pal=True)
     events = rename_correct_to_recalled(events)
     events = coerce_study_pair_to_word_event(events)
-    events = add_field(events, 'item_name', 'X')
-    events = add_field(events, 'category_num', 999)
+    events = add_field(events, 'item_name', 'X', '<U256')
+    events = add_field(events, 'category_num', 999, '<i8')
     return events
 
 
@@ -263,7 +252,7 @@ def rename_correct_to_recalled(events):
     return events
 
 
-def add_field(events, field_name, default_val):
+def add_field(events, field_name, default_val, dtype):
     """ Add field to the recarray
 
     Notes
@@ -275,10 +264,33 @@ def add_field(events, field_name, default_val):
     """
     events_df = pd.DataFrame(events)
     events_df[field_name] = default_val
-    events = np.rec.array(events_df.to_records(index=False))
+    orig_dtypes = build_dtype_list(events.dtype)
 
-    # to_records converts field names to unicode, which breaks pickling these
-    # events
+    # Add the given field and type to dtype list
+    orig_dtypes.append((field_name, dtype))
+    events = dataframe_to_recarray(events_df, orig_dtypes)
+    return events
+
+
+def build_dtype_list(dtypes):
+    """
+        Given a numpy.dtype object, return a list of tuples in the form
+        (field_name, field_type_string)
+    """
+    names = dtypes.names
+    dtype_list = []
+    for i in range(len(dtypes)):
+        dtype_list.append((names[i], dtypes[i].str))
+
+    return dtype_list
+
+
+def dataframe_to_recarray(dataframe, dtypes):
+    """
+        Convert from dataframe to recarray maintaining the original datatypes
+    """
+    events = dataframe.to_records(index=False)
+    events = events.astype(dtypes)
     events.dtype.names = [str(name) for name in events.dtype.names]
     return events
 
@@ -489,41 +501,41 @@ def initialize_empty_event_reccarray():
     but is empty.
 
     """
-    empty_recarray = np.recarray((0, ), dtype=[('serialpos', int),
-                                               ('session', int),
-                                               ('subject', object),
-                                               ('rectime', int),
-                                               ('experiment', object),
-                                               ('mstime', int),
-                                               ('type', object),
-                                               ('eegoffset', int),
-                                               ('recalled', int),
-                                               ('intrusion', int),
-                                               ('montage', int),
-                                               ('list', int),
-                                               ('stim_list', int),
-                                               ('phase', object),
-                                               ('eegfile', object),
-                                               ('msoffset', int),
-                                               ('item_name', object),
-                                               ('iscorrect', int)])
+    empty_recarray = np.recarray((0, ), dtype=[('serialpos', '<i8'),
+                                               ('session', '<i8'),
+                                               ('subject', '<U256'),
+                                               ('rectime', '<i8'),
+                                               ('experiment', '<U256'),
+                                               ('mstime', '<i8'),
+                                               ('type', '<U256'),
+                                               ('eegoffset', '<i8'),
+                                               ('recalled', '<i8'),
+                                               ('intrusion', '<i8'),
+                                               ('montage', '<i8'),
+                                               ('list', '<i8'),
+                                               ('stim_list', '<i8'),
+                                               ('phase', '<U256'),
+                                               ('eegfile', '<U256'),
+                                               ('msoffset', '<i8'),
+                                               ('item_name', '<U256'),
+                                               ('iscorrect', '<i8')])
     return empty_recarray
 
 
 def initialize_empty_stim_reccarray():
     """ Generate empty recarray that mirrors fields in stim_params """
-    empty_recarray = np.recarray((0, ), dtype=[('serialpos', int),
-                                               ('session', int),
-                                               ('subject', object),
-                                               ('experiment', object),
-                                               ('mstime', int),
-                                               ('type', object),
-                                               ('recalled', int),
-                                               ('list', int),
-                                               ('stim_list', int),
-                                               ('phase', object),
-                                               ('item_name', object),
-                                               ('stim_params', object)])
+    empty_recarray = np.recarray((0, ), dtype=[('serialpos', '<i8'),
+                                               ('session', '<i8'),
+                                               ('subject', '<U256'),
+                                               ('experiment', '<U256'),
+                                               ('mstime', '<i8'),
+                                               ('type', '<U256'),
+                                               ('recalled', '<i8'),
+                                               ('list', '<i8'),
+                                               ('stim_list', '<i8'),
+                                               ('phase', '<U256'),
+                                               ('item_name', '<U256'),
+                                               ('stim_params', '<U256')])
     return empty_recarray
 
 
