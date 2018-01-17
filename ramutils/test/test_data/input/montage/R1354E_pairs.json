@@ -5,15 +5,15 @@
     "pairs": {
       "11LD1-11LD2": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "rostralanteriorcingulate", 
             "x": -6.03, 
             "y": 34.295, 
             "z": 8.16
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "rostralanteriorcingulate", 
             "x": -6.03, 
             "y": 34.295, 
@@ -52,15 +52,15 @@
       }, 
       "11LD2-11LD3": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "rostralanteriorcingulate", 
             "x": -9.165, 
             "y": 33.64, 
             "z": 11.185
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "rostralanteriorcingulate", 
             "x": -9.165, 
             "y": 33.64, 
@@ -99,15 +99,15 @@
       }, 
       "11LD3-11LD4": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "rostralanteriorcingulate", 
             "x": -12.255, 
             "y": 32.5, 
             "z": 14.145
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "rostralanteriorcingulate", 
             "x": -12.255, 
             "y": 32.5, 
@@ -146,15 +146,15 @@
       }, 
       "11LD4-11LD8": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "superiorfrontal", 
             "x": -20.2, 
             "y": 30.535, 
             "z": 20.305
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "superiorfrontal", 
             "x": -20.2, 
             "y": 30.535, 
@@ -193,15 +193,15 @@
       }, 
       "11LD8-11LD9": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "rostralmiddlefrontal", 
             "x": -28.145, 
             "y": 29.145, 
             "z": 25.88
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "rostralmiddlefrontal", 
             "x": -28.145, 
             "y": 29.145, 
@@ -240,15 +240,15 @@
       }, 
       "11LD9-11LD10": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "rostralmiddlefrontal", 
             "x": -30.75, 
             "y": 28.615, 
             "z": 28.295
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "rostralmiddlefrontal", 
             "x": -30.75, 
             "y": 28.615, 
@@ -287,15 +287,15 @@
       }, 
       "13LD1-13LD2": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": null, 
             "x": -27.24, 
             "y": -10.46, 
             "z": -18.53
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": null, 
             "x": -27.24, 
             "y": -10.46, 
@@ -334,15 +334,15 @@
       }, 
       "13LD2-13LD3": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": null, 
             "x": -32.165, 
             "y": -11.99, 
             "z": -13.75
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": null, 
             "x": -32.165, 
             "y": -11.99, 
@@ -381,15 +381,15 @@
       }, 
       "13LD3-13LD4": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "insula", 
             "x": -37.09, 
             "y": -13.515, 
             "z": -8.975
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "insula", 
             "x": -37.09, 
             "y": -13.515, 
@@ -428,15 +428,15 @@
       }, 
       "13LD4-13LD5": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "superiortemporal", 
             "x": -41.73, 
             "y": -15.505, 
             "z": -4.245
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "superiortemporal", 
             "x": -41.73, 
             "y": -15.505, 
@@ -475,15 +475,15 @@
       }, 
       "13LD5-13LD6": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "transversetemporal", 
             "x": -46.415, 
             "y": -17.59, 
             "z": 1.14
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "transversetemporal", 
             "x": -46.415, 
             "y": -17.59, 
@@ -522,15 +522,15 @@
       }, 
       "13LD6-13LD8": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "transversetemporal", 
             "x": -53.465, 
             "y": -20.19, 
             "z": 8.955
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "transversetemporal", 
             "x": -53.465, 
             "y": -20.19, 
@@ -569,15 +569,15 @@
       }, 
       "13LD8-13LD9": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "supramarginal", 
             "x": -60.99, 
             "y": -22.25, 
             "z": 16.14
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "supramarginal", 
             "x": -60.99, 
             "y": -22.25, 
@@ -616,15 +616,15 @@
       }, 
       "15LD1-15LD2": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "medialorbitofrontal", 
             "x": -7.625, 
             "y": 19.3, 
             "z": -14.335
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "medialorbitofrontal", 
             "x": -7.625, 
             "y": 19.3, 
@@ -663,15 +663,15 @@
       }, 
       "15LD2-15LD3": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "lateralorbitofrontal", 
             "x": -14.055, 
             "y": 19.82, 
             "z": -11.05
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "lateralorbitofrontal", 
             "x": -14.055, 
             "y": 19.82, 
@@ -710,15 +710,15 @@
       }, 
       "15LD3-15LD4": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "lateralorbitofrontal", 
             "x": -20.485, 
             "y": 20.34, 
             "z": -7.765
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "lateralorbitofrontal", 
             "x": -20.485, 
             "y": 20.34, 
@@ -757,15 +757,15 @@
       }, 
       "15LD4-15LD5": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "lateralorbitofrontal", 
             "x": -26.61, 
             "y": 20.435, 
             "z": -4.855
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "lateralorbitofrontal", 
             "x": -26.61, 
             "y": 20.435, 
@@ -804,15 +804,15 @@
       }, 
       "15LD5-15LD6": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "insula", 
             "x": -32.995, 
             "y": 21.04, 
             "z": -2.225
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "insula", 
             "x": -32.995, 
             "y": 21.04, 
@@ -851,15 +851,15 @@
       }, 
       "15LD6-15LD7": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "parstriangularis", 
             "x": -39.43, 
             "y": 21.56, 
             "z": 1.055
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "parstriangularis", 
             "x": -39.43, 
             "y": 21.56, 
@@ -898,15 +898,15 @@
       }, 
       "15LD7-15LD8": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "parsopercularis", 
             "x": -45.6, 
             "y": 21.57, 
             "z": 4.615
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "parsopercularis", 
             "x": -45.6, 
             "y": 21.57, 
@@ -945,15 +945,15 @@
       }, 
       "15LD8-15LD9": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "parsopercularis", 
             "x": -51.745, 
             "y": 21.62, 
             "z": 7.855
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "parsopercularis", 
             "x": -51.745, 
             "y": 21.62, 
@@ -992,15 +992,15 @@
       }, 
       "17LD1-17LD2": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": null, 
             "x": -28.25, 
             "y": 7.79, 
             "z": -22.64
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": null, 
             "x": -28.25, 
             "y": 7.79, 
@@ -1039,15 +1039,15 @@
       }, 
       "17LD2-17LD3": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "insula", 
             "x": -32.59, 
             "y": 10.34, 
             "z": -16.545
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "insula", 
             "x": -32.59, 
             "y": 10.34, 
@@ -1086,15 +1086,15 @@
       }, 
       "17LD3-17LD4": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "insula", 
             "x": -35.86, 
             "y": 12.04, 
             "z": -10.83
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "insula", 
             "x": -35.86, 
             "y": 12.04, 
@@ -1133,15 +1133,15 @@
       }, 
       "17LD4-17LD5": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "insula", 
             "x": -38.86, 
             "y": 13.515, 
             "z": -5.13
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "insula", 
             "x": -38.86, 
             "y": 13.515, 
@@ -1180,15 +1180,15 @@
       }, 
       "17LD5-17LD6": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "parsopercularis", 
             "x": -41.885, 
             "y": 14.95, 
             "z": 0.9
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "parsopercularis", 
             "x": -41.885, 
             "y": 14.95, 
@@ -1227,15 +1227,15 @@
       }, 
       "17LD6-17LD7": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "parsopercularis", 
             "x": -44.915, 
             "y": 15.81, 
             "z": 7.52
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "parsopercularis", 
             "x": -44.915, 
             "y": 15.81, 
@@ -1274,15 +1274,15 @@
       }, 
       "17LD7-17LD8": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "parsopercularis", 
             "x": -48.405, 
             "y": 16.675, 
             "z": 13.77
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "parsopercularis", 
             "x": -48.405, 
             "y": 16.675, 
@@ -1321,15 +1321,15 @@
       }, 
       "19LD1-19LD2": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "insula", 
             "x": -37.95, 
             "y": -3.24, 
             "z": -1.145
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "insula", 
             "x": -37.95, 
             "y": -3.24, 
@@ -1368,15 +1368,15 @@
       }, 
       "19LD2-19LD3": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "insula", 
             "x": -41.075, 
             "y": -2.755, 
             "z": 0.705
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "insula", 
             "x": -41.075, 
             "y": -2.755, 
@@ -1415,15 +1415,15 @@
       }, 
       "19LD3-19LD4": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "precentral", 
             "x": -44.245, 
             "y": -2.355, 
             "z": 3.21
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "precentral", 
             "x": -44.245, 
             "y": -2.355, 
@@ -1462,15 +1462,15 @@
       }, 
       "19LD4-19LD5": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "precentral", 
             "x": -47.9, 
             "y": -1.995, 
             "z": 5.675
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "precentral", 
             "x": -47.9, 
             "y": -1.995, 
@@ -1509,15 +1509,15 @@
       }, 
       "19LD5-19LD6": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "precentral", 
             "x": -51.51, 
             "y": -1.545, 
             "z": 7.485
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "precentral", 
             "x": -51.51, 
             "y": -1.545, 
@@ -1556,15 +1556,15 @@
       }, 
       "19LD6-19LD7": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "precentral", 
             "x": -54.875, 
             "y": -1.075, 
             "z": 9.315
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "precentral", 
             "x": -54.875, 
             "y": -1.075, 
@@ -1603,15 +1603,15 @@
       }, 
       "19LD7-19LD8": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "precentral", 
             "x": -58.29, 
             "y": -0.695, 
             "z": 11.8
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "precentral", 
             "x": -58.29, 
             "y": -0.695, 
@@ -1650,15 +1650,15 @@
       }, 
       "1LD1-1LD2": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": null, 
             "x": -15.305, 
             "y": -3.5, 
             "z": -20.63
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": null, 
             "x": -15.305, 
             "y": -3.5, 
@@ -1697,15 +1697,15 @@
       }, 
       "1LD2-1LD3": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": null, 
             "x": -20.185, 
             "y": -4.18, 
             "z": -20.43
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": null, 
             "x": -20.185, 
             "y": -4.18, 
@@ -1744,15 +1744,15 @@
       }, 
       "1LD3-1LD4": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": null, 
             "x": -25.02, 
             "y": -5.06, 
             "z": -20.59
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": null, 
             "x": -25.02, 
             "y": -5.06, 
@@ -1791,15 +1791,15 @@
       }, 
       "1LD4-1LD5": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": null, 
             "x": -30.14, 
             "y": -5.47, 
             "z": -20.705
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": null, 
             "x": -30.14, 
             "y": -5.47, 
@@ -1838,15 +1838,15 @@
       }, 
       "1LD5-1LD6": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": null, 
             "x": -35.195, 
             "y": -6.32, 
             "z": -21.215
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": null, 
             "x": -35.195, 
             "y": -6.32, 
@@ -1885,15 +1885,15 @@
       }, 
       "1LD6-1LD7": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "superiortemporal", 
             "x": -40.01, 
             "y": -7.725, 
             "z": -21.115
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "superiortemporal", 
             "x": -40.01, 
             "y": -7.725, 
@@ -1932,15 +1932,15 @@
       }, 
       "1LD7-1LD8": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "superiortemporal", 
             "x": -44.87, 
             "y": -8.645, 
             "z": -20.95
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "superiortemporal", 
             "x": -44.87, 
             "y": -8.645, 
@@ -1979,15 +1979,15 @@
       }, 
       "1LD8-1LD9": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "superiortemporal", 
             "x": -49.97, 
             "y": -9.585, 
             "z": -20.805
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "superiortemporal", 
             "x": -49.97, 
             "y": -9.585, 
@@ -2026,15 +2026,15 @@
       }, 
       "1LD9-1LD10": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "middletemporal", 
             "x": -54.605, 
             "y": -10.535, 
             "z": -20.29
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "middletemporal", 
             "x": -54.605, 
             "y": -10.535, 
@@ -2073,15 +2073,15 @@
       }, 
       "21LD1-21LD3": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "precuneus", 
             "x": -13.375, 
             "y": -58.035, 
             "z": 21.545
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "precuneus", 
             "x": -13.375, 
             "y": -58.035, 
@@ -2120,15 +2120,15 @@
       }, 
       "21LD3-21LD5": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "precuneus", 
             "x": -26.845, 
             "y": -58.595, 
             "z": 24.805
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "precuneus", 
             "x": -26.845, 
             "y": -58.595, 
@@ -2167,15 +2167,15 @@
       }, 
       "21LD5-21LD7": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "inferiorparietal", 
             "x": -40.05, 
             "y": -58.81, 
             "z": 27.465
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "inferiorparietal", 
             "x": -40.05, 
             "y": -58.81, 
@@ -2214,15 +2214,15 @@
       }, 
       "21LD7-21LD8": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "inferiorparietal", 
             "x": -50.28, 
             "y": -58.68, 
             "z": 29.395
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "inferiorparietal", 
             "x": -50.28, 
             "y": -58.68, 
@@ -2261,15 +2261,15 @@
       }, 
       "23LD1-23LD2": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "fusiform", 
             "x": -30.695, 
             "y": -9.565, 
             "z": -35.125
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "fusiform", 
             "x": -30.695, 
             "y": -9.565, 
@@ -2308,15 +2308,15 @@
       }, 
       "23LD2-23LD3": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "fusiform", 
             "x": -34.585, 
             "y": -8.365, 
             "z": -33.565
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "fusiform", 
             "x": -34.585, 
             "y": -8.365, 
@@ -2355,15 +2355,15 @@
       }, 
       "23LD3-23LD4": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "fusiform", 
             "x": -38.19, 
             "y": -7.055, 
             "z": -32.64
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "fusiform", 
             "x": -38.19, 
             "y": -7.055, 
@@ -2402,15 +2402,15 @@
       }, 
       "23LD4-23LD5": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "inferiortemporal", 
             "x": -41.775, 
             "y": -5.985, 
             "z": -31.745
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "inferiortemporal", 
             "x": -41.775, 
             "y": -5.985, 
@@ -2449,15 +2449,15 @@
       }, 
       "23LD5-23LD6": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "inferiortemporal", 
             "x": -45.375, 
             "y": -4.395, 
             "z": -31.11
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "inferiortemporal", 
             "x": -45.375, 
             "y": -4.395, 
@@ -2496,15 +2496,15 @@
       }, 
       "23LD6-23LD7": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "middletemporal", 
             "x": -48.935, 
             "y": -3.285, 
             "z": -30.545
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "middletemporal", 
             "x": -48.935, 
             "y": -3.285, 
@@ -2543,15 +2543,15 @@
       }, 
       "25LD1-25LD2": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "fusiform", 
             "x": -32.16, 
             "y": -38.7, 
             "z": -17.355
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "fusiform", 
             "x": -32.16, 
             "y": -38.7, 
@@ -2590,15 +2590,15 @@
       }, 
       "25LD2-25LD3": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "fusiform", 
             "x": -36.995, 
             "y": -39.58, 
             "z": -17.515
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "fusiform", 
             "x": -36.995, 
             "y": -39.58, 
@@ -2637,15 +2637,15 @@
       }, 
       "25LD3-25LD4": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "fusiform", 
             "x": -41.81, 
             "y": -40.415, 
             "z": -18.005
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "fusiform", 
             "x": -41.81, 
             "y": -40.415, 
@@ -2684,15 +2684,15 @@
       }, 
       "25LD4-25LD5": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "inferiortemporal", 
             "x": -46.67, 
             "y": -41.335, 
             "z": -17.84
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "inferiortemporal", 
             "x": -46.67, 
             "y": -41.335, 
@@ -2731,15 +2731,15 @@
       }, 
       "25LD5-25LD6": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "inferiortemporal", 
             "x": -51.77, 
             "y": -42.27, 
             "z": -17.69
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "inferiortemporal", 
             "x": -51.77, 
             "y": -42.27, 
@@ -2778,15 +2778,15 @@
       }, 
       "25LD6-25LD7": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "inferiortemporal", 
             "x": -56.825, 
             "y": -43.12, 
             "z": -18.2
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "inferiortemporal", 
             "x": -56.825, 
             "y": -43.12, 
@@ -2825,15 +2825,15 @@
       }, 
       "25LD7-25LD8": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "inferiortemporal", 
             "x": -61.66, 
             "y": -44, 
             "z": -18.365
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "inferiortemporal", 
             "x": -61.66, 
             "y": -44, 
@@ -2872,15 +2872,15 @@
       }, 
       "27LD1-27LD2": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "rostralmiddlefrontal", 
             "x": -28.79, 
             "y": 55.475, 
             "z": -9.605
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "rostralmiddlefrontal", 
             "x": -28.79, 
             "y": 55.475, 
@@ -2919,15 +2919,15 @@
       }, 
       "27LD2-27LD3": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "rostralmiddlefrontal", 
             "x": -29.065, 
             "y": 53.8, 
             "z": -4.495
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "rostralmiddlefrontal", 
             "x": -29.065, 
             "y": 53.8, 
@@ -2966,15 +2966,15 @@
       }, 
       "27LD3-27LD4": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "rostralmiddlefrontal", 
             "x": -29.335, 
             "y": 52.12, 
             "z": 0.615
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "rostralmiddlefrontal", 
             "x": -29.335, 
             "y": 52.12, 
@@ -3013,15 +3013,15 @@
       }, 
       "27LD4-27LD5": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "rostralmiddlefrontal", 
             "x": -29.585, 
             "y": 50.2, 
             "z": 5.69
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "rostralmiddlefrontal", 
             "x": -29.585, 
             "y": 50.2, 
@@ -3060,15 +3060,15 @@
       }, 
       "27LD5-27LD6": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "rostralmiddlefrontal", 
             "x": -30.365, 
             "y": 48.725, 
             "z": 10.79
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "rostralmiddlefrontal", 
             "x": -30.365, 
             "y": 48.725, 
@@ -3107,15 +3107,15 @@
       }, 
       "27LD6-27LD7": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "rostralmiddlefrontal", 
             "x": -31.605, 
             "y": 47.545, 
             "z": 15.225
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "rostralmiddlefrontal", 
             "x": -31.605, 
             "y": 47.545, 
@@ -3154,15 +3154,15 @@
       }, 
       "27LD7-27LD8": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "rostralmiddlefrontal", 
             "x": -32.36, 
             "y": 46.405, 
             "z": 19.705
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "rostralmiddlefrontal", 
             "x": -32.36, 
             "y": 46.405, 
@@ -3201,15 +3201,15 @@
       }, 
       "29LD3-29LD4": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "superiorfrontal", 
             "x": -9.51, 
             "y": -12.51, 
             "z": 46.36
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "superiorfrontal", 
             "x": -9.51, 
             "y": -12.51, 
@@ -3248,15 +3248,15 @@
       }, 
       "29LD4-29LD5": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "superiorfrontal", 
             "x": -10.875, 
             "y": -12.81, 
             "z": 51.59
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "superiorfrontal", 
             "x": -10.875, 
             "y": -12.81, 
@@ -3295,15 +3295,15 @@
       }, 
       "29LD5-29LD6": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "superiorfrontal", 
             "x": -12.195, 
             "y": -13.025, 
             "z": 56.16
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "superiorfrontal", 
             "x": -12.195, 
             "y": -13.025, 
@@ -3342,15 +3342,15 @@
       }, 
       "2RD1-2RD3": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": null, 
             "x": 19.83, 
             "y": -7.825, 
             "z": -19.94
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": null, 
             "x": 19.83, 
             "y": -7.825, 
@@ -3389,15 +3389,15 @@
       }, 
       "2RD3-2RD5": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": null, 
             "x": 31.985, 
             "y": -10.385, 
             "z": -19.06
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": null, 
             "x": 31.985, 
             "y": -10.385, 
@@ -3436,15 +3436,15 @@
       }, 
       "2RD5-2RD7": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "superiortemporal", 
             "x": 43.63, 
             "y": -12.455, 
             "z": -18.475
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "superiortemporal", 
             "x": 43.63, 
             "y": -12.455, 
@@ -3483,15 +3483,15 @@
       }, 
       "3LD1-3LD2": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": null, 
             "x": -21.695, 
             "y": -16.59, 
             "z": -21.03
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": null, 
             "x": -21.695, 
             "y": -16.59, 
@@ -3530,15 +3530,15 @@
       }, 
       "3LD2-3LD3": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": null, 
             "x": -26.13, 
             "y": -17.61, 
             "z": -19.835
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": null, 
             "x": -26.13, 
             "y": -17.61, 
@@ -3577,15 +3577,15 @@
       }, 
       "3LD3-3LD4": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": null, 
             "x": -31.295, 
             "y": -18.685, 
             "z": -18.705
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": null, 
             "x": -31.295, 
             "y": -18.685, 
@@ -3624,15 +3624,15 @@
       }, 
       "3LD4-3LD5": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": null, 
             "x": -35.94, 
             "y": -20.205, 
             "z": -17.605
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": null, 
             "x": -35.94, 
             "y": -20.205, 
@@ -3671,15 +3671,15 @@
       }, 
       "3LD5-3LD6": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "fusiform", 
             "x": -40.38, 
             "y": -21.225, 
             "z": -16.415
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "fusiform", 
             "x": -40.38, 
             "y": -21.225, 
@@ -3718,15 +3718,15 @@
       }, 
       "3LD6-3LD7": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "superiortemporal", 
             "x": -45.34, 
             "y": -21.795, 
             "z": -15.195
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "superiortemporal", 
             "x": -45.34, 
             "y": -21.795, 
@@ -3765,15 +3765,15 @@
       }, 
       "3LD7-3LD8": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "superiortemporal", 
             "x": -50.04, 
             "y": -22.305, 
             "z": -14.28
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "superiortemporal", 
             "x": -50.04, 
             "y": -22.305, 
@@ -3812,15 +3812,15 @@
       }, 
       "3LD8-3LD9": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "middletemporal", 
             "x": -54.725, 
             "y": -23.345, 
             "z": -13.11
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "middletemporal", 
             "x": -54.725, 
             "y": -23.345, 
@@ -3859,15 +3859,15 @@
       }, 
       "3LD9-3LD10": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "middletemporal", 
             "x": -59.65, 
             "y": -24.4, 
             "z": -11.96
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "middletemporal", 
             "x": -59.65, 
             "y": -24.4, 
@@ -3906,15 +3906,15 @@
       }, 
       "4RD1-4RD3": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": null, 
             "x": 18.13, 
             "y": -16.105, 
             "z": -21.96
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": null, 
             "x": 18.13, 
             "y": -16.105, 
@@ -3953,15 +3953,15 @@
       }, 
       "4RD3-4RD5": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": null, 
             "x": 29.795, 
             "y": -19.275, 
             "z": -20.53
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": null, 
             "x": 29.795, 
             "y": -19.275, 
@@ -4000,15 +4000,15 @@
       }, 
       "4RD5-4RD7": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "fusiform", 
             "x": 41.355, 
             "y": -21.525, 
             "z": -18.64
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "fusiform", 
             "x": 41.355, 
             "y": -21.525, 
@@ -4047,15 +4047,15 @@
       }, 
       "5LD1-5LD2": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": null, 
             "x": -29.815, 
             "y": -29.975, 
             "z": -14.545
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": null, 
             "x": -29.815, 
             "y": -29.975, 
@@ -4094,15 +4094,15 @@
       }, 
       "5LD2-5LD3": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": null, 
             "x": -34.435, 
             "y": -31.735, 
             "z": -13.475
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": null, 
             "x": -34.435, 
             "y": -31.735, 
@@ -4141,15 +4141,15 @@
       }, 
       "5LD3-5LD4": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "fusiform", 
             "x": -38.815, 
             "y": -33.48, 
             "z": -12.385
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "fusiform", 
             "x": -38.815, 
             "y": -33.48, 
@@ -4188,15 +4188,15 @@
       }, 
       "5LD4-5LD5": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "middletemporal", 
             "x": -43.215, 
             "y": -34.98, 
             "z": -11.26
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "middletemporal", 
             "x": -43.215, 
             "y": -34.98, 
@@ -4235,15 +4235,15 @@
       }, 
       "5LD5-5LD6": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "middletemporal", 
             "x": -47.615, 
             "y": -36.485, 
             "z": -10.135
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "middletemporal", 
             "x": -47.615, 
             "y": -36.485, 
@@ -4282,15 +4282,15 @@
       }, 
       "5LD6-5LD7": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "middletemporal", 
             "x": -52.765, 
             "y": -38.085, 
             "z": -8.75
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "middletemporal", 
             "x": -52.765, 
             "y": -38.085, 
@@ -4329,15 +4329,15 @@
       }, 
       "5LD7-5LD8": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "middletemporal", 
             "x": -57.445, 
             "y": -39.12, 
             "z": -7.58
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "middletemporal", 
             "x": -57.445, 
             "y": -39.12, 
@@ -4376,15 +4376,15 @@
       }, 
       "7LD3-7LD4": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "temporalpole", 
             "x": -39.76, 
             "y": 12.12, 
             "z": -36.65
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "temporalpole", 
             "x": -39.76, 
             "y": 12.12, 
@@ -4423,15 +4423,15 @@
       }, 
       "7LD4-7LD5": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "middletemporal", 
             "x": -43.17, 
             "y": 10.73, 
             "z": -35.77
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "middletemporal", 
             "x": -43.17, 
             "y": 10.73, 
@@ -4470,15 +4470,15 @@
       }, 
       "7LD5-7LD6": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "middletemporal", 
             "x": -46.11, 
             "y": 9.335, 
             "z": -34.52
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "middletemporal", 
             "x": -46.11, 
             "y": 9.335, 
@@ -4517,15 +4517,15 @@
       }, 
       "7LD6-7LD7": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "middletemporal", 
             "x": -49.54, 
             "y": 7.33, 
             "z": -32.725
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "middletemporal", 
             "x": -49.54, 
             "y": 7.33, 
@@ -4564,15 +4564,15 @@
       }, 
       "7LD7-7LD8": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "middletemporal", 
             "x": -53.195, 
             "y": 5.355, 
             "z": -31.28
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "middletemporal", 
             "x": -53.195, 
             "y": 5.355, 
@@ -4611,15 +4611,15 @@
       }, 
       "8RD1-8RD3": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "temporalpole", 
             "x": 34.755, 
             "y": 14.34, 
             "z": -40.065
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "temporalpole", 
             "x": 34.755, 
             "y": 14.34, 
@@ -4658,15 +4658,15 @@
       }, 
       "8RD3-8RD5": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "middletemporal", 
             "x": 44.455, 
             "y": 8.175, 
             "z": -35.865
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "middletemporal", 
             "x": 44.455, 
             "y": 8.175, 
@@ -4705,15 +4705,15 @@
       }, 
       "9LD1-9LD2": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "medialorbitofrontal", 
             "x": -8.21, 
             "y": 44.79, 
             "z": -24.395
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "medialorbitofrontal", 
             "x": -8.21, 
             "y": 44.79, 
@@ -4752,15 +4752,15 @@
       }, 
       "9LD2-9LD3": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "lateralorbitofrontal", 
             "x": -13.43, 
             "y": 41.915, 
             "z": -20.845
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "lateralorbitofrontal", 
             "x": -13.43, 
             "y": 41.915, 
@@ -4799,15 +4799,15 @@
       }, 
       "9LD3-9LD4": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "lateralorbitofrontal", 
             "x": -19.215, 
             "y": 39.97, 
             "z": -17.205
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "lateralorbitofrontal", 
             "x": -19.215, 
             "y": 39.97, 
@@ -4846,15 +4846,15 @@
       }, 
       "9LD4-9LD5": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "lateralorbitofrontal", 
             "x": -25.205, 
             "y": 38.095, 
             "z": -14.24
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "lateralorbitofrontal", 
             "x": -25.205, 
             "y": 38.095, 
@@ -4893,15 +4893,15 @@
       }, 
       "9LD5-9LD6": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "lateralorbitofrontal", 
             "x": -31.195, 
             "y": 36.22, 
             "z": -11.275
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "lateralorbitofrontal", 
             "x": -31.195, 
             "y": 36.22, 
@@ -4940,15 +4940,15 @@
       }, 
       "9LD6-9LD7": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "parsorbitalis", 
             "x": -37.425, 
             "y": 34.325, 
             "z": -8.335
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "parsorbitalis", 
             "x": -37.425, 
             "y": 34.325, 
@@ -4987,15 +4987,15 @@
       }, 
       "9LD7-9LD8": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "parstriangularis", 
             "x": -43.59, 
             "y": 31.99, 
             "z": -5.79
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "parstriangularis", 
             "x": -43.59, 
             "y": 31.99, 
@@ -5034,15 +5034,15 @@
       }, 
       "9LD8-9LD9": {
         "atlases": {
-          "avg": {
-            "id": "avg", 
+          "mni": {
+            "id": "mni",
             "region": "parstriangularis", 
             "x": -49.03, 
             "y": 29.425, 
             "z": -2.885
           }, 
-          "avg.dural": {
-            "id": "avg.dural", 
+          "mni.dural": {
+            "id": "mni.dural",
             "region": "parstriangularis", 
             "x": -49.03, 
             "y": 29.425, 
