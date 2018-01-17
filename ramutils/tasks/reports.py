@@ -18,8 +18,11 @@ def build_static_report(subject, experiment, session_summaries, math_summaries,
                                 dest=dest)
     report = generator.generate()
 
-    today = datetime.datetime.today().strftime('%Y_%m_%d')
-    file_name = '_'.join([subject, experiment, today]) + ".html"
+    sessions = [str(summary.session_number) for summary in session_summaries]
+    sessions_str = "_".join(sessions)
+
+    today = datetime.datetime.today().strftime('%Y_%m_%d_%H_%M')
+    file_name = '_'.join([subject, experiment, sessions_str, today]) + ".html"
     final_destination = os.path.join(dest, file_name)
 
     with open(final_destination, 'w') as f:
