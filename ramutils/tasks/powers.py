@@ -3,9 +3,11 @@ import numpy as np
 from ramutils.events import partition_events, \
     concatenate_events_for_single_experiment, get_partition_masks
 from ramutils.log import get_logger
+from ramutils.events import extract_subject
 from ramutils.powers import compute_powers
 from ramutils.powers import reduce_powers as reduce_powers_core
-from ramutils.powers import calculate_delta_hfa_table as calculate_delta_hfa_table_core
+from ramutils.powers import calculate_delta_hfa_table
+from ramutils.controllability import calculate_modal_controllability, load_connectivity_matrix
 from ramutils.tasks import task
 
 logger = get_logger()
@@ -14,7 +16,7 @@ __all__ = [
     'compute_normalized_powers',
     'reduce_powers',
     'subset_powers',
-    'calculate_delta_hfa_table'
+    'create_target_selection_table'
 ]
 
 
@@ -107,10 +109,28 @@ def compute_normalized_powers(events, **kwargs):
 
 
 @task()
-def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events,
-                              frequencies, hfa_cutoff=65):
-    return calculate_delta_hfa_table_core(pairs_metadata_table,
-                                          normalized_powers,
-                                          events,
-                                          frequencies,
-                                          hfa_cutoff=hfa_cutoff)
+def create_target_selection_table(pairs_metadata_table, normalized_powers,
+                                  events, frequencies, hfa_cutoff=65, root="/"):
+    delta_hfa_table = calculate_delta_hfa_table(pairs_metadata_table,
+                                                normalized_powers,
+                                                events,
+                                                frequencies,
+                                                hfa_cutoff=hfa_cutoff)
+
+    subject = extract_subject(events)
+    connectivity_matrix = load_connectivity_matrix(subject, rhino_root=root)
+    if connectivity_matrix is None:
+        logger.warning("No DTI-based connectivity matrix found for %s" %
+                       subject)
+        modal_controllability_values = None
+
+    else:
+        coords = delta_hfa_table[['mni_x', 'mni_y', 'mni_z']].values
+        modal_controllability_values = calculate_modal_controllability(
+            connectivity_matrix, coords)
+
+    delta_hfa_table['controllability'] = modal_controllability_values
+    delta_hfa_table.to_csv("/Users/zduey/Desktop/controllability_table.csv",
+                           index=False)
+
+    return delta_hfa_table
