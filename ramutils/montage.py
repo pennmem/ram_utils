@@ -94,6 +94,11 @@ def build_montage_metadata_table(subject, all_pairs, root='/'):
     """
     pairs_from_json = load_pairs_from_json(subject, rootdir=root)
 
+    # Check if mni coordinates are present, since this is the case only since
+    # neurorad v2.0
+    first_channel = list(pairs_from_json.keys())[0]
+    mni_available = ('mni' in pairs_from_json[first_channel]['atlases'].keys())
+
     # Standardize labels from json so that lookup will be easier
     pairs_from_json = {standardize_label(key): val for key, val in pairs_from_json.items()}
 
@@ -112,17 +117,26 @@ def build_montage_metadata_table(subject, all_pairs, root='/'):
         all_pairs[subject]['pairs'][pair]['type'] = pairs_from_json[standardized_pair]['type_1']
         all_pairs[subject]['pairs'][pair]['location'] = extract_atlas_location(pairs_from_json[standardized_pair])
         all_pairs[subject]['pairs'][pair]['label'] = pair
-        all_pairs[subject]['pairs'][pair]['mni_x'] = pairs_from_json[
-            standardized_pair]['atlases']['mni']['x']
-        all_pairs[subject]['pairs'][pair]['mni_y'] = pairs_from_json[
-            standardized_pair]['atlases']['mni']['y']
-        all_pairs[subject]['pairs'][pair]['mni_z'] = pairs_from_json[
-            standardized_pair]['atlases']['mni']['z']
+
+        if mni_available:
+            all_pairs[subject]['pairs'][pair]['mni_x'] = pairs_from_json[
+                standardized_pair]['atlases']['mni']['x']
+            all_pairs[subject]['pairs'][pair]['mni_y'] = pairs_from_json[
+                standardized_pair]['atlases']['mni']['y']
+            all_pairs[subject]['pairs'][pair]['mni_z'] = pairs_from_json[
+                standardized_pair]['atlases']['mni']['z']
 
     # Constructing the dataframe will not preserve the order from the
     # OrderedDict
     pairs_metadata = pd.DataFrame.from_dict(all_pairs[subject]['pairs'],
                                             orient='index')
+
+    # Give some sort of default value when mni coordinates are not present
+    if mni_available is False:
+        pairs_metadata['mni_x'] = None
+        pairs_metadata['mni_y'] = None
+        pairs_metadata['mni_z'] = None
+
     pairs_metadata = pairs_metadata.reindex(all_pair_labels)
     pairs_metadata = pairs_metadata[['type', 'channel_1', 'channel_2', 'label',
                                      'location', 'mni_x', 'mni_y', 'mni_z']]
