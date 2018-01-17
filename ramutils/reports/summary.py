@@ -735,6 +735,10 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
     @property
     def recall_test_results(self):
         df = self.to_dataframe()
+        # Do not count first 3 lists in assess effects
+        # of stim since we never stimulate during them and task performance
+        # is likely to vary throughout the session
+        df = df[df.listno > 3]
         results = []
 
         # Stim lists vs. non-stim lists
