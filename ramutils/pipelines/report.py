@@ -77,9 +77,11 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                                sessions=sessions,
                                                                **kwargs)
 
-    delta_hfa_table = pd.DataFrame(columns=['type', 'contact0',
-                                            'contact1', 'label',
-                                            'p_value', 'tstat'])
+    target_selection_table = pd.DataFrame(columns=['type', 'contact0',
+                                                   'contact1', 'label',
+                                                   'p_value', 'tstat',
+                                                   'mni_x', 'mni_y', 'mni_z',
+                                                   'controllability'])
     repetition_ratio_dict = {}
     if not stim_report:
         if joint_report or (experiment == 'catFR1'):
@@ -140,14 +142,11 @@ def make_report(subject, experiment, paths, joint_report=False,
             final_encoding_task_events, kwargs['n_perm'],
             tag='Encoding Classifier', **kwargs)
 
-        delta_hfa_table = calculate_delta_hfa_table(pairs_metadata_table,
-                                                    powers,
-                                                    final_task_events,
-                                                    kwargs['freqs'],
-                                                    hfa_cutoff=kwargs['hfa_cutoff'])
+        # TODO: Add distanced-based ranking of electrodes to prior stim results
+        target_selection_table = create_target_selection_table(
+            pairs_metadata_table, powers, final_task_events, kwargs['freqs'],
+            hfa_cutoff=kwargs['hfa_cutoff'], root=paths.root)
 
-        # TODO: Modal Controllability Table calculation here
-        # TODO: Optimal stim target table based on prior stim results table here
         session_summaries = summarize_nonstim_sessions(all_events,
                                                        final_task_events,
                                                        joint=joint_report,
@@ -219,6 +218,7 @@ def make_report(subject, experiment, paths, joint_report=False,
             post_hoc_results['session_summaries_stim_table'],
             post_hoc_results['post_stim_predicted_probs'],
             pairs_metadata_table)
+
         math_summaries = summarize_math(all_events, joint=joint_report)
 
         # TODO: Commented out until we have a clean way to plot results from
@@ -241,7 +241,7 @@ def make_report(subject, experiment, paths, joint_report=False,
         results = post_hoc_results['session_summaries']
 
     report = build_static_report(subject, experiment, session_summaries,
-                                 math_summaries, delta_hfa_table,
+                                 math_summaries, target_selection_table,
                                  results, paths.dest)
 
     if vispath is not None:

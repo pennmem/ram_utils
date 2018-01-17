@@ -21,6 +21,7 @@
         <th>Location</th>
         <th>p-value</th>
         <th>t-stat</th>
+        <th>controllability</th>
       </tr>
     </thead>
     <tbody>
@@ -43,6 +44,7 @@
             <td>{{ '{:.3f}'.format(row['p_value']) }}</td>
           {% endif %}
           <td>{{ '{:.3f}'.format(row['t_stat']) }}</td>
+          <td>{{ '{:.5f}'.format(row['controllability']) }}</td>
         </tr>
       {% endfor %}
     </tbody>
