@@ -97,7 +97,7 @@ def build_montage_metadata_table(subject, all_pairs, root='/'):
     # Standardize labels from json so that lookup will be easier
     pairs_from_json = {standardize_label(key): val for key, val in pairs_from_json.items()}
 
-    # If all_pairs is an ordered dict, so this loop will preserve the ordering
+    # If all_pairs is an ordered dict, this loop will preserve the ordering
     all_pair_labels = all_pairs[subject]['pairs'].keys()
     for pair in all_pair_labels:
         standardized_pair = standardize_label(pair)
@@ -112,11 +112,20 @@ def build_montage_metadata_table(subject, all_pairs, root='/'):
         all_pairs[subject]['pairs'][pair]['type'] = pairs_from_json[standardized_pair]['type_1']
         all_pairs[subject]['pairs'][pair]['location'] = extract_atlas_location(pairs_from_json[standardized_pair])
         all_pairs[subject]['pairs'][pair]['label'] = pair
+        all_pairs[subject]['pairs'][pair]['mni_x'] = pairs_from_json[
+            standardized_pair]['atlases']['mni']['x']
+        all_pairs[subject]['pairs'][pair]['mni_y'] = pairs_from_json[
+            standardized_pair]['atlases']['mni']['y']
+        all_pairs[subject]['pairs'][pair]['mni_z'] = pairs_from_json[
+            standardized_pair]['atlases']['mni']['z']
 
-    # Constructing the dataframe will not preserve the order from the OrderedDict
-    pairs_metadata = pd.DataFrame.from_dict(all_pairs[subject]['pairs'], orient='index')
+    # Constructing the dataframe will not preserve the order from the
+    # OrderedDict
+    pairs_metadata = pd.DataFrame.from_dict(all_pairs[subject]['pairs'],
+                                            orient='index')
     pairs_metadata = pairs_metadata.reindex(all_pair_labels)
-    pairs_metadata = pairs_metadata[['type', 'channel_1', 'channel_2', 'label', 'location']]
+    pairs_metadata = pairs_metadata[['type', 'channel_1', 'channel_2', 'label',
+                                     'location', 'mni_x', 'mni_y', 'mni_z']]
 
     return pairs_metadata
 
