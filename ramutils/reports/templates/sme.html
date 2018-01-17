@@ -44,7 +44,11 @@
             <td>{{ '{:.3f}'.format(row['p_value']) }}</td>
           {% endif %}
           <td>{{ '{:.3f}'.format(row['t_stat']) }}</td>
-          <td>{{ '{:.5f}'.format(row['controllability']) }}</td>
+          {% if row['controllability'] != None %}
+            <td>{{ '{:.5f}'.format(row['controllability']) }}</td>
+          {% else %}
+            <td></td>
+          {% endif %}
         </tr>
       {% endfor %}
     </tbody>
