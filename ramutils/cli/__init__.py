@@ -12,6 +12,25 @@ class ValidationError(Exception):
 
 class RamArgumentParser(ArgumentParser):
     """Parse arguments and run common things afterwards."""
+    def __init__(self, **kwargs):
+        allowed_experiments = kwargs.pop('allowed_experiments')
+        super(RamArgumentParser, self).__init__(**kwargs)
+        default_cache_dir = os.path.expanduser(os.path.join('~', '.ramutils', 'cache'))
+
+        self.add_argument('--root', default='/', help='path to rhino root (default: /)')
+        self.add_argument('--dest', '-d', default='scratch/ramutils',
+                          help='directory to write output to (default: scratch/ramutils)')
+        self.add_argument('--cachedir', default=default_cache_dir,
+                          help='absolute path for caching dir')
+        self.add_argument('--subject', '-s', required=True, type=str, help='subject ID')
+        self.add_argument('--force-rerun', action='store_true', help='force re-running all tasks')
+        self.add_argument('--experiment', '-x', required=True, type=str,
+                          choices=allowed_experiments, help='experiment')
+        self.add_argument('--vispath', default=None, type=str,
+                          help='path to save task graph visualization to')
+        self.add_argument('--version', action='version',
+                          version='ramutils version {}'.format(__version__))
+
     def _create_dirs(self, path):
         if os.path.exists(path):
             if os.path.isfile(path):
@@ -51,23 +70,9 @@ def make_parser(description, allowed_experiments=sum([exps for exps in EXPERIMEN
         os.path.join(tempfile.gettempdir(), 'ramutils')
 
     """
-    default_cache_dir = os.path.expanduser(os.path.join('~', '.ramutils', 'cache'))
 
-    parser = RamArgumentParser(description=description)
-    parser.add_argument('--root', default='/', help='path to rhino root (default: /)')
-    parser.add_argument('--dest', '-d', default='scratch/ramutils',
-                        help='directory to write output to (default: scratch/ramutils)')
-    parser.add_argument('--cachedir', default=default_cache_dir,
-                        help='absolute path for caching dir')
-    parser.add_argument('--subject', '-s', required=True, type=str, help='subject ID')
-    parser.add_argument('--force-rerun', action='store_true', help='force re-running all tasks')
-    parser.add_argument('--experiment', '-x', required=True, type=str,
-                        choices=allowed_experiments, help='experiment')
-    parser.add_argument('--vispath', default=None, type=str,
-                        help='path to save task graph visualization to')
-    parser.add_argument('--version', action='version',
-                        version='ramutils version {}'.format(__version__))
-    return parser
+    return RamArgumentParser(description=description,
+                             allowed_experiments=allowed_experiments)
 
 
 def configure_caching(cachedir, invalidate=False):
