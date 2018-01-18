@@ -140,8 +140,8 @@ Testing
 -------
 
 Automated unit tests are run with every push to the remote repository or pull request. Longer running tests requiring
-local files can and should be run frequently, but require to additional argument to be passed to pytest:
+local files can and should be run frequently, but require to additional argument to be passed to pytest::
 
---rhino-root: The mount point for RHINO
---output-dest: Where output from blackbox tests will be saved
+    --rhino-root: The mount point for RHINO
+    --output-dest: Where output from blackbox tests will be saved
 
