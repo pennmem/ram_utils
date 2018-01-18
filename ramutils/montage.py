@@ -170,6 +170,35 @@ def generate_pairs_for_classifier(pairs, excluded_pairs):
     return pairs
 
 
+def generate_pairs_for_ptsa(pairs):
+    """ Convert bipolar pairs into a format expected by PTSA methods """
+    classifier_fmt_pairs = generate_pairs_for_classifier(pairs, {})
+    final_pairs = []
+    for rec in classifier_fmt_pairs:
+        final_pairs.append(('{:03d}'.format(rec[0]),
+                            '{:03d}'.format(rec[1])))
+
+    final_pairs = np.rec.array(np.array(final_pairs,
+                                        dtype=[('ch0', 'S3'),
+                                               ('ch1', 'S3')]))
+    return final_pairs
+
+
+def extract_monopolar_from_bipolar(bipolar_pairs_array):
+    unique_monopolar_channels = []
+    for rec in bipolar_pairs_array:
+        rec0 = rec[0]
+        rec1 = rec[1]
+        if rec0 not in unique_monopolar_channels:
+            unique_monopolar_channels.append(rec0)
+        if rec1 not in unique_monopolar_channels:
+            unique_monopolar_channels.append(rec1)
+
+    final_channels = np.array(unique_monopolar_channels, dtype='S3')
+
+    return final_channels
+
+
 def reduce_pairs(pairs, stim_params, return_excluded=False):
     """Remove stim pairs from the pairs.json dict.
 
@@ -338,7 +367,7 @@ def load_pairs_from_json(subject, just_pairs=True, localization=0, montage=0,
     # same
     bp_path = os.path.join(rootdir, list(all_pairs_paths)[0])
     with open(bp_path, 'r') as f:
-        pair_data = json.load(f)
+        pair_data = json.load(f, object_pairs_hook=OrderedDict)
 
     if just_pairs:
         pair_data = extract_pairs_dict(pair_data)

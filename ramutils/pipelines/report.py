@@ -99,8 +99,9 @@ def make_report(subject, experiment, paths, joint_report=False,
                                               sessions=sessions,
                                               **kwargs)
 
-        powers, final_task_events = compute_normalized_powers(all_task_events,
-                                                              **kwargs)
+        powers, final_task_events = compute_normalized_powers(
+            all_task_events, bipolar_pairs=ec_pairs, **kwargs)
+
         reduced_powers = reduce_powers(powers, used_pair_mask,
                                        len(kwargs['freqs']))
 
@@ -160,8 +161,9 @@ def make_report(subject, experiment, paths, joint_report=False,
         post_stim_powers, final_post_stim_events = compute_normalized_powers(
            post_stim_events, **kwargs)
 
-        powers, final_task_events = compute_normalized_powers(task_events,
-                                                              **kwargs)
+        powers, final_task_events = compute_normalized_powers(
+            task_events, bipolar_pairs=ec_pairs, **kwargs)
+
         used_classifiers = reload_used_classifiers(subject,
                                                    experiment,
                                                    final_task_events,
@@ -176,7 +178,7 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                   **kwargs)
 
             training_powers, final_training_events = compute_normalized_powers(
-                training_events, **kwargs)
+                training_events, bipolar_pairs=ec_pairs, **kwargs)
 
             training_reduced_powers = reduce_powers(training_powers,
                                                     used_pair_mask,

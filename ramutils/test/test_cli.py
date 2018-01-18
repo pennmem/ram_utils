@@ -140,6 +140,7 @@ class TestCreateReports:
     @pytest.mark.slow
     @pytest.mark.output
     @pytest.mark.parametrize('subject, experiment, sessions, joint', [
+        ('R1001P', 'FR1', None, False),
         ('R1354E', 'FR1', [0], False),
         ('R1354E', 'FR1', [0, 1], False),
         ('R1354E', 'CatFR1', [0], False),

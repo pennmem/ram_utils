@@ -18,6 +18,8 @@ except ImportError:
 from ramutils.log import get_logger
 from ramutils.utils import timer
 from ramutils.events import get_recall_events_mask
+from ramutils.montage import generate_pairs_for_ptsa, extract_monopolar_from_bipolar
+
 
 logger = get_logger()
 
@@ -57,12 +59,18 @@ def compute_single_session_powers(session, all_events, start_time, end_time,
         updated_events = updated_events[ev_order]
         updated_events = np.rec.array(updated_events)
 
-    eeg = eeg.add_mirror_buffer(buffer_time)
-
     # Use bipolar pairs if they exist and recording is not already bipolar
     if 'bipolar_pairs' not in eeg.coords:
+        monopolar_channels = extract_monopolar_from_bipolar(bipolar_pairs)
+        eeg_reader = EEGReader(events=session_events,
+                               start_time=start_time,
+                               end_time=end_time,
+                               channels=monopolar_channels)
+        eeg = eeg_reader.read()
         eeg = MonopolarToBipolarMapper(time_series=eeg,
                                        bipolar_pairs=bipolar_pairs).filter()
+
+    eeg = eeg.add_mirror_buffer(buffer_time)
 
     # Butterworth filter to remove line noise
     eeg = eeg.filtered(freq_range=[58., 62.],
@@ -125,9 +133,9 @@ def compute_powers(events, start_time, end_time, buffer_time, freqs,
     normalize: bool
         Whether power matrix should be zscored using mean and std. dev by
         electrode (row)
-    bipolar_pairs: array_like
-        List of bipolar pairs to use if converting a monopolar EEG recording to
-        bipolar recording
+    bipolar_pairs: OrderedDoct
+        OrderedDict of bipolar pairs to use if converting a monopolar EEG
+        recording to bipolar recording
 
     Returns
     -------
@@ -145,18 +153,8 @@ def compute_powers(events, start_time, end_time, buffer_time, freqs,
     """
     if (bipolar_pairs is not None) and \
             (not isinstance(bipolar_pairs, np.recarray)):
-        # it expects to receive a list
-        bipolar_pairs = np.rec.array(np.array(bipolar_pairs,
-                                              dtype=[('ch0', 'S3'),
-                                                     ('ch1', 'S3')]))
+        bipolar_pairs = generate_pairs_for_ptsa(bipolar_pairs)
 
-    elif (bipolar_pairs is not None) and \
-            (isinstance(bipolar_pairs, np.recarray)):
-        # to get the same treatment if we get recarray , we will convert it to
-        # a list and then back to recarray with correct dtype
-        bipolar_pairs = np.rec.array(np.array(list(bipolar_pairs),
-                                              dtype=[('ch0', 'S3'),
-                                                     ('ch1', 'S3')]))
     sessions = np.unique(events.session)
     pow_mat = None
 
