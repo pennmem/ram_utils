@@ -67,6 +67,19 @@ def compute_single_session_powers(session, all_events, start_time, end_time,
                                end_time=end_time,
                                channels=monopolar_channels)
         eeg = eeg_reader.read()
+        # Check for removal of bad data again and update events
+        if eeg_reader.removed_bad_data():
+            logger.warning('PTSA EEG reader elected to remove some bad events')
+            # TODO: Use the event utility functions here
+            updated_events = np.rec.array(np.concatenate(
+                (all_events[all_events.session != session],
+                 np.rec.array(eeg['events'].data))))
+            event_fields = updated_events.dtype.names
+            order = tuple(f for f in ['session', 'list', 'mstime'] if f in event_fields)
+            ev_order = np.argsort(updated_events, order=order)
+            updated_events = updated_events[ev_order]
+            updated_events = np.rec.array(updated_events)
+
         eeg = MonopolarToBipolarMapper(time_series=eeg,
                                        bipolar_pairs=bipolar_pairs).filter()
 
@@ -95,8 +108,9 @@ def compute_single_session_powers(session, all_events, start_time, end_time,
 
     # Re-ordering dimensions to be events, frequencies, electrodes with the
     # mean calculated over the time dimension
+    updated_session_events = updated_events[updated_events.session == session]
     sess_pow_mat = np.nanmean(sess_pow_mat.transpose(2, 1, 0, 3), -1)
-    sess_pow_mat = sess_pow_mat.reshape((len(session_events), -1))
+    sess_pow_mat = sess_pow_mat.reshape((len(updated_session_events), -1))
 
     if normalize:
         sess_pow_mat = zscore(sess_pow_mat, axis=0, ddof=1)
@@ -159,9 +173,10 @@ def compute_powers(events, start_time, end_time, buffer_time, freqs,
     pow_mat = None
 
     with timer("Total time for computing powers: %f"):
+        updated_events = events.copy()
         for sess in sessions:
             powers, updated_events = compute_single_session_powers(sess,
-                                                                   events,
+                                                                   updated_events,
                                                                    start_time,
                                                                    end_time,
                                                                    buffer_time,
@@ -174,7 +189,7 @@ def compute_powers(events, start_time, end_time, buffer_time, freqs,
             pow_mat = powers if pow_mat is None else np.concatenate((pow_mat,
                                                                      powers))
 
-    return pow_mat, events
+    return pow_mat, updated_events
 
 
 def reduce_powers(powers, mask, n_frequencies):

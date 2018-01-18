@@ -204,8 +204,6 @@ def normalize_pal_events(events):
 
     events = add_field(events, 'item_name', 'X', '<U256')
     events = add_field(events, 'category_num', 999, '<i8')
-    events = select_column_subset(events, pal=True, cat=True)
-
     return events
 
 
@@ -247,7 +245,6 @@ def separate_stim_events(events, pal=False, stim=True, cat=False):
 
     stim_params = events[stim_cols]
     events = events[all_fields]
-
 
     return events, stim_params
 
@@ -479,7 +476,7 @@ def remove_bad_events(events):
 
 def select_column_subset(events, all=False, pal=False, stim=False, cat=False):
     """ Select only the necessary subset of the fields """
-    columns = get_required_columns(pal=pal, stim=stim, cat=cat)
+    columns = get_required_columns(all=all, pal=pal, stim=stim, cat=cat)
 
     # Not all columns will always be available. This in handled during event
     # normalization, so column selection should allow for the non-existence
@@ -516,6 +513,7 @@ def get_required_columns(all=False, pal=False, stim=False, cat=False):
     if all:
         columns.append('correct')
         columns.append('category_num')
+        columns.append('RT')
         return columns
 
     if stim:
@@ -530,8 +528,6 @@ def get_required_columns(all=False, pal=False, stim=False, cat=False):
         columns.remove('item_name')
         columns.remove('recalled')
         columns.append('correct')
-
-
 
     return columns
 
