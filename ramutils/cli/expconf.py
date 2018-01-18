@@ -103,7 +103,6 @@ def create_expconf(input_args=None):
         output.append('--{} {}'.format(clarg, value))
 
     mode = 'w' if args.clear_log else 'a'
-    mode = 'w' if args.clear_log else 'a'
     with open(osp.expanduser('~/.ramutils_expconf.log'), mode) as f:
         f.write(datetime.now().strftime('[%Y-%m-%dT%H:%M:%S]\n'))
         f.write("ramulator-conf \\\n")
@@ -176,13 +175,38 @@ def create_expconf(input_args=None):
 
 
 if __name__ == "__main__":
-    create_expconf()
+    # create_expconf()
 
-    # create_expconf([
+    args = ['--root', '~/mnt/rhino', '-d', 'scratch/depalati', '--force-rerun']
+
+    create_expconf(args + [
+        '-s', 'R1383J', '-x', 'FR5',
+        '--anodes', 'LB7',
+        '--cathodes', 'LB8',
+        '--target-amplitudes', '0.5'
+    ])
+
+    # create_expconf(args + [
     #     '-s', 'R1385E',
-    #     '-x', 'FR1',
-    #     '--root', '~/mnt/rhino',
-    #     '-d', 'scratch/depalati',
-    #     '--area-file', 'data10/RAM/subjects/R1385E/docs/area.txt',
-    #     '--force-rerun'
+    #     '-x', 'CatFR5',
+    #     '--electrode-config-file',
+    #     'scratch/system3_configs/ODIN_configs/R1385E/R1385E_15JAN2018L0M0STIM.csv',
+    #     '--anodes', '3LD8',
+    #     '--cathodes', '3LD9',
+    #     '--target-amplitudes', '0.5'
+    # ])
+
+    # create_expconf(args + [
+    #     '-s',
+    #     'R1385E',
+    #     '-x',
+    #     'CatFR5',
+    #     '--electrode-config-file',
+    #     'scratch/system3_configs/ODIN_configs/R1385E/R1385E_15JAN2018L0M0STIM.csv',
+    #     '--anodes',
+    #     '3LD8',
+    #     '--cathodes',
+    #     '3LD9',
+    #     '--target-amplitudes',
+    #     '0.5'
     # ])
