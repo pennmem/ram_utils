@@ -1,6 +1,18 @@
 Changes
 =======
 
+Upcoming
+--------
+
+* Included pracitce lists in calculating PLI and ELI numbers (#102)
+* Added modal controllability to reporting (#103)
+* Updated saved reports to include session numbers to avoid naming conflicts
+  (#104)
+* Excluded first three lists from stim/nostim comparisons in reports (#105)
+* Updated command-line parsing to also perform common operations after parsing
+  arguments (#110)
+
+
 Version 2.1.2
 -------------
 
