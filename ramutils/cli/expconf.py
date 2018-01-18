@@ -125,7 +125,8 @@ def create_expconf(input_args=None):
     logger.info("Using %s as cache dir", args.cachedir)
     configure_caching(args.cachedir, args.force_rerun)
 
-    paths.pairs = osp.join(paths.root, 'protocols', 'subjects', args.subject,
+    paths.pairs = osp.join(paths.root, 'protocols', 'r1', 'subjects',
+                           args.subject,
                            'localizations', str(args.localization),
                            'montages', str(args.montage),
                            'neuroradiology', 'current_processed', 'pairs.json')
