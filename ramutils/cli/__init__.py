@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+import os
 import os.path
 
 from ramutils import __version__
@@ -7,6 +8,25 @@ from ramutils.constants import EXPERIMENTS
 
 class ValidationError(Exception):
     """Raised when command-line arguments are invalid."""
+
+
+class RamArgumentParser(ArgumentParser):
+    """Parse arguments and run common things afterwards."""
+    def _create_dirs(self, path):
+        if os.path.exists(path):
+            if os.path.isfile(path):
+                raise RuntimeError("{} is a file but must be a directory".format(path))
+        else:
+            try:
+                os.makedirs(path)
+            except OSError:
+                pass
+
+    def parse_args(self, args=None, namespace=None):
+        args = super(RamArgumentParser, self).parse_args(args, namespace)
+        self._create_dirs(args.dest)
+        self._create_dirs(args.cachedir)
+        return args
 
 
 def make_parser(description, allowed_experiments=sum([exps for exps in EXPERIMENTS.values()], [])):
@@ -33,7 +53,7 @@ def make_parser(description, allowed_experiments=sum([exps for exps in EXPERIMEN
     """
     default_cache_dir = os.path.expanduser(os.path.join('~', '.ramutils', 'cache'))
 
-    parser = ArgumentParser(description=description)
+    parser = RamArgumentParser(description=description)
     parser.add_argument('--root', default='/', help='path to rhino root (default: /)')
     parser.add_argument('--dest', '-d', default='scratch/ramutils',
                         help='directory to write output to (default: scratch/ramutils)')
