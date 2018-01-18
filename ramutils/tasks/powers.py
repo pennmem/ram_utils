@@ -135,7 +135,4 @@ def create_target_selection_table(pairs_metadata_table, normalized_powers,
             connectivity_matrix, coords)
 
     delta_hfa_table['controllability'] = modal_controllability_values
-    delta_hfa_table.to_csv("/Users/zduey/Desktop/controllability_table.csv",
-                           index=False)
-
     return delta_hfa_table
