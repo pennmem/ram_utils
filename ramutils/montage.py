@@ -437,6 +437,14 @@ def get_pairs(subject, experiment, paths, localization=0, montage=0):
     all_pairs : dict
         All pairs used in the experiment.
 
+    Notes
+    -----
+    This should only be used for getting pairs when building a report. For
+    config generation, use generate_pairs_from_electrode_config. To use
+    get_pairs, you would need to determine an open loop experiment that the
+    subject completed and use that experiment instead of the experiment whose
+    config file is being generated.
+
     """
     # Use * for session so we don't have to assume session numbers start at 0
     eeg_dir = osp.join(paths.root, 'protocols', 'r1', 'subjects',
@@ -474,13 +482,20 @@ def get_pairs(subject, experiment, paths, localization=0, montage=0):
     return all_pairs
 
 
-def generate_pairs_from_electrode_config(subject, paths):
+def generate_pairs_from_electrode_config(subject, paths, localization=0,
+                                         montage=0):
     """Load and verify the validity of the Odin electrode configuration file.
 
     Parameters
     ----------
     subject : str
         Subject ID
+    paths: FilePaths
+        Object containing common file paths used for building reports/configs
+    localization: int
+        Localization number
+    montage: int
+        Montage number
 
     Returns
     -------
@@ -532,6 +547,14 @@ def generate_pairs_from_electrode_config(subject, paths):
         # Note this is different from neurorad pipeline pairs.json because
         # the electrode configuration trumps it
         pairs_from_ec = {subject: {'pairs': pairs_dict}}
+
+    # For monopolar, fall back to pairs.json
+    else:
+        pairs_from_ec = load_pairs_from_json(subject,
+                                             just_pairs=False,
+                                             localization=localization,
+                                             montage=montage,
+                                             rootdir=paths.root)
 
     return pairs_from_ec
 
