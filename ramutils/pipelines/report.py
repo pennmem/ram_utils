@@ -184,7 +184,7 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                     used_pair_mask,
                                                     len(kwargs['freqs']))
 
-            sample_weights = get_sample_weights(training_events, **kwargs)
+            sample_weights = get_sample_weights(final_training_events, **kwargs)
 
             retrained_classifier = train_classifier(training_reduced_powers,
                                                     final_training_events,
