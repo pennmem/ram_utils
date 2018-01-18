@@ -511,6 +511,7 @@ def get_required_columns(all=False, pal=False, stim=False, cat=False):
     ]
 
     if all:
+        columns.append('stim_params')
         columns.append('correct')
         columns.append('category_num')
         columns.append('RT')

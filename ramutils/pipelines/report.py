@@ -70,12 +70,12 @@ def make_report(subject, experiment, paths, joint_report=False,
         # summaries. PS experiments do not have an all_events.json file,
         # which is what these subsets are built from, so PS has it's own
         # build_*_data function
-        all_events, task_events, stim_params = build_test_data(subject,
-                                                               experiment,
-                                                               paths,
-                                                               joint_report,
-                                                               sessions=sessions,
-                                                               **kwargs)
+        all_events, task_events, stim_data = build_test_data(subject,
+                                                             experiment,
+                                                             paths,
+                                                             joint_report,
+                                                             sessions=sessions,
+                                                             **kwargs)
 
     target_selection_table = pd.DataFrame(columns=['type', 'contact0',
                                                    'contact1', 'label',
@@ -216,7 +216,7 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                           **kwargs)
 
         session_summaries = summarize_stim_sessions(
-            all_events, final_task_events, stim_params,
+            all_events, final_task_events, stim_data,
             post_hoc_results['session_summaries_stim_table'],
             post_hoc_results['post_stim_predicted_probs'],
             pairs_metadata_table)
