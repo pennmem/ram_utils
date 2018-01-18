@@ -108,7 +108,7 @@ class TestExpConf:
             ('CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8']),
             ('FR6', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8']),
             ('PS4_FR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8']),
-            ('PAL5', 'R1318N', '11JUL17M0L0STIM', ['LAIIH2'], ['LAIIH3'])
+            ('PAL5', 'R1318N', 'R1318N11JUL17M0L0STIM', ['LAIIH2'], ['LAIIH3'])
         ]
     )
     def test_create_expconf(self, experiment, subject, postfix, anodes,
