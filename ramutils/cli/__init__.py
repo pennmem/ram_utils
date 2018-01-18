@@ -41,10 +41,36 @@ class RamArgumentParser(ArgumentParser):
             except OSError:
                 pass
 
+    @staticmethod
+    def _configure_caching(cachedir, invalidate=False):
+        """Setup task caching.
+
+        Parameters
+        ----------
+        cachedir : str
+            Location to cache task outputs to.
+        invalidate : bool
+            Clear all cached files.
+
+        Returns
+        -------
+        Configured caching object.
+
+        """
+        from ramutils.tasks import memory
+
+        memory.cachedir = cachedir
+
+        if invalidate and os.path.isdir(cachedir):
+            memory.clear()
+
+        return memory
+
     def parse_args(self, args=None, namespace=None):
         args = super(RamArgumentParser, self).parse_args(args, namespace)
         self._create_dirs(args.dest)
         self._create_dirs(args.cachedir)
+        self._configure_caching(args.cachedir, args.force_rerun)
         return args
 
 
@@ -73,28 +99,3 @@ def make_parser(description, allowed_experiments=sum([exps for exps in EXPERIMEN
 
     return RamArgumentParser(description=description,
                              allowed_experiments=allowed_experiments)
-
-
-def configure_caching(cachedir, invalidate=False):
-    """Setup task caching.
-
-    Parameters
-    ----------
-    cachedir : str
-        Location to cache task outputs to.
-    invalidate : bool
-        Clear all cached files.
-
-    Returns
-    -------
-    Configured caching object.
-
-    """
-    from ramutils.tasks import memory
-
-    memory.cachedir = cachedir
-
-    if invalidate and os.path.isdir(cachedir):
-        memory.clear()
-
-    return memory

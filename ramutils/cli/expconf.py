@@ -7,7 +7,7 @@ from datetime import datetime
 import functools
 import os.path as osp
 
-from ramutils.cli import make_parser, ValidationError, configure_caching
+from ramutils.cli import make_parser, ValidationError
 from ramutils.constants import EXPERIMENTS
 from ramutils.log import get_logger, get_warning_accumulator
 from ramutils.utils import timer
@@ -123,7 +123,6 @@ def create_expconf(input_args=None):
 
     # FIXME: figure out why MacOS won't work with sshfs-relative paths only here
     logger.info("Using %s as cache dir", args.cachedir)
-    configure_caching(args.cachedir, args.force_rerun)
 
     paths.pairs = osp.join(paths.root, 'protocols', 'subjects', args.subject,
                            'localizations', str(args.localization),

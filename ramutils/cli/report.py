@@ -32,7 +32,6 @@ logger = get_logger("reports")
 
 def create_report(input_args=None):
     args = parser.parse_args(input_args)
-    configure_caching(args.cachedir, args.force_rerun)
     warning_accumulator = get_warning_accumulator()
 
     paths = FilePaths(
