@@ -22,7 +22,7 @@ def test_configure_caching(invalidate, tmpdir):
     from ramutils.tasks import memory
 
     path = str(tmpdir)
-    configure_caching(path)
+    RamArgumentParser._configure_caching(path)
 
     @memory.cache
     def foo():
@@ -34,7 +34,7 @@ def test_configure_caching(invalidate, tmpdir):
     assert len(os.listdir(path))
 
     # Re-configure, possibly clearing
-    configure_caching(path, invalidate)
+    RamArgumentParser._configure_caching(path, invalidate)
 
     if invalidate:
         assert not len(os.listdir(path))

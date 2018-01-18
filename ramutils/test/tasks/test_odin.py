@@ -30,7 +30,6 @@ def jsondata(s):
     return json.loads(resource_string('ramutils.test.test_data', s))
 
 
-@pytest.mark.only
 def test_generate_electrode_config(tmpdir):
     # Make rhino-like directory structure
     subject = 'R1347D'

@@ -9,7 +9,7 @@ chosen for stimulation.
 from __future__ import print_function
 import os.path as osp
 
-from ramutils.cli import make_parser, configure_caching
+from ramutils.cli import make_parser
 from ramutils.exc import UnsupportedExperimentError, TooManySessionsError
 from ramutils.log import get_logger, get_warning_accumulator
 from ramutils.montage import make_stim_params
@@ -32,7 +32,6 @@ logger = get_logger("reports")
 
 def create_report(input_args=None):
     args = parser.parse_args(input_args)
-    configure_caching(args.cachedir, args.force_rerun)
     warning_accumulator = get_warning_accumulator()
 
     paths = FilePaths(
