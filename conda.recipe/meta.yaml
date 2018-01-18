@@ -9,9 +9,9 @@ source:
 
 build:
   # If this is a new build for the same version, increment the build number by
-  # setting the CONDA_BUILD environment variable. Without setting, this
-  # defaults to 1.
-  number: {{ CONDA_BUILD }}
+  # setting the PKG_BUILDNUM environment variable. Without setting, this
+  # defaults to 0.
+  number: {{ environ.get("PKG_BUILDNUM", 0) }}
 
   # Specify additional env vars pass through.
   # Variables that are accessible by default are documented at:
