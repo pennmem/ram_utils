@@ -1,6 +1,16 @@
 Changes
 =======
 
+Version 2.1.2
+-------------
+
+**2018-01-18**
+
+Updated required version of ``bptools`` to 1.3. This fixes a bug that affected
+subjects with ECG/EKG channels that appear in the jacksheet prior to the last
+set of contacts.
+
+
 Version 2.1.1
 -------------
 
