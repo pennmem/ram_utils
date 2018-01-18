@@ -54,9 +54,7 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
     # Note: All of these pairs variables are of type OrderedDict, which is
     # crucial for preserving the initial order of the electrodes in the
     # config file
-    #
-    # generate_pairs_from_electrode_config isn't defined as a task...
-    ec_pairs = make_task(generate_pairs_from_electrode_config, subject, paths)
+    ec_pairs = get_pairs(subject, experiment, paths)
     excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
     used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
     final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
@@ -85,10 +83,11 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
     # won't be necessary. Or, if we can remove bad events before passing to
     # compute powers, then we won't have to catch the events
     powers, final_task_events = compute_normalized_powers(all_task_events,
+                                                          bipolar_pairs=ec_pairs,
                                                           **kwargs)
     reduced_powers = reduce_powers(powers, used_pair_mask, len(kwargs['freqs']))
 
-    sample_weights = get_sample_weights(all_task_events, **kwargs)
+    sample_weights = get_sample_weights(final_task_events, **kwargs)
 
     classifier = train_classifier(reduced_powers,
                                   final_task_events,
