@@ -888,12 +888,10 @@ class PSSessionSummary(SessionSummary):
             'loc1': {},
             'loc2': {},
         }
-
-        # FIXME: Find a way to use self.dataframe() instead
         events_df = pd.DataFrame.from_records([e for e in self.events],
                                               columns=self.events.dtype.names)
 
-        decision = events_df.loc[events_df.type == 'OPTIMIZATION_DECISION']
+        decision = self.events[(self.events.type == 'OPTIMIZATION_DECISION')]
         # If a session completes with convergence, there will be an
         # optimization decision event at the end. Otherwise, we need to
         # manually calculate one
@@ -949,11 +947,10 @@ class PSSessionSummary(SessionSummary):
     @property
     def location_summary(self):
         location_summaries = {}
-        # FIXME: Also update the dataframe creation here
         events_df = pd.DataFrame.from_records([e for e in self.events],
                                               columns=self.events.dtype.names)
-        events_by_location = events_df.groupby(['anode_label', 'cathode_label'])
-
+        events_by_location = events_df.groupby(['anode_label',
+                                                'cathode_label'])
         for location, loc_events in events_by_location:
             location_summary = {
                'amplitude': {},
@@ -979,10 +976,7 @@ class PSSessionSummary(SessionSummary):
                         (events_df.position == 'POST')]
 
                     decision = self.decision
-                    if 'loc_name' not in decision['loc1'].keys():
-                        loc_decision_info = {}
-
-                    elif decision['loc1']['loc_name'] == loc_tag:
+                    if decision['loc1']['loc_name'] == loc_tag:
                         loc_decision_info = decision['loc1']
                     else:
                         loc_decision_info = decision['loc2']
