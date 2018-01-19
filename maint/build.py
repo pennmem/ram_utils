@@ -22,6 +22,36 @@ parser.add_argument("--python", "-p", nargs="+", default=["2.7", "3.6"],
                     help="python versions to build for (otherwise build all)")
 
 
+def clean():
+    """Clean the build directory."""
+    print("Removing build dir")
+    try:
+        shutil.rmtree('build')
+        os.mkdir('build')
+    except OSError:
+        pass
+
+
+def build(pyver):
+    """Build a conda package.
+
+    :param str pyver: Python version to build for
+
+    """
+    build_cmd = [
+        "conda", "build",
+        "--output-folder=build/",
+        "--python", pyver,
+    ]
+
+    for chan in ['conda-forge', 'pennmem']:
+        build_cmd += ['-c', chan]
+    build_cmd += ["conda.recipe"]
+
+    print(' '.join(build_cmd))
+    check_call(build_cmd)
+
+
 def convert():
     """Convert conda packages to other platforms."""
     os_name = {
@@ -42,32 +72,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if not args.no_clean:
-        try:
-            shutil.rmtree('build')
-            os.mkdir('build')
-        except OSError:
-            pass
-
-    # Extra conda channels to use
-    channels = [
-        'conda-forge',
-        'pennmem',
-    ]
+        clean()
 
     if not args.no_build:
         for pyver in args.python:
-            build_cmd = [
-                "conda", "build",
-                "--output-folder=build/",
-                "--python", pyver,
-            ]
-
-            for chan in channels:
-                build_cmd += ['-c', chan]
-            build_cmd += ["conda.recipe"]
-
-            print(' '.join(build_cmd))
-            check_call(build_cmd)
+            build(pyver)
 
     if not args.no_convert:
         convert()
