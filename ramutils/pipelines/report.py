@@ -123,7 +123,7 @@ def make_report(subject, experiment, paths, joint_report=False,
 
         # Subset events, powers, etc to get encoding-only classifier summary
         kwargs['scheme'] = 'EQUAL'
-        encoding_only_mask = get_word_event_mask(all_task_events, True)
+        encoding_only_mask = get_word_event_mask(final_task_events, True)
         final_encoding_task_events = subset_events(final_task_events,
                                                    encoding_only_mask)
         encoding_reduced_powers = subset_powers(powers, encoding_only_mask)
