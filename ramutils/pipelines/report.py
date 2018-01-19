@@ -194,8 +194,9 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                     kwargs['solver'])
 
             training_classifier_summaries = perform_cross_validation(
-                retrained_classifier, training_reduced_powers, training_events,
-                kwargs['n_perm'], tag='Original Classifier', **kwargs)
+                retrained_classifier, training_reduced_powers,
+                final_training_events, kwargs['n_perm'],
+                tag='Original Classifier', **kwargs)
 
             retrained_classifier = serialize_classifier(retrained_classifier,
                                                         final_pairs,
