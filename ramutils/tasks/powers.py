@@ -48,6 +48,9 @@ def compute_normalized_powers(events, **kwargs):
     cleaned_event_partitions = []
     power_partitions = {}
 
+    if 'bipolar_pairs' not in kwargs.keys():
+        kwargs['bipolar_pairs'] = None
+
     for subset_name, event_subset in event_partitions.items():
         if len(event_subset) == 0:
             continue
@@ -79,9 +82,6 @@ def compute_normalized_powers(events, **kwargs):
 
         else:
             raise RuntimeError("Unexpected event subset was encountered")
-
-        if 'bipolar_pairs' not in kwargs.keys():
-            kwargs['bipolar_pairs'] = None
 
         powers, cleaned_events = compute_powers(event_subset,
                                                 start_time,

@@ -159,7 +159,7 @@ def make_report(subject, experiment, paths, joint_report=False,
         post_stim_mask = get_post_stim_events_mask(all_events)
         post_stim_events = subset_events(all_events, post_stim_mask)
         post_stim_powers, final_post_stim_events = compute_normalized_powers(
-           post_stim_events, **kwargs)
+           post_stim_events, bipolar_pairs=ec_pairs, **kwargs)
 
         powers, final_task_events = compute_normalized_powers(
             task_events, bipolar_pairs=ec_pairs, **kwargs)

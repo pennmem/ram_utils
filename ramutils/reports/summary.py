@@ -879,7 +879,7 @@ class PSSessionSummary(SessionSummary):
             'sham_dc': '',
             'sham_sem': '',
             'best_location': '',
-            'best_amplitdue': '',
+            'best_amplitude': '',
             'pval': '',
             'tstat': '',
             'tie': '',
@@ -931,7 +931,7 @@ class PSSessionSummary(SessionSummary):
                                                                 ld.max()) for ld in loc_datasets]),
                                                      None)
             else:
-                return decision_dict # no decision reached
+                return
 
             for i, k in enumerate(loc_info):
                 loc_info[k]['amplitude'] = loc_info[k]['amplitude'] / 1000
@@ -979,7 +979,10 @@ class PSSessionSummary(SessionSummary):
                         (events_df.position == 'POST')]
 
                     decision = self.decision
-                    if decision['loc1']['loc_name'] == loc_tag:
+                    if 'loc_name' not in decision['loc1'].keys():
+                        loc_decision_info = {}
+
+                    elif decision['loc1']['loc_name'] == loc_tag:
                         loc_decision_info = decision['loc1']
                     else:
                         loc_decision_info = decision['loc2']
