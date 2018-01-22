@@ -120,8 +120,6 @@ class TestMontage:
     def test_load_pairs_from_json(self, subject):
         test_pairs = load_pairs_from_json(subject, 'FR1', rootdir=datafile(''))
         assert len(test_pairs.keys()) > 10
-        with open('/Users/zduey/Desktop/pairs.json', 'w') as f:
-            f.write(json.dumps(test_pairs))
         assert '11LD1-11LD2' in test_pairs
 
         return
