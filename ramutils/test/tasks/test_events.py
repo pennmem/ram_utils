@@ -5,6 +5,7 @@ import numpy as np
 from pkg_resources import resource_filename
 
 from ramutils.tasks import memory
+from ramutils.utils import load_event_test_data
 from ramutils.tasks.events import *
 from ramutils.parameters import FRParameters, PALParameters, FilePaths
 
@@ -25,9 +26,10 @@ class TestEvents:
         ('R1353N', 'PAL1', PALParameters),
         ('R1348J', 'catFR1', FRParameters)
     ])
-    def test_training_legacy_regression(self, subject, experiment, params, rhino_root):
+    def test_training_legacy_regression(self, subject, experiment, params,
+                                        rhino_root):
         expected = datafile("/{}_task_events_rhino.npy".format(subject))
-        expected_events = np.rec.array(np.load(expected))
+        expected_events = load_event_test_data(expected, rhino_root)
 
         paths = FilePaths(root=rhino_root)
         extra_kwargs = params().to_dict()
@@ -36,7 +38,6 @@ class TestEvents:
         assert len(actual_events) == len(expected_events)
         assert np.array_equal(actual_events.recalled,
                               expected_events.recalled)
-
 
     @pytest.mark.rhino
     @pytest.mark.parametrize('subject, experiment, params, combine_events', [
@@ -60,7 +61,7 @@ class TestEvents:
         current_events = build_training_data(subject, experiment, paths,
                                              **extra_kwargs).compute()
 
-        expected_events = np.rec.array(np.load(expected))
+        expected_events = load_event_test_data(expected, rhino_root)
         assert len(current_events) == len(expected_events)
         assert np.array_equal(current_events.recalled, expected_events.recalled)
 
@@ -93,7 +94,7 @@ class TestEvents:
             subject, experiment, paths, joint_report=joint_report,
             sessions=sessions, **extra_kwargs).compute()
 
-        expected_events = np.rec.array(np.load(expected))
+        expected_events = load_event_test_data(expected, rhino_root)
         assert len(expected_events) == len(task_events)
         assert np.array_equal(task_events.recalled, expected_events.recalled)
 

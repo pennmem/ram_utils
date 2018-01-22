@@ -4,6 +4,7 @@ import numpy as np
 
 from ramutils.parameters import FRParameters, PALParameters
 from ramutils.tasks.classifier import perform_cross_validation
+from ramutils.utils import load_event_test_data
 
 from pkg_resources import resource_filename
 from sklearn.externals import joblib
@@ -20,9 +21,10 @@ class TestCrossValidation:
         ('R1353N', PALParameters),  # pal
         ('R1354E', FRParameters)  # fr and catfr
     ])
-    def test_perform_cross_validation_regression(self, subject, params):
-        # Note: These expected outputs will change if *any* of the inputs change,
-        #  i.e. classifier, powers, events, or parameters
+    def test_perform_cross_validation_regression(self, subject, params,
+                                                 rhino_root):
+        # Note: These expected outputs will change if *any* of the inputs
+        # change, i.e. classifier, powers, events, or parameters
         expected_output = {
             'R1350D': 0.5205,
             'R1353N': 0.8790,
@@ -33,8 +35,8 @@ class TestCrossValidation:
             datafile('/classifiers/{}_trained_classifier.pkl'.format(subject)))
         powers = np.load(
             datafile('/powers/{}_normalized_powers.npy'.format(subject)))
-        events = np.rec.array(np.load(
-            datafile('/events/{}_task_events.npy'.format(subject))))
+        events = load_event_test_data(
+            datafile('/events/{}_task_events.npy'.format(subject)), rhino_root)
         classifier_summary = perform_cross_validation(classifier, powers,
                                                       events, 10 ,
                                                       tag='test',
@@ -48,9 +50,10 @@ class TestCrossValidation:
         ('R1353N', PALParameters),  # pal
         ('R1354E', FRParameters)  # fr and catfr
     ])
-    def test_perform_lolo_cross_validation_regression(self, subject, params):
-        # Note: These expected outputs will change if *any* of the inputs change,
-        #  i.e. classifier, powers, events, or parameters
+    def test_perform_lolo_cross_validation_regression(self, subject, params,
+                                                      rhino_root):
+        # Note: These expected outputs will change if *any* of the inputs
+        # change, i.e. classifier, powers, events, or parameters
         expected_output = {
             'R1350D': 0.5097,
             'R1353N': 0.7352,
@@ -61,8 +64,8 @@ class TestCrossValidation:
             datafile('/classifiers/{}_trained_classifier.pkl'.format(subject)))
         powers = np.load(
             datafile('/powers/{}_normalized_powers.npy'.format(subject)))
-        events = np.rec.array(np.load(
-            datafile('/events/{}_task_events.npy'.format(subject))))
+        events = load_event_test_data(
+            datafile('/events/{}_task_events.npy'.format(subject)), rhino_root)
 
         # Select just the first session so that lolo cross validation is used
         sessions = np.unique(events.session)
