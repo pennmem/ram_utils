@@ -123,7 +123,8 @@ def create_expconf(input_args=None):
     # FIXME: figure out why MacOS won't work with sshfs-relative paths only here
     logger.info("Using %s as cache dir", args.cachedir)
 
-    paths.pairs = osp.join(paths.root, 'protocols', 'subjects', args.subject,
+    paths.pairs = osp.join(paths.root, 'protocols', 'r1', 'subjects',
+                           args.subject,
                            'localizations', str(args.localization),
                            'montages', str(args.montage),
                            'neuroradiology', 'current_processed', 'pairs.json')

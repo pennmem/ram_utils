@@ -22,17 +22,17 @@ __all__ = [
 ]
 
 
-@task(cache=False)
+@task()
 def get_word_event_mask(events, encoding_only):
     return get_word_event_mask_core(events, encoding_only)
 
 
-@task(cache=False)
+@task()
 def get_post_stim_events_mask(events):
     return get_post_stim_events_mask_core(events)
 
 
-@task(cache=False)
+@task()
 def subset_events(events, mask):
     events_subset = events[mask]
     return events_subset

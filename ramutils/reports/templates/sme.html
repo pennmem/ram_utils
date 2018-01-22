@@ -1,15 +1,16 @@
 <div>
-  <h2>Electrode Metadata</h2>
+  <h2>Bipolar Pair Analysis</h2>
   <table id="montage_metadata_table" class="table table-striped table-hover">
     <caption>
-      Summary data useful for selecting stimulation targets is provided for each bipolar electrode in a subject's
+      Summary information for selecting stimulation targets is provided for each bipolar electrode in a subject's
       montage. For the 'p-value' and 't-stat' fields, high frequency activity (68, 110, 180 Hz) was measured across
       the word presentation interval (0 to 1600ms). At each electrode, a t-test compared HFA for subsequently recalled
       vs subsequently forgotten items. P-values are FDR-corrected. Red - significant positive effect (subsequently
       <i>remembered</i> HFA &gt; subsequently <i>forgotten</i> HFA). Blue - significant negative effect (subsequently
       <i>remembered</i> HFA &lt; subsequently <i>forgotten</i> HFA). Black - difference not significant. All bipolar pairs
       are shown in descending order of significance. When data is available, an additional column "controllability"
-      represents the modal controllability based on the Basset lab's DTI processing pipeline.
+      represents the modal controllability based on the participant's diffusion-weighted imaging, estimated using the
+      Basset lab pipeline.
     </caption>
 
     <thead>

@@ -70,12 +70,12 @@ def make_report(subject, experiment, paths, joint_report=False,
         # summaries. PS experiments do not have an all_events.json file,
         # which is what these subsets are built from, so PS has it's own
         # build_*_data function
-        all_events, task_events, stim_params = build_test_data(subject,
-                                                               experiment,
-                                                               paths,
-                                                               joint_report,
-                                                               sessions=sessions,
-                                                               **kwargs)
+        all_events, task_events, stim_data = build_test_data(subject,
+                                                             experiment,
+                                                             paths,
+                                                             joint_report,
+                                                             sessions=sessions,
+                                                             **kwargs)
 
     target_selection_table = pd.DataFrame(columns=['type', 'contact0',
                                                    'contact1', 'label',
@@ -99,8 +99,9 @@ def make_report(subject, experiment, paths, joint_report=False,
                                               sessions=sessions,
                                               **kwargs)
 
-        powers, final_task_events = compute_normalized_powers(all_task_events,
-                                                              **kwargs)
+        powers, final_task_events = compute_normalized_powers(
+            all_task_events, bipolar_pairs=ec_pairs, **kwargs)
+
         reduced_powers = reduce_powers(powers, used_pair_mask,
                                        len(kwargs['freqs']))
 
@@ -122,7 +123,7 @@ def make_report(subject, experiment, paths, joint_report=False,
 
         # Subset events, powers, etc to get encoding-only classifier summary
         kwargs['scheme'] = 'EQUAL'
-        encoding_only_mask = get_word_event_mask(all_task_events, True)
+        encoding_only_mask = get_word_event_mask(final_task_events, True)
         final_encoding_task_events = subset_events(final_task_events,
                                                    encoding_only_mask)
         encoding_reduced_powers = subset_powers(powers, encoding_only_mask)
@@ -158,10 +159,11 @@ def make_report(subject, experiment, paths, joint_report=False,
         post_stim_mask = get_post_stim_events_mask(all_events)
         post_stim_events = subset_events(all_events, post_stim_mask)
         post_stim_powers, final_post_stim_events = compute_normalized_powers(
-           post_stim_events, **kwargs)
+           post_stim_events, bipolar_pairs=ec_pairs, **kwargs)
 
-        powers, final_task_events = compute_normalized_powers(task_events,
-                                                              **kwargs)
+        powers, final_task_events = compute_normalized_powers(
+            task_events, bipolar_pairs=ec_pairs, **kwargs)
+
         used_classifiers = reload_used_classifiers(subject,
                                                    experiment,
                                                    final_task_events,
@@ -176,13 +178,13 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                   **kwargs)
 
             training_powers, final_training_events = compute_normalized_powers(
-                training_events, **kwargs)
+                training_events, bipolar_pairs=ec_pairs, **kwargs)
 
             training_reduced_powers = reduce_powers(training_powers,
                                                     used_pair_mask,
                                                     len(kwargs['freqs']))
 
-            sample_weights = get_sample_weights(training_events, **kwargs)
+            sample_weights = get_sample_weights(final_training_events, **kwargs)
 
             retrained_classifier = train_classifier(training_reduced_powers,
                                                     final_training_events,
@@ -192,8 +194,9 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                     kwargs['solver'])
 
             training_classifier_summaries = perform_cross_validation(
-                retrained_classifier, training_reduced_powers, training_events,
-                kwargs['n_perm'], tag='Original Classifier', **kwargs)
+                retrained_classifier, training_reduced_powers,
+                final_training_events, kwargs['n_perm'],
+                tag='Original Classifier', **kwargs)
 
             retrained_classifier = serialize_classifier(retrained_classifier,
                                                         final_pairs,
@@ -214,7 +217,7 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                           **kwargs)
 
         session_summaries = summarize_stim_sessions(
-            all_events, final_task_events, stim_params,
+            all_events, final_task_events, stim_data,
             post_hoc_results['session_summaries_stim_table'],
             post_hoc_results['post_stim_predicted_probs'],
             pairs_metadata_table)

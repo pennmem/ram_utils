@@ -134,9 +134,12 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
     events = remove_negative_offsets(events)
     events = remove_practice_lists(events)
     events = remove_incomplete_lists(events)
+    events = select_column_subset(events, all_relevant=True)
     # TODO: Add remove_repetitions() function to get rid of any recall events
     # that are just a repeated recall
 
+    # separate_stim_events is called within the task-specific functions
+    # because the columns to subset differs by task
     if "FR" in experiment:
         events, stim_params = separate_stim_events(events)
         events = insert_baseline_retrieval_events(events,
@@ -145,7 +148,6 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
                                                   duration,
                                                   pre,
                                                   post)
-
         events = remove_intrusions(events)
         events = update_recall_outcome_for_retrieval_events(events)
         events = normalize_fr_events(events)
@@ -177,13 +179,15 @@ def update_subject(events):
 
 def normalize_fr_events(events):
     events = combine_retrieval_events(events)
+
     if 'category_num' not in events.dtype.names:
-        # Subset first otherwise stim params will be there
-        # and this will prevent add_field from working
-        events = select_column_subset(events)
         events = add_field(events, 'category_num', 999, '<i8')
 
+    if 'phase' not in events.dtype.names:
+        events = add_field(events, 'phase', '', '<U256')
+
     events = select_column_subset(events, cat=True)
+
     return events
 
 
@@ -192,9 +196,12 @@ def normalize_pal_events(events):
         Perform any normalization to PAL event so make the homogeneous enough so
         that it is trivial to combine with other experiment events.
     """
-    events = select_column_subset(events, pal=True)
     events = rename_correct_to_recalled(events)
     events = coerce_study_pair_to_word_event(events)
+
+    if 'phase' not in events.dtype.names:
+        events = add_field(events, 'phase', '', '<U256')
+
     events = add_field(events, 'item_name', 'X', '<U256')
     events = add_field(events, 'category_num', 999, '<i8')
     return events
@@ -226,9 +233,17 @@ def separate_stim_events(events, pal=False, stim=True, cat=False):
         return events, stim_params
 
     stim_cols = get_required_columns(pal=pal, stim=stim, cat=cat)
-    stim_params = events[stim_cols]
+    all_cols = get_required_columns(pal)
     all_fields = list(events.dtype.names)
+
+    # Historically, some event files do not have a phase field, but we need
+    # it if it is there
+    if 'phase' not in events.dtype.names:
+        stim_cols.remove('phase')
+
     all_fields.remove('stim_params')
+
+    stim_params = events[stim_cols]
     events = events[all_fields]
 
     return events, stim_params
@@ -459,20 +474,67 @@ def remove_bad_events(events):
     raise NotImplementedError
 
 
-def select_column_subset(events, pal=False, stim=False, cat=False):
-    """ Select only the necessary subset of the fields """
-    columns = get_required_columns(pal=pal, stim=stim, cat=cat)
+def select_column_subset(events, all_relevant=False, pal=False, stim=False,
+                         cat=False):
+    """ Select only the necessary subset of the fields
+
+    Parameters
+    ----------
+    events: np.recaarray
+        The set of events to subset from
+
+    Keyword Arguments
+    -----------------
+    all_relevant: bool
+        A subset that includes all fields that are subsequently used by any
+        of the experiments
+    pal: bool
+        Fields specific to PAL experiments
+    stim: bool
+        Fields specific to stim experiments
+    cat: bool
+        Fields specific to categorical free recall experiments
+    """
+    columns = get_required_columns(all_relevant=all_relevant, pal=pal,
+                                   stim=stim, cat=cat)
+
+    # Not all columns will always be available. This in handled during event
+    # normalization, so column selection should allow for the non-existence
+    # of a desired column
+    final_columns = []
+    for col in columns:
+        if col in events.dtype.names:
+            final_columns.append(col)
+
     # Explicitly ask for a copy since a view is returned in numpy 1.13 and later
-    events = events[columns].copy()
+    events = events[final_columns].copy()
 
     return events
 
 
-def get_required_columns(pal=False, stim=False, cat=False):
-    """ Return baseline mandatory columns based on experiment type """
+def get_required_columns(all_relevant=False, pal=False, stim=False, cat=False):
+    """ Return baseline mandatory columns based on experiment type
 
-    if cat and pal:
-        raise RuntimeError("Either 'cat' or 'pal' can be chosen, but not both")
+     Keyword Arguments
+    -----------------
+    all_relevant: bool
+        A subset that includes all fields that are subsequently used by any
+        of the experiments
+    pal: bool
+        Fields specific to PAL experiments
+    stim: bool
+        Fields specific to stim experiments
+    cat: bool
+        Fields specific to categorical free recall experiments
+    """
+
+    # FIXME: This would probably be better as just a dictionary
+    if all_relevant and any([pal, stim, cat]):
+        raise RuntimeError('all cannot be chosen in conjunction with other '
+                           'options')
+
+    if cat & pal:
+        raise RuntimeError('cat and pal cannot be selected at the same time')
 
     columns = [
         'serialpos', 'session', 'subject', 'rectime', 'experiment',
@@ -481,13 +543,21 @@ def get_required_columns(pal=False, stim=False, cat=False):
         'iscorrect', 'phase'
     ]
 
-    if cat:
+    if all_relevant:
+        columns.append('stim_params')
+        columns.append('correct')
         columns.append('category_num')
+        columns.append('RT')
+        return columns
 
     if stim:
         columns = ['subject', 'experiment', 'session', 'list',
                    'stim_list', 'mstime', 'item_name', 'serialpos', 'type',
                    'phase', 'stim_params', 'recalled']
+
+    if cat:
+        columns.append('category_num')
+
     if pal:
         columns.remove('item_name')
         columns.remove('recalled')

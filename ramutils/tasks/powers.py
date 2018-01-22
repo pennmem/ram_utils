@@ -48,6 +48,9 @@ def compute_normalized_powers(events, **kwargs):
     cleaned_event_partitions = []
     power_partitions = {}
 
+    if 'bipolar_pairs' not in kwargs.keys():
+        kwargs['bipolar_pairs'] = None
+
     for subset_name, event_subset in event_partitions.items():
         if len(event_subset) == 0:
             continue
@@ -87,7 +90,9 @@ def compute_normalized_powers(events, **kwargs):
                                                 kwargs['freqs'],
                                                 kwargs['log_powers'],
                                                 filt_order=kwargs['filt_order'],
-                                                width=kwargs['width'])
+                                                width=kwargs['width'],
+                                                bipolar_pairs=kwargs[
+                                                    'bipolar_pairs'])
         cleaned_event_partitions.append(cleaned_events)
         power_partitions[subset_name] = powers
 
@@ -130,7 +135,4 @@ def create_target_selection_table(pairs_metadata_table, normalized_powers,
             connectivity_matrix, coords)
 
     delta_hfa_table['controllability'] = modal_controllability_values
-    delta_hfa_table.to_csv("/Users/zduey/Desktop/controllability_table.csv",
-                           index=False)
-
     return delta_hfa_table

@@ -108,7 +108,7 @@ class TestExpConf:
             ('CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8']),
             ('FR6', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8']),
             ('PS4_FR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8']),
-            ('PAL5', 'R1365N', '16NOV2017L0M0STIM', ['LAD12'], ['LAD13'])
+            ('PAL5', 'R1318N', 'R1318N11JUL17M0L0STIM', ['LAIIH2'], ['LAIIH3'])
         ]
     )
     def test_create_expconf(self, experiment, subject, postfix, anodes,
@@ -140,13 +140,15 @@ class TestCreateReports:
     @pytest.mark.slow
     @pytest.mark.output
     @pytest.mark.parametrize('subject, experiment, sessions, joint', [
+        ('R1001P', 'FR1', None, False),
         ('R1354E', 'FR1', [0], False),
         ('R1354E', 'FR1', [0, 1], False),
         ('R1354E', 'CatFR1', [0], False),
         ('R1354E', 'FR1', None, True),
         ('R1345D', 'FR1', None, False),
         ('R1374T', 'CatFR1', None, False),
-        ('R1374T', 'CatFR1', None, True)
+        ('R1374T', 'CatFR1', None, True),
+        ('R1385E', 'FR1', None, True) # modal controllability available
     ])
     def test_create_open_loop_report(self, subject, experiment, sessions, joint,
                                      rhino_root, output_dest):

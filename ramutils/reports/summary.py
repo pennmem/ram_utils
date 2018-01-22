@@ -879,7 +879,7 @@ class PSSessionSummary(SessionSummary):
             'sham_dc': '',
             'sham_sem': '',
             'best_location': '',
-            'best_amplitdue': '',
+            'best_amplitude': '',
             'pval': '',
             'tstat': '',
             'tie': '',
@@ -888,12 +888,10 @@ class PSSessionSummary(SessionSummary):
             'loc1': {},
             'loc2': {},
         }
-
-        # FIXME: Find a way to use self.dataframe() instead
         events_df = pd.DataFrame.from_records([e for e in self.events],
                                               columns=self.events.dtype.names)
 
-        decision = events_df.loc[events_df.type == 'OPTIMIZATION_DECISION']
+        decision = self.events[(self.events.type == 'OPTIMIZATION_DECISION')]
         # If a session completes with convergence, there will be an
         # optimization decision event at the end. Otherwise, we need to
         # manually calculate one
@@ -931,7 +929,7 @@ class PSSessionSummary(SessionSummary):
                                                                 ld.max()) for ld in loc_datasets]),
                                                      None)
             else:
-                return decision_dict # no decision reached
+                return
 
             for i, k in enumerate(loc_info):
                 loc_info[k]['amplitude'] = loc_info[k]['amplitude'] / 1000
@@ -949,11 +947,10 @@ class PSSessionSummary(SessionSummary):
     @property
     def location_summary(self):
         location_summaries = {}
-        # FIXME: Also update the dataframe creation here
         events_df = pd.DataFrame.from_records([e for e in self.events],
                                               columns=self.events.dtype.names)
-        events_by_location = events_df.groupby(['anode_label', 'cathode_label'])
-
+        events_by_location = events_df.groupby(['anode_label',
+                                                'cathode_label'])
         for location, loc_events in events_by_location:
             location_summary = {
                'amplitude': {},
