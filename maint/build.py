@@ -20,6 +20,7 @@ parser.add_argument("--no-convert", action="store_true",
                     help="don't run conda convert")
 parser.add_argument("--python", "-p", nargs="+", default=["2.7", "3.6"],
                     help="python versions to build for (otherwise build all)")
+parser.add_argument("--upload", action="store_true")
 
 
 def clean():
@@ -68,6 +69,16 @@ def convert():
         check_call(shlex.split(convert_cmd))
 
 
+def upload():
+    """ Upload pre-built package to conda """
+    for platform in ['linux-64', 'osx-64', 'win-32', 'win-64']:
+        files = glob.glob('build/{}/*.tar.bz2'.format(platform))
+        cmds = ['anaconda upload -u pennmem {}'.format(f) for f in files]
+        for cmd in cmds:
+            print(cmd)
+            check_call(shlex.split(cmd))
+
+
 if __name__ == "__main__":
     args = parser.parse_args()
 
@@ -80,3 +91,6 @@ if __name__ == "__main__":
 
     if not args.no_convert:
         convert()
+
+    if args.upload:
+        upload()
