@@ -32,11 +32,11 @@ def get_used_pair_mask(all_pairs, excluded_pairs):
 
 
 @task()
-def generate_montage_metadata_table(subject, all_pairs, root):
-    return build_montage_metadata_table(subject, all_pairs, root=root)
+def generate_montage_metadata_table(subject, experiment, all_pairs, root):
+    return build_montage_metadata_table(subject, experiment, all_pairs,
+                                        root=root)
 
 
 @task()
-def get_pairs(subject, experiment, paths, localization=0, montage=0):
-    return get_pairs_core(subject, experiment, paths, localization=localization,
-                          montage=montage)
+def get_pairs(subject, experiment, paths):
+    return get_pairs_core(subject, experiment, paths)

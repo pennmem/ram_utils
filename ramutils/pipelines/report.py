@@ -60,7 +60,9 @@ def make_report(subject, experiment, paths, joint_report=False,
     excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
     final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
     used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
-    pairs_metadata_table = generate_montage_metadata_table(subject, ec_pairs,
+    pairs_metadata_table = generate_montage_metadata_table(subject,
+                                                           experiment,
+                                                           ec_pairs,
                                                            root=paths.root)
 
     if 'PS' not in experiment:
