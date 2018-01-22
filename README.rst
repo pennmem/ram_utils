@@ -16,6 +16,7 @@ Bootstrapping a conda environment
 .. code-block:: shell-session
 
     conda create -y -n environment_name python=3
+    source activate environment_name
     conda install -c pennmem ramutils
 
 Usage with the RAM_clinical account
@@ -39,9 +40,7 @@ Info for account maintainers
 
 To update the account to a new release:
 
-1. ``git fetch``
-2. ``git checkout <release tag>``
-3. ``conda update ramutils``
+``conda update ramutils``
 
 Ramulator experiment config generation
 --------------------------------------
