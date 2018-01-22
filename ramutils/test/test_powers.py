@@ -9,17 +9,18 @@ from ramutils.powers import reduce_powers, compute_single_session_powers, \
     compute_powers, reshape_powers_to_2d, reshape_powers_to_3d, calculate_delta_hfa_table
 from ramutils.tasks import compute_normalized_powers, memory
 from ramutils.parameters import FRParameters, PALParameters
+from ramutils.utils import load_event_test_data
 
 datafile = functools.partial(resource_filename,
                              'ramutils.test.test_data.input')
 
 
 @pytest.mark.rhino
-def test_compute_single_session_powers():
+def test_compute_single_session_powers(rhino_root):
     # Cases: EEG from monopolar, mixed mode, and bipolar. EEG with removed bad
     # data and without. Log powers true and false
-    events = np.rec.array(np.load(datafile(
-        '/events/R1348J_task_events_rhino.npy')))[:5]
+    events = load_event_test_data(datafile(
+        '/events/R1348J_task_events_rhino.npy'), rhino_root)[:5]
     params = FRParameters().to_dict()
     powers, events = compute_single_session_powers(1,
                                                    events,
@@ -42,11 +43,12 @@ def test_compute_single_session_powers():
     'R1348J_task_events_rhino.npy',
     'R1350D_task_events_rhino.npy'
 ])
-def test_compute_powers(event_file):
+def test_compute_powers(event_file, rhino_root):
     # Cases: Bipolar_pairs == none and not none. Single session/multi.
     events_per_session = 5
 
-    events = np.rec.array(np.load(datafile('/events/' + event_file)))
+    events = load_event_test_data(datafile('/events/' + event_file),
+                                  rhino_root)
 
     sessions = np.unique(events.session)
     n_sessions = len(sessions)
@@ -110,13 +112,6 @@ def test_reduce_powers():
                 range(len(expected_sizes))])
     return
 
-
-def test_normalize_powers_by_session():
-    # Not sure how much there is to test here
-    return
-
-
-
 def test_reshape_powers_to_3d():
     test_powers = np.random.random(size=(10, 150))
     reshaped_powers = reshape_powers_to_3d(test_powers, 10)
@@ -134,16 +129,21 @@ def test_reshape_powers_to_2d():
 @pytest.mark.parametrize("events, powers, exp_table, parameters", [
     ('R1354E_task_events_rhino.npy', 'R1354E_normalized_powers.npy', 'R1354E_hfa_ttest_table.csv', FRParameters)
 ])
-def test_calculate_delta_hfa_table_regression(events, powers, exp_table, parameters):
+def test_calculate_delta_hfa_table_regression(events, powers, exp_table,
+                                              parameters, rhino_root):
     parameters = parameters().to_dict()
     powers = np.load(datafile('/powers/' + powers))
-    events = np.rec.array(np.load(datafile('/events/' + events)))
-    config_pairs = pd.read_csv(datafile('/montage/R1354E_montage_metadata.csv'), index_col=0)
-    hfa_table = calculate_delta_hfa_table(config_pairs, powers, events, parameters['freqs'])
+    events = load_event_test_data(datafile('/events/' + events), rhino_root)
+    config_pairs = pd.read_csv(datafile('/montage/R1354E_montage_metadata.csv'),
+                               index_col=0)
+    hfa_table = calculate_delta_hfa_table(config_pairs, powers, events,
+                                          parameters['freqs'])
     old_hfa_table = pd.read_csv(datafile('/powers/' + exp_table))
 
-    assert np.allclose(old_hfa_table['t_stat'].values, hfa_table['t_stat'].values)
-    assert np.allclose(old_hfa_table['p_value'].values, hfa_table['p_value'].values)
+    assert np.allclose(old_hfa_table['t_stat'].values,
+                       hfa_table['t_stat'].values)
+    assert np.allclose(old_hfa_table['p_value'].values,
+                       hfa_table['p_value'].values)
 
     return
 
@@ -151,13 +151,14 @@ def test_calculate_delta_hfa_table_regression(events, powers, exp_table, paramet
 @pytest.mark.rhino
 @pytest.mark.slow
 @pytest.mark.parametrize("events, exp_powers, parameters", [
-    # ('R1353N_task_events_rhino.npy', 'R1353N_normalized_powers.npy', PALParameters),
+    ('R1353N_task_events_rhino.npy', 'R1353N_normalized_powers.npy', PALParameters),
     ('R1354E_task_events_rhino.npy', 'R1354E_normalized_powers.npy', FRParameters),
     ('R1350D_task_events_rhino.npy', 'R1350D_normalized_powers.npy', FRParameters),
 ])
-def test_regression_compute_normalized_powers(events, exp_powers, parameters):
+def test_regression_compute_normalized_powers(events, exp_powers, parameters,
+                                              rhino_root):
     parameters = parameters().to_dict()
-    events = np.rec.array(np.load(datafile('/events/' + events)))
+    events = load_event_test_data(datafile('/events/' + events), rhino_root)
     new_powers, updated_events = compute_normalized_powers(events,
                                                            **parameters).compute()
 

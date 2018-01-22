@@ -118,21 +118,8 @@ class TestMontage:
         'R1354E',
     ])
     def test_load_pairs_from_json(self, subject):
-        test_pairs = load_pairs_from_json(subject, rootdir=datafile(''))
-        assert len(test_pairs.keys()) > 0
-        assert '11LD1-11LD2' in test_pairs
-
-        test_pairs = load_pairs_from_json(subject,
-                                          localization=0,
-                                          rootdir=datafile(''))
-        assert len(test_pairs.keys()) > 0
-        assert '11LD1-11LD2' in test_pairs
-
-        test_pairs = load_pairs_from_json(subject,
-                                          localization=0,
-                                          montage=0,
-                                          rootdir=datafile(''))
-        assert len(test_pairs.keys()) > 0
+        test_pairs = load_pairs_from_json(subject, 'FR1', rootdir=datafile(''))
+        assert len(test_pairs.keys()) > 10
         assert '11LD1-11LD2' in test_pairs
 
         return
@@ -144,7 +131,9 @@ class TestMontage:
         with open(datafile('/input/configs/{}_pairs_from_ec.json'.format(subject))) as f:
             pairs_from_ec = json.load(f)
 
-        metadata_table = build_montage_metadata_table(subject, pairs_from_ec,
+        metadata_table = build_montage_metadata_table(subject,
+                                                      'FR1',
+                                                      pairs_from_ec,
                                                       root=datafile(''))
         assert len(metadata_table) == len(pairs_from_ec[subject]['pairs'].keys())
 
@@ -157,11 +146,16 @@ class TestMontage:
         with open(datafile('/input/configs/{}_pairs_from_ec.json'.format(subject))) as f:
             pairs_from_ec = json.load(f)
 
-        metadata_table = build_montage_metadata_table(subject, pairs_from_ec, root=datafile(''))
-        old_metadata_table = pd.read_csv(datafile('/input/montage/{}_montage_metadata.csv'.format(subject)))
+        metadata_table = build_montage_metadata_table(subject,
+                                                      'FR1',
+                                                      pairs_from_ec,
+                                                      root=datafile(''))
+        old_metadata_table = pd.read_csv(
+            datafile('/input/montage/{}_montage_metadata.csv'.format(subject)))
 
         # Check correspondence my merging
-        merged = metadata_table.merge(old_metadata_table, how='outer', indicator=True)
+        merged = metadata_table.merge(old_metadata_table, how='outer',
+                                      indicator=True)
         assert 'left_only' not in merged._merge
         assert 'right_only' not in merged._merge
 
@@ -170,12 +164,14 @@ class TestMontage:
     @pytest.mark.rhino
     @pytest.mark.parametrize('subject, experiment', [
         ('R1375C', 'catFR1'), # Will use electrode config
-        ('R1320D', 'catFR1') # Will fall back to pairs.json
+        ('R1320D', 'catFR1'), # Will fall back to pairs.json
+        ('R1279P', 'catFR1'), # Falls back to pairs.json, updated subject needed
     ])
     def test_get_pairs(self, subject, experiment, rhino_root):
         paths = FilePaths(root=rhino_root)
         pairs = get_pairs(subject, experiment, paths)
         assert len(pairs.keys()) > 0
+        assert pairs[subject] is not None
 
         return
 
@@ -184,6 +180,7 @@ class TestMontage:
                           electrode_config_file='/input/configs/R1354E_26OCT2017L0M0STIM.csv',
                           pairs='/input/montage/R1354E_pairs.json')
         config_pairs = generate_pairs_from_electrode_config('R1354E',
+                                                            'FR1',
                                                             paths)
         assert len(config_pairs['R1354E']['pairs'].keys()) > 0
         return

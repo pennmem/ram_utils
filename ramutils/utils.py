@@ -4,7 +4,7 @@ from functools import wraps
 import json
 import os
 from timeit import default_timer
-
+import numpy as np
 import h5py
 
 from ramutils.log import get_logger
@@ -254,3 +254,16 @@ def bytes_to_str(istring, encoding='utf-8'):
         return istring.decode(encoding=encoding)
     else:
         return istring
+
+
+def load_event_test_data(datapath, rootdir):
+    """
+        Modify the path stored in the eegfile field to work with any given
+        root directory at runtime. Used in test data suite to allow running
+        tests rom an arbitrary location that has access to RHINO
+    """
+    events = np.rec.array(np.load(datapath))
+    events['eegfile'] = [path.replace('/Volumes/RHINO/', rootdir) for path in
+                         events['eegfile']]
+
+    return events

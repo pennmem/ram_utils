@@ -18,6 +18,7 @@ def output_dest(request):
     return request.config.getoption("--output-dest")
 
 
+
 def pytest_generate_tests(metafunc):
     if 'rhino' in metafunc.fixturenames:
         metafunc.parametrize("rhino",

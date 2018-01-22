@@ -1,10 +1,10 @@
 import pytest
 import functools
 import numpy as np
-from sklearn.externals import joblib
 
 from pkg_resources import resource_filename
 from ramutils.classifier.utils import reload_classifier, train_classifier
+from ramutils.utils import load_event_test_data
 
 
 datafile = functools.partial(resource_filename,
@@ -40,9 +40,9 @@ def test_reload_classifier_rhino(rhino_root):
     'R1353N',
     'R1354E'
 ])
-def test_train_classifier(subject):
-    events = np.rec.array(np.load(datafile('/events/{}_task_events.npy'.format(
-        subject))))
+def test_train_classifier(subject, rhino_root):
+    events = load_event_test_data(datafile('/events/{}_task_events.npy'.format(
+        subject)), rhino_root)
     powers = np.load(datafile('/powers/{}_normalized_powers.npy'.format(
         subject)))
     weights = np.load(datafile('/weights/{}_sample_weights.npy'.format(
