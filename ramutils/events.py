@@ -134,7 +134,7 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
     events = remove_negative_offsets(events)
     events = remove_practice_lists(events)
     events = remove_incomplete_lists(events)
-    events = select_column_subset(events, all=True)
+    events = select_column_subset(events, all_relevant=True)
     # TODO: Add remove_repetitions() function to get rid of any recall events
     # that are just a repeated recall
 
@@ -474,9 +474,29 @@ def remove_bad_events(events):
     raise NotImplementedError
 
 
-def select_column_subset(events, all=False, pal=False, stim=False, cat=False):
-    """ Select only the necessary subset of the fields """
-    columns = get_required_columns(all=all, pal=pal, stim=stim, cat=cat)
+def select_column_subset(events, all_relevant=False, pal=False, stim=False,
+                         cat=False):
+    """ Select only the necessary subset of the fields
+
+    Parameters
+    ----------
+    events: np.recaarray
+        The set of events to subset from
+
+    Keyword Arguments
+    -----------------
+    all_relevant: bool
+        A subset that includes all fields that are subsequently used by any
+        of the experiments
+    pal: bool
+        Fields specific to PAL experiments
+    stim: bool
+        Fields specific to stim experiments
+    cat: bool
+        Fields specific to categorical free recall experiments
+    """
+    columns = get_required_columns(all_relevant=all_relevant, pal=pal,
+                                   stim=stim, cat=cat)
 
     # Not all columns will always be available. This in handled during event
     # normalization, so column selection should allow for the non-existence
@@ -492,11 +512,24 @@ def select_column_subset(events, all=False, pal=False, stim=False, cat=False):
     return events
 
 
-def get_required_columns(all=False, pal=False, stim=False, cat=False):
-    """ Return baseline mandatory columns based on experiment type """
+def get_required_columns(all_relevant=False, pal=False, stim=False, cat=False):
+    """ Return baseline mandatory columns based on experiment type
+
+     Keyword Arguments
+    -----------------
+    all_relevant: bool
+        A subset that includes all fields that are subsequently used by any
+        of the experiments
+    pal: bool
+        Fields specific to PAL experiments
+    stim: bool
+        Fields specific to stim experiments
+    cat: bool
+        Fields specific to categorical free recall experiments
+    """
 
     # FIXME: This would probably be better as just a dictionary
-    if all and any([pal, stim, cat]):
+    if all_relevant and any([pal, stim, cat]):
         raise RuntimeError('all cannot be chosen in conjunction with other '
                            'options')
 
@@ -510,7 +543,7 @@ def get_required_columns(all=False, pal=False, stim=False, cat=False):
         'iscorrect', 'phase'
     ]
 
-    if all:
+    if all_relevant:
         columns.append('stim_params')
         columns.append('correct')
         columns.append('category_num')
