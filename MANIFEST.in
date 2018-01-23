@@ -1,4 +1,5 @@
 include *.rst
 include *.txt
+include ramutils/data/*
 recursive-exclude MatlabIO *
 recursive-include ramutils *.html *.js *.css
