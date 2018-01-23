@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ramutils.utils &mdash; Ramutils 2.1.2 documentation</title>
+  <title>ramutils.utils &mdash; Ramutils 2.1.3 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Ramutils 2.1.2 documentation" href="../../index.html"/>
+    <link rel="top" title="Ramutils 2.1.3 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -166,7 +166,7 @@
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">timeit</span> <span class="k">import</span> <span class="n">default_timer</span>
-
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">h5py</span>
 
 <span class="kn">from</span> <span class="nn">ramutils.log</span> <span class="k">import</span> <span class="n">get_logger</span>
@@ -416,6 +416,19 @@
         <span class="k">return</span> <span class="n">istring</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">istring</span></div>
+
+
+<div class="viewcode-block" id="load_event_test_data"><a class="viewcode-back" href="../../misc.html#ramutils.utils.load_event_test_data">[docs]</a><span class="k">def</span> <span class="nf">load_event_test_data</span><span class="p">(</span><span class="n">datapath</span><span class="p">,</span> <span class="n">rootdir</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Modify the path stored in the eegfile field to work with any given</span>
+<span class="sd">        root directory at runtime. Used in test data suite to allow running</span>
+<span class="sd">        tests rom an arbitrary location that has access to RHINO</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">datapath</span><span class="p">))</span>
+    <span class="n">events</span><span class="p">[</span><span class="s1">&#39;eegfile&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/Volumes/RHINO/&#39;</span><span class="p">,</span> <span class="n">rootdir</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span>
+                         <span class="n">events</span><span class="p">[</span><span class="s1">&#39;eegfile&#39;</span><span class="p">]]</span>
+
+    <span class="k">return</span> <span class="n">events</span></div>
 </pre></div>
 
            </div>
@@ -452,7 +465,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'2.1.2',
+            VERSION:'2.1.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
