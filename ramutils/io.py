@@ -1,5 +1,9 @@
 from importlib import import_module
-from urlparse import urlparse
+
+try:
+    from urlparse import urlparse
+except ImportError:
+    from urllib.parse import urlparse
 
 import h5py
 import numpy as np
