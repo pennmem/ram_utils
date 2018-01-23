@@ -6,6 +6,7 @@ package:
   version: {{ setup_data['version'] }}
 source:
   git_url: ../
+  git_rev: {{ 'v' + setup_data['version'] }}  # always use tagged version
 
 build:
   # If this is a new build for the same version, increment the build number by
@@ -26,17 +27,20 @@ build:
 #        once
 {%
 set deps = [
+    "bptools=1.3.0",
+    "classiflib=0.1.2",
     "dask=0.15.3",
     "graphviz=2.38.0",
     "h5py=2.7.0",
     "hdf5=1.10.1",
     "numpy=1.13.3",
     "pandas=0.20.3",
+    "ptsa=1.1.4",
     "pymc3=3.2",
-    "pytest=3.2.1",
-    "pytest-cov=2.5.1",
-    "pytest-html=1.16.0",
-    "pytest-xdist=1.20.1",
+#    "pytest=3.2.1",
+#    "pytest-cov=2.5.1",
+#    "pytest-html=1.16.0",
+#    "pytest-xdist=1.20.1",
     "pywavelets=0.5.2",
     "scikit-learn=0.19.1",
     "scipy=1.0.0",
