@@ -371,8 +371,8 @@ def post_hoc_classifier_evaluation(events, powers, post_stim_events,
 
     result_dict = {
         'cross_session_summary': cross_session_summary,
-        'session_summaries': classifier_summaries,
-        'session_summaries_stim_table': encoding_classifier_summaries,
+        'classifier_summaries': classifier_summaries,
+        'encoding_classifier_summaries': encoding_classifier_summaries,
         'post_stim_predicted_probs': post_stim_predicted_probs
     }
 

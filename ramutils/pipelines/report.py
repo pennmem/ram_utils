@@ -219,8 +219,8 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                           **kwargs)
 
         session_summaries = summarize_stim_sessions(
-            all_events, final_task_events, stim_data,
-            post_hoc_results['session_summaries_stim_table'],
+            all_events, final_task_events, stim_params,
+            post_hoc_results['encoding_classifier_summaries'],
             post_hoc_results['post_stim_predicted_probs'],
             pairs_metadata_table)
 
@@ -236,18 +236,25 @@ def make_report(subject, experiment, paths, joint_report=False,
                                   sessions, paths.root)
         session_summaries = summarize_ps_sessions(ps_events)
         math_summaries = [] # No math summaries for PS4
-        results = []
+        classifier_evaluation_results = []
 
     # TODO: Add task that saves out all necessary underlying data
 
     if not stim_report:
-        results = [encoding_classifier_summary, joint_classifier_summary]
+        classifier_evaluation_results = [encoding_classifier_summary,
+                                         joint_classifier_summary]
     elif stim_report and 'PS' not in experiment:
-        results = post_hoc_results['session_summaries']
+        classifier_evaluation_results = post_hoc_results[
+            'encoding_classifier_summaries']
+
+    output = save_all_output(subject, experiment, session_summaries,
+                             math_summaries, target_selection_table,
+                             classifier_evaluation_results,
+                             paths.data_db).compute()
 
     report = build_static_report(subject, experiment, session_summaries,
                                  math_summaries, target_selection_table,
-                                 results, paths.dest)
+                                 classifier_evaluation_results, paths.dest)
 
     if vispath is not None:
         report.visualize(filename=vispath)
