@@ -11,6 +11,7 @@ from ramutils.utils import safe_divide
 from ramutils.events import extract_subject, extract_experiment_from_events, \
     extract_sessions
 from ramutils.bayesian_optimization import choose_location
+from ramutils.exc import TooManySessionsError
 
 from traitschema import Schema
 from traits.api import Array, ArrayOrNone, Float, String, DictStrAny, Dict
@@ -164,7 +165,7 @@ class ClassifierSummary(Schema):
         """
         self.subject = subject
         self.experiment = experiment
-        self.session = session
+        self.sessions = session
         self.true_outcomes = true_outcomes
         self.predicted_probabilities = predicted_probabilities
         self.permuted_auc_values = permuted_auc_values
@@ -233,10 +234,6 @@ class Summary(Schema):
 
 class SessionSummary(Summary):
     """Base class for single-session objects."""
-    @property
-    def session(self):
-        sessions = extract_sessions(self.events)
-        return sessions[0]
 
     @property
     def subject(self):
@@ -248,6 +245,16 @@ class SessionSummary(Summary):
         return experiments[0]
 
     @property
+    def session_number(self):
+        sessions = extract_sessions(self.events)
+        if len(sessions) != 1:
+            raise TooManySessionsError("Single session expected for session "
+                                       "summary")
+
+        session = str(sessions[0])
+        return session
+
+    @property
     def events(self):
         return self._events
 
@@ -257,11 +264,6 @@ class SessionSummary(Summary):
         assert len(np.unique(new_events['session'])) == 1, "events should only be from a single session"
         if self._events is None:
             self._events = new_events
-
-    @property
-    def session_number(self):
-        """Returns the session number for this summary."""
-        return self.events.session[0]
 
     @property
     def session_length(self):
