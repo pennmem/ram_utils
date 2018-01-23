@@ -32,7 +32,7 @@ def test_store_results(scheme, datatype, tmpdir):
         uri = path
 
     if scheme in ['', 'file']:
-        store_results(data, uri).compute()
+        store_results(data, uri)
 
         with h5py.File(path, 'r') as hfile:
             if isinstance(data, np.ndarray):
@@ -45,11 +45,11 @@ def test_store_results(scheme, datatype, tmpdir):
 
     # Invalid data type
     with pytest.raises(NotImplementedError):
-        store_results([1, 2, 3], uri).compute()
+        store_results([1, 2, 3], uri)
 
     # Invalid scheme
     with pytest.raises(NotImplementedError):
-        store_results(data, 'sqlite:///path.sqlite').compute()
+        store_results(data, 'sqlite:///path.sqlite')
 
 
 @pytest.mark.parametrize('scheme', ['', 'file:///'])
@@ -59,7 +59,7 @@ def test_load_results(scheme, tmpdir):
     data.to_hdf(path)
     url = "{:s}{:s}".format(scheme, path)
 
-    results = load_results(url).compute()
+    results = load_results(url)
 
     assert results.x == data.x
     assert results.y == data.y
