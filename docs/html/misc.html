@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Miscellaneous utilities &mdash; Ramutils 2.1.2 documentation</title>
+  <title>Miscellaneous utilities &mdash; Ramutils 2.1.3 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Ramutils 2.1.2 documentation" href="index.html"/>
+    <link rel="top" title="Ramutils 2.1.3 documentation" href="index.html"/>
         <link rel="prev" title="Command-line usage" href="cli.html"/> 
 
   
@@ -380,6 +380,14 @@ cathode contact names.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="ramutils.utils.load_event_test_data">
+<code class="descclassname">ramutils.utils.</code><code class="descname">load_event_test_data</code><span class="sig-paren">(</span><em>datapath</em>, <em>rootdir</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/utils.html#load_event_test_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.utils.load_event_test_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modify the path stored in the eegfile field to work with any given
+root directory at runtime. Used in test data suite to allow running
+tests rom an arbitrary location that has access to RHINO</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="ramutils.utils.mkdir_p">
 <code class="descclassname">ramutils.utils.</code><code class="descname">mkdir_p</code><span class="sig-paren">(</span><em>dirs</em>, <em>mode=511</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/utils.html#mkdir_p"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.utils.mkdir_p" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mimic the shell command <code class="docutils literal"><span class="pre">mkdir</span> <span class="pre">-p</span></code>.</p>
@@ -545,7 +553,7 @@ data for report plots.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.2',
+            VERSION:'2.1.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
