@@ -365,7 +365,7 @@ def post_hoc_classifier_evaluation(events, powers, post_stim_events,
     cross_session_summary.populate(subject, experiment, sessions,
                                    non_stim_recalls, all_predicted_probs,
                                    permuted_auc_values, tag='Combined Sessions',
-                                   reloaded='N/A')
+                                   reloaded=False)
     classifier_summaries.append(cross_session_summary)
     logger.info("Combined AUC: {}".format(cross_session_summary.auc))
 
