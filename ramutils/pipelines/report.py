@@ -120,7 +120,7 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                             reduced_powers,
                                                             final_task_events,
                                                             kwargs['n_perm'],
-                                                            tag='Joint Classifier',
+                                                            tag='Joint',
                                                             **kwargs)
 
         # Subset events, powers, etc to get encoding-only classifier summary
@@ -143,7 +143,7 @@ def make_report(subject, experiment, paths, joint_report=False,
         encoding_classifier_summary = perform_cross_validation(
             encoding_classifier, encoding_reduced_powers,
             final_encoding_task_events, kwargs['n_perm'],
-            tag='Encoding Classifier', **kwargs)
+            tag='Encoding', **kwargs)
 
         # TODO: Add distanced-based ranking of electrodes to prior stim results
         target_selection_table = create_target_selection_table(
@@ -219,7 +219,7 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                           **kwargs)
 
         session_summaries = summarize_stim_sessions(
-            all_events, final_task_events, stim_params,
+            all_events, final_task_events, stim_data,
             post_hoc_results['encoding_classifier_summaries'],
             post_hoc_results['post_stim_predicted_probs'],
             pairs_metadata_table)
