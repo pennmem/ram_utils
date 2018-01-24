@@ -8,9 +8,14 @@ except ImportError:
 
 from ptsa.data.readers import JsonIndexReader
 from ramutils.io import load_results, store_results
+from ramutils.utils import get_session_str
 
 from ._wrapper import task
+from ramutils.reports.summary import *
 from ramutils.utils import is_stim_experiment as is_stim_experiment_core
+from ramutils.log import get_logger
+
+logger = get_logger()
 
 
 __all__ = [
@@ -40,18 +45,20 @@ def is_stim_experiment(experiment):
 
 @task(cache=False)
 def save_all_output(subject, experiment, session_summaries, math_summaries,
-                    delta_hfa_table, classifier_evaluation_results,
+                    target_selection_table, classifier_evaluation_results,
                     save_location):
 
     base_output_format = os.path.join(save_location,
                                       "{subject}_{experiment}_{session}_{"
                                       "data_type}.{file_type}")
 
-    delta_hfa_table.to_csv(base_output_format.format(subject=subject,
-                                                     experiment=experiment,
-                                                     session='all',
-                                                     data_type='delta_hfa_table',
-                                                     file_type='csv'))
+    session_str = '_'.join([str(summary.session_number) for summary in
+                            session_summaries])
+    target_selection_table.to_csv(base_output_format.format(subject=subject,
+                                                            experiment=experiment,
+                                                            session=session_str,
+                                                            data_type='target_selection_table',
+                                                            file_type='csv'))
 
     for session_summary in session_summaries:
         session = session_summary.session_number
@@ -65,12 +72,48 @@ def save_all_output(subject, experiment, session_summaries, math_summaries,
             subject=subject, experiment=experiment, session=session,
             data_type='math_summary', file_type='h5'))
 
-    for classifier_results in classifier_evaluation_results:
-        for classifier_summary in classifier_results:
-            session = classifier_summary.sessions
-            store_results(classifier_summary, base_output_format.format(
-                subject=subject, experiment=experiment, session=session,
-                data_type='classifier_summary', file_type='h5'))
+    for classifier_summary in classifier_evaluation_results:
+        sessions = classifier_summary.sessions
+        session_str = get_session_str(sessions)
+        store_results(classifier_summary, base_output_format.format(
+            subject=subject, experiment=experiment, session=session_str,
+            data_type=classifier_summary.tag,
+            file_type='h5'))
 
     return True
+
+
+@task(cache=False)
+def load_existing_results(subject, experiment, sessions, stim_report, db_loc):
+    # Cases: PS, stim, non-stim
+    subject_experiment = "_".join([subject, experiment])
+    base_output_format = os.path.join(db_loc, subject_experiment,
+                                      "_{session}_{data_type}.{file_type}")
+    session_str = get_session_str(sessions)
+    try:
+        target_selection_table = pd.read_csv(
+            base_output_format.format(session=session_str,
+                                      data_type='target_selection_table',
+                                      file_type='csv'))
+
+        session_summaries, math_summaries, classifier_evaluation_results = [], [], []
+        for session in sessions:
+            if ~stim_report:
+                # Load classifier summaries
+                encoding_classifier_summary = ClassifierSummary.from_hdf(
+                    base_output_format.format(session=str(session),
+                                              data_type='Encoding'))
+
+            elif stim_report and 'PS' not in experiment:
+                pass
+
+            else:
+                pass
+
+    except FileNotFoundError:
+        logger.warning('Not all underlying data could be found for the '
+                       'requested report, building from scratch instead.')
+        return False
+
+    return target_selection_table
 

@@ -1,40 +1,48 @@
 import os
+import glob
 import pytest
 import functools
 import pandas as pd
 
-from ramutils.tasks.misc import save_all_output
+from ramutils.reports.summary import FRSessionSummary, ClassifierSummary, MathSummary
+from ramutils.tasks import build_static_report
 from pkg_resources import resource_filename
-from sklearn.externals import joblib
 
 
 datafile = functools.partial(resource_filename,
                              'ramutils.test.test_data')
 
 
-def test_save_all_output():
-    session_summaries = joblib.load(datafile(
-        '/input/report_db/R1354E_FR1_1_session_summaries.pkl'))
+def test_build_report_from_cached_results():
+    session_summaries = [FRSessionSummary.from_hdf(datafile(
+        'input/report_db/R1354E_FR1_1_session_summary.h5'))]
 
-    math_summaries = joblib.load(datafile(
-        '/input/report_db/R1354E_FR1_1_math_summaries.pkl'))
+    classifier_summaries = [ClassifierSummary.from_hdf(datafile(
+        'input/report_db/R1354E_FR1_1_classifier_summary.h5'))]
 
-    sample_hfa_table = datafile('/input/powers/R1354E_hfa_ttest_table.csv')
-    test_hfa_table = pd.read_csv(sample_hfa_table)
+    math_summaries = [MathSummary.from_hdf(datafile(
+        'input/report_db/R1354E_FR1_1_math_summary.h5'))]
 
-    classifier_summaries = joblib.load(datafile(
-        '/input/report_db/R1354E_FR1_1_classifier_summaries.pkl'))
+    target_selection_table = pd.read_csv(datafile(
+        'input/report_db/R1354E_FR1_1_delta_hfa_table.csv'))
 
-    success = save_all_output('TEST', 'FR1', session_summaries, math_summaries,
-                              test_hfa_table, classifier_summaries,
-                              datafile('/output/')).compute()
+    assert session_summaries is not None
+    assert classifier_summaries is not None
+    assert target_selection_table is not None
 
-    assert os.path.exists(datafile('/output/TEST_FR1_all_delta_hfa_table.csv'))
-    assert os.path.exists(datafile('/output/TEST_FR1_1_session_summary.h5'))
-    assert os.path.exists(datafile('/output/TEST_FR1_1_math_summary.h5'))
-    assert os.path.exists(datafile('/output/TEST_FR1_1_classifier_summary.h5'))
+    report = build_static_report('R1354E', 'FR1', session_summaries,
+                                 math_summaries, target_selection_table,
+                                 classifier_summaries,
+                                 datafile(
+                                     'output/')).compute()
+
+    assert report is not None
+    output_files = glob.glob(datafile('output/*.html'))
+    assert len(output_files) == 1
+
+    # Clean up
+    for f in output_files:
+        os.remove(f)
+
     return
 
-
-def test_load_cached_results():
-    return
