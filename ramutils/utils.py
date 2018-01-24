@@ -267,3 +267,11 @@ def load_event_test_data(datapath, rootdir):
                          events['eegfile']]
 
     return events
+
+
+def get_session_str(session_list):
+    """
+        Combine session numbers into '_' separated string. Used for saving
+        underlying data
+    """
+    return "_".join([str(s) for s in session_list])
