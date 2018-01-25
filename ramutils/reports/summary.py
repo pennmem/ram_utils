@@ -3,6 +3,7 @@ from __future__ import division
 from datetime import datetime
 import warnings
 
+import json
 import numpy as np
 import pandas as pd
 import pytz
@@ -565,7 +566,7 @@ class CatFRSessionSummary(FRSessionSummary):
         Extends standard FR session summaries for categorized free recall
         experiments.
     """
-    _repetition_ratios = Dict(desc='Repetition ratio by subject')
+    _repetition_ratios = String(desc='Repetition ratio by subject')
 
     irt_within_cat = Array(desc='average inter-response time within categories')
     irt_between_cat = Array(desc='average inter-response time between categories')
@@ -574,6 +575,7 @@ class CatFRSessionSummary(FRSessionSummary):
                  repetition_ratio_dict={}):
         FRSessionSummary.populate(self, events, raw_events=raw_events,
                                   recall_probs=recall_probs)
+
         self.repetition_ratios = repetition_ratio_dict
 
         # Calculate between and within IRTs based on events
@@ -594,13 +596,20 @@ class CatFRSessionSummary(FRSessionSummary):
         self.irt_between_cat = irt_between_cat
 
     @property
+    def raw_repetition_ratios(self):
+        mydict = json.loads(self._repetition_ratios)
+        mydict = {k: np.array(v) for k, v in mydict.items()}
+        return mydict
+
+    @property
     def repetition_ratios(self):
-        return np.hstack([np.nanmean(v) for k, v in
-                          self._repetition_ratios.items()])
+        return np.hstack([np.nanmean(v) for k, v in self.raw_repetition_ratios.items()])
 
     @repetition_ratios.setter
     def repetition_ratios(self, new_repetition_ratios):
-        self._repetition_ratios = new_repetition_ratios
+        serializable_ratios = {k: v.tolist() for k, v in
+                               new_repetition_ratios.items()}
+        self._repetition_ratios = json.dumps(serializable_ratios)
 
     @property
     def irt_within_category(self):
@@ -612,7 +621,7 @@ class CatFRSessionSummary(FRSessionSummary):
 
     @property
     def subject_ratio(self):
-        return np.nanmean(self._repetition_ratios[self.subject])
+        return np.nanmean(self.raw_repetition_ratios[self.subject])
 
 
 class StimSessionSummary(SessionSummary):
