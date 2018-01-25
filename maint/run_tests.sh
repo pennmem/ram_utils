@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
-#conda env remove -n ramutils_test -y
-#set -e
-#echo "Creating python 3 environment"
-#conda create -y -n ramutils_test python=3
-#source activate ramutils_test
-#conda install -y -c pennmem -c conda-forge --file=requirements.txt
-#
-#echo "Pulling master branch from remote repository"
-#git pull origin master
-#
-## If any tests fail, non-zero error code returned by pytest, so allow shell script to contiue
-#echo "Running full test suite on python 3.6"
-#set +e
-#python -m pytest ramutils/ --cov=ramutils --cov-report html --html=report.html --self-contained-html --rhino-root=/ --output-dest=/scratch/zduey/nightly_build/python_36/
-#set -e
-#
-#zip coverage.zip htmlcov/
-#echo "Full test suite finished running" | mail -a coverage.zip -a report.html -s "Python 3.6 Test Results" zachduey@gmail.com
+conda env remove -n ramutils_test -y
+set -e
+echo "Creating python 3 environment"
+conda create -y -n ramutils_test python=3
+source activate ramutils_test
+conda install -y -c pennmem -c conda-forge --file=requirements.txt
+
+echo "Pulling master branch from remote repository"
+git pull origin master
+
+# If any tests fail, non-zero error code returned by pytest, so allow shell script to contiue
+echo "Running full test suite on python 3.6"
+set +e
+python -m pytest ramutils/ --cov=ramutils --cov-report html --html=report.html --self-contained-html --rhino-root=/ --output-dest=/scratch/zduey/nightly_build/python_36/
+set -e
+
+zip coverage.zip htmlcov/
+echo "Full test suite finished running" | mail -a coverage.zip -a report.html -s "Python 3.6 Test Results" zachduey@gmail.com
 
 echo "Creating python 2.7 environment"
 set +e
