@@ -290,11 +290,6 @@ class TestStimSessionSummary:
         cls.sample_summary_table = pd.read_csv(datafile(
             "/input/summaries/sample_stim_session_summary.csv"))
 
-    def test_from_dataframe(self):
-        stim_summary = StimSessionSummary()
-        stim_summary.populate_from_dataframe(self.sample_summary_table)
-        assert len(stim_summary.events) == 300
-
 
 class TestFRStimSessionSummary:
     @classmethod

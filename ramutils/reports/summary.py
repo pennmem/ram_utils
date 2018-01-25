@@ -209,6 +209,8 @@ class Summary(Schema):
 
     @property
     def raw_events(self):
+        if self._raw_events is None:
+            return None
         return np.rec.array(self._raw_events)
 
     @raw_events.setter
@@ -629,14 +631,6 @@ class StimSessionSummary(SessionSummary):
     pulse_frequency = Array(dtype=np.float64, desc='stim pulse frequency [Hz]')
     amplitude = Array(dtype=np.float64, desc='stim amplitude [mA]')
     duration = Array(dtype=np.float64, desc='stim duration [ms]')
-
-    def populate_from_dataframe(self, df, post_stim_prob_recall=None,
-                                raw_events=None, is_ps4_session=False):
-        events = df.to_records(index=False)
-        self.populate(events,
-                      post_stim_prob_recall=post_stim_prob_recall,
-                      raw_events=raw_events,
-                      is_ps4_session=is_ps4_session)
 
     def populate(self, events, post_stim_prob_recall=None,
                  raw_events=None,
