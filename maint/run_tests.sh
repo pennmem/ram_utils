@@ -12,7 +12,7 @@ git pull origin master
 # If any tests fail, non-zero error code returned by pytest, so allow shell script to contiue
 echo "Running full test suite on python 3.6"
 set +e
-python -m pytest ramutils/ --cov=ramutils --cov-report html --html=report.html --self-contained-html --rhino-root=/ --output-dest=/scratch/zduey/nightly_build/python_36/
+python -m pytest ramutils/ --cov=ramutils --cov-report html --html=report_36.html --self-contained-html --rhino-root=/ --output-dest=/scratch/zduey/nightly_build/python_36/
 set -e
 
 zip coverage.zip htmlcov/
@@ -28,7 +28,7 @@ conda install -y -c pennmem -c conda-forge --file=requirements.txt
 
 echo "Running full test suite on python 2.7"
 set +e
-python -m pytest ramutils/ --cov=ramutils --cov-report html --html=report.html --self-contained-html --rhino-root=/ --output-dest=/scratch/zduey/nightly_build/python_27/
+python -m pytest ramutils/ --cov=ramutils --cov-report html --html=report_27.html --self-contained-html --rhino-root=/ --output-dest=/scratch/zduey/nightly_build/python_27/
 set -e
 
 # Zip the htmlcov/ folder and email
