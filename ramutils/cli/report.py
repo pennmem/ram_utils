@@ -26,6 +26,10 @@ parser.add_argument('--excluded-contacts', '-E', nargs='+',
                     help='contacts to exclude from classifier')
 parser.add_argument('--joint-report', '-j', action='store_true', default=False,
                     help='include CatFR/FR for FR reports (default: off)')
+parser.add_argument('--use-cached', '-C', action="store_true", default=True,
+                    help='use previously generated data')
+parser.add_argument('--report_db_location',
+                    type=str, default="/scratch/report_database/")
 
 logger = get_logger("reports")
 
@@ -37,6 +41,7 @@ def create_report(input_args=None):
     paths = FilePaths(
         root=osp.expanduser(args.root),
         dest=args.dest,
+        data_db=args.report_db_location
     )
 
     # Stim params (used in make_report below) is really just used for excluding
@@ -79,6 +84,7 @@ def create_report(input_args=None):
             exp_params=exp_params,
             sessions=sessions,
             vispath=args.vispath,
+            use_cached=args.use_cached
         )
         logger.info("Wrote report to %s\n", path)
 
