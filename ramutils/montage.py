@@ -19,7 +19,7 @@ from classiflib import dtypes
 from ptsa.data.readers import JsonIndexReader
 
 from ramutils.parameters import StimParameters
-from ramutils.utils import extract_subject_montage, touch, bytes_to_str
+from ramutils.utils import extract_subject_montage, touch, bytes_to_str, tempdir
 
 
 def make_stim_params(subject, anodes, cathodes, min_amplitudes=None,
@@ -471,18 +471,22 @@ def get_pairs(subject, experiment, paths):
         with h5py.File(filename, 'r') as hfile:
             config_str = hfile['/config_files/electrode_config'].value
 
-        config_path = osp.join(gettempdir(), 'electrode_config.csv')
-        with open(config_path, 'wb') as f:
-            f.write(config_str)
-        paths.electrode_config_file = config_path
+        # This will create a temporary directory that is removed when the
+        # program exists the scope of the 'with' statement
+        with tempdir() as temp_path:
+            config_path = osp.join(temp_path, 'electrode_config.csv')
+            with open(config_path, 'wb') as f:
+                f.write(config_str)
 
-        # generate_pairs_from_electrode_config panics if the .bin file isn't
-        # found, so we have to make sure it's there
-        touch(config_path.replace('.csv', '.bin'))
+            paths.electrode_config_file = config_path
 
-        all_pairs = generate_pairs_from_electrode_config(subject,
-                                                         experiment,
-                                                         paths)
+            # generate_pairs_from_electrode_config panics if the .bin file isn't
+            # found, so we have to make sure it's there
+            touch(config_path.replace('.csv', '.bin'))
+
+            all_pairs = generate_pairs_from_electrode_config(subject,
+                                                             experiment,
+                                                             paths)
 
     # No HDF5 file exists, meaning this was a monopolar recording... read
     # pairs.json instead
