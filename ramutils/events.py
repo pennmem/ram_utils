@@ -93,7 +93,8 @@ def load_events(subject, experiment, file_type='all_events',
 
 
 def clean_events(events, start_time=None, end_time=None, duration=None,
-                 pre=None, post=None, return_stim_events=False):
+                 pre=None, post=None, return_stim_events=False,
+                 all_events=False):
     """
         Peform basic cleaning operations on events such as removing incomplete
         sessions, negative offset events, and incomplete lists. For FR events,
@@ -112,6 +113,9 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
     return_stim_events: bool
         Indicator for if stim parameters should be returned in addition to the
         cleaned events
+    all_events: bool
+        Indicates if the data to be cleaned is the all_event.json file. These
+        require a different set of cleaning procedures
 
     Returns
     -------
@@ -130,6 +134,13 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
         raise RuntimeError('Event cleaning can only happen on single-experiment'
                            ' datasets')
     experiment = experiments[0]
+
+    if all_events:
+        all_fields = list(events.dtype.names)
+        all_fields.remove('stim_params')
+        all_fields.remove('test')
+        all_events = events[all_fields].copy()
+        return all_events
 
     events = remove_negative_offsets(events)
     events = remove_practice_lists(events)
