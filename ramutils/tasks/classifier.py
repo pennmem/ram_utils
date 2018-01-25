@@ -230,8 +230,9 @@ def post_hoc_classifier_evaluation(events, powers, post_stim_events,
 
             {
                 'cross_session_summary': MultiSessionClassifierSummary,
-                'session_summaries': List of ClassifierSummary objects,
-                'session_summaries_stim_table': List of ClassifierSummary objects built using all encoding events,
+                'classifier_summaries': List of ClassifierSummary objects,
+                'encoding_classifier_summaries': List of ClassifierSummary
+                objects built using all encoding events,
                 'post_stim_predicted_probs': Classifier output during post stim period
             }
 
@@ -326,16 +327,21 @@ def post_hoc_classifier_evaluation(events, powers, post_stim_events,
         post_stim_predicted_probs.append(post_stim_probs)
 
         subject, experiment, sessions = extract_event_metadata(session_events)
+
+        # This is the primary classifier used for evaluation. It is based on
+        # assessing classifier output for non-stim encoding events
         classifier_summary.populate(subject, experiment, sessions,
                                     session_recalls, session_probs,
                                     permuted_auc_values,
-                                    tag='Session ' + str(session),
+                                    tag='session_' + str(session),
                                     reloaded=reloaded)
         classifier_summaries.append(classifier_summary)
         logger.info('AUC for session {}: {}'.format(session,
                                                     classifier_summary.auc))
 
-        # Get a classifier summary for all encoding events
+        # Get a classifier summary for all encoding events. This classifier
+        # is needed in order to match all encoding events to stim information
+        # in a later step
         session_encoding_powers = powers[(session_mask & encoding_mask)]
         reduced_session_encoding_powers = reduce_powers(
             session_encoding_powers, used_mask, len(kwargs['freqs']))
@@ -349,7 +355,8 @@ def post_hoc_classifier_evaluation(events, powers, post_stim_events,
         encoding_classifier_summary.populate(subject, experiment, sessions,
                                              session_encoding_recalls,
                                              session_encoding_probs,
-                                             None)
+                                             None,
+                                             tag='encoding_evaluation')
         encoding_classifier_summaries.append(encoding_classifier_summary)
 
     # Combine session-specific predicted probabilities into 1D array
@@ -366,7 +373,9 @@ def post_hoc_classifier_evaluation(events, powers, post_stim_events,
                                    non_stim_recalls, all_predicted_probs,
                                    permuted_auc_values, tag='Combined Sessions',
                                    reloaded=False)
-    classifier_summaries.append(cross_session_summary)
+    # Leave commented out until we have a way to do multi-stim-session
+    # evaluation, otherwise this classifier is just redundant.
+    #classifier_summaries.append(cross_session_summary)
     logger.info("Combined AUC: {}".format(cross_session_summary.auc))
 
     result_dict = {

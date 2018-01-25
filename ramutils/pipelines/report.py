@@ -7,7 +7,7 @@ from ramutils.tasks import *
 
 def make_report(subject, experiment, paths, joint_report=False,
                 retrain=False, stim_params=None, exp_params=None,
-                sessions=None, vispath=None):
+                sessions=None, vispath=None, use_cached=True):
     """Run a report.
 
     Parameters
@@ -31,6 +31,9 @@ def make_report(subject, experiment, paths, joint_report=False,
         When not given, all available sessions are used for reports.
     vispath : str
         Filename for task graph visualization.
+    use_cached: bool
+        If True, attempt to load data from long-term storage. If any
+        necessary data is not found, everything will be rerun
 
     Returns
     -------
@@ -50,10 +53,30 @@ def make_report(subject, experiment, paths, joint_report=False,
     if 'Cat' in experiment:
         experiment = experiment.replace('Cat', 'cat')
 
+    stim_report = is_stim_experiment(experiment).compute()
+
     # TODO: Add method that will check if the necessary underlying data already
     # exists to avoid re-running
+    if use_cached and 'PS' not in experiment:
+        target_selection_table, classifier_evaluation_results, \
+        session_summaries, math_summaries = load_existing_results(subject,
+                                                                  experiment,
+                                                                  sessions,
+                                                                  stim_report,
+                                                                  paths.data_db,
+                                                                  rootdir=paths.root).compute()
 
-    stim_report = is_stim_experiment(experiment).compute()
+        # Check if only None values were returned. Processing will continue
+        # undeterred
+        if all([val is None for val in [target_selection_table,
+                                        classifier_evaluation_results,
+                                        session_summaries, math_summaries]]):
+            pass
+        else:
+            report = build_static_report(subject, experiment, session_summaries,
+                                         math_summaries, target_selection_table,
+                                         classifier_evaluation_results, paths.dest)
+            return report.compute()
 
     # TODO: allow using different localization, montage numbers
     ec_pairs = get_pairs(subject, experiment, paths)
@@ -245,12 +268,13 @@ def make_report(subject, experiment, paths, joint_report=False,
                                          joint_classifier_summary]
     elif stim_report and 'PS' not in experiment:
         classifier_evaluation_results = post_hoc_results[
-            'encoding_classifier_summaries']
+            'classifier_summaries']
 
-    output = save_all_output(subject, experiment, session_summaries,
-                             math_summaries, target_selection_table,
-                             classifier_evaluation_results,
-                             paths.data_db).compute()
+    if 'PS' not in experiment:
+        output = save_all_output(subject, experiment, session_summaries,
+                                 math_summaries, target_selection_table,
+                                 classifier_evaluation_results,
+                                 paths.data_db).compute()
 
     report = build_static_report(subject, experiment, session_summaries,
                                  math_summaries, target_selection_table,
