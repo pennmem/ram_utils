@@ -29,6 +29,7 @@ parser.add_argument('--joint-report', '-j', action='store_true', default=False,
 parser.add_argument('--use-cached', '-C', action="store_true", default=True,
                     help='use previously generated data')
 parser.add_argument('--report_db_location',
+                    help='location of report data database',
                     type=str, default="/scratch/report_database/")
 
 logger = get_logger("reports")
