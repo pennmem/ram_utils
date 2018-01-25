@@ -53,8 +53,9 @@ def load_events(subject, experiment, file_type='all_events',
                                                "r1.json"))
 
     sessions_to_load = sessions
-    if sessions is None:
-        get_completed_sessions(subject, experiment, rootdir=rootdir)
+    if sessions_to_load is None:
+        sessions_to_load = get_completed_sessions(subject, experiment,
+                                                  rootdir=rootdir)
 
     event_files = []
     for session in sorted(sessions_to_load):

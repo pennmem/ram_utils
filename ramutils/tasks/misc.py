@@ -110,11 +110,11 @@ def load_existing_results(subject, experiment, sessions, stim_report, db_loc,
                                           file_type='csv'))
             encoding_classifier_summary = ClassifierSummary.from_hdf(
                 base_output_format.format(session=session_str,
-                                          data_type='Encoding',
+                                          data_type='classifier_Encoding',
                                           file_type='h5'))
             joint_classifier_summary = ClassifierSummary.from_hdf(
                 base_output_format.format(session=session_str,
-                                          data_type='Joint',
+                                          data_type='classifier_Joint',
                                           file_type='h5'))
             classifier_evaluation_results = [encoding_classifier_summary,
                                              joint_classifier_summary]

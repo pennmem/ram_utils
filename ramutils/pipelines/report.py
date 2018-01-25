@@ -55,8 +55,8 @@ def make_report(subject, experiment, paths, joint_report=False,
 
     stim_report = is_stim_experiment(experiment).compute()
 
-    # TODO: Add method that will check if the necessary underlying data already
-    # exists to avoid re-running
+    # PS runs so quickly and has a much more nested event structure, so it is
+    # better to always just re-run
     if use_cached and 'PS' not in experiment:
         target_selection_table, classifier_evaluation_results, \
         session_summaries, math_summaries = load_existing_results(subject,
