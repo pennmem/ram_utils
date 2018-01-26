@@ -161,7 +161,7 @@ def load_existing_results(subject, experiment, sessions, stim_report, db_loc,
         else:
             return None, None, None, None
 
-    except (FileNotFoundError, OSError):
+    except (IOError, OSError):
         logger.warning('Not all underlying data could be found for the '
                        'requested report, building from scratch instead.')
         return None, None, None, None
