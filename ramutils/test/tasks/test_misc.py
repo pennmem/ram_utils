@@ -1,5 +1,6 @@
 import os
 import glob
+import pytest
 import functools
 
 from ramutils.tasks.misc import load_existing_results
@@ -11,6 +12,7 @@ datafile = functools.partial(resource_filename,
                              'ramutils.test.test_data')
 
 
+@pytest.mark.rhino
 def test_build_report_from_cached_results():
 
     target_selection_table, classifier_summaries, session_summaries, \
