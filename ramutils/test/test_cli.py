@@ -149,7 +149,6 @@ class TestCreateReports:
         ('R1345D', 'FR1', None, False),
         ('R1374T', 'CatFR1', None, False),
         ('R1374T', 'CatFR1', None, True),
-        ('R1385E', 'FR1', None, True) # modal controllability available
     ])
     def test_create_open_loop_report(self, subject, experiment, sessions,
                                      joint, use_cached, rhino_root,

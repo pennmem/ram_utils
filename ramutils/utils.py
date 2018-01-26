@@ -6,6 +6,8 @@ import os
 from timeit import default_timer
 import numpy as np
 import h5py
+import tempfile
+import shutil
 
 from ramutils.log import get_logger
 from ptsa.data.readers import JsonIndexReader
@@ -295,3 +297,15 @@ def get_completed_sessions(subject, experiment, rootdir='/'):
                                             experiment=experiment)
 
     return sessions
+
+  
+@contextmanager
+def tempdir():
+    """Create a temporary directory and remove its contents upon completion."""
+    d = tempfile.mkdtemp()
+    yield d
+    try:
+        shutil.rmtree(d)
+    except:
+        pass
+
