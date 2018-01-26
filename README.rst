@@ -109,10 +109,11 @@ Generating reports on the command line::
     usage: ram-report [-h] [--root ROOT] [--dest DEST] [--cachedir CACHEDIR]
                       --subject SUBJECT [--force-rerun] --experiment
                       {FR1,CatFR1,PAL1,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR6,CatFR6}
-                      [--vispath VISPATH] [--sessions SESSIONS [SESSIONS ...]]
-                      [--retrain]
+                      [--vispath VISPATH] [--version]
+                      [--sessions SESSIONS [SESSIONS ...]] [--retrain]
                       [--excluded-contacts EXCLUDED_CONTACTS [EXCLUDED_CONTACTS ...]]
-                      [--joint-report]
+                      [--joint-report] [--use-cached]
+                      [--report_db_location REPORT_DB_LOCATION]
 
     Generate a report
 
@@ -128,12 +129,18 @@ Generating reports on the command line::
       --experiment {FR1,CatFR1,PAL1,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR6,CatFR6}, -x {FR1,CatFR1,PAL1,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR6,CatFR6}
                             experiment
       --vispath VISPATH     path to save task graph visualization to
+      --version             show program's version number and exit
       --sessions SESSIONS [SESSIONS ...], -S SESSIONS [SESSIONS ...]
                             sessions to read data from (default: use all)
       --retrain, -R         retrain classifier rather than loading from disk
       --excluded-contacts EXCLUDED_CONTACTS [EXCLUDED_CONTACTS ...], -E EXCLUDED_CONTACTS [EXCLUDED_CONTACTS ...]
                             contacts to exclude from classifier
       --joint-report, -j    include CatFR/FR for FR reports (default: off)
+      --use-cached, -C      use previously generated data
+      --report_db_location REPORT_DB_LOCATION
+                            location of report data database
+
+
 
 Testing
 -------

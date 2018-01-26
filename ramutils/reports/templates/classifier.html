@@ -26,9 +26,9 @@
     <tbody>
     {% for classifier in classifiers %}
       <tr>
-        <td>{{ classifier.metadata['tag'] }}</td>
+        <td>{{ classifier.tag }}</td>
         {% if stim %}
-        <td>{{ classifier.metadata['reloaded'] }}</td>
+        <td>{{ classifier.reloaded }}</td>
         {% endif %}
         <td>{{ "{:.3f}".format(classifier.auc) }}</td>
         {% if classifier.pvalue < 0.001 %}
@@ -51,7 +51,7 @@
       </caption>
     {% else %}
       <caption>
-        A classifier type of 'encoding is trained on encoding-period events only, while a 'joint' classifier uses events
+        A classifier type of 'encoding' is trained on encoding-period events only, while a 'joint' classifier uses events
         from both the encoding period and the retrieval period for training. 95% confidence intervals for the median
         classifier output are approximate and based on the procedure described
         <a href="http://www.ucl.ac.uk/ich/short-courses-events/about-stats-courses/stats-rm/Chapter_8_Content/confidence_interval_single_median">here.</a>

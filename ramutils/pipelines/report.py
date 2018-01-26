@@ -7,7 +7,7 @@ from ramutils.tasks import *
 
 def make_report(subject, experiment, paths, joint_report=False,
                 retrain=False, stim_params=None, exp_params=None,
-                sessions=None, vispath=None):
+                sessions=None, vispath=None, use_cached=True):
     """Run a report.
 
     Parameters
@@ -31,6 +31,9 @@ def make_report(subject, experiment, paths, joint_report=False,
         When not given, all available sessions are used for reports.
     vispath : str
         Filename for task graph visualization.
+    use_cached: bool
+        If True, attempt to load data from long-term storage. If any
+        necessary data is not found, everything will be rerun
 
     Returns
     -------
@@ -50,10 +53,30 @@ def make_report(subject, experiment, paths, joint_report=False,
     if 'Cat' in experiment:
         experiment = experiment.replace('Cat', 'cat')
 
-    # TODO: Add method that will check if the necessary underlying data already
-    # exists to avoid re-running
-
     stim_report = is_stim_experiment(experiment).compute()
+
+    # PS runs so quickly and has a much more nested event structure, so it is
+    # better to always just re-run
+    if use_cached and 'PS' not in experiment:
+        target_selection_table, classifier_evaluation_results, \
+        session_summaries, math_summaries = load_existing_results(subject,
+                                                                  experiment,
+                                                                  sessions,
+                                                                  stim_report,
+                                                                  paths.data_db,
+                                                                  rootdir=paths.root).compute()
+
+        # Check if only None values were returned. Processing will continue
+        # undeterred
+        if all([val is None for val in [target_selection_table,
+                                        classifier_evaluation_results,
+                                        session_summaries, math_summaries]]):
+            pass
+        else:
+            report = build_static_report(subject, experiment, session_summaries,
+                                         math_summaries, target_selection_table,
+                                         classifier_evaluation_results, paths.dest)
+            return report.compute()
 
     # TODO: allow using different localization, montage numbers
     ec_pairs = get_pairs(subject, experiment, paths)
@@ -120,7 +143,7 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                             reduced_powers,
                                                             final_task_events,
                                                             kwargs['n_perm'],
-                                                            tag='Joint Classifier',
+                                                            tag='Joint',
                                                             **kwargs)
 
         # Subset events, powers, etc to get encoding-only classifier summary
@@ -143,7 +166,7 @@ def make_report(subject, experiment, paths, joint_report=False,
         encoding_classifier_summary = perform_cross_validation(
             encoding_classifier, encoding_reduced_powers,
             final_encoding_task_events, kwargs['n_perm'],
-            tag='Encoding Classifier', **kwargs)
+            tag='Encoding', **kwargs)
 
         # TODO: Add distanced-based ranking of electrodes to prior stim results
         target_selection_table = create_target_selection_table(
@@ -220,7 +243,7 @@ def make_report(subject, experiment, paths, joint_report=False,
 
         session_summaries = summarize_stim_sessions(
             all_events, final_task_events, stim_data,
-            post_hoc_results['session_summaries_stim_table'],
+            post_hoc_results['encoding_classifier_summaries'],
             post_hoc_results['post_stim_predicted_probs'],
             pairs_metadata_table)
 
@@ -236,18 +259,26 @@ def make_report(subject, experiment, paths, joint_report=False,
                                   sessions, paths.root)
         session_summaries = summarize_ps_sessions(ps_events)
         math_summaries = [] # No math summaries for PS4
-        results = []
+        classifier_evaluation_results = []
 
     # TODO: Add task that saves out all necessary underlying data
 
     if not stim_report:
-        results = [encoding_classifier_summary, joint_classifier_summary]
+        classifier_evaluation_results = [encoding_classifier_summary,
+                                         joint_classifier_summary]
     elif stim_report and 'PS' not in experiment:
-        results = post_hoc_results['session_summaries']
+        classifier_evaluation_results = post_hoc_results[
+            'classifier_summaries']
+
+    if 'PS' not in experiment:
+        output = save_all_output(subject, experiment, session_summaries,
+                                 math_summaries, target_selection_table,
+                                 classifier_evaluation_results,
+                                 paths.data_db).compute()
 
     report = build_static_report(subject, experiment, session_summaries,
                                  math_summaries, target_selection_table,
-                                 results, paths.dest)
+                                 classifier_evaluation_results, paths.dest)
 
     if vispath is not None:
         report.visualize(filename=vispath)

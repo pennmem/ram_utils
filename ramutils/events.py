@@ -20,7 +20,7 @@ from itertools import groupby
 from numpy.lib.recfunctions import rename_fields
 
 from ptsa.data.readers import BaseEventReader, JsonIndexReader, EEGReader
-from ramutils.utils import extract_subject_montage
+from ramutils.utils import extract_subject_montage, get_completed_sessions
 from ramutils.exc import *
 
 
@@ -53,12 +53,9 @@ def load_events(subject, experiment, file_type='all_events',
                                                "r1.json"))
 
     sessions_to_load = sessions
-    if sessions is None:
-        # Find all sessions for the requested experiment.
-        # TODO: PS sessions should not be included when loading FR5/catFR5
-        sessions_to_load = json_reader.aggregate_values('sessions',
-                                                        subject=subject_id,
-                                                        experiment=experiment)
+    if sessions_to_load is None:
+        sessions_to_load = get_completed_sessions(subject, experiment,
+                                                  rootdir=rootdir)
 
     event_files = []
     for session in sorted(sessions_to_load):
@@ -93,7 +90,8 @@ def load_events(subject, experiment, file_type='all_events',
 
 
 def clean_events(events, start_time=None, end_time=None, duration=None,
-                 pre=None, post=None, return_stim_events=False):
+                 pre=None, post=None, return_stim_events=False,
+                 all_events=False):
     """
         Peform basic cleaning operations on events such as removing incomplete
         sessions, negative offset events, and incomplete lists. For FR events,
@@ -104,14 +102,17 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
     ----------
     events: np.recarray
         Raw events
-    start_time:
-    end_time:
-    duration:
-    pre:
-    post:
+    start_time: int
+    end_time: int
+    duration: int
+    pre: int
+    post: int
     return_stim_events: bool
         Indicator for if stim parameters should be returned in addition to the
         cleaned events
+    all_events: bool
+        Indicates if the data to be cleaned is the all_event.json file. These
+        require a different set of cleaning procedures
 
     Returns
     -------
@@ -122,8 +123,6 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
     -----
     This function should be called on an experiment by experiment basis and
     should not be used to clean cross-experiment datasets
-    :param return_stim_events:
-
     """
     experiments = extract_experiment_from_events(events)
     if len(experiments) > 1:
@@ -131,10 +130,18 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
                            ' datasets')
     experiment = experiments[0]
 
+    if all_events:
+        all_fields = list(events.dtype.names)
+        all_fields.remove('stim_params')
+        all_fields.remove('test')
+        all_events = events[all_fields].copy()
+        return all_events
+
     events = remove_negative_offsets(events)
     events = remove_practice_lists(events)
     events = remove_incomplete_lists(events)
     events = select_column_subset(events, all_relevant=True)
+
     # TODO: Add remove_repetitions() function to get rid of any recall events
     # that are just a repeated recall
 

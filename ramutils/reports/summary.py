@@ -3,6 +3,7 @@ from __future__ import division
 from datetime import datetime
 import warnings
 
+import json
 import numpy as np
 import pandas as pd
 import pytz
@@ -11,9 +12,10 @@ from ramutils.utils import safe_divide
 from ramutils.events import extract_subject, extract_experiment_from_events, \
     extract_sessions
 from ramutils.bayesian_optimization import choose_location
+from ramutils.exc import TooManySessionsError
 
 from traitschema import Schema
-from traits.api import Array, ArrayOrNone, Float, String, DictStrAny, Dict
+from traits.api import Array, ArrayOrNone, Float, String, DictStrAny, Dict, Bool
 
 from sklearn.metrics import roc_auc_score, roc_curve
 from statsmodels.stats.proportion import proportions_chisquare
@@ -39,23 +41,16 @@ class ClassifierSummary(Schema):
     _predicted_probabilities = ArrayOrNone(desc='predicted recall probabilities')
     _true_outcomes = ArrayOrNone(desc='actual results for recall vs. non-recall')
     _permuted_auc_values = ArrayOrNone(desc='permuted AUCs')
-    _metadata = DictStrAny(desc='Dictionary containing additional metadata')
 
     subject = String(desc='subject')
     experiment = String(desc='experiment')
     sessions = Array(desc='sessions summarized by the object')
     recall_rate = Float(desc='overall recall rate')
+    tag = String(desc='name of the classifier')
+    reloaded = Bool(desc='classifier was reloaded from hard disk')
     low_terc_recall_rate = Float(desc='recall rate when predicted probability of recall was in lowest tercile')
     mid_terc_recall_rate = Float(desc='recall reate when predicted probability of recall was in middle tercile')
     high_terc_recall_rate = Float(desc='recall rate when predicted probability of recall was in highest tercile')
-
-    @property
-    def metadata(self):
-        return self._metadata
-
-    @metadata.setter
-    def metadata(self, new_metadata):
-        self._metadata = new_metadata
 
     @property
     def predicted_probabilities(self):
@@ -139,7 +134,8 @@ class ClassifierSummary(Schema):
         return 100.0 * (self.high_terc_recall_rate - self.recall_rate) / self.recall_rate
 
     def populate(self, subject, experiment, session, true_outcomes,
-                 predicted_probabilities, permuted_auc_values, **kwargs):
+                 predicted_probabilities, permuted_auc_values,
+                 tag='', reloaded=False):
         """ Populate classifier performance metrics
 
         Parameters
@@ -156,6 +152,13 @@ class ClassifierSummary(Schema):
             Outputs from the trained classifier for each word event
         permuted_auc_values: array_like
             AUC values from performing a permutation test on classifier
+        tag: str
+            Name given to the classifier, used to differentiate between
+            multiple classifiers
+        reloaded: bool
+            Indicates whether the classifier is reloaded from hard disk,
+            i.e. is the actually classifier used. If false, then the
+            classifier was created from scratch
 
         Keyword Arguments
         -----------------
@@ -164,11 +167,12 @@ class ClassifierSummary(Schema):
         """
         self.subject = subject
         self.experiment = experiment
-        self.session = session
+        self.sessions = session
         self.true_outcomes = true_outcomes
         self.predicted_probabilities = predicted_probabilities
         self.permuted_auc_values = permuted_auc_values
-        self.metadata = kwargs
+        self.tag = tag
+        self.reloaded = reloaded
 
         thresh_low = np.percentile(predicted_probabilities, 100.0 / 3.0)
         thresh_high = np.percentile(predicted_probabilities, 2.0 * 100.0 / 3.0)
@@ -197,21 +201,23 @@ class Summary(Schema):
 
     @property
     def events(self):
-        return self._events
+        return np.rec.array(self._events)
 
     @events.setter
     def events(self, new_events):
         if self._events is None:
-            self._events = new_events
+            self._events = np.rec.array(new_events)
 
     @property
     def raw_events(self):
-        return self._raw_events
+        if self._raw_events is None:
+            return None
+        return np.rec.array(self._raw_events)
 
     @raw_events.setter
     def raw_events(self, new_events):
-        if self._raw_events is None:
-            self._raw_events = new_events
+        if self._raw_events is None and new_events is not None:
+            self._raw_events = np.rec.array(new_events)
 
     def populate(self, events, raw_events=None):
         raise NotImplementedError
@@ -233,10 +239,6 @@ class Summary(Schema):
 
 class SessionSummary(Summary):
     """Base class for single-session objects."""
-    @property
-    def session(self):
-        sessions = extract_sessions(self.events)
-        return sessions[0]
 
     @property
     def subject(self):
@@ -248,20 +250,26 @@ class SessionSummary(Summary):
         return experiments[0]
 
     @property
+    def session_number(self):
+        sessions = extract_sessions(self.events)
+        if len(sessions) != 1:
+            raise TooManySessionsError("Single session expected for session "
+                                       "summary")
+
+        session = str(sessions[0])
+        return session
+
+    @property
     def events(self):
-        return self._events
+        return np.rec.array(self._events)
 
     @events.setter
     def events(self, new_events):
         """Only allow setting of events which contain a single session."""
-        assert len(np.unique(new_events['session'])) == 1, "events should only be from a single session"
         if self._events is None:
-            self._events = new_events
-
-    @property
-    def session_number(self):
-        """Returns the session number for this summary."""
-        return self.events.session[0]
+            self._events = np.rec.array(new_events)
+            assert len(np.unique(new_events['session'])) == 1, \
+                "events should only be from a single session"
 
     @property
     def session_length(self):
@@ -305,7 +313,6 @@ class SessionSummary(Summary):
                 '_events',  # we don't need events in the dataframe
                 '_raw_events',
                 '_repetition_ratios',
-                '_metadata',
                 'irt_within_cat',
                 'irt_between_cat',
                 'rejected',
@@ -323,6 +330,7 @@ class SessionSummary(Summary):
                 if trait not in ignore
             }
             self._df = pd.DataFrame(columns)
+
         return self._df
 
     def populate(self, events, raw_events=None):
@@ -345,12 +353,13 @@ class MathSummary(SessionSummary):
     @property
     def events(self):
         """ For Math events, explicitly exclude practice lists """
-        return self._events[self._events.list > -1]
+        events = np.rec.array(self._events)
+        return events[events.list > -1]
 
     @events.setter
     def events(self, new_events):
         if self._events is None:
-            self._events = new_events
+            self._events = np.rec.array(new_events)
 
     @property
     def num_problems(self):
@@ -557,7 +566,7 @@ class CatFRSessionSummary(FRSessionSummary):
         Extends standard FR session summaries for categorized free recall
         experiments.
     """
-    _repetition_ratios = Dict(desc='Repetition ratio by subject')
+    _repetition_ratios = String(desc='Repetition ratio by subject')
 
     irt_within_cat = Array(desc='average inter-response time within categories')
     irt_between_cat = Array(desc='average inter-response time between categories')
@@ -566,6 +575,7 @@ class CatFRSessionSummary(FRSessionSummary):
                  repetition_ratio_dict={}):
         FRSessionSummary.populate(self, events, raw_events=raw_events,
                                   recall_probs=recall_probs)
+
         self.repetition_ratios = repetition_ratio_dict
 
         # Calculate between and within IRTs based on events
@@ -586,13 +596,20 @@ class CatFRSessionSummary(FRSessionSummary):
         self.irt_between_cat = irt_between_cat
 
     @property
+    def raw_repetition_ratios(self):
+        mydict = json.loads(self._repetition_ratios)
+        mydict = {k: np.array(v) for k, v in mydict.items()}
+        return mydict
+
+    @property
     def repetition_ratios(self):
-        return np.hstack([np.nanmean(v) for k, v in
-                          self._repetition_ratios.items()])
+        return np.hstack([np.nanmean(v) for k, v in self.raw_repetition_ratios.items()])
 
     @repetition_ratios.setter
     def repetition_ratios(self, new_repetition_ratios):
-        self._repetition_ratios = new_repetition_ratios
+        serializable_ratios = {k: v.tolist() for k, v in
+                               new_repetition_ratios.items()}
+        self._repetition_ratios = json.dumps(serializable_ratios)
 
     @property
     def irt_within_category(self):
@@ -604,7 +621,7 @@ class CatFRSessionSummary(FRSessionSummary):
 
     @property
     def subject_ratio(self):
-        return np.nanmean(self._repetition_ratios[self.subject])
+        return np.nanmean(self.raw_repetition_ratios[self.subject])
 
 
 class StimSessionSummary(SessionSummary):
@@ -623,14 +640,6 @@ class StimSessionSummary(SessionSummary):
     pulse_frequency = Array(dtype=np.float64, desc='stim pulse frequency [Hz]')
     amplitude = Array(dtype=np.float64, desc='stim amplitude [mA]')
     duration = Array(dtype=np.float64, desc='stim duration [ms]')
-
-    def populate_from_dataframe(self, df, post_stim_prob_recall=None,
-                                raw_events=None, is_ps4_session=False):
-        events = df.to_records(index=False)
-        self.populate(events,
-                      post_stim_prob_recall=post_stim_prob_recall,
-                      raw_events=raw_events,
-                      is_ps4_session=is_ps4_session)
 
     def populate(self, events, post_stim_prob_recall=None,
                  raw_events=None,

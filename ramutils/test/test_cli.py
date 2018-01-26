@@ -139,6 +139,7 @@ class TestCreateReports:
     @pytest.mark.rhino
     @pytest.mark.slow
     @pytest.mark.output
+    @pytest.mark.parametrize('use_cached', [False, True])
     @pytest.mark.parametrize('subject, experiment, sessions, joint', [
         ('R1001P', 'FR1', None, False),
         ('R1354E', 'FR1', [0], False),
@@ -149,14 +150,19 @@ class TestCreateReports:
         ('R1374T', 'CatFR1', None, False),
         ('R1374T', 'CatFR1', None, True),
     ])
-    def test_create_open_loop_report(self, subject, experiment, sessions, joint,
-                                     rhino_root, output_dest):
+    def test_create_open_loop_report(self, subject, experiment, sessions,
+                                     joint, use_cached, rhino_root,
+                                     output_dest):
         args = [
             '--root', rhino_root,
             '--dest', output_dest,
             '-s', subject,
             '-x', experiment,
+            '--report_db_location', output_dest
         ]
+
+        if use_cached is False:
+            args += ['-C']
 
         if joint:
             args += ['-j']
@@ -169,20 +175,25 @@ class TestCreateReports:
 
     @pytest.mark.rhino
     @pytest.mark.output
+    @pytest.mark.parametrize('use_cached', [False, True])
     @pytest.mark.parametrize('subject, experiment, sessions', [
         ('R1374T', 'CatFR5', [0]),
         ('R1345D', 'FR5', [0]),
         ('R1374T', 'PS4_CatFR5', None)
     ])
     def test_create_stim_session_report(self, subject, experiment, sessions,
-                                        rhino_root, output_dest):
+                                        use_cached, rhino_root, output_dest):
 
         args = [
             '--root', rhino_root,
             '--dest', output_dest,
             '-s', subject,
-            '-x', experiment
+            '-x', experiment,
+            '--report_db_location', output_dest
         ]
+
+        if use_cached is False:
+            args += ['-C']
 
         if sessions is not None:
             args += ['-S'] + sessions

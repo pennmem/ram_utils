@@ -10,6 +10,7 @@ import tempfile
 import shutil
 
 from ramutils.log import get_logger
+from ptsa.data.readers import JsonIndexReader
 
 
 def reindent_json(json_file, indent=2):
@@ -271,6 +272,33 @@ def load_event_test_data(datapath, rootdir):
     return events
 
 
+def get_session_str(session_list):
+    """
+        Combine session numbers into '_' separated string. Used for saving
+        underlying data
+    """
+    session_list = sorted(session_list)
+    return "_".join([str(s) for s in session_list])
+
+
+def get_completed_sessions(subject, experiment, rootdir='/'):
+    """ Get a list of sessions completed of a given experiment by a subject """
+
+    subject_id, montage = extract_subject_montage(subject)
+
+    json_reader = JsonIndexReader(os.path.join(rootdir,
+                                               "protocols",
+                                               "r1.json"))
+
+    # Find all sessions for the requested experiment.
+    # TODO: PS sessions should not be included when loading FR5/catFR5
+    sessions = json_reader.aggregate_values('sessions',
+                                            subject=subject_id,
+                                            experiment=experiment)
+
+    return sessions
+
+  
 @contextmanager
 def tempdir():
     """Create a temporary directory and remove its contents upon completion."""
@@ -280,3 +308,4 @@ def tempdir():
         shutil.rmtree(d)
     except:
         pass
+

@@ -1,65 +1,52 @@
+import os
+import glob
 import pytest
+import functools
 
-import h5py
-import numpy as np
-from numpy.testing import assert_equal
-from traits.api import Array
-from traitschema import Schema
-
-from ramutils.tasks.misc import store_results, load_results
+from ramutils.tasks.misc import load_existing_results
+from ramutils.tasks import build_static_report
+from pkg_resources import resource_filename
 
 
-class MySchema(Schema):
-    x = Array(dtype=np.float)
-    y = Array(dtype=np.float)
+datafile = functools.partial(resource_filename,
+                             'ramutils.test.test_data')
 
 
-@pytest.mark.parametrize("scheme", ['', 'file'])
-@pytest.mark.parametrize("datatype", ['schema', 'array'])
-def test_store_results(scheme, datatype, tmpdir):
-    data = None
-    x, y = np.random.random((100,)), np.random.random((100, 100))
+@pytest.mark.rhino
+def test_build_report_from_cached_results():
 
-    if datatype == 'array':
-        data = np.random.random((100, 100))
-    elif datatype == 'schema':
-        data = MySchema(x=x, y=y)
+    target_selection_table, classifier_summaries, session_summaries, \
+    math_summaries = load_existing_results('R1354E', 'FR1', [1], False,
+                                           datafile('input/report_db'),
+                                           datafile('')).compute()
 
-    path = str(tmpdir.join('out.h5'))
-    if scheme != '':
-        uri = 'file://{:s}/out.h5'.format(str(tmpdir))
-    else:
-        uri = path
+    assert session_summaries is not None
+    assert classifier_summaries is not None
+    assert target_selection_table is not None
 
-    if scheme in ['', 'file']:
-        store_results(data, uri).compute()
+    report = build_static_report('R1354E', 'FR1', session_summaries,
+                                 math_summaries, target_selection_table,
+                                 classifier_summaries,
+                                 datafile(
+                                     'output/')).compute()
 
-        with h5py.File(path, 'r') as hfile:
-            if isinstance(data, np.ndarray):
-                assert_equal(hfile['/data'], data)
-            else:
-                assert_equal(x, hfile['/x'])
-                assert_equal(y, hfile['/y'])
-    else:
-        raise RuntimeError("not a valid scheme")
+    assert report is not None
+    output_files = glob.glob(datafile('output/*.html'))
+    assert len(output_files) == 1
 
-    # Invalid data type
-    with pytest.raises(NotImplementedError):
-        store_results([1, 2, 3], uri).compute()
+    # Clean up
+    for f in output_files:
+        os.remove(f)
 
-    # Invalid scheme
-    with pytest.raises(NotImplementedError):
-        store_results(data, 'sqlite:///path.sqlite').compute()
+    # Check that non-existent data returns all None values
+    target_selection_table, classifier_summaries, session_summaries, \
+    math_summaries = load_existing_results('R1345D', 'FR1', [1], False,
+                                           datafile('input/report_db'),
+                                           datafile('')).compute()
 
+    results = [target_selection_table, classifier_summaries, session_summaries,
+               math_summaries]
 
-@pytest.mark.parametrize('scheme', ['', 'file:///'])
-def test_load_results(scheme, tmpdir):
-    data = MySchema(x=np.array([1]), y=np.array([2]))
-    path = str(tmpdir.join('out.h5'))
-    data.to_hdf(path)
-    url = "{:s}{:s}".format(scheme, path)
+    assert all([r is None for r in results])
+    return
 
-    results = load_results(url).compute()
-
-    assert results.x == data.x
-    assert results.y == data.y

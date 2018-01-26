@@ -157,7 +157,7 @@ class ReportGenerator(object):
                 'mid': [classifier.mid_tercile_diff_from_mean for classifier in self.classifiers],
                 'high': [classifier.high_tercile_diff_from_mean for classifier in self.classifiers]
             }),
-            'tags': json.dumps([classifier.metadata['tag'] for classifier
+            'tags': json.dumps([classifier.tag for classifier
                                 in self.classifiers])
         }
         if joint:
@@ -262,7 +262,7 @@ class ReportGenerator(object):
                     'mid': [classifier.mid_tercile_diff_from_mean for classifier in self.classifiers],
                     'high': [classifier.high_tercile_diff_from_mean for classifier in self.classifiers]
                 }),
-                'tags': json.dumps([classifier.metadata['tag'] for classifier
+                'tags': json.dumps([classifier.tag for classifier
                                     in self.classifiers]),
                 'serialpos': json.dumps({
                     'serialpos': list(range(1, 13)),
