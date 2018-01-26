@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
+cd /home1/zduey/ram_utils/
 conda env remove -n ramutils_test -y
 set -e
 echo "Creating python 3 environment"
 conda create -y -n ramutils_test python=3
 source activate ramutils_test
-conda install -y -c pennmem -c conda-forge --file=requirements.txt
+conda install -y -c pennmem -c conda-forge --file=/home1/zduey/ram_utils/requirements.txt
 
 echo "Pulling master branch from remote repository"
 git pull origin master
@@ -16,7 +17,7 @@ python -m pytest ramutils/ --cov=ramutils --cov-report html --html=report_36.htm
 set -e
 
 zip coverage.zip htmlcov/
-echo "Full test suite finished running" | mail -a coverage.zip -a report.html -s "Python 3.6 Test Results" zachduey@gmail.com
+echo "Full test suite finished running" | mail -a coverage.zip -a report_36.html -s "Python 3.6 Test Results" zachduey@gmail.com
 
 echo "Creating python 2.7 environment"
 set +e
@@ -24,7 +25,7 @@ conda env remove -n ramutils_test_27 -y
 set -e
 conda create -y -n ramutils_test_27 python=2.7
 source activate ramutils_test_27
-conda install -y -c pennmem -c conda-forge --file=requirements.txt
+conda install -y -c pennmem -c conda-forge --file=/home1/zduey/ram_utils/requirements.txt
 
 echo "Running full test suite on python 2.7"
 set +e
@@ -33,5 +34,5 @@ set -e
 
 # Zip the htmlcov/ folder and email
 zip coverage.zip htmlcov/
-echo "Full test suite finished running" | mail -a coverage.zip -a report.html -s "Python 2.7 Test Results" zachduey@gmail.com
+echo "Full test suite finished running" | mail -a coverage.zip -a report_27.html -s "Python 2.7 Test Results" zachduey@gmail.com
 
