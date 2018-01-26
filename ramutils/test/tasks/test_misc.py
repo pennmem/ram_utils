@@ -36,5 +36,15 @@ def test_build_report_from_cached_results():
     for f in output_files:
         os.remove(f)
 
+    # Check that non-existent data returns all None values
+    target_selection_table, classifier_summaries, session_summaries, \
+    math_summaries = load_existing_results('R1345D', 'FR1', [1], False,
+                                           datafile('input/report_db'),
+                                           datafile('')).compute()
+
+    results = [target_selection_table, classifier_summaries, session_summaries,
+               math_summaries]
+
+    assert all([r is None for r in results])
     return
 
