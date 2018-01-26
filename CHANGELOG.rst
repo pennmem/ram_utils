@@ -4,13 +4,23 @@ Changes
 Upcoming
 --------
 
-* Included pracitce lists in calculating PLI and ELI numbers (#102)
-* Added modal controllability to reporting (#103)
-* Updated saved reports to include session numbers to avoid naming conflicts
-  (#104)
-* Excluded first three lists from stim/nostim comparisons in reports (#105)
-* Updated command-line parsing to also perform common operations after parsing
-  arguments (#110)
+* store all underlying data necessary for building reports to facilitate quick reload #118
+
+Version 2.1.3
+-------------
+**2018-01-24**
+
+This is a minor release that includes a few bug fixes discovered when building reports for older subjects as well as a
+few minor enhancements. Summary of changes:
+
+* ramutils is now a conda package than can be installed with `conda install -c pennmem ramutils`
+* Include the practice list when calculating PLI and ELI.
+* Add modal controllability values to target selection table when data is available
+* Exclude the first three lists when assessing behavioral response to stim. This was done to bring the current reports
+  in line with how these values were reported in the legacy reports
+* Automatically detect localization and montage numbers based on the subject, experiment, and session information.
+  This still does not handle the case of montage changes from session to session within an experiment
+* Allow full test suite to be run from an arbitrary location
 
 
 Version 2.1.2
