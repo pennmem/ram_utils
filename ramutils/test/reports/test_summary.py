@@ -173,11 +173,6 @@ class TestFRSessionSummary:
         probs = np.random.random(len(events))
         cls.summary.populate(events, probs)
 
-    def test_no_probs_given(self, fr5_events):
-        summary = FRSessionSummary()
-        summary.populate(fr5_events)
-        assert all(summary.prob == -999)
-
     def test_num_lists(self):
         assert self.summary.num_lists == 25
 
