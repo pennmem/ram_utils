@@ -17,8 +17,8 @@ def test_make_parser():
     assert args.experiment == 'FR1'
 
 
-@pytest.mark.parametrize('invalidate', [True, False])
-def test_configure_caching(invalidate, tmpdir):
+@pytest.mark.parametrize('use_cached', [True, False])
+def test_configure_caching(use_cached, tmpdir):
     from ramutils.tasks import memory
 
     path = str(tmpdir)
@@ -34,12 +34,12 @@ def test_configure_caching(invalidate, tmpdir):
     assert len(os.listdir(path))
 
     # Re-configure, possibly clearing
-    RamArgumentParser._configure_caching(path, invalidate)
+    RamArgumentParser._configure_caching(path, use_cached)
 
-    if invalidate:
-        assert not len(os.listdir(path))
-    else:
+    if use_cached:
         assert len(os.listdir(path))
+    else:
+        assert not len(os.listdir(path))
 
 
 class TestExpConf:
