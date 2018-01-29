@@ -23,7 +23,7 @@ class RamArgumentParser(ArgumentParser):
         self.add_argument('--cachedir', default=default_cache_dir,
                           help='absolute path for caching dir')
         self.add_argument('--subject', '-s', required=True, type=str, help='subject ID')
-        self.add_argument('--use_cached', action='store_true',
+        self.add_argument('--use-cached', action='store_true',
                           help='allow cached results from previous run to be reused')
         self.add_argument('--experiment', '-x', required=True, type=str,
                           choices=allowed_experiments, help='experiment')
