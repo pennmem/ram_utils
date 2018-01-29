@@ -11,6 +11,8 @@ from ramutils.cli import make_parser, ValidationError
 from ramutils.constants import EXPERIMENTS
 from ramutils.log import get_logger, get_warning_accumulator
 from ramutils.utils import timer
+from ramutils.tasks import memory
+
 
 # Supported experiments
 experiments = (
@@ -168,6 +170,7 @@ def create_expconf(input_args=None):
                               localization=args.localization,
                               montage=args.montage,
                               default_surface_area=default_surface_area)
+        memory.clear() # clear cached intermediate results on successful build
 
     warnings = '\n' + warning_accumulator.format_all()
     if warnings is not None:
