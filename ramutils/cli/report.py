@@ -26,8 +26,8 @@ parser.add_argument('--excluded-contacts', '-E', nargs='+',
                     help='contacts to exclude from classifier')
 parser.add_argument('--joint-report', '-j', action='store_true', default=False,
                     help='include CatFR/FR for FR reports (default: off)')
-parser.add_argument('--use-cached', '-C', action="store_true", default=True,
-                    help='use previously generated data')
+parser.add_argument('--rerun', '-C', action="store_true", default=False,
+                    help='do not use previously generated output')
 parser.add_argument('--report_db_location',
                     help='location of report data database',
                     type=str, default="/scratch/report_database/")
@@ -85,7 +85,7 @@ def create_report(input_args=None):
             exp_params=exp_params,
             sessions=sessions,
             vispath=args.vispath,
-            use_cached=args.use_cached
+            rerun=args.rerun
         )
         logger.info("Wrote report to %s\n", path)
 
