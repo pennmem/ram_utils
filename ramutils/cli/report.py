@@ -16,6 +16,8 @@ from ramutils.montage import make_stim_params
 from ramutils.parameters import FilePaths, FRParameters
 from ramutils.pipelines.report import make_report
 from ramutils.utils import timer, is_stim_experiment
+from ramutils.tasks import memory
+
 
 parser = make_parser("Generate a report")
 parser.add_argument('--sessions', '-S', nargs='+',
@@ -26,8 +28,8 @@ parser.add_argument('--excluded-contacts', '-E', nargs='+',
                     help='contacts to exclude from classifier')
 parser.add_argument('--joint-report', '-j', action='store_true', default=False,
                     help='include CatFR/FR for FR reports (default: off)')
-parser.add_argument('--use-cached', '-C', action="store_true", default=True,
-                    help='use previously generated data')
+parser.add_argument('--rerun', '-C', action="store_true", default=False,
+                    help='do not use previously generated output')
 parser.add_argument('--report_db_location',
                     help='location of report data database',
                     type=str, default="/scratch/report_database/")
@@ -85,9 +87,10 @@ def create_report(input_args=None):
             exp_params=exp_params,
             sessions=sessions,
             vispath=args.vispath,
-            use_cached=args.use_cached
+            rerun=args.rerun
         )
         logger.info("Wrote report to %s\n", path)
+        memory.clear() # remove cached intermediate results if build succeeds
 
     warnings = '\n' + warning_accumulator.format_all()
     if warnings is not None:

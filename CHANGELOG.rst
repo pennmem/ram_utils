@@ -5,6 +5,8 @@ Upcoming
 --------
 
 * store all underlying data necessary for building reports to facilitate quick reload #118
+* do not use cached intermediate results be default (force-rerun)
+* clear memory on successful completion of report build
 
 Version 2.1.3
 -------------

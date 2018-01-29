@@ -17,8 +17,8 @@ def test_make_parser():
     assert args.experiment == 'FR1'
 
 
-@pytest.mark.parametrize('invalidate', [True, False])
-def test_configure_caching(invalidate, tmpdir):
+@pytest.mark.parametrize('use_cached', [True, False])
+def test_configure_caching(use_cached, tmpdir):
     from ramutils.tasks import memory
 
     path = str(tmpdir)
@@ -34,12 +34,12 @@ def test_configure_caching(invalidate, tmpdir):
     assert len(os.listdir(path))
 
     # Re-configure, possibly clearing
-    RamArgumentParser._configure_caching(path, invalidate)
+    RamArgumentParser._configure_caching(path, use_cached)
 
-    if invalidate:
-        assert not len(os.listdir(path))
-    else:
+    if use_cached:
         assert len(os.listdir(path))
+    else:
+        assert not len(os.listdir(path))
 
 
 class TestExpConf:
@@ -139,7 +139,7 @@ class TestCreateReports:
     @pytest.mark.rhino
     @pytest.mark.slow
     @pytest.mark.output
-    @pytest.mark.parametrize('use_cached', [False, True])
+    @pytest.mark.parametrize('rerun', [True, False])
     @pytest.mark.parametrize('subject, experiment, sessions, joint', [
         ('R1001P', 'FR1', None, False),
         ('R1354E', 'FR1', [0], False),
@@ -151,7 +151,7 @@ class TestCreateReports:
         ('R1374T', 'CatFR1', None, True),
     ])
     def test_create_open_loop_report(self, subject, experiment, sessions,
-                                     joint, use_cached, rhino_root,
+                                     joint, rerun, rhino_root,
                                      output_dest):
         args = [
             '--root', rhino_root,
@@ -161,8 +161,8 @@ class TestCreateReports:
             '--report_db_location', output_dest
         ]
 
-        if use_cached is False:
-            args += ['-C']
+        if rerun is True:
+            args += ['--rerun']
 
         if joint:
             args += ['-j']
@@ -175,14 +175,14 @@ class TestCreateReports:
 
     @pytest.mark.rhino
     @pytest.mark.output
-    @pytest.mark.parametrize('use_cached', [False, True])
+    @pytest.mark.parametrize('rerun', [True, False])
     @pytest.mark.parametrize('subject, experiment, sessions', [
         ('R1374T', 'CatFR5', [0]),
         ('R1345D', 'FR5', [0]),
         ('R1374T', 'PS4_CatFR5', None)
     ])
     def test_create_stim_session_report(self, subject, experiment, sessions,
-                                        use_cached, rhino_root, output_dest):
+                                        rerun, rhino_root, output_dest):
 
         args = [
             '--root', rhino_root,
@@ -192,8 +192,8 @@ class TestCreateReports:
             '--report_db_location', output_dest
         ]
 
-        if use_cached is False:
-            args += ['-C']
+        if rerun is True:
+            args += ['--rerun']
 
         if sessions is not None:
             args += ['-S'] + sessions

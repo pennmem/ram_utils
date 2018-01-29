@@ -7,7 +7,7 @@ from ramutils.tasks import *
 
 def make_report(subject, experiment, paths, joint_report=False,
                 retrain=False, stim_params=None, exp_params=None,
-                sessions=None, vispath=None, use_cached=True):
+                sessions=None, vispath=None, rerun=False):
     """Run a report.
 
     Parameters
@@ -31,8 +31,8 @@ def make_report(subject, experiment, paths, joint_report=False,
         When not given, all available sessions are used for reports.
     vispath : str
         Filename for task graph visualization.
-    use_cached: bool
-        If True, attempt to load data from long-term storage. If any
+    rerun: bool
+        If True, do not attempt to load data from long-term storage. If any
         necessary data is not found, everything will be rerun
 
     Returns
@@ -57,7 +57,7 @@ def make_report(subject, experiment, paths, joint_report=False,
 
     # PS runs so quickly and has a much more nested event structure, so it is
     # better to always just re-run
-    if use_cached and 'PS' not in experiment:
+    if not rerun and 'PS' not in experiment:
         target_selection_table, classifier_evaluation_results, \
         session_summaries, math_summaries = load_existing_results(subject,
                                                                   experiment,
