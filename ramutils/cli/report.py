@@ -16,6 +16,8 @@ from ramutils.montage import make_stim_params
 from ramutils.parameters import FilePaths, FRParameters
 from ramutils.pipelines.report import make_report
 from ramutils.utils import timer, is_stim_experiment
+from ramutils.tasks import memory
+
 
 parser = make_parser("Generate a report")
 parser.add_argument('--sessions', '-S', nargs='+',
@@ -88,6 +90,7 @@ def create_report(input_args=None):
             rerun=args.rerun
         )
         logger.info("Wrote report to %s\n", path)
+        memory.clear() # remove cached intermediate results if build succeeds
 
     warnings = '\n' + warning_accumulator.format_all()
     if warnings is not None:
