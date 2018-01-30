@@ -175,6 +175,9 @@ def make_report(subject, experiment, paths, joint_report=False,
 
         session_summaries = summarize_nonstim_sessions(all_events,
                                                        final_task_events,
+                                                       ec_pairs,
+                                                       excluded_pairs,
+                                                       powers,
                                                        joint=joint_report,
                                                        repetition_ratio_dict=repetition_ratio_dict)
         math_summaries = summarize_math(all_events, joint=joint_report)
@@ -242,7 +245,8 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                           **kwargs)
 
         session_summaries = summarize_stim_sessions(
-            all_events, final_task_events, stim_data,
+            all_events, final_task_events, stim_data, ec_pairs,
+            excluded_pairs, powers,
             post_hoc_results['encoding_classifier_summaries'],
             post_hoc_results['post_stim_predicted_probs'],
             pairs_metadata_table)
