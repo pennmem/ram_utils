@@ -120,7 +120,7 @@ class TestExpConf:
             "scratch/system3_configs/ODIN_configs/{subject:s}/{subject:s}_{postfix:s}.csv".format(
                 subject=subject, postfix=postfix),
             "--target-amplitudes", "0.5", "0.75",
-            "--root", rhino_root, "--dest", output_dest, "--force-rerun"
+            "--root", rhino_root, "--dest", output_dest,
         ]
 
         args += ["--anodes"] + anodes
