@@ -64,7 +64,7 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                                   sessions,
                                                                   stim_report,
                                                                   paths.data_db,
-                                                                  rootdir=paths.root).compute()
+                                                                  rootdir=paths.root)
 
         # Check if only None values were returned. Processing will continue
         # undeterred
@@ -100,7 +100,7 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                              paths,
                                                              joint_report,
                                                              sessions=sessions,
-                                                             **kwargs)
+                                                             **kwargs).compute()
 
     target_selection_table = pd.DataFrame(columns=['type', 'contact0',
                                                    'contact1', 'label',

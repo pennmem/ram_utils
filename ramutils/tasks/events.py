@@ -156,7 +156,8 @@ def build_test_data(subject, experiment, paths, joint_report, sessions=None,
     # Clean all events after using them to build task events because cleaning
     #  will remove fields that have nested recarrays to make serialization of
     #  these events possible downstream
-    all_events = clean_events(all_events, all_events=True)
+    if series_num != '1':
+        all_events = clean_events(all_events, all_events=True)
 
     return all_events, task_events, stim_params
 
