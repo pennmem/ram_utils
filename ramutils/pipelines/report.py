@@ -64,7 +64,7 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                                   sessions,
                                                                   stim_report,
                                                                   paths.data_db,
-                                                                  rootdir=paths.root)
+                                                                  rootdir=paths.root).compute()
 
         # Check if only None values were returned. Processing will continue
         # undeterred
