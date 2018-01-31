@@ -84,6 +84,7 @@ class ExperimentParameters(Schema):
     freqs = Array(value=np.logspace(np.log10(6), np.log10(180), 8),
                   desc='frequencies to compute powers for')
     hfa_cutoff = Int(65, desc="Lowers frequency that will be considered a 'high frequency'")
+    trigger_freq = Int(110, desc="Frequency to use for PS5 pseudo closed-loop experiment")
 
     log_powers = Bool(True)  # FIXME: do we really need this?
 
@@ -151,4 +152,6 @@ class PALParameters(FRParameters):
     encoding_multiplier = Float(7.2, desc="weighting factor for encoding "
                                           "samples in PAL")
     pal_multiplier = Float(1.93, desc="weighting factor for PAL samples")
+
+
 
