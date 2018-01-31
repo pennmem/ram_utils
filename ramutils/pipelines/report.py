@@ -100,7 +100,7 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                              paths,
                                                              joint_report,
                                                              sessions=sessions,
-                                                             **kwargs)
+                                                             **kwargs).compute()
 
     target_selection_table = pd.DataFrame(columns=['type', 'contact0',
                                                    'contact1', 'label',

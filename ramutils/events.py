@@ -124,12 +124,6 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
     This function should be called on an experiment by experiment basis and
     should not be used to clean cross-experiment datasets
     """
-    experiments = extract_experiment_from_events(events)
-    if len(experiments) > 1:
-        raise RuntimeError('Event cleaning can only happen on single-experiment'
-                           ' datasets')
-    experiment = experiments[0]
-
     if all_events:
         all_fields = list(events.dtype.names)
         all_fields.remove('stim_params')
@@ -137,6 +131,11 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
         all_events = events[all_fields].copy()
         return all_events
 
+    experiments = extract_experiment_from_events(events)
+    if len(experiments) > 1:
+        raise RuntimeError('Event cleaning can only happen on single-experiment'
+                           ' datasets')
+    experiment = experiments[0]
     events = remove_negative_offsets(events)
     events = remove_practice_lists(events)
     events = remove_incomplete_lists(events)
