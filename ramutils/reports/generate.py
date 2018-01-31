@@ -115,7 +115,7 @@ class ReportGenerator(object):
 
     def _make_sme_table(self):
         """ Create data for the SME table for record-only experiments. """
-        sme_table = (self.sme_table.sort_values(by='p_value',
+        sme_table = (self.sme_table.sort_values(by='hfa_p_value',
                                                 ascending=True)
                          .to_dict(orient='records'))
         return sme_table
