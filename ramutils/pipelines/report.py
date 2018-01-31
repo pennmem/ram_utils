@@ -48,6 +48,9 @@ def make_report(subject, experiment, paths, joint_report=False,
     """
     kwargs = exp_params.to_dict()
 
+    # TODO: PS is so different that there should probably be something that
+    # just routes everything to the appropriate alternative pipeline from here
+
     # Lower case 'c' is expected for reading events. The reader should probably
     # just be case insensitive
     if 'Cat' in experiment:
@@ -104,7 +107,8 @@ def make_report(subject, experiment, paths, joint_report=False,
 
     target_selection_table = pd.DataFrame(columns=['type', 'contact0',
                                                    'contact1', 'label',
-                                                   'p_value', 'tstat',
+                                                   'hfa_p_value', 'hfa_tstat',
+                                                   '110_p_value', '110_tstat',
                                                    'mni_x', 'mni_y', 'mni_z',
                                                    'controllability'])
     repetition_ratio_dict = {}
@@ -168,10 +172,10 @@ def make_report(subject, experiment, paths, joint_report=False,
             final_encoding_task_events, kwargs['n_perm'],
             tag='Encoding', **kwargs)
 
-        # TODO: Add distanced-based ranking of electrodes to prior stim results
         target_selection_table = create_target_selection_table(
             pairs_metadata_table, powers, final_task_events, kwargs['freqs'],
-            hfa_cutoff=kwargs['hfa_cutoff'], root=paths.root)
+            hfa_cutoff=kwargs['hfa_cutoff'], trigger_freq=kwargs['trigger_freq'],
+            root=paths.root)
 
         session_summaries = summarize_nonstim_sessions(all_events,
                                                        final_task_events,
@@ -257,6 +261,16 @@ def make_report(subject, experiment, paths, joint_report=False,
     elif stim_report and 'PS' in experiment:
         ps_events = build_ps_data(subject, experiment, 'ps4_events',
                                   sessions, paths.root)
+
+        if experiment == 'PS5':
+            # PS5-specific processing, i.e. the pseudo-classifier
+            # identify the triggering electrode from the session-specific config
+            # file
+            # calculate normalized powers at "trigger" electrode
+            # combine with events to determine which items were actually
+            # stimulated (talk to Leon)
+            pass
+
         session_summaries = summarize_ps_sessions(ps_events)
         math_summaries = [] # No math summaries for PS4
         classifier_evaluation_results = []
