@@ -115,12 +115,14 @@ def compute_normalized_powers(events, **kwargs):
 
 @task()
 def create_target_selection_table(pairs_metadata_table, normalized_powers,
-                                  events, frequencies, hfa_cutoff=65, root="/"):
+                                  events, frequencies, hfa_cutoff=65,
+                                  trigger_freq=110, root="/"):
     delta_hfa_table = calculate_delta_hfa_table(pairs_metadata_table,
                                                 normalized_powers,
                                                 events,
                                                 frequencies,
-                                                hfa_cutoff=hfa_cutoff)
+                                                hfa_cutoff=hfa_cutoff,
+                                                trigger_freq=trigger_freq)
 
     subject = extract_subject(events)
     connectivity_matrix = load_connectivity_matrix(subject, rhino_root=root)

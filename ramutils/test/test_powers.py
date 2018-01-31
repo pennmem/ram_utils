@@ -137,13 +137,14 @@ def test_calculate_delta_hfa_table_regression(events, powers, exp_table,
     config_pairs = pd.read_csv(datafile('/montage/R1354E_montage_metadata.csv'),
                                index_col=0)
     hfa_table = calculate_delta_hfa_table(config_pairs, powers, events,
-                                          parameters['freqs'])
+                                          parameters['freqs'],
+                                          parameters['trigger_freq'])
     old_hfa_table = pd.read_csv(datafile('/powers/' + exp_table))
 
     assert np.allclose(old_hfa_table['t_stat'].values,
-                       hfa_table['t_stat'].values)
+                       hfa_table['hfa_t_stat'].values)
     assert np.allclose(old_hfa_table['p_value'].values,
-                       hfa_table['p_value'].values)
+                       hfa_table['hfa_p_value'].values)
 
     return
 

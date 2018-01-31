@@ -272,7 +272,7 @@ def reshape_powers_to_2d(powers):
 
 
 def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events,
-                              frequencies, hfa_cutoff=65):
+                              frequencies, hfa_cutoff=65, trigger_freq=110):
     """
         Calculate tstats and pvalues from a ttest comparing HFA activity of
         recalled versus non-recalled items
@@ -291,11 +291,36 @@ def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events,
     tstats, pvals = ttest_ind(recalled_pow_mat, non_recalled_pow_mat, axis=0)
     sig_mask, pvals, _ , _ = multipletests(pvals, method='fdr_bh')
 
-    pairs_metadata_table['t_stat'] = tstats
-    pairs_metadata_table['p_value'] = pvals
+    pairs_metadata_table['hfa_t_stat'] = tstats
+    pairs_metadata_table['hfa_p_value'] = pvals
+
+    # Repeat for 110hz. Actual frequency is a decimal, so convert to int when
+    #  checking for equality
+    trigger_freq_mask = [True if int(freq) == trigger_freq else False for
+                         freq in frequencies]
+    single_freq_powers = powers_3d[:, :, trigger_freq_mask]
+    single_freq_powers = np.nanmean(single_freq_powers, axis=-1)
+
+    recalled_single_freq_powers = single_freq_powers[recall_mask, :]
+    non_recalled_single_freq_powers = single_freq_powers[~recall_mask, :]
+
+    tstats, pvals = ttest_ind(recalled_single_freq_powers,
+                              non_recalled_single_freq_powers, axis=0)
+    sig_mask, pvals, _ , _ = multipletests(pvals, method='fdr_bh')
+    pairs_metadata_table['110_t_stat'] = tstats
+    pairs_metadata_table['110_p_value'] = pvals
 
     # Pairs that do not have a label do not need to have the stats displayed
     pairs_metadata_table = pairs_metadata_table.dropna(subset=['label'])
 
     return pairs_metadata_table
+
+
+def calculate_sme_classifier_powers(pairs_metadata_table, events, frequency,
+                                    triggering_electrode):
+    # compute_single_session powers with normalize == False and passing in
+    # the specific channel that is desired
+    # This should return a vector of length n_events, which can then be added
+    # to a dataframe of the events as a single column
+    return
 
