@@ -68,11 +68,11 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
     final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
 
     # Special case handling of no-classifier tasks
-    no_classifier_experiments = [
+    no_classifier_experiments = EXPERIMENTS['record_only'] + [
         'AmplitudeDetermination',
         'PS5_FR',
         'PS5_CatFR',
-    ] + EXPERIMENTS['record_only']
+    ]
     if experiment in no_classifier_experiments:
         container = None
         config_path = generate_ramulator_config(subject=subject,

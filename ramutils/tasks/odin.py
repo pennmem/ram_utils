@@ -210,7 +210,8 @@ def _make_experiment_specs_section(experiment):
 
 def _make_ramulator_config_json(subject, experiment, electrode_config_file,
                                 stim_params, classifier_file=None,
-                                classifier_version=None, extended_blanking=True):
+                                classifier_version=None, extended_blanking=True,
+                                trigger_pairs=None):
     """Create the Ramulator ``experiment_config.json`` file.
 
     Parameters
@@ -222,6 +223,7 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
     classifier_file : str
     classifier_version : str
     extended_blanking : bool
+    trigger_pairs : List[str] or None
 
     Returns
     -------
@@ -243,7 +245,8 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
                 _make_experiment_specific_data_section(experiment,
                                                        stim_params,
                                                        classifier_file,
-                                                       classifier_version),
+                                                       classifier_version,
+                                                       trigger_pairs),
             'experiment_specs': _make_experiment_specs_section(experiment),
             'artifact_detection': {
                 "allow_artifact_detection": True,
@@ -358,6 +361,7 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
         subject, experiment, os.path.basename(ec_prefix + '.bin'), stim_dict,
         os.path.basename(classifier_path), CLASSIFIER_VERSION,
         extended_blanking=extended_blanking,
+        trigger_pairs=trigger_pairs,
     )
 
     with open(os.path.join(config_dir_root, 'experiment_config.json'), 'w') as f:
