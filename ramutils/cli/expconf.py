@@ -37,7 +37,7 @@ parser.add_argument('--max-amplitudes', nargs='+', type=float,
 parser.add_argument('--target-amplitudes', '-t', type=float, nargs='+',
                     help='target stim amplitudes')
 parser.add_argument('--trigger-pairs', nargs='+',
-                    help='trigger electrode pairs (e.g., LA1_LA2)')
+                    help='underscore separated trigger electrode pairs (e.g., LA1_LA2)')
 parser.add_argument('--no-extended-blanking', action='store_true',
                     help='disable extended blanking')
 
@@ -66,7 +66,7 @@ def validate_stim_settings(args):
         if not len(args.anodes) == len(args.cathodes):
             raise ValidationError("Number of anodes doesn't match number of cathodes")
 
-        if args.experiment != "AmplitudeDetermination" and 'PS4' not in args.experiment:
+        if args.experiment != "AmplitudeDetermination" and not args.experiment.startswith('PS'):
             if args.target_amplitudes is None:
                 raise RuntimeError("--target-amplitudes is required")
             valid = len(args.anodes) == len(args.target_amplitudes)
@@ -178,7 +178,8 @@ def create_expconf(input_args=None):
                               extended_blanking=(not args.no_extended_blanking),
                               localization=args.localization,
                               montage=args.montage,
-                              default_surface_area=default_surface_area)
+                              default_surface_area=default_surface_area,
+                              trigger_pairs=args.trigger_pairs)
         memory.clear()  # clear cached intermediate results on successful build
 
     warnings = '\n' + warning_accumulator.format_all()
@@ -189,13 +190,22 @@ def create_expconf(input_args=None):
 if __name__ == "__main__":
     # create_expconf()
 
-    args = ['--root', '~/mnt/rhino', '-d', 'scratch/depalati', '--force-rerun']
+    args = ['--root', '~/mnt/rhino', '-d', 'scratch/depalati']
+
+    # create_expconf(args + [
+    #     '-s', 'R1383J', '-x', 'FR5',
+    #     '--anodes', 'LB7',
+    #     '--cathodes', 'LB8',
+    #     '--target-amplitudes', '0.5'
+    # ])
 
     create_expconf(args + [
-        '-s', 'R1383J', '-x', 'FR5',
-        '--anodes', 'LB7',
-        '--cathodes', 'LB8',
-        '--target-amplitudes', '0.5'
+        '-s', 'R1378T', '-x', 'PS5_FR',
+        '--anodes', 'LC8',
+        '--cathodes', 'LC9',
+        '--min-amplitudes', '0.25',
+        '--max-amplitudes', '0.75',
+        '--trigger-pairs', 'LX15_LX16', 'LT8_LT9',
     ])
 
     # create_expconf(args + [

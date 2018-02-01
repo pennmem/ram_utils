@@ -67,8 +67,13 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
     used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
     final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
 
-    # Special case handling of amplitude determination and record-only tasks
-    if experiment in ["AmplitudeDetermination"] + EXPERIMENTS['record_only']:
+    # Special case handling of no-classifier tasks
+    no_classifier_experiments = [
+        'AmplitudeDetermination',
+        'PS5_FR',
+        'PS5_CatFR',
+    ] + EXPERIMENTS['record_only']
+    if experiment in no_classifier_experiments:
         container = None
         config_path = generate_ramulator_config(subject=subject,
                                                 experiment=experiment,
@@ -77,7 +82,8 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
                                                 paths=paths,
                                                 pairs=ec_pairs,
                                                 excluded_pairs=excluded_pairs,
-                                                extended_blanking=extended_blanking)
+                                                extended_blanking=extended_blanking,
+                                                trigger_pairs=trigger_pairs)
         return config_path.compute()
 
     if ("FR" not in experiment) and ("PAL" not in experiment):
