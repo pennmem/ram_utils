@@ -16,9 +16,9 @@ from bptools.odin import ElectrodeConfig
 from classiflib import ClassifierContainer
 
 from ramutils.constants import EXPERIMENTS
+from ramutils.exc import MissingArgumentsError
 from ramutils.log import get_logger
 from ramutils.tasks import task
-from ramutils.utils import reindent_json, bytes_to_str
 
 __all__ = [
     'generate_electrode_config',
@@ -105,7 +105,8 @@ def generate_electrode_config(subject, paths, anodes=None, cathodes=None,
 
 def _make_experiment_specific_data_section(experiment, stim_params,
                                            classifier_file,
-                                           classifier_version=CLASSIFIER_VERSION):
+                                           classifier_version=CLASSIFIER_VERSION,
+                                           trigger_pairs=None):
     """Return a dict containing the config section ``experiment_specific_data``.
 
     Parameters
@@ -114,6 +115,7 @@ def _make_experiment_specific_data_section(experiment, stim_params,
     stim_params : dict
     classifier_file : str
     classifier_version : str
+    trigger_pairs : List[str] or None
 
     Returns
     -------
@@ -129,7 +131,7 @@ def _make_experiment_specific_data_section(experiment, stim_params,
             "stim_frequency": 200
         }
 
-        if 'PS4' in experiment or experiment == 'AmplitudeDetermination':
+        if experiment.startswith('PS') or experiment == 'AmplitudeDetermination':
             stub.update({
                 'min_stim_amplitude': params[key]['min_stim_amplitude'],
                 'max_stim_amplitude': params[key]['max_stim_amplitude']
@@ -155,6 +157,10 @@ def _make_experiment_specific_data_section(experiment, stim_params,
         label: make_stim_channel_section(stim_params, label)
         for label in stim_params
     }
+
+    # Add trigger section for PS5
+    if experiment.startswith('PS5'):
+        esd['trigger'] = {'pairs': trigger_pairs}
 
     return esd
 
@@ -239,8 +245,6 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
                                                        classifier_file,
                                                        classifier_version),
             'experiment_specs': _make_experiment_specs_section(experiment),
-
-            # FIXME: are these the right defaults?
             'artifact_detection': {
                 "allow_artifact_detection": True,
                 "artifact_detection_number_of_stims_per_channel": 15,
@@ -274,7 +278,8 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
 @task(cache=False)
 def generate_ramulator_config(subject, experiment, container, stim_params,
                               paths, pairs=None, excluded_pairs=None,
-                              exp_params=None, extended_blanking=True):
+                              exp_params=None, extended_blanking=True,
+                              trigger_pairs=None):
     """Create configuration files for Ramulator.
 
     In hardware bipolar mode, the neurorad pipeline generates a ``pairs.json``
@@ -299,6 +304,8 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
         redundant with some data stored in the ``container`` object.
     extended_blanking : bool
         Whether or not to enable the ENS extended blanking (default: True).
+    trigger_pairs : List[str] or None
+        Pairs to be used for triggering stim in PS5.
 
     Returns
     -------
@@ -306,10 +313,16 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
         Path to generated configuration zip file
 
     """
-    no_classifier_experiments = ['AmplitudeDetermination'] + EXPERIMENTS['record_only']
+    no_classifier_experiments = (
+        ['AmplitudeDetermination'] + EXPERIMENTS['record_only'] +
+        ['PS5_FR', 'PS5_CatFR']
+    )
 
     if container is None and experiment not in no_classifier_experiments:
-        raise RuntimeError("container must not be None")
+        raise MissingArgumentsError("container must not be None")
+
+    if experiment.startswith('PS5') and trigger_pairs is None:
+        raise MissingArgumentsError("trigger_pairs needed for PS5")
 
     subject = subject.split('_')[0]
 
