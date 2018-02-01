@@ -141,6 +141,13 @@ def _make_experiment_specific_data_section(experiment, stim_params,
                 'stim_amplitude': params[key]['stim_amplitude']
             })
 
+        # We also need num_amplitudes for PS5 experiments. Note that it is
+        # fixed at 3 for now, but may become a command-line option later.
+        if experiment.startswith('PS5'):
+            stub.update({
+                'num_amplitudes': 3,
+            })
+
         return stub
 
     esd = {
