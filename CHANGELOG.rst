@@ -7,6 +7,8 @@ Upcoming
 * store all underlying data necessary for building reports to facilitate quick reload #118
 * do not use cached intermediate results be default (force-rerun)
 * clear memory on successful completion of report build
+* allow stim parameters to have null fields to accommodate missing region information (addresses issue #127)
+* updated logic for selecting region information for bipolar pairs
 
 Version 2.1.3
 -------------
