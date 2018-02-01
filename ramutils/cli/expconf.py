@@ -22,15 +22,24 @@ experiments = (
 )
 
 parser = make_parser("Generate experiment configs for Ramulator", experiments)
-parser.add_argument('--localization', '-l', default=0, type=int, help='localization number (default: 0)')
-parser.add_argument('--montage', '-m', default=0, type=int, help='montage number (default: 0)')
-parser.add_argument('--electrode-config-file', '-e', type=str, help='path to existing electrode config CSV file')
+parser.add_argument('--localization', '-l', default=0, type=int,
+                    help='localization number (default: 0)')
+parser.add_argument('--montage', '-m', default=0, type=int,
+                    help='montage number (default: 0)')
+parser.add_argument('--electrode-config-file', '-e', type=str,
+                    help='path to existing electrode config CSV file')
 parser.add_argument('--anodes', '-a', nargs='+', help='stim anode labels')
 parser.add_argument('--cathodes', '-c', nargs='+', help='stim cathode labels')
-parser.add_argument('--min-amplitudes', nargs='+', type=float, help='minimum stim amplitudes')
-parser.add_argument('--max-amplitudes', nargs='+', type=float, help='maximum stim amplitudes')
-parser.add_argument('--target-amplitudes', '-t', type=float, nargs='+', help='target stim amplitudes')
-parser.add_argument('--no-extended-blanking', action='store_true', help='disable extended blanking')
+parser.add_argument('--min-amplitudes', nargs='+', type=float,
+                    help='minimum stim amplitudes')
+parser.add_argument('--max-amplitudes', nargs='+', type=float,
+                    help='maximum stim amplitudes')
+parser.add_argument('--target-amplitudes', '-t', type=float, nargs='+',
+                    help='target stim amplitudes')
+parser.add_argument('--trigger-pairs', nargs='+',
+                    help='trigger electrode pairs (e.g., LA1_LA2)')
+parser.add_argument('--no-extended-blanking', action='store_true',
+                    help='disable extended blanking')
 
 # This is currently fixed so there is no need for an option
 # parser.add_argument('--pulse-frequencies', '-f', type=float, nargs='+',
@@ -40,7 +49,7 @@ parser.add_argument('--no-extended-blanking', action='store_true', help='disable
 # at the --area-file option or use a default value
 area_group = parser.add_mutually_exclusive_group(required=False)
 area_group.add_argument('--default-area', '-A', type=float,
-                        help='default surface area to use for all contacts (default: 0.001)')
+                        help='surface area to use for all contacts (default: 0.001)')
 area_group.add_argument('--area-file', type=str,
                         help='path to area.txt file relative to root')
 
@@ -170,7 +179,7 @@ def create_expconf(input_args=None):
                               localization=args.localization,
                               montage=args.montage,
                               default_surface_area=default_surface_area)
-        memory.clear() # clear cached intermediate results on successful build
+        memory.clear()  # clear cached intermediate results on successful build
 
     warnings = '\n' + warning_accumulator.format_all()
     if warnings is not None:

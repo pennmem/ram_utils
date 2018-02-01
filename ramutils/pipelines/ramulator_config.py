@@ -1,12 +1,13 @@
 from ramutils.constants import EXPERIMENTS
-from ramutils.exc import MultistimNotAllowedException
+from ramutils.exc import MultistimNotAllowedException, MissingArgumentsError
 from ramutils.montage import generate_pairs_from_electrode_config
 from ramutils.tasks import *
 
 
 def make_ramulator_config(subject, experiment, paths, stim_params,
                           exp_params=None, vispath=None, extended_blanking=True,
-                          localization=0, montage=0, default_surface_area=0.001):
+                          localization=0, montage=0, default_surface_area=0.001,
+                          trigger_pairs=None):
     """ Generate configuration files for a Ramulator experiment
 
     Parameters
@@ -31,6 +32,8 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
     default_surface_area : float
         Default surface area to set all electrodes to in mm^2. Only used if no
         area file can be found.
+    trigger_pairs : List[str] or None
+        Pairs to use for triggering stim in PS5 experiments.
 
     Returns
     -------
@@ -39,6 +42,10 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
     """
     if len(stim_params) > 1 and experiment not in EXPERIMENTS['multistim']:
         raise MultistimNotAllowedException
+
+    if trigger_pairs is None:
+        if experiment.startswith('PS5'):
+            raise MissingArgumentsError("PS5 requires trigger_pairs")
 
     anodes = [c.anode_label for c in stim_params]
     cathodes = [c.cathode_label for c in stim_params]

@@ -8,6 +8,7 @@ Upcoming
 * do not use cached intermediate results be default (force-rerun)
 * clear memory on successful completion of report build
 
+
 Version 2.1.3
 -------------
 **2018-01-24**
