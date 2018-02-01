@@ -150,13 +150,17 @@ def _make_experiment_specific_data_section(experiment, stim_params,
 
         return stub
 
-    esd = {
-        "allow_classifier_generalization": True,
-        "classifier_file": "config_files/{}".format(classifier_file),
-        "classifier_version": classifier_version,
-        "random_stim_prob": False,
-        "save_debug_output": True
-    }
+    # Add top-level stuff for experiments that require it
+    if not experiment.startswith('PS5'):
+        esd = {
+            "allow_classifier_generalization": True,
+            "classifier_file": "config_files/{}".format(classifier_file),
+            "classifier_version": classifier_version,
+            "random_stim_prob": False,
+            "save_debug_output": True
+        }
+    else:
+        esd = {}
 
     # Why oh why must everything be a special snowflake?
     key = 'stim_electrode_pairs' if experiment == 'AmplitudeDetermination' else 'stim_channels'
