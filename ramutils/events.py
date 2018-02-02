@@ -20,7 +20,7 @@ from itertools import groupby
 from numpy.lib.recfunctions import rename_fields
 
 from ptsa.data.readers import BaseEventReader, JsonIndexReader, EEGReader
-from ramutils.utils import extract_subject_montage, get_completed_sessions
+from ramutils.utils import extract_subject_montage, get_completed_sessions, extract_experiment_series
 from ramutils.exc import *
 
 
@@ -124,14 +124,22 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
     This function should be called on an experiment by experiment basis and
     should not be used to clean cross-experiment datasets
     """
+    experiments = extract_experiment_from_events(events)
+    series_num = extract_experiment_series(experiments[0])
+
     if all_events:
         all_fields = list(events.dtype.names)
-        all_fields.remove('stim_params')
-        all_fields.remove('test')
+        if (series_num != "1") and (series_num is not None):
+            if "stim_params" in all_fields:
+                all_fields.remove('stim_params')
+        if "test" in all_fields:
+            all_fields.remove('test')
         all_events = events[all_fields].copy()
         return all_events
 
-    experiments = extract_experiment_from_events(events)
+    # If you clean 'all_events' for joint reports, there will be multiple
+    # experiments, so only check this after determining if you are cleaning
+    # combined events
     if len(experiments) > 1:
         raise RuntimeError('Event cleaning can only happen on single-experiment'
                            ' datasets')

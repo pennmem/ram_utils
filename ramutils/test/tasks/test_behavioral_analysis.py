@@ -17,8 +17,9 @@ datafile = functools.partial(resource_filename,
 def test_estimate_effects_of_stim():
     sample_df = pd.read_csv(datafile(
         "/summaries/sample_stim_session_summary.csv"))
+    sample_recarray = sample_df.to_records(index=False)
     sample_summary = FRStimSessionSummary()
-    sample_summary.populate_from_dataframe(sample_df)
+    sample_summary.populate(sample_recarray)
     sample_summaries = [sample_summary]
     result_traces = estimate_effects_of_stim('R1374T', 'catFR5',
                                              sample_summaries).compute()
