@@ -192,12 +192,16 @@ def extract_experiment_series(experiment):
     Returns
     -------
     str
-        Series number in string format (to accommodate PS2.1)
+        Series number in string format (to accommodate PS2.1). If experiment
+        was invalid, None is returned
 
     """
     experiment = str(experiment)
     if experiment == 'PS2.1':
         return '2.1'
+
+    if experiment == '':
+        return None
 
     # Assume series is the last value
     return experiment[-1]
