@@ -200,6 +200,7 @@ def extract_experiment_series(experiment):
     if experiment == 'PS2.1':
         return '2.1'
 
+    # This can happen if the experiment is extracted from an empty recarray
     if experiment == '':
         return None
 
