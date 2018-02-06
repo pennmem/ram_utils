@@ -6,6 +6,8 @@ import os
 from timeit import default_timer
 import numpy as np
 import h5py
+import tempfile
+import shutil
 
 from ramutils.log import get_logger
 from ptsa.data.readers import JsonIndexReader
@@ -190,12 +192,17 @@ def extract_experiment_series(experiment):
     Returns
     -------
     str
-        Series number in string format (to accommodate PS2.1)
+        Series number in string format (to accommodate PS2.1). If experiment
+        was invalid, None is returned
 
     """
     experiment = str(experiment)
     if experiment == 'PS2.1':
         return '2.1'
+
+    # This can happen if the experiment is extracted from an empty recarray
+    if experiment == '':
+        return None
 
     # Assume series is the last value
     return experiment[-1]
@@ -295,3 +302,15 @@ def get_completed_sessions(subject, experiment, rootdir='/'):
                                             experiment=experiment)
 
     return sessions
+
+  
+@contextmanager
+def tempdir():
+    """Create a temporary directory and remove its contents upon completion."""
+    d = tempfile.mkdtemp()
+    yield d
+    try:
+        shutil.rmtree(d)
+    except:
+        pass
+

@@ -23,7 +23,8 @@ class RamArgumentParser(ArgumentParser):
         self.add_argument('--cachedir', default=default_cache_dir,
                           help='absolute path for caching dir')
         self.add_argument('--subject', '-s', required=True, type=str, help='subject ID')
-        self.add_argument('--force-rerun', action='store_true', help='force re-running all tasks')
+        self.add_argument('--use-cached', action='store_true',
+                          help='allow cached results from previous run to be reused')
         self.add_argument('--experiment', '-x', required=True, type=str,
                           choices=allowed_experiments, help='experiment')
         self.add_argument('--vispath', default=None, type=str,
@@ -42,15 +43,15 @@ class RamArgumentParser(ArgumentParser):
                 pass
 
     @staticmethod
-    def _configure_caching(cachedir, invalidate=False):
+    def _configure_caching(cachedir, use_cached=False):
         """Setup task caching.
 
         Parameters
         ----------
         cachedir : str
             Location to cache task outputs to.
-        invalidate : bool
-            Clear all cached files.
+        use_cached : bool
+            Use cached results from previous runs
 
         Returns
         -------
@@ -61,7 +62,7 @@ class RamArgumentParser(ArgumentParser):
 
         memory.cachedir = cachedir
 
-        if invalidate and os.path.isdir(cachedir):
+        if not use_cached and os.path.isdir(cachedir):
             memory.clear()
 
         return memory
@@ -70,7 +71,7 @@ class RamArgumentParser(ArgumentParser):
         args = super(RamArgumentParser, self).parse_args(args, namespace)
         self._create_dirs(args.dest)
         self._create_dirs(args.cachedir)
-        self._configure_caching(args.cachedir, args.force_rerun)
+        self._configure_caching(args.cachedir, args.use_cached)
         return args
 
 

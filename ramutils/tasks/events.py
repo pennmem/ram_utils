@@ -37,10 +37,6 @@ def subset_events(events, mask):
     events_subset = events[mask]
     return events_subset
 
-@task()
-def load_all_events():
-    return
-
 
 @task()
 def build_training_data(subject, experiment, paths, sessions=None, **kwargs):
@@ -148,15 +144,16 @@ def build_test_data(subject, experiment, paths, joint_report, sessions=None,
             return_stim_events=True)
 
     else:
-        all_events = load_all_events(subject, experiment, sessions=sessions,
-                                     rootdir=paths.root)
+        all_events = load_events(subject, experiment, sessions=sessions,
+                                 rootdir=paths.root)
         task_events, stim_params = clean_events(all_events,
                                                 return_stim_events=True)
 
     # Clean all events after using them to build task events because cleaning
     #  will remove fields that have nested recarrays to make serialization of
     #  these events possible downstream
-    all_events = clean_events(all_events, all_events=True)
+    if series_num != '1':
+        all_events = clean_events(all_events, all_events=True)
 
     return all_events, task_events, stim_params
 
