@@ -76,6 +76,10 @@ def determine_weighting_scheme_from_events(events):
         scheme = "PAL"
         event_types_to_check = ['WORD', 'REC_EVENT']
 
+    elif any([experiment.find("PS5") != -1 for experiment in experiments]):
+        scheme = "EQUAL"
+        event_types_to_check = []
+
     elif any([experiment.find("FR") != -1 for experiment in experiments]):
         scheme = 'FR'
         event_types_to_check = ['WORD', 'REC_EVENT']
