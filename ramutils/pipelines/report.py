@@ -181,7 +181,7 @@ def generate_ps4_report(subject, experiment, sessions, paths):
 
 def generate_data_for_nonstim_report(subject, experiment, sessions,
                                      joint_report, paths, ec_pairs,
-                                     used_pair_mask,
+                                     used_pair_mask, excluded_pairs,
                                      pairs_metadata_table, all_events,
                                      **kwargs):
     """ Report generation sub-pipeline that is shared by all nonstim reports """
@@ -252,6 +252,9 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
 
     session_summaries = summarize_nonstim_sessions(all_events,
                                                    final_task_events,
+                                                   ec_pairs,
+                                                   excluded_pairs,
+                                                   powers,
                                                    joint=joint_report,
                                                    repetition_ratio_dict=repetition_ratio_dict)
     math_summaries = summarize_math(all_events, joint=joint_report)
@@ -264,7 +267,7 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
 
 def generate_data_for_ps5_report(subject, experiment, joint_report,
                                  pairs_metadata_table,
-                                 trigger_electrode, ec_pairs,
+                                 trigger_electrode, ec_pairs, excluded_pairs,
                                  all_events, task_events, stim_data, paths,
                                  **kwargs):
     """
@@ -296,7 +299,9 @@ def generate_data_for_ps5_report(subject, experiment, joint_report,
                                    frequency_mask=trigger_frequency_mask)
 
     session_summaries = summarize_stim_sessions(all_events, task_events,
-                                                stim_data, pairs_metadata_table,
+                                                stim_data,
+                                                pairs_metadata_table,
+                                                ec_pairs, powers,
                                                 trigger_output=reduced_powers,
                                                 post_stim_trigger_output=post_stim_reduced_powers).compute()
     math_summaries = summarize_math(all_events)
@@ -307,7 +312,8 @@ def generate_data_for_ps5_report(subject, experiment, joint_report,
 
 
 def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
-                                  paths, ec_pairs, used_pair_mask, final_pairs,
+                                  paths, ec_pairs, excluded_pairs,
+                                  used_pair_mask, final_pairs,
                                   pairs_metadata_table, all_events,
                                   task_events, stim_data, **kwargs):
     """ Report generation sub-pipeline shared by all stim reports """
@@ -375,6 +381,8 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
 
     session_summaries = summarize_stim_sessions(all_events, final_task_events,
                                                 stim_data, pairs_metadata_table,
+                                                ec_pairs, excluded_pairs,
+                                                powers,
                                                 post_hoc_results[
                                                     'encoding_classifier_summaries'],
                                                 post_hoc_results[
