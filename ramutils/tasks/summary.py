@@ -11,7 +11,7 @@ from ramutils.events import validate_single_experiment, select_math_events, \
     extract_experiment_from_events, extract_sessions, select_session_events, \
     select_stim_table_events, extract_stim_information, \
     select_encoding_events, extract_event_metadata, dataframe_to_recarray, \
-    separate_stim_events
+    get_encoding_mask
 from ramutils.exc import *
 from ramutils.log import get_logger
 from ramutils.reports.summary import *
@@ -22,7 +22,7 @@ __all__ = [
     'summarize_nonstim_sessions',
     'summarize_math',
     'summarize_stim_sessions',
-    'summarize_ps_sessions'
+    'summarize_ps_sessions',
 ]
 
 
@@ -126,10 +126,11 @@ def summarize_nonstim_sessions(all_events, task_events, joint=False,
 
 
 @task()
-def summarize_stim_sessions(all_events, task_events, stim_params,
-                            encoding_classifier_summaries,
-                            post_stim_predicted_probs,
-                            pairs_data):
+def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
+                            encoding_classifier_summaries=None,
+                            post_stim_predicted_probs=None,
+                            trigger_output=None,
+                            post_stim_trigger_output=None):
     """ Construct stim session summaries """
     sessions = extract_sessions(task_events)
     stim_table_events = select_stim_table_events(stim_params)
@@ -141,13 +142,27 @@ def summarize_stim_sessions(all_events, task_events, stim_params,
         all_session_events = select_session_events(all_events, session)
         all_session_stim_events = select_session_events(stim_table_events, session)
         all_session_task_events = select_session_events(task_events, session)
+        encoding_mask = get_encoding_mask(all_session_task_events)
         all_session_task_events = select_encoding_events(all_session_task_events)
 
         stim_item_mask, post_stim_item_mask, stim_param_df = \
             extract_stim_information(all_session_stim_events,
                                      all_session_task_events)
 
-        predicted_probabilities = encoding_classifier_summaries[i].predicted_probabilities
+        # PS5 sessions do not have classifier summaries, but use the raw
+        # power value output for making the stim decision
+        if encoding_classifier_summaries is not None:
+            predicted_probabilities = encoding_classifier_summaries[i].predicted_probabilities
+            thresh = 0.5
+        else:
+            # We don't want retrieval powers for the triggering electrode
+            predicted_probabilities = trigger_output[encoding_mask]
+            event_based_avg = []
+            for j in range(len(predicted_probabilities)):
+                powers_so_far = predicted_probabilities[:j]
+                event_based_avg.append(np.mean(powers_so_far))
+            thresh = event_based_avg
+
         subject, experiment, session = extract_event_metadata(
             all_session_task_events)
         stim_df = pd.DataFrame(columns=['subject', 'experiment', 'session',
@@ -189,7 +204,7 @@ def summarize_stim_sessions(all_events, task_events, stim_params,
         stim_df['is_post_stim_item'] = post_stim_item_mask
         stim_df['stim_list'] = all_session_task_events.stim_list
         stim_df['recalled'] = all_session_task_events.recalled
-        stim_df['thresh'] = 0.5
+        stim_df['thresh'] = thresh
         stim_df['classifier_output'] = predicted_probabilities
         stim_df['subject'] = subject
         stim_df['experiment'] = experiment
@@ -213,8 +228,16 @@ def summarize_stim_sessions(all_events, task_events, stim_params,
             stim_session_summary.populate(
                 stim_events, raw_events=all_session_events,
                 post_stim_prob_recall=post_stim_predicted_probs[i])
+
+        elif experiment in ["PS5_FR", "PS5_catFR"]:
+            stim_events = dataframe_to_recarray(stim_df, expected_dtypes)
+            stim_session_summary = FRStimSessionSummary()
+            stim_session_summary.populate(
+                stim_events, raw_events=all_session_events,
+                post_stim_prob_recall=post_stim_trigger_output)
         else:
-            raise UnsupportedExperimentError('Only FR5 and catFR5 currently '
+            raise UnsupportedExperimentError('Only FR5/PS5_FR5 and '
+                                             'catFR5/PS5_catFR5 currently '
                                              'implemented')
 
         stim_session_summaries.append(stim_session_summary)
@@ -240,9 +263,4 @@ def summarize_ps_sessions(ps_events):
         session_summaries.append(summary)
 
     return session_summaries
-
-
-
-
-
 

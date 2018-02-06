@@ -316,7 +316,7 @@ class SessionSummary(Summary):
                 'irt_within_cat',
                 'irt_between_cat',
                 'rejected',
-                'post_stim_prob_recall'
+                '_post_stim_prob_recall'
             ]
 
             # also ignore phase for events that predate it
@@ -631,7 +631,7 @@ class StimSessionSummary(SessionSummary):
     is_stim_item = Array(dtype=np.bool, desc='stimulation occurred on this item')
     is_ps4_session = Array(dtype=np.bool, desc='list is part of a PS4 session')
     prob_recall = Array(dtype=np.float, desc='probability of recalling a word')
-    post_stim_prob_recall = ArrayOrNone(dtype=np.float,
+    _post_stim_prob_recall = ArrayOrNone(dtype=np.float,
                                         desc='classifier output in post stim period')
 
     stim_anode_tag = Array(desc='stim anode label')
@@ -640,6 +640,14 @@ class StimSessionSummary(SessionSummary):
     pulse_frequency = Array(dtype=np.float64, desc='stim pulse frequency [Hz]')
     amplitude = Array(dtype=np.float64, desc='stim amplitude [mA]')
     duration = Array(dtype=np.float64, desc='stim duration [ms]')
+
+    @property
+    def post_stim_prob_recall(self):
+        return self._post_stim_prob_recall
+
+    @post_stim_prob_recall.setter
+    def post_stim_prob_recall(self, new_post_stim_prob_recall):
+        self._post_stim_prob_recall = new_post_stim_prob_recall.flatten().tolist()
 
     def populate(self, events, post_stim_prob_recall=None,
                  raw_events=None,
@@ -724,7 +732,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         return df.groupby('serialpos').prob_recall.mean().tolist()
 
     def lists(self, stim=None):
-        """ Get a list of eith stim lists or non-stim lists """
+        """ Get a list of either stim lists or non-stim lists """
         df = self.to_dataframe()
         if stim is not None:
             lists = df[df.is_stim_list == stim].listno.unique().tolist()
@@ -748,7 +756,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         # of stim since we never stimulate during them and task performance
         # is likely to vary throughout the session
         df = df[df.listno > 3]
-        results = []
+        results = [] # TODO: Results should be by stimulation parameters
 
         # Stim lists vs. non-stim lists
         n_correct_stim_list_recalls = df[df.is_stim_list == True].recalled.sum()
@@ -770,11 +778,12 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         # stim items vs. non-stim low biomarker items
         n_correct_stim_item_recalls = df[df.is_stim_item == True].recalled.sum()
         n_correct_nonstim_item_recalls = df[(df.is_stim_item == False) &
-                                            (df.prob_recall < 0.5)].recalled.sum()
+                                            (df.prob_recall <
+                                             df.thresh)].recalled.sum()
 
         n_stim_items = df[df.is_stim_item == True].recalled.count()
         n_nonstim_items = df[(df.is_stim_item == False) &
-                             (df.prob_recall < 0.5)].recalled.count()
+                             (df.prob_recall < df.thresh)].recalled.count()
 
         tstat_list, pval_list, _ = proportions_chisquare(
             [n_correct_stim_item_recalls, n_correct_nonstim_item_recalls],
