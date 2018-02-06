@@ -145,7 +145,16 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
                            ' datasets')
     experiment = experiments[0]
     events = remove_negative_offsets(events)
-    events = remove_practice_lists(events)
+
+    # Only for PS5 do we want to keep the practice list around so we can know
+    # what the baseline mean power was for the session, but we still need to get
+    # rid of the events with -999 for list
+    if all(['PS5' not in experiment for experiment in experiments]):
+        events = remove_practice_lists(events)
+
+    else:
+        events = events[events.list >= -1]
+
     events = remove_incomplete_lists(events)
     events = select_column_subset(events, all_relevant=True)
 
