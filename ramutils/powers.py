@@ -297,7 +297,7 @@ def reduce_powers(powers, channel_mask, n_frequencies, frequency_mask=None):
         Subsetted power matrix
 
     """
-    if len(frequency_mask) != n_frequencies:
+    if frequency_mask is not None and (len(frequency_mask) != n_frequencies):
         raise RuntimeError("Size of frequency mask must match number of "
                            "frequencies")
 
