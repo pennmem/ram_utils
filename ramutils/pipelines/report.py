@@ -129,8 +129,9 @@ def make_report(subject, experiment, paths, joint_report=False,
             generate_data_for_ps5_report(subject, experiment, joint_report,
                                          pairs_metadata_table,
                                          trigger_electrode, ec_pairs,
-                                         all_events, task_events,
-                                         stim_data, paths, **kwargs)
+                                         excluded_pairs, all_events,
+                                         task_events, stim_data, paths,
+                                         **kwargs)
 
     # Non-PS5 stim session
     else:
@@ -301,7 +302,8 @@ def generate_data_for_ps5_report(subject, experiment, joint_report,
     session_summaries = summarize_stim_sessions(all_events, task_events,
                                                 stim_data,
                                                 pairs_metadata_table,
-                                                ec_pairs, powers,
+                                                ec_pairs, excluded_pairs,
+                                                powers,
                                                 trigger_output=reduced_powers,
                                                 post_stim_trigger_output=post_stim_reduced_powers).compute()
     math_summaries = summarize_math(all_events)
