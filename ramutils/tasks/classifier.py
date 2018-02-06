@@ -298,8 +298,7 @@ def post_hoc_classifier_evaluation(events, powers, post_stim_events,
         session_recalls = recalls[session_mask & non_stim_mask]
 
         session_powers = powers[(session_mask & non_stim_mask)]
-        reduced_session_powers = reduce_powers(session_powers,
-                                               used_mask,
+        reduced_session_powers = reduce_powers(session_powers, used_mask,
                                                len(kwargs['freqs']))
 
         # Manually pass in the weighting scheme here, otherwise the cross
@@ -319,9 +318,8 @@ def post_hoc_classifier_evaluation(events, powers, post_stim_events,
         # biomarker
         post_stim_session_mask = (post_stim_events.session == session)
         post_stim_session_powers = post_stim_powers[post_stim_session_mask]
-        post_stim_reduced_session_powers = reduce_powers(post_stim_session_powers,
-                                                         used_mask,
-                                                         len(kwargs['freqs']))
+        post_stim_reduced_session_powers = reduce_powers(
+            post_stim_session_powers, used_mask, len(kwargs['freqs']))
         post_stim_probs = classifier.predict_proba(
             post_stim_reduced_session_powers)[:, 1]
         post_stim_predicted_probs.append(post_stim_probs)
@@ -343,8 +341,9 @@ def post_hoc_classifier_evaluation(events, powers, post_stim_events,
         # is needed in order to match all encoding events to stim information
         # in a later step
         session_encoding_powers = powers[(session_mask & encoding_mask)]
-        reduced_session_encoding_powers = reduce_powers(
-            session_encoding_powers, used_mask, len(kwargs['freqs']))
+        reduced_session_encoding_powers = reduce_powers(session_encoding_powers,
+                                                        used_mask,
+                                                        len(kwargs['freqs']))
 
         session_encoding_probs = classifier.predict_proba(
             reduced_session_encoding_powers)[:, 1]
