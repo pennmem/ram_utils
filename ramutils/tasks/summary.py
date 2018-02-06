@@ -199,9 +199,9 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
                            ('thresh', 'f'),
                            ('classifier_output', 'f'),
                            ('location', '<U256'),
-                           ('amplitude', '<U256'),
-                           ('pulse_freq', '<U256'),
-                           ('stim_duration', '<U256'),
+                           ('amplitude', 'f'),
+                           ('pulse_freq', 'f'),
+                           ('stim_duration', 'f'),
                            ('stimAnodeTag', '<U256'),
                            ('stimCathodeTag', '<U256')]
 
