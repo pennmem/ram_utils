@@ -87,7 +87,7 @@ class ExperimentParameters(Schema):
     trigger_freq = Int(110, desc="Frequency to use for PS5 pseudo closed-loop experiment")
 
     log_powers = Bool(True)
-    normalized_powers = Bool(True)
+    normalize_powers = Bool(True)
 
     filt_order = Int(4, desc="Butterworth filter order")
 
