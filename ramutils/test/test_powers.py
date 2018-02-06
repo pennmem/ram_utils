@@ -6,8 +6,9 @@ import pandas as pd
 from pkg_resources import resource_filename
 
 from ramutils.powers import reduce_powers, compute_single_session_powers, \
-    compute_powers, reshape_powers_to_2d, reshape_powers_to_3d, calculate_delta_hfa_table
-from ramutils.tasks import compute_normalized_powers, memory
+    compute_powers, reshape_powers_to_2d, reshape_powers_to_3d, \
+    calculate_delta_hfa_table, compute_normalized_powers
+from ramutils.tasks import memory
 from ramutils.parameters import FRParameters, PALParameters
 from ramutils.utils import load_event_test_data
 
@@ -103,9 +104,9 @@ def test_reduce_powers():
             bool) for
         _ in range(10)]
     expected_sizes = [np.sum(mask) for mask in some_electrodes_masks]
-    reduced_power_matrices = [reduce_powers(sample_pow_mat,
-                                            some_electrodes_masks[i],
-                                            n_frequencies) for i in range(
+    reduced_power_matrices = [
+        reduce_powers(sample_pow_mat, some_electrodes_masks[i], n_frequencies)
+        for i in range(
         len(some_electrodes_masks))]
     assert all([reduced_power_matrices[i].shape == (n_events, expected_sizes[i]
                                                  * n_frequencies) for i in

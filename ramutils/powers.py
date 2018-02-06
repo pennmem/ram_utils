@@ -17,7 +17,9 @@ except ImportError:
 
 from ramutils.log import get_logger
 from ramutils.utils import timer
-from ramutils.events import get_recall_events_mask
+from ramutils.events import get_recall_events_mask, extract_sessions, \
+    partition_events, concatenate_events_for_single_experiment, \
+    get_partition_masks
 from ramutils.montage import generate_pairs_for_ptsa, extract_monopolar_from_bipolar
 
 
@@ -192,18 +194,102 @@ def compute_powers(events, start_time, end_time, buffer_time, freqs,
     return pow_mat, updated_events
 
 
-def reduce_powers(powers, mask, n_frequencies):
+def compute_normalized_powers(events, **kwargs):
+    """ Compute powers by session, encoding/retrieval, and FR vs. PAL
+
+    Notes
+    -----
+    There are different start times, end time, and buffer times for each
+    subset type, so those are passed in as kwargs and looked up prior to
+    calling the more general compute_powers function
+
+    """
+
+    event_partitions = partition_events(events)
+    cleaned_event_partitions = []
+    power_partitions = {}
+
+    if 'bipolar_pairs' not in kwargs.keys():
+        kwargs['bipolar_pairs'] = None
+
+    for subset_name, event_subset in event_partitions.items():
+        if len(event_subset) == 0:
+            continue
+
+        if subset_name == 'fr_encoding':
+            start_time = kwargs['encoding_start_time']
+            end_time = kwargs['encoding_end_time']
+            buffer_time = kwargs['encoding_buf']
+
+        elif subset_name == 'fr_retrieval':
+            start_time = kwargs['retrieval_start_time']
+            end_time = kwargs['retrieval_end_time']
+            buffer_time = kwargs['retrieval_buf']
+
+        elif subset_name == 'pal_encoding':
+            start_time = kwargs['pal_start_time']
+            end_time = kwargs['pal_end_time']
+            buffer_time = kwargs['pal_buf_time']
+
+        elif subset_name == 'pal_retrieval':
+            start_time = kwargs['pal_retrieval_start_time']
+            end_time = kwargs['pal_retrieval_end_time']
+            buffer_time = kwargs['pal_retrieval_buf']
+
+        elif subset_name == 'post_stim':
+            start_time = kwargs['post_stim_start_time']
+            end_time = kwargs['post_stim_end_time']
+            buffer_time = kwargs['post_stim_buf']
+
+        else:
+            raise RuntimeError("Unexpected event subset was encountered")
+
+        powers, cleaned_events = compute_powers(event_subset,
+                                                start_time,
+                                                end_time,
+                                                buffer_time,
+                                                kwargs['freqs'],
+                                                kwargs['log_powers'],
+                                                filt_order=kwargs['filt_order'],
+                                                normalize=kwargs[
+                                                    'normalize_powers'],
+                                                width=kwargs['width'],
+                                                bipolar_pairs=kwargs[
+                                                    'bipolar_pairs'])
+        cleaned_event_partitions.append(cleaned_events)
+        power_partitions[subset_name] = powers
+
+    cleaned_events = concatenate_events_for_single_experiment(
+        cleaned_event_partitions)
+
+    partition_masks = get_partition_masks(cleaned_events)
+
+    # Ensure that the rows of the power matrix match the order of the events.
+    # This works by creating masks for each of the event types from the
+    # sorted events structure
+    n_features = powers.shape[1]
+    normalized_powers = np.empty((len(cleaned_events), n_features))
+    for subset_name, power_subset in power_partitions.items():
+        partition_event_mask = partition_masks[subset_name]
+        normalized_powers[partition_event_mask, :] = power_subset
+
+    return normalized_powers, cleaned_events
+
+
+def reduce_powers(powers, channel_mask, n_frequencies, frequency_mask=None):
     """ Create a subset of the full power matrix by excluding certain electrodes
 
     Parameters
     ----------
     powers: np.ndarray
         Original power matrix
-    mask: array_like
+    channel_mask: array_like
         Boolean array of size n_channels
     n_frequencies: int
         Number of frequencies used in calculating the power matrix. This is
         needed to be able to properly reshape the array
+    frequency_mask: array_like
+        Boolean array of size n_frequencies
 
     Returns
     -------
@@ -211,14 +297,31 @@ def reduce_powers(powers, mask, n_frequencies):
         Subsetted power matrix
 
     """
+    if len(frequency_mask) != n_frequencies:
+        raise RuntimeError("Size of frequency mask must match number of "
+                           "frequencies")
+
     # Reshape into 3-dimensional array (n_events, n_electrodes, n_frequencies)
     reduced_powers = powers.reshape((len(powers), -1, n_frequencies))
-    reduced_powers = reduced_powers[:, mask, :]
+
+    if frequency_mask is not None:
+        reduced_powers = reduced_powers[:, channel_mask, frequency_mask]
+    else:
+        reduced_powers = reduced_powers[:, channel_mask, :]
 
     # Reshape back to 2D representation so it can be used as a feature matrix
     reduced_powers = reduced_powers.reshape((len(reduced_powers), -1))
 
     return reduced_powers
+
+
+def get_trigger_frequency_mask(trigger_frequency, frequencies):
+    """
+        Returns a boolean mask identifying a single frequency in a list of
+        frequencies
+    """
+    return [True if int(freq) == trigger_frequency else False for freq in
+            frequencies]
 
 
 def normalize_powers_by_session(pow_mat, events):
@@ -314,13 +417,4 @@ def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events,
     pairs_metadata_table = pairs_metadata_table.dropna(subset=['label'])
 
     return pairs_metadata_table
-
-
-def calculate_sme_classifier_powers(pairs_metadata_table, events, frequency,
-                                    triggering_electrode):
-    # compute_single_session powers with normalize == False and passing in
-    # the specific channel that is desired
-    # This should return a vector of length n_events, which can then be added
-    # to a dataframe of the events as a single column
-    return
 
