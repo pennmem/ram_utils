@@ -180,8 +180,11 @@ class ReportGenerator(object):
 
         """
         series = extract_experiment_series(self.experiments[0])
-        if all(['PS' in exp for exp in self.experiments]) and series == '5':
+        if all(['PS4' in exp for exp in self.experiments]) and series == '5':
             return self.generate_ps4_report()
+
+        elif all(['PS5' in exp for exp in self.experiments]):
+            return self.generate_ps5_report()
 
         elif series == '5':
             return self.generate_fr5_report()
@@ -347,5 +350,67 @@ class ReportGenerator(object):
                     }
                     for channel in list(location_summary_data.keys())
                 }
+            }
+        )
+
+    def generate_ps5_report(self):
+        """ Generate a PS5 report
+
+        Returns
+        -------
+        Rendered PS5 report as a string
+        """
+        return self._render(
+            'PS5',
+            stim=True,
+            combined_summary=self._make_combined_summary(),
+            stim_params=self.session_summaries[0].stim_parameters,
+            recall_tests=self.session_summaries[0].recall_test_results,
+            plot_data={
+                'serialpos': json.dumps({
+                    'serialpos': list(range(1, 13)),
+                    'overall': {
+                        'Overall (non-stim)': self.session_summaries[
+                            0].prob_recall_by_serialpos(stim_items_only=False),
+                        'Overall (stim)': self.session_summaries[
+                            0].prob_recall_by_serialpos(stim_items_only=True)
+                    },
+                    'first': {
+                        'First recall (non-stim)': self.session_summaries[
+                            0].prob_first_recall_by_serialpos(stim=False),
+                        'First recall (stim)': self.session_summaries[
+                            0].prob_first_recall_by_serialpos(stim=True)
+                    }
+                }),
+                'recall_summary': json.dumps({
+                    'nonstim': {
+                        'listno': self.session_summaries[0].lists(stim=False),
+                        'recalled': self.session_summaries[
+                            0].recalls_by_list(stim_list_only=False)
+                    },
+                    'stim': {
+                        'listno': self.session_summaries[0].lists(stim=True),
+                        'recalled': self.session_summaries[
+                            0].recalls_by_list(stim_list_only=True)
+                    },
+                    'stim_events': {
+                        'listno': self.session_summaries[0].lists(),
+                        'count': self.session_summaries[0].stim_events_by_list
+                    }
+                }),
+                'stim_probability': json.dumps({
+                    'serialpos': list(range(1, 13)),
+                    'probability': self.session_summaries[
+                        0].prob_stim_by_serialpos
+                }),
+                'recall_difference': json.dumps({
+                    'stim': self.session_summaries[0].delta_recall(),
+                    'post_stim': self.session_summaries[0].delta_recall(
+                        post_stim_items=True)
+                }),
+                'classifier_output': json.dumps({
+                    'pre_stim': list(self.session_summaries[0].pre_stim_prob_recall),
+                    'post_stim': list(self.session_summaries[0].post_stim_prob_recall)
+                }),
             }
         )
