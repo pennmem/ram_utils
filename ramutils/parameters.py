@@ -86,7 +86,8 @@ class ExperimentParameters(Schema):
     hfa_cutoff = Int(65, desc="Lowers frequency that will be considered a 'high frequency'")
     trigger_freq = Int(110, desc="Frequency to use for PS5 pseudo closed-loop experiment")
 
-    log_powers = Bool(True)  # FIXME: do we really need this?
+    log_powers = Bool(True)
+    normalized_powers = Bool(True)
 
     filt_order = Int(4, desc="Butterworth filter order")
 
@@ -152,6 +153,11 @@ class PALParameters(FRParameters):
     encoding_multiplier = Float(7.2, desc="weighting factor for encoding "
                                           "samples in PAL")
     pal_multiplier = Float(1.93, desc="weighting factor for PAL samples")
+
+
+class PS5Parameters(FRParameters):
+    """ PS5 experiment parameters """
+    normalize_powers = Bool(False)
 
 
 
