@@ -10,7 +10,7 @@ from __future__ import print_function
 import os.path as osp
 
 from ramutils.cli import make_parser
-from ramutils.exc import UnsupportedExperimentError, TooManySessionsError
+from ramutils.exc import UnsupportedExperimentError, TooManySessionsError, CommandLineError
 from ramutils.log import get_logger, get_warning_accumulator
 from ramutils.montage import make_stim_params
 from ramutils.parameters import FilePaths, FRParameters
@@ -33,6 +33,9 @@ parser.add_argument('--rerun', '-C', action="store_true", default=False,
 parser.add_argument('--report_db_location',
                     help='location of report data database',
                     type=str, default="/scratch/report_database/")
+parser.add_argument('--trigger-electrode', '-t', type=str,
+                    help='Label of the electrode to use for triggering '
+                         'stimulation in PS5')
 
 logger = get_logger("reports")
 
@@ -74,6 +77,10 @@ def create_report(input_args=None):
     else:
         raise UnsupportedExperimentError("Unsupported experiment: " + args.experiment)
 
+    if 'PS5' in args.experiment and args.trigger_electrode is None:
+        raise CommandLineError("Must specify a trigger electrode for PS5 "
+                               "experiments")
+
     # Generate report!
     # FIXME: stim_params should be called something different/just be a list of contacts to exclude
     with timer():
@@ -87,7 +94,8 @@ def create_report(input_args=None):
             exp_params=exp_params,
             sessions=sessions,
             vispath=args.vispath,
-            rerun=args.rerun
+            rerun=args.rerun,
+            trigger_electrode=args.trigger_electrode
         )
         logger.info("Wrote report to %s\n", path)
         memory.clear() # remove cached intermediate results if build succeeds

@@ -7,6 +7,8 @@ Upcoming
 * store all underlying data necessary for building reports to facilitate quick reload #118
 * do not use cached intermediate results be default (force-rerun)
 * clear memory on successful completion of report build
+* added montage information (all bipolar pairs, excluded pairs) and normalized powers to serialized data
+* added ability to generate a PS5 report
 
 Version 2.1.3
 -------------
