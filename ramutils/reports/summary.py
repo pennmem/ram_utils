@@ -198,7 +198,7 @@ class MathSummary(Schema):
     be all events (which include math events) or just math events.
 
     """
-    _events = ArrayOrNone(desc='task events')
+    _events = ArrayOrNone(desc='Math distractor task events')
 
     def populate(self, events):
         self.events = events
@@ -333,9 +333,8 @@ class MathSummary(Schema):
 
 class Summary(Schema):
     """Base class for all summary objects."""
-    _events = ArrayOrNone(desc='task events')
-    _events = ArrayOrNone(desc='task events')
-    _raw_events = ArrayOrNone(desc='all events')
+    _events = ArrayOrNone(desc='task-related events excluding math distractor events')
+    _raw_events = ArrayOrNone(desc='all event types including math distractor events')
     _bipolar_pairs = String(desc='bipolar pairs in montage')
     _excluded_pairs = String(desc='bipolar pairs not used for classification '
                                   'due to artifact or stimulation')
@@ -841,8 +840,13 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
 
     def recalls_by_list(self, stim_list_only=False):
         df = self.to_dataframe()
-        recalls_by_list = df[df.is_stim_list == stim_list_only].groupby(
-            'list').recalled.sum().astype(int).tolist()
+        recalls_by_list = (
+            df[df.is_stim_list == stim_list_only]
+            .groupby('list')
+            .recalled
+            .sum()
+            .astype(int)
+            .tolist())
         return recalls_by_list
 
     def prob_first_recall_by_serialpos(self, stim=False):
