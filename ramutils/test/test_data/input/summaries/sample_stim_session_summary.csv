@@ -1,4 +1,4 @@
-subject,experiment,session,list,mstime,item_name,type,serialpos,phase,is_stim_item,stim_list,is_post_stim_item,recalled,thresh,classifier_output,amplitude,pulse_freq,stimAnodeTag,stimCathodeTag,stim_duration,location
+subject,experiment,session,list,mstime,item_name,type,serialpos,phase,is_stim_item,is_stim_list,is_post_stim_item,recalled,thresh,classifier_output,amplitude,pulse_freq,stimAnodeTag,stimCathodeTag,stim_duration,location
 R1374T,catFR5,0,1,1513118748348,FOUNDATION,WORD,1,BASELINE,False,0,False,1,0.5,0.454159518373,,,,,,
 R1374T,catFR5,0,1,1513118751012,WINDOW,WORD,2,BASELINE,False,0,False,0,0.5,0.495032036667,,,,,,
 R1374T,catFR5,0,1,1513118753549,UNDERWEAR,WORD,3,BASELINE,False,0,False,0,0.5,0.478306234509,,,,,,

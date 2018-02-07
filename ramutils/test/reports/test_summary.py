@@ -31,6 +31,21 @@ def math_events():
     return events
 
 
+@pytest.fixture(scope='session')
+def bipolar_pairs():
+    return {}
+
+
+@pytest.fixture(scope='session')
+def excluded_pairs():
+    return {}
+
+
+@pytest.fixture(scope='session')
+def normalized_powers():
+    return np.array([[1,2], [3,4]])
+
+
 @pytest.fixture()
 def ps_events(rhino_root):
     ps_events = build_ps_data('R1374T', 'catFR5', 'ps4_events', None,
@@ -39,24 +54,14 @@ def ps_events(rhino_root):
 
 
 class TestSummary:
-    def test_to_dataframe(self):
-        class MySessionSummary(SessionSummary):
-            bools = ListBool()
-            ints = ListInt()
-            floats = ListFloat()
+    def test_to_dataframe(self, fr5_events, bipolar_pairs, excluded_pairs,
+                          normalized_powers):
 
-        summary = MySessionSummary(
-            bools=[True, True, True],
-            ints=[1, 2, 3],
-            floats=[1., 2., 3.],
-            phase=['a', 'b', 'c']
-        )
-
+        summary = SessionSummary()
+        summary.populate(fr5_events, bipolar_pairs, excluded_pairs, normalized_powers)
         df = summary.to_dataframe()
+        assert len(df) == len(fr5_events)
 
-        assert all(df.bools == summary.bools)
-        assert all(df.ints == summary.ints)
-        assert all(df.floats == summary.floats)
 
     def test_session_length(self, fr5_events):
         summary = SessionSummary()
@@ -79,10 +84,12 @@ class TestSummary:
     def test_populate(self):
         with pytest.raises(NotImplementedError):
             summary = Summary()
-            summary.populate(None)
+            summary.populate(None, None, None, None)
 
-    def test_create(self, fr5_events):
-        summary = SessionSummary.create(fr5_events)
+    def test_create(self, fr5_events, bipolar_pairs, excluded_pairs,
+                    normalized_powers):
+        summary = SessionSummary.create(fr5_events, bipolar_pairs,
+                                        excluded_pairs, normalized_powers)
         assert_equal(summary.events, fr5_events)
 
 
@@ -170,8 +177,10 @@ class TestFRSessionSummary:
     def setup_class(cls):
         cls.summary = FRSessionSummary()
         events = fr5_events()
-        probs = np.random.random(len(events))
-        cls.summary.populate(events, probs)
+        pairs = bipolar_pairs()
+        excluded = excluded_pairs()
+        powers = normalized_powers()
+        cls.summary.populate(events, pairs, excluded, powers)
 
     def test_num_lists(self):
         assert self.summary.num_lists == 25
@@ -195,8 +204,10 @@ class TestCatFRSessionSummary:
     def setup_class(cls):
         cls.summary = CatFRSessionSummary()
         events = fr5_events()
-        probs = np.random.random(len(events))
-        cls.summary.populate(events, probs)
+        pairs = bipolar_pairs()
+        excluded = excluded_pairs()
+        powers = normalized_powers()
+        cls.summary.populate(events, pairs, excluded, powers)
 
     def test_to_dataframe(self):
         df = self.summary.to_dataframe()
@@ -205,10 +216,11 @@ class TestCatFRSessionSummary:
 
 class TestStimSessionSummary:
     @pytest.mark.parametrize('is_ps4_session', [True, False])
-    def test_populate(self, fr5_events, is_ps4_session):
+    def test_populate(self, fr5_events, bipolar_pairs, excluded_pairs,
+                      normalized_powers):
         """Basic tests that data was populated correctly from events."""
         summary = StimSessionSummary()
-        summary.populate(fr5_events, is_ps4_session=is_ps4_session)
+        summary.populate(fr5_events, bipolar_pairs, excluded_pairs, normalized_powers)
         df = summary.to_dataframe()
 
         assert len(df[df.phase == 'BASELINE']) == 36
@@ -218,9 +230,10 @@ class TestStimSessionSummary:
 
 class TestFRStimSessionSummary:
     @pytest.mark.skip
-    def test_num_nonstim_lists(self, fr5_events):
+    def test_num_nonstim_lists(self, fr5_events, bipolar_pairs,
+                               excluded_pairs, normalized_powers):
         summary = FRStimSessionSummary()
-        summary.populate(fr5_events)
+        summary.populate(fr5_events, bipolar_pairs, excluded_pairs, normalized_powers)
         assert summary.num_nonstim_lists == 2
 
 
@@ -293,7 +306,10 @@ class TestFRStimSessionSummary:
             "/input/summaries/sample_stim_session_summary.csv"))
         cls.sample_events = cls.sample_summary_table.to_records(index=False)
         cls.sample_summary = FRStimSessionSummary()
-        cls.sample_summary.populate(cls.sample_events)
+        pairs = bipolar_pairs()
+        excluded = excluded_pairs()
+        powers = normalized_powers()
+        cls.sample_summary.populate(cls.sample_events, pairs, excluded, powers)
 
     def test_num_nonstim_lists(self):
         assert self.sample_summary.num_nonstim_lists == 9
@@ -374,21 +390,25 @@ class TestPSSessionSummary:
         cls.sample_summary = PSSessionSummary()
 
     @pytest.mark.xfail(reason='PS Events to dataframe not implemented')
-    def test_to_dataframe(self, ps_events):
+    def test_to_dataframe(self, ps_events, pairs, excluded):
         # FIXME: This is failing right now
-        self.sample_summary.populate(ps_events)
+        self.sample_summary.populate(ps_events, pairs, excluded, normalized_powers)
         df = self.sample_summary.to_dataframe()
         assert len(df) == 3068
 
-    def test_decision(self, ps_events):
-        self.sample_summary.populate(ps_events)
+    def test_decision(self, ps_events, bipolar_pairs, excluded_pairs,
+                      normalized_powers):
+        self.sample_summary.populate(ps_events, bipolar_pairs, excluded_pairs,
+                                     normalized_powers)
         decision = self.sample_summary.decision
         assert decision['best_amplitude'] == 0.998
         assert decision['best_location'] == 'LA7_LA8'
         assert np.isclose(decision['pval'], 0.00608, 1e-3)
 
-    def test_location_summary(self, ps_events):
-        self.sample_summary.populate(ps_events)
+    def test_location_summary(self, ps_events, bipolar_pairs, excluded_pairs,
+                              normalized_powers):
+        self.sample_summary.populate(ps_events, bipolar_pairs, excluded_pairs,
+                                     normalized_powers)
         location_summaries = self.sample_summary.location_summary
         assert np.isclose(location_summaries['LA7_LA8'][
                               'best_delta_classifier'], 0.030218, 1e-3)

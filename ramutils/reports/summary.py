@@ -15,7 +15,7 @@ from ramutils.bayesian_optimization import choose_location
 from ramutils.exc import TooManySessionsError
 
 from traitschema import Schema
-from traits.api import Array, ArrayOrNone, Float, String, DictStrAny, Dict, Bool
+from traits.api import Array, ArrayOrNone, Float, String, Bool
 
 from sklearn.metrics import roc_auc_score, roc_curve
 from statsmodels.stats.proportion import proportions_chisquare
@@ -193,107 +193,19 @@ class ClassifierSummary(Schema):
         return
 
 
-class Summary(Schema):
-    """Base class for all summary objects."""
-    _events = ArrayOrNone(desc='task events')
-    _raw_events = ArrayOrNone(desc='all events')
-    phase = Array(desc='list phase type (stim, non-stim, etc.)')
+class MathSummary(Schema):
+    """Summarizes data from math distractor periods. Input events must either
+    be all events (which include math events) or just math events.
 
-    @property
-    def events(self):
-        return np.rec.array(self._events)
+    """
+    _events = ArrayOrNone(desc='Math distractor task events')
 
-    @events.setter
-    def events(self, new_events):
-        if self._events is None:
-            self._events = np.rec.array(new_events)
-
-    @property
-    def raw_events(self):
-        if self._raw_events is None:
-            return None
-        return np.rec.array(self._raw_events)
-
-    @raw_events.setter
-    def raw_events(self, new_events):
-        if self._raw_events is None and new_events is not None:
-            self._raw_events = np.rec.array(new_events)
-
-    def populate(self, events, raw_events=None):
-        raise NotImplementedError
-
-    @classmethod
-    def create(cls, events, raw_events=None):
-        """Create a new summary object from events.
-
-        Parameters
-        ----------
-        events : np.recarray
-        raw_events: np.recarray
-
-        """
-        instance = cls()
-        instance.populate(events, raw_events=raw_events)
-        return instance
-
-
-class SessionSummary(Summary):
-    """Base class for single-session objects."""
-
-    @property
-    def subject(self):
-        return extract_subject(self.events)
-
-    @property
-    def experiment(self):
-        experiments = extract_experiment_from_events(self.events)
-        return experiments[0]
-
-    @property
-    def session_number(self):
-        sessions = extract_sessions(self.events)
-        if len(sessions) != 1:
-            raise TooManySessionsError("Single session expected for session "
-                                       "summary")
-
-        session = str(sessions[0])
-        return session
-
-    @property
-    def events(self):
-        return np.rec.array(self._events)
-
-    @events.setter
-    def events(self, new_events):
-        """Only allow setting of events which contain a single session."""
-        if self._events is None:
-            self._events = np.rec.array(new_events)
-            assert len(np.unique(new_events['session'])) == 1, \
-                "events should only be from a single session"
-
-    @property
-    def session_length(self):
-        """Computes the total amount of time the session lasted in seconds."""
-        start = self.events.mstime.min()
-        end = self.events.mstime.max()
-        return (end - start) / 1000.
-
-    @property
-    def session_datetime(self):
-        """Returns a timezone-aware datetime object of the end time of the
-        session in UTC.
-
-        """
-        timestamp = self.events.mstime.max() / 1000.
-        return datetime.fromtimestamp(timestamp, pytz.utc)
-
-    @property
-    def num_lists(self):
-        return len(np.unique(self.events.list))
+    def populate(self, events):
+        self.events = events
 
     def to_dataframe(self, recreate=False):
         """Convert the summary to a :class:`pd.DataFrame` for easier
-        manipulation.
+        manipulation. This amounts to converting the events to a dataframe
 
         Keyword arguments
         -----------------
@@ -308,47 +220,9 @@ class SessionSummary(Summary):
 
         """
         if not hasattr(self, '_df') or recreate:
-            # these attributes won't be included
-            ignore = [
-                '_events',  # we don't need events in the dataframe
-                '_raw_events',
-                '_repetition_ratios',
-                'irt_within_cat',
-                'irt_between_cat',
-                'rejected',
-                'post_stim_prob_recall'
-            ]
-
-            # also ignore phase for events that predate it
-            if 'phase' in self.visible_traits():
-                if len(self.phase) == 0:
-                    ignore += ['phase']
-
-            columns = {
-                trait: getattr(self, trait)
-                for trait in self.visible_traits()
-                if trait not in ignore
-            }
-            self._df = pd.DataFrame(columns)
+            self._df = pd.DataFrame.from_records(self.events)
 
         return self._df
-
-    def populate(self, events, raw_events=None):
-        """Populate attributes and store events."""
-        self.events = events
-        self.raw_events = raw_events
-        try:
-            self.phase = events.phase
-        except AttributeError:
-            warnings.warn("phase not found in events (probably pre-dates phase)",
-                          UserWarning)
-
-
-class MathSummary(SessionSummary):
-    """Summarizes data from math distractor periods. Input events must either
-    be all events (which include math events) or just math events.
-
-    """
 
     @property
     def events(self):
@@ -366,6 +240,10 @@ class MathSummary(SessionSummary):
         """Returns the total number of problems solved by the subject."""
         return len(self.events[(self.events.type == 'PROB') |
                                (self.events.type == b'PROB')])
+
+    @property
+    def num_lists(self):
+        return len(np.unique(self.events.list))
 
     @property
     def num_correct(self):
@@ -450,19 +328,182 @@ class MathSummary(SessionSummary):
         return MathSummary.total_num_problems(summaries) / n_lists
 
 
+class Summary(Schema):
+    """Base class for all summary objects."""
+    _events = ArrayOrNone(desc='task-related events excluding math distractor events')
+    _raw_events = ArrayOrNone(desc='all event types including math distractor events')
+    _bipolar_pairs = String(desc='bipolar pairs in montage')
+    _excluded_pairs = String(desc='bipolar pairs not used for classification '
+                                  'due to artifact or stimulation')
+    _normalized_powers = ArrayOrNone(desc="normalized powers for all events "
+                                          "and recorded pairs")
+
+    @property
+    def events(self):
+        return np.rec.array(self._events)
+
+    @events.setter
+    def events(self, new_events):
+        if self._events is None:
+            self._events = np.rec.array(new_events)
+
+    @property
+    def raw_events(self):
+        if self._raw_events is None:
+            return None
+        return np.rec.array(self._raw_events)
+
+    @raw_events.setter
+    def raw_events(self, new_events):
+        if self._raw_events is None and new_events is not None:
+            self._raw_events = np.rec.array(new_events)
+
+    def populate(self, events, bipolar_pairs, excluded_pairs,
+                 normalized_powers, raw_events=None):
+        raise NotImplementedError
+
+    @classmethod
+    def create(cls, events, bipolar_pairs, excluded_pairs,
+               normalized_powers, raw_events=None):
+        """Create a new summary object from events
+
+        Parameters
+        ----------
+        events : np.recarray
+        raw_events: np.recarray
+        bipolar_pairs: dict
+            Dictionary containing data in bipolar pairs in a montage
+        excluded_pairs: dict
+            Dictionary containing data on pairs excluded from analysis
+        normalized_powers: np.ndarray
+            2D array of normalzied powers of shape n_events x (
+            n_frequencies * n_bipolar_pairs)
+
+        """
+        instance = cls()
+        instance.populate(events,
+                          bipolar_pairs,
+                          excluded_pairs,
+                          normalized_powers,
+                          raw_events=raw_events)
+        return instance
+
+
+class SessionSummary(Summary):
+    """Base class for single-session objects."""
+
+    @property
+    def subject(self):
+        return extract_subject(self.events)
+
+    @property
+    def experiment(self):
+        experiments = extract_experiment_from_events(self.events)
+        return experiments[0]
+
+    @property
+    def session_number(self):
+        sessions = extract_sessions(self.events)
+        if len(sessions) != 1:
+            raise TooManySessionsError("Single session expected for session "
+                                       "summary")
+
+        session = str(sessions[0])
+        return session
+
+    @property
+    def events(self):
+        return np.rec.array(self._events)
+
+    @events.setter
+    def events(self, new_events):
+        """Only allow setting of events which contain a single session."""
+        if self._events is None:
+            self._events = np.rec.array(new_events)
+            assert len(np.unique(new_events['session'])) == 1, \
+                "events should only be from a single session"
+
+    @property
+    def bipolar_pairs(self):
+        """ Returns a dictionary of bipolar pairs"""
+        return json.loads(self._bipolar_pairs)
+
+    @bipolar_pairs.setter
+    def bipolar_pairs(self, new_bipolar_pairs):
+        self._bipolar_pairs = json.dumps(new_bipolar_pairs)
+
+    @property
+    def excluded_pairs(self):
+        """ Returns a dictionary of bipolar pairs"""
+        return json.loads(self._excluded_pairs)
+
+    @excluded_pairs.setter
+    def excluded_pairs(self, new_excluded_pairs):
+        self._excluded_pairs = json.dumps(new_excluded_pairs)
+
+    @property
+    def normalized_powers(self):
+        return self._normalized_powers
+
+    @normalized_powers.setter
+    def normalized_powers(self, new_normalized_powers):
+        self._normalized_powers = new_normalized_powers
+
+    @property
+    def session_length(self):
+        """Computes the total amount of time the session lasted in seconds."""
+        start = self.events.mstime.min()
+        end = self.events.mstime.max()
+        return (end - start) / 1000.
+
+    @property
+    def session_datetime(self):
+        """Returns a timezone-aware datetime object of the end time of the
+        session in UTC.
+
+        """
+        timestamp = self.events.mstime.max() / 1000.
+        return datetime.fromtimestamp(timestamp, pytz.utc)
+
+    @property
+    def num_lists(self):
+        return len(np.unique(self.events.list))
+
+    def to_dataframe(self, recreate=False):
+        """Convert the summary to a :class:`pd.DataFrame` for easier
+        manipulation. This amounts to converting the events to a dataframe
+
+        Keyword arguments
+        -----------------
+        recreate : bool
+            Force re-creating the dataframe. Otherwise, it will only be created
+            the first time this method is called and stored as an instance
+            attribute.
+
+        Returns
+        -------
+        pd.DataFrame
+
+        """
+        if not hasattr(self, '_df') or recreate:
+            self._df = pd.DataFrame.from_records(self.events)
+
+        return self._df
+
+    def populate(self, events, bipolar_pairs, excluded_pairs,
+                 normalized_powers, raw_events=None):
+        """Populate attributes and store events."""
+        self.events = events
+        self.raw_events = raw_events
+        self.bipolar_pairs = bipolar_pairs
+        self.excluded_pairs = excluded_pairs
+        self.normalized_powers = normalized_powers
+
+
 class FRSessionSummary(SessionSummary):
     """Free recall session summary data."""
-    item = Array(dtype='|U256', desc='list item (a.k.a. word)')
-    session = Array(dtype=int, desc='session number')
-    listno = Array(dtype=int, desc="item's list number")
-    serialpos = Array(dtype=int, desc='item serial position')
-
-    recalled = Array(dtype=bool, desc='item was recalled')
-    thresh = Array(dtype=np.float64, desc='classifier threshold')
-
-    prob = Array(dtype=np.float64, desc='predicted probability of recall')
-
-    def populate(self, events, raw_events=None, recall_probs=None):
+    def populate(self, events, bipolar_pairs, excluded_pairs,
+                 normalized_powers, raw_events=None):
         """Populate data from events.
 
         Parameters
@@ -475,14 +516,8 @@ class FRSessionSummary(SessionSummary):
             indicate this.
 
         """
-        SessionSummary.populate(self, events, raw_events=raw_events)
-        self.item = events.item_name
-        self.session = events.session
-        self.listno = events.list
-        self.serialpos = events.serialpos
-        self.recalled = events.recalled
-        self.thresh = [0.5] * len(events)
-        self.prob = recall_probs if recall_probs is not None else [-999] * len(events)
+        SessionSummary.populate(self, events, bipolar_pairs, excluded_pairs,
+                                normalized_powers, raw_events=raw_events)
 
     @property
     def intrusion_events(self):
@@ -515,7 +550,7 @@ class FRSessionSummary(SessionSummary):
     @property
     def num_lists(self):
         """Returns the total number of lists."""
-        return len(self.to_dataframe().listno.unique())
+        return len(np.unique(self.events.list))
 
     @property
     def percent_recalled(self):
@@ -567,14 +602,16 @@ class CatFRSessionSummary(FRSessionSummary):
         experiments.
     """
     _repetition_ratios = String(desc='Repetition ratio by subject')
-
     irt_within_cat = Array(desc='average inter-response time within categories')
     irt_between_cat = Array(desc='average inter-response time between categories')
 
-    def populate(self, events, raw_events=None, recall_probs=None,
+    def populate(self, events, bipolar_pairs, excluded_pairs,
+                 normalized_powers, raw_events=None,
                  repetition_ratio_dict={}):
-        FRSessionSummary.populate(self, events, raw_events=raw_events,
-                                  recall_probs=recall_probs)
+        FRSessionSummary.populate(self, events,
+                                  bipolar_pairs, excluded_pairs,
+                                  normalized_powers,
+                                  raw_events=raw_events)
 
         self.repetition_ratios = repetition_ratio_dict
 
@@ -626,24 +663,12 @@ class CatFRSessionSummary(FRSessionSummary):
 
 class StimSessionSummary(SessionSummary):
     """SessionSummary data specific to sessions with stimulation."""
-    is_stim_list = Array(dtype=np.bool, desc='item is from a stim list')
-    is_post_stim_item = Array(dtype=np.bool, desc='stimulation occurred on the previous item')
-    is_stim_item = Array(dtype=np.bool, desc='stimulation occurred on this item')
-    is_ps4_session = Array(dtype=np.bool, desc='list is part of a PS4 session')
-    prob_recall = Array(dtype=np.float, desc='probability of recalling a word')
-    post_stim_prob_recall = ArrayOrNone(dtype=np.float,
-                                        desc='classifier output in post stim period')
+    _post_stim_prob_recall = ArrayOrNone(dtype=np.float,
+                                         desc='classifier output in post stim period')
 
-    stim_anode_tag = Array(desc='stim anode label')
-    stim_cathode_tag = Array(desc='stim cathode label')
-    region = Array(desc='brain region of stim pair')
-    pulse_frequency = Array(dtype=np.float64, desc='stim pulse frequency [Hz]')
-    amplitude = Array(dtype=np.float64, desc='stim amplitude [mA]')
-    duration = Array(dtype=np.float64, desc='stim duration [ms]')
-
-    def populate(self, events, post_stim_prob_recall=None,
-                 raw_events=None,
-                 is_ps4_session=False):
+    def populate(self, events, bipolar_pairs, excluded_pairs,
+                 normalized_powers, post_stim_prob_recall=None,
+                 raw_events=None):
         """ Populate stim data from events.
 
         Parameters
@@ -656,35 +681,39 @@ class StimSessionSummary(SessionSummary):
             Whether or not this experiment is also a PS4 session.
 
         """
-        SessionSummary.populate(self, events, raw_events=raw_events)
-
-        self.is_stim_list = events.stim_list
-        self.is_stim_item = events.is_stim_item
-        self.is_post_stim_item = events.is_post_stim_item
-        self.is_ps4_session = [is_ps4_session] * len(events)
-        self.prob_recall = events.classifier_output
+        SessionSummary.populate(self, events,
+                                bipolar_pairs,
+                                excluded_pairs,
+                                normalized_powers,
+                                raw_events=raw_events)
         self.post_stim_prob_recall = post_stim_prob_recall
 
-        self.region = events.location
-        self.stim_anode_tag = events.stimAnodeTag
-        self.stim_cathode_tag = events.stimCathodeTag
-        self.pulse_frequency = events.pulse_freq
-        self.amplitude = events.amplitude
-        self.duration = events.stim_duration
+    @property
+    def post_stim_prob_recall(self):
+        return self._post_stim_prob_recall
+
+    @post_stim_prob_recall.setter
+    def post_stim_prob_recall(self, new_post_stim_prob_recall):
+        self._post_stim_prob_recall = new_post_stim_prob_recall
 
 
 class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
     """ SessionSummary for FR sessions with stim """
-    def populate(self, events, post_stim_prob_recall=None, raw_events=None,
-                 recall_probs=None, is_ps4_session=False):
+    def populate(self, events, bipolar_pairs,
+                 excluded_pairs, normalized_powers, post_stim_prob_recall=None,
+                 raw_events=None):
         FRSessionSummary.populate(self,
                                   events,
-                                  raw_events=raw_events,
-                                  recall_probs=recall_probs)
+                                  bipolar_pairs,
+                                  excluded_pairs,
+                                  normalized_powers,
+                                  raw_events=raw_events)
         StimSessionSummary.populate(self, events,
+                                    bipolar_pairs,
+                                    excluded_pairs,
+                                    normalized_powers,
                                     post_stim_prob_recall=post_stim_prob_recall,
-                                    raw_events=raw_events,
-                                    is_ps4_session=is_ps4_session)
+                                    raw_events=raw_events)
 
     @property
     def pre_stim_prob_recall(self):
@@ -697,8 +726,8 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         """Returns the number of non-stim lists."""
         df = self.to_dataframe()
         count = 0
-        for listno in df.listno.unique():
-            if not df[df.listno == listno].is_stim_list.all():
+        for listno in df.list.unique():
+            if not df[df.list == listno].is_stim_list.all():
                 count += 1
         return count
 
@@ -707,37 +736,37 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         """Returns the number of stim lists."""
         df = self.to_dataframe()
         count = 0
-        for listno in df.listno.unique():
-            if df[df.listno == listno].is_stim_list.all():
+        for listno in df.list.unique():
+            if df[df.list == listno].is_stim_list.all():
                 count += 1
         return count
 
     @property
     def stim_events_by_list(self):
         df = self.to_dataframe()
-        n_stim_events = df.groupby('listno').is_stim_item.sum().tolist()
+        n_stim_events = df.groupby('list').is_stim_item.sum().tolist()
         return n_stim_events
 
     @property
     def prob_stim_by_serialpos(self):
         df = self.to_dataframe()
-        return df.groupby('serialpos').prob_recall.mean().tolist()
+        return df.groupby('serialpos').classifier_output.mean().tolist()
 
     def lists(self, stim=None):
         """ Get a list of eith stim lists or non-stim lists """
         df = self.to_dataframe()
         if stim is not None:
-            lists = df[df.is_stim_list == stim].listno.unique().tolist()
+            lists = df[df.is_stim_list == stim].list.unique().tolist()
         else:
-            lists = df.listno.unique().tolist()
+            lists = df.list.unique().tolist()
         return lists
 
     @property
     def stim_parameters(self):
         df = self.to_dataframe()
-        unique_stim_info = df[['stim_anode_tag', 'stim_cathode_tag',
-                               'region', 'amplitude', 'duration',
-                               'pulse_frequency']].drop_duplicates().dropna()
+        unique_stim_info = df[['stimAnodeTag', 'stimCathodeTag',
+                               'location', 'amplitude', 'stim_duration',
+                               'pulse_freq']].drop_duplicates().dropna()
         unique_stim_info['amplitude'] = unique_stim_info['amplitude'].astype(float) / 1000.0
         return list(unique_stim_info.T.to_dict().values())
 
@@ -747,7 +776,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         # Do not count first 3 lists in assess effects
         # of stim since we never stimulate during them and task performance
         # is likely to vary throughout the session
-        df = df[df.listno > 3]
+        df = df[df.list > 3]
         results = []
 
         # Stim lists vs. non-stim lists
@@ -770,11 +799,11 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         # stim items vs. non-stim low biomarker items
         n_correct_stim_item_recalls = df[df.is_stim_item == True].recalled.sum()
         n_correct_nonstim_item_recalls = df[(df.is_stim_item == False) &
-                                            (df.prob_recall < 0.5)].recalled.sum()
+                                            (df.classifier_output < 0.5)].recalled.sum()
 
         n_stim_items = df[df.is_stim_item == True].recalled.count()
         n_nonstim_items = df[(df.is_stim_item == False) &
-                             (df.prob_recall < 0.5)].recalled.count()
+                             (df.classifier_output < 0.5)].recalled.count()
 
         tstat_list, pval_list, _ = proportions_chisquare(
             [n_correct_stim_item_recalls, n_correct_nonstim_item_recalls],
@@ -808,8 +837,13 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
 
     def recalls_by_list(self, stim_list_only=False):
         df = self.to_dataframe()
-        recalls_by_list = df[df.is_stim_list == stim_list_only].groupby(
-            'listno').recalled.sum().astype(int).tolist()
+        recalls_by_list = (
+            df[df.is_stim_list == stim_list_only]
+            .groupby('list')
+            .recalled
+            .sum()
+            .astype(int)
+            .tolist())
         return recalls_by_list
 
     def prob_first_recall_by_serialpos(self, stim=False):
@@ -817,16 +851,16 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         events = df[df.is_stim_item == stim]
 
         firstpos = np.zeros(len(events.serialpos.unique()), dtype=np.float)
-        for listno in events.listno.unique():
+        for listno in events.list.unique():
             try:
-                nonzero = events[(events.listno == listno) &
+                nonzero = events[(events.list == listno) &
                                  (events.recalled == 1)].serialpos.iloc[0]
             except IndexError:  # no items recalled this list
                 continue
             thispos = np.zeros(firstpos.shape, firstpos.dtype)
             thispos[nonzero - 1] = 1
             firstpos += thispos
-        return (firstpos / events.listno.max()).tolist()
+        return (firstpos / events.list.max()).tolist()
 
     def prob_recall_by_serialpos(self, stim_items_only=False):
         df = self.to_dataframe()
@@ -835,7 +869,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
 
     def delta_recall(self, post_stim_items=False):
         df = self.to_dataframe()
-        nonstim_low_bio_recall = df[(df.prob_recall < 0.5) &
+        nonstim_low_bio_recall = df[(df.classifier_output < 0.5) &
                                     (df.is_stim_list == False)].recalled.mean()
         if post_stim_items:
             recall_stim = df[df.is_post_stim_item == True].recalled.mean()
@@ -849,35 +883,26 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
 
 
 class FR5SessionSummary(FRStimSessionSummary):
-    """FR5-specific summary. This is a standard FR stim session with the
-    possible addition of a recognition subtask at the end (only when not also a
-    PS4 session).
+    """ FR5-specific summary """
 
-    """
-    recognized = Array(dtype=int, desc='item in recognition subtask recognized')
-    rejected = Array(dtype=int, desc='lure item in recognition subtask rejected')
-
-    def populate(self, events, post_stim_prob_recall=None, raw_events=None,
-                 recall_probs=None, is_ps4_session=False):
+    def populate(self, events, bipolar_pairs,
+                 excluded_pairs, normalized_powers, post_stim_prob_recall=None,
+                 raw_events=None):
         FRStimSessionSummary.populate(self, events,
+                                      bipolar_pairs,
+                                      excluded_pairs,
+                                      normalized_powers,
                                       raw_events=raw_events,
-                                      post_stim_prob_recall=post_stim_prob_recall,
-                                      recall_probs=recall_probs,
-                                      is_ps4_session=is_ps4_session)
-        self.recognized = events.recognized
+                                      post_stim_prob_recall=post_stim_prob_recall)
 
 
 class PSSessionSummary(SessionSummary):
     """ Parameter Search experiment summary """
 
-    def populate(self, events, **kwargs):
-        """ Populate stim data from events.
-
-        Parameters
-        ----------
-        events : np.recarray
-        """
-        SessionSummary.populate(self, events)
+    def populate(self, events, bipolar_pairs, excluded_pairs,
+                 normalized_powers, raw_events=None):
+        SessionSummary.populate(self, events, bipolar_pairs, excluded_pairs,
+                                normalized_powers, raw_events=raw_events)
         return
 
     @property

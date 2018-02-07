@@ -63,7 +63,9 @@ def summarize_math(events, joint=False):
 
 
 @task()
-def summarize_nonstim_sessions(all_events, task_events, joint=False,
+def summarize_nonstim_sessions(all_events, task_events,
+                               bipolar_pairs, excluded_pairs,
+                               normalized_powers, joint=False,
                                repetition_ratio_dict={}):
     """ Generate a summary by unique session/experiment
 
@@ -106,15 +108,22 @@ def summarize_nonstim_sessions(all_events, task_events, joint=False,
     for session in sessions:
         session_task_events = task_events[task_events.session == session]
         session_all_events = all_events[all_events.session == session]
+        session_powers = normalized_powers[(task_events.session == session)]
         experiment = extract_experiment_from_events(session_task_events)[0]
 
         if experiment in ['FR1']:
             summary = FRSessionSummary()
             summary.populate(session_task_events,
+                             bipolar_pairs,
+                             excluded_pairs,
+                             session_powers,
                              raw_events=session_all_events)
         elif experiment in ['catFR1']:
             summary = CatFRSessionSummary()
             summary.populate(session_task_events,
+                             bipolar_pairs,
+                             excluded_pairs,
+                             session_powers,
                              raw_events=session_all_events,
                              repetition_ratio_dict=repetition_ratio_dict)
         else:
@@ -127,6 +136,7 @@ def summarize_nonstim_sessions(all_events, task_events, joint=False,
 
 @task()
 def summarize_stim_sessions(all_events, task_events, stim_params,
+                            bipolar_pairs, excluded_pairs, normalized_powers,
                             encoding_classifier_summaries,
                             post_stim_predicted_probs,
                             pairs_data):
@@ -138,6 +148,7 @@ def summarize_stim_sessions(all_events, task_events, stim_params,
 
     stim_session_summaries = []
     for i, session in enumerate(sessions):
+        session_powers = normalized_powers[(task_events.session == session)]
         all_session_events = select_session_events(all_events, session)
         all_session_stim_events = select_session_events(stim_table_events, session)
         all_session_task_events = select_session_events(task_events, session)
@@ -153,7 +164,7 @@ def summarize_stim_sessions(all_events, task_events, stim_params,
         stim_df = pd.DataFrame(columns=['subject', 'experiment', 'session',
                                         'list', 'mstime', 'item_name', 'type',
                                         'serialpos', 'phase', 'is_stim_item',
-                                        'stim_list', 'is_post_stim_item',
+                                        'is_stim_list', 'is_post_stim_item',
                                         'recalled', 'thresh',
                                         'classifier_output'])
         expected_dtypes = [('serialpos', '<i8'),
@@ -164,7 +175,7 @@ def summarize_stim_sessions(all_events, task_events, stim_params,
                            ('type', '<U256'),
                            ('recalled', '<i8'),
                            ('list', '<i8'),
-                           ('stim_list', '<i8'),
+                           ('is_stim_list', '<i8'),
                            ('phase', '<U256'),
                            ('item_name', '<U256'),
                            ('is_stim_item', '<i8'),
@@ -187,7 +198,7 @@ def summarize_stim_sessions(all_events, task_events, stim_params,
         stim_df['phase'] = all_session_task_events.phase
         stim_df['is_stim_item'] = stim_item_mask
         stim_df['is_post_stim_item'] = post_stim_item_mask
-        stim_df['stim_list'] = all_session_task_events.stim_list
+        stim_df['is_stim_list'] = all_session_task_events.stim_list
         stim_df['recalled'] = all_session_task_events.recalled
         stim_df['thresh'] = 0.5
         stim_df['classifier_output'] = predicted_probabilities
@@ -211,7 +222,8 @@ def summarize_stim_sessions(all_events, task_events, stim_params,
             stim_events = dataframe_to_recarray(stim_df, expected_dtypes)
             stim_session_summary = FRStimSessionSummary()
             stim_session_summary.populate(
-                stim_events, raw_events=all_session_events,
+                stim_events, bipolar_pairs, excluded_pairs, session_powers,
+                raw_events=all_session_events,
                 post_stim_prob_recall=post_stim_predicted_probs[i])
         else:
             raise UnsupportedExperimentError('Only FR5 and catFR5 currently '
@@ -223,12 +235,14 @@ def summarize_stim_sessions(all_events, task_events, stim_params,
 
 
 @task()
-def summarize_ps_sessions(ps_events):
+def summarize_ps_sessions(ps_events, bipolar_pairs, excluded_pairs):
     """ Task for generating summaries of PS session
 
     Parameters
     ----------
-    ps_events
+    ps_events: np.recarray
+    bipolar_pairs: dict
+    excluded_pairs: dict
 
     """
     session_summaries = []
@@ -236,7 +250,7 @@ def summarize_ps_sessions(ps_events):
     for session in sessions:
         session_events = select_session_events(ps_events, session)
         summary = PSSessionSummary()
-        summary.populate(session_events)
+        summary.populate(session_events, bipolar_pairs, excluded_pairs, None)
         session_summaries.append(summary)
 
     return session_summaries
