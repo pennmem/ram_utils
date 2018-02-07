@@ -113,6 +113,7 @@ def test_reduce_powers():
                 range(len(expected_sizes))])
     return
 
+
 def test_reshape_powers_to_3d():
     test_powers = np.random.random(size=(10, 150))
     reshaped_powers = reshape_powers_to_3d(test_powers, 10)
@@ -128,7 +129,8 @@ def test_reshape_powers_to_2d():
 
 
 @pytest.mark.parametrize("events, powers, exp_table, parameters", [
-    ('R1354E_task_events_rhino.npy', 'R1354E_normalized_powers.npy', 'R1354E_hfa_ttest_table.csv', FRParameters)
+    ('R1354E_task_events_rhino.npy', 'R1354E_normalized_powers.npy',
+     'R1354E_hfa_ttest_table.csv', FRParameters)
 ])
 def test_calculate_delta_hfa_table_regression(events, powers, exp_table,
                                               parameters, rhino_root):
@@ -139,7 +141,8 @@ def test_calculate_delta_hfa_table_regression(events, powers, exp_table,
                                index_col=0)
     hfa_table = calculate_delta_hfa_table(config_pairs, powers, events,
                                           parameters['freqs'],
-                                          parameters['trigger_freq'])
+                                          hfa_cutoff=65,
+                                          trigger_freq=parameters['trigger_freq'])
     old_hfa_table = pd.read_csv(datafile('/powers/' + exp_table))
 
     assert np.allclose(old_hfa_table['t_stat'].values,
