@@ -46,13 +46,13 @@ def estimate_effects_of_stim(subject, experiment, stim_session_summaries):
 
     # Turn list into a % session completed variable to that subjects who
     # complete only partial sessions can still be compared to full sessions
-    df["listno"] = ((df["listno"] - (df["listno"].min())) /
-                    (len(df["listno"].unique())))
+    df["list"] = ((df["list"] - (df["list"].min())) /
+                    (len(df["list"].unique())))
 
     serialpos_dummies = pd.get_dummies(df.serialpos)
     df = pd.concat([df, serialpos_dummies], axis=1)
 
-    df["low_biomarker"] = (df["prob_recall"] < 0.5)
+    df["low_biomarker"] = (df["classifier_output"] < df["thresh"])
 
     # Stim Lists vs. Non-stim Lists
     stim_list_model = HierarchicalModel(df, subject, experiment,
