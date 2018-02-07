@@ -334,6 +334,7 @@ class MathSummary(Schema):
 class Summary(Schema):
     """Base class for all summary objects."""
     _events = ArrayOrNone(desc='task events')
+    _events = ArrayOrNone(desc='task events')
     _raw_events = ArrayOrNone(desc='all events')
     _bipolar_pairs = String(desc='bipolar pairs in montage')
     _excluded_pairs = String(desc='bipolar pairs not used for classification '
@@ -675,8 +676,8 @@ class StimSessionSummary(SessionSummary):
 
     @post_stim_prob_recall.setter
     def post_stim_prob_recall(self, new_post_stim_prob_recall):
-        self._post_stim_prob_recall = new_post_stim_prob_recall.flatten().tolist()
-
+        if new_post_stim_prob_recall is not None:
+            self._post_stim_prob_recall = new_post_stim_prob_recall.flatten().tolist()
 
     def populate(self, events, bipolar_pairs, excluded_pairs,
                  normalized_powers, post_stim_prob_recall=None,
