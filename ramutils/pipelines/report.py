@@ -120,7 +120,7 @@ def make_report(subject, experiment, paths, joint_report=False,
         classifier_evaluation_results, repetition_ratio_dict = \
             generate_data_for_nonstim_report(subject, experiment, sessions,
                                              joint_report, paths, ec_pairs,
-                                             used_pair_mask,
+                                             used_pair_mask, excluded_pairs,
                                              pairs_metadata_table, all_events,
                                              **kwargs)
     elif experiment.find("PS5") != -1:
