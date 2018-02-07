@@ -111,6 +111,11 @@ def test_reduce_powers():
     assert all([reduced_power_matrices[i].shape == (n_events, expected_sizes[i]
                                                  * n_frequencies) for i in
                 range(len(expected_sizes))])
+
+    # Case 4: Select a subset of frequencies
+    all_electrodes_mask = np.ones(100, dtype=bool)
+    reduced_pow_mat = reduce_powers(sample_pow_mat, all_electrodes_mask,
+                                    n_frequencies, )
     return
 
 

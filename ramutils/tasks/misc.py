@@ -57,7 +57,8 @@ def save_all_output(subject, experiment, session_summaries, math_summaries,
     session_str = '_'.join([str(summary.session_number) for summary in
                             session_summaries])
 
-    if target_selection_table is not None:
+    if (target_selection_table is not None) and \
+            (len(target_selection_table) > 0):
         target_selection_table.to_csv(
             base_output_format.format(subject=subject,
                                       experiment=experiment,

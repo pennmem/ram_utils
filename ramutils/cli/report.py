@@ -13,7 +13,7 @@ from ramutils.cli import make_parser
 from ramutils.exc import UnsupportedExperimentError, TooManySessionsError, CommandLineError
 from ramutils.log import get_logger, get_warning_accumulator
 from ramutils.montage import make_stim_params
-from ramutils.parameters import FilePaths, FRParameters
+from ramutils.parameters import FilePaths, FRParameters, PS5Parameters
 from ramutils.pipelines.report import make_report
 from ramutils.utils import timer, is_stim_experiment
 from ramutils.tasks import memory
@@ -70,7 +70,9 @@ def create_report(input_args=None):
     else:
         sessions = None
 
-    if 'FR' in args.experiment:
+    if 'PS5' in args.experiment:
+        exp_params = PS5Parameters()
+    elif 'FR' in args.experiment:
         exp_params = FRParameters()
     elif 'PAL' in args.experiment:
         raise NotImplementedError("PAL experiments are not supported yet")

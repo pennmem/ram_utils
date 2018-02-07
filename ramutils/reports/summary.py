@@ -771,7 +771,20 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         # Do not count first 3 lists in assess effects
         # of stim since we never stimulate during them and task performance
         # is likely to vary throughout the session
+        stim_columns = ['stimAnodeTag', 'stimCathodeTag', 'location',
+                        'amplitude', 'stim_duration', 'pulse_freq']
+        non_stim_columns = [c for c in df.columns if c not in stim_columns]
         df = df[df.list > 3]
+
+        stim_param_by_list = (df[(stim_columns + ['list'])]
+                                .drop_duplicates()
+                                .dropna())
+
+        # This ensures that for any given list, the stim parameters used
+        # during that list are populated. This makes calculating post stim
+        # item behavioral responses easier
+        df = df[non_stim_columns]
+        df = df.merge(stim_param_by_list, on='list', how='left')
 
         results = []
         for name, group in df.groupby(['stimAnodeTag', 'stimCathodeTag',
@@ -780,10 +793,9 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
             parameters = "/".join([str(n) for n in name])
 
             # Stim lists vs. non-stim lists
-            n_correct_stim_list_recalls = df[df.is_stim_list == True].recalled.sum()
-            n_correct_nonstim_list_recalls = df[df.is_stim_list ==
-                                                False].recalled.sum()
-            n_stim_list_words = df[df.is_stim_list == True].recalled.count()
+            n_correct_stim_list_recalls = group[group.is_stim_list == True].recalled.sum()
+            n_correct_nonstim_list_recalls = df[df.is_stim_list == False].recalled.sum()
+            n_stim_list_words = group[group.is_stim_list == True].recalled.count()
             n_nonstim_list_words = df[df.is_stim_list == False].recalled.count()
             tstat_list, pval_list, _ = proportions_chisquare([
                 n_correct_stim_list_recalls, n_correct_nonstim_list_recalls],
@@ -798,14 +810,15 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
                             "p-value": pval_list})
 
             # stim items vs. non-stim low biomarker items
-            n_correct_stim_item_recalls = df[df.is_stim_item == True].recalled.sum()
+            n_correct_stim_item_recalls = group[group.is_stim_item == True].recalled.sum()
             n_correct_nonstim_item_recalls = df[(df.is_stim_item == False) &
                                                 (df.classifier_output <
                                                  df.thresh)].recalled.sum()
 
-            n_stim_items = df[df.is_stim_item == True].recalled.count()
+            n_stim_items = group[group.is_stim_item == True].recalled.count()
             n_nonstim_items = df[(df.is_stim_item == False) &
-                                 (df.classifier_output < df.thresh)].recalled.count()
+                                 (df.classifier_output <
+                                  df.thresh)].recalled.count()
 
             tstat_list, pval_list, _ = proportions_chisquare(
                 [n_correct_stim_item_recalls, n_correct_nonstim_item_recalls],
@@ -820,22 +833,20 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
                 "p-value": pval_list})
 
             # post stim items vs. non-stim low biomarker items
-            n_correct_post_stim_item_recalls = df[df.is_post_stim_item ==
-                                                  True].recalled.sum()
-
-            n_post_stim_items = df[df.is_post_stim_item == True].recalled.count()
+            n_correct_post_stim_item_recalls = group[group.is_post_stim_item == True].recalled.sum()
+            n_post_stim_items = group[group.is_post_stim_item == True].recalled.count()
 
             tstat_list, pval_list, _ = proportions_chisquare(
             [n_correct_post_stim_item_recalls, n_correct_nonstim_item_recalls],
             [n_post_stim_items, n_nonstim_items])
 
-        results.append({
-            "parameters": parameters,
-            "comparison": "Post-stim Items vs. Low Biomarker Non-stim Items",
-            "stim": (n_correct_post_stim_item_recalls, n_post_stim_items),
-            "non-stim": (n_correct_nonstim_item_recalls, n_nonstim_items),
-            "t-stat": tstat_list,
-            "p-value": pval_list})
+            results.append({
+                "parameters": parameters,
+                "comparison": "Post-stim Items vs. Low Biomarker Non-stim Items",
+                "stim": (n_correct_post_stim_item_recalls, n_post_stim_items),
+                "non-stim": (n_correct_nonstim_item_recalls, n_nonstim_items),
+                "t-stat": tstat_list,
+                "p-value": pval_list})
 
         return results
 
