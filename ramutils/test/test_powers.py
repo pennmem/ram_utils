@@ -165,7 +165,7 @@ def test_regression_compute_normalized_powers(events, exp_powers, parameters,
     parameters = parameters().to_dict()
     events = load_event_test_data(datafile('/events/' + events), rhino_root)
     new_powers, updated_events = compute_normalized_powers(events,
-                                                           **parameters).compute()
+                                                           **parameters)
 
     orig_powers = np.load(datafile('/powers/' + exp_powers))
     assert np.allclose(orig_powers, new_powers, atol=1e-1)
