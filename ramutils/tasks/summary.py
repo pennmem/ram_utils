@@ -231,6 +231,7 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
         stim_df = stim_df.merge(location_data, how='left', on=['label'])
         del stim_df['label']
 
+
         # TODO: Add some sort of data quality check here potentially. Do the
         # observed stim items match what we expect from classifier output?
 
