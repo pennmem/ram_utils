@@ -66,12 +66,9 @@ def make_report(subject, experiment, paths, joint_report=False,
 
     if not rerun:
         target_selection_table, classifier_evaluation_results, \
-        session_summaries, math_summaries = load_existing_results(subject,
-                                                                  experiment,
-                                                                  sessions,
-                                                                  stim_report,
-                                                                  paths.data_db,
-                                                                  rootdir=paths.root).compute()
+        session_summaries, math_summaries, hmm_results = \
+            load_existing_results(subject, experiment, sessions, stim_report,
+                                  paths.data_db, rootdir=paths.root).compute()
 
         # Check if only None values were returned. Processing will continue
         # undeterred
@@ -82,7 +79,8 @@ def make_report(subject, experiment, paths, joint_report=False,
         else:
             report = build_static_report(subject, experiment, session_summaries,
                                          math_summaries, target_selection_table,
-                                         classifier_evaluation_results, paths.dest)
+                                         classifier_evaluation_results,
+                                         paths.dest, hmm_results=hmm_results)
             return report.compute()
 
     # TODO: allow using different localization, montage numbers
@@ -154,7 +152,8 @@ def make_report(subject, experiment, paths, joint_report=False,
 
     report = build_static_report(subject, experiment, session_summaries,
                                  math_summaries, target_selection_table,
-                                 classifier_evaluation_results, paths.dest)
+                                 classifier_evaluation_results,
+                                 hmm_results=output, dest=paths.dest)
 
     if vispath is not None:
         report.visualize(filename=vispath)
