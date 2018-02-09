@@ -11,11 +11,12 @@ __all__ = [
 
 @task(cache=False)
 def build_static_report(subject, experiment, session_summaries, math_summaries,
-                        delta_hfa_table, classifier_summaries, dest):
+                        delta_hfa_table, classifier_summaries, dest,
+                        hmm_results={}):
     """ Given a set of summary objects, generate a static HTML report """
     generator = ReportGenerator(session_summaries, math_summaries,
                                 delta_hfa_table, classifier_summaries,
-                                dest=dest)
+                                dest=dest, hmm_results=hmm_results)
     report = generator.generate()
 
     sessions = [str(summary.session_number) for summary in session_summaries]
