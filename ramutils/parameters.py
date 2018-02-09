@@ -86,8 +86,9 @@ class ExperimentParameters(Schema):
     hfa_cutoff = Int(65, desc="Lowers frequency that will be considered a 'high frequency'")
     trigger_freq = Int(110, desc="Frequency to use for PS5 pseudo closed-loop experiment")
 
-    log_powers = Bool(True)
-    normalize_powers = Bool(True)
+    log_powers = Bool(True, desc="If true, log of powers will be returned "
+                                 "rather than raw values")
+    normalize_powers = Bool(True, desc="If true, powers will be normalized by partition (encoding/retrieval/pal) and within session using standard (x - mu) / sigma")
 
     filt_order = Int(4, desc="Butterworth filter order")
 
