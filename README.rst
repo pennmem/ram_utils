@@ -49,10 +49,10 @@ Ramulator experiment configuration files for stimulation experiments are
 generated via the ``ramulator-conf`` script::
 
     usage: ramulator-conf [-h] [--root ROOT] [--dest DEST] [--cachedir CACHEDIR]
-                          --subject SUBJECT [--force-rerun] --experiment
-                          {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,FR1,CatFR1,PAL1}
-                          [--vispath VISPATH] [--localization LOCALIZATION]
-                          [--montage MONTAGE]
+                          --subject SUBJECT [--use-cached] --experiment
+                          {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,PS5_FR,PS5_CatFR,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,FR1,CatFR1,PAL1}
+                          [--vispath VISPATH] [--version]
+                          [--localization LOCALIZATION] [--montage MONTAGE]
                           [--electrode-config-file ELECTRODE_CONFIG_FILE]
                           [--anodes ANODES [ANODES ...]]
                           [--cathodes CATHODES [CATHODES ...]]
@@ -73,10 +73,11 @@ generated via the ``ramulator-conf`` script::
       --cachedir CACHEDIR   absolute path for caching dir
       --subject SUBJECT, -s SUBJECT
                             subject ID
-      --force-rerun         force re-running all tasks
-      --experiment {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,FR1,CatFR1,PAL1}, -x {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,FR1,CatFR1,PAL1}
+      --use-cached          allow cached results from previous run to be reused
+      --experiment {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,PS5_FR,PS5_CatFR,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,FR1,CatFR1,PAL1}, -x {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,PS5_FR,PS5_CatFR,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,FR1,CatFR1,PAL1}
                             experiment
       --vispath VISPATH     path to save task graph visualization to
+      --version             show program's version number and exit
       --localization LOCALIZATION, -l LOCALIZATION
                             localization number (default: 0)
       --montage MONTAGE, -m MONTAGE
@@ -96,10 +97,12 @@ generated via the ``ramulator-conf`` script::
       --no-extended-blanking
                             disable extended blanking
       --default-area DEFAULT_AREA, -A DEFAULT_AREA
-                            default surface area to use for all contacts
+                            default surface area to use for all contacts (default:
+                            0.001)
       --area-file AREA_FILE
-                            path to area.txt file relative to root
-      --clear-log           clear the log
+                        path to area.txt file relative to root
+  --clear-log           clear the log
+
 
 Report generation
 -----------------
@@ -107,13 +110,14 @@ Report generation
 Generating reports on the command line::
 
     usage: ram-report [-h] [--root ROOT] [--dest DEST] [--cachedir CACHEDIR]
-                      --subject SUBJECT [--force-rerun] --experiment
-                      {FR1,CatFR1,PAL1,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR6,CatFR6}
+                      --subject SUBJECT [--use-cached] --experiment
+                      {FR1,CatFR1,PAL1,PS4_FR5,PS4_CatFR5,PS5_FR,PS5_CatFR,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR6,CatFR6}
                       [--vispath VISPATH] [--version]
                       [--sessions SESSIONS [SESSIONS ...]] [--retrain]
                       [--excluded-contacts EXCLUDED_CONTACTS [EXCLUDED_CONTACTS ...]]
-                      [--joint-report] [--use-cached]
+                      [--joint-report] [--rerun]
                       [--report_db_location REPORT_DB_LOCATION]
+                      [--trigger-electrode TRIGGER_ELECTRODE]
 
     Generate a report
 
@@ -125,8 +129,8 @@ Generating reports on the command line::
       --cachedir CACHEDIR   absolute path for caching dir
       --subject SUBJECT, -s SUBJECT
                             subject ID
-      --force-rerun         force re-running all tasks
-      --experiment {FR1,CatFR1,PAL1,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR6,CatFR6}, -x {FR1,CatFR1,PAL1,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR6,CatFR6}
+      --use-cached          allow cached results from previous run to be reused
+      --experiment {FR1,CatFR1,PAL1,PS4_FR5,PS4_CatFR5,PS5_FR,PS5_CatFR,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR6,CatFR6}, -x {FR1,CatFR1,PAL1,PS4_FR5,PS4_CatFR5,PS5_FR,PS5_CatFR,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR6,CatFR6}
                             experiment
       --vispath VISPATH     path to save task graph visualization to
       --version             show program's version number and exit
@@ -136,9 +140,13 @@ Generating reports on the command line::
       --excluded-contacts EXCLUDED_CONTACTS [EXCLUDED_CONTACTS ...], -E EXCLUDED_CONTACTS [EXCLUDED_CONTACTS ...]
                             contacts to exclude from classifier
       --joint-report, -j    include CatFR/FR for FR reports (default: off)
-      --use-cached, -C      use previously generated data
+      --rerun, -C           do not use previously generated output
       --report_db_location REPORT_DB_LOCATION
                             location of report data database
+      --trigger-electrode TRIGGER_ELECTRODE, -t TRIGGER_ELECTRODE
+                        Label of the electrode to use for triggering
+                        stimulation in PS5
+
 
 
 

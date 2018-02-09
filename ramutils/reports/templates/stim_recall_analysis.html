@@ -1,9 +1,10 @@
 <div>
   <h2>Memory Modulation Analysis</h2>
 
-  <table class="table table-striped table-hover">
+  <table id="memory_modulation_table" class="table table-striped table-hover">
     <thead>
     <tr>
+      <th>Parameters</th>
       <th>Comparison</th>
       <th>Stim</th>
       <th>Non-stim</th>
@@ -14,6 +15,7 @@
     <tbody>
     {% for test in recall_tests %}
       <tr>
+        <td>{{test['parameters']}}</td>
         <td>{{ test['comparison'] }}</td>
         <td>{{ test['stim'][0] }}/{{ test['stim'][1] }} ({{ "{:.1f}".format(100 * (test['stim'][0] / test['stim'][1])) }}%)</td>
         <td>{{ test['non-stim'][0] }}/{{ test['non-stim'][1] }} ({{ "{:.1f}".format(100 * (test['non-stim'][0] / test['non-stim'][1])) }}%)</td>
@@ -47,6 +49,10 @@
 
 <script>
   window.addEventListener('load', () => {
+    $(document).ready( function () {
+    $('#memory_modulation_table').DataTable();
+    });
+
     const summary = JSON.parse('{{ plot_data["recall_summary"] }}');
     const probs = JSON.parse('{{ plot_data["stim_probability"] }}');
     const recallDifference = JSON.parse('{{ plot_data["recall_difference"] }}');

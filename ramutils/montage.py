@@ -6,7 +6,6 @@ import os
 import os.path
 from glob import glob
 from os import path as osp
-from tempfile import gettempdir
 
 import h5py
 import numpy as np
@@ -20,6 +19,10 @@ from ptsa.data.readers import JsonIndexReader
 
 from ramutils.parameters import StimParameters
 from ramutils.utils import extract_subject_montage, touch, bytes_to_str, tempdir
+from ramutils.log import get_logger
+
+
+logger = get_logger()
 
 
 def make_stim_params(subject, anodes, cathodes, min_amplitudes=None,
@@ -144,6 +147,20 @@ def build_montage_metadata_table(subject, experiment, all_pairs, root='/'):
                                      'location', 'mni_x', 'mni_y', 'mni_z']]
 
     return pairs_metadata
+
+
+def get_trigger_electrode_mask(montage_metadata_table, contact_label):
+    # Make sure labels are not the index, but are instead numeric
+    montage_metadata_table = montage_metadata_table.reset_index()
+
+    if contact_label not in montage_metadata_table['label'].values:
+        raise RuntimeError('%s not found. Check that label exists in the '
+                           'electrode config file.')
+    montage_metadata_table['is_trigger_electrode'] = (montage_metadata_table[
+        'label'] == contact_label)
+    trigger_electrode_mask = montage_metadata_table[
+        'is_trigger_electrode'].values.tolist()
+    return trigger_electrode_mask
 
 
 def generate_pairs_for_classifier(pairs, excluded_pairs):
@@ -405,18 +422,21 @@ def extract_atlas_location(bp_data):
     # Sort of a waterfall here: Stein, then WB for depths, then ind
     if 'stein' in atlases:
         loc_tag = atlases['stein']['region']
-        if (loc_tag is not None) and (loc_tag!='') and (loc_tag!='None'):
+        if (loc_tag is not None) and (loc_tag != '') and (loc_tag != 'None'):
             return loc_tag
 
     if (bp_data['type_1'] == 'D') and ('wb' in atlases):
         wb_loc = atlases['wb']['region']
-        if (wb_loc is not None) and (wb_loc!='') and (wb_loc!='None'):
+        if (wb_loc is not None) and (wb_loc != '') and (wb_loc != 'None'):
             return wb_loc
 
-    if 'ind' in atlases:
-        ind_loc = atlases['ind']['region']
-        if (ind_loc is not None) and (ind_loc!='') and (ind_loc!='None'):
-            return ('Left ' if atlases['ind']['x']<0.0 else 'Right ') + ind_loc
+    try:
+        if 'ind' in atlases:
+            ind_loc = atlases['ind']['region']
+            if (ind_loc is not None) and (ind_loc != '') and (ind_loc != 'None'):
+                return ('Left ' if atlases['ind']['x'] < 0.0 else 'Right ') + ind_loc
+    except TypeError:
+        logger.warning('Missing coordinates for an electrode. Likely a neurorad pipeline error')
 
     return '--'
 

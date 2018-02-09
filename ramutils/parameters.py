@@ -84,8 +84,11 @@ class ExperimentParameters(Schema):
     freqs = Array(value=np.logspace(np.log10(6), np.log10(180), 8),
                   desc='frequencies to compute powers for')
     hfa_cutoff = Int(65, desc="Lowers frequency that will be considered a 'high frequency'")
+    trigger_freq = Int(110, desc="Frequency to use for PS5 pseudo closed-loop experiment")
 
-    log_powers = Bool(True)  # FIXME: do we really need this?
+    log_powers = Bool(True, desc="If true, log of powers will be returned "
+                                 "rather than raw values")
+    normalize_powers = Bool(True, desc="If true, powers will be normalized by partition (encoding/retrieval/pal) and within session using standard (x - mu) / sigma")
 
     filt_order = Int(4, desc="Butterworth filter order")
 
@@ -151,4 +154,11 @@ class PALParameters(FRParameters):
     encoding_multiplier = Float(7.2, desc="weighting factor for encoding "
                                           "samples in PAL")
     pal_multiplier = Float(1.93, desc="weighting factor for PAL samples")
+
+
+class PS5Parameters(FRParameters):
+    """ PS5 experiment parameters """
+    normalize_powers = Bool(False)
+
+
 

@@ -40,9 +40,9 @@ class HierarchicalModel(object):
         self.data = data
         self.n_sessions = len(self.data.session.unique())
         self.n_serialpos = len(self.data.serialpos.unique())
-        self.n_lists = len(self.data.listno.unique())
+        self.n_lists = len(self.data.list.unique())
         self.session_idx = self.data.session.values
-        self.list_idx = self.data.listno.values
+        self.list_idx = self.data.list.values
         self.serialpos_idx = self.data.serialpos.values
 
         level_treatment_map = {
@@ -110,7 +110,7 @@ class HierarchicalModel(object):
                                      serialpos_coef[8] * self.data[9] +
                                      serialpos_coef[9] * self.data[10] +
                                      serialpos_coef[10] * self.data[11] +
-                                     listpos_coef * self.data.listno.values +
+                                     listpos_coef * self.data.list.values +
                                      beta[self.data.session.values] * self.data.is_stim_list)
 
             y_like = pm.Bernoulli('y_like',

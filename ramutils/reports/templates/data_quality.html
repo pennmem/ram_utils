@@ -2,10 +2,17 @@
   <h2>Data quality metrics</h2>
   <figure>
     <div id="classifier-output-placeholder"></div>
+    {% if experiment == 'PS5' %}
+    <figcaption>
+      Raw power at the triggering electrode before and after stimulation and the
+      difference between these. Click on a legend label to toggle visibility.
+    </figcaption>
+    {% else %}
     <figcaption>
       Classifier output distributions before and after stimulation and the
       difference between these. Click on a legend label to toggle visibility.
     </figcaption>
+    {% endif %}
   </figure>
 </div>
 

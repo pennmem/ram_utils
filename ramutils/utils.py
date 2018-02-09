@@ -223,8 +223,13 @@ def is_stim_experiment(experiment):
 
     """
     experiment_series = extract_experiment_series(experiment)
-    if experiment_series != '1':
+
+    if 'PS5' in experiment:
         return True
+
+    elif experiment_series != '1':
+        return True
+
     return False
 
 

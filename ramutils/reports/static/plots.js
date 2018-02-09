@@ -300,7 +300,6 @@ var ramutils = (function (mod, Plotly) {
 
       const layout = {
         // barmode: 'overlay',
-        xaxis: {title: 'Classifier output'},
         yaxis: {title: 'Frequency'}
       };
 

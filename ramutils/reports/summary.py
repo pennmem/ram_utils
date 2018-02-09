@@ -221,7 +221,6 @@ class MathSummary(Schema):
         """
         if not hasattr(self, '_df') or recreate:
             self._df = pd.DataFrame.from_records(self.events)
-
         return self._df
 
     @property
@@ -234,6 +233,10 @@ class MathSummary(Schema):
     def events(self, new_events):
         if self._events is None:
             self._events = np.rec.array(new_events)
+
+    @property
+    def session_number(self):
+        return np.unique(self.events.session)[0]
 
     @property
     def num_problems(self):
@@ -666,21 +669,19 @@ class StimSessionSummary(SessionSummary):
     _post_stim_prob_recall = ArrayOrNone(dtype=np.float,
                                          desc='classifier output in post stim period')
 
+    @property
+    def post_stim_prob_recall(self):
+        return self._post_stim_prob_recall
+
+    @post_stim_prob_recall.setter
+    def post_stim_prob_recall(self, new_post_stim_prob_recall):
+        if new_post_stim_prob_recall is not None:
+            self._post_stim_prob_recall = new_post_stim_prob_recall.flatten().tolist()
+
     def populate(self, events, bipolar_pairs, excluded_pairs,
                  normalized_powers, post_stim_prob_recall=None,
                  raw_events=None):
-        """ Populate stim data from events.
-
-        Parameters
-        ----------
-        events : np.recarray
-        post_stim_prob_recall: np.array
-            Classifier outputs during post stim period
-        raw_events: np.recarray
-        is_ps4_session : bool
-            Whether or not this experiment is also a PS4 session.
-
-        """
+        """ Populate stim data from events """
         SessionSummary.populate(self, events,
                                 bipolar_pairs,
                                 excluded_pairs,
@@ -688,13 +689,6 @@ class StimSessionSummary(SessionSummary):
                                 raw_events=raw_events)
         self.post_stim_prob_recall = post_stim_prob_recall
 
-    @property
-    def post_stim_prob_recall(self):
-        return self._post_stim_prob_recall
-
-    @post_stim_prob_recall.setter
-    def post_stim_prob_recall(self, new_post_stim_prob_recall):
-        self._post_stim_prob_recall = new_post_stim_prob_recall
 
 
 class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
@@ -718,7 +712,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
     @property
     def pre_stim_prob_recall(self):
         df = self.to_dataframe()
-        pre_stim_probs = df[df.is_stim_item == True].prob_recall.values.tolist()
+        pre_stim_probs = df[df.is_stim_item == True].classifier_output.values.tolist()
         return pre_stim_probs
 
     @property
@@ -753,7 +747,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         return df.groupby('serialpos').classifier_output.mean().tolist()
 
     def lists(self, stim=None):
-        """ Get a list of eith stim lists or non-stim lists """
+        """ Get a list of either stim lists or non-stim lists """
         df = self.to_dataframe()
         if stim is not None:
             lists = df[df.is_stim_list == stim].list.unique().tolist()
@@ -762,76 +756,109 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         return lists
 
     @property
-    def stim_parameters(self):
+    def stim_columns(self):
+        return ['stimAnodeTag', 'stimCathodeTag', 'location', 'amplitude',
+                'stim_duration', 'pulse_freq']
+
+    @property
+    def stim_params_by_list(self):
         df = self.to_dataframe()
-        unique_stim_info = df[['stimAnodeTag', 'stimCathodeTag',
-                               'location', 'amplitude', 'stim_duration',
-                               'pulse_freq']].drop_duplicates().dropna()
-        unique_stim_info['amplitude'] = unique_stim_info['amplitude'].astype(float) / 1000.0
-        return list(unique_stim_info.T.to_dict().values())
+        stim_columns = self.stim_columns
+        non_stim_columns = [c for c in df.columns if c not in stim_columns]
+
+        stim_param_by_list = (df[(stim_columns + ['list'])]
+                                .drop_duplicates()
+                                .dropna())
+
+        # This ensures that for any given list, the stim parameters used
+        # during that list are populated. This makes calculating post stim
+        # item behavioral responses easier
+        df = df[non_stim_columns]
+        df = df.merge(stim_param_by_list, on='list', how='left')
+        return df
+
+    @property
+    def stim_parameters(self):
+        df = self.stim_params_by_list
+        grouped = (df.groupby(by=(self.stim_columns + ['is_stim_list']))
+                     .agg({'is_stim_item' : 'sum',
+                           'subject': 'count'})
+                     .rename(columns={'is_stim_item': 'n_stimulations',
+                                      'subject': 'n_trials'})
+                     .reset_index())
+
+        return list(grouped.T.to_dict().values())
 
     @property
     def recall_test_results(self):
-        df = self.to_dataframe()
-        # Do not count first 3 lists in assess effects
-        # of stim since we never stimulate during them and task performance
-        # is likely to vary throughout the session
-        df = df[df.list > 3]
+        df = self.stim_params_by_list
+
+        if "PS5" not in self.experiment:
+            df = df[df.list > 3]
+        else:
+            df = df[df.list > -1]
+
         results = []
+        for name, group in df.groupby(['stimAnodeTag', 'stimCathodeTag',
+                                       'location', 'amplitude', 'stim_duration',
+                                       'pulse_freq']):
+            parameters = "/".join([str(n) for n in name])
 
-        # Stim lists vs. non-stim lists
-        n_correct_stim_list_recalls = df[df.is_stim_list == True].recalled.sum()
-        n_correct_nonstim_list_recalls = df[df.is_stim_list ==
-                                            False].recalled.sum()
-        n_stim_list_words = df[df.is_stim_list == True].recalled.count()
-        n_nonstim_list_words = df[df.is_stim_list == False].recalled.count()
-        tstat_list, pval_list, _ = proportions_chisquare([
-            n_correct_stim_list_recalls, n_correct_nonstim_list_recalls],
-            [n_stim_list_words, n_nonstim_list_words])
+            # Stim lists vs. non-stim lists
+            n_correct_stim_list_recalls = group[group.is_stim_list == True].recalled.sum()
+            n_correct_nonstim_list_recalls = df[df.is_stim_list == False].recalled.sum()
+            n_stim_list_words = group[group.is_stim_list == True].recalled.count()
+            n_nonstim_list_words = df[df.is_stim_list == False].recalled.count()
+            tstat_list, pval_list, _ = proportions_chisquare([
+                n_correct_stim_list_recalls, n_correct_nonstim_list_recalls],
+                [n_stim_list_words, n_nonstim_list_words])
 
-        results.append({"comparison": "Stim Lists vs. Non-stim Lists",
-                        "stim": (n_correct_stim_list_recalls,
-                                 n_stim_list_words),
-                        "non-stim": (n_correct_nonstim_list_recalls, n_nonstim_list_words),
-                        "t-stat": tstat_list,
-                        "p-value": pval_list})
+            results.append({"parameters": parameters,
+                            "comparison": "Stim Lists vs. Non-stim Lists",
+                            "stim": (n_correct_stim_list_recalls,
+                                     n_stim_list_words),
+                            "non-stim": (n_correct_nonstim_list_recalls, n_nonstim_list_words),
+                            "t-stat": tstat_list,
+                            "p-value": pval_list})
 
-        # stim items vs. non-stim low biomarker items
-        n_correct_stim_item_recalls = df[df.is_stim_item == True].recalled.sum()
-        n_correct_nonstim_item_recalls = df[(df.is_stim_item == False) &
-                                            (df.classifier_output < 0.5)].recalled.sum()
+            # stim items vs. non-stim low biomarker items
+            n_correct_stim_item_recalls = group[group.is_stim_item == True].recalled.sum()
+            n_correct_nonstim_item_recalls = df[(df.is_stim_item == False) &
+                                                (df.classifier_output <
+                                                 df.thresh)].recalled.sum()
 
-        n_stim_items = df[df.is_stim_item == True].recalled.count()
-        n_nonstim_items = df[(df.is_stim_item == False) &
-                             (df.classifier_output < 0.5)].recalled.count()
+            n_stim_items = group[group.is_stim_item == True].recalled.count()
+            n_nonstim_items = df[(df.is_stim_item == False) &
+                                 (df.classifier_output <
+                                  df.thresh)].recalled.count()
 
-        tstat_list, pval_list, _ = proportions_chisquare(
-            [n_correct_stim_item_recalls, n_correct_nonstim_item_recalls],
-            [n_stim_items, n_nonstim_items])
+            tstat_list, pval_list, _ = proportions_chisquare(
+                [n_correct_stim_item_recalls, n_correct_nonstim_item_recalls],
+                [n_stim_items, n_nonstim_items])
 
-        results.append({
-            "comparison": "Stim Items vs. Low Biomarker Non-stim Items",
-            "stim": (n_correct_stim_item_recalls, n_stim_items),
-            "non-stim": (n_correct_nonstim_item_recalls, n_nonstim_items),
-            "t-stat": tstat_list,
-            "p-value": pval_list})
+            results.append({
+                "parameters": parameters,
+                "comparison": "Stim Items vs. Low Biomarker Non-stim Items",
+                "stim": (n_correct_stim_item_recalls, n_stim_items),
+                "non-stim": (n_correct_nonstim_item_recalls, n_nonstim_items),
+                "t-stat": tstat_list,
+                "p-value": pval_list})
 
-        # post stim items vs. non-stim low biomarker items
-        n_correct_post_stim_item_recalls = df[df.is_post_stim_item ==
-                                              True].recalled.sum()
+            # post stim items vs. non-stim low biomarker items
+            n_correct_post_stim_item_recalls = group[group.is_post_stim_item == True].recalled.sum()
+            n_post_stim_items = group[group.is_post_stim_item == True].recalled.count()
 
-        n_post_stim_items = df[df.is_post_stim_item == True].recalled.count()
-
-        tstat_list, pval_list, _ = proportions_chisquare(
+            tstat_list, pval_list, _ = proportions_chisquare(
             [n_correct_post_stim_item_recalls, n_correct_nonstim_item_recalls],
             [n_post_stim_items, n_nonstim_items])
 
-        results.append({
-            "comparison": "Post-stim Items vs. Low Biomarker Non-stim Items",
-            "stim": (n_correct_post_stim_item_recalls, n_post_stim_items),
-            "non-stim": (n_correct_nonstim_item_recalls, n_nonstim_items),
-            "t-stat": tstat_list,
-            "p-value": pval_list})
+            results.append({
+                "parameters": parameters,
+                "comparison": "Post-stim Items vs. Low Biomarker Non-stim Items",
+                "stim": (n_correct_post_stim_item_recalls, n_post_stim_items),
+                "non-stim": (n_correct_nonstim_item_recalls, n_nonstim_items),
+                "t-stat": tstat_list,
+                "p-value": pval_list})
 
         return results
 
@@ -869,7 +896,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
 
     def delta_recall(self, post_stim_items=False):
         df = self.to_dataframe()
-        nonstim_low_bio_recall = df[(df.classifier_output < 0.5) &
+        nonstim_low_bio_recall = df[(df.classifier_output < df.thresh) &
                                     (df.is_stim_list == False)].recalled.mean()
         if post_stim_items:
             recall_stim = df[df.is_post_stim_item == True].recalled.mean()
