@@ -156,6 +156,7 @@ def save_foresplot(trace, full_path):
     ax = pm.forestplot(trace,
                        varnames=[stim_variable],
                        xtitle="Estimated Effect of Stimulation",
+                       ylabels=[''],
                        quartiles=False,
                        plot_kwargs=dict(
                            linewidth=5,
