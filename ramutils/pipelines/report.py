@@ -66,12 +66,9 @@ def make_report(subject, experiment, paths, joint_report=False,
 
     if not rerun:
         target_selection_table, classifier_evaluation_results, \
-        session_summaries, math_summaries = load_existing_results(subject,
-                                                                  experiment,
-                                                                  sessions,
-                                                                  stim_report,
-                                                                  paths.data_db,
-                                                                  rootdir=paths.root).compute()
+        session_summaries, math_summaries, hmm_results = \
+            load_existing_results(subject, experiment, sessions, stim_report,
+                                  paths.data_db, rootdir=paths.root).compute()
 
         # Check if only None values were returned. Processing will continue
         # undeterred
@@ -82,7 +79,8 @@ def make_report(subject, experiment, paths, joint_report=False,
         else:
             report = build_static_report(subject, experiment, session_summaries,
                                          math_summaries, target_selection_table,
-                                         classifier_evaluation_results, paths.dest)
+                                         classifier_evaluation_results,
+                                         paths.dest, hmm_results=hmm_results)
             return report.compute()
 
     # TODO: allow using different localization, montage numbers
@@ -117,7 +115,8 @@ def make_report(subject, experiment, paths, joint_report=False,
 
     if not stim_report:
         session_summaries, math_summaries, target_selection_table, \
-        classifier_evaluation_results, repetition_ratio_dict = \
+        classifier_evaluation_results, repetition_ratio_dict, \
+        behavioral_results = \
             generate_data_for_nonstim_report(subject, experiment, sessions,
                                              joint_report, paths, ec_pairs,
                                              used_pair_mask, excluded_pairs,
@@ -125,7 +124,8 @@ def make_report(subject, experiment, paths, joint_report=False,
                                              **kwargs)
     elif experiment.find("PS5") != -1:
         session_summaries, math_summaries, \
-        classifier_evaluation_results, repetition_ratio_dict = \
+        classifier_evaluation_results, repetition_ratio_dict, \
+        behavioral_results = \
             generate_data_for_ps5_report(subject, experiment, joint_report,
                                          pairs_metadata_table,
                                          trigger_electrode, ec_pairs,
@@ -135,21 +135,25 @@ def make_report(subject, experiment, paths, joint_report=False,
 
     # Non-PS5 stim session
     else:
-        session_summaries, math_summaries, classifier_evaluation_results = \
+        session_summaries, math_summaries, classifier_evaluation_results, \
+        behavioral_results = \
             generate_data_for_stim_report(subject, experiment, joint_report,
                                           retrain, paths, ec_pairs,
-                                          used_pair_mask, final_pairs,
-                                          pairs_metadata_table, all_events,
-                                          task_events, stim_data, **kwargs)
+                                          excluded_pairs, used_pair_mask,
+                                          final_pairs, pairs_metadata_table,
+                                          all_events, task_events, stim_data,
+                                          **kwargs)
 
     output = save_all_output(subject, experiment, session_summaries,
-                             math_summaries, target_selection_table,
-                             classifier_evaluation_results,
-                             paths.data_db).compute()
+                             math_summaries, classifier_evaluation_results,
+                             paths.data_db,
+                             target_selection_table=target_selection_table,
+                             behavioral_results=behavioral_results).compute()
 
     report = build_static_report(subject, experiment, session_summaries,
                                  math_summaries, target_selection_table,
-                                 classifier_evaluation_results, paths.dest)
+                                 classifier_evaluation_results,
+                                 hmm_results=output, dest=paths.dest)
 
     if vispath is not None:
         report.visualize(filename=vispath)
@@ -263,7 +267,7 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
                                      joint_classifier_summary]
 
     return session_summaries, math_summaries, target_selection_table, \
-           classifier_evaluation_results, repetition_ratio_dict
+           classifier_evaluation_results, repetition_ratio_dict, None
 
 
 def generate_data_for_ps5_report(subject, experiment, joint_report,
@@ -310,7 +314,7 @@ def generate_data_for_ps5_report(subject, experiment, joint_report,
     classifier_evaluation_results = []
 
     return session_summaries, math_summaries, classifier_evaluation_results, \
-           repetition_ratio_dict
+           repetition_ratio_dict, None
 
 
 def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
@@ -392,12 +396,11 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
 
     math_summaries = summarize_math(all_events, joint=joint_report)
 
-    # TODO: Commented out until we have a clean way to plot results from
-    # the traces
-    # behavioral_results = estimate_effects_of_stim(subject, experiment,
-    #     session_summaries).compute()
+    behavioral_results = estimate_effects_of_stim(subject, experiment,
+        session_summaries)
 
     classifier_evaluation_results = post_hoc_results[
         'classifier_summaries']
-    return session_summaries, math_summaries, classifier_evaluation_results
+    return session_summaries, math_summaries, classifier_evaluation_results, \
+           behavioral_results
 
