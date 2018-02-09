@@ -756,24 +756,15 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         return lists
 
     @property
-    def stim_parameters(self):
-        df = self.to_dataframe()
-        unique_stim_info = df[['stimAnodeTag', 'stimCathodeTag',
-                               'location', 'amplitude', 'stim_duration',
-                               'pulse_freq']].dropna(how='any').drop_duplicates()
-        unique_stim_info['amplitude'] = unique_stim_info['amplitude'].astype(float) / 1000.0
-        return list(unique_stim_info.T.to_dict().values())
+    def stim_columns(self):
+        return ['stimAnodeTag', 'stimCathodeTag', 'location', 'amplitude',
+                'stim_duration', 'pulse_freq']
 
     @property
-    def recall_test_results(self):
+    def stim_params_by_list(self):
         df = self.to_dataframe()
-        # Do not count first 3 lists in assess effects
-        # of stim since we never stimulate during them and task performance
-        # is likely to vary throughout the session
-        stim_columns = ['stimAnodeTag', 'stimCathodeTag', 'location',
-                        'amplitude', 'stim_duration', 'pulse_freq']
+        stim_columns = self.stim_columns
         non_stim_columns = [c for c in df.columns if c not in stim_columns]
-        df = df[df.list > 3]
 
         stim_param_by_list = (df[(stim_columns + ['list'])]
                                 .drop_duplicates()
@@ -784,6 +775,28 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         # item behavioral responses easier
         df = df[non_stim_columns]
         df = df.merge(stim_param_by_list, on='list', how='left')
+        return df
+
+    @property
+    def stim_parameters(self):
+        df = self.stim_params_by_list
+        grouped = (df.groupby(by=(self.stim_columns + ['is_stim_list']))
+                     .agg({'is_stim_item' : 'sum',
+                           'subject': 'count'})
+                     .rename(columns={'is_stim_item': 'n_stimulations',
+                                      'subject': 'n_trials'})
+                     .reset_index())
+
+        return list(grouped.T.to_dict().values())
+
+    @property
+    def recall_test_results(self):
+        df = self.stim_params_by_list
+
+        if "PS5" not in self.experiment:
+            df = df[df.list > 3]
+        else:
+            df = df[df.list > -1]
 
         results = []
         for name, group in df.groupby(['stimAnodeTag', 'stimCathodeTag',

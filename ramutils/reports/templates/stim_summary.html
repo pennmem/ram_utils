@@ -9,6 +9,7 @@
       <th>Amplitude [mA]</th>
       <th>Duration [ms]</th>
       <th>Pulse Frequency [Hz]</th>
+      <th>Stimulation Frequency</th>
     </tr>
     </thead>
     <tbody>
@@ -20,6 +21,7 @@
         <td>{{ '{:.1f}'.format(stim_param['amplitude']) }}</td>
         <td>{{ '{:.0f}'.format(stim_param['stim_duration']) }}</td>
         <td>{{ '{:.0f}'.format(stim_param['pulse_freq']) }}</td>
+        <td>{{ stim_param['n_stimulations'] }} / {{ stim_param['n_trials'] }} ({{ '{:.1f}'.format(100 * (stim_param['n_stimulations'] / stim_param['n_trials'])) }}%)</td>
       </tr>
     {% endfor %}
     </tbody>
