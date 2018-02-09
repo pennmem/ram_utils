@@ -141,9 +141,10 @@ def make_report(subject, experiment, paths, joint_report=False,
         behavioral_results = \
             generate_data_for_stim_report(subject, experiment, joint_report,
                                           retrain, paths, ec_pairs,
-                                          used_pair_mask, final_pairs,
-                                          pairs_metadata_table, all_events,
-                                          task_events, stim_data, **kwargs)
+                                          excluded_pairs, used_pair_mask,
+                                          final_pairs, pairs_metadata_table,
+                                          all_events, task_events, stim_data,
+                                          **kwargs)
 
     output = save_all_output(subject, experiment, session_summaries,
                              math_summaries, classifier_evaluation_results,

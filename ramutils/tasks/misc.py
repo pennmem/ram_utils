@@ -12,6 +12,7 @@ from ramutils.utils import get_session_str
 
 from ._wrapper import task
 from ramutils.reports.summary import *
+from ramutils.hmm import save_foresplot, save_traceplot
 from ramutils.utils import is_stim_experiment as is_stim_experiment_core
 from ramutils.utils import get_completed_sessions
 from ramutils.log import get_logger
@@ -47,8 +48,8 @@ def is_stim_experiment(experiment):
 
 @task(cache=False)
 def save_all_output(subject, experiment, session_summaries, math_summaries,
-                    target_selection_table, classifier_evaluation_results,
-                    save_location):
+                    classifier_evaluation_results, save_location,
+                    target_selection_table=None, behavioral_results=None):
 
     base_output_format = os.path.join(save_location,
                                       "{subject}_{experiment}_{session}_{"
@@ -85,6 +86,24 @@ def save_all_output(subject, experiment, session_summaries, math_summaries,
             subject=subject, experiment=experiment, session=session_str,
             data_type='classifier_' + classifier_summary.tag,
             file_type='h5'))
+
+    # Save plots from hmm models
+    if behavioral_results is not None:
+        for name, trace in behavioral_results.items():
+            full_path = base_output_format.format(subject=subject,
+                                                  experiment=experiment,
+                                                  session=session_str,
+                                                  data_type=(name +
+                                                             '_foresplot'),
+                                                  file_type='png')
+            save_foresplot(trace, full_path)
+            full_path = base_output_format.format(subject=subject,
+                                                  experiment=experiment,
+                                                  session=session_str,
+                                                  data_type=(name +
+                                                             '_traceplot'),
+                                                  file_type='png')
+            save_traceplot(trace, full_path)
 
     return True
 

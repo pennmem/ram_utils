@@ -151,11 +151,10 @@ def save_traceplot(trace, full_path):
     return
 
 
-def save_foresplot(trace, title, full_path):
+def save_foresplot(trace, full_path):
     stim_variable = "Stim Effect (Across Sessions)"
     ax = pm.forestplot(trace,
                        varnames=[stim_variable],
-                       main=title,
                        xtitle="Estimated Effect of Stimulation",
                        quartiles=False,
                        plot_kwargs=dict(
