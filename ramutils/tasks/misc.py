@@ -49,7 +49,8 @@ def is_stim_experiment(experiment):
 @task(cache=False)
 def save_all_output(subject, experiment, session_summaries, math_summaries,
                     classifier_evaluation_results, save_location,
-                    target_selection_table=None, behavioral_results=None):
+                    retrained_classifier=None, target_selection_table=None,
+                    behavioral_results=None):
 
     result_files = {}
 
@@ -88,6 +89,11 @@ def save_all_output(subject, experiment, session_summaries, math_summaries,
             subject=subject, experiment=experiment, session=session_str,
             data_type='classifier_' + classifier_summary.tag,
             file_type='h5'))
+
+    if retrained_classifier is not None:
+        retrained_classifier.save(base_output_format.format(
+            subject=subject, experiment=experiment, session='all',
+            data_type="retrained_classifier", file_type="zip"), overwrite=True)
 
     # Save plots from hmm models and return file paths in a dict
     if behavioral_results is not None:

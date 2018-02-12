@@ -160,6 +160,8 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
         stim_item_mask, post_stim_item_mask, stim_param_df = \
             extract_stim_information(all_session_stim_events,
                                      all_session_task_events)
+        stim_param_df["stimAnodeTag"] = stim_param_df["stimAnodeTag"].str.rstrip(',')
+        stim_param_df["stimCathodeTag"] = stim_param_df["stimCathodeTag"].str.rstrip(',')
 
         # PS5 sessions do not have classifier summaries, but use the raw
         # power value output for making the stim decision
