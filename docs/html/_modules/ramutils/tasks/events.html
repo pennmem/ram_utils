@@ -311,6 +311,12 @@
         <span class="n">task_events</span><span class="p">,</span> <span class="n">stim_params</span> <span class="o">=</span> <span class="n">clean_events</span><span class="p">(</span><span class="n">all_events</span><span class="p">,</span>
                                                 <span class="n">return_stim_events</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
+    <span class="c1"># Clean all events after using them to build task events because cleaning</span>
+    <span class="c1">#  will remove fields that have nested recarrays to make serialization of</span>
+    <span class="c1">#  these events possible downstream</span>
+    <span class="k">if</span> <span class="n">series_num</span> <span class="o">!=</span> <span class="s1">&#39;1&#39;</span><span class="p">:</span>
+        <span class="n">all_events</span> <span class="o">=</span> <span class="n">clean_events</span><span class="p">(</span><span class="n">all_events</span><span class="p">,</span> <span class="n">all_events</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">all_events</span><span class="p">,</span> <span class="n">task_events</span><span class="p">,</span> <span class="n">stim_params</span></div>
 
 

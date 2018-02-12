@@ -333,7 +333,8 @@ cathode contact names.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>experiment</strong> (<em>str</em>) – Name of the experiment</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Series number in string format (to accommodate PS2.1)</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Series number in string format (to accommodate PS2.1). If experiment
+was invalid, None is returned</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
 </tr>
@@ -359,6 +360,19 @@ cathode contact names.</p>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.utils.get_completed_sessions">
+<code class="descclassname">ramutils.utils.</code><code class="descname">get_completed_sessions</code><span class="sig-paren">(</span><em>subject</em>, <em>experiment</em>, <em>rootdir='/'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/utils.html#get_completed_sessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.utils.get_completed_sessions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a list of sessions completed of a given experiment by a subject</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.utils.get_session_str">
+<code class="descclassname">ramutils.utils.</code><code class="descname">get_session_str</code><span class="sig-paren">(</span><em>session_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/utils.html#get_session_str"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.utils.get_session_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine session numbers into ‘_’ separated string. Used for saving
+underlying data</p>
 </dd></dl>
 
 <dl class="function">
@@ -481,6 +495,12 @@ crashing.</p>
 <p class="rubric">Notes</p>
 <p>Primarily useful for debugging purposes. Could be used to save underlying
 data for report plots.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.utils.tempdir">
+<code class="descclassname">ramutils.utils.</code><code class="descname">tempdir</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/utils.html#tempdir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.utils.tempdir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a temporary directory and remove its contents upon completion.</p>
 </dd></dl>
 
 <dl class="function">

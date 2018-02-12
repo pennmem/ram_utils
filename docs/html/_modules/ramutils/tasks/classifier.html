@@ -392,8 +392,9 @@
 
 <span class="sd">            {</span>
 <span class="sd">                &#39;cross_session_summary&#39;: MultiSessionClassifierSummary,</span>
-<span class="sd">                &#39;session_summaries&#39;: List of ClassifierSummary objects,</span>
-<span class="sd">                &#39;session_summaries_stim_table&#39;: List of ClassifierSummary objects built using all encoding events,</span>
+<span class="sd">                &#39;classifier_summaries&#39;: List of ClassifierSummary objects,</span>
+<span class="sd">                &#39;encoding_classifier_summaries&#39;: List of ClassifierSummary</span>
+<span class="sd">                objects built using all encoding events,</span>
 <span class="sd">                &#39;post_stim_predicted_probs&#39;: Classifier output during post stim period</span>
 <span class="sd">            }</span>
 
@@ -459,8 +460,7 @@
         <span class="n">session_recalls</span> <span class="o">=</span> <span class="n">recalls</span><span class="p">[</span><span class="n">session_mask</span> <span class="o">&amp;</span> <span class="n">non_stim_mask</span><span class="p">]</span>
 
         <span class="n">session_powers</span> <span class="o">=</span> <span class="n">powers</span><span class="p">[(</span><span class="n">session_mask</span> <span class="o">&amp;</span> <span class="n">non_stim_mask</span><span class="p">)]</span>
-        <span class="n">reduced_session_powers</span> <span class="o">=</span> <span class="n">reduce_powers</span><span class="p">(</span><span class="n">session_powers</span><span class="p">,</span>
-                                               <span class="n">used_mask</span><span class="p">,</span>
+        <span class="n">reduced_session_powers</span> <span class="o">=</span> <span class="n">reduce_powers</span><span class="p">(</span><span class="n">session_powers</span><span class="p">,</span> <span class="n">used_mask</span><span class="p">,</span>
                                                <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;freqs&#39;</span><span class="p">]))</span>
 
         <span class="c1"># Manually pass in the weighting scheme here, otherwise the cross</span>
@@ -480,27 +480,32 @@
         <span class="c1"># biomarker</span>
         <span class="n">post_stim_session_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">post_stim_events</span><span class="o">.</span><span class="n">session</span> <span class="o">==</span> <span class="n">session</span><span class="p">)</span>
         <span class="n">post_stim_session_powers</span> <span class="o">=</span> <span class="n">post_stim_powers</span><span class="p">[</span><span class="n">post_stim_session_mask</span><span class="p">]</span>
-        <span class="n">post_stim_reduced_session_powers</span> <span class="o">=</span> <span class="n">reduce_powers</span><span class="p">(</span><span class="n">post_stim_session_powers</span><span class="p">,</span>
-                                                         <span class="n">used_mask</span><span class="p">,</span>
-                                                         <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;freqs&#39;</span><span class="p">]))</span>
+        <span class="n">post_stim_reduced_session_powers</span> <span class="o">=</span> <span class="n">reduce_powers</span><span class="p">(</span>
+            <span class="n">post_stim_session_powers</span><span class="p">,</span> <span class="n">used_mask</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;freqs&#39;</span><span class="p">]))</span>
         <span class="n">post_stim_probs</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span>
             <span class="n">post_stim_reduced_session_powers</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
         <span class="n">post_stim_predicted_probs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">post_stim_probs</span><span class="p">)</span>
 
         <span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">sessions</span> <span class="o">=</span> <span class="n">extract_event_metadata</span><span class="p">(</span><span class="n">session_events</span><span class="p">)</span>
+
+        <span class="c1"># This is the primary classifier used for evaluation. It is based on</span>
+        <span class="c1"># assessing classifier output for non-stim encoding events</span>
         <span class="n">classifier_summary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">sessions</span><span class="p">,</span>
                                     <span class="n">session_recalls</span><span class="p">,</span> <span class="n">session_probs</span><span class="p">,</span>
                                     <span class="n">permuted_auc_values</span><span class="p">,</span>
-                                    <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;Session &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">session</span><span class="p">),</span>
+                                    <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;session_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">session</span><span class="p">),</span>
                                     <span class="n">reloaded</span><span class="o">=</span><span class="n">reloaded</span><span class="p">)</span>
         <span class="n">classifier_summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">classifier_summary</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;AUC for session </span><span class="si">{}</span><span class="s1">: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">session</span><span class="p">,</span>
                                                     <span class="n">classifier_summary</span><span class="o">.</span><span class="n">auc</span><span class="p">))</span>
 
-        <span class="c1"># Get a classifier summary for all encoding events</span>
+        <span class="c1"># Get a classifier summary for all encoding events. This classifier</span>
+        <span class="c1"># is needed in order to match all encoding events to stim information</span>
+        <span class="c1"># in a later step</span>
         <span class="n">session_encoding_powers</span> <span class="o">=</span> <span class="n">powers</span><span class="p">[(</span><span class="n">session_mask</span> <span class="o">&amp;</span> <span class="n">encoding_mask</span><span class="p">)]</span>
-        <span class="n">reduced_session_encoding_powers</span> <span class="o">=</span> <span class="n">reduce_powers</span><span class="p">(</span>
-            <span class="n">session_encoding_powers</span><span class="p">,</span> <span class="n">used_mask</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;freqs&#39;</span><span class="p">]))</span>
+        <span class="n">reduced_session_encoding_powers</span> <span class="o">=</span> <span class="n">reduce_powers</span><span class="p">(</span><span class="n">session_encoding_powers</span><span class="p">,</span>
+                                                        <span class="n">used_mask</span><span class="p">,</span>
+                                                        <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;freqs&#39;</span><span class="p">]))</span>
 
         <span class="n">session_encoding_probs</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span>
             <span class="n">reduced_session_encoding_powers</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
@@ -511,7 +516,8 @@
         <span class="n">encoding_classifier_summary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">sessions</span><span class="p">,</span>
                                              <span class="n">session_encoding_recalls</span><span class="p">,</span>
                                              <span class="n">session_encoding_probs</span><span class="p">,</span>
-                                             <span class="kc">None</span><span class="p">)</span>
+                                             <span class="kc">None</span><span class="p">,</span>
+                                             <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;encoding_evaluation&#39;</span><span class="p">)</span>
         <span class="n">encoding_classifier_summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">encoding_classifier_summary</span><span class="p">)</span>
 
     <span class="c1"># Combine session-specific predicted probabilities into 1D array</span>
@@ -527,14 +533,16 @@
     <span class="n">cross_session_summary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">sessions</span><span class="p">,</span>
                                    <span class="n">non_stim_recalls</span><span class="p">,</span> <span class="n">all_predicted_probs</span><span class="p">,</span>
                                    <span class="n">permuted_auc_values</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;Combined Sessions&#39;</span><span class="p">,</span>
-                                   <span class="n">reloaded</span><span class="o">=</span><span class="s1">&#39;N/A&#39;</span><span class="p">)</span>
-    <span class="n">classifier_summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cross_session_summary</span><span class="p">)</span>
+                                   <span class="n">reloaded</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="c1"># Leave commented out until we have a way to do multi-stim-session</span>
+    <span class="c1"># evaluation, otherwise this classifier is just redundant.</span>
+    <span class="c1">#classifier_summaries.append(cross_session_summary)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Combined AUC: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cross_session_summary</span><span class="o">.</span><span class="n">auc</span><span class="p">))</span>
 
     <span class="n">result_dict</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;cross_session_summary&#39;</span><span class="p">:</span> <span class="n">cross_session_summary</span><span class="p">,</span>
-        <span class="s1">&#39;session_summaries&#39;</span><span class="p">:</span> <span class="n">classifier_summaries</span><span class="p">,</span>
-        <span class="s1">&#39;session_summaries_stim_table&#39;</span><span class="p">:</span> <span class="n">encoding_classifier_summaries</span><span class="p">,</span>
+        <span class="s1">&#39;classifier_summaries&#39;</span><span class="p">:</span> <span class="n">classifier_summaries</span><span class="p">,</span>
+        <span class="s1">&#39;encoding_classifier_summaries&#39;</span><span class="p">:</span> <span class="n">encoding_classifier_summaries</span><span class="p">,</span>
         <span class="s1">&#39;post_stim_predicted_probs&#39;</span><span class="p">:</span> <span class="n">post_stim_predicted_probs</span>
     <span class="p">}</span>
 

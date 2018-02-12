@@ -1,0 +1,1293 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ramutils.reports.summary &mdash; Ramutils 2.1.3 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="Ramutils 2.1.3 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Ramutils
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../data.html">Serializable data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../classifier.html">Classifier training, cross validation, and utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../events.html">Event processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html">Pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli.html">Command-line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc.html">Miscellaneous utilities</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Ramutils</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>ramutils.reports.summary</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for ramutils.reports.summary</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">pytz</span>
+
+<span class="kn">from</span> <span class="nn">ramutils.utils</span> <span class="k">import</span> <span class="n">safe_divide</span>
+<span class="kn">from</span> <span class="nn">ramutils.events</span> <span class="k">import</span> <span class="n">extract_subject</span><span class="p">,</span> <span class="n">extract_experiment_from_events</span><span class="p">,</span> \
+    <span class="n">extract_sessions</span>
+<span class="kn">from</span> <span class="nn">ramutils.bayesian_optimization</span> <span class="k">import</span> <span class="n">choose_location</span>
+<span class="kn">from</span> <span class="nn">ramutils.exc</span> <span class="k">import</span> <span class="n">TooManySessionsError</span>
+
+<span class="kn">from</span> <span class="nn">traitschema</span> <span class="k">import</span> <span class="n">Schema</span>
+<span class="kn">from</span> <span class="nn">traits.api</span> <span class="k">import</span> <span class="n">Array</span><span class="p">,</span> <span class="n">ArrayOrNone</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">String</span><span class="p">,</span> <span class="n">Bool</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">roc_auc_score</span><span class="p">,</span> <span class="n">roc_curve</span>
+<span class="kn">from</span> <span class="nn">statsmodels.stats.proportion</span> <span class="k">import</span> <span class="n">proportions_chisquare</span>
+
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;Summary&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;ClassifierSummary&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;SessionSummary&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;StimSessionSummary&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;FRSessionSummary&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;CatFRSessionSummary&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;FRStimSessionSummary&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;FR5SessionSummary&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;PSSessionSummary&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;MathSummary&#39;</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="ClassifierSummary"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.ClassifierSummary">[docs]</a><span class="k">class</span> <span class="nc">ClassifierSummary</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Classifier Summary Object &quot;&quot;&quot;</span>
+    <span class="n">_predicted_probabilities</span> <span class="o">=</span> <span class="n">ArrayOrNone</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;predicted recall probabilities&#39;</span><span class="p">)</span>
+    <span class="n">_true_outcomes</span> <span class="o">=</span> <span class="n">ArrayOrNone</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;actual results for recall vs. non-recall&#39;</span><span class="p">)</span>
+    <span class="n">_permuted_auc_values</span> <span class="o">=</span> <span class="n">ArrayOrNone</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;permuted AUCs&#39;</span><span class="p">)</span>
+
+    <span class="n">subject</span> <span class="o">=</span> <span class="n">String</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;subject&#39;</span><span class="p">)</span>
+    <span class="n">experiment</span> <span class="o">=</span> <span class="n">String</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;experiment&#39;</span><span class="p">)</span>
+    <span class="n">sessions</span> <span class="o">=</span> <span class="n">Array</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;sessions summarized by the object&#39;</span><span class="p">)</span>
+    <span class="n">recall_rate</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;overall recall rate&#39;</span><span class="p">)</span>
+    <span class="n">tag</span> <span class="o">=</span> <span class="n">String</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;name of the classifier&#39;</span><span class="p">)</span>
+    <span class="n">reloaded</span> <span class="o">=</span> <span class="n">Bool</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;classifier was reloaded from hard disk&#39;</span><span class="p">)</span>
+    <span class="n">low_terc_recall_rate</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;recall rate when predicted probability of recall was in lowest tercile&#39;</span><span class="p">)</span>
+    <span class="n">mid_terc_recall_rate</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;recall reate when predicted probability of recall was in middle tercile&#39;</span><span class="p">)</span>
+    <span class="n">high_terc_recall_rate</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;recall rate when predicted probability of recall was in highest tercile&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">predicted_probabilities</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predicted_probabilities</span>
+
+    <span class="nd">@predicted_probabilities</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">predicted_probabilities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_predicted_probabilities</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predicted_probabilities</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_predicted_probabilities</span> <span class="o">=</span> <span class="n">new_predicted_probabilities</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">true_outcomes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_true_outcomes</span>
+
+    <span class="nd">@true_outcomes</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">true_outcomes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_true_outcomes</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_true_outcomes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_true_outcomes</span> <span class="o">=</span> <span class="n">new_true_outcomes</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">permuted_auc_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_permuted_auc_values</span>
+
+    <span class="nd">@permuted_auc_values</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">permuted_auc_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_permuted_auc_values</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_permuted_auc_values</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_permuted_auc_values</span> <span class="o">=</span> <span class="n">new_permuted_auc_values</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">auc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">auc</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">true_outcomes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">predicted_probabilities</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">auc</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pvalue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">pvalue</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">permuted_auc_values</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">auc</span><span class="p">))</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">permuted_auc_values</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">pvalue</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">false_positive_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">fpr</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">roc_curve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">true_outcomes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">predicted_probabilities</span><span class="p">)</span>
+        <span class="n">fpr</span> <span class="o">=</span> <span class="n">fpr</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">fpr</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">true_positive_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">roc_curve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">true_outcomes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">predicted_probabilities</span><span class="p">)</span>
+        <span class="n">tpr</span> <span class="o">=</span> <span class="n">tpr</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">tpr</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">thresholds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">thresholds</span> <span class="o">=</span> <span class="n">roc_curve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">true_outcomes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">predicted_probabilities</span><span class="p">)</span>
+        <span class="n">thresholds</span> <span class="o">=</span> <span class="n">thresholds</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">thresholds</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">median_classifier_output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">predicted_probabilities</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">confidence_interval_median_classifier_output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">sorted_probs</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">predicted_probabilities</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">predicted_probabilities</span><span class="p">)</span>
+        <span class="n">low_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="n">n</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">-</span> <span class="p">((</span><span class="mf">1.96</span> <span class="o">*</span> <span class="n">n</span><span class="o">**.</span><span class="mi">5</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)))</span>
+        <span class="n">high_idx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">n</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">+</span> <span class="p">((</span><span class="mf">1.96</span> <span class="o">*</span> <span class="n">n</span><span class="o">**.</span><span class="mi">5</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)))</span>
+        <span class="n">low_val</span> <span class="o">=</span> <span class="n">sorted_probs</span><span class="p">[</span><span class="n">low_idx</span><span class="p">]</span>
+        <span class="n">high_val</span> <span class="o">=</span> <span class="n">sorted_probs</span><span class="p">[</span><span class="n">high_idx</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">low_val</span><span class="p">,</span> <span class="n">high_val</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">low_tercile_diff_from_mean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">low_terc_recall_rate</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">recall_rate</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">recall_rate</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mid_tercile_diff_from_mean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mid_terc_recall_rate</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">recall_rate</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">recall_rate</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">high_tercile_diff_from_mean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">high_terc_recall_rate</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">recall_rate</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">recall_rate</span>
+
+<div class="viewcode-block" id="ClassifierSummary.populate"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.ClassifierSummary.populate">[docs]</a>    <span class="k">def</span> <span class="nf">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">true_outcomes</span><span class="p">,</span>
+                 <span class="n">predicted_probabilities</span><span class="p">,</span> <span class="n">permuted_auc_values</span><span class="p">,</span>
+                 <span class="n">tag</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">reloaded</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Populate classifier performance metrics</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        subject: string</span>
+<span class="sd">            Subject identifier</span>
+<span class="sd">        experiment: string</span>
+<span class="sd">            Name of the experiment</span>
+<span class="sd">        session: string</span>
+<span class="sd">            Session number</span>
+<span class="sd">        true_outcomes: array_like</span>
+<span class="sd">            Boolean array for if a word was recalled or not</span>
+<span class="sd">        predicted_probabilities: array_like</span>
+<span class="sd">            Outputs from the trained classifier for each word event</span>
+<span class="sd">        permuted_auc_values: array_like</span>
+<span class="sd">            AUC values from performing a permutation test on classifier</span>
+<span class="sd">        tag: str</span>
+<span class="sd">            Name given to the classifier, used to differentiate between</span>
+<span class="sd">            multiple classifiers</span>
+<span class="sd">        reloaded: bool</span>
+<span class="sd">            Indicates whether the classifier is reloaded from hard disk,</span>
+<span class="sd">            i.e. is the actually classifier used. If false, then the</span>
+<span class="sd">            classifier was created from scratch</span>
+
+<span class="sd">        Keyword Arguments</span>
+<span class="sd">        -----------------</span>
+<span class="sd">        Any kwargs passed to populate will be stored in the metadata field of</span>
+<span class="sd">        the classifier summary object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subject</span> <span class="o">=</span> <span class="n">subject</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span> <span class="o">=</span> <span class="n">experiment</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span> <span class="o">=</span> <span class="n">session</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">true_outcomes</span> <span class="o">=</span> <span class="n">true_outcomes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predicted_probabilities</span> <span class="o">=</span> <span class="n">predicted_probabilities</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">permuted_auc_values</span> <span class="o">=</span> <span class="n">permuted_auc_values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="n">tag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reloaded</span> <span class="o">=</span> <span class="n">reloaded</span>
+
+        <span class="n">thresh_low</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">predicted_probabilities</span><span class="p">,</span> <span class="mf">100.0</span> <span class="o">/</span> <span class="mf">3.0</span><span class="p">)</span>
+        <span class="n">thresh_high</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">predicted_probabilities</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="mf">100.0</span> <span class="o">/</span> <span class="mf">3.0</span><span class="p">)</span>
+
+        <span class="n">low_tercile_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">predicted_probabilities</span> <span class="o">&lt;=</span> <span class="n">thresh_low</span><span class="p">)</span>
+        <span class="n">high_tercile_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">predicted_probabilities</span> <span class="o">&gt;=</span> <span class="n">thresh_high</span><span class="p">)</span>
+        <span class="n">mid_tercile_mask</span> <span class="o">=</span> <span class="o">~</span><span class="p">(</span><span class="n">low_tercile_mask</span> <span class="o">|</span> <span class="n">high_tercile_mask</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">low_terc_recall_rate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">true_outcomes</span><span class="p">[</span><span class="n">low_tercile_mask</span><span class="p">])</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+            <span class="n">low_tercile_mask</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mid_terc_recall_rate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">true_outcomes</span><span class="p">[</span><span class="n">mid_tercile_mask</span><span class="p">])</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+            <span class="n">mid_tercile_mask</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">high_terc_recall_rate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">true_outcomes</span><span class="p">[</span><span class="n">high_tercile_mask</span><span class="p">])</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">high_tercile_mask</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">recall_rate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">true_outcomes</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">true_outcomes</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+
+        <span class="k">return</span></div></div>
+
+
+<div class="viewcode-block" id="MathSummary"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.MathSummary">[docs]</a><span class="k">class</span> <span class="nc">MathSummary</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Summarizes data from math distractor periods. Input events must either</span>
+<span class="sd">    be all events (which include math events) or just math events.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_events</span> <span class="o">=</span> <span class="n">ArrayOrNone</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Math distractor task events&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">events</span> <span class="o">=</span> <span class="n">events</span>
+
+<div class="viewcode-block" id="MathSummary.to_dataframe"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.MathSummary.to_dataframe">[docs]</a>    <span class="k">def</span> <span class="nf">to_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recreate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Convert the summary to a :class:`pd.DataFrame` for easier</span>
+<span class="sd">        manipulation. This amounts to converting the events to a dataframe</span>
+
+<span class="sd">        Keyword arguments</span>
+<span class="sd">        -----------------</span>
+<span class="sd">        recreate : bool</span>
+<span class="sd">            Force re-creating the dataframe. Otherwise, it will only be created</span>
+<span class="sd">            the first time this method is called and stored as an instance</span>
+<span class="sd">            attribute.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_df&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">recreate</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_records</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">events</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; For Math events, explicitly exclude practice lists &quot;&quot;&quot;</span>
+        <span class="n">events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_events</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">events</span><span class="p">[</span><span class="n">events</span><span class="o">.</span><span class="n">list</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="nd">@events</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">events</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_events</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_events</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">new_events</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">session_number</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">session</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_problems</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the total number of problems solved by the subject.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;PROB&#39;</span><span class="p">)</span> <span class="o">|</span>
+                               <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">&#39;PROB&#39;</span><span class="p">)])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_lists</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">list</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the number of problems solved correctly.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">iscorrect</span> <span class="o">==</span> <span class="mi">1</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">percent_correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the percentage of problems solved correctly.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">100</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_correct</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_problems</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">problems_per_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the mean number of problems per list.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_problems</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_lists</span>
+
+<div class="viewcode-block" id="MathSummary.total_num_problems"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.MathSummary.total_num_problems">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">total_num_problems</span><span class="p">(</span><span class="n">summaries</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get total number of problems for multiple sessions.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        summaries : List[MathSummary]</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        : int</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">([</span><span class="n">summary</span><span class="o">.</span><span class="n">num_problems</span> <span class="k">for</span> <span class="n">summary</span> <span class="ow">in</span> <span class="n">summaries</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="MathSummary.total_num_correct"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.MathSummary.total_num_correct">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">total_num_correct</span><span class="p">(</span><span class="n">summaries</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the total number of correctly answered problems for multiple</span>
+<span class="sd">        sessions.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        summaries : List[MathSummary]</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        : int</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">([</span><span class="n">summary</span><span class="o">.</span><span class="n">num_correct</span> <span class="k">for</span> <span class="n">summary</span> <span class="ow">in</span> <span class="n">summaries</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="MathSummary.total_percent_correct"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.MathSummary.total_percent_correct">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="nd">@safe_divide</span>
+    <span class="k">def</span> <span class="nf">total_percent_correct</span><span class="p">(</span><span class="n">summaries</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the percent correct problems for multiple sessions.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        summaries : List[MathSummary]</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        : float</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">probs</span> <span class="o">=</span> <span class="n">MathSummary</span><span class="o">.</span><span class="n">total_num_problems</span><span class="p">(</span><span class="n">summaries</span><span class="p">)</span>
+        <span class="n">correct</span> <span class="o">=</span> <span class="n">MathSummary</span><span class="o">.</span><span class="n">total_num_correct</span><span class="p">(</span><span class="n">summaries</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">correct</span> <span class="o">/</span> <span class="n">probs</span></div>
+
+<div class="viewcode-block" id="MathSummary.total_problems_per_list"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.MathSummary.total_problems_per_list">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">total_problems_per_list</span><span class="p">(</span><span class="n">summaries</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the mean number of problems per list for multiple sessions.</span>
+
+<span class="sd">        FIXME: this doesn&#39;t seem to match R1111M&#39;s FR1 report.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        summaries : List[MathSummary]</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n_lists</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">summary</span><span class="o">.</span><span class="n">num_lists</span> <span class="k">for</span> <span class="n">summary</span> <span class="ow">in</span> <span class="n">summaries</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">MathSummary</span><span class="o">.</span><span class="n">total_num_problems</span><span class="p">(</span><span class="n">summaries</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_lists</span></div></div>
+
+
+<div class="viewcode-block" id="Summary"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.Summary">[docs]</a><span class="k">class</span> <span class="nc">Summary</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base class for all summary objects.&quot;&quot;&quot;</span>
+    <span class="n">_events</span> <span class="o">=</span> <span class="n">ArrayOrNone</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;task-related events excluding math distractor events&#39;</span><span class="p">)</span>
+    <span class="n">_raw_events</span> <span class="o">=</span> <span class="n">ArrayOrNone</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;all event types including math distractor events&#39;</span><span class="p">)</span>
+    <span class="n">_bipolar_pairs</span> <span class="o">=</span> <span class="n">String</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;bipolar pairs in montage&#39;</span><span class="p">)</span>
+    <span class="n">_excluded_pairs</span> <span class="o">=</span> <span class="n">String</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;bipolar pairs not used for classification &#39;</span>
+                                  <span class="s1">&#39;due to artifact or stimulation&#39;</span><span class="p">)</span>
+    <span class="n">_normalized_powers</span> <span class="o">=</span> <span class="n">ArrayOrNone</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;normalized powers for all events &quot;</span>
+                                          <span class="s2">&quot;and recorded pairs&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">events</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_events</span><span class="p">)</span>
+
+    <span class="nd">@events</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">events</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_events</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_events</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">new_events</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">raw_events</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_events</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_raw_events</span><span class="p">)</span>
+
+    <span class="nd">@raw_events</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">raw_events</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_events</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_events</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">new_events</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_raw_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">new_events</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span>
+                 <span class="n">normalized_powers</span><span class="p">,</span> <span class="n">raw_events</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+<div class="viewcode-block" id="Summary.create"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.Summary.create">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span>
+               <span class="n">normalized_powers</span><span class="p">,</span> <span class="n">raw_events</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a new summary object from events</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        events : np.recarray</span>
+<span class="sd">        raw_events: np.recarray</span>
+<span class="sd">        bipolar_pairs: dict</span>
+<span class="sd">            Dictionary containing data in bipolar pairs in a montage</span>
+<span class="sd">        excluded_pairs: dict</span>
+<span class="sd">            Dictionary containing data on pairs excluded from analysis</span>
+<span class="sd">        normalized_powers: np.ndarray</span>
+<span class="sd">            2D array of normalzied powers of shape n_events x (</span>
+<span class="sd">            n_frequencies * n_bipolar_pairs)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">instance</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
+        <span class="n">instance</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="n">events</span><span class="p">,</span>
+                          <span class="n">bipolar_pairs</span><span class="p">,</span>
+                          <span class="n">excluded_pairs</span><span class="p">,</span>
+                          <span class="n">normalized_powers</span><span class="p">,</span>
+                          <span class="n">raw_events</span><span class="o">=</span><span class="n">raw_events</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">instance</span></div></div>
+
+
+<div class="viewcode-block" id="SessionSummary"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.SessionSummary">[docs]</a><span class="k">class</span> <span class="nc">SessionSummary</span><span class="p">(</span><span class="n">Summary</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base class for single-session objects.&quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">subject</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">extract_subject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">experiment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">experiments</span> <span class="o">=</span> <span class="n">extract_experiment_from_events</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">experiments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">session_number</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">sessions</span> <span class="o">=</span> <span class="n">extract_sessions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sessions</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">TooManySessionsError</span><span class="p">(</span><span class="s2">&quot;Single session expected for session &quot;</span>
+                                       <span class="s2">&quot;summary&quot;</span><span class="p">)</span>
+
+        <span class="n">session</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sessions</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">session</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">events</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_events</span><span class="p">)</span>
+
+    <span class="nd">@events</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">events</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_events</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Only allow setting of events which contain a single session.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_events</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">new_events</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">new_events</span><span class="p">[</span><span class="s1">&#39;session&#39;</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> \
+                <span class="s2">&quot;events should only be from a single session&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bipolar_pairs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns a dictionary of bipolar pairs&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bipolar_pairs</span><span class="p">)</span>
+
+    <span class="nd">@bipolar_pairs</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">bipolar_pairs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_bipolar_pairs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bipolar_pairs</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">new_bipolar_pairs</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">excluded_pairs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns a dictionary of bipolar pairs&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_excluded_pairs</span><span class="p">)</span>
+
+    <span class="nd">@excluded_pairs</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">excluded_pairs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_excluded_pairs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_excluded_pairs</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">new_excluded_pairs</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">normalized_powers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalized_powers</span>
+
+    <span class="nd">@normalized_powers</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">normalized_powers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_normalized_powers</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_normalized_powers</span> <span class="o">=</span> <span class="n">new_normalized_powers</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">session_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Computes the total amount of time the session lasted in seconds.&quot;&quot;&quot;</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">mstime</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">mstime</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1000.</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">session_datetime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a timezone-aware datetime object of the end time of the</span>
+<span class="sd">        session in UTC.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">timestamp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">mstime</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">/</span> <span class="mf">1000.</span>
+        <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">pytz</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_lists</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">list</span><span class="p">))</span>
+
+<div class="viewcode-block" id="SessionSummary.to_dataframe"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.SessionSummary.to_dataframe">[docs]</a>    <span class="k">def</span> <span class="nf">to_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recreate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Convert the summary to a :class:`pd.DataFrame` for easier</span>
+<span class="sd">        manipulation. This amounts to converting the events to a dataframe</span>
+
+<span class="sd">        Keyword arguments</span>
+<span class="sd">        -----------------</span>
+<span class="sd">        recreate : bool</span>
+<span class="sd">            Force re-creating the dataframe. Otherwise, it will only be created</span>
+<span class="sd">            the first time this method is called and stored as an instance</span>
+<span class="sd">            attribute.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_df&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">recreate</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_records</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df</span></div>
+
+<div class="viewcode-block" id="SessionSummary.populate"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.SessionSummary.populate">[docs]</a>    <span class="k">def</span> <span class="nf">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span>
+                 <span class="n">normalized_powers</span><span class="p">,</span> <span class="n">raw_events</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Populate attributes and store events.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">events</span> <span class="o">=</span> <span class="n">events</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw_events</span> <span class="o">=</span> <span class="n">raw_events</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bipolar_pairs</span> <span class="o">=</span> <span class="n">bipolar_pairs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">excluded_pairs</span> <span class="o">=</span> <span class="n">excluded_pairs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalized_powers</span> <span class="o">=</span> <span class="n">normalized_powers</span></div></div>
+
+
+<div class="viewcode-block" id="FRSessionSummary"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.FRSessionSummary">[docs]</a><span class="k">class</span> <span class="nc">FRSessionSummary</span><span class="p">(</span><span class="n">SessionSummary</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Free recall session summary data.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="FRSessionSummary.populate"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.FRSessionSummary.populate">[docs]</a>    <span class="k">def</span> <span class="nf">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span>
+                 <span class="n">normalized_powers</span><span class="p">,</span> <span class="n">raw_events</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Populate data from events.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        events : np.recarray</span>
+<span class="sd">        raw_events: np.recarray</span>
+<span class="sd">        recall_probs : np.ndarray</span>
+<span class="sd">            Predicted probabilities of recall per item. If not given, assumed</span>
+<span class="sd">            there is no relevant classifier and values of -999 are used to</span>
+<span class="sd">            indicate this.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">SessionSummary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span>
+                                <span class="n">normalized_powers</span><span class="p">,</span> <span class="n">raw_events</span><span class="o">=</span><span class="n">raw_events</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">intrusion_events</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">intr_events</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_events</span><span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_events</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;REC_WORD&#39;</span><span class="p">)</span> <span class="o">&amp;</span>
+                                      <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_events</span><span class="o">.</span><span class="n">intrusion</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">999</span><span class="p">)</span> <span class="o">&amp;</span>
+                                      <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_events</span><span class="o">.</span><span class="n">intrusion</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">intr_events</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_words</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Number of words in the session &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;WORD&#39;</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Number of correctly-recalled words &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;WORD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">recalled</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_prior_list_intrusions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Calculates the number of prior list intrusions &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">intrusion_events</span><span class="o">.</span><span class="n">intrusion</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_extra_list_intrusions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Calculates the number of extra-list intrusions &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">intrusion_events</span><span class="o">.</span><span class="n">intrusion</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_lists</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the total number of lists.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">list</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">percent_recalled</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculates the percentage correctly recalled words.&quot;&quot;&quot;</span>
+        <span class="c1"># FIXME: is length of events always equal to number of items?</span>
+        <span class="k">return</span> <span class="mi">100</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_correct</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_words</span>
+
+<div class="viewcode-block" id="FRSessionSummary.serialpos_probabilities"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.FRSessionSummary.serialpos_probabilities">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">serialpos_probabilities</span><span class="p">(</span><span class="n">summaries</span><span class="p">,</span> <span class="n">first</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Computes the mean recall probability by word serial position.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        summaries : List[Summary]</span>
+<span class="sd">            Summaries of sessions.</span>
+<span class="sd">        first : bool</span>
+<span class="sd">            When True, return probabilities that each serial position is the</span>
+<span class="sd">            first recalled word. Otherwise, return the probability of recall</span>
+<span class="sd">            for each word by serial position.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        List[float]</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;serialpos&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="s1">&#39;recalled&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">]</span>
+        <span class="n">events</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">events</span><span class="p">[</span><span class="n">columns</span><span class="p">])</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">summaries</span><span class="p">])</span>
+        <span class="n">events</span> <span class="o">=</span> <span class="n">events</span><span class="p">[</span><span class="n">events</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;WORD&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">first</span><span class="p">:</span>
+            <span class="n">firstpos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">serialpos</span><span class="o">.</span><span class="n">unique</span><span class="p">()),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">listno</span> <span class="ow">in</span> <span class="n">events</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">nonzero</span> <span class="o">=</span> <span class="n">events</span><span class="p">[(</span><span class="n">events</span><span class="o">.</span><span class="n">list</span> <span class="o">==</span> <span class="n">listno</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">recalled</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)]</span><span class="o">.</span><span class="n">serialpos</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>  <span class="c1"># no items recalled this list</span>
+                    <span class="k">continue</span>
+                <span class="n">thispos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">firstpos</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">firstpos</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+                <span class="n">thispos</span><span class="p">[</span><span class="n">nonzero</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">firstpos</span> <span class="o">+=</span> <span class="n">thispos</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">firstpos</span> <span class="o">/</span> <span class="n">events</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">max</span><span class="p">())</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">group</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;serialpos&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">group</span><span class="o">.</span><span class="n">recalled</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="CatFRSessionSummary"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.CatFRSessionSummary">[docs]</a><span class="k">class</span> <span class="nc">CatFRSessionSummary</span><span class="p">(</span><span class="n">FRSessionSummary</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extends standard FR session summaries for categorized free recall</span>
+<span class="sd">        experiments.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_repetition_ratios</span> <span class="o">=</span> <span class="n">String</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Repetition ratio by subject&#39;</span><span class="p">)</span>
+    <span class="n">irt_within_cat</span> <span class="o">=</span> <span class="n">Array</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;average inter-response time within categories&#39;</span><span class="p">)</span>
+    <span class="n">irt_between_cat</span> <span class="o">=</span> <span class="n">Array</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;average inter-response time between categories&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span>
+                 <span class="n">normalized_powers</span><span class="p">,</span> <span class="n">raw_events</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">repetition_ratio_dict</span><span class="o">=</span><span class="p">{}):</span>
+        <span class="n">FRSessionSummary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span>
+                                  <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span>
+                                  <span class="n">normalized_powers</span><span class="p">,</span>
+                                  <span class="n">raw_events</span><span class="o">=</span><span class="n">raw_events</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">repetition_ratios</span> <span class="o">=</span> <span class="n">repetition_ratio_dict</span>
+
+        <span class="c1"># Calculate between and within IRTs based on events</span>
+        <span class="n">catfr_events</span> <span class="o">=</span> <span class="n">events</span><span class="p">[</span><span class="n">events</span><span class="o">.</span><span class="n">experiment</span> <span class="o">==</span> <span class="s1">&#39;catFR1&#39;</span><span class="p">]</span>
+        <span class="n">cat_recalled_events</span> <span class="o">=</span> <span class="n">catfr_events</span><span class="p">[</span><span class="n">catfr_events</span><span class="o">.</span><span class="n">recalled</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">irt_within_cat</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">irt_between_cat</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">catfr_events</span><span class="o">.</span><span class="n">session</span><span class="p">):</span>
+            <span class="n">cat_sess_recalls</span> <span class="o">=</span> <span class="n">cat_recalled_events</span><span class="p">[</span><span class="n">cat_recalled_events</span><span class="o">.</span><span class="n">session</span> <span class="o">==</span> <span class="n">session</span><span class="p">]</span>
+            <span class="k">for</span> <span class="nb">list</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">cat_sess_recalls</span><span class="o">.</span><span class="n">list</span><span class="p">):</span>
+                <span class="n">cat_sess_list_recalls</span> <span class="o">=</span> <span class="n">cat_sess_recalls</span><span class="p">[</span><span class="n">cat_sess_recalls</span><span class="o">.</span><span class="n">list</span> <span class="o">==</span> <span class="nb">list</span><span class="p">]</span>
+                <span class="n">irts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">cat_sess_list_recalls</span><span class="o">.</span><span class="n">mstime</span><span class="p">)</span>
+                <span class="n">within</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">cat_sess_list_recalls</span><span class="o">.</span><span class="n">category_num</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+                <span class="n">irt_within_cat</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">irts</span><span class="p">[</span><span class="n">within</span><span class="p">])</span>
+                <span class="n">irt_between_cat</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">irts</span><span class="p">[</span><span class="n">within</span> <span class="o">==</span> <span class="kc">False</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">irt_within_cat</span> <span class="o">=</span> <span class="n">irt_within_cat</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">irt_between_cat</span> <span class="o">=</span> <span class="n">irt_between_cat</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">raw_repetition_ratios</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">mydict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_repetition_ratios</span><span class="p">)</span>
+        <span class="n">mydict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mydict</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="k">return</span> <span class="n">mydict</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">repetition_ratios</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_repetition_ratios</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+
+    <span class="nd">@repetition_ratios</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">repetition_ratios</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_repetition_ratios</span><span class="p">):</span>
+        <span class="n">serializable_ratios</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span>
+                               <span class="n">new_repetition_ratios</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_repetition_ratios</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">serializable_ratios</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">irt_within_category</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">irt_within_cat</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">irt_between_category</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">irt_between_cat</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">subject_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_repetition_ratios</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">subject</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="StimSessionSummary"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.StimSessionSummary">[docs]</a><span class="k">class</span> <span class="nc">StimSessionSummary</span><span class="p">(</span><span class="n">SessionSummary</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;SessionSummary data specific to sessions with stimulation.&quot;&quot;&quot;</span>
+    <span class="n">_post_stim_prob_recall</span> <span class="o">=</span> <span class="n">ArrayOrNone</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">,</span>
+                                         <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;classifier output in post stim period&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">post_stim_prob_recall</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_post_stim_prob_recall</span>
+
+    <span class="nd">@post_stim_prob_recall</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">post_stim_prob_recall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_post_stim_prob_recall</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">new_post_stim_prob_recall</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_post_stim_prob_recall</span> <span class="o">=</span> <span class="n">new_post_stim_prob_recall</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+<div class="viewcode-block" id="StimSessionSummary.populate"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.StimSessionSummary.populate">[docs]</a>    <span class="k">def</span> <span class="nf">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span>
+                 <span class="n">normalized_powers</span><span class="p">,</span> <span class="n">post_stim_prob_recall</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">raw_events</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Populate stim data from events &quot;&quot;&quot;</span>
+        <span class="n">SessionSummary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span>
+                                <span class="n">bipolar_pairs</span><span class="p">,</span>
+                                <span class="n">excluded_pairs</span><span class="p">,</span>
+                                <span class="n">normalized_powers</span><span class="p">,</span>
+                                <span class="n">raw_events</span><span class="o">=</span><span class="n">raw_events</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">post_stim_prob_recall</span> <span class="o">=</span> <span class="n">post_stim_prob_recall</span></div></div>
+
+
+
+<div class="viewcode-block" id="FRStimSessionSummary"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.FRStimSessionSummary">[docs]</a><span class="k">class</span> <span class="nc">FRStimSessionSummary</span><span class="p">(</span><span class="n">FRSessionSummary</span><span class="p">,</span> <span class="n">StimSessionSummary</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; SessionSummary for FR sessions with stim &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span>
+                 <span class="n">excluded_pairs</span><span class="p">,</span> <span class="n">normalized_powers</span><span class="p">,</span> <span class="n">post_stim_prob_recall</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">raw_events</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">FRSessionSummary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                  <span class="n">events</span><span class="p">,</span>
+                                  <span class="n">bipolar_pairs</span><span class="p">,</span>
+                                  <span class="n">excluded_pairs</span><span class="p">,</span>
+                                  <span class="n">normalized_powers</span><span class="p">,</span>
+                                  <span class="n">raw_events</span><span class="o">=</span><span class="n">raw_events</span><span class="p">)</span>
+        <span class="n">StimSessionSummary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span>
+                                    <span class="n">bipolar_pairs</span><span class="p">,</span>
+                                    <span class="n">excluded_pairs</span><span class="p">,</span>
+                                    <span class="n">normalized_powers</span><span class="p">,</span>
+                                    <span class="n">post_stim_prob_recall</span><span class="o">=</span><span class="n">post_stim_prob_recall</span><span class="p">,</span>
+                                    <span class="n">raw_events</span><span class="o">=</span><span class="n">raw_events</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pre_stim_prob_recall</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
+        <span class="n">pre_stim_probs</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">is_stim_item</span> <span class="o">==</span> <span class="kc">True</span><span class="p">]</span><span class="o">.</span><span class="n">classifier_output</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">pre_stim_probs</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_nonstim_lists</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the number of non-stim lists.&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">listno</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">list</span> <span class="o">==</span> <span class="n">listno</span><span class="p">]</span><span class="o">.</span><span class="n">is_stim_list</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">count</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_stim_lists</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the number of stim lists.&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">listno</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">list</span> <span class="o">==</span> <span class="n">listno</span><span class="p">]</span><span class="o">.</span><span class="n">is_stim_list</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">count</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stim_events_by_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
+        <span class="n">n_stim_events</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;list&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">is_stim_item</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">n_stim_events</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">prob_stim_by_serialpos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;serialpos&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">classifier_output</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+<div class="viewcode-block" id="FRStimSessionSummary.lists"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.FRStimSessionSummary.lists">[docs]</a>    <span class="k">def</span> <span class="nf">lists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stim</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Get a list of either stim lists or non-stim lists &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">stim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">lists</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">is_stim_list</span> <span class="o">==</span> <span class="n">stim</span><span class="p">]</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lists</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">lists</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stim_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;stimAnodeTag&#39;</span><span class="p">,</span> <span class="s1">&#39;stimCathodeTag&#39;</span><span class="p">,</span> <span class="s1">&#39;location&#39;</span><span class="p">,</span> <span class="s1">&#39;amplitude&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;stim_duration&#39;</span><span class="p">,</span> <span class="s1">&#39;pulse_freq&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stim_params_by_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
+        <span class="n">stim_columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stim_columns</span>
+        <span class="n">non_stim_columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">stim_columns</span><span class="p">]</span>
+
+        <span class="n">stim_param_by_list</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[(</span><span class="n">stim_columns</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;list&#39;</span><span class="p">])]</span>
+                                <span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span>
+                                <span class="o">.</span><span class="n">dropna</span><span class="p">())</span>
+
+        <span class="c1"># This ensures that for any given list, the stim parameters used</span>
+        <span class="c1"># during that list are populated. This makes calculating post stim</span>
+        <span class="c1"># item behavioral responses easier</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">non_stim_columns</span><span class="p">]</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">stim_param_by_list</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stim_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stim_params_by_list</span>
+        <span class="n">grouped</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stim_columns</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;is_stim_list&#39;</span><span class="p">]))</span>
+                     <span class="o">.</span><span class="n">agg</span><span class="p">({</span><span class="s1">&#39;is_stim_item&#39;</span> <span class="p">:</span> <span class="s1">&#39;sum&#39;</span><span class="p">,</span>
+                           <span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="s1">&#39;count&#39;</span><span class="p">})</span>
+                     <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;is_stim_item&#39;</span><span class="p">:</span> <span class="s1">&#39;n_stimulations&#39;</span><span class="p">,</span>
+                                      <span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="s1">&#39;n_trials&#39;</span><span class="p">})</span>
+                     <span class="o">.</span><span class="n">reset_index</span><span class="p">())</span>
+        <span class="n">grouped</span><span class="p">[</span><span class="s1">&#39;amplitude&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">grouped</span><span class="p">[</span><span class="s1">&#39;amplitude&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1000.0</span>
+
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">grouped</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">recall_test_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stim_params_by_list</span>
+
+        <span class="k">if</span> <span class="s2">&quot;PS5&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">list</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">list</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;stimAnodeTag&#39;</span><span class="p">,</span> <span class="s1">&#39;stimCathodeTag&#39;</span><span class="p">,</span>
+                                       <span class="s1">&#39;location&#39;</span><span class="p">,</span> <span class="s1">&#39;amplitude&#39;</span><span class="p">,</span> <span class="s1">&#39;stim_duration&#39;</span><span class="p">,</span>
+                                       <span class="s1">&#39;pulse_freq&#39;</span><span class="p">]):</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">name</span><span class="p">])</span>
+
+            <span class="c1"># Stim lists vs. non-stim lists</span>
+            <span class="n">n_correct_stim_list_recalls</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="n">group</span><span class="o">.</span><span class="n">is_stim_list</span> <span class="o">==</span> <span class="kc">True</span><span class="p">]</span><span class="o">.</span><span class="n">recalled</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="n">n_correct_nonstim_list_recalls</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">is_stim_list</span> <span class="o">==</span> <span class="kc">False</span><span class="p">]</span><span class="o">.</span><span class="n">recalled</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="n">n_stim_list_words</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="n">group</span><span class="o">.</span><span class="n">is_stim_list</span> <span class="o">==</span> <span class="kc">True</span><span class="p">]</span><span class="o">.</span><span class="n">recalled</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+            <span class="n">n_nonstim_list_words</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">is_stim_list</span> <span class="o">==</span> <span class="kc">False</span><span class="p">]</span><span class="o">.</span><span class="n">recalled</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+            <span class="n">tstat_list</span><span class="p">,</span> <span class="n">pval_list</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">proportions_chisquare</span><span class="p">([</span>
+                <span class="n">n_correct_stim_list_recalls</span><span class="p">,</span> <span class="n">n_correct_nonstim_list_recalls</span><span class="p">],</span>
+                <span class="p">[</span><span class="n">n_stim_list_words</span><span class="p">,</span> <span class="n">n_nonstim_list_words</span><span class="p">])</span>
+
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;parameters&quot;</span><span class="p">:</span> <span class="n">parameters</span><span class="p">,</span>
+                            <span class="s2">&quot;comparison&quot;</span><span class="p">:</span> <span class="s2">&quot;Stim Lists vs. Non-stim Lists&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;stim&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">n_correct_stim_list_recalls</span><span class="p">,</span>
+                                     <span class="n">n_stim_list_words</span><span class="p">),</span>
+                            <span class="s2">&quot;non-stim&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">n_correct_nonstim_list_recalls</span><span class="p">,</span> <span class="n">n_nonstim_list_words</span><span class="p">),</span>
+                            <span class="s2">&quot;t-stat&quot;</span><span class="p">:</span> <span class="n">tstat_list</span><span class="p">,</span>
+                            <span class="s2">&quot;p-value&quot;</span><span class="p">:</span> <span class="n">pval_list</span><span class="p">})</span>
+
+            <span class="c1"># stim items vs. non-stim low biomarker items</span>
+            <span class="n">n_correct_stim_item_recalls</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="n">group</span><span class="o">.</span><span class="n">is_stim_item</span> <span class="o">==</span> <span class="kc">True</span><span class="p">]</span><span class="o">.</span><span class="n">recalled</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="n">n_correct_nonstim_item_recalls</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">is_stim_item</span> <span class="o">==</span> <span class="kc">False</span><span class="p">)</span> <span class="o">&amp;</span>
+                                                <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">classifier_output</span> <span class="o">&lt;</span>
+                                                 <span class="n">df</span><span class="o">.</span><span class="n">thresh</span><span class="p">)]</span><span class="o">.</span><span class="n">recalled</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+            <span class="n">n_stim_items</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="n">group</span><span class="o">.</span><span class="n">is_stim_item</span> <span class="o">==</span> <span class="kc">True</span><span class="p">]</span><span class="o">.</span><span class="n">recalled</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+            <span class="n">n_nonstim_items</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">is_stim_item</span> <span class="o">==</span> <span class="kc">False</span><span class="p">)</span> <span class="o">&amp;</span>
+                                 <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">classifier_output</span> <span class="o">&lt;</span>
+                                  <span class="n">df</span><span class="o">.</span><span class="n">thresh</span><span class="p">)]</span><span class="o">.</span><span class="n">recalled</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+
+            <span class="n">tstat_list</span><span class="p">,</span> <span class="n">pval_list</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">proportions_chisquare</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">n_correct_stim_item_recalls</span><span class="p">,</span> <span class="n">n_correct_nonstim_item_recalls</span><span class="p">],</span>
+                <span class="p">[</span><span class="n">n_stim_items</span><span class="p">,</span> <span class="n">n_nonstim_items</span><span class="p">])</span>
+
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s2">&quot;parameters&quot;</span><span class="p">:</span> <span class="n">parameters</span><span class="p">,</span>
+                <span class="s2">&quot;comparison&quot;</span><span class="p">:</span> <span class="s2">&quot;Stim Items vs. Low Biomarker Non-stim Items&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;stim&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">n_correct_stim_item_recalls</span><span class="p">,</span> <span class="n">n_stim_items</span><span class="p">),</span>
+                <span class="s2">&quot;non-stim&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">n_correct_nonstim_item_recalls</span><span class="p">,</span> <span class="n">n_nonstim_items</span><span class="p">),</span>
+                <span class="s2">&quot;t-stat&quot;</span><span class="p">:</span> <span class="n">tstat_list</span><span class="p">,</span>
+                <span class="s2">&quot;p-value&quot;</span><span class="p">:</span> <span class="n">pval_list</span><span class="p">})</span>
+
+            <span class="c1"># post stim items vs. non-stim low biomarker items</span>
+            <span class="n">n_correct_post_stim_item_recalls</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="n">group</span><span class="o">.</span><span class="n">is_post_stim_item</span> <span class="o">==</span> <span class="kc">True</span><span class="p">]</span><span class="o">.</span><span class="n">recalled</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="n">n_post_stim_items</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="n">group</span><span class="o">.</span><span class="n">is_post_stim_item</span> <span class="o">==</span> <span class="kc">True</span><span class="p">]</span><span class="o">.</span><span class="n">recalled</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+
+            <span class="n">tstat_list</span><span class="p">,</span> <span class="n">pval_list</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">proportions_chisquare</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">n_correct_post_stim_item_recalls</span><span class="p">,</span> <span class="n">n_correct_nonstim_item_recalls</span><span class="p">],</span>
+            <span class="p">[</span><span class="n">n_post_stim_items</span><span class="p">,</span> <span class="n">n_nonstim_items</span><span class="p">])</span>
+
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s2">&quot;parameters&quot;</span><span class="p">:</span> <span class="n">parameters</span><span class="p">,</span>
+                <span class="s2">&quot;comparison&quot;</span><span class="p">:</span> <span class="s2">&quot;Post-stim Items vs. Low Biomarker Non-stim Items&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;stim&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">n_correct_post_stim_item_recalls</span><span class="p">,</span> <span class="n">n_post_stim_items</span><span class="p">),</span>
+                <span class="s2">&quot;non-stim&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">n_correct_nonstim_item_recalls</span><span class="p">,</span> <span class="n">n_nonstim_items</span><span class="p">),</span>
+                <span class="s2">&quot;t-stat&quot;</span><span class="p">:</span> <span class="n">tstat_list</span><span class="p">,</span>
+                <span class="s2">&quot;p-value&quot;</span><span class="p">:</span> <span class="n">pval_list</span><span class="p">})</span>
+
+        <span class="k">return</span> <span class="n">results</span>
+
+    <span class="k">def</span> <span class="nf">recalls_by_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stim_list_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
+        <span class="n">recalls_by_list</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">is_stim_list</span> <span class="o">==</span> <span class="n">stim_list_only</span><span class="p">]</span>
+            <span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;list&#39;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">recalled</span>
+            <span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">recalls_by_list</span>
+
+    <span class="k">def</span> <span class="nf">prob_first_recall_by_serialpos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stim</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
+        <span class="n">events</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">is_stim_item</span> <span class="o">==</span> <span class="n">stim</span><span class="p">]</span>
+
+        <span class="n">firstpos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">serialpos</span><span class="o">.</span><span class="n">unique</span><span class="p">()),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">listno</span> <span class="ow">in</span> <span class="n">events</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">nonzero</span> <span class="o">=</span> <span class="n">events</span><span class="p">[(</span><span class="n">events</span><span class="o">.</span><span class="n">list</span> <span class="o">==</span> <span class="n">listno</span><span class="p">)</span> <span class="o">&amp;</span>
+                                 <span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">recalled</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)]</span><span class="o">.</span><span class="n">serialpos</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>  <span class="c1"># no items recalled this list</span>
+                <span class="k">continue</span>
+            <span class="n">thispos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">firstpos</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">firstpos</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="n">thispos</span><span class="p">[</span><span class="n">nonzero</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">firstpos</span> <span class="o">+=</span> <span class="n">thispos</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">firstpos</span> <span class="o">/</span> <span class="n">events</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">max</span><span class="p">())</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">prob_recall_by_serialpos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stim_items_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
+        <span class="n">group</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">is_stim_item</span> <span class="o">==</span> <span class="n">stim_items_only</span><span class="p">]</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;serialpos&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">group</span><span class="o">.</span><span class="n">recalled</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">delta_recall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">post_stim_items</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
+        <span class="n">nonstim_low_bio_recall</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">classifier_output</span> <span class="o">&lt;</span> <span class="n">df</span><span class="o">.</span><span class="n">thresh</span><span class="p">)</span> <span class="o">&amp;</span>
+                                    <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">is_stim_list</span> <span class="o">==</span> <span class="kc">False</span><span class="p">)]</span><span class="o">.</span><span class="n">recalled</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">post_stim_items</span><span class="p">:</span>
+            <span class="n">recall_stim</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">is_post_stim_item</span> <span class="o">==</span> <span class="kc">True</span><span class="p">]</span><span class="o">.</span><span class="n">recalled</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">recall_stim</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">is_stim_item</span> <span class="o">==</span> <span class="kc">True</span><span class="p">]</span><span class="o">.</span><span class="n">recalled</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+        <span class="n">delta_recall</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="n">recall_stim</span> <span class="o">-</span> <span class="n">nonstim_low_bio_recall</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">delta_recall</span></div>
+
+
+<div class="viewcode-block" id="FR5SessionSummary"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.FR5SessionSummary">[docs]</a><span class="k">class</span> <span class="nc">FR5SessionSummary</span><span class="p">(</span><span class="n">FRStimSessionSummary</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; FR5-specific summary &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span>
+                 <span class="n">excluded_pairs</span><span class="p">,</span> <span class="n">normalized_powers</span><span class="p">,</span> <span class="n">post_stim_prob_recall</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">raw_events</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">FRStimSessionSummary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span>
+                                      <span class="n">bipolar_pairs</span><span class="p">,</span>
+                                      <span class="n">excluded_pairs</span><span class="p">,</span>
+                                      <span class="n">normalized_powers</span><span class="p">,</span>
+                                      <span class="n">raw_events</span><span class="o">=</span><span class="n">raw_events</span><span class="p">,</span>
+                                      <span class="n">post_stim_prob_recall</span><span class="o">=</span><span class="n">post_stim_prob_recall</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PSSessionSummary"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.PSSessionSummary">[docs]</a><span class="k">class</span> <span class="nc">PSSessionSummary</span><span class="p">(</span><span class="n">SessionSummary</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Parameter Search experiment summary &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span>
+                 <span class="n">normalized_powers</span><span class="p">,</span> <span class="n">raw_events</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">SessionSummary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span>
+                                <span class="n">normalized_powers</span><span class="p">,</span> <span class="n">raw_events</span><span class="o">=</span><span class="n">raw_events</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">decision</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return a dictionary containing decision information &quot;&quot;&quot;</span>
+        <span class="n">decision_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;converged&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;sham_dc&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;sham_sem&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;best_location&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;best_amplitude&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;pval&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;tstat&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;tie&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;tstat_vs_sham&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;pval_vs_sham&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;loc1&#39;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s1">&#39;loc2&#39;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="p">}</span>
+        <span class="n">events_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_records</span><span class="p">([</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="p">],</span>
+                                              <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+
+        <span class="n">decision</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;OPTIMIZATION_DECISION&#39;</span><span class="p">)]</span>
+        <span class="c1"># If a session completes with convergence, there will be an</span>
+        <span class="c1"># optimization decision event at the end. Otherwise, we need to</span>
+        <span class="c1"># manually calculate one</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">decision</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">decision_dict</span><span class="p">[</span><span class="s1">&#39;sham_dc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">decision</span><span class="o">.</span><span class="n">sham</span><span class="o">.</span><span class="n">delta_classifier</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">decision_dict</span><span class="p">[</span><span class="s1">&#39;sham_sem&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">decision</span><span class="o">.</span><span class="n">sham</span><span class="o">.</span><span class="n">sem</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">decision_dict</span><span class="p">[</span><span class="s1">&#39;best_location&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">decision</span><span class="o">.</span><span class="n">decision</span><span class="o">.</span><span class="n">best_location</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">decision_dict</span><span class="p">[</span><span class="s1">&#39;best_amplitude&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">decision</span><span class="o">.</span><span class="n">loc1</span> <span class="k">if</span> <span class="n">decision</span><span class="o">.</span><span class="n">loc1</span><span class="o">.</span><span class="n">loc_name</span> <span class="o">==</span> <span class="n">decision_dict</span><span class="p">[</span>
+                    <span class="s1">&#39;best_location&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="n">decision</span><span class="o">.</span><span class="n">loc2</span><span class="p">)</span><span class="o">.</span><span class="n">amplitude</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">decision_dict</span><span class="p">[</span><span class="s1">&#39;pval&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">decision</span><span class="o">.</span><span class="n">decision</span><span class="o">.</span><span class="n">p_val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">decision_dict</span><span class="p">[</span><span class="s1">&#39;tstat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">decision</span><span class="o">.</span><span class="n">decision</span><span class="o">.</span><span class="n">t_stat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">decision_dict</span><span class="p">[</span><span class="s1">&#39;tie&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">decision</span><span class="o">.</span><span class="n">decision</span><span class="o">.</span><span class="n">tie</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">decision_dict</span><span class="p">[</span><span class="s1">&#39;tstat_vs_sham&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">decision</span><span class="o">.</span><span class="n">sham</span><span class="o">.</span><span class="n">t_stat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">decision_dict</span><span class="p">[</span><span class="s1">&#39;pval_vs_sham&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">decision</span><span class="o">.</span><span class="n">sham</span><span class="o">.</span><span class="n">p_val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">decision_dict</span><span class="p">[</span><span class="s1">&#39;loc1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">decision</span><span class="o">.</span><span class="n">loc1</span>
+            <span class="n">decision_dict</span><span class="p">[</span><span class="s1">&#39;loc2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">decision</span><span class="o">.</span><span class="n">loc2</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">decision_dict</span><span class="p">[</span><span class="s1">&#39;converged&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">opt_events</span> <span class="o">=</span> <span class="n">events_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">events_df</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;OPTIMIZATION&#39;</span><span class="p">]</span>
+            <span class="c1"># This should win an award for least-readable line of python code</span>
+            <span class="p">(</span><span class="n">locations</span><span class="p">,</span> <span class="n">loc_datasets</span><span class="p">)</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="p">[(</span><span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">name</span><span class="p">),</span>
+                                               <span class="n">table</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">[</span><span class="s1">&#39;amplitude&#39;</span><span class="p">,</span>
+                                                             <span class="s1">&#39;delta_classifier&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">table</span><span class="p">)</span> <span class="ow">in</span> <span class="n">opt_events</span><span class="o">.</span><span class="n">groupby</span><span class="p">((</span><span class="s1">&#39;anode_label&#39;</span><span class="p">,</span> <span class="s1">&#39;cathode_label&#39;</span><span class="p">))])</span>
+
+            <span class="c1"># TODO: include sham delta classifiers when we need to reconstruct</span>
+            <span class="c1"># results</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">locations</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">decision</span><span class="p">,</span> <span class="n">loc_info</span> <span class="o">=</span> <span class="n">choose_location</span><span class="p">(</span><span class="n">loc_datasets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                     <span class="n">locations</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                     <span class="n">loc_datasets</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                                     <span class="n">locations</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                                     <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">ld</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>
+                                                                <span class="n">ld</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="k">for</span> <span class="n">ld</span> <span class="ow">in</span> <span class="n">loc_datasets</span><span class="p">]),</span>
+                                                     <span class="kc">None</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span>
+
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">loc_info</span><span class="p">):</span>
+                <span class="n">loc_info</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="s1">&#39;amplitude&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">loc_info</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="s1">&#39;amplitude&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">1000</span>
+                <span class="n">decision_dict</span><span class="p">[</span><span class="s1">&#39;loc</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="n">loc_info</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+
+            <span class="n">decision_dict</span><span class="p">[</span><span class="s1">&#39;tie&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">decision</span><span class="p">[</span><span class="s1">&#39;Tie&#39;</span><span class="p">]</span>
+            <span class="n">decision_dict</span><span class="p">[</span><span class="s1">&#39;best_location&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">decision</span><span class="p">[</span><span class="s1">&#39;best_location_name&#39;</span><span class="p">]</span>
+            <span class="n">decision_dict</span><span class="p">[</span><span class="s1">&#39;best_amplitude&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">loc_info</span><span class="p">[</span>
+                 <span class="n">decision_dict</span><span class="p">[</span><span class="s1">&#39;best_location&#39;</span><span class="p">]][</span><span class="s1">&#39;amplitude&#39;</span><span class="p">]</span>
+            <span class="n">decision_dict</span><span class="p">[</span><span class="s1">&#39;pval&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">decision</span><span class="p">[</span><span class="s1">&#39;p_val&#39;</span><span class="p">]</span>
+            <span class="n">decision_dict</span><span class="p">[</span><span class="s1">&#39;tstat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">decision</span><span class="p">[</span><span class="s1">&#39;t_stat&#39;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">decision_dict</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">location_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">location_summaries</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">events_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_records</span><span class="p">([</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="p">],</span>
+                                              <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+        <span class="n">events_by_location</span> <span class="o">=</span> <span class="n">events_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;anode_label&#39;</span><span class="p">,</span>
+                                                <span class="s1">&#39;cathode_label&#39;</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">location</span><span class="p">,</span> <span class="n">loc_events</span> <span class="ow">in</span> <span class="n">events_by_location</span><span class="p">:</span>
+            <span class="n">location_summary</span> <span class="o">=</span> <span class="p">{</span>
+               <span class="s1">&#39;amplitude&#39;</span><span class="p">:</span> <span class="p">{},</span>
+               <span class="s1">&#39;delta_classifier&#39;</span><span class="p">:</span> <span class="p">{},</span>
+               <span class="s1">&#39;post_stim_biomarker&#39;</span><span class="p">:</span> <span class="p">{},</span>
+               <span class="s1">&#39;post_stim_amplitude&#39;</span><span class="p">:</span> <span class="p">{},</span>
+               <span class="s1">&#39;best_amplitude&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;best_delta_classifier&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;sem&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;snr&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span> <span class="n">location</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">location</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">loc_tag</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">location</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">location</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+                <span class="n">opt_events</span> <span class="o">=</span> <span class="p">(</span><span class="n">loc_events</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">loc_events</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;OPTIMIZATION&#39;</span><span class="p">]</span>
+                                        <span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;list_phase&#39;</span><span class="p">))</span>
+
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">phase</span><span class="p">,</span> <span class="n">phase_opt_events</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">opt_events</span><span class="p">):</span>
+                    <span class="n">post_stim_phase_events</span> <span class="o">=</span> <span class="n">loc_events</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+                        <span class="p">(</span><span class="n">events_df</span><span class="o">.</span><span class="n">list_phase</span> <span class="o">==</span> <span class="n">phase</span><span class="p">)</span> <span class="o">&amp;</span>
+                        <span class="p">(</span><span class="n">events_df</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;BIOMARKER&#39;</span><span class="p">)</span> <span class="o">&amp;</span>
+                        <span class="p">(</span><span class="n">events_df</span><span class="o">.</span><span class="n">position</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">)]</span>
+
+                    <span class="n">decision</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decision</span>
+                    <span class="k">if</span> <span class="n">decision</span><span class="p">[</span><span class="s1">&#39;loc1&#39;</span><span class="p">][</span><span class="s1">&#39;loc_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">loc_tag</span><span class="p">:</span>
+                        <span class="n">loc_decision_info</span> <span class="o">=</span> <span class="n">decision</span><span class="p">[</span><span class="s1">&#39;loc1&#39;</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">loc_decision_info</span> <span class="o">=</span> <span class="n">decision</span><span class="p">[</span><span class="s1">&#39;loc2&#39;</span><span class="p">]</span>
+
+                    <span class="n">location_summary</span><span class="p">[</span><span class="s1">&#39;amplitude&#39;</span><span class="p">][</span><span class="n">phase</span><span class="p">]</span> \
+                        <span class="o">=</span> <span class="p">(</span><span class="n">phase_opt_events</span><span class="o">.</span><span class="n">amplitude</span><span class="o">.</span><span class="n">values</span> <span class="o">/</span> <span class="mf">1000.</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                    <span class="n">location_summary</span><span class="p">[</span><span class="s1">&#39;delta_classifier&#39;</span><span class="p">][</span><span class="n">phase</span><span class="p">]</span> <span class="o">=</span> \
+                        <span class="n">phase_opt_events</span><span class="o">.</span><span class="n">delta_classifier</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                    <span class="n">location_summary</span><span class="p">[</span><span class="s1">&#39;post_stim_biomarker&#39;</span><span class="p">][</span>
+                        <span class="n">phase</span><span class="p">]</span> <span class="o">=</span> <span class="n">post_stim_phase_events</span><span class="o">.</span><span class="n">biomarker_value</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                    <span class="n">location_summary</span><span class="p">[</span><span class="s1">&#39;post_stim_amplitude&#39;</span><span class="p">][</span><span class="n">phase</span><span class="p">]</span> <span class="o">=</span> \
+                        <span class="p">(</span><span class="n">post_stim_phase_events</span><span class="o">.</span><span class="n">amplitude</span><span class="o">.</span><span class="n">values</span> <span class="o">/</span>
+                         <span class="mf">1000.</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">loc_decision_info</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">location_summary</span><span class="p">[</span><span class="s1">&#39;best_amplitude&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span>
+                            <span class="n">loc_decision_info</span><span class="p">[</span><span class="s1">&#39;amplitude&#39;</span><span class="p">])</span>
+                        <span class="n">location_summary</span><span class="p">[</span><span class="s1">&#39;best_delta_classifier&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span>
+                            <span class="n">loc_decision_info</span><span class="p">[</span><span class="s1">&#39;delta_classifier&#39;</span><span class="p">])</span>
+                        <span class="n">location_summary</span><span class="p">[</span><span class="s1">&#39;sem&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">loc_decision_info</span><span class="p">[</span><span class="s1">&#39;sem&#39;</span><span class="p">])</span>
+                        <span class="n">location_summary</span><span class="p">[</span><span class="s1">&#39;snr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">loc_decision_info</span><span class="p">[</span><span class="s1">&#39;snr&#39;</span><span class="p">])</span>
+                <span class="n">location_summaries</span><span class="p">[</span><span class="n">loc_tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">location_summary</span>
+
+        <span class="k">return</span> <span class="n">location_summaries</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'2.1.3',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
