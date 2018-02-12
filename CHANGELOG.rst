@@ -9,6 +9,7 @@ Upcoming
 * clear memory on successful completion of report build
 * added montage information (all bipolar pairs, excluded pairs) and normalized powers to serialized data
 * added ability to generate a PS5 report
+* added ability to generate an FR6 report
 
 Version 2.1.3
 -------------

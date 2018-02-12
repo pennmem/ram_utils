@@ -138,6 +138,7 @@ def make_report(subject, experiment, paths, joint_report=False,
         session_summaries, math_summaries, classifier_evaluation_results = \
             generate_data_for_stim_report(subject, experiment, joint_report,
                                           retrain, paths, ec_pairs,
+                                          excluded_pairs,
                                           used_pair_mask, final_pairs,
                                           pairs_metadata_table, all_events,
                                           task_events, stim_data, **kwargs)
@@ -390,7 +391,8 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
                                                 post_hoc_results[
                                                     'post_stim_predicted_probs'])
 
-    math_summaries = summarize_math(all_events, joint=joint_report)
+    # math_summaries = summarize_math(all_events, joint=joint_report)
+    math_summaries = []
 
     # TODO: Commented out until we have a clean way to plot results from
     # the traces
