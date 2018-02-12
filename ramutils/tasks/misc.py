@@ -48,7 +48,7 @@ def is_stim_experiment(experiment):
 @task(cache=False)
 def save_all_output(subject, experiment, session_summaries, math_summaries,
                     target_selection_table, classifier_evaluation_results,
-                    save_location):
+                    retrained_classifier, save_location):
 
     base_output_format = os.path.join(save_location,
                                       "{subject}_{experiment}_{session}_{"
@@ -85,6 +85,11 @@ def save_all_output(subject, experiment, session_summaries, math_summaries,
             subject=subject, experiment=experiment, session=session_str,
             data_type='classifier_' + classifier_summary.tag,
             file_type='h5'))
+
+    if retrained_classifier is not None:
+        retrained_classifier.save(base_output_format.format(
+            subject=subject, experiment=experiment, session=session_str,
+            data_type="retrained_classifier", file_type="zip"), overwrite=True)
 
     return True
 

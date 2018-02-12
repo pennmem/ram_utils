@@ -117,15 +117,17 @@ def make_report(subject, experiment, paths, joint_report=False,
 
     if not stim_report:
         session_summaries, math_summaries, target_selection_table, \
-        classifier_evaluation_results, repetition_ratio_dict = \
+        classifier_evaluation_results, trained_classifier, \
+        repetition_ratio_dict, retrained_classifier = \
             generate_data_for_nonstim_report(subject, experiment, sessions,
                                              joint_report, paths, ec_pairs,
                                              used_pair_mask, excluded_pairs,
-                                             pairs_metadata_table, all_events,
-                                             **kwargs)
+                                             final_pairs, pairs_metadata_table,
+                                             all_events, **kwargs)
     elif experiment.find("PS5") != -1:
         session_summaries, math_summaries, \
-        classifier_evaluation_results, repetition_ratio_dict = \
+        classifier_evaluation_results, repetition_ratio_dict, \
+        retrained_classifier = \
             generate_data_for_ps5_report(subject, experiment, joint_report,
                                          pairs_metadata_table,
                                          trigger_electrode, ec_pairs,
@@ -135,7 +137,8 @@ def make_report(subject, experiment, paths, joint_report=False,
 
     # Non-PS5 stim session
     else:
-        session_summaries, math_summaries, classifier_evaluation_results = \
+        session_summaries, math_summaries, classifier_evaluation_results, \
+        retrained_classifier = \
             generate_data_for_stim_report(subject, experiment, joint_report,
                                           retrain, paths, ec_pairs,
                                           excluded_pairs,
@@ -146,6 +149,7 @@ def make_report(subject, experiment, paths, joint_report=False,
     output = save_all_output(subject, experiment, session_summaries,
                              math_summaries, target_selection_table,
                              classifier_evaluation_results,
+                             retrained_classifier,
                              paths.data_db).compute()
 
     report = build_static_report(subject, experiment, session_summaries,
@@ -184,8 +188,8 @@ def generate_ps4_report(subject, experiment, sessions, paths):
 def generate_data_for_nonstim_report(subject, experiment, sessions,
                                      joint_report, paths, ec_pairs,
                                      used_pair_mask, excluded_pairs,
-                                     pairs_metadata_table, all_events,
-                                     **kwargs):
+                                     final_pairs, pairs_metadata_table,
+                                     all_events, **kwargs):
     """ Report generation sub-pipeline that is shared by all nonstim reports """
     repetition_ratio_dict = {}
     if joint_report or (experiment == 'catFR1'):
@@ -224,6 +228,14 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
                                                         kwargs['n_perm'],
                                                         tag='Joint',
                                                         **kwargs)
+    # Serialize the classifier here
+    trained_classifier = serialize_classifier(classifier,
+                                              final_pairs,
+                                              reduced_powers,
+                                              final_task_events,
+                                              sample_weights,
+                                              joint_classifier_summary,
+                                              subject)
 
     # Subset events, powers, etc to get encoding-only classifier summary
     kwargs['scheme'] = 'EQUAL'
@@ -264,7 +276,8 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
                                      joint_classifier_summary]
 
     return session_summaries, math_summaries, target_selection_table, \
-           classifier_evaluation_results, repetition_ratio_dict
+           classifier_evaluation_results, \
+           trained_classifier, repetition_ratio_dict, trained_classifier
 
 
 def generate_data_for_ps5_report(subject, experiment, joint_report,
@@ -311,7 +324,7 @@ def generate_data_for_ps5_report(subject, experiment, joint_report,
     classifier_evaluation_results = []
 
     return session_summaries, math_summaries, classifier_evaluation_results, \
-           repetition_ratio_dict
+           repetition_ratio_dict, None
 
 
 def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
@@ -380,6 +393,7 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
                                                       used_classifiers,
                                                       kwargs['n_perm'],
                                                       retrained_classifier,
+                                                      use_retrained=retrain,
                                                       **kwargs)
 
     session_summaries = summarize_stim_sessions(all_events, final_task_events,
@@ -391,7 +405,7 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
                                                 post_hoc_results[
                                                     'post_stim_predicted_probs'])
 
-    # math_summaries = summarize_math(all_events, joint=joint_report)
+    math_summaries = summarize_math(all_events, joint=joint_report)
     math_summaries = []
 
     # TODO: Commented out until we have a clean way to plot results from
@@ -401,5 +415,6 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
 
     classifier_evaluation_results = post_hoc_results[
         'classifier_summaries']
-    return session_summaries, math_summaries, classifier_evaluation_results
+    return session_summaries, math_summaries, classifier_evaluation_results, \
+           retrained_classifier
 
