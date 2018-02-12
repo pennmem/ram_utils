@@ -197,7 +197,7 @@ def reload_used_classifiers(subject, experiment, events, root):
 def post_hoc_classifier_evaluation(events, powers, post_stim_events,
                                    post_stim_powers, all_pairs, classifiers,
                                    n_permutations, retrained_classifier,
-                                   **kwargs):
+                                   use_retrained=False, **kwargs):
     """ Evaluate a trained classifier
 
     Parameters
@@ -279,7 +279,7 @@ def post_hoc_classifier_evaluation(events, powers, post_stim_events,
         # be re-fit as part of the lolo cross validation and if you pass
         # a reference, the AUCs will be wacky
 
-        if classifiers[i] is None:
+        if (classifiers[i] is None) or (use_retrained):
             classifier_container = retrained_classifier
             reloaded = False
             logger.info("Using the retrained classifier for session {}".format(session))
