@@ -92,6 +92,10 @@ def build_training_data(subject, experiment, paths, sessions=None, **kwargs):
 
     all_task_events = select_word_events(all_task_events,
                                          encoding_only=kwargs['encoding_only'])
+
+    if len(all_task_events) == 0:
+        raise RuntimeError("No events found")
+
     return all_task_events
 
 
@@ -155,6 +159,9 @@ def build_test_data(subject, experiment, paths, joint_report, sessions=None,
     if series_num != '1':
         all_events = clean_events(all_events, all_events=True)
 
+    if len(all_events) == 0:
+        raise RuntimeError('No events found')
+
     return all_events, task_events, stim_params
 
 
@@ -171,5 +178,8 @@ def build_ps_data(subject, experiment, file_type, sessions, rootdir):
     # The practice list is needed in order assess sham stim event, so this
     # may need to change in the future
     ps_events = remove_practice_lists(ps_events)
+
+    if len(ps_events) == 0:
+        raise RuntimeError("No events found")
     return ps_events
 
