@@ -12,6 +12,7 @@ from ramutils.utils import get_session_str
 
 from ._wrapper import task
 from ramutils.reports.summary import *
+from ramutils.hmm import save_foresplot, save_traceplot
 from ramutils.utils import is_stim_experiment as is_stim_experiment_core
 from ramutils.utils import get_completed_sessions
 from ramutils.log import get_logger
@@ -47,8 +48,11 @@ def is_stim_experiment(experiment):
 
 @task(cache=False)
 def save_all_output(subject, experiment, session_summaries, math_summaries,
-                    target_selection_table, classifier_evaluation_results,
-                    retrained_classifier, save_location):
+                    classifier_evaluation_results, save_location,
+                    retrained_classifier=None, target_selection_table=None,
+                    behavioral_results=None):
+
+    result_files = {}
 
     base_output_format = os.path.join(save_location,
                                       "{subject}_{experiment}_{session}_{"
@@ -88,10 +92,29 @@ def save_all_output(subject, experiment, session_summaries, math_summaries,
 
     if retrained_classifier is not None:
         retrained_classifier.save(base_output_format.format(
-            subject=subject, experiment=experiment, session=session_str,
+            subject=subject, experiment=experiment, session='all',
             data_type="retrained_classifier", file_type="zip"), overwrite=True)
 
-    return True
+    # Save plots from hmm models and return file paths in a dict
+    if behavioral_results is not None:
+        for name, trace in behavioral_results.items():
+            forestplot_path = base_output_format.format(subject=subject,
+                                                        experiment=experiment,
+                                                        session=session_str,
+                                                        data_type=(name +
+                                                                   '_foresplot'),
+                                                        file_type='png')
+            save_foresplot(trace, forestplot_path)
+            traceplot_path = base_output_format.format(subject=subject,
+                                                       experiment=experiment,
+                                                       session=session_str,
+                                                       data_type=(name +
+                                                                  '_traceplot'),
+                                                       file_type='png')
+            save_traceplot(trace, traceplot_path)
+            result_files[name] = forestplot_path
+
+    return result_files
 
 
 @task(cache=False)
@@ -108,6 +131,7 @@ def load_existing_results(subject, experiment, sessions, stim_report, db_loc,
 
     session_str = get_session_str(sessions)
     target_selection_table = None
+    hmm_results = {}
     try:
         if stim_report is False:
             target_selection_table = pd.read_csv(
@@ -164,14 +188,35 @@ def load_existing_results(subject, experiment, sessions, stim_report, db_loc,
                                               file_type='h5'))
                 session_summaries.append(session_summary)
 
-        else:
-            return None, None, None, None
+                # Check if behavioral model results are saved
+                if 'FR5' in experiment:
+                    for name in ['list', 'stim_item', 'post_stim_item']:
+                        forestplot_path = base_output_format.format(
+                            subject=subject,
+                            experiment=experiment,
+                            session=str(session),
+                            data_type=(name +'_foresplot'),
+                            file_type='png')
+                        assert os.path.exists(forestplot_path)
 
-    except (IOError, OSError):
+                        traceplot_path = base_output_format.format(
+                            subject=subject,
+                            experiment=experiment,
+                            session=str(session),
+                            data_type=(name + '_traceplot'),
+                            file_type='png')
+                        assert os.path.exists(traceplot_path)
+
+                        hmm_results[name] = forestplot_path
+
+        else:
+            return None, None, None, None, None
+
+    except (IOError, OSError, AssertionError):
         logger.warning('Not all underlying data could be found for the '
                        'requested report, building from scratch instead.')
-        return None, None, None, None
+        return None, None, None, None, None
 
     return target_selection_table, classifier_evaluation_results, \
-           session_summaries, math_summaries
+           session_summaries, math_summaries, hmm_results
 

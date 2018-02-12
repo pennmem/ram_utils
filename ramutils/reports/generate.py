@@ -50,7 +50,7 @@ class ReportGenerator(object):
 
     """
     def __init__(self, session_summaries, math_summaries,
-                 sme_table, classifier_summaries, dest='.'):
+                 sme_table, classifier_summaries, hmm_results={}, dest='.'):
         self.session_summaries = session_summaries
         self.math_summaries = math_summaries
         self.sme_table = sme_table
@@ -60,6 +60,7 @@ class ReportGenerator(object):
                               self.session_summaries]
         self.catfr_summaries = list(compress(self.session_summaries, catfr_summary_mask))
         self.subject = extract_subject(self.session_summaries[0].events)
+        self.hmm_results = hmm_results
 
         # PS has not math summaries, so only check for non-PS experiments
         if all(['PS' not in exp for exp in self.experiments]):
@@ -255,6 +256,7 @@ class ReportGenerator(object):
             classifiers=self.classifiers,
             stim_params=self.session_summaries[0].stim_parameters,
             recall_tests=self.session_summaries[0].recall_test_results,
+            hmm_results=self.hmm_results,
             plot_data={
                 'roc': json.dumps({
                     'fpr': [classifier.false_positive_rate for classifier in self.classifiers],

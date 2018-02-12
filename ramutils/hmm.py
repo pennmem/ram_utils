@@ -1,5 +1,9 @@
+import matplotlib as mpl
+mpl.use('Agg') # allows matplotlib to work without x-windows (for RHINO)
+
 import pymc3 as pm
 import pandas as pd
+import matplotlib.pyplot as plt
 
 
 class HierarchicalModel(object):
@@ -132,3 +136,38 @@ class HierarchicalModel(object):
 
     def _fit_catFR5_model(self, draws, tune):
         return self._fit_FR3_model(draws, tune)
+
+
+def save_traceplot(trace, full_path):
+    stim_variable = "Stim Effect (Across Sessions)"
+    line_dict = dict(zip(stim_variable, [0]))
+    ax = pm.traceplot(trace, lines=line_dict)
+    plt.savefig(full_path,
+                format="png",
+                dpi=300,
+                bbox_inchces="tight",
+                pad_inches=.1)
+    plt.close()
+    return
+
+
+def save_foresplot(trace, full_path):
+    stim_variable = "Stim Effect (Across Sessions)"
+    ax = pm.forestplot(trace,
+                       varnames=[stim_variable],
+                       xtitle="Estimated Effect of Stimulation",
+                       ylabels=[''],
+                       quartiles=False,
+                       plot_kwargs=dict(
+                           linewidth=5,
+                           color='#136ba5',
+                           markersize=6,
+                           fontsize=12)
+                       )
+    plt.savefig(full_path,
+                format="png",
+                dpi=300,
+                bbox_inches="tight",
+                pad_inches=0.1)
+    plt.close()
+    return
