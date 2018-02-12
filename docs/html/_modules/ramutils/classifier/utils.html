@@ -201,7 +201,11 @@
                                  <span class="s1">&#39;host_pc&#39;</span><span class="p">)</span>
 
     <span class="n">timestamped_dirs</span> <span class="o">=</span> <span class="n">glob</span><span class="p">(</span><span class="n">base_path</span> <span class="o">+</span> <span class="s2">&quot;/*&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timestamped_dirs</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timestamped_dirs</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># expected host_pc folder does not exist</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timestamped_dirs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="c1"># Return the original classifier</span>
         <span class="n">config_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">timestamped_dirs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;config_files&#39;</span><span class="p">)</span>
         <span class="n">classifier_path</span> <span class="o">=</span> <span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config_path</span><span class="p">,</span>

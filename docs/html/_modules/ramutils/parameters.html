@@ -211,6 +211,10 @@
 <span class="sd">        Path to surface area file. When generating Odin configuration files and</span>
 <span class="sd">        not defined, the default behavior is to look in the same directory as</span>
 <span class="sd">        the jacksheet for a file named ``area.txt``.</span>
+<span class="sd">    data_db: str</span>
+<span class="sd">        Path to directory where permanently-cached underlying data for</span>
+<span class="sd">        reports should be stored. In general, this should only be specified</span>
+<span class="sd">        when testing, otherwise the default location should be used</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -228,7 +232,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">pairs</span> <span class="o">=</span> <span class="n">makepath</span><span class="p">(</span><span class="s1">&#39;pairs&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">excluded_pairs</span> <span class="o">=</span> <span class="n">makepath</span><span class="p">(</span><span class="s1">&#39;excluded_pairs&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">electrode_config_file</span> <span class="o">=</span> <span class="n">makepath</span><span class="p">(</span><span class="s1">&#39;electrode_config_file&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">area_file</span> <span class="o">=</span> <span class="n">makepath</span><span class="p">(</span><span class="s1">&#39;area_file&#39;</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">area_file</span> <span class="o">=</span> <span class="n">makepath</span><span class="p">(</span><span class="s1">&#39;area_file&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_db</span> <span class="o">=</span> <span class="n">makepath</span><span class="p">(</span><span class="s1">&#39;data_db&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ExperimentParameters"><a class="viewcode-back" href="../../data.html#ramutils.parameters.ExperimentParameters">[docs]</a><span class="k">class</span> <span class="nc">ExperimentParameters</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
@@ -241,8 +246,11 @@
     <span class="n">freqs</span> <span class="o">=</span> <span class="n">Array</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mi">6</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mi">180</span><span class="p">),</span> <span class="mi">8</span><span class="p">),</span>
                   <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;frequencies to compute powers for&#39;</span><span class="p">)</span>
     <span class="n">hfa_cutoff</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">65</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Lowers frequency that will be considered a &#39;high frequency&#39;&quot;</span><span class="p">)</span>
+    <span class="n">trigger_freq</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">110</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Frequency to use for PS5 pseudo closed-loop experiment&quot;</span><span class="p">)</span>
 
-    <span class="n">log_powers</span> <span class="o">=</span> <span class="n">Bool</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># FIXME: do we really need this?</span>
+    <span class="n">log_powers</span> <span class="o">=</span> <span class="n">Bool</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;If true, log of powers will be returned &quot;</span>
+                                 <span class="s2">&quot;rather than raw values&quot;</span><span class="p">)</span>
+    <span class="n">normalize_powers</span> <span class="o">=</span> <span class="n">Bool</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;If true, powers will be normalized by partition (encoding/retrieval/pal) and within session using standard (x - mu) / sigma&quot;</span><span class="p">)</span>
 
     <span class="n">filt_order</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Butterworth filter order&quot;</span><span class="p">)</span>
 
@@ -308,6 +316,13 @@
     <span class="n">encoding_multiplier</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="mf">7.2</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;weighting factor for encoding &quot;</span>
                                           <span class="s2">&quot;samples in PAL&quot;</span><span class="p">)</span>
     <span class="n">pal_multiplier</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="mf">1.93</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;weighting factor for PAL samples&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PS5Parameters"><a class="viewcode-back" href="../../data.html#ramutils.parameters.PS5Parameters">[docs]</a><span class="k">class</span> <span class="nc">PS5Parameters</span><span class="p">(</span><span class="n">FRParameters</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; PS5 experiment parameters &quot;&quot;&quot;</span>
+    <span class="n">normalize_powers</span> <span class="o">=</span> <span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span></div>
+
+
 
 </pre></div>
 

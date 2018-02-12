@@ -160,27 +160,33 @@
            <div itemprop="articleBody">
             
   <h1>Source code for ramutils.tasks.misc</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">importlib</span> <span class="k">import</span> <span class="n">import_module</span>
-<span class="kn">import</span> <span class="nn">os</span>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="k">import</span> <span class="n">urlparse</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">urlparse</span> <span class="k">import</span> <span class="n">urlparse</span>
 
-<span class="kn">import</span> <span class="nn">h5py</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">ptsa.data.readers</span> <span class="k">import</span> <span class="n">JsonIndexReader</span>
-<span class="kn">from</span> <span class="nn">traitschema</span> <span class="k">import</span> <span class="n">Schema</span>
+<span class="kn">from</span> <span class="nn">ramutils.io</span> <span class="k">import</span> <span class="n">load_results</span><span class="p">,</span> <span class="n">store_results</span>
+<span class="kn">from</span> <span class="nn">ramutils.utils</span> <span class="k">import</span> <span class="n">get_session_str</span>
 
 <span class="kn">from</span> <span class="nn">._wrapper</span> <span class="k">import</span> <span class="n">task</span>
+<span class="kn">from</span> <span class="nn">ramutils.reports.summary</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">ramutils.hmm</span> <span class="k">import</span> <span class="n">save_foresplot</span><span class="p">,</span> <span class="n">save_traceplot</span>
 <span class="kn">from</span> <span class="nn">ramutils.utils</span> <span class="k">import</span> <span class="n">is_stim_experiment</span> <span class="k">as</span> <span class="n">is_stim_experiment_core</span>
+<span class="kn">from</span> <span class="nn">ramutils.utils</span> <span class="k">import</span> <span class="n">get_completed_sessions</span>
+<span class="kn">from</span> <span class="nn">ramutils.log</span> <span class="k">import</span> <span class="n">get_logger</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">()</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;read_index&#39;</span><span class="p">,</span>
     <span class="s1">&#39;is_stim_experiment&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;store_results&#39;</span>
+    <span class="s1">&#39;save_all_output&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;load_existing_results&#39;</span>
 <span class="p">]</span>
 
 
@@ -202,73 +208,174 @@
     <span class="k">return</span> <span class="n">is_stim</span>
 
 
-<div class="viewcode-block" id="store_results"><a class="viewcode-back" href="../../../pipeline.html#ramutils.tasks.misc.store_results">[docs]</a><span class="nd">@task</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">store_results</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Put computed data into storage.</span>
+<span class="nd">@task</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">save_all_output</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">session_summaries</span><span class="p">,</span> <span class="n">math_summaries</span><span class="p">,</span>
+                    <span class="n">classifier_evaluation_results</span><span class="p">,</span> <span class="n">save_location</span><span class="p">,</span>
+                    <span class="n">target_selection_table</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">behavioral_results</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    data</span>
-<span class="sd">        Data to store. Valid types include :class:`traitschema.Schema` instances</span>
-<span class="sd">        and Numpy arrays.</span>
-<span class="sd">    url : str</span>
-<span class="sd">        URI spec or file path for storing data.</span>
+    <span class="n">result_files</span> <span class="o">=</span> <span class="p">{}</span>
 
-<span class="sd">    Notes</span>
-<span class="sd">    -----</span>
-<span class="sd">    The ``url`` parameter is intended to accept generic URIs for the future</span>
-<span class="sd">    ability to store to other backends, meaning that the scheme component (the</span>
-<span class="sd">    piece before ``://``) indicates how and where to store the data. By default,</span>
-<span class="sd">    if ``url`` looks like a path, this function will assume it is just writing</span>
-<span class="sd">    to disk. In other words, ``/tmp/output`` is equivalent to</span>
-<span class="sd">    ``file:///tmp/output``.</span>
+    <span class="n">base_output_format</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_location</span><span class="p">,</span>
+                                      <span class="s2">&quot;</span><span class="si">{subject}</span><span class="s2">_</span><span class="si">{experiment}</span><span class="s2">_</span><span class="si">{session}</span><span class="s2">_{&quot;</span>
+                                      <span class="s2">&quot;data_type}.</span><span class="si">{file_type}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">url</span><span class="o">.</span><span class="n">scheme</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]:</span>
-        <span class="k">assert</span> <span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.h5&#39;</span><span class="p">),</span> <span class="s2">&quot;data must be saved as HDF5 files&quot;</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
-            <span class="n">data</span><span class="o">.</span><span class="n">to_hdf</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
-            <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hfile</span><span class="p">:</span>
-                <span class="n">hfile</span><span class="p">[</span><span class="s1">&#39;/data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Data must be a numpy array or a Schema instance&quot;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Only filesystem storage is implemented.&quot;</span><span class="p">)</span></div>
+    <span class="n">session_str</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">summary</span><span class="o">.</span><span class="n">session_number</span><span class="p">)</span> <span class="k">for</span> <span class="n">summary</span> <span class="ow">in</span>
+                            <span class="n">session_summaries</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">target_selection_table</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> \
+            <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">target_selection_table</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">target_selection_table</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
+            <span class="n">base_output_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
+                                      <span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">,</span>
+                                      <span class="n">session</span><span class="o">=</span><span class="n">session_str</span><span class="p">,</span>
+                                      <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;target_selection_table&#39;</span><span class="p">,</span>
+                                      <span class="n">file_type</span><span class="o">=</span><span class="s1">&#39;csv&#39;</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">session_summary</span> <span class="ow">in</span> <span class="n">session_summaries</span><span class="p">:</span>
+        <span class="n">session</span> <span class="o">=</span> <span class="n">session_summary</span><span class="o">.</span><span class="n">session_number</span>
+        <span class="n">store_results</span><span class="p">(</span><span class="n">session_summary</span><span class="p">,</span> <span class="n">base_output_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">,</span> <span class="n">session</span><span class="o">=</span><span class="n">session</span><span class="p">,</span>
+            <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;session_summary&#39;</span><span class="p">,</span> <span class="n">file_type</span><span class="o">=</span><span class="s1">&#39;h5&#39;</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">math_summary</span> <span class="ow">in</span> <span class="n">math_summaries</span><span class="p">:</span>
+        <span class="n">session</span> <span class="o">=</span> <span class="n">math_summary</span><span class="o">.</span><span class="n">session_number</span>
+        <span class="n">store_results</span><span class="p">(</span><span class="n">math_summary</span><span class="p">,</span> <span class="n">base_output_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">,</span> <span class="n">session</span><span class="o">=</span><span class="n">session</span><span class="p">,</span>
+            <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;math_summary&#39;</span><span class="p">,</span> <span class="n">file_type</span><span class="o">=</span><span class="s1">&#39;h5&#39;</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">classifier_summary</span> <span class="ow">in</span> <span class="n">classifier_evaluation_results</span><span class="p">:</span>
+        <span class="n">sessions</span> <span class="o">=</span> <span class="n">classifier_summary</span><span class="o">.</span><span class="n">sessions</span>
+        <span class="n">session_str</span> <span class="o">=</span> <span class="n">get_session_str</span><span class="p">(</span><span class="n">sessions</span><span class="p">)</span>
+        <span class="n">store_results</span><span class="p">(</span><span class="n">classifier_summary</span><span class="p">,</span> <span class="n">base_output_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">,</span> <span class="n">session</span><span class="o">=</span><span class="n">session_str</span><span class="p">,</span>
+            <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;classifier_&#39;</span> <span class="o">+</span> <span class="n">classifier_summary</span><span class="o">.</span><span class="n">tag</span><span class="p">,</span>
+            <span class="n">file_type</span><span class="o">=</span><span class="s1">&#39;h5&#39;</span><span class="p">))</span>
+
+    <span class="c1"># Save plots from hmm models and return file paths in a dict</span>
+    <span class="k">if</span> <span class="n">behavioral_results</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">trace</span> <span class="ow">in</span> <span class="n">behavioral_results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">forestplot_path</span> <span class="o">=</span> <span class="n">base_output_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
+                                                        <span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">,</span>
+                                                        <span class="n">session</span><span class="o">=</span><span class="n">session_str</span><span class="p">,</span>
+                                                        <span class="n">data_type</span><span class="o">=</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span>
+                                                                   <span class="s1">&#39;_foresplot&#39;</span><span class="p">),</span>
+                                                        <span class="n">file_type</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
+            <span class="n">save_foresplot</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span> <span class="n">forestplot_path</span><span class="p">)</span>
+            <span class="n">traceplot_path</span> <span class="o">=</span> <span class="n">base_output_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
+                                                       <span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">,</span>
+                                                       <span class="n">session</span><span class="o">=</span><span class="n">session_str</span><span class="p">,</span>
+                                                       <span class="n">data_type</span><span class="o">=</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span>
+                                                                  <span class="s1">&#39;_traceplot&#39;</span><span class="p">),</span>
+                                                       <span class="n">file_type</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
+            <span class="n">save_traceplot</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span> <span class="n">traceplot_path</span><span class="p">)</span>
+            <span class="n">result_files</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">forestplot_path</span>
+
+    <span class="k">return</span> <span class="n">result_files</span>
 
 
 <span class="nd">@task</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">load_results</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Load previously computed results from storage.</span>
+<span class="k">def</span> <span class="nf">load_existing_results</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">sessions</span><span class="p">,</span> <span class="n">stim_report</span><span class="p">,</span> <span class="n">db_loc</span><span class="p">,</span>
+                          <span class="n">rootdir</span><span class="o">=</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
+    <span class="c1"># Repetition ratio dictionary optional</span>
+    <span class="c1"># Cases: PS, stim, non-stim</span>
+    <span class="n">subject_experiment</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">])</span>
+    <span class="n">base_output_format</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">db_loc</span><span class="p">,</span> <span class="n">subject_experiment</span> <span class="o">+</span>
+                                      <span class="s2">&quot;_</span><span class="si">{session}</span><span class="s2">_</span><span class="si">{data_type}</span><span class="s2">.</span><span class="si">{file_type}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    url : str</span>
-<span class="sd">        URI spec or file path for storing data.</span>
+    <span class="k">if</span> <span class="n">sessions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">sessions</span> <span class="o">=</span> <span class="n">get_completed_sessions</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">rootdir</span><span class="o">=</span><span class="n">rootdir</span><span class="p">)</span>
 
-<span class="sd">    Notes</span>
-<span class="sd">    -----</span>
-<span class="sd">    See also :func:`store_results`.</span>
+    <span class="n">session_str</span> <span class="o">=</span> <span class="n">get_session_str</span><span class="p">(</span><span class="n">sessions</span><span class="p">)</span>
+    <span class="n">target_selection_table</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">hmm_results</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">stim_report</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">target_selection_table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+                <span class="n">base_output_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="n">session_str</span><span class="p">,</span>
+                                          <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;target_selection_table&#39;</span><span class="p">,</span>
+                                          <span class="n">file_type</span><span class="o">=</span><span class="s1">&#39;csv&#39;</span><span class="p">))</span>
+            <span class="n">encoding_classifier_summary</span> <span class="o">=</span> <span class="n">ClassifierSummary</span><span class="o">.</span><span class="n">from_hdf</span><span class="p">(</span>
+                <span class="n">base_output_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="n">session_str</span><span class="p">,</span>
+                                          <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;classifier_Encoding&#39;</span><span class="p">,</span>
+                                          <span class="n">file_type</span><span class="o">=</span><span class="s1">&#39;h5&#39;</span><span class="p">))</span>
+            <span class="n">joint_classifier_summary</span> <span class="o">=</span> <span class="n">ClassifierSummary</span><span class="o">.</span><span class="n">from_hdf</span><span class="p">(</span>
+                <span class="n">base_output_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="n">session_str</span><span class="p">,</span>
+                                          <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;classifier_Joint&#39;</span><span class="p">,</span>
+                                          <span class="n">file_type</span><span class="o">=</span><span class="s1">&#39;h5&#39;</span><span class="p">))</span>
+            <span class="n">classifier_evaluation_results</span> <span class="o">=</span> <span class="p">[</span><span class="n">encoding_classifier_summary</span><span class="p">,</span>
+                                             <span class="n">joint_classifier_summary</span><span class="p">]</span>
+            <span class="n">session_summaries</span><span class="p">,</span> <span class="n">math_summaries</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">sessions</span><span class="p">:</span>
+                <span class="n">math_summary</span> <span class="o">=</span> <span class="n">MathSummary</span><span class="o">.</span><span class="n">from_hdf</span><span class="p">(</span>
+                    <span class="n">base_output_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">session</span><span class="p">),</span>
+                                              <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;math_summary&#39;</span><span class="p">,</span>
+                                              <span class="n">file_type</span><span class="o">=</span><span class="s1">&#39;h5&#39;</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">math_summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">math_summary</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">experiment</span> <span class="o">==</span> <span class="s1">&#39;catFR1&#39;</span><span class="p">:</span>
+                    <span class="n">summary</span> <span class="o">=</span> <span class="n">CatFRSessionSummary</span>
+                <span class="k">elif</span> <span class="n">experiment</span> <span class="o">==</span> <span class="s1">&#39;FR1&#39;</span><span class="p">:</span>
+                    <span class="n">summary</span> <span class="o">=</span> <span class="n">FRSessionSummary</span>
 
+                <span class="n">session_summary</span> <span class="o">=</span> <span class="n">summary</span><span class="o">.</span><span class="n">from_hdf</span><span class="p">(</span>
+                    <span class="n">base_output_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">session</span><span class="p">),</span>
+                                              <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;session_summary&#39;</span><span class="p">,</span>
+                                              <span class="n">file_type</span><span class="o">=</span><span class="s1">&#39;h5&#39;</span><span class="p">))</span>
+                <span class="n">session_summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">session_summary</span><span class="p">)</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">url</span><span class="o">.</span><span class="n">scheme</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]:</span>
-        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hfile</span><span class="p">:</span>
-            <span class="c1"># Saved object is a Schema instance</span>
-            <span class="k">if</span> <span class="s1">&#39;classname&#39;</span> <span class="ow">in</span> <span class="n">hfile</span><span class="o">.</span><span class="n">attrs</span><span class="p">:</span>
-                <span class="n">modname</span> <span class="o">=</span> <span class="n">hfile</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;python_module&#39;</span><span class="p">]</span>
-                <span class="n">mod</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="n">modname</span><span class="p">)</span>
-                <span class="bp">cls</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="n">hfile</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;classname&#39;</span><span class="p">])</span>
-                <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_hdf</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">stim_report</span> <span class="ow">and</span> <span class="s1">&#39;PS&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">:</span>
+            <span class="n">classifier_evaluation_results</span><span class="p">,</span> <span class="n">math_summaries</span><span class="p">,</span> <span class="n">session_summaries</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">sessions</span><span class="p">:</span>
+                <span class="n">classifier_summary</span> <span class="o">=</span> <span class="n">ClassifierSummary</span><span class="o">.</span><span class="n">from_hdf</span><span class="p">(</span>
+                    <span class="n">base_output_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">session</span><span class="p">),</span>
+                                              <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;classifier_session_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">session</span><span class="p">),</span>
+                                              <span class="n">file_type</span><span class="o">=</span><span class="s1">&#39;h5&#39;</span><span class="p">))</span>
+                <span class="n">classifier_evaluation_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">classifier_summary</span><span class="p">)</span>
 
-            <span class="c1"># Saved object is a raw numpy array</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">hfile</span><span class="p">[</span><span class="s1">&#39;/data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Only filesystem storage is implemented.&quot;</span><span class="p">)</span>
+                <span class="n">math_summary</span> <span class="o">=</span> <span class="n">MathSummary</span><span class="o">.</span><span class="n">from_hdf</span><span class="p">(</span>
+                    <span class="n">base_output_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">session</span><span class="p">),</span>
+                                              <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;math_summary&#39;</span><span class="p">,</span>
+                                              <span class="n">file_type</span><span class="o">=</span><span class="s1">&#39;h5&#39;</span><span class="p">))</span>
+                <span class="n">math_summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">math_summary</span><span class="p">)</span>
+
+                <span class="n">session_summary</span> <span class="o">=</span> <span class="n">FRStimSessionSummary</span><span class="o">.</span><span class="n">from_hdf</span><span class="p">(</span>
+                    <span class="n">base_output_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">session</span><span class="p">),</span>
+                                              <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;session_summary&#39;</span><span class="p">,</span>
+                                              <span class="n">file_type</span><span class="o">=</span><span class="s1">&#39;h5&#39;</span><span class="p">))</span>
+                <span class="n">session_summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">session_summary</span><span class="p">)</span>
+
+                <span class="c1"># Check if behavioral model results are saved</span>
+                <span class="k">if</span> <span class="s1">&#39;FR5&#39;</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="s1">&#39;stim_item&#39;</span><span class="p">,</span> <span class="s1">&#39;post_stim_item&#39;</span><span class="p">]:</span>
+                        <span class="n">forestplot_path</span> <span class="o">=</span> <span class="n">base_output_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
+                            <span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">,</span>
+                            <span class="n">session</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">session</span><span class="p">),</span>
+                            <span class="n">data_type</span><span class="o">=</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span><span class="s1">&#39;_foresplot&#39;</span><span class="p">),</span>
+                            <span class="n">file_type</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
+                        <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">forestplot_path</span><span class="p">)</span>
+
+                        <span class="n">traceplot_path</span> <span class="o">=</span> <span class="n">base_output_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
+                            <span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">,</span>
+                            <span class="n">session</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">session</span><span class="p">),</span>
+                            <span class="n">data_type</span><span class="o">=</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_traceplot&#39;</span><span class="p">),</span>
+                            <span class="n">file_type</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
+                        <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">traceplot_path</span><span class="p">)</span>
+
+                        <span class="n">hmm_results</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">forestplot_path</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+    <span class="k">except</span> <span class="p">(</span><span class="ne">IOError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">,</span> <span class="ne">AssertionError</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Not all underlying data could be found for the &#39;</span>
+                       <span class="s1">&#39;requested report, building from scratch instead.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">target_selection_table</span><span class="p">,</span> <span class="n">classifier_evaluation_results</span><span class="p">,</span> \
+           <span class="n">session_summaries</span><span class="p">,</span> <span class="n">math_summaries</span><span class="p">,</span> <span class="n">hmm_results</span>
+
 </pre></div>
 
            </div>

@@ -200,7 +200,7 @@ events for that list</p>
 
 <dl class="function">
 <dt id="ramutils.events.clean_events">
-<code class="descclassname">ramutils.events.</code><code class="descname">clean_events</code><span class="sig-paren">(</span><em>events</em>, <em>start_time=None</em>, <em>end_time=None</em>, <em>duration=None</em>, <em>pre=None</em>, <em>post=None</em>, <em>return_stim_events=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#clean_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.clean_events" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ramutils.events.</code><code class="descname">clean_events</code><span class="sig-paren">(</span><em>events</em>, <em>start_time=None</em>, <em>end_time=None</em>, <em>duration=None</em>, <em>pre=None</em>, <em>post=None</em>, <em>return_stim_events=False</em>, <em>all_events=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#clean_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.clean_events" title="Permalink to this definition">¶</a></dt>
 <dd><blockquote>
 <div>Peform basic cleaning operations on events such as removing incomplete
 sessions, negative offset events, and incomplete lists. For FR events,
@@ -212,13 +212,15 @@ cross-experiment events can be merged.</div></blockquote>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>events</strong> (<em>np.recarray</em>) – Raw events</li>
-<li><strong>start_time</strong> – </li>
-<li><strong>end_time</strong> – </li>
-<li><strong>duration</strong> – </li>
-<li><strong>pre</strong> – </li>
-<li><strong>post</strong> – </li>
+<li><strong>start_time</strong> (<em>int</em>) – </li>
+<li><strong>end_time</strong> (<em>int</em>) – </li>
+<li><strong>duration</strong> (<em>int</em>) – </li>
+<li><strong>pre</strong> (<em>int</em>) – </li>
+<li><strong>post</strong> (<em>int</em>) – </li>
 <li><strong>return_stim_events</strong> (<em>bool</em>) – Indicator for if stim parameters should be returned in addition to the
 cleaned events</li>
+<li><strong>all_events</strong> (<em>bool</em>) – Indicates if the data to be cleaned is the all_event.json file. These
+require a different set of cleaning procedures</li>
 </ul>
 </td>
 </tr>
@@ -232,8 +234,7 @@ cleaned events</li>
 </table>
 <p class="rubric">Notes</p>
 <p>This function should be called on an experiment by experiment basis and
-should not be used to clean cross-experiment datasets
-:param return_stim_events:</p>
+should not be used to clean cross-experiment datasets</p>
 </dd></dl>
 
 <dl class="function">
