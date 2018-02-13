@@ -50,7 +50,7 @@ class ReportGenerator(object):
 
     """
     def __init__(self, session_summaries, math_summaries,
-                 sme_table, classifier_summaries, dest='.'):
+                 sme_table, classifier_summaries, hmm_results={}, dest='.'):
         self.session_summaries = session_summaries
         self.math_summaries = math_summaries
         self.sme_table = sme_table
@@ -60,6 +60,7 @@ class ReportGenerator(object):
                               self.session_summaries]
         self.catfr_summaries = list(compress(self.session_summaries, catfr_summary_mask))
         self.subject = extract_subject(self.session_summaries[0].events)
+        self.hmm_results = hmm_results
 
         # PS has not math summaries, so only check for non-PS experiments
         if all(['PS' not in exp for exp in self.experiments]):
@@ -115,7 +116,7 @@ class ReportGenerator(object):
 
     def _make_sme_table(self):
         """ Create data for the SME table for record-only experiments. """
-        sme_table = (self.sme_table.sort_values(by='p_value',
+        sme_table = (self.sme_table.sort_values(by='hfa_p_value',
                                                 ascending=True)
                          .to_dict(orient='records'))
         return sme_table
@@ -180,8 +181,11 @@ class ReportGenerator(object):
 
         """
         series = extract_experiment_series(self.experiments[0])
-        if all(['PS' in exp for exp in self.experiments]) and series == '5':
+        if all(['PS4' in exp for exp in self.experiments]) and series == '5':
             return self.generate_ps4_report()
+
+        elif all(['PS5' in exp for exp in self.experiments]):
+            return self.generate_ps5_report()
 
         elif series == '5':
             return self.generate_fr5_report()
@@ -252,6 +256,7 @@ class ReportGenerator(object):
             classifiers=self.classifiers,
             stim_params=self.session_summaries[0].stim_parameters,
             recall_tests=self.session_summaries[0].recall_test_results,
+            hmm_results=self.hmm_results,
             plot_data={
                 'roc': json.dumps({
                     'fpr': [classifier.false_positive_rate for classifier in self.classifiers],
@@ -347,5 +352,67 @@ class ReportGenerator(object):
                     }
                     for channel in list(location_summary_data.keys())
                 }
+            }
+        )
+
+    def generate_ps5_report(self):
+        """ Generate a PS5 report
+
+        Returns
+        -------
+        Rendered PS5 report as a string
+        """
+        return self._render(
+            'PS5',
+            stim=True,
+            combined_summary=self._make_combined_summary(),
+            stim_params=self.session_summaries[0].stim_parameters,
+            recall_tests=self.session_summaries[0].recall_test_results,
+            plot_data={
+                'serialpos': json.dumps({
+                    'serialpos': list(range(1, 13)),
+                    'overall': {
+                        'Overall (non-stim)': self.session_summaries[
+                            0].prob_recall_by_serialpos(stim_items_only=False),
+                        'Overall (stim)': self.session_summaries[
+                            0].prob_recall_by_serialpos(stim_items_only=True)
+                    },
+                    'first': {
+                        'First recall (non-stim)': self.session_summaries[
+                            0].prob_first_recall_by_serialpos(stim=False),
+                        'First recall (stim)': self.session_summaries[
+                            0].prob_first_recall_by_serialpos(stim=True)
+                    }
+                }),
+                'recall_summary': json.dumps({
+                    'nonstim': {
+                        'listno': self.session_summaries[0].lists(stim=False),
+                        'recalled': self.session_summaries[
+                            0].recalls_by_list(stim_list_only=False)
+                    },
+                    'stim': {
+                        'listno': self.session_summaries[0].lists(stim=True),
+                        'recalled': self.session_summaries[
+                            0].recalls_by_list(stim_list_only=True)
+                    },
+                    'stim_events': {
+                        'listno': self.session_summaries[0].lists(),
+                        'count': self.session_summaries[0].stim_events_by_list
+                    }
+                }),
+                'stim_probability': json.dumps({
+                    'serialpos': list(range(1, 13)),
+                    'probability': self.session_summaries[
+                        0].prob_stim_by_serialpos
+                }),
+                'recall_difference': json.dumps({
+                    'stim': self.session_summaries[0].delta_recall(),
+                    'post_stim': self.session_summaries[0].delta_recall(
+                        post_stim_items=True)
+                }),
+                'classifier_output': json.dumps({
+                    'pre_stim': list(self.session_summaries[0].pre_stim_prob_recall),
+                    'post_stim': list(self.session_summaries[0].post_stim_prob_recall)
+                }),
             }
         )

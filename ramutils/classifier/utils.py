@@ -39,7 +39,11 @@ def reload_classifier(subject, task, session, mount_point='/', base_path=None):
                                  'host_pc')
 
     timestamped_dirs = glob(base_path + "/*")
-    if len(timestamped_dirs) != 1:
+    if len(timestamped_dirs) < 1:
+        # expected host_pc folder does not exist
+        return None
+
+    if len(timestamped_dirs) > 1:
         # Return the original classifier
         config_path = os.path.join(timestamped_dirs[0], 'config_files')
         classifier_path = glob(os.path.join(config_path,

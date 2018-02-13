@@ -172,7 +172,8 @@
 <span class="kn">from</span> <span class="nn">ramutils.events</span> <span class="k">import</span> <span class="n">validate_single_experiment</span><span class="p">,</span> <span class="n">select_math_events</span><span class="p">,</span> \
     <span class="n">extract_experiment_from_events</span><span class="p">,</span> <span class="n">extract_sessions</span><span class="p">,</span> <span class="n">select_session_events</span><span class="p">,</span> \
     <span class="n">select_stim_table_events</span><span class="p">,</span> <span class="n">extract_stim_information</span><span class="p">,</span> \
-    <span class="n">select_encoding_events</span><span class="p">,</span> <span class="n">extract_event_metadata</span>
+    <span class="n">select_encoding_events</span><span class="p">,</span> <span class="n">extract_event_metadata</span><span class="p">,</span> <span class="n">dataframe_to_recarray</span><span class="p">,</span> \
+    <span class="n">get_encoding_mask</span>
 <span class="kn">from</span> <span class="nn">ramutils.exc</span> <span class="k">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">ramutils.log</span> <span class="k">import</span> <span class="n">get_logger</span>
 <span class="kn">from</span> <span class="nn">ramutils.reports.summary</span> <span class="k">import</span> <span class="o">*</span>
@@ -183,7 +184,7 @@
     <span class="s1">&#39;summarize_nonstim_sessions&#39;</span><span class="p">,</span>
     <span class="s1">&#39;summarize_math&#39;</span><span class="p">,</span>
     <span class="s1">&#39;summarize_stim_sessions&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;summarize_ps_sessions&#39;</span>
+    <span class="s1">&#39;summarize_ps_sessions&#39;</span><span class="p">,</span>
 <span class="p">]</span>
 
 
@@ -224,7 +225,9 @@
 
 
 <div class="viewcode-block" id="summarize_nonstim_sessions"><a class="viewcode-back" href="../../../pipeline.html#ramutils.tasks.summary.summarize_nonstim_sessions">[docs]</a><span class="nd">@task</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">summarize_nonstim_sessions</span><span class="p">(</span><span class="n">all_events</span><span class="p">,</span> <span class="n">task_events</span><span class="p">,</span> <span class="n">joint</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="k">def</span> <span class="nf">summarize_nonstim_sessions</span><span class="p">(</span><span class="n">all_events</span><span class="p">,</span> <span class="n">task_events</span><span class="p">,</span>
+                               <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span>
+                               <span class="n">normalized_powers</span><span class="p">,</span> <span class="n">joint</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                <span class="n">repetition_ratio_dict</span><span class="o">=</span><span class="p">{}):</span>
     <span class="sd">&quot;&quot;&quot; Generate a summary by unique session/experiment</span>
 
@@ -267,15 +270,22 @@
     <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">sessions</span><span class="p">:</span>
         <span class="n">session_task_events</span> <span class="o">=</span> <span class="n">task_events</span><span class="p">[</span><span class="n">task_events</span><span class="o">.</span><span class="n">session</span> <span class="o">==</span> <span class="n">session</span><span class="p">]</span>
         <span class="n">session_all_events</span> <span class="o">=</span> <span class="n">all_events</span><span class="p">[</span><span class="n">all_events</span><span class="o">.</span><span class="n">session</span> <span class="o">==</span> <span class="n">session</span><span class="p">]</span>
+        <span class="n">session_powers</span> <span class="o">=</span> <span class="n">normalized_powers</span><span class="p">[(</span><span class="n">task_events</span><span class="o">.</span><span class="n">session</span> <span class="o">==</span> <span class="n">session</span><span class="p">)]</span>
         <span class="n">experiment</span> <span class="o">=</span> <span class="n">extract_experiment_from_events</span><span class="p">(</span><span class="n">session_task_events</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;FR1&#39;</span><span class="p">]:</span>
             <span class="n">summary</span> <span class="o">=</span> <span class="n">FRSessionSummary</span><span class="p">()</span>
             <span class="n">summary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="n">session_task_events</span><span class="p">,</span>
+                             <span class="n">bipolar_pairs</span><span class="p">,</span>
+                             <span class="n">excluded_pairs</span><span class="p">,</span>
+                             <span class="n">session_powers</span><span class="p">,</span>
                              <span class="n">raw_events</span><span class="o">=</span><span class="n">session_all_events</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;catFR1&#39;</span><span class="p">]:</span>
             <span class="n">summary</span> <span class="o">=</span> <span class="n">CatFRSessionSummary</span><span class="p">()</span>
             <span class="n">summary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="n">session_task_events</span><span class="p">,</span>
+                             <span class="n">bipolar_pairs</span><span class="p">,</span>
+                             <span class="n">excluded_pairs</span><span class="p">,</span>
+                             <span class="n">session_powers</span><span class="p">,</span>
                              <span class="n">raw_events</span><span class="o">=</span><span class="n">session_all_events</span><span class="p">,</span>
                              <span class="n">repetition_ratio_dict</span><span class="o">=</span><span class="n">repetition_ratio_dict</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -287,10 +297,13 @@
 
 
 <div class="viewcode-block" id="summarize_stim_sessions"><a class="viewcode-back" href="../../../pipeline.html#ramutils.tasks.summary.summarize_stim_sessions">[docs]</a><span class="nd">@task</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">summarize_stim_sessions</span><span class="p">(</span><span class="n">all_events</span><span class="p">,</span> <span class="n">task_events</span><span class="p">,</span> <span class="n">stim_params</span><span class="p">,</span>
-                            <span class="n">encoding_classifier_summaries</span><span class="p">,</span>
-                            <span class="n">post_stim_predicted_probs</span><span class="p">,</span>
-                            <span class="n">pairs_data</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">summarize_stim_sessions</span><span class="p">(</span><span class="n">all_events</span><span class="p">,</span> <span class="n">task_events</span><span class="p">,</span> <span class="n">stim_params</span><span class="p">,</span> <span class="n">pairs_data</span><span class="p">,</span>
+                            <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span>
+                            <span class="n">normalized_powers</span><span class="p">,</span>
+                            <span class="n">encoding_classifier_summaries</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                            <span class="n">post_stim_predicted_probs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                            <span class="n">trigger_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                            <span class="n">post_stim_trigger_output</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Construct stim session summaries &quot;&quot;&quot;</span>
     <span class="n">sessions</span> <span class="o">=</span> <span class="n">extract_sessions</span><span class="p">(</span><span class="n">task_events</span><span class="p">)</span>
     <span class="n">stim_table_events</span> <span class="o">=</span> <span class="n">select_stim_table_events</span><span class="p">(</span><span class="n">stim_params</span><span class="p">)</span>
@@ -299,24 +312,60 @@
 
     <span class="n">stim_session_summaries</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">session</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sessions</span><span class="p">):</span>
+        <span class="n">session_powers</span> <span class="o">=</span> <span class="n">normalized_powers</span><span class="p">[(</span><span class="n">task_events</span><span class="o">.</span><span class="n">session</span> <span class="o">==</span> <span class="n">session</span><span class="p">)]</span>
         <span class="n">all_session_events</span> <span class="o">=</span> <span class="n">select_session_events</span><span class="p">(</span><span class="n">all_events</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
         <span class="n">all_session_stim_events</span> <span class="o">=</span> <span class="n">select_session_events</span><span class="p">(</span><span class="n">stim_table_events</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
         <span class="n">all_session_task_events</span> <span class="o">=</span> <span class="n">select_session_events</span><span class="p">(</span><span class="n">task_events</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
+        <span class="n">encoding_mask</span> <span class="o">=</span> <span class="n">get_encoding_mask</span><span class="p">(</span><span class="n">all_session_task_events</span><span class="p">)</span>
         <span class="n">all_session_task_events</span> <span class="o">=</span> <span class="n">select_encoding_events</span><span class="p">(</span><span class="n">all_session_task_events</span><span class="p">)</span>
 
         <span class="n">stim_item_mask</span><span class="p">,</span> <span class="n">post_stim_item_mask</span><span class="p">,</span> <span class="n">stim_param_df</span> <span class="o">=</span> \
             <span class="n">extract_stim_information</span><span class="p">(</span><span class="n">all_session_stim_events</span><span class="p">,</span>
                                      <span class="n">all_session_task_events</span><span class="p">)</span>
 
-        <span class="n">predicted_probabilities</span> <span class="o">=</span> <span class="n">encoding_classifier_summaries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">predicted_probabilities</span>
+        <span class="c1"># PS5 sessions do not have classifier summaries, but use the raw</span>
+        <span class="c1"># power value output for making the stim decision</span>
+        <span class="k">if</span> <span class="n">encoding_classifier_summaries</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">predicted_probabilities</span> <span class="o">=</span> <span class="n">encoding_classifier_summaries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">predicted_probabilities</span>
+            <span class="n">thresh</span> <span class="o">=</span> <span class="mf">0.5</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># We don&#39;t want retrieval powers for the triggering electrode</span>
+            <span class="n">predicted_probabilities</span> <span class="o">=</span> <span class="n">trigger_output</span><span class="p">[</span><span class="n">encoding_mask</span><span class="p">]</span>
+            <span class="n">event_based_avg</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">predicted_probabilities</span><span class="p">)):</span>
+                <span class="n">powers_so_far</span> <span class="o">=</span> <span class="n">predicted_probabilities</span><span class="p">[:</span><span class="n">j</span><span class="p">]</span>
+                <span class="n">event_based_avg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">powers_so_far</span><span class="p">))</span>
+            <span class="n">thresh</span> <span class="o">=</span> <span class="n">event_based_avg</span>
+
         <span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">session</span> <span class="o">=</span> <span class="n">extract_event_metadata</span><span class="p">(</span>
             <span class="n">all_session_task_events</span><span class="p">)</span>
         <span class="n">stim_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;experiment&#39;</span><span class="p">,</span> <span class="s1">&#39;session&#39;</span><span class="p">,</span>
                                         <span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="s1">&#39;mstime&#39;</span><span class="p">,</span> <span class="s1">&#39;item_name&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">,</span>
                                         <span class="s1">&#39;serialpos&#39;</span><span class="p">,</span> <span class="s1">&#39;phase&#39;</span><span class="p">,</span> <span class="s1">&#39;is_stim_item&#39;</span><span class="p">,</span>
-                                        <span class="s1">&#39;stim_list&#39;</span><span class="p">,</span> <span class="s1">&#39;is_post_stim_item&#39;</span><span class="p">,</span>
+                                        <span class="s1">&#39;is_stim_list&#39;</span><span class="p">,</span> <span class="s1">&#39;is_post_stim_item&#39;</span><span class="p">,</span>
                                         <span class="s1">&#39;recalled&#39;</span><span class="p">,</span> <span class="s1">&#39;thresh&#39;</span><span class="p">,</span>
                                         <span class="s1">&#39;classifier_output&#39;</span><span class="p">])</span>
+        <span class="n">expected_dtypes</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;serialpos&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;experiment&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;mstime&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;recalled&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;is_stim_list&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;phase&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;item_name&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;is_stim_item&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;is_post_stim_item&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;thresh&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;classifier_output&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;location&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;amplitude&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;pulse_freq&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;stim_duration&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;stimAnodeTag&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;stimCathodeTag&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">)]</span>
 
         <span class="n">stim_df</span><span class="p">[</span><span class="s1">&#39;session&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_session_task_events</span><span class="o">.</span><span class="n">session</span>
         <span class="n">stim_df</span><span class="p">[</span><span class="s1">&#39;list&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_session_task_events</span><span class="o">.</span><span class="n">list</span>
@@ -327,9 +376,9 @@
         <span class="n">stim_df</span><span class="p">[</span><span class="s1">&#39;phase&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_session_task_events</span><span class="o">.</span><span class="n">phase</span>
         <span class="n">stim_df</span><span class="p">[</span><span class="s1">&#39;is_stim_item&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stim_item_mask</span>
         <span class="n">stim_df</span><span class="p">[</span><span class="s1">&#39;is_post_stim_item&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">post_stim_item_mask</span>
-        <span class="n">stim_df</span><span class="p">[</span><span class="s1">&#39;stim_list&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_session_task_events</span><span class="o">.</span><span class="n">stim_list</span>
+        <span class="n">stim_df</span><span class="p">[</span><span class="s1">&#39;is_stim_list&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_session_task_events</span><span class="o">.</span><span class="n">stim_list</span>
         <span class="n">stim_df</span><span class="p">[</span><span class="s1">&#39;recalled&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_session_task_events</span><span class="o">.</span><span class="n">recalled</span>
-        <span class="n">stim_df</span><span class="p">[</span><span class="s1">&#39;thresh&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
+        <span class="n">stim_df</span><span class="p">[</span><span class="s1">&#39;thresh&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">thresh</span>
         <span class="n">stim_df</span><span class="p">[</span><span class="s1">&#39;classifier_output&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">predicted_probabilities</span>
         <span class="n">stim_df</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">subject</span>
         <span class="n">stim_df</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">experiment</span>
@@ -344,16 +393,28 @@
         <span class="n">stim_df</span> <span class="o">=</span> <span class="n">stim_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">location_data</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
         <span class="k">del</span> <span class="n">stim_df</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
 
+
         <span class="c1"># TODO: Add some sort of data quality check here potentially. Do the</span>
         <span class="c1"># observed stim items match what we expect from classifier output?</span>
 
         <span class="k">if</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;FR5&#39;</span><span class="p">,</span> <span class="s1">&#39;catFR5&#39;</span><span class="p">]:</span>
+            <span class="n">stim_events</span> <span class="o">=</span> <span class="n">dataframe_to_recarray</span><span class="p">(</span><span class="n">stim_df</span><span class="p">,</span> <span class="n">expected_dtypes</span><span class="p">)</span>
             <span class="n">stim_session_summary</span> <span class="o">=</span> <span class="n">FRStimSessionSummary</span><span class="p">()</span>
-            <span class="n">stim_session_summary</span><span class="o">.</span><span class="n">populate_from_dataframe</span><span class="p">(</span>
-                <span class="n">stim_df</span><span class="p">,</span> <span class="n">raw_events</span><span class="o">=</span><span class="n">all_session_events</span><span class="p">,</span>
+            <span class="n">stim_session_summary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span>
+                <span class="n">stim_events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span> <span class="n">session_powers</span><span class="p">,</span>
+                <span class="n">raw_events</span><span class="o">=</span><span class="n">all_session_events</span><span class="p">,</span>
                 <span class="n">post_stim_prob_recall</span><span class="o">=</span><span class="n">post_stim_predicted_probs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="k">elif</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;PS5_FR&quot;</span><span class="p">,</span> <span class="s2">&quot;PS5_catFR&quot;</span><span class="p">]:</span>
+            <span class="n">stim_events</span> <span class="o">=</span> <span class="n">dataframe_to_recarray</span><span class="p">(</span><span class="n">stim_df</span><span class="p">,</span> <span class="n">expected_dtypes</span><span class="p">)</span>
+            <span class="n">stim_session_summary</span> <span class="o">=</span> <span class="n">FRStimSessionSummary</span><span class="p">()</span>
+            <span class="n">stim_session_summary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span>
+                <span class="n">stim_events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span>
+                <span class="n">excluded_pairs</span><span class="p">,</span> <span class="n">trigger_output</span><span class="p">,</span> <span class="n">raw_events</span><span class="o">=</span><span class="n">all_session_events</span><span class="p">,</span>
+                <span class="n">post_stim_prob_recall</span><span class="o">=</span><span class="n">post_stim_trigger_output</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">UnsupportedExperimentError</span><span class="p">(</span><span class="s1">&#39;Only FR5 and catFR5 currently &#39;</span>
+            <span class="k">raise</span> <span class="n">UnsupportedExperimentError</span><span class="p">(</span><span class="s1">&#39;Only FR5/PS5_FR5 and &#39;</span>
+                                             <span class="s1">&#39;catFR5/PS5_catFR5 currently &#39;</span>
                                              <span class="s1">&#39;implemented&#39;</span><span class="p">)</span>
 
         <span class="n">stim_session_summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stim_session_summary</span><span class="p">)</span>
@@ -362,12 +423,14 @@
 
 
 <div class="viewcode-block" id="summarize_ps_sessions"><a class="viewcode-back" href="../../../pipeline.html#ramutils.tasks.summary.summarize_ps_sessions">[docs]</a><span class="nd">@task</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">summarize_ps_sessions</span><span class="p">(</span><span class="n">ps_events</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">summarize_ps_sessions</span><span class="p">(</span><span class="n">ps_events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Task for generating summaries of PS session</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    ps_events</span>
+<span class="sd">    ps_events: np.recarray</span>
+<span class="sd">    bipolar_pairs: dict</span>
+<span class="sd">    excluded_pairs: dict</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">session_summaries</span> <span class="o">=</span> <span class="p">[]</span>
@@ -375,15 +438,10 @@
     <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">sessions</span><span class="p">:</span>
         <span class="n">session_events</span> <span class="o">=</span> <span class="n">select_session_events</span><span class="p">(</span><span class="n">ps_events</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
         <span class="n">summary</span> <span class="o">=</span> <span class="n">PSSessionSummary</span><span class="p">()</span>
-        <span class="n">summary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="n">session_events</span><span class="p">)</span>
+        <span class="n">summary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="n">session_events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">session_summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">session_summaries</span></div>
-
-
-
-
-
 
 </pre></div>
 

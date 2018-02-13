@@ -1,5 +1,9 @@
+import matplotlib as mpl
+mpl.use('Agg') # allows matplotlib to work without x-windows (for RHINO)
+
 import pymc3 as pm
 import pandas as pd
+import matplotlib.pyplot as plt
 
 
 class HierarchicalModel(object):
@@ -40,9 +44,9 @@ class HierarchicalModel(object):
         self.data = data
         self.n_sessions = len(self.data.session.unique())
         self.n_serialpos = len(self.data.serialpos.unique())
-        self.n_lists = len(self.data.listno.unique())
+        self.n_lists = len(self.data.list.unique())
         self.session_idx = self.data.session.values
-        self.list_idx = self.data.listno.values
+        self.list_idx = self.data.list.values
         self.serialpos_idx = self.data.serialpos.values
 
         level_treatment_map = {
@@ -110,7 +114,7 @@ class HierarchicalModel(object):
                                      serialpos_coef[8] * self.data[9] +
                                      serialpos_coef[9] * self.data[10] +
                                      serialpos_coef[10] * self.data[11] +
-                                     listpos_coef * self.data.listno.values +
+                                     listpos_coef * self.data.list.values +
                                      beta[self.data.session.values] * self.data.is_stim_list)
 
             y_like = pm.Bernoulli('y_like',
@@ -132,3 +136,38 @@ class HierarchicalModel(object):
 
     def _fit_catFR5_model(self, draws, tune):
         return self._fit_FR3_model(draws, tune)
+
+
+def save_traceplot(trace, full_path):
+    stim_variable = "Stim Effect (Across Sessions)"
+    line_dict = dict(zip(stim_variable, [0]))
+    ax = pm.traceplot(trace, lines=line_dict)
+    plt.savefig(full_path,
+                format="png",
+                dpi=300,
+                bbox_inchces="tight",
+                pad_inches=.1)
+    plt.close()
+    return
+
+
+def save_foresplot(trace, full_path):
+    stim_variable = "Stim Effect (Across Sessions)"
+    ax = pm.forestplot(trace,
+                       varnames=[stim_variable],
+                       xtitle="Estimated Effect of Stimulation",
+                       ylabels=[''],
+                       quartiles=False,
+                       plot_kwargs=dict(
+                           linewidth=5,
+                           color='#136ba5',
+                           markersize=6,
+                           fontsize=12)
+                       )
+    plt.savefig(full_path,
+                format="png",
+                dpi=300,
+                bbox_inches="tight",
+                pad_inches=0.1)
+    plt.close()
+    return

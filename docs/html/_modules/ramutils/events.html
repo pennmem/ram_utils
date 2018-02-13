@@ -182,7 +182,7 @@
 <span class="kn">from</span> <span class="nn">numpy.lib.recfunctions</span> <span class="k">import</span> <span class="n">rename_fields</span>
 
 <span class="kn">from</span> <span class="nn">ptsa.data.readers</span> <span class="k">import</span> <span class="n">BaseEventReader</span><span class="p">,</span> <span class="n">JsonIndexReader</span><span class="p">,</span> <span class="n">EEGReader</span>
-<span class="kn">from</span> <span class="nn">ramutils.utils</span> <span class="k">import</span> <span class="n">extract_subject_montage</span>
+<span class="kn">from</span> <span class="nn">ramutils.utils</span> <span class="k">import</span> <span class="n">extract_subject_montage</span><span class="p">,</span> <span class="n">get_completed_sessions</span><span class="p">,</span> <span class="n">extract_experiment_series</span>
 <span class="kn">from</span> <span class="nn">ramutils.exc</span> <span class="k">import</span> <span class="o">*</span>
 
 
@@ -215,12 +215,9 @@
                                                <span class="s2">&quot;r1.json&quot;</span><span class="p">))</span>
 
     <span class="n">sessions_to_load</span> <span class="o">=</span> <span class="n">sessions</span>
-    <span class="k">if</span> <span class="n">sessions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="c1"># Find all sessions for the requested experiment.</span>
-        <span class="c1"># TODO: PS sessions should not be included when loading FR5/catFR5</span>
-        <span class="n">sessions_to_load</span> <span class="o">=</span> <span class="n">json_reader</span><span class="o">.</span><span class="n">aggregate_values</span><span class="p">(</span><span class="s1">&#39;sessions&#39;</span><span class="p">,</span>
-                                                        <span class="n">subject</span><span class="o">=</span><span class="n">subject_id</span><span class="p">,</span>
-                                                        <span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">sessions_to_load</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">sessions_to_load</span> <span class="o">=</span> <span class="n">get_completed_sessions</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span>
+                                                  <span class="n">rootdir</span><span class="o">=</span><span class="n">rootdir</span><span class="p">)</span>
 
     <span class="n">event_files</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">sessions_to_load</span><span class="p">):</span>
@@ -255,7 +252,8 @@
 
 
 <div class="viewcode-block" id="clean_events"><a class="viewcode-back" href="../../events.html#ramutils.events.clean_events">[docs]</a><span class="k">def</span> <span class="nf">clean_events</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">pre</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">post</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_stim_events</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+                 <span class="n">pre</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">post</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_stim_events</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">all_events</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Peform basic cleaning operations on events such as removing incomplete</span>
 <span class="sd">        sessions, negative offset events, and incomplete lists. For FR events,</span>
@@ -266,14 +264,17 @@
 <span class="sd">    ----------</span>
 <span class="sd">    events: np.recarray</span>
 <span class="sd">        Raw events</span>
-<span class="sd">    start_time:</span>
-<span class="sd">    end_time:</span>
-<span class="sd">    duration:</span>
-<span class="sd">    pre:</span>
-<span class="sd">    post:</span>
+<span class="sd">    start_time: int</span>
+<span class="sd">    end_time: int</span>
+<span class="sd">    duration: int</span>
+<span class="sd">    pre: int</span>
+<span class="sd">    post: int</span>
 <span class="sd">    return_stim_events: bool</span>
 <span class="sd">        Indicator for if stim parameters should be returned in addition to the</span>
 <span class="sd">        cleaned events</span>
+<span class="sd">    all_events: bool</span>
+<span class="sd">        Indicates if the data to be cleaned is the all_event.json file. These</span>
+<span class="sd">        require a different set of cleaning procedures</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -284,19 +285,41 @@
 <span class="sd">    -----</span>
 <span class="sd">    This function should be called on an experiment by experiment basis and</span>
 <span class="sd">    should not be used to clean cross-experiment datasets</span>
-<span class="sd">    :param return_stim_events:</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">experiments</span> <span class="o">=</span> <span class="n">extract_experiment_from_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+    <span class="n">series_num</span> <span class="o">=</span> <span class="n">extract_experiment_series</span><span class="p">(</span><span class="n">experiments</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">all_events</span><span class="p">:</span>
+        <span class="n">all_fields</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">series_num</span> <span class="o">!=</span> <span class="s2">&quot;1&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">series_num</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="k">if</span> <span class="s2">&quot;stim_params&quot;</span> <span class="ow">in</span> <span class="n">all_fields</span><span class="p">:</span>
+                <span class="n">all_fields</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;stim_params&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;test&quot;</span> <span class="ow">in</span> <span class="n">all_fields</span><span class="p">:</span>
+            <span class="n">all_fields</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
+        <span class="n">all_events</span> <span class="o">=</span> <span class="n">events</span><span class="p">[</span><span class="n">all_fields</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">all_events</span>
+
+    <span class="c1"># If you clean &#39;all_events&#39; for joint reports, there will be multiple</span>
+    <span class="c1"># experiments, so only check this after determining if you are cleaning</span>
+    <span class="c1"># combined events</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Event cleaning can only happen on single-experiment&#39;</span>
                            <span class="s1">&#39; datasets&#39;</span><span class="p">)</span>
     <span class="n">experiment</span> <span class="o">=</span> <span class="n">experiments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
     <span class="n">events</span> <span class="o">=</span> <span class="n">remove_negative_offsets</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
-    <span class="n">events</span> <span class="o">=</span> <span class="n">remove_practice_lists</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+
+    <span class="c1"># Only for PS5 do we want to keep the practice list around so we can know</span>
+    <span class="c1"># what the baseline mean power was for the session, but we still need to get</span>
+    <span class="c1"># rid of the events with -999 for list</span>
+    <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="s1">&#39;PS5&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">experiment</span> <span class="k">for</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="n">experiments</span><span class="p">]):</span>
+        <span class="n">events</span> <span class="o">=</span> <span class="n">remove_practice_lists</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">events</span> <span class="o">=</span> <span class="n">events</span><span class="p">[</span><span class="n">events</span><span class="o">.</span><span class="n">list</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
     <span class="n">events</span> <span class="o">=</span> <span class="n">remove_incomplete_lists</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
     <span class="n">events</span> <span class="o">=</span> <span class="n">select_column_subset</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">all_relevant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
     <span class="c1"># TODO: Add remove_repetitions() function to get rid of any recall events</span>
     <span class="c1"># that are just a repeated recall</span>
 

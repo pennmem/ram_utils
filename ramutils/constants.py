@@ -16,7 +16,7 @@ EXPERIMENTS = {
         'PS4_FR5',
         'PS4_CatFR5',
         'PS5_FR',
-        'PS5_CatFR',
+        'PS5_CatFR'
     ],
     'closed_loop': [
         'FR3',
