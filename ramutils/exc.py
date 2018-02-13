@@ -1,41 +1,52 @@
-class TooManySessionsError(Exception):
+class RamException(Exception):
+    """Base exception class for custom exceptions."""
+
+
+class TooManySessionsError(RamException):
     """Raised when too many sessions' worth of data are passed as an argument.
 
     """
 
 
-class TooManyExperimentsError(Exception):
+class TooManyExperimentsError(RamException):
     """Raised when too many experiments are included with events."""
 
 
-class TooManySessionsError(Exception):
-    """ Raised when too many sessions are present/requested """
-
-
-class UnsupportedExperimentError(Exception):
+class UnsupportedExperimentError(RamException):
     """Raised when trying to do something with an experiment that is not yet
     supported.
 
     """
 
 
-class MultistimNotAllowedException(Exception):
+# FIXME: refactor naming
+class MultistimNotAllowedException(RamException):
     """Raised when attempting to define multiple stim sites for an experiment
     which doesn't support it.
 
     """
 
 
-class UnableToReloadClassifierException(Exception):
-    """
-        Raised when processing cannot load or use the actual classifier from
-        a session
+# FIXME: refactor naming
+class UnableToReloadClassifierException(RamException):
+    """Raised when processing cannot load or use the actual classifier from
+    a session.
+
     """
 
 
-class MissingFileError(Exception):
+class MissingFileError(RamException):
     """Raised when a required file doesn't appear to exist."""
 
 
-class CommandLineError(Exception):
+class CommandLineError(RamException):
     """Raised when there are CLI-related errors."""
+
+
+class MissingArgumentsError(RamException):
+    """Raised when an optional argument is not optional for certain cases but
+    is not specified.
+
+    Example: when not giving trigger pairs for PS5 experiments.
+
+    """
