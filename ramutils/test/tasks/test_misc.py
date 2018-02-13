@@ -16,9 +16,9 @@ datafile = functools.partial(resource_filename,
 def test_build_report_from_cached_results():
 
     target_selection_table, classifier_summaries, session_summaries, \
-    math_summaries = load_existing_results('R1354E', 'FR1', [1], False,
-                                           datafile('input/report_db'),
-                                           datafile('')).compute()
+    math_summaries, hmm_results = load_existing_results(
+        'R1354E', 'FR1', [1], False, datafile('input/report_db'),
+        datafile('')).compute()
 
     assert session_summaries is not None
     assert classifier_summaries is not None
@@ -27,8 +27,7 @@ def test_build_report_from_cached_results():
     report = build_static_report('R1354E', 'FR1', session_summaries,
                                  math_summaries, target_selection_table,
                                  classifier_summaries,
-                                 datafile(
-                                     'output/')).compute()
+                                 datafile('output/')).compute()
 
     assert report is not None
     output_files = glob.glob(datafile('output/*.html'))
@@ -40,12 +39,12 @@ def test_build_report_from_cached_results():
 
     # Check that non-existent data returns all None values
     target_selection_table, classifier_summaries, session_summaries, \
-    math_summaries = load_existing_results('R1345D', 'FR1', [1], False,
-                                           datafile('input/report_db'),
-                                           datafile('')).compute()
+    math_summaries, hmm_results = load_existing_results(
+        'R1345D', 'FR1', [1], False, datafile('input/report_db'),
+        datafile('')).compute()
 
     results = [target_selection_table, classifier_summaries, session_summaries,
-               math_summaries]
+               math_summaries, hmm_results]
 
     assert all([r is None for r in results])
     return
