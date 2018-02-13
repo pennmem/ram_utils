@@ -390,9 +390,8 @@ class TestPSSessionSummary:
         cls.sample_summary = PSSessionSummary()
 
     @pytest.mark.xfail(reason='PS Events to dataframe not implemented')
-    def test_to_dataframe(self, ps_events, pairs, excluded):
-        # FIXME: This is failing right now
-        self.sample_summary.populate(ps_events, pairs, excluded, normalized_powers)
+    def test_to_dataframe(self, ps_events, bipolar_pairs, excluded_pairs):
+        self.sample_summary.populate(ps_events, bipolar_pairs, excluded_pairs, normalized_powers)
         df = self.sample_summary.to_dataframe()
         assert len(df) == 3068
 

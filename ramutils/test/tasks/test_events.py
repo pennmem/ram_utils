@@ -1,3 +1,4 @@
+import os
 import pytest
 import functools
 import numpy as np
@@ -73,11 +74,9 @@ class TestEvents:
         ('R1350D', 'FR1', FRParameters, True, None), # multi-session FR
         ('R1354E', 'FR1', FRParameters, True, None), # fr and catfr combined
         ('R1354E', 'FR1', FRParameters, False, None), # FR1 only
-        ('R1354E', 'CatFR1', FRParameters, False, None), # catFR1 only
+        ('R1354E', 'catFR1', FRParameters, False, [0]), # catFR1 only
         ('R1353N', 'PAL1', PALParameters, True, [0]), # PAL1 only
-        ('R1345D', 'FR5', FRParameters, False, None), # FR5 only
-        ('R1345D', 'CatFR5', FRParameters, False, None), # catFR5 only
-        ('R1345D', 'FR5', FRParameters, True, None) # FR5/catFR5
+        ('R1345D', 'FR5', FRParameters, False, [0]), # FR5 only
     ])
     def test_build_test_data_regression(self, subject, experiment, params,
                                         joint_report, sessions, rhino_root):
@@ -87,6 +86,8 @@ class TestEvents:
         if not joint_report:
             expected = expected.replace("_combined", "")
 
+        assert os.path.exists(expected)
+
         paths = FilePaths(root=rhino_root)
         extra_kwargs = params().to_dict()
 
@@ -94,7 +95,7 @@ class TestEvents:
             subject, experiment, paths, joint_report=joint_report,
             sessions=sessions, **extra_kwargs).compute()
 
-        expected_events = load_event_test_data(expected, rhino_root)
+        expected_events = np.load(expected)
         assert len(expected_events) == len(task_events)
         assert np.array_equal(task_events.recalled, expected_events.recalled)
 
