@@ -177,10 +177,10 @@ class TestCreateReports:
     @pytest.mark.output
     @pytest.mark.parametrize('rerun', [True, False])
     @pytest.mark.parametrize('subject, experiment, sessions', [
-        # ('R1374T', 'CatFR5', [0]),
-        # # ('R1345D', 'FR5', [0]),
-        # ('R1374T', 'PS4_CatFR5', [0]),
-        ('R1374T', 'PS5_CatFR', [0])
+        ('R1374T', 'CatFR5', [0]),
+        ('R1345D', 'FR5', [0]),
+        ('R1374T', 'PS4_CatFR5', [0]),
+        # ('R1374T', 'PS5_CatFR', [0]) Make this test case live once we have a real session. Otherwise, you have to specific a special rhino root to use the mocked data
     ])
     def test_create_stim_session_report(self, subject, experiment, sessions,
                                         rerun, rhino_root, output_dest):
