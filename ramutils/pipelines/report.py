@@ -380,7 +380,7 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
         retrained_classifier = serialize_classifier(retrained_classifier,
                                                     final_pairs,
                                                     training_reduced_powers,
-                                                    training_events,
+                                                    final_training_events,
                                                     sample_weights,
                                                     training_classifier_summaries,
                                                     subject)
