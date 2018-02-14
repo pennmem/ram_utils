@@ -375,8 +375,7 @@ def load_pairs_from_json(subject, experiment, just_pairs=True, rootdir='/'):
                                                "protocols",
                                                "r1.json"))
     all_pairs_paths = json_reader.aggregate_values('pairs',
-                                                   subject=subject_id,
-                                                   experiment=experiment)
+                                                   subject=subject_id)
 
     if len(all_pairs_paths) == 0:
         raise RuntimeError("No pairs.json found for subject {} "
