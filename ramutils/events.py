@@ -1004,8 +1004,8 @@ def get_stim_table_event_mask(events):
         Return a mask of events to be included for building stim session
         summaries
     """
-    stim_table_phases = ['STIM', 'NON-STIM', 'BASELINE', 'PRACTICE']
-    event_type_mask = [event.phase in stim_table_phases for event in events]
+    excluded_event_types = ['START', 'STOP', 'PROB']
+    event_type_mask = [event.type not in excluded_event_types for event in events]
 
     return event_type_mask
 
@@ -1115,12 +1115,10 @@ def extract_stim_information(all_events, task_events):
                             stim_param_data['stimCathodeTag'].append(",".join([str(stim_params[k].cathode_label) for k in range(len(stim_params))]))
                             break
 
-                # Messy logic to find post stim items
-                if ((lst_events[i - 1].type == 'STIM_OFF')
-                        or (lst_events[i + 1].type == 'STIM_OFF')
-                        or (lst_events[i - 2].type == 'STIM_OFF' and
-                            lst_events[i - 1].type == 'WORD_OFF')):
-                    lst_post_stim_words[j] = True
+                # Post stim words are always the word after a stim word,
+                # so just shift to find them
+                if j > 0:
+                    lst_post_stim_words[j] = lst_stim_words[j - 1]
                 j += 1
 
         # FYI: It should always be the case that the number of word events
