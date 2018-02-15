@@ -878,7 +878,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         df = self.to_dataframe()
         events = df[df.is_stim_item == stim]
 
-        firstpos = np.zeros(len(events.serialpos.unique()), dtype=np.float)
+        firstpos = np.zeros(12, dtype=np.float)
         for listno in events.list.unique():
             try:
                 nonzero = events[(events.list == listno) &
