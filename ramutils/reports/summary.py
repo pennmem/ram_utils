@@ -763,12 +763,13 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
     @property
     def stim_params_by_list(self):
         df = self.to_dataframe()
+        df = df.replace('nan', np.nan)
         stim_columns = self.stim_columns
         non_stim_columns = [c for c in df.columns if c not in stim_columns]
 
         stim_param_by_list = (df[(stim_columns + ['list'])]
                                 .drop_duplicates()
-                                .dropna())
+                                .dropna(how='all'))
 
         # This ensures that for any given list, the stim parameters used
         # during that list are populated. This makes calculating post stim
@@ -780,13 +781,13 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
     @property
     def stim_parameters(self):
         df = self.stim_params_by_list
+        df['location'] = df['location'].replace(np.nan, '--')
         grouped = (df.groupby(by=(self.stim_columns + ['is_stim_list']))
                      .agg({'is_stim_item' : 'sum',
                            'subject': 'count'})
                      .rename(columns={'is_stim_item': 'n_stimulations',
                                       'subject': 'n_trials'})
                      .reset_index())
-        grouped['amplitude'] = grouped['amplitude'] / 1000.0
 
         return list(grouped.T.to_dict().values())
 
@@ -801,7 +802,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
 
         results = []
         for name, group in df.groupby(['stimAnodeTag', 'stimCathodeTag',
-                                       'location', 'amplitude', 'stim_duration',
+                                       'amplitude', 'stim_duration',
                                        'pulse_freq']):
             parameters = "/".join([str(n) for n in name])
 
