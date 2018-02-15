@@ -123,6 +123,11 @@ class HierarchicalModel(object):
 
         return model
 
+    def _fit_FR2_model(self, draws, tune):
+        with self.model:
+            self.trace = pm.sample(draws=draws, tune=tune)[tune:]
+        return self.trace
+
     def _fit_FR3_model(self, draws, tune):
         with self.model:
             self.trace = pm.sample(draws=draws, tune=tune)[tune:]
