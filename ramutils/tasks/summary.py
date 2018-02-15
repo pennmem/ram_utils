@@ -164,11 +164,12 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
         stim_param_df["stimCathodeTag"] = stim_param_df["stimCathodeTag"].str.rstrip(',')
 
         # PS5 sessions do not have classifier summaries, but use the raw
-        # power value output for making the stim decision
+        # power value output for making the stim decision. Open loop stim
+        # sessions do not have a classifier, so there is no threshold
         if encoding_classifier_summaries is not None:
             predicted_probabilities = encoding_classifier_summaries[i].predicted_probabilities
             thresh = 0.5
-        else:
+        elif trigger_output is not None:
             # We don't want retrieval powers for the triggering electrode
             predicted_probabilities = trigger_output[encoding_mask]
             event_based_avg = []
@@ -176,6 +177,9 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
                 powers_so_far = predicted_probabilities[:j]
                 event_based_avg.append(np.mean(powers_so_far))
             thresh = event_based_avg
+        else:
+            predicted_probabilities = np.nan
+            thresh = np.nan
 
         subject, experiment, session = extract_event_metadata(
             all_session_task_events)
@@ -224,8 +228,7 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
         stim_df['experiment'] = experiment
 
         # Add in the stim params
-        stim_df = stim_df.merge(stim_param_df, on=['session', 'list',
-                                                   'item_name'], how='left')
+        stim_df = stim_df.merge(stim_param_df, on=['session', 'list'], how='left')
 
         # Add region from pairs_data. TODO: This won't scale to multi-site stim
         stim_df['label'] = (stim_df['stimAnodeTag'] + "-" +
@@ -233,17 +236,23 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
         stim_df = stim_df.merge(location_data, how='left', on=['label'])
         del stim_df['label']
 
-
         # TODO: Add some sort of data quality check here potentially. Do the
         # observed stim items match what we expect from classifier output?
 
-        if experiment in ['FR5', 'catFR5']:
+        if experiment in ['FR3', 'FR5', 'catFR3', 'catFR5']:
             stim_events = dataframe_to_recarray(stim_df, expected_dtypes)
             stim_session_summary = FRStimSessionSummary()
             stim_session_summary.populate(
                 stim_events, bipolar_pairs, excluded_pairs, session_powers,
                 raw_events=all_session_events,
                 post_stim_prob_recall=post_stim_predicted_probs[i])
+
+        elif experiment in ['FR2', 'catFR2']:
+            stim_events = dataframe_to_recarray(stim_df, expected_dtypes)
+            stim_session_summary = FRStimSessionSummary()
+            stim_session_summary.populate(
+                stim_events, bipolar_pairs, excluded_pairs, session_powers,
+                raw_events=all_session_events)
 
         elif experiment in ["PS5_FR", "PS5_catFR"]:
             stim_events = dataframe_to_recarray(stim_df, expected_dtypes)
@@ -253,9 +262,9 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
                 excluded_pairs, trigger_output, raw_events=all_session_events,
                 post_stim_prob_recall=post_stim_trigger_output)
         else:
-            raise UnsupportedExperimentError('Only FR5/PS5_FR5 and '
-                                             'catFR5/PS5_catFR5 currently '
-                                             'implemented')
+            raise UnsupportedExperimentError('Only FR2/FR3/FR5/PS5_FR5 and '
+                                             'catFR2/catFR3/catFR5/PS5_catFR5 '
+                                             'currently implemented')
 
         stim_session_summaries.append(stim_session_summary)
 

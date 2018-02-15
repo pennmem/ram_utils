@@ -46,7 +46,7 @@ class ReportGenerator(object):
 
     Supported reports:
 
-    * FR1, catFR1, FR5, catFR5, PS4
+    * FR1, catFR1, FR2, catFR2, FR3, catFR3, FR5, catFR5, PS4
 
     """
     def __init__(self, session_summaries, math_summaries,
@@ -187,8 +187,11 @@ class ReportGenerator(object):
         elif all(['PS5' in exp for exp in self.experiments]):
             return self.generate_ps5_report()
 
-        elif series == '5':
-            return self.generate_fr5_report()
+        elif (series == '2'):
+            return self.generate_open_loop_fr_report()
+
+        elif (series == '5') or (series == '3'):
+            return self.generate_closed_loop_fr_report()
 
         elif all(['FR' in exp for exp in self.experiments]):
             joint = False
@@ -232,7 +235,7 @@ class ReportGenerator(object):
 
         """
         return self._render(
-            'FR1',
+            self.experiments[0],
             stim=False,
             combined_summary=self._make_combined_summary(),
             classifiers=self.classifiers,
@@ -241,7 +244,67 @@ class ReportGenerator(object):
             joint=joint
         )
 
-    def generate_fr5_report(self):
+    def generate_open_loop_fr_report(self):
+        """ Generate an open-loop stim report
+
+        Returns
+        -------
+        Rendered open loop report as a string.
+
+        """
+        return self._render(
+            'FR2',
+            stim=True,
+            combined_summary=self._make_combined_summary(),
+            stim_params=self.session_summaries[0].stim_parameters,
+            recall_tests=self.session_summaries[0].recall_test_results,
+            hmm_results=self.hmm_results,
+            plot_data={
+               'serialpos': json.dumps({
+                    'serialpos': list(range(1, 13)),
+                    'overall': {
+                        'Overall (non-stim)': self.session_summaries[
+                            0].prob_recall_by_serialpos(stim_items_only=False),
+                        'Overall (stim)': self.session_summaries[
+                            0].prob_recall_by_serialpos(stim_items_only=True)
+                    },
+                    'first': {
+                        'First recall (non-stim)': self.session_summaries[
+                            0].prob_first_recall_by_serialpos(stim=False),
+                        'First recall (stim)': self.session_summaries[
+                            0].prob_first_recall_by_serialpos(stim=True)
+                    }
+                }),
+                'recall_summary': json.dumps({
+                    'nonstim': {
+                        'listno': self.session_summaries[0].lists(stim=False),
+                        'recalled': self.session_summaries[
+                            0].recalls_by_list(stim_list_only=False)
+                    },
+                    'stim': {
+                        'listno': self.session_summaries[0].lists(stim=True),
+                        'recalled': self.session_summaries[
+                            0].recalls_by_list(stim_list_only=True)
+                    },
+                    'stim_events': {
+                        'listno': self.session_summaries[0].lists(),
+                        'count': self.session_summaries[0].stim_events_by_list
+                    }
+                }),
+                'stim_probability': json.dumps({
+                    'serialpos': list(range(1, 13)),
+                    'probability': self.session_summaries[
+                        0].prob_stim_by_serialpos
+                }),
+                'recall_difference': json.dumps({
+                    'stim': self.session_summaries[0].delta_recall(),
+                    'post_stim': self.session_summaries[0].delta_recall(
+                        post_stim_items=True)
+                }),
+            }
+        )
+
+    def generate_closed_loop_fr_report(self):
         """ Generate an FR5 report
 
         Returns
@@ -250,7 +313,7 @@ class ReportGenerator(object):
 
         """
         return self._render(
-            'FR5',
+            self.experiments[0],
             stim=True,
             combined_summary=self._make_combined_summary(),
             classifiers=self.classifiers,

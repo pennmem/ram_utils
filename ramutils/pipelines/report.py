@@ -3,6 +3,7 @@
 import pandas as pd
 
 from ramutils.tasks import *
+from ramutils.utils import extract_experiment_series
 
 
 def make_report(subject, experiment, paths, joint_report=False,
@@ -63,6 +64,7 @@ def make_report(subject, experiment, paths, joint_report=False,
         experiment = experiment.replace('Cat', 'cat')
 
     stim_report = is_stim_experiment(experiment).compute()
+    series_num = extract_experiment_series(experiment)
 
     if not rerun:
         target_selection_table, classifier_evaluation_results, \
@@ -133,16 +135,26 @@ def make_report(subject, experiment, paths, joint_report=False,
                                          task_events, stim_data, paths,
                                          **kwargs)
 
-    # Non-PS5 stim session
+    # Open loop stim session
+    elif stim_report and series_num == '2':
+        session_summaries, math_summaries, classifier_evaluation_results, \
+        retrained_classifier, behavioral_results = \
+            generate_data_for_open_loop_report(subject, experiment,
+                                               joint_report, retrain, paths,
+                                               ec_pairs, excluded_pairs,
+                                               used_pair_mask, final_pairs,
+                                               pairs_metadata_table, all_events,
+                                               task_events, stim_data, **kwargs)
+    # Closed loop stim session
     else:
         session_summaries, math_summaries, classifier_evaluation_results, \
         retrained_classifier, behavioral_results = \
-            generate_data_for_stim_report(subject, experiment, joint_report,
-                                          retrain, paths, ec_pairs,
-                                          excluded_pairs,
-                                          used_pair_mask, final_pairs,
-                                          pairs_metadata_table, all_events,
-                                          task_events, stim_data, **kwargs)
+            generate_data_for_closed_loop_report(subject, experiment, joint_report,
+                                                 retrain, paths, ec_pairs,
+                                                 excluded_pairs,
+                                                 used_pair_mask, final_pairs,
+                                                 pairs_metadata_table, all_events,
+                                                 task_events, stim_data, **kwargs)
 
     output = save_all_output(subject, experiment, session_summaries,
                              math_summaries, classifier_evaluation_results,
@@ -280,58 +292,37 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
            trained_classifier, repetition_ratio_dict, trained_classifier, None
 
 
-def generate_data_for_ps5_report(subject, experiment, joint_report,
-                                 pairs_metadata_table,
-                                 trigger_electrode, ec_pairs, excluded_pairs,
-                                 all_events, task_events, stim_data, paths,
-                                 **kwargs):
-    """
-        Report generating sub-pipeline for PS5. This is an odd mix
-        of the non-stim report and the stim report sub-pipelines
-    """
-    repetition_ratio_dict = {}
-
-    trigger_electrode_mask = get_trigger_electrode_mask(pairs_metadata_table,
-                                                        trigger_electrode)
-    trigger_frequency_mask = get_trigger_frequency_mask(kwargs['trigger_freq'],
-                                                        kwargs['freqs'])
-
-    # Calculate post stim and encoding powers similar to stim report, but with
-    # just the one electrode/frequency
-    post_stim_mask = get_post_stim_events_mask(all_events)
-    post_stim_events = subset_events(all_events, post_stim_mask)
-    post_stim_powers, final_post_stim_events = compute_normalized_powers(
-       post_stim_events, bipolar_pairs=ec_pairs, **kwargs)
-    post_stim_reduced_powers = reduce_powers(post_stim_powers,
-                                             trigger_electrode_mask,
-                                             len(kwargs['freqs']),
-                                             frequency_mask=trigger_frequency_mask)
+def generate_data_for_open_loop_report(subject, experiment, joint_report, retrain,
+                                       paths, ec_pairs, excluded_pairs,
+                                       used_pair_mask, final_pairs,
+                                       pairs_metadata_table, all_events,
+                                       task_events, stim_data, **kwargs):
 
     powers, final_task_events = compute_normalized_powers(
-        task_events, bipolar_pairs=ec_pairs, **kwargs).compute()
-    reduced_powers = reduce_powers(powers, trigger_electrode_mask,
-                                   len(kwargs['freqs']),
-                                   frequency_mask=trigger_frequency_mask)
+        task_events, bipolar_pairs=ec_pairs, **kwargs)
 
-    session_summaries = summarize_stim_sessions(all_events, task_events,
-                                                stim_data,
-                                                pairs_metadata_table,
+    session_summaries = summarize_stim_sessions(all_events, final_task_events,
+                                                stim_data, pairs_metadata_table,
                                                 ec_pairs, excluded_pairs,
-                                                powers,
-                                                trigger_output=reduced_powers,
-                                                post_stim_trigger_output=post_stim_reduced_powers).compute()
-    math_summaries = summarize_math(all_events)
+                                                powers)
+
+    math_summaries = summarize_math(all_events, joint=joint_report)
+
+    behavioral_results = estimate_effects_of_stim(subject, experiment,
+        session_summaries)
+
     classifier_evaluation_results = []
+    retrained_classifier = None
 
     return session_summaries, math_summaries, classifier_evaluation_results, \
-           repetition_ratio_dict, None, None
+           retrained_classifier, behavioral_results
 
 
-def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
-                                  paths, ec_pairs, excluded_pairs,
-                                  used_pair_mask, final_pairs,
-                                  pairs_metadata_table, all_events,
-                                  task_events, stim_data, **kwargs):
+def generate_data_for_closed_loop_report(subject, experiment, joint_report, retrain,
+                                         paths, ec_pairs, excluded_pairs,
+                                         used_pair_mask, final_pairs,
+                                         pairs_metadata_table, all_events,
+                                         task_events, stim_data, **kwargs):
     """ Report generation sub-pipeline shared by all stim reports """
     # We need post stim period events/powers
     post_stim_mask = get_post_stim_events_mask(all_events)
@@ -415,3 +406,49 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
     return session_summaries, math_summaries, classifier_evaluation_results, \
            retrained_classifier, behavioral_results
 
+
+def generate_data_for_ps5_report(subject, experiment, joint_report,
+                                 pairs_metadata_table,
+                                 trigger_electrode, ec_pairs, excluded_pairs,
+                                 all_events, task_events, stim_data, paths,
+                                 **kwargs):
+    """
+        Report generating sub-pipeline for PS5. This is an odd mix
+        of the non-stim report and the stim report sub-pipelines
+    """
+    repetition_ratio_dict = {}
+
+    trigger_electrode_mask = get_trigger_electrode_mask(pairs_metadata_table,
+                                                        trigger_electrode)
+    trigger_frequency_mask = get_trigger_frequency_mask(kwargs['trigger_freq'],
+                                                        kwargs['freqs'])
+
+    # Calculate post stim and encoding powers similar to stim report, but with
+    # just the one electrode/frequency
+    post_stim_mask = get_post_stim_events_mask(all_events)
+    post_stim_events = subset_events(all_events, post_stim_mask)
+    post_stim_powers, final_post_stim_events = compute_normalized_powers(
+       post_stim_events, bipolar_pairs=ec_pairs, **kwargs)
+    post_stim_reduced_powers = reduce_powers(post_stim_powers,
+                                             trigger_electrode_mask,
+                                             len(kwargs['freqs']),
+                                             frequency_mask=trigger_frequency_mask)
+
+    powers, final_task_events = compute_normalized_powers(
+        task_events, bipolar_pairs=ec_pairs, **kwargs).compute()
+    reduced_powers = reduce_powers(powers, trigger_electrode_mask,
+                                   len(kwargs['freqs']),
+                                   frequency_mask=trigger_frequency_mask)
+
+    session_summaries = summarize_stim_sessions(all_events, task_events,
+                                                stim_data,
+                                                pairs_metadata_table,
+                                                ec_pairs, excluded_pairs,
+                                                powers,
+                                                trigger_output=reduced_powers,
+                                                post_stim_trigger_output=post_stim_reduced_powers).compute()
+    math_summaries = summarize_math(all_events)
+    classifier_evaluation_results = []
+
+    return session_summaries, math_summaries, classifier_evaluation_results, \
+           repetition_ratio_dict, None, None
