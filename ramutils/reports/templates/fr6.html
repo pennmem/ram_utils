@@ -4,6 +4,12 @@
 {% endblock %}
 
 {% block report %}
+{% include 'stim_summary.html' %}
 {% include 'session_summary.html' %}
-{% include 'roc_curve.html' %}
+{% include 'math_summary.html' %}
+
+{% include 'serialpos_curve.html' %}
+{% include 'classifier.html' %}
+{% include 'stim_recall_analysis.html' %}
+{% include 'data_quality.html' %}
 {% endblock %}
