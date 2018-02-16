@@ -190,8 +190,11 @@ class ReportGenerator(object):
         elif (series == '2'):
             return self.generate_open_loop_fr_report()
 
-        elif (series == '5') or (series == '3'):
-            return self.generate_closed_loop_fr_report()
+        elif (series == '5'):
+            return self.generate_closed_loop_fr_report('FR5')
+
+        elif (series == '3'):
+            return self.generate_closed_loop_fr_report('FR3')
 
         elif all(['FR' in exp for exp in self.experiments]):
             joint = False
@@ -304,7 +307,7 @@ class ReportGenerator(object):
             }
         )
 
-    def generate_closed_loop_fr_report(self):
+    def generate_closed_loop_fr_report(self, experiment):
         """ Generate an FR5 report
 
         Returns
@@ -313,7 +316,7 @@ class ReportGenerator(object):
 
         """
         return self._render(
-            self.experiments[0],
+            experiment,
             stim=True,
             combined_summary=self._make_combined_summary(),
             classifiers=self.classifiers,
