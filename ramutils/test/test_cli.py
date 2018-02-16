@@ -185,6 +185,8 @@ class TestCreateReports:
         ('R1374T', 'CatFR5', [0]),
         ('R1345D', 'FR5', [0]),
         ('R1374T', 'PS4_CatFR5', [0]),
+        ('R1001P', 'FR2', [0]),
+        ('R1260D', 'CatFR3', [0])
         # ('R1374T', 'PS5_CatFR', [0]) Make this test case live once we have a real session. Otherwise, you have to specific a special rhino root to use the mocked data
     ])
     def test_create_stim_session_report(self, subject, experiment, sessions,
@@ -206,8 +208,6 @@ class TestCreateReports:
 
         if experiment == 'PS5_CatFR':
             args += ['--trigger-electrode', 'LB6-LB7']
-
-        print(args)
 
         create_report(args)
         return
