@@ -227,7 +227,9 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
         stim_df['subject'] = subject
         stim_df['experiment'] = experiment
 
-        # Add in the stim params
+        # Add in the stim params. This is making the assumption that stim
+        # parameters do not change within a list
+        stim_param_df = stim_param_df.drop_duplicates(subset=['session', 'list'])
         stim_df = stim_df.merge(stim_param_df, on=['session', 'list'], how='left')
 
         # Add region from pairs_data. TODO: This won't scale to multi-site stim
