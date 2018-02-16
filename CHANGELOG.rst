@@ -1,6 +1,11 @@
 Changes
 =======
 
+Upcoming
+--------
+* embed images rather than using absolute paths
+
+
 Version 2.1.4
 -------------
 **2018-02-14**
