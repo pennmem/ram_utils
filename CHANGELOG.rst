@@ -1,6 +1,11 @@
 Changes
 =======
 
+Upcoming
+--------
+* Support for building FR2/catFR2, FR3/catFR3, and FR6/catFR6 reports
+
+
 Version 2.1.4
 -------------
 **2018-02-14**
