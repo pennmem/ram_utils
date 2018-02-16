@@ -1108,7 +1108,7 @@ def extract_stim_information(all_events, task_events):
                             stim_param_data['item_name'].append(lst_events[loc].item_name)
                             stim_param_data['session'].append(lst_events[loc].session)
                             stim_param_data['list'].append(lst_events[loc].list)
-                            stim_param_data['amplitude'].append(",".join([str(stim_params[k].amplitude) for k in range(len(stim_params))]))
+                            stim_param_data['amplitude'].append(",".join([str(stim_params[k].amplitude / 1000.0) for k in range(len(stim_params))]))
                             stim_param_data['pulse_freq'].append(",".join([str(stim_params[k].pulse_freq) for k in range(len(stim_params))]))
                             stim_param_data['stim_duration'].append(",".join([str(stim_params[k].stim_duration) for k in range(len(stim_params))]))
                             stim_param_data['stimAnodeTag'].append(",".join([str(stim_params[k].anode_label) for k in range(len(stim_params))]))
