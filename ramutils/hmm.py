@@ -136,6 +136,9 @@ class HierarchicalModel(object):
     def _fit_FR5_model(self, draws, tune):
         return self._fit_FR3_model(draws, tune)
 
+    def _fit_catFR2_model(self, draws, tune):
+        return self._fit_FR3_model(draws, tune)
+
     def _fit_catFR3_model(self, draws, tune):
         return self._fit_FR3_model(draws, tune)
 
