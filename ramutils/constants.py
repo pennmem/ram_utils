@@ -18,6 +18,10 @@ EXPERIMENTS = {
         'PS5_FR',
         'PS5_CatFR'
     ],
+    'open_loop': [
+        'FR2',
+        'CatFR2'
+    ],
     'closed_loop': [
         'FR3',
         'CatFR3',
