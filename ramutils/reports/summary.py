@@ -786,7 +786,6 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
                      .rename(columns={'is_stim_item': 'n_stimulations',
                                       'subject': 'n_trials'})
                      .reset_index())
-        grouped['amplitude'] = grouped['amplitude'] / 1000.0
 
         return list(grouped.T.to_dict().values())
 
