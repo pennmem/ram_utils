@@ -86,12 +86,13 @@ def make_report(subject, experiment, paths, joint_report=False,
             return report.compute()
 
     # TODO: allow using different localization, montage numbers
-    ec_pairs = get_pairs(subject, experiment, paths)
+    ec_pairs = get_pairs(subject, experiment, sessions, paths)
     excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
     final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
     used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
     pairs_metadata_table = generate_montage_metadata_table(subject,
                                                            experiment,
+                                                           sessions,
                                                            ec_pairs,
                                                            root=paths.root).compute()
 
