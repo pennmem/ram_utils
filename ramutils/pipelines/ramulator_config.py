@@ -1,7 +1,39 @@
 from ramutils.constants import EXPERIMENTS
-from ramutils.exc import MultistimNotAllowedException, MissingArgumentsError
+from ramutils.exc import (
+    MissingArgumentsError, MultistimNotAllowedException, ValidationError
+)
 from ramutils.montage import generate_pairs_from_electrode_config
 from ramutils.tasks import *
+
+
+@task(cache=False)
+def validate_pairs(subject, ec_pairs, trigger_pairs=None):
+    """Validate that specified pairs exist in the electrode config.
+
+    TODO: include validation of stim anodes, cathodes
+
+    Parameters
+    ----------
+    subject : str
+        Subject ID
+    ec_pairs : OrderedDict
+        Contents of pairs.json as generated from the electrode config file.
+        Pairs here are specified as ``<anode label>-<cathode label>``.
+    trigger_pairs : list
+        List of specified pairs to be used as triggers for PS5. Pairs here are
+        specified as ``<anode label>_<cathode label>``.
+
+    """
+    pairs_json = ec_pairs[subject]['pairs']
+
+    if trigger_pairs is not None:
+        for pair in trigger_pairs:
+            hyphenated_pair = pair.replace('_', '-')
+            if hyphenated_pair not in pairs_json:
+                raise ValidationError(
+                    "trigger pair " + pair +
+                    " not found in pairs.json (check for typos!)"
+                )
 
 
 def make_ramulator_config(subject, experiment, paths, stim_params,
@@ -47,6 +79,9 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
         if experiment.startswith('PS5'):
             raise MissingArgumentsError("PS5 requires trigger_pairs")
 
+        # setting to empty list for validation
+        trigger_pairs = []
+
     anodes = [c.anode_label for c in stim_params]
     cathodes = [c.cathode_label for c in stim_params]
 
@@ -66,6 +101,10 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
     excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
     used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
     final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
+
+    # Ensure specified pairs exist. We have to call .compute here since no
+    # other tasks depend on the output of this task.
+    validate_pairs(subject, ec_pairs, trigger_pairs).compute()
 
     # Special case handling of no-classifier tasks
     no_classifier_experiments = EXPERIMENTS['record_only'] + [
