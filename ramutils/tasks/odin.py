@@ -33,7 +33,8 @@ logger = get_logger()
 @task(cache=False)
 def generate_electrode_config(subject, paths, anodes=None, cathodes=None,
                               localization=0, montage=0,
-                              default_surface_area=0.001):
+                              default_surface_area=0.001,
+                              use_common_reference=False):
     """Generate electrode configuration files (CSV and binary).
 
     Parameters
@@ -52,6 +53,8 @@ def generate_electrode_config(subject, paths, anodes=None, cathodes=None,
     default_surface_area : float
         Default surface area to set all electrodes to in mm^2. Only used if no
         area file can be found.
+    use_common_reference : bool
+        Use common reference instead of bipolar referencing scheme.
 
     Returns
     -------
@@ -78,7 +81,9 @@ def generate_electrode_config(subject, paths, anodes=None, cathodes=None,
                            default_surface_area)
             area = default_surface_area
 
-    ec = ElectrodeConfig.from_jacksheet(jacksheet_filename, subject, area=area)
+    scheme = 'monopolar' if use_common_reference else 'bipolar'
+    ec = ElectrodeConfig.from_jacksheet(jacksheet_filename, subject, area=area,
+                                        scheme=scheme)
 
     if anodes is not None:
         assert cathodes is not None

@@ -40,6 +40,8 @@ parser.add_argument('--trigger-pairs', nargs='+',
                     help='underscore separated trigger electrode pairs (e.g., LA1_LA2)')
 parser.add_argument('--no-extended-blanking', action='store_true',
                     help='disable extended blanking')
+parser.add_argument('--use-common-reference', '-R', action='store_true',
+                    help='generate common reference electrode config instead of bipolar')
 
 # This is currently fixed so there is no need for an option
 # parser.add_argument('--pulse-frequencies', '-f', type=float, nargs='+',
@@ -131,7 +133,6 @@ def create_expconf(input_args=None):
 
     paths = FilePaths(**paths_kwargs)
 
-    # FIXME: figure out why MacOS won't work with sshfs-relative paths only here
     logger.info("Using %s as cache dir", args.cachedir)
 
     paths.pairs = osp.join(paths.root, 'protocols', 'r1', 'subjects',
@@ -180,7 +181,8 @@ def create_expconf(input_args=None):
                               localization=args.localization,
                               montage=args.montage,
                               default_surface_area=default_surface_area,
-                              trigger_pairs=args.trigger_pairs)
+                              trigger_pairs=args.trigger_pairs,
+                              use_common_reference=args.use_common_reference)
         memory.clear()  # clear cached intermediate results on successful build
 
     warnings = '\n' + warning_accumulator.format_all()
@@ -202,7 +204,7 @@ if __name__ == "__main__":
 
     create_expconf(args + [
         '-s', 'R1111M', '-x', 'DBOY1',
-        '--default-area', '5',
+        '--default-area', '5', '--use-common-reference',
     ])
 
     # create_expconf(args + [
