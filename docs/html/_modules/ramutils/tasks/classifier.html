@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ramutils.tasks.classifier &mdash; Ramutils 2.1.3 documentation</title>
+  <title>ramutils.tasks.classifier &mdash; Ramutils 2.1.5 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="Ramutils 2.1.3 documentation" href="../../../index.html"/>
+    <link rel="top" title="Ramutils 2.1.5 documentation" href="../../../index.html"/>
         <link rel="up" title="Module code" href="../../index.html"/> 
 
   
@@ -359,7 +359,7 @@
 <span class="k">def</span> <span class="nf">post_hoc_classifier_evaluation</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">powers</span><span class="p">,</span> <span class="n">post_stim_events</span><span class="p">,</span>
                                    <span class="n">post_stim_powers</span><span class="p">,</span> <span class="n">all_pairs</span><span class="p">,</span> <span class="n">classifiers</span><span class="p">,</span>
                                    <span class="n">n_permutations</span><span class="p">,</span> <span class="n">retrained_classifier</span><span class="p">,</span>
-                                   <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+                                   <span class="n">use_retrained</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Evaluate a trained classifier</span>
 
 <span class="sd">    Parameters</span>
@@ -441,7 +441,7 @@
         <span class="c1"># be re-fit as part of the lolo cross validation and if you pass</span>
         <span class="c1"># a reference, the AUCs will be wacky</span>
 
-        <span class="k">if</span> <span class="n">classifiers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">classifiers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">use_retrained</span><span class="p">):</span>
             <span class="n">classifier_container</span> <span class="o">=</span> <span class="n">retrained_classifier</span>
             <span class="n">reloaded</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Using the retrained classifier for session </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">session</span><span class="p">))</span>
@@ -583,7 +583,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'2.1.3',
+            VERSION:'2.1.5',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

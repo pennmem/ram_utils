@@ -36,7 +36,7 @@ documentation below.
 * classifier_summary -- Metadata related to classifier performance :class:`ClassifierSummary`
 * math_summary -- Math events and useful helper methods for assessing performance on the distractor task :class:`MathSummary`
 * session_summary -- Events and helper methods for conducting behavioral analyses and generating plots. In many cases,
-there are summary objects specific to the type of session, i.e. stim vs. nonstim, FR vs. CatFR vs. PS, etc.
+  there are summary objects specific to the type of session, i.e. stim vs. nonstim, FR vs. CatFR vs. PS, etc.
 
 
 .. automodule:: ramutils.reports.summary
