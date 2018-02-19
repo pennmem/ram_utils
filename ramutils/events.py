@@ -538,7 +538,7 @@ def select_column_subset(events, all_relevant=False, pal=False, stim=False,
 def get_required_columns(all_relevant=False, pal=False, stim=False, cat=False):
     """ Return baseline mandatory columns based on experiment type
 
-     Keyword Arguments
+    Keyword Arguments
     -----------------
     all_relevant: bool
         A subset that includes all fields that are subsequently used by any
@@ -549,6 +549,7 @@ def get_required_columns(all_relevant=False, pal=False, stim=False, cat=False):
         Fields specific to stim experiments
     cat: bool
         Fields specific to categorical free recall experiments
+
     """
 
     # FIXME: This would probably be better as just a dictionary
