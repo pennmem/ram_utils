@@ -1,8 +1,10 @@
 Changes
 =======
 
-Upcoming
---------
+Version 2.1.5
+-------------
+
+**2018-02-19**
 
 * Embed images rather than using absolute paths (#140)
 * Added support for DBOY1 Ramulator config generation and using common reference
