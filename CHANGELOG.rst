@@ -3,12 +3,17 @@ Changes
 
 Upcoming
 --------
-* embed images rather than using absolute paths
+
+* Embed images rather than using absolute paths
+* Added support for DBOY1 Ramulator config generation and using common reference
+  for data collection (#141)
 
 
 Version 2.1.4
 -------------
+
 **2018-02-14**
+
 * store all underlying data necessary for building reports to facilitate quick reload #118
 * do not use cached intermediate results be default (force-rerun)
 * clear memory on successful completion of report build
@@ -18,6 +23,7 @@ Version 2.1.4
 
 Version 2.1.3
 -------------
+
 **2018-01-24**
 
 This is a minor release that includes a few bug fixes discovered when building reports for older subjects as well as a
