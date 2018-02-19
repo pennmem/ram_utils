@@ -33,6 +33,8 @@ htmlcov/
 report.html
 assets/
 
+ramutils/test/test_data/output/
+
 # OS generated files #
 ######################
 .DS_Store
