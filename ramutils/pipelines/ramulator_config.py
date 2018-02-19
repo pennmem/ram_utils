@@ -7,7 +7,7 @@ from ramutils.tasks import *
 def make_ramulator_config(subject, experiment, paths, stim_params,
                           exp_params=None, vispath=None, extended_blanking=True,
                           localization=0, montage=0, default_surface_area=0.001,
-                          trigger_pairs=None):
+                          trigger_pairs=None, use_common_reference=False):
     """ Generate configuration files for a Ramulator experiment
 
     Parameters
@@ -34,6 +34,9 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
         area file can be found.
     trigger_pairs : List[str] or None
         Pairs to use for triggering stim in PS5 experiments.
+    use_common_reference : bool
+        Use a common reference in the electrode configuration instead of bipolar
+        referencing.
 
     Returns
     -------
@@ -56,7 +59,8 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
     if paths.electrode_config_file is None:
         paths = generate_electrode_config(subject, paths, anodes, cathodes,
                                           localization, montage,
-                                          default_surface_area)
+                                          default_surface_area,
+                                          use_common_reference)
 
     # Note: All of these pairs variables are of type OrderedDict, which is
     # crucial for preserving the initial order of the electrodes in the
