@@ -10,8 +10,6 @@ from ramutils.tasks import *
 def validate_pairs(subject, ec_pairs, trigger_pairs=None):
     """Validate that specified pairs exist in the electrode config.
 
-    TODO: include validation of stim anodes, cathodes
-
     Parameters
     ----------
     subject : str
@@ -19,9 +17,15 @@ def validate_pairs(subject, ec_pairs, trigger_pairs=None):
     ec_pairs : OrderedDict
         Contents of pairs.json as generated from the electrode config file.
         Pairs here are specified as ``<anode label>-<cathode label>``.
-    trigger_pairs : list
+    trigger_pairs : List
         List of specified pairs to be used as triggers for PS5. Pairs here are
         specified as ``<anode label>_<cathode label>``.
+
+    Notes
+    -----
+    Generating the electrode config file will already fail if anodes/cathodes
+    are not spelled correctly, so we only actually check trigger pairs for PS5
+    here.
 
     """
     pairs_json = ec_pairs[subject]['pairs']
