@@ -10,13 +10,14 @@ EXPERIMENTS = {
     'record_only': [
         'FR1',
         'CatFR1',
-        'PAL1'
+        'PAL1',
+        'DBOY1',
     ],
     'ps': [
         'PS4_FR5',
         'PS4_CatFR5',
         'PS5_FR',
-        'PS5_CatFR'
+        'PS5_CatFR',
     ],
     'closed_loop': [
         'FR3',

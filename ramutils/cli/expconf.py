@@ -143,7 +143,8 @@ def create_expconf(input_args=None):
     # Determine params based on experiment type
     if args.experiment == 'AmplitudeDetermination':
         exp_params = None
-    elif "FR" in args.experiment:
+    elif "FR" in args.experiment or "DBOY" in args.experiment:
+        # TODO: check if DBOY needs these
         exp_params = FRParameters()
     elif "PAL" in args.experiment:
         exp_params = PALParameters()
@@ -200,13 +201,19 @@ if __name__ == "__main__":
     # ])
 
     create_expconf(args + [
-        '-s', 'R1378T', '-x', 'PS5_FR',
-        '--anodes', 'LC8',
-        '--cathodes', 'LC9',
-        '--min-amplitudes', '0.25',
-        '--max-amplitudes', '0.75',
-        '--trigger-pairs', 'LX15_LX16', 'LT8_LT9',
+        '-s', 'R1111M', '-x', 'DBOY1',
+        '--default-area', '5',
     ])
+
+    # create_expconf(args + [
+    #     '-s', 'R1384J', '-x', 'PS5_CatFR',
+    #     '--anodes', 'LF7',
+    #     '--cathodes', 'LF8',
+    #     '--min-amplitudes', '0.1',
+    #     '--max-amplitudes', '0.5',
+    #     '--trigger-pairs', 'RPMS1_RPMS2',
+    #     '--default-area', '5.024',
+    # ])
 
     # create_expconf(args + [
     #     '-s', 'R1385E',
