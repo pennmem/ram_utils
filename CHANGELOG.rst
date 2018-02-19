@@ -4,9 +4,12 @@ Changes
 Upcoming
 --------
 
-* Embed images rather than using absolute paths
+* Embed images rather than using absolute paths (#140)
 * Added support for DBOY1 Ramulator config generation and using common reference
   for data collection (#141)
+* Added checks for typos when specifying trigger pairs in PS5 (#142)
+* Updated electrode config naming to specify ``NOSTIM`` for record-only
+  experiments
 
 
 Version 2.1.4
