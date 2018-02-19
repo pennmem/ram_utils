@@ -92,9 +92,15 @@ def generate_electrode_config(subject, paths, anodes=None, cathodes=None,
             ec.add_stim_channel(*labels)
 
     date = datetime.now().strftime('%d%b%Y').upper()
+    stim_str = "STIM"
+    if anodes is not None:
+        if not len(anodes):
+            stim_str = "NOSTIM"
+    else:
+        stim_str = "NOSTIM"
     prefix = '{subject:s}_{date:s}L{localization:d}M{montage:d}{stim:s}'.format(
         subject=subject, date=date, localization=localization, montage=montage,
-        stim=('STIM' if anodes is not None else 'NOSTIM')
+        stim=stim_str,
     )
     csv_path = os.path.join(paths.root, paths.dest, prefix + '.csv')
     bin_path = csv_path.replace('.csv', '.bin')
