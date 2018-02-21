@@ -95,7 +95,7 @@ class TestEvents:
             subject, experiment, paths, joint_report=joint_report,
             sessions=sessions, **extra_kwargs).compute()
 
-        expected_events = np.load(expected)
+        expected_events = load_event_test_data(expected, rhino_root)
         assert len(expected_events) == len(task_events)
         assert np.array_equal(task_events.recalled, expected_events.recalled)
 
