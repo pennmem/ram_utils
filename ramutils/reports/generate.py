@@ -188,16 +188,16 @@ class ReportGenerator(object):
             return self.generate_ps5_report()
 
         elif series == '5':
-            return self.generate_fr5_report()
+            return self.generate_closed_loop_fr_report('FR5')
+
+        elif series == '6':
+            return self.generate_closed_loop_fr_report('FR6')
 
         elif all(['FR' in exp for exp in self.experiments]):
             joint = False
             if any(['catFR' in exp for exp in self.experiments]):
                 joint = True
             return self.generate_fr_report(joint=joint)
-
-        elif (np.array(self.experiments) == 'FR5').all():
-            return self.generate_fr5_report()
 
         else:
             raise NotImplementedError("Unsupported report type")
@@ -241,7 +241,7 @@ class ReportGenerator(object):
             joint=joint
         )
 
-    def generate_fr5_report(self):
+    def generate_closed_loop_fr_report(self, experiment):
         """ Generate an FR5 report
 
         Returns
@@ -250,7 +250,7 @@ class ReportGenerator(object):
 
         """
         return self._render(
-            'FR5',
+            experiment,
             stim=True,
             combined_summary=self._make_combined_summary(),
             classifiers=self.classifiers,
