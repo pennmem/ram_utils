@@ -13,7 +13,7 @@ from ramutils.events import extract_subject, extract_experiment_from_events, \
     extract_sessions
 from ramutils.bayesian_optimization import choose_location
 from ramutils.exc import TooManySessionsError
-from ramutils.parameters import number_of_items
+from ramutils.parameters import ExperimentParameters
 
 from traitschema import Schema
 from traits.api import Array, ArrayOrNone, Float, String, Bool
@@ -880,7 +880,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         df = self.to_dataframe()
         events = df[df.is_stim_item == stim]
 
-        firstpos = np.zeros(number_of_items, dtype=np.float)
+        firstpos = np.zeros(ExperimentParameters().number_of_items, dtype=np.float)
         for listno in events.list.unique():
             try:
                 nonzero = events[(events.list == listno) &
