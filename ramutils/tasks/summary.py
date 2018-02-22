@@ -264,9 +264,7 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
                 excluded_pairs, trigger_output, raw_events=all_session_events,
                 post_stim_prob_recall=post_stim_trigger_output)
         else:
-            raise UnsupportedExperimentError('Only FR2/FR3/FR5/PS5_FR5/FR6 and '
-                                             'catFR2/catFR3/catFR5/PS5_catFR5/catFR6 '
-                                             'currently implemented')
+            raise UnsupportedExperimentError('Experiment not supported')
 
         stim_session_summaries.append(stim_session_summary)
 
