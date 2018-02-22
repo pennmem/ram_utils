@@ -5,10 +5,23 @@ Upcoming
 --------
 * Support for building FR2/catFR2, FR3/catFR3, and FR6/catFR6 reports
 
+Version 2.1.5
+-------------
+
+**2018-02-19**
+
+* Embed images rather than using absolute paths (#140)
+* Added support for DBOY1 Ramulator config generation and using common reference
+  for data collection (#141)
+* Added checks for typos when specifying trigger pairs in PS5 (#142)
+* Updated electrode config naming to specify ``NOSTIM`` for record-only
+  experiments
 
 Version 2.1.4
 -------------
+
 **2018-02-14**
+
 * store all underlying data necessary for building reports to facilitate quick reload #118
 * do not use cached intermediate results be default (force-rerun)
 * clear memory on successful completion of report build
@@ -18,6 +31,7 @@ Version 2.1.4
 
 Version 2.1.3
 -------------
+
 **2018-01-24**
 
 This is a minor release that includes a few bug fixes discovered when building reports for older subjects as well as a

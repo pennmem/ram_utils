@@ -52,17 +52,21 @@ def make_report(subject, experiment, paths, joint_report=False,
     report rather than the report itself.
 
     """
-    # PS4 is such a special beast, that we just return it's own sub-pipeline
-    # in order to simplify the branching logic for generating all other reports
-    if experiment == "PS4":
-        return generate_ps4_report(subject, experiment, sessions, paths)
-
-    kwargs = exp_params.to_dict()
-
     # Lower case 'c' is expected for reading events. The reader should probably
     # just be case insensitive
     if 'Cat' in experiment:
         experiment = experiment.replace('Cat', 'cat')
+
+    ec_pairs = get_pairs(subject, experiment, paths)
+    excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
+    # PS4 is such a special beast, that we just return it's own sub-pipeline
+    # in order to simplify the branching logic for generating all other reports
+    if "PS4" in experiment:
+        return generate_ps4_report(subject, experiment, sessions, ec_pairs,
+                                   excluded_pairs, paths)
+
+    kwargs = exp_params.to_dict()
+
 
     stim_report = is_stim_experiment(experiment).compute()
     series_num = extract_experiment_series(experiment)
@@ -87,8 +91,6 @@ def make_report(subject, experiment, paths, joint_report=False,
             return report.compute()
 
     # TODO: allow using different localization, montage numbers
-    ec_pairs = get_pairs(subject, experiment, sessions, paths)
-    excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
     final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
     used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
     pairs_metadata_table = generate_montage_metadata_table(subject,
@@ -165,11 +167,12 @@ def make_report(subject, experiment, paths, joint_report=False,
     return report.compute()
 
 
-def generate_ps4_report(subject, experiment, sessions, paths):
+def generate_ps4_report(subject, experiment, sessions, ec_pairs,
+                        excluded_pairs, paths):
     """ PS4-specific report generation pipeline """
     ps_events = build_ps_data(subject, experiment, 'ps4_events',
                               sessions, paths.root)
-    session_summaries = summarize_ps_sessions(ps_events)
+    session_summaries = summarize_ps_sessions(ps_events, ec_pairs, excluded_pairs)
 
     # PS4 doesn't have most of the same data/requirements as other experiments,
     # but we want to still be able to call the same build_static_report function

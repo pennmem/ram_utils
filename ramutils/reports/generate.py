@@ -190,20 +190,20 @@ class ReportGenerator(object):
         elif (series == '2'):
             return self.generate_open_loop_fr_report()
 
-        elif (series == '5'):
-            return self.generate_closed_loop_fr_report('FR5')
-
         elif (series == '3'):
             return self.generate_closed_loop_fr_report('FR3')
+
+        elif series == '5':
+            return self.generate_closed_loop_fr_report('FR5')
+
+        elif series == '6':
+            return self.generate_closed_loop_fr_report('FR6')
 
         elif all(['FR' in exp for exp in self.experiments]):
             joint = False
             if any(['catFR' in exp for exp in self.experiments]):
                 joint = True
             return self.generate_fr_report(joint=joint)
-
-        elif (np.array(self.experiments) == 'FR5').all():
-            return self.generate_fr5_report()
 
         else:
             raise NotImplementedError("Unsupported report type")

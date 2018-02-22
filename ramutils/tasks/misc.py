@@ -1,4 +1,5 @@
 import os
+import base64
 import pandas as pd
 
 try:
@@ -111,8 +112,9 @@ def save_all_output(subject, experiment, session_summaries, math_summaries,
                                                        data_type=(name +
                                                                   '_traceplot'),
                                                        file_type='png')
-            save_traceplot(trace, traceplot_path)
-            result_files[name] = forestplot_path
+            with open(forestplot_path, 'rb') as f:
+                encoded_image = base64.b64encode(f.read()).replace(b"\n", b"").decode()
+            result_files[name] = encoded_image
 
     return result_files
 
@@ -207,7 +209,10 @@ def load_existing_results(subject, experiment, sessions, stim_report, db_loc,
                             file_type='png')
                         assert os.path.exists(traceplot_path)
 
-                        hmm_results[name] = forestplot_path
+                        # Encode the image and pass along that data
+                        with open(forestplot_path, 'rb') as f:
+                            encoded_image = base64.b64encode(f.read()).replace(b"\n", b"").decode()
+                        hmm_results[name] = encoded_image
 
         else:
             return None, None, None, None, None

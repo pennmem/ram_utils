@@ -356,7 +356,7 @@ def remove_incomplete_lists(events):
         task_events = sess_events[~math_mask]
         math_events = sess_events[math_mask]
         final_sess_events = task_events
-        final_sess_events.sort(order=['session', 'list', 'mstime'])
+        final_sess_events.sort(order=['session', 'list', 'eegoffset'])
 
         # Remove all task events for lists that don't have a "REC_END" event
         events_by_list = (np.array([l for l in list_group]) for listno,
@@ -371,7 +371,7 @@ def remove_incomplete_lists(events):
         # Re-combine math and task events
         final_sess_events = np.rec.array(np.concatenate([final_sess_events,
                                             math_events]))
-        final_sess_events.sort(order=['session', 'list', 'mstime'])
+        final_sess_events.sort(order=['session', 'list', 'eegoffset'])
         final_event_list.append(final_sess_events)
 
         # METHOD #2 (perhaps less accurate?) We need to figure out which one
@@ -538,7 +538,7 @@ def select_column_subset(events, all_relevant=False, pal=False, stim=False,
 def get_required_columns(all_relevant=False, pal=False, stim=False, cat=False):
     """ Return baseline mandatory columns based on experiment type
 
-     Keyword Arguments
+    Keyword Arguments
     -----------------
     all_relevant: bool
         A subset that includes all fields that are subsequently used by any
@@ -549,6 +549,7 @@ def get_required_columns(all_relevant=False, pal=False, stim=False, cat=False):
         Fields specific to stim experiments
     cat: bool
         Fields specific to categorical free recall experiments
+
     """
 
     # FIXME: This would probably be better as just a dictionary
@@ -865,7 +866,7 @@ def concatenate_events_for_single_experiment(event_list):
         return empty_events
     final_events = np.rec.array(np.concatenate(event_list))
     final_events.sort(order=['subject', 'session', 'list',
-                             'mstime'])
+                             'eegoffset'])
 
     return final_events
 

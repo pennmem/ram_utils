@@ -50,3 +50,7 @@ class MissingArgumentsError(RamException):
     Example: when not giving trigger pairs for PS5 experiments.
 
     """
+
+
+class ValidationError(Exception):
+    """Raised when validation checks fail."""

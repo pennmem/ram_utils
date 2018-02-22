@@ -186,7 +186,7 @@ class TestCreateReports:
         ('R1154D', 'FR3', [0]),
         ('R1374T', 'CatFR5', [0]),
         ('R1345D', 'FR5', [0]),
-        ('R1374T', 'PS4_CatFR5', [0]),
+        ('R1374T', 'PS4_CatFR5', [3]),
         ('R1001P', 'FR2', [0]),
         ('R1260D', 'CatFR3', [0])
         # ('R1374T', 'PS5_CatFR', [0]) Make this test case live once we have a real session. Otherwise, you have to specific a special rhino root to use the mocked data
@@ -206,7 +206,7 @@ class TestCreateReports:
             args += ['--rerun']
 
         if sessions is not None:
-            args += ['-S'] + sessions
+            args += ['-S'] + [str(session) for session in sessions]
 
         if experiment == 'PS5_CatFR':
             args += ['--trigger-electrode', 'LB6-LB7']

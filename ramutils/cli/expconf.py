@@ -40,6 +40,8 @@ parser.add_argument('--trigger-pairs', nargs='+',
                     help='underscore separated trigger electrode pairs (e.g., LA1_LA2)')
 parser.add_argument('--no-extended-blanking', action='store_true',
                     help='disable extended blanking')
+parser.add_argument('--use-common-reference', '-R', action='store_true',
+                    help='generate common reference electrode config instead of bipolar')
 
 # This is currently fixed so there is no need for an option
 # parser.add_argument('--pulse-frequencies', '-f', type=float, nargs='+',
@@ -131,7 +133,6 @@ def create_expconf(input_args=None):
 
     paths = FilePaths(**paths_kwargs)
 
-    # FIXME: figure out why MacOS won't work with sshfs-relative paths only here
     logger.info("Using %s as cache dir", args.cachedir)
 
     paths.pairs = osp.join(paths.root, 'protocols', 'r1', 'subjects',
@@ -143,7 +144,8 @@ def create_expconf(input_args=None):
     # Determine params based on experiment type
     if args.experiment == 'AmplitudeDetermination':
         exp_params = None
-    elif "FR" in args.experiment:
+    elif "FR" in args.experiment or "DBOY" in args.experiment:
+        # TODO: check if DBOY needs these
         exp_params = FRParameters()
     elif "PAL" in args.experiment:
         exp_params = PALParameters()
@@ -179,7 +181,8 @@ def create_expconf(input_args=None):
                               localization=args.localization,
                               montage=args.montage,
                               default_surface_area=default_surface_area,
-                              trigger_pairs=args.trigger_pairs)
+                              trigger_pairs=args.trigger_pairs,
+                              use_common_reference=args.use_common_reference)
         memory.clear()  # clear cached intermediate results on successful build
 
     warnings = '\n' + warning_accumulator.format_all()
@@ -200,13 +203,19 @@ if __name__ == "__main__":
     # ])
 
     create_expconf(args + [
-        '-s', 'R1378T', '-x', 'PS5_FR',
-        '--anodes', 'LC8',
-        '--cathodes', 'LC9',
-        '--min-amplitudes', '0.25',
-        '--max-amplitudes', '0.75',
-        '--trigger-pairs', 'LX15_LX16', 'LT8_LT9',
+        '-s', 'R1111M', '-x', 'DBOY1',
+        '--default-area', '5', '--use-common-reference',
     ])
+
+    # create_expconf(args + [
+    #     '-s', 'R1384J', '-x', 'PS5_CatFR',
+    #     '--anodes', 'LF7',
+    #     '--cathodes', 'LF8',
+    #     '--min-amplitudes', '0.1',
+    #     '--max-amplitudes', '0.5',
+    #     '--trigger-pairs', 'RPMS1_RPMS2',
+    #     '--default-area', '5.024',
+    # ])
 
     # create_expconf(args + [
     #     '-s', 'R1385E',

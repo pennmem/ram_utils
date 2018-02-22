@@ -13,17 +13,18 @@ Ramulator experiment configuration files for stimulation experiments are
 generated via the ``ramulator-conf`` script::
 
     usage: ramulator-conf [-h] [--root ROOT] [--dest DEST] [--cachedir CACHEDIR]
-                          --subject SUBJECT [--force-rerun] --experiment
-                          {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,FR1,CatFR1,PAL1}
-                          [--vispath VISPATH] [--localization LOCALIZATION]
-                          [--montage MONTAGE]
+                          --subject SUBJECT [--use-cached] --experiment
+                          {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,PS5_FR,PS5_CatFR,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,FR1,CatFR1,PAL1,DBOY1}
+                          [--vispath VISPATH] [--version]
+                          [--localization LOCALIZATION] [--montage MONTAGE]
                           [--electrode-config-file ELECTRODE_CONFIG_FILE]
                           [--anodes ANODES [ANODES ...]]
                           [--cathodes CATHODES [CATHODES ...]]
                           [--min-amplitudes MIN_AMPLITUDES [MIN_AMPLITUDES ...]]
                           [--max-amplitudes MAX_AMPLITUDES [MAX_AMPLITUDES ...]]
                           [--target-amplitudes TARGET_AMPLITUDES [TARGET_AMPLITUDES ...]]
-                          [--no-extended-blanking]
+                          [--trigger-pairs TRIGGER_PAIRS [TRIGGER_PAIRS ...]]
+                          [--no-extended-blanking] [--use-common-reference]
                           [--default-area DEFAULT_AREA | --area-file AREA_FILE]
                           [--clear-log]
 
@@ -37,10 +38,11 @@ generated via the ``ramulator-conf`` script::
       --cachedir CACHEDIR   absolute path for caching dir
       --subject SUBJECT, -s SUBJECT
                             subject ID
-      --force-rerun         force re-running all tasks
-      --experiment {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,FR1,CatFR1,PAL1}, -x {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,FR1,CatFR1,PAL1}
+      --use-cached          allow cached results from previous run to be reused
+      --experiment {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,PS5_FR,PS5_CatFR,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,FR1,CatFR1,PAL1,DBOY1}, -x {AmplitudeDetermination,PS4_FR5,PS4_CatFR5,PS5_FR,PS5_CatFR,FR3,CatFR3,PAL3,FR5,CatFR5,PAL5,FR6,CatFR6,FR1,CatFR1,PAL1,DBOY1}
                             experiment
       --vispath VISPATH     path to save task graph visualization to
+      --version             show program's version number and exit
       --localization LOCALIZATION, -l LOCALIZATION
                             localization number (default: 0)
       --montage MONTAGE, -m MONTAGE
@@ -57,11 +59,16 @@ generated via the ``ramulator-conf`` script::
                             maximum stim amplitudes
       --target-amplitudes TARGET_AMPLITUDES [TARGET_AMPLITUDES ...], -t TARGET_AMPLITUDES [TARGET_AMPLITUDES ...]
                             target stim amplitudes
+      --trigger-pairs TRIGGER_PAIRS [TRIGGER_PAIRS ...]
+                            underscore separated trigger electrode pairs (e.g.,
+                            LA1_LA2)
       --no-extended-blanking
                             disable extended blanking
+      --use-common-reference, -R
+                            generate common reference electrode config instead of
+                            bipolar
       --default-area DEFAULT_AREA, -A DEFAULT_AREA
-                            default surface area to use for all contacts (default:
-                            0.001)
+                            surface area to use for all contacts (default: 0.001)
       --area-file AREA_FILE
                             path to area.txt file relative to root
       --clear-log           clear the log

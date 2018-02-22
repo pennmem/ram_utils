@@ -1,13 +1,49 @@
 from ramutils.constants import EXPERIMENTS
-from ramutils.exc import MultistimNotAllowedException, MissingArgumentsError
+from ramutils.exc import (
+    MissingArgumentsError, MultistimNotAllowedException, ValidationError
+)
 from ramutils.montage import generate_pairs_from_electrode_config
 from ramutils.tasks import *
+
+
+@task(cache=False)
+def validate_pairs(subject, ec_pairs, trigger_pairs=None):
+    """Validate that specified pairs exist in the electrode config.
+
+    Parameters
+    ----------
+    subject : str
+        Subject ID
+    ec_pairs : OrderedDict
+        Contents of pairs.json as generated from the electrode config file.
+        Pairs here are specified as ``<anode label>-<cathode label>``.
+    trigger_pairs : List
+        List of specified pairs to be used as triggers for PS5. Pairs here are
+        specified as ``<anode label>_<cathode label>``.
+
+    Notes
+    -----
+    Generating the electrode config file will already fail if anodes/cathodes
+    are not spelled correctly, so we only actually check trigger pairs for PS5
+    here.
+
+    """
+    pairs_json = ec_pairs[subject]['pairs']
+
+    if trigger_pairs is not None:
+        for pair in trigger_pairs:
+            hyphenated_pair = pair.replace('_', '-')
+            if hyphenated_pair not in pairs_json:
+                raise ValidationError(
+                    "trigger pair " + pair +
+                    " not found in pairs.json (check for typos!)"
+                )
 
 
 def make_ramulator_config(subject, experiment, paths, stim_params,
                           exp_params=None, vispath=None, extended_blanking=True,
                           localization=0, montage=0, default_surface_area=0.001,
-                          trigger_pairs=None):
+                          trigger_pairs=None, use_common_reference=False):
     """ Generate configuration files for a Ramulator experiment
 
     Parameters
@@ -34,6 +70,9 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
         area file can be found.
     trigger_pairs : List[str] or None
         Pairs to use for triggering stim in PS5 experiments.
+    use_common_reference : bool
+        Use a common reference in the electrode configuration instead of bipolar
+        referencing.
 
     Returns
     -------
@@ -47,6 +86,9 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
         if experiment.startswith('PS5'):
             raise MissingArgumentsError("PS5 requires trigger_pairs")
 
+        # setting to empty list for validation
+        trigger_pairs = []
+
     anodes = [c.anode_label for c in stim_params]
     cathodes = [c.cathode_label for c in stim_params]
 
@@ -56,7 +98,8 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
     if paths.electrode_config_file is None:
         paths = generate_electrode_config(subject, paths, anodes, cathodes,
                                           localization, montage,
-                                          default_surface_area)
+                                          default_surface_area,
+                                          use_common_reference)
 
     # Note: All of these pairs variables are of type OrderedDict, which is
     # crucial for preserving the initial order of the electrodes in the
@@ -66,6 +109,10 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
     excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
     used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
     final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
+
+    # Ensure specified pairs exist. We have to call .compute here since no
+    # other tasks depend on the output of this task.
+    validate_pairs(subject, ec_pairs, trigger_pairs).compute()
 
     # Special case handling of no-classifier tasks
     no_classifier_experiments = EXPERIMENTS['record_only'] + [

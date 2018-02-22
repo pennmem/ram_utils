@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Miscellaneous utilities &mdash; Ramutils 2.1.3 documentation</title>
+  <title>Miscellaneous utilities &mdash; Ramutils 2.1.5 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Ramutils 2.1.3 documentation" href="index.html"/>
+    <link rel="top" title="Ramutils 2.1.5 documentation" href="index.html"/>
         <link rel="prev" title="Command-line usage" href="cli.html"/> 
 
   
@@ -179,6 +179,14 @@
 </dd></dl>
 
 <dl class="exception">
+<dt id="ramutils.exc.MissingArgumentsError">
+<em class="property">exception </em><code class="descclassname">ramutils.exc.</code><code class="descname">MissingArgumentsError</code><a class="reference internal" href="_modules/ramutils/exc.html#MissingArgumentsError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.exc.MissingArgumentsError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when an optional argument is not optional for certain cases but
+is not specified.</p>
+<p>Example: when not giving trigger pairs for PS5 experiments.</p>
+</dd></dl>
+
+<dl class="exception">
 <dt id="ramutils.exc.MissingFileError">
 <em class="property">exception </em><code class="descclassname">ramutils.exc.</code><code class="descname">MissingFileError</code><a class="reference internal" href="_modules/ramutils/exc.html#MissingFileError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.exc.MissingFileError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised when a required file doesn’t appear to exist.</p>
@@ -192,6 +200,12 @@ which doesn’t support it.</p>
 </dd></dl>
 
 <dl class="exception">
+<dt id="ramutils.exc.RamException">
+<em class="property">exception </em><code class="descclassname">ramutils.exc.</code><code class="descname">RamException</code><a class="reference internal" href="_modules/ramutils/exc.html#RamException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.exc.RamException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base exception class for custom exceptions.</p>
+</dd></dl>
+
+<dl class="exception">
 <dt id="ramutils.exc.TooManyExperimentsError">
 <em class="property">exception </em><code class="descclassname">ramutils.exc.</code><code class="descname">TooManyExperimentsError</code><a class="reference internal" href="_modules/ramutils/exc.html#TooManyExperimentsError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.exc.TooManyExperimentsError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised when too many experiments are included with events.</p>
@@ -200,14 +214,14 @@ which doesn’t support it.</p>
 <dl class="exception">
 <dt id="ramutils.exc.TooManySessionsError">
 <em class="property">exception </em><code class="descclassname">ramutils.exc.</code><code class="descname">TooManySessionsError</code><a class="reference internal" href="_modules/ramutils/exc.html#TooManySessionsError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.exc.TooManySessionsError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Raised when too many sessions are present/requested</p>
+<dd><p>Raised when too many sessions’ worth of data are passed as an argument.</p>
 </dd></dl>
 
 <dl class="exception">
 <dt id="ramutils.exc.UnableToReloadClassifierException">
 <em class="property">exception </em><code class="descclassname">ramutils.exc.</code><code class="descname">UnableToReloadClassifierException</code><a class="reference internal" href="_modules/ramutils/exc.html#UnableToReloadClassifierException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.exc.UnableToReloadClassifierException" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised when processing cannot load or use the actual classifier from
-a session</p>
+a session.</p>
 </dd></dl>
 
 <dl class="exception">
@@ -215,6 +229,12 @@ a session</p>
 <em class="property">exception </em><code class="descclassname">ramutils.exc.</code><code class="descname">UnsupportedExperimentError</code><a class="reference internal" href="_modules/ramutils/exc.html#UnsupportedExperimentError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.exc.UnsupportedExperimentError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised when trying to do something with an experiment that is not yet
 supported.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="ramutils.exc.ValidationError">
+<em class="property">exception </em><code class="descclassname">ramutils.exc.</code><code class="descname">ValidationError</code><a class="reference internal" href="_modules/ramutils/exc.html#ValidationError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.exc.ValidationError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when validation checks fail.</p>
 </dd></dl>
 
 </div>
@@ -573,7 +593,7 @@ data for report plots.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.3',
+            VERSION:'2.1.5',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
