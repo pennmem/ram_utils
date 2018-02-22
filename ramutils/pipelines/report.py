@@ -1,4 +1,5 @@
 """Pipeline for creating reports."""
+from __future__  import unicode_literals
 
 import pandas as pd
 
@@ -107,7 +108,7 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                          paths,
                                                          joint_report,
                                                          sessions=sessions,
-                                                         **kwargs)
+                                                         **kwargs).compute()
 
     target_selection_table = pd.DataFrame(columns=['type', 'contact0',
                                                    'contact1', 'label',
@@ -136,26 +137,15 @@ def make_report(subject, experiment, paths, joint_report=False,
                                          task_events, stim_data, paths,
                                          **kwargs)
 
-    # Open loop stim session
-    elif stim_report and series_num == '2':
-        session_summaries, math_summaries, classifier_evaluation_results, \
-        retrained_classifier, behavioral_results = \
-            generate_data_for_open_loop_report(subject, experiment,
-                                               joint_report, retrain, paths,
-                                               ec_pairs, excluded_pairs,
-                                               used_pair_mask, final_pairs,
-                                               pairs_metadata_table, all_events,
-                                               task_events, stim_data, **kwargs)
-    # Closed loop stim session
     else:
         session_summaries, math_summaries, classifier_evaluation_results, \
         retrained_classifier, behavioral_results = \
-            generate_data_for_closed_loop_report(subject, experiment, joint_report,
-                                                 retrain, paths, ec_pairs,
-                                                 excluded_pairs,
-                                                 used_pair_mask, final_pairs,
-                                                 pairs_metadata_table, all_events,
-                                                 task_events, stim_data, **kwargs)
+            generate_data_for_stim_report(subject, experiment, joint_report,
+                                          retrain, paths, ec_pairs,
+                                          excluded_pairs,
+                                          used_pair_mask, final_pairs,
+                                          pairs_metadata_table, all_events,
+                                          task_events, stim_data, **kwargs)
 
     output = save_all_output(subject, experiment, session_summaries,
                              math_summaries, classifier_evaluation_results,
@@ -293,46 +283,27 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
            trained_classifier, repetition_ratio_dict, trained_classifier, None
 
 
-def generate_data_for_open_loop_report(subject, experiment, joint_report, retrain,
-                                       paths, ec_pairs, excluded_pairs,
-                                       used_pair_mask, final_pairs,
-                                       pairs_metadata_table, all_events,
-                                       task_events, stim_data, **kwargs):
-
-    powers, final_task_events = compute_normalized_powers(
-        task_events, bipolar_pairs=ec_pairs, **kwargs)
-
-    session_summaries = summarize_stim_sessions(all_events, final_task_events,
-                                                stim_data, pairs_metadata_table,
-                                                ec_pairs, excluded_pairs,
-                                                powers)
-
-    math_summaries = summarize_math(all_events, joint=joint_report)
-
-    behavioral_results = estimate_effects_of_stim(subject, experiment,
-        session_summaries)
-
-    classifier_evaluation_results = []
-    retrained_classifier = None
-
-    return session_summaries, math_summaries, classifier_evaluation_results, \
-           retrained_classifier, behavioral_results
-
-
-def generate_data_for_closed_loop_report(subject, experiment, joint_report, retrain,
-                                         paths, ec_pairs, excluded_pairs,
-                                         used_pair_mask, final_pairs,
-                                         pairs_metadata_table, all_events,
-                                         task_events, stim_data, **kwargs):
+def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
+                                  paths, ec_pairs, excluded_pairs,
+                                  used_pair_mask, final_pairs,
+                                  pairs_metadata_table, all_events,
+                                  task_events, stim_data, **kwargs):
     """ Report generation sub-pipeline shared by all stim reports """
-    # We need post stim period events/powers
-    post_stim_mask = get_post_stim_events_mask(all_events)
-    post_stim_events = subset_events(all_events, post_stim_mask)
-    post_stim_powers, final_post_stim_events = compute_normalized_powers(
-       post_stim_events, bipolar_pairs=ec_pairs, **kwargs)
+    series_num = extract_experiment_series(experiment)
+    # FR2 does not have STIM_OFF events, so until we can identify them more
+    # easily, do not compute post stim powers for now
+    if series_num != '2':
+        # We need post stim period events/powers
+        post_stim_mask = get_post_stim_events_mask(all_events)
+        post_stim_events = subset_events(all_events, post_stim_mask)
+        post_stim_powers, final_post_stim_events = compute_normalized_powers(
+            post_stim_events, bipolar_pairs=ec_pairs, **kwargs)
+    else:
+        final_post_stim_events = None
+        post_stim_powers = None
 
     powers, final_task_events = compute_normalized_powers(
-        task_events, bipolar_pairs=ec_pairs, **kwargs)
+        task_events, bipolar_pairs=ec_pairs, **kwargs).compute()
 
     used_classifiers = reload_used_classifiers(subject,
                                                experiment,
@@ -343,10 +314,8 @@ def generate_data_for_closed_loop_report(subject, experiment, joint_report, retr
     # failed to load.
     retrained_classifier = None
     if retrain or any([classifier is None for classifier in used_classifiers]):
-        # Intentionally not passing 'sessions' so that training takes place
-        # on the full set of record only events
         training_events = build_training_data(subject, experiment, paths,
-                                              **kwargs)
+                                              **kwargs).compute()
 
         training_powers, final_training_events = compute_normalized_powers(
             training_events, bipolar_pairs=ec_pairs, **kwargs)
@@ -379,13 +348,13 @@ def generate_data_for_closed_loop_report(subject, experiment, joint_report, retr
 
     post_hoc_results = post_hoc_classifier_evaluation(final_task_events,
                                                       powers,
-                                                      final_post_stim_events,
-                                                      post_stim_powers,
                                                       ec_pairs,
                                                       used_classifiers,
                                                       kwargs['n_perm'],
                                                       retrained_classifier,
                                                       use_retrained=retrain,
+                                                      post_stim_events=final_post_stim_events,
+                                                      post_stim_powers=post_stim_powers,
                                                       **kwargs)
 
     session_summaries = summarize_stim_sessions(all_events, final_task_events,
