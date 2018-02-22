@@ -138,41 +138,95 @@ class ReportGenerator(object):
             'n_eli': sum([summary.num_extra_list_intrusions for summary in self.session_summaries])
         }
 
-    def _make_fr_plot_data(self, joint=False):
-        plot_data={
-            'serialpos': json.dumps({
-                'serialpos': list(range(1, 13)),
-                'overall': {
-                    'Overall': FRSessionSummary.serialpos_probabilities(self.session_summaries, False),
-                },
-                'first': {
-                    'First recall': FRSessionSummary.serialpos_probabilities(self.session_summaries, True),
-                }
-            }),
-            'roc': json.dumps({
-                'fpr': [classifier.false_positive_rate for classifier in self.classifiers],
-                'tpr': [classifier.true_positive_rate for classifier in self.classifiers],
-            }),
-            'tercile': json.dumps({
-                'low': [classifier.low_tercile_diff_from_mean for classifier in self.classifiers],
-                'mid': [classifier.mid_tercile_diff_from_mean for classifier in self.classifiers],
-                'high': [classifier.high_tercile_diff_from_mean for classifier in self.classifiers]
-            }),
-            'tags': json.dumps([classifier.tag for classifier
-                                in self.classifiers])
-        }
-        if joint:
-            plot_data['category'] = json.dumps({
-                'irt_between_cat': np.nanmean(np.concatenate(
-                    [summary.irt_between_category for summary in
-                     self.catfr_summaries])),
-                'irt_within_cat': np.nanmean(np.concatenate(
-                    [summary.irt_within_category for summary in
-                     self.catfr_summaries])),
-                'repetition_ratios': self.catfr_summaries[
-                    0].repetition_ratios.tolist(),
-                'subject_ratio': self.catfr_summaries[0].subject_ratio
+    def _make_plot_data(self, stim=False, classifier=False, joint=False, biomarker_delta=False):
+        if not stim:
+            plot_data = {
+                'serialpos': json.dumps({
+                    'serialpos': list(range(1, 13)),
+                    'overall': {
+                        'Overall': FRSessionSummary.serialpos_probabilities(self.session_summaries, False),
+                    },
+                    'first': {
+                        'First recall': FRSessionSummary.serialpos_probabilities(self.session_summaries, True),
+                    }
+                })
+            }
+            # Only non-stim reports have the option of this IRT plot
+            if joint:
+                plot_data['category'] = json.dumps({
+                    'irt_between_cat': np.nanmean(np.concatenate(
+                        [summary.irt_between_category for summary in
+                         self.catfr_summaries])),
+                    'irt_within_cat': np.nanmean(np.concatenate(
+                        [summary.irt_within_category for summary in
+                         self.catfr_summaries])),
+                    'repetition_ratios': self.catfr_summaries[
+                        0].repetition_ratios.tolist(),
+                    'subject_ratio': self.catfr_summaries[0].subject_ratio
+                })
+        else:
+            plot_data = {
+                'serialpos': json.dumps({
+                    'serialpos': list(range(1, 13)),
+                    'overall': {
+                        'Overall (non-stim)': self.session_summaries[
+                            0].prob_recall_by_serialpos(stim_items_only=False),
+                        'Overall (stim)': self.session_summaries[
+                            0].prob_recall_by_serialpos(stim_items_only=True)
+                    },
+                    'first': {
+                        'First recall (non-stim)': self.session_summaries[
+                            0].prob_first_recall_by_serialpos(stim=False),
+                        'First recall (stim)': self.session_summaries[
+                            0].prob_first_recall_by_serialpos(stim=True)
+                    }
+                }),
+                'recall_summary': json.dumps({
+                    'nonstim': {
+                        'listno': self.session_summaries[0].lists(stim=False),
+                        'recalled': self.session_summaries[
+                            0].recalls_by_list(stim_list_only=False)
+                    },
+                    'stim': {
+                        'listno': self.session_summaries[0].lists(stim=True),
+                        'recalled': self.session_summaries[
+                            0].recalls_by_list(stim_list_only=True)
+                    },
+                    'stim_events': {
+                        'listno': self.session_summaries[0].lists(),
+                        'count': self.session_summaries[0].stim_events_by_list
+                    }
+                }),
+                'stim_probability': json.dumps({
+                    'serialpos': list(range(1, 13)),
+                    'probability': self.session_summaries[
+                        0].prob_stim_by_serialpos
+                }),
+                'recall_difference': json.dumps({
+                    'stim': self.session_summaries[0].delta_recall(),
+                    'post_stim': self.session_summaries[0].delta_recall(
+                        post_stim_items=True)
+                }),
+             }
+
+        if biomarker_delta:
+            plot_data['classifier_output'] = json.dumps({
+                'pre_stim': list(self.session_summaries[0].pre_stim_prob_recall),
+                'post_stim': list(self.session_summaries[0].post_stim_prob_recall)
             })
+
+        if classifier:
+                plot_data['roc'] = json.dumps({
+                    'fpr': [classifier.false_positive_rate for classifier in self.classifiers],
+                    'tpr': [classifier.true_positive_rate for classifier in self.classifiers],
+                })
+                plot_data['tercile'] = json.dumps({
+                    'low': [classifier.low_tercile_diff_from_mean for classifier in self.classifiers],
+                    'mid': [classifier.mid_tercile_diff_from_mean for classifier in self.classifiers],
+                    'high': [classifier.high_tercile_diff_from_mean for classifier in self.classifiers]
+                }),
+                plot_data['tags'] = json.dumps([classifier.tag for classifier in self.classifiers])
+
         return plot_data
 
     def generate(self):
@@ -242,7 +296,7 @@ class ReportGenerator(object):
             stim=False,
             combined_summary=self._make_combined_summary(),
             classifiers=self.classifiers,
-            plot_data=self._make_fr_plot_data(joint=joint),
+            plot_data=self._make_plot_data(stim=False, joint=joint),
             sme_table=self._make_sme_table(),
             joint=joint
         )
@@ -262,49 +316,8 @@ class ReportGenerator(object):
             stim_params=self.session_summaries[0].stim_parameters,
             recall_tests=self.session_summaries[0].recall_test_results,
             hmm_results=self.hmm_results,
-            plot_data={
-               'serialpos': json.dumps({
-                    'serialpos': list(range(1, 13)),
-                    'overall': {
-                        'Overall (non-stim)': self.session_summaries[
-                            0].prob_recall_by_serialpos(stim_items_only=False),
-                        'Overall (stim)': self.session_summaries[
-                            0].prob_recall_by_serialpos(stim_items_only=True)
-                    },
-                    'first': {
-                        'First recall (non-stim)': self.session_summaries[
-                            0].prob_first_recall_by_serialpos(stim=False),
-                        'First recall (stim)': self.session_summaries[
-                            0].prob_first_recall_by_serialpos(stim=True)
-                    }
-                }),
-                'recall_summary': json.dumps({
-                    'nonstim': {
-                        'listno': self.session_summaries[0].lists(stim=False),
-                        'recalled': self.session_summaries[
-                            0].recalls_by_list(stim_list_only=False)
-                    },
-                    'stim': {
-                        'listno': self.session_summaries[0].lists(stim=True),
-                        'recalled': self.session_summaries[
-                            0].recalls_by_list(stim_list_only=True)
-                    },
-                    'stim_events': {
-                        'listno': self.session_summaries[0].lists(),
-                        'count': self.session_summaries[0].stim_events_by_list
-                    }
-                }),
-                'stim_probability': json.dumps({
-                    'serialpos': list(range(1, 13)),
-                    'probability': self.session_summaries[
-                        0].prob_stim_by_serialpos
-                }),
-                'recall_difference': json.dumps({
-                    'stim': self.session_summaries[0].delta_recall(),
-                    'post_stim': self.session_summaries[0].delta_recall(
-                        post_stim_items=True)
-                }),
-            }
+            plot_Data=self._make_plot_data(stim=True, classifier=False, biomarker_delta=False)
+
         )
 
     def generate_closed_loop_fr_report(self, experiment):
@@ -323,65 +336,8 @@ class ReportGenerator(object):
             stim_params=self.session_summaries[0].stim_parameters,
             recall_tests=self.session_summaries[0].recall_test_results,
             hmm_results=self.hmm_results,
-            plot_data={
-                'roc': json.dumps({
-                    'fpr': [classifier.false_positive_rate for classifier in self.classifiers],
-                    'tpr': [classifier.true_positive_rate for classifier in self.classifiers],
-                }),
-                'tercile': json.dumps({
-                    'low': [classifier.low_tercile_diff_from_mean for classifier in self.classifiers],
-                    'mid': [classifier.mid_tercile_diff_from_mean for classifier in self.classifiers],
-                    'high': [classifier.high_tercile_diff_from_mean for classifier in self.classifiers]
-                }),
-                'tags': json.dumps([classifier.tag for classifier
-                                    in self.classifiers]),
-                'serialpos': json.dumps({
-                    'serialpos': list(range(1, 13)),
-                    'overall': {
-                        'Overall (non-stim)': self.session_summaries[
-                            0].prob_recall_by_serialpos(stim_items_only=False),
-                        'Overall (stim)': self.session_summaries[
-                            0].prob_recall_by_serialpos(stim_items_only=True)
-                    },
-                    'first': {
-                        'First recall (non-stim)': self.session_summaries[
-                            0].prob_first_recall_by_serialpos(stim=False),
-                        'First recall (stim)': self.session_summaries[
-                            0].prob_first_recall_by_serialpos(stim=True)
-                    }
-                }),
-                'recall_summary': json.dumps({
-                    'nonstim': {
-                        'listno': self.session_summaries[0].lists(stim=False),
-                        'recalled': self.session_summaries[
-                            0].recalls_by_list(stim_list_only=False)
-                    },
-                    'stim': {
-                        'listno': self.session_summaries[0].lists(stim=True),
-                        'recalled': self.session_summaries[
-                            0].recalls_by_list(stim_list_only=True)
-                    },
-                    'stim_events': {
-                        'listno': self.session_summaries[0].lists(),
-                        'count': self.session_summaries[0].stim_events_by_list
-                    }
-                }),
-                'stim_probability': json.dumps({
-                    'serialpos': list(range(1, 13)),
-                    'probability': self.session_summaries[
-                        0].prob_stim_by_serialpos
-                }),
-                'recall_difference': json.dumps({
-                    'stim': self.session_summaries[0].delta_recall(),
-                    'post_stim': self.session_summaries[0].delta_recall(
-                        post_stim_items=True)
-                }),
-                'classifier_output': json.dumps({
-                    'pre_stim': list(self.session_summaries[0].pre_stim_prob_recall),
-                    'post_stim': list(self.session_summaries[0].post_stim_prob_recall)
-                }),
-            }
-        )
+            plot_data = self._make_plot_data(stim=True, classifier=True, biomarker_delta=True)
+       )
 
     def generate_ps4_report(self):
         """ Generate a PS4 report.
@@ -434,51 +390,5 @@ class ReportGenerator(object):
             combined_summary=self._make_combined_summary(),
             stim_params=self.session_summaries[0].stim_parameters,
             recall_tests=self.session_summaries[0].recall_test_results,
-            plot_data={
-                'serialpos': json.dumps({
-                    'serialpos': list(range(1, 13)),
-                    'overall': {
-                        'Overall (non-stim)': self.session_summaries[
-                            0].prob_recall_by_serialpos(stim_items_only=False),
-                        'Overall (stim)': self.session_summaries[
-                            0].prob_recall_by_serialpos(stim_items_only=True)
-                    },
-                    'first': {
-                        'First recall (non-stim)': self.session_summaries[
-                            0].prob_first_recall_by_serialpos(stim=False),
-                        'First recall (stim)': self.session_summaries[
-                            0].prob_first_recall_by_serialpos(stim=True)
-                    }
-                }),
-                'recall_summary': json.dumps({
-                    'nonstim': {
-                        'listno': self.session_summaries[0].lists(stim=False),
-                        'recalled': self.session_summaries[
-                            0].recalls_by_list(stim_list_only=False)
-                    },
-                    'stim': {
-                        'listno': self.session_summaries[0].lists(stim=True),
-                        'recalled': self.session_summaries[
-                            0].recalls_by_list(stim_list_only=True)
-                    },
-                    'stim_events': {
-                        'listno': self.session_summaries[0].lists(),
-                        'count': self.session_summaries[0].stim_events_by_list
-                    }
-                }),
-                'stim_probability': json.dumps({
-                    'serialpos': list(range(1, 13)),
-                    'probability': self.session_summaries[
-                        0].prob_stim_by_serialpos
-                }),
-                'recall_difference': json.dumps({
-                    'stim': self.session_summaries[0].delta_recall(),
-                    'post_stim': self.session_summaries[0].delta_recall(
-                        post_stim_items=True)
-                }),
-                'classifier_output': json.dumps({
-                    'pre_stim': list(self.session_summaries[0].pre_stim_prob_recall),
-                    'post_stim': list(self.session_summaries[0].post_stim_prob_recall)
-                }),
-            }
+            plot_data = self._make_plot_data(stim=True, classifier=False, biomarker_delta=True)
         )
