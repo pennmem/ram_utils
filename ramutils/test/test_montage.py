@@ -133,6 +133,7 @@ class TestMontage:
 
         metadata_table = build_montage_metadata_table(subject,
                                                       'FR1',
+                                                      [0],
                                                       pairs_from_ec,
                                                       root=datafile(''))
         assert len(metadata_table) == len(pairs_from_ec[subject]['pairs'].keys())
@@ -148,6 +149,7 @@ class TestMontage:
 
         metadata_table = build_montage_metadata_table(subject,
                                                       'FR1',
+                                                      [0],
                                                       pairs_from_ec,
                                                       root=datafile(''))
         old_metadata_table = pd.read_csv(
@@ -181,6 +183,7 @@ class TestMontage:
                           pairs='/input/montage/R1354E_pairs.json')
         config_pairs = generate_pairs_from_electrode_config('R1354E',
                                                             'FR1',
+                                                            [0],
                                                             paths)
         assert len(config_pairs['R1354E']['pairs'].keys()) > 0
         return
