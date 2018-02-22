@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import unicode_literals
 
 from datetime import datetime
 import warnings
@@ -15,7 +16,7 @@ from ramutils.bayesian_optimization import choose_location
 from ramutils.exc import TooManySessionsError
 
 from traitschema import Schema
-from traits.api import Array, ArrayOrNone, Float, String, Bool
+from traits.api import Array, ArrayOrNone, Float, Unicode, Bool
 
 from sklearn.metrics import roc_auc_score, roc_curve
 from statsmodels.stats.proportion import proportions_chisquare
@@ -42,11 +43,11 @@ class ClassifierSummary(Schema):
     _true_outcomes = ArrayOrNone(desc='actual results for recall vs. non-recall')
     _permuted_auc_values = ArrayOrNone(desc='permuted AUCs')
 
-    subject = String(desc='subject')
-    experiment = String(desc='experiment')
+    subject = Unicode(desc='subject')
+    experiment = Unicode(desc='experiment')
     sessions = Array(desc='sessions summarized by the object')
     recall_rate = Float(desc='overall recall rate')
-    tag = String(desc='name of the classifier')
+    tag = Unicode(desc='name of the classifier')
     reloaded = Bool(desc='classifier was reloaded from hard disk')
     low_terc_recall_rate = Float(desc='recall rate when predicted probability of recall was in lowest tercile')
     mid_terc_recall_rate = Float(desc='recall reate when predicted probability of recall was in middle tercile')
@@ -335,8 +336,8 @@ class Summary(Schema):
     """Base class for all summary objects."""
     _events = ArrayOrNone(desc='task-related events excluding math distractor events')
     _raw_events = ArrayOrNone(desc='all event types including math distractor events')
-    _bipolar_pairs = String(desc='bipolar pairs in montage')
-    _excluded_pairs = String(desc='bipolar pairs not used for classification '
+    _bipolar_pairs = Unicode(desc='bipolar pairs in montage')
+    _excluded_pairs = Unicode(desc='bipolar pairs not used for classification '
                                   'due to artifact or stimulation')
     _normalized_powers = ArrayOrNone(desc="normalized powers for all events "
                                           "and recorded pairs")
@@ -604,7 +605,7 @@ class CatFRSessionSummary(FRSessionSummary):
         Extends standard FR session summaries for categorized free recall
         experiments.
     """
-    _repetition_ratios = String(desc='Repetition ratio by subject')
+    _repetition_ratios = Unicode(desc='Repetition ratio by subject')
     irt_within_cat = Array(desc='average inter-response time within categories')
     irt_between_cat = Array(desc='average inter-response time between categories')
 

@@ -1,5 +1,5 @@
 """Pipeline for creating reports."""
-
+from __future__ import unicode_literals
 import pandas as pd
 
 from ramutils.tasks import *
