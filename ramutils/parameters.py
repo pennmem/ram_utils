@@ -112,6 +112,7 @@ class ExperimentParameters(Schema):
                                            "for a recall event to have "
                                            "occured after some sort of "
                                            "cognitive process [ms]")
+    number_of_items = Int(12, desc='default number of items per list')
 
 
 class FRParameters(ExperimentParameters):
