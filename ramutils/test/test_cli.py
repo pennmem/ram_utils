@@ -182,6 +182,8 @@ class TestCreateReports:
     @pytest.mark.output
     @pytest.mark.parametrize('rerun', [True, False])
     @pytest.mark.parametrize('subject, experiment, sessions', [
+        ('R1111M', 'FR2', [0]),
+        ('R1154D', 'FR3', [0]),
         ('R1374T', 'CatFR5', [0]),
         ('R1345D', 'FR5', [0]),
         ('R1374T', 'PS4_CatFR5', [0]),
