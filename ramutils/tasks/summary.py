@@ -241,11 +241,7 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
         # TODO: Add some sort of data quality check here potentially. Do the
         # observed stim items match what we expect from classifier output?
 
-<<<<<<< HEAD
-        if experiment in ['FR3', 'FR5', 'catFR3', 'catFR5']:
-=======
-        if experiment in ['FR5', 'FR6', 'catFR5', 'catFR6']:
->>>>>>> master
+        if experiment in ['FR3', 'FR5', 'catFR3', 'catFR5', 'FR6', 'catFR6']:
             stim_events = dataframe_to_recarray(stim_df, expected_dtypes)
             stim_session_summary = FRStimSessionSummary()
             stim_session_summary.populate(
@@ -268,16 +264,9 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
                 excluded_pairs, trigger_output, raw_events=all_session_events,
                 post_stim_prob_recall=post_stim_trigger_output)
         else:
-<<<<<<< HEAD
-            raise UnsupportedExperimentError('Only FR2/FR3/FR5/PS5_FR5 and '
-                                             'catFR2/catFR3/catFR5/PS5_catFR5 '
+            raise UnsupportedExperimentError('Only FR2/FR3/FR5/PS5_FR5/FR6 and '
+                                             'catFR2/catFR3/catFR5/PS5_catFR5/catFR6 '
                                              'currently implemented')
-=======
-            raise UnsupportedExperimentError('Only FR5/PS5_FR5/FR6 and '
-                                             'catFR5/PS5_catFR5/catFR6 '
-                                             'currently '
-                                             'implemented')
->>>>>>> master
 
         stim_session_summaries.append(stim_session_summary)
 
