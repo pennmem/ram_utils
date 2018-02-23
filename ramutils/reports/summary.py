@@ -399,7 +399,7 @@ class SessionSummary(Summary):
 
     @property
     def subject(self):
-        return extract_subject(self.events)
+        return extract_subject(self.events, add_localization=True)
 
     @property
     def experiment(self):
@@ -663,6 +663,7 @@ class CatFRSessionSummary(FRSessionSummary):
 
     @property
     def subject_ratio(self):
+
         return np.nanmean(self.raw_repetition_ratios[self.subject])
 
 

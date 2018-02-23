@@ -154,6 +154,7 @@ class TestCreateReports:
         ('R1345D', 'FR1', None, False),
         ('R1374T', 'CatFR1', None, False),
         ('R1374T', 'CatFR1', None, True),
+        ('R1394E_1', 'FR1', None, True) # Test case for re-localized subject
     ])
     def test_create_open_loop_report(self, subject, experiment, sessions,
                                      joint, rerun, rhino_root,

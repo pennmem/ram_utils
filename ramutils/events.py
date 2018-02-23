@@ -46,8 +46,6 @@ def load_events(subject, experiment, file_type='all_events',
         experiment, and session(s)
 
     """
-    subject_id, montage = extract_subject_montage(subject)
-
     json_reader = JsonIndexReader(os.path.join(rootdir,
                                                "protocols",
                                                "r1.json"))
@@ -932,7 +930,7 @@ def extract_event_metadata(events):
     return subject, experiment, sessions
 
 
-def extract_subject(events):
+def extract_subject(events, add_localization=False):
     """ Extract subject identifier from events """
     subjects = np.unique(events[events.subject != u''].subject).tolist()
     if len(subjects) > 1:
@@ -944,10 +942,11 @@ def extract_subject(events):
     else:
         subject = subjects[0]
 
-    montage = np.unique(events[events.montage != ''].montage).tolist()
-    if montage[0] != '0.0':
-        localization = montage[0][0]
-        subject = "_".join([subject, localization])
+    if add_localization:
+        montage = np.unique(events[events.montage != ''].montage).tolist()
+        if montage[0] != '0.0':
+            localization = montage[0][0]
+            subject = "_".join([subject, localization])
 
     return subject
 
