@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import pytz
 
-from ramutils.utils import safe_divide
+from ramutils.utils import safe_divide, extract_subject_montage
 from ramutils.events import extract_subject, extract_experiment_from_events, \
     extract_sessions
 from ramutils.bayesian_optimization import choose_location
@@ -662,7 +662,11 @@ class CatFRSessionSummary(FRSessionSummary):
 
     @property
     def subject_ratio(self):
-        return np.nanmean(self.raw_repetition_ratios[self.subject])
+        # When the reptition ratio dict is built, it ignores multiple localizations
+        # and treats them as the same subject, so we need to take that into account
+        # when looking things up
+        subject_id, montage = extract_subject_montage(self.subject)
+        return np.nanmean(self.raw_repetition_ratios[subject_id])
 
 
 class StimSessionSummary(SessionSummary):
