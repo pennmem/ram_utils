@@ -82,7 +82,8 @@ def make_stim_params(subject, anodes, cathodes, min_amplitudes=None,
     return stim_params
 
 
-def build_montage_metadata_table(subject, experiment, all_pairs, root='/'):
+def build_montage_metadata_table(subject, experiment, sessions, all_pairs,
+                                 root='/'):
     """ Create a dataframe containing atlas labels, locations, and coordinates
 
     Parameters
@@ -97,7 +98,8 @@ def build_montage_metadata_table(subject, experiment, all_pairs, root='/'):
         Base path for RHINO
 
     """
-    pairs_from_json = load_pairs_from_json(subject, experiment, rootdir=root)
+    pairs_from_json = load_pairs_from_json(subject, experiment,
+                                           sessions, rootdir=root)
 
     # Check if mni coordinates are present, since this is the case only since
     # neurorad v2.0
@@ -348,7 +350,8 @@ def extract_pairs_dict(pairs):
     return pairs
 
 
-def load_pairs_from_json(subject, experiment, just_pairs=True, rootdir='/'):
+def load_pairs_from_json(subject, experiment, sessions=None, just_pairs=True,
+                         rootdir='/'):
     """ Load montage information from pairs.json file
 
     Parameters
@@ -369,20 +372,29 @@ def load_pairs_from_json(subject, experiment, just_pairs=True, rootdir='/'):
         montage
 
     """
-    subject_id, _ = extract_subject_montage(subject)
-
     json_reader = JsonIndexReader(os.path.join(rootdir,
                                                "protocols",
                                                "r1.json"))
-    all_pairs_paths = json_reader.aggregate_values('pairs',
-                                                   subject_alias=subject)
+    if sessions is not None:
+        if len(sessions) == 1:
+            all_pairs_paths = json_reader.aggregate_values('pairs',
+                                                           subject_alias=subject,
+                                                           experiment=experiment,
+                                                           session=sessions[0])
+        else:
+            all_pairs_paths = json_reader.aggregate_values('pairs',
+                                                           subject_alias=subject,
+                                                           experiment=experiment)
+    else:
+        all_pairs_paths = json_reader.aggregate_values('pairs',
+                                                       subject_alias=subject)
 
     if len(all_pairs_paths) == 0:
         raise RuntimeError("No pairs.json found for subject {} "
                            "and experiment {}".format(subject, experiment))
 
     elif len(all_pairs_paths) > 1:
-        raise RuntimeError('Multiple montages across sessions not supported')
+        raise RuntimeError('Multiple montages are possible')
 
     # For simplicity, just load the first file since they *should* all be the
     # same
@@ -440,7 +452,7 @@ def extract_atlas_location(bp_data):
     return '--'
 
 
-def get_pairs(subject, experiment, paths):
+def get_pairs(subject, experiment, sessions, paths):
     """Determine how we should figure out what pairs to use.
 
     Option 1: In the case of hardware bipolar recordings with the ENS, EEG
@@ -456,6 +468,8 @@ def get_pairs(subject, experiment, paths):
         Subject ID
     experiment : str
         Experiment type
+    sessions: list
+        List of sessions to use
     paths : FilePaths
         Object for storing important file paths
     localization : int
@@ -505,6 +519,7 @@ def get_pairs(subject, experiment, paths):
 
             all_pairs = generate_pairs_from_electrode_config(subject,
                                                              experiment,
+                                                             sessions,
                                                              paths)
 
     # No HDF5 file exists, meaning this was a monopolar recording... read
@@ -512,13 +527,14 @@ def get_pairs(subject, experiment, paths):
     else:
         all_pairs = load_pairs_from_json(subject,
                                          experiment,
+                                         sessions=sessions,
                                          just_pairs=False,
                                          rootdir=paths.root)
 
     return all_pairs
 
 
-def generate_pairs_from_electrode_config(subject, experiment, paths):
+def generate_pairs_from_electrode_config(subject, experiment, session, paths):
     """Load and verify the validity of the Odin electrode configuration file.
 
     Parameters
@@ -585,6 +601,7 @@ def generate_pairs_from_electrode_config(subject, experiment, paths):
     else:
         pairs_from_ec = load_pairs_from_json(subject,
                                              experiment,
+                                             sessions=sessions,
                                              just_pairs=False,
                                              rootdir=paths.root)
 

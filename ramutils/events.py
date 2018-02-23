@@ -1011,8 +1011,8 @@ def get_stim_table_event_mask(events):
         Return a mask of events to be included for building stim session
         summaries
     """
-    stim_table_phases = ['STIM', 'NON-STIM', 'BASELINE', 'PRACTICE']
-    event_type_mask = [event.phase in stim_table_phases for event in events]
+    excluded_event_types = ['START', 'STOP', 'PROB']
+    event_type_mask = [event.type not in excluded_event_types for event in events]
 
     return event_type_mask
 
@@ -1115,19 +1115,17 @@ def extract_stim_information(all_events, task_events):
                             stim_param_data['item_name'].append(lst_events[loc].item_name)
                             stim_param_data['session'].append(lst_events[loc].session)
                             stim_param_data['list'].append(lst_events[loc].list)
-                            stim_param_data['amplitude'].append(",".join([str(stim_params[k].amplitude) for k in range(len(stim_params))]))
+                            stim_param_data['amplitude'].append(",".join([str(stim_params[k].amplitude / 1000.0) for k in range(len(stim_params))]))
                             stim_param_data['pulse_freq'].append(",".join([str(stim_params[k].pulse_freq) for k in range(len(stim_params))]))
                             stim_param_data['stim_duration'].append(",".join([str(stim_params[k].stim_duration) for k in range(len(stim_params))]))
                             stim_param_data['stimAnodeTag'].append(",".join([str(stim_params[k].anode_label) for k in range(len(stim_params))]))
                             stim_param_data['stimCathodeTag'].append(",".join([str(stim_params[k].cathode_label) for k in range(len(stim_params))]))
                             break
 
-                # Messy logic to find post stim items
-                if ((lst_events[i - 1].type == 'STIM_OFF')
-                        or (lst_events[i + 1].type == 'STIM_OFF')
-                        or (lst_events[i - 2].type == 'STIM_OFF' and
-                            lst_events[i - 1].type == 'WORD_OFF')):
-                    lst_post_stim_words[j] = True
+                # Post stim words are always the word after a stim word,
+                # so just shift to find them
+                if j > 0:
+                    lst_post_stim_words[j] = lst_stim_words[j - 1]
                 j += 1
 
         # FYI: It should always be the case that the number of word events
