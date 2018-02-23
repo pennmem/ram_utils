@@ -11,6 +11,7 @@
 
 <script>
   window.addEventListener('load', () => {
+    let plot_data = JSON.parse('{{ plot_data }}');
     const categorical_info = plot_data.category;
     ramutils.plots.plotCategoricalFreeRecallSummary(categorical_info['irt_within_cat'],
                                                     categorical_info['irt_between_cat'],
