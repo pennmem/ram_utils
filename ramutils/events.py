@@ -944,6 +944,11 @@ def extract_subject(events):
     else:
         subject = subjects[0]
 
+    montage = np.unique(events[events.montage != ''].montage).tolist()
+    if montage[0] != '0.0':
+        localization = montage[0][0]
+        subject = "_".join([subject, localization])
+
     return subject
 
 
@@ -1424,7 +1429,7 @@ def find_subjects(experiment, rootdir="/"):
     json_reader = JsonIndexReader(os.path.join(rootdir,
                                                "protocols",
                                                "r1.json"))
-    subjects = json_reader.subjects(experiment=experiment)
+    subjects = json_reader.aggregate_values('subject_alias', experiment=experiment)
     return subjects
 
 

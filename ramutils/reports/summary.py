@@ -662,11 +662,7 @@ class CatFRSessionSummary(FRSessionSummary):
 
     @property
     def subject_ratio(self):
-        # When the reptition ratio dict is built, it ignores multiple localizations
-        # and treats them as the same subject, so we need to take that into account
-        # when looking things up
-        subject_id, montage = extract_subject_montage(self.subject)
-        return np.nanmean(self.raw_repetition_ratios[subject_id])
+        return np.nanmean(self.raw_repetition_ratios[self.subject])
 
 
 class StimSessionSummary(SessionSummary):
