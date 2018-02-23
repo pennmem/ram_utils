@@ -139,21 +139,21 @@ class ReportGenerator(object):
         }
 
     def _make_plot_data(self, stim=False, classifier=False, joint=False, biomarker_delta=False):
+        """ Build up a large dictionary of data for various plots from plot-specific components """
+        plot_data = {}
         if not stim:
-            plot_data = {
-                'serialpos': json.dumps({
-                    'serialpos': list(range(1, 13)),
+            plot_data['serialpos'] ={
+                'serialpos': list(range(1, 13)),
                     'overall': {
                         'Overall': FRSessionSummary.serialpos_probabilities(self.session_summaries, False),
                     },
                     'first': {
                         'First recall': FRSessionSummary.serialpos_probabilities(self.session_summaries, True),
                     }
-                })
-            }
+                }
             # Only non-stim reports have the option of this IRT plot
             if joint:
-                plot_data['category'] = json.dumps({
+                plot_data['category'] = {
                     'irt_between_cat': np.nanmean(np.concatenate(
                         [summary.irt_between_category for summary in
                          self.catfr_summaries])),
@@ -163,10 +163,9 @@ class ReportGenerator(object):
                     'repetition_ratios': self.catfr_summaries[
                         0].repetition_ratios.tolist(),
                     'subject_ratio': self.catfr_summaries[0].subject_ratio
-                })
+                }
         else:
-            plot_data = {
-                'serialpos': json.dumps({
+            plot_data['serialpos'] = {
                     'serialpos': list(range(1, 13)),
                     'overall': {
                         'Overall (non-stim)': self.session_summaries[
@@ -180,8 +179,8 @@ class ReportGenerator(object):
                         'First recall (stim)': self.session_summaries[
                             0].prob_first_recall_by_serialpos(stim=True)
                     }
-                }),
-                'recall_summary': json.dumps({
+                }
+            plot_data['recall_summary'] = {
                     'nonstim': {
                         'listno': self.session_summaries[0].lists(stim=False),
                         'recalled': self.session_summaries[
@@ -196,38 +195,37 @@ class ReportGenerator(object):
                         'listno': self.session_summaries[0].lists(),
                         'count': self.session_summaries[0].stim_events_by_list
                     }
-                }),
-                'stim_probability': json.dumps({
+                }
+            plot_data['stim_probability'] = {
                     'serialpos': list(range(1, 13)),
                     'probability': self.session_summaries[
                         0].prob_stim_by_serialpos
-                }),
-                'recall_difference': json.dumps({
+                }
+            plot_data['recall_difference'] = {
                     'stim': self.session_summaries[0].delta_recall(),
                     'post_stim': self.session_summaries[0].delta_recall(
                         post_stim_items=True)
-                }),
-             }
+                },
 
         if biomarker_delta:
-            plot_data['classifier_output'] = json.dumps({
+            plot_data['classifier_output'] = {
                 'pre_stim': list(self.session_summaries[0].pre_stim_prob_recall),
                 'post_stim': list(self.session_summaries[0].post_stim_prob_recall)
-            })
+            }
 
         if classifier:
-                plot_data['roc'] = json.dumps({
+                plot_data['roc'] = {
                     'fpr': [classifier.false_positive_rate for classifier in self.classifiers],
                     'tpr': [classifier.true_positive_rate for classifier in self.classifiers],
-                })
-                plot_data['tercile'] = json.dumps({
+                }
+                plot_data['tercile'] = {
                     'low': [classifier.low_tercile_diff_from_mean for classifier in self.classifiers],
                     'mid': [classifier.mid_tercile_diff_from_mean for classifier in self.classifiers],
                     'high': [classifier.high_tercile_diff_from_mean for classifier in self.classifiers]
-                }),
-                plot_data['tags'] = json.dumps([classifier.tag for classifier in self.classifiers])
+                }
+                plot_data['tags'] = [classifier.tag for classifier in self.classifiers]
 
-        return plot_data
+        return json.dumps(plot_data)
 
     def generate(self):
         """Central method to generate any report. The report to run is
