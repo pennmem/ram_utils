@@ -57,7 +57,7 @@ def make_report(subject, experiment, paths, joint_report=False,
     if 'Cat' in experiment:
         experiment = experiment.replace('Cat', 'cat')
 
-    ec_pairs = get_pairs(subject, experiment, paths)
+    ec_pairs = get_pairs(subject, experiment, sessions, paths)
     excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
     # PS4 is such a special beast, that we just return it's own sub-pipeline
     # in order to simplify the branching logic for generating all other reports
