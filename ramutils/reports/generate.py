@@ -241,10 +241,16 @@ class ReportGenerator(object):
         elif all(['PS5' in exp for exp in self.experiments]):
             return self.generate_ps5_report()
 
-        elif (series == '2'):
+        elif series == '1':
+            joint = False
+            if any(['catFR' in exp for exp in self.experiments]):
+                joint = True
+            return self.generate_record_only_report(joint=joint)
+
+        elif series == '2':
             return self.generate_open_loop_fr_report()
 
-        elif (series == '3'):
+        elif series == '3':
             return self.generate_closed_loop_fr_report('FR3')
 
         elif series == '5':
@@ -252,12 +258,6 @@ class ReportGenerator(object):
 
         elif series == '6':
             return self.generate_closed_loop_fr_report('FR6')
-
-        elif all(['FR' in exp for exp in self.experiments]):
-            joint = False
-            if any(['catFR' in exp for exp in self.experiments]):
-                joint = True
-            return self.generate_fr_report(joint=joint)
 
         else:
             raise NotImplementedError("Unsupported report type")
@@ -283,7 +283,7 @@ class ReportGenerator(object):
             **kwargs
         )
 
-    def generate_fr_report(self, joint):
+    def generate_record_only_report(self, joint):
         """ Generate an FR1 report
 
         Returns
@@ -296,7 +296,8 @@ class ReportGenerator(object):
             stim=False,
             combined_summary=self._make_combined_summary(),
             classifiers=self.classifiers,
-            plot_data=self._make_plot_data(stim=False, joint=joint),
+            plot_data=self._make_plot_data(stim=False, classifier=True,
+                                           joint=joint),
             sme_table=self._make_sme_table(),
             joint=joint
         )
@@ -316,7 +317,8 @@ class ReportGenerator(object):
             stim_params=self.session_summaries[0].stim_parameters,
             recall_tests=self.session_summaries[0].recall_test_results,
             hmm_results=self.hmm_results,
-            plot_Data=self._make_plot_data(stim=True, classifier=False, biomarker_delta=False)
+            plot_Data=self._make_plot_data(stim=True, classifier=False,
+                                           biomarker_delta=False)
 
         )
 
@@ -336,7 +338,8 @@ class ReportGenerator(object):
             stim_params=self.session_summaries[0].stim_parameters,
             recall_tests=self.session_summaries[0].recall_test_results,
             hmm_results=self.hmm_results,
-            plot_data = self._make_plot_data(stim=True, classifier=True, biomarker_delta=True)
+            plot_data = self._make_plot_data(stim=True, classifier=True,
+                                             biomarker_delta=True)
        )
 
     def generate_ps4_report(self):
@@ -390,5 +393,6 @@ class ReportGenerator(object):
             combined_summary=self._make_combined_summary(),
             stim_params=self.session_summaries[0].stim_parameters,
             recall_tests=self.session_summaries[0].recall_test_results,
-            plot_data = self._make_plot_data(stim=True, classifier=False, biomarker_delta=True)
+            plot_data = self._make_plot_data(stim=True, classifier=False,
+                                             biomarker_delta=True)
         )
