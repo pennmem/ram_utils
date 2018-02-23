@@ -284,7 +284,7 @@ class ReportGenerator(object):
         )
 
     def generate_record_only_report(self, joint):
-        """ Generate an FR1 report
+        """ Generate report for record only experiments
 
         Returns
         -------
