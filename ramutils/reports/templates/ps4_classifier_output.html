@@ -9,7 +9,7 @@
 
   <script>
     window.addEventListener('load', () => {
-      let data = JSON.parse('{{ plot_data["ps4"] }}');
+      let data = plot_data["ps4"];
       ramutils.plots.plotPS4ClassifierOutput(data);
     });
   </script>

@@ -53,9 +53,9 @@
     $('#memory_modulation_table').DataTable();
     });
 
-    const summary = JSON.parse('{{ plot_data["recall_summary"] }}');
-    const probs = JSON.parse('{{ plot_data["stim_probability"] }}');
-    const recallDifference = JSON.parse('{{ plot_data["recall_difference"] }}');
+    const summary = plot_data["recall_summary"];
+    const probs = plot_data["stim_probability"]);
+    const recallDifference = plot_data["recall_difference"]);
 
     ramutils.plots.plotRecallSummary(summary['nonstim'], summary['stim'], summary['stim_events']);
     ramutils.plots.plotStimProbability(probs['serialpos'], probs['probability']);

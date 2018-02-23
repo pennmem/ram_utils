@@ -18,7 +18,7 @@
 
 <script>
   window.addEventListener('load', () => {
-    const classifierOutput = JSON.parse('{{ plot_data["classifier_output"] }}');
+    const classifierOutput = plot_data["classifier_output"];
     ramutils.plots.plotClassifierOutputDistros(classifierOutput['pre_stim'], classifierOutput['post_stim']);
   });
 </script>
