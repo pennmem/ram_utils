@@ -576,8 +576,8 @@ def get_required_columns(all_relevant=False, pal=False, stim=False, cat=False):
 
     if stim:
         columns = ['subject', 'experiment', 'session', 'list',
-                   'stim_list', 'mstime', 'item_name', 'serialpos', 'type',
-                   'phase', 'stim_params', 'recalled']
+                   'stim_list', 'mstime', 'eegoffset', 'item_name',
+                   'serialpos', 'type', 'phase', 'stim_params', 'recalled']
 
     if cat:
         columns.append('category_num')
