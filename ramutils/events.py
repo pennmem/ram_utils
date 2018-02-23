@@ -61,7 +61,7 @@ def load_events(subject, experiment, file_type='all_events',
     for session in sorted(sessions_to_load):
         try:
             event_file = json_reader.get_value(file_type,
-                                               subject=subject,
+                                               subject_alias=subject,
                                                experiment=experiment,
                                                session=session)
             event_files.append(event_file)
@@ -623,6 +623,7 @@ def initialize_empty_stim_reccarray():
                                                ('subject', '<U256'),
                                                ('experiment', '<U256'),
                                                ('mstime', '<i8'),
+                                               ('eegoffset', '<i8'),
                                                ('type', '<U256'),
                                                ('recalled', '<i8'),
                                                ('list', '<i8'),

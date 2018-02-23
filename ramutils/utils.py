@@ -303,7 +303,7 @@ def get_completed_sessions(subject, experiment, rootdir='/'):
     # Find all sessions for the requested experiment.
     # TODO: PS sessions should not be included when loading FR5/catFR5
     sessions = json_reader.aggregate_values('sessions',
-                                            subject=subject_id,
+                                            subject_alias=subject,
                                             experiment=experiment)
 
     return sessions
