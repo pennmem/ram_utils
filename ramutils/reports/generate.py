@@ -144,15 +144,15 @@ class ReportGenerator(object):
         """ Build up a large dictionary of data for various plots from plot-specific components """
         plot_data = {}
         if not stim:
-            plot_data['serialpos'] ={
+            plot_data['serialpos'] = {
                 'serialpos': list(range(1, 13)),
-                    'overall': {
-                        'Overall': FRSessionSummary.serialpos_probabilities(self.session_summaries, False),
-                    },
-                    'first': {
-                        'First recall': FRSessionSummary.serialpos_probabilities(self.session_summaries, True),
-                    }
+                'overall': {
+                    'Overall': FRSessionSummary.serialpos_probabilities(self.session_summaries, False),
+                },
+                'first': {
+                    'First recall': FRSessionSummary.serialpos_probabilities(self.session_summaries, True),
                 }
+            }
             # Only non-stim reports have the option of this IRT plot
             if joint:
                 plot_data['category'] = {
