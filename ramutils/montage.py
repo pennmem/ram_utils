@@ -384,7 +384,10 @@ def load_pairs_from_json(subject, experiment, sessions=None, just_pairs=True,
                                                            subject=subject_id,
                                                            experiment=experiment,
                                                            session=sessions[0])
-
+        else:
+            all_pairs_paths = json_reader.aggregate_values('pairs',
+                                                           subject=subject_id,
+                                                           experiment=experiment)
     else:
         all_pairs_paths = json_reader.aggregate_values('pairs',
                                                        subject=subject_id)
