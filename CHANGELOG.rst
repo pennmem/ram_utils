@@ -1,6 +1,10 @@
 Changes
 =======
 
+Upcoming
+--------
+* Support for building FR2/catFR2, FR3/catFR3, and FR6/catFR6 reports
+
 Version 2.1.5
 -------------
 
@@ -12,7 +16,6 @@ Version 2.1.5
 * Added checks for typos when specifying trigger pairs in PS5 (#142)
 * Updated electrode config naming to specify ``NOSTIM`` for record-only
   experiments
-
 
 Version 2.1.4
 -------------

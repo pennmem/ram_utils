@@ -194,10 +194,10 @@ def reload_used_classifiers(subject, experiment, events, root):
 
 
 @task()
-def post_hoc_classifier_evaluation(events, powers, post_stim_events,
-                                   post_stim_powers, all_pairs, classifiers,
+def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
                                    n_permutations, retrained_classifier,
-                                   use_retrained=False, **kwargs):
+                                   use_retrained=False, post_stim_events=None,
+                                   post_stim_powers=None, **kwargs):
     """ Evaluate a trained classifier
 
     Parameters
@@ -206,11 +206,7 @@ def post_hoc_classifier_evaluation(events, powers, post_stim_events,
         Task events associated with the stim sessesion to be evaluated
     powers: np.ndarray
         Normalized mean powers
-    post_stim_events: np.recarray
-        Post-stimulation events associated with the stim sessesion to be
-        evaluated
-    post_stim_powers: np.ndarray
-        Normalized mean powers for post_stim period events
+
     all_pairs: OrderedDict
         All pairs based on recorded electrodes combine from config file
     classifiers: List
@@ -219,7 +215,14 @@ def post_hoc_classifier_evaluation(events, powers, post_stim_events,
         Number of permutations to use for cross validation
     retrained_classifier: classiflib.container.ClassifierContainer
         classifier container object based on a retrained classifier
-    kwargs
+    use_retrained: bool (default False)
+        Indicates if the retrained classifier should be used over the actual
+        classifier for the purpose of evaluation
+    post_stim_events: np.recarray or None
+        Post-stimulation events associated with the stim sessesion to be
+        evaluated. Can be done in the case of FR2 where post stim events
+    post_stim_powers: np.ndarray or None
+        Normalized mean powers for post_stim period events
 
     Returns
     -------
@@ -259,7 +262,8 @@ def post_hoc_classifier_evaluation(events, powers, post_stim_events,
         raise RuntimeError('A retrained classifier must be passed if any '
                            'sessions have missing classifiers')
     recalls = events.recalled
-    post_stim_recalls = post_stim_events.recalled
+    if post_stim_events is not None:
+        post_stim_recalls = post_stim_events.recalled
 
     # Masks for encoding events
     encoding_mask = get_encoding_mask(events)
@@ -316,13 +320,14 @@ def post_hoc_classifier_evaluation(events, powers, post_stim_events,
         # Calculate classifier outputs during the post stim period. This is
         # used downstream in the reports to see if stimulation affected the
         # biomarker
-        post_stim_session_mask = (post_stim_events.session == session)
-        post_stim_session_powers = post_stim_powers[post_stim_session_mask]
-        post_stim_reduced_session_powers = reduce_powers(
-            post_stim_session_powers, used_mask, len(kwargs['freqs']))
-        post_stim_probs = classifier.predict_proba(
-            post_stim_reduced_session_powers)[:, 1]
-        post_stim_predicted_probs.append(post_stim_probs)
+        if post_stim_events is not None:
+            post_stim_session_mask = (post_stim_events.session == session)
+            post_stim_session_powers = post_stim_powers[post_stim_session_mask]
+            post_stim_reduced_session_powers = reduce_powers(
+                post_stim_session_powers, used_mask, len(kwargs['freqs']))
+            post_stim_probs = classifier.predict_proba(
+                post_stim_reduced_session_powers)[:, 1]
+            post_stim_predicted_probs.append(post_stim_probs)
 
         subject, experiment, sessions = extract_event_metadata(session_events)
 

@@ -1,8 +1,10 @@
 """Pipeline for creating reports."""
-from __future__ import unicode_literals
+from __future__  import unicode_literals
+
 import pandas as pd
 
 from ramutils.tasks import *
+from ramutils.utils import extract_experiment_series
 
 
 def make_report(subject, experiment, paths, joint_report=False,
@@ -55,7 +57,7 @@ def make_report(subject, experiment, paths, joint_report=False,
     if 'Cat' in experiment:
         experiment = experiment.replace('Cat', 'cat')
 
-    ec_pairs = get_pairs(subject, experiment, paths)
+    ec_pairs = get_pairs(subject, experiment, sessions, paths)
     excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
     # PS4 is such a special beast, that we just return it's own sub-pipeline
     # in order to simplify the branching logic for generating all other reports
@@ -67,6 +69,7 @@ def make_report(subject, experiment, paths, joint_report=False,
 
 
     stim_report = is_stim_experiment(experiment).compute()
+    series_num = extract_experiment_series(experiment)
 
     if not rerun:
         target_selection_table, classifier_evaluation_results, \
@@ -92,6 +95,7 @@ def make_report(subject, experiment, paths, joint_report=False,
     used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
     pairs_metadata_table = generate_montage_metadata_table(subject,
                                                            experiment,
+                                                           sessions,
                                                            ec_pairs,
                                                            root=paths.root).compute()
 
@@ -106,7 +110,7 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                          paths,
                                                          joint_report,
                                                          sessions=sessions,
-                                                         **kwargs)
+                                                         **kwargs).compute()
 
     target_selection_table = pd.DataFrame(columns=['type', 'contact0',
                                                    'contact1', 'label',
@@ -135,7 +139,6 @@ def make_report(subject, experiment, paths, joint_report=False,
                                          task_events, stim_data, paths,
                                          **kwargs)
 
-    # Non-PS5 stim session
     else:
         session_summaries, math_summaries, classifier_evaluation_results, \
         retrained_classifier, behavioral_results = \
@@ -283,6 +286,100 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
            trained_classifier, repetition_ratio_dict, trained_classifier, None
 
 
+def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
+                                  paths, ec_pairs, excluded_pairs,
+                                  used_pair_mask, final_pairs,
+                                  pairs_metadata_table, all_events,
+                                  task_events, stim_data, **kwargs):
+    """ Report generation sub-pipeline shared by all stim reports """
+    series_num = extract_experiment_series(experiment)
+    # FR2 does not have STIM_OFF events, so until we can identify them more
+    # easily, do not compute post stim powers for now
+    if series_num != '2':
+        # We need post stim period events/powers
+        post_stim_mask = get_post_stim_events_mask(all_events)
+        post_stim_events = subset_events(all_events, post_stim_mask)
+        post_stim_powers, final_post_stim_events = compute_normalized_powers(
+            post_stim_events, bipolar_pairs=ec_pairs, **kwargs)
+    else:
+        final_post_stim_events = None
+        post_stim_powers = None
+
+    powers, final_task_events = compute_normalized_powers(
+        task_events, bipolar_pairs=ec_pairs, **kwargs).compute()
+
+    used_classifiers = reload_used_classifiers(subject,
+                                               experiment,
+                                               final_task_events,
+                                               paths.root).compute()
+
+    # Retraining occurs on-demand or if any session-specific classifiers
+    # failed to load.
+    retrained_classifier = None
+    if retrain or any([classifier is None for classifier in used_classifiers]):
+        training_events = build_training_data(subject, experiment, paths,
+                                              **kwargs).compute()
+
+        training_powers, final_training_events = compute_normalized_powers(
+            training_events, bipolar_pairs=ec_pairs, **kwargs)
+
+        training_reduced_powers = reduce_powers(training_powers,
+                                                used_pair_mask,
+                                                len(kwargs['freqs']))
+
+        sample_weights = get_sample_weights(final_training_events, **kwargs)
+
+        retrained_classifier = train_classifier(training_reduced_powers,
+                                                final_training_events,
+                                                sample_weights,
+                                                kwargs['C'],
+                                                kwargs['penalty_type'],
+                                                kwargs['solver'])
+
+        training_classifier_summaries = perform_cross_validation(
+            retrained_classifier, training_reduced_powers,
+            final_training_events, kwargs['n_perm'],
+            tag='Original Classifier', **kwargs)
+
+        retrained_classifier = serialize_classifier(retrained_classifier,
+                                                    final_pairs,
+                                                    training_reduced_powers,
+                                                    final_training_events,
+                                                    sample_weights,
+                                                    training_classifier_summaries,
+                                                    subject)
+
+    post_hoc_results = post_hoc_classifier_evaluation(final_task_events,
+                                                      powers,
+                                                      ec_pairs,
+                                                      used_classifiers,
+                                                      kwargs['n_perm'],
+                                                      retrained_classifier,
+                                                      use_retrained=retrain,
+                                                      post_stim_events=final_post_stim_events,
+                                                      post_stim_powers=post_stim_powers,
+                                                      **kwargs)
+
+    session_summaries = summarize_stim_sessions(all_events, final_task_events,
+                                                stim_data, pairs_metadata_table,
+                                                ec_pairs, excluded_pairs,
+                                                powers,
+                                                post_hoc_results[
+                                                    'encoding_classifier_summaries'],
+                                                post_hoc_results[
+                                                    'post_stim_predicted_probs'])
+
+    math_summaries = summarize_math(all_events, joint=joint_report)
+
+    behavioral_results = estimate_effects_of_stim(subject, experiment,
+        session_summaries)
+
+    classifier_evaluation_results = post_hoc_results[
+        'classifier_summaries']
+    return session_summaries, math_summaries, classifier_evaluation_results, \
+           retrained_classifier, behavioral_results
+
+
 def generate_data_for_ps5_report(subject, experiment, joint_report,
                                  pairs_metadata_table,
                                  trigger_electrode, ec_pairs, excluded_pairs,
@@ -328,93 +425,3 @@ def generate_data_for_ps5_report(subject, experiment, joint_report,
 
     return session_summaries, math_summaries, classifier_evaluation_results, \
            repetition_ratio_dict, None, None
-
-
-def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
-                                  paths, ec_pairs, excluded_pairs,
-                                  used_pair_mask, final_pairs,
-                                  pairs_metadata_table, all_events,
-                                  task_events, stim_data, **kwargs):
-    """ Report generation sub-pipeline shared by all stim reports """
-    # We need post stim period events/powers
-    post_stim_mask = get_post_stim_events_mask(all_events)
-    post_stim_events = subset_events(all_events, post_stim_mask)
-    post_stim_powers, final_post_stim_events = compute_normalized_powers(
-       post_stim_events, bipolar_pairs=ec_pairs, **kwargs)
-
-    powers, final_task_events = compute_normalized_powers(
-        task_events, bipolar_pairs=ec_pairs, **kwargs)
-
-    used_classifiers = reload_used_classifiers(subject,
-                                               experiment,
-                                               final_task_events,
-                                               paths.root).compute()
-
-    # Retraining occurs on-demand or if any session-specific classifiers
-    # failed to load.
-    retrained_classifier = None
-    if retrain or any([classifier is None for classifier in used_classifiers]):
-        # Intentionally not passing 'sessions' so that training takes place
-        # on the full set of record only events
-        training_events = build_training_data(subject, experiment, paths,
-                                              **kwargs)
-
-        training_powers, final_training_events = compute_normalized_powers(
-            training_events, bipolar_pairs=ec_pairs, **kwargs)
-
-        training_reduced_powers = reduce_powers(training_powers,
-                                                used_pair_mask,
-                                                len(kwargs['freqs']))
-
-        sample_weights = get_sample_weights(final_training_events, **kwargs)
-
-        retrained_classifier = train_classifier(training_reduced_powers,
-                                                final_training_events,
-                                                sample_weights,
-                                                kwargs['C'],
-                                                kwargs['penalty_type'],
-                                                kwargs['solver'])
-
-        training_classifier_summaries = perform_cross_validation(
-            retrained_classifier, training_reduced_powers,
-            final_training_events, kwargs['n_perm'],
-            tag='Original Classifier', **kwargs)
-
-        retrained_classifier = serialize_classifier(retrained_classifier,
-                                                    final_pairs,
-                                                    training_reduced_powers,
-                                                    final_training_events,
-                                                    sample_weights,
-                                                    training_classifier_summaries,
-                                                    subject)
-
-    post_hoc_results = post_hoc_classifier_evaluation(final_task_events,
-                                                      powers,
-                                                      final_post_stim_events,
-                                                      post_stim_powers,
-                                                      ec_pairs,
-                                                      used_classifiers,
-                                                      kwargs['n_perm'],
-                                                      retrained_classifier,
-                                                      use_retrained=retrain,
-                                                      **kwargs)
-
-    session_summaries = summarize_stim_sessions(all_events, final_task_events,
-                                                stim_data, pairs_metadata_table,
-                                                ec_pairs, excluded_pairs,
-                                                powers,
-                                                post_hoc_results[
-                                                    'encoding_classifier_summaries'],
-                                                post_hoc_results[
-                                                    'post_stim_predicted_probs'])
-
-    math_summaries = summarize_math(all_events, joint=joint_report)
-
-    behavioral_results = estimate_effects_of_stim(subject, experiment,
-        session_summaries)
-
-    classifier_evaluation_results = post_hoc_results[
-        'classifier_summaries']
-    return session_summaries, math_summaries, classifier_evaluation_results, \
-           retrained_classifier, behavioral_results
-
