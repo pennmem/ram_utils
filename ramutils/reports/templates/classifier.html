@@ -60,9 +60,9 @@
   </table>
   <script>
     window.addEventListener('load', () => {
-      let rocData = JSON.parse('{{ plot_data["roc"] }}');
-      let tercData = JSON.parse('{{ plot_data["tercile"] }}');
-      let tags = JSON.parse('{{ plot_data["tags"] }}');
+      let rocData = plot_data["roc"];
+      let tercData = plot_data["tercile"];
+      let tags = plot_data["tags"];
       ramutils.plots.plotClassifierPerformance(rocData.fpr, rocData.tpr, tercData.low, tercData.mid, tercData.high, tags);
     });
   </script>
