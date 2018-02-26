@@ -98,7 +98,7 @@
                   "math_events": "protocols/r1/subjects/R1354E/experiments/FR1/sessions/0/behavioral/current_processed/math_events.json",
                   "montage": "0",
                   "pairs": "protocols/r1/subjects/R1354E/localizations/0/montages/0/neuroradiology/current_processed/pairs.json",
-                  "subject_alias": "R1354E",
+                  "subject_alias": "R1350D",
                   "system_version": 3.1,
                   "task_events": "protocols/R1354E_FR1_0.json"
                 },
@@ -110,7 +110,7 @@
                   "math_events": "protocols/r1/subjects/R1354E/experiments/FR1/sessions/1/behavioral/current_processed/math_events.json",
                   "montage": "0",
                   "pairs": "protocols/r1/subjects/R1354E/localizations/0/montages/0/neuroradiology/current_processed/pairs.json",
-                  "subject_alias": "R1354E",
+                  "subject_alias": "R1350D",
                   "system_version": 3.1,
                   "task_events": "protocols/R1354E_FR1_1.json"
                 },
@@ -122,7 +122,7 @@
                   "math_events": "protocols/r1/subjects/R1354E/experiments/FR1/sessions/1/behavioral/current_processed/math_events.json",
                   "montage": "0",
                   "pairs": "protocols/r1/subjects/R1354E/localizations/0/montages/0/neuroradiology/current_processed/pairs.json",
-                  "subject_alias": "R1354E",
+                  "subject_alias": "R1350D",
                   "system_version": 3.1,
                   "task_events": "protocols/R1354E_FR1_1.json"
                 },

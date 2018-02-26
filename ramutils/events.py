@@ -46,8 +46,6 @@ def load_events(subject, experiment, file_type='all_events',
         experiment, and session(s)
 
     """
-    subject_id, montage = extract_subject_montage(subject)
-
     json_reader = JsonIndexReader(os.path.join(rootdir,
                                                "protocols",
                                                "r1.json"))
@@ -61,7 +59,7 @@ def load_events(subject, experiment, file_type='all_events',
     for session in sorted(sessions_to_load):
         try:
             event_file = json_reader.get_value(file_type,
-                                               subject=subject,
+                                               subject_alias=subject,
                                                experiment=experiment,
                                                session=session)
             event_files.append(event_file)
@@ -576,8 +574,8 @@ def get_required_columns(all_relevant=False, pal=False, stim=False, cat=False):
 
     if stim:
         columns = ['subject', 'experiment', 'session', 'list',
-                   'stim_list', 'mstime', 'item_name', 'serialpos', 'type',
-                   'phase', 'stim_params', 'recalled']
+                   'stim_list', 'mstime', 'eegoffset', 'item_name',
+                   'serialpos', 'type', 'phase', 'stim_params', 'recalled']
 
     if cat:
         columns.append('category_num')
@@ -623,6 +621,7 @@ def initialize_empty_stim_reccarray():
                                                ('subject', '<U256'),
                                                ('experiment', '<U256'),
                                                ('mstime', '<i8'),
+                                               ('eegoffset', '<i8'),
                                                ('type', '<U256'),
                                                ('recalled', '<i8'),
                                                ('list', '<i8'),
@@ -931,7 +930,7 @@ def extract_event_metadata(events):
     return subject, experiment, sessions
 
 
-def extract_subject(events):
+def extract_subject(events, add_localization=False):
     """ Extract subject identifier from events """
     subjects = np.unique(events[events.subject != u''].subject).tolist()
     if len(subjects) > 1:
@@ -942,6 +941,12 @@ def extract_subject(events):
 
     else:
         subject = subjects[0]
+
+    if add_localization:
+        montage = np.unique(events[events.montage != ''].montage).tolist()
+        if montage[0] != '0.0':
+            localization = montage[0][0]
+            subject = "_".join([subject, localization])
 
     return subject
 
@@ -1421,7 +1426,7 @@ def find_subjects(experiment, rootdir="/"):
     json_reader = JsonIndexReader(os.path.join(rootdir,
                                                "protocols",
                                                "r1.json"))
-    subjects = json_reader.subjects(experiment=experiment)
+    subjects = json_reader.aggregate_values('subject_alias', experiment=experiment)
     return subjects
 
 

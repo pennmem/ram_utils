@@ -293,17 +293,13 @@ def get_session_str(session_list):
 
 def get_completed_sessions(subject, experiment, rootdir='/'):
     """ Get a list of sessions completed of a given experiment by a subject """
-
-    subject_id, montage = extract_subject_montage(subject)
-
     json_reader = JsonIndexReader(os.path.join(rootdir,
                                                "protocols",
                                                "r1.json"))
 
     # Find all sessions for the requested experiment.
-    # TODO: PS sessions should not be included when loading FR5/catFR5
     sessions = json_reader.aggregate_values('sessions',
-                                            subject=subject_id,
+                                            subject_alias=subject,
                                             experiment=experiment)
 
     return sessions

@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import pytz
 
-from ramutils.utils import safe_divide
+from ramutils.utils import safe_divide, extract_subject_montage
 from ramutils.events import extract_subject, extract_experiment_from_events, \
     extract_sessions
 from ramutils.bayesian_optimization import choose_location
@@ -399,7 +399,7 @@ class SessionSummary(Summary):
 
     @property
     def subject(self):
-        return extract_subject(self.events)
+        return extract_subject(self.events, add_localization=True)
 
     @property
     def experiment(self):
@@ -663,6 +663,7 @@ class CatFRSessionSummary(FRSessionSummary):
 
     @property
     def subject_ratio(self):
+
         return np.nanmean(self.raw_repetition_ratios[self.subject])
 
 

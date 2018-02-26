@@ -69,12 +69,6 @@ class ReportGenerator(object):
             if len(session_summaries) != len(math_summaries):
                 raise ValueError("Summaries contain different numbers of sessions")
 
-            for i in range(len(session_summaries)):
-                s_subj = session_summaries[i].events.subject == self.subject
-                m_subj = math_summaries[i].events.subject == self.subject
-                if not (all(s_subj) or all(m_subj)):
-                    raise ValueError("Subjects should all match")
-
         self._env = Environment(
             loader=PackageLoader('ramutils.reports', 'templates'),
         )
