@@ -601,7 +601,7 @@ def generate_pairs_from_electrode_config(subject, experiment, session, paths):
     else:
         pairs_from_ec = load_pairs_from_json(subject,
                                              experiment,
-                                             sessions=sessions,
+                                             sessions=session,
                                              just_pairs=False,
                                              rootdir=paths.root)
 

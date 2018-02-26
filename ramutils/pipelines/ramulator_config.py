@@ -105,7 +105,7 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
     # crucial for preserving the initial order of the electrodes in the
     # config file
     ec_pairs = make_task(generate_pairs_from_electrode_config, subject,
-                         experiment, paths)
+                         experiment, None, paths)
     excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
     used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
     final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
