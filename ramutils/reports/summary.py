@@ -56,6 +56,7 @@ class ClassifierSummary(Schema):
 
     @property
     def predicted_probabilities(self):
+        """ Classifier output for each word encoding event """
         return self._predicted_probabilities
 
     @predicted_probabilities.setter
@@ -65,6 +66,7 @@ class ClassifierSummary(Schema):
 
     @property
     def true_outcomes(self):
+        """ Behavioral response (recalled/not-recalled) to each word encoding event"""
         return self._true_outcomes
 
     @true_outcomes.setter
@@ -74,6 +76,7 @@ class ClassifierSummary(Schema):
 
     @property
     def permuted_auc_values(self):
+        """ Array of AUC values from performing permutation test """
         return self._permuted_auc_values
 
     @permuted_auc_values.setter
@@ -83,38 +86,48 @@ class ClassifierSummary(Schema):
 
     @property
     def auc(self):
+        """ Classifier AUC """
         auc = roc_auc_score(self.true_outcomes, self.predicted_probabilities)
         return auc
 
     @property
     def pvalue(self):
+        """ p-value of classifier AUC based on permuted AUCs """
         pvalue = np.count_nonzero((self.permuted_auc_values >= self.auc)) / float(len(self.permuted_auc_values))
         return pvalue
 
     @property
     def false_positive_rate(self):
+        """ False positive rate used for AUC curve """
         fpr, _, _ = roc_curve(self.true_outcomes, self.predicted_probabilities)
         fpr = fpr.tolist()
         return fpr
 
     @property
     def true_positive_rate(self):
+        """ True positive rate used for AUC curve"""
         _, tpr, _ = roc_curve(self.true_outcomes, self.predicted_probabilities)
         tpr = tpr.tolist()
         return tpr
 
     @property
     def thresholds(self):
+        """ Thresholds used for AUC curve """
         _, _, thresholds = roc_curve(self.true_outcomes, self.predicted_probabilities)
         thresholds = thresholds.tolist()
         return thresholds
 
     @property
     def median_classifier_output(self):
+        """ Median of the classifier outputs """
         return np.median(self.predicted_probabilities)
 
     @property
     def confidence_interval_median_classifier_output(self):
+        """
+            95% confidence interval for the median of the classifier output. Used as a sniff test for if something is
+            amiss. Should be centered around 0.5
+        """
         sorted_probs = sorted(self.predicted_probabilities)
         n = len(self.predicted_probabilities)
         low_idx = int(round((n / 2.0) - ((1.96 * n**.5) / 2.0)))
@@ -125,14 +138,17 @@ class ClassifierSummary(Schema):
 
     @property
     def low_tercile_diff_from_mean(self):
+        """ % change in recall rate from overall recall when classifier output was in lowest tercile """
         return 100.0 * (self.low_terc_recall_rate - self.recall_rate) / self.recall_rate
 
     @property
     def mid_tercile_diff_from_mean(self):
+        """ % change in recall rate from overall recall when classifier output was in middle tercile """
         return 100.0 * (self.mid_terc_recall_rate - self.recall_rate) / self.recall_rate
 
     @property
     def high_tercile_diff_from_mean(self):
+        """ % change in recall rate from overall recall when classifier output was in highest tercile """
         return 100.0 * (self.high_terc_recall_rate - self.recall_rate) / self.recall_rate
 
     def populate(self, subject, experiment, session, true_outcomes,
@@ -162,10 +178,6 @@ class ClassifierSummary(Schema):
             i.e. is the actually classifier used. If false, then the
             classifier was created from scratch
 
-        Keyword Arguments
-        -----------------
-        Any kwargs passed to populate will be stored in the metadata field of
-        the classifier summary object
         """
         self.subject = subject
         self.experiment = experiment
@@ -203,6 +215,7 @@ class MathSummary(Schema):
     _events = ArrayOrNone(desc='Math distractor task events')
 
     def populate(self, events):
+        """ Populate the summary object with the given events """
         self.events = events
 
     def to_dataframe(self, recreate=False):
@@ -227,7 +240,7 @@ class MathSummary(Schema):
 
     @property
     def events(self):
-        """ For Math events, explicitly exclude practice lists """
+        """ For Math events, returns original events after excluding practice lists """
         events = np.rec.array(self._events)
         return events[events.list > -1]
 
@@ -238,6 +251,7 @@ class MathSummary(Schema):
 
     @property
     def session_number(self):
+        """ Session number """
         return np.unique(self.events.session)[0]
 
     @property
@@ -248,6 +262,7 @@ class MathSummary(Schema):
 
     @property
     def num_lists(self):
+        """ Number of lists at least partially completed in the session """
         return len(np.unique(self.events.list))
 
     @property
@@ -318,8 +333,6 @@ class MathSummary(Schema):
     def total_problems_per_list(summaries):
         """Get the mean number of problems per list for multiple sessions.
 
-        FIXME: this doesn't seem to match R1111M's FR1 report.
-
         Parameters
         ----------
         summaries : List[MathSummary]
@@ -334,7 +347,7 @@ class MathSummary(Schema):
 
 
 class Summary(Schema):
-    """Base class for all summary objects."""
+    """Base class for all session summary objects """
     _events = ArrayOrNone(desc='task-related events excluding math distractor events')
     _raw_events = ArrayOrNone(desc='all event types including math distractor events')
     _bipolar_pairs = Unicode(desc='bipolar pairs in montage')
@@ -345,6 +358,7 @@ class Summary(Schema):
 
     @property
     def events(self):
+        """ Numpy recarray of task events, i.e. the events used to train a classifier """
         return np.rec.array(self._events)
 
     @events.setter
@@ -354,6 +368,7 @@ class Summary(Schema):
 
     @property
     def raw_events(self):
+        """ :class:`np.rec.array` of all events (math and task) from the session """
         if self._raw_events is None:
             return None
         return np.rec.array(self._raw_events)
@@ -365,6 +380,7 @@ class Summary(Schema):
 
     def populate(self, events, bipolar_pairs, excluded_pairs,
                  normalized_powers, raw_events=None):
+        """ Abstract method to be overriden by child classes """
         raise NotImplementedError
 
     @classmethod
@@ -374,13 +390,13 @@ class Summary(Schema):
 
         Parameters
         ----------
-        events : np.recarray
-        raw_events: np.recarray
+        events : :class:`np.recarray`
+        raw_events: :class:`np.recarray`
         bipolar_pairs: dict
             Dictionary containing data in bipolar pairs in a montage
         excluded_pairs: dict
             Dictionary containing data on pairs excluded from analysis
-        normalized_powers: np.ndarray
+        normalized_powers: :class:`np.ndarray`
             2D array of normalzied powers of shape n_events x (
             n_frequencies * n_bipolar_pairs)
 
@@ -399,15 +415,18 @@ class SessionSummary(Summary):
 
     @property
     def subject(self):
+        """ Subject ID associated with the session """
         return extract_subject(self.events, add_localization=True)
 
     @property
     def experiment(self):
+        """ Experiment name """
         experiments = extract_experiment_from_events(self.events)
         return experiments[0]
 
     @property
     def session_number(self):
+        """ Session number """
         sessions = extract_sessions(self.events)
         if len(sessions) != 1:
             raise TooManySessionsError("Single session expected for session "
@@ -418,6 +437,7 @@ class SessionSummary(Summary):
 
     @property
     def events(self):
+        """ :class:`np.recarray` of events """
         return np.rec.array(self._events)
 
     @events.setter
@@ -439,7 +459,7 @@ class SessionSummary(Summary):
 
     @property
     def excluded_pairs(self):
-        """ Returns a dictionary of bipolar pairs"""
+        """ Returns a dictionary of bipolar pairs to be excluded in classifier training """
         return json.loads(self._excluded_pairs)
 
     @excluded_pairs.setter
@@ -448,6 +468,7 @@ class SessionSummary(Summary):
 
     @property
     def normalized_powers(self):
+        """ Powers normalized to 0 mean and unit variance """
         return self._normalized_powers
 
     @normalized_powers.setter
@@ -472,6 +493,7 @@ class SessionSummary(Summary):
 
     @property
     def num_lists(self):
+        """ Number of lists completed in the session """
         return len(np.unique(self.events.list))
 
     def to_dataframe(self, recreate=False):
@@ -526,6 +548,7 @@ class FRSessionSummary(SessionSummary):
 
     @property
     def intrusion_events(self):
+        """ Recall events that were either extra-list or prior-list intrusions """
         intr_events = self.raw_events[(self.raw_events.type == 'REC_WORD') &
                                       (self.raw_events.intrusion != -999) &
                                       (self.raw_events.intrusion != 0)]
@@ -560,7 +583,6 @@ class FRSessionSummary(SessionSummary):
     @property
     def percent_recalled(self):
         """Calculates the percentage correctly recalled words."""
-        # FIXME: is length of events always equal to number of items?
         return 100 * self.num_correct / self.num_words
 
     @staticmethod
@@ -613,6 +635,7 @@ class CatFRSessionSummary(FRSessionSummary):
     def populate(self, events, bipolar_pairs, excluded_pairs,
                  normalized_powers, raw_events=None,
                  repetition_ratio_dict={}):
+        """ Populates the CatFRSessionSummary object """
         FRSessionSummary.populate(self, events,
                                   bipolar_pairs, excluded_pairs,
                                   normalized_powers,
@@ -639,12 +662,20 @@ class CatFRSessionSummary(FRSessionSummary):
 
     @property
     def raw_repetition_ratios(self):
+        """
+            Dictionary where keys are subject identifiers for subjects completing at least one CatFR session and
+            values are the repetition ratio for that subject by list
+        """
         mydict = json.loads(self._repetition_ratios)
         mydict = {k: np.array(v) for k, v in mydict.items()}
         return mydict
 
     @property
     def repetition_ratios(self):
+        """
+            Dictionary where keys are subject identifiers for subjects completing at least one CatFR session and
+            values are the repetition ratio for that subject averaged over the session
+        """
         return np.hstack([np.nanmean(v) for k, v in self.raw_repetition_ratios.items()])
 
     @repetition_ratios.setter
@@ -655,15 +686,17 @@ class CatFRSessionSummary(FRSessionSummary):
 
     @property
     def irt_within_category(self):
+        """ Within-category item response time """
         return self.irt_within_cat
 
     @property
     def irt_between_category(self):
+        """ Between category item response time """
         return self.irt_between_cat
 
     @property
     def subject_ratio(self):
-
+        """ Repetition ratio for the current subject """
         return np.nanmean(self.raw_repetition_ratios[self.subject])
 
 
@@ -674,6 +707,7 @@ class StimSessionSummary(SessionSummary):
 
     @property
     def post_stim_prob_recall(self):
+        """ Classifier output in the post-stim period """
         return self._post_stim_prob_recall
 
     @post_stim_prob_recall.setter
@@ -691,7 +725,6 @@ class StimSessionSummary(SessionSummary):
                                 normalized_powers,
                                 raw_events=raw_events)
         self.post_stim_prob_recall = post_stim_prob_recall
-
 
 
 class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
@@ -714,6 +747,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
 
     @property
     def pre_stim_prob_recall(self):
+        """ Classifier output in the pre-stim period for items that were eventually stimulated """
         df = self.to_dataframe()
         pre_stim_probs = df[df.is_stim_item == True].classifier_output.values.tolist()
         return pre_stim_probs
@@ -740,12 +774,14 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
 
     @property
     def stim_events_by_list(self):
+        """ Array containing the number of stim evenets by list """
         df = self.to_dataframe()
         n_stim_events = df.groupby('list').is_stim_item.sum().tolist()
         return n_stim_events
 
     @property
     def prob_stim_by_serialpos(self):
+        """ Array containing the probability of stimulation (mean of the classifier output) by serial position """
         df = self.to_dataframe()
         return df.groupby('serialpos').classifier_output.mean().tolist()
 
@@ -760,11 +796,13 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
 
     @property
     def stim_columns(self):
+        """ Fields associated with stimulation parameters """
         return ['stimAnodeTag', 'stimCathodeTag', 'location', 'amplitude',
                 'stim_duration', 'pulse_freq']
 
     @property
     def stim_params_by_list(self):
+        """ Returns a dataframe of stimulation parameters used within each list """
         df = self.to_dataframe()
         df = df.replace('nan', np.nan)
         stim_columns = self.stim_columns
@@ -783,6 +821,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
 
     @property
     def stim_parameters(self):
+        """ Returns a list of unique stimulation parameters used during the experiment """
         df = self.stim_params_by_list
         df['location'] = df['location'].replace(np.nan, '--')
         grouped = (df.groupby(by=(self.stim_columns + ['is_stim_list']))
@@ -796,6 +835,11 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
 
     @property
     def recall_test_results(self):
+        """
+            Returns a dictionary containing the results of chi-squared tests for the behavioral effects of stimulation.
+            Comparisons include stim lists vs. non-stim lists, stim items vs. low-biomarker non-stim items, and post-stim
+            items vers. low-biomarker non-stim items. All comparisons are done for each unique set of stimulation parameters
+        """
         df = self.stim_params_by_list
 
         if "PS5" not in self.experiment:
@@ -868,6 +912,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         return results
 
     def recalls_by_list(self, stim_list_only=False):
+        """ Number of recalls by list. Optionally returns results for only stim lists """
         df = self.to_dataframe()
         recalls_by_list = (
             df[df.is_stim_list == stim_list_only]
@@ -879,6 +924,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         return recalls_by_list
 
     def prob_first_recall_by_serialpos(self, stim=False):
+        """ Probability of recalling a word first by serial position. Optionally returns results for only stim items """
         df = self.to_dataframe()
         events = df[df.is_stim_item == stim]
 
@@ -895,11 +941,16 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         return (firstpos / events.list.max()).tolist()
 
     def prob_recall_by_serialpos(self, stim_items_only=False):
+        """ Probability of recall by serial position. Optionally returns results for only stim items """
         df = self.to_dataframe()
         group = df[df.is_stim_item == stim_items_only].groupby('serialpos')
         return group.recalled.mean().tolist()
 
     def delta_recall(self, post_stim_items=False):
+        """
+            %change in item recall for stimulated items versus non-stimulated low biomarker items. Optionally return
+            the same comparison, but for post-stim items
+        """
         df = self.to_dataframe()
         nonstim_low_bio_recall = df[(df.classifier_output < df.thresh) &
                                     (df.is_stim_list == False)].recalled.mean()
@@ -920,6 +971,7 @@ class FR5SessionSummary(FRStimSessionSummary):
     def populate(self, events, bipolar_pairs,
                  excluded_pairs, normalized_powers, post_stim_prob_recall=None,
                  raw_events=None):
+        """ Constructor for the object """
         FRStimSessionSummary.populate(self, events,
                                       bipolar_pairs,
                                       excluded_pairs,
@@ -939,7 +991,7 @@ class PSSessionSummary(SessionSummary):
 
     @property
     def decision(self):
-        """ Return a dictionary containing decision information """
+        """ Return a dictionary containing decision information from the Bayesian optimization algorithm """
         decision_dict = {
             'converged': True,
             'sham_dc': '',
@@ -1012,6 +1064,10 @@ class PSSessionSummary(SessionSummary):
 
     @property
     def location_summary(self):
+        """
+            Return a dictionary whose keys are the locations stimulated in the experiment and values are a dictionary
+            containing additional metadata about the results from stimulating at that location
+        """
         location_summaries = {}
         events_df = pd.DataFrame.from_records([e for e in self.events],
                                               columns=self.events.dtype.names)
