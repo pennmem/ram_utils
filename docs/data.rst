@@ -10,15 +10,15 @@ data classes that are defined using the :mod:`traits` package. To ensure
 serializability, use the ``Array`` type whenever possible.
 
 
-Experimental parameters
+Experiment parameters
 -----------------------
 
-Experimental parameters (e.g., timing windows) are defined as
+Experiment parameters (e.g., timing windows) are defined as
 :class:`traitschema.Schema` subclasses so that the parameters used when
 training a classifier can be easily saved.
 
 .. automodule:: ramutils.parameters
-    :members:
+    :members: FilePaths, ExperimentParameters, FRParameters, PALParameters, PS5Parameters, StimParameters
 
 Underlying Data
 ---------------
@@ -40,4 +40,4 @@ documentation below.
 
 
 .. automodule:: ramutils.reports.summary
-    :members:
+    :members: ClassifierSummary, MathSummary, Summary, SessionSummary, FRSessionSummary, CatFRSessionSummary, StimSessionSummary, FRStimSessionSummary, PSSessionSummary

@@ -93,7 +93,7 @@
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Serializable data structures</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#defining-data-classes">Defining data classes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#experimental-parameters">Experimental parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#experiment-parameters">Experiment parameters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#underlying-data">Underlying Data</a></li>
 </ul>
 </li>
@@ -174,25 +174,12 @@
 data classes that are defined using the <code class="xref py py-mod docutils literal"><span class="pre">traits</span></code> package. To ensure
 serializability, use the <code class="docutils literal"><span class="pre">Array</span></code> type whenever possible.</p>
 </div>
-<div class="section" id="experimental-parameters">
-<h2>Experimental parameters<a class="headerlink" href="#experimental-parameters" title="Permalink to this headline">¶</a></h2>
-<p>Experimental parameters (e.g., timing windows) are defined as
+<div class="section" id="experiment-parameters">
+<h2>Experiment parameters<a class="headerlink" href="#experiment-parameters" title="Permalink to this headline">¶</a></h2>
+<p>Experiment parameters (e.g., timing windows) are defined as
 <code class="xref py py-class docutils literal"><span class="pre">traitschema.Schema</span></code> subclasses so that the parameters used when
 training a classifier can be easily saved.</p>
 <span class="target" id="module-ramutils.parameters"></span><p>Common experimental/model parameters.</p>
-<dl class="class">
-<dt id="ramutils.parameters.ExperimentParameters">
-<em class="property">class </em><code class="descclassname">ramutils.parameters.</code><code class="descname">ExperimentParameters</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/parameters.html#ExperimentParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.parameters.ExperimentParameters" title="Permalink to this definition">¶</a></dt>
-<dd><p>Common parameters used in an experiment. Default values apply to the FR
-class of experiments.</p>
-</dd></dl>
-
-<dl class="class">
-<dt id="ramutils.parameters.FRParameters">
-<em class="property">class </em><code class="descclassname">ramutils.parameters.</code><code class="descname">FRParameters</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/parameters.html#FRParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.parameters.FRParameters" title="Permalink to this definition">¶</a></dt>
-<dd><p>Free recall experiment parameters relevant for classification.</p>
-</dd></dl>
-
 <dl class="class">
 <dt id="ramutils.parameters.FilePaths">
 <em class="property">class </em><code class="descclassname">ramutils.parameters.</code><code class="descname">FilePaths</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/parameters.html#FilePaths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.parameters.FilePaths" title="Permalink to this definition">¶</a></dt>
@@ -221,6 +208,19 @@ when testing, otherwise the default location should be used</li>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="class">
+<dt id="ramutils.parameters.ExperimentParameters">
+<em class="property">class </em><code class="descclassname">ramutils.parameters.</code><code class="descname">ExperimentParameters</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/parameters.html#ExperimentParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.parameters.ExperimentParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Common parameters used in an experiment. Default values apply to the FR
+class of experiments.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ramutils.parameters.FRParameters">
+<em class="property">class </em><code class="descclassname">ramutils.parameters.</code><code class="descname">FRParameters</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/parameters.html#FRParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.parameters.FRParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Free recall experiment parameters relevant for classification.</p>
 </dd></dl>
 
 <dl class="class">
@@ -263,37 +263,58 @@ documentation below.</p>
 there are summary objects specific to the type of session, i.e. stim vs. nonstim, FR vs. CatFR vs. PS, etc.</li>
 </ul>
 <span class="target" id="module-ramutils.reports.summary"></span><dl class="class">
-<dt id="ramutils.reports.summary.Summary">
-<em class="property">class </em><code class="descclassname">ramutils.reports.summary.</code><code class="descname">Summary</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#Summary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.Summary" title="Permalink to this definition">¶</a></dt>
-<dd><p>Base class for all summary objects.</p>
-<dl class="classmethod">
-<dt id="ramutils.reports.summary.Summary.create">
-<em class="property">classmethod </em><code class="descname">create</code><span class="sig-paren">(</span><em>events</em>, <em>bipolar_pairs</em>, <em>excluded_pairs</em>, <em>normalized_powers</em>, <em>raw_events=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#Summary.create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.Summary.create" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a new summary object from events</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>events</strong> (<em>np.recarray</em>) – </li>
-<li><strong>raw_events</strong> (<em>np.recarray</em>) – </li>
-<li><strong>bipolar_pairs</strong> (<em>dict</em>) – Dictionary containing data in bipolar pairs in a montage</li>
-<li><strong>excluded_pairs</strong> (<em>dict</em>) – Dictionary containing data on pairs excluded from analysis</li>
-<li><strong>normalized_powers</strong> (<em>np.ndarray</em>) – 2D array of normalzied powers of shape n_events x (
-n_frequencies * n_bipolar_pairs)</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
 <dt id="ramutils.reports.summary.ClassifierSummary">
 <em class="property">class </em><code class="descclassname">ramutils.reports.summary.</code><code class="descname">ClassifierSummary</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#ClassifierSummary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.ClassifierSummary" title="Permalink to this definition">¶</a></dt>
 <dd><p>Classifier Summary Object</p>
+<dl class="attribute">
+<dt id="ramutils.reports.summary.ClassifierSummary.auc">
+<code class="descname">auc</code><a class="headerlink" href="#ramutils.reports.summary.ClassifierSummary.auc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Classifier AUC</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.ClassifierSummary.confidence_interval_median_classifier_output">
+<code class="descname">confidence_interval_median_classifier_output</code><a class="headerlink" href="#ramutils.reports.summary.ClassifierSummary.confidence_interval_median_classifier_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>95% confidence interval for the median of the classifier output. Used as a sniff test for if something is
+amiss. Should be centered around 0.5</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.ClassifierSummary.false_positive_rate">
+<code class="descname">false_positive_rate</code><a class="headerlink" href="#ramutils.reports.summary.ClassifierSummary.false_positive_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>False positive rate used for AUC curve</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.ClassifierSummary.high_tercile_diff_from_mean">
+<code class="descname">high_tercile_diff_from_mean</code><a class="headerlink" href="#ramutils.reports.summary.ClassifierSummary.high_tercile_diff_from_mean" title="Permalink to this definition">¶</a></dt>
+<dd><p>% change in recall rate from overall recall when classifier output was in highest tercile</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.ClassifierSummary.low_tercile_diff_from_mean">
+<code class="descname">low_tercile_diff_from_mean</code><a class="headerlink" href="#ramutils.reports.summary.ClassifierSummary.low_tercile_diff_from_mean" title="Permalink to this definition">¶</a></dt>
+<dd><p>% change in recall rate from overall recall when classifier output was in lowest tercile</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.ClassifierSummary.median_classifier_output">
+<code class="descname">median_classifier_output</code><a class="headerlink" href="#ramutils.reports.summary.ClassifierSummary.median_classifier_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Median of the classifier outputs</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.ClassifierSummary.mid_tercile_diff_from_mean">
+<code class="descname">mid_tercile_diff_from_mean</code><a class="headerlink" href="#ramutils.reports.summary.ClassifierSummary.mid_tercile_diff_from_mean" title="Permalink to this definition">¶</a></dt>
+<dd><p>% change in recall rate from overall recall when classifier output was in middle tercile</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.ClassifierSummary.permuted_auc_values">
+<code class="descname">permuted_auc_values</code><a class="headerlink" href="#ramutils.reports.summary.ClassifierSummary.permuted_auc_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Array of AUC values from performing permutation test</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="ramutils.reports.summary.ClassifierSummary.populate">
 <code class="descname">populate</code><span class="sig-paren">(</span><em>subject</em>, <em>experiment</em>, <em>session</em>, <em>true_outcomes</em>, <em>predicted_probabilities</em>, <em>permuted_auc_values</em>, <em>tag=''</em>, <em>reloaded=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#ClassifierSummary.populate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.ClassifierSummary.populate" title="Permalink to this definition">¶</a></dt>
@@ -302,7 +323,7 @@ n_frequencies * n_bipolar_pairs)</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>subject</strong> (<em>string</em>) – Subject identifier</li>
 <li><strong>experiment</strong> (<em>string</em>) – Name of the experiment</li>
 <li><strong>session</strong> (<em>string</em>) – Session number</li>
@@ -317,15 +338,234 @@ classifier was created from scratch</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
-<tr class="field-even field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
-<li><strong>kwargs passed to populate will be stored in the metadata field of</strong> (<em>Any</em>) – </li>
-<li><strong>classifier summary object</strong> (<em>the</em>) – </li>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.ClassifierSummary.predicted_probabilities">
+<code class="descname">predicted_probabilities</code><a class="headerlink" href="#ramutils.reports.summary.ClassifierSummary.predicted_probabilities" title="Permalink to this definition">¶</a></dt>
+<dd><p>Classifier output for each word encoding event</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.ClassifierSummary.pvalue">
+<code class="descname">pvalue</code><a class="headerlink" href="#ramutils.reports.summary.ClassifierSummary.pvalue" title="Permalink to this definition">¶</a></dt>
+<dd><p>p-value of classifier AUC based on permuted AUCs</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.ClassifierSummary.thresholds">
+<code class="descname">thresholds</code><a class="headerlink" href="#ramutils.reports.summary.ClassifierSummary.thresholds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Thresholds used for AUC curve</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.ClassifierSummary.true_outcomes">
+<code class="descname">true_outcomes</code><a class="headerlink" href="#ramutils.reports.summary.ClassifierSummary.true_outcomes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Behavioral response (recalled/not-recalled) to each word encoding event</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.ClassifierSummary.true_positive_rate">
+<code class="descname">true_positive_rate</code><a class="headerlink" href="#ramutils.reports.summary.ClassifierSummary.true_positive_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>True positive rate used for AUC curve</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ramutils.reports.summary.MathSummary">
+<em class="property">class </em><code class="descclassname">ramutils.reports.summary.</code><code class="descname">MathSummary</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#MathSummary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.MathSummary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Summarizes data from math distractor periods. Input events must either
+be all events (which include math events) or just math events.</p>
+<dl class="attribute">
+<dt id="ramutils.reports.summary.MathSummary.events">
+<code class="descname">events</code><a class="headerlink" href="#ramutils.reports.summary.MathSummary.events" title="Permalink to this definition">¶</a></dt>
+<dd><p>For Math events, returns original events after excluding practice lists</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.MathSummary.num_correct">
+<code class="descname">num_correct</code><a class="headerlink" href="#ramutils.reports.summary.MathSummary.num_correct" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the number of problems solved correctly.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.MathSummary.num_lists">
+<code class="descname">num_lists</code><a class="headerlink" href="#ramutils.reports.summary.MathSummary.num_lists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of lists at least partially completed in the session</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.MathSummary.num_problems">
+<code class="descname">num_problems</code><a class="headerlink" href="#ramutils.reports.summary.MathSummary.num_problems" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the total number of problems solved by the subject.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.MathSummary.percent_correct">
+<code class="descname">percent_correct</code><a class="headerlink" href="#ramutils.reports.summary.MathSummary.percent_correct" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the percentage of problems solved correctly.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ramutils.reports.summary.MathSummary.populate">
+<code class="descname">populate</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#MathSummary.populate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.MathSummary.populate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Populate the summary object with the given events</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.MathSummary.problems_per_list">
+<code class="descname">problems_per_list</code><a class="headerlink" href="#ramutils.reports.summary.MathSummary.problems_per_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the mean number of problems per list.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.MathSummary.session_number">
+<code class="descname">session_number</code><a class="headerlink" href="#ramutils.reports.summary.MathSummary.session_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Session number</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ramutils.reports.summary.MathSummary.to_dataframe">
+<code class="descname">to_dataframe</code><span class="sig-paren">(</span><em>recreate=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#MathSummary.to_dataframe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.MathSummary.to_dataframe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the summary to a <code class="xref py py-class docutils literal"><span class="pre">pd.DataFrame</span></code> for easier
+manipulation. This amounts to converting the events to a dataframe</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><strong>recreate</strong> (<em>bool</em>) – Force re-creating the dataframe. Otherwise, it will only be created
+the first time this method is called and stored as an instance
+attribute.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">pd.DataFrame</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="ramutils.reports.summary.MathSummary.total_num_correct">
+<em class="property">static </em><code class="descname">total_num_correct</code><span class="sig-paren">(</span><em>summaries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#MathSummary.total_num_correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.MathSummary.total_num_correct" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the total number of correctly answered problems for multiple
+sessions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>summaries</strong> (<em>List</em><em>[</em><a class="reference internal" href="#ramutils.reports.summary.MathSummary" title="ramutils.reports.summary.MathSummary"><em>MathSummary</em></a><em>]</em>) – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="ramutils.reports.summary.MathSummary.total_num_problems">
+<em class="property">static </em><code class="descname">total_num_problems</code><span class="sig-paren">(</span><em>summaries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#MathSummary.total_num_problems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.MathSummary.total_num_problems" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get total number of problems for multiple sessions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>summaries</strong> (<em>List</em><em>[</em><a class="reference internal" href="#ramutils.reports.summary.MathSummary" title="ramutils.reports.summary.MathSummary"><em>MathSummary</em></a><em>]</em>) – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="ramutils.reports.summary.MathSummary.total_percent_correct">
+<em class="property">static </em><code class="descname">total_percent_correct</code><span class="sig-paren">(</span><em>summaries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#MathSummary.total_percent_correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.MathSummary.total_percent_correct" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the percent correct problems for multiple sessions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>summaries</strong> (<em>List</em><em>[</em><a class="reference internal" href="#ramutils.reports.summary.MathSummary" title="ramutils.reports.summary.MathSummary"><em>MathSummary</em></a><em>]</em>) – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="ramutils.reports.summary.MathSummary.total_problems_per_list">
+<em class="property">static </em><code class="descname">total_problems_per_list</code><span class="sig-paren">(</span><em>summaries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#MathSummary.total_problems_per_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.MathSummary.total_problems_per_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the mean number of problems per list for multiple sessions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>summaries</strong> (<em>List</em><em>[</em><a class="reference internal" href="#ramutils.reports.summary.MathSummary" title="ramutils.reports.summary.MathSummary"><em>MathSummary</em></a><em>]</em>) – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ramutils.reports.summary.Summary">
+<em class="property">class </em><code class="descclassname">ramutils.reports.summary.</code><code class="descname">Summary</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#Summary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.Summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for all session summary objects</p>
+<dl class="classmethod">
+<dt id="ramutils.reports.summary.Summary.create">
+<em class="property">classmethod </em><code class="descname">create</code><span class="sig-paren">(</span><em>events</em>, <em>bipolar_pairs</em>, <em>excluded_pairs</em>, <em>normalized_powers</em>, <em>raw_events=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#Summary.create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.Summary.create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new summary object from events</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>events</strong> (<code class="xref py py-class docutils literal"><span class="pre">np.recarray</span></code>) – </li>
+<li><strong>raw_events</strong> (<code class="xref py py-class docutils literal"><span class="pre">np.recarray</span></code>) – </li>
+<li><strong>bipolar_pairs</strong> (<em>dict</em>) – Dictionary containing data in bipolar pairs in a montage</li>
+<li><strong>excluded_pairs</strong> (<em>dict</em>) – Dictionary containing data on pairs excluded from analysis</li>
+<li><strong>normalized_powers</strong> (<code class="xref py py-class docutils literal"><span class="pre">np.ndarray</span></code>) – 2D array of normalzied powers of shape n_events x (
+n_frequencies * n_bipolar_pairs)</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.Summary.events">
+<code class="descname">events</code><a class="headerlink" href="#ramutils.reports.summary.Summary.events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Numpy recarray of task events, i.e. the events used to train a classifier</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ramutils.reports.summary.Summary.populate">
+<code class="descname">populate</code><span class="sig-paren">(</span><em>events</em>, <em>bipolar_pairs</em>, <em>excluded_pairs</em>, <em>normalized_powers</em>, <em>raw_events=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#Summary.populate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.Summary.populate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abstract method to be overriden by child classes</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.Summary.raw_events">
+<code class="descname">raw_events</code><a class="headerlink" href="#ramutils.reports.summary.Summary.raw_events" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-class docutils literal"><span class="pre">np.rec.array</span></code> of all events (math and task) from the session</p>
 </dd></dl>
 
 </dd></dl>
@@ -341,9 +581,33 @@ classifier was created from scratch</li>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="ramutils.reports.summary.SessionSummary.events">
+<code class="descname">events</code><a class="headerlink" href="#ramutils.reports.summary.SessionSummary.events" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-class docutils literal"><span class="pre">np.recarray</span></code> of events</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="ramutils.reports.summary.SessionSummary.excluded_pairs">
 <code class="descname">excluded_pairs</code><a class="headerlink" href="#ramutils.reports.summary.SessionSummary.excluded_pairs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a dictionary of bipolar pairs</p>
+<dd><p>Returns a dictionary of bipolar pairs to be excluded in classifier training</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.SessionSummary.experiment">
+<code class="descname">experiment</code><a class="headerlink" href="#ramutils.reports.summary.SessionSummary.experiment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Experiment name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.SessionSummary.normalized_powers">
+<code class="descname">normalized_powers</code><a class="headerlink" href="#ramutils.reports.summary.SessionSummary.normalized_powers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Powers normalized to 0 mean and unit variance</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.SessionSummary.num_lists">
+<code class="descname">num_lists</code><a class="headerlink" href="#ramutils.reports.summary.SessionSummary.num_lists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of lists completed in the session</p>
 </dd></dl>
 
 <dl class="method">
@@ -363,6 +627,18 @@ session in UTC.</p>
 <dt id="ramutils.reports.summary.SessionSummary.session_length">
 <code class="descname">session_length</code><a class="headerlink" href="#ramutils.reports.summary.SessionSummary.session_length" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the total amount of time the session lasted in seconds.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.SessionSummary.session_number">
+<code class="descname">session_number</code><a class="headerlink" href="#ramutils.reports.summary.SessionSummary.session_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Session number</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.SessionSummary.subject">
+<code class="descname">subject</code><a class="headerlink" href="#ramutils.reports.summary.SessionSummary.subject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subject ID associated with the session</p>
 </dd></dl>
 
 <dl class="method">
@@ -390,21 +666,15 @@ attribute.</td>
 </dd></dl>
 
 <dl class="class">
-<dt id="ramutils.reports.summary.StimSessionSummary">
-<em class="property">class </em><code class="descclassname">ramutils.reports.summary.</code><code class="descname">StimSessionSummary</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#StimSessionSummary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.StimSessionSummary" title="Permalink to this definition">¶</a></dt>
-<dd><p>SessionSummary data specific to sessions with stimulation.</p>
-<dl class="method">
-<dt id="ramutils.reports.summary.StimSessionSummary.populate">
-<code class="descname">populate</code><span class="sig-paren">(</span><em>events</em>, <em>bipolar_pairs</em>, <em>excluded_pairs</em>, <em>normalized_powers</em>, <em>post_stim_prob_recall=None</em>, <em>raw_events=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#StimSessionSummary.populate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.StimSessionSummary.populate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Populate stim data from events</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
 <dt id="ramutils.reports.summary.FRSessionSummary">
 <em class="property">class </em><code class="descclassname">ramutils.reports.summary.</code><code class="descname">FRSessionSummary</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRSessionSummary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRSessionSummary" title="Permalink to this definition">¶</a></dt>
 <dd><p>Free recall session summary data.</p>
+<dl class="attribute">
+<dt id="ramutils.reports.summary.FRSessionSummary.intrusion_events">
+<code class="descname">intrusion_events</code><a class="headerlink" href="#ramutils.reports.summary.FRSessionSummary.intrusion_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recall events that were either extra-list or prior-list intrusions</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ramutils.reports.summary.FRSessionSummary.num_correct">
 <code class="descname">num_correct</code><a class="headerlink" href="#ramutils.reports.summary.FRSessionSummary.num_correct" title="Permalink to this definition">¶</a></dt>
@@ -495,12 +765,75 @@ for each word by serial position.</li>
 <em class="property">class </em><code class="descclassname">ramutils.reports.summary.</code><code class="descname">CatFRSessionSummary</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#CatFRSessionSummary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.CatFRSessionSummary" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extends standard FR session summaries for categorized free recall
 experiments.</p>
+<dl class="attribute">
+<dt id="ramutils.reports.summary.CatFRSessionSummary.irt_between_category">
+<code class="descname">irt_between_category</code><a class="headerlink" href="#ramutils.reports.summary.CatFRSessionSummary.irt_between_category" title="Permalink to this definition">¶</a></dt>
+<dd><p>Between category item response time</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.CatFRSessionSummary.irt_within_category">
+<code class="descname">irt_within_category</code><a class="headerlink" href="#ramutils.reports.summary.CatFRSessionSummary.irt_within_category" title="Permalink to this definition">¶</a></dt>
+<dd><p>Within-category item response time</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ramutils.reports.summary.CatFRSessionSummary.populate">
+<code class="descname">populate</code><span class="sig-paren">(</span><em>events</em>, <em>bipolar_pairs</em>, <em>excluded_pairs</em>, <em>normalized_powers</em>, <em>raw_events=None</em>, <em>repetition_ratio_dict={}</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#CatFRSessionSummary.populate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.CatFRSessionSummary.populate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Populates the CatFRSessionSummary object</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.CatFRSessionSummary.raw_repetition_ratios">
+<code class="descname">raw_repetition_ratios</code><a class="headerlink" href="#ramutils.reports.summary.CatFRSessionSummary.raw_repetition_ratios" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dictionary where keys are subject identifiers for subjects completing at least one CatFR session and
+values are the repetition ratio for that subject by list</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.CatFRSessionSummary.repetition_ratios">
+<code class="descname">repetition_ratios</code><a class="headerlink" href="#ramutils.reports.summary.CatFRSessionSummary.repetition_ratios" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dictionary where keys are subject identifiers for subjects completing at least one CatFR session and
+values are the repetition ratio for that subject averaged over the session</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.CatFRSessionSummary.subject_ratio">
+<code class="descname">subject_ratio</code><a class="headerlink" href="#ramutils.reports.summary.CatFRSessionSummary.subject_ratio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Repetition ratio for the current subject</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ramutils.reports.summary.StimSessionSummary">
+<em class="property">class </em><code class="descclassname">ramutils.reports.summary.</code><code class="descname">StimSessionSummary</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#StimSessionSummary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.StimSessionSummary" title="Permalink to this definition">¶</a></dt>
+<dd><p>SessionSummary data specific to sessions with stimulation.</p>
+<dl class="method">
+<dt id="ramutils.reports.summary.StimSessionSummary.populate">
+<code class="descname">populate</code><span class="sig-paren">(</span><em>events</em>, <em>bipolar_pairs</em>, <em>excluded_pairs</em>, <em>normalized_powers</em>, <em>post_stim_prob_recall=None</em>, <em>raw_events=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#StimSessionSummary.populate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.StimSessionSummary.populate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Populate stim data from events</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.StimSessionSummary.post_stim_prob_recall">
+<code class="descname">post_stim_prob_recall</code><a class="headerlink" href="#ramutils.reports.summary.StimSessionSummary.post_stim_prob_recall" title="Permalink to this definition">¶</a></dt>
+<dd><p>Classifier output in the post-stim period</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
 <dt id="ramutils.reports.summary.FRStimSessionSummary">
 <em class="property">class </em><code class="descclassname">ramutils.reports.summary.</code><code class="descname">FRStimSessionSummary</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary" title="Permalink to this definition">¶</a></dt>
 <dd><p>SessionSummary for FR sessions with stim</p>
+<dl class="method">
+<dt id="ramutils.reports.summary.FRStimSessionSummary.delta_recall">
+<code class="descname">delta_recall</code><span class="sig-paren">(</span><em>post_stim_items=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.delta_recall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.delta_recall" title="Permalink to this definition">¶</a></dt>
+<dd><p>%change in item recall for stimulated items versus non-stimulated low biomarker items. Optionally return
+the same comparison, but for post-stim items</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="ramutils.reports.summary.FRStimSessionSummary.lists">
 <code class="descname">lists</code><span class="sig-paren">(</span><em>stim=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.lists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.lists" title="Permalink to this definition">¶</a></dt>
@@ -519,12 +852,68 @@ experiments.</p>
 <dd><p>Returns the number of stim lists.</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="ramutils.reports.summary.FRStimSessionSummary.pre_stim_prob_recall">
+<code class="descname">pre_stim_prob_recall</code><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.pre_stim_prob_recall" title="Permalink to this definition">¶</a></dt>
+<dd><p>Classifier output in the pre-stim period for items that were eventually stimulated</p>
 </dd></dl>
 
-<dl class="class">
-<dt id="ramutils.reports.summary.FR5SessionSummary">
-<em class="property">class </em><code class="descclassname">ramutils.reports.summary.</code><code class="descname">FR5SessionSummary</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FR5SessionSummary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FR5SessionSummary" title="Permalink to this definition">¶</a></dt>
-<dd><p>FR5-specific summary</p>
+<dl class="method">
+<dt id="ramutils.reports.summary.FRStimSessionSummary.prob_first_recall_by_serialpos">
+<code class="descname">prob_first_recall_by_serialpos</code><span class="sig-paren">(</span><em>stim=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.prob_first_recall_by_serialpos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.prob_first_recall_by_serialpos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Probability of recalling a word first by serial position. Optionally returns results for only stim items</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ramutils.reports.summary.FRStimSessionSummary.prob_recall_by_serialpos">
+<code class="descname">prob_recall_by_serialpos</code><span class="sig-paren">(</span><em>stim_items_only=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.prob_recall_by_serialpos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.prob_recall_by_serialpos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Probability of recall by serial position. Optionally returns results for only stim items</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.FRStimSessionSummary.prob_stim_by_serialpos">
+<code class="descname">prob_stim_by_serialpos</code><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.prob_stim_by_serialpos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Array containing the probability of stimulation (mean of the classifier output) by serial position</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.FRStimSessionSummary.recall_test_results">
+<code class="descname">recall_test_results</code><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.recall_test_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary containing the results of chi-squared tests for the behavioral effects of stimulation.
+Comparisons include stim lists vs. non-stim lists, stim items vs. low-biomarker non-stim items, and post-stim
+items vers. low-biomarker non-stim items. All comparisons are done for each unique set of stimulation parameters</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ramutils.reports.summary.FRStimSessionSummary.recalls_by_list">
+<code class="descname">recalls_by_list</code><span class="sig-paren">(</span><em>stim_list_only=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.recalls_by_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.recalls_by_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of recalls by list. Optionally returns results for only stim lists</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.FRStimSessionSummary.stim_columns">
+<code class="descname">stim_columns</code><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.stim_columns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fields associated with stimulation parameters</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.FRStimSessionSummary.stim_events_by_list">
+<code class="descname">stim_events_by_list</code><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.stim_events_by_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Array containing the number of stim evenets by list</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.FRStimSessionSummary.stim_parameters">
+<code class="descname">stim_parameters</code><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.stim_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of unique stimulation parameters used during the experiment</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.FRStimSessionSummary.stim_params_by_list">
+<code class="descname">stim_params_by_list</code><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.stim_params_by_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dataframe of stimulation parameters used within each list</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
@@ -534,140 +923,14 @@ experiments.</p>
 <dl class="attribute">
 <dt id="ramutils.reports.summary.PSSessionSummary.decision">
 <code class="descname">decision</code><a class="headerlink" href="#ramutils.reports.summary.PSSessionSummary.decision" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a dictionary containing decision information</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="ramutils.reports.summary.MathSummary">
-<em class="property">class </em><code class="descclassname">ramutils.reports.summary.</code><code class="descname">MathSummary</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#MathSummary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.MathSummary" title="Permalink to this definition">¶</a></dt>
-<dd><p>Summarizes data from math distractor periods. Input events must either
-be all events (which include math events) or just math events.</p>
-<dl class="attribute">
-<dt id="ramutils.reports.summary.MathSummary.events">
-<code class="descname">events</code><a class="headerlink" href="#ramutils.reports.summary.MathSummary.events" title="Permalink to this definition">¶</a></dt>
-<dd><p>For Math events, explicitly exclude practice lists</p>
+<dd><p>Return a dictionary containing decision information from the Bayesian optimization algorithm</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="ramutils.reports.summary.MathSummary.num_correct">
-<code class="descname">num_correct</code><a class="headerlink" href="#ramutils.reports.summary.MathSummary.num_correct" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the number of problems solved correctly.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ramutils.reports.summary.MathSummary.num_problems">
-<code class="descname">num_problems</code><a class="headerlink" href="#ramutils.reports.summary.MathSummary.num_problems" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the total number of problems solved by the subject.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ramutils.reports.summary.MathSummary.percent_correct">
-<code class="descname">percent_correct</code><a class="headerlink" href="#ramutils.reports.summary.MathSummary.percent_correct" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the percentage of problems solved correctly.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ramutils.reports.summary.MathSummary.problems_per_list">
-<code class="descname">problems_per_list</code><a class="headerlink" href="#ramutils.reports.summary.MathSummary.problems_per_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the mean number of problems per list.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ramutils.reports.summary.MathSummary.to_dataframe">
-<code class="descname">to_dataframe</code><span class="sig-paren">(</span><em>recreate=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#MathSummary.to_dataframe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.MathSummary.to_dataframe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert the summary to a <code class="xref py py-class docutils literal"><span class="pre">pd.DataFrame</span></code> for easier
-manipulation. This amounts to converting the events to a dataframe</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
-<tr class="field-odd field"><td>&#160;</td><td class="field-body"><strong>recreate</strong> (<em>bool</em>) – Force re-creating the dataframe. Otherwise, it will only be created
-the first time this method is called and stored as an instance
-attribute.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">pd.DataFrame</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="staticmethod">
-<dt id="ramutils.reports.summary.MathSummary.total_num_correct">
-<em class="property">static </em><code class="descname">total_num_correct</code><span class="sig-paren">(</span><em>summaries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#MathSummary.total_num_correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.MathSummary.total_num_correct" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the total number of correctly answered problems for multiple
-sessions.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>summaries</strong> (<em>List</em><em>[</em><a class="reference internal" href="#ramutils.reports.summary.MathSummary" title="ramutils.reports.summary.MathSummary"><em>MathSummary</em></a><em>]</em>) – </td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="staticmethod">
-<dt id="ramutils.reports.summary.MathSummary.total_num_problems">
-<em class="property">static </em><code class="descname">total_num_problems</code><span class="sig-paren">(</span><em>summaries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#MathSummary.total_num_problems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.MathSummary.total_num_problems" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get total number of problems for multiple sessions.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>summaries</strong> (<em>List</em><em>[</em><a class="reference internal" href="#ramutils.reports.summary.MathSummary" title="ramutils.reports.summary.MathSummary"><em>MathSummary</em></a><em>]</em>) – </td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="staticmethod">
-<dt id="ramutils.reports.summary.MathSummary.total_percent_correct">
-<em class="property">static </em><code class="descname">total_percent_correct</code><span class="sig-paren">(</span><em>summaries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#MathSummary.total_percent_correct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.MathSummary.total_percent_correct" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the percent correct problems for multiple sessions.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>summaries</strong> (<em>List</em><em>[</em><a class="reference internal" href="#ramutils.reports.summary.MathSummary" title="ramutils.reports.summary.MathSummary"><em>MathSummary</em></a><em>]</em>) – </td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="staticmethod">
-<dt id="ramutils.reports.summary.MathSummary.total_problems_per_list">
-<em class="property">static </em><code class="descname">total_problems_per_list</code><span class="sig-paren">(</span><em>summaries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#MathSummary.total_problems_per_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.MathSummary.total_problems_per_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the mean number of problems per list for multiple sessions.</p>
-<p>FIXME: this doesn’t seem to match R1111M’s FR1 report.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>summaries</strong> (<em>List</em><em>[</em><a class="reference internal" href="#ramutils.reports.summary.MathSummary" title="ramutils.reports.summary.MathSummary"><em>MathSummary</em></a><em>]</em>) – </td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float</td>
-</tr>
-</tbody>
-</table>
+<dt id="ramutils.reports.summary.PSSessionSummary.location_summary">
+<code class="descname">location_summary</code><a class="headerlink" href="#ramutils.reports.summary.PSSessionSummary.location_summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a dictionary whose keys are the locations stimulated in the experiment and values are a dictionary
+containing additional metadata about the results from stimulating at that location</p>
 </dd></dl>
 
 </dd></dl>

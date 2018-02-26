@@ -356,10 +356,10 @@
 
 
 <div class="viewcode-block" id="post_hoc_classifier_evaluation"><a class="viewcode-back" href="../../../pipeline.html#ramutils.tasks.classifier.post_hoc_classifier_evaluation">[docs]</a><span class="nd">@task</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">post_hoc_classifier_evaluation</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">powers</span><span class="p">,</span> <span class="n">post_stim_events</span><span class="p">,</span>
-                                   <span class="n">post_stim_powers</span><span class="p">,</span> <span class="n">all_pairs</span><span class="p">,</span> <span class="n">classifiers</span><span class="p">,</span>
+<span class="k">def</span> <span class="nf">post_hoc_classifier_evaluation</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">powers</span><span class="p">,</span> <span class="n">all_pairs</span><span class="p">,</span> <span class="n">classifiers</span><span class="p">,</span>
                                    <span class="n">n_permutations</span><span class="p">,</span> <span class="n">retrained_classifier</span><span class="p">,</span>
-                                   <span class="n">use_retrained</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+                                   <span class="n">use_retrained</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">post_stim_events</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                   <span class="n">post_stim_powers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Evaluate a trained classifier</span>
 
 <span class="sd">    Parameters</span>
@@ -368,11 +368,7 @@
 <span class="sd">        Task events associated with the stim sessesion to be evaluated</span>
 <span class="sd">    powers: np.ndarray</span>
 <span class="sd">        Normalized mean powers</span>
-<span class="sd">    post_stim_events: np.recarray</span>
-<span class="sd">        Post-stimulation events associated with the stim sessesion to be</span>
-<span class="sd">        evaluated</span>
-<span class="sd">    post_stim_powers: np.ndarray</span>
-<span class="sd">        Normalized mean powers for post_stim period events</span>
+
 <span class="sd">    all_pairs: OrderedDict</span>
 <span class="sd">        All pairs based on recorded electrodes combine from config file</span>
 <span class="sd">    classifiers: List</span>
@@ -381,7 +377,14 @@
 <span class="sd">        Number of permutations to use for cross validation</span>
 <span class="sd">    retrained_classifier: classiflib.container.ClassifierContainer</span>
 <span class="sd">        classifier container object based on a retrained classifier</span>
-<span class="sd">    kwargs</span>
+<span class="sd">    use_retrained: bool (default False)</span>
+<span class="sd">        Indicates if the retrained classifier should be used over the actual</span>
+<span class="sd">        classifier for the purpose of evaluation</span>
+<span class="sd">    post_stim_events: np.recarray or None</span>
+<span class="sd">        Post-stimulation events associated with the stim sessesion to be</span>
+<span class="sd">        evaluated. Can be done in the case of FR2 where post stim events</span>
+<span class="sd">    post_stim_powers: np.ndarray or None</span>
+<span class="sd">        Normalized mean powers for post_stim period events</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -421,7 +424,8 @@
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;A retrained classifier must be passed if any &#39;</span>
                            <span class="s1">&#39;sessions have missing classifiers&#39;</span><span class="p">)</span>
     <span class="n">recalls</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">recalled</span>
-    <span class="n">post_stim_recalls</span> <span class="o">=</span> <span class="n">post_stim_events</span><span class="o">.</span><span class="n">recalled</span>
+    <span class="k">if</span> <span class="n">post_stim_events</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">post_stim_recalls</span> <span class="o">=</span> <span class="n">post_stim_events</span><span class="o">.</span><span class="n">recalled</span>
 
     <span class="c1"># Masks for encoding events</span>
     <span class="n">encoding_mask</span> <span class="o">=</span> <span class="n">get_encoding_mask</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
@@ -478,13 +482,14 @@
         <span class="c1"># Calculate classifier outputs during the post stim period. This is</span>
         <span class="c1"># used downstream in the reports to see if stimulation affected the</span>
         <span class="c1"># biomarker</span>
-        <span class="n">post_stim_session_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">post_stim_events</span><span class="o">.</span><span class="n">session</span> <span class="o">==</span> <span class="n">session</span><span class="p">)</span>
-        <span class="n">post_stim_session_powers</span> <span class="o">=</span> <span class="n">post_stim_powers</span><span class="p">[</span><span class="n">post_stim_session_mask</span><span class="p">]</span>
-        <span class="n">post_stim_reduced_session_powers</span> <span class="o">=</span> <span class="n">reduce_powers</span><span class="p">(</span>
-            <span class="n">post_stim_session_powers</span><span class="p">,</span> <span class="n">used_mask</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;freqs&#39;</span><span class="p">]))</span>
-        <span class="n">post_stim_probs</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span>
-            <span class="n">post_stim_reduced_session_powers</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
-        <span class="n">post_stim_predicted_probs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">post_stim_probs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">post_stim_events</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">post_stim_session_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">post_stim_events</span><span class="o">.</span><span class="n">session</span> <span class="o">==</span> <span class="n">session</span><span class="p">)</span>
+            <span class="n">post_stim_session_powers</span> <span class="o">=</span> <span class="n">post_stim_powers</span><span class="p">[</span><span class="n">post_stim_session_mask</span><span class="p">]</span>
+            <span class="n">post_stim_reduced_session_powers</span> <span class="o">=</span> <span class="n">reduce_powers</span><span class="p">(</span>
+                <span class="n">post_stim_session_powers</span><span class="p">,</span> <span class="n">used_mask</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;freqs&#39;</span><span class="p">]))</span>
+            <span class="n">post_stim_probs</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span>
+                <span class="n">post_stim_reduced_session_powers</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">post_stim_predicted_probs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">post_stim_probs</span><span class="p">)</span>
 
         <span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">sessions</span> <span class="o">=</span> <span class="n">extract_event_metadata</span><span class="p">(</span><span class="n">session_events</span><span class="p">)</span>
 

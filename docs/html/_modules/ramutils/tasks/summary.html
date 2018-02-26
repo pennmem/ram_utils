@@ -326,11 +326,12 @@
         <span class="n">stim_param_df</span><span class="p">[</span><span class="s2">&quot;stimCathodeTag&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stim_param_df</span><span class="p">[</span><span class="s2">&quot;stimCathodeTag&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
 
         <span class="c1"># PS5 sessions do not have classifier summaries, but use the raw</span>
-        <span class="c1"># power value output for making the stim decision</span>
+        <span class="c1"># power value output for making the stim decision. Open loop stim</span>
+        <span class="c1"># sessions do not have a classifier, so there is no threshold</span>
         <span class="k">if</span> <span class="n">encoding_classifier_summaries</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">predicted_probabilities</span> <span class="o">=</span> <span class="n">encoding_classifier_summaries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">predicted_probabilities</span>
             <span class="n">thresh</span> <span class="o">=</span> <span class="mf">0.5</span>
-        <span class="k">else</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">trigger_output</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># We don&#39;t want retrieval powers for the triggering electrode</span>
             <span class="n">predicted_probabilities</span> <span class="o">=</span> <span class="n">trigger_output</span><span class="p">[</span><span class="n">encoding_mask</span><span class="p">]</span>
             <span class="n">event_based_avg</span> <span class="o">=</span> <span class="p">[]</span>
@@ -338,6 +339,9 @@
                 <span class="n">powers_so_far</span> <span class="o">=</span> <span class="n">predicted_probabilities</span><span class="p">[:</span><span class="n">j</span><span class="p">]</span>
                 <span class="n">event_based_avg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">powers_so_far</span><span class="p">))</span>
             <span class="n">thresh</span> <span class="o">=</span> <span class="n">event_based_avg</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">predicted_probabilities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="n">thresh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
 
         <span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">session</span> <span class="o">=</span> <span class="n">extract_event_metadata</span><span class="p">(</span>
             <span class="n">all_session_task_events</span><span class="p">)</span>
@@ -363,9 +367,9 @@
                            <span class="p">(</span><span class="s1">&#39;thresh&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">),</span>
                            <span class="p">(</span><span class="s1">&#39;classifier_output&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">),</span>
                            <span class="p">(</span><span class="s1">&#39;location&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
-                           <span class="p">(</span><span class="s1">&#39;amplitude&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">),</span>
-                           <span class="p">(</span><span class="s1">&#39;pulse_freq&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">),</span>
-                           <span class="p">(</span><span class="s1">&#39;stim_duration&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;amplitude&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;pulse_freq&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                           <span class="p">(</span><span class="s1">&#39;stim_duration&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
                            <span class="p">(</span><span class="s1">&#39;stimAnodeTag&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
                            <span class="p">(</span><span class="s1">&#39;stimCathodeTag&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">)]</span>
 
@@ -385,9 +389,10 @@
         <span class="n">stim_df</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">subject</span>
         <span class="n">stim_df</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">experiment</span>
 
-        <span class="c1"># Add in the stim params</span>
-        <span class="n">stim_df</span> <span class="o">=</span> <span class="n">stim_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">stim_param_df</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span>
-                                                   <span class="s1">&#39;item_name&#39;</span><span class="p">],</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
+        <span class="c1"># Add in the stim params. This is making the assumption that stim</span>
+        <span class="c1"># parameters do not change within a list</span>
+        <span class="n">stim_param_df</span> <span class="o">=</span> <span class="n">stim_param_df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">])</span>
+        <span class="n">stim_df</span> <span class="o">=</span> <span class="n">stim_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">stim_param_df</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">],</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
 
         <span class="c1"># Add region from pairs_data. TODO: This won&#39;t scale to multi-site stim</span>
         <span class="n">stim_df</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">stim_df</span><span class="p">[</span><span class="s1">&#39;stimAnodeTag&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span>
@@ -395,17 +400,23 @@
         <span class="n">stim_df</span> <span class="o">=</span> <span class="n">stim_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">location_data</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
         <span class="k">del</span> <span class="n">stim_df</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
 
-
         <span class="c1"># TODO: Add some sort of data quality check here potentially. Do the</span>
         <span class="c1"># observed stim items match what we expect from classifier output?</span>
 
-        <span class="k">if</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;FR5&#39;</span><span class="p">,</span> <span class="s1">&#39;catFR5&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;FR3&#39;</span><span class="p">,</span> <span class="s1">&#39;FR5&#39;</span><span class="p">,</span> <span class="s1">&#39;catFR3&#39;</span><span class="p">,</span> <span class="s1">&#39;catFR5&#39;</span><span class="p">,</span> <span class="s1">&#39;FR6&#39;</span><span class="p">,</span> <span class="s1">&#39;catFR6&#39;</span><span class="p">]:</span>
             <span class="n">stim_events</span> <span class="o">=</span> <span class="n">dataframe_to_recarray</span><span class="p">(</span><span class="n">stim_df</span><span class="p">,</span> <span class="n">expected_dtypes</span><span class="p">)</span>
             <span class="n">stim_session_summary</span> <span class="o">=</span> <span class="n">FRStimSessionSummary</span><span class="p">()</span>
             <span class="n">stim_session_summary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span>
                 <span class="n">stim_events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span> <span class="n">session_powers</span><span class="p">,</span>
                 <span class="n">raw_events</span><span class="o">=</span><span class="n">all_session_events</span><span class="p">,</span>
                 <span class="n">post_stim_prob_recall</span><span class="o">=</span><span class="n">post_stim_predicted_probs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="k">elif</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;FR2&#39;</span><span class="p">,</span> <span class="s1">&#39;catFR2&#39;</span><span class="p">]:</span>
+            <span class="n">stim_events</span> <span class="o">=</span> <span class="n">dataframe_to_recarray</span><span class="p">(</span><span class="n">stim_df</span><span class="p">,</span> <span class="n">expected_dtypes</span><span class="p">)</span>
+            <span class="n">stim_session_summary</span> <span class="o">=</span> <span class="n">FRStimSessionSummary</span><span class="p">()</span>
+            <span class="n">stim_session_summary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span>
+                <span class="n">stim_events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span> <span class="n">session_powers</span><span class="p">,</span>
+                <span class="n">raw_events</span><span class="o">=</span><span class="n">all_session_events</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;PS5_FR&quot;</span><span class="p">,</span> <span class="s2">&quot;PS5_catFR&quot;</span><span class="p">]:</span>
             <span class="n">stim_events</span> <span class="o">=</span> <span class="n">dataframe_to_recarray</span><span class="p">(</span><span class="n">stim_df</span><span class="p">,</span> <span class="n">expected_dtypes</span><span class="p">)</span>
@@ -415,9 +426,7 @@
                 <span class="n">excluded_pairs</span><span class="p">,</span> <span class="n">trigger_output</span><span class="p">,</span> <span class="n">raw_events</span><span class="o">=</span><span class="n">all_session_events</span><span class="p">,</span>
                 <span class="n">post_stim_prob_recall</span><span class="o">=</span><span class="n">post_stim_trigger_output</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">UnsupportedExperimentError</span><span class="p">(</span><span class="s1">&#39;Only FR5/PS5_FR5 and &#39;</span>
-                                             <span class="s1">&#39;catFR5/PS5_catFR5 currently &#39;</span>
-                                             <span class="s1">&#39;implemented&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">UnsupportedExperimentError</span><span class="p">(</span><span class="s1">&#39;Experiment not supported&#39;</span><span class="p">)</span>
 
         <span class="n">stim_session_summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stim_session_summary</span><span class="p">)</span>
 
