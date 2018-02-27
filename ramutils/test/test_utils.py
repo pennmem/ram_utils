@@ -71,3 +71,17 @@ def test_safe_divide_decorator():
         return 1/0
 
     assert division() == 0.
+
+
+@pytest.mark.parametrize("file_path, subject, experiment, sessions, file_name, file_type", [
+    ('/R1345D_catFR5_0_math_summary.h5', 'R1345D', 'catFR5', [0], 'math_summary', 'h5'),
+    ('/R1345D_FR1_0_1_2_target_selection_table.csv', 'R1345D', 'FR1', [0, 1, 2], 'target_selection_table', 'csv'),
+    ('/R1345D_FR1_0_classifier_session_0.h5', 'R1345D', 'FR1', [0], 'classifier_session_0', 'h5'),
+])
+def test_extract_report_info_from_path(file_path, subject, experiment, sessions, file_name, file_type):
+    results = extract_report_info_from_path(file_path)
+    assert results['subject'] == subject
+    assert results['experiment'] == experiment
+    assert results['sessions'] == sessions
+    assert results['file_name'] == file_name
+    assert results['file_type'] == file_type
