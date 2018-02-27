@@ -455,17 +455,13 @@
 
 <div class="viewcode-block" id="get_completed_sessions"><a class="viewcode-back" href="../../misc.html#ramutils.utils.get_completed_sessions">[docs]</a><span class="k">def</span> <span class="nf">get_completed_sessions</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">rootdir</span><span class="o">=</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Get a list of sessions completed of a given experiment by a subject &quot;&quot;&quot;</span>
-
-    <span class="n">subject_id</span><span class="p">,</span> <span class="n">montage</span> <span class="o">=</span> <span class="n">extract_subject_montage</span><span class="p">(</span><span class="n">subject</span><span class="p">)</span>
-
     <span class="n">json_reader</span> <span class="o">=</span> <span class="n">JsonIndexReader</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rootdir</span><span class="p">,</span>
                                                <span class="s2">&quot;protocols&quot;</span><span class="p">,</span>
                                                <span class="s2">&quot;r1.json&quot;</span><span class="p">))</span>
 
     <span class="c1"># Find all sessions for the requested experiment.</span>
-    <span class="c1"># TODO: PS sessions should not be included when loading FR5/catFR5</span>
     <span class="n">sessions</span> <span class="o">=</span> <span class="n">json_reader</span><span class="o">.</span><span class="n">aggregate_values</span><span class="p">(</span><span class="s1">&#39;sessions&#39;</span><span class="p">,</span>
-                                            <span class="n">subject</span><span class="o">=</span><span class="n">subject_id</span><span class="p">,</span>
+                                            <span class="n">subject_alias</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
                                             <span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">sessions</span></div>

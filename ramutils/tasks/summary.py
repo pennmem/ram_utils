@@ -150,12 +150,15 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
 
     stim_session_summaries = []
     for i, session in enumerate(sessions):
-        session_powers = normalized_powers[(task_events.session == session)]
         all_session_events = select_session_events(all_events, session)
         all_session_stim_events = select_session_events(stim_table_events, session)
         all_session_task_events = select_session_events(task_events, session)
         encoding_mask = get_encoding_mask(all_session_task_events)
+
+        # Careful: Events and powers need to have the same number of entries
         all_session_task_events = select_encoding_events(all_session_task_events)
+        session_powers = normalized_powers[encoding_mask]
+        assert len(all_session_task_events) == len(session_powers)
 
         stim_item_mask, post_stim_item_mask, stim_param_df = \
             extract_stim_information(all_session_stim_events,

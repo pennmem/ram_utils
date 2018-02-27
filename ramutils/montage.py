@@ -381,6 +381,14 @@ def load_pairs_from_json(subject, experiment, sessions=None, just_pairs=True,
                                                            subject_alias=subject,
                                                            experiment=experiment,
                                                            session=sessions[0])
+
+            # For PS4 sessions, the experiment is listed as FR5/catFR5, so we need to look it up
+            # based on original_experiment field instead
+            if len(all_pairs_paths) == 0:
+                all_pairs_paths = json_reader.aggregate_values('pairs',
+                                                               subject_alias=subject,
+                                                               original_experiment=experiment,
+                                                               session=sessions[0])
         else:
             all_pairs_paths = json_reader.aggregate_values('pairs',
                                                            subject_alias=subject,
@@ -601,7 +609,7 @@ def generate_pairs_from_electrode_config(subject, experiment, session, paths):
     else:
         pairs_from_ec = load_pairs_from_json(subject,
                                              experiment,
-                                             sessions=sessions,
+                                             sessions=session,
                                              just_pairs=False,
                                              rootdir=paths.root)
 

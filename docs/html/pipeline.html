@@ -295,7 +295,7 @@ that function for more details</li>
 
 <dl class="function">
 <dt id="ramutils.tasks.classifier.post_hoc_classifier_evaluation">
-<code class="descclassname">ramutils.tasks.classifier.</code><code class="descname">post_hoc_classifier_evaluation</code><span class="sig-paren">(</span><em>events</em>, <em>powers</em>, <em>post_stim_events</em>, <em>post_stim_powers</em>, <em>all_pairs</em>, <em>classifiers</em>, <em>n_permutations</em>, <em>retrained_classifier</em>, <em>use_retrained=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/classifier.html#post_hoc_classifier_evaluation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.classifier.post_hoc_classifier_evaluation" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ramutils.tasks.classifier.</code><code class="descname">post_hoc_classifier_evaluation</code><span class="sig-paren">(</span><em>events</em>, <em>powers</em>, <em>all_pairs</em>, <em>classifiers</em>, <em>n_permutations</em>, <em>retrained_classifier</em>, <em>use_retrained=False</em>, <em>post_stim_events=None</em>, <em>post_stim_powers=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/classifier.html#post_hoc_classifier_evaluation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.classifier.post_hoc_classifier_evaluation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate a trained classifier</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -304,14 +304,15 @@ that function for more details</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>events</strong> (<em>np.recarray</em>) – Task events associated with the stim sessesion to be evaluated</li>
 <li><strong>powers</strong> (<em>np.ndarray</em>) – Normalized mean powers</li>
-<li><strong>post_stim_events</strong> (<em>np.recarray</em>) – Post-stimulation events associated with the stim sessesion to be
-evaluated</li>
-<li><strong>post_stim_powers</strong> (<em>np.ndarray</em>) – Normalized mean powers for post_stim period events</li>
 <li><strong>all_pairs</strong> (<em>OrderedDict</em>) – All pairs based on recorded electrodes combine from config file</li>
 <li><strong>classifiers</strong> (<em>List</em>) – List of classifiers corresponding to each session</li>
 <li><strong>n_permutations</strong> (<em>int</em>) – Number of permutations to use for cross validation</li>
 <li><strong>retrained_classifier</strong> (<em>classiflib.container.ClassifierContainer</em>) – classifier container object based on a retrained classifier</li>
-<li><strong>kwargs</strong> – </li>
+<li><strong>use_retrained</strong> (<em>bool</em><em> (</em><em>default False</em><em>)</em>) – Indicates if the retrained classifier should be used over the actual
+classifier for the purpose of evaluation</li>
+<li><strong>post_stim_events</strong> (<em>np.recarray</em><em> or </em><em>None</em>) – Post-stimulation events associated with the stim sessesion to be
+evaluated. Can be done in the case of FR2 where post stim events</li>
+<li><strong>post_stim_powers</strong> (<em>np.ndarray</em><em> or </em><em>None</em>) – Normalized mean powers for post_stim period events</li>
 </ul>
 </td>
 </tr>

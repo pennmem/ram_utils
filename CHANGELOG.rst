@@ -1,9 +1,13 @@
 Changes
 =======
 
-Upcoming
---------
-* Support for building FR2/catFR2, FR3/catFR3, and FR6/catFR6 reports
+Version 2.1.6
+--------------
+* Added support for building FR2/catFR2, FR3/catFR3
+* Added support for building preliminary FR6/catFR6 reports
+* Bugfix to allow re-localized subjects to be run through the pipeline
+* Updated documentation of serialized data structures
+
 
 Version 2.1.5
 -------------

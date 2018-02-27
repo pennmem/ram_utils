@@ -286,7 +286,7 @@ class ReportGenerator(object):
 
         """
         return self._render(
-            self.experiments[0],
+            'FR1',
             stim=False,
             combined_summary=self._make_combined_summary(),
             classifiers=self.classifiers,
