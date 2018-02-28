@@ -322,10 +322,10 @@ def extract_report_info_from_path(file_path):
     tokens = stripped_name.split('_')
 
     subject = tokens[0]
-    if tokens[1] == '_':
+    try:
         montage = int(tokens[1])
         exp_start = 2
-    else:
+    except ValueError:
         montage = 0
         exp_start = 1
 
