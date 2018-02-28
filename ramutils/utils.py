@@ -315,3 +315,45 @@ def tempdir():
     except:
         pass
 
+
+def extract_report_info_from_path(file_path):
+    """ Exploit the naming convention to parse underlying data into its components """
+    stripped_name = file_path[file_path.rfind('/') + 1 :]
+    tokens = stripped_name.split('_')
+
+    subject = tokens[0]
+    try:
+        montage = int(tokens[1])
+        exp_start = 2
+    except ValueError:
+        montage = 0
+        exp_start = 1
+
+    experiment = tokens[exp_start]
+
+    sessions = []
+    i = exp_start + 1
+    while(True):
+        try:
+            session = int(tokens[i])
+            sessions.append(session)
+            i += 1
+        except ValueError:
+            break
+
+    file_plus_extension = '_'.join(tokens[i:])
+    file_tokens = file_plus_extension.split('.')
+    file_name = file_tokens[0]
+    file_type = file_tokens[1]
+
+    results = {
+        'subject': subject,
+        'experiment': experiment,
+        'montage': montage,
+        'sessions': sessions,
+        'file_name': file_name,
+        'file_type': file_type
+    }
+
+    return results
+
