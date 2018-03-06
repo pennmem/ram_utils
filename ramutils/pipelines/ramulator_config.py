@@ -43,7 +43,8 @@ def validate_pairs(subject, ec_pairs, trigger_pairs=None):
 def make_ramulator_config(subject, experiment, paths, stim_params,
                           exp_params=None, vispath=None, extended_blanking=True,
                           localization=0, montage=0, default_surface_area=0.001,
-                          trigger_pairs=None, use_common_reference=False):
+                          trigger_pairs=None, use_common_reference=False,
+                          additional_pairs_to_exclude=None):
     """ Generate configuration files for a Ramulator experiment
 
     Parameters
@@ -106,7 +107,13 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
     # config file
     ec_pairs = make_task(generate_pairs_from_electrode_config, subject,
                          experiment, None, paths)
-    excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
+
+    # Append additional pairs to this excluded pairs if requested
+    if additional_pairs_to_exclude is not None:
+        excluded_pairs = reduce_pairs(ec_pairs, additional_pairs_to_exclude, True)
+    else:
+        excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
+
     used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
     final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
 
