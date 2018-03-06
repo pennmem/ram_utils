@@ -10,7 +10,7 @@ from ramutils.utils import extract_experiment_series
 def make_report(subject, experiment, paths, joint_report=False,
                 retrain=False, stim_params=None, exp_params=None,
                 sessions=None, vispath=None, rerun=False,
-                trigger_electrode=None):
+                trigger_electrode=None, use_bad_leads=False):
     """Run a report.
 
     Parameters
@@ -40,6 +40,8 @@ def make_report(subject, experiment, paths, joint_report=False,
     trigger_electrode: str
         The label for the bipolar pair to be used for triggering stimulation
         in PS5
+    use_bad_leads: bool
+        Use contents of bad_leads.txt to exclude channels from classifier training
 
     Returns
     -------

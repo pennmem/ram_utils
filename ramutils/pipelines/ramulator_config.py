@@ -43,7 +43,8 @@ def validate_pairs(subject, ec_pairs, trigger_pairs=None):
 def make_ramulator_config(subject, experiment, paths, stim_params,
                           exp_params=None, vispath=None, extended_blanking=True,
                           localization=0, montage=0, default_surface_area=0.001,
-                          trigger_pairs=None, use_common_reference=False):
+                          trigger_pairs=None, use_common_reference=False,
+                          use_bad_leads=False):
     """ Generate configuration files for a Ramulator experiment
 
     Parameters
@@ -73,6 +74,8 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
     use_common_reference : bool
         Use a common reference in the electrode configuration instead of bipolar
         referencing.
+    use_bad_leads: bool
+        Use contents of bad_leads.txt to exclude channels from classifier training
 
     Returns
     -------
