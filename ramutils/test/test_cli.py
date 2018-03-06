@@ -102,18 +102,19 @@ class TestExpConf:
     @pytest.mark.trylast
     @pytest.mark.output
     @pytest.mark.parametrize(
-        'experiment,subject,postfix,anodes,cathodes',
+        'experiment,subject,postfix,anodes,cathodes,use_classifier_excluded_leads',
         [
-            ('AmplitudeDetermination', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8']),
-            ('CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8']),
-            ('FR6', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8']),
-            ('PS4_FR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8']),
-            ('PAL5', 'R1318N', 'R1318N11JUL17M0L0STIM', ['LAIIH2'], ['LAIIH3']),
-            ('PS5_FR', 'R1378T', '18DEC2017L0M0STIM', ['LC8'], ['LC9'])
+            ('AmplitudeDetermination', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8'], False),
+            ('CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8']), False,
+            ('CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8'], True),
+            ('FR6', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8'], False),
+            ('PS4_FR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8'], False),
+            ('PAL5', 'R1318N', 'R1318N11JUL17M0L0STIM', ['LAIIH2'], ['LAIIH3'], False),
+            ('PS5_FR', 'R1378T', '18DEC2017L0M0STIM', ['LC8'], ['LC9'], False)
         ]
     )
     def test_create_expconf(self, experiment, subject, postfix, anodes,
-                            cathodes, rhino_root, output_dest):
+                            cathodes, use_classifier_excluded_leads, rhino_root, output_dest):
 
         args = [
             "-s", subject, "-x", experiment,
@@ -137,6 +138,9 @@ class TestExpConf:
             args += ['--min-amplitudes'] + ['0.1'] * len(anodes)
             args += ['--max-amplitudes'] + ['1.0'] * len(anodes)
 
+        if use_classifier_excluded_leads:
+            args += ['-u']
+
         create_expconf(args)
 
 
@@ -145,19 +149,20 @@ class TestCreateReports:
     @pytest.mark.slow
     @pytest.mark.output
     @pytest.mark.parametrize('rerun', [True, False])
-    @pytest.mark.parametrize('subject, experiment, sessions, joint', [
-        ('R1001P', 'FR1', None, False),
-        ('R1354E', 'FR1', [0], False),
-        ('R1354E', 'FR1', [0, 1], False),
-        ('R1354E', 'CatFR1', [0], False),
-        ('R1354E', 'FR1', None, True),
-        ('R1345D', 'FR1', None, False),
-        ('R1374T', 'CatFR1', None, False),
-        ('R1374T', 'CatFR1', None, True),
-        ('R1394E_1', 'FR1', None, True) # Test case for re-localized subject
+    @pytest.mark.parametrize('subject, experiment, sessions, joint, use_classifier_excluded_leads', [
+        ('R1001P', 'FR1', None, False, False),
+        ('R1354E', 'FR1', [0], False, False),
+        ('R1354E', 'FR1', [0, 1], False, False),
+        ('R1354E', 'CatFR1', [0], False, False),
+        ('R1354E', 'FR1', None, True, False),
+        ('R1345D', 'FR1', None, False, False),
+        ('R1374T', 'CatFR1', None, False, False),
+        ('R1374T', 'CatFR1', None, True, False),
+        ('R1394E_1', 'FR1', None, True, False), # Test case for re-localized subject
+        ('R1364C', 'FR1', [0], False, True)  # use excluded classifier leads test
     ])
     def test_create_open_loop_report(self, subject, experiment, sessions,
-                                     joint, rerun, rhino_root,
+                                     joint, use_classifier_excluded_leads, rerun, rhino_root,
                                      output_dest):
         args = [
             '--root', rhino_root,
@@ -175,6 +180,9 @@ class TestCreateReports:
 
         if sessions is not None:
             args += ['-S'] + [str(session) for session in sessions]
+
+        if use_classifier_excluded_leads:
+            args += ['-u']
 
         create_report(args)
         return
