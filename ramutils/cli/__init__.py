@@ -24,8 +24,8 @@ class RamArgumentParser(ArgumentParser):
                           help='allow cached results from previous run to be reused')
         self.add_argument('--experiment', '-x', required=True, type=str,
                           choices=allowed_experiments, help='experiment')
-        self.add_argument('--use-bad-leads', '-b', action='store_true',
-                          help='Exclude channels in bad_leads.txt from classifier')
+        self.add_argument('--use-classifier-excluded-leads', '-e', action='store_true', default=False,
+                          help='Exclude channels in classifier_excluded_leads.txt from classifier')
         self.add_argument('--vispath', default=None, type=str,
                           help='path to save task graph visualization to')
         self.add_argument('--version', action='version',

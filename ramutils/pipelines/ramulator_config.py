@@ -2,7 +2,7 @@ from ramutils.constants import EXPERIMENTS
 from ramutils.exc import (
     MissingArgumentsError, MultistimNotAllowedException, ValidationError
 )
-from ramutils.montage import generate_pairs_from_electrode_config
+from ramutils.montage import generate_pairs_from_electrode_config, get_classifier_excluded_leads
 from ramutils.tasks import *
 
 
@@ -44,7 +44,7 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
                           exp_params=None, vispath=None, extended_blanking=True,
                           localization=0, montage=0, default_surface_area=0.001,
                           trigger_pairs=None, use_common_reference=False,
-                          use_bad_leads=False):
+                          use_classifier_excluded_leads=False):
     """ Generate configuration files for a Ramulator experiment
 
     Parameters
@@ -74,8 +74,8 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
     use_common_reference : bool
         Use a common reference in the electrode configuration instead of bipolar
         referencing.
-    use_bad_leads: bool
-        Use contents of bad_leads.txt to exclude channels from classifier training
+    use_classifier_excluded_leads: bool
+        Use contents of classifier_excluded_leads.txt to exclude channels from classifier training
 
     Returns
     -------
@@ -102,14 +102,22 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
         paths = generate_electrode_config(subject, paths, anodes, cathodes,
                                           localization, montage,
                                           default_surface_area,
-                                          use_common_reference)
+                                          use_common_reference).compute()
 
     # Note: All of these pairs variables are of type OrderedDict, which is
     # crucial for preserving the initial order of the electrodes in the
     # config file
     ec_pairs = make_task(generate_pairs_from_electrode_config, subject,
                          experiment, None, paths)
-    excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
+
+    # Ignore leads identified in classifier_excluded_leads.txt
+    pairs_to_exclude = stim_params
+    if use_classifier_excluded_leads:
+        classifier_excluded_leads = get_classifier_excluded_leads(subject, rootdir=paths.root)
+        pairs_to_exclude = pairs_to_exclude + classifier_excluded_leads
+
+    excluded_pairs = reduce_pairs(ec_pairs, pairs_to_exclude, True)
+
     used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
     final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
 

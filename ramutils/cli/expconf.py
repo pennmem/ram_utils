@@ -182,62 +182,11 @@ def create_expconf(input_args=None):
                               montage=args.montage,
                               default_surface_area=default_surface_area,
                               trigger_pairs=args.trigger_pairs,
-                              use_common_reference=args.use_common_reference)
+                              use_common_reference=args.use_common_reference,
+                              use_classifier_excluded_leads=args.use_classifier_excluded_leads)
         memory.clear()  # clear cached intermediate results on successful build
 
     warnings = '\n' + warning_accumulator.format_all()
     if warnings is not None:
         logger.info(warnings)
 
-
-if __name__ == "__main__":
-    # create_expconf()
-
-    args = ['--root', '~/mnt/rhino', '-d', 'scratch/depalati']
-
-    # create_expconf(args + [
-    #     '-s', 'R1383J', '-x', 'FR5',
-    #     '--anodes', 'LB7',
-    #     '--cathodes', 'LB8',
-    #     '--target-amplitudes', '0.5'
-    # ])
-
-    create_expconf(args + [
-        '-s', 'R1111M', '-x', 'DBOY1',
-        '--default-area', '5', '--use-common-reference',
-    ])
-
-    # create_expconf(args + [
-    #     '-s', 'R1384J', '-x', 'PS5_CatFR',
-    #     '--anodes', 'LF7',
-    #     '--cathodes', 'LF8',
-    #     '--min-amplitudes', '0.1',
-    #     '--max-amplitudes', '0.5',
-    #     '--trigger-pairs', 'RPMS1_RPMS2',
-    #     '--default-area', '5.024',
-    # ])
-
-    # create_expconf(args + [
-    #     '-s', 'R1385E',
-    #     '-x', 'CatFR5',
-    #     '--electrode-config-file',
-    #     'scratch/system3_configs/ODIN_configs/R1385E/R1385E_15JAN2018L0M0STIM.csv',
-    #     '--anodes', '3LD8',
-    #     '--cathodes', '3LD9',
-    #     '--target-amplitudes', '0.5'
-    # ])
-
-    # create_expconf(args + [
-    #     '-s',
-    #     'R1385E',
-    #     '-x',
-    #     'CatFR5',
-    #     '--electrode-config-file',
-    #     'scratch/system3_configs/ODIN_configs/R1385E/R1385E_15JAN2018L0M0STIM.csv',
-    #     '--anodes',
-    #     '3LD8',
-    #     '--cathodes',
-    #     '3LD9',
-    #     '--target-amplitudes',
-    #     '0.5'
-    # ])
