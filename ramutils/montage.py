@@ -56,11 +56,17 @@ def make_stim_params(subject, anodes, cathodes, min_amplitudes=None,
 
     stim_params = []
 
-    # TODO: Fail smarter if the label cannot be found
-    #  in the jacksheet
+    valid_labels = jacksheet.label.values
     for i in range(len(anodes)):
         anode = anodes[i]
         cathode = cathodes[i]
+
+        if anode not in valid_labels:
+            raise RuntimeError("Label {} could not be found in the jacksheet".format(anode))
+
+        if cathode not in valid_labels:
+            raise RuntimeError("Label {} could not be found in the jacksheet".format(cathode))
+
         anode_idx = jacksheet[jacksheet.label == anode].index[0]
         cathode_idx = jacksheet[jacksheet.label == cathode].index[0]
 
@@ -540,6 +546,39 @@ def get_pairs(subject, experiment, sessions, paths):
                                          rootdir=paths.root)
 
     return all_pairs
+
+
+def get_classifier_excluded_leads(subject, rootdir='/'):
+    """ Identify channels to be excluded using the classifier_excluded_leads.txt file
+
+    Parameters:
+    -----------
+    subject: str
+        Subject identifier
+
+    paths: FilePaths object including RHINO root directory
+
+    Returns:
+    --------
+    excluded_contacts: List of contacts in the same format as what is returned by make_stim_params
+
+    """
+    classifier_excluded_leads_path = osp.join(rootdir, 'data', 'eeg', subject, 'tal', 'classifier_excluded_leads.txt')
+    if not osp.exists(classifier_excluded_leads_path):
+        raise RuntimeError("No classifier_excluded_leads.txt file found for {}".format(subject))
+
+    with open(classifier_excluded_leads_path) as f:
+        file_contents = f.read()
+        excluded_labels = file_contents.split('\n')
+
+    excluded_labels = [label for label in excluded_labels if label != '']
+
+    # This may seem a bit odd, but it returns the labels in a format that is easy to use by other functions
+    # in ramutils
+    excluded_contacts = make_stim_params(subject, excluded_labels, excluded_labels,
+                                         target_amplitudes=[0.5] * len(excluded_labels),
+                                         root=rootdir)
+    return excluded_contacts
 
 
 def generate_pairs_from_electrode_config(subject, experiment, session, paths):
