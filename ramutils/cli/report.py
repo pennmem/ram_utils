@@ -56,6 +56,7 @@ def create_report(input_args=None):
         stim_params = make_stim_params(args.subject,
                                        anodes=args.excluded_contacts,
                                        cathodes=args.excluded_contacts,
+                                       target_amplitudes=[0.5]*len(args.excluded_contacts),
                                        root=paths.root)
     else:
         stim_params = []
