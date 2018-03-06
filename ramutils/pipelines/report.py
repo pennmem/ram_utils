@@ -5,12 +5,13 @@ import pandas as pd
 
 from ramutils.tasks import *
 from ramutils.utils import extract_experiment_series
+from ramutils.montage import get_classifier_excluded_leads
 
 
 def make_report(subject, experiment, paths, joint_report=False,
                 retrain=False, stim_params=None, exp_params=None,
                 sessions=None, vispath=None, rerun=False,
-                trigger_electrode=None, use_bad_leads=False):
+                trigger_electrode=None, use_classifier_excluded_leads=False):
     """Run a report.
 
     Parameters
@@ -40,8 +41,8 @@ def make_report(subject, experiment, paths, joint_report=False,
     trigger_electrode: str
         The label for the bipolar pair to be used for triggering stimulation
         in PS5
-    use_bad_leads: bool
-        Use contents of bad_leads.txt to exclude channels from classifier training
+    use_classifier_excluded_leads: bool
+        Use contents of classifier_excluded_leads.txt to exclude channels from classifier training
 
     Returns
     -------
@@ -60,7 +61,14 @@ def make_report(subject, experiment, paths, joint_report=False,
         experiment = experiment.replace('Cat', 'cat')
 
     ec_pairs = get_pairs(subject, experiment, sessions, paths)
+
+    if use_classifier_excluded_leads:
+        classifier_excluded_leads = get_classifier_excluded_leads(subject, paths.root)
+        if stim_params is None:
+            stim_params = []
+        stim_params.extend(classifier_excluded_leads)
     excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
+
     # PS4 is such a special beast, that we just return it's own sub-pipeline
     # in order to simplify the branching logic for generating all other reports
     if "PS4" in experiment:
@@ -68,7 +76,6 @@ def make_report(subject, experiment, paths, joint_report=False,
                                    excluded_pairs, paths)
 
     kwargs = exp_params.to_dict()
-
 
     stim_report = is_stim_experiment(experiment).compute()
     series_num = extract_experiment_series(experiment)

@@ -52,14 +52,7 @@ def create_report(input_args=None):
 
     # Stim params (used in make_report below) is really just used for excluding
     # pairs.
-    if args.excluded_contacts is not None:
-        stim_params = make_stim_params(args.subject,
-                                       anodes=args.excluded_contacts,
-                                       cathodes=args.excluded_contacts,
-                                       target_amplitudes=[0.5]*len(args.excluded_contacts),
-                                       root=paths.root)
-    else:
-        stim_params = []
+    stim_params = []
 
     # Extract sessions
     stim_experiment = is_stim_experiment(args.experiment)
@@ -98,7 +91,8 @@ def create_report(input_args=None):
             sessions=sessions,
             vispath=args.vispath,
             rerun=args.rerun,
-            trigger_electrode=args.trigger_electrode
+            trigger_electrode=args.trigger_electrode,
+            use_classifier_excluded_leads=args.use_classifier_excluded_leads
         )
         logger.info("Wrote report to %s\n", path)
         memory.clear() # remove cached intermediate results if build succeeds
