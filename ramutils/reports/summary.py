@@ -55,6 +55,11 @@ class ClassifierSummary(Schema):
     high_terc_recall_rate = Float(desc='recall rate when predicted probability of recall was in highest tercile')
 
     @property
+    def id(self):
+        session_str = ".".join([str(sess) for sess in np.unique(self.sessions)])
+        return ":".join([self.subject, self.experiment, session_str])
+
+    @property
     def predicted_probabilities(self):
         """ Classifier output for each word encoding event """
         return self._predicted_probabilities
@@ -436,6 +441,10 @@ class SessionSummary(Summary):
         return session
 
     @property
+    def id(self):
+        return ":".join([self.subject, self.experiment, self.session_number])
+
+    @property
     def events(self):
         """ :class:`np.recarray` of events """
         return np.rec.array(self._events)
@@ -725,6 +734,11 @@ class StimSessionSummary(SessionSummary):
                                 normalized_powers,
                                 raw_events=raw_events)
         self.post_stim_prob_recall = post_stim_prob_recall
+
+    @property
+    def subject(self):
+        """ Subject ID associated with the session """
+        return extract_subject(self.events, add_localization=False)
 
 
 class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):

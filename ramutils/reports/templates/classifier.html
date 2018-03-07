@@ -13,7 +13,8 @@
   <table class="table table-striped table-hover">
     <thead>
     <tr>
-      <th>Classifier</td>
+      <th>Classifier ID</th>
+      <th>Tag</td>
       {% if stim %}
       <th>Reloaded</td>
       {% endif %}
@@ -26,6 +27,7 @@
     <tbody>
     {% for classifier in classifiers %}
       <tr>
+        <td>{{ classifier.id }}</td>
         <td>{{ classifier.tag }}</td>
         {% if stim %}
         <td>{{ classifier.reloaded }}</td>

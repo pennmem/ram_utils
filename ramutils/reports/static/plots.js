@@ -138,7 +138,7 @@ var ramutils = (function (mod, Plotly) {
         },
         yaxis: {
           title: 'Number of items',
-          range: [0, 12.1]
+          range: [0, Math.max(...stimEvents.count) + 0.5]
         }
       };
 

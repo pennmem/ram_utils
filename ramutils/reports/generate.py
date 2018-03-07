@@ -197,7 +197,7 @@ class ReportGenerator(object):
             plot_data['recall_difference'] = {
                     'stim': FRStimSessionSummary.delta_recall(self.session_summaries),
                     'post_stim': FRStimSessionSummary.delta_recall(self.session_summaries, post_stim_items=True)
-                },
+                }
 
         if biomarker_delta:
             plot_data['classifier_output'] = {
@@ -215,7 +215,7 @@ class ReportGenerator(object):
                     'mid': [classifier.mid_tercile_diff_from_mean for classifier in self.classifiers],
                     'high': [classifier.high_tercile_diff_from_mean for classifier in self.classifiers]
                 }
-                plot_data['tags'] = [classifier.tag for classifier in self.classifiers]
+                plot_data['tags'] = [classifier.id for classifier in self.classifiers]
 
         return json.dumps(plot_data)
 

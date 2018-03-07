@@ -67,7 +67,6 @@ def make_report(subject, experiment, paths, joint_report=False,
 
     kwargs = exp_params.to_dict()
 
-
     stim_report = is_stim_experiment(experiment).compute()
     series_num = extract_experiment_series(experiment)
 
@@ -90,7 +89,6 @@ def make_report(subject, experiment, paths, joint_report=False,
                                          paths.dest, hmm_results=hmm_results)
             return report.compute()
 
-    # TODO: allow using different localization, montage numbers
     final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
     used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
     pairs_metadata_table = generate_montage_metadata_table(subject,

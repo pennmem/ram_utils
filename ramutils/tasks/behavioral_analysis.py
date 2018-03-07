@@ -41,7 +41,7 @@ def estimate_effects_of_stim(subject, experiment, stim_session_summaries):
 
     # serialpos, list, session all need to be 0-indexed for the vectorized
     # implementation of the model to work
-    df["session"] = df["session"] - (df["session"].min())
+    df['session_idx'] = df.groupby(by=['subject', 'experiment', 'session']).grouper.group_info[0]
     df["serialpos"] = df["serialpos"] - (df["serialpos"].min())
 
     # Turn list into a % session completed variable to that subjects who
