@@ -11,7 +11,7 @@ import numpy as np
 from pkg_resources import resource_listdir, resource_string
 
 from ramutils import __version__
-from ramutils.reports.summary import FRSessionSummary, MathSummary
+from ramutils.reports.summary import FRSessionSummary, MathSummary, FRStimSessionSummary
 from ramutils.events import extract_experiment_from_events, extract_subject
 from ramutils.utils import extract_experiment_series
 
@@ -164,49 +164,45 @@ class ReportGenerator(object):
             plot_data['serialpos'] = {
                     'serialpos': list(range(1, 13)),
                     'overall': {
-                        'Overall (non-stim)': self.session_summaries[
-                            0].prob_recall_by_serialpos(stim_items_only=False),
-                        'Overall (stim)': self.session_summaries[
-                            0].prob_recall_by_serialpos(stim_items_only=True)
+                        'Overall (non-stim)': FRStimSessionSummary.prob_recall_by_serialpos(self.session_summaries,
+                                                                                            stim_items_only=False),
+                        'Overall (stim)': FRStimSessionSummary.prob_recall_by_serialpos(self.session_summaries,
+                                                                                        stim_items_only=True)
                     },
                     'first': {
-                        'First recall (non-stim)': self.session_summaries[
-                            0].prob_first_recall_by_serialpos(stim=False),
-                        'First recall (stim)': self.session_summaries[
-                            0].prob_first_recall_by_serialpos(stim=True)
+                        'First recall (non-stim)': FRStimSessionSummary.prob_first_recall_by_serialpos(self.session_summaries,
+                                                                                                       stim=False),
+                        'First recall (stim)': FRStimSessionSummary.prob_first_recall_by_serialpos(self.session_summaries,
+                                                                                                   stim=True)
                     }
                 }
             plot_data['recall_summary'] = {
                     'nonstim': {
-                        'listno': self.session_summaries[0].lists(stim=False),
-                        'recalled': self.session_summaries[
-                            0].recalls_by_list(stim_list_only=False)
+                        'listno': FRStimSessionSummary.lists(self.session_summaries, stim=False),
+                        'recalled': FRStimSessionSummary.recalls_by_list(self.session_summaries, stim_list_only=False)
                     },
                     'stim': {
-                        'listno': self.session_summaries[0].lists(stim=True),
-                        'recalled': self.session_summaries[
-                            0].recalls_by_list(stim_list_only=True)
+                        'listno': FRStimSessionSummary.lists(self.session_summaries, stim=True),
+                        'recalled': FRStimSessionSummary.recalls_by_list(self.session_summaries, stim_list_only=True)
                     },
                     'stim_events': {
-                        'listno': self.session_summaries[0].lists(),
-                        'count': self.session_summaries[0].stim_events_by_list
+                        'listno': FRStimSessionSummary.lists(self.session_summaries),
+                        'count': FRStimSessionSummary.stim_events_by_list(self.session_summaries)
                     }
                 }
             plot_data['stim_probability'] = {
                     'serialpos': list(range(1, 13)),
-                    'probability': self.session_summaries[
-                        0].prob_stim_by_serialpos
+                    'probability': FRStimSessionSummary.prob_stim_by_serialpos(self.session_summaries)
                 }
             plot_data['recall_difference'] = {
-                    'stim': self.session_summaries[0].delta_recall(),
-                    'post_stim': self.session_summaries[0].delta_recall(
-                        post_stim_items=True)
+                    'stim': FRStimSessionSummary.delta_recall(self.session_summaries),
+                    'post_stim': FRStimSessionSummary.delta_recall(self.session_summaries, post_stim_items=True)
                 },
 
         if biomarker_delta:
             plot_data['classifier_output'] = {
-                'pre_stim': list(self.session_summaries[0].pre_stim_prob_recall),
-                'post_stim': list(self.session_summaries[0].post_stim_prob_recall)
+                'pre_stim': FRStimSessionSummary.pre_stim_prob_recall(self.session_summaries),
+                'post_stim': FRStimSessionSummary.all_post_stim_prob_recall(self.session_summaries)
             }
 
         if classifier:
@@ -308,8 +304,8 @@ class ReportGenerator(object):
             'FR2',
             stim=True,
             combined_summary=self._make_combined_summary(),
-            stim_params=self.session_summaries[0].stim_parameters,
-            recall_tests=self.session_summaries[0].recall_test_results,
+            stim_params=FRStimSessionSummary.stim_parameters(self.session_summaries),
+            recall_tests=FRStimSessionSummary.recall_test_results(self.session_summaries, 'FR2'),
             hmm_results=self.hmm_results,
             plot_Data=self._make_plot_data(stim=True, classifier=False,
                                            biomarker_delta=False)
@@ -329,8 +325,8 @@ class ReportGenerator(object):
             stim=True,
             combined_summary=self._make_combined_summary(),
             classifiers=self.classifiers,
-            stim_params=self.session_summaries[0].stim_parameters,
-            recall_tests=self.session_summaries[0].recall_test_results,
+            stim_params=FRStimSessionSummary.stim_parameters(self.session_summaries),
+            recall_tests=FRStimSessionSummary.recall_test_results(self.session_summaries, experiment),
             hmm_results=self.hmm_results,
             plot_data = self._make_plot_data(stim=True, classifier=True,
                                              biomarker_delta=True)
@@ -385,8 +381,8 @@ class ReportGenerator(object):
             'PS5',
             stim=True,
             combined_summary=self._make_combined_summary(),
-            stim_params=self.session_summaries[0].stim_parameters,
-            recall_tests=self.session_summaries[0].recall_test_results,
+            stim_params=FRStimSessionSummary.stim_parameters(self.session_summaries),
+            recall_tests=FRStimSessionSummary.recall_test_results(self.session_summaries, 'PS5'),
             plot_data = self._make_plot_data(stim=True, classifier=False,
                                              biomarker_delta=True)
         )

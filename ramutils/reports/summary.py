@@ -745,49 +745,67 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
                                     post_stim_prob_recall=post_stim_prob_recall,
                                     raw_events=raw_events)
 
-    @property
-    def pre_stim_prob_recall(self):
+    @staticmethod
+    def combine_sessions(summaries):
+        """ Combine information from multiple stim sessions """
+        all_summary_dfs = []
+        for summary in summaries:
+            df = summary.to_dataframe()
+            all_summary_dfs.append(df)
+
+        combined_df = pd.concat(all_summary_dfs)
+        return combined_df
+
+    @staticmethod
+    def all_post_stim_prob_recall(summaries):
+        post_stim_prob_recall = [summary.post_stim_prob_recall for summary in summaries]
+        post_stim_prob_recall = np.concatenate(post_stim_prob_recall).tolist()
+        return post_stim_prob_recall
+
+    @staticmethod
+    def pre_stim_prob_recall(summaries):
         """ Classifier output in the pre-stim period for items that were eventually stimulated """
-        df = self.to_dataframe()
-        pre_stim_probs = df[df.is_stim_item == True].classifier_output.values.tolist()
+        df = FRStimSessionSummary.combine_sessions(summaries)
+        pre_stim_probs = df[df['is_stim_item'] == True].classifier_output.values.tolist()
         return pre_stim_probs
 
-    @property
-    def num_nonstim_lists(self):
+    @staticmethod
+    def num_nonstim_lists(summaries):
         """Returns the number of non-stim lists."""
-        df = self.to_dataframe()
+        df = FRStimSessionSummary.combine_sessions(summaries)
         count = 0
         for listno in df.list.unique():
             if not df[df.list == listno].is_stim_list.all():
                 count += 1
         return count
 
-    @property
-    def num_stim_lists(self):
+    @staticmethod
+    def num_stim_lists(summaries):
         """Returns the number of stim lists."""
-        df = self.to_dataframe()
+        df = FRStimSessionSummary.combine_sessions(summaries)
         count = 0
         for listno in df.list.unique():
             if df[df.list == listno].is_stim_list.all():
                 count += 1
         return count
 
-    @property
-    def stim_events_by_list(self):
-        """ Array containing the number of stim evenets by list """
-        df = self.to_dataframe()
+    @staticmethod
+    def stim_events_by_list(summaries):
+        """ Array containing the number of stim events by list """
+        df = FRStimSessionSummary.combine_sessions(summaries)
         n_stim_events = df.groupby('list').is_stim_item.sum().tolist()
         return n_stim_events
 
-    @property
-    def prob_stim_by_serialpos(self):
+    @staticmethod
+    def prob_stim_by_serialpos(summaries):
         """ Array containing the probability of stimulation (mean of the classifier output) by serial position """
-        df = self.to_dataframe()
+        df = FRStimSessionSummary.combine_sessions(summaries)
         return df.groupby('serialpos').classifier_output.mean().tolist()
 
-    def lists(self, stim=None):
+    @staticmethod
+    def lists(summaries, stim=None):
         """ Get a list of either stim lists or non-stim lists """
-        df = self.to_dataframe()
+        df = FRStimSessionSummary.combine_sessions(summaries)
         if stim is not None:
             lists = df[df.is_stim_list == stim].list.unique().tolist()
         else:
@@ -800,15 +818,17 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         return ['stimAnodeTag', 'stimCathodeTag', 'location', 'amplitude',
                 'stim_duration', 'pulse_freq']
 
-    @property
-    def stim_params_by_list(self):
-        """ Returns a dataframe of stimulation parameters used within each list """
-        df = self.to_dataframe()
+    @staticmethod
+    def stim_params_by_list(summaries):
+        """ Returns a dataframe of stimulation parameters used within each session/list """
+        df = FRStimSessionSummary.combine_sessions(summaries)
         df = df.replace('nan', np.nan)
-        stim_columns = self.stim_columns
+        stim_columns = ['stimAnodeTag', 'stimCathodeTag', 'location',
+                        'amplitude', 'stim_duration', 'pulse_freq']
         non_stim_columns = [c for c in df.columns if c not in stim_columns]
 
-        stim_param_by_list = (df[(stim_columns + ['list'])]
+        stim_param_by_list = (df[(stim_columns + ['subject', 'experiment',
+                                                  'session', 'list'])]
                                 .drop_duplicates()
                                 .dropna(how='all'))
 
@@ -816,15 +836,18 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         # during that list are populated. This makes calculating post stim
         # item behavioral responses easier
         df = df[non_stim_columns]
-        df = df.merge(stim_param_by_list, on='list', how='left')
+        df = df.merge(stim_param_by_list, on=['subject', 'experiment',
+                                              'session','list'], how='left')
         return df
 
-    @property
-    def stim_parameters(self):
+    @staticmethod
+    def stim_parameters(summaries):
         """ Returns a list of unique stimulation parameters used during the experiment """
-        df = self.stim_params_by_list
+        df = FRStimSessionSummary.stim_params_by_list(summaries)
         df['location'] = df['location'].replace(np.nan, '--')
-        grouped = (df.groupby(by=(self.stim_columns + ['is_stim_list']))
+        stim_columns =['stimAnodeTag', 'stimCathodeTag', 'location', 'amplitude',
+                       'stim_duration', 'pulse_freq']
+        grouped = (df.groupby(by=(stim_columns + ['is_stim_list']))
                      .agg({'is_stim_item' : 'sum',
                            'subject': 'count'})
                      .rename(columns={'is_stim_item': 'n_stimulations',
@@ -833,16 +856,16 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
 
         return list(grouped.T.to_dict().values())
 
-    @property
-    def recall_test_results(self):
+    @staticmethod
+    def recall_test_results(summaries, experiment):
         """
             Returns a dictionary containing the results of chi-squared tests for the behavioral effects of stimulation.
             Comparisons include stim lists vs. non-stim lists, stim items vs. low-biomarker non-stim items, and post-stim
             items vers. low-biomarker non-stim items. All comparisons are done for each unique set of stimulation parameters
         """
-        df = self.stim_params_by_list
+        df = FRStimSessionSummary.stim_params_by_list(summaries)
 
-        if "PS5" not in self.experiment:
+        if "PS5" not in experiment:
             df = df[df.list > 3]
         else:
             df = df[df.list > -1]
@@ -911,9 +934,10 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
 
         return results
 
-    def recalls_by_list(self, stim_list_only=False):
+    @staticmethod
+    def recalls_by_list(summaries, stim_list_only=False):
         """ Number of recalls by list. Optionally returns results for only stim lists """
-        df = self.to_dataframe()
+        df = FRStimSessionSummary.combine_sessions(summaries)
         recalls_by_list = (
             df[df.is_stim_list == stim_list_only]
             .groupby('list')
@@ -923,9 +947,10 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
             .tolist())
         return recalls_by_list
 
-    def prob_first_recall_by_serialpos(self, stim=False):
+    @staticmethod
+    def prob_first_recall_by_serialpos(summaries, stim=False):
         """ Probability of recalling a word first by serial position. Optionally returns results for only stim items """
-        df = self.to_dataframe()
+        df = FRStimSessionSummary.combine_sessions(summaries)
         events = df[df.is_stim_item == stim]
 
         firstpos = np.zeros(ExperimentParameters().number_of_items, dtype=np.float)
@@ -940,18 +965,20 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
             firstpos += thispos
         return (firstpos / events.list.max()).tolist()
 
-    def prob_recall_by_serialpos(self, stim_items_only=False):
+    @staticmethod
+    def prob_recall_by_serialpos(summaries, stim_items_only=False):
         """ Probability of recall by serial position. Optionally returns results for only stim items """
-        df = self.to_dataframe()
+        df = FRStimSessionSummary.combine_sessions(summaries)
         group = df[df.is_stim_item == stim_items_only].groupby('serialpos')
         return group.recalled.mean().tolist()
 
-    def delta_recall(self, post_stim_items=False):
+    @staticmethod
+    def delta_recall(summaries, post_stim_items=False):
         """
             %change in item recall for stimulated items versus non-stimulated low biomarker items. Optionally return
             the same comparison, but for post-stim items
         """
-        df = self.to_dataframe()
+        df = FRStimSessionSummary.combine_sessions(summaries)
         nonstim_low_bio_recall = df[(df.classifier_output < df.thresh) &
                                     (df.is_stim_list == False)].recalled.mean()
         if post_stim_items:
