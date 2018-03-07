@@ -3,6 +3,7 @@ mpl.use('Agg') # allows matplotlib to work without x-windows (for RHINO)
 
 import pymc3 as pm
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 
 
@@ -164,11 +165,21 @@ def save_traceplot(trace, full_path):
 
 
 def save_foresplot(trace, full_path):
-    stim_variable = "Stim Effect (Across Sessions)"
+    session_values = trace.get_values("Stim Effect (Session Level)", chains=[trace.chains[0]][0])
+    num_sessions = np.shape(session_values)[1]
+    session_titles = [" ".join(["Session", str(i)]) for i in range(num_sessions)]
+
+    ylabels=['']
+    stim_vars = ["Stim Effect (Across Sessions)"]
+
+    if num_sessions > 1:
+        ylabels = ["Agg"] + session_titles
+        stim_vars += ["Stim Effect (Session Level)"]
+
     ax = pm.forestplot(trace,
-                       varnames=[stim_variable],
+                       varnames=stim_vars,
                        xtitle="Estimated Effect of Stimulation",
-                       ylabels=[''],
+                       ylabels=ylabels,
                        quartiles=False,
                        plot_kwargs=dict(
                            linewidth=5,
