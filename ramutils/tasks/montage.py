@@ -7,6 +7,7 @@ from ramutils.montage import build_montage_metadata_table
 from ramutils.montage import get_pairs as get_pairs_core
 from ramutils.montage import get_trigger_electrode_mask as \
     get_trigger_electrode_mask_core
+from ramutils.montage import get_classifier_excluded_leads as get_classifier_excluded_leads_core
 
 
 __all__ = [
@@ -16,6 +17,7 @@ __all__ = [
     'generate_montage_metadata_table',
     'get_trigger_electrode_mask',
     'get_pairs',
+    'get_classifier_excluded_leads'
 ]
 
 
@@ -34,6 +36,9 @@ def reduce_pairs(pairs, stim_params, return_excluded=False):
 def get_used_pair_mask(all_pairs, excluded_pairs):
     return get_used_pair_mask_core(all_pairs, excluded_pairs)
 
+@task()
+def get_classifier_excluded_leads(subject, ec_pairs, rootdir):
+    return get_classifier_excluded_leads_core(subject, ec_pairs, rootdir=rootdir)
 
 @task()
 def generate_montage_metadata_table(subject, experiment, sessions, all_pairs,

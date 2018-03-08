@@ -182,13 +182,13 @@ def create_expconf(input_args=None):
                               montage=args.montage,
                               default_surface_area=default_surface_area,
                               trigger_pairs=args.trigger_pairs,
-                              use_common_reference=args.use_common_reference)
+                              use_common_reference=args.use_common_reference,
+                              use_classifier_excluded_leads=args.use_classifier_excluded_leads)
         memory.clear()  # clear cached intermediate results on successful build
 
     warnings = '\n' + warning_accumulator.format_all()
     if warnings is not None:
         logger.info(warnings)
-
 
 if __name__ == "__main__":
     # create_expconf()

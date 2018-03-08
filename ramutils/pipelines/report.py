@@ -10,7 +10,7 @@ from ramutils.utils import extract_experiment_series
 def make_report(subject, experiment, paths, joint_report=False,
                 retrain=False, stim_params=None, exp_params=None,
                 sessions=None, vispath=None, rerun=False,
-                trigger_electrode=None):
+                trigger_electrode=None, use_classifier_excluded_leads=False):
     """Run a report.
 
     Parameters
@@ -40,6 +40,8 @@ def make_report(subject, experiment, paths, joint_report=False,
     trigger_electrode: str
         The label for the bipolar pair to be used for triggering stimulation
         in PS5
+    use_classifier_excluded_leads: bool
+        Use contents of classifier_excluded_leads.txt to exclude channels from classifier training
 
     Returns
     -------
@@ -58,7 +60,14 @@ def make_report(subject, experiment, paths, joint_report=False,
         experiment = experiment.replace('Cat', 'cat')
 
     ec_pairs = get_pairs(subject, experiment, sessions, paths)
-    excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
+
+    if use_classifier_excluded_leads:
+        classifier_excluded_leads = get_classifier_excluded_leads(subject, ec_pairs, paths.root).compute()
+        if stim_params is None:
+            stim_params = []
+        stim_params.extend(classifier_excluded_leads)
+    excluded_pairs = reduce_pairs(ec_pairs, stim_params, return_excluded=True)
+
     # PS4 is such a special beast, that we just return it's own sub-pipeline
     # in order to simplify the branching logic for generating all other reports
     if "PS4" in experiment:
