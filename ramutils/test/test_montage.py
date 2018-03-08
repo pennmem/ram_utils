@@ -186,3 +186,12 @@ class TestMontage:
                                                             paths)
         assert len(config_pairs['R1354E']['pairs'].keys()) > 0
         return
+
+    def test_get_classifier_excluded_leads(self):
+        paths = FilePaths(root=datafile(''))
+
+        excluded_contacts = get_classifier_excluded_leads('test_subject', self.test_pairs, paths.root)
+        assert len(excluded_contacts) == 1
+        assert excluded_contacts[0].anode_label == 'LAD1'
+        assert excluded_contacts[0].cathode_label == 'LAD2'
+

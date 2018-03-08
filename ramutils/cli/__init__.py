@@ -21,6 +21,8 @@ class RamArgumentParser(ArgumentParser):
                           help='absolute path for caching dir')
         self.add_argument('--use-cached', action='store_true',
                           help='allow cached results from previous run to be reused')
+        self.add_argument('--use-classifier-excluded-leads', '-u', action='store_true', default=False,
+                          help='Exclude channels in classifier_excluded_leads.txt from classifier')
         self.add_argument('--vispath', default=None, type=str,
                           help='path to save task graph visualization to')
         self.add_argument('--version', action='version',
