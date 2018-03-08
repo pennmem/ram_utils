@@ -7,7 +7,7 @@ from ramutils.events import get_repetition_ratio_dict as \
     get_repetition_ratio_dict_core
 from ramutils.events import get_post_stim_events_mask as \
     get_post_stim_events_mask_core
-from ramutils.events import remove_practice_lists, remove_sessions
+from ramutils.events import remove_practice_lists
 from ramutils.tasks import task
 from ramutils.utils import extract_experiment_series
 
