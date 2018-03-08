@@ -1,12 +1,12 @@
 from contextlib import contextmanager
 from copy import deepcopy
-import os
 
 import pytest
 
 from ramutils.cli import *
 from ramutils.cli.expconf import *
 from ramutils.cli.report import *
+from ramutils.cli.aggregated_report import *
 
 
 def test_make_parser():
@@ -217,26 +217,27 @@ class TestCreateReports:
     @pytest.mark.rhino
     @pytest.mark.output
     @pytest.mark.parametrize('subjects, experiments, sessions', [
-        (['R1384J'], 'FR5', None),
+        (['R1384J'], ['FR5'], None),
+        (['R1384J'], ['FR5'], [0, 1]),
+        (['R1384J'], ['FR5', 'CatFR5'], None),
+        (None, ['FR5'], None),
+        (['R1384J', 'R1395M'], ['FR5'], None)
     ])
     def test_create_aggregated_stim_session_report(self, subjects, experiments, sessions, rhino_root, output_dest):
 
         args = [
             '--root', rhino_root,
             '--dest', output_dest,
-            '-s', subject,
-            '-x', experiment,
-            '--report_db_location', output_dest
         ]
 
-        if rerun is True:
-            args += ['--rerun']
+        if subjects is not None:
+            args += ['-s'] + subjects
+
+        if experiments is not None:
+            args += ['-x'] + experiments
 
         if sessions is not None:
             args += ['-S'] + [str(session) for session in sessions]
 
-        if experiment == 'PS5_CatFR':
-            args += ['--trigger-electrode', 'LB6-LB7']
-
-        create_report(args)
+        create_aggregate_report(args)
         return

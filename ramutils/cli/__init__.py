@@ -9,7 +9,7 @@ from ramutils.exc import ValidationError  # so that other imports don't need to 
 
 class RamArgumentParser(ArgumentParser):
     """Parse arguments and run common things afterwards."""
-    def __init__(self, **kwargs):
+    def __init__(self, agg=False, **kwargs):
         allowed_experiments = kwargs.pop('allowed_experiments')
         super(RamArgumentParser, self).__init__(**kwargs)
         default_cache_dir = os.path.expanduser(os.path.join('~', '.ramutils', 'cache'))
@@ -26,7 +26,7 @@ class RamArgumentParser(ArgumentParser):
         self.add_argument('--version', action='version',
                           version='ramutils version {}'.format(__version__))
 
-        if kwargs['agg']:
+        if agg:
             self.add_argument('--subject', '-s', nargs='+', help='List of subjects')
             self.add_argument('--experiment', '-x', nargs='+', help='List of experiments')
 

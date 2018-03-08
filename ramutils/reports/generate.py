@@ -65,11 +65,6 @@ class ReportGenerator(object):
         self.catfr_summaries = list(compress(self.session_summaries, catfr_summary_mask))
         self.hmm_results = hmm_results
 
-        # PS has not math summaries, so only check for non-PS experiments
-        if all(['PS' not in exp for exp in self.experiments]):
-            if len(session_summaries) != len(math_summaries):
-                raise ValueError("Summaries contain different numbers of sessions")
-
         self._env = Environment(
             loader=PackageLoader('ramutils.reports', 'templates'),
         )
@@ -225,7 +220,7 @@ class ReportGenerator(object):
         determined by the experiments found in :attr:`session_summary`.
 
         """
-        series = extract_experiment_series(self.experiments[0])
+        series = extract_experiment_series(self.experiment)
         if all(['PS4' in exp for exp in self.experiments]) and series == '5':
             return self.generate_ps4_report()
 

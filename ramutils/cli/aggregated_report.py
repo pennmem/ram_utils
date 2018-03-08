@@ -33,14 +33,16 @@ def create_aggregate_report(input_args=None):
     )
 
     # Valid options
-    if args.subjects is None and args.experiments is None and args.sessions is None:
+    if args.subject is None and args.experiment is None and args.sessions is None:
         raise CommandLineError("Insufficient information. Must specify at least subject(s) or experiment(s)")
 
-    if args.subjects is not None and args.sessions is not None:
-        raise CommandLineError("Sessions may only be specified for single subject/experiment aggregations")
+    if args.subject is not None:
+        if len(args.subject) > 1 and args.sessions is not None:
+            raise CommandLineError("Sessions may only be specified for single subject/experiment aggregations")
 
-    if args.experiments is not None and args.sessions is not None:
-        raise CommandLineError("Sessions may only be specified for single subject/experiment aggregations")
+    if args.experiment is not None and args.sessions is not None:
+        if len(args.experiment) > 1:
+            raise CommandLineError("Sessions may only be specified for single subject/experiment aggregations")
 
     with timer():
         path = make_aggregated_report(
