@@ -142,6 +142,7 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
         raise RuntimeError('Event cleaning can only happen on single-experiment'
                            ' datasets')
     experiment = experiments[0]
+
     events = remove_negative_offsets(events)
 
     # Only for PS5 do we want to keep the practice list around so we can know
@@ -155,9 +156,6 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
 
     events = remove_incomplete_lists(events)
     events = select_column_subset(events, all_relevant=True)
-
-    # TODO: Add remove_repetitions() function to get rid of any recall events
-    # that are just a repeated recall
 
     # separate_stim_events is called within the task-specific functions
     # because the columns to subset differs by task
@@ -187,6 +185,28 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
 
     if return_stim_events:
         return events, stim_params
+
+    return events
+
+
+def remove_sessions(events, excluded_sessions):
+    """ Remove the requested sessions from the events
+
+    Parameters:
+    -----------
+    excluded_sessions: List[int]
+        List of session numbers to exclude. Convention is to start at 0 for FR, 100 for catFR, and 200 for PAL
+
+    Returns:
+    --------
+    events: np.recarray
+        Recarray of events
+    """
+    if excluded_sessions is None:
+        return events
+
+    for session in excluded_sessions:
+        events = events[events.session != session]
 
     return events
 

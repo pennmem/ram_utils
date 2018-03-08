@@ -7,7 +7,7 @@ from ramutils.events import get_repetition_ratio_dict as \
     get_repetition_ratio_dict_core
 from ramutils.events import get_post_stim_events_mask as \
     get_post_stim_events_mask_core
-from ramutils.events import remove_practice_lists
+from ramutils.events import remove_practice_lists, remove_sessions
 from ramutils.tasks import task
 from ramutils.utils import extract_experiment_series
 
@@ -39,12 +39,13 @@ def subset_events(events, mask):
 
 
 @task()
-def build_training_data(subject, experiment, paths, sessions=None, **kwargs):
+def build_training_data(subject, experiment, paths, sessions=None, excluded_sessions=None, **kwargs):
     """ Construct the set of events needed for classifier training """
     if "PAL" in experiment:
         pal_events = load_events(subject, "PAL1", sessions=sessions,
                                  rootdir=paths.root)
         cleaned_pal_events = clean_events(pal_events)
+        cleaned_pal_events = remove_sessions(cleaned_pal_events, excluded_sessions)
 
     if (("FR" in experiment) and kwargs['combine_events']) or \
             ("PAL" in experiment and kwargs['combine_events']):
@@ -69,6 +70,7 @@ def build_training_data(subject, experiment, paths, sessions=None, **kwargs):
 
         free_recall_events = concatenate_events_across_experiments(
             [cleaned_fr_events, cleaned_catfr_events], cat=True)
+        free_recall_events = remove_sessions(free_recall_events, excluded_sessions)
 
     elif "FR" in experiment and not kwargs['combine_events']:
         free_recall_events = load_events(subject, experiment, sessions=sessions,
@@ -79,10 +81,12 @@ def build_training_data(subject, experiment, paths, sessions=None, **kwargs):
                                           duration=kwargs['empty_epoch_duration'],
                                           pre=kwargs['pre_event_buf'],
                                           post=kwargs['post_event_buf'])
+        free_recall_events = remove_sessions(free_recall_events, excluded_sessions)
 
     if ("PAL" in experiment) and kwargs['combine_events']:
         all_task_events = concatenate_events_across_experiments([
             free_recall_events, cleaned_pal_events])
+        all_task_events = remove_sessions(all_task_events, excluded_sessions)
 
     elif ("PAL" in experiment) and not kwargs['combine_events']:
         all_task_events = cleaned_pal_events
