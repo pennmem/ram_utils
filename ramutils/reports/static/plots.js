@@ -225,7 +225,7 @@ var ramutils = (function (mod, Plotly) {
           type: 'scatter',
           mode: 'lines',
           name: `${tag} ROC Curve`,
-          legendgroup: 1
+          legendgroup: i
         };
         const tercile = {
           x: ['low', 'middle', 'high'],
@@ -234,7 +234,7 @@ var ramutils = (function (mod, Plotly) {
           yaxis: 'y2',
           type: 'bar',
           name: `${tag} Tercile`,
-          legendgroup: 2
+          legendgroup: i
         };
         data.push(roc_curve);
         data.push(tercile);
