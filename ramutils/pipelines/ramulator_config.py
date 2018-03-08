@@ -44,7 +44,7 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
                           exp_params=None, vispath=None, extended_blanking=True,
                           localization=0, montage=0, default_surface_area=0.001,
                           trigger_pairs=None, use_common_reference=False,
-                          use_classifier_excluded_leads=False, excluded_sessions=None):
+                          use_classifier_excluded_leads=False):
     """ Generate configuration files for a Ramulator experiment
 
     Parameters
@@ -76,8 +76,6 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
         referencing.
     use_classifier_excluded_leads: bool
         Use contents of classifier_excluded_leads.txt to exclude channels from classifier training
-    excluded_sessions: List[int]
-        Sessions to exclude from classifier training and config generation
 
     Returns
     -------
@@ -151,7 +149,7 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
                            "implemented")
     kwargs = exp_params.to_dict()
 
-    all_task_events = build_training_data(subject, experiment, paths, excluded_sessions=excluded_sessions, **kwargs)
+    all_task_events = build_training_data(subject, experiment, paths, **kwargs)
 
     powers, final_task_events = compute_normalized_powers(all_task_events,
                                                           bipolar_pairs=ec_pairs,
