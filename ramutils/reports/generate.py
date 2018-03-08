@@ -51,8 +51,10 @@ class ReportGenerator(object):
     * FR1, catFR1, FR2, catFR2, FR3, catFR3, FR5, catFR5, PS4
 
     """
-    def __init__(self, session_summaries, math_summaries,
-                 sme_table, classifier_summaries, hmm_results={}, dest='.'):
+    def __init__(self, subject, experiment, session_summaries, math_summaries,
+                 sme_table, classifier_summaries, hmm_results=None, dest='.'):
+        self.subject = subject
+        self.experiment = experiment
         self.session_summaries = session_summaries
         self.math_summaries = math_summaries
         self.sme_table = sme_table
@@ -61,7 +63,6 @@ class ReportGenerator(object):
         catfr_summary_mask = [summary.experiment == 'catFR1' for summary in
                               self.session_summaries]
         self.catfr_summaries = list(compress(self.session_summaries, catfr_summary_mask))
-        self.subject = extract_subject(self.session_summaries[0].events)
         self.hmm_results = hmm_results
 
         # PS has not math summaries, so only check for non-PS experiments

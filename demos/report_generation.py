@@ -9,14 +9,16 @@ from ramutils.tasks import memory
 memory.cachedir = "/home/zachduey/ramutils"
 
 
+
+params = FRParameters()
+
 paths = FilePaths(
-    root='/mnt/rhino/',
+    root='/Volumes/RHINO/',
     dest='/scratch/zduey/',
     data_db='/scratch/report_database/'
 )
 
 params = FRParameters()
-# make_report('R1384J', "catFR5", paths, exp_params=params, stim_params=None,
-#             joint_report=False, sessions=[1], rerun=False, retrain=False)
-
-make_aggregated_report('R1384J', 'catFR5', joint=True, paths=paths)
+# make_report(subject, "catFR1", paths, exp_params=params, rerun=True,
+#             joint_report=False, sessions=None, use_classifier_excluded_leads=True)
+make_aggregated_report(experiments=['catFR5', 'FR5'], fit_model=False, paths=paths)

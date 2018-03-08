@@ -1,6 +1,6 @@
 <div class="plot stim-params">
   <h2>Stimulation Parameter Summary</h2>
-  <table class="table table-striped table-hover">
+  <table id="stim_summary" class="table table-striped table-hover">
     <thead>
     <tr>
       <th>Anode</th>
@@ -26,4 +26,11 @@
     {% endfor %}
     </tbody>
   </table>
- </div>
+    <script>
+    window.addEventListener('load', () => {
+      $(document).ready( function () {
+        $('#stim_summary').DataTable();
+      });
+    });
+  </script>
+</div>
