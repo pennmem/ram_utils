@@ -152,7 +152,7 @@ Generating reports on the command line::
 
 Aggregated Stim Report generation
 ---------------------------------
-Generating an aggregated stim report from the command line
+Generating an aggregated stim report from the command line::
 
     usage: ram-aggregated-report [-h] [--root ROOT] [--dest DEST]
                              [--cachedir CACHEDIR] [--use-cached]
