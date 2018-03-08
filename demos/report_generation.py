@@ -1,24 +1,23 @@
 from __future__ import print_function
 
+import os.path
 from ramutils.parameters import FilePaths, FRParameters, PS5Parameters
 from ramutils.pipelines.report import make_report
-from ramutils.pipelines.aggregated_report import make_aggregated_report
 
 from ramutils.tasks import memory
 
-memory.cachedir = "/home/zachduey/ramutils"
+memory.cachedir = "/Users/zduey/tmp/"
 
 
-
-params = FRParameters()
+subject = 'R1401J'
+rhino = os.path.expanduser('/Volumes/rhino')
 
 paths = FilePaths(
     root='/Volumes/RHINO/',
     dest='/scratch/zduey/',
-    data_db='/scratch/report_database/'
+    data_db='/scratch/zduey/'
 )
 
 params = FRParameters()
-# make_report(subject, "catFR1", paths, exp_params=params, rerun=True,
-#             joint_report=False, sessions=None, use_classifier_excluded_leads=True)
-make_aggregated_report(experiments=['catFR5', 'FR5'], fit_model=False, paths=paths)
+make_report(subject, "FR1", paths, exp_params=params, stim_params=None,
+            joint_report=True, rerun=True, sessions=[0, 1, 100, 102])

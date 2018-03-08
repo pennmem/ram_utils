@@ -19,15 +19,21 @@ class RamArgumentParser(ArgumentParser):
                           help='directory to write output to (default: scratch/ramutils)')
         self.add_argument('--cachedir', default=default_cache_dir,
                           help='absolute path for caching dir')
-        self.add_argument('--subject', '-s', required=True, type=str, help='subject ID')
         self.add_argument('--use-cached', action='store_true',
                           help='allow cached results from previous run to be reused')
-        self.add_argument('--experiment', '-x', required=True, type=str,
-                          choices=allowed_experiments, help='experiment')
         self.add_argument('--vispath', default=None, type=str,
                           help='path to save task graph visualization to')
         self.add_argument('--version', action='version',
                           version='ramutils version {}'.format(__version__))
+
+        if kwargs['agg']:
+            self.add_argument('--subject', '-s', nargs='+', help='List of subjects')
+            self.add_argument('--experiment', '-x', nargs='+', help='List of experiments')
+
+        else:
+            self.add_argument('--subject', '-s', required=True, type=str, help='subject ID')
+            self.add_argument('--experiment', '-x', required=True, type=str,
+                              choices=allowed_experiments, help='experiment')
 
     def _create_dirs(self, path):
         if os.path.exists(path):
@@ -72,13 +78,15 @@ class RamArgumentParser(ArgumentParser):
         return args
 
 
-def make_parser(description, allowed_experiments=sum([exps for exps in EXPERIMENTS.values()], [])):
+def make_parser(description, agg=False, allowed_experiments=sum([exps for exps in EXPERIMENTS.values()], [])):
     """Create a stub parser containing common options.
 
     Parameters
     ----------
     description : str
         Passed along to :class:`ArgumentParser`
+    agg: bool
+        If True, then subject and experiment can be lists instead of single items
     allowed_experiments : List[str]
         List of allowed experiments.
 
@@ -96,4 +104,5 @@ def make_parser(description, allowed_experiments=sum([exps for exps in EXPERIMEN
     """
 
     return RamArgumentParser(description=description,
+                             agg=agg,
                              allowed_experiments=allowed_experiments)

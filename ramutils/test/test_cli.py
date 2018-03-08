@@ -213,3 +213,30 @@ class TestCreateReports:
 
         create_report(args)
         return
+
+    @pytest.mark.rhino
+    @pytest.mark.output
+    @pytest.mark.parametrize('subjects, experiments, sessions', [
+        (['R1384J'], 'FR5', None),
+    ])
+    def test_create_aggregated_stim_session_report(self, subjects, experiments, sessions, rhino_root, output_dest):
+
+        args = [
+            '--root', rhino_root,
+            '--dest', output_dest,
+            '-s', subject,
+            '-x', experiment,
+            '--report_db_location', output_dest
+        ]
+
+        if rerun is True:
+            args += ['--rerun']
+
+        if sessions is not None:
+            args += ['-S'] + [str(session) for session in sessions]
+
+        if experiment == 'PS5_CatFR':
+            args += ['--trigger-electrode', 'LB6-LB7']
+
+        create_report(args)
+        return
