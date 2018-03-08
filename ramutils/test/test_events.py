@@ -284,8 +284,8 @@ class TestEvents:
         ('PAL1', [0, 1, 100, 102, 203], [3]),
         ('PS', [0, 1, 100, 102, 203], [0, 1])
     ])
-    def test_extract_relevant_sessions(self, experiment, session_list, exp_sessions):
-        extracted_sessions = extract_relevant_sessions(experiment, session_list)
+    def test_remove_session_number_offsets(self, experiment, session_list, exp_sessions):
+        extracted_sessions = remove_session_number_offsets(experiment, session_list)
         assert extracted_sessions == exp_sessions
         return
 

@@ -50,7 +50,7 @@ def load_events(subject, experiment, file_type='all_events',
                                                "protocols",
                                                "r1.json"))
 
-    sessions_to_load = extract_relevant_sessions(experiment, sessions)
+    sessions_to_load = remove_session_number_offsets(experiment, sessions)
     if sessions_to_load is None:
         sessions_to_load = get_completed_sessions(subject, experiment,
                                                   rootdir=rootdir)
@@ -188,7 +188,7 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
     return events
 
 
-def extract_relevant_sessions(experiment, sessions):
+def remove_session_number_offsets(experiment, sessions):
     """
         Given a list of sessions to include, undo the offsets for catFR and
         PAL so the sessions can be looked up correctly in the r1.json file

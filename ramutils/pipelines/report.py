@@ -205,7 +205,7 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
                                      joint_report, paths, ec_pairs,
                                      used_pair_mask, excluded_pairs,
                                      final_pairs, pairs_metadata_table,
-                                     all_events,  **kwargs):
+                                     all_events, **kwargs):
     """ Report generation sub-pipeline that is shared by all nonstim reports """
     repetition_ratio_dict = {}
     if joint_report or (experiment == 'catFR1'):
