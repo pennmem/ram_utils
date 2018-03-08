@@ -343,7 +343,7 @@ class TestFRStimSessionSummary:
 
         nonstim_recalls_by_list = FRStimSessionSummary.recalls_by_list(
             [self.sample_summary], stim_list_only=False)
-        assert sum(nonstim_recalls_by_list) == 12
+        assert sum(nonstim_recalls_by_list) == 55
 
     def test_prob_first_recall_by_serialpos(self):
         prob_first_recall_nonstim = FRStimSessionSummary.prob_first_recall_by_serialpos([self.sample_summary], stim=False)
