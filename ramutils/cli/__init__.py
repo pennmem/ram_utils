@@ -28,14 +28,10 @@ class RamArgumentParser(ArgumentParser):
         self.add_argument('--version', action='version',
                           version='ramutils version {}'.format(__version__))
 
-        if agg:
-            self.add_argument('--subject', '-s', nargs='+', help='List of subjects')
-            self.add_argument('--experiment', '-x', nargs='+', help='List of experiments')
-
-        else:
-            self.add_argument('--subject', '-s', required=True, type=str, help='subject ID')
-            self.add_argument('--experiment', '-x', required=True, type=str,
-                              choices=allowed_experiments, help='experiment')
+        self.add_argument('--subject', '-s', required=(False if agg else True), nargs=('+' if agg else 1),
+                          help='subject ID(s)')
+        self.add_argument('--experiment', '-x', required=(False if agg else True), nargs=('+' if agg else 1),
+                          choices=allowed_experiments, help='experiment')
 
     def _create_dirs(self, path):
         if os.path.exists(path):

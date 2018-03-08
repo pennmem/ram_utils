@@ -49,9 +49,7 @@
 
 <script>
   window.addEventListener('load', () => {
-    $(document).ready( function () {
     $('#memory_modulation_table').DataTable();
-    });
 
     let plot_data = JSON.parse('{{ plot_data }}');
     const summary = plot_data["recall_summary"];

@@ -62,9 +62,7 @@
   </table>
   <script>
     window.addEventListener('load', () => {
-      $(document).ready( function () {
-        $('#classifier_summary').DataTable();
-      });
+      $('#classifier_summary').DataTable();
 
       let plot_data = JSON.parse('{{ plot_data }}');
       let rocData = plot_data["roc"];

@@ -1,4 +1,4 @@
-""" Pipeline for create aggregated reports """
+""" Pipeline for creating aggregated stim reports """
 
 from ramutils.tasks import *
 from ramutils.events import find_subjects
