@@ -151,9 +151,6 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
 
     all_task_events = build_training_data(subject, experiment, paths, **kwargs)
 
-    # FIXME: If PTSA is updated to not remove events behind this scenes, this
-    # won't be necessary. Or, if we can remove bad events before passing to
-    # compute powers, then we won't have to catch the events
     powers, final_task_events = compute_normalized_powers(all_task_events,
                                                           bipolar_pairs=ec_pairs,
                                                           **kwargs)

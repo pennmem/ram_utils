@@ -64,11 +64,6 @@ class ReportGenerator(object):
         self.subject = extract_subject(self.session_summaries[0].events)
         self.hmm_results = hmm_results
 
-        # PS has not math summaries, so only check for non-PS experiments
-        if all(['PS' not in exp for exp in self.experiments]):
-            if len(session_summaries) != len(math_summaries):
-                raise ValueError("Summaries contain different numbers of sessions")
-
         self._env = Environment(
             loader=PackageLoader('ramutils.reports', 'templates'),
         )

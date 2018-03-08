@@ -42,7 +42,7 @@ class TestEvents:
         ('R1354E', 'FR1', None),
         ('R1354E', 'FR1', [1]),
         ('R1354E', 'catFR1', None),
-        ('R1354E', 'catFR1', [1])
+        ('R1354E', 'catFR1', [101])
     ])
     def test_load_events(self, subject, experiment, sessions):
         events = load_events(subject, experiment, sessions=sessions,
@@ -276,6 +276,17 @@ class TestEvents:
 
     def test_extract_stim_and_post_stim_masks(self):
         # TODO: Fill in with comparison to legacy outputs
+        return
+
+    @pytest.mark.parametrize("experiment, session_list, exp_sessions", [
+        ('FR1', [0, 1, 100, 102, 203], [0, 1]),
+        ('catfr1', [0, 1, 100, 102, 203], [0, 2]),
+        ('PAL1', [0, 1, 100, 102, 203], [3]),
+        ('PS', [0, 1, 100, 102, 203], [0, 1])
+    ])
+    def test_remove_session_number_offsets(self, experiment, session_list, exp_sessions):
+        extracted_sessions = remove_session_number_offsets(experiment, session_list)
+        assert extracted_sessions == exp_sessions
         return
 
     @pytest.mark.rhino

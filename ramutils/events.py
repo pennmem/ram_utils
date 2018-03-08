@@ -50,7 +50,7 @@ def load_events(subject, experiment, file_type='all_events',
                                                "protocols",
                                                "r1.json"))
 
-    sessions_to_load = sessions
+    sessions_to_load = remove_session_number_offsets(experiment, sessions)
     if sessions_to_load is None:
         sessions_to_load = get_completed_sessions(subject, experiment,
                                                   rootdir=rootdir)
@@ -79,7 +79,6 @@ def load_events(subject, experiment, file_type='all_events',
         empty_recarray = initialize_empty_event_reccarray()
         return empty_recarray
 
-    # TODO: Make this less ugly to look at
     events = np.rec.array(np.concatenate([
         BaseEventReader(filename=f, eliminate_events_with_no_eeg=True).read()
         for f in event_files]))
@@ -142,6 +141,7 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
         raise RuntimeError('Event cleaning can only happen on single-experiment'
                            ' datasets')
     experiment = experiments[0]
+
     events = remove_negative_offsets(events)
 
     # Only for PS5 do we want to keep the practice list around so we can know
@@ -155,9 +155,6 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
 
     events = remove_incomplete_lists(events)
     events = select_column_subset(events, all_relevant=True)
-
-    # TODO: Add remove_repetitions() function to get rid of any recall events
-    # that are just a repeated recall
 
     # separate_stim_events is called within the task-specific functions
     # because the columns to subset differs by task
@@ -189,6 +186,31 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
         return events, stim_params
 
     return events
+
+
+def remove_session_number_offsets(experiment, sessions):
+    """
+        Given a list of sessions to include, undo the offsets for catFR and
+        PAL so the sessions can be looked up correctly in the r1.json file
+    """
+    if sessions is None:
+        return sessions
+
+    elif experiment.find("PAL") != -1:
+        relevant_sessions = [(sess - 200) for sess in sessions if sess >= 200]
+
+    elif experiment.find("cat") != -1:
+        relevant_sessions = [(sess - 100) for sess in sessions if (sess >= 100 and sess < 200)]
+
+    elif experiment.find("FR") != -1:
+        relevant_sessions = [sess for sess in sessions if sess < 100]
+
+    elif experiment.find("PS") != -1:
+        relevant_sessions = [sess for sess in sessions if sess < 100]
+
+    else:
+        raise RuntimeError("Only Fr/catFR/PAL session numbering with offsets is supported")
+    return relevant_sessions
 
 
 def update_subject(events):
