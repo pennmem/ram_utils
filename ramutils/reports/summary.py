@@ -952,13 +952,22 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
     def recalls_by_list(summaries, stim_list_only=False):
         """ Number of recalls by list. Optionally returns results for only stim lists """
         df = FRStimSessionSummary.combine_sessions(summaries)
-        recalls_by_list = (
-            df[df.is_stim_list == stim_list_only]
-            .groupby('list')
-            .recalled
-            .sum()
-            .astype(int)
-            .tolist())
+        if stim_list_only:
+            recalls_by_list = (
+                df[df.is_stim_list == stim_list_only]
+                .groupby('list')
+                .recalled
+                .sum()
+                .astype(int)
+                .tolist())
+        else:
+            recalls_by_list = (
+                df.groupby('list')
+                  .recalled
+                  .sum()
+                  .astype(int)
+                  .tolist())
+
         return recalls_by_list
 
     @staticmethod
