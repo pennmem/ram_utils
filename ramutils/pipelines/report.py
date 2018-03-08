@@ -5,7 +5,6 @@ import pandas as pd
 
 from ramutils.tasks import *
 from ramutils.utils import extract_experiment_series
-from ramutils.montage import get_classifier_excluded_leads
 
 
 def make_report(subject, experiment, paths, joint_report=False,
@@ -63,11 +62,11 @@ def make_report(subject, experiment, paths, joint_report=False,
     ec_pairs = get_pairs(subject, experiment, sessions, paths)
 
     if use_classifier_excluded_leads:
-        classifier_excluded_leads = get_classifier_excluded_leads(subject, paths.root)
+        classifier_excluded_leads = get_classifier_excluded_leads(subject, ec_pairs, paths.root).compute()
         if stim_params is None:
             stim_params = []
         stim_params.extend(classifier_excluded_leads)
-    excluded_pairs = reduce_pairs(ec_pairs, stim_params, True)
+    excluded_pairs = reduce_pairs(ec_pairs, stim_params, return_excluded=True)
 
     # PS4 is such a special beast, that we just return it's own sub-pipeline
     # in order to simplify the branching logic for generating all other reports
@@ -99,7 +98,6 @@ def make_report(subject, experiment, paths, joint_report=False,
                                          paths.dest, hmm_results=hmm_results)
             return report.compute()
 
-    # TODO: allow using different localization, montage numbers
     final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
     used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
     pairs_metadata_table = generate_montage_metadata_table(subject,

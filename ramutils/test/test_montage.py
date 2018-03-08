@@ -187,10 +187,11 @@ class TestMontage:
         assert len(config_pairs['R1354E']['pairs'].keys()) > 0
         return
 
-    @pytest.mark.parametrize('subject', ['R1395M'])
-    def test_get_classifier_excluded_leads(self, subject):
+    def test_get_classifier_excluded_leads(self):
         paths = FilePaths(root=datafile(''))
-        excluded_contacts = get_classifier_excluded_leads(subject, paths.root)
-        assert excluded_contacts[0].anode_label == 'LA1'
-        assert excluded_contacts[1].anode_label == 'LA2'
+
+        excluded_contacts = get_classifier_excluded_leads('test_subject', self.test_pairs, paths.root)
+        assert len(excluded_contacts) == 1
+        assert excluded_contacts[0].anode_label == 'LAD1'
+        assert excluded_contacts[0].cathode_label == 'LAD2'
 
