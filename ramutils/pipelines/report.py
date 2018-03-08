@@ -11,7 +11,7 @@ from ramutils.montage import get_classifier_excluded_leads
 def make_report(subject, experiment, paths, joint_report=False,
                 retrain=False, stim_params=None, exp_params=None,
                 sessions=None, vispath=None, rerun=False,
-                trigger_electrode=None, use_classifier_excluded_leads=False):
+                trigger_electrode=None, use_classifier_excluded_leads=False, excluded_sessions=None):
     """Run a report.
 
     Parameters
@@ -43,6 +43,8 @@ def make_report(subject, experiment, paths, joint_report=False,
         in PS5
     use_classifier_excluded_leads: bool
         Use contents of classifier_excluded_leads.txt to exclude channels from classifier training
+    excluded_sessions: Lis[int]
+        List of sessions to exclude from classifier training
 
     Returns
     -------
@@ -99,7 +101,6 @@ def make_report(subject, experiment, paths, joint_report=False,
                                          paths.dest, hmm_results=hmm_results)
             return report.compute()
 
-    # TODO: allow using different localization, montage numbers
     final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
     used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
     pairs_metadata_table = generate_montage_metadata_table(subject,
@@ -136,7 +137,9 @@ def make_report(subject, experiment, paths, joint_report=False,
                                              joint_report, paths, ec_pairs,
                                              used_pair_mask, excluded_pairs,
                                              final_pairs, pairs_metadata_table,
-                                             all_events, **kwargs)
+                                             all_events,
+                                             excluded_sessions=excluded_sessions,
+                                             **kwargs)
     elif experiment.find("PS5") != -1:
         session_summaries, math_summaries, \
         classifier_evaluation_results, repetition_ratio_dict, \
@@ -156,7 +159,9 @@ def make_report(subject, experiment, paths, joint_report=False,
                                           excluded_pairs,
                                           used_pair_mask, final_pairs,
                                           pairs_metadata_table, all_events,
-                                          task_events, stim_data, **kwargs)
+                                          task_events, stim_data,
+                                          excluded_sessions=excluded_sessions,
+                                          **kwargs)
 
     output = save_all_output(subject, experiment, session_summaries,
                              math_summaries, classifier_evaluation_results,
@@ -204,7 +209,7 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
                                      joint_report, paths, ec_pairs,
                                      used_pair_mask, excluded_pairs,
                                      final_pairs, pairs_metadata_table,
-                                     all_events, **kwargs):
+                                     all_events, excluded_sessions=None, **kwargs):
     """ Report generation sub-pipeline that is shared by all nonstim reports """
     repetition_ratio_dict = {}
     if joint_report or (experiment == 'catFR1'):
@@ -220,6 +225,7 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
                                           experiment,
                                           paths,
                                           sessions=sessions,
+                                          excluded_sessions=excluded_sessions,
                                           **kwargs)
 
     powers, final_task_events = compute_normalized_powers(
@@ -299,7 +305,8 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
                                   paths, ec_pairs, excluded_pairs,
                                   used_pair_mask, final_pairs,
                                   pairs_metadata_table, all_events,
-                                  task_events, stim_data, **kwargs):
+                                  task_events, stim_data, excluded_sessions=None,
+                                  **kwargs):
     """ Report generation sub-pipeline shared by all stim reports """
     series_num = extract_experiment_series(experiment)
     # FR2 does not have STIM_OFF events, so until we can identify them more
@@ -327,6 +334,7 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
     retrained_classifier = None
     if retrain or any([classifier is None for classifier in used_classifiers]):
         training_events = build_training_data(subject, experiment, paths,
+                                              excluded_sessions=excluded_sessions,
                                               **kwargs).compute()
 
         training_powers, final_training_events = compute_normalized_powers(
