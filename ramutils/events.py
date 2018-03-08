@@ -50,7 +50,7 @@ def load_events(subject, experiment, file_type='all_events',
                                                "protocols",
                                                "r1.json"))
 
-    sessions_to_load = sessions
+    sessions_to_load = extract_relevant_sessions(experiment, sessions)
     if sessions_to_load is None:
         sessions_to_load = get_completed_sessions(subject, experiment,
                                                   rootdir=rootdir)
@@ -79,7 +79,6 @@ def load_events(subject, experiment, file_type='all_events',
         empty_recarray = initialize_empty_event_reccarray()
         return empty_recarray
 
-    # TODO: Make this less ugly to look at
     events = np.rec.array(np.concatenate([
         BaseEventReader(filename=f, eliminate_events_with_no_eeg=True).read()
         for f in event_files]))
@@ -189,26 +188,29 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
     return events
 
 
-def remove_sessions(events, excluded_sessions):
-    """ Remove the requested sessions from the events
-
-    Parameters:
-    -----------
-    excluded_sessions: List[int]
-        List of session numbers to exclude. Convention is to start at 0 for FR, 100 for catFR, and 200 for PAL
-
-    Returns:
-    --------
-    events: np.recarray
-        Recarray of events
+def extract_relevant_sessions(experiment, sessions):
     """
-    if excluded_sessions is None:
-        return events
+        Given a list of sessions to include, undo the offsets for catFR and
+        PAL so the sessions can be looked up correctly in the r1.json file
+    """
+    if sessions is None:
+        return sessions
 
-    for session in excluded_sessions:
-        events = events[events.session != session]
+    elif experiment.find("PAL") != -1:
+        relevant_sessions = [(sess - 200) for sess in sessions if sess >= 200]
 
-    return events
+    elif experiment.find("cat") != -1:
+        relevant_sessions = [(sess - 100) for sess in sessions if (sess >= 100 and sess < 200)]
+
+    elif experiment.find("FR") != -1:
+        relevant_sessions = [sess for sess in sessions if sess < 100]
+
+    elif experiment.find("PS") != -1:
+        relevant_sessions = [sess for sess in sessions if sess < 100]
+
+    else:
+        raise RuntimeError("Only Fr/catFR/PAL session numbering with offsets is supported")
+    return relevant_sessions
 
 
 def update_subject(events):
