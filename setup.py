@@ -32,7 +32,8 @@ setup(
     entry_points={
         'console_scripts': [
             'ramulator-conf=ramutils.cli.expconf:create_expconf',
-            'ram-report=ramutils.cli.report:create_report'
+            'ram-report=ramutils.cli.report:create_report',
+            'ram-aggregated-report=ramutils.cli.aggregated_report:create_aggregate_report'
         ]
     }
 )
