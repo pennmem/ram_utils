@@ -548,7 +548,7 @@ def get_pairs(subject, experiment, sessions, paths):
     return all_pairs
 
 
-def get_classifier_excluded_leads(subject, rootdir='/'):
+def get_classifier_excluded_leads(subject, all_pairs, rootdir='/'):
     """ Identify channels to be excluded using the classifier_excluded_leads.txt file
 
     Parameters:
@@ -573,9 +573,20 @@ def get_classifier_excluded_leads(subject, rootdir='/'):
 
     excluded_labels = [label for label in excluded_labels if label != '']
 
+    # Find all bipolar pairs where any of the excluded labels appear
+    excluded_anodes = []
+    excluded_cathodes = []
+    for pair in all_pairs[subject]['pairs'].keys():
+        excluded_label_mask = [(pair.find(excluded) != -1) for excluded in excluded_labels]
+        if any(excluded_label_mask):
+            anode = pair.split('-')[0]
+            excluded_anodes.append(anode)
+            cathode = pair.split('-')[1]
+            excluded_cathodes.append(cathode)
+
     # This may seem a bit odd, but it returns the labels in a format that is easy to use by other functions
     # in ramutils
-    excluded_contacts = make_stim_params(subject, excluded_labels, excluded_labels,
+    excluded_contacts = make_stim_params(subject, excluded_anodes, excluded_cathodes,
                                          target_amplitudes=[0.5] * len(excluded_labels),
                                          root=rootdir)
     return excluded_contacts

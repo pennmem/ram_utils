@@ -2,7 +2,7 @@ from ramutils.constants import EXPERIMENTS
 from ramutils.exc import (
     MissingArgumentsError, MultistimNotAllowedException, ValidationError
 )
-from ramutils.montage import generate_pairs_from_electrode_config, get_classifier_excluded_leads
+from ramutils.montage import generate_pairs_from_electrode_config
 from ramutils.tasks import *
 
 
@@ -113,7 +113,7 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
     # Ignore leads identified in classifier_excluded_leads.txt
     pairs_to_exclude = stim_params
     if use_classifier_excluded_leads:
-        classifier_excluded_leads = get_classifier_excluded_leads(subject, rootdir=paths.root)
+        classifier_excluded_leads = get_classifier_excluded_leads(subject, ec_pairs, rootdir=paths.root).compute()
         pairs_to_exclude = pairs_to_exclude + classifier_excluded_leads
 
     excluded_pairs = reduce_pairs(ec_pairs, pairs_to_exclude, True)
