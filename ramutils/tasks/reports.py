@@ -16,6 +16,10 @@ def build_static_report(subject, experiment, session_summaries, math_summaries,
                         delta_hfa_table, classifier_summaries, dest,
                         hmm_results={}, save=True, aggregated_report=False):
     """ Given a set of summary objects, generate a static HTML report """
+
+    if aggregated_report and len(subject) > 8:
+        subject = "Multi-subject"
+
     generator = ReportGenerator(subject, experiment, session_summaries, math_summaries,
                                 delta_hfa_table, classifier_summaries,
                                 dest=dest, hmm_results=hmm_results)
