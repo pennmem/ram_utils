@@ -197,10 +197,10 @@ def remove_session_number_offsets(experiment, sessions):
         return sessions
 
     elif experiment.find("PAL") != -1:
-        relevant_sessions = [(sess - 200) for sess in sessions if sess >= 200]
+        relevant_sessions = [(sess - 200) if sess >= 200 else sess for sess in sessions]
 
     elif experiment.find("cat") != -1:
-        relevant_sessions = [(sess - 100) for sess in sessions if (sess >= 100 and sess < 200)]
+        relevant_sessions = [(sess - 100) if sess >= 100 and sess < 200 else sess for sess in sessions]
 
     elif experiment.find("FR") != -1:
         relevant_sessions = [sess for sess in sessions if sess < 100]

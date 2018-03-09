@@ -5,6 +5,7 @@ import pandas as pd
 
 from ramutils.tasks import *
 from ramutils.utils import extract_experiment_series
+from ramutils.events import remove_session_number_offsets
 
 
 def make_report(subject, experiment, paths, joint_report=False,
@@ -59,6 +60,7 @@ def make_report(subject, experiment, paths, joint_report=False,
     if 'Cat' in experiment:
         experiment = experiment.replace('Cat', 'cat')
 
+    sessions = remove_session_number_offsets(experiment, sessions)
     ec_pairs = get_pairs(subject, experiment, sessions, paths)
 
     if use_classifier_excluded_leads:

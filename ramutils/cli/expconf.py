@@ -21,7 +21,7 @@ experiments = (
     EXPERIMENTS['record_only']
 )
 
-parser = make_parser("Generate experiment configs for Ramulator", experiments)
+parser = make_parser("Generate experiment configs for Ramulator", agg=False, allowed_experiments=experiments)
 parser.add_argument('--localization', '-l', default=0, type=int,
                     help='localization number (default: 0)')
 parser.add_argument('--montage', '-m', default=0, type=int,
