@@ -102,19 +102,20 @@ class TestExpConf:
     @pytest.mark.trylast
     @pytest.mark.output
     @pytest.mark.parametrize(
-        'experiment,subject,postfix,anodes,cathodes,use_classifier_excluded_leads',
+        'experiment,subject,postfix,anodes,cathodes,use_classifier_excluded_leads, sessions',
         [
-            ('AmplitudeDetermination', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8'], False),
-            ('CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8'], False),
-            ('CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8'], True),
-            ('FR6', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8'], False),
-            ('PS4_FR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8'], False),
-            ('PAL5', 'R1318N', 'R1318N11JUL17M0L0STIM', ['LAIIH2'], ['LAIIH3'], False),
-            ('PS5_FR', 'R1378T', '18DEC2017L0M0STIM', ['LC8'], ['LC9'], False)
+            ('AmplitudeDetermination', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8'], False, None),
+            ('CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8'], False, None),
+            ('CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8'], False, None),
+            ('CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8'], True, [0, 1, 100]), # limited sessions config
+            ('FR6', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8'], False, None),
+            ('PS4_FR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8'], False, None),
+            ('PAL5', 'R1318N', 'R1318N11JUL17M0L0STIM', ['LAIIH2'], ['LAIIH3'], False, None),
+            ('PS5_FR', 'R1378T', '18DEC2017L0M0STIM', ['LC8'], ['LC9'], False, None)
         ]
     )
     def test_create_expconf(self, experiment, subject, postfix, anodes,
-                            cathodes, use_classifier_excluded_leads, rhino_root, output_dest):
+                            cathodes, use_classifier_excluded_leads, sessions, rhino_root, output_dest):
 
         args = [
             "-s", subject, "-x", experiment,
@@ -140,6 +141,9 @@ class TestExpConf:
 
         if use_classifier_excluded_leads:
             args += ['-u']
+
+        if sessions is not None:
+            args += ['-S'] + [str(session) for session in sessions]
 
         create_expconf(args)
 

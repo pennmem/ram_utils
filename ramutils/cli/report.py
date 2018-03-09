@@ -20,12 +20,8 @@ from ramutils.tasks import memory
 
 
 parser = make_parser("Generate a report")
-parser.add_argument('--sessions', '-S', nargs='+',
-                    help='sessions to read data from (default: use all)')
 parser.add_argument("--retrain", "-R", action="store_true", default=False,
                     help="retrain classifier rather than loading from disk")
-parser.add_argument('--excluded-contacts', '-E', nargs='+',
-                    help='contacts to exclude from classifier')
 parser.add_argument('--joint-report', '-j', action='store_true', default=False,
                     help='include CatFR/FR for FR reports (default: off)')
 parser.add_argument('--rerun', '-C', action="store_true", default=False,

@@ -13,7 +13,6 @@ from ramutils.tasks import memory
 
 
 parser = make_parser("Generate a report", agg=True)
-parser.add_argument('--sessions', '-S', nargs='+')
 parser.add_argument('--fit-model', '-f', action='store_true', default=False,
                     help='Fit model to estimate behavioral effects of stim (very slow)')
 parser.add_argument('--report_db_location',
