@@ -59,8 +59,9 @@ def load_events(subject, experiment, file_type='all_events',
 
     # If the given sessions have offsets, then remove, otherwise leave them alone
     sessions_to_load = sessions
-    if max(sessions) >= 100:
-        sessions_to_load = remove_session_number_offsets(experiment, sessions)
+    if len(sessions_to_load) > 0:
+        if max(sessions) >= 100:
+            sessions_to_load = remove_session_number_offsets(experiment, sessions)
 
     event_files = []
     for session in sorted(sessions_to_load):
