@@ -1,8 +1,21 @@
 Changes
 =======
 
+Version 2.1.7
+--------------
+
+**2018-03-08**
+
+* Added support for building aggregated stim reports #149
+* Added utility function for extracting metadata based on the file names in the report database #147
+* Added ability to exclude sessions from reports and config generation #151
+* Added ability to exclude specific contacts from classifier training #148, #150
+
 Version 2.1.6
 --------------
+
+**2018-02-27**
+
 * Added support for building FR2/catFR2, FR3/catFR3
 * Added support for building preliminary FR6/catFR6 reports
 * Bugfix to allow re-localized subjects to be run through the pipeline

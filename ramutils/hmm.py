@@ -3,6 +3,7 @@ mpl.use('Agg') # allows matplotlib to work without x-windows (for RHINO)
 
 import pymc3 as pm
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 
 
@@ -42,10 +43,10 @@ class HierarchicalModel(object):
         self.item_comparison = item_comparison
 
         self.data = data
-        self.n_sessions = len(self.data.session.unique())
+        self.n_sessions = len(self.data.session_idx.unique())
         self.n_serialpos = len(self.data.serialpos.unique())
         self.n_lists = len(self.data.list.unique())
-        self.session_idx = self.data.session.values
+        self.session_idx = self.data.session_idx.values
         self.list_idx = self.data.list.values
         self.serialpos_idx = self.data.serialpos.values
 
@@ -102,7 +103,7 @@ class HierarchicalModel(object):
                                     mu_beta + beta_offset * sigma_beta)
 
             # Expected value
-            recall_est = pm.invlogit(alpha[self.data.session.values] +
+            recall_est = pm.invlogit(alpha[self.data.session_idx.values] +
                                      serialpos_coef[0] * self.data[0] +
                                      serialpos_coef[1] * self.data[1] +
                                      serialpos_coef[2] * self.data[2] +
@@ -115,7 +116,7 @@ class HierarchicalModel(object):
                                      serialpos_coef[9] * self.data[10] +
                                      serialpos_coef[10] * self.data[11] +
                                      listpos_coef * self.data.list.values +
-                                     beta[self.data.session.values] * self.data.is_stim_list)
+                                     beta[self.data.session_idx.values] * self.data.is_stim_list)
 
             y_like = pm.Bernoulli('y_like',
                                   recall_est,
@@ -164,11 +165,21 @@ def save_traceplot(trace, full_path):
 
 
 def save_foresplot(trace, full_path):
-    stim_variable = "Stim Effect (Across Sessions)"
+    session_values = trace.get_values("Stim Effect (Session Level)", chains=[trace.chains[0]][0])
+    num_sessions = np.shape(session_values)[1]
+    session_titles = [" ".join(["Session", str(i)]) for i in range(num_sessions)]
+
+    ylabels=['']
+    stim_vars = ["Stim Effect (Across Sessions)"]
+
+    if num_sessions > 1:
+        ylabels = ["Agg"] + session_titles
+        stim_vars += ["Stim Effect (Session Level)"]
+
     ax = pm.forestplot(trace,
-                       varnames=[stim_variable],
+                       varnames=stim_vars,
                        xtitle="Estimated Effect of Stimulation",
-                       ylabels=[''],
+                       ylabels=ylabels,
                        quartiles=False,
                        plot_kwargs=dict(
                            linewidth=5,

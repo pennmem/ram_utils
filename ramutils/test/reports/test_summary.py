@@ -312,72 +312,76 @@ class TestFRStimSessionSummary:
         cls.sample_summary.populate(cls.sample_events, pairs, excluded, powers)
 
     def test_num_nonstim_lists(self):
-        assert self.sample_summary.num_nonstim_lists == 9
+        assert FRStimSessionSummary.num_nonstim_lists([self.sample_summary]) == 9
 
     def test_num_stim_lists(self):
-        assert self.sample_summary.num_stim_lists == 16
+        assert FRStimSessionSummary.num_stim_lists([self.sample_summary]) == 16
 
     def test_lists(self):
-        lists = self.sample_summary.lists()
+        lists = FRStimSessionSummary.lists([self.sample_summary])
         assert min(lists) == 1
         assert max(lists) == 25
 
-        stim_lists = self.sample_summary.lists(stim=True)
+        stim_lists = FRStimSessionSummary.lists([self.sample_summary], stim=True)
         assert len(stim_lists) == 16
 
     def test_stim_events_by_list(self):
-        stim_events_by_list = self.sample_summary.stim_events_by_list
+        stim_events_by_list = FRStimSessionSummary.stim_events_by_list([self.sample_summary])
         assert min(stim_events_by_list) == 0
         assert max(stim_events_by_list) == 9
 
     def test_prob_stim_by_serialpos(self):
-        prob_stim_by_serialpos = self.sample_summary.prob_stim_by_serialpos
+        prob_stim_by_serialpos = FRStimSessionSummary.prob_stim_by_serialpos([self.sample_summary])
         assert min(prob_stim_by_serialpos) > .46
         assert max(prob_stim_by_serialpos) > .52
         return
 
     def test_recalls_by_list(self):
-        stim_recalls_by_list = self.sample_summary.recalls_by_list(
-            stim_list_only=True)
+        stim_recalls_by_list = FRStimSessionSummary.recalls_by_list(
+            [self.sample_summary], stim_list_only=True)
         assert sum(stim_recalls_by_list) == 43
 
-        nonstim_recalls_by_list = self.sample_summary.recalls_by_list(
-            stim_list_only=False)
-        assert sum(nonstim_recalls_by_list) == 12
+        nonstim_recalls_by_list = FRStimSessionSummary.recalls_by_list(
+            [self.sample_summary], stim_list_only=False)
+        assert sum(nonstim_recalls_by_list) == 55
 
     def test_prob_first_recall_by_serialpos(self):
-        prob_first_recall_nonstim = self.sample_summary.prob_first_recall_by_serialpos(stim=False)
+        prob_first_recall_nonstim = FRStimSessionSummary.prob_first_recall_by_serialpos([self.sample_summary], stim=False)
         assert max(prob_first_recall_nonstim) < 0.57
 
-        prob_first_recall_stim = self.sample_summary.prob_first_recall_by_serialpos(stim=True)
+        prob_first_recall_stim = FRStimSessionSummary.prob_first_recall_by_serialpos([self.sample_summary], stim=True)
         assert max(prob_first_recall_stim) < 0.13
 
     def test_prob_recall_by_serialpos(self):
-        recall_by_serialpos = self.sample_summary.prob_recall_by_serialpos(
+        recall_by_serialpos = FRStimSessionSummary.prob_recall_by_serialpos(
+            [self.sample_summary],
             stim_items_only=False)
         assert max(recall_by_serialpos) > 0.29
         assert min(recall_by_serialpos) < 0.53
 
-        recall_by_serialpos = self.sample_summary.prob_recall_by_serialpos(
+        recall_by_serialpos = FRStimSessionSummary.prob_recall_by_serialpos(
+            [self.sample_summary],
             stim_items_only=True)
         assert max(recall_by_serialpos) > 0.66
         assert min(recall_by_serialpos) == 0
 
     def test_delta_recall(self):
-        delta_recall_stim = self.sample_summary.delta_recall(
+        delta_recall_stim = FRStimSessionSummary.delta_recall(
+            [self.sample_summary],
             post_stim_items=False)
         assert np.isclose(delta_recall_stim, 9.704164)
 
-        delta_recall_post_stim = self.sample_summary.delta_recall(
+        delta_recall_post_stim = FRStimSessionSummary.delta_recall(
+            [self.sample_summary],
             post_stim_items=True)
         assert np.isclose(delta_recall_post_stim, 5.953408)
 
     def test_stim_parameters(self):
-        stim_params = self.sample_summary.stim_parameters
+        stim_params = FRStimSessionSummary.stim_parameters([self.sample_summary])
         assert len(stim_params) == 1
 
     def test_recall_test_results(self):
-        test_results = self.sample_summary.recall_test_results
+        test_results = FRStimSessionSummary.recall_test_results([self.sample_summary], 'FR5')
         # TODO: Manually check these values to ensure accuracy and add
         # assertions
 

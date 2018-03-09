@@ -114,6 +114,8 @@ def save_all_output(subject, experiment, session_summaries, math_summaries,
                                                        data_type=(name +
                                                                   '_traceplot'),
                                                        file_type='png')
+            save_traceplot(trace, traceplot_path)
+
             with open(forestplot_path, 'rb') as f:
                 encoded_image = base64.b64encode(f.read()).replace(b"\n", b"").decode()
             result_files[name] = encoded_image
@@ -202,14 +204,6 @@ def load_existing_results(subject, experiment, sessions, stim_report, db_loc,
                             data_type=(name +'_foresplot'),
                             file_type='png')
                         assert os.path.exists(forestplot_path)
-
-                        traceplot_path = base_output_format.format(
-                            subject=subject,
-                            experiment=experiment,
-                            session=str(session),
-                            data_type=(name + '_traceplot'),
-                            file_type='png')
-                        assert os.path.exists(traceplot_path)
 
                         # Encode the image and pass along that data
                         with open(forestplot_path, 'rb') as f:

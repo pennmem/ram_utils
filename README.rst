@@ -150,6 +150,39 @@ Generating reports on the command line::
 
 
 
+Aggregated Stim Report generation
+---------------------------------
+Generating an aggregated stim report from the command line::
+
+    usage: ram-aggregated-report [-h] [--root ROOT] [--dest DEST]
+                             [--cachedir CACHEDIR] [--use-cached]
+                             [--vispath VISPATH] [--version]
+                             [--subject SUBJECT [SUBJECT ...]]
+                             [--experiment EXPERIMENT [EXPERIMENT ...]]
+                             [--sessions SESSIONS [SESSIONS ...]]
+                             [--fit-model]
+                             [--report_db_location REPORT_DB_LOCATION]
+
+    Generate a report
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      --root ROOT           path to rhino root (default: /)
+      --dest DEST, -d DEST  directory to write output to (default:
+                            scratch/ramutils)
+      --cachedir CACHEDIR   absolute path for caching dir
+      --use-cached          allow cached results from previous run to be reused
+      --vispath VISPATH     path to save task graph visualization to
+      --version             show program's version number and exit
+      --subject SUBJECT [SUBJECT ...], -s SUBJECT [SUBJECT ...]
+                            List of subjects
+      --experiment EXPERIMENT [EXPERIMENT ...], -x EXPERIMENT [EXPERIMENT ...]
+                            List of experiments
+      --sessions SESSIONS [SESSIONS ...], -S SESSIONS [SESSIONS ...]
+      --fit-model, -f
+      --report_db_location REPORT_DB_LOCATION
+                            location of report data database
+
 Testing
 -------
 

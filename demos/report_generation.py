@@ -9,21 +9,15 @@ from ramutils.tasks import memory
 memory.cachedir = "/Users/zduey/tmp/"
 
 
-subject = 'R1385E'
+subject = 'R1401J'
 rhino = os.path.expanduser('/Volumes/rhino')
-pairs_path = os.path.join(
-    'protocols', 'r1', 'subjects', subject,
-    'localizations', str(0),
-    'montages', str(0),
-    'neuroradiology', 'current_processed', 'pairs.json')
 
 paths = FilePaths(
     root='/Volumes/RHINO/',
-    pairs=pairs_path,
-    dest='/scratch/zduey/FR5_CatFR5/reports/',
-    data_db='/scratch/zduey/FR5_CatFR5/'
+    dest='/scratch/zduey/',
+    data_db='/scratch/zduey/'
 )
 
 params = FRParameters()
-make_report(subject, "catFR5", paths, exp_params=params, stim_params=None,
-            joint_report=False, sessions=[0], rerun=True, retrain=True)
+make_report(subject, "FR1", paths, exp_params=params, stim_params=None,
+            joint_report=True, rerun=True, sessions=[0, 1, 100, 102])

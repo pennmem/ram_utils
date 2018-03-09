@@ -49,15 +49,14 @@
 
 <script>
   window.addEventListener('load', () => {
-    $(document).ready( function () {
     $('#memory_modulation_table').DataTable();
-    });
-
-    const summary = plot_data["recall_summary"];
-    const probs = plot_data["stim_probability"]);
-    const recallDifference = plot_data["recall_difference"]);
 
     let plot_data = JSON.parse('{{ plot_data }}');
+    const summary = plot_data["recall_summary"];
+    const probs = plot_data["stim_probability"];
+    const recallDifference = plot_data["recall_difference"];
+
+
     ramutils.plots.plotRecallSummary(summary['nonstim'], summary['stim'], summary['stim_events']);
     ramutils.plots.plotStimProbability(probs['serialpos'], probs['probability']);
     ramutils.plots.plotRecallDifference(recallDifference['stim'], recallDifference['post_stim']);
