@@ -60,7 +60,6 @@ def make_report(subject, experiment, paths, joint_report=False,
     if 'Cat' in experiment:
         experiment = experiment.replace('Cat', 'cat')
 
-    sessions = remove_session_number_offsets(experiment, sessions)
     ec_pairs = get_pairs(subject, experiment, sessions, paths)
 
     if use_classifier_excluded_leads:

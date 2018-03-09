@@ -150,10 +150,11 @@ class TestCreateReports:
     @pytest.mark.output
     @pytest.mark.parametrize('rerun', [True, False])
     @pytest.mark.parametrize('subject, experiment, sessions, joint, use_classifier_excluded_leads', [
-        ('R1001P', 'FR1', None, False, False),
-        ('R1354E', 'FR1', [0], False, False),
-        ('R1354E', 'FR1', [0, 1], False, False),
-        ('R1354E', 'CatFR1', [100], False, False),
+        # ('R1001P', 'FR1', None, False, False),
+        # ('R1354E', 'FR1', [0], False, False),
+        # ('R1354E', 'FR1', [0, 1], False, False),
+        ('R1354E', 'CatFR1', [1], False, False),
+        ('R1354E', 'FR1', [0, 100], True, False), # test case for cross-experiment session subset
         ('R1354E', 'FR1', None, True, False),
         ('R1345D', 'FR1', None, False, False),
         ('R1374T', 'CatFR1', None, False, False),
@@ -193,7 +194,7 @@ class TestCreateReports:
     @pytest.mark.parametrize('subject, experiment, sessions', [
         ('R1111M', 'FR2', [0]),
         ('R1154D', 'FR3', [0]),
-        ('R1374T', 'CatFR5', [100]),
+        ('R1374T', 'CatFR5', [0]),
         ('R1345D', 'FR5', [0]),
         ('R1374T', 'PS4_CatFR5', [3]),
         ('R1001P', 'FR2', [0]),

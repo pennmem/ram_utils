@@ -50,10 +50,15 @@ def load_events(subject, experiment, file_type='all_events',
                                                "protocols",
                                                "r1.json"))
 
-    sessions_to_load = remove_session_number_offsets(experiment, sessions)
-    if sessions_to_load is None:
-        sessions_to_load = get_completed_sessions(subject, experiment,
-                                                  rootdir=rootdir)
+    if sessions is None:
+        sessions = get_completed_sessions(subject, experiment,
+                                          rootdir=rootdir)
+        sessions = [int(s) for s in sessions]
+
+    # If the given sessions have offsets, then remove, otherwise leave them alone
+    sessions_to_load = sessions
+    if max(sessions) >= 100:
+        sessions_to_load = remove_session_number_offsets(experiment, sessions)
 
     event_files = []
     for session in sorted(sessions_to_load):
@@ -197,10 +202,10 @@ def remove_session_number_offsets(experiment, sessions):
         return sessions
 
     elif experiment.find("PAL") != -1:
-        relevant_sessions = [(sess - 200) if sess >= 200 else sess for sess in sessions]
+        relevant_sessions = [(sess - 200) for sess in sessions if sess >= 200]
 
     elif experiment.find("cat") != -1:
-        relevant_sessions = [(sess - 100) if sess >= 100 and sess < 200 else sess for sess in sessions]
+        relevant_sessions = [(sess - 100) for sess in sessions if (sess >= 100 and sess < 200)]
 
     elif experiment.find("FR") != -1:
         relevant_sessions = [sess for sess in sessions if sess < 100]
