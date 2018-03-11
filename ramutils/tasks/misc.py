@@ -162,7 +162,7 @@ def load_existing_results(subject, experiment, sessions, stim_report, db_loc,
                                               file_type='h5')
                 )
                 math_summaries.append(math_summary)
-                if experiment == 'catFR1':
+                if (experiment == 'catFR1') or (session >= 100):
                     summary = CatFRSessionSummary
                 elif experiment == 'FR1':
                     summary = FRSessionSummary
