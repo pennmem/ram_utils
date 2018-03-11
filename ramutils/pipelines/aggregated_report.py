@@ -51,6 +51,7 @@ def make_aggregated_report(subjects=None, experiments=None, sessions=None, fit_m
                                                 classifier_evaluation_results,
                                                 session_summaries, math_summaries]]):
                     logger.warning('Unable to find underlying data for {}, experiment {}'.format(subject, experiment))
+                    continue
 
                 all_classifier_evaluation_results.extend(classifier_evaluation_results)
                 all_session_summaries.extend(session_summaries)

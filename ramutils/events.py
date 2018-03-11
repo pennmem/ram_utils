@@ -50,10 +50,18 @@ def load_events(subject, experiment, file_type='all_events',
                                                "protocols",
                                                "r1.json"))
 
-    sessions_to_load = remove_session_number_offsets(experiment, sessions)
-    if sessions_to_load is None:
-        sessions_to_load = get_completed_sessions(subject, experiment,
-                                                  rootdir=rootdir)
+    if sessions is None:
+        sessions = get_completed_sessions(subject, experiment,
+                                          rootdir=rootdir)
+
+    # Make sure sessions are integers since this is required to check the max
+    sessions = [int(s) for s in sessions]
+
+    # If the given sessions have offsets, then remove, otherwise leave them alone
+    sessions_to_load = sessions
+    if len(sessions_to_load) > 0:
+        if max(sessions) >= 100:
+            sessions_to_load = remove_session_number_offsets(experiment, sessions)
 
     event_files = []
     for session in sorted(sessions_to_load):

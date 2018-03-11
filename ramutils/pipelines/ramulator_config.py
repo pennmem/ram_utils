@@ -40,7 +40,7 @@ def validate_pairs(subject, ec_pairs, trigger_pairs=None):
                 )
 
 
-def make_ramulator_config(subject, experiment, paths, stim_params,
+def make_ramulator_config(subject, experiment, paths, stim_params, sessions=None,
                           exp_params=None, vispath=None, extended_blanking=True,
                           localization=0, montage=0, default_surface_area=0.001,
                           trigger_pairs=None, use_common_reference=False,
@@ -56,6 +56,8 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
     paths : FilePaths
     stim_params : List[StimParameters]
         Stimulation parameters for this experiment.
+    sessions: List[int]
+        Sessions to include when training classifier
     exp_params : ExperimentParameters
         Parameters for the experiment.
     vispath : str
@@ -149,7 +151,7 @@ def make_ramulator_config(subject, experiment, paths, stim_params,
                            "implemented")
     kwargs = exp_params.to_dict()
 
-    all_task_events = build_training_data(subject, experiment, paths, **kwargs)
+    all_task_events = build_training_data(subject, experiment, paths, sessions=sessions, **kwargs)
 
     powers, final_task_events = compute_normalized_powers(all_task_events,
                                                           bipolar_pairs=ec_pairs,

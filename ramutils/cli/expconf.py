@@ -21,7 +21,7 @@ experiments = (
     EXPERIMENTS['record_only']
 )
 
-parser = make_parser("Generate experiment configs for Ramulator", experiments)
+parser = make_parser("Generate experiment configs for Ramulator", agg=False, allowed_experiments=experiments)
 parser.add_argument('--localization', '-l', default=0, type=int,
                     help='localization number (default: 0)')
 parser.add_argument('--montage', '-m', default=0, type=int,
@@ -175,8 +175,13 @@ def create_expconf(input_args=None):
 
     # Generate!
     with timer():
-        make_ramulator_config(args.subject, args.experiment, paths, stim_params,
-                              exp_params, args.vispath,
+        make_ramulator_config(args.subject,
+                              args.experiment,
+                              paths,
+                              stim_params,
+                              exp_params=exp_params,
+                              sessions=args.sessions,
+                              vispath=args.vispath,
                               extended_blanking=(not args.no_extended_blanking),
                               localization=args.localization,
                               montage=args.montage,

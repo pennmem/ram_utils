@@ -27,6 +27,8 @@ class RamArgumentParser(ArgumentParser):
                           help='path to save task graph visualization to')
         self.add_argument('--version', action='version',
                           version='ramutils version {}'.format(__version__))
+        self.add_argument('--sessions', '-S', nargs='+',
+                          help='sessions to read data from (default: use all)')
 
         # Number of args, type, and required flag are different so it is easier to do set them up
         # completely separately
