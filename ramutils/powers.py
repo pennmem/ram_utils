@@ -373,6 +373,17 @@ def reshape_powers_to_2d(powers):
     reshaped_powers = powers.reshape((len(powers), -1))
     return reshaped_powers
 
+def save_power_plot(powers,full_path):
+    from matplotlib import pyplot as plt
+
+    plt.imshow(reshape_powers_to_2d(powers),cmap='bwr',aspect='auto',)
+    plt.savefig(full_path,
+                format="png",
+                dpi=300,
+                bbox_inchces="tight",
+                pad_inches=.1)
+    plt.close()
+    return
 
 def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events,
                               frequencies, hfa_cutoff=65, trigger_freq=110):
