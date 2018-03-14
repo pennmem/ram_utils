@@ -1,0 +1,16 @@
+<div class="plot serialpos-curve">
+  <h2>Serial Position</h2>
+  <figure>
+    <div id="feature-plot-placeholder"></div>
+    <figcaption>
+      'stim' and 'non-stim' refer to stim lists and non-stim lists. 'First recall' indicates the plot is based only on
+      the serial position of the first recalled word. 'Overall' means that the recall order is not taken into account.
+    </figcaption>
+    <script>
+      window.addEventListener('load', () => {
+        let plot_data = JSON.parse('{{ plot_data }}');
+        ramutils.plots.plotZtransPowers(plot_data.features);
+      });
+    </script>
+  </figure>
+</div>
