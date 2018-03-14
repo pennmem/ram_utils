@@ -377,11 +377,14 @@ def save_power_plot(powers,full_path):
     from matplotlib import pyplot as plt
 
     plt.imshow(reshape_powers_to_2d(powers),cmap='bwr',aspect='auto',)
+    plt.colorbar()
+    plt.ylabel('Event Number')
+    plt.xlabel('Feature Number')
     plt.savefig(full_path,
                 format="png",
                 dpi=300,
-                bbox_inchces="tight",
-                pad_inches=.1)
+                bbox_inches="tight",
+                )
     plt.close()
     return
 
