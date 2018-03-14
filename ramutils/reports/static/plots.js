@@ -305,6 +305,25 @@ var ramutils = (function (mod, Plotly) {
 
       Plotly.plot('classifier-output-placeholder', data, layout);
     },
+    /** Plot the feature matrix
+    * @params {Array} features
+    */
+    plotZtransPowers: function (features) {
+        const data = {
+            z: features,
+            type: 'heatmap',
+            name: 'Features',
+        };
+        const layout = {
+            xaxis: {title: 'Channel x frequency'},
+            yaxis: {
+                title: 'Event no.',
+                range: [0,features.length]
+            }
+        };
+
+        Plotly.plot('ztrans-powers-placeholder',data,layout);
+    },
 
     /**
      * Plot classifier output as a function of amplitude for each stim site in

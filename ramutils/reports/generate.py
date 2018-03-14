@@ -132,15 +132,15 @@ class ReportGenerator(object):
 
     def _make_plot_data(self, stim=False, classifier=False, joint=False, biomarker_delta=False):
         """ Build up a large dictionary of data for various plots from plot-specific components """
-        plot_data = {}
+        plot_data = {'features': np.concatenate([summary.normalized_powers for summary in self.session_summaries]).tolist()}
         if not stim:
             plot_data['serialpos'] = {
                 'serialpos': list(range(1, 13)),
                 'overall': {
-                    'Overall': FRSessionSummary.serialpos_probabilities(self.session_summaries, False),
+                    'Overall': FRSessionSummary.serialpos_probabilities(self.session_summaries, first=False),
                 },
                 'first': {
-                    'First recall': FRSessionSummary.serialpos_probabilities(self.session_summaries, True),
+                    'First recall': FRSessionSummary.serialpos_probabilities(self.session_summaries, first=True),
                 }
             }
             # Only non-stim reports have the option of this IRT plot
