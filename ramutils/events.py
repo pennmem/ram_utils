@@ -86,10 +86,13 @@ def load_events(subject, experiment, file_type='all_events',
     if len(event_files) == 0:
         empty_recarray = initialize_empty_event_reccarray()
         return empty_recarray
+    try:
+        events = np.rec.array(np.concatenate([
+            BaseEventReader(filename=f, eliminate_events_with_no_eeg=True).read()
+            for f in event_files]))
+    except Exception:
+        raise RamException('Could not load events for %s, %s'%(subject,experiment))
 
-    events = np.rec.array(np.concatenate([
-        BaseEventReader(filename=f, eliminate_events_with_no_eeg=True).read()
-        for f in event_files]))
 
     return events
 
