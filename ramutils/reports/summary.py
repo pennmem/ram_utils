@@ -17,6 +17,7 @@ from ramutils.events import extract_subject, extract_experiment_from_events, \
 from ramutils.bayesian_optimization import choose_location
 from ramutils.exc import TooManySessionsError
 from ramutils.parameters import ExperimentParameters
+from ramutils.powers import save_power_plot
 
 from traitschema import Schema
 from traits.api import Array, ArrayOrNone, Float, Unicode, Bool, Bytes
@@ -485,6 +486,9 @@ class SessionSummary(Summary):
     @normalized_powers.setter
     def normalized_powers(self, new_normalized_powers):
         self._normalized_powers = new_normalized_powers
+
+    def plot_normalized_powers(self,fname_or_file):
+        save_power_plot(self.normalized_powers,fname_or_file)
 
     @property
     def session_length(self):

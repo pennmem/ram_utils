@@ -4,6 +4,8 @@ from datetime import datetime
 import json
 import os.path as osp
 import random
+import six
+import base64
 
 from itertools import compress
 from jinja2 import Environment, PackageLoader
@@ -135,6 +137,19 @@ class ReportGenerator(object):
             'output_median': self.classifier_summary.median_classifier_output,
         }
 
+    def _make_feature_plots(self):
+        def get_feature_plot(s):
+            fd = six.BytesIO()
+            s.plot_normalized_powers(fd)
+            fd.seek(0)
+            return base64.b64encode(fd.read()).replace(b"\n", b"").decode()
+
+        feature_data = {
+            'feature_data': [summary.normalized_powers.tolist() for summary in self.session_summaries],
+            'feature_plots': [get_feature_plot(summary) for summary in self.session_summaries]
+        }
+        return feature_data
+
     def _make_combined_summary(self):
         """ Aggregate behavioral summary data across given sessions """
         return {
@@ -146,7 +161,8 @@ class ReportGenerator(object):
 
     def _make_plot_data(self, stim=False, classifier=False, joint=False, biomarker_delta=False):
         """ Build up a large dictionary of data for various plots from plot-specific components """
-        plot_data = {'features': np.concatenate([summary.normalized_powers for summary in self.session_summaries]).tolist()}
+
+        plot_data = {}
         if not stim:
             plot_data['serialpos'] = {
                 'serialpos': list(range(1, 13)),
@@ -216,16 +232,16 @@ class ReportGenerator(object):
             }
 
         if classifier:
-                plot_data['roc'] = {
-                    'fpr': [classifier.false_positive_rate for classifier in self.classifiers],
-                    'tpr': [classifier.true_positive_rate for classifier in self.classifiers],
-                }
-                plot_data['tercile'] = {
-                    'low': [classifier.low_tercile_diff_from_mean for classifier in self.classifiers],
-                    'mid': [classifier.mid_tercile_diff_from_mean for classifier in self.classifiers],
-                    'high': [classifier.high_tercile_diff_from_mean for classifier in self.classifiers]
-                }
-                plot_data['tags'] = [classifier.id for classifier in self.classifiers]
+            plot_data['roc'] = {
+                'fpr': [classifier.false_positive_rate for classifier in self.classifiers],
+                'tpr': [classifier.true_positive_rate for classifier in self.classifiers],
+            }
+            plot_data['tercile'] = {
+                'low': [classifier.low_tercile_diff_from_mean for classifier in self.classifiers],
+                'mid': [classifier.mid_tercile_diff_from_mean for classifier in self.classifiers],
+                'high': [classifier.high_tercile_diff_from_mean for classifier in self.classifiers]
+            }
+            plot_data['tags'] = [classifier.id for classifier in self.classifiers]
 
         return json.dumps(plot_data)
 
@@ -299,6 +315,7 @@ class ReportGenerator(object):
             plot_data=self._make_plot_data(stim=False, classifier=True,
                                            joint=joint),
             sme_table=self._make_target_selection_table(),
+            feature_data = self._make_feature_plots(),
             joint=joint
         )
 
@@ -337,6 +354,7 @@ class ReportGenerator(object):
             classifiers=self.classifiers,
             stim_params=FRStimSessionSummary.stim_parameters(self.session_summaries),
             recall_tests=FRStimSessionSummary.recall_test_results(self.session_summaries, experiment),
+            feature_data = self._make_feature_plots(),
             hmm_results=self.hmm_results,
             plot_data = self._make_plot_data(stim=True, classifier=True,
                                              biomarker_delta=True)

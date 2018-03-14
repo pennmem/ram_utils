@@ -309,20 +309,13 @@ var ramutils = (function (mod, Plotly) {
     * @params {Array} features
     */
     plotZtransPowers: function (features) {
-        const data = {
+        const data = [{
             z: features,
             type: 'heatmap',
             name: 'Features',
-        };
-        const layout = {
-            xaxis: {title: 'Channel x frequency'},
-            yaxis: {
-                title: 'Event no.',
-                range: [0,features.length]
-            }
-        };
+        }];
 
-        Plotly.plot('ztrans-powers-placeholder',data,layout);
+        Plotly.plot('feature-plot-placeholder',data);
     },
 
     /**
