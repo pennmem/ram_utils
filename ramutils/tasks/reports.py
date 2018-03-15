@@ -42,4 +42,4 @@ def build_static_report(subject, experiment, session_summaries, math_summaries,
         with open(final_destination, 'w') as f:
             f.write(report)
 
-    return True
+    return final_destination
