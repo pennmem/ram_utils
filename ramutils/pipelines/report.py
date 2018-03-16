@@ -1,11 +1,17 @@
 """Pipeline for creating reports."""
 from __future__  import unicode_literals
+from collections import namedtuple
 
 import pandas as pd
 
 from ramutils.tasks import *
 from ramutils.utils import extract_experiment_series
-from ramutils.events import remove_session_number_offsets
+
+
+ReportData = namedtuple('ReportData', 'session_summaries, math_summaries, '
+                                      'target_selection_table, classifier_evaluation_results,'
+                                      'trained_classifier, repetition_ratio_dict, '
+                                      'retrained_classifier, behavioral_results')
 
 
 def make_report(subject, experiment, paths, joint_report=False,
@@ -81,22 +87,25 @@ def make_report(subject, experiment, paths, joint_report=False,
     series_num = extract_experiment_series(experiment)
 
     if not rerun:
-        target_selection_table, classifier_evaluation_results, \
-        session_summaries, math_summaries, hmm_results = \
-            load_existing_results(subject, experiment, sessions, stim_report,
-                                  paths.data_db, rootdir=paths.root).compute()
+        pre_built_results = load_existing_results(subject, experiment, sessions, stim_report,
+                                                  paths.data_db, rootdir=paths.root).compute()
 
         # Check if only None values were returned. Processing will continue
         # undeterred
-        if all([val is None for val in [target_selection_table,
-                                        classifier_evaluation_results,
-                                        session_summaries, math_summaries]]):
+        if any([val is None for val in [pre_built_results['target_selection_table'],
+                                        pre_built_results['classifier_evaluation_results'],
+                                        pre_built_results['session_summaries'],
+                                        pre_built_results['math_summaries']]]):
             pass
         else:
-            report = build_static_report(subject, experiment, session_summaries,
-                                         math_summaries, target_selection_table,
-                                         classifier_evaluation_results,
-                                         paths.dest, hmm_results=hmm_results)
+            report = build_static_report(subject,
+                                         experiment,
+                                         pre_built_results['session_summaries'],
+                                         pre_built_results['math_summaries'],
+                                         pre_built_results['target_selection_table'],
+                                         pre_built_results['classifier_evaluation_results'],
+                                         paths.dest,
+                                         hmm_results=pre_built_results['hmm_results'])
             return report.compute()
 
     final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
@@ -128,47 +137,39 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                    'controllability'])
 
     if not stim_report:
-        session_summaries, math_summaries, target_selection_table, \
-        classifier_evaluation_results, trained_classifier, \
-        repetition_ratio_dict, retrained_classifier, behavioral_results = \
-            generate_data_for_nonstim_report(subject, experiment, sessions,
-                                             joint_report, paths, ec_pairs,
-                                             used_pair_mask, excluded_pairs,
-                                             final_pairs, pairs_metadata_table,
-                                             all_events,
-                                             **kwargs)
+        data = generate_data_for_nonstim_report(subject, experiment, sessions,
+                                                joint_report, paths, ec_pairs,
+                                                used_pair_mask, excluded_pairs,
+                                                final_pairs, pairs_metadata_table,
+                                                all_events,
+                                                **kwargs)
     elif experiment.find("PS5") != -1:
-        session_summaries, math_summaries, \
-        classifier_evaluation_results, repetition_ratio_dict, \
-        retrained_classifier, behavioral_results = \
-            generate_data_for_ps5_report(subject, experiment, joint_report,
-                                         pairs_metadata_table,
-                                         trigger_electrode, ec_pairs,
-                                         excluded_pairs, all_events,
-                                         task_events, stim_data, paths,
-                                         **kwargs)
+        data = generate_data_for_ps5_report(subject, experiment, joint_report,
+                                            pairs_metadata_table,
+                                            trigger_electrode, ec_pairs,
+                                            excluded_pairs, all_events,
+                                            task_events, stim_data, paths,
+                                            **kwargs)
 
     else:
-        session_summaries, math_summaries, classifier_evaluation_results, \
-        retrained_classifier, behavioral_results = \
-            generate_data_for_stim_report(subject, experiment, joint_report,
-                                          retrain, paths, ec_pairs,
-                                          excluded_pairs,
-                                          used_pair_mask, final_pairs,
-                                          pairs_metadata_table, all_events,
-                                          task_events, stim_data,
-                                          **kwargs)
+        data = generate_data_for_stim_report(subject, experiment, joint_report,
+                                             retrain, paths, ec_pairs,
+                                             excluded_pairs,
+                                             used_pair_mask, final_pairs,
+                                             pairs_metadata_table, all_events,
+                                             task_events, stim_data,
+                                             **kwargs)
 
-    output = save_all_output(subject, experiment, session_summaries,
-                             math_summaries, classifier_evaluation_results,
+    output = save_all_output(subject, experiment, data.session_summaries,
+                             data.math_summaries, data.classifier_evaluation_results,
                              paths.data_db,
-                             retrained_classifier=retrained_classifier,
-                             target_selection_table=target_selection_table,
-                             behavioral_results=behavioral_results).compute()
+                             retrained_classifier=data.retrained_classifier,
+                             target_selection_table=data.target_selection_table,
+                             behavioral_results=data.behavioral_results).compute()
 
-    report = build_static_report(subject, experiment, session_summaries,
-                                 math_summaries, target_selection_table,
-                                 classifier_evaluation_results,
+    report = build_static_report(subject, experiment, data.session_summaries,
+                                 data.math_summaries, target_selection_table,
+                                 data.classifier_evaluation_results,
                                  hmm_results=output, dest=paths.dest)
 
     if vispath is not None:
@@ -291,9 +292,11 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
     classifier_evaluation_results = [encoding_classifier_summary,
                                      joint_classifier_summary]
 
-    return session_summaries, math_summaries, target_selection_table, \
-           classifier_evaluation_results, \
-           trained_classifier, repetition_ratio_dict, trained_classifier, None
+    data = ReportData(session_summaries, math_summaries, target_selection_table,
+                      classifier_evaluation_results, trained_classifier, repetition_ratio_dict,
+                      trained_classifier, None)
+
+    return data
 
 
 def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
@@ -386,8 +389,11 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
 
     classifier_evaluation_results = post_hoc_results[
         'classifier_summaries']
-    return session_summaries, math_summaries, classifier_evaluation_results, \
-           retrained_classifier, behavioral_results
+    data = ReportData(session_summaries, math_summaries, None,
+                      classifier_evaluation_results, None, None,
+                      retrained_classifier, behavioral_results)
+
+    return data
 
 
 def generate_data_for_ps5_report(subject, experiment, joint_report,
@@ -399,8 +405,6 @@ def generate_data_for_ps5_report(subject, experiment, joint_report,
         Report generating sub-pipeline for PS5. This is an odd mix
         of the non-stim report and the stim report sub-pipelines
     """
-    repetition_ratio_dict = {}
-
     trigger_electrode_mask = get_trigger_electrode_mask(pairs_metadata_table,
                                                         trigger_electrode)
     trigger_frequency_mask = get_trigger_frequency_mask(kwargs['trigger_freq'],
@@ -433,5 +437,8 @@ def generate_data_for_ps5_report(subject, experiment, joint_report,
     math_summaries = summarize_math(all_events)
     classifier_evaluation_results = []
 
-    return session_summaries, math_summaries, classifier_evaluation_results, \
-           repetition_ratio_dict, None, None
+    data = ReportData(session_summaries, math_summaries, None,
+                      classifier_evaluation_results, None, None,
+                      None, None)
+
+    return data
