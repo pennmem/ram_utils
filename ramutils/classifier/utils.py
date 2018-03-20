@@ -8,6 +8,7 @@ from sklearn.linear_model.logistic import LogisticRegression
 
 from classiflib.container import ClassifierContainer
 from ramutils.exc import UnableToReloadClassifierException
+from matplotlib import pyplot as plt
 
 
 def reload_classifier(subject, task, session, mount_point='/', base_path=None):
@@ -111,3 +112,25 @@ def train_classifier(pow_mat, events, sample_weights, penalty_param,
     return classifier
 
 
+# TODO: group and average classifier weights by brain region
+def plot_classifier_weights(weights, frequencies, pairs, file_):
+    """
+    Visualize the classifier weights as a function of frequency and location.
+    :param weights: np.ndarray (len(pairs)*len(frequencies)
+    :param frequencies: np.ndarray[float]
+    :param pairs: ??? Iterable describing the pairs in some way
+    :param file_: The destination of the classifier weight plot,
+    which should be either a path or a file-like object.
+    :return: None
+    """
+    weights_by_channel = weights.reshape((len(pairs),len(frequencies)))
+    plt.imshow(weights_by_channel,aspect='auto',origin='lower')
+    locs,old_labels = plt.yticks()
+    new_labels = ['%d'%(np.rint(frequencies[i]).astype(int)) for i in locs[1:-1]]
+    plt.yticks(locs[1:-1],new_labels)
+    plt.savefig(file_,
+                format="png",
+                dpi=300,
+                bbox_inches="tight",
+                pad_inches=0.1)
+    plt.close()
