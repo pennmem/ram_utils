@@ -74,6 +74,7 @@ class ReportGenerator(object):
         self.math_summaries = math_summaries
         self.target_selection_table = target_selection_table
         self.classifiers = classifier_summaries
+        self.classifier_summaries = classifier_summaries
 
         catfr_summary_mask = [summary.experiment == 'catFR1' for summary in
                               self.session_summaries]
@@ -231,15 +232,17 @@ class ReportGenerator(object):
 
         if classifier:
             plot_data['roc'] = {
-                'fpr': [classifier.false_positive_rate for classifier in self.classifiers],
-                'tpr': [classifier.true_positive_rate for classifier in self.classifiers],
+                'fpr': [classifier.false_positive_rate for classifier in self.classifier_summaries],
+                'tpr': [classifier.true_positive_rate for classifier in self.classifier_summaries],
             }
             plot_data['tercile'] = {
-                'low': [classifier.low_tercile_diff_from_mean for classifier in self.classifiers],
-                'mid': [classifier.mid_tercile_diff_from_mean for classifier in self.classifiers],
-                'high': [classifier.high_tercile_diff_from_mean for classifier in self.classifiers]
+                'low': [classifier.low_tercile_diff_from_mean for classifier in self.classifier_summaries],
+                'mid': [classifier.mid_tercile_diff_from_mean for classifier in self.classifier_summaries],
+                'high': [classifier.high_tercile_diff_from_mean for classifier in self.classifier_summaries]
             }
-            plot_data['tags'] = [classifier.id for classifier in self.classifiers]
+            plot_data['tags'] = [classifier.id for classifier in self.classifier_summaries]
+            plot_data['weights'] = [encode_file(classifier.plot_classifier_weights())
+                                    for classifier in self.classifier_summaries]
 
         return json.dumps(plot_data)
 
@@ -309,7 +312,7 @@ class ReportGenerator(object):
             'FR1',
             stim=False,
             combined_summary=self._make_combined_summary(),
-            classifiers=self.classifiers,
+            classifiers=self.classifier_summaries,
             plot_data=self._make_plot_data(stim=False, classifier=True,
                                            joint=joint),
             sme_table=self._make_target_selection_table(),
@@ -349,7 +352,7 @@ class ReportGenerator(object):
             experiment,
             stim=True,
             combined_summary=self._make_combined_summary(),
-            classifiers=self.classifiers,
+            classifiers=self.classifier_summaries,
             stim_params=FRStimSessionSummary.stim_parameters(self.session_summaries),
             recall_tests=FRStimSessionSummary.recall_test_results(self.session_summaries, experiment),
             feature_data = self._make_feature_plots(),

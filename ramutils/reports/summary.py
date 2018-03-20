@@ -2,7 +2,6 @@ from __future__ import division
 from __future__ import unicode_literals
 
 from datetime import datetime
-import warnings
 
 import json
 import numpy as np
@@ -11,6 +10,8 @@ import pytz
 import pickle
 import base64
 
+import io
+
 from ramutils.utils import safe_divide, extract_subject_montage
 from ramutils.events import extract_subject, extract_experiment_from_events, \
     extract_sessions
@@ -18,6 +19,8 @@ from ramutils.bayesian_optimization import choose_location
 from ramutils.exc import TooManySessionsError
 from ramutils.parameters import ExperimentParameters
 from ramutils.powers import save_power_plot
+from ramutils.classifier.utils import plot_classifier_weights
+
 
 from traitschema import Schema
 from traits.api import Array, ArrayOrNone, Float, Unicode, Bool, Bytes
@@ -46,6 +49,8 @@ class ClassifierSummary(Schema):
     _predicted_probabilities = ArrayOrNone(desc='predicted recall probabilities')
     _true_outcomes = ArrayOrNone(desc='actual results for recall vs. non-recall')
     _permuted_auc_values = ArrayOrNone(desc='permuted AUCs')
+    _classifier_weights = ArrayOrNone(desc='classifier weights')
+
 
     subject = Unicode(desc='subject')
     experiment = Unicode(desc='experiment')
@@ -56,6 +61,8 @@ class ClassifierSummary(Schema):
     low_terc_recall_rate = Float(desc='recall rate when predicted probability of recall was in lowest tercile')
     mid_terc_recall_rate = Float(desc='recall reate when predicted probability of recall was in middle tercile')
     high_terc_recall_rate = Float(desc='recall rate when predicted probability of recall was in highest tercile')
+    frequencies = ArrayOrNone(desc='Frequencies the classifier was trained on')
+    pairs = ArrayOrNone(desc='Bipolar pairs used to train the classifier')
 
     @property
     def id(self):
@@ -159,8 +166,25 @@ class ClassifierSummary(Schema):
         """ % change in recall rate from overall recall when classifier output was in highest tercile """
         return 100.0 * (self.high_terc_recall_rate - self.recall_rate) / self.recall_rate
 
+    @property
+    def classifier_weights(self):
+        return self._classifier_weights
+
+    @classifier_weights.setter
+    def classifier_weights(self,new_weights):
+        if self._classifier_weights is None:
+            self._classifier_weights = new_weights
+
+    def plot_classifier_weights(self,fd=None):
+        if fd is None:
+            fd = io.BytesIO()
+        if self.classifier_weights is not None:
+            plot_classifier_weights(self.classifier_weights,self.frequencies,self.pairs,fd)
+        return fd
+
     def populate(self, subject, experiment, session, true_outcomes,
                  predicted_probabilities, permuted_auc_values,
+                 weights=None,frequencies=None, pairs=None,
                  tag='', reloaded=False):
         """ Populate classifier performance metrics
 
@@ -195,6 +219,9 @@ class ClassifierSummary(Schema):
         self.permuted_auc_values = permuted_auc_values
         self.tag = tag
         self.reloaded = reloaded
+        self.classifier_weights = weights
+        self.frequencies = frequencies
+        self.pairs = pairs
 
         thresh_low = np.percentile(predicted_probabilities, 100.0 / 3.0)
         thresh_high = np.percentile(predicted_probabilities, 2.0 * 100.0 / 3.0)
