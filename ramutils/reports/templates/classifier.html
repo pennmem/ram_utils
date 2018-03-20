@@ -60,6 +60,15 @@
       </caption>
     {% endif %}
   </table>
+  {% for weight_plot in plot_data['weights'] %}
+  <div class="classifier-weight-plot">
+    <figure>
+      <img class="img-thumbnail" src="data:image/png;base64,{{ weight_plot }}">
+      <figcaption> Classifier weights by channel and frequency </figcaption>
+    </figure>
+  </div>
+  {% endfor %}
+</div>
   <script>
     window.addEventListener('load', () => {
       $('#classifier_summary').DataTable();
