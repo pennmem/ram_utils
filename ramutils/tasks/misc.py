@@ -295,6 +295,7 @@ def load_existing_results(subject, experiment, sessions, stim_report, db_loc,
 
             saved_results['session_summaries'] = session_summaries
             saved_results['math_summaries'] = math_summaries
+            saved_results['classifier_evaluation_results'] = classifier_evaluation_results
 
         else:
             return saved_results

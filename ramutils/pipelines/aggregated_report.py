@@ -22,19 +22,17 @@ def make_aggregated_report(subjects=None, experiments=None, sessions=None, fit_m
         for experiment in experiments:
             exp_subjects = find_subjects(experiment, paths.root)
             for subject in exp_subjects:
-                target_selection_table, classifier_evaluation_results, \
-                session_summaries, math_summaries, hmm_results = \
-                    load_existing_results(subject, experiment, sessions, True,
-                                          paths.data_db, rootdir=paths.root).compute()
-                if all([val is None for val in [target_selection_table,
-                                                classifier_evaluation_results,
-                                                session_summaries, math_summaries]]):
+                pre_built_results = load_existing_results(subject, experiment, sessions, True,
+                                                          paths.data_db, rootdir=paths.root).compute()
+                if all([val is None for val in [pre_built_results['classifier_evaluation_results'],
+                                                pre_built_results['session_summaries'],
+                                                pre_built_results['math_summaries']]]):
                     logger.warning('Unable to find underlying data for {}, experiment {}'.format(subject, experiment))
                     continue
 
-                all_classifier_evaluation_results.extend(classifier_evaluation_results)
-                all_session_summaries.extend(session_summaries)
-                all_math_summaries.extend(math_summaries)
+                all_classifier_evaluation_results.extend(pre_built_results['classifier_evaluation_results'])
+                all_session_summaries.extend(pre_built_results['session_summaries'])
+                all_math_summaries.extend(pre_built_results['math_summaries'])
         subject = 'combined'
         experiment = "_".join(experiments)
 
@@ -42,20 +40,19 @@ def make_aggregated_report(subjects=None, experiments=None, sessions=None, fit_m
     elif subjects is not None and experiments is not None and sessions is None:
         for subject in subjects:
             for experiment in experiments:
-                target_selection_table, classifier_evaluation_results, \
-                session_summaries, math_summaries, hmm_results = \
-                    load_existing_results(subject, experiment, sessions, True,
-                                          paths.data_db, rootdir=paths.root).compute()
-
-                if all([val is None for val in [target_selection_table,
-                                                classifier_evaluation_results,
-                                                session_summaries, math_summaries]]):
+                pre_built_results = load_existing_results(subject, experiment, sessions, True,
+                                                     paths.data_db, rootdir=paths.root).compute()
+                # Check if only None values were returned. Processing will continue
+                # undeterred
+                if all([val is None for val in [pre_built_results['classifier_evaluation_results'],
+                                                pre_built_results['session_summaries'],
+                                                pre_built_results['math_summaries']]]):
                     logger.warning('Unable to find underlying data for {}, experiment {}'.format(subject, experiment))
                     continue
 
-                all_classifier_evaluation_results.extend(classifier_evaluation_results)
-                all_session_summaries.extend(session_summaries)
-                all_math_summaries.extend(math_summaries)
+                all_classifier_evaluation_results.extend(pre_built_results['classifier_evaluation_results'])
+                all_session_summaries.extend(pre_built_results['session_summaries'])
+                all_math_summaries.extend(pre_built_results['math_summaries'])
         subject = '_'.join(subjects)
         experiment = "_".join(experiments)
 
@@ -66,18 +63,16 @@ def make_aggregated_report(subjects=None, experiments=None, sessions=None, fit_m
         subject = subjects[0]
         experiment = experiments[0]
 
-        target_selection_table, classifier_evaluation_results, \
-        session_summaries, math_summaries, hmm_results = \
-            load_existing_results(subject, experiment, sessions, True,
-                                  paths.data_db, rootdir=paths.root).compute()
-
-        if all([val is None for val in [target_selection_table,
-                                        classifier_evaluation_results,
-                                        session_summaries, math_summaries]]):
+        pre_built_results = load_existing_results(subject, experiment, sessions, True,
+                                                  paths.data_db, rootdir=paths.root).compute()
+        if all([val is None for val in [pre_built_results['classifier_evaluation_results'],
+                                        pre_built_results['session_summaries'],
+                                        pre_built_results['math_summaries']]]):
             logger.warning('Unable to find underlying data for {}, experiment {}'.format(subject, experiment))
-        all_classifier_evaluation_results.extend(classifier_evaluation_results)
-        all_session_summaries.extend(session_summaries)
-        all_math_summaries.extend(math_summaries)
+
+        all_classifier_evaluation_results.extend(pre_built_results['classifier_evaluation_results'])
+        all_session_summaries.extend(pre_built_results['session_summaries'])
+        all_math_summaries.extend(pre_built_results['math_summaries'])
 
     else:
         raise RuntimeError('The requested type of aggregation is not currently supported')
