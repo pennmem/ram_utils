@@ -4,8 +4,7 @@ from datetime import datetime
 import json
 import os.path as osp
 import random
-import six
-import base64
+import io
 
 from itertools import compress
 from jinja2 import Environment, PackageLoader
@@ -16,7 +15,7 @@ from ramutils import __version__
 from ramutils.reports.summary import FRSessionSummary, MathSummary, FRStimSessionSummary
 from ramutils.events import extract_experiment_from_events, extract_subject
 from ramutils.utils import extract_experiment_series
-
+from ramutils.tasks.misc import encode_file
 
 class ReportGenerator(object):
     """Class responsible for generating reports.
@@ -125,10 +124,9 @@ class ReportGenerator(object):
 
     def _make_feature_plots(self):
         def get_feature_plot(s):
-            fd = six.BytesIO()
+            fd = io.BytesIO()
             s.plot_normalized_powers(fd)
-            fd.seek(0)
-            return base64.b64encode(fd.read()).replace(b"\n", b"").decode()
+            return encode_file(fd)
 
         feature_data = {
             'feature_data': [summary.normalized_powers.tolist() for summary in self.session_summaries],

@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 import os
-import base64
 import pandas as pd
 
 try:
@@ -18,6 +17,7 @@ from ramutils.reports.summary import *
 from ramutils.hmm import save_foresplot, save_traceplot
 from ramutils.utils import is_stim_experiment as is_stim_experiment_core
 from ramutils.utils import get_completed_sessions
+from ramutils.utils import encode_file
 from ramutils.log import get_logger
 
 logger = get_logger()
@@ -117,7 +117,7 @@ def save_all_output(subject, experiment, session_summaries, math_summaries,
             save_traceplot(trace, traceplot_path)
 
             with open(forestplot_path, 'rb') as f:
-                encoded_image = base64.b64encode(f.read()).replace(b"\n", b"").decode()
+                encoded_image = encode_file(f)
             result_files[name] = encoded_image
 
     return result_files
@@ -207,7 +207,7 @@ def load_existing_results(subject, experiment, sessions, stim_report, db_loc,
 
                         # Encode the image and pass along that data
                         with open(forestplot_path, 'rb') as f:
-                            encoded_image = base64.b64encode(f.read()).replace(b"\n", b"").decode()
+                            encoded_image = encode_file(f)
                         hmm_results[name] = encoded_image
 
         else:

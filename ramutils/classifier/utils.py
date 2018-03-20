@@ -8,7 +8,6 @@ from sklearn.linear_model.logistic import LogisticRegression
 
 from classiflib.container import ClassifierContainer
 from ramutils.exc import UnableToReloadClassifierException
-from matplotlib import pyplot as plt
 
 
 def reload_classifier(subject, task, session, mount_point='/', base_path=None):
@@ -116,6 +115,7 @@ def train_classifier(pow_mat, events, sample_weights, penalty_param,
 def plot_classifier_weights(weights, frequencies, pairs, file_):
     """
     Visualize the classifier weights as a function of frequency and location.
+
     :param weights: np.ndarray (len(pairs)*len(frequencies)
     :param frequencies: np.ndarray[float]
     :param pairs: ??? Iterable describing the pairs in some way
@@ -123,6 +123,10 @@ def plot_classifier_weights(weights, frequencies, pairs, file_):
     which should be either a path or a file-like object.
     :return: None
     """
+    # pyplot is imported here rather than at the top of the module to avoid any
+    # problems setting the matplotlib backend elsewhere.
+    from matplotlib import pyplot as plt
+
     weights_by_channel = weights.reshape((len(pairs),len(frequencies)))
     plt.imshow(weights_by_channel,aspect='auto',origin='lower')
     locs,old_labels = plt.yticks()
