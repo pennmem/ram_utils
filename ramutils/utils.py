@@ -9,6 +9,7 @@ import numpy as np
 import h5py
 import tempfile
 import shutil
+import base64
 
 from ramutils.log import get_logger
 from ptsa.data.readers import JsonIndexReader
@@ -377,3 +378,13 @@ def show_log_handlers():
     yield
     print("after")
     print_handlers()
+
+
+def encode_file(fd):
+    """
+    Produces a base64-encoded version of the data inside the file-like object fd.
+    :param fd:
+    :return: str
+    """
+    fd.seek(0)
+    return base64.b64encode(fd.read().decode())
