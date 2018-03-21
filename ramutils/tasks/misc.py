@@ -10,7 +10,7 @@ except ImportError:
     from urlparse import urlparse
 
 from ptsa.data.readers import JsonIndexReader
-from ramutils.io import load_results, store_results
+from ramutils.io import store_results
 from ramutils.utils import get_session_str
 
 from ._wrapper import task
@@ -54,6 +54,50 @@ def save_all_output(subject, experiment, session_summaries, math_summaries,
                     classifier_evaluation_results, save_location,
                     retrained_classifier=None, target_selection_table=None,
                     behavioral_results=None):
+    """ Save all required output necessary to re-generate a report
+
+    Parameters:
+    -----------
+    subject: str
+        Subject ID
+    experiment: str
+        Experiment name
+    session_summaries: List
+        List of SessionSummary derived objects
+    math_summaries: List
+        List of MathSummary objects
+    classifier_evaluation_results: List
+        List of ClassifierSummary objects
+    save_location: str
+        Destination for data to be saved. Typically in
+        /scratch/report_database/ on RHINO
+    retrained_classifier: ClassifierContainer
+        Serialized representation of the retrained classifier
+    target_selection_table pd.DataFrame
+        DataFrame representation of the target selection table, formerly known
+        as the subsequent memory effect table
+    behavioral_results: dict
+        Keys are the behavioral effect model type (stim list, stim item, etc.)
+        and values are the traces from estimating those models
+
+    Returns
+    -------
+    results_files: dict
+        Dictionary whose keys are the names of statically-produced plots and
+        values are encoded versions of those images. These are used to embed
+        the static plots in the html reports during report generation
+
+    Notes
+    -----
+    All output files are of the format {subject}_{experiment}_{session}_{data_type}.{file_type}
+    where data_type is a generic name for the type of data being saved. The following data types
+    map to a summary object:
+
+    * sessions_summary: :class:`ramutils.reports.summary.SessionSummary`
+    * math_summary: :class:`ramutils.reports.summary.MathSummary`
+    * classifier_[tag]: :class:`ramutils.reports.summary.ClassifierSummary`
+
+    """
 
     result_files = {}
 
@@ -126,6 +170,38 @@ def save_all_output(subject, experiment, session_summaries, math_summaries,
 @task(cache=False)
 def load_existing_results(subject, experiment, sessions, stim_report, db_loc,
                           rootdir='/'):
+    """ Load previously-saved data creating during report generation
+
+    Parameters:
+    -----------
+    subject: str
+        Subject ID
+    experiment: str
+        Experiment ID
+    sessions: list or None
+        If none, then sessions are looked up from r1.json for the given subject and experiment.
+    stim_report: bool
+        Indicator for if the requested data is associated with a stim report
+    db_loc: str
+        Report database location relative to rootdir
+    rootdir: str
+        RHINO mount point or root directory
+
+    Returns:
+    --------
+    saved_results: dict
+        Mirrors the input to save_all_output
+
+    """
+
+    saved_results = {
+        'target_selection_table': None,
+        'classifier_evaluation_results': None,
+        'session_summaries': None,
+        'math_summaries': None,
+        'hmm_results': None
+    }
+
     # Repetition ratio dictionary optional
     # Cases: PS, stim, non-stim
     subject_experiment = "_".join([subject, experiment])
@@ -144,6 +220,8 @@ def load_existing_results(subject, experiment, sessions, stim_report, db_loc,
                 base_output_format.format(session=session_str,
                                           data_type='target_selection_table',
                                           file_type='csv'))
+            saved_results['target_selection_table'] = target_selection_table
+
             encoding_classifier_summary = ClassifierSummary.from_hdf(
                 base_output_format.format(session=session_str,
                                           data_type='classifier_Encoding',
@@ -154,6 +232,8 @@ def load_existing_results(subject, experiment, sessions, stim_report, db_loc,
                                           file_type='h5'))
             classifier_evaluation_results = [encoding_classifier_summary,
                                              joint_classifier_summary]
+            saved_results['classifier_evaluation_results'] = classifier_evaluation_results
+
             session_summaries, math_summaries = [], []
             for session in sessions:
                 math_summary = MathSummary.from_hdf(
@@ -172,6 +252,9 @@ def load_existing_results(subject, experiment, sessions, stim_report, db_loc,
                                               data_type='session_summary',
                                               file_type='h5'))
                 session_summaries.append(session_summary)
+
+            saved_results['session_summaries'] = session_summaries
+            saved_results['math_summaries'] = math_summaries
 
         elif stim_report and 'PS' not in experiment:
             classifier_evaluation_results, math_summaries, session_summaries = [], [], []
@@ -210,14 +293,17 @@ def load_existing_results(subject, experiment, sessions, stim_report, db_loc,
                             encoded_image = base64.b64encode(f.read()).replace(b"\n", b"").decode()
                         hmm_results[name] = encoded_image
 
+            saved_results['session_summaries'] = session_summaries
+            saved_results['math_summaries'] = math_summaries
+            saved_results['classifier_evaluation_results'] = classifier_evaluation_results
+
         else:
-            return None, None, None, None, None
+            return saved_results
 
     except (IOError, OSError, AssertionError):
         logger.warning('Not all underlying data could be found for the '
                        'requested report, building from scratch instead.')
-        return None, None, None, None, None
+        return saved_results
 
-    return target_selection_table, classifier_evaluation_results, \
-           session_summaries, math_summaries, hmm_results
+    return saved_results
 
