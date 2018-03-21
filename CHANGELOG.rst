@@ -1,6 +1,15 @@
 Changes
 =======
 
+Version 2.1.8
+--------------
+
+**2018-03-21**
+
+* Minor bugfix to return the path of the generated report instead of the html report itself
+* Internal refactoring to clean up how previous results are loaded and passed around
+
+
 Version 2.1.7
 --------------
 
