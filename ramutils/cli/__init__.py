@@ -29,6 +29,8 @@ class RamArgumentParser(ArgumentParser):
                           version='ramutils version {}'.format(__version__))
         self.add_argument('--sessions', '-S', nargs='+',
                           help='sessions to read data from (default: use all)')
+        self.add_argument('--debug', '-D',action='store_true',
+                          help='Run in debug mode')
 
         # Number of args, type, and required flag are different so it is easier to do set them up
         # completely separately
