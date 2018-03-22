@@ -38,6 +38,10 @@ logger = get_logger("reports")
 
 def create_report(input_args=None):
     args = parser.parse_args(input_args)
+    if args.debug:
+        import dask
+        dask.set_options(get=dask.get)
+
 
     paths = FilePaths(
         root=osp.expanduser(args.root),
