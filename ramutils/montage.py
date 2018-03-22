@@ -116,7 +116,7 @@ def build_montage_metadata_table(subject, experiment, sessions, all_pairs,
     pairs_from_json = {standardize_label(key): val for key, val in pairs_from_json.items()}
 
     # If all_pairs is an ordered dict, this loop will preserve the ordering
-    all_pair_labels = list(all_pairs[subject]['pairs'].keys())
+    all_pair_labels = all_pairs[subject]['pairs'].keys()
     for pair in all_pair_labels:
         standardized_pair = standardize_label(pair)
         if standardized_pair not in pairs_from_json:
