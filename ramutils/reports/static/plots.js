@@ -268,6 +268,50 @@ var ramutils = (function (mod, Plotly) {
 
       Plotly.plot('classifier-performance-plot-placeholder', data, layout);
     },
+    /**
+    * Plot classifier weights as a heatmap: frequency by channel
+    * @param{Array} weights - classfier weights
+    * @param{Array} freqs - frequencies used
+    */
+    plotClassifierWeights: function(weights,freqs){
+
+        let data =[];
+        for(i=1;i<=weights.length;i++){
+        data.push( {
+            z: weights[i],
+            y: freqs[i],
+            type: 'heatmap',
+            xaxis:`x${i}`,
+            yaxis:`y${i}`
+            });
+        }
+
+        const layout = {
+            yaxis: {
+                title: 'Frequency',
+                type: 'log',
+                autorange: true,
+                anchor: 'x1'
+            },
+            xaxis: {
+                title: 'Channel',
+                domain: [0, 0.45]
+            },
+            yaxis2: {
+                title: 'Frequency',
+                type: 'log',
+                autorange: true,
+                anchor: 'x2',
+            },
+            xaxis2: {
+                title: 'Channel',
+                domain: [0.55,1]
+            },
+            showlegend: true,
+
+        }
+        Plotly.plot("classifier-weight-plot",data,layout)
+    },
 
     /**
      * Plot classifier output distributions.
