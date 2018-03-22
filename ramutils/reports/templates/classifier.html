@@ -60,10 +60,10 @@
       </caption>
     {% endif %}
   </table>
-  {% for weight_plot in plot_data["weights"] %}
+  {% for classifier in classifiers %}
   <div class="classifier-weight-plot">
     <figure>
-      <img class="img-thumbnail" src="data:image/png;base64,{{ weight_plot }}">
+      <img class="img-thumbnail" src="data:image/png;base64,{{ classifier.weight_plot_str }}">
       <figcaption> Classifier weights by channel and frequency </figcaption>
     </figure>
   </div>

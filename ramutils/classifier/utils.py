@@ -130,7 +130,7 @@ def plot_classifier_weights(weights, frequencies, pairs, file_):
     weights_by_channel = weights.reshape((len(pairs),len(frequencies)))
     plt.imshow(weights_by_channel,aspect='auto',origin='lower')
     locs,old_labels = plt.yticks()
-    new_labels = ['%d'%(np.rint(frequencies[i]).astype(int)) for i in locs[1:-1]]
+    new_labels = ['%d'%(np.rint(f).astype(int)) for f in frequencies]
     plt.yticks(locs[1:-1],new_labels)
     plt.savefig(file_,
                 format="png",

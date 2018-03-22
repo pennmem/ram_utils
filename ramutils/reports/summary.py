@@ -20,7 +20,7 @@ from ramutils.exc import TooManySessionsError
 from ramutils.parameters import ExperimentParameters
 from ramutils.powers import save_power_plot
 from ramutils.classifier.utils import plot_classifier_weights
-
+from ramutils.utils import encode_file
 
 from traitschema import Schema
 from traits.api import Array, ArrayOrNone, Float, Unicode, Bool, Bytes
@@ -174,6 +174,10 @@ class ClassifierSummary(Schema):
     def classifier_weights(self,new_weights):
         if self._classifier_weights is None:
             self._classifier_weights = new_weights
+
+    @property
+    def weight_plot_str(self):
+        return encode_file(self.plot_classifier_weights())
 
     def plot_classifier_weights(self,fd=None):
         if fd is None:
