@@ -29,6 +29,7 @@ def normalized_powers():
 # Not really a rhino test, but it is so slow that we don't want it running
 # all the time
 @pytest.mark.rhino
+@pytest.mark.slow
 def test_estimate_effects_of_stim(bipolar_pairs, excluded_pairs,
                                   normalized_powers):
     sample_df = pd.read_csv(datafile(

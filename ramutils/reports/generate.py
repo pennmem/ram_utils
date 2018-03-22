@@ -16,6 +16,8 @@ from ramutils.reports.summary import FRSessionSummary, MathSummary, FRStimSessio
 from ramutils.events import extract_experiment_from_events, extract_subject
 from ramutils.utils import extract_experiment_series
 from ramutils.tasks.misc import encode_file
+from ramutils.log import get_logger
+
 
 class ReportGenerator(object):
     """Class responsible for generating reports.
@@ -135,8 +137,10 @@ class ReportGenerator(object):
             return encode_file(fd)
 
         feature_data = {
-            'feature_data': [summary.normalized_powers.tolist() for summary in self.session_summaries],
-            'feature_plots': [get_feature_plot(summary) for summary in self.session_summaries]
+            'feature_data': [summary.normalized_powers.tolist() for summary in self.session_summaries
+                             if summary.normalized_powers is not None],
+            'feature_plots': [get_feature_plot(summary) for summary in self.session_summaries
+                              if summary.normalized_powers is not None]
         }
         return feature_data
 
@@ -233,7 +237,10 @@ class ReportGenerator(object):
             }
             plot_data['tags'] = [classifier.id for classifier in self.classifier_summaries]
             plot_data['weights'] = [encode_file(classifier.plot_classifier_weights())
-                                    for classifier in self.classifier_summaries]
+                                    for classifier in self.classifier_summaries
+                                    if classifier.classifier_weights is not None]
+            logger = get_logger()
+            logger.info('%s weights in plot_data'%len(plot_data['weights']))
 
         return json.dumps(plot_data)
 

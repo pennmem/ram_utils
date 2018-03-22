@@ -175,7 +175,7 @@ class ClassifierSummary(Schema):
     def plot_classifier_weights(self,fd=None):
         if fd is None:
             fd = io.BytesIO()
-        if self.classifier_weights is not None:
+        if self.classifier_weights is not None and self.frequencies is not None and self.pairs is not None:
             plot_classifier_weights(self.classifier_weights,self.frequencies,self.pairs,fd)
         return fd
 
