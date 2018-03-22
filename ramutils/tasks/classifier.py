@@ -133,7 +133,7 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
                                               recalls, **kwargs)
         classifier_summary.populate(subject, experiment,
                                     sessions, encoding_recalls, probs,
-                                    permuted_auc_values, tag=tag)
+                                    permuted_auc_values, tag=tag,weights=classifier.coef_)
 
     else:
         logger.info("Performing LOLO cross validation")
@@ -144,10 +144,12 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
                                                              **kwargs)
         probs = perform_lolo_cross_validation(classifier, pow_mat, events,
                                               recalls, **kwargs)
-
+        weights = classifier.coef_ if 'pairs' in kwargs else None
         classifier_summary.populate(subject, experiment,
                                     sessions, encoding_recalls, probs,
-                                    permuted_auc_values, tag=tag)
+                                    permuted_auc_values, tag=tag,
+                                    weights = weights,frequencies=kwargs.get('freqs'),
+                                    pairs=kwargs.get('pairs'))
 
     logger.info("Permutation test p-value = %f", classifier_summary.pvalue)
     recall_prob = classifier.predict_proba(pow_mat)[:, 1]

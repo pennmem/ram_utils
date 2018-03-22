@@ -255,6 +255,7 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
                                                         final_task_events,
                                                         kwargs['n_perm'],
                                                         tag='Joint',
+                                                        pairs=ec_pairs[used_pair_mask],
                                                         **kwargs)
     # Serialize the classifier here
     trained_classifier = serialize_classifier(classifier,
@@ -285,7 +286,8 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
     encoding_classifier_summary = perform_cross_validation(
         encoding_classifier, encoding_reduced_powers,
         final_encoding_task_events, kwargs['n_perm'],
-        tag='Encoding', **kwargs)
+        tag='Encoding',pairs= ec_pairs[used_pair_mask],
+        **kwargs)
 
     target_selection_table = create_target_selection_table(
         pairs_metadata_table, powers, final_task_events, kwargs['freqs'],
@@ -363,7 +365,8 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
         training_classifier_summaries = perform_cross_validation(
             retrained_classifier, training_reduced_powers,
             final_training_events, kwargs['n_perm'],
-            tag='Original Classifier', **kwargs)
+            tag='Original Classifier',pairs= ec_pairs[used_pair_mask],
+            **kwargs)
 
         retrained_classifier = serialize_classifier(retrained_classifier,
                                                     final_pairs,

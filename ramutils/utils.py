@@ -387,4 +387,4 @@ def encode_file(fd):
     :return: str
     """
     fd.seek(0)
-    return base64.b64encode(fd.read().decode())
+    return base64.b64encode(fd.read()).decode()
