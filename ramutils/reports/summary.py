@@ -170,6 +170,10 @@ class ClassifierSummary(Schema):
     def classifier_weights(self):
         return self._classifier_weights
 
+    @property
+    def weights2D(self):
+        return self.classifier_weights.reshape(len(self.frequencies),-1)
+
     @classifier_weights.setter
     def classifier_weights(self,new_weights):
         if self._classifier_weights is None:

@@ -60,16 +60,11 @@
       </caption>
     {% endif %}
   </table>
-  {% for classifier in classifiers %}
-  <div class="classifier-weight-plot">
-    <figure>
-      <img class="img-thumbnail" src="data:image/png;base64,{{ classifier.weight_plot_str }}">
-      <figcaption> Classifier weights by channel and frequency </figcaption>
-    </figure>
-  </div>
-  {% else %}
-  <h4>No classifier weight plots generated</h4>
-  {% endfor %}
+  <figure>
+      <div id="classifier-weight-plot"></div>
+      <figcaption> Classifier weights by channel and frequency.
+        {% if not stim %} <b>(Left)</b> encoding only classifier; <b>(Right)</b> joint classifier. {% endif %}</figcaption>
+  </figure>
 </div>
   <script>
     window.addEventListener('load', () => {
@@ -80,7 +75,13 @@
       let tercData = plot_data["tercile"];
       let tags = plot_data["tags"];
       ramutils.plots.plotClassifierPerformance(rocData.fpr, rocData.tpr, tercData.low, tercData.mid, tercData.high, tags);
-
+      let weights=[];
+      let freqs = [];
+      {% for classifier in classifiers %}
+      weights.push({{ classifier.weights2D.tolist() }});
+      freqs.push({{ classifier.frequencies.tolist() }});
+      {% endfor %}
+      ramutils.plots.plotClassifierWeights(weights,freqs);
     });
   </script>
 </div>
