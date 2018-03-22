@@ -44,6 +44,8 @@ def estimate_effects_of_stim(subject, experiment, stim_session_summaries):
     df['session_idx'] = df.groupby(by=['subject', 'experiment', 'session']).grouper.group_info[0]
     df["serialpos"] = df["serialpos"] - (df["serialpos"].min())
 
+    df = df[df["list"] > 3] # drop the first 3 lists since they are not technically part of the experiment
+
     # Turn list into a % session completed variable to that subjects who
     # complete only partial sessions can still be compared to full sessions
     df["list"] = ((df["list"] - (df["list"].min())) /
