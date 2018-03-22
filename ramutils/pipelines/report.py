@@ -92,7 +92,7 @@ def make_report(subject, experiment, paths, joint_report=False,
 
         # Check if only None values were returned. Processing will continue
         # undeterred
-        if any([val is None for val in [pre_built_results['target_selection_table'],
+        if all([val is None for val in [pre_built_results['target_selection_table'],
                                         pre_built_results['classifier_evaluation_results'],
                                         pre_built_results['session_summaries'],
                                         pre_built_results['math_summaries']]]):
