@@ -276,55 +276,38 @@ var ramutils = (function (mod, Plotly) {
     plotClassifierWeights: function(weights,freqs){
 
         let data =[];
-        for(i=0;i<weights.length;i++){
-        let xaxis = 'x';
-        let yaxis = 'y';
-        if (i>0) {
-         xaxis = xaxis+(i+1);
-         yaxis = yaxis+(i+1);
-         }
-
-        data.push( {
-            z: weights[i],
-            y: freqs[i],
-            type: 'heatmap',
-            xaxis: xaxis,
-            yaxis: yaxis,
-            zmin: -0.05,
-            zmax: 0.05,
-            showscale: false,
-            colorbar:{
-                title: 'Weight'
-                }
-            });
+        let layout = {
+            title: 'Classifier Weights',
+            showlegend: true
         }
 
-        let data_0 = data[0];
-        data_0.showscale = true;
+        for(i=0;i<weights.length;i++){
+            let xaxis = 'x';
+            let yaxis = 'y';
+            if (i>0) {
+             xaxis = xaxis+(i+1);
+             yaxis = yaxis+(i+1);
+             }
 
-        const layout = {
-            title: 'Classifier Weights',
-            yaxis: {
-                title: 'Frequency',
-                type: 'log',
-                autorange: true,
-                anchor: 'x'
-            },
-            xaxis: {
-                title: 'Channel',
-                domain: [0, 0.45]
-            },
-            yaxis2: {
-                type: 'log',
-                autorange: true,
-                anchor: 'x2',
-            },
-            xaxis2: {
-                title: 'Channel',
-                domain: [0.55,1]
-            },
-            showlegend: true,
-
+            data.push( {
+                z: weights[i],
+                y: freqs[i],
+                type: 'heatmap',
+                xaxis: xaxis,
+                yaxis: yaxis,
+                zmin: -0.05,
+                zmax: 0.05,
+                showscale: ((i+1)==weights.length),
+                colorbar:{
+                    title: 'Weight'
+                    }
+                });
+            let xax_name = i==0? 'xaxis' : 'xaxis'+(i+1);
+            let yax_name = i==0? 'yaxis' : 'yaxis'+(i+1);
+            let start_offset = i==0?0:0.1/(weights.length);
+            let end_offset = i==weights.length-1?0:0.1/weights.length;
+            layout[xax_name] = {title: 'Channel',domain:[i/weights.length+start_offset, (i+1)/weights.length-end_offset]};
+            layout[yax_name] = {title: i?'':'Frequency', type:'log',autorange:true,anchor:xaxis}
         }
         Plotly.plot("classifier-weight-plot",data,layout)
     },
