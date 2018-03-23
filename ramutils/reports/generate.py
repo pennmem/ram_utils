@@ -245,11 +245,6 @@ class ReportGenerator(object):
                 'high': [classifier.high_tercile_diff_from_mean for classifier in self.classifier_summaries]
             }
             plot_data['tags'] = [classifier.id for classifier in self.classifier_summaries]
-            plot_data['weights'] = [encode_file(classifier.plot_classifier_weights())
-                                    for classifier in self.classifier_summaries
-                                    if classifier.classifier_weights is not None]
-            logger = get_logger()
-            logger.info('%s weights in plot_data'%len(plot_data['weights']))
 
         return json.dumps(plot_data)
 
