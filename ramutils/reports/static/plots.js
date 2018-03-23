@@ -276,29 +276,47 @@ var ramutils = (function (mod, Plotly) {
     plotClassifierWeights: function(weights,freqs){
 
         let data =[];
-        for(i=1;i<=weights.length;i++){
+        for(i=0;i<weights.length;i++){
+        let xaxis = 'x';
+        let yaxis = 'y';
+        if (i>0) {
+         xaxis = xaxis+(i+1);
+         yaxis = yaxis+(i+1);
+         }
+        console.log('xaxis = '+xaxis+'\n');
+        console.log('yaxis = '+yaxis+'\n');
+
         data.push( {
             z: weights[i],
             y: freqs[i],
             type: 'heatmap',
-            xaxis:`x${i}`,
-            yaxis:`y${i}`
+            xaxis: xaxis,
+            yaxis: yaxis,
+            zmin: -0.05,
+            zmax: 0.05,
+            showscale: false,
+            colorbar:{
+                title: 'Weight'
+                }
             });
         }
 
+        let data_0 = data[0];
+        data_0.showscale = true;
+
         const layout = {
+            title: 'Classifier Weights',
             yaxis: {
                 title: 'Frequency',
                 type: 'log',
                 autorange: true,
-                anchor: 'x1'
+                anchor: 'x'
             },
             xaxis: {
                 title: 'Channel',
                 domain: [0, 0.45]
             },
             yaxis2: {
-                title: 'Frequency',
                 type: 'log',
                 autorange: true,
                 anchor: 'x2',
