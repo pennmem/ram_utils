@@ -1,0 +1,11 @@
+<div class="feature-plot>">
+    <h2> Post-stim EEG</h2>
+    {% for plot_str in feature_data['post_stim_eeg'] %}
+    <div class="feature-plot-img">
+    <figure>
+      <img class="img-thumbnail" src="data:image/png;base64,{{ plot_str }}">
+      <figcaption> Post-stim EEG by channel </figcaption>
+    </figure>
+    </div>
+    {% endfor %}
+</div>
