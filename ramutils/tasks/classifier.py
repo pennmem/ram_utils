@@ -341,6 +341,9 @@ def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
                                     session_recalls, session_probs,
                                     permuted_auc_values,
                                     tag='session_' + str(session),
+                                    pairs = classifier_container.pairs,
+                                    frequencies=classifier_container.frequencies,
+                                    weights=classifier.coef_,
                                     reloaded=reloaded)
         classifier_summaries.append(classifier_summary)
         logger.info('AUC for session {}: {}'.format(session,
@@ -364,6 +367,9 @@ def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
                                              session_encoding_recalls,
                                              session_encoding_probs,
                                              None,
+                                             pairs=classifier_container.pairs,
+                                             frequencies=classifier_container.frequencies,
+                                             weights=classifier.coef_,
                                              tag='encoding_evaluation')
         encoding_classifier_summaries.append(encoding_classifier_summary)
 
@@ -380,6 +386,9 @@ def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
     cross_session_summary.populate(subject, experiment, sessions,
                                    non_stim_recalls, all_predicted_probs,
                                    permuted_auc_values, tag='Combined Sessions',
+                                   pairs=classifier_container.pairs,
+                                   frequencies=classifier_container.frequencies,
+                                   weights=(retrained_classifier if retrained_classifier else classifier).coef_,
                                    reloaded=False)
     # Leave commented out until we have a way to do multi-stim-session
     # evaluation, otherwise this classifier is just redundant.

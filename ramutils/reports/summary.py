@@ -58,8 +58,8 @@ class ClassifierSummary(Schema):
     low_terc_recall_rate = Float(desc='recall rate when predicted probability of recall was in lowest tercile')
     mid_terc_recall_rate = Float(desc='recall reate when predicted probability of recall was in middle tercile')
     high_terc_recall_rate = Float(desc='recall rate when predicted probability of recall was in highest tercile')
-    frequencies = ArrayOrNone(desc='Frequencies the classifier was trained on')
-    pairs = ArrayOrNone(desc='Bipolar pairs used to train the classifier')
+    frequencies = Array(desc='Frequencies the classifier was trained on')
+    pairs = Array(desc='Bipolar pairs used to train the classifier')
 
     @property
     def id(self):
@@ -169,7 +169,9 @@ class ClassifierSummary(Schema):
 
     @property
     def weights2D(self):
-        return self.classifier_weights.reshape(len(self.frequencies),-1)
+        if self.frequencies is not None:
+            return self.classifier_weights.reshape(len(self.frequencies),-1)
+        return np.array([])
 
     @classifier_weights.setter
     def classifier_weights(self,new_weights):

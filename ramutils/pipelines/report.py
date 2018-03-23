@@ -97,6 +97,9 @@ def make_report(subject, experiment, paths, joint_report=False,
                                          math_summaries, target_selection_table,
                                          classifier_evaluation_results,
                                          paths.dest, hmm_results=hmm_results)
+            if vispath is not None:
+                report.visualize(filename=vispath)
+
             return report.compute()
 
     final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
