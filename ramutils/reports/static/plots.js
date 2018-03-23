@@ -283,8 +283,6 @@ var ramutils = (function (mod, Plotly) {
          xaxis = xaxis+(i+1);
          yaxis = yaxis+(i+1);
          }
-        console.log('xaxis = '+xaxis+'\n');
-        console.log('yaxis = '+yaxis+'\n');
 
         data.push( {
             z: weights[i],
