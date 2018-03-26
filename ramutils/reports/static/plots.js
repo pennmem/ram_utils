@@ -324,7 +324,6 @@ var ramutils = (function (mod, Plotly) {
                                 dtick:Math.log10(these_freqs[these_freqs.length-1]/these_freqs[0])/(these_freqs.length-1)
                                 };
         }
-        console.log(JSON.stringify(layout))
         Plotly.plot("classifier-weight-plot",data,layout)
     },
 
