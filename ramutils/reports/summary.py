@@ -521,8 +521,17 @@ class SessionSummary(Summary):
     def normalized_powers(self, new_normalized_powers):
         self._normalized_powers = new_normalized_powers
 
-    def plot_normalized_powers(self,fname_or_file):
+    def plot_normalized_powers(self,fname_or_file=None):
+        """
+        Plot the matrix of normalized powers for the session to the specified filename or file-like object.
+        If no file is give, use an in-memory buffer.
+        :param fname_or_file:
+        :return: fname_or_file
+        """
+        if fname_or_file is None:
+            fname_or_file = io.BytesIO()
         save_power_plot(self.normalized_powers,fname_or_file)
+        return fname_or_file
 
     @property
     def session_length(self):
