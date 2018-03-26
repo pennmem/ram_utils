@@ -652,11 +652,14 @@ class CatFRSessionSummary(FRSessionSummary):
 
         self.repetition_ratios = repetition_ratio_dict
 
-        # Calculate between and within IRTs based on non-intrusion recall
-        # events
-        catfr_events = events[(events.experiment == 'catFR1') &
-                              (events.type == 'REC_EVENT')]
-        cat_recalled_events = catfr_events[catfr_events.recalled == 1]
+
+        # Calculate between and within IRTs based on the REC_WORD events as found in all_events.json
+        # Exclude all intrusions so that a transition between an intrusion and a recall will not be
+        # counted towards either within or between times.
+        catfr_events = raw_events[(raw_events.experiment == 'catFR1') &
+                                  (raw_events.type == 'REC_WORD') &
+                                  (raw_events.intrusion == 0)]
+        cat_recalled_events = catfr_events[(catfr_events.recalled == 1)]
         irt_within_cat = []
         irt_between_cat = []
         for session in np.unique(catfr_events.session):
