@@ -270,6 +270,7 @@ var ramutils = (function (mod, Plotly) {
     },
     /**
     * Plot classifier weights as a heatmap: frequency by channel
+    * This function assumes that the classifier weights are log-spaced.
     * @param{Array} weights - classfier weights
     * @param{Array} freqs - frequencies used
     */
@@ -282,6 +283,7 @@ var ramutils = (function (mod, Plotly) {
         }
 
         for(i=0;i<weights.length;i++){
+            let these_freqs = freqs[i];
             let xaxis = 'x';
             let yaxis = 'y';
             if (i>0) {
@@ -291,7 +293,7 @@ var ramutils = (function (mod, Plotly) {
 
             data.push( {
                 z: weights[i],
-                y: freqs[i],
+                y: these_freqs,
                 type: 'heatmap',
                 xaxis: xaxis,
                 yaxis: yaxis,
@@ -306,9 +308,23 @@ var ramutils = (function (mod, Plotly) {
             let yax_name = i==0? 'yaxis' : 'yaxis'+(i+1);
             let start_offset = i==0?0:0.1/(weights.length);
             let end_offset = i==weights.length-1?0:0.1/weights.length;
-            layout[xax_name] = {title: 'Channel',domain:[i/weights.length+start_offset, (i+1)/weights.length-end_offset]};
-            layout[yax_name] = {title: i?'':'Frequency', type:'log',autorange:true,anchor:xaxis}
+            let freq_names = [];
+            for(j=0; j<these_freqs.length; j++){
+                freq_names.push(Math.round(these_freqs[j]).toString())
+                }
+
+            layout[xax_name] = {title: 'Channel',
+                                domain:[i/weights.length+start_offset, (i+1)/weights.length-end_offset]};
+            layout[yax_name] = {title: i?'':'Frequency',
+                                type:'log',
+                                autorange:true,
+                                anchor:xaxis,
+                                tickmode:'linear',
+                                tick0:Math.log10(these_freqs[0]),
+                                dtick:Math.log10(these_freqs[these_freqs.length-1]/these_freqs[0])/(these_freqs.length-1)
+                                };
         }
+        console.log(JSON.stringify(layout))
         Plotly.plot("classifier-weight-plot",data,layout)
     },
 
