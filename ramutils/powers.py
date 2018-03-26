@@ -33,9 +33,46 @@ def compute_single_session_powers(session, all_events, start_time, end_time,
     # PTSA will sometimes modify events when reading the eeg, so we ultimately
     # need to return the updated events. In case no events are removed, return
     # the original set of events
+    eeg, updated_events = load_single_session_eeg(session, all_events, start_time, end_time, bipolar_pairs)
+
+    eeg = eeg.add_mirror_buffer(buffer_time)
+
+    # Butterworth filter to remove line noise
+    eeg = eeg.filtered(freq_range=[58., 62.],
+                       filt_type='stop',
+                       order=filt_order)
+    with timer("Total wavelet decomposition time: %f s"):
+        eeg.data = np.ascontiguousarray(eeg.data)
+        wavelet_filter = MorletWaveletFilterCpp(time_series=eeg,
+                                                freqs=freqs,
+                                                output='power',
+                                                width=width,
+                                                cpus=25)  # FIXME: why 25?
+        # At this point, pow mat has dimensions: frequency, bipolar_pairs,
+        # events, time
+        sess_pow_mat, phase_mat = wavelet_filter.filter()
+
+    sess_pow_mat = sess_pow_mat.remove_buffer(buffer_time).data + np.finfo(
+        np.float).eps/2.
+
+    if log_powers:
+        np.log10(sess_pow_mat, sess_pow_mat)
+
+    # Re-ordering dimensions to be events, frequencies, electrodes with the
+    # mean calculated over the time dimension
+    updated_session_events = updated_events[updated_events.session == session]
+    sess_pow_mat = np.nanmean(sess_pow_mat.transpose(2, 1, 0, 3), -1)
+    sess_pow_mat = sess_pow_mat.reshape((len(updated_session_events), -1))
+
+    if normalize:
+        sess_pow_mat = zscore(sess_pow_mat, axis=0, ddof=1)
+
+    return sess_pow_mat, updated_events
+
+
+def load_single_session_eeg(session, all_events, start_time, end_time, bipolar_pairs):
     updated_events = all_events
     session_events = all_events[all_events.session == session]
-
     logger.info("Loading EEG data for session %d", session)
     eeg_reader = EEGReader(events=session_events,
                            start_time=start_time,
@@ -48,7 +85,6 @@ def compute_single_session_powers(session, all_events, start_time, end_time,
     except IndexError:
         eeg_reader.channels = np.array([])
         eeg = eeg_reader.read()
-
     if eeg_reader.removed_bad_data():
         logger.warning('PTSA EEG reader elected to remove some bad events')
         # TODO: Use the event utility functions here
@@ -84,40 +120,7 @@ def compute_single_session_powers(session, all_events, start_time, end_time,
 
         eeg = MonopolarToBipolarMapper(time_series=eeg,
                                        bipolar_pairs=bipolar_pairs).filter()
-
-    eeg = eeg.add_mirror_buffer(buffer_time)
-
-    # Butterworth filter to remove line noise
-    eeg = eeg.filtered(freq_range=[58., 62.],
-                       filt_type='stop',
-                       order=filt_order)
-    with timer("Total wavelet decomposition time: %f s"):
-        eeg.data = np.ascontiguousarray(eeg.data)
-        wavelet_filter = MorletWaveletFilterCpp(time_series=eeg,
-                                                freqs=freqs,
-                                                output='power',
-                                                width=width,
-                                                cpus=25)  # FIXME: why 25?
-        # At this point, pow mat has dimensions: frequency, bipolar_pairs,
-        # events, time
-        sess_pow_mat, phase_mat = wavelet_filter.filter()
-
-    sess_pow_mat = sess_pow_mat.remove_buffer(buffer_time).data + np.finfo(
-        np.float).eps/2.
-
-    if log_powers:
-        np.log10(sess_pow_mat, sess_pow_mat)
-
-    # Re-ordering dimensions to be events, frequencies, electrodes with the
-    # mean calculated over the time dimension
-    updated_session_events = updated_events[updated_events.session == session]
-    sess_pow_mat = np.nanmean(sess_pow_mat.transpose(2, 1, 0, 3), -1)
-    sess_pow_mat = sess_pow_mat.reshape((len(updated_session_events), -1))
-
-    if normalize:
-        sess_pow_mat = zscore(sess_pow_mat, axis=0, ddof=1)
-
-    return sess_pow_mat, updated_events
+    return eeg, updated_events
 
 
 def compute_powers(events, start_time, end_time, buffer_time, freqs,
@@ -374,9 +377,18 @@ def reshape_powers_to_2d(powers):
     return reshaped_powers
 
 def save_power_plot(powers,full_path):
+    """
+    Plots the feature matrix to a file path or file-like object
+    :param powers:
+    :param full_path:
+    :return:
+    """
     from matplotlib import pyplot as plt
 
     plt.imshow(reshape_powers_to_2d(powers),cmap='bwr',aspect='auto',)
+    cmin,cmax = powers.min(),powers.max()
+    clim = max(abs(cmin),abs(cmax))
+    plt.clim(-clim,clim)
     plt.colorbar()
     plt.ylabel('Event Number')
     plt.xlabel('Feature Number')
@@ -386,7 +398,30 @@ def save_power_plot(powers,full_path):
                 bbox_inches="tight",
                 )
     plt.close()
-    return
+    return full_path
+
+def plot_post_stim_eeg(all_events,start_time,end_time,bipolar_pairs,full_path):
+    from matplotlib import pyplot as plt
+
+    post_stim_events = all_events[all_events.type=='STIM_OFF']
+    full_eeg = []
+    for session in np.unique(post_stim_events.session):
+        eeg,_  = load_single_session_eeg(session, post_stim_events, start_time, end_time, bipolar_pairs)
+        full_eeg.append(eeg)
+    full_eeg = np.concatenate([e.data for e in full_eeg],axis=1)
+    ylen = int(np.sqrt(full_eeg.shape[0]))
+    xlen = int(len(bipolar_pairs)/ylen)+1
+
+    for i in range(0,len(bipolar_pairs)):
+        plt.subplot(xlen,ylen,i+1)
+        plt.plot(full_eeg[i],alpha=0.05)
+    plt.tight_layout()
+    plt.savefig(full_path,
+                format='png',
+                dpi=200,
+                bbox_inches='tight')
+
+
 
 def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events,
                               frequencies, hfa_cutoff=65, trigger_freq=110):

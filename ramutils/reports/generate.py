@@ -140,15 +140,12 @@ class ReportGenerator(object):
         }
 
     def _make_feature_plots(self):
-        def get_feature_plot(s):
-            fd = io.BytesIO()
-            s.plot_normalized_powers(fd)
-            return encode_file(fd)
 
         feature_data = {
             'feature_data': [summary.normalized_powers.tolist() for summary in self.session_summaries
                              if summary.normalized_powers is not None],
-            'feature_plots': [get_feature_plot(summary) for summary in self.session_summaries
+            'feature_plots': [encode_file(summary.plot_normalized_powers())
+                              for summary in self.session_summaries
                               if summary.normalized_powers is not None]
         }
         return feature_data
