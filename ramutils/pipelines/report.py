@@ -325,13 +325,15 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
         # We need post stim period events/powers
         post_stim_mask = get_post_stim_events_mask(all_events)
         post_stim_events = subset_events(all_events, post_stim_mask)
+        # post_stim_eeg, final_post_stim_events = load_eeg(post_stim_events,bipolar_pairs=ec_pairs,**kwargs)
+        # post_stim_powers = compute_normalized_powers(post_stim_eeg,**kwargs)
         post_stim_powers, final_post_stim_events = compute_normalized_powers(
             post_stim_events, bipolar_pairs=ec_pairs, **kwargs)
-        post_stim_eeg_plot = plot_post_stim_eeg(post_stim_events,**kwargs).compute()
+        post_stim_eeg = load_eeg(post_stim_events,**kwargs).compute()
     else:
         final_post_stim_events = None
         post_stim_powers = None
-        post_stim_eeg_plot = None
+        post_stim_eeg = None
 
     powers, final_task_events = compute_normalized_powers(
         task_events, bipolar_pairs=ec_pairs, **kwargs).compute()
@@ -396,7 +398,7 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
                                                     'encoding_classifier_summaries'],
                                                 post_hoc_results[
                                                     'post_stim_predicted_probs'],
-                                                post_stim_eeg=encode_file(post_stim_eeg_plot))
+                                                post_stim_eeg=post_stim_eeg)
 
     math_summaries = summarize_math(all_events, joint=joint_report)
 
