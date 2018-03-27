@@ -204,10 +204,11 @@ class TestCatFRSessionSummary:
     def setup_class(cls):
         cls.summary = CatFRSessionSummary()
         events = fr5_events()
+        raw_events = fr5_events()
         pairs = bipolar_pairs()
         excluded = excluded_pairs()
         powers = normalized_powers()
-        cls.summary.populate(events, pairs, excluded, powers)
+        cls.summary.populate(events, pairs, excluded, powers, raw_events=raw_events)
 
     def test_to_dataframe(self):
         df = self.summary.to_dataframe()
