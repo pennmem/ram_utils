@@ -38,7 +38,7 @@ def test_hooks():
         assert emit.call_count == 5
 
         for i, args in enumerate(emit.call_args_list):
-            data = json.loads(args[0][0].message)
+            data = json.loads(args[0][0].msg)
             assert data['pipeline'] == name
 
             if i == 0:
