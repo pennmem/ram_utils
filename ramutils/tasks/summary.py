@@ -252,7 +252,7 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
                 stim_events, bipolar_pairs, excluded_pairs, session_powers,
                 raw_events=all_session_events,
                 post_stim_prob_recall=post_stim_predicted_probs[i],
-                post_stim_eeg_plot = post_stim_eeg
+                post_stim_eeg = post_stim_eeg
             )
 
         elif experiment in ['FR2', 'catFR2']:

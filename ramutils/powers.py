@@ -402,35 +402,42 @@ def save_power_plot(powers,full_path):
     plt.close()
     return full_path
 
-def plot_eeg_segment(all_events, start_time, end_time, bipolar_pairs=None, full_path=None, **kwargs):
 
-    from matplotlib import pyplot as plt
-    if full_path is None:
-        full_path = io.BytesIO()
-
-    post_stim_events = all_events[all_events.type=='STIM_OFF']
+def load_eeg(all_events, start_time, end_time, bipolar_pairs=None):
     full_eeg = []
-    for session in np.unique(post_stim_events.session):
-        eeg,_  = load_single_session_eeg(session, post_stim_events, start_time, end_time, bipolar_pairs)
+    for session in np.unique(all_events.session):
+        eeg,_  = load_single_session_eeg(session, all_events, start_time, end_time, bipolar_pairs)
         if bipolar_pairs is None and 'bipolar_pairs' in eeg.dims:
             bipolar_pairs = eeg.bipolar_pairs.values
         time = eeg.time.values
         full_eeg.append(eeg)
     full_eeg = np.concatenate([e.data for e in full_eeg],axis=1)
-    ylen = int(np.sqrt(full_eeg.shape[0]))
-    xlen = int(len(bipolar_pairs)/ylen)+1
+    return full_eeg
 
-    for i in range(0,len(bipolar_pairs)):
-        plt.subplot(xlen,ylen,i+1)
-        plt.plot(full_eeg[i].squeeze().T, time, alpha=0.05)
+
+def plot_eeg_by_channel(bipolar_pairs, full_eeg,  time=None, full_path=None):
+    from matplotlib import pyplot as plt
+    if full_path is None:
+        full_path = io.BytesIO()
+    if time is None:
+        time = np.arange(full_eeg.shape[-1])
+
+    ylen = int(np.sqrt(full_eeg.shape[0]))
+    xlen = int(len(bipolar_pairs) / ylen) + 1
+    plt.figure(figsize=(20, 15))
+    for i in range(0, len(bipolar_pairs)):
+        plt.subplot(xlen, ylen, i + 1)
+        plt.plot(time, full_eeg[i].squeeze().T,color='grey', alpha=0.05)
+        plt.ylim(-30000, 30000)
+        plt.xlabel('%s'%(bipolar_pairs[i]))
     plt.tight_layout()
     plt.savefig(full_path,
                 format='png',
                 dpi=200,
                 bbox_inches='tight')
-
     plt.close()
     return full_path
+
 
 def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events,
                               frequencies, hfa_cutoff=65, trigger_freq=110):

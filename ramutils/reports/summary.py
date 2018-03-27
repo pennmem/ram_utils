@@ -15,9 +15,10 @@ from ramutils.events import extract_subject, extract_experiment_from_events, \
 from ramutils.bayesian_optimization import choose_location
 from ramutils.exc import TooManySessionsError
 from ramutils.parameters import ExperimentParameters
-from ramutils.powers import save_power_plot
+from ramutils.powers import save_power_plot,plot_eeg_by_channel
 from ramutils.classifier.utils import plot_classifier_weights
 from ramutils.utils import encode_file
+from ramutils.montage import generate_pairs_for_classifier
 
 from traitschema import Schema
 from traits.api import Array, ArrayOrNone, Float, Unicode, Bool,Str
@@ -778,7 +779,8 @@ class StimSessionSummary(SessionSummary):
     """SessionSummary data specific to sessions with stimulation."""
     _post_stim_prob_recall = ArrayOrNone(dtype=np.float,
                                          desc='classifier output in post stim period')
-    post_stim_eeg_plot = Str
+    _post_stim_eeg = ArrayOrNone
+
     @property
     def post_stim_prob_recall(self):
         """ Classifier output in the post-stim period """
@@ -791,7 +793,7 @@ class StimSessionSummary(SessionSummary):
 
     def populate(self, events, bipolar_pairs, excluded_pairs,
                  normalized_powers, post_stim_prob_recall=None,
-                 raw_events=None,post_stim_eeg_plot=b''):
+                 raw_events=None,post_stim_eeg = None):
         """ Populate stim data from events """
         SessionSummary.populate(self, events,
                                 bipolar_pairs,
@@ -799,7 +801,17 @@ class StimSessionSummary(SessionSummary):
                                 normalized_powers,
                                 raw_events=raw_events)
         self.post_stim_prob_recall = post_stim_prob_recall
-        self.post_stim_eeg_plot = post_stim_eeg_plot
+        self._post_stim_eeg = post_stim_eeg
+
+    @property
+    def post_stim_eeg_plot(self):
+        if self._post_stim_eeg is None:
+            return ''
+        else:
+            pairs = ['%s-\n%s'%(pair['label0'],pair['label1'])
+                     for pair in generate_pairs_for_classifier(self.bipolar_pairs,[])
+                     ]
+            return encode_file(plot_eeg_by_channel(pairs,self._post_stim_eeg))
 
     @property
     def subject(self):
@@ -811,7 +823,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
     """ SessionSummary for FR sessions with stim """
     def populate(self, events, bipolar_pairs,
                  excluded_pairs, normalized_powers, post_stim_prob_recall=None,
-                 raw_events=None,post_stim_eeg_plot=b''):
+                 raw_events=None,post_stim_eeg=None):
         FRSessionSummary.populate(self,
                                   events,
                                   bipolar_pairs,
@@ -823,7 +835,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
                                     excluded_pairs,
                                     normalized_powers,
                                     post_stim_prob_recall=post_stim_prob_recall,
-                                    raw_events=raw_events,post_stim_eeg_plot=post_stim_eeg_plot)
+                                    raw_events=raw_events,post_stim_eeg=post_stim_eeg)
 
     @staticmethod
     def combine_sessions(summaries):
