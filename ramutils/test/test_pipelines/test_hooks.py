@@ -35,8 +35,15 @@ def test_hooks():
         with PipelineCallback(name):
             total(sqrt(generate_data(10))).compute()
 
-        assert emit.call_count == 3
+        assert emit.call_count == 5
 
-        for args in emit.call_args_list:
+        for i, args in enumerate(emit.call_args_list):
             data = json.loads(args[0][0].message)
             assert data['pipeline'] == name
+
+            if i == 0:
+                assert data['type'] == 'start'
+            elif i == 4:
+                assert data['type'] == 'finish'
+            else:
+                assert data['type'] == 'posttask'
