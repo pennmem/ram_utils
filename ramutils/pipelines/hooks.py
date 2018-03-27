@@ -70,3 +70,64 @@ class PipelineCallback(Callback):
             'errored': errored,
         })
         self.logger.info(data)
+
+
+def make_listener(callback, pipeline_id=None, port=50001, done=None):
+    """Creates a server to listen for progress updates sent out by the pipeline
+    callbacks.
+
+    Parameters
+    ----------
+    callback : callable
+        Callback to execute upon receiving a message. This should take a single
+        dict argument.
+    pipeline_id : str or None
+        Pipeline ID to filter on or None to listen to all.
+    port : int
+        Port number to listen on
+    done : threading.Event
+        Event used to signal the server to exit.
+
+    Returns
+    -------
+    socketserver.UDPServer
+
+    Notes
+    -----
+    Start the server in a separate thread and stop it with the ``shutdown``
+    method.
+
+    """
+    import pickle
+
+    try:
+        from socketserver import DatagramRequestHandler, UDPServer
+    except ImportError:
+        from SocketServer import DatagramRequestHandler, UDPServer
+
+    class Handler(DatagramRequestHandler):
+        def handle(self):
+            data = self.request[0]
+            record = logging.makeLogRecord(pickle.loads(data[4:]))
+
+            if pipeline_id is not None:
+                if record.name != pipeline_id:
+                    return
+
+            msg = json.loads(record.msg)
+            callback(msg)
+
+    return UDPServer(('127.0.0.1', port), Handler)
+
+
+if __name__ == "__main__":
+    from threading import Event, Thread
+    import time
+
+    done = Event()
+    server = make_listener(lambda x: print(x), done=done)
+    thread = Thread(target=server.serve_forever)
+    thread.start()
+
+    time.sleep(5)
+    server.shutdown()
