@@ -3,12 +3,42 @@ from logging.handlers import RotatingFileHandler
 from os.path import expanduser
 from threading import Lock
 
-try:  # pragma: nocover
-    from typing import Dict
-except ImportError:
-    pass
+__all__ = [
+    'RamutilsStreamHandler',
+    'RamutilsFileHandler',
+    'get_warning_accumulator',
+    'get_logger',
+]
 
-_loggers = {}  # type: Dict[logging.Logger]
+
+class RamutilsStreamHandler(logging.StreamHandler):
+    """Custom stream handler used by ramutils loggers."""
+    _FORMAT = '[%(levelname)1.1s %(asctime)s %(filename)s:%(lineno)d] %(message)s'
+
+    def __init__(self, *args, **kwargs):
+        logging.StreamHandler.__init__(self, *args, **kwargs)
+
+        formatter = logging.Formatter(fmt=self._FORMAT)
+        self.setFormatter(formatter)
+
+
+class RamutilsFileHandler(RotatingFileHandler):
+    """Custom rotating file handler used by ramutils loggers.
+
+    Parameters
+    ----------
+    filename : str
+        Base filename for logs.
+
+    """
+    _FORMAT = '[%(levelname)1.1s %(asctime)s %(pathname)s:%(lineno)d]\n    %(message)s'
+
+    def __init__(self, filename):
+        RotatingFileHandler.__init__(self, filename, 'a', maxBytes=10e6,
+                                     backupCount=4)
+
+        formatter = logging.Formatter(fmt=self._FORMAT)
+        self.setFormatter(formatter)
 
 
 class WarningAccumulator(logging.Handler):
@@ -84,19 +114,16 @@ def get_logger(name='ramutils'):
     :param str name: Name for the logger (default: ``'ramutils'``)
 
     """
-    if name not in _loggers:
-        stream_handler = logging.StreamHandler()
-        stream_formatter = logging.Formatter(fmt='[%(levelname)1.1s %(asctime)s %(filename)s:%(lineno)d] %(message)s')
-        stream_handler.setFormatter(stream_formatter)
+    logger = logging.getLogger(name)
 
-        file_handler = RotatingFileHandler(expanduser("~/.ramutils.log"),
-                                           maxBytes=10e6, backupCount=4)
-        file_formatter = logging.Formatter(fmt='[%(levelname)1.1s %(asctime)s %(pathname)s:%(lineno)d]\n    %(message)s')
-        file_handler.setFormatter(file_formatter)
+    for handler in logger.handlers:
+        if isinstance(handler, RamutilsStreamHandler):
+            # Logging has already been configured
+            return logger
 
-        _loggers[name] = logging.getLogger(name)
-        _loggers[name].addHandler(stream_handler)
-        _loggers[name].addHandler(file_handler)
-        _loggers[name].setLevel(logging.INFO)
-
-    return _loggers[name]
+    stream_handler = RamutilsStreamHandler()
+    file_handler = RamutilsFileHandler(expanduser("~/.ramutils.log"))
+    logger.addHandler(stream_handler)
+    logger.addHandler(file_handler)
+    logger.setLevel(logging.INFO)
+    return logger
