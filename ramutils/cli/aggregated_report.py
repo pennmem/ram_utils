@@ -5,7 +5,7 @@ import os.path as osp
 
 from ramutils.cli import make_parser
 from ramutils.exc import CommandLineError
-from ramutils.log import get_logger, get_warning_accumulator
+from ramutils.log import get_logger
 from ramutils.parameters import FilePaths
 from ramutils.pipelines.aggregated_report import make_aggregated_report
 from ramutils.utils import timer
@@ -24,7 +24,6 @@ logger = get_logger("reports")
 
 def create_aggregate_report(input_args=None):
     args = parser.parse_args(input_args)
-    warning_accumulator = get_warning_accumulator()
 
     paths = FilePaths(
         root=osp.expanduser(args.root),
@@ -54,10 +53,6 @@ def create_aggregate_report(input_args=None):
         )
         logger.info("Wrote report to %s\n", path)
         memory.clear()
-
-    warnings = '\n' + warning_accumulator.format_all()
-    if warnings is not None:
-        logger.info(warnings)
 
 
 if __name__ == "__main__":

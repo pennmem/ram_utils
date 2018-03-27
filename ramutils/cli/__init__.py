@@ -4,7 +4,6 @@ import os.path
 
 from ramutils import __version__
 from ramutils.constants import EXPERIMENTS
-from ramutils.exc import ValidationError  # so that other imports don't need to be updated
 
 
 class RamArgumentParser(ArgumentParser):

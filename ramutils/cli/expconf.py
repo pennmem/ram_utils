@@ -7,10 +7,11 @@ from datetime import datetime
 import functools
 import os.path as osp
 
-from ramutils.cli import make_parser, ValidationError
+from ramutils.cli import make_parser
 from ramutils.constants import EXPERIMENTS
-from ramutils.log import get_logger, get_warning_accumulator
-from ramutils.utils import timer
+from ramutils.exc import ValidationError
+from ramutils.log import get_logger
+from ramutils.utils import timer, show_log_handlers
 from ramutils.tasks import memory
 
 
@@ -92,8 +93,6 @@ def create_expconf(input_args=None):
     from ramutils.montage import make_stim_params
     from ramutils.parameters import FilePaths, FRParameters, PALParameters
     from ramutils.pipelines.ramulator_config import make_ramulator_config
-
-    warning_accumulator = get_warning_accumulator()
 
     args = parser.parse_args(input_args)
     validate_stim_settings(args)
@@ -191,9 +190,6 @@ def create_expconf(input_args=None):
                               use_classifier_excluded_leads=args.use_classifier_excluded_leads)
         memory.clear()  # clear cached intermediate results on successful build
 
-    warnings = '\n' + warning_accumulator.format_all()
-    if warnings is not None:
-        logger.info(warnings)
 
 if __name__ == "__main__":
     # create_expconf()

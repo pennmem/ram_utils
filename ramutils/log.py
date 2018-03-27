@@ -1,81 +1,42 @@
 import logging
 from logging.handlers import RotatingFileHandler
 from os.path import expanduser
-from threading import Lock
 
-try:  # pragma: nocover
-    from typing import Dict
-except ImportError:
-    pass
-
-_loggers = {}  # type: Dict[logging.Logger]
+__all__ = [
+    'RamutilsStreamHandler',
+    'RamutilsFileHandler',
+    'get_logger',
+]
 
 
-class WarningAccumulator(logging.Handler):
-    """A special log handler to accumulate all logged warnings to prominently
-    display them at the end.
+class RamutilsStreamHandler(logging.StreamHandler):
+    """Custom stream handler used by ramutils loggers."""
+    _FORMAT = '[%(levelname)1.1s %(asctime)s %(filename)s:%(lineno)d] %(message)s'
 
-    """
-    def __init__(self):
-        super(WarningAccumulator, self).__init__(level=logging.WARNING)
-        self._warnings = []
-        self._lock = Lock()
+    def __init__(self, *args, **kwargs):
+        logging.StreamHandler.__init__(self, *args, **kwargs)
 
-        formatter = logging.Formatter('[%(pathname)s:%(lineno)d] %(message)s')
+        formatter = logging.Formatter(fmt=self._FORMAT)
         self.setFormatter(formatter)
 
-    def emit(self, record):
-        with self._lock:
-            if record.levelno == logging.WARNING:
-                self._warnings.append(record)
 
-    def format_all(self, flush=True):
-        """Formats all accumulated warnings.
+class RamutilsFileHandler(RotatingFileHandler):
+    """Custom rotating file handler used by ramutils loggers.
 
-        Parameters
-        ----------
-        flush : bool
-            When True (the default), remove all accumulated warnings after
-            formatting.
-
-        Returns
-        -------
-        str or None
-            A string of all formatted warnings or None if no warnings were
-            accumulated.
-
-        """
-        lines = []
-        with self._lock:
-            for record in self._warnings:
-                lines.append(self.formatter.format(record))
-
-            if flush:
-                self._warnings = []
-
-        if len(lines):
-            return "ACCUMULATED WARNINGS\n--------------------\n" + '\n'.join(lines)
-        else:
-            return ''
-
-
-def get_warning_accumulator():
-    """Creates a new :class:`WarningAccumulator` if necessary and adds it to
-    the root logger.
-
-    Returns
-    -------
-    handler : WarningAccumulator
+    Parameters
+    ----------
+    filename : str
+        Base filename for logs.
 
     """
-    root_logger = logging.getLogger()
-    for handler in root_logger.handlers:
-        if isinstance(handler, WarningAccumulator):
-            return handler
+    _FORMAT = '[%(levelname)1.1s %(asctime)s %(pathname)s:%(lineno)d]\n    %(message)s'
 
-    handler = WarningAccumulator()
-    root_logger.addHandler(handler)
-    return handler
+    def __init__(self, filename):
+        RotatingFileHandler.__init__(self, filename, 'a', maxBytes=10e6,
+                                     backupCount=4)
+
+        formatter = logging.Formatter(fmt=self._FORMAT)
+        self.setFormatter(formatter)
 
 
 def get_logger(name='ramutils'):
@@ -84,19 +45,16 @@ def get_logger(name='ramutils'):
     :param str name: Name for the logger (default: ``'ramutils'``)
 
     """
-    if name not in _loggers:
-        stream_handler = logging.StreamHandler()
-        stream_formatter = logging.Formatter(fmt='[%(levelname)1.1s %(asctime)s %(filename)s:%(lineno)d] %(message)s')
-        stream_handler.setFormatter(stream_formatter)
+    logger = logging.getLogger(name)
 
-        file_handler = RotatingFileHandler(expanduser("~/.ramutils.log"),
-                                           maxBytes=10e6, backupCount=4)
-        file_formatter = logging.Formatter(fmt='[%(levelname)1.1s %(asctime)s %(pathname)s:%(lineno)d]\n    %(message)s')
-        file_handler.setFormatter(file_formatter)
+    for handler in logger.handlers:
+        if isinstance(handler, RamutilsStreamHandler):
+            # Logging has already been configured
+            return logger
 
-        _loggers[name] = logging.getLogger(name)
-        _loggers[name].addHandler(stream_handler)
-        _loggers[name].addHandler(file_handler)
-        _loggers[name].setLevel(logging.INFO)
-
-    return _loggers[name]
+    stream_handler = RamutilsStreamHandler()
+    file_handler = RamutilsFileHandler(expanduser("~/.ramutils.log"))
+    logger.addHandler(stream_handler)
+    logger.addHandler(file_handler)
+    logger.setLevel(logging.INFO)
+    return logger
