@@ -7,10 +7,11 @@ from datetime import datetime
 import functools
 import os.path as osp
 
-from ramutils.cli import make_parser, ValidationError
+from ramutils.cli import make_parser
 from ramutils.constants import EXPERIMENTS
+from ramutils.exc import ValidationError
 from ramutils.log import get_logger
-from ramutils.utils import timer
+from ramutils.utils import timer, show_log_handlers
 from ramutils.tasks import memory
 
 

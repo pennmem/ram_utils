@@ -2,6 +2,7 @@ from collections import OrderedDict
 from contextlib import contextmanager
 from functools import wraps
 import json
+import logging
 import os
 from timeit import default_timer
 import numpy as np
@@ -304,7 +305,7 @@ def get_completed_sessions(subject, experiment, rootdir='/'):
 
     return sessions
 
-  
+
 @contextmanager
 def tempdir():
     """Create a temporary directory and remove its contents upon completion."""
@@ -357,3 +358,22 @@ def extract_report_info_from_path(file_path):
 
     return results
 
+
+@contextmanager
+def show_log_handlers():
+    """Prints logging handlers. Used for figuring out what is manipulating
+    logging that shouldn't be.
+
+    """
+    root_logger = logging.getLogger()
+    logger = get_logger()
+
+    def print_handlers():
+        print("root_logger:", root_logger.handlers)
+        print("logger:", logger.handlers)
+
+    print("before")
+    print_handlers()
+    yield
+    print("after")
+    print_handlers()
