@@ -278,7 +278,7 @@ var ramutils = (function (mod, Plotly) {
 
         let data =[];
         let layout = {
-            title: 'Classifier Weights',
+            title: 'Classifier Activation',
             showlegend: true
         }
 
@@ -315,13 +315,14 @@ var ramutils = (function (mod, Plotly) {
 
             layout[xax_name] = {title: 'Channel',
                                 domain:[i/weights.length+start_offset, (i+1)/weights.length-end_offset]};
-            layout[yax_name] = {title: i?'':'Frequency',
+            layout[yax_name] = {title: i?'':'Frequency (Hz)',
                                 type:'log',
                                 autorange:true,
                                 anchor:xaxis,
                                 tickmode:'linear',
                                 tick0:Math.log10(these_freqs[0]),
-                                dtick:Math.log10(these_freqs[these_freqs.length-1]/these_freqs[0])/(these_freqs.length-1)
+                                dtick:Math.log10(these_freqs[these_freqs.length-1]/these_freqs[0])/(these_freqs.length-1),
+                                tickformat: '.0f'
                                 };
         }
         Plotly.plot("classifier-weight-plot",data,layout)

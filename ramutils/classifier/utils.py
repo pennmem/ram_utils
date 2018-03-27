@@ -128,9 +128,10 @@ def plot_classifier_weights(weights, frequencies, pairs, file_):
     from matplotlib import pyplot as plt
 
     weights_by_channel = weights.reshape((len(frequencies),len(pairs)))
-    plt.imshow(weights_by_channel,aspect='auto',origin='lower',cmap='bwr')
+    plt.imshow(weights_by_channel,aspect='auto',origin='lower',cmap='RdBu')
     cmin,cmax = weights.min(),weights.max()
-    plt.clim(cmin if cmin<-1*cmax else -cmax, cmax if cmax>-cmin else -cmin)
+    clim = max(abs(cmin),abs(cmax))
+    plt.clim(-clim,clim)
     plt.colorbar()
     locs,old_labels = plt.yticks()
     new_labels = ['%d'%(np.rint(f).astype(int)) for f in frequencies]

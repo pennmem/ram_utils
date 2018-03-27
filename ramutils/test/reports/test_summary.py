@@ -251,10 +251,8 @@ class TestClassifierSummary:
 
     def test_populate(self):
         summary = ClassifierSummary()
-        summary.populate(self.subject, self.experiment,
-                         self.sessions, self.recalls,
-                         self.predicted_probabilities, self.permuation_aucs,
-                         tag='Encoding')
+        summary.populate(self.subject, self.experiment, self.sessions, self.recalls, self.predicted_probabilities,
+                         self.permuation_aucs, tag='Encoding')
         assert np.array_equal(self.recalls, summary.true_outcomes)
         assert np.array_equal(self.predicted_probabilities, summary.predicted_probabilities)
         assert np.array_equal(self.permuation_aucs, summary.permuted_auc_values)
@@ -265,9 +263,7 @@ class TestClassifierSummary:
 
     def test_auc(self):
         summary = ClassifierSummary()
-        summary.populate(self.subject, self.experiment,
-                         self.sessions, self.recalls,
-                         self.predicted_probabilities,
+        summary.populate(self.subject, self.experiment, self.sessions, self.recalls, self.predicted_probabilities,
                          self.permuation_aucs)
         return
 

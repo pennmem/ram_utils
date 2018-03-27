@@ -8,6 +8,9 @@ from ramutils.powers import get_trigger_frequency_mask as \
     get_trigger_frequency_mask_core
 from ramutils.controllability import calculate_modal_controllability, load_connectivity_matrix
 from ramutils.tasks import task
+from ramutils.powers import plot_eeg_segment as plot_post_stim_eeg_core
+
+import io
 
 logger = get_logger()
 
@@ -16,7 +19,8 @@ __all__ = [
     'subset_powers',
     'create_target_selection_table',
     'compute_normalized_powers',
-    'get_trigger_frequency_mask'
+    'get_trigger_frequency_mask',
+    'plot_post_stim_eeg'
 ]
 
 
@@ -69,3 +73,14 @@ def create_target_selection_table(pairs_metadata_table, normalized_powers,
 @task()
 def get_trigger_frequency_mask(trigger_frequency, frequencies):
     return get_trigger_frequency_mask_core(trigger_frequency, frequencies)
+
+
+@task()
+def plot_post_stim_eeg(events,fp=None,**kwargs):
+    if fp is None:
+        fp=io.BytesIO()
+    return plot_post_stim_eeg_core(events,full_path=fp,
+            start_time = kwargs['post_stim_start_time'],
+            end_time = kwargs['post_stim_end_time'],
+            buffer_time = kwargs['post_stim_buf'])
+
