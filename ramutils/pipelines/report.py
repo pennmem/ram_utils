@@ -4,9 +4,7 @@ from __future__  import unicode_literals
 import pandas as pd
 
 from ramutils.tasks import *
-from ramutils.utils import extract_experiment_series
-from ramutils.events import remove_session_number_offsets
-
+from ramutils.utils import extract_experiment_series,encode_file
 
 def make_report(subject, experiment, paths, joint_report=False,
                 retrain=False, stim_params=None, exp_params=None,
@@ -315,9 +313,11 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
         post_stim_events = subset_events(all_events, post_stim_mask)
         post_stim_powers, final_post_stim_events = compute_normalized_powers(
             post_stim_events, bipolar_pairs=ec_pairs, **kwargs)
+        post_stim_eeg_plot = plot_post_stim_eeg(post_stim_events,**kwargs).compute()
     else:
         final_post_stim_events = None
         post_stim_powers = None
+        post_stim_eeg_plot = None
 
     powers, final_task_events = compute_normalized_powers(
         task_events, bipolar_pairs=ec_pairs, **kwargs).compute()
@@ -381,7 +381,8 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
                                                 post_hoc_results[
                                                     'encoding_classifier_summaries'],
                                                 post_hoc_results[
-                                                    'post_stim_predicted_probs'])
+                                                    'post_stim_predicted_probs'],
+                                                post_stim_eeg=encode_file(post_stim_eeg_plot))
 
     math_summaries = summarize_math(all_events, joint=joint_report)
 

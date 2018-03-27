@@ -9,7 +9,7 @@ from ptsa.data.filters import (
 from ptsa.data.readers import EEGReader
 from scipy.stats import zscore, ttest_ind
 from statsmodels.sandbox.stats.multicomp import multipletests
-
+import io
 try:
     from typing import List
 except ImportError:
@@ -385,11 +385,13 @@ def save_power_plot(powers,full_path):
     """
     from matplotlib import pyplot as plt
 
-    plt.imshow(reshape_powers_to_2d(powers),cmap='bwr',aspect='auto',)
+    plt.imshow(reshape_powers_to_2d(powers),cmap='RdBu_r',aspect='auto',)
     cmin,cmax = powers.min(),powers.max()
     clim = max(abs(cmin),abs(cmax))
     plt.clim(-clim,clim)
-    plt.colorbar()
+    cbar = plt.colorbar()
+    cbar.ax.set_xlabel('Z-Score')
+    cbar.ax.xaxis.set_label_position('top')
     plt.ylabel('Event Number')
     plt.xlabel('Feature Number')
     plt.savefig(full_path,
@@ -400,13 +402,19 @@ def save_power_plot(powers,full_path):
     plt.close()
     return full_path
 
-def plot_post_stim_eeg(all_events,start_time,end_time,bipolar_pairs,full_path):
+def plot_eeg_segment(all_events, start_time, end_time, bipolar_pairs=None, full_path=None, **kwargs):
+
     from matplotlib import pyplot as plt
+    if full_path is None:
+        full_path = io.BytesIO()
 
     post_stim_events = all_events[all_events.type=='STIM_OFF']
     full_eeg = []
     for session in np.unique(post_stim_events.session):
         eeg,_  = load_single_session_eeg(session, post_stim_events, start_time, end_time, bipolar_pairs)
+        if bipolar_pairs is None and 'bipolar_pairs' in eeg.dims:
+            bipolar_pairs = eeg.bipolar_pairs.values
+        time = eeg.time.values
         full_eeg.append(eeg)
     full_eeg = np.concatenate([e.data for e in full_eeg],axis=1)
     ylen = int(np.sqrt(full_eeg.shape[0]))
@@ -414,14 +422,15 @@ def plot_post_stim_eeg(all_events,start_time,end_time,bipolar_pairs,full_path):
 
     for i in range(0,len(bipolar_pairs)):
         plt.subplot(xlen,ylen,i+1)
-        plt.plot(full_eeg[i],alpha=0.05)
+        plt.plot(full_eeg[i].squeeze().T, time, alpha=0.05)
     plt.tight_layout()
     plt.savefig(full_path,
                 format='png',
                 dpi=200,
                 bbox_inches='tight')
 
-
+    plt.close()
+    return full_path
 
 def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events,
                               frequencies, hfa_cutoff=65, trigger_freq=110):

@@ -20,7 +20,7 @@ from ramutils.classifier.utils import plot_classifier_weights
 from ramutils.utils import encode_file
 
 from traitschema import Schema
-from traits.api import Array, ArrayOrNone, Float, Unicode, Bool
+from traits.api import Array, ArrayOrNone, Float, Unicode, Bool,Str
 
 from sklearn.metrics import roc_auc_score, roc_curve
 from statsmodels.stats.proportion import proportions_chisquare
@@ -60,6 +60,7 @@ class ClassifierSummary(Schema):
     high_terc_recall_rate = Float(desc='recall rate when predicted probability of recall was in highest tercile')
     frequencies = Array(desc='Frequencies the classifier was trained on')
     pairs = Array(desc='Bipolar pairs used to train the classifier')
+    features = ArrayOrNone
 
     @property
     def id(self):
@@ -164,6 +165,10 @@ class ClassifierSummary(Schema):
         return 100.0 * (self.high_terc_recall_rate - self.recall_rate) / self.recall_rate
 
     @property
+    def predicted_probability_covariance(self):
+        return np.cov(self._predicted_probabilities)
+
+    @property
     def classifier_weights(self):
         return self._classifier_weights
 
@@ -179,20 +184,26 @@ class ClassifierSummary(Schema):
             self._classifier_weights = new_weights
 
     @property
-    def weight_plot_str(self):
-        return encode_file(self.plot_classifier_weights())
+    def classifier_activation(self):
+        """
+        Forward model of classifier activation from Haufe et. al. 2014
+        :return:
+        """
+        return np.cov(self.features.T,self.predicted_probabilities)[-1,:-1]
 
-    def plot_classifier_weights(self,fd=None):
+    @property
+    def weight_plot_str(self):
+        return encode_file(self.plot_classifier_activation())
+
+    def plot_classifier_activation(self, fd=None):
         if fd is None:
             fd = io.BytesIO()
         if self.classifier_weights is not None and self.frequencies is not None and self.pairs is not None:
-            plot_classifier_weights(self.classifier_weights,self.frequencies,self.pairs,fd)
+            plot_classifier_weights(self.classifier_activation,self.frequencies,self.pairs,fd)
         return fd
 
-    def populate(self, subject, experiment, session, true_outcomes,
-                 predicted_probabilities, permuted_auc_values,
-                 weights=None,frequencies=None, pairs=None,
-                 tag='', reloaded=False):
+    def populate(self, subject, experiment, session, true_outcomes, predicted_probabilities, permuted_auc_values,
+                 weights=None, frequencies=None, pairs=None, features=None, tag='', reloaded=False):
         """ Populate classifier performance metrics
 
         Parameters
@@ -216,6 +227,7 @@ class ClassifierSummary(Schema):
             Indicates whether the classifier is reloaded from hard disk,
             i.e. is the actually classifier used. If false, then the
             classifier was created from scratch
+            :param features:
 
         """
         self.subject = subject
@@ -229,6 +241,7 @@ class ClassifierSummary(Schema):
         self.classifier_weights = weights
         self.frequencies = frequencies
         self.pairs = pairs
+        self.features = features
 
         thresh_low = np.percentile(predicted_probabilities, 100.0 / 3.0)
         thresh_high = np.percentile(predicted_probabilities, 2.0 * 100.0 / 3.0)
@@ -520,6 +533,9 @@ class SessionSummary(Summary):
     @normalized_powers.setter
     def normalized_powers(self, new_normalized_powers):
         self._normalized_powers = new_normalized_powers
+    @property
+    def normalized_powers_covariance(self):
+        return np.cov(self._normalized_powers.T)
 
     def plot_normalized_powers(self,fname_or_file=None):
         """
@@ -762,7 +778,7 @@ class StimSessionSummary(SessionSummary):
     """SessionSummary data specific to sessions with stimulation."""
     _post_stim_prob_recall = ArrayOrNone(dtype=np.float,
                                          desc='classifier output in post stim period')
-
+    post_stim_eeg_plot = Str
     @property
     def post_stim_prob_recall(self):
         """ Classifier output in the post-stim period """
@@ -775,7 +791,7 @@ class StimSessionSummary(SessionSummary):
 
     def populate(self, events, bipolar_pairs, excluded_pairs,
                  normalized_powers, post_stim_prob_recall=None,
-                 raw_events=None):
+                 raw_events=None,post_stim_eeg_plot=b''):
         """ Populate stim data from events """
         SessionSummary.populate(self, events,
                                 bipolar_pairs,
@@ -783,6 +799,7 @@ class StimSessionSummary(SessionSummary):
                                 normalized_powers,
                                 raw_events=raw_events)
         self.post_stim_prob_recall = post_stim_prob_recall
+        self.post_stim_eeg_plot = post_stim_eeg_plot
 
     @property
     def subject(self):
@@ -794,7 +811,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
     """ SessionSummary for FR sessions with stim """
     def populate(self, events, bipolar_pairs,
                  excluded_pairs, normalized_powers, post_stim_prob_recall=None,
-                 raw_events=None):
+                 raw_events=None,post_stim_eeg_plot=b''):
         FRSessionSummary.populate(self,
                                   events,
                                   bipolar_pairs,
@@ -806,7 +823,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
                                     excluded_pairs,
                                     normalized_powers,
                                     post_stim_prob_recall=post_stim_prob_recall,
-                                    raw_events=raw_events)
+                                    raw_events=raw_events,post_stim_eeg_plot=post_stim_eeg_plot)
 
     @staticmethod
     def combine_sessions(summaries):

@@ -62,7 +62,7 @@
   </table>
   <figure>
       <div id="classifier-weight-plot"></div>
-      <figcaption> Classifier weights by channel and frequency.
+      <figcaption> Classifier activation pattern by channel and frequency.
         {% if not stim %} <b>(Left)</b> encoding only classifier; <b>(Right)</b> joint classifier. {% endif %}</figcaption>
   </figure>
 </div>
@@ -78,7 +78,7 @@
       let weights=[];
       let freqs = [];
       {% for classifier in classifiers %}
-      weights.push({{ classifier.weights2D.tolist() }});
+      weights.push({{ classifier.classifier_activation.reshape(classifier.frequencies.__len__(),-1).tolist() }});
       freqs.push({{ classifier.frequencies.tolist() }});
       {% endfor %}
       ramutils.plots.plotClassifierWeights(weights,freqs);

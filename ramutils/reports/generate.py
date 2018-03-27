@@ -215,6 +215,7 @@ class ReportGenerator(object):
                     'stim': FRStimSessionSummary.delta_recall(self.session_summaries),
                     'post_stim': FRStimSessionSummary.delta_recall(self.session_summaries, post_stim_items=True)
                 }
+            plot_data['post_stim_plots'] = [summary.post_stim_eeg_plot for summary in self.session_summaries]
 
         if biomarker_delta:
             plot_data['classifier_output'] = {
