@@ -39,7 +39,7 @@ def test_hooks():
         with PipelineCallback(name):
             total(sqrt(generate_data(10))).compute()
 
-        assert emit.call_count == 5
+        assert emit.call_count == 8
 
         for i, args in enumerate(emit.call_args_list):
             data = json.loads(args[0][0].msg)
@@ -47,10 +47,12 @@ def test_hooks():
 
             if i == 0:
                 assert data['type'] == 'start'
-            elif i == 4:
+            elif i == 7:
                 assert data['type'] == 'finish'
-            else:
+            elif i % 2 == 0:
                 assert data['type'] == 'posttask'
+            else:
+                assert data['type'] == 'pretask'
 
 
 @pytest.mark.parametrize('pipeline_id', [None, 'mypipeline'])

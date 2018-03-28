@@ -60,6 +60,18 @@ class PipelineCallback(Callback):
         })
         self.logger.info(data)
 
+    def _pretask(self, key, dsk, state):
+        data = json.dumps({
+            'pipeline': self._pipeline_id,
+            'type': 'pretask',
+            'progress': {
+                'complete': len(state['finished']),
+                'total': len(state['dependencies']),
+            },
+            'task': key,
+        })
+        self.logger.info(data)
+
     def _posttask(self, key, result, dsk, state, id):
         data = json.dumps({
             'pipeline': self._pipeline_id,
@@ -68,7 +80,7 @@ class PipelineCallback(Callback):
                 'complete': len(state['finished']),
                 'total': len(state['dependencies']),
             },
-            'last_task': key,
+            'task': key,
         })
         self.logger.info(data)
 
