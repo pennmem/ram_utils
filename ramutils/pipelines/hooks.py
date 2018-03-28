@@ -74,7 +74,7 @@ class PipelineCallback(Callback):
         self.logger.info(data)
 
 
-def make_listener(callback, pipeline_id=None, port=50001, done=None):
+def make_listener(callback, pipeline_id=None, port=50001):
     """Creates a server to listen for progress updates sent out by the pipeline
     callbacks.
 
@@ -87,8 +87,6 @@ def make_listener(callback, pipeline_id=None, port=50001, done=None):
         Pipeline ID to filter on or None to listen to all.
     port : int
         Port number to listen on
-    done : threading.Event
-        Event used to signal the server to exit.
 
     Returns
     -------
@@ -123,11 +121,10 @@ def make_listener(callback, pipeline_id=None, port=50001, done=None):
 
 
 if __name__ == "__main__":
-    from threading import Event, Thread
+    from threading import Thread
     import time
 
-    done = Event()
-    server = make_listener(lambda x: print(x), done=done)
+    server = make_listener(lambda x: print(x))
     thread = Thread(target=server.serve_forever)
     thread.start()
 
