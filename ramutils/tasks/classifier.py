@@ -133,7 +133,7 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
                                               recalls, **kwargs)
         classifier_summary.populate(subject, experiment, sessions, encoding_recalls, probs, permuted_auc_values,
                                     weights=classifier.coef_, frequencies=kwargs.get('freqs'),
-                                    pairs=kwargs.get('pairs'), features=pow_mat,tag=tag)
+                                    pairs=kwargs.get('pairs'), features=pow_mat[encoding_event_mask,...],tag=tag)
 
     else:
         logger.info("Performing LOLO cross validation")
