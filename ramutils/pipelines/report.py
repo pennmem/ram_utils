@@ -6,6 +6,7 @@ import pandas as pd
 
 from ramutils.tasks import *
 from ramutils.utils import extract_experiment_series
+from .hooks import PipelineCallback
 
 
 ReportData = namedtuple('ReportData', 'session_summaries, math_summaries, '
@@ -17,7 +18,8 @@ ReportData = namedtuple('ReportData', 'session_summaries, math_summaries, '
 def make_report(subject, experiment, paths, joint_report=False,
                 retrain=False, stim_params=None, exp_params=None,
                 sessions=None, vispath=None, rerun=False,
-                trigger_electrode=None, use_classifier_excluded_leads=False):
+                trigger_electrode=None, use_classifier_excluded_leads=False,
+                pipeline_name="report"):
     """Run a report.
 
     Parameters
@@ -48,7 +50,10 @@ def make_report(subject, experiment, paths, joint_report=False,
         The label for the bipolar pair to be used for triggering stimulation
         in PS5
     use_classifier_excluded_leads: bool
-        Use contents of classifier_excluded_leads.txt to exclude channels from classifier training
+        Use contents of classifier_excluded_leads.txt to exclude channels from
+        classifier training
+    pipeline_name : str
+        Name to use for status updates.
 
     Returns
     -------
@@ -175,7 +180,8 @@ def make_report(subject, experiment, paths, joint_report=False,
     if vispath is not None:
         report.visualize(filename=vispath)
 
-    return report.compute()
+    with PipelineCallback(pipeline_name):
+        return report.compute()
 
 
 def generate_ps4_report(subject, experiment, sessions, ec_pairs,

@@ -43,7 +43,7 @@ class PipelineCallback(Callback):
     def __init__(self, pipeline_id=None, host='127.0.0.1', port=50001):
         super(PipelineCallback, self).__init__()
         self._pipeline_id = pipeline_id if pipeline_id is not None else uuid4().hex
-        self.logger = logging.getLogger('pipeline.' + pipeline_id)
+        self.logger = logging.getLogger(pipeline_id)
 
         handler = DatagramHandler(host, port)
         formatter = logging.Formatter(fmt="%(message)s")
@@ -144,3 +144,10 @@ class PipelineStatusListener(object):
 
     def __exit__(self, type, value, traceback):
         self.server.shutdown()
+
+
+if __name__ == "__main__":
+    import time
+
+    with PipelineStatusListener(lambda x: print(x)):
+        time.sleep(60)
