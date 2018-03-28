@@ -1,7 +1,11 @@
+import logging
 from logging.handlers import DatagramHandler
 import json
 import math
 import random
+import time
+
+import pytest
 
 try:
     from unittest.mock import patch
@@ -10,7 +14,7 @@ except ImportError:
 
 from dask import delayed
 
-from ramutils.pipelines.hooks import PipelineCallback
+from ramutils.pipelines.hooks import PipelineCallback, PipelineStatusListener
 
 
 @delayed
@@ -47,3 +51,23 @@ def test_hooks():
                 assert data['type'] == 'finish'
             else:
                 assert data['type'] == 'posttask'
+
+
+@pytest.mark.parametrize('pipeline_id', [None, 'mypipeline'])
+@pytest.mark.parametrize('port', [50001])
+def test_listener(pipeline_id, port):
+    messages = []
+
+    def callback(msg):
+        messages.append(msg)
+
+    with PipelineStatusListener(callback, pipeline_id):
+        logger = logging.getLogger(pipeline_id or __name__)
+        logger.setLevel(logging.INFO)
+        logger.addHandler(DatagramHandler('127.0.0.1', port))
+
+        logger.info('{"level":"info"}')
+        logger.warning('{"level":"warning"}')
+        time.sleep(0.001)
+
+    assert len(messages) == 2

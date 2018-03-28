@@ -3,7 +3,14 @@ from __future__ import print_function
 import json
 import logging
 from logging.handlers import DatagramHandler
+import pickle
+from threading import Thread
 from uuid import uuid4
+
+try:
+    from socketserver import DatagramRequestHandler, UDPServer
+except ImportError:
+    from SocketServer import DatagramRequestHandler, UDPServer
 
 from dask.callbacks import Callback
 
@@ -74,9 +81,14 @@ class PipelineCallback(Callback):
         self.logger.info(data)
 
 
-def make_listener(callback, pipeline_id=None, port=50001):
+class PipelineStatusListener(object):
     """Creates a server to listen for progress updates sent out by the pipeline
-    callbacks.
+    callbacks. Note that this should be used as a context manager to start the
+    server in a background thread and close it automatically::
+
+        with PipelineStatusListener(callback):
+            # do stuff here
+            pass
 
     Parameters
     ----------
@@ -88,45 +100,35 @@ def make_listener(callback, pipeline_id=None, port=50001):
     port : int
         Port number to listen on
 
-    Returns
-    -------
-    socketserver.UDPServer
-
     Notes
     -----
     Start the server in a separate thread and stop it with the ``shutdown``
     method.
 
     """
-    import pickle
+    def __init__(self, callback, pipeline_id=None, port=50001):
+        class Handler(DatagramRequestHandler):
+            def handle(self):
+                data = self.request[0]
+                record = logging.makeLogRecord(pickle.loads(data[4:]))
 
-    try:
-        from socketserver import DatagramRequestHandler, UDPServer
-    except ImportError:
-        from SocketServer import DatagramRequestHandler, UDPServer
+                if pipeline_id is not None:
+                    if record.name != pipeline_id:
+                        return
 
-    class Handler(DatagramRequestHandler):
-        def handle(self):
-            data = self.request[0]
-            record = logging.makeLogRecord(pickle.loads(data[4:]))
+                msg = json.loads(record.msg)
+                callback(msg)
 
-            if pipeline_id is not None:
-                if record.name != pipeline_id:
-                    return
+        self._handler_class = Handler
+        self.host = '127.0.0.1'
+        self.port = port
+        self.server = None
+        self._server_thread = None  # type: Thread
 
-            msg = json.loads(record.msg)
-            callback(msg)
+    def __enter__(self):
+        self.server = UDPServer(('127.0.0.1', self.port), self._handler_class)
+        self._server_thread = Thread(target=self.server.serve_forever)
+        self._server_thread.start()
 
-    return UDPServer(('127.0.0.1', port), Handler)
-
-
-if __name__ == "__main__":
-    from threading import Thread
-    import time
-
-    server = make_listener(lambda x: print(x))
-    thread = Thread(target=server.serve_forever)
-    thread.start()
-
-    time.sleep(5)
-    server.shutdown()
+    def __exit__(self, type, value, traceback):
+        self.server.shutdown()
