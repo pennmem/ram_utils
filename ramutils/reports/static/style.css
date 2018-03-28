@@ -14,6 +14,16 @@ figcaption {
   caption-side: bottom;
 }
 
+.feature-plot{
+    display:grid;
+    grid-template-columns: repeat(auto-fill,minmax(400px,1fr));
+}
+
+.feature-plot-img{
+    min-width:400px;
+    margin: 1vw;
+}
+
 #navbar-spacer {
   padding-top: 5em;
 }
