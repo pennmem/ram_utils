@@ -551,7 +551,7 @@ class SessionSummary(Summary):
         """
         if fname_or_file is None:
             fname_or_file = io.BytesIO()
-        save_power_plot(self.normalized_powers,fname_or_file)
+        save_power_plot(self.normalized_powers,self.session_number,fname_or_file)
         return fname_or_file
 
     @property
