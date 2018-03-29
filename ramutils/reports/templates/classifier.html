@@ -78,7 +78,7 @@
       let weights=[];
       let freqs = [];
       {% for classifier in classifiers %}
-      weights.push({{ classifier.classifier_activation.reshape(classifier.frequencies.__len__(),-1).tolist() }});
+      weights.push({{ classifier.classifier_activation.reshape(-1,classifier.frequencies.__len__()).T.tolist() }});
       freqs.push({{ classifier.frequencies.tolist() }});
       {% endfor %}
       ramutils.plots.plotClassifierWeights(weights,freqs);
