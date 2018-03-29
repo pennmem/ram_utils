@@ -376,7 +376,7 @@ def reshape_powers_to_2d(powers):
     reshaped_powers = powers.reshape((len(powers), -1))
     return reshaped_powers
 
-def save_power_plot(powers,full_path):
+def save_power_plot(powers,session,full_path):
     """
     Plots the feature matrix to a file path or file-like object
     :param powers:
@@ -394,6 +394,7 @@ def save_power_plot(powers,full_path):
     cbar.ax.xaxis.set_label_position('top')
     plt.ylabel('Event Number')
     plt.xlabel('Feature Number')
+    plt.title('Session %s'%session)
     plt.savefig(full_path,
                 format="png",
                 dpi=300,
