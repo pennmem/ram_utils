@@ -297,8 +297,8 @@ var ramutils = (function (mod, Plotly) {
                 type: 'heatmap',
                 xaxis: xaxis,
                 yaxis: yaxis,
-                zmin: -0.05,
-                zmax: 0.05,
+                zmin: -0.1,
+                zmax: 0.1,
                 showscale: ((i+1)==weights.length),
                 colorbar:{
                     title: 'Weight'
