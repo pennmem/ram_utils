@@ -1352,7 +1352,7 @@ def get_recall_events_mask(events):
 
 
 def get_post_stim_events_mask(events):
-    # In general, there are not stim events during practice lists, but when artifact detection
+    # In general, there are no stim events during practice lists, but when artifact detection
     # is enabled, the STIM_OFF events have -999 for the list number, so this will be sure
     # to exclude those stim events
     post_stim_events_mask = ((events.type == 'STIM_OFF') & (events.list > -1))
