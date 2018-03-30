@@ -132,7 +132,7 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
         probs = perform_loso_cross_validation(classifier, pow_mat, events,
                                               recalls, **kwargs)
         classifier_summary.populate(subject, experiment, sessions, encoding_recalls, probs, permuted_auc_values,
-                                    weights=classifier.coef_, frequencies=kwargs.get('freqs'),
+                                    frequencies=kwargs.get('freqs'),
                                     pairs=kwargs.get('pairs'), features=pow_mat[encoding_event_mask,...],tag=tag)
 
     else:
@@ -144,9 +144,8 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
                                                              **kwargs)
         probs = perform_lolo_cross_validation(classifier, pow_mat, events,
                                               recalls, **kwargs)
-        weights = classifier.coef_ if 'pairs' in kwargs else None
         classifier_summary.populate(subject, experiment, sessions, encoding_recalls, probs, permuted_auc_values,
-                                    weights=weights, frequencies=kwargs.get('freqs'), pairs=kwargs.get('pairs'),
+                                    frequencies=kwargs.get('freqs'), pairs=kwargs.get('pairs'),
                                     tag=tag,features=pow_mat)
 
     logger.info("Permutation test p-value = %f", classifier_summary.pvalue)
@@ -334,7 +333,7 @@ def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
         # This is the primary classifier used for evaluation. It is based on
         # assessing classifier output for non-stim encoding events
         classifier_summary.populate(subject, experiment, sessions, session_recalls, session_probs, permuted_auc_values,
-                                    weights=classifier.coef_, frequencies=classifier_container.frequencies,
+                                    frequencies=classifier_container.frequencies,
                                     pairs=classifier_container.pairs, tag='session_' + str(session), reloaded=reloaded,
                                     features=reduced_session_powers)
         classifier_summaries.append(classifier_summary)
@@ -356,7 +355,7 @@ def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
 
         encoding_classifier_summary = ClassifierSummary()
         encoding_classifier_summary.populate(subject, experiment, sessions, session_encoding_recalls,
-                                             session_encoding_probs, None, weights=classifier.coef_,
+                                             session_encoding_probs, None,
                                              frequencies=classifier_container.frequencies,
                                              pairs=classifier_container.pairs, tag='encoding_evaluation',
                                              features=reduced_session_encoding_powers)
