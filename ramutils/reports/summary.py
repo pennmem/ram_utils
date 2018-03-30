@@ -47,9 +47,11 @@ class ClassifierSummary(Schema):
     _predicted_probabilities = ArrayOrNone(desc='predicted recall probabilities')
     _true_outcomes = ArrayOrNone(desc='actual results for recall vs. non-recall')
     _permuted_auc_values = ArrayOrNone(desc='permuted AUCs')
-    _classifier_weights = ArrayOrNone(desc='classifier weights')
-
-
+    
+    _frequencies = ArrayOrNone(desc='Frequencies the classifier was trained on')
+    _pairs = ArrayOrNone(desc='Bipolar pairs used to train the classifier')
+    _features = ArrayOrNone
+    
     subject = Unicode(desc='subject')
     experiment = Unicode(desc='experiment')
     sessions = Array(desc='sessions summarized by the object')
@@ -59,9 +61,9 @@ class ClassifierSummary(Schema):
     low_terc_recall_rate = Float(desc='recall rate when predicted probability of recall was in lowest tercile')
     mid_terc_recall_rate = Float(desc='recall reate when predicted probability of recall was in middle tercile')
     high_terc_recall_rate = Float(desc='recall rate when predicted probability of recall was in highest tercile')
-    frequencies = ArrayOrNone(desc='Frequencies the classifier was trained on')
-    pairs = ArrayOrNone(desc='Bipolar pairs used to train the classifier')
-    features = ArrayOrNone
+    
+    
+    
 
     @property
     def id(self):
@@ -165,12 +167,27 @@ class ClassifierSummary(Schema):
         """ % change in recall rate from overall recall when classifier output was in highest tercile """
         return 100.0 * (self.high_terc_recall_rate - self.recall_rate) / self.recall_rate
 
+
+    @property
+    def features(self):
+        return self._features if self._features is not None else np.array([])
+
+    @property
+    def pairs(self):
+        return self._pairs if self._pairs is not None else np.array([])
+
+    @property
+    def frequencies(self):
+        return self._frequencies if self._frequencies is not None else np.array([])
+    
     @property
     def classifier_activation(self):
         """
         Forward model of classifier activation from Haufe et. al. 2014
         :return:
         """
+        if self._features is None:
+            return np.array([])
         return np.cov(self.features.T,self.predicted_probabilities)[-1,:-1]
 
     @property
@@ -179,14 +196,17 @@ class ClassifierSummary(Schema):
 
     @property
     def classifier_activation_by_region(self):
-        import pandas as pd
-        activation_df = pd.DataFrame(data=self.classifier_activation_2d,index=self.pairs['region'])
-        mean_activation = activation_df.groupby(activation_df.index).mean()
-        return mean_activation.values
+        if len(self.classifier_activation):
+            import pandas as pd
+            activation_df = pd.DataFrame(data=self.classifier_activation_2d,index=self.pairs['region'])
+            mean_activation = activation_df.groupby(activation_df.index).mean()
+            return mean_activation.values
+        else:
+            return np.array([])
 
     @property
     def regions(self):
-        return np.unique(self.pairs['region'].tolist()) if self.pairs is not None else []
+        return np.unique(self.pairs['region'].tolist()) if len(self.pairs) else np.array([])
 
     def populate(self, subject, experiment, session, true_outcomes, predicted_probabilities, permuted_auc_values,
                  frequencies=None, pairs=None, features=None, tag='', reloaded=False):
@@ -224,10 +244,9 @@ class ClassifierSummary(Schema):
         self.permuted_auc_values = permuted_auc_values
         self.tag = tag
         self.reloaded = reloaded
-        self.classifier_weights = weights
-        self.frequencies = frequencies
-        self.pairs = pairs
-        self.features = features
+        self._frequencies = frequencies
+        self._pairs = pairs
+        self._features = features
 
         thresh_low = np.percentile(predicted_probabilities, 100.0 / 3.0)
         thresh_high = np.percentile(predicted_probabilities, 2.0 * 100.0 / 3.0)
