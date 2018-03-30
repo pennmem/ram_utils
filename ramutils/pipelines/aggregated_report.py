@@ -3,13 +3,21 @@
 from ramutils.tasks import *
 from ramutils.events import find_subjects
 from ramutils.log import get_logger
+from .hooks import PipelineCallback
 
 logger = get_logger()
 
 
-def make_aggregated_report(subjects=None, experiments=None, sessions=None, fit_model=True, paths=None):
-    """ Create an aggregated stim session report """
+def make_aggregated_report(subjects=None, experiments=None, sessions=None,
+                           fit_model=True, paths=None, pipeline_name="aggregate"):
+    """Create an aggregated stim session report
 
+    Keyword Arguments
+    -----------------
+    pipeline_name : str
+        Name to use for status updates.
+
+    """
     if experiments is not None:
         for i, experiment in enumerate(experiments):
             if 'Cat' in experiment:
@@ -92,4 +100,5 @@ def make_aggregated_report(subjects=None, experiments=None, sessions=None, fit_m
                                  paths.dest, hmm_results=output,
                                  save=True, aggregated_report=True)
 
-    return report.compute()
+    with PipelineCallback(pipeline_name):
+        return report.compute()

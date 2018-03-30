@@ -4,6 +4,7 @@ from ramutils.exc import (
 )
 from ramutils.montage import generate_pairs_from_electrode_config
 from ramutils.tasks import *
+from .hooks import PipelineCallback
 
 
 @task(cache=False)
@@ -44,7 +45,8 @@ def make_ramulator_config(subject, experiment, paths, stim_params, sessions=None
                           exp_params=None, vispath=None, extended_blanking=True,
                           localization=0, montage=0, default_surface_area=0.001,
                           trigger_pairs=None, use_common_reference=False,
-                          use_classifier_excluded_leads=False):
+                          use_classifier_excluded_leads=False,
+                          pipeline_name="ramulator-conf"):
     """ Generate configuration files for a Ramulator experiment
 
     Parameters
@@ -77,7 +79,10 @@ def make_ramulator_config(subject, experiment, paths, stim_params, sessions=None
         Use a common reference in the electrode configuration instead of bipolar
         referencing.
     use_classifier_excluded_leads: bool
-        Use contents of classifier_excluded_leads.txt to exclude channels from classifier training
+        Use contents of classifier_excluded_leads.txt to exclude channels from
+        classifier training
+    pipeline_name : str
+        Name to use for status updates.
 
     Returns
     -------
@@ -144,7 +149,8 @@ def make_ramulator_config(subject, experiment, paths, stim_params, sessions=None
                                                 excluded_pairs=excluded_pairs,
                                                 extended_blanking=extended_blanking,
                                                 trigger_pairs=trigger_pairs)
-        return config_path.compute()
+        with PipelineCallback(pipeline_name):
+            return config_path.compute()
 
     if ("FR" not in experiment) and ("PAL" not in experiment):
         raise RuntimeError("Only PAL, FR, and catFR experiments are currently"
@@ -195,4 +201,5 @@ def make_ramulator_config(subject, experiment, paths, stim_params, sessions=None
     if vispath is not None:
         config_path.visualize(filename=vispath)
 
-    return config_path.compute()
+    with PipelineCallback(pipeline_name):
+        return config_path.compute()
