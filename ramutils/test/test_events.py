@@ -237,14 +237,15 @@ class TestEvents:
     def test_partition_events(self):
         dtypes = [
             ('experiment', '|U256'),
-            ('type', '|U256')
+            ('type', '|U256'),
+            ('list', '<i8')
         ]
-        test_fr_encoding = np.rec.array(np.array([('FR1', 'WORD')], dtype=dtypes))
-        test_fr_retrieval = np.rec.array(np.array([('FR1', 'REC_EVENT')],
+        test_fr_encoding = np.rec.array(np.array([('FR1', 'WORD', 1)], dtype=dtypes))
+        test_fr_retrieval = np.rec.array(np.array([('FR1', 'REC_EVENT', 1)],
                                                   dtype=dtypes))
-        test_pal_encoding = np.rec.array(np.array([('PAL1', 'WORD')],
+        test_pal_encoding = np.rec.array(np.array([('PAL1', 'WORD', 1)],
                                                   dtype=dtypes))
-        test_pal_retrieval = np.rec.array(np.array([('PAL1', 'REC_EVENT')],
+        test_pal_retrieval = np.rec.array(np.array([('PAL1', 'REC_EVENT', 1)],
                                                    dtype=dtypes))
 
         for subset in [test_fr_encoding, test_fr_retrieval,
