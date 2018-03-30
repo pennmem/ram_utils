@@ -130,6 +130,9 @@ def build_montage_metadata_table(subject, experiment, sessions, all_pairs,
         all_pairs[subject]['pairs'][pair]['type'] = pairs_from_json[standardized_pair]['type_1']
         all_pairs[subject]['pairs'][pair]['location'] = extract_atlas_location(pairs_from_json[standardized_pair])
         all_pairs[subject]['pairs'][pair]['label'] = pair
+        all_pairs[subject]['pairs'][pair]['region'] = get_region_name(
+            all_pairs[subject]['pairs'][pair]['location'].partition(' ')[-1]
+        )
 
         if mni_available:
             all_pairs[subject]['pairs'][pair]['mni_x'] = pairs_from_json[
@@ -151,7 +154,7 @@ def build_montage_metadata_table(subject, experiment, sessions, all_pairs,
         pairs_metadata['mni_z'] = None
 
     pairs_metadata = pairs_metadata.reindex(all_pair_labels)
-    pairs_metadata = pairs_metadata[['type', 'channel_1', 'channel_2', 'label',
+    pairs_metadata = pairs_metadata[['type', 'channel_1', 'channel_2', 'label','region',
                                      'location', 'mni_x', 'mni_y', 'mni_z']]
 
     return pairs_metadata
@@ -464,6 +467,34 @@ def extract_atlas_location(bp_data):
         logger.warning('Missing coordinates for an electrode. Likely a neurorad pipeline error')
 
     return '--'
+
+
+def get_region_name(name):
+
+    mtl_loc_dict = {
+        'Hipp':['Left CA1','Left CA2','Left CA3','Left DG','Left Sub',
+            'Right CA1','Right CA2','Right CA3','Right DG','Right Sub'],
+        'MTL':['Left PRC', 'Right PRC', 'Right EC', 'Right PHC', 'Left EC', 'Left PHC']
+    }
+
+    dk_loc_dict= {
+        'IFG': ['parsopercularis','parsorbitalis', 'parstriangularis'],
+        'MFG': ['caudalmiddlefrontal', 'rostralmiddlefrontal'],
+        'SFG': ['superiorfrontal'],
+        'TC': ['middletemporal','inferiortemporal','superiortemporal'],
+        'IPC': ['inferiorparietal','supramarginal'],
+        'SPC': ['superiorparietal','precuneus'],
+        'OC': ['lateraloccipital','lingual', 'cuneus','pericalcarine'],
+    }
+    for k in mtl_loc_dict:
+        if name in mtl_loc_dict[k]:
+            return k
+
+    for k in dk_loc_dict:
+        if name in dk_loc_dict[k]:
+            return k
+
+    return 'Other'
 
 
 def get_pairs(subject, experiment, sessions, paths):

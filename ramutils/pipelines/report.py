@@ -5,6 +5,7 @@ import pandas as pd
 
 from ramutils.tasks import *
 from ramutils.utils import extract_experiment_series,encode_file
+from ramutils.events import dataframe_to_recarray
 
 def make_report(subject, experiment, paths, joint_report=False,
                 retrain=False, stim_params=None, exp_params=None,
@@ -239,12 +240,15 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
                                   kwargs['penalty_type'],
                                   kwargs['solver'])
 
+    pairinfo = dataframe_to_recarray(pairs_metadata_table[['label','location','region']],
+                                     [('label','S256'),('location','S256'),('region','S256')])
+
     joint_classifier_summary = perform_cross_validation(classifier,
                                                         reduced_powers,
                                                         final_task_events,
                                                         kwargs['n_perm'],
                                                         tag='Joint',
-                                                        pairs=final_pairs,
+                                                        pairs=pairinfo,
                                                         **kwargs)
     # Serialize the classifier here
     trained_classifier = serialize_classifier(classifier,
@@ -271,10 +275,12 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
                                            kwargs['C'],
                                            kwargs['penalty_type'],
                                            kwargs['solver'])
+    pairinfo = dataframe_to_recarray(pairs_metadata_table[['label','location','region']],
+                                     [('label','S256'),('location','S256'),('region','S256')])
 
     encoding_classifier_summary = perform_cross_validation(
         encoding_classifier, encoding_reduced_powers,
-        final_encoding_task_events, kwargs['n_perm'],pairs=final_pairs,
+        final_encoding_task_events, kwargs['n_perm'],pairs=pairinfo,
         tag='Encoding', **kwargs)
 
     target_selection_table = create_target_selection_table(
