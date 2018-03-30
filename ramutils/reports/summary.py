@@ -24,7 +24,7 @@ from ramutils.utils import encode_file
 from ramutils.montage import generate_pairs_for_classifier
 
 from traitschema import Schema
-from traits.api import Array, ArrayOrNone, Float, Unicode, Bool, Bytes,Str
+from traits.api import Array, ArrayOrNone, Float, Unicode, Bool, Bytes,CArray
 
 
 from sklearn.metrics import roc_auc_score, roc_curve
@@ -64,7 +64,7 @@ class ClassifierSummary(Schema):
     mid_terc_recall_rate = Float(desc='recall reate when predicted probability of recall was in middle tercile')
     high_terc_recall_rate = Float(desc='recall rate when predicted probability of recall was in highest tercile')
     frequencies = Array(desc='Frequencies the classifier was trained on')
-    pairs = Array(desc='Bipolar pairs used to train the classifier')
+    pairs = CArray(desc='Bipolar pairs used to train the classifier')
     features = ArrayOrNone
 
     @property
@@ -195,6 +195,21 @@ class ClassifierSummary(Schema):
         :return:
         """
         return np.cov(self.features.T,self.predicted_probabilities)[-1,:-1]
+
+    @property
+    def classifier_activation_2d(self):
+        return self.classifier_activation.reshape(len(self.pairs),len(self.frequencies))
+
+    @property
+    def classifier_activation_by_region(self):
+        import pandas as pd
+        activation_df = pd.DataFrame(data=self.classifier_activation_2d,index=self.pairs['region'])
+        mean_activation = activation_df.groupby(activation_df.index).mean()
+        return mean_activation.values
+
+    @property
+    def regions(self):
+        return np.unique(self.pairs['region'].tolist())
 
     @property
     def weight_plot_str(self):

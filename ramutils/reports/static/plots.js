@@ -274,7 +274,7 @@ var ramutils = (function (mod, Plotly) {
     * @param{Array} weights - classfier weights
     * @param{Array} freqs - frequencies used
     */
-    plotClassifierWeights: function(weights,freqs){
+    plotClassifierWeights: function(weights,freqs,labels,names){
 
         let data =[];
         let layout = {
@@ -313,8 +313,12 @@ var ramutils = (function (mod, Plotly) {
                 freq_names.push(Math.round(these_freqs[j]).toString())
                 }
 
-            layout[xax_name] = {title: 'Channel',
-                                domain:[i/weights.length+start_offset, (i+1)/weights.length-end_offset]};
+            layout[xax_name] = {title: names[i],
+                                domain:[i/weights.length+start_offset, (i+1)/weights.length-end_offset],
+                                ticktext:labels[i],
+                                tickvals:Array.from(Array(labels[i].length).keys()),
+                                tickangle: -45,
+                                };
             layout[yax_name] = {title: i?'':'Frequency (Hz)',
                                 type:'log',
                                 autorange:true,

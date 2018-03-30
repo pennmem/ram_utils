@@ -62,7 +62,7 @@
   </table>
   <figure>
       <div id="classifier-weight-plot"></div>
-      <figcaption> Classifier activation pattern by channel and frequency.
+      <figcaption> Average classifier activation pattern by frequency and brain region.
         {% if not stim %} <b>(Left)</b> encoding only classifier; <b>(Right)</b> joint classifier. {% endif %}</figcaption>
   </figure>
 </div>
@@ -77,11 +77,15 @@
       ramutils.plots.plotClassifierPerformance(rocData.fpr, rocData.tpr, tercData.low, tercData.mid, tercData.high, tags);
       let weights=[];
       let freqs = [];
+      let regions = [];
+      let names=  []
       {% for classifier in classifiers %}
-      weights.push({{ classifier.classifier_activation.reshape(-1,classifier.frequencies.__len__()).T.tolist() }});
+      weights.push({{ classifier.classifier_activation_by_region.T.tolist() }});
       freqs.push({{ classifier.frequencies.tolist() }});
+      regions.push( {{ classifier.regions.tolist() }} );
+      names.push('{{ classifier.tag }}' );
       {% endfor %}
-      ramutils.plots.plotClassifierWeights(weights,freqs);
+      ramutils.plots.plotClassifierWeights(weights,freqs,regions,names);
     });
   </script>
 </div>
