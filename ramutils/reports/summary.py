@@ -63,8 +63,8 @@ class ClassifierSummary(Schema):
     low_terc_recall_rate = Float(desc='recall rate when predicted probability of recall was in lowest tercile')
     mid_terc_recall_rate = Float(desc='recall reate when predicted probability of recall was in middle tercile')
     high_terc_recall_rate = Float(desc='recall rate when predicted probability of recall was in highest tercile')
-    frequencies = Array(desc='Frequencies the classifier was trained on')
-    pairs = CArray(desc='Bipolar pairs used to train the classifier')
+    frequencies = ArrayOrNone(desc='Frequencies the classifier was trained on')
+    pairs = ArrayOrNone(desc='Bipolar pairs used to train the classifier')
     features = ArrayOrNone
 
     @property
@@ -170,25 +170,6 @@ class ClassifierSummary(Schema):
         return 100.0 * (self.high_terc_recall_rate - self.recall_rate) / self.recall_rate
 
     @property
-    def predicted_probability_covariance(self):
-        return np.cov(self._predicted_probabilities)
-
-    @property
-    def classifier_weights(self):
-        return self._classifier_weights
-
-    @property
-    def weights2D(self):
-        if self.frequencies is not None:
-            return self.classifier_weights.reshape(len(self.frequencies),-1)
-        return np.array([])
-
-    @classifier_weights.setter
-    def classifier_weights(self,new_weights):
-        if self._classifier_weights is None:
-            self._classifier_weights = new_weights
-
-    @property
     def classifier_activation(self):
         """
         Forward model of classifier activation from Haufe et. al. 2014
@@ -209,21 +190,10 @@ class ClassifierSummary(Schema):
 
     @property
     def regions(self):
-        return np.unique(self.pairs['region'].tolist())
-
-    @property
-    def weight_plot_str(self):
-        return encode_file(self.plot_classifier_activation())
-
-    def plot_classifier_activation(self, fd=None):
-        if fd is None:
-            fd = io.BytesIO()
-        if self.classifier_weights is not None and self.frequencies is not None and self.pairs is not None:
-            plot_classifier_weights(self.classifier_activation,self.frequencies,self.pairs,fd)
-        return fd
+        return np.unique(self.pairs['region'].tolist()) if self.pairs is not None else []
 
     def populate(self, subject, experiment, session, true_outcomes, predicted_probabilities, permuted_auc_values,
-                 weights=None, frequencies=None, pairs=None, features=None, tag='', reloaded=False):
+                 frequencies=None, pairs=None, features=None, tag='', reloaded=False):
         """ Populate classifier performance metrics
 
         Parameters
