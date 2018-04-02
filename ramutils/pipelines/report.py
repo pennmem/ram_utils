@@ -20,7 +20,12 @@ def make_report(subject, experiment, paths, joint_report=False,
                 sessions=None, vispath=None, rerun=False,
                 trigger_electrode=None, use_classifier_excluded_leads=False,
                 pipeline_name="report"):
-    """Run a report.
+    """ Constructs a report and saves out all the necessary data to re-construct the report
+
+    This pipeline should be used for generating single session reports for both record-only and
+    stimulation sessions. However, the current pipeline also support combining sessions of record-only
+    experiments into a single report. In the future, this capability may be moved to
+    `ramutils.pipelines.aggregated_report.make_aggregated_report` since that is a more natural location
 
     Parameters
     ----------

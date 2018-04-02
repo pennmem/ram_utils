@@ -17,20 +17,36 @@ from ramutils.utils import extract_experiment_series
 
 
 class ReportGenerator(object):
-    """Class responsible for generating reports.
+    """Class responsible for generating both single session and aggregate reports
 
     Parameters
     ----------
+    subject: str
+        The subject associated with the report. This is primarily used for creating a report title. In the case of
+        an aggregated report, something like "Multi-Subject" should be used as the subject identifier to make it clear
+        what the report contains
+    experiment: str
+        The experiment being summarized in the report. In the case of multi-experiment reports, either something like
+        "Multi-Experiment" can be passed, or possibly the actual set of experiments. Again, this is really used for
+        creating the report title
     session_summaries : List[SessionSummary]
         List of session summaries. The type of report to run is inferred from
         the included summaries.
     math_summaries : List[MathSummary]
         List of math distractor summaries. Can be an empty list for PS stim
         sessions
-    sme_table: pd.DataFrame
-        Subsequent memory effect table. Can be empty for any stim report
+    target_selection_table: pd.DataFrame
+        A table containing the subsequent memory effect metadata by electrode. Can be empty for any stim report
+    classifier_summaries : List[ClassifierSummary]
+        List of classifier summaries associated with the session(s)
+    hmm_results: dict
+        Dictionary of results from fitting a Bayesian hierarchical model for estimating the behavioral effects of
+        stimulation. Keys are the names of comparison used, for example "list", "stim_item", and "post_stim_item"
+         are the current set of comparisons. The values are the encoded images of the matplotlib-generated
+         forestplots showing the 95% credible intervals for the estimated effect of stimulation for each
+         comparison.
     dest : str
-        Directory to write output to.
+        Directory to write the output to.
 
     Raises
     ------
@@ -44,20 +60,18 @@ class ReportGenerator(object):
     * Subject should match
     * Number of summaries should match
 
-    FIXME: check session numbers, experiments match up
-
     Supported reports:
 
-    * FR1, catFR1, FR2, catFR2, FR3, catFR3, FR5, catFR5, PS4
+    * FR1, catFR1, FR2, catFR2, FR3, catFR3, FR5, catFR5, PS4, PS5, FR6, catFR6
 
     """
     def __init__(self, subject, experiment, session_summaries, math_summaries,
-                 sme_table, classifier_summaries, hmm_results=None, dest='.'):
+                 target_selection_table, classifier_summaries, hmm_results=None, dest='.'):
         self.subject = subject
         self.experiment = experiment
         self.session_summaries = session_summaries
         self.math_summaries = math_summaries
-        self.sme_table = sme_table
+        self.target_selection_table = target_selection_table
         self.classifiers = classifier_summaries
 
         catfr_summary_mask = [summary.experiment == 'catFR1' for summary in
@@ -106,12 +120,12 @@ class ReportGenerator(object):
     def version(self):
         return __version__
 
-    def _make_sme_table(self):
+    def _make_target_selection_table(self):
         """ Create data for the SME table for record-only experiments. """
-        sme_table = (self.sme_table.sort_values(by='hfa_p_value',
+        target_selection_table = (self.target_selection_table.sort_values(by='hfa_p_value',
                                                 ascending=True)
                          .to_dict(orient='records'))
-        return sme_table
+        return target_selection_table
 
     def _make_classifier_data(self):
         """Create JSON object for classifier data """
@@ -284,7 +298,7 @@ class ReportGenerator(object):
             classifiers=self.classifiers,
             plot_data=self._make_plot_data(stim=False, classifier=True,
                                            joint=joint),
-            sme_table=self._make_sme_table(),
+            sme_table=self._make_target_selection_table(),
             joint=joint
         )
 
