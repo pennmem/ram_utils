@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Pipelines &mdash; Ramutils 2.1.5 documentation</title>
+  <title>Pipelines &mdash; Ramutils 2.1.8 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Ramutils 2.1.5 documentation" href="index.html"/>
+    <link rel="top" title="Ramutils 2.1.8 documentation" href="index.html"/>
         <link rel="next" title="Command-line usage" href="cli.html"/>
         <link rel="prev" title="Event processing" href="events.html"/> 
 
@@ -95,17 +95,18 @@
 <li class="toctree-l1"><a class="reference internal" href="classifier.html">Classifier training, cross validation, and utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="events.html">Event processing</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Pipelines</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#defining-tasks">Defining tasks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#reference">Reference</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#module-ramutils.tasks.classifier">Classifier tasks</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-ramutils.tasks.events">Events tasks</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-ramutils.tasks.misc">Miscellaneous tasks</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-ramutils.tasks.montage">Montage tasks</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-ramutils.tasks.odin">Odin/Ramulator tasks</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-ramutils.tasks.powers">Power computation tasks</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-ramutils.tasks.summary">Report summary tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#existing-pipelines">Existing Pipelines</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#defining-tasks">Defining tasks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reference">Reference</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#module-ramutils.tasks.classifier">Classifier tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-ramutils.tasks.events">Events tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-ramutils.tasks.misc">Miscellaneous tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-ramutils.tasks.montage">Montage tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-ramutils.tasks.odin">Odin/Ramulator tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-ramutils.tasks.powers">Power computation tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-ramutils.tasks.summary">Report summary tasks</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line usage</a></li>
@@ -177,8 +178,138 @@
 <h1>Pipelines<a class="headerlink" href="#pipelines" title="Permalink to this headline">¶</a></h1>
 <p>Experiment configuration file generation and post-experiment reporting is done
 via a series of tasks that are built up into a pipeline using <a class="reference external" href="http://dask.pydata.org/en/latest/index.html">dask</a>.</p>
+<div class="section" id="existing-pipelines">
+<h2>Existing Pipelines<a class="headerlink" href="#existing-pipelines" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ramutils.pipelines.ramulator_config.make_ramulator_config">
+<code class="descclassname">ramutils.pipelines.ramulator_config.</code><code class="descname">make_ramulator_config</code><span class="sig-paren">(</span><em>subject</em>, <em>experiment</em>, <em>paths</em>, <em>stim_params</em>, <em>sessions=None</em>, <em>exp_params=None</em>, <em>vispath=None</em>, <em>extended_blanking=True</em>, <em>localization=0</em>, <em>montage=0</em>, <em>default_surface_area=0.001</em>, <em>trigger_pairs=None</em>, <em>use_common_reference=False</em>, <em>use_classifier_excluded_leads=False</em>, <em>pipeline_name='ramulator-conf'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/pipelines/ramulator_config.html#make_ramulator_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.pipelines.ramulator_config.make_ramulator_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate configuration files for a Ramulator experiment</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>subject</strong> (<em>str</em>) – Subject ID</li>
+<li><strong>experiment</strong> (<em>str</em>) – Experiment to generate configuration file for</li>
+<li><strong>paths</strong> (<a class="reference internal" href="data.html#ramutils.parameters.FilePaths" title="ramutils.parameters.FilePaths"><em>FilePaths</em></a>) – </li>
+<li><strong>stim_params</strong> (<em>List</em><em>[</em><a class="reference internal" href="data.html#ramutils.parameters.StimParameters" title="ramutils.parameters.StimParameters"><em>StimParameters</em></a><em>]</em>) – Stimulation parameters for this experiment.</li>
+<li><strong>sessions</strong> (<em>List</em><em>[</em><em>int</em><em>]</em>) – Sessions to include when training classifier</li>
+<li><strong>exp_params</strong> (<a class="reference internal" href="data.html#ramutils.parameters.ExperimentParameters" title="ramutils.parameters.ExperimentParameters"><em>ExperimentParameters</em></a>) – Parameters for the experiment.</li>
+<li><strong>vispath</strong> (<em>str</em>) – Path to save task graph visualization to if given.</li>
+<li><strong>extended_blanking</strong> (<em>bool</em>) – Whether to enable extended blanking on the ENS (default: True).</li>
+<li><strong>localization</strong> (<em>int</em>) – Localization number</li>
+<li><strong>montage</strong> (<em>int</em>) – Montage number</li>
+<li><strong>default_surface_area</strong> (<em>float</em>) – Default surface area to set all electrodes to in mm^2. Only used if no
+area file can be found.</li>
+<li><strong>trigger_pairs</strong> (<em>List</em><em>[</em><em>str</em><em>] or </em><em>None</em>) – Pairs to use for triggering stim in PS5 experiments.</li>
+<li><strong>use_common_reference</strong> (<em>bool</em>) – Use a common reference in the electrode configuration instead of bipolar
+referencing.</li>
+<li><strong>use_classifier_excluded_leads</strong> (<em>bool</em>) – Use contents of classifier_excluded_leads.txt to exclude channels from
+classifier training</li>
+<li><strong>pipeline_name</strong> (<em>str</em>) – Name to use for status updates.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">The path to the generated configuration zip file.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.pipelines.report.make_report">
+<code class="descclassname">ramutils.pipelines.report.</code><code class="descname">make_report</code><span class="sig-paren">(</span><em>subject</em>, <em>experiment</em>, <em>paths</em>, <em>joint_report=False</em>, <em>retrain=False</em>, <em>stim_params=None</em>, <em>exp_params=None</em>, <em>sessions=None</em>, <em>vispath=None</em>, <em>rerun=False</em>, <em>trigger_electrode=None</em>, <em>use_classifier_excluded_leads=False</em>, <em>pipeline_name='report'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/pipelines/report.html#make_report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.pipelines.report.make_report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a report and saves out all the necessary data to re-construct the report</p>
+<p>This pipeline should be used for generating single session reports for both record-only and
+stimulation sessions. However, the current pipeline also support combining sessions of record-only
+experiments into a single report. In the future, this capability may be moved to
+<cite>ramutils.pipelines.aggregated_report.make_aggregated_report</cite> since that is a more natural location</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>subject</strong> (<em>str</em>) – Subject ID</li>
+<li><strong>experiment</strong> (<em>str</em>) – Experiment to generate report for</li>
+<li><strong>paths</strong> (<a class="reference internal" href="data.html#ramutils.parameters.FilePaths" title="ramutils.parameters.FilePaths"><em>FilePaths</em></a>) – </li>
+<li><strong>joint_report</strong> (<em>Bool</em>) – If True, catFR/FR sessions will be combined in the report</li>
+<li><strong>retrain</strong> (<em>Bool</em>) – If True, retrain classifier rather than trying to load from disk</li>
+<li><strong>stim_params</strong> (<em>List</em><em>[</em><a class="reference internal" href="data.html#ramutils.parameters.StimParameters" title="ramutils.parameters.StimParameters"><em>StimParameters</em></a><em>]</em>) – Stimulation parameters (empty list for non-stim experiments).</li>
+<li><strong>exp_params</strong> (<a class="reference internal" href="data.html#ramutils.parameters.ExperimentParameters" title="ramutils.parameters.ExperimentParameters"><em>ExperimentParameters</em></a>) – When given, overrides the inferred default parameters to use for an
+experiment.</li>
+<li><strong>sessions</strong> (<em>list</em><em> or </em><em>None</em>) – For reports that span sessions, sessions to read data from.
+When not given, all available sessions are used for reports.</li>
+<li><strong>vispath</strong> (<em>str</em>) – Filename for task graph visualization.</li>
+<li><strong>rerun</strong> (<em>bool</em>) – If True, do not attempt to load data from long-term storage. If any
+necessary data is not found, everything will be rerun</li>
+<li><strong>trigger_electrode</strong> (<em>str</em>) – The label for the bipolar pair to be used for triggering stimulation
+in PS5</li>
+<li><strong>use_classifier_excluded_leads</strong> (<em>bool</em>) – Use contents of classifier_excluded_leads.txt to exclude channels from
+classifier training</li>
+<li><strong>pipeline_name</strong> (<em>str</em>) – Name to use for status updates.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>report_path</strong> – Path to generated report.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Eventually this will return an object that summarizes all output of the
+report rather than the report itself.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.pipelines.aggregated_report.make_aggregated_report">
+<code class="descclassname">ramutils.pipelines.aggregated_report.</code><code class="descname">make_aggregated_report</code><span class="sig-paren">(</span><em>subjects=None</em>, <em>experiments=None</em>, <em>sessions=None</em>, <em>fit_model=True</em>, <em>paths=None</em>, <em>pipeline_name='aggregate'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/pipelines/aggregated_report.html#make_aggregated_report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.pipelines.aggregated_report.make_aggregated_report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build an aggregated stim session report</p>
+<p>This pipeline should be used for combining data across stim experiment sessions into a single report. The concept
+of a “joint report” already exists for record-only sessions and can be generated using the
+<cite>ramutils.pipelines.report.make_report</cite> pipeline. In the future, a more sensible approach would be to have joint
+reports for both stim sessions and record-only sessions be built using the same pipeline.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>subjects</strong> (<em>list</em><em> or </em><em>None</em>) – The set of subjects to include when building the report. If None and one or more experiments are specified, then
+the subjects who completed each experiment will be identified automatically.</li>
+<li><strong>experiments</strong> (<em>list</em><em> or </em><em>None</em>) – The set of experiments to include when building the report. This is primarily useful for combining FR with CatFR
+session data, effectively a joint report for stim sessions. However, it is also possible to combine across
+experiment series. For example, a joint report could be built that combines FR3, catFR3, FR5, and catFR5. This
+is possible because the report templates for these experiments are identical. It is not, however, possible to
+combine stim reports across dissimilar reports. For example, it would not make sense to build an aggregate report
+combining PS5 with catFR5 since those use completely different templates.</li>
+<li><strong>sessions</strong> (<em>list</em><em> or </em><em>None</em>) – The set of sessions to include. This parameter can only be used if a single subject and a single experiment have
+been provided. The main use case is for generating a stim report that excludes 1 or more sessions. We do not
+currently support the ability to combine the sessions paramter with more than one subject or more than one
+experiment. This could be a future enhancement. For example, it may be useful to be able to generate an
+aggregated report of all the first sessions of a particular experiment type, or all first sessions for a
+particular subject.</li>
+<li><strong>fit_model</strong> (<em>bool</em>) – If true, the a Bayesian hierachical multilvel model will be fit using the data combined across the requested
+subjects, experiments, and sessions. This process can be very slow as the number of sessions increases, so it
+is False by default. The main use case if for building a stim report that aggregates over the sessions that
+a particular subject completed of a particular experiment.</li>
+<li><strong>paths</strong> (<cite>ramutils.parameters.FilePaths</cite>) – Helper class for setting up the set of paths that will be necessary for loading existing results</li>
+<li><strong>pipeline_name</strong> (<em>str</em>) – Name to use for status updates.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <div class="section" id="defining-tasks">
-<h2>Defining tasks<a class="headerlink" href="#defining-tasks" title="Permalink to this headline">¶</a></h2>
+<h3>Defining tasks<a class="headerlink" href="#defining-tasks" title="Permalink to this headline">¶</a></h3>
 <p>Tasks are created by using the <a class="reference internal" href="#ramutils.tasks.task" title="ramutils.tasks.task"><code class="xref py py-func docutils literal"><span class="pre">ramutils.tasks.task()</span></code></a> decorator or wrapping
 a function with <a class="reference internal" href="#ramutils.tasks.make_task" title="ramutils.tasks.make_task"><code class="xref py py-func docutils literal"><span class="pre">ramutils.tasks.make_task()</span></code></a>. These simply apply the
 <code class="xref py py-func docutils literal"><span class="pre">dask.delayed()</span></code> and (optionally) <code class="docutils literal"><span class="pre">joblib</span></code> caching decorators. The former
@@ -229,11 +360,13 @@ the <code class="xref py py-func docutils literal"><span class="pre">task()</spa
 
 </div>
 <div class="section" id="reference">
-<h2>Reference<a class="headerlink" href="#reference" title="Permalink to this headline">¶</a></h2>
+<h3>Reference<a class="headerlink" href="#reference" title="Permalink to this headline">¶</a></h3>
 <p>Common tasks come predefined in the <code class="xref py py-mod docutils literal"><span class="pre">ramutils.tasks</span></code> package and are
 documented below.</p>
+</div>
+</div>
 <div class="section" id="module-ramutils.tasks.classifier">
-<span id="classifier-tasks"></span><h3>Classifier tasks<a class="headerlink" href="#module-ramutils.tasks.classifier" title="Permalink to this headline">¶</a></h3>
+<span id="classifier-tasks"></span><h2>Classifier tasks<a class="headerlink" href="#module-ramutils.tasks.classifier" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="ramutils.tasks.classifier.perform_cross_validation">
 <code class="descclassname">ramutils.tasks.classifier.</code><code class="descname">perform_cross_validation</code><span class="sig-paren">(</span><em>classifier</em>, <em>pow_mat</em>, <em>events</em>, <em>n_permutations</em>, <em>tag='classifier'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/classifier.html#perform_cross_validation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.classifier.perform_cross_validation" title="Permalink to this definition">¶</a></dt>
@@ -380,7 +513,7 @@ will have None as the entry for that session.</p>
 
 </div>
 <div class="section" id="module-ramutils.tasks.events">
-<span id="events-tasks"></span><h3>Events tasks<a class="headerlink" href="#module-ramutils.tasks.events" title="Permalink to this headline">¶</a></h3>
+<span id="events-tasks"></span><h2>Events tasks<a class="headerlink" href="#module-ramutils.tasks.events" title="Permalink to this headline">¶</a></h2>
 <p>Partial pipelines for processing events that is used by full pipelines.</p>
 <dl class="function">
 <dt id="ramutils.tasks.events.build_test_data">
@@ -397,7 +530,7 @@ evaluation, i.e. the test data</p>
 
 </div>
 <div class="section" id="module-ramutils.tasks.misc">
-<span id="miscellaneous-tasks"></span><h3>Miscellaneous tasks<a class="headerlink" href="#module-ramutils.tasks.misc" title="Permalink to this headline">¶</a></h3>
+<span id="miscellaneous-tasks"></span><h2>Miscellaneous tasks<a class="headerlink" href="#module-ramutils.tasks.misc" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="ramutils.tasks.misc.read_index">
 <code class="descclassname">ramutils.tasks.misc.</code><code class="descname">read_index</code><span class="sig-paren">(</span><em>mount_point='/'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/misc.html#read_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.misc.read_index" title="Permalink to this definition">¶</a></dt>
@@ -414,12 +547,86 @@ evaluation, i.e. the test data</p>
 </table>
 </dd></dl>
 
+<dl class="function">
+<dt id="ramutils.tasks.misc.save_all_output">
+<code class="descclassname">ramutils.tasks.misc.</code><code class="descname">save_all_output</code><span class="sig-paren">(</span><em>subject</em>, <em>experiment</em>, <em>session_summaries</em>, <em>math_summaries</em>, <em>classifier_evaluation_results</em>, <em>save_location</em>, <em>retrained_classifier=None</em>, <em>target_selection_table=None</em>, <em>behavioral_results=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/misc.html#save_all_output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.misc.save_all_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save all required output necessary to re-generate a report</p>
+<dl class="docutils">
+<dt>subject: str</dt>
+<dd>Subject ID</dd>
+<dt>experiment: str</dt>
+<dd>Experiment name</dd>
+<dt>session_summaries: List</dt>
+<dd>List of SessionSummary derived objects</dd>
+<dt>math_summaries: List</dt>
+<dd>List of MathSummary objects</dd>
+<dt>classifier_evaluation_results: List</dt>
+<dd>List of ClassifierSummary objects</dd>
+<dt>save_location: str</dt>
+<dd>Destination for data to be saved. Typically in
+/scratch/report_database/ on RHINO</dd>
+<dt>retrained_classifier: ClassifierContainer</dt>
+<dd>Serialized representation of the retrained classifier</dd>
+<dt>target_selection_table pd.DataFrame</dt>
+<dd>DataFrame representation of the target selection table, formerly known
+as the subsequent memory effect table</dd>
+<dt>behavioral_results: dict</dt>
+<dd>Keys are the behavioral effect model type (stim list, stim item, etc.)
+and values are the traces from estimating those models</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>results_files</strong> – Dictionary whose keys are the names of statically-produced plots and
+values are encoded versions of those images. These are used to embed
+the static plots in the html reports during report generation</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>All output files are of the format {subject}_{experiment}_{session}_{data_type}.{file_type}
+where data_type is a generic name for the type of data being saved. The following data types
+map to a summary object:</p>
+<ul class="simple">
+<li>sessions_summary: <a class="reference internal" href="data.html#ramutils.reports.summary.SessionSummary" title="ramutils.reports.summary.SessionSummary"><code class="xref py py-class docutils literal"><span class="pre">ramutils.reports.summary.SessionSummary</span></code></a></li>
+<li>math_summary: <a class="reference internal" href="data.html#ramutils.reports.summary.MathSummary" title="ramutils.reports.summary.MathSummary"><code class="xref py py-class docutils literal"><span class="pre">ramutils.reports.summary.MathSummary</span></code></a></li>
+<li>classifier_[tag]: <a class="reference internal" href="data.html#ramutils.reports.summary.ClassifierSummary" title="ramutils.reports.summary.ClassifierSummary"><code class="xref py py-class docutils literal"><span class="pre">ramutils.reports.summary.ClassifierSummary</span></code></a></li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.tasks.misc.load_existing_results">
+<code class="descclassname">ramutils.tasks.misc.</code><code class="descname">load_existing_results</code><span class="sig-paren">(</span><em>subject</em>, <em>experiment</em>, <em>sessions</em>, <em>stim_report</em>, <em>db_loc</em>, <em>rootdir='/'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/misc.html#load_existing_results"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.misc.load_existing_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load previously-saved data creating during report generation</p>
+<dl class="docutils">
+<dt>subject: str</dt>
+<dd>Subject ID</dd>
+<dt>experiment: str</dt>
+<dd>Experiment ID</dd>
+<dt>sessions: list or None</dt>
+<dd>If none, then sessions are looked up from r1.json for the given subject and experiment.</dd>
+<dt>stim_report: bool</dt>
+<dd>Indicator for if the requested data is associated with a stim report</dd>
+<dt>db_loc: str</dt>
+<dd>Report database location relative to rootdir</dd>
+<dt>rootdir: str</dt>
+<dd>RHINO mount point or root directory</dd>
+</dl>
+<dl class="docutils">
+<dt>saved_results: dict</dt>
+<dd>Mirrors the input to save_all_output</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="module-ramutils.tasks.montage">
-<span id="montage-tasks"></span><h3>Montage tasks<a class="headerlink" href="#module-ramutils.tasks.montage" title="Permalink to this headline">¶</a></h3>
+<span id="montage-tasks"></span><h2>Montage tasks<a class="headerlink" href="#module-ramutils.tasks.montage" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-ramutils.tasks.odin">
-<span id="odin-ramulator-tasks"></span><h3>Odin/Ramulator tasks<a class="headerlink" href="#module-ramutils.tasks.odin" title="Permalink to this headline">¶</a></h3>
+<span id="odin-ramulator-tasks"></span><h2>Odin/Ramulator tasks<a class="headerlink" href="#module-ramutils.tasks.odin" title="Permalink to this headline">¶</a></h2>
 <p>Tasks specific to the Medtronic Odin ENS.</p>
 <dl class="function">
 <dt id="ramutils.tasks.odin.generate_electrode_config">
@@ -495,10 +702,10 @@ redundant with some data stored in the <code class="docutils literal"><span clas
 
 </div>
 <div class="section" id="module-ramutils.tasks.powers">
-<span id="power-computation-tasks"></span><h3>Power computation tasks<a class="headerlink" href="#module-ramutils.tasks.powers" title="Permalink to this headline">¶</a></h3>
+<span id="power-computation-tasks"></span><h2>Power computation tasks<a class="headerlink" href="#module-ramutils.tasks.powers" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-ramutils.tasks.summary">
-<span id="report-summary-tasks"></span><h3>Report summary tasks<a class="headerlink" href="#module-ramutils.tasks.summary" title="Permalink to this headline">¶</a></h3>
+<span id="report-summary-tasks"></span><h2>Report summary tasks<a class="headerlink" href="#module-ramutils.tasks.summary" title="Permalink to this headline">¶</a></h2>
 <p>Tasks related to summarizing an experiment. Used primarily in reporting
 results.</p>
 <dl class="function">
@@ -585,7 +792,6 @@ multiple experiments should be allowed</li>
 
 </div>
 </div>
-</div>
 
 
            </div>
@@ -631,7 +837,7 @@ multiple experiments should be allowed</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.5',
+            VERSION:'2.1.8',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

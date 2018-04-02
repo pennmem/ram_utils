@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Serializable data structures &mdash; Ramutils 2.1.5 documentation</title>
+  <title>Serializable data structures &mdash; Ramutils 2.1.8 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Ramutils 2.1.5 documentation" href="index.html"/>
+    <link rel="top" title="Ramutils 2.1.8 documentation" href="index.html"/>
         <link rel="next" title="Classifier training, cross validation, and utilities" href="classifier.html"/>
         <link rel="prev" title="ramutils" href="index.html"/> 
 
@@ -250,7 +250,7 @@ few more</p>
 into a single directory with differentiation between subjects/sessions/data done by following a strict naming convention:
 {subject}_{experiment}_{session}_{data_type}.{file_type}. Most saved objects are unique to a particular subject/experiment/session.
 In cases where this is not true, {session} wil be an underscore-separated list of the sessions used to generate the data.
-To see how this is done, see  <code class="xref py py-func docutils literal"><span class="pre">ramutils.tasks.misc.save_all_output()</span></code> and <code class="xref py py-func docutils literal"><span class="pre">ramutils.tasks.misc.load_existing_results()</span></code>.
+To see how this is done, see  <a class="reference internal" href="pipeline.html#ramutils.tasks.misc.save_all_output" title="ramutils.tasks.misc.save_all_output"><code class="xref py py-func docutils literal"><span class="pre">ramutils.tasks.misc.save_all_output()</span></code></a> and <a class="reference internal" href="pipeline.html#ramutils.tasks.misc.load_existing_results" title="ramutils.tasks.misc.load_existing_results"><code class="xref py py-func docutils literal"><span class="pre">ramutils.tasks.misc.load_existing_results()</span></code></a>.
 For example, if a target selection table was generated using sessions 1, 2, and 3 for subject R1XXX and experiment
 XYZ, then the file would be saved as R1XXX_XYZ_1_2_3_target_selection_table.csv. Listed below are the types of data stored. Their
 corresponding objects are also noted. The properties and methods defined for each of these objects can be found in the
@@ -821,72 +821,84 @@ values are the repetition ratio for that subject averaged over the session</p>
 <dd><p>Classifier output in the post-stim period</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="ramutils.reports.summary.StimSessionSummary.subject">
+<code class="descname">subject</code><a class="headerlink" href="#ramutils.reports.summary.StimSessionSummary.subject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subject ID associated with the session</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
 <dt id="ramutils.reports.summary.FRStimSessionSummary">
 <em class="property">class </em><code class="descclassname">ramutils.reports.summary.</code><code class="descname">FRStimSessionSummary</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary" title="Permalink to this definition">¶</a></dt>
 <dd><p>SessionSummary for FR sessions with stim</p>
-<dl class="method">
+<dl class="staticmethod">
+<dt id="ramutils.reports.summary.FRStimSessionSummary.combine_sessions">
+<em class="property">static </em><code class="descname">combine_sessions</code><span class="sig-paren">(</span><em>summaries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.combine_sessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.combine_sessions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine information from multiple stim sessions</p>
+</dd></dl>
+
+<dl class="staticmethod">
 <dt id="ramutils.reports.summary.FRStimSessionSummary.delta_recall">
-<code class="descname">delta_recall</code><span class="sig-paren">(</span><em>post_stim_items=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.delta_recall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.delta_recall" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">delta_recall</code><span class="sig-paren">(</span><em>summaries</em>, <em>post_stim_items=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.delta_recall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.delta_recall" title="Permalink to this definition">¶</a></dt>
 <dd><p>%change in item recall for stimulated items versus non-stimulated low biomarker items. Optionally return
 the same comparison, but for post-stim items</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="staticmethod">
 <dt id="ramutils.reports.summary.FRStimSessionSummary.lists">
-<code class="descname">lists</code><span class="sig-paren">(</span><em>stim=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.lists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.lists" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">lists</code><span class="sig-paren">(</span><em>summaries</em>, <em>stim=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.lists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.lists" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a list of either stim lists or non-stim lists</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="staticmethod">
 <dt id="ramutils.reports.summary.FRStimSessionSummary.num_nonstim_lists">
-<code class="descname">num_nonstim_lists</code><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.num_nonstim_lists" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">num_nonstim_lists</code><span class="sig-paren">(</span><em>summaries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.num_nonstim_lists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.num_nonstim_lists" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the number of non-stim lists.</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="staticmethod">
 <dt id="ramutils.reports.summary.FRStimSessionSummary.num_stim_lists">
-<code class="descname">num_stim_lists</code><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.num_stim_lists" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">num_stim_lists</code><span class="sig-paren">(</span><em>summaries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.num_stim_lists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.num_stim_lists" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the number of stim lists.</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="staticmethod">
 <dt id="ramutils.reports.summary.FRStimSessionSummary.pre_stim_prob_recall">
-<code class="descname">pre_stim_prob_recall</code><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.pre_stim_prob_recall" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">pre_stim_prob_recall</code><span class="sig-paren">(</span><em>summaries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.pre_stim_prob_recall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.pre_stim_prob_recall" title="Permalink to this definition">¶</a></dt>
 <dd><p>Classifier output in the pre-stim period for items that were eventually stimulated</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="staticmethod">
 <dt id="ramutils.reports.summary.FRStimSessionSummary.prob_first_recall_by_serialpos">
-<code class="descname">prob_first_recall_by_serialpos</code><span class="sig-paren">(</span><em>stim=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.prob_first_recall_by_serialpos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.prob_first_recall_by_serialpos" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">prob_first_recall_by_serialpos</code><span class="sig-paren">(</span><em>summaries</em>, <em>stim=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.prob_first_recall_by_serialpos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.prob_first_recall_by_serialpos" title="Permalink to this definition">¶</a></dt>
 <dd><p>Probability of recalling a word first by serial position. Optionally returns results for only stim items</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="staticmethod">
 <dt id="ramutils.reports.summary.FRStimSessionSummary.prob_recall_by_serialpos">
-<code class="descname">prob_recall_by_serialpos</code><span class="sig-paren">(</span><em>stim_items_only=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.prob_recall_by_serialpos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.prob_recall_by_serialpos" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">prob_recall_by_serialpos</code><span class="sig-paren">(</span><em>summaries</em>, <em>stim_items_only=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.prob_recall_by_serialpos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.prob_recall_by_serialpos" title="Permalink to this definition">¶</a></dt>
 <dd><p>Probability of recall by serial position. Optionally returns results for only stim items</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="staticmethod">
 <dt id="ramutils.reports.summary.FRStimSessionSummary.prob_stim_by_serialpos">
-<code class="descname">prob_stim_by_serialpos</code><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.prob_stim_by_serialpos" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">prob_stim_by_serialpos</code><span class="sig-paren">(</span><em>summaries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.prob_stim_by_serialpos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.prob_stim_by_serialpos" title="Permalink to this definition">¶</a></dt>
 <dd><p>Array containing the probability of stimulation (mean of the classifier output) by serial position</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="staticmethod">
 <dt id="ramutils.reports.summary.FRStimSessionSummary.recall_test_results">
-<code class="descname">recall_test_results</code><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.recall_test_results" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">recall_test_results</code><span class="sig-paren">(</span><em>summaries</em>, <em>experiment</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.recall_test_results"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.recall_test_results" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a dictionary containing the results of chi-squared tests for the behavioral effects of stimulation.
 Comparisons include stim lists vs. non-stim lists, stim items vs. low-biomarker non-stim items, and post-stim
 items vers. low-biomarker non-stim items. All comparisons are done for each unique set of stimulation parameters</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="staticmethod">
 <dt id="ramutils.reports.summary.FRStimSessionSummary.recalls_by_list">
-<code class="descname">recalls_by_list</code><span class="sig-paren">(</span><em>stim_list_only=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.recalls_by_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.recalls_by_list" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">recalls_by_list</code><span class="sig-paren">(</span><em>summaries</em>, <em>stim_list_only=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.recalls_by_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.recalls_by_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of recalls by list. Optionally returns results for only stim lists</p>
 </dd></dl>
 
@@ -896,22 +908,22 @@ items vers. low-biomarker non-stim items. All comparisons are done for each uniq
 <dd><p>Fields associated with stimulation parameters</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="staticmethod">
 <dt id="ramutils.reports.summary.FRStimSessionSummary.stim_events_by_list">
-<code class="descname">stim_events_by_list</code><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.stim_events_by_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>Array containing the number of stim evenets by list</p>
+<em class="property">static </em><code class="descname">stim_events_by_list</code><span class="sig-paren">(</span><em>summaries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.stim_events_by_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.stim_events_by_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Array containing the number of stim events by list</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="staticmethod">
 <dt id="ramutils.reports.summary.FRStimSessionSummary.stim_parameters">
-<code class="descname">stim_parameters</code><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.stim_parameters" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">stim_parameters</code><span class="sig-paren">(</span><em>summaries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.stim_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.stim_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of unique stimulation parameters used during the experiment</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="staticmethod">
 <dt id="ramutils.reports.summary.FRStimSessionSummary.stim_params_by_list">
-<code class="descname">stim_params_by_list</code><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.stim_params_by_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a dataframe of stimulation parameters used within each list</p>
+<em class="property">static </em><code class="descname">stim_params_by_list</code><span class="sig-paren">(</span><em>summaries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.stim_params_by_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.stim_params_by_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dataframe of stimulation parameters used within each session/list</p>
 </dd></dl>
 
 </dd></dl>
@@ -982,7 +994,7 @@ containing additional metadata about the results from stimulating at that locati
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.5',
+            VERSION:'2.1.8',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

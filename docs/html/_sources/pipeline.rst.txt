@@ -6,6 +6,12 @@ via a series of tasks that are built up into a pipeline using dask_.
 
 .. _dask: http://dask.pydata.org/en/latest/index.html
 
+Existing Pipelines
+^^^^^^^^^^^^^^^^
+.. autofunction:: ramutils.pipelines.ramulator_config.make_ramulator_config
+.. autofunction:: ramutils.pipelines.report.make_report
+.. autofunction:: ramutils.pipelines.aggregated_report.make_aggregated_report
+
 Defining tasks
 --------------
 

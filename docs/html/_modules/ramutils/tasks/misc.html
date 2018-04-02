@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ramutils.tasks.misc &mdash; Ramutils 2.1.5 documentation</title>
+  <title>ramutils.tasks.misc &mdash; Ramutils 2.1.8 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="Ramutils 2.1.5 documentation" href="../../../index.html"/>
+    <link rel="top" title="Ramutils 2.1.8 documentation" href="../../../index.html"/>
         <link rel="up" title="Module code" href="../../index.html"/> 
 
   
@@ -172,7 +172,7 @@
     <span class="kn">from</span> <span class="nn">urlparse</span> <span class="k">import</span> <span class="n">urlparse</span>
 
 <span class="kn">from</span> <span class="nn">ptsa.data.readers</span> <span class="k">import</span> <span class="n">JsonIndexReader</span>
-<span class="kn">from</span> <span class="nn">ramutils.io</span> <span class="k">import</span> <span class="n">load_results</span><span class="p">,</span> <span class="n">store_results</span>
+<span class="kn">from</span> <span class="nn">ramutils.io</span> <span class="k">import</span> <span class="n">store_results</span>
 <span class="kn">from</span> <span class="nn">ramutils.utils</span> <span class="k">import</span> <span class="n">get_session_str</span>
 
 <span class="kn">from</span> <span class="nn">._wrapper</span> <span class="k">import</span> <span class="n">task</span>
@@ -211,11 +211,55 @@
     <span class="k">return</span> <span class="n">is_stim</span>
 
 
-<span class="nd">@task</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="viewcode-block" id="save_all_output"><a class="viewcode-back" href="../../../pipeline.html#ramutils.tasks.misc.save_all_output">[docs]</a><span class="nd">@task</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">save_all_output</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">session_summaries</span><span class="p">,</span> <span class="n">math_summaries</span><span class="p">,</span>
                     <span class="n">classifier_evaluation_results</span><span class="p">,</span> <span class="n">save_location</span><span class="p">,</span>
                     <span class="n">retrained_classifier</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">target_selection_table</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                     <span class="n">behavioral_results</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Save all required output necessary to re-generate a report</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    -----------</span>
+<span class="sd">    subject: str</span>
+<span class="sd">        Subject ID</span>
+<span class="sd">    experiment: str</span>
+<span class="sd">        Experiment name</span>
+<span class="sd">    session_summaries: List</span>
+<span class="sd">        List of SessionSummary derived objects</span>
+<span class="sd">    math_summaries: List</span>
+<span class="sd">        List of MathSummary objects</span>
+<span class="sd">    classifier_evaluation_results: List</span>
+<span class="sd">        List of ClassifierSummary objects</span>
+<span class="sd">    save_location: str</span>
+<span class="sd">        Destination for data to be saved. Typically in</span>
+<span class="sd">        /scratch/report_database/ on RHINO</span>
+<span class="sd">    retrained_classifier: ClassifierContainer</span>
+<span class="sd">        Serialized representation of the retrained classifier</span>
+<span class="sd">    target_selection_table pd.DataFrame</span>
+<span class="sd">        DataFrame representation of the target selection table, formerly known</span>
+<span class="sd">        as the subsequent memory effect table</span>
+<span class="sd">    behavioral_results: dict</span>
+<span class="sd">        Keys are the behavioral effect model type (stim list, stim item, etc.)</span>
+<span class="sd">        and values are the traces from estimating those models</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    results_files: dict</span>
+<span class="sd">        Dictionary whose keys are the names of statically-produced plots and</span>
+<span class="sd">        values are encoded versions of those images. These are used to embed</span>
+<span class="sd">        the static plots in the html reports during report generation</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    All output files are of the format {subject}_{experiment}_{session}_{data_type}.{file_type}</span>
+<span class="sd">    where data_type is a generic name for the type of data being saved. The following data types</span>
+<span class="sd">    map to a summary object:</span>
+
+<span class="sd">    * sessions_summary: :class:`ramutils.reports.summary.SessionSummary`</span>
+<span class="sd">    * math_summary: :class:`ramutils.reports.summary.MathSummary`</span>
+<span class="sd">    * classifier_[tag]: :class:`ramutils.reports.summary.ClassifierSummary`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">result_files</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -276,16 +320,50 @@
                                                        <span class="n">data_type</span><span class="o">=</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span>
                                                                   <span class="s1">&#39;_traceplot&#39;</span><span class="p">),</span>
                                                        <span class="n">file_type</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
+            <span class="n">save_traceplot</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span> <span class="n">traceplot_path</span><span class="p">)</span>
+
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">forestplot_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">encoded_image</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
             <span class="n">result_files</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">encoded_image</span>
 
-    <span class="k">return</span> <span class="n">result_files</span>
+    <span class="k">return</span> <span class="n">result_files</span></div>
 
 
-<span class="nd">@task</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="viewcode-block" id="load_existing_results"><a class="viewcode-back" href="../../../pipeline.html#ramutils.tasks.misc.load_existing_results">[docs]</a><span class="nd">@task</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">load_existing_results</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">sessions</span><span class="p">,</span> <span class="n">stim_report</span><span class="p">,</span> <span class="n">db_loc</span><span class="p">,</span>
                           <span class="n">rootdir</span><span class="o">=</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Load previously-saved data creating during report generation</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    -----------</span>
+<span class="sd">    subject: str</span>
+<span class="sd">        Subject ID</span>
+<span class="sd">    experiment: str</span>
+<span class="sd">        Experiment ID</span>
+<span class="sd">    sessions: list or None</span>
+<span class="sd">        If none, then sessions are looked up from r1.json for the given subject and experiment.</span>
+<span class="sd">    stim_report: bool</span>
+<span class="sd">        Indicator for if the requested data is associated with a stim report</span>
+<span class="sd">    db_loc: str</span>
+<span class="sd">        Report database location relative to rootdir</span>
+<span class="sd">    rootdir: str</span>
+<span class="sd">        RHINO mount point or root directory</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    --------</span>
+<span class="sd">    saved_results: dict</span>
+<span class="sd">        Mirrors the input to save_all_output</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">saved_results</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;target_selection_table&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;classifier_evaluation_results&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;session_summaries&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;math_summaries&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;hmm_results&#39;</span><span class="p">:</span> <span class="kc">None</span>
+    <span class="p">}</span>
+
     <span class="c1"># Repetition ratio dictionary optional</span>
     <span class="c1"># Cases: PS, stim, non-stim</span>
     <span class="n">subject_experiment</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">])</span>
@@ -304,6 +382,8 @@
                 <span class="n">base_output_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="n">session_str</span><span class="p">,</span>
                                           <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;target_selection_table&#39;</span><span class="p">,</span>
                                           <span class="n">file_type</span><span class="o">=</span><span class="s1">&#39;csv&#39;</span><span class="p">))</span>
+            <span class="n">saved_results</span><span class="p">[</span><span class="s1">&#39;target_selection_table&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_selection_table</span>
+
             <span class="n">encoding_classifier_summary</span> <span class="o">=</span> <span class="n">ClassifierSummary</span><span class="o">.</span><span class="n">from_hdf</span><span class="p">(</span>
                 <span class="n">base_output_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="n">session_str</span><span class="p">,</span>
                                           <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;classifier_Encoding&#39;</span><span class="p">,</span>
@@ -314,6 +394,8 @@
                                           <span class="n">file_type</span><span class="o">=</span><span class="s1">&#39;h5&#39;</span><span class="p">))</span>
             <span class="n">classifier_evaluation_results</span> <span class="o">=</span> <span class="p">[</span><span class="n">encoding_classifier_summary</span><span class="p">,</span>
                                              <span class="n">joint_classifier_summary</span><span class="p">]</span>
+            <span class="n">saved_results</span><span class="p">[</span><span class="s1">&#39;classifier_evaluation_results&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">classifier_evaluation_results</span>
+
             <span class="n">session_summaries</span><span class="p">,</span> <span class="n">math_summaries</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">sessions</span><span class="p">:</span>
                 <span class="n">math_summary</span> <span class="o">=</span> <span class="n">MathSummary</span><span class="o">.</span><span class="n">from_hdf</span><span class="p">(</span>
@@ -322,7 +404,7 @@
                                               <span class="n">file_type</span><span class="o">=</span><span class="s1">&#39;h5&#39;</span><span class="p">)</span>
                 <span class="p">)</span>
                 <span class="n">math_summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">math_summary</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">experiment</span> <span class="o">==</span> <span class="s1">&#39;catFR1&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">experiment</span> <span class="o">==</span> <span class="s1">&#39;catFR1&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">session</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">100</span><span class="p">):</span>
                     <span class="n">summary</span> <span class="o">=</span> <span class="n">CatFRSessionSummary</span>
                 <span class="k">elif</span> <span class="n">experiment</span> <span class="o">==</span> <span class="s1">&#39;FR1&#39;</span><span class="p">:</span>
                     <span class="n">summary</span> <span class="o">=</span> <span class="n">FRSessionSummary</span>
@@ -332,6 +414,9 @@
                                               <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;session_summary&#39;</span><span class="p">,</span>
                                               <span class="n">file_type</span><span class="o">=</span><span class="s1">&#39;h5&#39;</span><span class="p">))</span>
                 <span class="n">session_summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">session_summary</span><span class="p">)</span>
+
+            <span class="n">saved_results</span><span class="p">[</span><span class="s1">&#39;session_summaries&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">session_summaries</span>
+            <span class="n">saved_results</span><span class="p">[</span><span class="s1">&#39;math_summaries&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">math_summaries</span>
 
         <span class="k">elif</span> <span class="n">stim_report</span> <span class="ow">and</span> <span class="s1">&#39;PS&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">:</span>
             <span class="n">classifier_evaluation_results</span><span class="p">,</span> <span class="n">math_summaries</span><span class="p">,</span> <span class="n">session_summaries</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
@@ -365,29 +450,25 @@
                             <span class="n">file_type</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
                         <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">forestplot_path</span><span class="p">)</span>
 
-                        <span class="n">traceplot_path</span> <span class="o">=</span> <span class="n">base_output_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                            <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
-                            <span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">,</span>
-                            <span class="n">session</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">session</span><span class="p">),</span>
-                            <span class="n">data_type</span><span class="o">=</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_traceplot&#39;</span><span class="p">),</span>
-                            <span class="n">file_type</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
-                        <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">traceplot_path</span><span class="p">)</span>
-
                         <span class="c1"># Encode the image and pass along that data</span>
                         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">forestplot_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                             <span class="n">encoded_image</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
                         <span class="n">hmm_results</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">encoded_image</span>
+                    <span class="n">saved_results</span><span class="p">[</span><span class="s1">&#39;hmm_results&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hmm_results</span>
+
+            <span class="n">saved_results</span><span class="p">[</span><span class="s1">&#39;session_summaries&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">session_summaries</span>
+            <span class="n">saved_results</span><span class="p">[</span><span class="s1">&#39;math_summaries&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">math_summaries</span>
+            <span class="n">saved_results</span><span class="p">[</span><span class="s1">&#39;classifier_evaluation_results&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">classifier_evaluation_results</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="n">saved_results</span>
 
     <span class="k">except</span> <span class="p">(</span><span class="ne">IOError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">,</span> <span class="ne">AssertionError</span><span class="p">):</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Not all underlying data could be found for the &#39;</span>
                        <span class="s1">&#39;requested report, building from scratch instead.&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">saved_results</span>
 
-    <span class="k">return</span> <span class="n">target_selection_table</span><span class="p">,</span> <span class="n">classifier_evaluation_results</span><span class="p">,</span> \
-           <span class="n">session_summaries</span><span class="p">,</span> <span class="n">math_summaries</span><span class="p">,</span> <span class="n">hmm_results</span>
+    <span class="k">return</span> <span class="n">saved_results</span></div>
 
 </pre></div>
 
@@ -425,7 +506,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'2.1.5',
+            VERSION:'2.1.8',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
