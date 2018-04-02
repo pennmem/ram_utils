@@ -17,7 +17,7 @@ from ramutils.exc import TooManySessionsError
 from ramutils.parameters import ExperimentParameters
 
 from traitschema import Schema
-from traits.api import Array, ArrayOrNone, Float, Unicode, Bool
+from traits.api import Array, ArrayOrNone, Float, Unicode, Bool, DictStrAny
 
 from sklearn.metrics import roc_auc_score, roc_curve
 from statsmodels.stats.proportion import proportions_chisquare
@@ -719,6 +719,7 @@ class StimSessionSummary(SessionSummary):
     """SessionSummary data specific to sessions with stimulation."""
     _post_stim_prob_recall = ArrayOrNone(dtype=np.float,
                                          desc='classifier output in post stim period')
+    _model_metadata = DictStrAny(desc="traces for Bayesian multilevel models")
 
     @property
     def post_stim_prob_recall(self):
@@ -730,9 +731,17 @@ class StimSessionSummary(SessionSummary):
         if new_post_stim_prob_recall is not None:
             self._post_stim_prob_recall = new_post_stim_prob_recall.flatten().tolist()
 
+    @property
+    def model_metadata(self):
+        return self._model_metadata
+
+    @model_metadata.setter
+    def model_metadata(self, new_model_metadata):
+        self._model_metadata = new_model_metadata
+
     def populate(self, events, bipolar_pairs, excluded_pairs,
                  normalized_powers, post_stim_prob_recall=None,
-                 raw_events=None):
+                 raw_events=None, model_metadata={}):
         """ Populate stim data from events """
         SessionSummary.populate(self, events,
                                 bipolar_pairs,
@@ -740,6 +749,7 @@ class StimSessionSummary(SessionSummary):
                                 normalized_powers,
                                 raw_events=raw_events)
         self.post_stim_prob_recall = post_stim_prob_recall
+        self.model_metadata = model_metadata
 
     @property
     def subject(self):
@@ -749,9 +759,10 @@ class StimSessionSummary(SessionSummary):
 
 class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
     """ SessionSummary for FR sessions with stim """
+
     def populate(self, events, bipolar_pairs,
                  excluded_pairs, normalized_powers, post_stim_prob_recall=None,
-                 raw_events=None):
+                 raw_events=None, model_metadata={}):
         FRSessionSummary.populate(self,
                                   events,
                                   bipolar_pairs,
@@ -763,7 +774,8 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
                                     excluded_pairs,
                                     normalized_powers,
                                     post_stim_prob_recall=post_stim_prob_recall,
-                                    raw_events=raw_events)
+                                    raw_events=raw_events,
+                                    model_metadata=model_metadata)
 
     @staticmethod
     def combine_sessions(summaries):
