@@ -47,4 +47,3 @@ def test_build_report_from_cached_results():
 
     assert all([r is None for r in results])
     return
-

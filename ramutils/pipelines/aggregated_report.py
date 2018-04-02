@@ -10,10 +10,45 @@ logger = get_logger()
 
 def make_aggregated_report(subjects=None, experiments=None, sessions=None,
                            fit_model=True, paths=None, pipeline_name="aggregate"):
-    """Create an aggregated stim session report
+    """ Build an aggregated stim session report
+
+    This pipeline should be used for combining data across stim experiment sessions into a single report. The concept
+    of a "joint report" already exists for record-only sessions and can be generated using the
+    `ramutils.pipelines.report.make_report` pipeline. In the future, a more sensible approach would be to have joint
+    reports for both stim sessions and record-only sessions be built using the same pipeline.
+
 
     Keyword Arguments
     -----------------
+    subjects: list or None
+        The set of subjects to include when building the report. If None and one or more experiments are specified, then
+        the subjects who completed each experiment will be identified automatically.
+
+    experiments: list or None
+        The set of experiments to include when building the report. This is primarily useful for combining FR with CatFR
+        session data, effectively a joint report for stim sessions. However, it is also possible to combine across
+        experiment series. For example, a joint report could be built that combines FR3, catFR3, FR5, and catFR5. This
+        is possible because the report templates for these experiments are identical. It is not, however, possible to
+        combine stim reports across dissimilar reports. For example, it would not make sense to build an aggregate report
+        combining PS5 with catFR5 since those use completely different templates.
+
+    sessions: list or None
+        The set of sessions to include. This parameter can only be used if a single subject and a single experiment have
+        been provided. The main use case is for generating a stim report that excludes 1 or more sessions. We do not
+        currently support the ability to combine the sessions paramter with more than one subject or more than one
+        experiment. This could be a future enhancement. For example, it may be useful to be able to generate an
+        aggregated report of all the first sessions of a particular experiment type, or all first sessions for a
+        particular subject.
+
+    fit_model: bool
+        If true, the a Bayesian hierachical multilvel model will be fit using the data combined across the requested
+        subjects, experiments, and sessions. This process can be very slow as the number of sessions increases, so it
+        is False by default. The main use case if for building a stim report that aggregates over the sessions that
+        a particular subject completed of a particular experiment.
+
+    paths: `ramutils.parameters.FilePaths`
+        Helper class for setting up the set of paths that will be necessary for loading existing results
+
     pipeline_name : str
         Name to use for status updates.
 

@@ -1,0 +1,367 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ramutils.pipelines.aggregated_report &mdash; Ramutils 2.1.8 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="Ramutils 2.1.8 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Ramutils
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../data.html">Serializable data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../classifier.html">Classifier training, cross validation, and utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../events.html">Event processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html">Pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli.html">Command-line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc.html">Miscellaneous utilities</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Ramutils</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>ramutils.pipelines.aggregated_report</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for ramutils.pipelines.aggregated_report</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Pipeline for creating aggregated stim reports &quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">ramutils.tasks</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">ramutils.events</span> <span class="k">import</span> <span class="n">find_subjects</span>
+<span class="kn">from</span> <span class="nn">ramutils.log</span> <span class="k">import</span> <span class="n">get_logger</span>
+<span class="kn">from</span> <span class="nn">.hooks</span> <span class="k">import</span> <span class="n">PipelineCallback</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="make_aggregated_report"><a class="viewcode-back" href="../../../pipeline.html#ramutils.pipelines.aggregated_report.make_aggregated_report">[docs]</a><span class="k">def</span> <span class="nf">make_aggregated_report</span><span class="p">(</span><span class="n">subjects</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">experiments</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sessions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                           <span class="n">fit_model</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">paths</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pipeline_name</span><span class="o">=</span><span class="s2">&quot;aggregate&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Build an aggregated stim session report</span>
+
+<span class="sd">    This pipeline should be used for combining data across stim experiment sessions into a single report. The concept</span>
+<span class="sd">    of a &quot;joint report&quot; already exists for record-only sessions and can be generated using the</span>
+<span class="sd">    `ramutils.pipelines.report.make_report` pipeline. In the future, a more sensible approach would be to have joint</span>
+<span class="sd">    reports for both stim sessions and record-only sessions be built using the same pipeline.</span>
+
+
+<span class="sd">    Keyword Arguments</span>
+<span class="sd">    -----------------</span>
+<span class="sd">    subjects: list or None</span>
+<span class="sd">        The set of subjects to include when building the report. If None and one or more experiments are specified, then</span>
+<span class="sd">        the subjects who completed each experiment will be identified automatically.</span>
+
+<span class="sd">    experiments: list or None</span>
+<span class="sd">        The set of experiments to include when building the report. This is primarily useful for combining FR with CatFR</span>
+<span class="sd">        session data, effectively a joint report for stim sessions. However, it is also possible to combine across</span>
+<span class="sd">        experiment series. For example, a joint report could be built that combines FR3, catFR3, FR5, and catFR5. This</span>
+<span class="sd">        is possible because the report templates for these experiments are identical. It is not, however, possible to</span>
+<span class="sd">        combine stim reports across dissimilar reports. For example, it would not make sense to build an aggregate report</span>
+<span class="sd">        combining PS5 with catFR5 since those use completely different templates.</span>
+
+<span class="sd">    sessions: list or None</span>
+<span class="sd">        The set of sessions to include. This parameter can only be used if a single subject and a single experiment have</span>
+<span class="sd">        been provided. The main use case is for generating a stim report that excludes 1 or more sessions. We do not</span>
+<span class="sd">        currently support the ability to combine the sessions paramter with more than one subject or more than one</span>
+<span class="sd">        experiment. This could be a future enhancement. For example, it may be useful to be able to generate an</span>
+<span class="sd">        aggregated report of all the first sessions of a particular experiment type, or all first sessions for a</span>
+<span class="sd">        particular subject.</span>
+
+<span class="sd">    fit_model: bool</span>
+<span class="sd">        If true, the a Bayesian hierachical multilvel model will be fit using the data combined across the requested</span>
+<span class="sd">        subjects, experiments, and sessions. This process can be very slow as the number of sessions increases, so it</span>
+<span class="sd">        is False by default. The main use case if for building a stim report that aggregates over the sessions that</span>
+<span class="sd">        a particular subject completed of a particular experiment.</span>
+
+<span class="sd">    paths: `ramutils.parameters.FilePaths`</span>
+<span class="sd">        Helper class for setting up the set of paths that will be necessary for loading existing results</span>
+
+<span class="sd">    pipeline_name : str</span>
+<span class="sd">        Name to use for status updates.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">experiments</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">experiments</span><span class="p">):</span>
+            <span class="k">if</span> <span class="s1">&#39;Cat&#39;</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">:</span>
+                <span class="n">experiments</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">experiments</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;Cat&#39;</span><span class="p">,</span> <span class="s1">&#39;cat&#39;</span><span class="p">)</span>
+
+    <span class="n">all_classifier_evaluation_results</span><span class="p">,</span> <span class="n">all_session_summaries</span><span class="p">,</span> <span class="n">all_math_summaries</span><span class="p">,</span> <span class="n">target_selection_table</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="kc">None</span>
+
+    <span class="c1"># All subjects completing a given experiment(s)</span>
+    <span class="k">if</span> <span class="n">subjects</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">experiments</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="n">experiments</span><span class="p">:</span>
+            <span class="n">exp_subjects</span> <span class="o">=</span> <span class="n">find_subjects</span><span class="p">(</span><span class="n">experiment</span><span class="p">,</span> <span class="n">paths</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">subject</span> <span class="ow">in</span> <span class="n">exp_subjects</span><span class="p">:</span>
+                <span class="n">pre_built_results</span> <span class="o">=</span> <span class="n">load_existing_results</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">sessions</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span>
+                                                          <span class="n">paths</span><span class="o">.</span><span class="n">data_db</span><span class="p">,</span> <span class="n">rootdir</span><span class="o">=</span><span class="n">paths</span><span class="o">.</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+                <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">[</span><span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;classifier_evaluation_results&#39;</span><span class="p">],</span>
+                                                <span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;session_summaries&#39;</span><span class="p">],</span>
+                                                <span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;math_summaries&#39;</span><span class="p">]]]):</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Unable to find underlying data for </span><span class="si">{}</span><span class="s1">, experiment </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">))</span>
+                    <span class="k">continue</span>
+
+                <span class="n">all_classifier_evaluation_results</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;classifier_evaluation_results&#39;</span><span class="p">])</span>
+                <span class="n">all_session_summaries</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;session_summaries&#39;</span><span class="p">])</span>
+                <span class="n">all_math_summaries</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;math_summaries&#39;</span><span class="p">])</span>
+        <span class="n">subject</span> <span class="o">=</span> <span class="s1">&#39;combined&#39;</span>
+        <span class="n">experiment</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span>
+
+    <span class="c1"># Set of subject(s) completing a specific set of experiment(s)</span>
+    <span class="k">elif</span> <span class="n">subjects</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">experiments</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">sessions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">subject</span> <span class="ow">in</span> <span class="n">subjects</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="n">experiments</span><span class="p">:</span>
+                <span class="n">pre_built_results</span> <span class="o">=</span> <span class="n">load_existing_results</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">sessions</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span>
+                                                     <span class="n">paths</span><span class="o">.</span><span class="n">data_db</span><span class="p">,</span> <span class="n">rootdir</span><span class="o">=</span><span class="n">paths</span><span class="o">.</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+                <span class="c1"># Check if only None values were returned. Processing will continue</span>
+                <span class="c1"># undeterred</span>
+                <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">[</span><span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;classifier_evaluation_results&#39;</span><span class="p">],</span>
+                                                <span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;session_summaries&#39;</span><span class="p">],</span>
+                                                <span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;math_summaries&#39;</span><span class="p">]]]):</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Unable to find underlying data for </span><span class="si">{}</span><span class="s1">, experiment </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">))</span>
+                    <span class="k">continue</span>
+
+                <span class="n">all_classifier_evaluation_results</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;classifier_evaluation_results&#39;</span><span class="p">])</span>
+                <span class="n">all_session_summaries</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;session_summaries&#39;</span><span class="p">])</span>
+                <span class="n">all_math_summaries</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;math_summaries&#39;</span><span class="p">])</span>
+        <span class="n">subject</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">subjects</span><span class="p">)</span>
+        <span class="n">experiment</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span>
+
+    <span class="c1"># Single subject/experiment and a subset of sessions</span>
+    <span class="k">elif</span> <span class="n">subjects</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">experiments</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">sessions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subjects</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;When specifying sessions, only single subject and experiment are allowed&quot;</span><span class="p">)</span>
+        <span class="n">subject</span> <span class="o">=</span> <span class="n">subjects</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">experiment</span> <span class="o">=</span> <span class="n">experiments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">pre_built_results</span> <span class="o">=</span> <span class="n">load_existing_results</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">sessions</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span>
+                                                  <span class="n">paths</span><span class="o">.</span><span class="n">data_db</span><span class="p">,</span> <span class="n">rootdir</span><span class="o">=</span><span class="n">paths</span><span class="o">.</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">[</span><span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;classifier_evaluation_results&#39;</span><span class="p">],</span>
+                                        <span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;session_summaries&#39;</span><span class="p">],</span>
+                                        <span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;math_summaries&#39;</span><span class="p">]]]):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Unable to find underlying data for </span><span class="si">{}</span><span class="s1">, experiment </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">))</span>
+
+        <span class="n">all_classifier_evaluation_results</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;classifier_evaluation_results&#39;</span><span class="p">])</span>
+        <span class="n">all_session_summaries</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;session_summaries&#39;</span><span class="p">])</span>
+        <span class="n">all_math_summaries</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;math_summaries&#39;</span><span class="p">])</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;The requested type of aggregation is not currently supported&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">fit_model</span><span class="p">:</span>
+        <span class="c1"># Fit model and save resulting images. subject/experiment do not really matter since the model is the same</span>
+        <span class="c1"># at least for now</span>
+        <span class="n">hmm_results</span> <span class="o">=</span> <span class="n">estimate_effects_of_stim</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="s1">&#39;FR3&#39;</span><span class="p">,</span> <span class="n">all_session_summaries</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">save_all_output</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="n">paths</span><span class="o">.</span><span class="n">data_db</span><span class="p">,</span>
+                                 <span class="n">behavioral_results</span><span class="o">=</span><span class="n">hmm_results</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">report</span> <span class="o">=</span> <span class="n">build_static_report</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">all_session_summaries</span><span class="p">,</span>
+                                 <span class="n">all_math_summaries</span><span class="p">,</span> <span class="n">target_selection_table</span><span class="p">,</span>
+                                 <span class="n">all_classifier_evaluation_results</span><span class="p">,</span>
+                                 <span class="n">paths</span><span class="o">.</span><span class="n">dest</span><span class="p">,</span> <span class="n">hmm_results</span><span class="o">=</span><span class="n">output</span><span class="p">,</span>
+                                 <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">aggregated_report</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">PipelineCallback</span><span class="p">(</span><span class="n">pipeline_name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">report</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'2.1.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

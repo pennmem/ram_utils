@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Event processing &mdash; Ramutils 2.1.5 documentation</title>
+  <title>Event processing &mdash; Ramutils 2.1.8 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Ramutils 2.1.5 documentation" href="index.html"/>
+    <link rel="top" title="Ramutils 2.1.8 documentation" href="index.html"/>
         <link rel="next" title="Pipelines" href="pipeline.html"/>
         <link rel="prev" title="Classifier training, cross validation, and utilities" href="classifier.html"/> 
 
@@ -675,6 +675,13 @@ were non-intrusion retrieval events.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="ramutils.events.remove_session_number_offsets">
+<code class="descclassname">ramutils.events.</code><code class="descname">remove_session_number_offsets</code><span class="sig-paren">(</span><em>experiment</em>, <em>sessions</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#remove_session_number_offsets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.remove_session_number_offsets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a list of sessions to include, undo the offsets for catFR and
+PAL so the sessions can be looked up correctly in the r1.json file</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="ramutils.events.rename_correct_to_recalled">
 <code class="descclassname">ramutils.events.</code><code class="descname">rename_correct_to_recalled</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#rename_correct_to_recalled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.rename_correct_to_recalled" title="Permalink to this definition">¶</a></dt>
 <dd><p>Normalizes PAL “recall” event names to match those of FR experiments.</p>
@@ -925,7 +932,7 @@ should already be true in the raw events data.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.5',
+            VERSION:'2.1.8',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

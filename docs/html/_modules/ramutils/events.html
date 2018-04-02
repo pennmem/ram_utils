@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ramutils.events &mdash; Ramutils 2.1.5 documentation</title>
+  <title>ramutils.events &mdash; Ramutils 2.1.8 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Ramutils 2.1.5 documentation" href="../../index.html"/>
+    <link rel="top" title="Ramutils 2.1.8 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -212,10 +212,18 @@
                                                <span class="s2">&quot;protocols&quot;</span><span class="p">,</span>
                                                <span class="s2">&quot;r1.json&quot;</span><span class="p">))</span>
 
+    <span class="k">if</span> <span class="n">sessions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">sessions</span> <span class="o">=</span> <span class="n">get_completed_sessions</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span>
+                                          <span class="n">rootdir</span><span class="o">=</span><span class="n">rootdir</span><span class="p">)</span>
+
+    <span class="c1"># Make sure sessions are integers since this is required to check the max</span>
+    <span class="n">sessions</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sessions</span><span class="p">]</span>
+
+    <span class="c1"># If the given sessions have offsets, then remove, otherwise leave them alone</span>
     <span class="n">sessions_to_load</span> <span class="o">=</span> <span class="n">sessions</span>
-    <span class="k">if</span> <span class="n">sessions_to_load</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">sessions_to_load</span> <span class="o">=</span> <span class="n">get_completed_sessions</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span>
-                                                  <span class="n">rootdir</span><span class="o">=</span><span class="n">rootdir</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sessions_to_load</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">sessions</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">100</span><span class="p">:</span>
+            <span class="n">sessions_to_load</span> <span class="o">=</span> <span class="n">remove_session_number_offsets</span><span class="p">(</span><span class="n">experiment</span><span class="p">,</span> <span class="n">sessions</span><span class="p">)</span>
 
     <span class="n">event_files</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">sessions_to_load</span><span class="p">):</span>
@@ -241,7 +249,6 @@
         <span class="n">empty_recarray</span> <span class="o">=</span> <span class="n">initialize_empty_event_reccarray</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">empty_recarray</span>
 
-    <span class="c1"># TODO: Make this less ugly to look at</span>
     <span class="n">events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span>
         <span class="n">BaseEventReader</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">eliminate_events_with_no_eeg</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">event_files</span><span class="p">]))</span>
@@ -304,6 +311,7 @@
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Event cleaning can only happen on single-experiment&#39;</span>
                            <span class="s1">&#39; datasets&#39;</span><span class="p">)</span>
     <span class="n">experiment</span> <span class="o">=</span> <span class="n">experiments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
     <span class="n">events</span> <span class="o">=</span> <span class="n">remove_negative_offsets</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
 
     <span class="c1"># Only for PS5 do we want to keep the practice list around so we can know</span>
@@ -317,9 +325,6 @@
 
     <span class="n">events</span> <span class="o">=</span> <span class="n">remove_incomplete_lists</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
     <span class="n">events</span> <span class="o">=</span> <span class="n">select_column_subset</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">all_relevant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-    <span class="c1"># TODO: Add remove_repetitions() function to get rid of any recall events</span>
-    <span class="c1"># that are just a repeated recall</span>
 
     <span class="c1"># separate_stim_events is called within the task-specific functions</span>
     <span class="c1"># because the columns to subset differs by task</span>
@@ -351,6 +356,31 @@
         <span class="k">return</span> <span class="n">events</span><span class="p">,</span> <span class="n">stim_params</span>
 
     <span class="k">return</span> <span class="n">events</span></div>
+
+
+<div class="viewcode-block" id="remove_session_number_offsets"><a class="viewcode-back" href="../../events.html#ramutils.events.remove_session_number_offsets">[docs]</a><span class="k">def</span> <span class="nf">remove_session_number_offsets</span><span class="p">(</span><span class="n">experiment</span><span class="p">,</span> <span class="n">sessions</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given a list of sessions to include, undo the offsets for catFR and</span>
+<span class="sd">        PAL so the sessions can be looked up correctly in the r1.json file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">sessions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sessions</span>
+
+    <span class="k">elif</span> <span class="n">experiment</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;PAL&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">relevant_sessions</span> <span class="o">=</span> <span class="p">[(</span><span class="n">sess</span> <span class="o">-</span> <span class="mi">200</span><span class="p">)</span> <span class="k">for</span> <span class="n">sess</span> <span class="ow">in</span> <span class="n">sessions</span> <span class="k">if</span> <span class="n">sess</span> <span class="o">&gt;=</span> <span class="mi">200</span><span class="p">]</span>
+
+    <span class="k">elif</span> <span class="n">experiment</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;cat&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">relevant_sessions</span> <span class="o">=</span> <span class="p">[(</span><span class="n">sess</span> <span class="o">-</span> <span class="mi">100</span><span class="p">)</span> <span class="k">for</span> <span class="n">sess</span> <span class="ow">in</span> <span class="n">sessions</span> <span class="k">if</span> <span class="p">(</span><span class="n">sess</span> <span class="o">&gt;=</span> <span class="mi">100</span> <span class="ow">and</span> <span class="n">sess</span> <span class="o">&lt;</span> <span class="mi">200</span><span class="p">)]</span>
+
+    <span class="k">elif</span> <span class="n">experiment</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;FR&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">relevant_sessions</span> <span class="o">=</span> <span class="p">[</span><span class="n">sess</span> <span class="k">for</span> <span class="n">sess</span> <span class="ow">in</span> <span class="n">sessions</span> <span class="k">if</span> <span class="n">sess</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">]</span>
+
+    <span class="k">elif</span> <span class="n">experiment</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;PS&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">relevant_sessions</span> <span class="o">=</span> <span class="p">[</span><span class="n">sess</span> <span class="k">for</span> <span class="n">sess</span> <span class="ow">in</span> <span class="n">sessions</span> <span class="k">if</span> <span class="n">sess</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">]</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Only Fr/catFR/PAL session numbering with offsets is supported&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">relevant_sessions</span></div>
 
 
 <div class="viewcode-block" id="update_subject"><a class="viewcode-back" href="../../events.html#ramutils.events.update_subject">[docs]</a><span class="k">def</span> <span class="nf">update_subject</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
@@ -1484,7 +1514,10 @@
 
 
 <span class="k">def</span> <span class="nf">get_post_stim_events_mask</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
-    <span class="n">post_stim_events_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;STIM_OFF&#39;</span><span class="p">)</span>
+    <span class="c1"># In general, there are no stim events during practice lists, but when artifact detection</span>
+    <span class="c1"># is enabled, the STIM_OFF events have -999 for the list number, so this will be sure</span>
+    <span class="c1"># to exclude those stim events</span>
+    <span class="n">post_stim_events_mask</span> <span class="o">=</span> <span class="p">((</span><span class="n">events</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;STIM_OFF&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">list</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">post_stim_events_mask</span>
 
 
@@ -1637,7 +1670,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'2.1.5',
+            VERSION:'2.1.8',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

@@ -1,0 +1,433 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ramutils.pipelines.ramulator_config &mdash; Ramutils 2.1.8 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="Ramutils 2.1.8 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Ramutils
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../data.html">Serializable data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../classifier.html">Classifier training, cross validation, and utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../events.html">Event processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html">Pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli.html">Command-line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../misc.html">Miscellaneous utilities</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Ramutils</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>ramutils.pipelines.ramulator_config</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for ramutils.pipelines.ramulator_config</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">ramutils.constants</span> <span class="k">import</span> <span class="n">EXPERIMENTS</span>
+<span class="kn">from</span> <span class="nn">ramutils.exc</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">MissingArgumentsError</span><span class="p">,</span> <span class="n">MultistimNotAllowedException</span><span class="p">,</span> <span class="n">ValidationError</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">ramutils.montage</span> <span class="k">import</span> <span class="n">generate_pairs_from_electrode_config</span>
+<span class="kn">from</span> <span class="nn">ramutils.tasks</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">.hooks</span> <span class="k">import</span> <span class="n">PipelineCallback</span>
+
+
+<span class="nd">@task</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">validate_pairs</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">ec_pairs</span><span class="p">,</span> <span class="n">trigger_pairs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Validate that specified pairs exist in the electrode config.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    subject : str</span>
+<span class="sd">        Subject ID</span>
+<span class="sd">    ec_pairs : OrderedDict</span>
+<span class="sd">        Contents of pairs.json as generated from the electrode config file.</span>
+<span class="sd">        Pairs here are specified as ``&lt;anode label&gt;-&lt;cathode label&gt;``.</span>
+<span class="sd">    trigger_pairs : List</span>
+<span class="sd">        List of specified pairs to be used as triggers for PS5. Pairs here are</span>
+<span class="sd">        specified as ``&lt;anode label&gt;_&lt;cathode label&gt;``.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Generating the electrode config file will already fail if anodes/cathodes</span>
+<span class="sd">    are not spelled correctly, so we only actually check trigger pairs for PS5</span>
+<span class="sd">    here.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pairs_json</span> <span class="o">=</span> <span class="n">ec_pairs</span><span class="p">[</span><span class="n">subject</span><span class="p">][</span><span class="s1">&#39;pairs&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">trigger_pairs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">trigger_pairs</span><span class="p">:</span>
+            <span class="n">hyphenated_pair</span> <span class="o">=</span> <span class="n">pair</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">hyphenated_pair</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pairs_json</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span>
+                    <span class="s2">&quot;trigger pair &quot;</span> <span class="o">+</span> <span class="n">pair</span> <span class="o">+</span>
+                    <span class="s2">&quot; not found in pairs.json (check for typos!)&quot;</span>
+                <span class="p">)</span>
+
+
+<div class="viewcode-block" id="make_ramulator_config"><a class="viewcode-back" href="../../../pipeline.html#ramutils.pipelines.ramulator_config.make_ramulator_config">[docs]</a><span class="k">def</span> <span class="nf">make_ramulator_config</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">paths</span><span class="p">,</span> <span class="n">stim_params</span><span class="p">,</span> <span class="n">sessions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">exp_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vispath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">extended_blanking</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                          <span class="n">localization</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">montage</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">default_surface_area</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span>
+                          <span class="n">trigger_pairs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">use_common_reference</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">use_classifier_excluded_leads</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">pipeline_name</span><span class="o">=</span><span class="s2">&quot;ramulator-conf&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Generate configuration files for a Ramulator experiment</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    subject : str</span>
+<span class="sd">        Subject ID</span>
+<span class="sd">    experiment : str</span>
+<span class="sd">        Experiment to generate configuration file for</span>
+<span class="sd">    paths : FilePaths</span>
+<span class="sd">    stim_params : List[StimParameters]</span>
+<span class="sd">        Stimulation parameters for this experiment.</span>
+<span class="sd">    sessions: List[int]</span>
+<span class="sd">        Sessions to include when training classifier</span>
+<span class="sd">    exp_params : ExperimentParameters</span>
+<span class="sd">        Parameters for the experiment.</span>
+<span class="sd">    vispath : str</span>
+<span class="sd">        Path to save task graph visualization to if given.</span>
+<span class="sd">    extended_blanking : bool</span>
+<span class="sd">        Whether to enable extended blanking on the ENS (default: True).</span>
+<span class="sd">    localization : int</span>
+<span class="sd">        Localization number</span>
+<span class="sd">    montage : int</span>
+<span class="sd">        Montage number</span>
+<span class="sd">    default_surface_area : float</span>
+<span class="sd">        Default surface area to set all electrodes to in mm^2. Only used if no</span>
+<span class="sd">        area file can be found.</span>
+<span class="sd">    trigger_pairs : List[str] or None</span>
+<span class="sd">        Pairs to use for triggering stim in PS5 experiments.</span>
+<span class="sd">    use_common_reference : bool</span>
+<span class="sd">        Use a common reference in the electrode configuration instead of bipolar</span>
+<span class="sd">        referencing.</span>
+<span class="sd">    use_classifier_excluded_leads: bool</span>
+<span class="sd">        Use contents of classifier_excluded_leads.txt to exclude channels from</span>
+<span class="sd">        classifier training</span>
+<span class="sd">    pipeline_name : str</span>
+<span class="sd">        Name to use for status updates.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    The path to the generated configuration zip file.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stim_params</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">experiment</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">EXPERIMENTS</span><span class="p">[</span><span class="s1">&#39;multistim&#39;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="n">MultistimNotAllowedException</span>
+
+    <span class="k">if</span> <span class="n">trigger_pairs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">experiment</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;PS5&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">MissingArgumentsError</span><span class="p">(</span><span class="s2">&quot;PS5 requires trigger_pairs&quot;</span><span class="p">)</span>
+
+        <span class="c1"># setting to empty list for validation</span>
+        <span class="n">trigger_pairs</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">anodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">anode_label</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">stim_params</span><span class="p">]</span>
+    <span class="n">cathodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">cathode_label</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">stim_params</span><span class="p">]</span>
+
+    <span class="c1"># If the electrode config path is defined, load it instead of creating a new</span>
+    <span class="c1"># one. This is useful if we want to make comparisons with old referencing</span>
+    <span class="c1"># schemes that are not currently implemented in bptools.</span>
+    <span class="k">if</span> <span class="n">paths</span><span class="o">.</span><span class="n">electrode_config_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">paths</span> <span class="o">=</span> <span class="n">generate_electrode_config</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">paths</span><span class="p">,</span> <span class="n">anodes</span><span class="p">,</span> <span class="n">cathodes</span><span class="p">,</span>
+                                          <span class="n">localization</span><span class="p">,</span> <span class="n">montage</span><span class="p">,</span>
+                                          <span class="n">default_surface_area</span><span class="p">,</span>
+                                          <span class="n">use_common_reference</span><span class="p">)</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+
+    <span class="c1"># Note: All of these pairs variables are of type OrderedDict, which is</span>
+    <span class="c1"># crucial for preserving the initial order of the electrodes in the</span>
+    <span class="c1"># config file</span>
+    <span class="n">ec_pairs</span> <span class="o">=</span> <span class="n">make_task</span><span class="p">(</span><span class="n">generate_pairs_from_electrode_config</span><span class="p">,</span> <span class="n">subject</span><span class="p">,</span>
+                         <span class="n">experiment</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">paths</span><span class="p">)</span>
+
+    <span class="c1"># Ignore leads identified in classifier_excluded_leads.txt</span>
+    <span class="n">pairs_to_exclude</span> <span class="o">=</span> <span class="n">stim_params</span>
+    <span class="k">if</span> <span class="n">use_classifier_excluded_leads</span><span class="p">:</span>
+        <span class="n">classifier_excluded_leads</span> <span class="o">=</span> <span class="n">get_classifier_excluded_leads</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">ec_pairs</span><span class="p">,</span> <span class="n">rootdir</span><span class="o">=</span><span class="n">paths</span><span class="o">.</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+        <span class="n">pairs_to_exclude</span> <span class="o">=</span> <span class="n">pairs_to_exclude</span> <span class="o">+</span> <span class="n">classifier_excluded_leads</span>
+
+    <span class="n">excluded_pairs</span> <span class="o">=</span> <span class="n">reduce_pairs</span><span class="p">(</span><span class="n">ec_pairs</span><span class="p">,</span> <span class="n">pairs_to_exclude</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">used_pair_mask</span> <span class="o">=</span> <span class="n">get_used_pair_mask</span><span class="p">(</span><span class="n">ec_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">)</span>
+    <span class="n">final_pairs</span> <span class="o">=</span> <span class="n">generate_pairs_for_classifier</span><span class="p">(</span><span class="n">ec_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">)</span>
+
+    <span class="c1"># Ensure specified pairs exist. We have to call .compute here since no</span>
+    <span class="c1"># other tasks depend on the output of this task.</span>
+    <span class="n">validate_pairs</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">ec_pairs</span><span class="p">,</span> <span class="n">trigger_pairs</span><span class="p">)</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+
+    <span class="c1"># Special case handling of no-classifier tasks</span>
+    <span class="n">no_classifier_experiments</span> <span class="o">=</span> <span class="n">EXPERIMENTS</span><span class="p">[</span><span class="s1">&#39;record_only&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span>
+        <span class="s1">&#39;AmplitudeDetermination&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;PS5_FR&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;PS5_CatFR&#39;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="n">no_classifier_experiments</span><span class="p">:</span>
+        <span class="n">container</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">config_path</span> <span class="o">=</span> <span class="n">generate_ramulator_config</span><span class="p">(</span><span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
+                                                <span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">,</span>
+                                                <span class="n">container</span><span class="o">=</span><span class="n">container</span><span class="p">,</span>
+                                                <span class="n">stim_params</span><span class="o">=</span><span class="n">stim_params</span><span class="p">,</span>
+                                                <span class="n">paths</span><span class="o">=</span><span class="n">paths</span><span class="p">,</span>
+                                                <span class="n">pairs</span><span class="o">=</span><span class="n">ec_pairs</span><span class="p">,</span>
+                                                <span class="n">excluded_pairs</span><span class="o">=</span><span class="n">excluded_pairs</span><span class="p">,</span>
+                                                <span class="n">extended_blanking</span><span class="o">=</span><span class="n">extended_blanking</span><span class="p">,</span>
+                                                <span class="n">trigger_pairs</span><span class="o">=</span><span class="n">trigger_pairs</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">PipelineCallback</span><span class="p">(</span><span class="n">pipeline_name</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">config_path</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;FR&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s2">&quot;PAL&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Only PAL, FR, and catFR experiments are currently&quot;</span>
+                           <span class="s2">&quot;implemented&quot;</span><span class="p">)</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="n">exp_params</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+
+    <span class="n">all_task_events</span> <span class="o">=</span> <span class="n">build_training_data</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">paths</span><span class="p">,</span> <span class="n">sessions</span><span class="o">=</span><span class="n">sessions</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">powers</span><span class="p">,</span> <span class="n">final_task_events</span> <span class="o">=</span> <span class="n">compute_normalized_powers</span><span class="p">(</span><span class="n">all_task_events</span><span class="p">,</span>
+                                                          <span class="n">bipolar_pairs</span><span class="o">=</span><span class="n">ec_pairs</span><span class="p">,</span>
+                                                          <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">reduced_powers</span> <span class="o">=</span> <span class="n">reduce_powers</span><span class="p">(</span><span class="n">powers</span><span class="p">,</span> <span class="n">used_pair_mask</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;freqs&#39;</span><span class="p">]))</span>
+
+    <span class="n">sample_weights</span> <span class="o">=</span> <span class="n">get_sample_weights</span><span class="p">(</span><span class="n">final_task_events</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">classifier</span> <span class="o">=</span> <span class="n">train_classifier</span><span class="p">(</span><span class="n">reduced_powers</span><span class="p">,</span>
+                                  <span class="n">final_task_events</span><span class="p">,</span>
+                                  <span class="n">sample_weights</span><span class="p">,</span>
+                                  <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;C&#39;</span><span class="p">],</span>
+                                  <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;penalty_type&#39;</span><span class="p">],</span>
+                                  <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;solver&#39;</span><span class="p">])</span>
+
+    <span class="n">cross_validation_results</span> <span class="o">=</span> <span class="n">perform_cross_validation</span><span class="p">(</span><span class="n">classifier</span><span class="p">,</span>
+                                                        <span class="n">reduced_powers</span><span class="p">,</span>
+                                                        <span class="n">final_task_events</span><span class="p">,</span>
+                                                        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;n_perm&#39;</span><span class="p">],</span>
+                                                        <span class="s1">&#39;Trained Classifier&#39;</span><span class="p">,</span>
+                                                        <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">container</span> <span class="o">=</span> <span class="n">serialize_classifier</span><span class="p">(</span><span class="n">classifier</span><span class="p">,</span>
+                                     <span class="n">final_pairs</span><span class="p">,</span>
+                                     <span class="n">reduced_powers</span><span class="p">,</span>
+                                     <span class="n">final_task_events</span><span class="p">,</span>
+                                     <span class="n">sample_weights</span><span class="p">,</span>
+                                     <span class="n">cross_validation_results</span><span class="p">,</span>
+                                     <span class="n">subject</span><span class="p">)</span>
+
+    <span class="n">config_path</span> <span class="o">=</span> <span class="n">generate_ramulator_config</span><span class="p">(</span><span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
+                                            <span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">,</span>
+                                            <span class="n">container</span><span class="o">=</span><span class="n">container</span><span class="p">,</span>
+                                            <span class="n">stim_params</span><span class="o">=</span><span class="n">stim_params</span><span class="p">,</span>
+                                            <span class="n">paths</span><span class="o">=</span><span class="n">paths</span><span class="p">,</span>
+                                            <span class="n">pairs</span><span class="o">=</span><span class="n">ec_pairs</span><span class="p">,</span>
+                                            <span class="n">excluded_pairs</span><span class="o">=</span><span class="n">excluded_pairs</span><span class="p">,</span>
+                                            <span class="n">exp_params</span><span class="o">=</span><span class="n">exp_params</span><span class="p">,</span>
+                                            <span class="n">extended_blanking</span><span class="o">=</span><span class="n">extended_blanking</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">vispath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">config_path</span><span class="o">.</span><span class="n">visualize</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">vispath</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">PipelineCallback</span><span class="p">(</span><span class="n">pipeline_name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">config_path</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'2.1.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
