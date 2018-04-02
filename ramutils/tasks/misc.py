@@ -292,6 +292,7 @@ def load_existing_results(subject, experiment, sessions, stim_report, db_loc,
                         with open(forestplot_path, 'rb') as f:
                             encoded_image = base64.b64encode(f.read()).replace(b"\n", b"").decode()
                         hmm_results[name] = encoded_image
+                    saved_results['hmm_results'] = hmm_results
 
             saved_results['session_summaries'] = session_summaries
             saved_results['math_summaries'] = math_summaries
