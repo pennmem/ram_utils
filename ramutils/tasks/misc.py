@@ -183,7 +183,9 @@ def load_existing_results(subject, experiment, sessions, stim_report, db_loc,
     stim_report: bool
         Indicator for if the requested data is associated with a stim report
     db_loc: str
-        Report database location relative to rootdir
+        Report database location relative to rootdir. db_loc will be appended to rootdir
+        to find the full absolute path. If both db_loc and rootdir are absolute paths,
+        it will be assumed that db_loc contains the root directory.
     rootdir: str
         RHINO mount point or root directory
 
@@ -205,7 +207,7 @@ def load_existing_results(subject, experiment, sessions, stim_report, db_loc,
     # Repetition ratio dictionary optional
     # Cases: PS, stim, non-stim
     subject_experiment = "_".join([subject, experiment])
-    base_output_format = os.path.join(db_loc, subject_experiment +
+    base_output_format = os.path.join(rootdir, db_loc, subject_experiment +
                                       "_{session}_{data_type}.{file_type}")
 
     if sessions is None:
