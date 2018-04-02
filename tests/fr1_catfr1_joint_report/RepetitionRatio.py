@@ -5,7 +5,7 @@ import hashlib
 
 from sklearn.externals import joblib
 
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 from ptsa.data.readers import BaseEventReader
 
 from ramutils.pipeline import RamTask

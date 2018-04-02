@@ -5,7 +5,7 @@ from sklearn.externals import joblib
 
 from ptsa.data.readers import EEGReader
 from ReportUtils import ReportRamTask
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 
 import hashlib
 try:

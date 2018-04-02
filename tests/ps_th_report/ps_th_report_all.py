@@ -4,7 +4,7 @@ import re
 import sys
 from os.path import *
 from setup_utils import parse_command_line, configure_python_paths
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 from ReportUtils import CMLParser,ReportPipeline
 
 cml_parser = CMLParser(arg_count_threshold=1)

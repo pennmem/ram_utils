@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import norm
 from ReportUtils import ReportRamTask
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 
 import hashlib
 

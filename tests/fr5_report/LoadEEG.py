@@ -2,7 +2,7 @@ from ReportUtils import ReportRamTask
 from ptsa.data.readers import EEGReader
 from ptsa.data.filters import MonopolarToBipolarMapper
 from sklearn.externals import joblib
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 import hashlib,os
 import numpy as np
 from matplotlib.colorbar import colorbar_doc

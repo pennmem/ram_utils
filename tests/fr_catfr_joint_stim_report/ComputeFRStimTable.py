@@ -6,7 +6,7 @@ import pandas as pd
 from sklearn.externals import joblib
 
 from ReportUtils import ReportRamTask
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 from parse_biomarker_output import parse_biomarker_output
 
 import hashlib

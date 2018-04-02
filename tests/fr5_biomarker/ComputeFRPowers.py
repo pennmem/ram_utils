@@ -7,7 +7,7 @@ from sklearn.externals import joblib
 import json
 
 from ptsa.data.readers import EEGReader
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 
 import hashlib
 from ReportTasks.RamTaskMethods import compute_powers,get_reduced_pairs,get_excluded_dict

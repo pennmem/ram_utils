@@ -8,7 +8,7 @@ from sklearn.externals import joblib
 
 from ReportUtils import ReportRamTask
 from ptsa.data.readers import TalReader
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 
 import hashlib
 import traceback

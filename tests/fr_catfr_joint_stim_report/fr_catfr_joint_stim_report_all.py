@@ -1,6 +1,6 @@
 from os.path import join
 
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 
 from ReportUtils import CMLParser,ReportPipeline
 

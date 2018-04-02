@@ -7,7 +7,7 @@
 from os.path import *
 from ReportUtils import CMLParser,ReportPipeline
 from ReportUtils import ReportSummaryInventory
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 
 cml_parser = CMLParser(arg_count_threshold=1)
 

@@ -8,7 +8,7 @@ from ReportTasks.RamTaskMethods import run_lolo_xval, run_loso_xval, permuted_lo
 from sklearn.externals import joblib
 import warnings
 
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 
 import hashlib
 
@@ -396,12 +396,16 @@ class ComputeClassifier(RamTask):
         electrodes
         :return: None
         """
+
         bipolar_pairs = self.get_passed_object('bipolar_pairs')
         reduced_pairs = self.get_passed_object('reduced_pairs')
         to_include = np.array([bp in reduced_pairs for bp in bipolar_pairs])
         pow_mat = self.get_passed_object('pow_mat')
-        pow_mat = pow_mat.reshape((len(pow_mat), -1, len(self.params.freqs)))[:, to_include, :]
-        return pow_mat.reshape((len(pow_mat), -1))
+        try:
+            pow_mat = pow_mat.reshape((len(pow_mat), -1, len(self.params.freqs)))[:, to_include, :]
+            return pow_mat.reshape((len(pow_mat), -1))
+        except IndexError:
+            return pow_mat
 
     def pass_objects(self):
         subject = self.pipeline.subject

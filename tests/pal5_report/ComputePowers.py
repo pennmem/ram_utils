@@ -2,8 +2,7 @@ import os
 import numpy as np
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from sklearn.externals import joblib
-
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 
 import hashlib
 import warnings
@@ -109,7 +108,8 @@ class ComputePowers(RamTask):
         params = self.params
 
         fr_session_present = np.sum(fr1_encoding_mask.astype(np.int)) != 0
-
+        encoding_fr1_pow_mat = retrieval_fr1_pow_mat = []
+        encoding_fr1_events = retrieval_fr1_events = evs[:0]
         if fr_session_present:
             print 'Computing powers during FR encoding'
             encoding_fr1_pow_mat, encoding_fr1_events = compute_powers(evs[fr1_encoding_mask], monopolar_channels,
@@ -142,9 +142,12 @@ class ComputePowers(RamTask):
                                                                        params.pal1_retrieval_buf,
                                                                        params.freqs, params.log_powers)
 
-        self.pow_mat = np.zeros((len(evs), len(bipolar_pairs) * len(params.freqs)))
-
-
+        self.pow_mat = np.zeros(shape=(len(evs),encoding_pal1_pow_mat.shape[-1]))
+        fr1_encoding_mask,fr1_retrieval_mask,pal1_encoding_mask,pal1_retrieval_mask = [np.in1d(evs,new_events)
+                                                                                       for new_events in
+                                                                                       [encoding_fr1_events,retrieval_fr1_events,
+                                                                                        encoding_pal1_events,retrieval_pal1_events]]
+        full_mask = (fr1_encoding_mask | fr1_retrieval_mask | pal1_encoding_mask | pal1_retrieval_mask)
         if fr_session_present:
             self.pow_mat[fr1_encoding_mask, ...] = encoding_fr1_pow_mat
             self.pow_mat[fr1_retrieval_mask, ...] = retrieval_fr1_pow_mat
@@ -152,7 +155,8 @@ class ComputePowers(RamTask):
         self.pow_mat[pal1_encoding_mask, ...] = encoding_pal1_pow_mat
         self.pow_mat[pal1_retrieval_mask, ...] = retrieval_pal1_pow_mat
 
-        self.pass_object('pow_mat', self.pow_mat)
+        self.pass_object('pow_mat', self.pow_mat[full_mask])
+        self.pass_object('combined_evs',evs[full_mask])
 
         freq_min = int(round(params.freqs[0]))
         freq_max = int(round(params.freqs[-1]))

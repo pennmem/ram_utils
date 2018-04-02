@@ -10,7 +10,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.externals import joblib
 from sklearn.metrics import roc_auc_score
 
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 
 from ReportTasks.RamTaskMethods import run_lolo_xval,run_loso_xval,permuted_loso_AUCs,permuted_lolo_AUCs,ModelOutput
 from ReportUtils import ReportRamTask

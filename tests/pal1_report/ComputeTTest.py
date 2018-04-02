@@ -2,7 +2,7 @@ import os
 import numpy as np
 from scipy.stats import ttest_ind
 from sklearn.externals import joblib
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 import hashlib
 
 from ReportUtils import ReportRamTask

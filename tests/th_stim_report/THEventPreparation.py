@@ -2,7 +2,7 @@ import os
 import os.path
 import numpy as np
 from ptsa.data.readers import BaseEventReader
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 import hashlib
 from ReportUtils import ReportRamTask
 from numpy.lib.recfunctions import append_fields

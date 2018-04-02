@@ -10,7 +10,7 @@ python odin_config_tool_generator.py --subject SUBJECT --contacts-json CONTACTS 
 from OdinConfigToolGeneratorParser import OdinConfigToolGeneratorParser
 from system_3_utils.ElectrodeConfigSystem3 import contacts_json_2_configuration_csv, \
     contacts_json_2_bipol_medtronic_configuration_csv
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 
 # from ElectrodeConfigSystem3 import contacts_json_2_configuration_csv
 

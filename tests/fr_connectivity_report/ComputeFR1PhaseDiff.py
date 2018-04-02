@@ -6,7 +6,7 @@ from ptsa.extensions.circular_stat.circular_stat import circ_diff_time_bins
 from sklearn.externals import joblib
 
 from ptsa.data.readers import EEGReader
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 from ptsa.data.filters import MorletWaveletFilter,MonopolarToBipolarMapper
 from ReportUtils import ReportRamTask
 

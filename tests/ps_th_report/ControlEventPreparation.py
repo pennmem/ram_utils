@@ -4,7 +4,7 @@ import numpy as np
 from ptsa.data.readers import BaseEventReader
 
 from ReportUtils import ReportRamTask
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 
 class ControlEventPreparation(ReportRamTask):
     def __init__(self, params, mark_as_completed=True):

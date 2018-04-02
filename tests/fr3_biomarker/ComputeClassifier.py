@@ -7,7 +7,7 @@ from sklearn.metrics import roc_auc_score, roc_curve
 from sklearn.externals import joblib
 from ReportTasks.RamTaskMethods import run_lolo_xval,run_loso_xval,permuted_loso_AUCs,permuted_lolo_AUCs,ModelOutput
 import warnings
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 from ReportUtils import ReportRamTask
 
 import hashlib

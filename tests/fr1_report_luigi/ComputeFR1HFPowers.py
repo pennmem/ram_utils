@@ -9,7 +9,7 @@ from FR1EventPreparation import FR1EventPreparation
 from MontagePreparation import MontagePreparation
 from ComputeFR1Powers import ComputeFR1Powers
 from ptsa.data.readers import EEGReader
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 import hashlib
 
 

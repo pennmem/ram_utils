@@ -8,7 +8,7 @@ from sklearn.externals import joblib
 from sklearn.metrics import roc_auc_score
 
 from ReportUtils import  ReportRamTask
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 from ptsa.data.readers import EEGReader
 from ReportTasks.RamTaskMethods import ModelOutput
 from ramutils.classifier.utils import reload_classifier, get_sample_weights

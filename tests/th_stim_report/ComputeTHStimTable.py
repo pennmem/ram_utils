@@ -5,7 +5,7 @@ from sklearn.externals import joblib
 from sklearn.metrics import roc_auc_score
 from random import random
 from ReportUtils import ReportRamTask
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 import hashlib
 import os
 

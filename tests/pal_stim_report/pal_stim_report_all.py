@@ -2,7 +2,7 @@ import sys
 from setup_utils import parse_command_line, configure_python_paths
 from os.path import join
 
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 
 from ReportUtils import CMLParser,ReportPipeline
 

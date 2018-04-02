@@ -7,7 +7,7 @@ from sklearn.externals import joblib
 
 from ReportUtils import ReportRamTask
 from ramutils.utils import combine_tag_names, sanitize_comma_sep_list
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 
 
 class ComputeFRStimTable(ReportRamTask):

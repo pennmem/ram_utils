@@ -1,5 +1,5 @@
 from ReportUtils import ReportRamTask
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 import os
 import hashlib
 from ReportTasks.RamTaskMethods import compute_powers

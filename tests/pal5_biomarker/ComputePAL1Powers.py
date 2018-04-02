@@ -3,7 +3,7 @@ import numpy as np
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from sklearn.externals import joblib
 
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 
 import hashlib
 import warnings

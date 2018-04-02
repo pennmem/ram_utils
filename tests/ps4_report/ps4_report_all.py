@@ -1,7 +1,7 @@
 
 from ReportUtils import ReportPipeline,CMLParser
 from os.path import join
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 
 parser=CMLParser()
 parser.arg('--task','catFR5')

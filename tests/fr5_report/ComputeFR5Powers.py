@@ -7,7 +7,7 @@ from sklearn.externals import joblib
 from ReportTasks.RamTaskMethods import compute_powers
 
 from ptsa.data.readers import EEGReader
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 from ReportUtils import ReportRamTask
 
 import hashlib

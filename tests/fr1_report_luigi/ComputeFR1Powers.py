@@ -4,7 +4,7 @@ from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from ptsa.data.readers import EEGReader
 import os.path
 import numpy as np
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 import hashlib
 import time
 

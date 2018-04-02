@@ -2,7 +2,7 @@ import os
 import numpy as np
 
 from ptsa.data.readers import EEGReader
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 from ReportTasks.RamTaskMethods import compute_wavelets_powers
 
 import hashlib

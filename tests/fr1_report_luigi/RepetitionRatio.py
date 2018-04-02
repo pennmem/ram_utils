@@ -2,7 +2,7 @@ from os import path
 import luigi
 import numpy as np
 from ptsa.data.readers import BaseEventReader
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 import hashlib
 from RamTaskL import RamTaskL
 from FR1EventPreparation import FR1EventPreparation

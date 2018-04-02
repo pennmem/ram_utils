@@ -4,7 +4,7 @@ import os.path
 import numpy as np
 from numpy.lib.recfunctions import append_fields
 from ptsa.data.readers import BaseEventReader
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 
 import hashlib
 import warnings

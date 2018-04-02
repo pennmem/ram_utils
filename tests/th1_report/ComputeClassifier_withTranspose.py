@@ -9,7 +9,7 @@ from random import shuffle
 from sklearn.externals import joblib
 from ReportUtils import ReportRamTask
 
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 import hashlib
 
 def normalize_sessions(pow_mat, events):

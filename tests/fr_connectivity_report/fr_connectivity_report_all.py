@@ -7,7 +7,7 @@
 import sys
 import os
 from os.path import *
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 # sys.path.append(join(dirname(__file__),'..','..'))
 
 from ReportUtils import CMLParser,ReportPipeline

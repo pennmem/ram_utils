@@ -1,5 +1,5 @@
 import os
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 import hashlib
 
 import numpy as np

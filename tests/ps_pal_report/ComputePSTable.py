@@ -8,7 +8,7 @@ from scipy.stats import norm
 import sys
 from scipy.stats import describe
 from ReportUtils import ReportRamTask
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 
 import hashlib
 

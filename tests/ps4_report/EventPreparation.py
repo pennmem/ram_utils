@@ -1,5 +1,5 @@
 from ReportUtils import ReportRamTask
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 from ptsa.data.readers import BaseEventReader
 from os.path import join
 import numpy as np

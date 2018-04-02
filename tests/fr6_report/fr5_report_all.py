@@ -26,7 +26,7 @@ from GenerateReportTasks import GeneratePlots, GenerateTex, GenerateReportPDF,De
 from LoadEEG import LoadPostStimEEG
 
 
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 parser = CMLParser()
 # Default-ish args here
 parser.arg('--subject','R1304N')

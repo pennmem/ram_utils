@@ -5,7 +5,7 @@ from scipy.stats import zmap
 from ptsa.extensions.circular_stat.circular_stat import compute_f_stat, compute_zscores
 
 from sklearn.externals import joblib
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 from ReportUtils import ReportRamTask
 
 import hashlib

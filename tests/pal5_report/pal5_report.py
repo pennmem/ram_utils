@@ -20,7 +20,7 @@ from GenerateReportTasks import GenerateReportPDF,GeneratePlots,GenerateTex
 
 parser = CMLParser()
 parser.parser.add_argument('--classifier')
-parser.arg('--subject','R1312N')
+parser.arg('--subject','R1318N')
 parser.arg('--workspace-dir','scratch',)
 parser.arg('--mount-point','/Volumes/rhino_root')
 parser.arg('--classifier','pal')

@@ -10,7 +10,7 @@ python odin_config_tool_generator.py --subject SUBJECT  --output-dir OUTPUT_DIR 
 from OdinConfigToolGeneratorParser import OdinConfigToolGeneratorParser
 from system_3_utils.ElectrodeConfigSystem3 import (contacts_json_2_configuration_csv,
     contacts_json_2_bipol_medtronic_configuration_csv, jacksheet_leads_2_contacts_json,monopolar_to_mixed_mode_config)
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 import argparse
 import sys
 from os.path import *

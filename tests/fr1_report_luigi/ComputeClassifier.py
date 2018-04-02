@@ -7,7 +7,7 @@ from sklearn.metrics import roc_auc_score
 import os.path
 import numpy as np
 
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 import hashlib
 from RamTaskL import RamTaskL
 from ComputeFR1Powers import ComputeFR1Powers

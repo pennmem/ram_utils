@@ -1,5 +1,5 @@
 from ReportUtils import  ReportRamTask
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 from os import path
 import hashlib
 from sklearn.externals import joblib

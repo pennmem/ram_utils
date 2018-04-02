@@ -5,7 +5,7 @@ from sklearn.linear_model import LogisticRegression
 from ReportTasks.RamTaskMethods import run_loso_xval,run_lolo_xval,permuted_lolo_AUCs,permuted_loso_AUCs,ModelOutput
 from sklearn.externals import joblib
 import warnings
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 from ReportUtils import ReportRamTask
 
 import hashlib

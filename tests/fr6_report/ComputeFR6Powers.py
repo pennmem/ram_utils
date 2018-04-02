@@ -8,7 +8,7 @@ from sklearn.externals import joblib
 from ReportUtils import ReportRamTask
 from ramutils.eeg.powers import compute_powers
 from ptsa.data.readers import EEGReader
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 
 
 

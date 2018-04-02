@@ -8,7 +8,7 @@ import pandas as pd
 from sklearn.externals import joblib
 
 from ReportUtils import RamTask
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 
 import hashlib
 

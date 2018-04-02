@@ -8,7 +8,7 @@ from random import shuffle
 from sklearn.externals import joblib
 import warnings
 
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 import hashlib
 
 from ReportUtils import ReportRamTask

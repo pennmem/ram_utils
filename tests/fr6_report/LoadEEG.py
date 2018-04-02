@@ -7,7 +7,7 @@ from sklearn.externals import joblib
 from ReportUtils import ReportRamTask
 from ptsa.data.readers import EEGReader
 from ptsa.data.filters import MonopolarToBipolarMapper
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 
 class LoadPostStimEEG(ReportRamTask):
     def __init__(self,params,**kwargs):

@@ -10,7 +10,7 @@ import hashlib
 
 from ReportUtils import ReportRamTask
 from ptsa.data.readers import TalReader
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 from loc_to_df import loc_to_df
 
 

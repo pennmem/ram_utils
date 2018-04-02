@@ -4,7 +4,7 @@ import numpy as np
 import os
 import errno
 from os.path import *
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 from ReportTasks.hdf5_utils import save_arrays_as_hdf5
 from JSONUtils import JSONNode
 import json

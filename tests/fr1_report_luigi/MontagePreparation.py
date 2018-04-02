@@ -3,7 +3,7 @@ import pandas as pd
 
 import os.path
 import numpy as np
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 import hashlib
 
 from RamTaskL import RamTaskL

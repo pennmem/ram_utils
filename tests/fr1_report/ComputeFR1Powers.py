@@ -14,7 +14,7 @@ except ImportError as ie:
         compute_powers = None
     else:
         raise ie
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 from ReportUtils import ReportRamTask
 
 import hashlib

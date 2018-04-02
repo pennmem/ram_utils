@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 from sklearn.externals import joblib
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 from ReportUtils import ReportRamTask
 
 import hashlib

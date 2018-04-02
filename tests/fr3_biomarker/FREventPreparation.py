@@ -3,7 +3,7 @@ import os.path
 import numpy as np
 
 from ptsa.data.readers import BaseEventReader
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 
 from ramutils.pipeline import RamTask
 from ReportUtils import RamTask

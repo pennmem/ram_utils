@@ -6,7 +6,7 @@ from sklearn.externals import joblib
 
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from ptsa.data.readers import EEGReader
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 from ramutils.eeg.powers import compute_powers
 from ramutils.pipeline import RamTask
 

@@ -4,7 +4,7 @@ import numpy as np
 import hashlib
 
 from ptsa.data.readers import BaseEventReader
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 
 from ReportTasks.RamTaskMethods import create_baseline_events
 from ReportTasks.RamTaskMethods import filter_session

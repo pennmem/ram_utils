@@ -3,7 +3,7 @@ import numpy as np
 from scipy.stats.mstats import zscore
 from ptsa.extensions.morlet.morlet import MorletWaveletTransform
 from sklearn.externals import joblib
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 from ptsa.data.readers import EEGReader,BaseRawReader
 from ReportUtils import ReportRamTask
 from ptsa.data.filters import MonopolarToBipolarMapper

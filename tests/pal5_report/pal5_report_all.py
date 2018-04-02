@@ -5,7 +5,7 @@ from os.path import *
 from ReportUtils import CMLParser,ReportPipeline,ReportSummaryInventory
 import sys
 import time
-from ptsa.data.readers.IndexReader import JsonIndexReader
+from ptsa.data.readers  import JsonIndexReader
 
 parser = CMLParser()
 parser.parser.add_argument('--classifier')
