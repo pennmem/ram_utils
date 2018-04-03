@@ -395,6 +395,10 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
 
     math_summaries = summarize_math(all_events, joint=joint_report)
 
+    # Note: This task modifies the session summaries by adding the result traces after the
+    # models are fit. In general, it would be better to create the session summary objects
+    # in summarize_stim_sessions and not modify them afterwards, but this task currently
+    # needs the session summaries to exist in order to work
     behavioral_results = estimate_effects_of_stim(subject, experiment,
         session_summaries)
 
