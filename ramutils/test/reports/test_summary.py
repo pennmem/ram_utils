@@ -370,12 +370,12 @@ class TestFRStimSessionSummary:
         delta_recall_stim = FRStimSessionSummary.delta_recall(
             [self.sample_summary],
             post_stim_items=False)
-        assert np.isclose(delta_recall_stim, 9.704164)
+        assert np.isclose(delta_recall_stim, 52.931805334)
 
         delta_recall_post_stim = FRStimSessionSummary.delta_recall(
             [self.sample_summary],
             post_stim_items=True)
-        assert np.isclose(delta_recall_post_stim, 5.953408)
+        assert np.isclose(delta_recall_post_stim, 32.4731351)
 
     def test_stim_parameters(self):
         stim_params = FRStimSessionSummary.stim_parameters([self.sample_summary])
