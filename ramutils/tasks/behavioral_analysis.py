@@ -84,11 +84,6 @@ def estimate_effects_of_stim(subject, experiment, stim_session_summaries):
     post_stim_item_trace = post_stim_item_model.fit()
     result_traces['post_stim_item'] = post_stim_item_trace
 
-    # In an ideal world, this task would not have the side-effect of updating a member variable
-    # of the stim session summary, but I do not currently see a way around it
-    for summary in stim_session_summaries:
-        summary.model_metadata = result_traces
-
     return result_traces
 
 

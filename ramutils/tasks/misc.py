@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import os
 import base64
+import pickle
 import pandas as pd
 
 try:
@@ -144,6 +145,16 @@ def save_all_output(subject, experiment, session_summaries, math_summaries,
 
     # Save plots from hmm models and return file paths in a dict
     if behavioral_results is not None:
+        # Save a pickled version of the dictionary of model type and model traces.
+        # This cannot be saved into the summary objects because of the way that HDF5
+        # handles bytes. In particular, the pickled representation of this dictionary
+        # contains NULLs, which are not handled by HDF5
+        pickle.dump(behavioral_results,
+                    base_output_format.format(subject=subject,
+                                              experiment=experiment,
+                                              session=session_str,
+                                              data_type='model_traces',
+                                              file_type=".pkl"))
         for name, trace in behavioral_results.items():
             forestplot_path = base_output_format.format(subject=subject,
                                                         experiment=experiment,
