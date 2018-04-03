@@ -84,6 +84,9 @@ def estimate_effects_of_stim(subject, experiment, stim_session_summaries):
     post_stim_item_trace = post_stim_item_model.fit()
     result_traces['post_stim_item'] = post_stim_item_trace
 
+    for summary in stim_session_summaries:
+        summary.model_metadata = result_traces
+
     return result_traces
 
 
