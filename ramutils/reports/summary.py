@@ -5,6 +5,7 @@ from datetime import datetime
 import warnings
 
 import json
+import pickle
 import numpy as np
 import pandas as pd
 import pytz
@@ -17,7 +18,7 @@ from ramutils.exc import TooManySessionsError
 from ramutils.parameters import ExperimentParameters
 
 from traitschema import Schema
-from traits.api import Array, ArrayOrNone, Float, Unicode, Bool, DictStrAny
+from traits.api import Array, ArrayOrNone, Float, Unicode, Bool, Bytes
 
 from sklearn.metrics import roc_auc_score, roc_curve
 from statsmodels.stats.proportion import proportions_chisquare
@@ -719,7 +720,7 @@ class StimSessionSummary(SessionSummary):
     """SessionSummary data specific to sessions with stimulation."""
     _post_stim_prob_recall = ArrayOrNone(dtype=np.float,
                                          desc='classifier output in post stim period')
-    _model_metadata = DictStrAny(desc="traces for Bayesian multilevel models")
+    _model_metadata = Bytes(desc="pickled dict of traces for Bayesian multilevel models")
 
     @property
     def post_stim_prob_recall(self):
@@ -733,11 +734,11 @@ class StimSessionSummary(SessionSummary):
 
     @property
     def model_metadata(self):
-        return self._model_metadata
+        return pickle.loads(self._model_metadata)
 
     @model_metadata.setter
     def model_metadata(self, new_model_metadata):
-        self._model_metadata = new_model_metadata
+        self._model_metadata = pickle.dumps(new_model_metadata)
 
     def populate(self, events, bipolar_pairs, excluded_pairs,
                  normalized_powers, post_stim_prob_recall=None,
@@ -1038,14 +1039,15 @@ class FR5SessionSummary(FRStimSessionSummary):
 
     def populate(self, events, bipolar_pairs,
                  excluded_pairs, normalized_powers, post_stim_prob_recall=None,
-                 raw_events=None):
+                 raw_events=None, model_metadata={}):
         """ Constructor for the object """
         FRStimSessionSummary.populate(self, events,
                                       bipolar_pairs,
                                       excluded_pairs,
                                       normalized_powers,
                                       raw_events=raw_events,
-                                      post_stim_prob_recall=post_stim_prob_recall)
+                                      post_stim_prob_recall=post_stim_prob_recall,
+                                      model_metadata=model_metadata)
 
 
 class PSSessionSummary(SessionSummary):
