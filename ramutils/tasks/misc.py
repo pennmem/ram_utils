@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import os
 import base64
+import pickle
 import pandas as pd
 
 try:
@@ -107,6 +108,8 @@ def save_all_output(subject, experiment, session_summaries, math_summaries,
 
     session_str = '_'.join([str(summary.session_number) for summary in
                             session_summaries])
+
+    # FIXME: If there is a very long session string, do not save that
 
     if (target_selection_table is not None) and \
             (len(target_selection_table) > 0):

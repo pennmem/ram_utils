@@ -84,6 +84,11 @@ def estimate_effects_of_stim(subject, experiment, stim_session_summaries):
     post_stim_item_trace = post_stim_item_model.fit()
     result_traces['post_stim_item'] = post_stim_item_trace
 
+    # Ideally we would not need to modify the session summaries after they have been created, but I'm not sure
+    # that there is a better way around this for now
+    for summary in stim_session_summaries:
+        summary.model_metadata = result_traces
+
     return result_traces
 
 
