@@ -1016,7 +1016,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         else:
             recall_stim = df[df.is_stim_item == True].recalled.mean()
 
-        delta_recall = 100 * (recall_stim - nonstim_low_bio_recall)
+        delta_recall = 100 * ((recall_stim - nonstim_low_bio_recall) / df.recalled.mean())
 
         return delta_recall
 
