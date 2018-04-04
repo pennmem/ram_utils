@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import os
 import base64
+import pickle
 import pandas as pd
 
 try:
@@ -112,6 +113,7 @@ def save_all_output(subject, experiment, session_summaries, math_summaries,
     # as part of the file name
     if agg_report:
         session_str = ""
+
 
     if (target_selection_table is not None) and \
             (len(target_selection_table) > 0):
