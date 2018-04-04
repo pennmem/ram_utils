@@ -11,7 +11,7 @@ from ramutils.events import validate_single_experiment, select_math_events, \
     extract_experiment_from_events, extract_sessions, select_session_events, \
     select_stim_table_events, extract_stim_information, \
     select_encoding_events, extract_event_metadata, dataframe_to_recarray, \
-    get_encoding_mask
+    get_encoding_mask, correct_fr2_stim_item_identification
 from ramutils.exc import *
 from ramutils.log import get_logger
 from ramutils.reports.summary import *
@@ -163,6 +163,7 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
         stim_item_mask, post_stim_item_mask, stim_param_df = \
             extract_stim_information(all_session_stim_events,
                                      all_session_task_events)
+
         stim_param_df["stimAnodeTag"] = stim_param_df["stimAnodeTag"].str.rstrip(',')
         stim_param_df["stimCathodeTag"] = stim_param_df["stimCathodeTag"].str.rstrip(',')
 
@@ -241,6 +242,8 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
         stim_df = stim_df.merge(location_data, how='left', on=['label'])
         del stim_df['label']
 
+
+
         # TODO: Add some sort of data quality check here potentially. Do the
         # observed stim items match what we expect from classifier output?
 
@@ -253,6 +256,11 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
                 post_stim_prob_recall=post_stim_predicted_probs[i])
 
         elif experiment in ['FR2', 'catFR2']:
+            # The FR2 experiment is a special bird in that stimulation occurs
+            # across two items at a time, and therefore only a single STIM_ON
+            # event is recorded. This causes the stim item identification
+            # algorithm to miss those second items
+            stim__df = correct_fr2_stim_item_identification(stim_df)
             stim_events = dataframe_to_recarray(stim_df, expected_dtypes)
             stim_session_summary = FRStimSessionSummary()
             stim_session_summary.populate(

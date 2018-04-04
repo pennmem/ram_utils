@@ -1178,7 +1178,38 @@ def extract_stim_information(all_events, task_events):
 
     stim_df = pd.DataFrame.from_dict(stim_param_data)
 
+
     return is_stim_item, is_post_stim_item, stim_df
+
+
+def correct_fr2_stim_item_identification(stim_param_df):
+    """ Corrects the boolean masks for is_stim_item and is_post_stim_item """
+    updated_is_stim_item = [0] * len(stim_param_df)
+    updated_is_post_stim_item = [0] * len(stim_param_df)
+
+    for index, row in stim_param_df.iterrows():
+        if row['is_stim_item'] == 1:
+            updated_is_stim_item[index] = 1
+
+        if row['is_post_stim_item'] == 1:
+            updated_is_post_stim_item[index] = 1
+
+        if ((row['experiment'] == 'FR2') or (
+                row['experiment'] == 'catFR2')) and (row['is_stim_item'] == 1):
+            # Only items from the same list should be counted as stim items or
+            # post stim items. Ensure this by checking serial position
+            updated_is_stim_item[index] = 1
+
+            if row['serialpos'] < 12:
+                updated_is_stim_item[index + 1] = 1
+                updated_is_post_stim_item[index + 1] = 1
+            if row['serialpos'] < 11:
+                updated_is_post_stim_item[index + 2] = 1
+
+    stim_param_df['is_stim_item'] = updated_is_stim_item
+    stim_param_df['is_post_stim_item'] = updated_is_post_stim_item
+
+    return stim_param_df
 
 
 def validate_single_experiment(events):
