@@ -54,7 +54,7 @@ def is_stim_experiment(experiment):
 def save_all_output(subject, experiment, session_summaries, math_summaries,
                     classifier_evaluation_results, save_location,
                     retrained_classifier=None, target_selection_table=None,
-                    behavioral_results=None):
+                    behavioral_results=None, agg_report=False):
     """ Save all required output necessary to re-generate a report
 
     Parameters:
@@ -109,7 +109,11 @@ def save_all_output(subject, experiment, session_summaries, math_summaries,
     session_str = '_'.join([str(summary.session_number) for summary in
                             session_summaries])
 
-    # FIXME: If there is a very long session string, do not save that
+    # Agg reports could have hundreds of sessions, so do not save them
+    # as part of the file name
+    if agg_report:
+        session_str = ""
+
 
     if (target_selection_table is not None) and \
             (len(target_selection_table) > 0):
