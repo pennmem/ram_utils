@@ -125,7 +125,7 @@ def make_aggregated_report(subjects=None, experiments=None, sessions=None,
         # at least for now
         hmm_results = estimate_effects_of_stim(subject, 'FR3', all_session_summaries)
         output = save_all_output(subject, experiment, [], [], [], paths.data_db,
-                                 behavioral_results=hmm_results)
+                                 behavioral_results=hmm_results, agg_report=True)
     else:
         output = None
 
