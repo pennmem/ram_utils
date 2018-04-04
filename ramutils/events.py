@@ -1178,12 +1178,23 @@ def extract_stim_information(all_events, task_events):
 
     stim_df = pd.DataFrame.from_dict(stim_param_data)
 
-
     return is_stim_item, is_post_stim_item, stim_df
 
 
 def correct_fr2_stim_item_identification(stim_param_df):
-    """ Corrects the boolean masks for is_stim_item and is_post_stim_item """
+    """ Corrects the boolean masks for is_stim_item and is_post_stim_item
+
+    Parameters:
+    -----------
+    stim_param_df: `pd.DataFrame`
+        Table containing the fully processed encoding events
+
+    Returns
+    -------
+    stim_param_df: `pd.DataFrame`
+        DataFrame with corrected is_stim_item and is_post_stim_item fields
+
+    """
     updated_is_stim_item = [0] * len(stim_param_df)
     updated_is_post_stim_item = [0] * len(stim_param_df)
 
