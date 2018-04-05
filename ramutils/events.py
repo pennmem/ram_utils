@@ -1181,6 +1181,54 @@ def extract_stim_information(all_events, task_events):
     return is_stim_item, is_post_stim_item, stim_df
 
 
+def correct_fr2_stim_item_identification(stim_param_df):
+    """ Update the stim_item and post_stim_item masks for FR2 stim experiments
+
+    The FR2 experiment is a special bird in that stimulation occurs
+    across two items at a time, and therefore only a single STIM_ON
+    event is recorded. This causes the stim item identification
+    algorithm to miss those second items and therefore they must be corrected
+    separately
+
+    Parameters:
+    -----------
+    stim_param_df: `pd.DataFrame`
+        Table containing the fully processed encoding events
+
+    Returns
+    -------
+    stim_param_df: `pd.DataFrame`
+        DataFrame with corrected is_stim_item and is_post_stim_item fields
+
+    """
+    updated_is_stim_item = [0] * len(stim_param_df)
+    updated_is_post_stim_item = [0] * len(stim_param_df)
+
+    for index, row in stim_param_df.iterrows():
+        if row['is_stim_item'] == 1:
+            updated_is_stim_item[index] = 1
+
+        if row['is_post_stim_item'] == 1:
+            updated_is_post_stim_item[index] = 1
+
+        if ((row['experiment'] == 'FR2') or (
+                row['experiment'] == 'catFR2')) and (row['is_stim_item'] == 1):
+            # Only items from the same list should be counted as stim items or
+            # post stim items. Ensure this by checking serial position
+            updated_is_stim_item[index] = 1
+
+            if row['serialpos'] < 12:
+                updated_is_stim_item[index + 1] = 1
+                updated_is_post_stim_item[index + 1] = 1
+            if row['serialpos'] < 11:
+                updated_is_post_stim_item[index + 2] = 1
+
+    stim_param_df['is_stim_item'] = updated_is_stim_item
+    stim_param_df['is_post_stim_item'] = updated_is_post_stim_item
+
+    return stim_param_df
+
+
 def validate_single_experiment(events):
     """ Raises an error if more than one experiment is present in the events """
     experiments = extract_experiment_from_events(events)
