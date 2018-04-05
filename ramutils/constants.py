@@ -43,3 +43,19 @@ EXPERIMENTS = {
         'CatFR6',
     ]
 }
+
+MTL_LOC_DICT = {
+    'Hipp': ['Left CA1', 'Left CA2', 'Left CA3', 'Left DG', 'Left Sub',
+             'Right CA1', 'Right CA2', 'Right CA3', 'Right DG', 'Right Sub'],
+    'MTL': ['Left PRC', 'Right PRC', 'Right EC', 'Right PHC', 'Left EC', 'Left PHC']
+}
+
+DK_LOC_DICT = {
+    'IFG': ['parsopercularis', 'parsorbitalis', 'parstriangularis'],
+    'MFG': ['caudalmiddlefrontal', 'rostralmiddlefrontal'],
+    'SFG': ['superiorfrontal'],
+    'TC': ['middletemporal', 'inferiortemporal', 'superiortemporal'],
+    'IPC': ['inferiorparietal', 'supramarginal'],
+    'SPC': ['superiorparietal', 'precuneus'],
+    'OC': ['lateraloccipital', 'lingual', 'cuneus', 'pericalcarine'],
+}
