@@ -50,7 +50,7 @@ class ClassifierSummary(Schema):
     
     _frequencies = ArrayOrNone(desc='Frequencies the classifier was trained on')
     _pairs = ArrayOrNone(desc='Bipolar pairs used to train the classifier')
-    _features = ArrayOrNone
+    _features = ArrayOrNone(desc='Feature matrix used to train the classifier')
     
     subject = Unicode(desc='subject')
     experiment = Unicode(desc='experiment')
@@ -184,7 +184,7 @@ class ClassifierSummary(Schema):
     def classifier_activation(self):
         """
         Forward model of classifier activation from Haufe et. al. 2014
-        :return:
+
         """
         if self._features is None:
             return np.array([])
@@ -196,16 +196,20 @@ class ClassifierSummary(Schema):
 
     @property
     def classifier_activation_by_region(self):
+        """
+
+        """
         if len(self.classifier_activation):
             import pandas as pd
             activation_df = pd.DataFrame(data=self.classifier_activation_2d,index=self.pairs['region'])
             mean_activation = activation_df.groupby(activation_df.index).mean()
-            return mean_activation.values
+            return mean_activation.values.T
         else:
             return np.array([])
 
     @property
     def regions(self):
+        """ List of unique electrode regions """
         return np.unique(self.pairs['region'].tolist()) if len(self.pairs) else np.array([])
 
     def populate(self, subject, experiment, session, true_outcomes, predicted_probabilities, permuted_auc_values,
@@ -226,6 +230,13 @@ class ClassifierSummary(Schema):
             Outputs from the trained classifier for each word event
         permuted_auc_values: array_like
             AUC values from performing a permutation test on classifier
+        frequencies: array_like
+            Frequencies used to train the classifier
+        pairs: pd.DataFrame
+            Metadata for each bipolar pair recorded from
+        features: np.ndarray
+            Feature matrix used to train the classifier,
+            of shape [len(predicted_probabilities) , (len(pairs) * len(frequencies)].
         tag: str
             Name given to the classifier, used to differentiate between
             multiple classifiers
@@ -233,7 +244,6 @@ class ClassifierSummary(Schema):
             Indicates whether the classifier is reloaded from hard disk,
             i.e. is the actually classifier used. If false, then the
             classifier was created from scratch
-            :param features:
 
         """
         self.subject = subject

@@ -82,7 +82,7 @@
       let regions = [];
       let names=  []
       {% for classifier in classifiers %}
-      weights.push({{ classifier.classifier_activation_by_region.T.tolist() }});
+      weights.push({{ classifier.classifier_activation_by_region.tolist() }});
       freqs.push({{ classifier.frequencies.tolist() }});
       regions.push( {{ classifier.regions.tolist() }} );
       names.push('{{ classifier.tag }}' );
