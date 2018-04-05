@@ -91,7 +91,7 @@ def load_events(subject, experiment, file_type='all_events',
             BaseEventReader(filename=f, eliminate_events_with_no_eeg=True).read()
             for f in event_files]))
     except Exception:
-        raise RamException('Could not load events for %s, %s'%(subject,experiment))
+        raise DataLoadingError('Could not load events for %s, %s'%(subject,experiment))
 
 
     return events

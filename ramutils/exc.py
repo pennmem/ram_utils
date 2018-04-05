@@ -18,6 +18,8 @@ class UnsupportedExperimentError(RamException):
 
     """
 
+class DataLoadingError(RamException):
+    """ Raised when when unable to load expected files"""
 
 # FIXME: refactor naming
 class MultistimNotAllowedException(RamException):
