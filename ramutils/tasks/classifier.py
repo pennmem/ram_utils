@@ -5,18 +5,18 @@ from classiflib import ClassifierContainer
 from sklearn.metrics import roc_auc_score
 
 from ramutils.classifier.cross_validation import permuted_loso_cross_validation, \
-    perform_loso_cross_validation, logger, \
-    permuted_lolo_cross_validation, perform_lolo_cross_validation
-from ramutils.classifier.utils import train_classifier as train_classifier_core
+    logger, \
+    permuted_lolo_cross_validation, perform_cross_validation
 from ramutils.classifier.utils import reload_classifier
+from ramutils.classifier.utils import train_classifier as train_classifier_core
 from ramutils.classifier.weighting import \
     get_sample_weights as get_sample_weights_core
-from ramutils.reports.summary import ClassifierSummary
 from ramutils.events import extract_sessions, get_nonstim_events_mask, \
     get_encoding_mask, extract_event_metadata
+from ramutils.log import get_logger
 from ramutils.montage import compare_recorded_with_all_pairs
 from ramutils.powers import reduce_powers
-from ramutils.log import get_logger
+from ramutils.reports.summary import ClassifierSummary
 from ramutils.tasks import task
 
 
@@ -25,7 +25,7 @@ logger = get_logger()
 __all__ = [
     'get_sample_weights',
     'train_classifier',
-    'perform_cross_validation',
+    'summarize_classifier',
     'serialize_classifier',
     'post_hoc_classifier_evaluation',
     'reload_used_classifiers'
@@ -91,8 +91,8 @@ def serialize_classifier(classifier, pairs, features, events, sample_weights,
 
 
 @task()
-def perform_cross_validation(classifier, pow_mat, events, n_permutations,
-                             tag='classifier', **kwargs):
+def summarize_classifier(classifier, pow_mat, events, n_permutations,
+                         tag='classifier', **kwargs):
     """Perform LOSO or LOLO cross validation on a classifier.
 
     Parameters
@@ -118,35 +118,19 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
     encoding_event_mask = get_encoding_mask(events)
     encoding_recalls = recalls[encoding_event_mask]
 
-    classifier_summary = ClassifierSummary()
-    subject, experiment, sessions = extract_event_metadata(events)
 
     # Run leave-one-session-out cross validation when we have > 1 session,
     # otherwise leave-one-list-out
-    if len(sessions) > 1:
-        permuted_auc_values = permuted_loso_cross_validation(classifier,
-                                                             pow_mat,
-                                                             events,
-                                                             n_permutations,
-                                                             **kwargs)
-        probs = perform_loso_cross_validation(classifier, pow_mat, events,
-                                              recalls, **kwargs)
-        classifier_summary.populate(subject, experiment, sessions, encoding_recalls, probs, permuted_auc_values,
-                                    frequencies=kwargs.get('freqs'),
-                                    pairs=kwargs.get('pairs'), features=pow_mat[encoding_event_mask,...],tag=tag)
+    subject, experiment, sessions = extract_event_metadata(events)
 
-    else:
-        logger.info("Performing LOLO cross validation")
-        permuted_auc_values = permuted_lolo_cross_validation(classifier,
-                                                             pow_mat,
-                                                             events,
-                                                             n_permutations,
-                                                             **kwargs)
-        probs = perform_lolo_cross_validation(classifier, pow_mat, events,
-                                              recalls, **kwargs)
-        classifier_summary.populate(subject, experiment, sessions, encoding_recalls, probs, permuted_auc_values,
-                                    frequencies=kwargs.get('freqs'), pairs=kwargs.get('pairs'),
-                                    tag=tag,features=pow_mat)
+    permuted_auc_values, probs = perform_cross_validation(classifier, events, n_permutations, pow_mat, recalls,
+                                                          sessions, **kwargs)
+
+    classifier_summary = ClassifierSummary()
+
+    classifier_summary.populate(subject, experiment, sessions, encoding_recalls, probs, permuted_auc_values,
+                                frequencies=kwargs.get('freqs'), pairs=kwargs.get('pairs'),
+                                tag=tag, features=pow_mat)
 
     logger.info("Permutation test p-value = %f", classifier_summary.pvalue)
     recall_prob = classifier.predict_proba(pow_mat)[:, 1]

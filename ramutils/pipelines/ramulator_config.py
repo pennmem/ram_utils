@@ -167,12 +167,12 @@ def make_ramulator_config(subject, experiment, paths, stim_params, sessions=None
                                   kwargs['penalty_type'],
                                   kwargs['solver'])
 
-    cross_validation_results = perform_cross_validation(classifier,
-                                                        reduced_powers,
-                                                        final_task_events,
-                                                        kwargs['n_perm'],
+    cross_validation_results = summarize_classifier(classifier,
+                                                    reduced_powers,
+                                                    final_task_events,
+                                                    kwargs['n_perm'],
                                                         'Trained Classifier',
-                                                        **kwargs)
+                                                    **kwargs)
 
     container = serialize_classifier(classifier,
                                      final_pairs,
