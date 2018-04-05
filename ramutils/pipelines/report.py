@@ -287,8 +287,6 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
                                            kwargs['C'],
                                            kwargs['penalty_type'],
                                            kwargs['solver'])
-    pairinfo = dataframe_to_recarray(pairs_metadata_table[['label','location','region']],
-                                     [('label','S256'),('location','S256'),('region','S256')])
 
     encoding_classifier_summary = perform_cross_validation(
         encoding_classifier, encoding_reduced_powers,
@@ -331,11 +329,9 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
         # We need post stim period events/powers
         post_stim_mask = get_post_stim_events_mask(all_events)
         post_stim_events = subset_events(all_events, post_stim_mask)
-        # post_stim_eeg, final_post_stim_events = load_eeg(post_stim_events,bipolar_pairs=ec_pairs,**kwargs)
-        # post_stim_powers = compute_normalized_powers(post_stim_eeg,**kwargs)
         post_stim_powers, final_post_stim_events = compute_normalized_powers(
             post_stim_events, bipolar_pairs=ec_pairs, **kwargs)
-        post_stim_eeg = load_eeg(post_stim_events,**kwargs).compute()
+        post_stim_eeg = load_post_stim_eeg(post_stim_events,**kwargs)
     else:
         final_post_stim_events = None
         post_stim_powers = None
