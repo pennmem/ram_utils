@@ -135,7 +135,7 @@ class ReportGenerator(object):
         feature_data = {
             'feature_data': [summary.normalized_powers.tolist() for summary in self.session_summaries
                              if summary.normalized_powers is not None],
-            'feature_plots': [encode_file(summary.plot_normalized_powers())
+            'feature_plots': [summary.normalized_powers_plot
                               for summary in self.session_summaries
                               if summary.normalized_powers is not None]
         }

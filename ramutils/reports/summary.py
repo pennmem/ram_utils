@@ -15,7 +15,7 @@ from ramutils.events import extract_subject, extract_experiment_from_events, \
 from ramutils.bayesian_optimization import choose_location
 from ramutils.exc import TooManySessionsError
 from ramutils.parameters import ExperimentParameters
-from ramutils.powers import save_power_plot,plot_eeg_by_channel
+from ramutils.powers import save_power_plot,save_eeg_by_channel_plot
 from ramutils.classifier.utils import plot_classifier_weights
 from ramutils.utils import encode_file
 from ramutils.montage import generate_pairs_for_classifier
@@ -538,21 +538,20 @@ class SessionSummary(Summary):
     @normalized_powers.setter
     def normalized_powers(self, new_normalized_powers):
         self._normalized_powers = new_normalized_powers
+
     @property
     def normalized_powers_covariance(self):
         return np.cov(self._normalized_powers.T)
 
-    def plot_normalized_powers(self,fname_or_file=None):
+    @property
+    def normalized_powers_plot(self):
         """
-        Plot the matrix of normalized powers for the session to the specified filename or file-like object.
-        If no file is give, use an in-memory buffer.
-        :param fname_or_file:
-        :return: fname_or_file
+        Plot the matrix of normalized powers for the session to the specified filename or file-like object, and return
+        the plot as a base64-encoded string
         """
-        if fname_or_file is None:
-            fname_or_file = io.BytesIO()
-        save_power_plot(self.normalized_powers,self.session_number,fname_or_file)
-        return fname_or_file
+        plot_buffer = io.BytesIO()
+        save_power_plot(self.normalized_powers,self.session_number,plot_buffer)
+        return encode_file(plot_buffer)
 
     @property
     def session_length(self):
@@ -815,7 +814,7 @@ class StimSessionSummary(SessionSummary):
             pairs = ['%s-\n%s'%(pair['label0'],pair['label1'])
                      for pair in generate_pairs_for_classifier(self.bipolar_pairs,[])
                      ]
-            return encode_file(plot_eeg_by_channel(pairs,self._post_stim_eeg))
+            return encode_file(save_eeg_by_channel_plot(pairs, self._post_stim_eeg))
 
     @property
     def subject(self):
