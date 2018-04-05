@@ -20,7 +20,7 @@ __all__ = [
     'create_target_selection_table',
     'compute_normalized_powers',
     'get_trigger_frequency_mask',
-    'load_eeg'
+    'load_post_stim_eeg'
 ]
 
 
@@ -76,7 +76,7 @@ def get_trigger_frequency_mask(trigger_frequency, frequencies):
 
 
 @task()
-def load_eeg(events, **kwargs):
+def load_post_stim_eeg(events, **kwargs):
     return load_eeg_core(events,
                          start_time = kwargs['post_stim_start_time'],
                          end_time = kwargs['post_stim_end_time'],
