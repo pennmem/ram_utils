@@ -271,6 +271,17 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
 
         stim_session_summaries.append(stim_session_summary)
 
+        # Do a quick quality check here to see that the number of stim items
+        # matches the size of the post_stim_prob_recall
+        num_stim_items = FRStimSessionSummary.pre_stim_prob_recall([stim_session_summary])
+        num_post_stim_prob_recall = FRStimSessionSummary.all_post_stim_prob_recall([stim_session_summary])
+        if len(num_stim_items) != len(num_post_stim_prob_recall):
+            logger.warning("Number of identified stim items ({}) does not "
+                           "match the  number of STIM_OFF events ({}). Confirm "
+                           "that the stim item identification algorithm is "
+                           "working correctly".format(len(num_stim_items),
+                                                      len(num_post_stim_prob_recall)))
+
     return stim_session_summaries
 
 
