@@ -20,7 +20,7 @@ from ptsa.data.readers import JsonIndexReader
 from ramutils.parameters import StimParameters
 from ramutils.utils import extract_subject_montage, touch, bytes_to_str, tempdir
 from ramutils.log import get_logger
-
+from ramutils.constants import MTL_LOC_DICT,DK_LOC_DICT
 
 logger = get_logger()
 
@@ -471,27 +471,12 @@ def extract_atlas_location(bp_data):
 
 def get_region_name(name):
 
-    mtl_loc_dict = {
-        'Hipp':['Left CA1','Left CA2','Left CA3','Left DG','Left Sub',
-            'Right CA1','Right CA2','Right CA3','Right DG','Right Sub'],
-        'MTL':['Left PRC', 'Right PRC', 'Right EC', 'Right PHC', 'Left EC', 'Left PHC']
-    }
-
-    dk_loc_dict= {
-        'IFG': ['parsopercularis','parsorbitalis', 'parstriangularis'],
-        'MFG': ['caudalmiddlefrontal', 'rostralmiddlefrontal'],
-        'SFG': ['superiorfrontal'],
-        'TC': ['middletemporal','inferiortemporal','superiortemporal'],
-        'IPC': ['inferiorparietal','supramarginal'],
-        'SPC': ['superiorparietal','precuneus'],
-        'OC': ['lateraloccipital','lingual', 'cuneus','pericalcarine'],
-    }
-    for k in mtl_loc_dict:
-        if name in mtl_loc_dict[k]:
+    for k in MTL_LOC_DICT:
+        if name in MTL_LOC_DICT[k]:
             return k
 
-    for k in dk_loc_dict:
-        if name in dk_loc_dict[k]:
+    for k in DK_LOC_DICT:
+        if name in DK_LOC_DICT[k]:
             return k
 
     return 'Other'
