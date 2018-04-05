@@ -256,10 +256,8 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
                 post_stim_prob_recall=post_stim_predicted_probs[i])
 
         elif experiment in ['FR2', 'catFR2']:
-            # The FR2 experiment is a special bird in that stimulation occurs
-            # across two items at a time, and therefore only a single STIM_ON
-            # event is recorded. This causes the stim item identification
-            # algorithm to miss those second items
+            # The usual algorithm for identifying stim events will miss some
+            # specifically for FR2
             stim__df = correct_fr2_stim_item_identification(stim_df)
             stim_events = dataframe_to_recarray(stim_df, expected_dtypes)
             stim_session_summary = FRStimSessionSummary()

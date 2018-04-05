@@ -1182,7 +1182,13 @@ def extract_stim_information(all_events, task_events):
 
 
 def correct_fr2_stim_item_identification(stim_param_df):
-    """ Corrects the boolean masks for is_stim_item and is_post_stim_item
+    """ Update the stim_item and post_stim_item masks for FR2 stim experiments
+
+    The FR2 experiment is a special bird in that stimulation occurs
+    across two items at a time, and therefore only a single STIM_ON
+    event is recorded. This causes the stim item identification
+    algorithm to miss those second items and therefore they must be corrected
+    separately
 
     Parameters:
     -----------
