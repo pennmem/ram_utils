@@ -416,7 +416,7 @@ def load_eeg(all_events, start_time, end_time, bipolar_pairs=None):
     return full_eeg
 
 
-def plot_eeg_by_channel(bipolar_pairs, full_eeg,  time=None, full_path=None):
+def save_eeg_by_channel_plot(bipolar_pairs, full_eeg, time=None, full_path=None):
     from matplotlib import pyplot as plt
     if full_path is None:
         full_path = io.BytesIO()
