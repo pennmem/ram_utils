@@ -255,13 +255,13 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
     pairinfo = dataframe_to_recarray(pairs_metadata_table[['label','location','region']],
                                      [('label','S256'),('location','S256'),('region','S256')])
 
-    joint_classifier_summary = perform_cross_validation(classifier,
-                                                        reduced_powers,
-                                                        final_task_events,
-                                                        kwargs['n_perm'],
-                                                        tag='Joint',
-                                                        pairs=pairinfo,
-                                                        **kwargs)
+    joint_classifier_summary = summarize_classifier(classifier,
+                                                    reduced_powers,
+                                                    final_task_events,
+                                                    kwargs['n_perm'],
+                                                    tag='Joint',
+                                                    pairs=pairinfo,
+                                                    **kwargs)
     # Serialize the classifier here
     trained_classifier = serialize_classifier(classifier,
                                               final_pairs,
@@ -288,7 +288,7 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
                                            kwargs['penalty_type'],
                                            kwargs['solver'])
 
-    encoding_classifier_summary = perform_cross_validation(
+    encoding_classifier_summary = summarize_classifier(
         encoding_classifier, encoding_reduced_powers,
         final_encoding_task_events, kwargs['n_perm'],pairs=pairinfo,
         tag='Encoding', **kwargs)
@@ -368,7 +368,7 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
                                                 kwargs['penalty_type'],
                                                 kwargs['solver'])
 
-        training_classifier_summaries = perform_cross_validation(
+        training_classifier_summaries = summarize_classifier(
             retrained_classifier, training_reduced_powers,
             final_training_events, kwargs['n_perm'],
             tag='Original Classifier', **kwargs)

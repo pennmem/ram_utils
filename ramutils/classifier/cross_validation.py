@@ -8,6 +8,7 @@ from sklearn.metrics import roc_auc_score
 from ramutils.classifier.weighting import get_sample_weights
 from ramutils.events import get_encoding_mask, select_encoding_events
 from ramutils.log import get_logger
+from ramutils.tasks.classifier import logger
 
 try:
     from typing import Dict, Union, Tuple
@@ -230,3 +231,23 @@ def perform_loso_cross_validation(classifier, powers, events, recalls, **kwargs)
     return probs
 
 
+def perform_cross_validation(classifier, events, n_permutations, pow_mat, recalls, sessions, **kwargs):
+    if len(sessions) > 1:
+        permuted_auc_values = permuted_loso_cross_validation(classifier,
+                                                             pow_mat,
+                                                             events,
+                                                             n_permutations,
+                                                             **kwargs)
+        probs = perform_loso_cross_validation(classifier, pow_mat, events,
+                                              recalls, **kwargs)
+
+    else:
+        logger.info("Performing LOLO cross validation")
+        permuted_auc_values = permuted_lolo_cross_validation(classifier,
+                                                             pow_mat,
+                                                             events,
+                                                             n_permutations,
+                                                             **kwargs)
+        probs = perform_lolo_cross_validation(classifier, pow_mat, events,
+                                              recalls, **kwargs)
+    return permuted_auc_values, probs
