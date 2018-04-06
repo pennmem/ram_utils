@@ -172,8 +172,7 @@ def get_repetition_ratio_dict(paths):
 
 @task()
 def build_ps_data(subject, experiment, file_type, sessions, rootdir):
-    updated_experiment = experiment.replace("PS4_", "")
-    ps_events = load_events(subject, updated_experiment, file_type=file_type,
+    ps_events = load_events(subject, experiment, file_type=file_type,
                             sessions=sessions, rootdir=rootdir)
     # The practice list is needed in order assess sham stim event, so this
     # may need to change in the future

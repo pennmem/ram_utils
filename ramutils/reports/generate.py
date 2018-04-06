@@ -235,7 +235,7 @@ class ReportGenerator(object):
 
         """
         series = extract_experiment_series(self.experiment)
-        if all(['PS4' in exp for exp in self.experiments]) and series == '5':
+        if all(['PS4' in exp for exp in self.experiments]):
             return self.generate_ps4_report()
 
         elif all(['PS5' in exp for exp in self.experiments]):
