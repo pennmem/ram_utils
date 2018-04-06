@@ -1,6 +1,21 @@
 Changes
 =======
 
+Version 2.1.9
+-------------
+**2018-04-09**
+
+* Fixed logging to avoid duplicated messages #164
+* Added support for broadcasting task updates over UDP socket #166
+* Bugfix to identification of post-stim powers that had previously included artifact detection events #172
+* Bugfix to how previous results were loaded that actually uses the given root path #157
+* Documentation updates to make_report and make_aggregated_report pipelines #162
+* Delta recall is now normalized by the in-session recall rate #182
+* Multi-trace objects from Bayesian hmm models are now saved as part of session summary #167
+* Avoid OS errors for long pathnames by not saving session numbers as part of file name for agg report data #183
+* Bugfix to how stim items are identified for FR2/catFR2 #168
+* Updated how PS4 reports are generated after RHINO folders were renamed to reflect the actual experiment name
+
 Version 2.1.8
 --------------
 
