@@ -16,6 +16,8 @@ EXPERIMENTS = {
     'ps': [
         'PS4_FR5',
         'PS4_CatFR5',
+        'PS4_FR', # reports use different naming convention from config generation
+        'PS4_catFR'
         'PS5_FR',
         'PS5_CatFR',
     ],
