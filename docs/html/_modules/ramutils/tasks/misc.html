@@ -164,6 +164,7 @@
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">base64</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="k">try</span><span class="p">:</span>
@@ -215,7 +216,7 @@
 <span class="k">def</span> <span class="nf">save_all_output</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">session_summaries</span><span class="p">,</span> <span class="n">math_summaries</span><span class="p">,</span>
                     <span class="n">classifier_evaluation_results</span><span class="p">,</span> <span class="n">save_location</span><span class="p">,</span>
                     <span class="n">retrained_classifier</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">target_selection_table</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                    <span class="n">behavioral_results</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                    <span class="n">behavioral_results</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">agg_report</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Save all required output necessary to re-generate a report</span>
 
 <span class="sd">    Parameters:</span>
@@ -269,6 +270,11 @@
 
     <span class="n">session_str</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">summary</span><span class="o">.</span><span class="n">session_number</span><span class="p">)</span> <span class="k">for</span> <span class="n">summary</span> <span class="ow">in</span>
                             <span class="n">session_summaries</span><span class="p">])</span>
+
+    <span class="c1"># Agg reports could have hundreds of sessions, so do not save them</span>
+    <span class="c1"># as part of the file name</span>
+    <span class="k">if</span> <span class="n">agg_report</span><span class="p">:</span>
+        <span class="n">session_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="n">target_selection_table</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> \
             <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">target_selection_table</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
@@ -345,7 +351,9 @@
 <span class="sd">    stim_report: bool</span>
 <span class="sd">        Indicator for if the requested data is associated with a stim report</span>
 <span class="sd">    db_loc: str</span>
-<span class="sd">        Report database location relative to rootdir</span>
+<span class="sd">        Report database location relative to rootdir. db_loc will be appended to rootdir</span>
+<span class="sd">        to find the full absolute path. If both db_loc and rootdir are absolute paths,</span>
+<span class="sd">        it will be assumed that db_loc contains the root directory.</span>
 <span class="sd">    rootdir: str</span>
 <span class="sd">        RHINO mount point or root directory</span>
 
@@ -367,7 +375,7 @@
     <span class="c1"># Repetition ratio dictionary optional</span>
     <span class="c1"># Cases: PS, stim, non-stim</span>
     <span class="n">subject_experiment</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">])</span>
-    <span class="n">base_output_format</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">db_loc</span><span class="p">,</span> <span class="n">subject_experiment</span> <span class="o">+</span>
+    <span class="n">base_output_format</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rootdir</span><span class="p">,</span> <span class="n">db_loc</span><span class="p">,</span> <span class="n">subject_experiment</span> <span class="o">+</span>
                                       <span class="s2">&quot;_</span><span class="si">{session}</span><span class="s2">_</span><span class="si">{data_type}</span><span class="s2">.</span><span class="si">{file_type}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">sessions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>

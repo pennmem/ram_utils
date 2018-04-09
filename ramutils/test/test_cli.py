@@ -105,6 +105,7 @@ class TestExpConf:
         'experiment,subject,postfix,anodes,cathodes,use_classifier_excluded_leads, sessions',
         [
             ('AmplitudeDetermination', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8'], False, None),
+            ('TICL_FR', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8'], False, None),
             ('CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8'], False, None),
             ('CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8'], False, None),
             ('CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8'], True, [0, 1, 100]), # limited sessions config
@@ -200,7 +201,7 @@ class TestCreateReports:
         ('R1154D', 'FR3', [0]),
         ('R1374T', 'CatFR5', [0]),
         ('R1345D', 'FR5', [0]),
-        ('R1374T', 'PS4_CatFR5', [3]),
+        ('R1364C', 'PS4_FR', [1]),
         ('R1001P', 'FR2', [0]),
         # ('R1374T', 'PS5_CatFR', [0]) Make this test case live once we have a real session. Otherwise, you have to specific a special rhino root to use the mocked data
     ])

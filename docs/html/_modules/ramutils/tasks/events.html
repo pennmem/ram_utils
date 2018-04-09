@@ -334,8 +334,7 @@
 
 <span class="nd">@task</span><span class="p">()</span>
 <span class="k">def</span> <span class="nf">build_ps_data</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">file_type</span><span class="p">,</span> <span class="n">sessions</span><span class="p">,</span> <span class="n">rootdir</span><span class="p">):</span>
-    <span class="n">updated_experiment</span> <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;PS4_&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-    <span class="n">ps_events</span> <span class="o">=</span> <span class="n">load_events</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">updated_experiment</span><span class="p">,</span> <span class="n">file_type</span><span class="o">=</span><span class="n">file_type</span><span class="p">,</span>
+    <span class="n">ps_events</span> <span class="o">=</span> <span class="n">load_events</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">file_type</span><span class="o">=</span><span class="n">file_type</span><span class="p">,</span>
                             <span class="n">sessions</span><span class="o">=</span><span class="n">sessions</span><span class="p">,</span> <span class="n">rootdir</span><span class="o">=</span><span class="n">rootdir</span><span class="p">)</span>
     <span class="c1"># The practice list is needed in order assess sham stim event, so this</span>
     <span class="c1"># may need to change in the future</span>

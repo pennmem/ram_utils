@@ -278,18 +278,17 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
         stim_session_summaries.append(stim_session_summary)
 
         # Do a quick quality check here to see that the number of stim items
-        # matches the size of the post_stim_prob_recall. Note: This warning
-        # should always occur for FR2/catFR2 because there should be half as
-        # many post stim probabilities of recall relative to the number of
-        # stim items
-        num_stim_items = FRStimSessionSummary.pre_stim_prob_recall([stim_session_summary])
-        num_post_stim_prob_recall = FRStimSessionSummary.all_post_stim_prob_recall([stim_session_summary])
-        if len(num_stim_items) != len(num_post_stim_prob_recall):
-            logger.warning("Number of identified stim items ({}) does not "
-                           "match the  number of STIM_OFF events ({}). Confirm "
-                           "that the stim item identification algorithm is "
-                           "working correctly".format(len(num_stim_items),
-                                                      len(num_post_stim_prob_recall)))
+        # matches the size of the post_stim_prob_recall. We do not calculate
+        # post stim prob recall for FR2, so do not check in that case
+        if (experiment not in ['FR2', 'catFR2']):
+            num_stim_items = FRStimSessionSummary.pre_stim_prob_recall([stim_session_summary])
+            num_post_stim_prob_recall = FRStimSessionSummary.all_post_stim_prob_recall([stim_session_summary])
+            if len(num_stim_items) != len(num_post_stim_prob_recall):
+                logger.warning("Number of identified stim items ({}) does not "
+                               "match the  number of STIM_OFF events ({}). Confirm "
+                               "that the stim item identification algorithm is "
+                               "working correctly".format(len(num_stim_items),
+                                                          len(num_post_stim_prob_recall)))
 
     return stim_session_summaries
 

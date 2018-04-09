@@ -173,7 +173,7 @@
     <span class="n">extract_experiment_from_events</span><span class="p">,</span> <span class="n">extract_sessions</span><span class="p">,</span> <span class="n">select_session_events</span><span class="p">,</span> \
     <span class="n">select_stim_table_events</span><span class="p">,</span> <span class="n">extract_stim_information</span><span class="p">,</span> \
     <span class="n">select_encoding_events</span><span class="p">,</span> <span class="n">extract_event_metadata</span><span class="p">,</span> <span class="n">dataframe_to_recarray</span><span class="p">,</span> \
-    <span class="n">get_encoding_mask</span>
+    <span class="n">get_encoding_mask</span><span class="p">,</span> <span class="n">correct_fr2_stim_item_identification</span>
 <span class="kn">from</span> <span class="nn">ramutils.exc</span> <span class="k">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">ramutils.log</span> <span class="k">import</span> <span class="n">get_logger</span>
 <span class="kn">from</span> <span class="nn">ramutils.reports.summary</span> <span class="k">import</span> <span class="o">*</span>
@@ -325,6 +325,7 @@
         <span class="n">stim_item_mask</span><span class="p">,</span> <span class="n">post_stim_item_mask</span><span class="p">,</span> <span class="n">stim_param_df</span> <span class="o">=</span> \
             <span class="n">extract_stim_information</span><span class="p">(</span><span class="n">all_session_stim_events</span><span class="p">,</span>
                                      <span class="n">all_session_task_events</span><span class="p">)</span>
+
         <span class="n">stim_param_df</span><span class="p">[</span><span class="s2">&quot;stimAnodeTag&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stim_param_df</span><span class="p">[</span><span class="s2">&quot;stimAnodeTag&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
         <span class="n">stim_param_df</span><span class="p">[</span><span class="s2">&quot;stimCathodeTag&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stim_param_df</span><span class="p">[</span><span class="s2">&quot;stimCathodeTag&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
 
@@ -403,6 +404,8 @@
         <span class="n">stim_df</span> <span class="o">=</span> <span class="n">stim_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">location_data</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
         <span class="k">del</span> <span class="n">stim_df</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
 
+
+
         <span class="c1"># TODO: Add some sort of data quality check here potentially. Do the</span>
         <span class="c1"># observed stim items match what we expect from classifier output?</span>
 
@@ -415,6 +418,9 @@
                 <span class="n">post_stim_prob_recall</span><span class="o">=</span><span class="n">post_stim_predicted_probs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
 
         <span class="k">elif</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;FR2&#39;</span><span class="p">,</span> <span class="s1">&#39;catFR2&#39;</span><span class="p">]:</span>
+            <span class="c1"># The usual algorithm for identifying stim events will miss some</span>
+            <span class="c1"># specifically for FR2</span>
+            <span class="n">stim__df</span> <span class="o">=</span> <span class="n">correct_fr2_stim_item_identification</span><span class="p">(</span><span class="n">stim_df</span><span class="p">)</span>
             <span class="n">stim_events</span> <span class="o">=</span> <span class="n">dataframe_to_recarray</span><span class="p">(</span><span class="n">stim_df</span><span class="p">,</span> <span class="n">expected_dtypes</span><span class="p">)</span>
             <span class="n">stim_session_summary</span> <span class="o">=</span> <span class="n">FRStimSessionSummary</span><span class="p">()</span>
             <span class="n">stim_session_summary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span>
@@ -432,6 +438,20 @@
             <span class="k">raise</span> <span class="n">UnsupportedExperimentError</span><span class="p">(</span><span class="s1">&#39;Experiment not supported&#39;</span><span class="p">)</span>
 
         <span class="n">stim_session_summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stim_session_summary</span><span class="p">)</span>
+
+        <span class="c1"># Do a quick quality check here to see that the number of stim items</span>
+        <span class="c1"># matches the size of the post_stim_prob_recall. Note: This warning</span>
+        <span class="c1"># should always occur for FR2/catFR2 because there should be half as</span>
+        <span class="c1"># many post stim probabilities of recall relative to the number of</span>
+        <span class="c1"># stim items</span>
+        <span class="n">num_stim_items</span> <span class="o">=</span> <span class="n">FRStimSessionSummary</span><span class="o">.</span><span class="n">pre_stim_prob_recall</span><span class="p">([</span><span class="n">stim_session_summary</span><span class="p">])</span>
+        <span class="n">num_post_stim_prob_recall</span> <span class="o">=</span> <span class="n">FRStimSessionSummary</span><span class="o">.</span><span class="n">all_post_stim_prob_recall</span><span class="p">([</span><span class="n">stim_session_summary</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">num_stim_items</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">num_post_stim_prob_recall</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Number of identified stim items (</span><span class="si">{}</span><span class="s2">) does not &quot;</span>
+                           <span class="s2">&quot;match the  number of STIM_OFF events (</span><span class="si">{}</span><span class="s2">). Confirm &quot;</span>
+                           <span class="s2">&quot;that the stim item identification algorithm is &quot;</span>
+                           <span class="s2">&quot;working correctly&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">num_stim_items</span><span class="p">),</span>
+                                                      <span class="nb">len</span><span class="p">(</span><span class="n">num_post_stim_prob_recall</span><span class="p">)))</span>
 
     <span class="k">return</span> <span class="n">stim_session_summaries</span></div>
 

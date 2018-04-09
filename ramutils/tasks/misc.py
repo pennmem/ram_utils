@@ -114,7 +114,6 @@ def save_all_output(subject, experiment, session_summaries, math_summaries,
     if agg_report:
         session_str = ""
 
-
     if (target_selection_table is not None) and \
             (len(target_selection_table) > 0):
         target_selection_table.to_csv(

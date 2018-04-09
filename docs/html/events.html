@@ -301,6 +301,31 @@ then stim_params field will be kept</li>
 </dd></dl>
 
 <dl class="function">
+<dt id="ramutils.events.correct_fr2_stim_item_identification">
+<code class="descclassname">ramutils.events.</code><code class="descname">correct_fr2_stim_item_identification</code><span class="sig-paren">(</span><em>stim_param_df</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#correct_fr2_stim_item_identification"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.correct_fr2_stim_item_identification" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the stim_item and post_stim_item masks for FR2 stim experiments</p>
+<p>The FR2 experiment is a special bird in that stimulation occurs
+across two items at a time, and therefore only a single STIM_ON
+event is recorded. This causes the stim item identification
+algorithm to miss those second items and therefore they must be corrected
+separately</p>
+<dl class="docutils">
+<dt>stim_param_df: <cite>pd.DataFrame</cite></dt>
+<dd>Table containing the fully processed encoding events</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>stim_param_df</strong> – DataFrame with corrected is_stim_item and is_post_stim_item fields</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><cite>pd.DataFrame</cite></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="ramutils.events.dataframe_to_recarray">
 <code class="descclassname">ramutils.events.</code><code class="descname">dataframe_to_recarray</code><span class="sig-paren">(</span><em>dataframe</em>, <em>dtypes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#dataframe_to_recarray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.dataframe_to_recarray" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert from dataframe to recarray maintaining the original datatypes</p>
