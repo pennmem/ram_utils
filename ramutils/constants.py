@@ -34,6 +34,7 @@ EXPERIMENTS = {
         'PAL5',
         'FR6',
         'CatFR6',
+        'TICL_FR'
     ],
 
     # Experiments that allow multiple stim locations

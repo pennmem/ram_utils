@@ -15,6 +15,7 @@ Version 2.1.9
 * Avoid OS errors for long pathnames by not saving session numbers as part of file name for agg report data #183
 * Bugfix to how stim items are identified for FR2/catFR2 #168
 * Updated how PS4 reports are generated after RHINO folders were renamed to reflect the actual experiment name
+* Added support for generating TICL_FR ramulator config files
 
 Version 2.1.8
 --------------

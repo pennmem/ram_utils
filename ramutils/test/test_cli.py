@@ -105,6 +105,7 @@ class TestExpConf:
         'experiment,subject,postfix,anodes,cathodes,use_classifier_excluded_leads, sessions',
         [
             ('AmplitudeDetermination', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8'], False, None),
+            ('TICL_FR', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8'], False, None),
             ('CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8'], False, None),
             ('CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8'], False, None),
             ('CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8'], True, [0, 1, 100]), # limited sessions config
