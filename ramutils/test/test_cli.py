@@ -104,22 +104,15 @@ class TestExpConf:
     @pytest.mark.parametrize(
         'experiment,subject,postfix,anodes,cathodes,use_classifier_excluded_leads, sessions',
         [
-            ('AmplitudeDetermination', 'R1364C', '06NOV2017L0M0STIM',
-             ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8'], False, None),
-            ('CatFR5', 'R1364C', '06NOV2017L0M0STIM',
-             ['AMY7'], ['AMY8'], False, None),
-            ('CatFR5', 'R1364C', '06NOV2017L0M0STIM',
-             ['AMY7'], ['AMY8'], False, None),
-            ('CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], [
-             'AMY8'], True, [0, 1, 100]),  # limited sessions config
-            ('FR6', 'R1364C', '06NOV2017L0M0STIM', [
-             'AMY7', 'TOJ7'], ['AMY8', 'TOJ8'], False, None),
-            ('PS4_FR5', 'R1364C', '06NOV2017L0M0STIM', [
-             'AMY7', 'TOJ7'], ['AMY8', 'TOJ8'], False, None),
-            ('PAL5', 'R1318N', 'R1318N11JUL17M0L0STIM',
-             ['LAIIH2'], ['LAIIH3'], False, None),
-            ('PS5_FR', 'R1378T', '18DEC2017L0M0STIM',
-             ['LC8'], ['LC9'], False, None)
+            ('AmplitudeDetermination', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8'], False, None),
+            ('TICL_FR', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8'], False, None),
+            ('CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8'], False, None),
+            ('CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8'], False, None),
+            ('CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8'], True, [0, 1, 100]), # limited sessions config
+            ('FR6', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8'], False, None),
+            ('PS4_FR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8'], False, None),
+            ('PAL5', 'R1318N', 'R1318N11JUL17M0L0STIM', ['LAIIH2'], ['LAIIH3'], False, None),
+            ('PS5_FR', 'R1378T', '18DEC2017L0M0STIM', ['LC8'], ['LC9'], False, None)
         ]
     )
     def test_create_expconf(self, experiment, subject, postfix, anodes,
@@ -211,7 +204,7 @@ class TestCreateReports:
         ('R1154D', 'FR3', [0]),
         ('R1374T', 'CatFR5', [0]),
         ('R1345D', 'FR5', [0]),
-        ('R1374T', 'PS4_CatFR5', [3]),
+        ('R1364C', 'PS4_FR', [1]),
         ('R1001P', 'FR2', [0]),
         # ('R1374T', 'PS5_CatFR', [0]) Make this test case live once we have a real session. Otherwise, you have to specific a special rhino root to use the mocked data
     ])

@@ -549,7 +549,7 @@ evaluation, i.e. the test data</p>
 
 <dl class="function">
 <dt id="ramutils.tasks.misc.save_all_output">
-<code class="descclassname">ramutils.tasks.misc.</code><code class="descname">save_all_output</code><span class="sig-paren">(</span><em>subject</em>, <em>experiment</em>, <em>session_summaries</em>, <em>math_summaries</em>, <em>classifier_evaluation_results</em>, <em>save_location</em>, <em>retrained_classifier=None</em>, <em>target_selection_table=None</em>, <em>behavioral_results=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/misc.html#save_all_output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.misc.save_all_output" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ramutils.tasks.misc.</code><code class="descname">save_all_output</code><span class="sig-paren">(</span><em>subject</em>, <em>experiment</em>, <em>session_summaries</em>, <em>math_summaries</em>, <em>classifier_evaluation_results</em>, <em>save_location</em>, <em>retrained_classifier=None</em>, <em>target_selection_table=None</em>, <em>behavioral_results=None</em>, <em>agg_report=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/misc.html#save_all_output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.misc.save_all_output" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save all required output necessary to re-generate a report</p>
 <dl class="docutils">
 <dt>subject: str</dt>
@@ -611,7 +611,9 @@ map to a summary object:</p>
 <dt>stim_report: bool</dt>
 <dd>Indicator for if the requested data is associated with a stim report</dd>
 <dt>db_loc: str</dt>
-<dd>Report database location relative to rootdir</dd>
+<dd>Report database location relative to rootdir. db_loc will be appended to rootdir
+to find the full absolute path. If both db_loc and rootdir are absolute paths,
+it will be assumed that db_loc contains the root directory.</dd>
 <dt>rootdir: str</dt>
 <dd>RHINO mount point or root directory</dd>
 </dl>

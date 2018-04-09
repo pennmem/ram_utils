@@ -8,6 +8,8 @@ source activate ramutils_test
 conda install -y -c pennmem -c conda-forge --file=/home1/zduey/ram_utils/requirements.txt
 
 echo "Pulling master branch from remote repository"
+git stash
+git checkout master
 git pull origin master
 
 # If any tests fail, non-zero error code returned by pytest, so allow shell script to contiue

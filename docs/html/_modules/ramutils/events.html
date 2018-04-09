@@ -1343,6 +1343,54 @@
     <span class="k">return</span> <span class="n">is_stim_item</span><span class="p">,</span> <span class="n">is_post_stim_item</span><span class="p">,</span> <span class="n">stim_df</span></div>
 
 
+<div class="viewcode-block" id="correct_fr2_stim_item_identification"><a class="viewcode-back" href="../../events.html#ramutils.events.correct_fr2_stim_item_identification">[docs]</a><span class="k">def</span> <span class="nf">correct_fr2_stim_item_identification</span><span class="p">(</span><span class="n">stim_param_df</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Update the stim_item and post_stim_item masks for FR2 stim experiments</span>
+
+<span class="sd">    The FR2 experiment is a special bird in that stimulation occurs</span>
+<span class="sd">    across two items at a time, and therefore only a single STIM_ON</span>
+<span class="sd">    event is recorded. This causes the stim item identification</span>
+<span class="sd">    algorithm to miss those second items and therefore they must be corrected</span>
+<span class="sd">    separately</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    -----------</span>
+<span class="sd">    stim_param_df: `pd.DataFrame`</span>
+<span class="sd">        Table containing the fully processed encoding events</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    stim_param_df: `pd.DataFrame`</span>
+<span class="sd">        DataFrame with corrected is_stim_item and is_post_stim_item fields</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">updated_is_stim_item</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">stim_param_df</span><span class="p">)</span>
+    <span class="n">updated_is_post_stim_item</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">stim_param_df</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">stim_param_df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;is_stim_item&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">updated_is_stim_item</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;is_post_stim_item&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">updated_is_post_stim_item</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="p">((</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;FR2&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+                <span class="n">row</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;catFR2&#39;</span><span class="p">))</span> <span class="ow">and</span> <span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;is_stim_item&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="c1"># Only items from the same list should be counted as stim items or</span>
+            <span class="c1"># post stim items. Ensure this by checking serial position</span>
+            <span class="n">updated_is_stim_item</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;serialpos&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">12</span><span class="p">:</span>
+                <span class="n">updated_is_stim_item</span><span class="p">[</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">updated_is_post_stim_item</span><span class="p">[</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;serialpos&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">11</span><span class="p">:</span>
+                <span class="n">updated_is_post_stim_item</span><span class="p">[</span><span class="n">index</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">stim_param_df</span><span class="p">[</span><span class="s1">&#39;is_stim_item&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">updated_is_stim_item</span>
+    <span class="n">stim_param_df</span><span class="p">[</span><span class="s1">&#39;is_post_stim_item&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">updated_is_post_stim_item</span>
+
+    <span class="k">return</span> <span class="n">stim_param_df</span></div>
+
+
 <div class="viewcode-block" id="validate_single_experiment"><a class="viewcode-back" href="../../events.html#ramutils.events.validate_single_experiment">[docs]</a><span class="k">def</span> <span class="nf">validate_single_experiment</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Raises an error if more than one experiment is present in the events &quot;&quot;&quot;</span>
     <span class="n">experiments</span> <span class="o">=</span> <span class="n">extract_experiment_from_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>

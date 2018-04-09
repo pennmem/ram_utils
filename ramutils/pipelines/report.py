@@ -180,7 +180,7 @@ def make_report(subject, experiment, paths, joint_report=False,
                              behavioral_results=data.behavioral_results).compute()
 
     report = build_static_report(subject, experiment, data.session_summaries,
-                                 data.math_summaries, target_selection_table,
+                                 data.math_summaries, data.target_selection_table,
                                  data.classifier_evaluation_results,
                                  hmm_results=output, dest=paths.dest)
 

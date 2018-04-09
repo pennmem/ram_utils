@@ -48,7 +48,7 @@ def normalized_powers():
 
 @pytest.fixture()
 def ps_events(rhino_root):
-    ps_events = build_ps_data('R1354E', 'PS4_catFR', 'ps4_events', [1],
+    ps_events = build_ps_data('R1364C', 'PS4_FR', 'ps4_events', None,
                               rhino_root).compute()
     return ps_events
 
@@ -419,17 +419,19 @@ class TestPSSessionSummary:
         self.sample_summary.populate(ps_events, bipolar_pairs, excluded_pairs,
                                      normalized_powers)
         decision = self.sample_summary.decision
-        assert decision['best_amplitude'] == 1.00
-        assert decision['best_location'] == '1Ld9_1Ld10'
-        assert np.isclose(decision['pval'], 0.11919, 1e-3)
+        print(decision)
+        assert decision['best_amplitude'] == 1.0
+        assert decision['best_location'] == 'TOJ7_TOJ8'
+        assert np.isclose(decision['pval'], 0.101613, 1e-3)
 
     def test_location_summary(self, ps_events, bipolar_pairs, excluded_pairs,
                               normalized_powers):
         self.sample_summary.populate(ps_events, bipolar_pairs, excluded_pairs,
                                      normalized_powers)
         location_summaries = self.sample_summary.location_summary
-        assert np.isclose(location_summaries['1Ld9_1Ld10'][
-            'best_delta_classifier'],0.02552, 1e-3)
-        assert np.isclose(location_summaries['25Ld7_25Ld8'][
-            'best_delta_classifier'], 0.04955, 1e-3)
+        assert np.isclose(location_summaries['TOJ7_TOJ8'][
+                              'best_delta_classifier'], 0.0630465, 1e-3)
+        assert np.isclose(location_summaries['HCB11_HCB12'][
+                              'best_delta_classifier'], 0.08719, 1e-3)
 
+        
