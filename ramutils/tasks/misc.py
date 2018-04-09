@@ -113,7 +113,6 @@ def save_all_output(subject, experiment, session_summaries, math_summaries,
     if agg_report:
         session_str = ""
 
-
     if (target_selection_table is not None) and \
             (len(target_selection_table) > 0):
         target_selection_table.to_csv(
@@ -269,7 +268,8 @@ def load_existing_results(subject, experiment, sessions, stim_report, db_loc,
             for session in sessions:
                 classifier_summary = ClassifierSummary.from_hdf(
                     base_output_format.format(session=str(session),
-                                              data_type='classifier_session_' + str(session),
+                                              data_type='classifier_session_' +
+                                              str(session),
                                               file_type='h5'))
                 classifier_evaluation_results.append(classifier_summary)
 
@@ -292,7 +292,7 @@ def load_existing_results(subject, experiment, sessions, stim_report, db_loc,
                             subject=subject,
                             experiment=experiment,
                             session=str(session),
-                            data_type=(name +'_foresplot'),
+                            data_type=(name + '_foresplot'),
                             file_type='png')
                         assert os.path.exists(forestplot_path)
 
@@ -315,4 +315,3 @@ def load_existing_results(subject, experiment, sessions, stim_report, db_loc,
         return saved_results
 
     return saved_results
-

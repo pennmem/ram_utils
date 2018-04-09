@@ -3,7 +3,7 @@ import collections
 import numpy as np
 import sklearn.gaussian_process as gp
 
-from scipy.stats import norm,sem
+from scipy.stats import norm, sem
 from sklearn.gaussian_process.kernels import Matern, WhiteKernel
 
 
@@ -38,7 +38,7 @@ def choose_location(dataset_loc_0, loc_name_0, dataset_loc_1, loc_name_1,
                                         normalize_y=True)
 
     if dataset_loc_1 is None or not loc_name_1:
-        dataset_loc_1 = np.zeros((0,2))
+        dataset_loc_1 = np.zeros((0, 2))
         loc_name_1 = ''
 
     xp_loc = [np.array([np.array([x]) for x in dataset_loc_0[:, 0]]),
@@ -66,7 +66,8 @@ def choose_location(dataset_loc_0, loc_name_0, dataset_loc_1, loc_name_1,
         loc_info[loc_name]['snr'] = SNR[i]
         loc_info[loc_name]['loc_name'] = loc_name
 
-    t_stat = (y_max_loc[0] - y_max_loc[1]) / np.sqrt((sem_list[0]) ** 2 + (sem_list[1]) ** 2)
+    t_stat = (y_max_loc[0] - y_max_loc[1]) / \
+        np.sqrt((sem_list[0]) ** 2 + (sem_list[1]) ** 2)
     p_val = norm.cdf(- np.abs(t_stat))
 
     decision = collections.OrderedDict()  # store decision
@@ -88,19 +89,21 @@ def choose_location(dataset_loc_0, loc_name_0, dataset_loc_1, loc_name_1,
             decision['best_location_name'] = loc_names[1]
 
     # comparing "the champion" to  sham
-    champion_mean = loc_info[decision['best_location_name']]['delta_classifier']
+    champion_mean = loc_info[decision['best_location_name']
+                             ]['delta_classifier']
     champion_sem = loc_info[decision['best_location_name']]['sem']
     if sham_delta_classifier_vector is not None:
         sham_mean = np.mean(sham_delta_classifier_vector)
         sham_sem = sem(sham_delta_classifier_vector)
-        t_stat_champ_sham = (champion_mean - sham_mean) / np.sqrt((champion_sem) ** 2 + (sham_sem) ** 2)
+        t_stat_champ_sham = (champion_mean - sham_mean) / \
+            np.sqrt((champion_sem) ** 2 + (sham_sem) ** 2)
         p_val_champ_sham = norm.cdf(- np.abs(t_stat_champ_sham))
         decision['p_val_champ_sham'] = p_val_champ_sham
         decision['t_stat_champ_sham'] = t_stat_champ_sham
         decision['sham_delta_classifier'] = sham_mean
         decision['sham_sem'] = sham_sem
     else:
-        decision['p_val_champ_sham'] = decision['t_stat_champ_sham'] =decision['sham_delta_classifier'] = decision['sham_sem'] = 'N/A'
+        decision['p_val_champ_sham'] = decision['t_stat_champ_sham'] = decision['sham_delta_classifier'] = decision['sham_sem'] = 'N/A'
     return decision, loc_info
 
 
@@ -109,7 +112,7 @@ def find_max(xp, yp, model, bounds, n_samp=100):
     evaluated_loss = model.predict(xp)
     opt_loc = np.argmax(evaluated_loss)
     x_max = xp[opt_loc]
-    y_max = model.predict(x_max.reshape(1,1))
+    y_max = model.predict(x_max.reshape(1, 1))
 
     kernel = model.kernel_.k1
     sigma_noise = model.kernel_.k2.noise_level
@@ -121,16 +124,18 @@ def find_max(xp, yp, model, bounds, n_samp=100):
     K = sigma_joint[:-1, :-1] + sigma_noise * np.eye(T, T)
     k = sigma_joint[:-1, -1]
     kp1 = sigma_joint[-1, -1] + sigma_noise
-    mu_pred = np.dot(np.dot(k.T, np.linalg.inv(K + sigma_noise * np.eye(T, T))), yp)
-    sigma_pred = kp1 - np.dot(np.dot(k.T, np.linalg.inv(K + sigma_noise * np.eye(T, T))), k)
+    mu_pred = np.dot(np.dot(k.T, np.linalg.inv(
+        K + sigma_noise * np.eye(T, T))), yp)
+    sigma_pred = kp1 - \
+        np.dot(np.dot(k.T, np.linalg.inv(K + sigma_noise * np.eye(T, T))), k)
     sigma_cond = np.dot(k.T, np.linalg.inv(K + sigma_noise * np.eye(T, T)))
 
     se = np.sqrt(np.dot(sigma_cond, sigma_cond.T) * sigma_noise)
-    SNR = np.mean(np.abs(evaluated_loss)) / np.sqrt(sigma_noise)  # Signal to noise ratio
+    SNR = np.mean(np.abs(evaluated_loss)) / \
+        np.sqrt(sigma_noise)  # Signal to noise ratio
 
     return x_max, y_max, se, SNR
 
 
 def target(x):
     return np.exp(-(x - 0.8) ** 2) + np.exp(-(x - 0.2) ** 2) - 0.5 * (x - 0.8) ** 3 - 2.0
-

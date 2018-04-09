@@ -180,6 +180,8 @@ def build_ps_data(subject, experiment, file_type, sessions, rootdir):
     ps_events = remove_practice_lists(ps_events)
 
     if len(ps_events) == 0:
-        raise RuntimeError("No events found")
+        raise RuntimeError(
+            "No events found in {rootdir}/protocols for subject".format(rootdir=rootdir) +
+            "{subject},experiment {updated_experiment}".format(subject=subject,
+                                                               updated_experiment=updated_experiment))
     return ps_events
-

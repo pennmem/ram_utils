@@ -5,7 +5,6 @@ from classiflib import ClassifierContainer
 from sklearn.metrics import roc_auc_score
 
 from ramutils.classifier.cross_validation import permuted_loso_cross_validation, \
-    logger, \
     permuted_lolo_cross_validation, perform_cross_validation
 from ramutils.classifier.utils import reload_classifier
 from ramutils.classifier.utils import train_classifier as train_classifier_core
@@ -50,7 +49,6 @@ def train_classifier(pow_mat, events, sample_weights, penalty_param,
 @task(cache=False)
 def serialize_classifier(classifier, pairs, features, events, sample_weights,
                          classifier_summary, subject):
-
     """ Serialize classifier into a container object
 
     Parameters
@@ -118,19 +116,30 @@ def summarize_classifier(classifier, pow_mat, events, n_permutations,
     encoding_event_mask = get_encoding_mask(events)
     encoding_recalls = recalls[encoding_event_mask]
 
-
     # Run leave-one-session-out cross validation when we have > 1 session,
     # otherwise leave-one-list-out
     subject, experiment, sessions = extract_event_metadata(events)
 
-    permuted_auc_values, probs = perform_cross_validation(classifier, events, n_permutations, pow_mat, recalls,
-                                                          sessions, **kwargs)
+    permuted_auc_values, probs = perform_cross_validation(classifier,
+                                                          events,
+                                                          n_permutations,
+                                                          pow_mat,
+                                                          recalls,
+                                                          sessions,
+                                                          **kwargs)
 
     classifier_summary = ClassifierSummary()
 
-    classifier_summary.populate(subject, experiment, sessions, encoding_recalls, probs, permuted_auc_values,
-                                frequencies=kwargs.get('freqs'), pairs=kwargs.get('pairs'),
-                                tag=tag, features=pow_mat)
+    classifier_summary.populate(subject,
+                                experiment,
+                                sessions,
+                                encoding_recalls,
+                                probs,
+                                permuted_auc_values,
+                                frequencies=kwargs.get('freqs'),
+                                pairs=kwargs.get('pairs'),
+                                tag=tag,
+                                features=pow_mat)
 
     logger.info("Permutation test p-value = %f", classifier_summary.pvalue)
     recall_prob = classifier.predict_proba(pow_mat)[:, 1]
@@ -269,11 +278,13 @@ def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
         if (classifiers[i] is None) or (use_retrained):
             classifier_container = retrained_classifier
             reloaded = False
-            logger.info("Using the retrained classifier for session {}".format(session))
+            logger.info(
+                "Using the retrained classifier for session {}".format(session))
 
         else:
             classifier_container = classifiers[i]
-            logger.info("Using actual classifier for session {}".format(session))
+            logger.info(
+                "Using actual classifier for session {}".format(session))
 
         classifier = classifier_container.classifier
         recorded_pairs = classifier_container.pairs
@@ -316,9 +327,14 @@ def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
 
         # This is the primary classifier used for evaluation. It is based on
         # assessing classifier output for non-stim encoding events
-        classifier_summary.populate(subject, experiment, sessions, session_recalls, session_probs, permuted_auc_values,
+        classifier_summary.populate(subject, experiment, sessions,
+                                    session_recalls,
+                                    session_probs,
+                                    permuted_auc_values,
                                     frequencies=classifier_container.frequencies,
-                                    pairs=classifier_container.pairs, tag='session_' + str(session), reloaded=reloaded,
+                                    pairs=classifier_container.pairs,
+                                    tag='session_' + str(session),
+                                    reloaded=reloaded,
                                     features=reduced_session_powers)
         classifier_summaries.append(classifier_summary)
         logger.info('AUC for session {}: {}'.format(session,
@@ -338,10 +354,13 @@ def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
         session_encoding_recalls = recalls[session_mask & encoding_mask]
 
         encoding_classifier_summary = ClassifierSummary()
-        encoding_classifier_summary.populate(subject, experiment, sessions, session_encoding_recalls,
-                                             session_encoding_probs, None,
+        encoding_classifier_summary.populate(subject, experiment, sessions,
+                                             session_encoding_recalls,
+                                             session_encoding_probs,
+                                             permuted_auc_values=None,
                                              frequencies=classifier_container.frequencies,
-                                             pairs=classifier_container.pairs, tag='encoding_evaluation',
+                                             pairs=classifier_container.pairs,
+                                             tag='encoding_evaluation',
                                              features=reduced_session_encoding_powers)
         encoding_classifier_summaries.append(encoding_classifier_summary)
 
@@ -350,19 +369,25 @@ def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
 
     if len(sessions) > 1:
         permuted_auc_values = permuted_loso_cross_validation(
-          retrained_classifier.classifier, powers, events, n_permutations,
+            retrained_classifier.classifier, powers, events, n_permutations,
             scheme='EQUAL', **kwargs)
 
     subject, experiment, sessions = extract_event_metadata(events)
     cross_session_summary = ClassifierSummary()
-    cross_session_summary.populate(subject, experiment, sessions, non_stim_recalls, all_predicted_probs,
+    classifier_ = retrained_classifier if retrained_classifier else classifier
+    cross_session_summary.populate(subject, experiment, sessions,
+                                   non_stim_recalls,
+                                   all_predicted_probs,
                                    permuted_auc_values,
-                                   weights=(retrained_classifier if retrained_classifier else classifier).coef_,
-                                   frequencies=classifier_container.frequencies, pairs=classifier_container.pairs,
-                                   tag='Combined Sessions', reloaded=False,features=classifier_container.features)
+                                   weights=classifier_.coef_,
+                                   frequencies=classifier_container.frequencies,
+                                   pairs=classifier_container.pairs,
+                                   tag='Combined Sessions',
+                                   reloaded=False,
+                                   features=classifier_container.features)
     # Leave commented out until we have a way to do multi-stim-session
     # evaluation, otherwise this classifier is just redundant.
-    #classifier_summaries.append(cross_session_summary)
+    # classifier_summaries.append(cross_session_summary)
     logger.info("Combined AUC: {}".format(cross_session_summary.auc))
 
     result_dict = {

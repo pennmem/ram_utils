@@ -36,9 +36,11 @@ def reduce_pairs(pairs, stim_params, return_excluded=False):
 def get_used_pair_mask(all_pairs, excluded_pairs):
     return get_used_pair_mask_core(all_pairs, excluded_pairs)
 
+
 @task()
 def get_classifier_excluded_leads(subject, ec_pairs, rootdir):
     return get_classifier_excluded_leads_core(subject, ec_pairs, rootdir=rootdir)
+
 
 @task()
 def generate_montage_metadata_table(subject, experiment, sessions, all_pairs,

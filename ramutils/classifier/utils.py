@@ -127,15 +127,15 @@ def plot_classifier_weights(weights, frequencies, pairs, file_):
     # problems setting the matplotlib backend elsewhere.
     from matplotlib import pyplot as plt
 
-    weights_by_channel = weights.reshape((len(frequencies),len(pairs)))
-    plt.imshow(weights_by_channel,aspect='auto',origin='lower',cmap='RdBu')
-    cmin,cmax = weights.min(),weights.max()
-    clim = max(abs(cmin),abs(cmax))
-    plt.clim(-clim,clim)
+    weights_by_channel = weights.reshape((len(frequencies), len(pairs)))
+    plt.imshow(weights_by_channel, aspect='auto', origin='lower', cmap='RdBu')
+    cmin, cmax = weights.min(), weights.max()
+    clim = max(abs(cmin), abs(cmax))
+    plt.clim(-clim, clim)
     plt.colorbar()
-    locs,old_labels = plt.yticks()
-    new_labels = ['%d'%(np.rint(f).astype(int)) for f in frequencies]
-    plt.yticks(locs[1:-1],new_labels)
+    locs, old_labels = plt.yticks()
+    new_labels = ['%d' % (np.rint(f).astype(int)) for f in frequencies]
+    plt.yticks(locs[1:-1], new_labels)
     plt.savefig(file_,
                 format="png",
                 dpi=300,

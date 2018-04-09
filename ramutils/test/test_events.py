@@ -78,7 +78,8 @@ class TestEvents:
 
     def test_concatenate_events_across_experiments(self):
         fr_events = load_events(self.subject, 'FR1', rootdir=self.rootdir)
-        catfr_events = load_events(self.subject, 'catFR1', rootdir=self.rootdir)
+        catfr_events = load_events(
+            self.subject, 'catFR1', rootdir=self.rootdir)
 
         combined_events = concatenate_events_across_experiments([fr_events,
                                                                  catfr_events])
@@ -93,9 +94,9 @@ class TestEvents:
         assert 1 not in combined_events[combined_events.experiment ==
                                         'catFR1'].session
         assert 100 in combined_events[combined_events.experiment ==
-                                          'catFR1'].session
+                                      'catFR1'].session
         assert 101 in combined_events[combined_events.experiment ==
-                                          'catFR1'].session
+                                      'catFR1'].session
 
         assert 0 in combined_events[combined_events.experiment ==
                                     'FR1'].session
@@ -117,7 +118,8 @@ class TestEvents:
         if encoding_only:
             assert len(word_events) == self.n_word
         else:
-            assert len(word_events) == (self.n_word + self.n_rec_base + self.n_rec_word)
+            assert len(word_events) == (self.n_word +
+                                        self.n_rec_base + self.n_rec_word)
 
         return
 
@@ -188,9 +190,11 @@ class TestEvents:
             ('intrusion', '<i8'),
             ('eegoffset', '<i8')
         ]
-        no_baseline_retrieval_events = np.rec.array(np.array(data, dtype=dtype))
+        no_baseline_retrieval_events = np.rec.array(
+            np.array(data, dtype=dtype))
         try:
-            baseline_retrieval_events = select_baseline_retrieval_events(no_baseline_retrieval_events)
+            baseline_retrieval_events = select_baseline_retrieval_events(
+                no_baseline_retrieval_events)
         except RuntimeError:
             pass
 
@@ -240,7 +244,8 @@ class TestEvents:
             ('type', '|U256'),
             ('list', '<i8')
         ]
-        test_fr_encoding = np.rec.array(np.array([('FR1', 'WORD', 1)], dtype=dtypes))
+        test_fr_encoding = np.rec.array(
+            np.array([('FR1', 'WORD', 1)], dtype=dtypes))
         test_fr_retrieval = np.rec.array(np.array([('FR1', 'REC_EVENT', 1)],
                                                   dtype=dtypes))
         test_pal_encoding = np.rec.array(np.array([('PAL1', 'WORD', 1)],
@@ -251,13 +256,15 @@ class TestEvents:
         for subset in [test_fr_encoding, test_fr_retrieval,
                        test_pal_encoding, test_pal_retrieval]:
             partitions = partition_events(subset)
-            combined_event_length = sum([len(v) for k, v in partitions.items()])
+            combined_event_length = sum([len(v)
+                                         for k, v in partitions.items()])
             assert combined_event_length == 1
             assert len(partitions['post_stim']) == 0
 
         encoding_retrieval_partitions = partition_events(
             np.rec.array(np.concatenate([test_fr_encoding, test_fr_retrieval])))
-        assert sum([len(v) for k, v in encoding_retrieval_partitions.items()]) == 2
+        assert sum([len(v)
+                    for k, v in encoding_retrieval_partitions.items()]) == 2
 
         pal_fr_partitions = partition_events(np.rec.array(np.concatenate([
             test_fr_encoding, test_pal_encoding])))
@@ -266,7 +273,8 @@ class TestEvents:
         pal_fr_encoding_retrieval_partitions = partition_events(
             np.rec.array(np.concatenate([test_fr_encoding, test_fr_retrieval,
                                          test_pal_encoding])))
-        assert sum([len(v) for k, v in pal_fr_encoding_retrieval_partitions.items()]) == 3
+        assert sum([len(v)
+                    for k, v in pal_fr_encoding_retrieval_partitions.items()]) == 3
 
         all_partitions = partition_events(np.rec.array(np.concatenate([
             test_fr_encoding, test_fr_retrieval, test_pal_encoding,
@@ -286,7 +294,8 @@ class TestEvents:
         ('PS', [0, 1, 100, 102, 203], [0, 1])
     ])
     def test_remove_session_number_offsets(self, experiment, session_list, exp_sessions):
-        extracted_sessions = remove_session_number_offsets(experiment, session_list)
+        extracted_sessions = remove_session_number_offsets(
+            experiment, session_list)
         assert extracted_sessions == exp_sessions
         return
 
@@ -310,4 +319,3 @@ class TestEvents:
                 current = np.nan_to_num(current_repetitions_dict[subject])
                 old = np.nan_to_num(ratios)
                 assert np.allclose(current, old)
-

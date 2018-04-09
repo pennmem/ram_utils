@@ -70,6 +70,7 @@ def create_target_selection_table(pairs_metadata_table, normalized_powers,
     delta_hfa_table['controllability'] = modal_controllability_values
     return delta_hfa_table
 
+
 @task()
 def get_trigger_frequency_mask(trigger_frequency, frequencies):
     return get_trigger_frequency_mask_core(trigger_frequency, frequencies)
@@ -78,7 +79,6 @@ def get_trigger_frequency_mask(trigger_frequency, frequencies):
 @task()
 def load_post_stim_eeg(events, **kwargs):
     return load_eeg_core(events,
-                         start_time = kwargs['post_stim_start_time'],
-                         end_time = kwargs['post_stim_end_time'],
+                         start_time=kwargs['post_stim_start_time'],
+                         end_time=kwargs['post_stim_end_time'],
                          )
-

@@ -15,7 +15,8 @@ def _log_call(func, with_args=True):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         if with_args:
-            logger.info("calling %s with args=%r, kwargs=%r", func.__name__, args, kwargs)
+            logger.info("calling %s with args=%r, kwargs=%r",
+                        func.__name__, args, kwargs)
         else:
             logger.info("calling %s", func.__name__)
         return func(*args, **kwargs)
@@ -41,7 +42,8 @@ def task(cache=True, log_args=False, nout=None):
         def wrapper(*args, **kwargs):
             wrapped = _log_call(func, log_args)
             if cache:
-                wrapped = delayed(memory.cache(wrapped), nout=nout)(*args, **kwargs)
+                wrapped = delayed(memory.cache(wrapped),
+                                  nout=nout)(*args, **kwargs)
             else:
                 wrapped = delayed(wrapped, nout=nout)(*args, **kwargs)
             return wrapped

@@ -1,10 +1,12 @@
 """Pipeline for creating reports."""
-from __future__  import unicode_literals
+from __future__ import unicode_literals
 from collections import namedtuple
 
 import pandas as pd
 
 from ramutils.tasks import *
+from ramutils.utils import extract_experiment_series, encode_file
+from ramutils.events import dataframe_to_recarray
 from .hooks import PipelineCallback
 
 
@@ -13,9 +15,6 @@ ReportData = namedtuple('ReportData', 'session_summaries, math_summaries, '
                                       'trained_classifier, repetition_ratio_dict, '
                                       'retrained_classifier, behavioral_results')
 
-
-from ramutils.utils import extract_experiment_series,encode_file
-from ramutils.events import dataframe_to_recarray
 
 def make_report(subject, experiment, paths, joint_report=False,
                 retrain=False, stim_params=None, exp_params=None,
@@ -81,7 +80,8 @@ def make_report(subject, experiment, paths, joint_report=False,
     ec_pairs = get_pairs(subject, experiment, sessions, paths)
 
     if use_classifier_excluded_leads:
-        classifier_excluded_leads = get_classifier_excluded_leads(subject, ec_pairs, paths.root).compute()
+        classifier_excluded_leads = get_classifier_excluded_leads(
+            subject, ec_pairs, paths.root).compute()
         if stim_params is None:
             stim_params = []
         stim_params.extend(classifier_excluded_leads)
@@ -196,7 +196,8 @@ def generate_ps4_report(subject, experiment, sessions, ec_pairs,
     """ PS4-specific report generation pipeline """
     ps_events = build_ps_data(subject, experiment, 'ps4_events',
                               sessions, paths.root)
-    session_summaries = summarize_ps_sessions(ps_events, ec_pairs, excluded_pairs)
+    session_summaries = summarize_ps_sessions(
+        ps_events, ec_pairs, excluded_pairs)
 
     # PS4 doesn't have most of the same data/requirements as other experiments,
     # but we want to still be able to call the same build_static_report function
@@ -252,8 +253,12 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
                                   kwargs['penalty_type'],
                                   kwargs['solver'])
 
-    pairinfo = dataframe_to_recarray(pairs_metadata_table[['label','location','region']],
-                                     [('label','S256'),('location','S256'),('region','S256')])
+    pairinfo = dataframe_to_recarray(pairs_metadata_table[['label',
+                                                           'location',
+                                                           'region']],
+                                     [('label', 'S256'),
+                                      ('location', 'S256'),
+                                      ('region', 'S256')])
 
     joint_classifier_summary = summarize_classifier(classifier,
                                                     reduced_powers,
@@ -290,7 +295,7 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
 
     encoding_classifier_summary = summarize_classifier(
         encoding_classifier, encoding_reduced_powers,
-        final_encoding_task_events, kwargs['n_perm'],pairs=pairinfo,
+        final_encoding_task_events, kwargs['n_perm'], pairs=pairinfo,
         tag='Encoding', **kwargs)
 
     target_selection_table = create_target_selection_table(
@@ -331,7 +336,7 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
         post_stim_events = subset_events(all_events, post_stim_mask)
         post_stim_powers, final_post_stim_events = compute_normalized_powers(
             post_stim_events, bipolar_pairs=ec_pairs, **kwargs)
-        post_stim_eeg = load_post_stim_eeg(post_stim_events,**kwargs)
+        post_stim_eeg = load_post_stim_eeg(post_stim_events, **kwargs)
     else:
         final_post_stim_events = None
         post_stim_powers = None
@@ -409,7 +414,7 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
     # in summarize_stim_sessions and not modify them afterwards, but this task currently
     # needs the session summaries to exist in order to work
     behavioral_results = estimate_effects_of_stim(subject, experiment,
-        session_summaries)
+                                                  session_summaries)
 
     classifier_evaluation_results = post_hoc_results[
         'classifier_summaries']
@@ -439,7 +444,7 @@ def generate_data_for_ps5_report(subject, experiment, joint_report,
     post_stim_mask = get_post_stim_events_mask(all_events)
     post_stim_events = subset_events(all_events, post_stim_mask)
     post_stim_powers, final_post_stim_events = compute_normalized_powers(
-       post_stim_events, bipolar_pairs=ec_pairs, **kwargs)
+        post_stim_events, bipolar_pairs=ec_pairs, **kwargs)
     post_stim_reduced_powers = reduce_powers(post_stim_powers,
                                              trigger_electrode_mask,
                                              len(kwargs['freqs']),

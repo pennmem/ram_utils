@@ -12,8 +12,10 @@ def test_generate_fr1_report():
     check that data is correct.
 
     """
-    events_file = resource_filename('ramutils.test.test_data', 'R1111M_task_events.npz')
-    math_events_file = resource_filename('ramutils.test.test_data', 'R1111M_math_events.npz')
+    events_file = resource_filename(
+        'ramutils.test.test_data', 'R1111M_task_events.npz')
+    math_events_file = resource_filename(
+        'ramutils.test.test_data', 'R1111M_math_events.npz')
 
     events = np.rec.array(np.load(events_file)['events'])
     math_events = np.rec.array(np.load(math_events_file)['events'])

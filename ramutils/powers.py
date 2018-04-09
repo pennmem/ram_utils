@@ -33,7 +33,11 @@ def compute_single_session_powers(session, all_events, start_time, end_time,
     # PTSA will sometimes modify events when reading the eeg, so we ultimately
     # need to return the updated events. In case no events are removed, return
     # the original set of events
-    eeg, updated_events = load_single_session_eeg(session, all_events, start_time, end_time, bipolar_pairs)
+    eeg, updated_events = load_single_session_eeg(session,
+                                                  all_events,
+                                                  start_time,
+                                                  end_time,
+                                                  bipolar_pairs)
 
     eeg = eeg.add_mirror_buffer(buffer_time)
 
@@ -92,7 +96,8 @@ def load_single_session_eeg(session, all_events, start_time, end_time, bipolar_p
             (all_events[all_events.session != session],
              np.rec.array(eeg['events'].data))))
         event_fields = updated_events.dtype.names
-        order = tuple(f for f in ['session', 'list', 'mstime'] if f in event_fields)
+        order = tuple(f for f in ['session', 'list',
+                                  'mstime'] if f in event_fields)
         ev_order = np.argsort(updated_events, order=order)
         updated_events = updated_events[ev_order]
         updated_events = np.rec.array(updated_events)
@@ -113,7 +118,8 @@ def load_single_session_eeg(session, all_events, start_time, end_time, bipolar_p
                 (all_events[all_events.session != session],
                  np.rec.array(eeg['events'].data))))
             event_fields = updated_events.dtype.names
-            order = tuple(f for f in ['session', 'list', 'mstime'] if f in event_fields)
+            order = tuple(
+                f for f in ['session', 'list', 'mstime'] if f in event_fields)
             ev_order = np.argsort(updated_events, order=order)
             updated_events = updated_events[ev_order]
             updated_events = np.rec.array(updated_events)
@@ -376,7 +382,8 @@ def reshape_powers_to_2d(powers):
     reshaped_powers = powers.reshape((len(powers), -1))
     return reshaped_powers
 
-def save_power_plot(powers,session,full_path):
+
+def save_power_plot(powers, session, full_path):
     """
     Plots the feature matrix to a file path or file-like object
     :param powers:
@@ -385,16 +392,16 @@ def save_power_plot(powers,session,full_path):
     """
     from matplotlib import pyplot as plt
 
-    plt.imshow(reshape_powers_to_2d(powers),cmap='RdBu_r',aspect='auto',)
-    cmin,cmax = powers.min(),powers.max()
-    clim = max(abs(cmin),abs(cmax))
-    plt.clim(-clim,clim)
+    plt.imshow(reshape_powers_to_2d(powers), cmap='RdBu_r', aspect='auto',)
+    cmin, cmax = powers.min(), powers.max()
+    clim = max(abs(cmin), abs(cmax))
+    plt.clim(-clim, clim)
     cbar = plt.colorbar()
     cbar.ax.set_xlabel('Z-Score')
     cbar.ax.xaxis.set_label_position('top')
     plt.ylabel('Event Number')
     plt.xlabel('Feature Number')
-    plt.title('Session %s'%session)
+    plt.title('Session %s' % session)
     plt.savefig(full_path,
                 format="png",
                 dpi=300,
@@ -407,12 +414,13 @@ def save_power_plot(powers,session,full_path):
 def load_eeg(all_events, start_time, end_time, bipolar_pairs=None):
     full_eeg = []
     for session in np.unique(all_events.session):
-        eeg,_  = load_single_session_eeg(session, all_events, start_time, end_time, bipolar_pairs)
+        eeg, _ = load_single_session_eeg(session, all_events,
+                                         start_time, end_time, bipolar_pairs)
         if bipolar_pairs is None and 'bipolar_pairs' in eeg.dims:
             bipolar_pairs = eeg.bipolar_pairs.values
         time = eeg.time.values
         full_eeg.append(eeg)
-    full_eeg = np.concatenate([e.data for e in full_eeg],axis=1)
+    full_eeg = np.concatenate([e.data for e in full_eeg], axis=1)
     return full_eeg
 
 
@@ -428,9 +436,9 @@ def save_eeg_by_channel_plot(bipolar_pairs, full_eeg, time=None, full_path=None)
     plt.figure(figsize=(20, 15))
     for i in range(0, len(bipolar_pairs)):
         plt.subplot(xlen, ylen, i + 1)
-        plt.plot(time, full_eeg[i].squeeze().T,color='grey', alpha=0.05)
+        plt.plot(time, full_eeg[i].squeeze().T, color='grey', alpha=0.05)
         plt.ylim(-30000, 30000)
-        plt.xlabel('%s'%(bipolar_pairs[i]))
+        plt.xlabel('%s' % (bipolar_pairs[i]))
     plt.tight_layout()
     plt.savefig(full_path,
                 format='png',
@@ -458,7 +466,7 @@ def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events,
     non_recalled_pow_mat = hfa_powers[~recall_mask, :]
 
     tstats, pvals = ttest_ind(recalled_pow_mat, non_recalled_pow_mat, axis=0)
-    sig_mask, pvals, _ , _ = multipletests(pvals, method='fdr_bh')
+    sig_mask, pvals, _, _ = multipletests(pvals, method='fdr_bh')
 
     pairs_metadata_table['hfa_t_stat'] = tstats
     pairs_metadata_table['hfa_p_value'] = pvals
@@ -475,7 +483,7 @@ def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events,
 
     tstats, pvals = ttest_ind(recalled_single_freq_powers,
                               non_recalled_single_freq_powers, axis=0)
-    sig_mask, pvals, _ , _ = multipletests(pvals, method='fdr_bh')
+    sig_mask, pvals, _, _ = multipletests(pvals, method='fdr_bh')
     pairs_metadata_table['110_t_stat'] = tstats
     pairs_metadata_table['110_p_value'] = pvals
 
@@ -483,4 +491,3 @@ def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events,
     pairs_metadata_table = pairs_metadata_table.dropna(subset=['label'])
 
     return pairs_metadata_table
-

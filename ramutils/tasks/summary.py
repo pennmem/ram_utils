@@ -127,7 +127,8 @@ def summarize_nonstim_sessions(all_events, task_events,
                              raw_events=session_all_events,
                              repetition_ratio_dict=repetition_ratio_dict)
         else:
-            raise UnsupportedExperimentError("Unsupported experiment: {}".format(experiment))
+            raise UnsupportedExperimentError(
+                "Unsupported experiment: {}".format(experiment))
 
         summaries.append(summary)
 
@@ -142,7 +143,7 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
                             post_stim_predicted_probs=None,
                             trigger_output=None,
                             post_stim_trigger_output=None,
-                            post_stim_eeg = None):
+                            post_stim_eeg=None):
     """ Construct stim session summaries """
     sessions = extract_sessions(task_events)
     stim_table_events = select_stim_table_events(stim_params)
@@ -152,12 +153,14 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
     stim_session_summaries = []
     for i, session in enumerate(sessions):
         all_session_events = select_session_events(all_events, session)
-        all_session_stim_events = select_session_events(stim_table_events, session)
+        all_session_stim_events = select_session_events(
+            stim_table_events, session)
         all_session_task_events = select_session_events(task_events, session)
         encoding_mask = get_encoding_mask(all_session_task_events)
 
         # Careful: Events and powers need to have the same number of entries
-        all_session_task_events = select_encoding_events(all_session_task_events)
+        all_session_task_events = select_encoding_events(
+            all_session_task_events)
         session_powers = normalized_powers[encoding_mask]
         assert len(all_session_task_events) == len(session_powers)
 
@@ -165,8 +168,10 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
             extract_stim_information(all_session_stim_events,
                                      all_session_task_events)
 
-        stim_param_df["stimAnodeTag"] = stim_param_df["stimAnodeTag"].str.rstrip(',')
-        stim_param_df["stimCathodeTag"] = stim_param_df["stimCathodeTag"].str.rstrip(',')
+        stim_param_df["stimAnodeTag"] = stim_param_df["stimAnodeTag"].str.rstrip(
+            ',')
+        stim_param_df["stimCathodeTag"] = stim_param_df["stimCathodeTag"].str.rstrip(
+            ',')
 
         # PS5 sessions do not have classifier summaries, but use the raw
         # power value output for making the stim decision. Open loop stim
@@ -234,16 +239,16 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
 
         # Add in the stim params. This is making the assumption that stim
         # parameters do not change within a list
-        stim_param_df = stim_param_df.drop_duplicates(subset=['session', 'list'])
-        stim_df = stim_df.merge(stim_param_df, on=['session', 'list'], how='left')
+        stim_param_df = stim_param_df.drop_duplicates(
+            subset=['session', 'list'])
+        stim_df = stim_df.merge(
+            stim_param_df, on=['session', 'list'], how='left')
 
         # Add region from pairs_data. TODO: This won't scale to multi-site stim
         stim_df['label'] = (stim_df['stimAnodeTag'] + "-" +
                             stim_df['stimCathodeTag'])
         stim_df = stim_df.merge(location_data, how='left', on=['label'])
         del stim_df['label']
-
-
 
         # TODO: Add some sort of data quality check here potentially. Do the
         # observed stim items match what we expect from classifier output?
@@ -255,7 +260,7 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
                 stim_events, bipolar_pairs, excluded_pairs, session_powers,
                 raw_events=all_session_events,
                 post_stim_prob_recall=post_stim_predicted_probs[i],
-                post_stim_eeg = post_stim_eeg
+                post_stim_eeg=post_stim_eeg
             )
 
         elif experiment in ['FR2', 'catFR2']:
@@ -285,8 +290,10 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
         # should always occur for FR2/catFR2 because there should be half as
         # many post stim probabilities of recall relative to the number of
         # stim items
-        num_stim_items = FRStimSessionSummary.pre_stim_prob_recall([stim_session_summary])
-        num_post_stim_prob_recall = FRStimSessionSummary.all_post_stim_prob_recall([stim_session_summary])
+        num_stim_items = FRStimSessionSummary.pre_stim_prob_recall(
+            [stim_session_summary])
+        num_post_stim_prob_recall = FRStimSessionSummary.all_post_stim_prob_recall([
+                                                                                   stim_session_summary])
         if len(num_stim_items) != len(num_post_stim_prob_recall):
             logger.warning("Number of identified stim items ({}) does not "
                            "match the  number of STIM_OFF events ({}). Confirm "
@@ -317,4 +324,3 @@ def summarize_ps_sessions(ps_events, bipolar_pairs, excluded_pairs):
         session_summaries.append(summary)
 
     return session_summaries
-

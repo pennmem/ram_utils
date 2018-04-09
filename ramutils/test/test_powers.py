@@ -107,9 +107,9 @@ def test_reduce_powers():
     reduced_power_matrices = [
         reduce_powers(sample_pow_mat, some_electrodes_masks[i], n_frequencies)
         for i in range(
-        len(some_electrodes_masks))]
+            len(some_electrodes_masks))]
     assert all([reduced_power_matrices[i].shape == (n_events, expected_sizes[i]
-                                                 * n_frequencies) for i in
+                                                    * n_frequencies) for i in
                 range(len(expected_sizes))])
 
     # Case 4: Select a subset of frequencies
@@ -177,4 +177,3 @@ def test_regression_compute_normalized_powers(events, exp_powers, parameters,
     memory.clear(warn=False)  # Clean up if the assertion passes
 
     return
-

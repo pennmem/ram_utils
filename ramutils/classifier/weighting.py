@@ -141,7 +141,7 @@ def get_fr_sample_weights(events, encoding_multiplier):
     n_ret_1 = events[(events.type == 'REC_EVENT') &
                      (events.recalled == 1)].shape[0]
 
-    n_vec = np.array([1.0/n_enc_0, 1.0/n_enc_1, 1.0/n_ret_0, 1.0/n_ret_1 ],
+    n_vec = np.array([1.0/n_enc_0, 1.0/n_enc_1, 1.0/n_ret_0, 1.0/n_ret_1],
                      dtype=np.float)
 
     n_vec /= np.mean(n_vec)

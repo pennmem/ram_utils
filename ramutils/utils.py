@@ -320,7 +320,7 @@ def tempdir():
 
 def extract_report_info_from_path(file_path):
     """ Exploit the naming convention to parse underlying data into its components """
-    stripped_name = file_path[file_path.rfind('/') + 1 :]
+    stripped_name = file_path[file_path.rfind('/') + 1:]
     tokens = stripped_name.split('_')
 
     subject = tokens[0]

@@ -42,7 +42,6 @@ def create_report(input_args=None):
         import dask
         dask.set_options(get=dask.get)
 
-
     paths = FilePaths(
         root=osp.expanduser(args.root),
         dest=args.dest,
@@ -70,7 +69,8 @@ def create_report(input_args=None):
     elif 'PAL' in args.experiment:
         raise NotImplementedError("PAL experiments are not supported yet")
     else:
-        raise UnsupportedExperimentError("Unsupported experiment: " + args.experiment)
+        raise UnsupportedExperimentError(
+            "Unsupported experiment: " + args.experiment)
 
     if 'PS5' in args.experiment and args.trigger_electrode is None:
         raise CommandLineError("Must specify a trigger electrode for PS5 "
@@ -94,7 +94,7 @@ def create_report(input_args=None):
             use_classifier_excluded_leads=args.use_classifier_excluded_leads
         )
         logger.info("Wrote report to %s\n", path)
-        memory.clear() # remove cached intermediate results if build succeeds
+        memory.clear()  # remove cached intermediate results if build succeeds
 
 
 if __name__ == "__main__":

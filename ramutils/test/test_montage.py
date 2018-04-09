@@ -136,7 +136,8 @@ class TestMontage:
                                                       [0],
                                                       pairs_from_ec,
                                                       root=datafile(''))
-        assert len(metadata_table) == len(pairs_from_ec[subject]['pairs'].keys())
+        assert len(metadata_table) == len(
+            pairs_from_ec[subject]['pairs'].keys())
 
         return
 
@@ -165,8 +166,8 @@ class TestMontage:
 
     @pytest.mark.rhino
     @pytest.mark.parametrize('subject, experiment', [
-        ('R1375C', 'catFR1'), # Will use electrode config
-        ('R1320D', 'catFR1'), # Will fall back to pairs.json
+        ('R1375C', 'catFR1'),  # Will use electrode config
+        ('R1320D', 'catFR1'),  # Will fall back to pairs.json
     ])
     def test_get_pairs(self, subject, experiment, rhino_root):
         paths = FilePaths(root=rhino_root)
@@ -190,8 +191,8 @@ class TestMontage:
     def test_get_classifier_excluded_leads(self):
         paths = FilePaths(root=datafile(''))
 
-        excluded_contacts = get_classifier_excluded_leads('test_subject', self.test_pairs, paths.root)
+        excluded_contacts = get_classifier_excluded_leads(
+            'test_subject', self.test_pairs, paths.root)
         assert len(excluded_contacts) == 1
         assert excluded_contacts[0].anode_label == 'LAD1'
         assert excluded_contacts[0].cathode_label == 'LAD2'
-

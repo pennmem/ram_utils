@@ -8,7 +8,8 @@ from ramutils.tasks.behavioral_analysis import estimate_effects_of_stim
 from ramutils.reports.summary import FRStimSessionSummary
 
 
-datafile = functools.partial(resource_filename, 'ramutils.test.test_data.input')
+datafile = functools.partial(
+    resource_filename, 'ramutils.test.test_data.input')
 
 
 @pytest.fixture(scope='session')
@@ -23,7 +24,7 @@ def excluded_pairs():
 
 @pytest.fixture(scope='session')
 def normalized_powers():
-    return np.array([[1,2], [3,4]])
+    return np.array([[1, 2], [3, 4]])
 
 
 # Not really a rhino test, but it is so slow that we don't want it running

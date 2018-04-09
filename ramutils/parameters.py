@@ -55,6 +55,7 @@ class FilePaths(object):
         when testing, otherwise the default location should be used
 
     """
+
     def __init__(self, **kwargs):
         # root is the only required kwarg
         self.root = os.path.expanduser(kwargs['root'])
@@ -83,35 +84,40 @@ class ExperimentParameters(Schema):
     width = Int(5, desc='wavelet width')
     freqs = Array(value=np.logspace(np.log10(6), np.log10(180), 8),
                   desc='frequencies to compute powers for')
-    hfa_cutoff = Int(65, desc="Lowers frequency that will be considered a 'high frequency'")
-    trigger_freq = Int(110, desc="Frequency to use for PS5 pseudo closed-loop experiment")
+    hfa_cutoff = Int(
+        65, desc="Lowers frequency that will be considered a 'high frequency'")
+    trigger_freq = Int(
+        110, desc="Frequency to use for PS5 pseudo closed-loop experiment")
 
     log_powers = Bool(True, desc="If true, log of powers will be returned "
                                  "rather than raw values")
-    normalize_powers = Bool(True, desc="If true, powers will be normalized by partition (encoding/retrieval/pal) and within session using standard (x - mu) / sigma")
+    normalize_powers = Bool(
+        True, desc="If true, powers will be normalized by partition (encoding/retrieval/pal) and within session using standard (x - mu) / sigma")
 
     filt_order = Int(4, desc="Butterworth filter order")
 
     penalty_type = String('l2', desc='logistic regression penalty type')
     C = Float(7.2e-4, desc='inverse of regularization strength')
-    n_perm = Int(200, desc='number of permutations to use for cross-validation')
-    solver = String('liblinear', desc='algorithm to use in optimization process')
+    n_perm = Int(
+        200, desc='number of permutations to use for cross-validation')
+    solver = String(
+        'liblinear', desc='algorithm to use in optimization process')
 
     baseline_removal_start_time = Int(1000, desc="The amount of time to "
-                                                   "skip at the beginning of "
-                                                   "the sessions [ms]")
+                                      "skip at the beginning of "
+                                      "the sessions [ms]")
     retrieval_time = Int(29000, desc="The amount of time within the recall "
-                                       "period to consider")
+                         "period to consider")
     empty_epoch_duration = Int(500, desc="The length of desired empty "
-                                           "epochs [ms]")
+                               "epochs [ms]")
     pre_event_buf = Int(2000, desc="The time before each event to exclude ["
-                                    "ms]")
+                        "ms]")
     post_event_buf = Int(1000, desc="The time after each event to exclude ["
-                                     "ms]")
+                         "ms]")
     inter_response_time = Int(1000, desc="Duration between events required "
-                                           "for a recall event to have "
-                                           "occured after some sort of "
-                                           "cognitive process [ms]")
+                              "for a recall event to have "
+                              "occured after some sort of "
+                              "cognitive process [ms]")
     number_of_items = Int(12, desc='default number of items per list')
 
 
@@ -160,6 +166,3 @@ class PALParameters(FRParameters):
 class PS5Parameters(FRParameters):
     """ PS5 experiment parameters """
     normalize_powers = Bool(False)
-
-
-

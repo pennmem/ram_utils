@@ -325,7 +325,9 @@ var ramutils = (function (mod, Plotly) {
                                 anchor:xaxis,
                                 tickmode:'linear',
                                 tick0:Math.log10(these_freqs[0]),
-                                dtick:Math.log10(these_freqs[these_freqs.length-1]/these_freqs[0])/(these_freqs.length-1),
+                                dtick:Math.log10(
+                                    these_freqs[these_freqs.length-1]/these_freqs[0]
+                                    )/(these_freqs.length-1),
                                 tickformat: '.0f'
                                 };
         }

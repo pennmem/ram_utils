@@ -43,7 +43,7 @@ def test_build_report_from_cached_results():
         'R1345D', 'FR1', [1], False, datafile('input/report_db'),
         datafile('')).compute()
 
-    results = [v for k,v in prior_results.items()]
+    results = [v for k, v in prior_results.items()]
 
     assert all([r is None for r in results])
     return

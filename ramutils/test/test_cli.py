@@ -104,14 +104,22 @@ class TestExpConf:
     @pytest.mark.parametrize(
         'experiment,subject,postfix,anodes,cathodes,use_classifier_excluded_leads, sessions',
         [
-            ('AmplitudeDetermination', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8'], False, None),
-            ('CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8'], False, None),
-            ('CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8'], False, None),
-            ('CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8'], True, [0, 1, 100]), # limited sessions config
-            ('FR6', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8'], False, None),
-            ('PS4_FR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8'], False, None),
-            ('PAL5', 'R1318N', 'R1318N11JUL17M0L0STIM', ['LAIIH2'], ['LAIIH3'], False, None),
-            ('PS5_FR', 'R1378T', '18DEC2017L0M0STIM', ['LC8'], ['LC9'], False, None)
+            ('AmplitudeDetermination', 'R1364C', '06NOV2017L0M0STIM',
+             ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8'], False, None),
+            ('CatFR5', 'R1364C', '06NOV2017L0M0STIM',
+             ['AMY7'], ['AMY8'], False, None),
+            ('CatFR5', 'R1364C', '06NOV2017L0M0STIM',
+             ['AMY7'], ['AMY8'], False, None),
+            ('CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], [
+             'AMY8'], True, [0, 1, 100]),  # limited sessions config
+            ('FR6', 'R1364C', '06NOV2017L0M0STIM', [
+             'AMY7', 'TOJ7'], ['AMY8', 'TOJ8'], False, None),
+            ('PS4_FR5', 'R1364C', '06NOV2017L0M0STIM', [
+             'AMY7', 'TOJ7'], ['AMY8', 'TOJ8'], False, None),
+            ('PAL5', 'R1318N', 'R1318N11JUL17M0L0STIM',
+             ['LAIIH2'], ['LAIIH3'], False, None),
+            ('PS5_FR', 'R1378T', '18DEC2017L0M0STIM',
+             ['LC8'], ['LC9'], False, None)
         ]
     )
     def test_create_expconf(self, experiment, subject, postfix, anodes,
@@ -158,13 +166,16 @@ class TestCreateReports:
         ('R1354E', 'FR1', [0], False, False),
         ('R1354E', 'FR1', [0, 1], False, False),
         ('R1354E', 'CatFR1', [1], False, False),
-        ('R1354E', 'FR1', [0, 100], True, False), # test case for cross-experiment session subset
+        # test case for cross-experiment session subset
+        ('R1354E', 'FR1', [0, 100], True, False),
         ('R1354E', 'FR1', None, True, False),
         ('R1345D', 'FR1', None, False, False),
         ('R1374T', 'CatFR1', None, False, False),
         ('R1374T', 'CatFR1', None, True, False),
-        ('R1394E_1', 'FR1', None, True, False), # Test case for re-localized subject
-        ('R1364C', 'FR1', [0], False, True)  # use excluded classifier leads test
+        # Test case for re-localized subject
+        ('R1394E_1', 'FR1', None, True, False),
+        # use excluded classifier leads test
+        ('R1364C', 'FR1', [0], False, True)
     ])
     def test_create_open_loop_report(self, subject, experiment, sessions,
                                      joint, use_classifier_excluded_leads, rerun, rhino_root,

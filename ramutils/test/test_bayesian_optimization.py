@@ -10,8 +10,10 @@ datafile = functools.partial(resource_filename,
 
 
 def test_choose_location():
-    dataset_loc_0 = np.load(datafile('/bayesian_optimization/dataset_loc_0.npy'))
-    dataset_loc_1 = np.load(datafile('/bayesian_optimization/dataset_loc_1.npy'))
+    dataset_loc_0 = np.load(
+        datafile('/bayesian_optimization/dataset_loc_0.npy'))
+    dataset_loc_1 = np.load(
+        datafile('/bayesian_optimization/dataset_loc_1.npy'))
     loc_name_0 = "LA7_LA8"
     loc_name_1 = "LC6_LC7"
     bounds = np.load(datafile('/bayesian_optimization/bounds.npy'))

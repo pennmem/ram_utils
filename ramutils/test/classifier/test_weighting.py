@@ -21,7 +21,8 @@ datafile = functools.partial(resource_filename,
 ])
 def test_determine_weighting_scheme_from_events(event_file, exp_scheme,
                                                 rhino_root):
-    events = load_event_test_data(datafile('/events/' + event_file), rhino_root)
+    events = load_event_test_data(
+        datafile('/events/' + event_file), rhino_root)
     scheme = determine_weighting_scheme_from_events(events)
     assert scheme == exp_scheme
     return
@@ -35,7 +36,7 @@ def test_determine_weighting_scheme_from_events(event_file, exp_scheme,
 ])
 def test_get_equal_weights(event_file, rhino_root):
     events = load_event_test_data(datafile('/events/' + event_file),
-    rhino_root)
+                                  rhino_root)
     weights = get_equal_weights(events)
     assert len(weights) == len(events)
     assert np.allclose(weights, 1)
@@ -46,7 +47,8 @@ def test_get_equal_weights(event_file, rhino_root):
     'R1350D_task_events.npy',
 ])
 def test_force_specific_weighting(event_file, rhino_root):
-    events = load_event_test_data(datafile('/events/' + event_file), rhino_root)
+    events = load_event_test_data(
+        datafile('/events/' + event_file), rhino_root)
     weights = get_sample_weights(events, scheme='EQUAL')
     assert len(weights) == len(events)
     assert np.allclose(weights, 1)
@@ -64,7 +66,8 @@ def test_force_specific_weighting(event_file, rhino_root):
 ])
 def test_get_fr_sample_weights(event_file, rhino_root):
     # TODO: This check should be more robust
-    events = load_event_test_data(datafile('/events/' + event_file), rhino_root)
+    events = load_event_test_data(
+        datafile('/events/' + event_file), rhino_root)
     weights = get_fr_sample_weights(events, 2.5)
     assert np.allclose(weights, 1) == False
     return
@@ -108,7 +111,8 @@ def test_get_sample_weights_blackbox(event_file, parameters, rhino_root):
 def test_sample_weighting_regression(event_file, exp_weights, parameters,
                                      rhino_root):
     parameters = parameters().to_dict()
-    events = load_event_test_data(datafile('/events/' + event_file), rhino_root)
+    events = load_event_test_data(
+        datafile('/events/' + event_file), rhino_root)
     current_weights = get_sample_weights(events, **parameters)
     old_weights = np.load(datafile('/weights/' + exp_weights))
 

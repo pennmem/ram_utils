@@ -68,6 +68,7 @@ class ReportGenerator(object):
     * FR1, catFR1, FR2, catFR2, FR3, catFR3, FR5, catFR5, PS4, PS5, FR6, catFR6
 
     """
+
     def __init__(self, subject, experiment, session_summaries, math_summaries,
                  target_selection_table, classifier_summaries, hmm_results=None, dest='.'):
         self.subject = subject
@@ -80,7 +81,8 @@ class ReportGenerator(object):
 
         catfr_summary_mask = [summary.experiment == 'catFR1' for summary in
                               self.session_summaries]
-        self.catfr_summaries = list(compress(self.session_summaries, catfr_summary_mask))
+        self.catfr_summaries = list(
+            compress(self.session_summaries, catfr_summary_mask))
         self.hmm_results = hmm_results
 
         self._env = Environment(
@@ -88,7 +90,8 @@ class ReportGenerator(object):
         )
 
         # Filter to indicate that p-values are small
-        self._env.filters['pvalue'] = lambda p: '{:.3f}'.format(p) if p > 0.001 else '&le; 0.001'
+        self._env.filters['pvalue'] = lambda p: '{:.3f}'.format(
+            p) if p > 0.001 else '&le; 0.001'
 
         # Give access to some static methods
         self._env.globals['MathSummary'] = MathSummary
@@ -104,10 +107,12 @@ class ReportGenerator(object):
         self._env.globals['css'] = {}
         for filename in resource_listdir('ramutils.reports', 'static'):
             if filename.endswith('.js'):
-                script = resource_string('ramutils.reports.static', filename).decode()
+                script = resource_string(
+                    'ramutils.reports.static', filename).decode()
                 self._env.globals['js'][filename.split('.')[0]] = script
             elif filename.endswith('.css'):
-                css = resource_string('ramutils.reports.static', filename).decode()
+                css = resource_string(
+                    'ramutils.reports.static', filename).decode()
                 self._env.globals['css'][filename.split('.')[0]] = css
 
         self.dest = osp.realpath(osp.expanduser(dest))
@@ -127,8 +132,8 @@ class ReportGenerator(object):
     def _make_target_selection_table(self):
         """ Create data for the SME table for record-only experiments. """
         target_selection_table = (self.target_selection_table.sort_values(by='hfa_p_value',
-                                                ascending=True)
-                         .to_dict(orient='records'))
+                                                                          ascending=True)
+                                  .to_dict(orient='records'))
         return target_selection_table
 
     def _make_classifier_data(self):
@@ -142,7 +147,8 @@ class ReportGenerator(object):
     def _make_feature_plots(self):
 
         feature_data = {
-            'feature_data': [summary.normalized_powers.tolist() for summary in self.session_summaries
+            'feature_data': [summary.normalized_powers.tolist()
+                             for summary in self.session_summaries
                              if summary.normalized_powers is not None],
             'feature_plots': [summary.normalized_powers_plot
                               for summary in self.session_summaries
@@ -167,10 +173,12 @@ class ReportGenerator(object):
             plot_data['serialpos'] = {
                 'serialpos': list(range(1, 13)),
                 'overall': {
-                    'Overall': FRSessionSummary.serialpos_probabilities(self.session_summaries, first=False),
+                    'Overall': FRSessionSummary.serialpos_probabilities(
+                        self.session_summaries, first=False),
                 },
                 'first': {
-                    'First recall': FRSessionSummary.serialpos_probabilities(self.session_summaries, first=True),
+                    'First recall': FRSessionSummary.serialpos_probabilities(
+                        self.session_summaries, first=True),
                 }
             }
             # Only non-stim reports have the option of this IRT plot
@@ -188,43 +196,44 @@ class ReportGenerator(object):
                 }
         else:
             plot_data['serialpos'] = {
-                    'serialpos': list(range(1, 13)),
-                    'overall': {
-                        'Overall (non-stim)': FRStimSessionSummary.prob_recall_by_serialpos(self.session_summaries,
-                                                                                            stim_items_only=False),
-                        'Overall (stim)': FRStimSessionSummary.prob_recall_by_serialpos(self.session_summaries,
-                                                                                        stim_items_only=True)
-                    },
-                    'first': {
-                        'First recall (non-stim)': FRStimSessionSummary.prob_first_recall_by_serialpos(self.session_summaries,
-                                                                                                       stim=False),
-                        'First recall (stim)': FRStimSessionSummary.prob_first_recall_by_serialpos(self.session_summaries,
-                                                                                                   stim=True)
-                    }
+                'serialpos': list(range(1, 13)),
+                'overall': {
+                    'Overall (non-stim)': FRStimSessionSummary.prob_recall_by_serialpos(self.session_summaries,
+                                                                                        stim_items_only=False),
+                    'Overall (stim)': FRStimSessionSummary.prob_recall_by_serialpos(self.session_summaries,
+                                                                                    stim_items_only=True)
+                },
+                'first': {
+                    'First recall (non-stim)': FRStimSessionSummary.prob_first_recall_by_serialpos(self.session_summaries,
+                                                                                                   stim=False),
+                    'First recall (stim)': FRStimSessionSummary.prob_first_recall_by_serialpos(self.session_summaries,
+                                                                                               stim=True)
                 }
+            }
             plot_data['recall_summary'] = {
-                    'nonstim': {
-                        'listno': FRStimSessionSummary.lists(self.session_summaries, stim=False),
-                        'recalled': FRStimSessionSummary.recalls_by_list(self.session_summaries, stim_list_only=False)
-                    },
-                    'stim': {
-                        'listno': FRStimSessionSummary.lists(self.session_summaries, stim=True),
-                        'recalled': FRStimSessionSummary.recalls_by_list(self.session_summaries, stim_list_only=True)
-                    },
-                    'stim_events': {
-                        'listno': FRStimSessionSummary.lists(self.session_summaries),
-                        'count': FRStimSessionSummary.stim_events_by_list(self.session_summaries)
-                    }
+                'nonstim': {
+                    'listno': FRStimSessionSummary.lists(self.session_summaries, stim=False),
+                    'recalled': FRStimSessionSummary.recalls_by_list(self.session_summaries, stim_list_only=False)
+                },
+                'stim': {
+                    'listno': FRStimSessionSummary.lists(self.session_summaries, stim=True),
+                    'recalled': FRStimSessionSummary.recalls_by_list(self.session_summaries, stim_list_only=True)
+                },
+                'stim_events': {
+                    'listno': FRStimSessionSummary.lists(self.session_summaries),
+                    'count': FRStimSessionSummary.stim_events_by_list(self.session_summaries)
                 }
+            }
             plot_data['stim_probability'] = {
-                    'serialpos': list(range(1, 13)),
-                    'probability': FRStimSessionSummary.prob_stim_by_serialpos(self.session_summaries)
-                }
+                'serialpos': list(range(1, 13)),
+                'probability': FRStimSessionSummary.prob_stim_by_serialpos(self.session_summaries)
+            }
             plot_data['recall_difference'] = {
-                    'stim': FRStimSessionSummary.delta_recall(self.session_summaries),
-                    'post_stim': FRStimSessionSummary.delta_recall(self.session_summaries, post_stim_items=True)
-                }
-            plot_data['post_stim_plots'] = [summary.post_stim_eeg_plot for summary in self.session_summaries]
+                'stim': FRStimSessionSummary.delta_recall(self.session_summaries),
+                'post_stim': FRStimSessionSummary.delta_recall(self.session_summaries, post_stim_items=True)
+            }
+            plot_data['post_stim_plots'] = [summary.post_stim_eeg_plot
+                                            for summary in self.session_summaries]
 
         if biomarker_delta:
             plot_data['classifier_output'] = {
@@ -242,7 +251,8 @@ class ReportGenerator(object):
                 'mid': [classifier.mid_tercile_diff_from_mean for classifier in self.classifier_summaries],
                 'high': [classifier.high_tercile_diff_from_mean for classifier in self.classifier_summaries]
             }
-            plot_data['tags'] = [classifier.id for classifier in self.classifier_summaries]
+            plot_data['tags'] = [
+                classifier.id for classifier in self.classifier_summaries]
 
         return json.dumps(plot_data)
 
@@ -316,7 +326,7 @@ class ReportGenerator(object):
             plot_data=self._make_plot_data(stim=False, classifier=True,
                                            joint=joint),
             sme_table=self._make_target_selection_table(),
-            feature_data = self._make_feature_plots(),
+            feature_data=self._make_feature_plots(),
             joint=joint
         )
 
@@ -332,8 +342,10 @@ class ReportGenerator(object):
             'FR2',
             stim=True,
             combined_summary=self._make_combined_summary(),
-            stim_params=FRStimSessionSummary.stim_parameters(self.session_summaries),
-            recall_tests=FRStimSessionSummary.recall_test_results(self.session_summaries, 'FR2'),
+            stim_params=FRStimSessionSummary.stim_parameters(
+                self.session_summaries),
+            recall_tests=FRStimSessionSummary.recall_test_results(
+                self.session_summaries, 'FR2'),
             hmm_results=self.hmm_results,
             plot_Data=self._make_plot_data(stim=True, classifier=False,
                                            biomarker_delta=False)
@@ -353,13 +365,15 @@ class ReportGenerator(object):
             stim=True,
             combined_summary=self._make_combined_summary(),
             classifiers=self.classifier_summaries,
-            stim_params=FRStimSessionSummary.stim_parameters(self.session_summaries),
-            recall_tests=FRStimSessionSummary.recall_test_results(self.session_summaries, experiment),
-            feature_data = self._make_feature_plots(),
+            stim_params=FRStimSessionSummary.stim_parameters(
+                self.session_summaries),
+            recall_tests=FRStimSessionSummary.recall_test_results(
+                self.session_summaries, experiment),
+            feature_data=self._make_feature_plots(),
             hmm_results=self.hmm_results,
-            plot_data = self._make_plot_data(stim=True, classifier=True,
-                                             biomarker_delta=True)
-       )
+            plot_data=self._make_plot_data(stim=True, classifier=True,
+                                           biomarker_delta=True)
+        )
 
     def generate_ps4_report(self):
         """ Generate a PS4 report.
@@ -410,8 +424,10 @@ class ReportGenerator(object):
             'PS5',
             stim=True,
             combined_summary=self._make_combined_summary(),
-            stim_params=FRStimSessionSummary.stim_parameters(self.session_summaries),
-            recall_tests=FRStimSessionSummary.recall_test_results(self.session_summaries, 'PS5'),
-            plot_data = self._make_plot_data(stim=True, classifier=False,
-                                             biomarker_delta=True)
+            stim_params=FRStimSessionSummary.stim_parameters(
+                self.session_summaries),
+            recall_tests=FRStimSessionSummary.recall_test_results(
+                self.session_summaries, 'PS5'),
+            plot_data=self._make_plot_data(stim=True, classifier=False,
+                                           biomarker_delta=True)
         )

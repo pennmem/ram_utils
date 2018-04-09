@@ -22,7 +22,8 @@ experiments = (
     EXPERIMENTS['record_only']
 )
 
-parser = make_parser("Generate experiment configs for Ramulator", agg=False, allowed_experiments=experiments)
+parser = make_parser("Generate experiment configs for Ramulator",
+                     agg=False, allowed_experiments=experiments)
 parser.add_argument('--localization', '-l', default=0, type=int,
                     help='localization number (default: 0)')
 parser.add_argument('--montage', '-m', default=0, type=int,
@@ -67,17 +68,20 @@ def validate_stim_settings(args):
     # FIXME: check that stim channels as defined actually exist
     if args.experiment not in EXPERIMENTS['record_only']:
         if not len(args.anodes) == len(args.cathodes):
-            raise ValidationError("Number of anodes doesn't match number of cathodes")
+            raise ValidationError(
+                "Number of anodes doesn't match number of cathodes")
 
         if args.experiment != "AmplitudeDetermination" and not args.experiment.startswith('PS'):
             if args.target_amplitudes is None:
                 raise RuntimeError("--target-amplitudes is required")
             valid = len(args.anodes) == len(args.target_amplitudes)
         else:
-            valid = len(args.anodes) == len(args.min_amplitudes) == len(args.max_amplitudes)
+            valid = len(args.anodes) == len(
+                args.min_amplitudes) == len(args.max_amplitudes)
 
         if not valid:
-            raise ValidationError("Number of stim contacts doesn't match number of amplitude settings")
+            raise ValidationError(
+                "Number of stim contacts doesn't match number of amplitude settings")
 
         # We're not actually using this as an option, so it's commented out
         # if args.pulse_frequencies is None:
@@ -161,7 +165,8 @@ def create_expconf(input_args=None):
         else:
             make_stim_params = functools.partial(make_stim_params,
                                                  target_amplitudes=args.target_amplitudes)
-        stim_params = make_stim_params(args.subject, args.anodes, args.cathodes, root=paths.root)
+        stim_params = make_stim_params(
+            args.subject, args.anodes, args.cathodes, root=paths.root)
     else:
         stim_params = []
 
@@ -181,7 +186,8 @@ def create_expconf(input_args=None):
                               exp_params=exp_params,
                               sessions=args.sessions,
                               vispath=args.vispath,
-                              extended_blanking=(not args.no_extended_blanking),
+                              extended_blanking=(
+                                  not args.no_extended_blanking),
                               localization=args.localization,
                               montage=args.montage,
                               default_surface_area=default_surface_area,

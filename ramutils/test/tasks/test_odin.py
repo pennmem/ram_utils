@@ -45,16 +45,19 @@ def test_generate_electrode_config(tmpdir):
     mkdir_p(str(tmpdir.join(dest)))
 
     with open(osp.join(docs_dir, 'jacksheet.txt'), 'wb') as f:
-        f.write(resource_string('ramutils.test.test_data', '{}_jacksheet.txt'.format(subject)))
+        f.write(resource_string('ramutils.test.test_data',
+                                '{}_jacksheet.txt'.format(subject)))
 
     with open(osp.join(docs_dir, 'area.txt'), 'wb') as f:
-        f.write(resource_string('ramutils.test.test_data', '{}_area.txt'.format(subject)))
+        f.write(resource_string('ramutils.test.test_data',
+                                '{}_area.txt'.format(subject)))
 
     paths = FilePaths(root=str(tmpdir), dest=dest)
     anodes = None
     cathodes = None
 
-    path = generate_electrode_config(subject, paths, anodes, cathodes).compute()
+    path = generate_electrode_config(
+        subject, paths, anodes, cathodes).compute()
     assert isinstance(path, FilePaths)
 
 
