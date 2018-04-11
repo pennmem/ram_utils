@@ -1088,7 +1088,7 @@ def extract_stim_information(all_events, task_events):
     separate entries in the json event structures.
 
     """
-    experiment = extract_experiment_from_events(task_events)
+    experiment = extract_experiment_from_events(task_events)[0]
     n_events = len(task_events)
     is_stim_item = np.zeros(n_events, dtype=np.bool)
     is_post_stim_item = np.zeros(n_events, dtype=np.bool)
@@ -1116,12 +1116,15 @@ def extract_stim_information(all_events, task_events):
             if event.type == 'WORD':
                 # For FR2, stimulation parameters are stored with the WORD
                 # events
-                if 'FR2' in experiment:
-                    if len(lst_events[i].stim_params) > 0:
+                if experiment in ['FR2', 'catFR2']:
+                    stim_params = lst_events[i].stim_params
+                    # For non-stimulated words, the recarray shows some empty
+                    # values, so check for that to determine if the word was
+                    # stimulated
+                    if stim_params.amplitude > 0:
                         stim_param_data = update_stim_params(lst_events[i],
                                                              stim_param_data)
                         lst_stim_words[j] = True
-                        continue
 
                 # For all other experiments, we have to find the corresponding
                 # STIM_ON event

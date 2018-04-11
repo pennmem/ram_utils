@@ -6,6 +6,7 @@ from pkg_resources import resource_filename
 
 from ramutils.events import *
 from sklearn.externals import joblib
+from ramutils.utils import load_event_test_data
 
 datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
 
@@ -275,8 +276,8 @@ class TestEvents:
 
         return
 
-    def test_extract_stim_and_post_stim_masks(self):
-        # TODO: Fill in with comparison to legacy outputs
+    @pytest.mark.rhino
+    def test_extract_stim_and_post_stim_masks(self, rhino_root):
         return
 
     @pytest.mark.parametrize("experiment, session_list, exp_sessions", [
