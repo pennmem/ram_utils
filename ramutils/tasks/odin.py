@@ -199,6 +199,7 @@ def _make_experiment_specs_section(experiment):
     ``experiment_specs`` dict
 
     """
+    # TODO: These should all be retrieved from the Parameter classes
     if experiment in EXPERIMENTS['record_only']:
         return {}
 
@@ -225,6 +226,17 @@ def _make_experiment_specs_section(experiment):
             "post_stim_biomarker_sample_time_length": 500,
             "post_stim_buffer_time": 499,
             "post_stim_wait_time": 100,
+        })
+
+    if 'TICL' in experiment:
+        specs.update({
+            "biomarker_sample_time_length": 525,
+            "buffer_time": 524,
+            "version": "5.0.0",
+            "post_stim_wait_time": 30,
+            "post_stim_buffer_time": 524,
+            "post_stim_biomarker_sample_time_length": 525,
+
         })
 
     return specs
@@ -259,6 +271,7 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
     Ramulator.
 
     """
+    # FIXME: Remove this hard-coding
     config = {
         'subject': subject,
         'experiment': {
