@@ -80,7 +80,7 @@
       let weights=[];
       let freqs = [];
       let regions = [];
-      let names=  []
+      let names=  [];
       {% for classifier in classifiers %}
       weights.push({{ classifier.classifier_activation_by_region.tolist() }});
       freqs.push({{ classifier.frequencies.tolist() }});
