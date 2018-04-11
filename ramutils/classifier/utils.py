@@ -112,16 +112,21 @@ def train_classifier(pow_mat, events, sample_weights, penalty_param,
 
 
 # TODO: group and average classifier weights by brain region
-def plot_classifier_weights(weights, frequencies, pairs, file_):
+def save_classifier_weights_plot(weights, frequencies, pairs, file_):
     """
     Visualize the classifier weights as a function of frequency and location.
 
-    :param weights: np.ndarray (len(pairs)*len(frequencies)
-    :param frequencies: np.ndarray[float]
-    :param pairs: ??? Iterable describing the pairs in some way
-    :param file_: The destination of the classifier weight plot,
+    Parameters
+    -----------
+    weights : np.ndarray (len(pairs)*len(frequencies)
+    frequencies : np.ndarray[float]
+    pairs : ??? Iterable describing the pairs in some way
+    file_ : The destination of the classifier weight plot,
     which should be either a path or a file-like object.
-    :return: None
+
+    Returns:
+    file_ : string or file-like
+        The file_ parameter
     """
     # pyplot is imported here rather than at the top of the module to avoid any
     # problems setting the matplotlib backend elsewhere.
@@ -142,3 +147,4 @@ def plot_classifier_weights(weights, frequencies, pairs, file_):
                 bbox_inches="tight",
                 pad_inches=0.1)
     plt.close()
+    return file_
