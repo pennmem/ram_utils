@@ -11,7 +11,7 @@ from ramutils.events import validate_single_experiment, select_math_events, \
     extract_experiment_from_events, extract_sessions, select_session_events, \
     select_stim_table_events, extract_stim_information, \
     select_encoding_events, extract_event_metadata, dataframe_to_recarray, \
-    get_encoding_mask, correct_fr2_stim_item_identification
+    get_encoding_mask
 from ramutils.exc import *
 from ramutils.log import get_logger
 from ramutils.reports.summary import *
@@ -256,9 +256,6 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
                 post_stim_prob_recall=post_stim_predicted_probs[i])
 
         elif experiment in ['FR2', 'catFR2']:
-            # The usual algorithm for identifying stim events will miss some
-            # specifically for FR2
-            stim__df = correct_fr2_stim_item_identification(stim_df)
             stim_events = dataframe_to_recarray(stim_df, expected_dtypes)
             stim_session_summary = FRStimSessionSummary()
             stim_session_summary.populate(

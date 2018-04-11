@@ -1088,6 +1088,7 @@ def extract_stim_information(all_events, task_events):
     separate entries in the json event structures.
 
     """
+    experiment = extract_experiment_from_events(task_events)
     n_events = len(task_events)
     is_stim_item = np.zeros(n_events, dtype=np.bool)
     is_post_stim_item = np.zeros(n_events, dtype=np.bool)
@@ -1113,42 +1114,24 @@ def extract_stim_information(all_events, task_events):
         j = 0
         for i, event in enumerate(lst_events):
             if event.type == 'WORD':
-                # Messy logic to find stim items
-                if ((lst_events[i + 1].type == 'STIM_ON')
-                        or (lst_events[i + 1].type == 'WORD_OFF' and
-                            (lst_events[i + 2].type == 'STIM_ON' or (
-                                    lst_events[i + 2].type == 'DISTRACT_START'
-                                    and lst_events[i + 3].type == 'STIM_ON')))):
+                # For FR2, stimulation parameters are stored with the WORD
+                # events
+                if 'FR2' in experiment:
+                    if len(lst_events[i].stim_params) > 0:
+                        stim_param_data = update_stim_params(lst_events[i],
+                                                             stim_param_data)
+                        lst_stim_words[j] = True
+                        continue
+
+                # For all other experiments, we have to find the corresponding
+                # STIM_ON event
+                elif is_stimulated_word(i, lst_events):
                     lst_stim_words[j] = True
-                    # Identify which post 'WORD' event was the 'STIM_ON'
-                    # event and use the stored stim params for that event to
-                    # update the stim table
                     for offset in range(1, 4):
                         if lst_events[i + offset].type == 'STIM_ON':
-                            # Assign stim params
                             loc = i + offset
-
-                            # Single-site stimulation will have stim_param
-                            # field as a record, while multi-site will be
-                            # ndarray. Coerce everything to ndarray for
-                            # consistency
-                            stim_params = lst_events[loc].stim_params
-                            if type(stim_params) != np.ndarray:
-                                stim_params = np.array([stim_params])
-
-                            # TODO: Add location field to stim params by
-                            # looking up the contacts in the pairs metadata
-                            # table, which would need to be passed to this
-                            # function
-
-                            stim_param_data['item_name'].append(lst_events[loc].item_name)
-                            stim_param_data['session'].append(lst_events[loc].session)
-                            stim_param_data['list'].append(lst_events[loc].list)
-                            stim_param_data['amplitude'].append(",".join([str(stim_params[k].amplitude / 1000.0) for k in range(len(stim_params))]))
-                            stim_param_data['pulse_freq'].append(",".join([str(stim_params[k].pulse_freq) for k in range(len(stim_params))]))
-                            stim_param_data['stim_duration'].append(",".join([str(stim_params[k].stim_duration) for k in range(len(stim_params))]))
-                            stim_param_data['stimAnodeTag'].append(",".join([str(stim_params[k].anode_label) for k in range(len(stim_params))]))
-                            stim_param_data['stimCathodeTag'].append(",".join([str(stim_params[k].cathode_label) for k in range(len(stim_params))]))
+                            stim_param_data = update_stim_params(lst_events[loc],
+                                                                 stim_param_data)
                             break
 
                 # Post stim words are always the word after a stim word,
@@ -1181,52 +1164,77 @@ def extract_stim_information(all_events, task_events):
     return is_stim_item, is_post_stim_item, stim_df
 
 
-def correct_fr2_stim_item_identification(stim_param_df):
-    """ Update the stim_item and post_stim_item masks for FR2 stim experiments
+def is_stimulated_word(index, events):
+    """ Determines if the event at index was a stim item
 
-    The FR2 experiment is a special bird in that stimulation occurs
-    across two items at a time, and therefore only a single STIM_ON
-    event is recorded. This causes the stim item identification
-    algorithm to miss those second items and therefore they must be corrected
-    separately
+    Two events are possible after a WORD event occurs if that word was
+    stimulated. The first thing that can happen, is that the next event is a
+    'STIM_ON' event. Clearly, the word was stimulated. Otherwise, the next event
+    could be the 'WORD_OFF" event. If 'WORD_OFF' occurs, then the item was
+    stimulated if the event following WORD_OFF is the STIM_ON event.
+    Otherwise, the item following the WORD_OFF event could be the start of the
+    distractor period and the STIM_ON will occur after the DISTRACT_START event.
+    This should only happen if the last item in a list was stimulated.
 
     Parameters:
     -----------
-    stim_param_df: `pd.DataFrame`
-        Table containing the fully processed encoding events
+    index: int
+        Index with events to check
+    events: np.rec.array
+        Event structure
 
-    Returns
-    -------
-    stim_param_df: `pd.DataFrame`
-        DataFrame with corrected is_stim_item and is_post_stim_item fields
+    Returns:
+    --------
+    bool: True if the word was a stim item, false if not
 
     """
-    updated_is_stim_item = [0] * len(stim_param_df)
-    updated_is_post_stim_item = [0] * len(stim_param_df)
+    is_stim_item = ((events[index + 1].type == 'STIM_ON') or
+                    (events[index + 1].type == 'WORD_OFF' and
+                     (events[index + 2].type == 'STIM_ON' or
+                      (events[index + 2].type == 'DISTRACT_START' and
+                       events[index + 3].type == 'STIM_ON'))))
 
-    for index, row in stim_param_df.iterrows():
-        if row['is_stim_item'] == 1:
-            updated_is_stim_item[index] = 1
+    return is_stim_item
 
-        if row['is_post_stim_item'] == 1:
-            updated_is_post_stim_item[index] = 1
 
-        if ((row['experiment'] == 'FR2') or (
-                row['experiment'] == 'catFR2')) and (row['is_stim_item'] == 1):
-            # Only items from the same list should be counted as stim items or
-            # post stim items. Ensure this by checking serial position
-            updated_is_stim_item[index] = 1
+def update_stim_params(event, stim_param_data):
+    """
+    Given a single event with a stim params field, extract the stimulation
+    parameters.
 
-            if row['serialpos'] < 12:
-                updated_is_stim_item[index + 1] = 1
-                updated_is_post_stim_item[index + 1] = 1
-            if row['serialpos'] < 11:
-                updated_is_post_stim_item[index + 2] = 1
+    Parameters:
+    -----------
+    event:
+    stim_param_data: dict
+        Dictionary where keys are stim param fields and values are arrays
 
-    stim_param_df['is_stim_item'] = updated_is_stim_item
-    stim_param_df['is_post_stim_item'] = updated_is_post_stim_item
+    Returns:
+    --------
+    stim_param_data: dict
+        Input dictionary with the stim params from the given event appended
+    """
+    stim_params = event.stim_params
+    # Single-site stimulation will have stim_param field as a record, while
+    # multi-site will be ndarray. Coerce everything to ndarray for consistency
+    if type(stim_params) != np.ndarray:
+        stim_params = np.array([stim_params])
 
-    return stim_param_df
+    stim_param_data['item_name'].append(event.item_name)
+    stim_param_data['session'].append(event.session)
+    stim_param_data['list'].append(event.list)
+    stim_param_data['amplitude'].append(",".join(
+        [str(stim_params[k].amplitude / 1000.0) for k in
+         range(len(stim_params))]))
+    stim_param_data['pulse_freq'].append(",".join(
+        [str(stim_params[k].pulse_freq) for k in range(len(stim_params))]))
+    stim_param_data['stim_duration'].append(",".join(
+        [str(stim_params[k].stim_duration) for k in range(len(stim_params))]))
+    stim_param_data['stimAnodeTag'].append(",".join(
+        [str(stim_params[k].anode_label) for k in range(len(stim_params))]))
+    stim_param_data['stimCathodeTag'].append(",".join(
+        [str(stim_params[k].cathode_label) for k in range(len(stim_params))]))
+
+    return stim_param_data
 
 
 def validate_single_experiment(events):
