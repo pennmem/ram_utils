@@ -139,7 +139,8 @@ def summarize_classifier(classifier, pow_mat, events, n_permutations,
                                 frequencies=kwargs.get('freqs'),
                                 pairs=kwargs.get('pairs'),
                                 tag=tag,
-                                features=pow_mat)
+                                features=pow_mat,
+                                coefficients=classifier.coef_)
 
     logger.info("Permutation test p-value = %f", classifier_summary.pvalue)
     recall_prob = classifier.predict_proba(pow_mat)[:, 1]
@@ -335,7 +336,8 @@ def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
                                     pairs=classifier_container.pairs,
                                     tag='session_' + str(session),
                                     reloaded=reloaded,
-                                    features=reduced_session_powers)
+                                    features=reduced_session_powers,
+                                    coefficients=classifier.coef_)
         classifier_summaries.append(classifier_summary)
         logger.info('AUC for session {}: {}'.format(session,
                                                     classifier_summary.auc))
@@ -361,7 +363,8 @@ def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
                                              frequencies=classifier_container.frequencies,
                                              pairs=classifier_container.pairs,
                                              tag='encoding_evaluation',
-                                             features=reduced_session_encoding_powers)
+                                             features=reduced_session_encoding_powers,
+                                             coefficients=classifier.coef_)
         encoding_classifier_summaries.append(encoding_classifier_summary)
 
     # Combine session-specific predicted probabilities into 1D array
@@ -379,7 +382,7 @@ def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
                                    non_stim_recalls,
                                    all_predicted_probs,
                                    permuted_auc_values,
-                                   weights=classifier_.coef_,
+                                   coefficients=classifier_.classifier.coef_,
                                    frequencies=classifier_container.frequencies,
                                    pairs=classifier_container.pairs,
                                    tag='Combined Sessions',
