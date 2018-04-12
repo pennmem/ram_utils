@@ -45,9 +45,8 @@ EXPERIMENTS = {
 }
 
 MTL_LOC_DICT = {
-    'Hipp': ['Left CA1', 'Left CA2', 'Left CA3', 'Left DG', 'Left Sub',
-             'Right CA1', 'Right CA2', 'Right CA3', 'Right DG', 'Right Sub'],
-    'MTL': ['Left PRC', 'Right PRC', 'Right EC', 'Right PHC', 'Left EC', 'Left PHC']
+    'Hipp': ['CA1','CA2','CA3','DG','Sub'],
+    'MTL': ['PRC', 'EC', 'PHC', 'EC', 'PHC'],
 }
 
 DK_LOC_DICT = {
