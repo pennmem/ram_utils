@@ -411,13 +411,15 @@ def save_power_plot(powers, session, full_path):
     return full_path
 
 
-def load_eeg(all_events, start_time, end_time, bipolar_pairs=None):
+def load_eeg(all_events, start_time, end_time, bipolar_pairs):
+    if (bipolar_pairs is not None) and \
+            (not isinstance(bipolar_pairs, np.recarray)):
+        bipolar_pairs = generate_pairs_for_ptsa(bipolar_pairs)
+
     full_eeg = []
     for session in np.unique(all_events.session):
         eeg, _ = load_single_session_eeg(session, all_events,
                                          start_time, end_time, bipolar_pairs)
-        if bipolar_pairs is None and 'bipolar_pairs' in eeg.dims:
-            bipolar_pairs = eeg.bipolar_pairs.values
         time = eeg.time.values
         full_eeg.append(eeg)
     full_eeg = np.concatenate([e.data for e in full_eeg], axis=1)

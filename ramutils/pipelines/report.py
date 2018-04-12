@@ -336,7 +336,10 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
         post_stim_events = subset_events(all_events, post_stim_mask)
         post_stim_powers, final_post_stim_events = compute_normalized_powers(
             post_stim_events, bipolar_pairs=ec_pairs, **kwargs)
-        post_stim_eeg = load_post_stim_eeg(post_stim_events, **kwargs)
+        post_stim_eeg = load_post_stim_eeg(post_stim_events,
+                                           bipolar_pairs=ec_pairs,
+                                           **kwargs
+                                           )
     else:
         final_post_stim_events = None
         post_stim_powers = None

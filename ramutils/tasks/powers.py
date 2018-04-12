@@ -10,7 +10,6 @@ from ramutils.controllability import calculate_modal_controllability, load_conne
 from ramutils.tasks import task
 from ramutils.powers import load_eeg as load_eeg_core
 
-import io
 
 logger = get_logger()
 
@@ -81,4 +80,5 @@ def load_post_stim_eeg(events, **kwargs):
     return load_eeg_core(events,
                          start_time=kwargs['post_stim_start_time'],
                          end_time=kwargs['post_stim_end_time'],
+                         bipolar_pairs=kwargs.get('bipolar_pairs')
                          )
