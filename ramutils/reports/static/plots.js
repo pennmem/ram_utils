@@ -281,6 +281,9 @@ var ramutils = (function (mod, Plotly) {
             title: 'Classifier Activation',
             showlegend: true
         }
+        let zmin = Math.min(...[].concat(...[].concat(...[].concat(...weights))))
+        let zmax = Math.max(...[].concat(...[].concat(...[].concat(...weights))))
+
 
         for(i=0;i<weights.length;i++){
             let these_freqs = freqs[i];
@@ -297,8 +300,8 @@ var ramutils = (function (mod, Plotly) {
                 type: 'heatmap',
                 xaxis: xaxis,
                 yaxis: yaxis,
-                zmin: -0.1,
-                zmax: 0.1,
+                zmin: zmin,
+                zmax: zmax,
                 showscale: ((i+1)==weights.length),
                 colorbar:{
                     title: 'Weight'
