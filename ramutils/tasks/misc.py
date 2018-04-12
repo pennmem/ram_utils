@@ -105,6 +105,8 @@ def save_all_output(subject, experiment, session_summaries, math_summaries,
     base_output_format = os.path.join(save_location,
                                       "{subject}_{experiment}_{session}_{"
                                       "data_type}.{file_type}")
+    subject_specific_output = os.path.join(save_location,
+                                      "{subject}_{data_type}.{file_type}")
 
     session_str = '_'.join([str(summary.session_number) for summary in
                             session_summaries])
@@ -144,9 +146,11 @@ def save_all_output(subject, experiment, session_summaries, math_summaries,
             file_type='h5'))
 
     if retrained_classifier is not None:
-        retrained_classifier.save(base_output_format.format(
-            subject=subject, experiment=experiment, session='all',
-            data_type="retrained_classifier", file_type="zip"), overwrite=True)
+        # The retrained classifier is the same regardless of session/experiment
+        # so just save one per subject
+        retrained_classifier.save(subject_specific_output.format(
+            subject=subject, data_type="retrained_classifier",
+            file_type="zip"), overwrite=True)
 
     # Save plots from hmm models and return file paths in a dict
     if behavioral_results is not None:
