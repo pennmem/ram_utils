@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 cd /home1/zduey/ram_utils/
 conda env remove -n ramutils_test -y
-set -e
+conda env remove -n ramutils_test_27 -y
+
 echo "Creating python 3 environment"
+set -e
 conda create -y -n ramutils_test python=3
 source activate ramutils_test
 conda install -y -c pennmem -c conda-forge --file=/home1/zduey/ram_utils/requirements.txt
@@ -22,9 +24,6 @@ zip coverage.zip htmlcov/
 echo "Full test suite finished running" | mail -a coverage.zip -a report_36.html -s "Python 3.6 Test Results" zachduey@gmail.com
 
 echo "Creating python 2.7 environment"
-set +e
-conda env remove -n ramutils_test_27 -y
-set -e
 conda create -y -n ramutils_test_27 python=2.7
 source activate ramutils_test_27
 conda install -y -c pennmem -c conda-forge --file=/home1/zduey/ram_utils/requirements.txt
