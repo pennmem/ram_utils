@@ -252,13 +252,19 @@ class TestClassifierSummary:
         cls.recalls = np.random.random_integers(0, 1, 100)
         cls.predicted_probabilities = np.random.normal(.5, .03, size=100)
         cls.permuation_aucs = np.random.normal(.5, .01, size=200)
+        cls.freqs = np.arange(10)
+        cls.pairs = np.array(['A1','A2','A3'])
+        cls.coef =  np.random.rand(1,len(cls.freqs)*len(cls.pairs))
+        cls.features = np.random.rand(10,cls.coef.shape[-1])
         cls.summary = ClassifierSummary()
 
     def test_populate(self):
         summary = ClassifierSummary()
         summary.populate(self.subject, self.experiment, self.sessions,
                          self.recalls, self.predicted_probabilities,
-                         self.permuation_aucs, tag='Encoding')
+                         self.permuation_aucs,
+                         self.freqs,self.pairs,self.features,self.coef,
+                         tag='Encoding')
         assert np.array_equal(self.recalls, summary.true_outcomes)
         assert np.array_equal(self.predicted_probabilities,
                               summary.predicted_probabilities)
@@ -273,7 +279,8 @@ class TestClassifierSummary:
         summary = ClassifierSummary()
         summary.populate(self.subject, self.experiment, self.sessions,
                          self.recalls, self.predicted_probabilities,
-                         self.permuation_aucs)
+                         self.permuation_aucs,
+                         self.freqs, self.pairs, self.features, self.coef)
         return
 
     def test_pvalue(self):
@@ -431,5 +438,5 @@ class TestPSSessionSummary:
         assert np.isclose(location_summaries['1Ld9_1Ld10'][
             'best_delta_classifier'],0.02552, 1e-3)
         assert np.isclose(location_summaries['25Ld7_25Ld8'][
-            'best_delta_classifier'], 0.04955, 1e-3)
+            'best_delta_classifier'], 0.025504, 1e-3)
 
