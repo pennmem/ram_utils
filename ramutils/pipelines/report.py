@@ -310,6 +310,7 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
                                                    powers,
                                                    joint=joint_report,
                                                    repetition_ratio_dict=repetition_ratio_dict)
+
     math_summaries = summarize_math(all_events, joint=joint_report)
     classifier_evaluation_results = [encoding_classifier_summary,
                                      joint_classifier_summary]
@@ -348,6 +349,13 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
     powers, final_task_events = compute_normalized_powers(
         task_events, bipolar_pairs=ec_pairs, **kwargs).compute()
 
+    pairinfo = dataframe_to_recarray(pairs_metadata_table[['label',
+                                                           'location',
+                                                           'region']],
+                                     [('label', 'S256'),
+                                      ('location', 'S256'),
+                                      ('region', 'S256')])
+
     used_classifiers = reload_used_classifiers(subject,
                                                experiment,
                                                final_task_events,
@@ -379,7 +387,8 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
         training_classifier_summaries = summarize_classifier(
             retrained_classifier, training_reduced_powers,
             final_training_events, kwargs['n_perm'],
-            tag='Original Classifier', **kwargs)
+            tag='Original Classifier', pairs=pairinfo,
+            **kwargs)
 
         retrained_classifier = serialize_classifier(retrained_classifier,
                                                     final_pairs,

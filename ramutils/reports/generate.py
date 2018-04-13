@@ -15,8 +15,6 @@ from ramutils import __version__
 from ramutils.reports.summary import FRSessionSummary, MathSummary, FRStimSessionSummary
 from ramutils.events import extract_experiment_from_events, extract_subject
 from ramutils.utils import extract_experiment_series
-from ramutils.tasks.misc import encode_file
-from ramutils.log import get_logger
 
 
 class ReportGenerator(object):

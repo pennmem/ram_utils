@@ -12,14 +12,13 @@ import base64
 
 import io
 
-from ramutils.utils import safe_divide, extract_subject_montage
+from ramutils.utils import safe_divide
 from ramutils.events import extract_subject, extract_experiment_from_events, \
     extract_sessions
 from ramutils.bayesian_optimization import choose_location
 from ramutils.exc import TooManySessionsError
 from ramutils.parameters import ExperimentParameters
 from ramutils.powers import save_power_plot, save_eeg_by_channel_plot
-from ramutils.classifier.utils import plot_classifier_weights
 from ramutils.utils import encode_file
 from ramutils.montage import generate_pairs_for_classifier
 
@@ -57,6 +56,7 @@ class ClassifierSummary(Schema):
         desc='Frequencies the classifier was trained on')
     _pairs = ArrayOrNone(desc='Bipolar pairs used to train the classifier')
     _features = ArrayOrNone(desc='Feature matrix used to train the classifier')
+    _coef = ArrayOrNone(desc = 'Classifier coefficients')
 
     subject = Unicode(desc='subject')
     experiment = Unicode(desc='experiment')
@@ -192,11 +192,10 @@ class ClassifierSummary(Schema):
     def classifier_activation(self):
         """
         Forward model of classifier activation from Haufe et. al. 2014
-
         """
         if self._features is None:
             return np.array([])
-        return np.cov(self.features.T, self.predicted_probabilities)[-1, :-1]
+        return np.dot(np.cov(self._features,rowvar=False),self._coef.squeeze())
 
     @property
     def classifier_activation_2d(self):
@@ -206,11 +205,7 @@ class ClassifierSummary(Schema):
 
     @property
     def classifier_activation_by_region(self):
-        """
-
-        """
         if len(self.classifier_activation):
-            import pandas as pd
             activation_df = pd.DataFrame(data=self.classifier_activation_2d,
                                          index=self.pairs['region'])
             mean_activation = activation_df.groupby(activation_df.index).mean()
@@ -226,8 +221,10 @@ class ClassifierSummary(Schema):
         else:
             return np.array([])
 
-    def populate(self, subject, experiment, session, true_outcomes, predicted_probabilities, permuted_auc_values,
-                 frequencies=None, pairs=None, features=None, tag='', reloaded=False):
+    def populate(self, subject, experiment, session, true_outcomes,
+                 predicted_probabilities, permuted_auc_values,
+                 frequencies, pairs, features, coefficients,
+                 tag='', reloaded=False):
         """ Populate classifier performance metrics
 
         Parameters
@@ -251,6 +248,8 @@ class ClassifierSummary(Schema):
         features: np.ndarray
             Feature matrix used to train the classifier,
             of shape [len(predicted_probabilities) , (len(pairs) * len(frequencies)].
+        coefficients : np.array
+            Array of classifier weights
         tag: str
             Name given to the classifier, used to differentiate between
             multiple classifiers
@@ -271,6 +270,7 @@ class ClassifierSummary(Schema):
         self._frequencies = frequencies
         self._pairs = pairs
         self._features = features
+        self._coef = coefficients
 
         thresh_low = np.percentile(predicted_probabilities, 100.0 / 3.0)
         thresh_high = np.percentile(predicted_probabilities, 2.0 * 100.0 / 3.0)
