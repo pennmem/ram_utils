@@ -377,12 +377,12 @@ def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
 
     subject, experiment, sessions = extract_event_metadata(events)
     cross_session_summary = ClassifierSummary()
-    classifier_ = retrained_classifier if retrained_classifier else classifier
+    classifier_ = retrained_classifier.classifier if retrained_classifier else classifier
     cross_session_summary.populate(subject, experiment, sessions,
                                    non_stim_recalls,
                                    all_predicted_probs,
                                    permuted_auc_values,
-                                   coefficients=classifier_.classifier.coef_,
+                                   coefficients=classifier_.coef_,
                                    frequencies=classifier_container.frequencies,
                                    pairs=kwargs['pairs'],
                                    tag='Combined Sessions',

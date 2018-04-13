@@ -56,11 +56,14 @@ def create_report(input_args=None):
 
     # Extract sessions
     stim_experiment = is_stim_experiment(args.experiment)
-    if args.sessions is not None:
-        if stim_experiment and len(args.sessions) != 1:
+    if (args.sessions is None or len(args.sessions) != 1):
+        if stim_experiment:
             raise TooManySessionsError("Stim reports must be built one "
                                        "session at a time")
-        sessions = [int(session) for session in args.sessions]
+        elif args.sessions is not None:
+            sessions = [int(session) for session in args.sessions]
+        else:
+            sessions = None
     else:
         sessions = None
 

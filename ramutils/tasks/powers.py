@@ -36,7 +36,7 @@ def subset_powers(powers, mask):
     return condensed_powers
 
 
-@task(nout=2)
+@task(nout=2,cache=False)
 def compute_normalized_powers(events, **kwargs):
     normalized_powers, updated_events = compute_normalized_powers_core(events,
                                                                        **kwargs)

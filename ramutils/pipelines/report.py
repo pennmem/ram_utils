@@ -259,7 +259,7 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
                                                            'region']],
                                      [('label', 'U256'),
                                       ('location', 'U256'),
-                                      ('region', 'U256')])
+                                      ('region', 'U256')])[used_pair_mask]
 
     joint_classifier_summary = summarize_classifier(classifier,
                                                     reduced_powers,
@@ -355,7 +355,7 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
                                                            'region']],
                                      [('label', 'S256'),
                                       ('location', 'S256'),
-                                      ('region', 'S256')])
+                                      ('region', 'S256')])[used_pair_mask.compute()]
 
     used_classifiers = reload_used_classifiers(subject,
                                                experiment,
