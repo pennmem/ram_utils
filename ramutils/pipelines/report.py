@@ -8,7 +8,7 @@ from ramutils.tasks import *
 from ramutils.utils import extract_experiment_series, encode_file
 from ramutils.events import dataframe_to_recarray
 from .hooks import PipelineCallback
-
+from ramutils.log import get_logger
 
 ReportData = namedtuple('ReportData', 'session_summaries, math_summaries, '
                                       'target_selection_table, classifier_evaluation_results,'
@@ -99,6 +99,7 @@ def make_report(subject, experiment, paths, joint_report=False,
     series_num = extract_experiment_series(experiment)
 
     if not rerun:
+        print('Loading results from %s'%paths.data_db)
         pre_built_results = load_existing_results(subject, experiment, sessions, stim_report,
                                                   paths.data_db, rootdir=paths.root).compute()
 
@@ -256,9 +257,9 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
     pairinfo = dataframe_to_recarray(pairs_metadata_table[['label',
                                                            'location',
                                                            'region']],
-                                     [('label', 'S256'),
-                                      ('location', 'S256'),
-                                      ('region', 'S256')])
+                                     [('label', 'U256'),
+                                      ('location', 'U256'),
+                                      ('region', 'U256')])
 
     joint_classifier_summary = summarize_classifier(classifier,
                                                     reduced_powers,
@@ -347,7 +348,7 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
         post_stim_eeg = None
 
     powers, final_task_events = compute_normalized_powers(
-        task_events, bipolar_pairs=ec_pairs, **kwargs).compute()
+        task_events, bipolar_pairs=ec_pairs, **kwargs)
 
     pairinfo = dataframe_to_recarray(pairs_metadata_table[['label',
                                                            'location',
@@ -366,7 +367,7 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
     retrained_classifier = None
     if retrain or any([classifier is None for classifier in used_classifiers]):
         training_events = build_training_data(subject, experiment, paths,
-                                              **kwargs).compute()
+                                              **kwargs)
 
         training_powers, final_training_events = compute_normalized_powers(
             training_events, bipolar_pairs=ec_pairs, **kwargs)
@@ -407,6 +408,7 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
                                                       use_retrained=retrain,
                                                       post_stim_events=final_post_stim_events,
                                                       post_stim_powers=post_stim_powers,
+                                                      pairs=pairinfo,
                                                       **kwargs)
 
     session_summaries = summarize_stim_sessions(all_events, final_task_events,

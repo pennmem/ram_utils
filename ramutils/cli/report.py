@@ -17,6 +17,7 @@ from ramutils.parameters import FilePaths, FRParameters, PS5Parameters
 from ramutils.pipelines.report import make_report
 from ramutils.utils import timer, is_stim_experiment
 from ramutils.tasks import memory
+import logging
 
 
 parser = make_parser("Generate a report")
@@ -41,6 +42,7 @@ def create_report(input_args=None):
     if args.debug:
         import dask
         dask.set_options(get=dask.get)
+        logger.setLevel(logging.DEBUG)
 
     paths = FilePaths(
         root=osp.expanduser(args.root),
