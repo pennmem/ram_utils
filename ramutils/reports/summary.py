@@ -818,8 +818,9 @@ class CatFRSessionSummary(FRSessionSummary):
 
 class StimSessionSummary(SessionSummary):
     """SessionSummary data specific to sessions with stimulation."""
-    _post_stim_prob_recall = ArrayOrNone(dtype=np.float,
-                                         desc='classifier output in post stim period')
+    _post_stim_prob_recall = CArray(dtype=np.float,
+                                         desc='classifier output in post stim period',
+                                    default_value=np.array([]))
     _model_metadata = Bytes(desc="traces for Bayesian multilevel models")
     _post_stim_eeg = ArrayOrNone(desc='raw post-stim EEG')
 
@@ -856,9 +857,12 @@ class StimSessionSummary(SessionSummary):
                                 excluded_pairs,
                                 normalized_powers,
                                 raw_events=raw_events)
-        self.post_stim_prob_recall = post_stim_prob_recall
-        self.model_metadata = model_metadata
-        self._post_stim_eeg = post_stim_eeg
+        if post_stim_prob_recall is not None:
+            self.post_stim_prob_recall = post_stim_prob_recall
+        if len(model_metadata)>0:
+            self.model_metadata = model_metadata
+        if post_stim_eeg is not None:
+            self._post_stim_eeg = post_stim_eeg
 
     @property
     def post_stim_eeg_plot(self):

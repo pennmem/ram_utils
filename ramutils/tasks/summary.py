@@ -266,7 +266,7 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
         elif experiment in ['FR2', 'catFR2']:
             # The usual algorithm for identifying stim events will miss some
             # specifically for FR2
-            stim__df = correct_fr2_stim_item_identification(stim_df)
+            stim_df = correct_fr2_stim_item_identification(stim_df)
             stim_events = dataframe_to_recarray(stim_df, expected_dtypes)
             stim_session_summary = FRStimSessionSummary()
             stim_session_summary.populate(
@@ -292,8 +292,7 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
         # stim items
         num_stim_items = FRStimSessionSummary.pre_stim_prob_recall(
             [stim_session_summary])
-        num_post_stim_prob_recall = FRStimSessionSummary.all_post_stim_prob_recall([
-                                                                                   stim_session_summary])
+        num_post_stim_prob_recall = FRStimSessionSummary.all_post_stim_prob_recall(stim_session_summaries)
         if len(num_stim_items) != len(num_post_stim_prob_recall):
             logger.warning("Number of identified stim items ({}) does not "
                            "match the  number of STIM_OFF events ({}). Confirm "
