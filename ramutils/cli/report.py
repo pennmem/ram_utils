@@ -65,7 +65,7 @@ def create_report(input_args=None):
         else:
             sessions = None
     else:
-        sessions = None
+        sessions = [int(session) for session in args.sessions]
 
     if 'PS5' in args.experiment:
         exp_params = PS5Parameters()
