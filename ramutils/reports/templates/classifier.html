@@ -84,7 +84,7 @@
       {% for classifier in classifiers %}
       weights.push({{ classifier.classifier_activation_by_region.tolist() }});
       freqs.push({{ classifier.frequencies.tolist() }});
-      regions.push( {{ classifier.regions.tolist() }} );
+      regions.push( {{ classifier.regions}} );
       names.push('{{ classifier.tag }}' );
       {% endfor %}
       ramutils.plots.plotClassifierWeights(weights,freqs,regions,names);

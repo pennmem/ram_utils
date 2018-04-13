@@ -217,9 +217,9 @@ class ClassifierSummary(Schema):
     def regions(self):
         """ List of unique electrode regions """
         if len(self.pairs):
-            return np.unique(self.pairs['region'].tolist())
+            return [str(x) for x in np.unique(self.pairs['region'])]
         else:
-            return np.array([])
+            return []
 
     def populate(self, subject, experiment, session, true_outcomes,
                  predicted_probabilities, permuted_auc_values,
