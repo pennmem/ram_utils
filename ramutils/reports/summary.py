@@ -820,7 +820,7 @@ class StimSessionSummary(SessionSummary):
     """SessionSummary data specific to sessions with stimulation."""
     _post_stim_prob_recall = CArray(dtype=np.float,
                                          desc='classifier output in post stim period',
-                                    default_value=np.array([]))
+                                    default=np.array([]))
     _model_metadata = Bytes(desc="traces for Bayesian multilevel models")
     _post_stim_eeg = ArrayOrNone(desc='raw post-stim EEG')
 
