@@ -345,7 +345,7 @@ class ReportGenerator(object):
             recall_tests=FRStimSessionSummary.recall_test_results(
                 self.session_summaries, 'FR2'),
             hmm_results=self.hmm_results,
-            plot_Data=self._make_plot_data(stim=True, classifier=False,
+            plot_data=self._make_plot_data(stim=True, classifier=False,
                                            biomarker_delta=False)
 
         )
