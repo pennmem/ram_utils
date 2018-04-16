@@ -287,7 +287,7 @@
         <span class="c1"># at least for now</span>
         <span class="n">hmm_results</span> <span class="o">=</span> <span class="n">estimate_effects_of_stim</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="s1">&#39;FR3&#39;</span><span class="p">,</span> <span class="n">all_session_summaries</span><span class="p">)</span>
         <span class="n">output</span> <span class="o">=</span> <span class="n">save_all_output</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="n">paths</span><span class="o">.</span><span class="n">data_db</span><span class="p">,</span>
-                                 <span class="n">behavioral_results</span><span class="o">=</span><span class="n">hmm_results</span><span class="p">)</span>
+                                 <span class="n">behavioral_results</span><span class="o">=</span><span class="n">hmm_results</span><span class="p">,</span> <span class="n">agg_report</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">output</span> <span class="o">=</span> <span class="kc">None</span>
 

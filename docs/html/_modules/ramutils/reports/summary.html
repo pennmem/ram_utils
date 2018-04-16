@@ -170,6 +170,8 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">pytz</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">base64</span>
 
 <span class="kn">from</span> <span class="nn">ramutils.utils</span> <span class="k">import</span> <span class="n">safe_divide</span><span class="p">,</span> <span class="n">extract_subject_montage</span>
 <span class="kn">from</span> <span class="nn">ramutils.events</span> <span class="k">import</span> <span class="n">extract_subject</span><span class="p">,</span> <span class="n">extract_experiment_from_events</span><span class="p">,</span> \
@@ -179,7 +181,7 @@
 <span class="kn">from</span> <span class="nn">ramutils.parameters</span> <span class="k">import</span> <span class="n">ExperimentParameters</span>
 
 <span class="kn">from</span> <span class="nn">traitschema</span> <span class="k">import</span> <span class="n">Schema</span>
-<span class="kn">from</span> <span class="nn">traits.api</span> <span class="k">import</span> <span class="n">Array</span><span class="p">,</span> <span class="n">ArrayOrNone</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Unicode</span><span class="p">,</span> <span class="n">Bool</span>
+<span class="kn">from</span> <span class="nn">traits.api</span> <span class="k">import</span> <span class="n">Array</span><span class="p">,</span> <span class="n">ArrayOrNone</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Unicode</span><span class="p">,</span> <span class="n">Bool</span><span class="p">,</span> <span class="n">Bytes</span>
 
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">roc_auc_score</span><span class="p">,</span> <span class="n">roc_curve</span>
 <span class="kn">from</span> <span class="nn">statsmodels.stats.proportion</span> <span class="k">import</span> <span class="n">proportions_chisquare</span>
@@ -881,6 +883,7 @@
     <span class="sd">&quot;&quot;&quot;SessionSummary data specific to sessions with stimulation.&quot;&quot;&quot;</span>
     <span class="n">_post_stim_prob_recall</span> <span class="o">=</span> <span class="n">ArrayOrNone</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">,</span>
                                          <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;classifier output in post stim period&#39;</span><span class="p">)</span>
+    <span class="n">_model_metadata</span> <span class="o">=</span> <span class="n">Bytes</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;traces for Bayesian multilevel models&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">post_stim_prob_recall</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -892,16 +895,31 @@
         <span class="k">if</span> <span class="n">new_post_stim_prob_recall</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_post_stim_prob_recall</span> <span class="o">=</span> <span class="n">new_post_stim_prob_recall</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">model_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model_metadata</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">metadata</span>
+
+    <span class="nd">@model_metadata</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">model_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_model_metadata</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Save the dictionary of model traces such that it can be stored in HDF5 &quot;&quot;&quot;</span>
+        <span class="c1"># Use pickle to convert to byte string and then base64 encode/decode to remove</span>
+        <span class="c1"># NULL characters that are not handled well by HDF5</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">new_model_metadata</span><span class="p">)</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model_metadata</span> <span class="o">=</span> <span class="n">metadata</span>
+
 <div class="viewcode-block" id="StimSessionSummary.populate"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.StimSessionSummary.populate">[docs]</a>    <span class="k">def</span> <span class="nf">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span>
                  <span class="n">normalized_powers</span><span class="p">,</span> <span class="n">post_stim_prob_recall</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">raw_events</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                 <span class="n">raw_events</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_metadata</span><span class="o">=</span><span class="p">{}):</span>
         <span class="sd">&quot;&quot;&quot; Populate stim data from events &quot;&quot;&quot;</span>
         <span class="n">SessionSummary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span>
                                 <span class="n">bipolar_pairs</span><span class="p">,</span>
                                 <span class="n">excluded_pairs</span><span class="p">,</span>
                                 <span class="n">normalized_powers</span><span class="p">,</span>
                                 <span class="n">raw_events</span><span class="o">=</span><span class="n">raw_events</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">post_stim_prob_recall</span> <span class="o">=</span> <span class="n">post_stim_prob_recall</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">post_stim_prob_recall</span> <span class="o">=</span> <span class="n">post_stim_prob_recall</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_metadata</span> <span class="o">=</span> <span class="n">model_metadata</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">subject</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -911,9 +929,10 @@
 
 <div class="viewcode-block" id="FRStimSessionSummary"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.FRStimSessionSummary">[docs]</a><span class="k">class</span> <span class="nc">FRStimSessionSummary</span><span class="p">(</span><span class="n">FRSessionSummary</span><span class="p">,</span> <span class="n">StimSessionSummary</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; SessionSummary for FR sessions with stim &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span>
                  <span class="n">excluded_pairs</span><span class="p">,</span> <span class="n">normalized_powers</span><span class="p">,</span> <span class="n">post_stim_prob_recall</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">raw_events</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                 <span class="n">raw_events</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_metadata</span><span class="o">=</span><span class="p">{}):</span>
         <span class="n">FRSessionSummary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                                   <span class="n">events</span><span class="p">,</span>
                                   <span class="n">bipolar_pairs</span><span class="p">,</span>
@@ -925,7 +944,8 @@
                                     <span class="n">excluded_pairs</span><span class="p">,</span>
                                     <span class="n">normalized_powers</span><span class="p">,</span>
                                     <span class="n">post_stim_prob_recall</span><span class="o">=</span><span class="n">post_stim_prob_recall</span><span class="p">,</span>
-                                    <span class="n">raw_events</span><span class="o">=</span><span class="n">raw_events</span><span class="p">)</span>
+                                    <span class="n">raw_events</span><span class="o">=</span><span class="n">raw_events</span><span class="p">,</span>
+                                    <span class="n">model_metadata</span><span class="o">=</span><span class="n">model_metadata</span><span class="p">)</span>
 
 <div class="viewcode-block" id="FRStimSessionSummary.combine_sessions"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.FRStimSessionSummary.combine_sessions">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">combine_sessions</span><span class="p">(</span><span class="n">summaries</span><span class="p">):</span>
@@ -1178,7 +1198,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">recall_stim</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">is_stim_item</span> <span class="o">==</span> <span class="kc">True</span><span class="p">]</span><span class="o">.</span><span class="n">recalled</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
 
-        <span class="n">delta_recall</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="n">recall_stim</span> <span class="o">-</span> <span class="n">nonstim_low_bio_recall</span><span class="p">)</span>
+        <span class="n">delta_recall</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="p">((</span><span class="n">recall_stim</span> <span class="o">-</span> <span class="n">nonstim_low_bio_recall</span><span class="p">)</span> <span class="o">/</span> <span class="n">df</span><span class="o">.</span><span class="n">recalled</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
 
         <span class="k">return</span> <span class="n">delta_recall</span></div></div>
 
@@ -1188,14 +1208,15 @@
 
     <span class="k">def</span> <span class="nf">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span>
                  <span class="n">excluded_pairs</span><span class="p">,</span> <span class="n">normalized_powers</span><span class="p">,</span> <span class="n">post_stim_prob_recall</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">raw_events</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                 <span class="n">raw_events</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_metadata</span><span class="o">=</span><span class="p">{}):</span>
         <span class="sd">&quot;&quot;&quot; Constructor for the object &quot;&quot;&quot;</span>
         <span class="n">FRStimSessionSummary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span>
                                       <span class="n">bipolar_pairs</span><span class="p">,</span>
                                       <span class="n">excluded_pairs</span><span class="p">,</span>
                                       <span class="n">normalized_powers</span><span class="p">,</span>
                                       <span class="n">raw_events</span><span class="o">=</span><span class="n">raw_events</span><span class="p">,</span>
-                                      <span class="n">post_stim_prob_recall</span><span class="o">=</span><span class="n">post_stim_prob_recall</span><span class="p">)</span>
+                                      <span class="n">post_stim_prob_recall</span><span class="o">=</span><span class="n">post_stim_prob_recall</span><span class="p">,</span>
+                                      <span class="n">model_metadata</span><span class="o">=</span><span class="n">model_metadata</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="PSSessionSummary"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.PSSessionSummary">[docs]</a><span class="k">class</span> <span class="nc">PSSessionSummary</span><span class="p">(</span><span class="n">SessionSummary</span><span class="p">):</span>
