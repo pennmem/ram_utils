@@ -355,7 +355,7 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
                                                            'region']],
                                      [('label', 'S256'),
                                       ('location', 'S256'),
-                                      ('region', 'S256')])[used_pair_mask.compute()]
+                                      ('region', 'S256')])
 
     used_classifiers = reload_used_classifiers(subject,
                                                experiment,
