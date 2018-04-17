@@ -236,6 +236,7 @@ def _make_experiment_specs_section(experiment):
             "post_stim_wait_time": 30,
             "post_stim_buffer_time": 524,
             "post_stim_biomarker_sample_time_length": 525,
+            "refractory_duration": 0,
 
         })
 
