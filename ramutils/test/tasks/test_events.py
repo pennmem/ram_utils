@@ -101,6 +101,6 @@ class TestEvents:
 
     @pytest.mark.rhino
     def test_build_ps_events(self, rhino_root):
-        actual = build_ps_data('R1374T', 'catFR5', 'ps4_events', None,
+        actual = build_ps_data('R1275D', 'PS4_catFR', 'ps4_events', None,
                                rhino_root).compute()
-        assert len(actual) == 3068
+        assert len(actual) == 8458
