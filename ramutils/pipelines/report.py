@@ -259,7 +259,7 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
                                                            'region']],
                                      [('label', 'U256'),
                                       ('location', 'U256'),
-                                      ('region', 'U256')])[used_pair_mask]
+                                      ('region', 'U256')])
 
     joint_classifier_summary = summarize_classifier(classifier,
                                                     reduced_powers,
