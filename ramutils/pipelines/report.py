@@ -259,7 +259,7 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
                                                            'region']],
                                      [('label', 'U256'),
                                       ('location', 'U256'),
-                                      ('region', 'U256')])
+                                      ('region', 'U256')])[used_pair_mask.compute()]
 
     joint_classifier_summary = summarize_classifier(classifier,
                                                     reduced_powers,
@@ -282,7 +282,7 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
     encoding_only_mask = get_word_event_mask(final_task_events, True)
     final_encoding_task_events = subset_events(final_task_events,
                                                encoding_only_mask)
-    encoding_reduced_powers = subset_powers(powers, encoding_only_mask)
+    encoding_reduced_powers = subset_powers(reduced_powers, encoding_only_mask)
 
     encoding_sample_weights = get_sample_weights(final_encoding_task_events,
                                                  **kwargs)
