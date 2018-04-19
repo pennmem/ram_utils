@@ -488,7 +488,7 @@ def get_region_name(name):
     return 'Other'
 
 
-def get_pairs(subject, experiment, sessions, paths):
+def get_pairs(subject_id, experiment, sessions, paths):
     """Determine how we should figure out what pairs to use.
 
     Option 1: In the case of hardware bipolar recordings with the ENS, EEG
@@ -500,7 +500,7 @@ def get_pairs(subject, experiment, sessions, paths):
 
     Parameters
     ----------
-    subject : str
+    subject_id : str
         Subject ID
     experiment : str
         Experiment type
@@ -528,9 +528,14 @@ def get_pairs(subject, experiment, sessions, paths):
 
     """
     # Use * for session so we don't have to assume session numbers start at 0
-    eeg_dir = osp.join(paths.root, 'protocols', 'r1', 'subjects',
-                       subject, 'experiments', experiment, 'sessions', '*',
-                       'ephys', 'current_processed', 'noreref', '*.h5')
+    subject,montage = extract_subject_montage(subject_id)
+    reader = JsonIndexReader(osp.join(paths.root,'protocols','r1.json'))
+    event_path = list(reader.aggregate_values(
+        'task_events',subject=subject,montage=montage,experiment=experiment)
+        )[0]
+    beh_root = event_path.partition('behavioral')[0]
+
+    eeg_dir = osp.join(beh_root,'ephys', 'current_processed', 'noreref', '*.h5')
     files = glob(eeg_dir)
 
     # Read HDF5 file to get pairs
@@ -553,7 +558,7 @@ def get_pairs(subject, experiment, sessions, paths):
             # found, so we have to make sure it's there
             touch(config_path.replace('.csv', '.bin'))
 
-            all_pairs = generate_pairs_from_electrode_config(subject,
+            all_pairs = generate_pairs_from_electrode_config(subject_id,
                                                              experiment,
                                                              sessions,
                                                              paths)
@@ -561,7 +566,7 @@ def get_pairs(subject, experiment, sessions, paths):
     # No HDF5 file exists, meaning this was a monopolar recording... read
     # pairs.json instead
     else:
-        all_pairs = load_pairs_from_json(subject,
+        all_pairs = load_pairs_from_json(subject_id,
                                          experiment,
                                          sessions=sessions,
                                          just_pairs=False,
