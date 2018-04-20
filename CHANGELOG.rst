@@ -1,6 +1,14 @@
 Changes
 =======
 
+Version 2.1.10
+--------------
+**2018-04-20**
+
+* Updated parameters for TICL_FR ramulator configs
+* Added additional diagnostic plots to stim and record-only reports
+* Removed experiment name from saved classifiers since classifiers should be constant across expeirments
+
 Version 2.1.9
 -------------
 **2018-04-09**
