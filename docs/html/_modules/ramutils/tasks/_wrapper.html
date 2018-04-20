@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ramutils.tasks._wrapper &mdash; Ramutils 2.1.8 documentation</title>
+  <title>ramutils.tasks._wrapper &mdash; Ramutils 2.1.10 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="Ramutils 2.1.8 documentation" href="../../../index.html"/>
+    <link rel="top" title="Ramutils 2.1.10 documentation" href="../../../index.html"/>
         <link rel="up" title="Module code" href="../../index.html"/> 
 
   
@@ -177,7 +177,8 @@
     <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">with_args</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;calling </span><span class="si">%s</span><span class="s2"> with args=</span><span class="si">%r</span><span class="s2">, kwargs=</span><span class="si">%r</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;calling </span><span class="si">%s</span><span class="s2"> with args=</span><span class="si">%r</span><span class="s2">, kwargs=</span><span class="si">%r</span><span class="s2">&quot;</span><span class="p">,</span>
+                        <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;calling </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -203,7 +204,8 @@
         <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
             <span class="n">wrapped</span> <span class="o">=</span> <span class="n">_log_call</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">log_args</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">cache</span><span class="p">:</span>
-                <span class="n">wrapped</span> <span class="o">=</span> <span class="n">delayed</span><span class="p">(</span><span class="n">memory</span><span class="o">.</span><span class="n">cache</span><span class="p">(</span><span class="n">wrapped</span><span class="p">),</span> <span class="n">nout</span><span class="o">=</span><span class="n">nout</span><span class="p">)(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="n">wrapped</span> <span class="o">=</span> <span class="n">delayed</span><span class="p">(</span><span class="n">memory</span><span class="o">.</span><span class="n">cache</span><span class="p">(</span><span class="n">wrapped</span><span class="p">),</span>
+                                  <span class="n">nout</span><span class="o">=</span><span class="n">nout</span><span class="p">)(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">wrapped</span> <span class="o">=</span> <span class="n">delayed</span><span class="p">(</span><span class="n">wrapped</span><span class="p">,</span> <span class="n">nout</span><span class="o">=</span><span class="n">nout</span><span class="p">)(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">wrapped</span>
@@ -277,7 +279,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'2.1.8',
+            VERSION:'2.1.10',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Serializable data structures &mdash; Ramutils 2.1.8 documentation</title>
+  <title>Serializable data structures &mdash; Ramutils 2.1.10 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Ramutils 2.1.8 documentation" href="index.html"/>
+    <link rel="top" title="Ramutils 2.1.10 documentation" href="index.html"/>
         <link rel="next" title="Classifier training, cross validation, and utilities" href="classifier.html"/>
         <link rel="prev" title="ramutils" href="index.html"/> 
 
@@ -273,6 +273,12 @@ there are summary objects specific to the type of session, i.e. stim vs. nonstim
 </dd></dl>
 
 <dl class="attribute">
+<dt id="ramutils.reports.summary.ClassifierSummary.classifier_activation">
+<code class="descname">classifier_activation</code><a class="headerlink" href="#ramutils.reports.summary.ClassifierSummary.classifier_activation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forward model of classifier activation from Haufe et. al. 2014</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="ramutils.reports.summary.ClassifierSummary.confidence_interval_median_classifier_output">
 <code class="descname">confidence_interval_median_classifier_output</code><a class="headerlink" href="#ramutils.reports.summary.ClassifierSummary.confidence_interval_median_classifier_output" title="Permalink to this definition">¶</a></dt>
 <dd><p>95% confidence interval for the median of the classifier output. Used as a sniff test for if something is
@@ -317,7 +323,7 @@ amiss. Should be centered around 0.5</p>
 
 <dl class="method">
 <dt id="ramutils.reports.summary.ClassifierSummary.populate">
-<code class="descname">populate</code><span class="sig-paren">(</span><em>subject</em>, <em>experiment</em>, <em>session</em>, <em>true_outcomes</em>, <em>predicted_probabilities</em>, <em>permuted_auc_values</em>, <em>tag=''</em>, <em>reloaded=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#ClassifierSummary.populate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.ClassifierSummary.populate" title="Permalink to this definition">¶</a></dt>
+<code class="descname">populate</code><span class="sig-paren">(</span><em>subject</em>, <em>experiment</em>, <em>session</em>, <em>true_outcomes</em>, <em>predicted_probabilities</em>, <em>permuted_auc_values</em>, <em>frequencies</em>, <em>pairs</em>, <em>features</em>, <em>coefficients</em>, <em>tag=''</em>, <em>reloaded=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#ClassifierSummary.populate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.ClassifierSummary.populate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Populate classifier performance metrics</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -330,6 +336,11 @@ amiss. Should be centered around 0.5</p>
 <li><strong>true_outcomes</strong> (<em>array_like</em>) – Boolean array for if a word was recalled or not</li>
 <li><strong>predicted_probabilities</strong> (<em>array_like</em>) – Outputs from the trained classifier for each word event</li>
 <li><strong>permuted_auc_values</strong> (<em>array_like</em>) – AUC values from performing a permutation test on classifier</li>
+<li><strong>frequencies</strong> (<em>array_like</em>) – Frequencies used to train the classifier</li>
+<li><strong>pairs</strong> (<em>pd.DataFrame</em>) – Metadata for each bipolar pair recorded from</li>
+<li><strong>features</strong> (<em>np.ndarray</em>) – Feature matrix used to train the classifier,
+of shape [len(predicted_probabilities) , (len(pairs) * len(frequencies)].</li>
+<li><strong>coefficients</strong> (<em>np.array</em>) – Array of classifier weights</li>
 <li><strong>tag</strong> (<em>str</em>) – Name given to the classifier, used to differentiate between
 multiple classifiers</li>
 <li><strong>reloaded</strong> (<em>bool</em>) – Indicates whether the classifier is reloaded from hard disk,
@@ -352,6 +363,12 @@ classifier was created from scratch</li>
 <dt id="ramutils.reports.summary.ClassifierSummary.pvalue">
 <code class="descname">pvalue</code><a class="headerlink" href="#ramutils.reports.summary.ClassifierSummary.pvalue" title="Permalink to this definition">¶</a></dt>
 <dd><p>p-value of classifier AUC based on permuted AUCs</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ramutils.reports.summary.ClassifierSummary.regions">
+<code class="descname">regions</code><a class="headerlink" href="#ramutils.reports.summary.ClassifierSummary.regions" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of unique electrode regions</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -605,6 +622,14 @@ n_frequencies * n_bipolar_pairs)</li>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="ramutils.reports.summary.SessionSummary.normalized_powers_plot">
+<code class="descname">normalized_powers_plot</code><a class="headerlink" href="#ramutils.reports.summary.SessionSummary.normalized_powers_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the matrix of normalized powers for the session
+to the specified filename or file-like object,
+and returns the plot as a base64-encoded string</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="ramutils.reports.summary.SessionSummary.num_lists">
 <code class="descname">num_lists</code><a class="headerlink" href="#ramutils.reports.summary.SessionSummary.num_lists" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of lists completed in the session</p>
@@ -811,7 +836,7 @@ values are the repetition ratio for that subject averaged over the session</p>
 <dd><p>SessionSummary data specific to sessions with stimulation.</p>
 <dl class="method">
 <dt id="ramutils.reports.summary.StimSessionSummary.populate">
-<code class="descname">populate</code><span class="sig-paren">(</span><em>events</em>, <em>bipolar_pairs</em>, <em>excluded_pairs</em>, <em>normalized_powers</em>, <em>post_stim_prob_recall=None</em>, <em>raw_events=None</em>, <em>model_metadata={}</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#StimSessionSummary.populate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.StimSessionSummary.populate" title="Permalink to this definition">¶</a></dt>
+<code class="descname">populate</code><span class="sig-paren">(</span><em>events</em>, <em>bipolar_pairs</em>, <em>excluded_pairs</em>, <em>normalized_powers</em>, <em>post_stim_prob_recall=None</em>, <em>raw_events=None</em>, <em>model_metadata={}</em>, <em>post_stim_eeg=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#StimSessionSummary.populate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.StimSessionSummary.populate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Populate stim data from events</p>
 </dd></dl>
 
@@ -994,7 +1019,7 @@ containing additional metadata about the results from stimulating at that locati
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.8',
+            VERSION:'2.1.10',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

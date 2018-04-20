@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Classifier training, cross validation, and utilities &mdash; Ramutils 2.1.8 documentation</title>
+  <title>Classifier training, cross validation, and utilities &mdash; Ramutils 2.1.10 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Ramutils 2.1.8 documentation" href="index.html"/>
+    <link rel="top" title="Ramutils 2.1.10 documentation" href="index.html"/>
         <link rel="next" title="Event processing" href="events.html"/>
         <link rel="prev" title="Serializable data structures" href="data.html"/> 
 
@@ -318,6 +318,29 @@ is to look in the expected location on RHINO</li>
 </dd></dl>
 
 <dl class="function">
+<dt id="ramutils.classifier.utils.save_classifier_weights_plot">
+<code class="descclassname">ramutils.classifier.utils.</code><code class="descname">save_classifier_weights_plot</code><span class="sig-paren">(</span><em>weights</em>, <em>frequencies</em>, <em>pairs</em>, <em>file_</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/utils.html#save_classifier_weights_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.utils.save_classifier_weights_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Visualize the classifier weights as a function of frequency and location.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>weights</strong> (<em>np.ndarray</em><em> (</em><em>len</em><em>(</em><em>pairs</em><em>)</em><em>*len</em><em>(</em><em>frequencies</em><em>)</em>) – </li>
+<li><strong>frequencies</strong> (<em>np.ndarray</em><em>[</em><em>float</em><em>]</em>) – </li>
+<li><strong>pairs</strong> (<em>??? Iterable describing the pairs in some way</em>) – </li>
+<li><strong>file</strong> (<em>string</em><em> or </em><em>file-like</em>) – </li>
+<li><strong>should be either a path</strong><strong> or </strong><strong>a file-like object.</strong> (<em>which</em>) – </li>
+<li><strong>Returns</strong> – </li>
+<li><strong>file</strong> – The <a href="#id1"><span class="problematic" id="id2">file_</span></a> parameter</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="ramutils.classifier.utils.train_classifier">
 <code class="descclassname">ramutils.classifier.utils.</code><code class="descname">train_classifier</code><span class="sig-paren">(</span><em>pow_mat</em>, <em>events</em>, <em>sample_weights</em>, <em>penalty_param</em>, <em>penalty_type</em>, <em>solver</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/classifier/utils.html#train_classifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.classifier.utils.train_classifier" title="Permalink to this definition">¶</a></dt>
 <dd><p>Train a classifier.</p>
@@ -392,7 +415,7 @@ is to look in the expected location on RHINO</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.8',
+            VERSION:'2.1.10',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ramutils.pipelines.aggregated_report &mdash; Ramutils 2.1.8 documentation</title>
+  <title>ramutils.pipelines.aggregated_report &mdash; Ramutils 2.1.10 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="Ramutils 2.1.8 documentation" href="../../../index.html"/>
+    <link rel="top" title="Ramutils 2.1.10 documentation" href="../../../index.html"/>
         <link rel="up" title="Module code" href="../../index.html"/> 
 
   
@@ -232,11 +232,14 @@
                 <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">[</span><span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;classifier_evaluation_results&#39;</span><span class="p">],</span>
                                                 <span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;session_summaries&#39;</span><span class="p">],</span>
                                                 <span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;math_summaries&#39;</span><span class="p">]]]):</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Unable to find underlying data for </span><span class="si">{}</span><span class="s1">, experiment </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Unable to find underlying data for </span><span class="si">{}</span><span class="s1">, experiment </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">))</span>
                     <span class="k">continue</span>
 
-                <span class="n">all_classifier_evaluation_results</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;classifier_evaluation_results&#39;</span><span class="p">])</span>
-                <span class="n">all_session_summaries</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;session_summaries&#39;</span><span class="p">])</span>
+                <span class="n">all_classifier_evaluation_results</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                    <span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;classifier_evaluation_results&#39;</span><span class="p">])</span>
+                <span class="n">all_session_summaries</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                    <span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;session_summaries&#39;</span><span class="p">])</span>
                 <span class="n">all_math_summaries</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;math_summaries&#39;</span><span class="p">])</span>
         <span class="n">subject</span> <span class="o">=</span> <span class="s1">&#39;combined&#39;</span>
         <span class="n">experiment</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span>
@@ -246,17 +249,20 @@
         <span class="k">for</span> <span class="n">subject</span> <span class="ow">in</span> <span class="n">subjects</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="n">experiments</span><span class="p">:</span>
                 <span class="n">pre_built_results</span> <span class="o">=</span> <span class="n">load_existing_results</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">sessions</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span>
-                                                     <span class="n">paths</span><span class="o">.</span><span class="n">data_db</span><span class="p">,</span> <span class="n">rootdir</span><span class="o">=</span><span class="n">paths</span><span class="o">.</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+                                                          <span class="n">paths</span><span class="o">.</span><span class="n">data_db</span><span class="p">,</span> <span class="n">rootdir</span><span class="o">=</span><span class="n">paths</span><span class="o">.</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
                 <span class="c1"># Check if only None values were returned. Processing will continue</span>
                 <span class="c1"># undeterred</span>
                 <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">[</span><span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;classifier_evaluation_results&#39;</span><span class="p">],</span>
                                                 <span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;session_summaries&#39;</span><span class="p">],</span>
                                                 <span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;math_summaries&#39;</span><span class="p">]]]):</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Unable to find underlying data for </span><span class="si">{}</span><span class="s1">, experiment </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Unable to find underlying data for </span><span class="si">{}</span><span class="s1">, experiment </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">))</span>
                     <span class="k">continue</span>
 
-                <span class="n">all_classifier_evaluation_results</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;classifier_evaluation_results&#39;</span><span class="p">])</span>
-                <span class="n">all_session_summaries</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;session_summaries&#39;</span><span class="p">])</span>
+                <span class="n">all_classifier_evaluation_results</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                    <span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;classifier_evaluation_results&#39;</span><span class="p">])</span>
+                <span class="n">all_session_summaries</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                    <span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;session_summaries&#39;</span><span class="p">])</span>
                 <span class="n">all_math_summaries</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;math_summaries&#39;</span><span class="p">])</span>
         <span class="n">subject</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">subjects</span><span class="p">)</span>
         <span class="n">experiment</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span>
@@ -264,7 +270,8 @@
     <span class="c1"># Single subject/experiment and a subset of sessions</span>
     <span class="k">elif</span> <span class="n">subjects</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">experiments</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">sessions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subjects</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">experiments</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;When specifying sessions, only single subject and experiment are allowed&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s2">&quot;When specifying sessions, only single subject and experiment are allowed&quot;</span><span class="p">)</span>
         <span class="n">subject</span> <span class="o">=</span> <span class="n">subjects</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">experiment</span> <span class="o">=</span> <span class="n">experiments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
@@ -273,19 +280,23 @@
         <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">val</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">[</span><span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;classifier_evaluation_results&#39;</span><span class="p">],</span>
                                         <span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;session_summaries&#39;</span><span class="p">],</span>
                                         <span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;math_summaries&#39;</span><span class="p">]]]):</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Unable to find underlying data for </span><span class="si">{}</span><span class="s1">, experiment </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Unable to find underlying data for </span><span class="si">{}</span><span class="s1">, experiment </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">))</span>
 
-        <span class="n">all_classifier_evaluation_results</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;classifier_evaluation_results&#39;</span><span class="p">])</span>
+        <span class="n">all_classifier_evaluation_results</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+            <span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;classifier_evaluation_results&#39;</span><span class="p">])</span>
         <span class="n">all_session_summaries</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;session_summaries&#39;</span><span class="p">])</span>
         <span class="n">all_math_summaries</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pre_built_results</span><span class="p">[</span><span class="s1">&#39;math_summaries&#39;</span><span class="p">])</span>
 
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;The requested type of aggregation is not currently supported&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="s1">&#39;The requested type of aggregation is not currently supported&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">fit_model</span><span class="p">:</span>
         <span class="c1"># Fit model and save resulting images. subject/experiment do not really matter since the model is the same</span>
         <span class="c1"># at least for now</span>
-        <span class="n">hmm_results</span> <span class="o">=</span> <span class="n">estimate_effects_of_stim</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="s1">&#39;FR3&#39;</span><span class="p">,</span> <span class="n">all_session_summaries</span><span class="p">)</span>
+        <span class="n">hmm_results</span> <span class="o">=</span> <span class="n">estimate_effects_of_stim</span><span class="p">(</span>
+            <span class="n">subject</span><span class="p">,</span> <span class="s1">&#39;FR3&#39;</span><span class="p">,</span> <span class="n">all_session_summaries</span><span class="p">)</span>
         <span class="n">output</span> <span class="o">=</span> <span class="n">save_all_output</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="n">paths</span><span class="o">.</span><span class="n">data_db</span><span class="p">,</span>
                                  <span class="n">behavioral_results</span><span class="o">=</span><span class="n">hmm_results</span><span class="p">,</span> <span class="n">agg_report</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -335,7 +346,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'2.1.8',
+            VERSION:'2.1.10',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

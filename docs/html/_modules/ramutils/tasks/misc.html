@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ramutils.tasks.misc &mdash; Ramutils 2.1.8 documentation</title>
+  <title>ramutils.tasks.misc &mdash; Ramutils 2.1.10 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="Ramutils 2.1.8 documentation" href="../../../index.html"/>
+    <link rel="top" title="Ramutils 2.1.10 documentation" href="../../../index.html"/>
         <link rel="up" title="Module code" href="../../index.html"/> 
 
   
@@ -163,8 +163,6 @@
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">unicode_literals</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">base64</span>
-<span class="kn">import</span> <span class="nn">pickle</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="k">try</span><span class="p">:</span>
@@ -181,6 +179,7 @@
 <span class="kn">from</span> <span class="nn">ramutils.hmm</span> <span class="k">import</span> <span class="n">save_foresplot</span><span class="p">,</span> <span class="n">save_traceplot</span>
 <span class="kn">from</span> <span class="nn">ramutils.utils</span> <span class="k">import</span> <span class="n">is_stim_experiment</span> <span class="k">as</span> <span class="n">is_stim_experiment_core</span>
 <span class="kn">from</span> <span class="nn">ramutils.utils</span> <span class="k">import</span> <span class="n">get_completed_sessions</span>
+<span class="kn">from</span> <span class="nn">ramutils.utils</span> <span class="k">import</span> <span class="n">encode_file</span>
 <span class="kn">from</span> <span class="nn">ramutils.log</span> <span class="k">import</span> <span class="n">get_logger</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">()</span>
@@ -267,6 +266,8 @@
     <span class="n">base_output_format</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_location</span><span class="p">,</span>
                                       <span class="s2">&quot;</span><span class="si">{subject}</span><span class="s2">_</span><span class="si">{experiment}</span><span class="s2">_</span><span class="si">{session}</span><span class="s2">_{&quot;</span>
                                       <span class="s2">&quot;data_type}.</span><span class="si">{file_type}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">subject_specific_output</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_location</span><span class="p">,</span>
+                                      <span class="s2">&quot;</span><span class="si">{subject}</span><span class="s2">_</span><span class="si">{data_type}</span><span class="s2">.</span><span class="si">{file_type}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="n">session_str</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">summary</span><span class="o">.</span><span class="n">session_number</span><span class="p">)</span> <span class="k">for</span> <span class="n">summary</span> <span class="ow">in</span>
                             <span class="n">session_summaries</span><span class="p">])</span>
@@ -306,9 +307,11 @@
             <span class="n">file_type</span><span class="o">=</span><span class="s1">&#39;h5&#39;</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">retrained_classifier</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">retrained_classifier</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">base_output_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">,</span> <span class="n">session</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>
-            <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;retrained_classifier&quot;</span><span class="p">,</span> <span class="n">file_type</span><span class="o">=</span><span class="s2">&quot;zip&quot;</span><span class="p">),</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># The retrained classifier is the same regardless of session/experiment</span>
+        <span class="c1"># so just save one per subject</span>
+        <span class="n">retrained_classifier</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">subject_specific_output</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span> <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;retrained_classifier&quot;</span><span class="p">,</span>
+            <span class="n">file_type</span><span class="o">=</span><span class="s2">&quot;zip&quot;</span><span class="p">),</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># Save plots from hmm models and return file paths in a dict</span>
     <span class="k">if</span> <span class="n">behavioral_results</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -329,7 +332,7 @@
             <span class="n">save_traceplot</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span> <span class="n">traceplot_path</span><span class="p">)</span>
 
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">forestplot_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-                <span class="n">encoded_image</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+                <span class="n">encoded_image</span> <span class="o">=</span> <span class="n">encode_file</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
             <span class="n">result_files</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">encoded_image</span>
 
     <span class="k">return</span> <span class="n">result_files</span></div>
@@ -431,7 +434,8 @@
             <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">sessions</span><span class="p">:</span>
                 <span class="n">classifier_summary</span> <span class="o">=</span> <span class="n">ClassifierSummary</span><span class="o">.</span><span class="n">from_hdf</span><span class="p">(</span>
                     <span class="n">base_output_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">session</span><span class="p">),</span>
-                                              <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;classifier_session_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">session</span><span class="p">),</span>
+                                              <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;classifier_session_&#39;</span> <span class="o">+</span>
+                                              <span class="nb">str</span><span class="p">(</span><span class="n">session</span><span class="p">),</span>
                                               <span class="n">file_type</span><span class="o">=</span><span class="s1">&#39;h5&#39;</span><span class="p">))</span>
                 <span class="n">classifier_evaluation_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">classifier_summary</span><span class="p">)</span>
 
@@ -454,13 +458,13 @@
                             <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
                             <span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">,</span>
                             <span class="n">session</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">session</span><span class="p">),</span>
-                            <span class="n">data_type</span><span class="o">=</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span><span class="s1">&#39;_foresplot&#39;</span><span class="p">),</span>
+                            <span class="n">data_type</span><span class="o">=</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_foresplot&#39;</span><span class="p">),</span>
                             <span class="n">file_type</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>
                         <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">forestplot_path</span><span class="p">)</span>
 
                         <span class="c1"># Encode the image and pass along that data</span>
                         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">forestplot_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-                            <span class="n">encoded_image</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+                            <span class="n">encoded_image</span> <span class="o">=</span> <span class="n">encode_file</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
                         <span class="n">hmm_results</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">encoded_image</span>
                     <span class="n">saved_results</span><span class="p">[</span><span class="s1">&#39;hmm_results&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hmm_results</span>
 
@@ -477,7 +481,6 @@
         <span class="k">return</span> <span class="n">saved_results</span>
 
     <span class="k">return</span> <span class="n">saved_results</span></div>
-
 </pre></div>
 
            </div>
@@ -514,7 +517,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'2.1.8',
+            VERSION:'2.1.10',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
