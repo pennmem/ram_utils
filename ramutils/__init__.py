@@ -3,7 +3,8 @@ import logging
 
 __version__ = "2.1.9"
 
-version_info = namedtuple('VersionInfo', 'major,minor,patch')(*__version__.split('.'))
+version_info = namedtuple('VersionInfo', 'major,minor,patch')(
+    *__version__.split('.'))
 
 # So we don't end up getting things logged multiple times
 _root_logger = logging.getLogger()

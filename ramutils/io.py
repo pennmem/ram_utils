@@ -41,7 +41,8 @@ def store_results(data, url):
             with h5py.File(url.path, 'w') as hfile:
                 hfile['/data'] = data
         else:
-            raise NotImplementedError("Data must be a numpy array or a Schema instance")
+            raise NotImplementedError(
+                "Data must be a numpy array or a Schema instance")
     else:
         raise NotImplementedError("Only filesystem storage is implemented.")
 

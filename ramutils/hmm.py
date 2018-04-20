@@ -1,5 +1,5 @@
 import matplotlib as mpl
-mpl.use('Agg') # allows matplotlib to work without x-windows (for RHINO)
+mpl.use('Agg')  # allows matplotlib to work without x-windows (for RHINO)
 
 import pymc3 as pm
 import pandas as pd
@@ -51,8 +51,8 @@ class HierarchicalModel(object):
         self.serialpos_idx = self.data.serialpos.values
 
         level_treatment_map = {
-            'list' : self.data.is_stim_list.values,
-            'stim' : self.data.is_stim_item.values,
+            'list': self.data.is_stim_list.values,
+            'stim': self.data.is_stim_item.values,
             'post_stim': self.data.is_post_stim_item
         }
         self.treatment_vals = level_treatment_map[self.item_comparison]
@@ -165,11 +165,13 @@ def save_traceplot(trace, full_path):
 
 
 def save_foresplot(trace, full_path):
-    session_values = trace.get_values("Stim Effect (Session Level)", chains=[trace.chains[0]][0])
+    session_values = trace.get_values(
+        "Stim Effect (Session Level)", chains=[trace.chains[0]][0])
     num_sessions = np.shape(session_values)[1]
-    session_titles = [" ".join(["Session", str(i)]) for i in range(num_sessions)]
+    session_titles = [" ".join(["Session", str(i)])
+                      for i in range(num_sessions)]
 
-    ylabels=['']
+    ylabels = ['']
     stim_vars = ["Stim Effect (Across Sessions)"]
 
     if num_sessions > 1:

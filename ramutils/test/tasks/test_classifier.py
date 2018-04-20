@@ -3,7 +3,7 @@ import functools
 import numpy as np
 
 from ramutils.parameters import FRParameters, PALParameters
-from ramutils.tasks.classifier import perform_cross_validation
+from ramutils.tasks.classifier import summarize_classifier
 from ramutils.utils import load_event_test_data
 
 from pkg_resources import resource_filename
@@ -37,10 +37,10 @@ class TestCrossValidation:
             datafile('/powers/{}_normalized_powers.npy'.format(subject)))
         events = load_event_test_data(
             datafile('/events/{}_task_events.npy'.format(subject)), rhino_root)
-        classifier_summary = perform_cross_validation(classifier, powers,
-                                                      events, 10 ,
-                                                      tag='test',
-                                                      **params).compute()
+        classifier_summary = summarize_classifier(classifier, powers,
+                                                  events, 10,
+                                                  tag='test',
+                                                  **params).compute()
         assert np.isclose(classifier_summary.auc, expected_output[subject],
                           rtol=1e-3)
         return
@@ -73,11 +73,11 @@ class TestCrossValidation:
         sess_mask = (events.session == test_session)
         events = events[events.session == test_session]
         powers = powers[sess_mask, :]
-        classifier_summary = perform_cross_validation(classifier,
-                                                      powers,
-                                                      events, 10,
-                                                      tag='test',
-                                                      **params).compute()
+        classifier_summary = summarize_classifier(classifier,
+                                                  powers,
+                                                  events, 10,
+                                                  tag='test',
+                                                  **params).compute()
         assert np.isclose(classifier_summary.auc, expected_output[subject],
                           rtol=1e-3)
 

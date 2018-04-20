@@ -222,7 +222,8 @@ def perform_loso_cross_validation(classifier, powers, events, recalls, **kwargs)
         outsample_mask = ~insample_mask & encoding_mask
         outsample_pow_mat = powers[outsample_mask]
 
-        outsample_probs = classifier_copy.predict_proba(outsample_pow_mat)[:, 1]
+        outsample_probs = classifier_copy.predict_proba(outsample_pow_mat)[
+            :, 1]
 
         outsample_encoding_event_mask = (encoding_events.session == sess)
         probs[outsample_encoding_event_mask] = outsample_probs
@@ -230,3 +231,24 @@ def perform_loso_cross_validation(classifier, powers, events, recalls, **kwargs)
     return probs
 
 
+def perform_cross_validation(classifier, events, n_permutations, pow_mat,
+                             recalls, sessions, **kwargs):
+    if len(sessions) > 1:
+        permuted_auc_values = permuted_loso_cross_validation(classifier,
+                                                             pow_mat,
+                                                             events,
+                                                             n_permutations,
+                                                             **kwargs)
+        probs = perform_loso_cross_validation(classifier, pow_mat, events,
+                                              recalls, **kwargs)
+
+    else:
+        logger.info("Performing LOLO cross validation")
+        permuted_auc_values = permuted_lolo_cross_validation(classifier,
+                                                             pow_mat,
+                                                             events,
+                                                             n_permutations,
+                                                             **kwargs)
+        probs = perform_lolo_cross_validation(classifier, pow_mat, events,
+                                              recalls, **kwargs)
+    return permuted_auc_values, probs

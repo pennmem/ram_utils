@@ -9,7 +9,7 @@ from ptsa.data.filters import (
 from ptsa.data.readers import EEGReader
 from scipy.stats import zscore, ttest_ind
 from statsmodels.sandbox.stats.multicomp import multipletests
-
+import io
 try:
     from typing import List
 except ImportError:
@@ -33,57 +33,11 @@ def compute_single_session_powers(session, all_events, start_time, end_time,
     # PTSA will sometimes modify events when reading the eeg, so we ultimately
     # need to return the updated events. In case no events are removed, return
     # the original set of events
-    updated_events = all_events
-    session_events = all_events[all_events.session == session]
-
-    logger.info("Loading EEG data for session %d", session)
-    eeg_reader = EEGReader(events=session_events,
-                           start_time=start_time,
-                           end_time=end_time,
-                           )
-    try:
-        eeg = eeg_reader.read()
-    # recording was done in bipolar mode, and the channels are different than
-    # what we expect
-    except IndexError:
-        eeg_reader.channels = np.array([])
-        eeg = eeg_reader.read()
-
-    if eeg_reader.removed_bad_data():
-        logger.warning('PTSA EEG reader elected to remove some bad events')
-        # TODO: Use the event utility functions here
-        updated_events = np.rec.array(np.concatenate(
-            (all_events[all_events.session != session],
-             np.rec.array(eeg['events'].data))))
-        event_fields = updated_events.dtype.names
-        order = tuple(f for f in ['session', 'list', 'mstime'] if f in event_fields)
-        ev_order = np.argsort(updated_events, order=order)
-        updated_events = updated_events[ev_order]
-        updated_events = np.rec.array(updated_events)
-
-    # Use bipolar pairs if they exist and recording is not already bipolar
-    if 'bipolar_pairs' not in eeg.coords:
-        monopolar_channels = extract_monopolar_from_bipolar(bipolar_pairs)
-        eeg_reader = EEGReader(events=session_events,
-                               start_time=start_time,
-                               end_time=end_time,
-                               channels=monopolar_channels)
-        eeg = eeg_reader.read()
-        # Check for removal of bad data again and update events
-        if eeg_reader.removed_bad_data():
-            logger.warning('PTSA EEG reader elected to remove some bad events')
-            # TODO: Use the event utility functions here
-            updated_events = np.rec.array(np.concatenate(
-                (all_events[all_events.session != session],
-                 np.rec.array(eeg['events'].data))))
-            event_fields = updated_events.dtype.names
-            order = tuple(f for f in ['session', 'list', 'mstime'] if f in event_fields)
-            ev_order = np.argsort(updated_events, order=order)
-            updated_events = updated_events[ev_order]
-            updated_events = np.rec.array(updated_events)
-
-        eeg = MonopolarToBipolarMapper(time_series=eeg,
-                                       bipolar_pairs=bipolar_pairs).filter()
+    eeg, updated_events = load_single_session_eeg(session,
+                                                  all_events,
+                                                  start_time,
+                                                  end_time,
+                                                  bipolar_pairs)
 
     eeg = eeg.add_mirror_buffer(buffer_time)
 
@@ -118,6 +72,61 @@ def compute_single_session_powers(session, all_events, start_time, end_time,
         sess_pow_mat = zscore(sess_pow_mat, axis=0, ddof=1)
 
     return sess_pow_mat, updated_events
+
+
+def load_single_session_eeg(session, all_events, start_time, end_time, bipolar_pairs):
+    updated_events = all_events
+    session_events = all_events[all_events.session == session]
+    logger.info("Loading EEG data for session %d", session)
+    eeg_reader = EEGReader(events=session_events,
+                           start_time=start_time,
+                           end_time=end_time,
+                           )
+    try:
+        eeg = eeg_reader.read()
+    # recording was done in bipolar mode, and the channels are different than
+    # what we expect
+    except IndexError:
+        eeg_reader.channels = np.array([])
+        eeg = eeg_reader.read()
+    if eeg_reader.removed_bad_data():
+        logger.warning('PTSA EEG reader elected to remove some bad events')
+        # TODO: Use the event utility functions here
+        updated_events = np.rec.array(np.concatenate(
+            (all_events[all_events.session != session],
+             np.rec.array(eeg['events'].data))))
+        event_fields = updated_events.dtype.names
+        order = tuple(f for f in ['session', 'list',
+                                  'mstime'] if f in event_fields)
+        ev_order = np.argsort(updated_events, order=order)
+        updated_events = updated_events[ev_order]
+        updated_events = np.rec.array(updated_events)
+
+    # Use bipolar pairs if they exist and recording is not already bipolar
+    if 'bipolar_pairs' not in eeg.coords:
+        monopolar_channels = extract_monopolar_from_bipolar(bipolar_pairs)
+        eeg_reader = EEGReader(events=session_events,
+                               start_time=start_time,
+                               end_time=end_time,
+                               channels=monopolar_channels)
+        eeg = eeg_reader.read()
+        # Check for removal of bad data again and update events
+        if eeg_reader.removed_bad_data():
+            logger.warning('PTSA EEG reader elected to remove some bad events')
+            # TODO: Use the event utility functions here
+            updated_events = np.rec.array(np.concatenate(
+                (all_events[all_events.session != session],
+                 np.rec.array(eeg['events'].data))))
+            event_fields = updated_events.dtype.names
+            order = tuple(
+                f for f in ['session', 'list', 'mstime'] if f in event_fields)
+            ev_order = np.argsort(updated_events, order=order)
+            updated_events = updated_events[ev_order]
+            updated_events = np.rec.array(updated_events)
+
+        eeg = MonopolarToBipolarMapper(time_series=eeg,
+                                       bipolar_pairs=bipolar_pairs).filter()
+    return eeg, updated_events
 
 
 def compute_powers(events, start_time, end_time, buffer_time, freqs,
@@ -374,6 +383,73 @@ def reshape_powers_to_2d(powers):
     return reshaped_powers
 
 
+def save_power_plot(powers, session, full_path):
+    """
+    Plots the feature matrix to a file path or file-like object
+    :param powers:
+    :param full_path:
+    :return:
+    """
+    from matplotlib import pyplot as plt
+
+    plt.imshow(reshape_powers_to_2d(powers), cmap='RdBu_r', aspect='auto',)
+    cmin, cmax = powers.min(), powers.max()
+    clim = max(abs(cmin), abs(cmax))
+    plt.clim(-clim, clim)
+    cbar = plt.colorbar()
+    cbar.ax.set_xlabel('Z-Score')
+    cbar.ax.xaxis.set_label_position('top')
+    plt.ylabel('Event Number')
+    plt.xlabel('Feature Number')
+    plt.title('Session %s' % session)
+    plt.savefig(full_path,
+                format="png",
+                dpi=300,
+                bbox_inches="tight",
+                )
+    plt.close()
+    return full_path
+
+
+def load_eeg(all_events, start_time, end_time, bipolar_pairs):
+    if (bipolar_pairs is not None) and \
+            (not isinstance(bipolar_pairs, np.recarray)):
+        bipolar_pairs = generate_pairs_for_ptsa(bipolar_pairs)
+
+    full_eeg = []
+    for session in np.unique(all_events.session):
+        eeg, _ = load_single_session_eeg(session, all_events,
+                                         start_time, end_time, bipolar_pairs)
+        time = eeg.time.values
+        full_eeg.append(eeg)
+    full_eeg = np.concatenate([e.data for e in full_eeg], axis=1)
+    return full_eeg
+
+
+def save_eeg_by_channel_plot(bipolar_pairs, full_eeg, time=None, full_path=None):
+    from matplotlib import pyplot as plt
+    if full_path is None:
+        full_path = io.BytesIO()
+    if time is None:
+        time = np.arange(full_eeg.shape[-1])
+
+    ylen = int(np.sqrt(full_eeg.shape[0]))
+    xlen = int(len(bipolar_pairs) / ylen) + 1
+    plt.figure(figsize=(20, 15))
+    for i in range(0, len(bipolar_pairs)):
+        plt.subplot(xlen, ylen, i + 1)
+        plt.plot(time, full_eeg[i].squeeze().T, color='grey', alpha=0.05)
+        plt.ylim(-30000, 30000)
+        plt.xlabel('%s' % (bipolar_pairs[i]))
+    plt.tight_layout()
+    plt.savefig(full_path,
+                format='png',
+                dpi=200,
+                bbox_inches='tight')
+    plt.close()
+    return full_path
+
+
 def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events,
                               frequencies, hfa_cutoff=65, trigger_freq=110):
     """
@@ -392,7 +468,7 @@ def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events,
     non_recalled_pow_mat = hfa_powers[~recall_mask, :]
 
     tstats, pvals = ttest_ind(recalled_pow_mat, non_recalled_pow_mat, axis=0)
-    sig_mask, pvals, _ , _ = multipletests(pvals, method='fdr_bh')
+    sig_mask, pvals, _, _ = multipletests(pvals, method='fdr_bh')
 
     pairs_metadata_table['hfa_t_stat'] = tstats
     pairs_metadata_table['hfa_p_value'] = pvals
@@ -409,7 +485,7 @@ def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events,
 
     tstats, pvals = ttest_ind(recalled_single_freq_powers,
                               non_recalled_single_freq_powers, axis=0)
-    sig_mask, pvals, _ , _ = multipletests(pvals, method='fdr_bh')
+    sig_mask, pvals, _, _ = multipletests(pvals, method='fdr_bh')
     pairs_metadata_table['110_t_stat'] = tstats
     pairs_metadata_table['110_p_value'] = pvals
 
@@ -417,4 +493,3 @@ def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events,
     pairs_metadata_table = pairs_metadata_table.dropna(subset=['label'])
 
     return pairs_metadata_table
-

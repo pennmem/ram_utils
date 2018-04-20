@@ -120,7 +120,8 @@ def make_ramulator_config(subject, experiment, paths, stim_params, sessions=None
     # Ignore leads identified in classifier_excluded_leads.txt
     pairs_to_exclude = stim_params
     if use_classifier_excluded_leads:
-        classifier_excluded_leads = get_classifier_excluded_leads(subject, ec_pairs, rootdir=paths.root).compute()
+        classifier_excluded_leads = get_classifier_excluded_leads(
+            subject, ec_pairs, rootdir=paths.root).compute()
         pairs_to_exclude = pairs_to_exclude + classifier_excluded_leads
 
     excluded_pairs = reduce_pairs(ec_pairs, pairs_to_exclude, True)
@@ -157,12 +158,14 @@ def make_ramulator_config(subject, experiment, paths, stim_params, sessions=None
                            "implemented")
     kwargs = exp_params.to_dict()
 
-    all_task_events = build_training_data(subject, experiment, paths, sessions=sessions, **kwargs)
+    all_task_events = build_training_data(
+        subject, experiment, paths, sessions=sessions, **kwargs)
 
     powers, final_task_events = compute_normalized_powers(all_task_events,
                                                           bipolar_pairs=ec_pairs,
                                                           **kwargs)
-    reduced_powers = reduce_powers(powers, used_pair_mask, len(kwargs['freqs']))
+    reduced_powers = reduce_powers(
+        powers, used_pair_mask, len(kwargs['freqs']))
 
     sample_weights = get_sample_weights(final_task_events, **kwargs)
 
@@ -173,12 +176,12 @@ def make_ramulator_config(subject, experiment, paths, stim_params, sessions=None
                                   kwargs['penalty_type'],
                                   kwargs['solver'])
 
-    cross_validation_results = perform_cross_validation(classifier,
-                                                        reduced_powers,
-                                                        final_task_events,
-                                                        kwargs['n_perm'],
-                                                        'Trained Classifier',
-                                                        **kwargs)
+    cross_validation_results = summarize_classifier(classifier,
+                                                    reduced_powers,
+                                                    final_task_events,
+                                                    kwargs['n_perm'],
+                                                    'Trained Classifier',
+                                                    **kwargs)
 
     container = serialize_classifier(classifier,
                                      final_pairs,

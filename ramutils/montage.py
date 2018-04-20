@@ -20,7 +20,7 @@ from ptsa.data.readers import JsonIndexReader
 from ramutils.parameters import StimParameters
 from ramutils.utils import extract_subject_montage, touch, bytes_to_str, tempdir
 from ramutils.log import get_logger
-
+from ramutils.constants import MTL_LOC_DICT, DK_LOC_DICT
 
 logger = get_logger()
 
@@ -62,10 +62,12 @@ def make_stim_params(subject, anodes, cathodes, min_amplitudes=None,
         cathode = cathodes[i]
 
         if anode not in valid_labels:
-            raise RuntimeError("Label {} could not be found in the jacksheet".format(anode))
+            raise RuntimeError(
+                "Label {} could not be found in the jacksheet".format(anode))
 
         if cathode not in valid_labels:
-            raise RuntimeError("Label {} could not be found in the jacksheet".format(cathode))
+            raise RuntimeError(
+                "Label {} could not be found in the jacksheet".format(cathode))
 
         anode_idx = jacksheet[jacksheet.label == anode].index[0]
         cathode_idx = jacksheet[jacksheet.label == cathode].index[0]
@@ -113,7 +115,8 @@ def build_montage_metadata_table(subject, experiment, sessions, all_pairs,
     mni_available = ('mni' in pairs_from_json[first_channel]['atlases'].keys())
 
     # Standardize labels from json so that lookup will be easier
-    pairs_from_json = {standardize_label(key): val for key, val in pairs_from_json.items()}
+    pairs_from_json = {standardize_label(
+        key): val for key, val in pairs_from_json.items()}
 
     # If all_pairs is an ordered dict, this loop will preserve the ordering
     all_pair_labels = all_pairs[subject]['pairs'].keys()
@@ -128,8 +131,12 @@ def build_montage_metadata_table(subject, experiment, sessions, all_pairs,
         all_pairs[subject]['pairs'][pair]['channel_2'] = str(channel_2)
         # types should be same for both electrodes
         all_pairs[subject]['pairs'][pair]['type'] = pairs_from_json[standardized_pair]['type_1']
-        all_pairs[subject]['pairs'][pair]['location'] = extract_atlas_location(pairs_from_json[standardized_pair])
+        all_pairs[subject]['pairs'][pair]['location'] = extract_atlas_location(
+            pairs_from_json[standardized_pair])
         all_pairs[subject]['pairs'][pair]['label'] = pair
+        all_pairs[subject]['pairs'][pair]['region'] = get_region_name(
+            all_pairs[subject]['pairs'][pair]['location'].partition(' ')[-1]
+        )
 
         if mni_available:
             all_pairs[subject]['pairs'][pair]['mni_x'] = pairs_from_json[
@@ -152,7 +159,8 @@ def build_montage_metadata_table(subject, experiment, sessions, all_pairs,
 
     pairs_metadata = pairs_metadata.reindex(all_pair_labels)
     pairs_metadata = pairs_metadata[['type', 'channel_1', 'channel_2', 'label',
-                                     'location', 'mni_x', 'mni_y', 'mni_z']]
+                                     'region', 'location',
+                                     'mni_x', 'mni_y', 'mni_z']]
 
     return pairs_metadata
 
@@ -189,7 +197,7 @@ def generate_pairs_for_classifier(pairs, excluded_pairs):
 
     pairs = np.rec.fromrecords([(item['channel_1'], item['channel_2'],
                                  pair.split('-')[0], pair.split('-')[1])
-                                 for pair, item in used_pairs.items()],
+                                for pair, item in used_pairs.items()],
                                dtype=dtypes.pairs)
 
     pairs.sort(order='contact0')
@@ -461,12 +469,26 @@ def extract_atlas_location(bp_data):
             if (ind_loc is not None) and (ind_loc != '') and (ind_loc != 'None'):
                 return ('Left ' if atlases['ind']['x'] < 0.0 else 'Right ') + ind_loc
     except TypeError:
-        logger.warning('Missing coordinates for an electrode. Likely a neurorad pipeline error')
+        logger.warning(
+            'Missing coordinates for an electrode. Likely a neurorad pipeline error')
 
     return '--'
 
 
-def get_pairs(subject, experiment, sessions, paths):
+def get_region_name(name):
+
+    for k in MTL_LOC_DICT:
+        if name in MTL_LOC_DICT[k]:
+            return k
+
+    for k in DK_LOC_DICT:
+        if name in DK_LOC_DICT[k]:
+            return k
+
+    return 'Other'
+
+
+def get_pairs(subject_id, experiment, sessions, paths):
     """Determine how we should figure out what pairs to use.
 
     Option 1: In the case of hardware bipolar recordings with the ENS, EEG
@@ -478,7 +500,7 @@ def get_pairs(subject, experiment, sessions, paths):
 
     Parameters
     ----------
-    subject : str
+    subject_id : str
         Subject ID
     experiment : str
         Experiment type
@@ -506,9 +528,14 @@ def get_pairs(subject, experiment, sessions, paths):
 
     """
     # Use * for session so we don't have to assume session numbers start at 0
-    eeg_dir = osp.join(paths.root, 'protocols', 'r1', 'subjects',
-                       subject, 'experiments', experiment, 'sessions', '*',
-                       'ephys', 'current_processed', 'noreref', '*.h5')
+    subject,montage = extract_subject_montage(subject_id)
+    reader = JsonIndexReader(osp.join(paths.root,'protocols','r1.json'))
+    event_path = list(reader.aggregate_values(
+        'task_events',subject=subject,montage=montage,experiment=experiment)
+        )[0]
+    beh_root = event_path.partition('behavioral')[0]
+
+    eeg_dir = osp.join(beh_root,'ephys', 'current_processed', 'noreref', '*.h5')
     files = glob(eeg_dir)
 
     # Read HDF5 file to get pairs
@@ -531,7 +558,7 @@ def get_pairs(subject, experiment, sessions, paths):
             # found, so we have to make sure it's there
             touch(config_path.replace('.csv', '.bin'))
 
-            all_pairs = generate_pairs_from_electrode_config(subject,
+            all_pairs = generate_pairs_from_electrode_config(subject_id,
                                                              experiment,
                                                              sessions,
                                                              paths)
@@ -539,7 +566,7 @@ def get_pairs(subject, experiment, sessions, paths):
     # No HDF5 file exists, meaning this was a monopolar recording... read
     # pairs.json instead
     else:
-        all_pairs = load_pairs_from_json(subject,
+        all_pairs = load_pairs_from_json(subject_id,
                                          experiment,
                                          sessions=sessions,
                                          just_pairs=False,
@@ -563,9 +590,11 @@ def get_classifier_excluded_leads(subject, all_pairs, rootdir='/'):
     excluded_contacts: List of contacts in the same format as what is returned by make_stim_params
 
     """
-    classifier_excluded_leads_path = osp.join(rootdir, 'data', 'eeg', subject, 'tal', 'classifier_excluded_leads.txt')
+    classifier_excluded_leads_path = osp.join(
+        rootdir, 'data', 'eeg', subject, 'tal', 'classifier_excluded_leads.txt')
     if not osp.exists(classifier_excluded_leads_path):
-        raise RuntimeError("No classifier_excluded_leads.txt file found for {}".format(subject))
+        raise RuntimeError(
+            "No classifier_excluded_leads.txt file found for {}".format(subject))
 
     with open(classifier_excluded_leads_path) as f:
         file_contents = f.read()
@@ -577,7 +606,8 @@ def get_classifier_excluded_leads(subject, all_pairs, rootdir='/'):
     excluded_anodes = []
     excluded_cathodes = []
     for pair in all_pairs[subject]['pairs'].keys():
-        excluded_label_mask = [(pair.find(excluded) != -1) for excluded in excluded_labels]
+        excluded_label_mask = [(pair.find(excluded) != -1)
+                               for excluded in excluded_labels]
         if any(excluded_label_mask):
             anode = pair.split('-')[0]
             excluded_anodes.append(anode)
@@ -587,7 +617,8 @@ def get_classifier_excluded_leads(subject, all_pairs, rootdir='/'):
     # This may seem a bit odd, but it returns the labels in a format that is easy to use by other functions
     # in ramutils
     excluded_contacts = make_stim_params(subject, excluded_anodes, excluded_cathodes,
-                                         target_amplitudes=[0.5] * len(excluded_labels),
+                                         target_amplitudes=[
+                                             0.5] * len(excluded_labels),
                                          root=rootdir)
     return excluded_contacts
 
@@ -643,8 +674,10 @@ def generate_pairs_from_electrode_config(subject, experiment, session, paths):
 
         for ch in ec.sense_channels:
             anode, cathode = ch.contact, ch.ref
-            aname = bytes_to_str(contacts[contacts.jack_box_num == anode].contact_name[0])
-            cname = bytes_to_str(contacts[contacts.jack_box_num == cathode].contact_name[0])
+            aname = bytes_to_str(
+                contacts[contacts.jack_box_num == anode].contact_name[0])
+            cname = bytes_to_str(
+                contacts[contacts.jack_box_num == cathode].contact_name[0])
             name = '{}-{}'.format(aname, cname)
             pairs_dict[name] = {
                 'channel_1': anode,
@@ -664,4 +697,3 @@ def generate_pairs_from_electrode_config(subject, experiment, session, paths):
                                              rootdir=paths.root)
 
     return pairs_from_ec
-

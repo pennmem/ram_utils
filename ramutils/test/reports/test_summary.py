@@ -43,7 +43,7 @@ def excluded_pairs():
 
 @pytest.fixture(scope='session')
 def normalized_powers():
-    return np.array([[1,2], [3,4]])
+    return np.array([[1, 2], [3, 4]])
 
 
 @pytest.fixture()
@@ -58,10 +58,10 @@ class TestSummary:
                           normalized_powers):
 
         summary = SessionSummary()
-        summary.populate(fr5_events, bipolar_pairs, excluded_pairs, normalized_powers)
+        summary.populate(fr5_events, bipolar_pairs,
+                         excluded_pairs, normalized_powers)
         df = summary.to_dataframe()
         assert len(df) == len(fr5_events)
-
 
     def test_session_length(self, fr5_events):
         summary = SessionSummary()
@@ -191,9 +191,11 @@ class TestFRSessionSummary:
     @pytest.mark.parametrize('first', [True, False])
     def test_serialpos_probabilities(self, first):
         if first:
-            expected = [0.2, 0.12, 0.08, 0.08, 0.08, 0.0, 0.08, 0.04, 0.08, 0.0, 0.0, 0.04]
+            expected = [0.2, 0.12, 0.08, 0.08, 0.08,
+                        0.0, 0.08, 0.04, 0.08, 0.0, 0.0, 0.04]
         else:
-            expected = [0.2, 0.16, 0.08, 0.16, 0.16, 0.12, 0.28, 0.2, 0.08, 0.16, 0.24, 0.08]
+            expected = [0.2, 0.16, 0.08, 0.16, 0.16,
+                        0.12, 0.28, 0.2, 0.08, 0.16, 0.24, 0.08]
 
         probs = FRSessionSummary.serialpos_probabilities([self.summary], first)
         assert_almost_equal(probs, expected, decimal=2)
@@ -208,7 +210,8 @@ class TestCatFRSessionSummary:
         pairs = bipolar_pairs()
         excluded = excluded_pairs()
         powers = normalized_powers()
-        cls.summary.populate(events, pairs, excluded, powers, raw_events=raw_events)
+        cls.summary.populate(events, pairs, excluded,
+                             powers, raw_events=raw_events)
 
     def test_to_dataframe(self):
         df = self.summary.to_dataframe()
@@ -221,7 +224,8 @@ class TestStimSessionSummary:
                       normalized_powers):
         """Basic tests that data was populated correctly from events."""
         summary = StimSessionSummary()
-        summary.populate(fr5_events, bipolar_pairs, excluded_pairs, normalized_powers)
+        summary.populate(fr5_events, bipolar_pairs,
+                         excluded_pairs, normalized_powers)
         df = summary.to_dataframe()
 
         assert len(df[df.phase == 'BASELINE']) == 36
@@ -234,7 +238,8 @@ class TestFRStimSessionSummary:
     def test_num_nonstim_lists(self, fr5_events, bipolar_pairs,
                                excluded_pairs, normalized_powers):
         summary = FRStimSessionSummary()
-        summary.populate(fr5_events, bipolar_pairs, excluded_pairs, normalized_powers)
+        summary.populate(fr5_events, bipolar_pairs,
+                         excluded_pairs, normalized_powers)
         assert summary.num_nonstim_lists == 2
 
 
@@ -247,17 +252,24 @@ class TestClassifierSummary:
         cls.recalls = np.random.random_integers(0, 1, 100)
         cls.predicted_probabilities = np.random.normal(.5, .03, size=100)
         cls.permuation_aucs = np.random.normal(.5, .01, size=200)
+        cls.freqs = np.arange(10)
+        cls.pairs = np.array(['A1','A2','A3'])
+        cls.coef =  np.random.rand(1,len(cls.freqs)*len(cls.pairs))
+        cls.features = np.random.rand(10,cls.coef.shape[-1])
         cls.summary = ClassifierSummary()
 
     def test_populate(self):
         summary = ClassifierSummary()
-        summary.populate(self.subject, self.experiment,
-                         self.sessions, self.recalls,
-                         self.predicted_probabilities, self.permuation_aucs,
+        summary.populate(self.subject, self.experiment, self.sessions,
+                         self.recalls, self.predicted_probabilities,
+                         self.permuation_aucs,
+                         self.freqs,self.pairs,self.features,self.coef,
                          tag='Encoding')
         assert np.array_equal(self.recalls, summary.true_outcomes)
-        assert np.array_equal(self.predicted_probabilities, summary.predicted_probabilities)
-        assert np.array_equal(self.permuation_aucs, summary.permuted_auc_values)
+        assert np.array_equal(self.predicted_probabilities,
+                              summary.predicted_probabilities)
+        assert np.array_equal(self.permuation_aucs,
+                              summary.permuted_auc_values)
         assert summary.tag == 'Encoding'
         assert summary.reloaded == False
 
@@ -265,10 +277,10 @@ class TestClassifierSummary:
 
     def test_auc(self):
         summary = ClassifierSummary()
-        summary.populate(self.subject, self.experiment,
-                         self.sessions, self.recalls,
-                         self.predicted_probabilities,
-                         self.permuation_aucs)
+        summary.populate(self.subject, self.experiment, self.sessions,
+                         self.recalls, self.predicted_probabilities,
+                         self.permuation_aucs,
+                         self.freqs, self.pairs, self.features, self.coef)
         return
 
     def test_pvalue(self):
@@ -313,7 +325,8 @@ class TestFRStimSessionSummary:
         cls.sample_summary.populate(cls.sample_events, pairs, excluded, powers)
 
     def test_num_nonstim_lists(self):
-        assert FRStimSessionSummary.num_nonstim_lists([self.sample_summary]) == 9
+        assert FRStimSessionSummary.num_nonstim_lists(
+            [self.sample_summary]) == 9
 
     def test_num_stim_lists(self):
         assert FRStimSessionSummary.num_stim_lists([self.sample_summary]) == 16
@@ -323,16 +336,19 @@ class TestFRStimSessionSummary:
         assert min(lists) == 1
         assert max(lists) == 25
 
-        stim_lists = FRStimSessionSummary.lists([self.sample_summary], stim=True)
+        stim_lists = FRStimSessionSummary.lists(
+            [self.sample_summary], stim=True)
         assert len(stim_lists) == 16
 
     def test_stim_events_by_list(self):
-        stim_events_by_list = FRStimSessionSummary.stim_events_by_list([self.sample_summary])
+        stim_events_by_list = FRStimSessionSummary.stim_events_by_list(
+            [self.sample_summary])
         assert min(stim_events_by_list) == 0
         assert max(stim_events_by_list) == 9
 
     def test_prob_stim_by_serialpos(self):
-        prob_stim_by_serialpos = FRStimSessionSummary.prob_stim_by_serialpos([self.sample_summary])
+        prob_stim_by_serialpos = FRStimSessionSummary.prob_stim_by_serialpos([
+                                                                             self.sample_summary])
         assert min(prob_stim_by_serialpos) > .46
         assert max(prob_stim_by_serialpos) > .52
         return
@@ -347,10 +363,12 @@ class TestFRStimSessionSummary:
         assert sum(nonstim_recalls_by_list) == 55
 
     def test_prob_first_recall_by_serialpos(self):
-        prob_first_recall_nonstim = FRStimSessionSummary.prob_first_recall_by_serialpos([self.sample_summary], stim=False)
+        prob_first_recall_nonstim = FRStimSessionSummary.prob_first_recall_by_serialpos(
+            [self.sample_summary], stim=False)
         assert max(prob_first_recall_nonstim) < 0.57
 
-        prob_first_recall_stim = FRStimSessionSummary.prob_first_recall_by_serialpos([self.sample_summary], stim=True)
+        prob_first_recall_stim = FRStimSessionSummary.prob_first_recall_by_serialpos(
+            [self.sample_summary], stim=True)
         assert max(prob_first_recall_stim) < 0.13
 
     def test_prob_recall_by_serialpos(self):
@@ -378,11 +396,13 @@ class TestFRStimSessionSummary:
         assert np.isclose(delta_recall_post_stim, 32.4731351)
 
     def test_stim_parameters(self):
-        stim_params = FRStimSessionSummary.stim_parameters([self.sample_summary])
+        stim_params = FRStimSessionSummary.stim_parameters(
+            [self.sample_summary])
         assert len(stim_params) == 1
 
     def test_recall_test_results(self):
-        test_results = FRStimSessionSummary.recall_test_results([self.sample_summary], 'FR5')
+        test_results = FRStimSessionSummary.recall_test_results(
+            [self.sample_summary], 'FR5')
         # TODO: Manually check these values to ensure accuracy and add
         # assertions
 
@@ -396,7 +416,8 @@ class TestPSSessionSummary:
 
     @pytest.mark.xfail(reason='PS Events to dataframe not implemented')
     def test_to_dataframe(self, ps_events, bipolar_pairs, excluded_pairs):
-        self.sample_summary.populate(ps_events, bipolar_pairs, excluded_pairs, normalized_powers)
+        self.sample_summary.populate(
+            ps_events, bipolar_pairs, excluded_pairs, normalized_powers)
         df = self.sample_summary.to_dataframe()
         assert len(df) == 3068
 
@@ -419,7 +440,4 @@ class TestPSSessionSummary:
                               'best_delta_classifier'], 0.0630465, 1e-3)
         assert np.isclose(location_summaries['HCB11_HCB12'][
                               'best_delta_classifier'], 0.08719, 1e-3)
-
-
-
 

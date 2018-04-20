@@ -61,7 +61,8 @@ def load_events(subject, experiment, file_type='all_events',
     sessions_to_load = sessions
     if len(sessions_to_load) > 0:
         if max(sessions) >= 100:
-            sessions_to_load = remove_session_number_offsets(experiment, sessions)
+            sessions_to_load = remove_session_number_offsets(
+                experiment, sessions)
 
     event_files = []
     for session in sorted(sessions_to_load):
@@ -86,10 +87,14 @@ def load_events(subject, experiment, file_type='all_events',
     if len(event_files) == 0:
         empty_recarray = initialize_empty_event_reccarray()
         return empty_recarray
-
-    events = np.rec.array(np.concatenate([
-        BaseEventReader(filename=f, eliminate_events_with_no_eeg=True).read()
-        for f in event_files]))
+    try:
+        events = np.rec.array(np.concatenate([
+            BaseEventReader(filename=f,
+                            eliminate_events_with_no_eeg=True).read()
+            for f in event_files]))
+    except Exception:
+        raise DataLoadingError(
+            'Could not load events for %s, %s' % (subject, experiment))
 
     return events
 
@@ -208,7 +213,8 @@ def remove_session_number_offsets(experiment, sessions):
         relevant_sessions = [(sess - 200) for sess in sessions if sess >= 200]
 
     elif experiment.find("cat") != -1:
-        relevant_sessions = [(sess - 100) for sess in sessions if (sess >= 100 and sess < 200)]
+        relevant_sessions = [(sess - 100)
+                             for sess in sessions if (sess >= 100 and sess < 200)]
 
     elif experiment.find("FR") != -1:
         relevant_sessions = [sess for sess in sessions if sess < 100]
@@ -217,7 +223,8 @@ def remove_session_number_offsets(experiment, sessions):
         relevant_sessions = [sess for sess in sessions if sess < 100]
 
     else:
-        raise RuntimeError("Only Fr/catFR/PAL session numbering with offsets is supported")
+        raise RuntimeError(
+            "Only Fr/catFR/PAL session numbering with offsets is supported")
     return relevant_sessions
 
 
@@ -388,7 +395,7 @@ def remove_incomplete_lists(events):
 
         # Remove all task events for lists that don't have a "REC_END" event
         events_by_list = (np.array([l for l in list_group]) for listno,
-                                                                list_group in
+                          list_group in
                           groupby(final_sess_events, lambda x: x.list))
         list_has_end = [any([l['type'] == 'REC_END' for l in list_group]) or
                         listno == -999 for listno, list_group in groupby(
@@ -398,7 +405,7 @@ def remove_incomplete_lists(events):
 
         # Re-combine math and task events
         final_sess_events = np.rec.array(np.concatenate([final_sess_events,
-                                            math_events]))
+                                                         math_events]))
         final_sess_events.sort(order=['session', 'list', 'eegoffset'])
         final_event_list.append(final_sess_events)
 
@@ -460,7 +467,7 @@ def update_pal_retrieval_events(events):
 
     """
     # Identify the sample rate
-    samplerate = 1000 #extract_sample_rate(events)
+    samplerate = 1000  # extract_sample_rate(events)
 
     # Separate retrieval and non-retrieval events
     retrieval_mask = get_pal_retrieval_events_mask(events)
@@ -721,7 +728,7 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
         # TODO: Pull this into its own function?
         times = [voc_events[(voc_events.list == lst)].mstime if (
             voc_events.list == lst).any() else []
-                 for lst in rec_lists]
+            for lst in rec_lists]
 
         epochs = find_free_time_periods(times,
                                         duration,
@@ -757,7 +764,7 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
 
         matching_epochs = epochs[full_match_accum]
         new_events = np.rec.array(np.zeros(len(matching_epochs),
-                                          dtype=sess_events.dtype))
+                                           dtype=sess_events.dtype))
 
         for i, _ in enumerate(new_events):
             new_events[i].mstime = matching_epochs[i]
@@ -765,7 +772,7 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
 
         new_events.recalled = 0
         merged_events = np.rec.array(np.concatenate((sess_events,
-                                                    new_events)))
+                                                     new_events)))
         merged_events.sort(order='mstime')
 
         for (i, event) in enumerate(merged_events):
@@ -821,7 +828,8 @@ def find_free_time_periods(times, duration, pre, post, start=None, end=None):
         for interval in free_intervals:
             begin = post_times[interval]
             finish = pre_times[interval + 1] - duration
-            interval_epoch_times = range(int(begin), int(finish), int(duration))
+            interval_epoch_times = range(
+                int(begin), int(finish), int(duration))
             trial_epoch_times.extend(interval_epoch_times)
         epoch_times.append(np.array(trial_epoch_times))
 
@@ -862,7 +870,7 @@ def concatenate_events_across_experiments(event_list, pal=False, stim=False,
     final_event_list = []
     for events in event_list:
         if len(events) == 0:
-            continue # we don't want to be incrementing if we dont have to
+            continue  # we don't want to be incrementing if we dont have to
         events.session += session_offset
         events = select_column_subset(events, pal=pal, stim=stim, cat=cat)
         final_event_list.append(events)
@@ -987,7 +995,8 @@ def extract_experiment_from_events(events):
     """
     # Experiment field can be blank, so make sure to not include that in the
     # final list
-    experiments = np.unique(events[events.experiment != ''].experiment).tolist()
+    experiments = np.unique(
+        events[events.experiment != ''].experiment).tolist()
 
     # Handle the case of empty events being passed
     if len(events) == 0:
@@ -1041,7 +1050,8 @@ def get_stim_table_event_mask(events):
         summaries
     """
     excluded_event_types = ['START', 'STOP', 'PROB']
-    event_type_mask = [event.type not in excluded_event_types for event in events]
+    event_type_mask = [
+        event.type not in excluded_event_types for event in events]
 
     return event_type_mask
 
@@ -1107,7 +1117,8 @@ def extract_stim_information(all_events, task_events):
     for lst in lists:
         lst_events = all_events[all_events.list == lst]
         lst_stim_words = np.zeros(len(lst_events[lst_events.type == 'WORD']))
-        lst_post_stim_words = np.zeros(len(lst_events[lst_events.type == 'WORD']))
+        lst_post_stim_words = np.zeros(
+            len(lst_events[lst_events.type == 'WORD']))
 
         # j will track word (task) events, while i tracks all events
         j = 0
@@ -1117,8 +1128,8 @@ def extract_stim_information(all_events, task_events):
                 if ((lst_events[i + 1].type == 'STIM_ON')
                         or (lst_events[i + 1].type == 'WORD_OFF' and
                             (lst_events[i + 2].type == 'STIM_ON' or (
-                                    lst_events[i + 2].type == 'DISTRACT_START'
-                                    and lst_events[i + 3].type == 'STIM_ON')))):
+                                lst_events[i + 2].type == 'DISTRACT_START'
+                                and lst_events[i + 3].type == 'STIM_ON')))):
                     lst_stim_words[j] = True
                     # Identify which post 'WORD' event was the 'STIM_ON'
                     # event and use the stored stim params for that event to
@@ -1141,14 +1152,22 @@ def extract_stim_information(all_events, task_events):
                             # table, which would need to be passed to this
                             # function
 
-                            stim_param_data['item_name'].append(lst_events[loc].item_name)
-                            stim_param_data['session'].append(lst_events[loc].session)
-                            stim_param_data['list'].append(lst_events[loc].list)
-                            stim_param_data['amplitude'].append(",".join([str(stim_params[k].amplitude / 1000.0) for k in range(len(stim_params))]))
-                            stim_param_data['pulse_freq'].append(",".join([str(stim_params[k].pulse_freq) for k in range(len(stim_params))]))
-                            stim_param_data['stim_duration'].append(",".join([str(stim_params[k].stim_duration) for k in range(len(stim_params))]))
-                            stim_param_data['stimAnodeTag'].append(",".join([str(stim_params[k].anode_label) for k in range(len(stim_params))]))
-                            stim_param_data['stimCathodeTag'].append(",".join([str(stim_params[k].cathode_label) for k in range(len(stim_params))]))
+                            stim_param_data['item_name'].append(
+                                lst_events[loc].item_name)
+                            stim_param_data['session'].append(
+                                lst_events[loc].session)
+                            stim_param_data['list'].append(
+                                lst_events[loc].list)
+                            stim_param_data['amplitude'].append(",".join(
+                                [str(stim_params[k].amplitude / 1000.0) for k in range(len(stim_params))]))
+                            stim_param_data['pulse_freq'].append(
+                                ",".join([str(stim_params[k].pulse_freq) for k in range(len(stim_params))]))
+                            stim_param_data['stim_duration'].append(
+                                ",".join([str(stim_params[k].stim_duration) for k in range(len(stim_params))]))
+                            stim_param_data['stimAnodeTag'].append(
+                                ",".join([str(stim_params[k].anode_label) for k in range(len(stim_params))]))
+                            stim_param_data['stimCathodeTag'].append(
+                                ",".join([str(stim_params[k].cathode_label) for k in range(len(stim_params))]))
                             break
 
                 # Post stim words are always the word after a stim word,
@@ -1507,7 +1526,8 @@ def find_subjects(experiment, rootdir="/"):
     json_reader = JsonIndexReader(os.path.join(rootdir,
                                                "protocols",
                                                "r1.json"))
-    subjects = json_reader.aggregate_values('subject_alias', experiment=experiment)
+    subjects = json_reader.aggregate_values(
+        'subject_alias', experiment=experiment)
     return subjects
 
 

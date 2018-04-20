@@ -37,7 +37,8 @@ def load_connectivity_matrix(subject, rhino_root="/"):
     expected_path = os.path.join(rhino_root, location)
 
     if os.path.exists(expected_path) is False:
-        logger.error('Controllability folder not found in /data/eeg/[SUBJECT]/')
+        logger.error(
+            'Controllability folder not found in /data/eeg/[SUBJECT]/')
         return
 
     connectivity_matrices = glob.glob(expected_path + "*.mat")
@@ -171,7 +172,7 @@ def modal_control(A):
 
     # Evaluate schur stability
     T, U = scila.schur(A, 'real')
-    eigVals = np.diag(T);
+    eigVals = np.diag(T)
 
     N = A.shape[0]
     phi = np.zeros(N)

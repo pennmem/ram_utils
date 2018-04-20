@@ -4,7 +4,7 @@ import functools
 import numpy as np
 
 from ramutils.controllability import assign_electrode_to_lausanne, \
-modal_control, load_connectivity_matrix, calculate_modal_controllability
+    modal_control, load_connectivity_matrix, calculate_modal_controllability
 from pkg_resources import resource_filename
 from scipy.io import loadmat
 

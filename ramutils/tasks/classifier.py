@@ -5,18 +5,17 @@ from classiflib import ClassifierContainer
 from sklearn.metrics import roc_auc_score
 
 from ramutils.classifier.cross_validation import permuted_loso_cross_validation, \
-    perform_loso_cross_validation, logger, \
-    permuted_lolo_cross_validation, perform_lolo_cross_validation
-from ramutils.classifier.utils import train_classifier as train_classifier_core
+    permuted_lolo_cross_validation, perform_cross_validation
 from ramutils.classifier.utils import reload_classifier
+from ramutils.classifier.utils import train_classifier as train_classifier_core
 from ramutils.classifier.weighting import \
     get_sample_weights as get_sample_weights_core
-from ramutils.reports.summary import ClassifierSummary
 from ramutils.events import extract_sessions, get_nonstim_events_mask, \
     get_encoding_mask, extract_event_metadata
+from ramutils.log import get_logger
 from ramutils.montage import compare_recorded_with_all_pairs
 from ramutils.powers import reduce_powers
-from ramutils.log import get_logger
+from ramutils.reports.summary import ClassifierSummary
 from ramutils.tasks import task
 
 
@@ -25,7 +24,7 @@ logger = get_logger()
 __all__ = [
     'get_sample_weights',
     'train_classifier',
-    'perform_cross_validation',
+    'summarize_classifier',
     'serialize_classifier',
     'post_hoc_classifier_evaluation',
     'reload_used_classifiers'
@@ -50,7 +49,6 @@ def train_classifier(pow_mat, events, sample_weights, penalty_param,
 @task(cache=False)
 def serialize_classifier(classifier, pairs, features, events, sample_weights,
                          classifier_summary, subject):
-
     """ Serialize classifier into a container object
 
     Parameters
@@ -91,8 +89,8 @@ def serialize_classifier(classifier, pairs, features, events, sample_weights,
 
 
 @task()
-def perform_cross_validation(classifier, pow_mat, events, n_permutations,
-                             tag='classifier', **kwargs):
+def summarize_classifier(classifier, pow_mat, events, n_permutations,
+                         tag='classifier', **kwargs):
     """Perform LOSO or LOLO cross validation on a classifier.
 
     Parameters
@@ -118,36 +116,31 @@ def perform_cross_validation(classifier, pow_mat, events, n_permutations,
     encoding_event_mask = get_encoding_mask(events)
     encoding_recalls = recalls[encoding_event_mask]
 
-    classifier_summary = ClassifierSummary()
-    subject, experiment, sessions = extract_event_metadata(events)
-
     # Run leave-one-session-out cross validation when we have > 1 session,
     # otherwise leave-one-list-out
-    if len(sessions) > 1:
-        permuted_auc_values = permuted_loso_cross_validation(classifier,
-                                                             pow_mat,
-                                                             events,
-                                                             n_permutations,
-                                                             **kwargs)
-        probs = perform_loso_cross_validation(classifier, pow_mat, events,
-                                              recalls, **kwargs)
-        classifier_summary.populate(subject, experiment,
-                                    sessions, encoding_recalls, probs,
-                                    permuted_auc_values, tag=tag)
+    subject, experiment, sessions = extract_event_metadata(events)
 
-    else:
-        logger.info("Performing LOLO cross validation")
-        permuted_auc_values = permuted_lolo_cross_validation(classifier,
-                                                             pow_mat,
-                                                             events,
-                                                             n_permutations,
-                                                             **kwargs)
-        probs = perform_lolo_cross_validation(classifier, pow_mat, events,
-                                              recalls, **kwargs)
+    permuted_auc_values, probs = perform_cross_validation(classifier,
+                                                          events,
+                                                          n_permutations,
+                                                          pow_mat,
+                                                          recalls,
+                                                          sessions,
+                                                          **kwargs)
 
-        classifier_summary.populate(subject, experiment,
-                                    sessions, encoding_recalls, probs,
-                                    permuted_auc_values, tag=tag)
+    classifier_summary = ClassifierSummary()
+
+    classifier_summary.populate(subject,
+                                experiment,
+                                sessions,
+                                encoding_recalls,
+                                probs,
+                                permuted_auc_values,
+                                frequencies=kwargs.get('freqs'),
+                                pairs=kwargs.get('pairs'),
+                                tag=tag,
+                                features=pow_mat,
+                                coefficients=classifier.coef_)
 
     logger.info("Permutation test p-value = %f", classifier_summary.pvalue)
     recall_prob = classifier.predict_proba(pow_mat)[:, 1]
@@ -286,11 +279,13 @@ def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
         if (classifiers[i] is None) or (use_retrained):
             classifier_container = retrained_classifier
             reloaded = False
-            logger.info("Using the retrained classifier for session {}".format(session))
+            logger.info(
+                "Using the retrained classifier for session {}".format(session))
 
         else:
             classifier_container = classifiers[i]
-            logger.info("Using actual classifier for session {}".format(session))
+            logger.info(
+                "Using actual classifier for session {}".format(session))
 
         classifier = classifier_container.classifier
         recorded_pairs = classifier_container.pairs
@@ -334,10 +329,15 @@ def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
         # This is the primary classifier used for evaluation. It is based on
         # assessing classifier output for non-stim encoding events
         classifier_summary.populate(subject, experiment, sessions,
-                                    session_recalls, session_probs,
+                                    session_recalls,
+                                    session_probs,
                                     permuted_auc_values,
+                                    frequencies=classifier_container.frequencies,
+                                    pairs=kwargs['pairs'][used_mask],
                                     tag='session_' + str(session),
-                                    reloaded=reloaded)
+                                    reloaded=reloaded,
+                                    features=reduced_session_powers,
+                                    coefficients=classifier.coef_)
         classifier_summaries.append(classifier_summary)
         logger.info('AUC for session {}: {}'.format(session,
                                                     classifier_summary.auc))
@@ -359,8 +359,12 @@ def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
         encoding_classifier_summary.populate(subject, experiment, sessions,
                                              session_encoding_recalls,
                                              session_encoding_probs,
-                                             None,
-                                             tag='encoding_evaluation')
+                                             permuted_auc_values=None,
+                                             frequencies=classifier_container.frequencies,
+                                             pairs=kwargs['pairs'],
+                                             tag='encoding_evaluation',
+                                             features=reduced_session_encoding_powers,
+                                             coefficients=classifier.coef_)
         encoding_classifier_summaries.append(encoding_classifier_summary)
 
     # Combine session-specific predicted probabilities into 1D array
@@ -368,18 +372,25 @@ def post_hoc_classifier_evaluation(events, powers, all_pairs, classifiers,
 
     if len(sessions) > 1:
         permuted_auc_values = permuted_loso_cross_validation(
-          retrained_classifier.classifier, powers, events, n_permutations,
+            retrained_classifier.classifier, powers, events, n_permutations,
             scheme='EQUAL', **kwargs)
 
     subject, experiment, sessions = extract_event_metadata(events)
     cross_session_summary = ClassifierSummary()
+    classifier_ = retrained_classifier.classifier if retrained_classifier else classifier
     cross_session_summary.populate(subject, experiment, sessions,
-                                   non_stim_recalls, all_predicted_probs,
-                                   permuted_auc_values, tag='Combined Sessions',
-                                   reloaded=False)
+                                   non_stim_recalls,
+                                   all_predicted_probs,
+                                   permuted_auc_values,
+                                   coefficients=classifier_.coef_,
+                                   frequencies=classifier_container.frequencies,
+                                   pairs=kwargs['pairs'],
+                                   tag='Combined Sessions',
+                                   reloaded=False,
+                                   features=classifier_container.features)
     # Leave commented out until we have a way to do multi-stim-session
     # evaluation, otherwise this classifier is just redundant.
-    #classifier_summaries.append(cross_session_summary)
+    # classifier_summaries.append(cross_session_summary)
     logger.info("Combined AUC: {}".format(cross_session_summary.auc))
 
     result_dict = {

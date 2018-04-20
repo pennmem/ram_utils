@@ -41,15 +41,17 @@ def estimate_effects_of_stim(subject, experiment, stim_session_summaries):
 
     # serialpos, list, session all need to be 0-indexed for the vectorized
     # implementation of the model to work
-    df['session_idx'] = df.groupby(by=['subject', 'experiment', 'session']).grouper.group_info[0]
+    df['session_idx'] = df.groupby(
+        by=['subject', 'experiment', 'session']).grouper.group_info[0]
     df["serialpos"] = df["serialpos"] - (df["serialpos"].min())
 
-    df = df[df["list"] > 3] # drop the first 3 lists since they are not technically part of the experiment
+    # drop the first 3 lists since they are not technically part of the experiment
+    df = df[df["list"] > 3]
 
     # Turn list into a % session completed variable to that subjects who
     # complete only partial sessions can still be compared to full sessions
     df["list"] = ((df["list"] - (df["list"].min())) /
-                    (len(df["list"].unique())))
+                  (len(df["list"].unique())))
 
     serialpos_dummies = pd.get_dummies(df.serialpos)
     df = pd.concat([df, serialpos_dummies], axis=1)
@@ -64,8 +66,8 @@ def estimate_effects_of_stim(subject, experiment, stim_session_summaries):
 
     # Stim items vs. low bio non stim items
     stim_or_low_bio_df = df[((df["is_stim_item"] == True) |
-                            ((df["low_biomarker"] == True) &
-                            (df["is_stim_item"] == False)))]
+                             ((df["low_biomarker"] == True) &
+                              (df["is_stim_item"] == False)))]
     stim_item_model = HierarchicalModel(stim_or_low_bio_df,
                                         subject,
                                         experiment,
@@ -76,7 +78,7 @@ def estimate_effects_of_stim(subject, experiment, stim_session_summaries):
     # Post Stim Items vs. Low Biomarker Non-stim Items
     post_stim_or_low_bio_df = df[((df["is_post_stim_item"] == True) |
                                   ((df["low_biomarker"] == True) &
-                                  (df["is_post_stim_item"] == False)))]
+                                   (df["is_post_stim_item"] == False)))]
     post_stim_item_model = HierarchicalModel(post_stim_or_low_bio_df,
                                              subject,
                                              experiment,
@@ -90,5 +92,3 @@ def estimate_effects_of_stim(subject, experiment, stim_session_summaries):
         summary.model_metadata = result_traces
 
     return result_traces
-
-

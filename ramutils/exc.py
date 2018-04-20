@@ -19,7 +19,12 @@ class UnsupportedExperimentError(RamException):
     """
 
 
+class DataLoadingError(RamException):
+    """ Raised when when unable to load expected files"""
+
 # FIXME: refactor naming
+
+
 class MultistimNotAllowedException(RamException):
     """Raised when attempting to define multiple stim sites for an experiment
     which doesn't support it.

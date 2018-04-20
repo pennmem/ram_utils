@@ -8,12 +8,15 @@ from ramutils.constants import EXPERIMENTS
 
 class RamArgumentParser(ArgumentParser):
     """Parse arguments and run common things afterwards."""
+
     def __init__(self, agg=False, **kwargs):
         allowed_experiments = kwargs.pop('allowed_experiments')
         super(RamArgumentParser, self).__init__(**kwargs)
-        default_cache_dir = os.path.expanduser(os.path.join('~', '.ramutils', 'cache'))
+        default_cache_dir = os.path.expanduser(
+            os.path.join('~', '.ramutils', 'cache'))
 
-        self.add_argument('--root', default='/', help='path to rhino root (default: /)')
+        self.add_argument('--root', default='/',
+                          help='path to rhino root (default: /)')
         self.add_argument('--dest', '-d', default='scratch/ramutils',
                           help='directory to write output to (default: scratch/ramutils)')
         self.add_argument('--cachedir', default=default_cache_dir,
@@ -28,22 +31,28 @@ class RamArgumentParser(ArgumentParser):
                           version='ramutils version {}'.format(__version__))
         self.add_argument('--sessions', '-S', nargs='+',
                           help='sessions to read data from (default: use all)')
+        self.add_argument('--debug', '-D', action='store_true',
+                          help='Run in debug mode')
 
         # Number of args, type, and required flag are different so it is easier to do set them up
         # completely separately
         if agg:
-            self.add_argument('--subject', '-s', nargs='+', help='List of subjects')
-            self.add_argument('--experiment', '-x', nargs='+', help='List of experiments')
+            self.add_argument('--subject', '-s', nargs='+',
+                              help='List of subjects')
+            self.add_argument('--experiment', '-x', nargs='+',
+                              help='List of experiments')
 
         else:
-            self.add_argument('--subject', '-s', required=True, type=str, help='subject ID')
+            self.add_argument('--subject', '-s', required=True,
+                              type=str, help='subject ID')
             self.add_argument('--experiment', '-x', required=True, type=str,
                               choices=allowed_experiments, help='experiment')
 
     def _create_dirs(self, path):
         if os.path.exists(path):
             if os.path.isfile(path):
-                raise RuntimeError("{} is a file but must be a directory".format(path))
+                raise RuntimeError(
+                    "{} is a file but must be a directory".format(path))
         else:
             try:
                 os.makedirs(path)

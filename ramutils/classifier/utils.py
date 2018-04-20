@@ -111,3 +111,40 @@ def train_classifier(pow_mat, events, sample_weights, penalty_param,
     return classifier
 
 
+# TODO: group and average classifier weights by brain region
+def save_classifier_weights_plot(weights, frequencies, pairs, file_):
+    """
+    Visualize the classifier weights as a function of frequency and location.
+
+    Parameters
+    -----------
+    weights : np.ndarray (len(pairs)*len(frequencies)
+    frequencies : np.ndarray[float]
+    pairs : ??? Iterable describing the pairs in some way
+    file_ : The destination of the classifier weight plot,
+    which should be either a path or a file-like object.
+
+    Returns:
+    file_ : string or file-like
+        The file_ parameter
+    """
+    # pyplot is imported here rather than at the top of the module to avoid any
+    # problems setting the matplotlib backend elsewhere.
+    from matplotlib import pyplot as plt
+
+    weights_by_channel = weights.reshape((len(frequencies), len(pairs)))
+    plt.imshow(weights_by_channel, aspect='auto', origin='lower', cmap='RdBu')
+    cmin, cmax = weights.min(), weights.max()
+    clim = max(abs(cmin), abs(cmax))
+    plt.clim(-clim, clim)
+    plt.colorbar()
+    locs, old_labels = plt.yticks()
+    new_labels = ['%d' % (np.rint(f).astype(int)) for f in frequencies]
+    plt.yticks(locs[1:-1], new_labels)
+    plt.savefig(file_,
+                format="png",
+                dpi=300,
+                bbox_inches="tight",
+                pad_inches=0.1)
+    plt.close()
+    return file_

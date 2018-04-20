@@ -159,13 +159,16 @@ class TestCreateReports:
         ('R1354E', 'FR1', [0], False, False),
         ('R1354E', 'FR1', [0, 1], False, False),
         ('R1354E', 'CatFR1', [1], False, False),
-        ('R1354E', 'FR1', [0, 100], True, False), # test case for cross-experiment session subset
+        # test case for cross-experiment session subset
+        ('R1354E', 'FR1', [0, 100], True, False),
         ('R1354E', 'FR1', None, True, False),
         ('R1345D', 'FR1', None, False, False),
         ('R1374T', 'CatFR1', None, False, False),
         ('R1374T', 'CatFR1', None, True, False),
-        ('R1394E_1', 'FR1', None, True, False), # Test case for re-localized subject
-        ('R1364C', 'FR1', [0], False, True)  # use excluded classifier leads test
+        # Test case for re-localized subject
+        ('R1394E_1', 'FR1', None, True, False),
+        # use excluded classifier leads test
+        ('R1364C', 'FR1', [0], False, True)
     ])
     def test_create_open_loop_report(self, subject, experiment, sessions,
                                      joint, use_classifier_excluded_leads, rerun, rhino_root,

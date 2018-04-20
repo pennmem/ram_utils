@@ -40,6 +40,7 @@ class PipelineCallback(Callback):
         UDP host port (default: ``50001``)
 
     """
+
     def __init__(self, pipeline_id=None, host='127.0.0.1', port=50001):
         super(PipelineCallback, self).__init__()
         self._pipeline_id = pipeline_id if pipeline_id is not None else uuid4().hex
@@ -118,6 +119,7 @@ class PipelineStatusListener(object):
     method.
 
     """
+
     def __init__(self, callback, pipeline_id=None, port=50001):
         class Handler(DatagramRequestHandler):
             def handle(self):

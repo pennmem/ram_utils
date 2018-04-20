@@ -17,6 +17,7 @@ from ramutils.parameters import FilePaths, FRParameters, PS5Parameters
 from ramutils.pipelines.report import make_report
 from ramutils.utils import timer, is_stim_experiment
 from ramutils.tasks import memory
+import logging
 
 
 parser = make_parser("Generate a report")
@@ -38,6 +39,10 @@ logger = get_logger("reports")
 
 def create_report(input_args=None):
     args = parser.parse_args(input_args)
+    if args.debug:
+        import dask
+        dask.set_options(get=dask.get)
+        logger.setLevel(logging.DEBUG)
 
     paths = FilePaths(
         root=osp.expanduser(args.root),
@@ -51,13 +56,16 @@ def create_report(input_args=None):
 
     # Extract sessions
     stim_experiment = is_stim_experiment(args.experiment)
-    if args.sessions is not None:
-        if stim_experiment and len(args.sessions) != 1:
+    if (args.sessions is None or len(args.sessions) != 1):
+        if stim_experiment:
             raise TooManySessionsError("Stim reports must be built one "
                                        "session at a time")
-        sessions = [int(session) for session in args.sessions]
+        elif args.sessions is not None:
+            sessions = [int(session) for session in args.sessions]
+        else:
+            sessions = None
     else:
-        sessions = None
+        sessions = [int(session) for session in args.sessions]
 
     if 'PS5' in args.experiment:
         exp_params = PS5Parameters()
@@ -66,7 +74,8 @@ def create_report(input_args=None):
     elif 'PAL' in args.experiment:
         raise NotImplementedError("PAL experiments are not supported yet")
     else:
-        raise UnsupportedExperimentError("Unsupported experiment: " + args.experiment)
+        raise UnsupportedExperimentError(
+            "Unsupported experiment: " + args.experiment)
 
     if 'PS5' in args.experiment and args.trigger_electrode is None:
         raise CommandLineError("Must specify a trigger electrode for PS5 "
@@ -90,7 +99,7 @@ def create_report(input_args=None):
             use_classifier_excluded_leads=args.use_classifier_excluded_leads
         )
         logger.info("Wrote report to %s\n", path)
-        memory.clear() # remove cached intermediate results if build succeeds
+        memory.clear()  # remove cached intermediate results if build succeeds
 
 
 if __name__ == "__main__":

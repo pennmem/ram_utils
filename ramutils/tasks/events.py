@@ -178,7 +178,4 @@ def build_ps_data(subject, experiment, file_type, sessions, rootdir):
     # may need to change in the future
     ps_events = remove_practice_lists(ps_events)
 
-    if len(ps_events) == 0:
-        raise RuntimeError("No events found")
     return ps_events
-

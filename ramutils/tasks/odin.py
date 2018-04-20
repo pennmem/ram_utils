@@ -290,7 +290,7 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
                 "artifact_detection_sample_time_length": 500,
                 "artifact_detection_inter_stim_interval": 2000,
                 "allow_artifact_detection_during_session": False,
-            },
+                    },
         },
 
         "biomarker_threshold": 0.5,
@@ -390,7 +390,8 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
         if e.errno != 17:  # File exists
             raise
 
-    classifier_path = os.path.join(config_files_dir, '{}-classifier.zip'.format(subject))
+    classifier_path = os.path.join(
+        config_files_dir, '{}-classifier.zip'.format(subject))
     ec_prefix, _ = os.path.splitext(paths.electrode_config_file)
 
     experiment_config_content = _make_ramulator_config_json(
@@ -438,7 +439,8 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
                           "classifier may not be 100% reproducible", UserWarning)
 
     filename_tmpl = '{subject:s}_{experiment:s}{pairs:s}{date:s}'
-    pair_str = '_' + "_".join([pair.label for pair in stim_params]) + '_' if len(stim_params) else '_'
+    pair_str = '_' + "_".join([pair.label for pair in stim_params]
+                              ) + '_' if len(stim_params) else '_'
     zip_prefix = os.path.join(dest, filename_tmpl.format(
         subject=subject,
         experiment=experiment,

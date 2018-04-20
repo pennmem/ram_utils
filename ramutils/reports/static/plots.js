@@ -268,6 +268,74 @@ var ramutils = (function (mod, Plotly) {
 
       Plotly.plot('classifier-performance-plot-placeholder', data, layout);
     },
+    /**
+    * Plot classifier weights as a heatmap: frequency by channel
+    * This function assumes that the classifier weights are log-spaced.
+    * @param{Array} weights - classfier weights
+    * @param{Array} freqs - frequencies used
+    */
+    plotClassifierWeights: function(weights,freqs,labels,names){
+
+        let data =[];
+        let layout = {
+            title: 'Classifier Activation',
+            showlegend: true
+        }
+        let zmin = Math.min(...[].concat(...[].concat(...[].concat(...weights))))
+        let zmax = Math.max(...[].concat(...[].concat(...[].concat(...weights))))
+
+
+        for(i=0;i<weights.length;i++){
+            let these_freqs = freqs[i];
+            let xaxis = 'x';
+            let yaxis = 'y';
+            if (i>0) {
+             xaxis = xaxis+(i+1);
+             yaxis = yaxis+(i+1);
+             }
+
+            data.push( {
+                z: weights[i],
+                y: these_freqs,
+                type: 'heatmap',
+                xaxis: xaxis,
+                yaxis: yaxis,
+                zmin: zmin,
+                zmax: zmax,
+                showscale: ((i+1)==weights.length),
+                colorbar:{
+                    title: 'Weight'
+                    }
+                });
+            let xax_name = i==0? 'xaxis' : 'xaxis'+(i+1);
+            let yax_name = i==0? 'yaxis' : 'yaxis'+(i+1);
+            let start_offset = i==0?0:0.1/(weights.length);
+            let end_offset = i==weights.length-1?0:0.1/weights.length;
+            let freq_names = [];
+            for(j=0; j<these_freqs.length; j++){
+                freq_names.push(Math.round(these_freqs[j]).toString())
+                }
+
+            layout[xax_name] = {title: names[i],
+                                domain:[i/weights.length+start_offset, (i+1)/weights.length-end_offset],
+                                ticktext:labels[i],
+                                tickvals:Array.from(Array(labels[i].length).keys()),
+                                tickangle: -45,
+                                };
+            layout[yax_name] = {title: i?'':'Frequency (Hz)',
+                                type:'log',
+                                autorange:true,
+                                anchor:xaxis,
+                                tickmode:'linear',
+                                tick0:Math.log10(these_freqs[0]),
+                                dtick:Math.log10(
+                                    these_freqs[these_freqs.length-1]/these_freqs[0]
+                                    )/(these_freqs.length-1),
+                                tickformat: '.0f'
+                                };
+        }
+        Plotly.plot("classifier-weight-plot",data,layout)
+    },
 
     /**
      * Plot classifier output distributions.
@@ -304,6 +372,18 @@ var ramutils = (function (mod, Plotly) {
       };
 
       Plotly.plot('classifier-output-placeholder', data, layout);
+    },
+    /** Plot the feature matrix
+    * @params {Array} features
+    */
+    plotZtransPowers: function (features) {
+        const data = [{
+            z: features,
+            type: 'heatmap',
+            name: 'Features',
+        }];
+
+        Plotly.plot('feature-plot-placeholder',data);
     },
 
     /**

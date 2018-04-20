@@ -2,7 +2,6 @@ from __future__ import division
 from __future__ import unicode_literals
 
 from datetime import datetime
-import warnings
 
 import json
 import numpy as np
@@ -11,19 +10,24 @@ import pytz
 import pickle
 import base64
 
-from ramutils.utils import safe_divide, extract_subject_montage
+import io
+
+from ramutils.utils import safe_divide
 from ramutils.events import extract_subject, extract_experiment_from_events, \
     extract_sessions
 from ramutils.bayesian_optimization import choose_location
 from ramutils.exc import TooManySessionsError
 from ramutils.parameters import ExperimentParameters
+from ramutils.powers import save_power_plot, save_eeg_by_channel_plot
+from ramutils.utils import encode_file
+from ramutils.montage import generate_pairs_for_classifier
 
 from traitschema import Schema
-from traits.api import Array, ArrayOrNone, Float, Unicode, Bool, Bytes
+from traits.api import Array, ArrayOrNone, Float, Unicode, Bool, Bytes, CArray
+
 
 from sklearn.metrics import roc_auc_score, roc_curve
 from statsmodels.stats.proportion import proportions_chisquare
-
 
 
 __all__ = [
@@ -42,9 +46,17 @@ __all__ = [
 
 class ClassifierSummary(Schema):
     """ Classifier Summary Object """
-    _predicted_probabilities = ArrayOrNone(desc='predicted recall probabilities')
-    _true_outcomes = ArrayOrNone(desc='actual results for recall vs. non-recall')
+    _predicted_probabilities = ArrayOrNone(
+        desc='predicted recall probabilities')
+    _true_outcomes = ArrayOrNone(
+        desc='actual results for recall vs. non-recall')
     _permuted_auc_values = ArrayOrNone(desc='permuted AUCs')
+
+    _frequencies = ArrayOrNone(
+        desc='Frequencies the classifier was trained on')
+    _pairs = ArrayOrNone(desc='Bipolar pairs used to train the classifier')
+    _features = ArrayOrNone(desc='Feature matrix used to train the classifier')
+    _coef = ArrayOrNone(desc = 'Classifier coefficients')
 
     subject = Unicode(desc='subject')
     experiment = Unicode(desc='experiment')
@@ -52,13 +64,17 @@ class ClassifierSummary(Schema):
     recall_rate = Float(desc='overall recall rate')
     tag = Unicode(desc='name of the classifier')
     reloaded = Bool(desc='classifier was reloaded from hard disk')
-    low_terc_recall_rate = Float(desc='recall rate when predicted probability of recall was in lowest tercile')
-    mid_terc_recall_rate = Float(desc='recall reate when predicted probability of recall was in middle tercile')
-    high_terc_recall_rate = Float(desc='recall rate when predicted probability of recall was in highest tercile')
+    low_terc_recall_rate = Float(
+        desc='recall rate when predicted probability of recall was in lowest tercile')
+    mid_terc_recall_rate = Float(
+        desc='recall reate when predicted probability of recall was in middle tercile')
+    high_terc_recall_rate = Float(
+        desc='recall rate when predicted probability of recall was in highest tercile')
 
     @property
     def id(self):
-        session_str = ".".join([str(sess) for sess in np.unique(self.sessions)])
+        session_str = ".".join([str(sess)
+                                for sess in np.unique(self.sessions)])
         return ":".join([self.subject, self.experiment, session_str])
 
     @property
@@ -100,7 +116,8 @@ class ClassifierSummary(Schema):
     @property
     def pvalue(self):
         """ p-value of classifier AUC based on permuted AUCs """
-        pvalue = np.count_nonzero((self.permuted_auc_values >= self.auc)) / float(len(self.permuted_auc_values))
+        pvalue = np.count_nonzero(
+            (self.permuted_auc_values >= self.auc)) / float(len(self.permuted_auc_values))
         return pvalue
 
     @property
@@ -120,7 +137,8 @@ class ClassifierSummary(Schema):
     @property
     def thresholds(self):
         """ Thresholds used for AUC curve """
-        _, _, thresholds = roc_curve(self.true_outcomes, self.predicted_probabilities)
+        _, _, thresholds = roc_curve(
+            self.true_outcomes, self.predicted_probabilities)
         thresholds = thresholds.tolist()
         return thresholds
 
@@ -158,8 +176,54 @@ class ClassifierSummary(Schema):
         """ % change in recall rate from overall recall when classifier output was in highest tercile """
         return 100.0 * (self.high_terc_recall_rate - self.recall_rate) / self.recall_rate
 
+    @property
+    def features(self):
+        return self._features if self._features is not None else np.array([])
+
+    @property
+    def pairs(self):
+        return self._pairs if self._pairs is not None else np.array([])
+
+    @property
+    def frequencies(self):
+        return self._frequencies if self._frequencies is not None else np.array([])
+
+    @property
+    def classifier_activation(self):
+        """
+        Forward model of classifier activation from Haufe et. al. 2014
+        """
+        if self._features is None:
+            return np.array([])
+        return np.dot(np.cov(self._features,rowvar=False),self._coef.squeeze())
+
+    @property
+    def classifier_activation_2d(self):
+        return self.classifier_activation.reshape(
+            len(self.pairs), len(self.frequencies)
+        )
+
+    @property
+    def classifier_activation_by_region(self):
+        if len(self.classifier_activation):
+            activation_df = pd.DataFrame(data=self.classifier_activation_2d,
+                                         index=self.pairs['region'])
+            mean_activation = activation_df.groupby(activation_df.index).mean()
+            return mean_activation.values.T
+        else:
+            return np.array([])
+
+    @property
+    def regions(self):
+        """ List of unique electrode regions """
+        if len(self.pairs):
+            return [str(x) for x in np.unique(self.pairs['region'])]
+        else:
+            return []
+
     def populate(self, subject, experiment, session, true_outcomes,
                  predicted_probabilities, permuted_auc_values,
+                 frequencies, pairs, features, coefficients,
                  tag='', reloaded=False):
         """ Populate classifier performance metrics
 
@@ -177,6 +241,15 @@ class ClassifierSummary(Schema):
             Outputs from the trained classifier for each word event
         permuted_auc_values: array_like
             AUC values from performing a permutation test on classifier
+        frequencies: array_like
+            Frequencies used to train the classifier
+        pairs: pd.DataFrame
+            Metadata for each bipolar pair recorded from
+        features: np.ndarray
+            Feature matrix used to train the classifier,
+            of shape [len(predicted_probabilities) , (len(pairs) * len(frequencies)].
+        coefficients : np.array
+            Array of classifier weights
         tag: str
             Name given to the classifier, used to differentiate between
             multiple classifiers
@@ -194,6 +267,10 @@ class ClassifierSummary(Schema):
         self.permuted_auc_values = permuted_auc_values
         self.tag = tag
         self.reloaded = reloaded
+        self._frequencies = frequencies
+        self._pairs = pairs
+        self._features = features
+        self._coef = coefficients
 
         thresh_low = np.percentile(predicted_probabilities, 100.0 / 3.0)
         thresh_high = np.percentile(predicted_probabilities, 2.0 * 100.0 / 3.0)
@@ -355,11 +432,13 @@ class MathSummary(Schema):
 
 class Summary(Schema):
     """Base class for all session summary objects """
-    _events = ArrayOrNone(desc='task-related events excluding math distractor events')
-    _raw_events = ArrayOrNone(desc='all event types including math distractor events')
+    _events = ArrayOrNone(
+        desc='task-related events excluding math distractor events')
+    _raw_events = ArrayOrNone(
+        desc='all event types including math distractor events')
     _bipolar_pairs = Unicode(desc='bipolar pairs in montage')
     _excluded_pairs = Unicode(desc='bipolar pairs not used for classification '
-                                  'due to artifact or stimulation')
+                              'due to artifact or stimulation')
     _normalized_powers = ArrayOrNone(desc="normalized powers for all events "
                                           "and recorded pairs")
 
@@ -487,6 +566,22 @@ class SessionSummary(Summary):
         self._normalized_powers = new_normalized_powers
 
     @property
+    def normalized_powers_covariance(self):
+        return np.cov(self._normalized_powers.T)
+
+    @property
+    def normalized_powers_plot(self):
+        """
+        Plots the matrix of normalized powers for the session
+        to the specified filename or file-like object,
+        and returns the plot as a base64-encoded string
+        """
+        plot_buffer = io.BytesIO()
+        save_power_plot(self.normalized_powers,
+                        self.session_number, plot_buffer)
+        return encode_file(plot_buffer)
+
+    @property
     def session_length(self):
         """Computes the total amount of time the session lasted in seconds."""
         start = self.events.mstime.min()
@@ -540,6 +635,7 @@ class SessionSummary(Summary):
 
 class FRSessionSummary(SessionSummary):
     """Free recall session summary data."""
+
     def populate(self, events, bipolar_pairs, excluded_pairs,
                  normalized_powers, raw_events=None):
         """Populate data from events.
@@ -615,14 +711,16 @@ class FRSessionSummary(SessionSummary):
 
         """
         columns = ['serialpos', 'list', 'recalled', 'type']
-        events = pd.concat([pd.DataFrame(s.events[columns]) for s in summaries])
+        events = pd.concat([pd.DataFrame(s.events[columns])
+                            for s in summaries])
         events = events[events.type == 'WORD']
 
         if first:
             firstpos = np.zeros(len(events.serialpos.unique()), dtype=np.float)
             for listno in events.list.unique():
                 try:
-                    nonzero = events[(events.list == listno) & (events.recalled == 1)].serialpos.iloc[0]
+                    nonzero = events[(events.list == listno) & (
+                        events.recalled == 1)].serialpos.iloc[0]
                 except IndexError:  # no items recalled this list
                     continue
                 thispos = np.zeros(firstpos.shape, firstpos.dtype)
@@ -640,8 +738,10 @@ class CatFRSessionSummary(FRSessionSummary):
         experiments.
     """
     _repetition_ratios = Unicode(desc='Repetition ratio by subject')
-    irt_within_cat = Array(desc='average inter-response time within categories')
-    irt_between_cat = Array(desc='average inter-response time between categories')
+    irt_within_cat = Array(
+        desc='average inter-response time within categories')
+    irt_between_cat = Array(
+        desc='average inter-response time between categories')
 
     def populate(self, events, bipolar_pairs, excluded_pairs,
                  normalized_powers, raw_events=None,
@@ -654,14 +754,13 @@ class CatFRSessionSummary(FRSessionSummary):
 
         self.repetition_ratios = repetition_ratio_dict
 
-
         # Calculate between and within IRTs based on the REC_WORD events as found in all_events.json
         # Exclude all intrusions so that a transition between an intrusion and a recall will not be
         # counted towards either within or between times.
         catfr_events = events[(events.experiment == 'catFR1') &
                               (events.type == 'REC_EVENT') &
                               (events.intrusion == 0) &
-                              (events.recalled == 1)] # recalled == 0 indicates a baseline recall event
+                              (events.recalled == 1)]  # recalled == 0 indicates a baseline recall event
         cat_recalled_events = catfr_events[(catfr_events.recalled == 1)]
         irt_within_cat = []
         irt_between_cat = []
@@ -719,9 +818,11 @@ class CatFRSessionSummary(FRSessionSummary):
 
 class StimSessionSummary(SessionSummary):
     """SessionSummary data specific to sessions with stimulation."""
-    _post_stim_prob_recall = ArrayOrNone(dtype=np.float,
-                                         desc='classifier output in post stim period')
+    _post_stim_prob_recall = CArray(dtype=np.float,
+                                         desc='classifier output in post stim period',
+                                    default=np.array([]))
     _model_metadata = Bytes(desc="traces for Bayesian multilevel models")
+    _post_stim_eeg = ArrayOrNone(desc='raw post-stim EEG')
 
     @property
     def post_stim_prob_recall(self):
@@ -749,15 +850,29 @@ class StimSessionSummary(SessionSummary):
 
     def populate(self, events, bipolar_pairs, excluded_pairs,
                  normalized_powers, post_stim_prob_recall=None,
-                 raw_events=None, model_metadata={}):
+                 raw_events=None, model_metadata={}, post_stim_eeg=None):
         """ Populate stim data from events """
         SessionSummary.populate(self, events,
                                 bipolar_pairs,
                                 excluded_pairs,
                                 normalized_powers,
                                 raw_events=raw_events)
-        self.post_stim_prob_recall = post_stim_prob_recall
-        self.model_metadata = model_metadata
+        if post_stim_prob_recall is not None:
+            self.post_stim_prob_recall = post_stim_prob_recall
+        if len(model_metadata)>0:
+            self.model_metadata = model_metadata
+        if post_stim_eeg is not None:
+            self._post_stim_eeg = post_stim_eeg
+
+    @property
+    def post_stim_eeg_plot(self):
+        if self._post_stim_eeg is None:
+            return ''
+        else:
+            pairs = ['%s-\n%s' % (pair['label0'], pair['label1'])
+                     for pair in generate_pairs_for_classifier(self.bipolar_pairs, [])
+                     ]
+            return encode_file(save_eeg_by_channel_plot(pairs, self._post_stim_eeg))
 
     @property
     def subject(self):
@@ -770,7 +885,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
 
     def populate(self, events, bipolar_pairs,
                  excluded_pairs, normalized_powers, post_stim_prob_recall=None,
-                 raw_events=None, model_metadata={}):
+                 raw_events=None, model_metadata={}, post_stim_eeg=None):
         FRSessionSummary.populate(self,
                                   events,
                                   bipolar_pairs,
@@ -783,7 +898,8 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
                                     normalized_powers,
                                     post_stim_prob_recall=post_stim_prob_recall,
                                     raw_events=raw_events,
-                                    model_metadata=model_metadata)
+                                    model_metadata=model_metadata,
+                                    post_stim_eeg=post_stim_eeg)
 
     @staticmethod
     def combine_sessions(summaries):
@@ -798,7 +914,8 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
 
     @staticmethod
     def all_post_stim_prob_recall(summaries):
-        post_stim_prob_recall = [summary.post_stim_prob_recall for summary in summaries]
+        post_stim_prob_recall = [
+            summary.post_stim_prob_recall for summary in summaries]
         post_stim_prob_recall = np.concatenate(post_stim_prob_recall).tolist()
         return post_stim_prob_recall
 
@@ -806,7 +923,8 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
     def pre_stim_prob_recall(summaries):
         """ Classifier output in the pre-stim period for items that were eventually stimulated """
         df = FRStimSessionSummary.combine_sessions(summaries)
-        pre_stim_probs = df[df['is_stim_item'] == True].classifier_output.values.tolist()
+        pre_stim_probs = df[df['is_stim_item'] ==
+                            True].classifier_output.values.tolist()
         return pre_stim_probs
 
     @staticmethod
@@ -869,15 +987,15 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
 
         stim_param_by_list = (df[(stim_columns + ['subject', 'experiment',
                                                   'session', 'list'])]
-                                .drop_duplicates()
-                                .dropna(how='all'))
+                              .drop_duplicates()
+                              .dropna(how='all'))
 
         # This ensures that for any given list, the stim parameters used
         # during that list are populated. This makes calculating post stim
         # item behavioral responses easier
         df = df[non_stim_columns]
         df = df.merge(stim_param_by_list, on=['subject', 'experiment',
-                                              'session','list'], how='left')
+                                              'session', 'list'], how='left')
         return df
 
     @staticmethod
@@ -885,10 +1003,10 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         """ Returns a list of unique stimulation parameters used during the experiment """
         df = FRStimSessionSummary.stim_params_by_list(summaries)
         df['location'] = df['location'].replace(np.nan, '--')
-        stim_columns =['stimAnodeTag', 'stimCathodeTag', 'location', 'amplitude',
-                       'stim_duration', 'pulse_freq']
+        stim_columns = ['stimAnodeTag', 'stimCathodeTag', 'location', 'amplitude',
+                        'stim_duration', 'pulse_freq']
         grouped = (df.groupby(by=(stim_columns + ['is_stim_list']))
-                     .agg({'is_stim_item' : 'sum',
+                     .agg({'is_stim_item': 'sum',
                            'subject': 'count'})
                      .rename(columns={'is_stim_item': 'n_stimulations',
                                       'subject': 'n_trials'})
@@ -917,10 +1035,14 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
             parameters = "/".join([str(n) for n in name])
 
             # Stim lists vs. non-stim lists
-            n_correct_stim_list_recalls = group[group.is_stim_list == True].recalled.sum()
-            n_correct_nonstim_list_recalls = df[df.is_stim_list == False].recalled.sum()
-            n_stim_list_words = group[group.is_stim_list == True].recalled.count()
-            n_nonstim_list_words = df[df.is_stim_list == False].recalled.count()
+            n_correct_stim_list_recalls = group[group.is_stim_list == True].recalled.sum(
+            )
+            n_correct_nonstim_list_recalls = df[df.is_stim_list == False].recalled.sum(
+            )
+            n_stim_list_words = group[group.is_stim_list ==
+                                      True].recalled.count()
+            n_nonstim_list_words = df[df.is_stim_list ==
+                                      False].recalled.count()
             tstat_list, pval_list, _ = proportions_chisquare([
                 n_correct_stim_list_recalls, n_correct_nonstim_list_recalls],
                 [n_stim_list_words, n_nonstim_list_words])
@@ -934,7 +1056,8 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
                             "p-value": pval_list})
 
             # stim items vs. non-stim low biomarker items
-            n_correct_stim_item_recalls = group[group.is_stim_item == True].recalled.sum()
+            n_correct_stim_item_recalls = group[group.is_stim_item == True].recalled.sum(
+            )
             n_correct_nonstim_item_recalls = df[(df.is_stim_item == False) &
                                                 (df.classifier_output <
                                                  df.thresh)].recalled.sum()
@@ -957,12 +1080,14 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
                 "p-value": pval_list})
 
             # post stim items vs. non-stim low biomarker items
-            n_correct_post_stim_item_recalls = group[group.is_post_stim_item == True].recalled.sum()
-            n_post_stim_items = group[group.is_post_stim_item == True].recalled.count()
+            n_correct_post_stim_item_recalls = group[group.is_post_stim_item == True].recalled.sum(
+            )
+            n_post_stim_items = group[group.is_post_stim_item ==
+                                      True].recalled.count()
 
             tstat_list, pval_list, _ = proportions_chisquare(
-            [n_correct_post_stim_item_recalls, n_correct_nonstim_item_recalls],
-            [n_post_stim_items, n_nonstim_items])
+                [n_correct_post_stim_item_recalls, n_correct_nonstim_item_recalls],
+                [n_post_stim_items, n_nonstim_items])
 
             results.append({
                 "parameters": parameters,
@@ -1002,7 +1127,8 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         df = FRStimSessionSummary.combine_sessions(summaries)
         events = df[df.is_stim_item == stim]
 
-        firstpos = np.zeros(ExperimentParameters().number_of_items, dtype=np.float)
+        firstpos = np.zeros(
+            ExperimentParameters().number_of_items, dtype=np.float)
         for listno in events.list.unique():
             try:
                 nonzero = events[(events.list == listno) &
@@ -1036,7 +1162,8 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         else:
             recall_stim = df[df.is_stim_item == True].recalled.mean()
 
-        delta_recall = 100 * ((recall_stim - nonstim_low_bio_recall) / df.recalled.mean())
+        delta_recall = 100 * \
+            ((recall_stim - nonstim_low_bio_recall) / df.recalled.mean())
 
         return delta_recall
 
@@ -1133,7 +1260,7 @@ class PSSessionSummary(SessionSummary):
             decision_dict['tie'] = decision['Tie']
             decision_dict['best_location'] = decision['best_location_name']
             decision_dict['best_amplitude'] = loc_info[
-                 decision_dict['best_location']]['amplitude']
+                decision_dict['best_location']]['amplitude']
             decision_dict['pval'] = decision['p_val']
             decision_dict['tstat'] = decision['t_stat']
 
@@ -1152,14 +1279,14 @@ class PSSessionSummary(SessionSummary):
                                                 'cathode_label'])
         for location, loc_events in events_by_location:
             location_summary = {
-               'amplitude': {},
-               'delta_classifier': {},
-               'post_stim_biomarker': {},
-               'post_stim_amplitude': {},
-               'best_amplitude': '',
-               'best_delta_classifier': '',
-               'sem': '',
-               'snr': ''
+                'amplitude': {},
+                'delta_classifier': {},
+                'post_stim_biomarker': {},
+                'post_stim_amplitude': {},
+                'best_amplitude': '',
+                'best_delta_classifier': '',
+                'sem': '',
+                'snr': ''
             }
 
             if location[0] and location[1]:
@@ -1195,8 +1322,10 @@ class PSSessionSummary(SessionSummary):
                             loc_decision_info['amplitude'])
                         location_summary['best_delta_classifier'] = float(
                             loc_decision_info['delta_classifier'])
-                        location_summary['sem'] = float(loc_decision_info['sem'])
-                        location_summary['snr'] = float(loc_decision_info['snr'])
+                        location_summary['sem'] = float(
+                            loc_decision_info['sem'])
+                        location_summary['snr'] = float(
+                            loc_decision_info['snr'])
                 location_summaries[loc_tag] = location_summary
 
         return location_summaries
