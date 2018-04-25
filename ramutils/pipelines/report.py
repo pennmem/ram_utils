@@ -1,5 +1,4 @@
 """Pipeline for creating reports."""
-from __future__ import unicode_literals
 from collections import namedtuple
 
 import pandas as pd
@@ -257,9 +256,9 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
     pairinfo = dataframe_to_recarray(pairs_metadata_table[['label',
                                                            'location',
                                                            'region']],
-                                     [('label', 'U256'),
-                                      ('location', 'U256'),
-                                      ('region', 'U256')])[used_pair_mask.compute()]
+                                     [('label', 'S256'),
+                                      ('location', 'S256'),
+                                      ('region', 'S256')])[used_pair_mask.compute()]
 
     joint_classifier_summary = summarize_classifier(classifier,
                                                     reduced_powers,
