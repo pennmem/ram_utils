@@ -8,6 +8,7 @@ Version 2.1.10
 * Updated parameters for TICL_FR ramulator configs
 * Added additional diagnostic plots to stim and record-only reports
 * Removed experiment name from saved classifiers since classifiers should be constant across expeirments
+* Removed explicit Python 2 support
 
 Version 2.1.9
 -------------
