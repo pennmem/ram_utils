@@ -257,9 +257,9 @@ def generate_data_for_nonstim_report(subject, experiment, sessions,
     pairinfo = dataframe_to_recarray(pairs_metadata_table[['label',
                                                            'location',
                                                            'region']],
-                                     [('label', 'U256'),
-                                      ('location', 'U256'),
-                                      ('region', 'U256')])[used_pair_mask.compute()]
+                                     [(str('label'), 'U256'),
+                                      (str('location'), 'U256'),
+                                      (str('region'), 'U256')])[used_pair_mask.compute()]
 
     joint_classifier_summary = summarize_classifier(classifier,
                                                     reduced_powers,
@@ -353,9 +353,9 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
     pairinfo = dataframe_to_recarray(pairs_metadata_table[['label',
                                                            'location',
                                                            'region']],
-                                     [('label', 'S256'),
-                                      ('location', 'S256'),
-                                      ('region', 'S256')])
+                                     [(str('label'), 'U256'),
+                                      (str('location'), 'U256'),
+                                      (str('region'), 'U256')])
 
     used_classifiers = reload_used_classifiers(subject,
                                                experiment,
