@@ -209,11 +209,6 @@ if __name__ == "__main__":
     #     '--target-amplitudes', '0.5'
     # ])
 
-    create_expconf(args + [
-        '-s', 'R1111M', '-x', 'DBOY1',
-        '--default-area', '5', '--use-common-reference',
-    ])
-
     # create_expconf(args + [
     #     '-s', 'R1384J', '-x', 'PS5_CatFR',
     #     '--anodes', 'LF7',
@@ -234,17 +229,10 @@ if __name__ == "__main__":
     #     '--target-amplitudes', '0.5'
     # ])
 
-    # create_expconf(args + [
-    #     '-s',
-    #     'R1385E',
-    #     '-x',
-    #     'CatFR5',
-    #     '--electrode-config-file',
-    #     'scratch/system3_configs/ODIN_configs/R1385E/R1385E_15JAN2018L0M0STIM.csv',
-    #     '--anodes',
-    #     '3LD8',
-    #     '--cathodes',
-    #     '3LD9',
-    #     '--target-amplitudes',
-    #     '0.5'
-    # ])
+    create_expconf(args + [
+        '-s', 'R1384J',
+        '-x', 'CatFR5',
+        '--anodes', '3LD8',
+        '--cathodes', '3LD9',
+        '--target-amplitudes', '0.5'
+    ])

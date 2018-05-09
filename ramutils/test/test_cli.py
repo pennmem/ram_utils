@@ -97,6 +97,7 @@ class TestExpConf:
                 args2.target_amplitudes = [0.5, 0.5]
                 validate_stim_settings(args2)
 
+    @pytest.mark.expconf
     @pytest.mark.rhino
     @pytest.mark.slow
     @pytest.mark.trylast
@@ -106,11 +107,12 @@ class TestExpConf:
         [
             ('AmplitudeDetermination', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8'], False, None),
             ('TICL_FR', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8'], False, None),
-            ('CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8'], False, None),
+            ('TICL_CatFR', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8'], False, None),
             ('CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8'], False, None),
             ('CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7'], ['AMY8'], True, [0, 1, 100]), # limited sessions config
             ('FR6', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8'], False, None),
             ('PS4_FR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8'], False, None),
+            ('PS4_CatFR5', 'R1364C', '06NOV2017L0M0STIM', ['AMY7', 'TOJ7'], ['AMY8', 'TOJ8'], False, None),
             ('PAL5', 'R1318N', 'R1318N11JUL17M0L0STIM', ['LAIIH2'], ['LAIIH3'], False, None),
             ('PS5_FR', 'R1378T', '18DEC2017L0M0STIM', ['LC8'], ['LC9'], False, None)
         ]
