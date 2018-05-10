@@ -764,28 +764,11 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
                      zip([rec_events[rec_events.list == lst].mstime for lst in
                           rec_lists], start_times)
                      ]
-        rel_epochs = epochs - start_times[:, None]
-        full_match_accum = np.zeros(epochs.shape, dtype=np.bool)
 
-        for (i, rec_times_list) in enumerate(rel_times):
-            is_match = np.empty(epochs.shape, dtype=np.bool)
-            is_match[...] = False
-            for t in rec_times_list:
-                # TODO: possibly parametrize this
-                # For each recall event, reject everything that is more than
-                # three seconds away
-                is_match_tmp = np.abs((rel_epochs - t)) < 3000
-                is_match_tmp[i, ...] = False
-                good_locs = np.where(is_match_tmp & (~full_match_accum))
-                if len(good_locs[0]):
-                    # Find next closest list with a valid deliberation period
-                    choice_position = np.argmin(
-                        np.mod(good_locs[0] - i, len(good_locs[0])))
-                    choice_inds = (good_locs[0][choice_position],
-                                   good_locs[1][choice_position])
-                    full_match_accum[choice_inds] = True
+        matches_rec_event = match_events_to_baseline(epochs, rel_times,
+                                                    start_times)
 
-        matching_epochs = epochs[full_match_accum]
+        matching_epochs = epochs[matches_rec_event]
         new_events = np.rec.array(np.zeros(len(matching_epochs),
                                            dtype=sess_events.dtype))
 
@@ -813,6 +796,22 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
         all_events.append(merged_events)
 
     return np.rec.array(np.concatenate(all_events))
+
+
+def match_events_to_baseline(epochs, rel_recall_times, start_times, window=3000):
+    rel_epochs = epochs - start_times[:, None]
+    is_matched_epoch = np.zeros(epochs.shape, dtype=np.bool)
+    for (i, rec_times_list) in enumerate(rel_recall_times):
+        is_match = np.empty(epochs.shape, dtype=np.bool)
+        is_match[...] = False
+        for t in rec_times_list:
+            dists = np.abs(rel_epochs-t)
+            dists[is_match] = np.inf
+            dists[i,:] = np.inf
+            if dists.min() < window:
+                # Choose the closest epoch for each event
+                is_matched_epoch[np.argmin(dists)] = True
+    return is_matched_epoch
 
 
 def find_free_time_periods(times, duration, pre, post, start=None, end=None):
