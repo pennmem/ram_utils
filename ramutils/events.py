@@ -13,6 +13,7 @@
 """
 
 import os
+import json
 import numpy as np
 import pandas as pd
 
@@ -136,6 +137,7 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
     """
     experiments = extract_experiment_from_events(events)
     series_num = extract_experiment_series(experiments[0])
+    sample_rate = extract_sample_rate_from_eeg(events)
 
     if all_events:
         all_fields = list(events.dtype.names)
@@ -372,6 +374,20 @@ def remove_negative_offsets(events):
     """ Remove events with a negative eegoffset """
     pos_offset_events = events[events['eegoffset'] >= 0]
     return pos_offset_events
+
+
+def lookup_sample_rate(subject, experiment, session, rootdir="/"):
+    """ Identify the sample rate used for a session """
+    base_path = os.path.join(rootdir,
+                             'protocols/r1/subjects/{subject}/experiments/{experiment}/sessions/{session}/ephys/current_processed/sources.json')
+
+    with open(base_path.format(subject=subject, experiment=experiment,
+                               session=session)) as f:
+        contents = json.load(f)
+        first_key = list(contents.keys())[0]
+        sample_rate = contents[first_key]['sample_rate']
+
+    return sample_rate
 
 
 def remove_incomplete_lists(events):
@@ -704,6 +720,11 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
     if len(events) == 0:
         return events
 
+    # We need to know the sample rate in order to create the new REC_BASE
+    # events. Rather than load a file, we can just load a snippet of eeg and
+    # back out the sample rate
+    samplerate = extract_sample_rate_from_eeg(events)
+
     # TODO: document within code blocks what is actually happening
     # TODO: Finish cleaning this mess up
     all_events = []
@@ -752,10 +773,13 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
             is_match[...] = False
             for t in rec_times_list:
                 # TODO: possibly parametrize this
+                # For each recall event, reject everything that is more than
+                # three seconds away
                 is_match_tmp = np.abs((rel_epochs - t)) < 3000
                 is_match_tmp[i, ...] = False
                 good_locs = np.where(is_match_tmp & (~full_match_accum))
                 if len(good_locs[0]):
+                    # Find next closest list with a valid deliberation period
                     choice_position = np.argmin(
                         np.mod(good_locs[0] - i, len(good_locs[0])))
                     choice_inds = (good_locs[0][choice_position],
@@ -781,8 +805,11 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
                 merged_events[i].session = merged_events[i - 1].session
                 merged_events[i].list = merged_events[i - 1].list
                 merged_events[i].eegfile = merged_events[i - 1].eegfile
-                merged_events[i].eegoffset = merged_events[i - 1].eegoffset + (
-                    merged_events[i].mstime - merged_events[i - 1].mstime)
+                elapsed_time_sec = (merged_events[i].mstime -
+                                    merged_events[i - 1].mstime) / 1000.0
+                samples_elapsed = samplerate * elapsed_time_sec
+                merged_events[i].eegoffset = (merged_events[i - 1].eegoffset +
+                                              samples_elapsed)
 
         all_events.append(merged_events)
 
@@ -796,21 +823,28 @@ def find_free_time_periods(times, duration, pre, post, start=None, end=None):
 
     Parameters
     ----------
-    times : list or np.ndarray
-        An iterable of 1-d numpy arrays, each of which indicates event times
+    times : list where elements are lists
+        An iterable of 1-d numpy arrays, each of which is a list that
+        indicates the starting times of all vocalization events. We do not
+        want to include these as candidate time periods
     duration : int
         The length of the desired empty epochs
     pre : int
         the time before each event to exclude
     post: int
         The time after each event to exclude
+    start: array_like
+        List of a recall period start times
+    end: array_like
+        List of recall period end times
 
     Returns
     -------
     epoch_array : np.ndarray
 
     """
-
+    # TODO: Do not allow start and end to be optional because bad stuff will
+    # happen
     # TODO: Clean this up and add some explanation about what is happening
     n_trials = len(times)
     epoch_times = []
@@ -822,8 +856,12 @@ def find_free_time_periods(times, duration, pre, post, start=None, end=None):
             ext_times = np.append(ext_times, [end[i]])
         pre_times = ext_times - pre
         post_times = ext_times + post
+
+        # FIXME: Is this backwards?
         interval_durations = pre_times[1:] - post_times[:-1]
         free_intervals = np.where(interval_durations > duration)[0]
+        # For each word event, attempt to find a set of possible deliberation
+        # periods in the recall phase
         trial_epoch_times = []
         for interval in free_intervals:
             begin = post_times[interval]
@@ -1264,8 +1302,8 @@ def validate_single_session(events):
     return
 
 
-def extract_sample_rate(events):
-    """ Extract the samplerate used for the given set of events """
+def extract_sample_rate_from_eeg(events):
+    """ Extract the samplerate used for the given set of events by loading EEG """
     eeg_reader = EEGReader(events=events[:2], start_time=0.0, end_time=1.0)
     eeg = eeg_reader.read()
     samplerate = float(eeg['samplerate'])
