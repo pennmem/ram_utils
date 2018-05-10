@@ -6,6 +6,7 @@ from pkg_resources import resource_filename
 
 from ramutils.events import *
 from sklearn.externals import joblib
+from ramutils.parameters import FRParameters
 
 datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
 
@@ -97,7 +98,6 @@ class TestEvents:
                                       'catFR1'].session
         assert 101 in combined_events[combined_events.experiment ==
                                       'catFR1'].session
-
         assert 0 in combined_events[combined_events.experiment ==
                                     'FR1'].session
         assert 1 in combined_events[combined_events.experiment ==
@@ -127,9 +127,38 @@ class TestEvents:
         # TODO: This is a more complicated algorithm to test
         return
 
+    @pytest.mark.rhino
     def test_insert_baseline_retrieval_events(self):
-        # TODO: This is another somewhat complicated algorithm to test
+        # This is just a regression test. There should be something more
+        # comprehensive. This does not look like it would be using rhino, but
+        # under the hood a sample of eeg data is loaded to determine the sample
+        # rate
+        events = np.rec.array(
+            np.load(datafile("input/events/R1409D_pre_baseline_event_insertion_events.npy")))
+        params = FRParameters()
+        final_events = insert_baseline_retrieval_events(events,
+                                                        params.baseline_removal_start_time,
+                                                        params.retrieval_time,
+                                                        params.empty_epoch_duration,
+                                                        params.pre_event_buf,
+                                                        params.post_event_buf)
+        expected_events = np.rec.array(
+            np.load(datafile("input/events/R1409D_post_retrieval_baseline_event_insertion_events.npy")))
+
+        assert len(final_events) == len(expected_events)
+
         return
+
+    @pytest.mark.rhino
+    @pytest.mark.parametrize("subject,experiment,session,samplerate", [
+        ('R1409D', 'FR1', '1', 1000),
+        ('R1001P', 'FR1', '0', 500)
+    ])
+    def test_lookup_sample_rates(self, subject, experiment, session, samplerate,
+                                 rhino_root):
+        actual_samplerate = lookup_sample_rate(subject, experiment, session,
+                                               rootdir=rhino_root)
+        assert actual_samplerate == samplerate
 
     def test_remove_incomplete_lists(self):
         # TODO: There are two ways to do this. In addition to unit tests,
