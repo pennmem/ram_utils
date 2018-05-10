@@ -175,20 +175,30 @@ var ramutils = (function (mod, Plotly) {
 
     /**
      * Plot overall recall difference for stim/post-stim items.
+     * @param {Object} stimPercent -- Delta recall by target and across targets for stim items
+     * @param {Object} postStimPercent -- Delta recall by target and across targets for post stim items
      */
     plotRecallDifference: function (stimPercent, postStimPercent) {
-      const data = [{
-        x: ['stim', 'post-stim'],
-        y: [stimPercent, postStimPercent],
-        type: 'bar'
-      }];
+      const targets = Object.keys(stimPercent)
+
+      let data = [];
+
+      for (var target of targets) {
+        const bar_data = {
+          x: ['stim', 'post-stim'],
+          y: [stimPercent[target], postStimPercent[target]],
+          type: 'bar',
+          name: `${target}`,
+        };
+        data.push(bar_data);
+      }
 
       const layout = {
         title: "Change in Recall Performance for Stimulated and Post-Stimulation Items",
         xaxis: {title: 'Items'},
         yaxis: {
           title: 'Recall difference [%]',
-          range: [Math.min(stimPercent, postStimPercent, -4) - 1, Math.max(stimPercent, postStimPercent, 0) + 1]
+          /**range: [Math.min(stimPercent, postStimPercent, -4) - 1, Math.max(stimPercent, postStimPercent, 0) + 1]**/
         }
       };
 

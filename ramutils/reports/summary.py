@@ -1153,19 +1153,27 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
             %change in item recall for stimulated items versus non-stimulated low biomarker items. Optionally return
             the same comparison, but for post-stim items
         """
+        results = {}
         df = FRStimSessionSummary.combine_sessions(summaries)
-        nonstim_low_bio_recall = df[(df.classifier_output < df.thresh) &
-                                    (df.is_stim_list == False)].recalled.mean()
-        if post_stim_items:
-            recall_stim = df[df.is_post_stim_item == True].recalled.mean()
+        for name, group in df.groupby(['subject', 'stimAnodeTag',
+                                       'stimCathodeTag', 'amplitude',
+                                       'stim_duration', 'pulse_freq']):
+            if 'nan' in name:
+                continue
+            target_id = ":".join(name[0:3])
+            nonstim_low_bio_recall = df[(df.classifier_output < df.thresh) &
+                                        (df.is_stim_list == False)].recalled.mean()
+            if post_stim_items:
+                recall_stim = group[group.is_post_stim_item == True].recalled.mean()
+            else:
+                recall_stim = group[group.is_stim_item == True].recalled.mean()
 
-        else:
-            recall_stim = df[df.is_stim_item == True].recalled.mean()
+            delta_recall = 100 * \
+                ((recall_stim - nonstim_low_bio_recall) / group.recalled.mean())
 
-        delta_recall = 100 * \
-            ((recall_stim - nonstim_low_bio_recall) / df.recalled.mean())
+            results[target_id] = delta_recall
 
-        return delta_recall
+        return results
 
 
 class FR5SessionSummary(FRStimSessionSummary):
