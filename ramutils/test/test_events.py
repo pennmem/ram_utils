@@ -127,9 +127,12 @@ class TestEvents:
         # TODO: This is a more complicated algorithm to test
         return
 
+    @pytest.mark.rhino
     def test_insert_baseline_retrieval_events(self):
         # This is just a regression test. There should be something more
-        # comprehensive
+        # comprehensive. This does not look like it would be using rhino, but
+        # under the hood a sample of eeg data is loaded to determine the sample
+        # rate
         events = np.rec.array(
             np.load(datafile("input/events/R1409D_pre_baseline_event_insertion_events.npy")))
         params = FRParameters()

@@ -137,7 +137,6 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
     """
     experiments = extract_experiment_from_events(events)
     series_num = extract_experiment_series(experiments[0])
-    sample_rate = extract_sample_rate_from_eeg(events)
 
     if all_events:
         all_fields = list(events.dtype.names)
