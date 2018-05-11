@@ -1,7 +1,6 @@
 import matplotlib as mpl
 mpl.use('Agg')  # allows matplotlib to work without x-windows (for RHINO)
 
-import pymc3 as pm
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -75,6 +74,8 @@ class HierarchicalModel(object):
         return dispatch_method(draws, tune)
 
     def _build_baseline_model(self):
+        import pymc3 as pm
+
         with pm.Model() as model:
             # Treat list as a continuous variable
             listpos_coef = pm.Normal('listnum', mu=0, sd=1)
@@ -131,6 +132,8 @@ class HierarchicalModel(object):
         return self._fit_FR3_model(draws, tune)
 
     def _fit_FR3_model(self, draws, tune):
+        import pymc3 as pm
+
         with self.model:
             self.trace = pm.sample(draws=draws, tune=tune)[tune:]
         return self.trace
@@ -152,6 +155,8 @@ class HierarchicalModel(object):
 
 
 def save_traceplot(trace, full_path):
+    import pymc3 as pm
+
     stim_variable = "Stim Effect (Across Sessions)"
     line_dict = dict(zip(stim_variable, [0]))
     ax = pm.traceplot(trace, lines=line_dict)
@@ -165,6 +170,8 @@ def save_traceplot(trace, full_path):
 
 
 def save_foresplot(trace, full_path):
+    import pymc3 as pm
+
     session_values = trace.get_values(
         "Stim Effect (Session Level)", chains=[trace.chains[0]][0])
     num_sessions = np.shape(session_values)[1]
