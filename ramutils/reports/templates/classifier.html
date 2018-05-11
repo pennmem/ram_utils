@@ -60,6 +60,11 @@
       </caption>
     {% endif %}
   </table>
+  <figure>
+      <div id="classifier-weight-plot"></div>
+      <figcaption> Average classifier activation pattern by frequency and brain region.
+        {% if not stim %} <b>(Left)</b> encoding only classifier; <b>(Right)</b> joint classifier. {% endif %}</figcaption>
+  </figure>
 </div>
   <script>
     window.addEventListener('load', () => {

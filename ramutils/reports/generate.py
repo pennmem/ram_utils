@@ -4,7 +4,7 @@ from datetime import datetime
 import json
 import os.path as osp
 import random
-import io
+import itertools
 
 from itertools import compress
 from jinja2 import Environment, PackageLoader
@@ -163,15 +163,17 @@ class ReportGenerator(object):
 
     def _build_classifier_metadata_dict(self, classifier_summary):
         """ Extract classifier metadata from the classifier summmary """
-        classifier_metadata = {}
-        classifier_metadata['id'] = classifier_summary.id
-        classifier_metadata['tag'] = classifier_summary.tag
-        classifier_metadata['reloaded'] = classifier_summary.reloaded
-        classifier_metadata['auc'] = classifier_summary.auc
-        classifier_metadata['pvalue'] = classifier_summary.pvalue
-        classifier_metadata['median_classifier_output'] = classifier_summary.median_classifier_output
-        classifier_metadata['median_lower_bound'] = classifier_summary.confidence_interval_median_classifier_output[0]
-        classifier_metadata['median_upper_bound'] = classifier_summary.confidence_interval_median_classifier_output[1]
+
+        classifier_metadata = {
+            'id': classifier_summary.id,
+            'tag': classifier_summary.tag,
+            'reloaded': classifier_summary.reloaded,
+            'auc': classifier_summary.auc,
+            'pvalue': classifier_summary.pvalue,
+            'median_classifier_output': classifier_summary.median_classifier_output,
+            'median_lower_bound': classifier_summary.confidence_interval_median_classifier_output[0],
+            'median_upper_bound': classifier_summary.confidence_interval_median_classifier_output[1]
+        }
         return classifier_metadata
 
     def _make_plot_data(self, stim=False, classifier=False, joint=False, biomarker_delta=False):
@@ -263,10 +265,13 @@ class ReportGenerator(object):
             plot_data['tags'] = [
                 classifier.id for classifier in self.classifier_summaries],
             plot_data['activation'] = {
-                'weights': [],
-                'freqs': [],
-                'regions': [],
-                'names': []
+                'weights': list(itertools.chain([classifier.classifier_activation_by_region.tolist()
+                                                 for classifier in self.classifier_summaries])),
+                'freqs': list(itertools.chain([classifier.frequencies.tolist()
+                                               for classifier in self.classifier_summaries])),
+                'regions': list(itertools.chain([classifier.regions
+                                                 for classifier in self.classifier_summaries])),
+                'names': [classifier.tag for classifier in self.classifier_summaries]
             }
 
         return json.dumps(plot_data)
@@ -379,7 +384,7 @@ class ReportGenerator(object):
             experiment,
             stim=True,
             combined_summary=self._make_combined_summary(),
-            classifiers=self.classifier_summaries,
+            classifiers=self._make_classifier_data(),
             stim_params=FRStimSessionSummary.stim_parameters(
                 self.session_summaries),
             recall_tests=FRStimSessionSummary.recall_test_results(
