@@ -134,14 +134,6 @@ class ReportGenerator(object):
                                   .to_dict(orient='records'))
         return target_selection_table
 
-    def _make_classifier_data(self):
-        """Create JSON object for classifier data """
-        return {
-            'auc': self.classifier_summary.auc,
-            'p_value': self.classifier_summary.pvalue,
-            'output_median': self.classifier_summary.median_classifier_output,
-        }
-
     def _make_feature_plots(self):
 
         feature_data = {
@@ -162,6 +154,25 @@ class ReportGenerator(object):
             'n_pli': sum([summary.num_prior_list_intrusions for summary in self.session_summaries]),
             'n_eli': sum([summary.num_extra_list_intrusions for summary in self.session_summaries])
         }
+
+    def _make_classifier_data(self):
+        classifier_data = {
+            'metadata': [self._build_classifier_metadata_dict(classifier) for classifier in self.classifier_summaries]
+        }
+        return classifier_data
+
+    def _build_classifier_metadata_dict(self, classifier_summary):
+        """ Extract classifier metadata from the classifier summmary """
+        classifier_metadata = {}
+        classifier_metadata['id'] = classifier_summary.id
+        classifier_metadata['tag'] = classifier_summary.tag
+        classifier_metadata['reloaded'] = classifier_summary.reloaded
+        classifier_metadata['auc'] = classifier_summary.auc
+        classifier_metadata['pvalue'] = classifier_summary.pvalue
+        classifier_metadata['median_classifier_output'] = classifier_summary.median_classifier_output
+        classifier_metadata['median_lower_bound'] = classifier_summary.confidence_interval_median_classifier_output[0]
+        classifier_metadata['median_upper_bound'] = classifier_summary.confidence_interval_median_classifier_output[1]
+        return classifier_metadata
 
     def _make_plot_data(self, stim=False, classifier=False, joint=False, biomarker_delta=False):
         """ Build up a large dictionary of data for various plots from plot-specific components """
@@ -250,7 +261,13 @@ class ReportGenerator(object):
                 'high': [classifier.high_tercile_diff_from_mean for classifier in self.classifier_summaries]
             }
             plot_data['tags'] = [
-                classifier.id for classifier in self.classifier_summaries]
+                classifier.id for classifier in self.classifier_summaries],
+            plot_data['activation'] = {
+                'weights': [],
+                'freqs': [],
+                'regions': [],
+                'names': []
+            }
 
         return json.dumps(plot_data)
 
@@ -320,7 +337,7 @@ class ReportGenerator(object):
             'FR1',
             stim=False,
             combined_summary=self._make_combined_summary(),
-            classifiers=self.classifier_summaries,
+            classifiers=self._make_classifier_data(),
             plot_data=self._make_plot_data(stim=False, classifier=True,
                                            joint=joint),
             sme_table=self._make_target_selection_table(),
