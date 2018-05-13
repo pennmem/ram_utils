@@ -195,7 +195,7 @@ class ClassifierSummary(Schema):
         """
         if self._features is None:
             return np.array([])
-        return np.dot(np.cov(self._features,rowvar=False),self._coef.squeeze())
+        return np.dot(np.cov(self._features, rowvar=False), self._coef.squeeze())
 
     @property
     def classifier_activation_2d(self):
