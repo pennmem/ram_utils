@@ -60,11 +60,6 @@
       </caption>
     {% endif %}
   </table>
-  <figure>
-      <div id="classifier-weight-plot"></div>
-      <figcaption> Average classifier activation pattern by frequency and brain region.
-        {% if not stim %} <b>(Left)</b> encoding only classifier; <b>(Right)</b> joint classifier. {% endif %}</figcaption>
-  </figure>
 </div>
   <script>
     window.addEventListener('load', () => {
@@ -75,9 +70,6 @@
       let tercData = plot_data["tercile"];
       let tags = plot_data["tags"];
       ramutils.plots.plotClassifierPerformance(rocData.fpr, rocData.tpr, tercData.low, tercData.mid, tercData.high, tags);
-
-      let activation_data = plot_data["activation"]
-      ramutils.plots.plotClassifierWeights(activation_data.weights, activation_data.freqs, activation_data.regions, activation_data.names);
     });
   </script>
 </div>

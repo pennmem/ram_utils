@@ -264,15 +264,6 @@ class ReportGenerator(object):
             }
             plot_data['tags'] = [
                 classifier.id for classifier in self.classifier_summaries],
-            plot_data['activation'] = {
-                'weights': list(itertools.chain([classifier.classifier_activation_by_region.tolist()
-                                                 for classifier in self.classifier_summaries])),
-                'freqs': list(itertools.chain([classifier.frequencies.tolist()
-                                               for classifier in self.classifier_summaries])),
-                'regions': list(itertools.chain([classifier.regions
-                                                 for classifier in self.classifier_summaries])),
-                'names': [classifier.tag for classifier in self.classifier_summaries]
-            }
 
         return json.dumps(plot_data)
 
