@@ -6,18 +6,16 @@ from ramutils.pipelines.report import make_report
 
 from ramutils.tasks import memory
 
-memory.cachedir = "/Users/zduey/tmp/"
+memory.cachedir = "~"
 
 
-subject = 'R1401J'
-rhino = os.path.expanduser('/Volumes/rhino')
 
 paths = FilePaths(
-    root='/Volumes/RHINO/',
+    root='/',
     dest='/scratch/zduey/',
     data_db='/scratch/zduey/'
 )
 
 params = FRParameters()
-make_report(subject, "FR1", paths, exp_params=params, stim_params=None,
-            joint_report=True, rerun=True, sessions=[0, 1, 100, 102])
+make_report("R1001P", "FR1", paths, exp_params=params, stim_params=None,
+            joint_report=False, rerun=False, sessions=None)
