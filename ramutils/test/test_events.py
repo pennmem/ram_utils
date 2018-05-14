@@ -7,6 +7,7 @@ from pkg_resources import resource_filename
 from ramutils.events import *
 from sklearn.externals import joblib
 from ramutils.parameters import FRParameters
+from ramutils.utils import load_event_test_data
 
 datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
 
@@ -128,13 +129,12 @@ class TestEvents:
         return
 
     @pytest.mark.rhino
-    def test_insert_baseline_retrieval_events(self):
+    def test_insert_baseline_retrieval_events(self, rhino_root):
         # This is just a regression test. There should be something more
         # comprehensive. This does not look like it would be using rhino, but
         # under the hood a sample of eeg data is loaded to determine the sample
         # rate
-        events = np.rec.array(
-            np.load(datafile("input/events/R1409D_pre_baseline_event_insertion_events.npy")))
+        events = load_event_test_data(datafile("input/events/R1409D_pre_baseline_event_insertion_events.npy"), rhino_root)
         params = FRParameters()
         final_events = insert_baseline_retrieval_events(events,
                                                         params.baseline_removal_start_time,
@@ -142,8 +142,7 @@ class TestEvents:
                                                         params.empty_epoch_duration,
                                                         params.pre_event_buf,
                                                         params.post_event_buf)
-        expected_events = np.rec.array(
-            np.load(datafile("input/events/R1409D_post_retrieval_baseline_event_insertion_events.npy")))
+        expected_events = load_event_test_data(datafile("input/events/R1409D_post_retrieval_baseline_event_insertion_events.npy"), rhino_root)
 
         assert len(final_events) == len(expected_events)
 
