@@ -274,7 +274,7 @@ var ramutils = (function (mod, Plotly) {
     * @param{Array} weights - classfier weights
     * @param{Array} freqs - frequencies used
     */
-    plotClassifierWeights: function(weights,freqs,labels,names){
+    plotClassifierWeights: function(weights, freqs, labels, names){
 
         let data =[];
         let layout = {
