@@ -294,8 +294,10 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
                 "stim_events": 30,
                 "isi_min": 1500,
                 "isi_max": 2000,
+                "method": "zscore",  # this or ttest
                 "std_threshold": 2,
-                "event_threshold": 0.5
+                "event_threshold": 0.5,
+                "ttest_threshold": 0.01,
             },
         },
 
