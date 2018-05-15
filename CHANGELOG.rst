@@ -3,12 +3,14 @@ Changes
 
 Version 2.1.10
 --------------
-**2018-04-20**
+**2018-05-15**
 
 * Updated parameters for TICL_FR ramulator configs
 * Added additional diagnostic plots to stim and record-only reports
 * Removed experiment name from saved classifiers since classifiers should be constant across expeirments
 * Removed explicit Python 2 support
+* Fixed bug in deliberation period algorithm that implicitly assumed 1000HZ sampling rate
+
 
 Version 2.1.9
 -------------
