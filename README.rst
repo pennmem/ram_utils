@@ -192,3 +192,6 @@ local files can and should be run frequently, but require to additional argument
     --rhino-root: The mount point for RHINO
     --output-dest: Where output from blackbox tests will be saved
 
+You will likely also need to set the environment variable::
+
+    MKL_THREADING_LAYER=GNU
