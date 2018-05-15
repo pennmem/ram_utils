@@ -25,21 +25,21 @@
     </tr>
     </thead>
     <tbody>
-    {% for classifier in classifiers %}
+    {% for classifier in classifiers["metadata"] %}
       <tr>
-        <td>{{ classifier.id }}</td>
-        <td>{{ classifier.tag }}</td>
+        <td>{{ classifier['id'] }}</td>
+        <td>{{ classifier['tag'] }}</td>
         {% if stim %}
-        <td>{{ classifier.reloaded }}</td>
+        <td>{{ classifier['reloaded'] }}</td>
         {% endif %}
-        <td>{{ "{:.3f}".format(classifier.auc) }}</td>
-        {% if classifier.pvalue < 0.001 %}
+        <td>{{ "{:.3f}".format(classifier['auc']) }}</td>
+        {% if classifier['pvalue'] < 0.001 %}
           <td>&lt; 0.001</td>
         {% else %}
-          <td>{{ '{:.3f}'.format(classifier.pvalue) }}</td>
+          <td>{{ '{:.3f}'.format(classifier['pvalue']) }}</td>
         {% endif %}
-        <td>{{ "{:.3f}".format(classifier.median_classifier_output) }}</td>
-        <td>{{ "[{:.3f}, {:.3f}]".format(classifier.confidence_interval_median_classifier_output[0], classifier.confidence_interval_median_classifier_output[1]) }}</td>
+        <td>{{ "{:.3f}".format(classifier['median_classifier_output']) }}</td>
+        <td>{{ "[{:.3f}, {:.3f}]".format(classifier['median_lower_bound'], classifier['median_upper_bound'])}}</td>
       </tr>
     {% endfor %}
     </tbody>
@@ -60,13 +60,6 @@
       </caption>
     {% endif %}
   </table>
-  {% if classifiers[0].classifier_activation.any() %}
-  <figure>
-      <div id="classifier-weight-plot"></div>
-      <figcaption> Average classifier activation pattern by frequency and brain region.
-        {% if not stim %} <b>(Left)</b> encoding only classifier; <b>(Right)</b> joint classifier. {% endif %}</figcaption>
-  </figure>
-  {% endif %}
 </div>
   <script>
     window.addEventListener('load', () => {
@@ -77,17 +70,6 @@
       let tercData = plot_data["tercile"];
       let tags = plot_data["tags"];
       ramutils.plots.plotClassifierPerformance(rocData.fpr, rocData.tpr, tercData.low, tercData.mid, tercData.high, tags);
-      let weights=[];
-      let freqs = [];
-      let regions = [];
-      let names=  [];
-      {% for classifier in classifiers %}
-      weights.push({{ classifier.classifier_activation_by_region.tolist() }});
-      freqs.push({{ classifier.frequencies.tolist() }});
-      regions.push( {{ classifier.regions}} );
-      names.push('{{ classifier.tag }}' );
-      {% endfor %}
-      ramutils.plots.plotClassifierWeights(weights,freqs,regions,names);
     });
   </script>
 </div>
