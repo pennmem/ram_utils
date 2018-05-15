@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ramutils.parameters &mdash; Ramutils 2.1.8 documentation</title>
+  <title>ramutils.parameters &mdash; Ramutils 2.1.10 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Ramutils 2.1.8 documentation" href="../../index.html"/>
+    <link rel="top" title="Ramutils 2.1.10 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -217,6 +217,7 @@
 <span class="sd">        when testing, otherwise the default location should be used</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="c1"># root is the only required kwarg</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;root&#39;</span><span class="p">])</span>
@@ -245,35 +246,40 @@
     <span class="n">width</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;wavelet width&#39;</span><span class="p">)</span>
     <span class="n">freqs</span> <span class="o">=</span> <span class="n">Array</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mi">6</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mi">180</span><span class="p">),</span> <span class="mi">8</span><span class="p">),</span>
                   <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;frequencies to compute powers for&#39;</span><span class="p">)</span>
-    <span class="n">hfa_cutoff</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">65</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Lowers frequency that will be considered a &#39;high frequency&#39;&quot;</span><span class="p">)</span>
-    <span class="n">trigger_freq</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">110</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Frequency to use for PS5 pseudo closed-loop experiment&quot;</span><span class="p">)</span>
+    <span class="n">hfa_cutoff</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span>
+        <span class="mi">65</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Lowers frequency that will be considered a &#39;high frequency&#39;&quot;</span><span class="p">)</span>
+    <span class="n">trigger_freq</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span>
+        <span class="mi">110</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Frequency to use for PS5 pseudo closed-loop experiment&quot;</span><span class="p">)</span>
 
     <span class="n">log_powers</span> <span class="o">=</span> <span class="n">Bool</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;If true, log of powers will be returned &quot;</span>
                                  <span class="s2">&quot;rather than raw values&quot;</span><span class="p">)</span>
-    <span class="n">normalize_powers</span> <span class="o">=</span> <span class="n">Bool</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;If true, powers will be normalized by partition (encoding/retrieval/pal) and within session using standard (x - mu) / sigma&quot;</span><span class="p">)</span>
+    <span class="n">normalize_powers</span> <span class="o">=</span> <span class="n">Bool</span><span class="p">(</span>
+        <span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;If true, powers will be normalized by partition (encoding/retrieval/pal) and within session using standard (x - mu) / sigma&quot;</span><span class="p">)</span>
 
     <span class="n">filt_order</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Butterworth filter order&quot;</span><span class="p">)</span>
 
     <span class="n">penalty_type</span> <span class="o">=</span> <span class="n">String</span><span class="p">(</span><span class="s1">&#39;l2&#39;</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;logistic regression penalty type&#39;</span><span class="p">)</span>
     <span class="n">C</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="mf">7.2e-4</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;inverse of regularization strength&#39;</span><span class="p">)</span>
-    <span class="n">n_perm</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;number of permutations to use for cross-validation&#39;</span><span class="p">)</span>
-    <span class="n">solver</span> <span class="o">=</span> <span class="n">String</span><span class="p">(</span><span class="s1">&#39;liblinear&#39;</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;algorithm to use in optimization process&#39;</span><span class="p">)</span>
+    <span class="n">n_perm</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span>
+        <span class="mi">200</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;number of permutations to use for cross-validation&#39;</span><span class="p">)</span>
+    <span class="n">solver</span> <span class="o">=</span> <span class="n">String</span><span class="p">(</span>
+        <span class="s1">&#39;liblinear&#39;</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;algorithm to use in optimization process&#39;</span><span class="p">)</span>
 
     <span class="n">baseline_removal_start_time</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;The amount of time to &quot;</span>
-                                                   <span class="s2">&quot;skip at the beginning of &quot;</span>
-                                                   <span class="s2">&quot;the sessions [ms]&quot;</span><span class="p">)</span>
+                                      <span class="s2">&quot;skip at the beginning of &quot;</span>
+                                      <span class="s2">&quot;the sessions [ms]&quot;</span><span class="p">)</span>
     <span class="n">retrieval_time</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">29000</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;The amount of time within the recall &quot;</span>
-                                       <span class="s2">&quot;period to consider&quot;</span><span class="p">)</span>
+                         <span class="s2">&quot;period to consider&quot;</span><span class="p">)</span>
     <span class="n">empty_epoch_duration</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;The length of desired empty &quot;</span>
-                                           <span class="s2">&quot;epochs [ms]&quot;</span><span class="p">)</span>
+                               <span class="s2">&quot;epochs [ms]&quot;</span><span class="p">)</span>
     <span class="n">pre_event_buf</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">2000</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;The time before each event to exclude [&quot;</span>
-                                    <span class="s2">&quot;ms]&quot;</span><span class="p">)</span>
+                        <span class="s2">&quot;ms]&quot;</span><span class="p">)</span>
     <span class="n">post_event_buf</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;The time after each event to exclude [&quot;</span>
-                                     <span class="s2">&quot;ms]&quot;</span><span class="p">)</span>
+                         <span class="s2">&quot;ms]&quot;</span><span class="p">)</span>
     <span class="n">inter_response_time</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Duration between events required &quot;</span>
-                                           <span class="s2">&quot;for a recall event to have &quot;</span>
-                                           <span class="s2">&quot;occured after some sort of &quot;</span>
-                                           <span class="s2">&quot;cognitive process [ms]&quot;</span><span class="p">)</span>
+                              <span class="s2">&quot;for a recall event to have &quot;</span>
+                              <span class="s2">&quot;occured after some sort of &quot;</span>
+                              <span class="s2">&quot;cognitive process [ms]&quot;</span><span class="p">)</span>
     <span class="n">number_of_items</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;default number of items per list&#39;</span><span class="p">)</span></div>
 
 
@@ -322,9 +328,6 @@
 <div class="viewcode-block" id="PS5Parameters"><a class="viewcode-back" href="../../data.html#ramutils.parameters.PS5Parameters">[docs]</a><span class="k">class</span> <span class="nc">PS5Parameters</span><span class="p">(</span><span class="n">FRParameters</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; PS5 experiment parameters &quot;&quot;&quot;</span>
     <span class="n">normalize_powers</span> <span class="o">=</span> <span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span></div>
-
-
-
 </pre></div>
 
            </div>
@@ -361,7 +364,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'2.1.8',
+            VERSION:'2.1.10',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

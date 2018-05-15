@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ramutils.classifier.utils &mdash; Ramutils 2.1.8 documentation</title>
+  <title>ramutils.classifier.utils &mdash; Ramutils 2.1.10 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="Ramutils 2.1.8 documentation" href="../../../index.html"/>
+    <link rel="top" title="Ramutils 2.1.10 documentation" href="../../../index.html"/>
         <link rel="up" title="Module code" href="../../index.html"/> 
 
   
@@ -273,6 +273,43 @@
     <span class="k">return</span> <span class="n">classifier</span></div>
 
 
+<span class="c1"># TODO: group and average classifier weights by brain region</span>
+<div class="viewcode-block" id="save_classifier_weights_plot"><a class="viewcode-back" href="../../../classifier.html#ramutils.classifier.utils.save_classifier_weights_plot">[docs]</a><span class="k">def</span> <span class="nf">save_classifier_weights_plot</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">frequencies</span><span class="p">,</span> <span class="n">pairs</span><span class="p">,</span> <span class="n">file_</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Visualize the classifier weights as a function of frequency and location.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    -----------</span>
+<span class="sd">    weights : np.ndarray (len(pairs)*len(frequencies)</span>
+<span class="sd">    frequencies : np.ndarray[float]</span>
+<span class="sd">    pairs : ??? Iterable describing the pairs in some way</span>
+<span class="sd">    file_ : The destination of the classifier weight plot,</span>
+<span class="sd">    which should be either a path or a file-like object.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    file_ : string or file-like</span>
+<span class="sd">        The file_ parameter</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># pyplot is imported here rather than at the top of the module to avoid any</span>
+    <span class="c1"># problems setting the matplotlib backend elsewhere.</span>
+    <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+    <span class="n">weights_by_channel</span> <span class="o">=</span> <span class="n">weights</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">frequencies</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">pairs</span><span class="p">)))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">weights_by_channel</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;RdBu&#39;</span><span class="p">)</span>
+    <span class="n">cmin</span><span class="p">,</span> <span class="n">cmax</span> <span class="o">=</span> <span class="n">weights</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">weights</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">clim</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">cmin</span><span class="p">),</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cmax</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">clim</span><span class="p">(</span><span class="o">-</span><span class="n">clim</span><span class="p">,</span> <span class="n">clim</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+    <span class="n">locs</span><span class="p">,</span> <span class="n">old_labels</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">()</span>
+    <span class="n">new_labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">rint</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">frequencies</span><span class="p">]</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="n">locs</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">new_labels</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span>
+                <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">,</span>
+                <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+                <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">,</span>
+                <span class="n">pad_inches</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">file_</span></div>
 </pre></div>
 
            </div>
@@ -309,7 +346,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'2.1.8',
+            VERSION:'2.1.10',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ramutils.tasks.odin &mdash; Ramutils 2.1.8 documentation</title>
+  <title>ramutils.tasks.odin &mdash; Ramutils 2.1.10 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../../genindex.html"/>
         <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="Ramutils 2.1.8 documentation" href="../../../index.html"/>
+    <link rel="top" title="Ramutils 2.1.10 documentation" href="../../../index.html"/>
         <link rel="up" title="Module code" href="../../index.html"/> 
 
   
@@ -361,6 +361,7 @@
 <span class="sd">    ``experiment_specs`` dict</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: These should all be retrieved from the Parameter classes</span>
     <span class="k">if</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="n">EXPERIMENTS</span><span class="p">[</span><span class="s1">&#39;record_only&#39;</span><span class="p">]:</span>
         <span class="k">return</span> <span class="p">{}</span>
 
@@ -387,6 +388,18 @@
             <span class="s2">&quot;post_stim_biomarker_sample_time_length&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>
             <span class="s2">&quot;post_stim_buffer_time&quot;</span><span class="p">:</span> <span class="mi">499</span><span class="p">,</span>
             <span class="s2">&quot;post_stim_wait_time&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="p">})</span>
+
+    <span class="k">if</span> <span class="s1">&#39;TICL&#39;</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">:</span>
+        <span class="n">specs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+            <span class="s2">&quot;biomarker_sample_time_length&quot;</span><span class="p">:</span> <span class="mi">525</span><span class="p">,</span>
+            <span class="s2">&quot;buffer_time&quot;</span><span class="p">:</span> <span class="mi">524</span><span class="p">,</span>
+            <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;5.0.0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;post_stim_wait_time&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+            <span class="s2">&quot;post_stim_buffer_time&quot;</span><span class="p">:</span> <span class="mi">524</span><span class="p">,</span>
+            <span class="s2">&quot;post_stim_biomarker_sample_time_length&quot;</span><span class="p">:</span> <span class="mi">525</span><span class="p">,</span>
+            <span class="s2">&quot;refractory_duration&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+
         <span class="p">})</span>
 
     <span class="k">return</span> <span class="n">specs</span>
@@ -421,6 +434,7 @@
 <span class="sd">    Ramulator.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># FIXME: Remove this hard-coding</span>
     <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="n">subject</span><span class="p">,</span>
         <span class="s1">&#39;experiment&#39;</span><span class="p">:</span> <span class="p">{</span>
@@ -438,7 +452,7 @@
                 <span class="s2">&quot;artifact_detection_sample_time_length&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>
                 <span class="s2">&quot;artifact_detection_inter_stim_interval&quot;</span><span class="p">:</span> <span class="mi">2000</span><span class="p">,</span>
                 <span class="s2">&quot;allow_artifact_detection_during_session&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="p">},</span>
+                    <span class="p">},</span>
         <span class="p">},</span>
 
         <span class="s2">&quot;biomarker_threshold&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
@@ -538,7 +552,8 @@
         <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="o">!=</span> <span class="mi">17</span><span class="p">:</span>  <span class="c1"># File exists</span>
             <span class="k">raise</span>
 
-    <span class="n">classifier_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config_files_dir</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">-classifier.zip&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">subject</span><span class="p">))</span>
+    <span class="n">classifier_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="n">config_files_dir</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">-classifier.zip&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">subject</span><span class="p">))</span>
     <span class="n">ec_prefix</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">paths</span><span class="o">.</span><span class="n">electrode_config_file</span><span class="p">)</span>
 
     <span class="n">experiment_config_content</span> <span class="o">=</span> <span class="n">_make_ramulator_config_json</span><span class="p">(</span>
@@ -586,7 +601,8 @@
                           <span class="s2">&quot;classifier may not be 100</span><span class="si">% r</span><span class="s2">eproducible&quot;</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">)</span>
 
     <span class="n">filename_tmpl</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{subject:s}</span><span class="s1">_</span><span class="si">{experiment:s}{pairs:s}{date:s}</span><span class="s1">&#39;</span>
-    <span class="n">pair_str</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">pair</span><span class="o">.</span><span class="n">label</span> <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">stim_params</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stim_params</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;_&#39;</span>
+    <span class="n">pair_str</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">pair</span><span class="o">.</span><span class="n">label</span> <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">stim_params</span><span class="p">]</span>
+                              <span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stim_params</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;_&#39;</span>
     <span class="n">zip_prefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">filename_tmpl</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
         <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
         <span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">,</span>
@@ -633,7 +649,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'2.1.8',
+            VERSION:'2.1.10',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

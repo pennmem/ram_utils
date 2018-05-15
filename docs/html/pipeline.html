@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Pipelines &mdash; Ramutils 2.1.8 documentation</title>
+  <title>Pipelines &mdash; Ramutils 2.1.10 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Ramutils 2.1.8 documentation" href="index.html"/>
+    <link rel="top" title="Ramutils 2.1.10 documentation" href="index.html"/>
         <link rel="next" title="Command-line usage" href="cli.html"/>
         <link rel="prev" title="Event processing" href="events.html"/> 
 
@@ -368,8 +368,8 @@ documented below.</p>
 <div class="section" id="module-ramutils.tasks.classifier">
 <span id="classifier-tasks"></span><h2>Classifier tasks<a class="headerlink" href="#module-ramutils.tasks.classifier" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="ramutils.tasks.classifier.perform_cross_validation">
-<code class="descclassname">ramutils.tasks.classifier.</code><code class="descname">perform_cross_validation</code><span class="sig-paren">(</span><em>classifier</em>, <em>pow_mat</em>, <em>events</em>, <em>n_permutations</em>, <em>tag='classifier'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/classifier.html#perform_cross_validation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.classifier.perform_cross_validation" title="Permalink to this definition">¶</a></dt>
+<dt id="ramutils.tasks.classifier.summarize_classifier">
+<code class="descclassname">ramutils.tasks.classifier.</code><code class="descname">summarize_classifier</code><span class="sig-paren">(</span><em>classifier</em>, <em>pow_mat</em>, <em>events</em>, <em>n_permutations</em>, <em>tag='classifier'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/classifier.html#summarize_classifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.classifier.summarize_classifier" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform LOSO or LOLO cross validation on a classifier.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -769,7 +769,7 @@ multiple experiments should be allowed</li>
 
 <dl class="function">
 <dt id="ramutils.tasks.summary.summarize_stim_sessions">
-<code class="descclassname">ramutils.tasks.summary.</code><code class="descname">summarize_stim_sessions</code><span class="sig-paren">(</span><em>all_events</em>, <em>task_events</em>, <em>stim_params</em>, <em>pairs_data</em>, <em>bipolar_pairs</em>, <em>excluded_pairs</em>, <em>normalized_powers</em>, <em>encoding_classifier_summaries=None</em>, <em>post_stim_predicted_probs=None</em>, <em>trigger_output=None</em>, <em>post_stim_trigger_output=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/summary.html#summarize_stim_sessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.summary.summarize_stim_sessions" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ramutils.tasks.summary.</code><code class="descname">summarize_stim_sessions</code><span class="sig-paren">(</span><em>all_events</em>, <em>task_events</em>, <em>stim_params</em>, <em>pairs_data</em>, <em>bipolar_pairs</em>, <em>excluded_pairs</em>, <em>normalized_powers</em>, <em>encoding_classifier_summaries=None</em>, <em>post_stim_predicted_probs=None</em>, <em>trigger_output=None</em>, <em>post_stim_trigger_output=None</em>, <em>post_stim_eeg=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/summary.html#summarize_stim_sessions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.summary.summarize_stim_sessions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construct stim session summaries</p>
 </dd></dl>
 
@@ -839,7 +839,7 @@ multiple experiments should be allowed</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.8',
+            VERSION:'2.1.10',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

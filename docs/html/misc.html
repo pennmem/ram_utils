@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Miscellaneous utilities &mdash; Ramutils 2.1.8 documentation</title>
+  <title>Miscellaneous utilities &mdash; Ramutils 2.1.10 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Ramutils 2.1.8 documentation" href="index.html"/>
+    <link rel="top" title="Ramutils 2.1.10 documentation" href="index.html"/>
         <link rel="prev" title="Command-line usage" href="cli.html"/> 
 
   
@@ -179,6 +179,12 @@
 </dd></dl>
 
 <dl class="exception">
+<dt id="ramutils.exc.DataLoadingError">
+<em class="property">exception </em><code class="descclassname">ramutils.exc.</code><code class="descname">DataLoadingError</code><a class="reference internal" href="_modules/ramutils/exc.html#DataLoadingError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.exc.DataLoadingError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raised when when unable to load expected files</p>
+</dd></dl>
+
+<dl class="exception">
 <dt id="ramutils.exc.MissingArgumentsError">
 <em class="property">exception </em><code class="descclassname">ramutils.exc.</code><code class="descname">MissingArgumentsError</code><a class="reference internal" href="_modules/ramutils/exc.html#MissingArgumentsError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.exc.MissingArgumentsError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised when an optional argument is not optional for certain cases but
@@ -317,6 +323,14 @@ defined here include:</p>
 <code class="descclassname">ramutils.utils.</code><code class="descname">combine_tag_names</code><span class="sig-paren">(</span><em>tag_name_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/utils.html#combine_tag_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.utils.combine_tag_names" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate sensible output from a list of tuples containing anode and
 cathode contact names.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.utils.encode_file">
+<code class="descclassname">ramutils.utils.</code><code class="descname">encode_file</code><span class="sig-paren">(</span><em>fd</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/utils.html#encode_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.utils.encode_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Produces a base64-encoded version of the data inside the file-like object fd.
+:param fd:
+:return: str</p>
 </dd></dl>
 
 <dl class="function">
@@ -582,7 +596,7 @@ logging that shouldn’t be.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.8',
+            VERSION:'2.1.10',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
