@@ -88,7 +88,7 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument('--root', '-r', default=None, help='root path')
     parser.add_argument('--dest', '-d', default='scratch/ramutils_test', help='destination path')
-    parser.add_argument('--max-workers', '-w', type=int, default=8, help='max worker processes')
+    parser.add_argument('--max-workers', '-w', type=int, default=2, help='max worker processes')
     args = parser.parse_args()
 
     with ProcessPoolExecutor(max_workers=args.max_workers) as executor:
