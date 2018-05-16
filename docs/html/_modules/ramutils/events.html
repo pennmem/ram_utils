@@ -25,25 +25,17 @@
   
 
   
-  
     <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../genindex.html"/>
-        <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Ramutils 2.1.10 documentation" href="../../index.html"/>
-        <link rel="up" title="Module code" href="../index.html"/> 
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
 
   
   <script src="../../_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -89,7 +81,9 @@
               
             
             
-              <ul>
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started_report_data.html">Getting Statrted: RAM Report Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../data.html">Serializable data structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../classifier.html">Classifier training, cross validation, and utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../events.html">Event processing</a></li>
@@ -107,7 +101,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">Ramutils</a>
@@ -115,9 +109,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -147,8 +142,6 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
-        
       </li>
     
   </ul>
@@ -175,6 +168,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
@@ -536,6 +530,20 @@
     <span class="k">return</span> <span class="n">pos_offset_events</span></div>
 
 
+<div class="viewcode-block" id="lookup_sample_rate"><a class="viewcode-back" href="../../events.html#ramutils.events.lookup_sample_rate">[docs]</a><span class="k">def</span> <span class="nf">lookup_sample_rate</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">rootdir</span><span class="o">=</span><span class="s2">&quot;/&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Identify the sample rate used for a session &quot;&quot;&quot;</span>
+    <span class="n">base_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rootdir</span><span class="p">,</span>
+                             <span class="s1">&#39;protocols/r1/subjects/</span><span class="si">{subject}</span><span class="s1">/experiments/</span><span class="si">{experiment}</span><span class="s1">/sessions/</span><span class="si">{session}</span><span class="s1">/ephys/current_processed/sources.json&#39;</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">base_path</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">,</span>
+                               <span class="n">session</span><span class="o">=</span><span class="n">session</span><span class="p">))</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">contents</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="n">first_key</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">contents</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">sample_rate</span> <span class="o">=</span> <span class="n">contents</span><span class="p">[</span><span class="n">first_key</span><span class="p">][</span><span class="s1">&#39;sample_rate&#39;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">sample_rate</span></div>
+
+
 <div class="viewcode-block" id="remove_incomplete_lists"><a class="viewcode-back" href="../../events.html#ramutils.events.remove_incomplete_lists">[docs]</a><span class="k">def</span> <span class="nf">remove_incomplete_lists</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Remove incomplete lists for every session in the given events. Note,</span>
 <span class="sd">    there are two ways that this is done in the reporting code, so it is an</span>
@@ -866,6 +874,11 @@
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">events</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">events</span>
 
+    <span class="c1"># We need to know the sample rate in order to create the new REC_BASE</span>
+    <span class="c1"># events. Rather than load a file, we can just load a snippet of eeg and</span>
+    <span class="c1"># back out the sample rate</span>
+    <span class="n">samplerate</span> <span class="o">=</span> <span class="n">extract_sample_rate_from_eeg</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+
     <span class="c1"># TODO: document within code blocks what is actually happening</span>
     <span class="c1"># TODO: Finish cleaning this mess up</span>
     <span class="n">all_events</span> <span class="o">=</span> <span class="p">[]</span>
@@ -914,10 +927,13 @@
             <span class="n">is_match</span><span class="p">[</span><span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">rec_times_list</span><span class="p">:</span>
                 <span class="c1"># TODO: possibly parametrize this</span>
+                <span class="c1"># For each recall event, reject everything that is more than</span>
+                <span class="c1"># three seconds away</span>
                 <span class="n">is_match_tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">((</span><span class="n">rel_epochs</span> <span class="o">-</span> <span class="n">t</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">3000</span>
                 <span class="n">is_match_tmp</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">good_locs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">is_match_tmp</span> <span class="o">&amp;</span> <span class="p">(</span><span class="o">~</span><span class="n">full_match_accum</span><span class="p">))</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">good_locs</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                    <span class="c1"># Find next closest list with a valid deliberation period</span>
                     <span class="n">choice_position</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span>
                         <span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">good_locs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">i</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">good_locs</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
                     <span class="n">choice_inds</span> <span class="o">=</span> <span class="p">(</span><span class="n">good_locs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">choice_position</span><span class="p">],</span>
@@ -943,8 +959,11 @@
                 <span class="n">merged_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">merged_events</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">session</span>
                 <span class="n">merged_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">list</span> <span class="o">=</span> <span class="n">merged_events</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">list</span>
                 <span class="n">merged_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">eegfile</span> <span class="o">=</span> <span class="n">merged_events</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">eegfile</span>
-                <span class="n">merged_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">eegoffset</span> <span class="o">=</span> <span class="n">merged_events</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">eegoffset</span> <span class="o">+</span> <span class="p">(</span>
-                    <span class="n">merged_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">mstime</span> <span class="o">-</span> <span class="n">merged_events</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">mstime</span><span class="p">)</span>
+                <span class="n">elapsed_time_sec</span> <span class="o">=</span> <span class="p">(</span><span class="n">merged_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">mstime</span> <span class="o">-</span>
+                                    <span class="n">merged_events</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">mstime</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1000.0</span>
+                <span class="n">samples_elapsed</span> <span class="o">=</span> <span class="n">samplerate</span> <span class="o">*</span> <span class="n">elapsed_time_sec</span>
+                <span class="n">merged_events</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">eegoffset</span> <span class="o">=</span> <span class="p">(</span><span class="n">merged_events</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">eegoffset</span> <span class="o">+</span>
+                                              <span class="n">samples_elapsed</span><span class="p">)</span>
 
         <span class="n">all_events</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">merged_events</span><span class="p">)</span>
 
@@ -958,21 +977,28 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    times : list or np.ndarray</span>
-<span class="sd">        An iterable of 1-d numpy arrays, each of which indicates event times</span>
+<span class="sd">    times : list where elements are lists</span>
+<span class="sd">        An iterable of 1-d numpy arrays, each of which is a list that</span>
+<span class="sd">        indicates the starting times of all vocalization events. We do not</span>
+<span class="sd">        want to include these as candidate time periods</span>
 <span class="sd">    duration : int</span>
 <span class="sd">        The length of the desired empty epochs</span>
 <span class="sd">    pre : int</span>
 <span class="sd">        the time before each event to exclude</span>
 <span class="sd">    post: int</span>
 <span class="sd">        The time after each event to exclude</span>
+<span class="sd">    start: array_like</span>
+<span class="sd">        List of a recall period start times</span>
+<span class="sd">    end: array_like</span>
+<span class="sd">        List of recall period end times</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    epoch_array : np.ndarray</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-
+    <span class="c1"># TODO: Do not allow start and end to be optional because bad stuff will</span>
+    <span class="c1"># happen</span>
     <span class="c1"># TODO: Clean this up and add some explanation about what is happening</span>
     <span class="n">n_trials</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
     <span class="n">epoch_times</span> <span class="o">=</span> <span class="p">[]</span>
@@ -984,8 +1010,12 @@
             <span class="n">ext_times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ext_times</span><span class="p">,</span> <span class="p">[</span><span class="n">end</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
         <span class="n">pre_times</span> <span class="o">=</span> <span class="n">ext_times</span> <span class="o">-</span> <span class="n">pre</span>
         <span class="n">post_times</span> <span class="o">=</span> <span class="n">ext_times</span> <span class="o">+</span> <span class="n">post</span>
+
+        <span class="c1"># FIXME: Is this backwards?</span>
         <span class="n">interval_durations</span> <span class="o">=</span> <span class="n">pre_times</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">post_times</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">free_intervals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">interval_durations</span> <span class="o">&gt;</span> <span class="n">duration</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># For each word event, attempt to find a set of possible deliberation</span>
+        <span class="c1"># periods in the recall phase</span>
         <span class="n">trial_epoch_times</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">interval</span> <span class="ow">in</span> <span class="n">free_intervals</span><span class="p">:</span>
             <span class="n">begin</span> <span class="o">=</span> <span class="n">post_times</span><span class="p">[</span><span class="n">interval</span><span class="p">]</span>
@@ -1426,8 +1456,8 @@
     <span class="k">return</span></div>
 
 
-<div class="viewcode-block" id="extract_sample_rate"><a class="viewcode-back" href="../../events.html#ramutils.events.extract_sample_rate">[docs]</a><span class="k">def</span> <span class="nf">extract_sample_rate</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Extract the samplerate used for the given set of events &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="extract_sample_rate_from_eeg"><a class="viewcode-back" href="../../events.html#ramutils.events.extract_sample_rate_from_eeg">[docs]</a><span class="k">def</span> <span class="nf">extract_sample_rate_from_eeg</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Extract the samplerate used for the given set of events by loading EEG &quot;&quot;&quot;</span>
     <span class="n">eeg_reader</span> <span class="o">=</span> <span class="n">EEGReader</span><span class="p">(</span><span class="n">events</span><span class="o">=</span><span class="n">events</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">start_time</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
     <span class="n">eeg</span> <span class="o">=</span> <span class="n">eeg_reader</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
     <span class="n">samplerate</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">eeg</span><span class="p">[</span><span class="s1">&#39;samplerate&#39;</span><span class="p">])</span>
@@ -1705,9 +1735,7 @@
 </pre></div>
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -1720,7 +1748,7 @@
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -1739,6 +1767,7 @@
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
             VERSION:'2.1.10',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -1757,14 +1786,11 @@
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
   
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

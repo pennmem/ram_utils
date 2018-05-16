@@ -25,26 +25,19 @@
   
 
   
-  
     <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Ramutils 2.1.10 documentation" href="index.html"/>
-        <link rel="next" title="Pipelines" href="pipeline.html"/>
-        <link rel="prev" title="Classifier training, cross validation, and utilities" href="classifier.html"/> 
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Pipelines" href="pipeline.html" />
+    <link rel="prev" title="Classifier training, cross validation, and utilities" href="classifier.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -90,7 +83,9 @@
               
             
             
-              <ul class="current">
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started_report_data.html">Getting Statrted: RAM Report Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="data.html">Serializable data structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="classifier.html">Classifier training, cross validation, and utilities</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Event processing</a></li>
@@ -108,7 +103,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Ramutils</a>
@@ -116,9 +111,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -160,7 +156,26 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-ramutils.events">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="module-ramutils.events">
 <span id="event-processing"></span><h1>Event processing<a class="headerlink" href="#module-ramutils.events" title="Permalink to this headline">¶</a></h1>
 <p>A collection of utility functions for loading, cleaning, normalizing, and
 combining events. There are also a smattering of other helper function for
@@ -352,9 +367,9 @@ within</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ramutils.events.extract_sample_rate">
-<code class="descclassname">ramutils.events.</code><code class="descname">extract_sample_rate</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#extract_sample_rate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.extract_sample_rate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Extract the samplerate used for the given set of events</p>
+<dt id="ramutils.events.extract_sample_rate_from_eeg">
+<code class="descclassname">ramutils.events.</code><code class="descname">extract_sample_rate_from_eeg</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#extract_sample_rate_from_eeg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.extract_sample_rate_from_eeg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract the samplerate used for the given set of events by loading EEG</p>
 </dd></dl>
 
 <dl class="function">
@@ -411,10 +426,14 @@ happening.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>times</strong> (<em>list</em><em> or </em><em>np.ndarray</em>) – An iterable of 1-d numpy arrays, each of which indicates event times</li>
+<li><strong>times</strong> (<em>list where elements are lists</em>) – An iterable of 1-d numpy arrays, each of which is a list that
+indicates the starting times of all vocalization events. We do not
+want to include these as candidate time periods</li>
 <li><strong>duration</strong> (<em>int</em>) – The length of the desired empty epochs</li>
 <li><strong>pre</strong> (<em>int</em>) – the time before each event to exclude</li>
 <li><strong>post</strong> (<em>int</em>) – The time after each event to exclude</li>
+<li><strong>start</strong> (<em>array_like</em>) – List of a recall period start times</li>
+<li><strong>end</strong> (<em>array_like</em>) – List of recall period end times</li>
 </ul>
 </td>
 </tr>
@@ -629,6 +648,12 @@ experiment, and session(s)</p>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.lookup_sample_rate">
+<code class="descclassname">ramutils.events.</code><code class="descname">lookup_sample_rate</code><span class="sig-paren">(</span><em>subject</em>, <em>experiment</em>, <em>session</em>, <em>rootdir='/'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#lookup_sample_rate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.lookup_sample_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identify the sample rate used for a session</p>
 </dd></dl>
 
 <dl class="function">
@@ -915,9 +940,7 @@ should already be true in the raw events data.</p>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -939,7 +962,7 @@ should already be true in the raw events data.</p>
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -958,6 +981,7 @@ should already be true in the raw events data.</p>
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
             VERSION:'2.1.10',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -976,14 +1000,11 @@ should already be true in the raw events data.</p>
     <script type="text/javascript" src="_static/js/theme.js"></script>
   
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>
