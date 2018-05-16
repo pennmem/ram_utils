@@ -25,25 +25,17 @@
   
 
   
-  
     <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../../genindex.html"/>
-        <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="Ramutils 2.1.10 documentation" href="../../../index.html"/>
-        <link rel="up" title="Module code" href="../../index.html"/> 
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
 
   
   <script src="../../../_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -89,7 +81,9 @@
               
             
             
-              <ul>
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started_report_data.html">Getting Statrted: RAM Report Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../data.html">Serializable data structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../classifier.html">Classifier training, cross validation, and utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../events.html">Event processing</a></li>
@@ -107,7 +101,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">Ramutils</a>
@@ -115,9 +109,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -146,8 +141,6 @@
     
     
       <li class="wy-breadcrumbs-aside">
-        
-            
         
       </li>
     
@@ -448,11 +441,17 @@
             <span class="s1">&#39;experiment_specs&#39;</span><span class="p">:</span> <span class="n">_make_experiment_specs_section</span><span class="p">(</span><span class="n">experiment</span><span class="p">),</span>
             <span class="s1">&#39;artifact_detection&#39;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s2">&quot;allow_artifact_detection&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="s2">&quot;artifact_detection_number_of_stims_per_channel&quot;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span>
-                <span class="s2">&quot;artifact_detection_sample_time_length&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>
-                <span class="s2">&quot;artifact_detection_inter_stim_interval&quot;</span><span class="p">:</span> <span class="mi">2000</span><span class="p">,</span>
-                <span class="s2">&quot;allow_artifact_detection_during_session&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-                    <span class="p">},</span>
+                <span class="s2">&quot;pre_start&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">440</span><span class="p">,</span>
+                <span class="s2">&quot;pre_stop&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">40</span><span class="p">,</span>
+                <span class="s2">&quot;post_start&quot;</span><span class="p">:</span> <span class="mi">40</span><span class="p">,</span>
+                <span class="s2">&quot;post_stop&quot;</span><span class="p">:</span> <span class="mi">440</span><span class="p">,</span>
+                <span class="s2">&quot;sham_events&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+                <span class="s2">&quot;stim_events&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+                <span class="s2">&quot;isi_min&quot;</span><span class="p">:</span> <span class="mi">1500</span><span class="p">,</span>
+                <span class="s2">&quot;isi_max&quot;</span><span class="p">:</span> <span class="mi">2000</span><span class="p">,</span>
+                <span class="s2">&quot;std_threshold&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="s2">&quot;event_threshold&quot;</span><span class="p">:</span> <span class="mf">0.5</span>
+            <span class="p">},</span>
         <span class="p">},</span>
 
         <span class="s2">&quot;biomarker_threshold&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
@@ -616,9 +615,7 @@
 </pre></div>
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -631,7 +628,7 @@
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -650,6 +647,7 @@
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
             VERSION:'2.1.10',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -668,14 +666,11 @@
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
   
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

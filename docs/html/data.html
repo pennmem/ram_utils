@@ -25,26 +25,19 @@
   
 
   
-  
     <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Ramutils 2.1.10 documentation" href="index.html"/>
-        <link rel="next" title="Classifier training, cross validation, and utilities" href="classifier.html"/>
-        <link rel="prev" title="ramutils" href="index.html"/> 
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Classifier training, cross validation, and utilities" href="classifier.html" />
+    <link rel="prev" title="Getting Statrted: RAM Report Data" href="getting_started_report_data.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -90,7 +83,9 @@
               
             
             
-              <ul class="current">
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started_report_data.html">Getting Statrted: RAM Report Data</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Serializable data structures</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#defining-data-classes">Defining data classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#experiment-parameters">Experiment parameters</a></li>
@@ -113,7 +108,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Ramutils</a>
@@ -121,9 +116,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -165,19 +161,38 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="serializable-data-structures">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="serializable-data-structures">
 <h1>Serializable data structures<a class="headerlink" href="#serializable-data-structures" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="defining-data-classes">
 <h2>Defining data classes<a class="headerlink" href="#defining-data-classes" title="Permalink to this headline">¶</a></h2>
 <p>Data can be defined in a serializable manner using the
-<code class="xref py py-class docutils literal"><span class="pre">traitschema.Schema</span></code> base class which adds serialization methods to
-data classes that are defined using the <code class="xref py py-mod docutils literal"><span class="pre">traits</span></code> package. To ensure
-serializability, use the <code class="docutils literal"><span class="pre">Array</span></code> type whenever possible.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">traitschema.Schema</span></code> base class which adds serialization methods to
+data classes that are defined using the <code class="xref py py-mod docutils literal notranslate"><span class="pre">traits</span></code> package. To ensure
+serializability, use the <code class="docutils literal notranslate"><span class="pre">Array</span></code> type whenever possible.</p>
 </div>
 <div class="section" id="experiment-parameters">
 <h2>Experiment parameters<a class="headerlink" href="#experiment-parameters" title="Permalink to this headline">¶</a></h2>
 <p>Experiment parameters (e.g., timing windows) are defined as
-<code class="xref py py-class docutils literal"><span class="pre">traitschema.Schema</span></code> subclasses so that the parameters used when
+<code class="xref py py-class docutils literal notranslate"><span class="pre">traitschema.Schema</span></code> subclasses so that the parameters used when
 training a classifier can be easily saved.</p>
 <span class="target" id="module-ramutils.parameters"></span><p>Common experimental/model parameters.</p>
 <dl class="class">
@@ -194,12 +209,12 @@ paths on creation.</p>
 <tr class="field-odd field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
 <li><strong>root</strong> (<em>str</em>) – Rhino mount point.</li>
 <li><strong>dest</strong> (<em>str</em>) – Directory to write files to.</li>
-<li><strong>pairs</strong> (<em>str</em>) – Path to <code class="docutils literal"><span class="pre">pairs.json</span></code>.</li>
-<li><strong>excluded_pairs</strong> (<em>str</em>) – Path to <code class="docutils literal"><span class="pre">excluded_pairs.json</span></code>.</li>
+<li><strong>pairs</strong> (<em>str</em>) – Path to <code class="docutils literal notranslate"><span class="pre">pairs.json</span></code>.</li>
+<li><strong>excluded_pairs</strong> (<em>str</em>) – Path to <code class="docutils literal notranslate"><span class="pre">excluded_pairs.json</span></code>.</li>
 <li><strong>electrode_config_file</strong> (<em>str</em>) – Path to electrode config file.</li>
 <li><strong>area_file</strong> (<em>str</em>) – Path to surface area file. When generating Odin configuration files and
 not defined, the default behavior is to look in the same directory as
-the jacksheet for a file named <code class="docutils literal"><span class="pre">area.txt</span></code>.</li>
+the jacksheet for a file named <code class="docutils literal notranslate"><span class="pre">area.txt</span></code>.</li>
 <li><strong>data_db</strong> (<em>str</em>) – Path to directory where permanently-cached underlying data for
 reports should be stored. In general, this should only be specified
 when testing, otherwise the default location should be used</li>
@@ -250,15 +265,15 @@ few more</p>
 into a single directory with differentiation between subjects/sessions/data done by following a strict naming convention:
 {subject}_{experiment}_{session}_{data_type}.{file_type}. Most saved objects are unique to a particular subject/experiment/session.
 In cases where this is not true, {session} wil be an underscore-separated list of the sessions used to generate the data.
-To see how this is done, see  <a class="reference internal" href="pipeline.html#ramutils.tasks.misc.save_all_output" title="ramutils.tasks.misc.save_all_output"><code class="xref py py-func docutils literal"><span class="pre">ramutils.tasks.misc.save_all_output()</span></code></a> and <a class="reference internal" href="pipeline.html#ramutils.tasks.misc.load_existing_results" title="ramutils.tasks.misc.load_existing_results"><code class="xref py py-func docutils literal"><span class="pre">ramutils.tasks.misc.load_existing_results()</span></code></a>.
+To see how this is done, see  <a class="reference internal" href="pipeline.html#ramutils.tasks.misc.save_all_output" title="ramutils.tasks.misc.save_all_output"><code class="xref py py-func docutils literal notranslate"><span class="pre">ramutils.tasks.misc.save_all_output()</span></code></a> and <a class="reference internal" href="pipeline.html#ramutils.tasks.misc.load_existing_results" title="ramutils.tasks.misc.load_existing_results"><code class="xref py py-func docutils literal notranslate"><span class="pre">ramutils.tasks.misc.load_existing_results()</span></code></a>.
 For example, if a target selection table was generated using sessions 1, 2, and 3 for subject R1XXX and experiment
 XYZ, then the file would be saved as R1XXX_XYZ_1_2_3_target_selection_table.csv. Listed below are the types of data stored. Their
 corresponding objects are also noted. The properties and methods defined for each of these objects can be found in the
 documentation below.</p>
 <ul class="simple">
 <li>target_selection_table – A csv file containing metadata for each electrode</li>
-<li>classifier_summary – Metadata related to classifier performance <code class="xref py py-class docutils literal"><span class="pre">ClassifierSummary</span></code></li>
-<li>math_summary – Math events and useful helper methods for assessing performance on the distractor task <code class="xref py py-class docutils literal"><span class="pre">MathSummary</span></code></li>
+<li>classifier_summary – Metadata related to classifier performance <code class="xref py py-class docutils literal notranslate"><span class="pre">ClassifierSummary</span></code></li>
+<li>math_summary – Math events and useful helper methods for assessing performance on the distractor task <code class="xref py py-class docutils literal notranslate"><span class="pre">MathSummary</span></code></li>
 <li>session_summary – Events and helper methods for conducting behavioral analyses and generating plots. In many cases,
 there are summary objects specific to the type of session, i.e. stim vs. nonstim, FR vs. CatFR vs. PS, etc.</li>
 </ul>
@@ -447,7 +462,7 @@ be all events (which include math events) or just math events.</p>
 <dl class="method">
 <dt id="ramutils.reports.summary.MathSummary.to_dataframe">
 <code class="descname">to_dataframe</code><span class="sig-paren">(</span><em>recreate=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#MathSummary.to_dataframe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.MathSummary.to_dataframe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert the summary to a <code class="xref py py-class docutils literal"><span class="pre">pd.DataFrame</span></code> for easier
+<dd><p>Convert the summary to a <code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DataFrame</span></code> for easier
 manipulation. This amounts to converting the events to a dataframe</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -554,11 +569,11 @@ sessions.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>events</strong> (<code class="xref py py-class docutils literal"><span class="pre">np.recarray</span></code>) – </li>
-<li><strong>raw_events</strong> (<code class="xref py py-class docutils literal"><span class="pre">np.recarray</span></code>) – </li>
+<li><strong>events</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">np.recarray</span></code>) – </li>
+<li><strong>raw_events</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">np.recarray</span></code>) – </li>
 <li><strong>bipolar_pairs</strong> (<em>dict</em>) – Dictionary containing data in bipolar pairs in a montage</li>
 <li><strong>excluded_pairs</strong> (<em>dict</em>) – Dictionary containing data on pairs excluded from analysis</li>
-<li><strong>normalized_powers</strong> (<code class="xref py py-class docutils literal"><span class="pre">np.ndarray</span></code>) – 2D array of normalzied powers of shape n_events x (
+<li><strong>normalized_powers</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">np.ndarray</span></code>) – 2D array of normalzied powers of shape n_events x (
 n_frequencies * n_bipolar_pairs)</li>
 </ul>
 </td>
@@ -582,7 +597,7 @@ n_frequencies * n_bipolar_pairs)</li>
 <dl class="attribute">
 <dt id="ramutils.reports.summary.Summary.raw_events">
 <code class="descname">raw_events</code><a class="headerlink" href="#ramutils.reports.summary.Summary.raw_events" title="Permalink to this definition">¶</a></dt>
-<dd><p><code class="xref py py-class docutils literal"><span class="pre">np.rec.array</span></code> of all events (math and task) from the session</p>
+<dd><p><code class="xref py py-class docutils literal notranslate"><span class="pre">np.rec.array</span></code> of all events (math and task) from the session</p>
 </dd></dl>
 
 </dd></dl>
@@ -600,7 +615,7 @@ n_frequencies * n_bipolar_pairs)</li>
 <dl class="attribute">
 <dt id="ramutils.reports.summary.SessionSummary.events">
 <code class="descname">events</code><a class="headerlink" href="#ramutils.reports.summary.SessionSummary.events" title="Permalink to this definition">¶</a></dt>
-<dd><p><code class="xref py py-class docutils literal"><span class="pre">np.recarray</span></code> of events</p>
+<dd><p><code class="xref py py-class docutils literal notranslate"><span class="pre">np.recarray</span></code> of events</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -669,7 +684,7 @@ session in UTC.</p>
 <dl class="method">
 <dt id="ramutils.reports.summary.SessionSummary.to_dataframe">
 <code class="descname">to_dataframe</code><span class="sig-paren">(</span><em>recreate=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#SessionSummary.to_dataframe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.SessionSummary.to_dataframe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert the summary to a <code class="xref py py-class docutils literal"><span class="pre">pd.DataFrame</span></code> for easier
+<dd><p>Convert the summary to a <code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DataFrame</span></code> for easier
 manipulation. This amounts to converting the events to a dataframe</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -889,6 +904,27 @@ the same comparison, but for post-stim items</p>
 <dd><p>Returns the number of stim lists.</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="ramutils.reports.summary.FRStimSessionSummary.populate">
+<code class="descname">populate</code><span class="sig-paren">(</span><em>events</em>, <em>bipolar_pairs</em>, <em>excluded_pairs</em>, <em>normalized_powers</em>, <em>post_stim_prob_recall=None</em>, <em>raw_events=None</em>, <em>model_metadata={}</em>, <em>post_stim_eeg=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.populate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.populate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Populate data from events.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>events</strong> (<em>np.recarray</em>) – </li>
+<li><strong>raw_events</strong> (<em>np.recarray</em>) – </li>
+<li><strong>recall_probs</strong> (<em>np.ndarray</em>) – Predicted probabilities of recall per item. If not given, assumed
+there is no relevant classifier and values of -999 are used to
+indicate this.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="staticmethod">
 <dt id="ramutils.reports.summary.FRStimSessionSummary.pre_stim_prob_recall">
 <em class="property">static </em><code class="descname">pre_stim_prob_recall</code><span class="sig-paren">(</span><em>summaries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.pre_stim_prob_recall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.pre_stim_prob_recall" title="Permalink to this definition">¶</a></dt>
@@ -970,6 +1006,12 @@ items vers. low-biomarker non-stim items. All comparisons are done for each uniq
 containing additional metadata about the results from stimulating at that location</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="ramutils.reports.summary.PSSessionSummary.populate">
+<code class="descname">populate</code><span class="sig-paren">(</span><em>events</em>, <em>bipolar_pairs</em>, <em>excluded_pairs</em>, <em>normalized_powers</em>, <em>raw_events=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#PSSessionSummary.populate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.PSSessionSummary.populate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Populate attributes and store events.</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -977,9 +1019,7 @@ containing additional metadata about the results from stimulating at that locati
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -988,7 +1028,7 @@ containing additional metadata about the results from stimulating at that locati
         <a href="classifier.html" class="btn btn-neutral float-right" title="Classifier training, cross validation, and utilities" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral" title="ramutils" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="getting_started_report_data.html" class="btn btn-neutral" title="Getting Statrted: RAM Report Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -1001,7 +1041,7 @@ containing additional metadata about the results from stimulating at that locati
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -1020,6 +1060,7 @@ containing additional metadata about the results from stimulating at that locati
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
             VERSION:'2.1.10',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -1038,14 +1079,11 @@ containing additional metadata about the results from stimulating at that locati
     <script type="text/javascript" src="_static/js/theme.js"></script>
   
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

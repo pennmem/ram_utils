@@ -25,25 +25,18 @@
   
 
   
-  
     <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Ramutils 2.1.10 documentation" href="#"/>
-        <link rel="next" title="Serializable data structures" href="data.html"/> 
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Getting Statrted: RAM Report Data" href="getting_started_report_data.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -89,7 +82,9 @@
               
             
             
-              <ul>
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting_started_report_data.html">Getting Statrted: RAM Report Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="data.html">Serializable data structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="classifier.html">Classifier training, cross validation, and utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="events.html">Event processing</a></li>
@@ -107,7 +102,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="#">Ramutils</a>
@@ -115,9 +110,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -159,38 +155,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="ramutils">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+</style>
+<div class="section" id="ramutils">
 <h1>ramutils<a class="headerlink" href="#ramutils" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<p>Clone the repository:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>$ git clone https://github.com/pennmem/ram_utils.git
-$ cd ram_utils
-</pre></div>
-</div>
-<p>Create a conda environment with all prerequisites:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>$ conda create -y -n ramutils
-</pre></div>
-</div>
-<p>Install dependencies:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>$ source activate ramutils
-(ramutils) $ conda install -y -c pennmem --file=requirements.txt
-</pre></div>
-</div>
-<p>Install <code class="docutils literal"><span class="pre">ramutils</span></code>:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span>(ramutils) $ python setup.py install
-</pre></div>
-</div>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">Future releases should be installable via a conda package with dependencies
-specified there.</p>
-</div>
-</div>
-<div class="section" id="contents">
-<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div>$ conda install -c pennmem -c conda-forge ramutils</div></blockquote>
 <div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contents</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="getting_started_report_data.html">Getting Statrted: RAM Report Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting_started_report_data.html#Finding-Data">Finding Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started_report_data.html#Loading-Multiple-Files-of-a-Single-Type">Loading Multiple Files of a Single Type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started_report_data.html#Extracting-Metadata-from-the-File-Path">Extracting Metadata from the File Path</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started_report_data.html#Building-an-Item-Level-Dataset">Building an Item-Level Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started_report_data.html#Reloading-a-Trained-Classifier">Reloading a Trained Classifier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started_report_data.html#Pandas-Magic">Pandas Magic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started_report_data.html#Combining-Across-Summary-File-Types">Combining Across Summary File Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started_report_data.html#Aggregating-to-a-different-level">Aggregating to a different level</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="data.html">Serializable data structures</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="data.html#defining-data-classes">Defining data classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="data.html#experiment-parameters">Experiment parameters</a></li>
@@ -231,15 +234,13 @@ specified there.</p>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="data.html" class="btn btn-neutral float-right" title="Serializable data structures" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="getting_started_report_data.html" class="btn btn-neutral float-right" title="Getting Statrted: RAM Report Data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
     </div>
@@ -253,7 +254,7 @@ specified there.</p>
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -272,6 +273,7 @@ specified there.</p>
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
             VERSION:'2.1.10',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -290,14 +292,11 @@ specified there.</p>
     <script type="text/javascript" src="_static/js/theme.js"></script>
   
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

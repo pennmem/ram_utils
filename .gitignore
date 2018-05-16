@@ -11,6 +11,7 @@ scratch/
 *.swp
 *.png
 *.zip
+*.ipynb_checkpoints/
 
 # Build artifacts
 build/

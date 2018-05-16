@@ -25,25 +25,17 @@
   
 
   
-  
     <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../../genindex.html"/>
-        <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="Ramutils 2.1.10 documentation" href="../../../index.html"/>
-        <link rel="up" title="Module code" href="../../index.html"/> 
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
 
   
   <script src="../../../_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -89,7 +81,9 @@
               
             
             
-              <ul>
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started_report_data.html">Getting Statrted: RAM Report Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../data.html">Serializable data structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../classifier.html">Classifier training, cross validation, and utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../events.html">Event processing</a></li>
@@ -107,7 +101,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">Ramutils</a>
@@ -115,9 +109,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -146,8 +141,6 @@
     
     
       <li class="wy-breadcrumbs-aside">
-        
-            
         
       </li>
     
@@ -357,7 +350,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cov</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_features</span><span class="p">,</span><span class="n">rowvar</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">_coef</span><span class="o">.</span><span class="n">squeeze</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cov</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_features</span><span class="p">,</span> <span class="n">rowvar</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coef</span><span class="o">.</span><span class="n">squeeze</span><span class="p">())</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">classifier_activation_2d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1045,7 +1038,7 @@
 <div class="viewcode-block" id="FRStimSessionSummary"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.FRStimSessionSummary">[docs]</a><span class="k">class</span> <span class="nc">FRStimSessionSummary</span><span class="p">(</span><span class="n">FRSessionSummary</span><span class="p">,</span> <span class="n">StimSessionSummary</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; SessionSummary for FR sessions with stim &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span>
+<div class="viewcode-block" id="FRStimSessionSummary.populate"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.FRStimSessionSummary.populate">[docs]</a>    <span class="k">def</span> <span class="nf">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span>
                  <span class="n">excluded_pairs</span><span class="p">,</span> <span class="n">normalized_powers</span><span class="p">,</span> <span class="n">post_stim_prob_recall</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">raw_events</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_metadata</span><span class="o">=</span><span class="p">{},</span> <span class="n">post_stim_eeg</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">FRSessionSummary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
@@ -1061,7 +1054,7 @@
                                     <span class="n">post_stim_prob_recall</span><span class="o">=</span><span class="n">post_stim_prob_recall</span><span class="p">,</span>
                                     <span class="n">raw_events</span><span class="o">=</span><span class="n">raw_events</span><span class="p">,</span>
                                     <span class="n">model_metadata</span><span class="o">=</span><span class="n">model_metadata</span><span class="p">,</span>
-                                    <span class="n">post_stim_eeg</span><span class="o">=</span><span class="n">post_stim_eeg</span><span class="p">)</span>
+                                    <span class="n">post_stim_eeg</span><span class="o">=</span><span class="n">post_stim_eeg</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="FRStimSessionSummary.combine_sessions"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.FRStimSessionSummary.combine_sessions">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">combine_sessions</span><span class="p">(</span><span class="n">summaries</span><span class="p">):</span>
@@ -1349,11 +1342,11 @@
 <div class="viewcode-block" id="PSSessionSummary"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.PSSessionSummary">[docs]</a><span class="k">class</span> <span class="nc">PSSessionSummary</span><span class="p">(</span><span class="n">SessionSummary</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Parameter Search experiment summary &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span>
+<div class="viewcode-block" id="PSSessionSummary.populate"><a class="viewcode-back" href="../../../data.html#ramutils.reports.summary.PSSessionSummary.populate">[docs]</a>    <span class="k">def</span> <span class="nf">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span>
                  <span class="n">normalized_powers</span><span class="p">,</span> <span class="n">raw_events</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">SessionSummary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span>
                                 <span class="n">normalized_powers</span><span class="p">,</span> <span class="n">raw_events</span><span class="o">=</span><span class="n">raw_events</span><span class="p">)</span>
-        <span class="k">return</span>
+        <span class="k">return</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">decision</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1494,9 +1487,7 @@
 </pre></div>
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -1509,7 +1500,7 @@
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -1528,6 +1519,7 @@
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
             VERSION:'2.1.10',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -1546,14 +1538,11 @@
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
   
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>
