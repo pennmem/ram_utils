@@ -775,6 +775,7 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
         for i, _ in enumerate(new_events):
             new_events[i].mstime = matching_epochs[i]
             new_events[i].type = 'REC_BASE'
+            new_events[i].rectime  = rel_epochs[full_match_accum][i]
 
         new_events.recalled = 0
         merged_events = np.rec.array(np.concatenate((sess_events,
