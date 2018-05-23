@@ -209,15 +209,16 @@ if __name__ == "__main__":
     #     '--target-amplitudes', '0.5'
     # ])
 
-    # create_expconf(args + [
-    #     '-s', 'R1384J', '-x', 'PS5_CatFR',
-    #     '--anodes', 'LF7',
-    #     '--cathodes', 'LF8',
-    #     '--min-amplitudes', '0.1',
-    #     '--max-amplitudes', '0.5',
-    #     '--trigger-pairs', 'RPMS1_RPMS2',
-    #     '--default-area', '5.024',
-    # ])
+    create_expconf(args + [
+        '-s', 'R1384J', '-x', 'CatFR6',
+        '--anodes', 'LF7', 'LS8',
+        '--cathodes', 'LF8', 'LS9',
+        '--target-amplitudes', '0.5', '0.5',
+        # '--min-amplitudes', '0.1', '0.1',
+        # '--max-amplitudes', '0.5', '0.5',
+        # '--trigger-pairs', 'RPMS1_RPMS2',
+        '--default-area', '5.024',
+    ])
 
     # create_expconf(args + [
     #     '-s', 'R1385E',
@@ -229,10 +230,10 @@ if __name__ == "__main__":
     #     '--target-amplitudes', '0.5'
     # ])
 
-    create_expconf(args + [
-        '-s', 'R1384J',
-        '-x', 'CatFR5',
-        '--anodes', '3LD8',
-        '--cathodes', '3LD9',
-        '--target-amplitudes', '0.5'
-    ])
+    # create_expconf(args + [
+    #     '-s', 'R1384J',
+    #     '-x', 'CatFR5',
+    #     '--anodes', '3LD8',
+    #     '--cathodes', '3LD9',
+    #     '--target-amplitudes', '0.5'
+    # ])
