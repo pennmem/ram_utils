@@ -44,7 +44,7 @@ def create_matched_events(events,
                           recall_eeg_start = -1250, recall_eeg_end = 250,
                           match_tolerance = 3000,
                           remove_before_recall = 2000, remove_after_recall = 2000,
-                          verbose=False):
+                          verbose=False,samplerate=None):
     """Creates behavioral events for recall and matched-in-time deliberation points
 
     Parameters
@@ -123,6 +123,7 @@ def create_matched_events(events,
                                                 remove_before_recall=remove_before_recall,
                                                 remove_after_recall=remove_after_recall,
                                                 desired_duration=None,  # UNTIL IMPLEMENTED SET AS NONE!
+                                                samplerate = samplerate,
                                                 verbose=verbose)
 
     return subject_instance.create_matched_recarray()
@@ -181,6 +182,7 @@ class RetrievalEventCreator(object):
     # -----> Initialize the instance
     def __init__(self, events,
                  inclusion_time_before, inclusion_time_after,
+                 samplerate=None,
                  verbose=False):
 
         # Initialize passed arguments
@@ -201,7 +203,7 @@ class RetrievalEventCreator(object):
 
         # Initialize attributes we'll want to construct initially as None
         self.events = events
-        self.sample_rate = None
+        self.sample_rate = samplerate
         self.montage = None
         self.possible_sessions = None
         self.trials = None
@@ -213,7 +215,8 @@ class RetrievalEventCreator(object):
         """Main code to run through the steps in the code"""
         self.set_events()
         self.events = self.add_fields_timebefore_and_timeafter(self.events)
-        self.set_samplerate_params()
+        if self.sample_rate is None:
+            self.set_samplerate_params()
         self.set_valid_trials()
 
         # ----------> Check the formatting of the events to ensure that they have correct info
@@ -362,7 +365,7 @@ class RetrievalEventCreator(object):
         -------
         Attribute self.trials
         """
-        trial_field = 'trial' if self.experiment in self.jr_scalp.experiments() else 'list'
+        trial_field = 'trial' if 'trial' in self.events.dtype.names else 'list'
         self.trials = np.unique(self.events[trial_field])
 
         if self.verbose:
@@ -694,12 +697,13 @@ class DeliberationEventCreator(RetrievalEventCreator):
                  rec_inclusion_before, rec_inclusion_after,
                  recall_eeg_start, recall_eeg_end, match_tolerance,
                  remove_before_recall, remove_after_recall,
-                 desired_duration=None, verbose=False):
+                 desired_duration=None, verbose=False,samplerate=None):
         # Inheritance (Sets all attributes of RetrievalEventCreator)
         super(DeliberationEventCreator, self).__init__(events=events,
                                                        inclusion_time_before=rec_inclusion_before,
                                                        inclusion_time_after=rec_inclusion_after,
-                                                       verbose=verbose)
+                                                       verbose=verbose,
+                                                       samplerate=samplerate)
         # Initialize the relevant RetrievalEventCreator attributes
         self.initialize_recall_events()
         # This seems silly to have four attributes refer to two things?
@@ -969,7 +973,7 @@ class DeliberationEventCreator(RetrievalEventCreator):
             bl['type'] = 'REC_BASE'
             bl[trial_field] = trial
             bl[item_field] = 'N/A'
-            bl[item_number_field] = -999
+            # bl[item_number_field] = -999
             bl['timebefore'] = -999
             bl['timeafter'] = -999
             bl['eegoffset'] = -999

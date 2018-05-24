@@ -718,8 +718,10 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
 
     if len(events) == 0:
         return events
+    samplerate = extract_sample_rate_from_eeg(events)
     new_events = create_matched_events(
         events,
+        samplerate =samplerate,
         rec_inclusion_before=pre,
         rec_inclusion_after=post,
         recall_eeg_start=-1*duration,
@@ -727,6 +729,8 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
         remove_before_recall=1000,remove_after_recall=1000,
     )
     events = events[events['type'] != 'REC_WORD']
+    event_fields = list(events.dtype.names)
+    new_events = new_events[event_fields][:]
     return concatenate_events_for_single_experiment([events,new_events])
 
 
