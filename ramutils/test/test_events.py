@@ -129,12 +129,15 @@ class TestEvents:
         return
 
     @pytest.mark.rhino
-    def test_insert_baseline_retrieval_events(self, rhino_root):
+    def test_insert_baseline_retrieval_events(self,rhino_root):
         # This is just a regression test. There should be something more
         # comprehensive. This does not look like it would be using rhino, but
         # under the hood a sample of eeg data is loaded to determine the sample
         # rate
-        events = load_event_test_data(datafile("input/events/R1409D_pre_baseline_event_insertion_events.npy"), rhino_root)
+        events = np.rec.array(
+            np.load(datafile("input/events/R1409D_pre_baseline_event_insertion_events.npy")))
+        events['eegfile'] = [os.path.join(rhino_root,ev['eegfile'])
+                             for ev in events]
         params = FRParameters()
         final_events = insert_baseline_retrieval_events(events,
                                                         params.baseline_removal_start_time,
