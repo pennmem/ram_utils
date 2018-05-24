@@ -23,7 +23,7 @@ from numpy.lib.recfunctions import rename_fields
 from ptsa.data.readers import BaseEventReader, JsonIndexReader, EEGReader
 from ramutils.utils import extract_subject_montage, get_completed_sessions, extract_experiment_series
 from ramutils.exc import *
-
+from ramutils.retrieval import create_matched_events
 
 def load_events(subject, experiment, file_type='all_events',
                 sessions=None, rootdir='/'):
@@ -712,91 +712,22 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
     Returns
     -------
     np.reccarray
-        Events with REC_BASE event types inserted
-
+        Events with REC_BASE event types inserted and unmatched REC_WORD events
+        dropped.
     """
 
     if len(events) == 0:
         return events
-
-    # We need to know the sample rate in order to create the new REC_BASE
-    # events. Rather than load a file, we can just load a snippet of eeg and
-    # back out the sample rate
-    samplerate = extract_sample_rate_from_eeg(events)
-
-    # TODO: document within code blocks what is actually happening
-    # TODO: Finish cleaning this mess up
-    all_events = []
-    for session in np.unique(events.session):
-        sess_events = events[(events.session == session)]
-        rec_events = select_retrieval_events(sess_events)
-        voc_events = select_vocalization_events(sess_events)
-
-        # Events corresponding to the start of the recall period
-        starts = sess_events[(sess_events.type == 'REC_START')]
-
-        # Events corresponding to the end of the recall period
-        ends = sess_events[(sess_events.type == 'REC_END')]
-
-        # Times associated with start and stop of recall period
-        start_times = starts.mstime.astype(np.int)
-        end_times = ends.mstime.astype(np.int)
-
-        rec_lists = tuple(np.unique(starts.list))
-
-        # Get list of vocalization times by list if there were any vocalizations
-        # TODO: Pull this into its own function?
-        times = [voc_events[(voc_events.list == lst)].mstime if (
-            voc_events.list == lst).any() else []
-            for lst in rec_lists]
-
-        epochs = find_free_time_periods(times,
-                                        duration,
-                                        pre,
-                                        post,
-                                        start=start_times,
-                                        end=end_times)
-
-        # FIXME: Wow... could this be any more confusing? Pull out into a
-        # separate function. Times relative to recall start
-        rel_times = [(t - i)[(t - i > start_time) & (t - i < end_time)] for
-                     (t, i) in
-                     zip([rec_events[rec_events.list == lst].mstime for lst in
-                          rec_lists], start_times)
-                     ]
-
-        matches_rec_event = match_events_to_baseline(epochs, rel_times,
-                                                    start_times)
-
-        matching_epochs = epochs[matches_rec_event]
-        new_events = np.rec.array(np.zeros(len(matching_epochs),
-                                           dtype=sess_events.dtype))
-
-        for i, _ in enumerate(new_events):
-            new_events[i].mstime = matching_epochs[i]
-            new_events[i].type = 'REC_BASE'
-            new_events[i].rectime  = rel_epochs[full_match_accum][i]
-
-        new_events.recalled = 0
-        merged_events = np.rec.array(np.concatenate((sess_events,
-                                                     new_events)))
-        merged_events.sort(order='mstime')
-
-        for (i, event) in enumerate(merged_events):
-            if event.type == 'REC_BASE':
-                merged_events[i].experiment = merged_events[i - 1].experiment
-                merged_events[i].session = merged_events[i - 1].session
-                merged_events[i].list = merged_events[i - 1].list
-                merged_events[i].eegfile = merged_events[i - 1].eegfile
-                elapsed_time_sec = (merged_events[i].mstime -
-                                    merged_events[i - 1].mstime) / 1000.0
-                samples_elapsed = samplerate * elapsed_time_sec
-                merged_events[i].eegoffset = (merged_events[i - 1].eegoffset +
-                                              samples_elapsed)
-
-        all_events.append(merged_events)
-
-    return np.rec.array(np.concatenate(all_events))
+    new_events = create_matched_events(
+        events,
+        rec_inclusion_before=pre,
+        rec_inclusion_after=post,
+        recall_eeg_start=-1*duration,
+        recall_eeg_end=0,
+        remove_before_recall=1000,remove_after_recall=1000,
+    )
+    events = events[events['type'] != 'REC_WORD']
+    return concatenate_events_for_single_experiment([events,new_events])
 
 
 def match_events_to_baseline(epochs, rel_recall_times, start_times, window=3000):
