@@ -73,17 +73,9 @@ def create_matched_events(events,
     :match_tolerance:
         int, time in ms that a deliberation may deviate from the
         retrieval of an item and still count as a match.
-    :desired_duration:
-        ###FOR NOW DO NOT USE THIS PARAMETER!!!! TODO: ADD IN FULL FUNCTIONALITY###
-        int, default = None, time in ms of eeg that we would like the deliberation
-        period to last for. If None, the code assumes the desired duration is calculated
-        using recall_eeg_start and recall_eeg_end
     :verbose:
         bool, by default False, whether or not to print out the steps of the code along the way, additionally if set to
         true then the code will output a report on the goodness of fit for the created events
-    :goodness_fit_check:
-        bool, by default False, whether or not to display information regarding the goodness of
-        fit of the code
 
     Returns
     ----------
@@ -984,10 +976,13 @@ class DeliberationEventCreator(RetrievalEventCreator):
             bl['eegoffset'] = trial_rec_start_events['eegoffset'] + (self.sample_rate * (bl['rectime'] / 1000.))
             valid_deliberation.append(bl)
 
-        valid_recalls = np.array(valid_recalls).view(np.recarray)
-        valid_deliberation = np.array(valid_deliberation).view(np.recarray)
+        valid_recalls = np.rec.array(np.array(valid_recalls))
+        valid_deliberation = np.rec.array(np.array(valid_deliberation))
+        valid_deliberation['recalled'] = False
 
-        behavioral_events = np.concatenate((valid_deliberation, valid_recalls)).view(np.recarray)
+        behavioral_events = np.rec.array(
+            np.concatenate((valid_deliberation, valid_recalls))
+        )
         behavioral_events.sort(order='match')
         self.matched_events = behavioral_events
 

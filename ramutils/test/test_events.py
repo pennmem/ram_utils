@@ -127,6 +127,24 @@ class TestEvents:
         # TODO: This is a more complicated algorithm to test
         return
 
+    def test_match_baseline_retrieval_events(self,rhino_root):
+        events = np.rec.array(
+            np.load(datafile("input/events/R1409D_pre_baseline_event_insertion_events.npy")))
+        events['eegfile'] = [os.path.join(rhino_root,ev['eegfile'])
+                             for ev in events]
+        params = FRParameters()
+        final_events = insert_baseline_retrieval_events(
+            events,
+            params.baseline_removal_start_time,
+            params.retrieval_time,
+            params.empty_epoch_duration,
+            params.pre_event_buf,
+            params.post_event_buf
+        )
+        retrieval_mask = get_all_retrieval_events_mask(final_events)
+        assert (final_events[retrieval_mask].recalled.sum() ==
+                (final_events[retrieval_mask].recalled==0).sum())
+
     @pytest.mark.rhino
     def test_insert_baseline_retrieval_events(self,rhino_root):
         # This is just a regression test. There should be something more

@@ -614,7 +614,7 @@ def get_required_columns(all_relevant=False, pal=False, stim=False, cat=False):
         'serialpos', 'session', 'subject', 'rectime', 'experiment',
         'mstime', 'type', 'eegoffset', 'recalled', 'intrusion',
         'montage', 'list', 'stim_list', 'eegfile', 'msoffset', 'item_name',
-        'iscorrect', 'phase'
+        'iscorrect', 'phase','matched'
     ]
 
     if all_relevant:
@@ -717,30 +717,36 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
 
     if len(events) == 0:
         return events
-    samplerate = extract_sample_rate_from_eeg(events)
-    new_events = create_matched_events(
-        events,
-        samplerate =samplerate,
-        rec_inclusion_before=pre,
-        rec_inclusion_after=post,
-        recall_eeg_start=-1*duration,
-        recall_eeg_end=0,
-        remove_before_recall=1000,remove_after_recall=1000,
-    )
-    event_fields = list(events.dtype.names)
-    new_events = new_events[event_fields][:]
-    is_matched_rec_word = np.in1d(events[events.type == 'REC_WORD'],
-                                   new_events[new_events.type == 'REC_WORD'])
+    all_events = []
+    for experiment in extract_experiment_from_events(events):
+        exp_events = events[events['experiment']==experiment]
+        for session in extract_sessions(exp_events):
+            sess_events = select_session_events(events,session)
+            samplerate = extract_sample_rate_from_eeg(sess_events)
+            new_events = create_matched_events(
+                sess_events,
+                samplerate =samplerate,
+                rec_inclusion_before=pre,
+                rec_inclusion_after=post,
+                recall_eeg_start=-1*duration,
+                recall_eeg_end=0,
+                remove_before_recall=1000,remove_after_recall=1000,
+            )
+            event_fields = list(sess_events.dtype.names)
+            new_events = new_events[event_fields][:]
+            is_matched_rec_word = np.in1d(sess_events[sess_events.type == 'REC_WORD'],
+                                           new_events[new_events.type == 'REC_WORD'])
 
-    new_events = add_field(new_events,'matched',True,np.bool_)
-    events = add_field(events,'matched',False,np.bool_)
-    rec_events = events[events.type == 'REC_WORD']
-    rec_events['matched'] = is_matched_rec_word
-    events[events.type == 'REC_WORD'] = is_matched_rec_word
-    return concatenate_events_for_single_experiment([events,
-                                                     new_events[new_events.type
-                                                                == 'REC_BASE']]
-                                                    )
+            new_events = add_field(new_events,'matched',True,np.bool_)
+            sess_events = add_field(sess_events,'matched',False,np.bool_)
+            rec_events = sess_events[sess_events.type == 'REC_WORD']
+            rec_events['matched'] = is_matched_rec_word
+            sess_events[sess_events.type == 'REC_WORD'] = rec_events
+            all_events.append(
+                concatenate_events_for_single_experiment(
+                    [sess_events,new_events[new_events.type == 'REC_BASE']])
+            )
+    return concatenate_events_for_single_experiment(all_events)
 
 
 def concatenate_events_across_experiments(event_list, pal=False, stim=False,
@@ -1311,18 +1317,11 @@ def get_all_retrieval_events_mask(events):
     all_retrieval_mask = ((events.type == 'REC_WORD') |
                           (events.type == 'REC_BASE') |
                           (events.type == 'REC_EVENT'))
-    return all_retrieval_mask
+    if 'matched' not in events.dtype.names:
+        return all_retrieval_mask
+    matched_mask = events['matched']
+    return matched_mask & all_retrieval_mask
 
-
-def get_matched_retrieval_events_mask(events):
-    """ Create a boolean mask for matched retrieval/deliberation events"""
-
-    all_retrieval_events_mask = get_all_retrieval_events_mask(events)
-    if b'matched' not in events.dtype.names:
-        return all_retrieval_events_mask
-    else:
-        matched_mask = events.masked
-        return matched_mask & all_retrieval_events_mask
 
 
 def get_recall_events_mask(events):
@@ -1356,7 +1355,7 @@ def partition_events(events):
 
     """
 
-    retrieval_mask = get_matched_retrieval_events_mask(events)
+    retrieval_mask = get_all_retrieval_events_mask(events)
     pal_mask = (events.experiment == "PAL1")
     post_stim_mask = get_post_stim_events_mask(events)
 
