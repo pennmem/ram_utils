@@ -712,8 +712,7 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
     Returns
     -------
     np.reccarray
-        Events with REC_BASE event types inserted and unmatched REC_WORD events
-        dropped.
+        Events with REC_BASE event types inserted
     """
 
     if len(events) == 0:
@@ -728,89 +727,20 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
         recall_eeg_end=0,
         remove_before_recall=1000,remove_after_recall=1000,
     )
-    events = events[events['type'] != 'REC_WORD']
     event_fields = list(events.dtype.names)
     new_events = new_events[event_fields][:]
-    return concatenate_events_for_single_experiment([events,new_events])
+    is_matched_rec_word = np.in1d(events[events.type == 'REC_WORD'],
+                                   new_events[new_events.type == 'REC_WORD'])
 
-
-def match_events_to_baseline(epochs, rel_recall_times, start_times, window=3000):
-    rel_epochs = epochs - start_times[:, None]
-    is_matched_epoch = np.zeros(epochs.shape, dtype=np.bool)
-    for (i, rec_times_list) in enumerate(rel_recall_times):
-        is_match = np.empty(epochs.shape, dtype=np.bool)
-        is_match[...] = False
-        for t in rec_times_list:
-            dists = np.abs(rel_epochs-t)
-            dists[is_match] = np.inf
-            dists[i,:] = np.inf
-            if dists.min() < window:
-                # Choose the closest epoch for each event
-                is_matched_epoch[np.argmin(dists)] = True
-    return is_matched_epoch
-
-
-def find_free_time_periods(times, duration, pre, post, start=None, end=None):
-    """
-    Given a list of event times, find epochs between them when nothing is
-    happening.
-
-    Parameters
-    ----------
-    times : list where elements are lists
-        An iterable of 1-d numpy arrays, each of which is a list that
-        indicates the starting times of all vocalization events. We do not
-        want to include these as candidate time periods
-    duration : int
-        The length of the desired empty epochs
-    pre : int
-        the time before each event to exclude
-    post: int
-        The time after each event to exclude
-    start: array_like
-        List of a recall period start times
-    end: array_like
-        List of recall period end times
-
-    Returns
-    -------
-    epoch_array : np.ndarray
-
-    """
-    # TODO: Do not allow start and end to be optional because bad stuff will
-    # happen
-    # TODO: Clean this up and add some explanation about what is happening
-    n_trials = len(times)
-    epoch_times = []
-    for i in range(n_trials):
-        ext_times = times[i]
-        if start is not None:
-            ext_times = np.append([start[i]], ext_times)
-        if end is not None:
-            ext_times = np.append(ext_times, [end[i]])
-        pre_times = ext_times - pre
-        post_times = ext_times + post
-
-        # FIXME: Is this backwards?
-        interval_durations = pre_times[1:] - post_times[:-1]
-        free_intervals = np.where(interval_durations > duration)[0]
-        # For each word event, attempt to find a set of possible deliberation
-        # periods in the recall phase
-        trial_epoch_times = []
-        for interval in free_intervals:
-            begin = post_times[interval]
-            finish = pre_times[interval + 1] - duration
-            interval_epoch_times = range(
-                int(begin), int(finish), int(duration))
-            trial_epoch_times.extend(interval_epoch_times)
-        epoch_times.append(np.array(trial_epoch_times))
-
-    epoch_array = np.empty((n_trials, max([len(x) for x in epoch_times])))
-    epoch_array[...] = -np.inf
-    for i, epoch in enumerate(epoch_times):
-        epoch_array[i, :len(epoch)] = epoch
-
-    return epoch_array
+    new_events = add_field(new_events,'matched',True,np.bool_)
+    events = add_field(events,'matched',False,np.bool_)
+    rec_events = events[events.type == 'REC_WORD']
+    rec_events['matched'] = is_matched_rec_word
+    events[events.type == 'REC_WORD'] = is_matched_rec_word
+    return concatenate_events_for_single_experiment([events,
+                                                     new_events[new_events.type
+                                                                == 'REC_BASE']]
+                                                    )
 
 
 def concatenate_events_across_experiments(event_list, pal=False, stim=False,
@@ -1384,6 +1314,17 @@ def get_all_retrieval_events_mask(events):
     return all_retrieval_mask
 
 
+def get_matched_retrieval_events_mask(events):
+    """ Create a boolean mask for matched retrieval/deliberation events"""
+
+    all_retrieval_events_mask = get_all_retrieval_events_mask(events)
+    if b'matched' not in events.dtype.names:
+        return all_retrieval_events_mask
+    else:
+        matched_mask = events.masked
+        return matched_mask & all_retrieval_events_mask
+
+
 def get_recall_events_mask(events):
     """ Create a boolean mask for any recall events """
     recall_mask = (events.recalled == 1)
@@ -1415,7 +1356,7 @@ def partition_events(events):
 
     """
 
-    retrieval_mask = get_all_retrieval_events_mask(events)
+    retrieval_mask = get_matched_retrieval_events_mask(events)
     pal_mask = (events.experiment == "PAL1")
     post_stim_mask = get_post_stim_events_mask(events)
 
