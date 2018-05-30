@@ -7,6 +7,7 @@ from pkg_resources import resource_filename
 from ramutils.events import *
 from sklearn.externals import joblib
 from ramutils.parameters import FRParameters
+from ramutils.retrieval import create_matched_events
 from ramutils.utils import load_event_test_data
 
 datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
@@ -128,11 +129,43 @@ class TestEvents:
         # TODO: This is a more complicated algorithm to test
         return
 
+
+    def test_create_baseline_events_regression(self):
+        static_events = load_event_test_data(
+            datafile('input/events/R1354E_matched_baseline_events.npy'),
+            ''
+        )
+        static_events.sort(order='mstime')
+        events = BaseEventReader(filename=
+                                 datafile('protocols/R1354E_catFR1_0.json')
+                                 ).read()
+
+        params = FRParameters()
+        samplerate = 1000
+        print(np.unique(events.experiment))
+        matched_events = create_matched_events(
+            events,
+            samplerate=samplerate,
+            rec_inclusion_before=params.pre_event_buf,
+            rec_inclusion_after=params.post_event_buf,
+            recall_eeg_start=-1 * params.empty_epoch_duration,
+            recall_eeg_end=0,
+            remove_before_recall=1000, remove_after_recall=1000,
+        )
+        matched_events.sort(order=['list','mstime'])
+        common_fields = ['list','serialpos','type',
+                         'item_name','mstime','eegoffset']
+
+        assert len(static_events) == len(matched_events)
+        assert (static_events[common_fields] == matched_events[common_fields]).all()
+
+
+    @pytest.mark.rhino
     def test_match_baseline_retrieval_events(self,rhino_root):
-        events = np.rec.array(
-            np.load(datafile("input/events/R1409D_pre_baseline_event_insertion_events.npy")))
-        events['eegfile'] = [os.path.join(rhino_root,ev['eegfile'])
-                             for ev in events]
+        events = load_event_test_data(
+            datafile("input/events/R1409D_pre_baseline_event_insertion_events.npy"),
+            rhino_root
+        )
         params = FRParameters()
         final_events = insert_baseline_retrieval_events(
             events,
@@ -152,10 +185,9 @@ class TestEvents:
         # comprehensive. This does not look like it would be using rhino, but
         # under the hood a sample of eeg data is loaded to determine the sample
         # rate
-        events = np.rec.array(
-            np.load(datafile("input/events/R1409D_pre_baseline_event_insertion_events.npy")))
-        events['eegfile'] = [os.path.join(rhino_root,ev['eegfile'])
-                             for ev in events]
+        events = load_event_test_data(
+            datafile("input/events/R1409D_pre_baseline_event_insertion_events.npy"),
+            rhino_root)
         params = FRParameters()
         final_events = insert_baseline_retrieval_events(events,
                                                         params.baseline_removal_start_time,
@@ -163,7 +195,9 @@ class TestEvents:
                                                         params.empty_epoch_duration,
                                                         params.pre_event_buf,
                                                         params.post_event_buf)
-        expected_events = load_event_test_data(datafile("input/events/R1409D_post_retrieval_baseline_event_insertion_events.npy"), rhino_root)
+        expected_events = load_event_test_data(
+            datafile("input/events/R1409D_post_retrieval_baseline_event_insertion_events.npy"),
+            rhino_root)
 
         assert len(final_events) == len(expected_events)
 
