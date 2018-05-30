@@ -15,19 +15,6 @@ Example usage and import to use:
 
 from RetrievalCreationHelper import create_matched_events
 
-#------> Example FR1 usage
-events = create_matched_events(subject='R1111M', experiment='FR1', session=0,
-                               rec_inclusion_before = 2000, rec_inclusion_after = 1000,
-                               remove_before_recall = 2000, remove_after_recall = 2000,
-                               recall_eeg_start = -1250, recall_eeg_end = 250,
-                               match_tolerance = 2000, verbose=True)
-
-#------> Example ltpFR2
-events = create_matched_events(subject='LTP093', experiment='ltpFR2', session=1,
-                               rec_inclusion_before = 3000, rec_inclusion_after = 1000,
-                               remove_before_recall = 3000, remove_after_recall = 3000,
-                               recall_eeg_start = -1500, recall_eeg_end = 500,
-                               match_tolerance = 3000)
 """
 # General imports
 from copy import deepcopy
@@ -37,54 +24,62 @@ import numpy as np
 import pandas as pd
 
 from ptsa.data.readers import BaseEventReader
+from ramutils import log
+logger = log.get_logger()
 
-# ----------> Main function to import
+__all__ = ['create_matched_events',
+           'RetrievalEventCreator',
+           'DeliberationEventCreator']
+
 def create_matched_events(events,
-                          rec_inclusion_before = 2000, rec_inclusion_after = 1000,
-                          recall_eeg_start = -1250, recall_eeg_end = 250,
+                          rec_inclusion_before = 2000,
+                          rec_inclusion_after = 1000,
+                          recall_eeg_start = -1250,
+                          recall_eeg_end = 250,
                           match_tolerance = 3000,
-                          remove_before_recall = 2000, remove_after_recall = 2000,
+                          remove_before_recall = 2000,
+                          remove_after_recall = 2000,
                           verbose=False,samplerate=None):
     """Creates behavioral events for recall and matched-in-time deliberation points
 
     Parameters
     ----------
-    :events:
+    events: np.recarray
         set of events to build matched deliberation periods for
-    :rec_inclusion_before:
-        int,  time in ms before each recall that must be free
+    rec_inclusion_before: int
+        Time in ms before each recall that must be free
         from other events (vocalizations, recalls, stimuli, etc.) to count
         as a valid recall
-    :rec_inclusion_after:
-        int, time in ms after each recall that must be free
+    rec_inclusion_after: int
+        Time in ms after each recall that must be free
         from other events (vocalizations, recalls, stimuli, etc.) to count
         as a valid recall
-    :remove_before_recall:
-        int, time in ms to remove before a recall/vocalization
+    remove_before_recall: int
+        Time in ms to remove before a recall/vocalization
         used to know when a point is "valid" for a baseline
-    :remove_after_recall:
-        int, time in ms to remove after a recall/vocalization
+    remove_after_recall: int
+        Time in ms to remove after a recall/vocalization
         used to know when a point is "valid" for a baseline
-    :recall_eeg_start:
-        int, time in ms of eeg that we would start at
+    recall_eeg_start: int
+        Time in ms of eeg that we would start at
         relative to recall onset, note the sign (e.g. -1500 vs 1500) does not matter
-    :recall_eeg_end:
-        int, time in ms of eeg that we would stop at relative to recall onset
-    :match_tolerance:
-        int, time in ms that a deliberation may deviate from the
+    recall_eeg_end: int
+        Time in ms of eeg that we would stop at relative to recall onset
+    match_tolerance: int
+        Time in ms that a deliberation may deviate from the
         retrieval of an item and still count as a match.
     :verbose:
         bool, by default False, whether or not to print out the steps of the code along the way, additionally if set to
         true then the code will output a report on the goodness of fit for the created events
 
     Returns
-    ----------
+    -------
     :matched_events:
         np.recarray, array of behavioral events corresponding to included recalls with matches
         and their corresponding matches
 
-    Example Usage
-    ---------
+    Examples
+    --------
 
     #------> Example FR1 usage
     events = create_matched_events(subject='R1111M', experiment='FR1', session=0,
@@ -262,22 +257,13 @@ class RetrievalEventCreator(object):
             sessions = np.unique(evs['session'])
 
         # Replaced np.array((map(int, (sessions)))) for py3 functionality
-        self.possible_sessions = np.array(list(map(int, (sessions))))
+        self.possible_sessions = np.array([int(x) for x in sessions])
 
-        # If the user chose a session not in the possible sessions then by default
-        # We will defer to the first session of the possible sessions
-        """5/18/18: Changing default behavior to raise an error if session inputted is not valid"""
+        # If the user chose a session not in the possible sessions ,
+        # then crash
+
         if self.session not in self.possible_sessions:
             raise DoneGoofedError(self.session, self.possible_sessions)
-            #if self.verbose:
-                #print('Could not find session {} in possible sessions: {}'.format(self.session, self.possible_sessions))
-                #print('Over-riding attribute session input {} with {}'.format(self.session,
-                                                                              #self.possible_sessions[0]))
-
-            #self.session = self.possible_sessions[0]
-
-        if self.verbose:
-            print('Set Attribute possible_sessions')
         return
 
     def set_behavioral_event_path(self):
@@ -306,23 +292,14 @@ class RetrievalEventCreator(object):
         elif self.experiment == 'pyFR':  # THIS WILL INITIALLY HAVE ALL SESSIONS!
             event_path = '/data/events/{}/{}_events.mat'.format(self.experiment, self.subject)
 
-        # TO DO: Add in ltpFR1 functionality
-        # event_path = '/data/eeg/scalp/ltp/ltpFR/behavioral/events/events_all_LTP065.mat'
-
-
-        # If Logan is unsure where the data is
         else:
-            if self.verbose:
-                print('Unclear where the path of the data is is...')
-                print('Is {} a valid experiment?'.format(self.experiment))
-                print('Not creating attribute event_path')
+            logger.log('Unclear where the path of the data is is...')
+            logger.log('Is {} a valid experiment?'.format(self.experiment))
+            logger.log('Not creating attribute event_path')
             return
 
         # Set the event path to the attribute event_path
         self.event_path = event_path
-
-        if self.verbose:
-            print('Set attribute event_path')
 
         return
 
@@ -334,19 +311,11 @@ class RetrievalEventCreator(object):
         Attributes self.events
         """
 
-        if self.verbose:
-            print('Set attribute events')
-
         # Remove practice events if there are any
         trial_field = 'trial' if 'trial' in self.events.dtype.names else 'list'
         self.events = self.events[self.events[trial_field] >= 0]
 
-        if self.verbose:
-            print('Removing practice events')
-
         self.events = append_fields(self.events, [('match', '<i8')])
-        if self.verbose:
-            print('Adding field "match" to attribute events')
 
         return
 
@@ -360,8 +329,6 @@ class RetrievalEventCreator(object):
         trial_field = 'trial' if 'trial' in self.events.dtype.names else 'list'
         self.trials = np.unique(self.events[trial_field])
 
-        if self.verbose:
-            print('Set attribute trials')
         return
 
     def set_samplerate_params(self):
@@ -389,19 +356,14 @@ class RetrievalEventCreator(object):
                 self.sample_rate = 2048.
 
         if not scalp:
-            if self.events is None:
-                self.set_behavioral_events()
 
             # Use recall's mstime and eegoffset to determine the sample rate
-            # Seriously, use the recall event not an arbitary type event or errors
             recalls = self.events[self.events['type'] == 'REC_WORD']
             diff_in_seconds = (recalls['mstime'][4] - recalls['mstime'][3]) / 1000.
             diff_in_samples = recalls['eegoffset'][4] - recalls['eegoffset'][3]
             # Round is because we want 499.997 etc. to be 500
             self.sample_rate = np.round(diff_in_samples / diff_in_seconds)
 
-        if self.verbose:
-            print('Set attribute sample_rate')
         return
 
     def set_included_recalls(self, events=None):
@@ -409,7 +371,9 @@ class RetrievalEventCreator(object):
 
         Parameters
         ----------
-        events: np.array, by default None and self.events is used, behavioral events of the subject
+        events: np.array
+            Behavioral events of the subject. If none, self.events is used
+            instead
 
         Sets
         -------
@@ -426,11 +390,9 @@ class RetrievalEventCreator(object):
         recalls['match'] = np.arange(len(recalls))
         self.included_recalls = recalls
 
-        if self.verbose:
-            print('Set attribute included_recalls')
-
         if len(self.included_recalls) == 0:
-            print('No recalls detected for {} session {}'.format(self.subject, self.session))
+            logger.warn('No recalls detected for {} session {}'.format(
+                self.subject, self.session))
 
         return
 
@@ -484,7 +446,7 @@ class RetrievalEventCreator(object):
 
         Returns
         -------
-        True if there are REC_END type events in events otherwise returns False
+        True if there are REC_START type events in events otherwise returns False
         """
 
         return True if len(events[events['type'] == 'REC_START']) > 0 else False
@@ -613,84 +575,43 @@ class RetrievalEventCreator(object):
         behavioral_events = base_e_reader.read()
         return behavioral_events
 
-# ------> Create an object to create matched in time periods of deliberation
+
 class DeliberationEventCreator(RetrievalEventCreator):
-    """An object used to create recall behavioral events that are formatted in a consistent way regardless of the CML
-       experiment.
+    """
+    An object used to create recall deliberation events that are formatted
+    in a consistent way regardless of the CML experiment.
 
-       PARAMETERS
-       -------
-       INPUTS:
-           :subject:
-               str; subject id, e.g. 'R1111M'
-           :experiment:
-               str, experiment id, e.g. 'FR1'
-               valid intracranial experiments:
-                   ['FR1', 'FR2', 'FR3', 'FR5', 'FR6', 'PAL1', 'PAL2', 'PAL3', 'PAL5',
-                    'PS1', 'PS2', 'PS2.1', 'PS3', 'PS4_FR', 'PS4_catFR', 'PS5_catFR',
-                    'TH1', 'TH3', 'THR', 'THR1', 'YC1', 'YC2', 'catFR1', 'catFR2',
-                    'catFR3', 'catFR5', 'catFR6', 'pyFR']
-               valid scalp experiments:
-                   ['ltpFR2']
-           :session:
-               int, session to analyze
-           :rec_inclusion_before:
-               int, time in ms before each recall that must be free from other events
-               (vocalizations, recalls, stimuli, etc.) to count as a valid recall
-           :rec_inclusion_after:
-               int, time in ms after each recall that must be free from other events
-               (vocalizations, recalls, stimuli, etc.) to count as a valid recall
-           :recall_eeg_start:
-               int, time in ms prior to each recall's vocalization onset that we want
-               to start looking at the eeg at
-           :match_tolerance:
-               int, time in ms relative to a recall's retrieval period (e.g. from
-               recall_eeg_start up until vocalization onset) that a match is allowed
-               to vary by while still counting as a match
-           :remove_before_recall:
-               int, time in ms to remove before a recall (or vocalization) from being
-               a valid deliberation period
-           :remove_after_recall:
-               int, time in ms to remove after a recall (or vocalization) from being
-               a valid deliberation period
-           ####### TODO: UPDATE #######
-           :desired_duration:
-               int, by default set as None and assumed to be the total eeg length,
-               Not currently implemented besides default setting. Do not use until then
-           ############################
-           :verbose:
-               bool, by default False, whether or not to print out steps along the way,
+    Parameters
+    ----------
+    events: np.rec.array
+        Event structure with which to create matching deliberation periods
+    rec_inclusion_before: int
+        Time in ms before each recall that must be free from other events
+        (vocalizations, recalls, stimuli, etc.) to count as a valid recall
+    rec_inclusion_after: int
+        Time in ms after each recall that must be free from other events
+        (vocalizations, recalls, stimuli, etc.) to count as a valid recall
+    recall_eeg_start: int
+        Time in ms prior to each recall's vocalization onset that we want
+        to start looking at the eeg at
+    match_tolerance: int
+        Time in ms relative to a recall's retrieval period (e.g. from
+        recall_eeg_start up until vocalization onset) that a match is allowed
+        to vary by while still counting as a match
+    remove_before_recall: int
+        Time in ms to remove before a recall (or vocalization) from being
+        a valid deliberation period
+    remove_after_recall: int
+        Time in ms to remove after a recall (or vocalization) from being
+        a valid deliberation period
+    """
 
-
-               Not true anymore:#if True then the code will also generate a report of the goodness of fit of
-               Not true anymore:#the matching process
-
-
-       EXAMPLE USAGE
-       --------------
-       # ------> Example RAM data
-       subject = DeliberationEventCreator(subject='R1111M', experiment='FR1', session=0,
-                                          rec_inclusion_before = 2000, rec_inclusion_after = 1000,
-                                          remove_before_recall = 2000, remove_after_recall = 2000,
-                                          recall_eeg_start = -1250, recall_eeg_end = 250,
-                                          match_tolerance = 2000, verbose=True)
-       events = subject.create_matched_recarray()
-
-
-       # -------> Example ltpFR2
-       scalp_sub = DeliberationEventCreator(subject='LTP093', experiment='ltpFR2', session=1,
-                                            rec_inclusion_before = 2000, rec_inclusion_after = 1000,
-                                            remove_before_recall = 3000, remove_after_recall = 3000,
-                                            recall_eeg_start = -1250, recall_eeg_end = 250,
-                                            match_tolerance = 2000, verbose=True)
-       scalp_events = scalp_sub.create_matched_recarray()
-       """
     def __init__(self, events,
                  rec_inclusion_before, rec_inclusion_after,
                  recall_eeg_start, recall_eeg_end, match_tolerance,
                  remove_before_recall, remove_after_recall,
                  desired_duration=None, verbose=False,samplerate=None):
-        # Inheritance (Sets all attributes of RetrievalEventCreator)
+
         super(DeliberationEventCreator, self).__init__(events=events,
                                                        inclusion_time_before=rec_inclusion_before,
                                                        inclusion_time_after=rec_inclusion_after,
