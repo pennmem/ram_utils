@@ -68,35 +68,18 @@ def create_matched_events(events,
     match_tolerance: int
         Time in ms that a deliberation may deviate from the
         retrieval of an item and still count as a match.
-    :verbose:
-        bool, by default False, whether or not to print out the steps of the code along the way, additionally if set to
-        true then the code will output a report on the goodness of fit for the created events
+    verbose:
+        bool, by default False, whether or not to print out the steps of the
+        code along the way
 
     Returns
     -------
-    :matched_events:
-        np.recarray, array of behavioral events corresponding to included recalls with matches
-        and their corresponding matches
-
-    Examples
-    --------
-
-    #------> Example FR1 usage
-    events = create_matched_events(subject='R1111M', experiment='FR1', session=0,
-                                   rec_inclusion_before = 2000, rec_inclusion_after = 1000,
-                                   remove_before_recall = 2000, remove_after_recall = 2000,
-                                   recall_eeg_start = -1250, recall_eeg_end = 250,
-                                   match_tolerance = 2000, verbose=True)
-
-    #------> Example ltpFR2
-    events = create_matched_events(subject='LTP093', experiment='ltpFR2', session=1,
-                                   rec_inclusion_before = 3000, rec_inclusion_after = 1000,
-                                   remove_before_recall = 3000, remove_after_recall = 3000,
-                                   recall_eeg_start = -1500, recall_eeg_end = 500,
-                                   match_tolerance = 3000, goodness_fit_check=True)
+    matched_events:np.recarray
+        Array of behavioral events consisting of recalls with matches
+        and their corresponding deliberation periods
 
     Notes
-    -------
+    -----
     Code will do a exact match in time first, afterwards will do a "tolerated" match. Any recalls that
     are not matched are dropped. If there are multiple possibles matches (either exact or tolerated) for a
     recall then the code will select the match that is closest in trial number to the recall.
@@ -117,50 +100,25 @@ def create_matched_events(events,
 
 
 class RetrievalEventCreator(object):
-    """An object used to create recall behavioral events that are formatted in a consistent way regardless of the CML
+    """An object used to create recall behavioral events that are formatted
+    in a consistent way regardless of the CML
     experiment.
 
-    PARAMETERS
-    -------
-    INPUTS:
-        :subject:
-            str; subject id, e.g. 'R1111M'
-        :experiment:
-            str, experiment id, e.g. 'FR1'
-            valid intracranial experiments:
-                ['FR1', 'FR2', 'FR3', 'FR5', 'FR6', 'PAL1', 'PAL2', 'PAL3', 'PAL5',
-                 'PS1', 'PS2', 'PS2.1', 'PS3', 'PS4_FR', 'PS4_catFR', 'PS5_catFR',
-                 'TH1', 'TH3', 'THR', 'THR1', 'YC1', 'YC2', 'catFR1', 'catFR2',
-                 'catFR3', 'catFR5', 'catFR6', 'pyFR']
-            valid scalp experiments:
-                ['ltpFR2']
-        :session:
-            int, session to analyze
-        :inclusion_time_before:
-            int, by default 1500, time in ms before each recall that must be free
-            from other events (vocalizations, recalls, stimuli, etc.) to count
-            as a valid recall
-        :inclusion_time_after:
-            int, by default 250, time in ms after each recall that must be free
-            from other events (vocalizations, recalls, stimuli, etc.) to count
-            as a valid recall
-        :verbose:
-            bool, by default False, whether or not to print out steps along the way
+    Parameters
+    ----------
 
-
-    EXAMPLE USAGE
-    --------------
-    old_ieeg_data = RetrievalEventCreator(subject='BW022', experiment='pyFR',
-                                 session=2, inclusion_time_before=1500,
-                                inclusion_time_after=500, verbose=True)
-    # Set all the attributes of the object, which can then be used.
-    old_ieeg_data.initialize_recall_events()
-
-
-    self = RetrievalEventCreator(subject='R1111M', experiment='FR1', session=2,
-                                 inclusion_time_before=1500, inclusion_time_after=500,
-                                 verbose=True)
+    events: np.rec.array
+        Event structure with which to create matching deliberation periods
+    inclusion_time_before: int
+        Time in ms before each recall that must be free from other events
+        (vocalizations, recalls, stimuli, etc.) to count as a valid recall
+    inclusion_time_after: int
+        Time in ms after each recall that must be free from other events
+        (vocalizations, recalls, stimuli, etc.) to count as a valid recall
+    samplerate: float, optional
+        sampling rate of the EEG associated with the events.
     """
+
     # Shared by the class
     jr = None # JsonIndexReader
     jr_scalp = None # JsonIndexReader
@@ -256,7 +214,6 @@ class RetrievalEventCreator(object):
             evs = self.get_pyFR_events(self.subject)
             sessions = np.unique(evs['session'])
 
-        # Replaced np.array((map(int, (sessions)))) for py3 functionality
         self.possible_sessions = np.array([int(x) for x in sessions])
 
         # If the user chose a session not in the possible sessions ,
@@ -644,7 +601,9 @@ class DeliberationEventCreator(RetrievalEventCreator):
         self.matched_events = None
 
     def set_valid_baseline_intervals(self):
-        """Sets to attribute baseline_array an array of 1 and 0 (num_unique_trials x 30000) where 1 is a valid time point
+        """Sets  :py:attribute baseline_array: to a Boolean array
+        of shape (num_unique_trials x 30000), where points are True if they
+        correspond to valid milliseconds
 
         Parameters
         -----------
@@ -714,7 +673,9 @@ class DeliberationEventCreator(RetrievalEventCreator):
         return
 
     def order_recalls_by_num_exact_matches(self):
-        """Orders included_recalls array by least to most number of exact matches to create attribute ordered_recalls
+        """Orders included_recalls array by least to most number of
+        exact matches to create attribute ordered_recalls
+
         Creates
         -------
         Attribute ordered_recalls
@@ -745,11 +706,15 @@ class DeliberationEventCreator(RetrievalEventCreator):
         return
 
     def match_accumulator(self):
-        """Accumulates matches between included recalls and baseline array, upon selection of a match invalidates it for other recalls
+        """Accumulates matches between included recalls and baseline array, upon
+         selection of a match invalidates it for other recalls
 
-        Code will first go through each recall (ordered from least to most number of matches)  and try to select an exact match in time
-        in another trial/list. If it cannot, after completeion of all exact matches the code will go through and try to find a tolerated
-        match, that is a period in time that is within the instance's match_tolrance relative to the retrieval phase (eeg_rec_start up
+        Code will first go through each recall (ordered from least to most
+        number of matches)  and try to select an exact match in time
+        in another trial/list. If it cannot, after completeion of all exact
+        matches the code will go through and try to find a tolerated
+        match, that is a period in time that is within the instance's
+        match_tolrance relative to the retrieval phase (eeg_rec_start up
         until vocalization onset)
 
         Modifies
@@ -851,24 +816,22 @@ class DeliberationEventCreator(RetrievalEventCreator):
         return
 
     def create_matched_recarray(self):
-        """Constructs a recarray of ordered_recalls and their matched deliberation points
+        """
+        Constructs a recarray of ordered_recalls
+        and their matched deliberation points
 
         Returns
         -------
-        behavioral_events: np.recarray, array of included recalls and matched deliberation periods
+        behavioral_events: np.rec.array
+            Array of included recalls and matched deliberation periods
         """
-        # if np.sign(self.recall_eeg_start) == -1:
-        # self.recall_eeg_start *= -1
 
         if self.matched_events is None:
             self.match_accumulator()
 
         rec_start = self.events[self.events['type'] == 'REC_START']
-        # rec_end = self.events[self.events['type']=='REC_END']
-        # Non-sense is due to inconsistent fields
         trial_field = 'trial' if 'trial' in self.ordered_recalls.dtype.names else 'list'
         item_field = 'item_name' if 'item_name' in self.ordered_recalls.dtype.names else 'item'
-        item_number_field = 'item_num' if 'item_num' in self.ordered_recalls.dtype.names else 'itemno'
 
         valid_recalls, valid_deliberation = [], []
         # Use the matches dictionary to construct a recarray
@@ -922,13 +885,18 @@ def append_fields(old_array, list_of_tuples_field_type):
 
     *This is necessary to do use than using the np.lib.recfunction.append_fields
     function b/c the json loaded events use a dictionary for stim_params in the events*
-    -----
-    INPUTS
-    old_array: a structured numpy array, the behavioral events from ptsa
-    list_of_tuples_field_type: a numpy type description of the new fields
-    -----
-    OUTPUTS
-    new_array: a structured numpy array, a copy of old_array with the new fields
+
+    Parameters
+    ----------
+    old_array: np.rec.array
+    list_of_tuples_field_type:
+        a numpy type description of the new fields
+
+
+    Returns
+    -------
+    new_array: np.rec.array
+        a copy of old_array with the new fields
     """
     if old_array.dtype.fields is None:
         raise ValueError("'old_array' must be a structured numpy array")
@@ -949,8 +917,5 @@ def append_fields(old_array, list_of_tuples_field_type):
 class DoneGoofedError(Exception):
     """Exception raised for errors in the input,
 
-    Attributes:
-        session -- input session of thes
-        possible_sessions -- valid sessions of the subject
     """
     pass
