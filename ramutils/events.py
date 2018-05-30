@@ -599,7 +599,6 @@ def get_required_columns(all_relevant=False, pal=False, stim=False, cat=False):
         Fields specific to stim experiments
     cat: bool
         Fields specific to categorical free recall experiments
-
     """
 
     # FIXME: This would probably be better as just a dictionary
@@ -614,7 +613,7 @@ def get_required_columns(all_relevant=False, pal=False, stim=False, cat=False):
         'serialpos', 'session', 'subject', 'rectime', 'experiment',
         'mstime', 'type', 'eegoffset', 'recalled', 'intrusion',
         'montage', 'list', 'stim_list', 'eegfile', 'msoffset', 'item_name',
-        'iscorrect', 'phase','matched'
+        'iscorrect', 'phase', 'matched'
     ]
 
     if all_relevant:
@@ -719,26 +718,26 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
         return events
     all_events = []
     for experiment in extract_experiment_from_events(events):
-        exp_events = events[events['experiment']==experiment]
+        exp_events = events[events['experiment'] == experiment]
         for session in extract_sessions(exp_events):
             sess_events = select_session_events(events,session)
             samplerate = extract_sample_rate_from_eeg(sess_events)
             new_events = create_matched_events(
                 sess_events,
-                samplerate =samplerate,
+                samplerate=samplerate,
                 rec_inclusion_before=pre,
                 rec_inclusion_after=post,
                 recall_eeg_start=-1*duration,
                 recall_eeg_end=0,
-                remove_before_recall=1000,remove_after_recall=1000,
+                remove_before_recall=1000, remove_after_recall=1000,
             )
             event_fields = list(sess_events.dtype.names)
             new_events = new_events[event_fields][:]
-            is_matched_rec_word = np.in1d(sess_events[sess_events.type == 'REC_WORD'],
-                                           new_events[new_events.type == 'REC_WORD'])
-
-            new_events = add_field(new_events,'matched',True,np.bool_)
-            sess_events = add_field(sess_events,'matched',False,np.bool_)
+            is_matched_rec_word = np.in1d(
+                sess_events[sess_events.type == 'REC_WORD'],
+                new_events[new_events.type == 'REC_WORD'])
+            new_events = add_field(new_events, 'matched', True, np.bool_)
+            sess_events = add_field(sess_events, 'matched', False, np.bool_)
             rec_events = sess_events[sess_events.type == 'REC_WORD']
             rec_events['matched'] = is_matched_rec_word
             sess_events[sess_events.type == 'REC_WORD'] = rec_events
