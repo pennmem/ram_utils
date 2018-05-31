@@ -338,9 +338,9 @@ class RetrievalEventCreator(object):
             event_path = '/data/events/{}/{}_events.mat'.format(self.experiment, self.subject)
 
         else:
-            logger.log('Unclear where the path of the data is is...')
-            logger.log('Is {} a valid experiment?'.format(self.experiment))
-            logger.log('Not creating attribute event_path')
+            logger.log(logger.level,'Unclear where the path of the data is is...')
+            logger.log(logger.level,'Is %s a valid experiment?',self.experiment)
+            logger.log(logger.level,'Not creating attribute event_path')
             return
 
         # Set the event path to the attribute event_path
@@ -436,7 +436,7 @@ class RetrievalEventCreator(object):
         self.included_recalls = recalls
 
         if len(self.included_recalls) == 0:
-            logger.warn('No recalls detected for {} session {}'.format(
+            raise RetrievalBaselineError('No recalls detected for {} session {}'.format(
                 self.subject, np.unique(events['session'])))
 
         return
@@ -804,7 +804,7 @@ class DeliberationEventCreator(RetrievalEventCreator):
             # Convert row to trial number through indexing the valid rows
             valid_trials = trials[(np.unique(valid_rows),)]
             if len(valid_trials) == 0:
-                logger.log('Could not match recall index {}'.format(index))
+                logger.info('Could not match recall index {}'.format(index))
                 continue
 
             # Find the closest trial
@@ -864,7 +864,7 @@ class DeliberationEventCreator(RetrievalEventCreator):
         # Use the matches dictionary to construct a recarray
         for k, v in enumerate(matches):
             if matches[v] == []:
-                logger.log('Code could not successfully match recall index {}, dropping recall index {}'.format(k, k))
+                logger.info('Code could not successfully match recall index {}, dropping recall index {}'.format(k, k))
                 continue
 
             valid_recalls.append(ordered_recalls[k])
