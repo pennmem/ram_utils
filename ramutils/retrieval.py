@@ -17,19 +17,21 @@ from RetrievalCreationHelper import create_matched_events
 
 """
 # General imports
-from copy import deepcopy
 from collections import OrderedDict
+from copy import deepcopy
 
 import numpy as np
 import pandas as pd
 
-from ptsa.data.readers import BaseEventReader
 from ramutils import log
+from ramutils.exc import RetrievalEventHelperError
+
 logger = log.get_logger()
 
 __all__ = ['create_matched_events',
            'RetrievalEventCreator',
            'DeliberationEventCreator']
+
 
 def create_matched_events(events,
                           rec_inclusion_before = 2000,
@@ -219,7 +221,7 @@ class RetrievalEventCreator(object):
         experiments = np.unique(events['experiment'])
         subjects = np.unique(events['subject'])
         if len(experiments) != 1 or len(subjects) != 1:
-            raise DoneGoofedError
+            raise RetrievalEventHelperError
         self.experiment = experiments[0]
         self.subject = subjects[0]
         self.sessions = np.unique(events['session'])
@@ -306,7 +308,7 @@ class RetrievalEventCreator(object):
         # then crash
 
         if self.session not in self.possible_sessions:
-            raise DoneGoofedError(self.session, self.possible_sessions)
+            raise RetrievalEventHelperError(self.session, self.possible_sessions)
         return
 
     def set_behavioral_event_path(self):
@@ -919,6 +921,9 @@ def append_fields(old_array, list_of_tuples_field_type):
     new_array: np.rec.array
         a copy of old_array with the new fields
     """
+    # TODO: This function is very similar to ramutils.events.add_field.
+    # It would be nice to only have one function that does this,
+    # but there are some circular imports to work out first
     if old_array.dtype.fields is None:
         raise ValueError("'old_array' must be a structured numpy array")
 
@@ -935,8 +940,3 @@ def append_fields(old_array, list_of_tuples_field_type):
         return old_array
 
 
-class DoneGoofedError(Exception):
-    """Exception raised for errors in the input,
-
-    """
-    pass
