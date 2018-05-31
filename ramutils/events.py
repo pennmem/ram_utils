@@ -684,7 +684,8 @@ def initialize_empty_stim_reccarray():
 
 
 def insert_baseline_retrieval_events(events, start_time, end_time, duration,
-                                     pre, post):
+                                     pre, post,
+                                     use_deprecated=False):
     """Match recall events to matching baseline periods of failure to recall.
     This is required for all free recall events, but is not necessary for
     PAL events, which have a natural baseline/comparison group. Baseline
@@ -713,9 +714,45 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
     np.reccarray
         Events with REC_BASE event types inserted
     """
-
     if len(events) == 0:
         return events
+    if use_deprecated:
+        return insert_baseline_retrieval_events_deprecated(
+            events, start_time, end_time, duration, pre, post
+        )
+    else:
+        return insert_baseline_retrieval_events_logan(events,
+                                                      duration,
+                                                      pre,
+                                                      post)
+
+
+def insert_baseline_retrieval_events_logan(events,duration,pre,post):
+    """Match recall events to matching baseline periods of failure to recall.
+    This is required for all free recall events, but is not necessary for
+    PAL events, which have a natural baseline/comparison group. Baseline
+    events all begin at least 1000 ms after a vocalization, and end
+    at least 1000 ms before a vocalization. Each recall event is matched,
+    wherever possible, to a valid baseline period from a different list
+    within 3 seconds relative to the onset of the recall period.
+
+    Parameters
+    ----------
+    events : np.recarray
+        The event structure in which to incorporate these baseline periods
+    duration: int
+        The length of desired empty epochs
+    pre: int
+        The time before each event to exclude
+    post: int
+        The time after each event to exclude
+
+    Returns
+    -------
+    np.reccarray
+        Events with REC_BASE event types inserted
+    """
+
     all_events = []
     for experiment in extract_experiment_from_events(events):
         exp_events = events[events['experiment'] == experiment]
@@ -746,6 +783,201 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
                     [sess_events,new_events[new_events.type == 'REC_BASE']])
             )
     return concatenate_events_for_single_experiment(all_events)
+
+
+def insert_baseline_retrieval_events_deprecated(
+        events, start_time, end_time, duration, pre, post):
+    """Match recall events to matching baseline periods of failure to recall.
+    This is required for all free recall events, but is not necessary for
+    PAL events, which have a natural baseline/comparison group. Baseline
+    events all begin at least 1000 ms after a vocalization, and end
+    at least 1000 ms before a vocalization. Each recall event is matched,
+    wherever possible, to a valid baseline period from a different list
+    within 3 seconds relative to the onset of the recall period.
+
+    Parameters
+    ----------
+    events : np.recarray
+        The event structure in which to incorporate these baseline periods
+    start_time : int
+        The amount of time to skip at the beginning of the session (ms)
+    end_time : int
+        The amount of time within the recall period to consider (ms)
+    duration: int
+        The length of desired empty epochs
+    pre: int
+        The time before each event to exclude
+    post: int
+        The time after each event to exclude
+
+    Returns
+    -------
+    np.reccarray
+        Events with REC_BASE event types inserted
+
+    """
+
+    if len(events) == 0:
+        return events
+
+    # We need to know the sample rate in order to create the new REC_BASE
+    # events. Rather than load a file, we can just load a snippet of eeg and
+    # back out the sample rate
+    samplerate = extract_sample_rate_from_eeg(events)
+
+    # TODO: document within code blocks what is actually happening
+    # TODO: Finish cleaning this mess up
+    all_events = []
+    for session in np.unique(events.session):
+        sess_events = events[(events.session == session)]
+        rec_events = select_retrieval_events(sess_events)
+        voc_events = select_vocalization_events(sess_events)
+
+        # Events corresponding to the start of the recall period
+        starts = sess_events[(sess_events.type == 'REC_START')]
+
+        # Events corresponding to the end of the recall period
+        ends = sess_events[(sess_events.type == 'REC_END')]
+
+        # Times associated with start and stop of recall period
+        start_times = starts.mstime.astype(np.int)
+        end_times = ends.mstime.astype(np.int)
+
+        rec_lists = tuple(np.unique(starts.list))
+
+        # Get list of vocalization times by list if there were any vocalizations
+        # TODO: Pull this into its own function?
+        times = [voc_events[(voc_events.list == lst)].mstime if (
+            voc_events.list == lst).any() else []
+            for lst in rec_lists]
+
+        epochs = find_free_time_periods(times,
+                                        duration,
+                                        pre,
+                                        post,
+                                        start=start_times,
+                                        end=end_times)
+
+        # FIXME: Wow... could this be any more confusing? Pull out into a
+        # separate function. Times relative to recall start
+        rel_times = [(t - i)[(t - i > start_time) & (t - i < end_time)] for
+                     (t, i) in
+                     zip([rec_events[rec_events.list == lst].mstime for lst in
+                          rec_lists], start_times)
+                     ]
+        rel_epochs = epochs - start_times[:, None]
+        full_match_accum = np.zeros(epochs.shape, dtype=np.bool)
+
+        for (i, rec_times_list) in enumerate(rel_times):
+            is_match = np.empty(epochs.shape, dtype=np.bool)
+            is_match[...] = False
+            for t in rec_times_list:
+                # TODO: possibly parametrize this
+                # For each recall event, reject everything that is more than
+                # three seconds away
+                is_match_tmp = np.abs((rel_epochs - t)) < 3000
+                is_match_tmp[i, ...] = False
+                good_locs = np.where(is_match_tmp & (~full_match_accum))
+                if len(good_locs[0]):
+                    # Find next closest list with a valid deliberation period
+                    choice_position = np.argmin(
+                        np.mod(good_locs[0] - i, len(good_locs[0])))
+                    choice_inds = (good_locs[0][choice_position],
+                                   good_locs[1][choice_position])
+                    full_match_accum[choice_inds] = True
+
+        matching_epochs = epochs[full_match_accum]
+        new_events = np.rec.array(np.zeros(len(matching_epochs),
+                                           dtype=sess_events.dtype))
+
+        for i, _ in enumerate(new_events):
+            new_events[i].mstime = matching_epochs[i]
+            new_events[i].type = 'REC_BASE'
+
+        new_events.recalled = 0
+        merged_events = np.rec.array(np.concatenate((sess_events,
+                                                     new_events)))
+        merged_events.sort(order='mstime')
+
+        for (i, event) in enumerate(merged_events):
+            if event.type == 'REC_BASE':
+                merged_events[i].experiment = merged_events[i - 1].experiment
+                merged_events[i].session = merged_events[i - 1].session
+                merged_events[i].list = merged_events[i - 1].list
+                merged_events[i].eegfile = merged_events[i - 1].eegfile
+                elapsed_time_sec = (merged_events[i].mstime -
+                                    merged_events[i - 1].mstime) / 1000.0
+                samples_elapsed = samplerate * elapsed_time_sec
+                merged_events[i].eegoffset = (merged_events[i - 1].eegoffset +
+                                              samples_elapsed)
+
+        all_events.append(merged_events)
+
+    return np.rec.array(np.concatenate(all_events))
+
+
+def find_free_time_periods(times, duration, pre, post, start=None, end=None):
+    """
+    Given a list of event times, find epochs between them when nothing is
+    happening.
+
+    Parameters
+    ----------
+    times : list where elements are lists
+        An iterable of 1-d numpy arrays, each of which is a list that
+        indicates the starting times of all vocalization events. We do not
+        want to include these as candidate time periods
+    duration : int
+        The length of the desired empty epochs
+    pre : int
+        the time before each event to exclude
+    post: int
+        The time after each event to exclude
+    start: array_like
+        List of a recall period start times
+    end: array_like
+        List of recall period end times
+
+    Returns
+    -------
+    epoch_array : np.ndarray
+
+    """
+    # TODO: Do not allow start and end to be optional because bad stuff will
+    # happen
+    # TODO: Clean this up and add some explanation about what is happening
+    n_trials = len(times)
+    epoch_times = []
+    for i in range(n_trials):
+        ext_times = times[i]
+        if start is not None:
+            ext_times = np.append([start[i]], ext_times)
+        if end is not None:
+            ext_times = np.append(ext_times, [end[i]])
+        pre_times = ext_times - pre
+        post_times = ext_times + post
+
+        # FIXME: Is this backwards?
+        interval_durations = pre_times[1:] - post_times[:-1]
+        free_intervals = np.where(interval_durations > duration)[0]
+        # For each word event, attempt to find a set of possible deliberation
+        # periods in the recall phase
+        trial_epoch_times = []
+        for interval in free_intervals:
+            begin = post_times[interval]
+            finish = pre_times[interval + 1] - duration
+            interval_epoch_times = range(
+                int(begin), int(finish), int(duration))
+            trial_epoch_times.extend(interval_epoch_times)
+        epoch_times.append(np.array(trial_epoch_times))
+
+    epoch_array = np.empty((n_trials, max([len(x) for x in epoch_times])))
+    epoch_array[...] = -np.inf
+    for i, epoch in enumerate(epoch_times):
+        epoch_array[i, :len(epoch)] = epoch
+
+    return epoch_array
+
 
 
 def concatenate_events_across_experiments(event_list, pal=False, stim=False,
