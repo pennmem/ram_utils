@@ -180,7 +180,7 @@ class TestEvents:
                 (final_events[retrieval_mask].recalled==0).sum())
 
     @pytest.mark.rhino
-    def test_insert_baseline_retrieval_events(self,rhino_root):
+    def test_insert_baseline_retrieval_events_deprecated(self,rhino_root):
         # This is just a regression test. There should be something more
         # comprehensive. This does not look like it would be using rhino, but
         # under the hood a sample of eeg data is loaded to determine the sample
@@ -194,7 +194,9 @@ class TestEvents:
                                                         params.retrieval_time,
                                                         params.empty_epoch_duration,
                                                         params.pre_event_buf,
-                                                        params.post_event_buf)
+                                                        params.post_event_buf,
+                                                        use_deprecated=True
+                                                        )
         expected_events = load_event_test_data(
             datafile("input/events/R1409D_post_retrieval_baseline_event_insertion_events.npy"),
             rhino_root)
