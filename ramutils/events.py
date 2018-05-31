@@ -23,7 +23,7 @@ from numpy.lib.recfunctions import rename_fields
 from ptsa.data.readers import BaseEventReader, JsonIndexReader, EEGReader
 from ramutils.utils import extract_subject_montage, get_completed_sessions, extract_experiment_series
 from ramutils.exc import *
-from ramutils.retrieval import create_matched_events
+from ramutils.retrieval import create_matched_events,append_fields
 
 def load_events(subject, experiment, file_type='all_events',
                 sessions=None, rootdir='/'):
@@ -174,12 +174,13 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
     # because the columns to subset differs by task
     if "FR" in experiment:
         events, stim_params = separate_stim_events(events)
-        events = insert_baseline_retrieval_events(events,
-                                                  start_time,
-                                                  end_time,
-                                                  duration,
-                                                  pre,
-                                                  post)
+        if series_num == '1':
+            events = insert_baseline_retrieval_events(events,
+                                                      start_time,
+                                                      end_time,
+                                                      duration,
+                                                      pre,
+                                                      post)
         events = remove_intrusions(events)
         events = update_recall_outcome_for_retrieval_events(events)
         events = normalize_fr_events(events)
@@ -762,19 +763,22 @@ def insert_baseline_retrieval_events_logan(events,duration,pre,post):
             new_events = create_matched_events(
                 sess_events,
                 samplerate=samplerate,
-                rec_inclusion_before=pre,
-                rec_inclusion_after=post,
+                rec_inclusion_before=1000,
+                rec_inclusion_after=1000,
                 recall_eeg_start=-1*duration,
                 recall_eeg_end=0,
-                remove_before_recall=1000, remove_after_recall=1000,
+                remove_before_recall=pre,
+                remove_after_recall=post,
             )
             event_fields = list(sess_events.dtype.names)
             new_events = new_events[event_fields][:]
             is_matched_rec_word = np.in1d(
                 sess_events[sess_events.type == 'REC_WORD'],
                 new_events[new_events.type == 'REC_WORD'])
-            new_events = add_field(new_events, 'matched', True, np.bool_)
-            sess_events = add_field(sess_events, 'matched', False, np.bool_)
+            new_events = append_fields(new_events, [('matched',np.bool_)])
+            new_events['matched'] = True
+            sess_events = append_fields(sess_events, [('matched', np.bool_)])
+            sess_events['matched'] = False
             rec_events = sess_events[sess_events.type == 'REC_WORD']
             rec_events['matched'] = is_matched_rec_word
             sess_events[sess_events.type == 'REC_WORD'] = rec_events
