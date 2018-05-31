@@ -24,7 +24,7 @@ import numpy as np
 import pandas as pd
 
 from ramutils import log
-from ramutils.exc import RetrievalEventHelperError
+from ramutils.exc import RetrievalBaselineError
 
 logger = log.get_logger()
 
@@ -221,7 +221,7 @@ class RetrievalEventCreator(object):
         experiments = np.unique(events['experiment'])
         subjects = np.unique(events['subject'])
         if len(experiments) != 1 or len(subjects) != 1:
-            raise RetrievalEventHelperError
+            raise RetrievalBaselineError
         self.experiment = experiments[0]
         self.subject = subjects[0]
         self.sessions = np.unique(events['session'])
@@ -308,7 +308,7 @@ class RetrievalEventCreator(object):
         # then crash
 
         if self.session not in self.possible_sessions:
-            raise RetrievalEventHelperError(self.session, self.possible_sessions)
+            raise RetrievalBaselineError(self.session, self.possible_sessions)
         return
 
     def set_behavioral_event_path(self):
