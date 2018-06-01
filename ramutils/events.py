@@ -157,6 +157,7 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
     experiment = experiments[0]
 
     events = remove_negative_offsets(events)
+    events = remove_voice_detection(events)
 
     # Only for PS5 do we want to keep the practice list around so we can know
     # what the baseline mean power was for the session, but we still need to get
@@ -174,13 +175,12 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
     # because the columns to subset differs by task
     if "FR" in experiment:
         events, stim_params = separate_stim_events(events)
-        if series_num == '1':
-            events = insert_baseline_retrieval_events(events,
-                                                      start_time,
-                                                      end_time,
-                                                      duration,
-                                                      pre,
-                                                      post)
+        events = insert_baseline_retrieval_events(events,
+                                                  start_time,
+                                                  end_time,
+                                                  duration,
+                                                  pre,
+                                                  post)
         events = remove_intrusions(events)
         events = update_recall_outcome_for_retrieval_events(events)
         events = normalize_fr_events(events)
@@ -374,6 +374,11 @@ def remove_negative_offsets(events):
     """ Remove events with a negative eegoffset """
     pos_offset_events = events[events['eegoffset'] >= 0]
     return pos_offset_events
+
+def remove_voice_detection(events):
+    """ Remove events
+    """
+    return events[['VOCALIZATION' not in ev['type'] for ev in events]]
 
 
 def lookup_sample_rate(subject, experiment, session, rootdir="/"):
@@ -722,11 +727,15 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
             events, start_time, end_time, duration, pre, post
         )
     else:
-        return insert_baseline_retrieval_events_logan(events,
-                                                      duration,
-                                                      pre,
-                                                      post)
-
+        try:
+            return insert_baseline_retrieval_events_logan(events,
+                                                          duration,
+                                                          pre,
+                                                          post)
+        except RetrievalBaselineError:
+            return insert_baseline_retrieval_events_deprecated(
+                events, start_time, end_time, duration, pre, post
+            )
 
 def insert_baseline_retrieval_events_logan(events,duration,pre,post):
     """Match recall events to matching baseline periods of failure to recall.
@@ -914,7 +923,10 @@ def insert_baseline_retrieval_events_deprecated(
                 samples_elapsed = samplerate * elapsed_time_sec
                 merged_events[i].eegoffset = (merged_events[i - 1].eegoffset +
                                               samples_elapsed)
-
+        merged_events = append_fields(merged_events,[('matched',np.bool_)])
+        merged_events['matched']=False
+        merged_events[(merged_events['type']=='REC_WORD') |
+                      (merged_events['type']=='REC_BASE')]['matched']=True
         all_events.append(merged_events)
 
     return np.rec.array(np.concatenate(all_events))
