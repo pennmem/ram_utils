@@ -727,15 +727,10 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
             events, start_time, end_time, duration, pre, post
         )
     else:
-        try:
-            return insert_baseline_retrieval_events_logan(events,
-                                                          duration,
-                                                          pre,
-                                                          post)
-        except RetrievalBaselineError:
-            return insert_baseline_retrieval_events_deprecated(
-                events, start_time, end_time, duration, pre, post
-            )
+        return insert_baseline_retrieval_events_logan(events,
+                                                      duration,
+                                                      pre,
+                                                      post)
 
 def insert_baseline_retrieval_events_logan(events,duration,pre,post):
     """Match recall events to matching baseline periods of failure to recall.
