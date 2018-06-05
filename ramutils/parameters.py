@@ -136,7 +136,7 @@ class FRParameters(ExperimentParameters):
     post_stim_buf = Float(0.524, desc="post stim period buffer time [s]")
 
     encoding_only = Bool(False, desc="use encoding-only classifier")
-    encoding_multiplier = Float(2.5, desc="weighting factor for encoding "
+    encoding_multiplier = Float(4.125, desc="weighting factor for encoding "
                                           "samples")
     combine_events = Bool(True, desc="combine record-only events for "
                                      "classifier training")

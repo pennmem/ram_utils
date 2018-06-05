@@ -23,7 +23,7 @@ from numpy.lib.recfunctions import rename_fields
 from ptsa.data.readers import BaseEventReader, JsonIndexReader, EEGReader
 from ramutils.utils import extract_subject_montage, get_completed_sessions, extract_experiment_series
 from ramutils.exc import *
-
+from ramutils.retrieval import create_matched_events,append_fields
 
 def load_events(subject, experiment, file_type='all_events',
                 sessions=None, rootdir='/'):
@@ -157,6 +157,7 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
     experiment = experiments[0]
 
     events = remove_negative_offsets(events)
+    events = remove_voice_detection(events)
 
     # Only for PS5 do we want to keep the practice list around so we can know
     # what the baseline mean power was for the session, but we still need to get
@@ -260,9 +261,11 @@ def normalize_pal_events(events):
 
     if 'phase' not in events.dtype.names:
         events = add_field(events, 'phase', '', '<U256')
-
+    if 'matched' not in events.dtype.names:
+        events = add_field(events, 'matched', True, np.bool_)
     events = add_field(events, 'item_name', 'X', '<U256')
     events = add_field(events, 'category_num', 999, '<i8')
+
     return events
 
 
@@ -373,6 +376,11 @@ def remove_negative_offsets(events):
     """ Remove events with a negative eegoffset """
     pos_offset_events = events[events['eegoffset'] >= 0]
     return pos_offset_events
+
+def remove_voice_detection(events):
+    """ Remove events
+    """
+    return events[['VOCALIZATION' not in ev['type'] for ev in events]]
 
 
 def lookup_sample_rate(subject, experiment, session, rootdir="/"):
@@ -599,7 +607,6 @@ def get_required_columns(all_relevant=False, pal=False, stim=False, cat=False):
         Fields specific to stim experiments
     cat: bool
         Fields specific to categorical free recall experiments
-
     """
 
     # FIXME: This would probably be better as just a dictionary
@@ -614,7 +621,7 @@ def get_required_columns(all_relevant=False, pal=False, stim=False, cat=False):
         'serialpos', 'session', 'subject', 'rectime', 'experiment',
         'mstime', 'type', 'eegoffset', 'recalled', 'intrusion',
         'montage', 'list', 'stim_list', 'eegfile', 'msoffset', 'item_name',
-        'iscorrect', 'phase'
+        'iscorrect', 'phase', 'matched'
     ]
 
     if all_relevant:
@@ -685,7 +692,111 @@ def initialize_empty_stim_reccarray():
 
 
 def insert_baseline_retrieval_events(events, start_time, end_time, duration,
-                                     pre, post):
+                                     pre, post,
+                                     use_deprecated=False):
+    """Match recall events to matching baseline periods of failure to recall.
+    This is required for all free recall events, but is not necessary for
+    PAL events, which have a natural baseline/comparison group. Baseline
+    events all begin at least 1000 ms after a vocalization, and end
+    at least 1000 ms before a vocalization. Each recall event is matched,
+    wherever possible, to a valid baseline period from a different list
+    within 3 seconds relative to the onset of the recall period.
+
+    Parameters
+    ----------
+    events : np.recarray
+        The event structure in which to incorporate these baseline periods
+    start_time : int
+        The amount of time to skip at the beginning of the session (ms)
+    end_time : int
+        The amount of time within the recall period to consider (ms)
+    duration: int
+        The length of desired empty epochs
+    pre: int
+        The time before each event to exclude
+    post: int
+        The time after each event to exclude
+
+    Returns
+    -------
+    np.reccarray
+        Events with REC_BASE event types inserted
+    """
+    if len(events) == 0:
+        return events
+    if use_deprecated:
+        return insert_baseline_retrieval_events_deprecated(
+            events, start_time, end_time, duration, pre, post
+        )
+    else:
+        return insert_baseline_retrieval_events_logan(events,
+                                                      duration,
+                                                      pre,
+                                                      post)
+
+def insert_baseline_retrieval_events_logan(events,duration,pre,post):
+    """Match recall events to matching baseline periods of failure to recall.
+    This is required for all free recall events, but is not necessary for
+    PAL events, which have a natural baseline/comparison group. Baseline
+    events all begin at least 1000 ms after a vocalization, and end
+    at least 1000 ms before a vocalization. Each recall event is matched,
+    wherever possible, to a valid baseline period from a different list
+    within 3 seconds relative to the onset of the recall period.
+
+    Parameters
+    ----------
+    events : np.recarray
+        The event structure in which to incorporate these baseline periods
+    duration: int
+        The length of desired empty epochs
+    pre: int
+        The time before each event to exclude
+    post: int
+        The time after each event to exclude
+
+    Returns
+    -------
+    np.reccarray
+        Events with REC_BASE event types inserted
+    """
+
+    all_events = []
+    for experiment in extract_experiment_from_events(events):
+        exp_events = events[events['experiment'] == experiment]
+        for session in extract_sessions(exp_events):
+            sess_events = select_session_events(events,session)
+            samplerate = extract_sample_rate_from_eeg(sess_events)
+            new_events = create_matched_events(
+                sess_events,
+                samplerate=samplerate,
+                rec_inclusion_before=1000,
+                rec_inclusion_after=1000,
+                recall_eeg_start=-1*duration,
+                recall_eeg_end=0,
+                remove_before_recall=pre,
+                remove_after_recall=post,
+            )
+            event_fields = list(sess_events.dtype.names)
+            new_events = new_events[event_fields][:]
+            is_matched_rec_word = np.in1d(
+                sess_events[sess_events.type == 'REC_WORD'],
+                new_events[new_events.type == 'REC_WORD'])
+            new_events = append_fields(new_events, [('matched',np.bool_)])
+            new_events['matched'] = True
+            sess_events = append_fields(sess_events, [('matched', np.bool_)])
+            sess_events['matched'] = False
+            rec_events = sess_events[sess_events.type == 'REC_WORD']
+            rec_events['matched'] = is_matched_rec_word
+            sess_events[sess_events.type == 'REC_WORD'] = rec_events
+            all_events.append(
+                concatenate_events_for_single_experiment(
+                    [sess_events,new_events[new_events.type == 'REC_BASE']])
+            )
+    return concatenate_events_for_single_experiment(all_events)
+
+
+def insert_baseline_retrieval_events_deprecated(
+        events, start_time, end_time, duration, pre, post):
     """Match recall events to matching baseline periods of failure to recall.
     This is required for all free recall events, but is not necessary for
     PAL events, which have a natural baseline/comparison group. Baseline
@@ -809,7 +920,10 @@ def insert_baseline_retrieval_events(events, start_time, end_time, duration,
                 samples_elapsed = samplerate * elapsed_time_sec
                 merged_events[i].eegoffset = (merged_events[i - 1].eegoffset +
                                               samples_elapsed)
-
+        merged_events = append_fields(merged_events,[('matched',np.bool_)])
+        merged_events['matched']=False
+        merged_events[(merged_events['type']=='REC_WORD') |
+                      (merged_events['type']=='REC_BASE')]['matched']=True
         all_events.append(merged_events)
 
     return np.rec.array(np.concatenate(all_events))
@@ -876,6 +990,7 @@ def find_free_time_periods(times, duration, pre, post, start=None, end=None):
         epoch_array[i, :len(epoch)] = epoch
 
     return epoch_array
+
 
 
 def concatenate_events_across_experiments(event_list, pal=False, stim=False,
@@ -1446,7 +1561,11 @@ def get_all_retrieval_events_mask(events):
     all_retrieval_mask = ((events.type == 'REC_WORD') |
                           (events.type == 'REC_BASE') |
                           (events.type == 'REC_EVENT'))
-    return all_retrieval_mask
+    if 'matched' not in events.dtype.names:
+        return all_retrieval_mask
+    matched_mask = events['matched']
+    return matched_mask & all_retrieval_mask
+
 
 
 def get_recall_events_mask(events):

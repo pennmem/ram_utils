@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Event processing &mdash; Ramutils 2.1.10 documentation</title>
+  <title>Event processing &mdash; Ramutils 2.1.11 documentation</title>
   
 
   
@@ -25,19 +25,26 @@
   
 
   
+  
     <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Pipelines" href="pipeline.html" />
-    <link rel="prev" title="Classifier training, cross validation, and utilities" href="classifier.html" /> 
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Ramutils 2.1.11 documentation" href="index.html"/>
+        <link rel="next" title="Pipelines" href="pipeline.html"/>
+        <link rel="prev" title="Classifier training, cross validation, and utilities" href="classifier.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav">
+<body class="wy-body-for-nav" role="document">
 
    
   <div class="wy-grid-for-nav">
@@ -103,7 +110,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" aria-label="top navigation">
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Ramutils</a>
@@ -111,10 +118,9 @@
       </nav>
 
 
+      
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
           
 
 
@@ -588,7 +594,7 @@ but is empty.</p>
 
 <dl class="function">
 <dt id="ramutils.events.insert_baseline_retrieval_events">
-<code class="descclassname">ramutils.events.</code><code class="descname">insert_baseline_retrieval_events</code><span class="sig-paren">(</span><em>events</em>, <em>start_time</em>, <em>end_time</em>, <em>duration</em>, <em>pre</em>, <em>post</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#insert_baseline_retrieval_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.insert_baseline_retrieval_events" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ramutils.events.</code><code class="descname">insert_baseline_retrieval_events</code><span class="sig-paren">(</span><em>events</em>, <em>start_time</em>, <em>end_time</em>, <em>duration</em>, <em>pre</em>, <em>post</em>, <em>use_deprecated=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#insert_baseline_retrieval_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.insert_baseline_retrieval_events" title="Permalink to this definition">¶</a></dt>
 <dd><p>Match recall events to matching baseline periods of failure to recall.
 This is required for all free recall events, but is not necessary for
 PAL events, which have a natural baseline/comparison group. Baseline
@@ -604,6 +610,72 @@ within 3 seconds relative to the onset of the recall period.</p>
 <li><strong>events</strong> (<em>np.recarray</em>) – The event structure in which to incorporate these baseline periods</li>
 <li><strong>start_time</strong> (<em>int</em>) – The amount of time to skip at the beginning of the session (ms)</li>
 <li><strong>end_time</strong> (<em>int</em>) – The amount of time within the recall period to consider (ms)</li>
+<li><strong>duration</strong> (<em>int</em>) – The length of desired empty epochs</li>
+<li><strong>pre</strong> (<em>int</em>) – The time before each event to exclude</li>
+<li><strong>post</strong> (<em>int</em>) – The time after each event to exclude</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Events with REC_BASE event types inserted</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.reccarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.insert_baseline_retrieval_events_deprecated">
+<code class="descclassname">ramutils.events.</code><code class="descname">insert_baseline_retrieval_events_deprecated</code><span class="sig-paren">(</span><em>events</em>, <em>start_time</em>, <em>end_time</em>, <em>duration</em>, <em>pre</em>, <em>post</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#insert_baseline_retrieval_events_deprecated"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.insert_baseline_retrieval_events_deprecated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match recall events to matching baseline periods of failure to recall.
+This is required for all free recall events, but is not necessary for
+PAL events, which have a natural baseline/comparison group. Baseline
+events all begin at least 1000 ms after a vocalization, and end
+at least 1000 ms before a vocalization. Each recall event is matched,
+wherever possible, to a valid baseline period from a different list
+within 3 seconds relative to the onset of the recall period.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>events</strong> (<em>np.recarray</em>) – The event structure in which to incorporate these baseline periods</li>
+<li><strong>start_time</strong> (<em>int</em>) – The amount of time to skip at the beginning of the session (ms)</li>
+<li><strong>end_time</strong> (<em>int</em>) – The amount of time within the recall period to consider (ms)</li>
+<li><strong>duration</strong> (<em>int</em>) – The length of desired empty epochs</li>
+<li><strong>pre</strong> (<em>int</em>) – The time before each event to exclude</li>
+<li><strong>post</strong> (<em>int</em>) – The time after each event to exclude</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Events with REC_BASE event types inserted</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.reccarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.insert_baseline_retrieval_events_logan">
+<code class="descclassname">ramutils.events.</code><code class="descname">insert_baseline_retrieval_events_logan</code><span class="sig-paren">(</span><em>events</em>, <em>duration</em>, <em>pre</em>, <em>post</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#insert_baseline_retrieval_events_logan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.insert_baseline_retrieval_events_logan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match recall events to matching baseline periods of failure to recall.
+This is required for all free recall events, but is not necessary for
+PAL events, which have a natural baseline/comparison group. Baseline
+events all begin at least 1000 ms after a vocalization, and end
+at least 1000 ms before a vocalization. Each recall event is matched,
+wherever possible, to a valid baseline period from a different list
+within 3 seconds relative to the onset of the recall period.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>events</strong> (<em>np.recarray</em>) – The event structure in which to incorporate these baseline periods</li>
 <li><strong>duration</strong> (<em>int</em>) – The length of desired empty epochs</li>
 <li><strong>pre</strong> (<em>int</em>) – The time before each event to exclude</li>
 <li><strong>post</strong> (<em>int</em>) – The time after each event to exclude</li>
@@ -729,6 +801,12 @@ were non-intrusion retrieval events.</p>
 <code class="descclassname">ramutils.events.</code><code class="descname">remove_session_number_offsets</code><span class="sig-paren">(</span><em>experiment</em>, <em>sessions</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#remove_session_number_offsets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.remove_session_number_offsets" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a list of sessions to include, undo the offsets for catFR and
 PAL so the sessions can be looked up correctly in the r1.json file</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.events.remove_voice_detection">
+<code class="descclassname">ramutils.events.</code><code class="descname">remove_voice_detection</code><span class="sig-paren">(</span><em>events</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/events.html#remove_voice_detection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.events.remove_voice_detection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove events</p>
 </dd></dl>
 
 <dl class="function">
@@ -940,7 +1018,9 @@ should already be true in the raw events data.</p>
 
 
            </div>
-           
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
@@ -962,7 +1042,7 @@ should already be true in the raw events data.</p>
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -980,8 +1060,7 @@ should already be true in the raw events data.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.10',
-            LANGUAGE:'None',
+            VERSION:'2.1.11',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -1000,11 +1079,14 @@ should already be true in the raw events data.</p>
     <script type="text/javascript" src="_static/js/theme.js"></script>
   
 
+  
+  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
+          SphinxRtdTheme.StickyNav.enable();
       });
-  </script> 
+  </script>
+   
 
 </body>
 </html>

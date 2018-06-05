@@ -57,5 +57,12 @@ class MissingArgumentsError(RamException):
     """
 
 
-class ValidationError(Exception):
+class ValidationError(RamException):
     """Raised when validation checks fail."""
+
+
+class RetrievalBaselineError(RamException):
+    """
+    Raised when something goes wrong with adding baseline events during
+     the retrieval period
+    """

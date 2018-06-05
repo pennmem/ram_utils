@@ -9,7 +9,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Index &mdash; Ramutils 2.1.10 documentation</title>
+  <title>Index &mdash; Ramutils 2.1.11 documentation</title>
   
 
   
@@ -26,17 +26,24 @@
   
 
   
+  
     <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="index" title="Index" href="#" />
-    <link rel="search" title="Search" href="search.html" /> 
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="#"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Ramutils 2.1.11 documentation" href="index.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav">
+<body class="wy-body-for-nav" role="document">
 
    
   <div class="wy-grid-for-nav">
@@ -102,7 +109,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" aria-label="top navigation">
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Ramutils</a>
@@ -110,10 +117,9 @@
       </nav>
 
 
+      
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
           
 
 
@@ -394,8 +400,12 @@
 </li>
       <li><a href="events.html#ramutils.events.insert_baseline_retrieval_events">insert_baseline_retrieval_events() (in module ramutils.events)</a>
 </li>
+      <li><a href="events.html#ramutils.events.insert_baseline_retrieval_events_deprecated">insert_baseline_retrieval_events_deprecated() (in module ramutils.events)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="events.html#ramutils.events.insert_baseline_retrieval_events_logan">insert_baseline_retrieval_events_logan() (in module ramutils.events)</a>
+</li>
       <li><a href="data.html#ramutils.reports.summary.FRSessionSummary.intrusion_events">intrusion_events (ramutils.reports.summary.FRSessionSummary attribute)</a>
 </li>
       <li><a href="data.html#ramutils.reports.summary.CatFRSessionSummary.irt_between_category">irt_between_category (ramutils.reports.summary.CatFRSessionSummary attribute)</a>
@@ -527,11 +537,7 @@
 </li>
         <li><a href="data.html#ramutils.reports.summary.FRSessionSummary.populate">(ramutils.reports.summary.FRSessionSummary method)</a>
 </li>
-        <li><a href="data.html#ramutils.reports.summary.FRStimSessionSummary.populate">(ramutils.reports.summary.FRStimSessionSummary method)</a>
-</li>
         <li><a href="data.html#ramutils.reports.summary.MathSummary.populate">(ramutils.reports.summary.MathSummary method)</a>
-</li>
-        <li><a href="data.html#ramutils.reports.summary.PSSessionSummary.populate">(ramutils.reports.summary.PSSessionSummary method)</a>
 </li>
         <li><a href="data.html#ramutils.reports.summary.SessionSummary.populate">(ramutils.reports.summary.SessionSummary method)</a>
 </li>
@@ -606,10 +612,10 @@
 </li>
       <li><a href="misc.html#ramutils.log.RamutilsFileHandler">RamutilsFileHandler (class in ramutils.log)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="misc.html#ramutils.log.RamutilsStreamHandler">RamutilsStreamHandler (class in ramutils.log)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="data.html#ramutils.reports.summary.Summary.raw_events">raw_events (ramutils.reports.summary.Summary attribute)</a>
 </li>
       <li><a href="data.html#ramutils.reports.summary.CatFRSessionSummary.raw_repetition_ratios">raw_repetition_ratios (ramutils.reports.summary.CatFRSessionSummary attribute)</a>
@@ -642,9 +648,13 @@
 </li>
       <li><a href="events.html#ramutils.events.remove_session_number_offsets">remove_session_number_offsets() (in module ramutils.events)</a>
 </li>
+      <li><a href="events.html#ramutils.events.remove_voice_detection">remove_voice_detection() (in module ramutils.events)</a>
+</li>
       <li><a href="events.html#ramutils.events.rename_correct_to_recalled">rename_correct_to_recalled() (in module ramutils.events)</a>
 </li>
       <li><a href="data.html#ramutils.reports.summary.CatFRSessionSummary.repetition_ratios">repetition_ratios (ramutils.reports.summary.CatFRSessionSummary attribute)</a>
+</li>
+      <li><a href="misc.html#ramutils.exc.RetrievalBaselineError">RetrievalBaselineError</a>
 </li>
   </ul></td>
 </tr></table>
@@ -818,7 +828,9 @@
 
 
            </div>
-           
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
@@ -831,7 +843,7 @@
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -849,8 +861,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.10',
-            LANGUAGE:'None',
+            VERSION:'2.1.11',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -869,11 +880,14 @@
     <script type="text/javascript" src="_static/js/theme.js"></script>
   
 
+  
+  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
+          SphinxRtdTheme.StickyNav.enable();
       });
-  </script> 
+  </script>
+   
 
 </body>
 </html>

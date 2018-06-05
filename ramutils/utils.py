@@ -278,8 +278,8 @@ def load_event_test_data(datapath, rootdir):
         tests rom an arbitrary location that has access to RHINO
     """
     events = np.rec.array(np.load(datapath))
-    events['eegfile'] = [path.replace('/Volumes/RHINO/', rootdir) for path in
-                         events['eegfile']]
+    events['eegfile'] = [''.join((rootdir,)+(path.partition('protocols')[1:]))
+                         for path in events['eegfile']]
 
     return events
 

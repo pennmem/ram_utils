@@ -1,5 +1,11 @@
 Changes
 =======
+Version 2.1.11
+--------------
+**2018-06-??**
+
+* Switched deliberation period algorithm to code developed by @LoganJF #202
+* Changed encoding_sample_weight parameter from 2.5 to 4.25
 
 Version 2.1.10
 --------------

@@ -198,7 +198,6 @@ def create_expconf(input_args=None):
 
 
 if __name__ == "__main__":
-    # create_expconf()
 
     args = ['--root', '~/mnt/rhino', '-d', 'scratch/depalati']
 
