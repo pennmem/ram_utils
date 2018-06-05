@@ -198,5 +198,41 @@ def create_expconf(input_args=None):
 
 
 if __name__ == "__main__":
-    create_expconf()
 
+    args = ['--root', '~/mnt/rhino', '-d', 'scratch/depalati']
+
+    # create_expconf(args + [
+    #     '-s', 'R1383J', '-x', 'FR5',
+    #     '--anodes', 'LB7',
+    #     '--cathodes', 'LB8',
+    #     '--target-amplitudes', '0.5'
+    # ])
+
+    create_expconf(args + [
+        '-s', 'R1384J', '-x', 'CatFR6',
+        '--anodes', 'LF7', 'LS8',
+        '--cathodes', 'LF8', 'LS9',
+        '--target-amplitudes', '0.5', '0.5',
+        # '--min-amplitudes', '0.1', '0.1',
+        # '--max-amplitudes', '0.5', '0.5',
+        # '--trigger-pairs', 'RPMS1_RPMS2',
+        '--default-area', '5.024',
+    ])
+
+    # create_expconf(args + [
+    #     '-s', 'R1385E',
+    #     '-x', 'CatFR5',
+    #     '--electrode-config-file',
+    #     'scratch/system3_configs/ODIN_configs/R1385E/R1385E_15JAN2018L0M0STIM.csv',
+    #     '--anodes', '3LD8',
+    #     '--cathodes', '3LD9',
+    #     '--target-amplitudes', '0.5'
+    # ])
+
+    # create_expconf(args + [
+    #     '-s', 'R1384J',
+    #     '-x', 'CatFR5',
+    #     '--anodes', '3LD8',
+    #     '--cathodes', '3LD9',
+    #     '--target-amplitudes', '0.5'
+    # ])
