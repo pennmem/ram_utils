@@ -261,9 +261,11 @@ def normalize_pal_events(events):
 
     if 'phase' not in events.dtype.names:
         events = add_field(events, 'phase', '', '<U256')
-
+    if 'matched' not in events.dtype.names:
+        events = add_field(events, 'matched', True, np.bool_)
     events = add_field(events, 'item_name', 'X', '<U256')
     events = add_field(events, 'category_num', 999, '<i8')
+
     return events
 
 
