@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-BASEDIR=/home1/zduey/ram_utils/
-OUTPUT_FOLDER=/scratch/zduey/nightly_build/
-RESULTS_DISTRIBUTION=zachduey@gmail.com
+BASEDIR=/home2/RAM_maint/repos/ram_utils/
+OUTPUT_FOLDER=/scratch/RAM_maint/nightly_testing/
+RESULTS_DISTRIBUTION="zduey@sas.upenn.edu,depalati@sas.upenn.edu,leond@sas.upenn.edu"
 
 cd $BASEDIR
 conda env remove -n ramutils_test -y
