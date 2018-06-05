@@ -9,7 +9,7 @@ How to release a new version
 5. Confirm that config files produced during testing can be loaded
    into RAMulator without issue. This involves copying zipped config files
    onto a flash drive and loading them one at a time from a host pc
-5. Merge the pre-release branch into ``master`` after tests pass
+6. Merge the pre-release branch into ``master`` after tests pass
 7. Create a new release on GitHub with a version number in the format ``v2.1.0``
 8. Build and upload the conda package ``python maint/build.py --upload``
 9. Notify users of the new release and include a link to the release notes on Github
