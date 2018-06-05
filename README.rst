@@ -35,13 +35,6 @@ The general workflow for users is the following:
 4. Activate the ``ramutils`` environment: ``source activate ramutils``
 5. Run the provided command line scripts
 
-Info for account maintainers
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-To update the account to a new release:
-
-``conda update ramutils``
-
 Ramulator experiment config generation
 --------------------------------------
 
@@ -183,11 +176,31 @@ Generating an aggregated stim report from the command line::
       --report_db_location REPORT_DB_LOCATION
                             location of report data database
 
+Info for account maintainers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To update an existing conda environment to use the latest release:
+
+``conda update ramutils``
+
+To set up a conda environment for development purposes, execute the following
+commands from the top-level of the repository:
+
+.. code-block:: shell-session
+
+    conda create -y -n ramutils_dev python=3
+    source activate ramutils_dev
+    conda install -c pennmem -c conda-forge --file=requirements.txt
+
 Testing
 -------
 
-Automated unit tests are run with every push to the remote repository or pull request. Longer running tests requiring
-local files can and should be run frequently, but require to additional argument to be passed to pytest::
+Automated unit tests that do not require access to RHINO are run with every
+push to the remote repository or pull request. Longer running tests requiring
+local files can and should be run frequently. Please note that the full test
+suite takes appropximately 4 hours to complete. The full test suite should pass
+before any new release. Running the full test suite requires two additional
+arguments to be passed to pytest::
 
     --rhino-root: The mount point for RHINO
     --output-dest: Where output from blackbox tests will be saved
@@ -195,3 +208,22 @@ local files can and should be run frequently, but require to additional argument
 You will likely also need to set the environment variable::
 
     MKL_THREADING_LAYER=GNU
+
+To run the full testing suite from a local copy of the repository, create
+a development environment as outlined above, then execute the following from
+top level of the repository:
+
+.. code-block:: shell-session
+
+    qlogin
+    source activate ramutils_dev
+    pytest ramutils/ --rhino-root RHINO_ROOT --output-dest OUTPUT_DEST
+
+
+The full set of tests are run nightly (5pm EST) from the RAM_maint account on
+RHINO by submitting ``ramutils/maint/run_tests.sh`` as a cron job. To update the
+timing of the automated tests, switch to the RAM_maint user account on rhino and
+edit the crontab file: ``crontab -e``. To update what users receive the
+testing report or to modify anything related to the testing itself, update
+``ramutils/maint/run_tests.sh``.
+
