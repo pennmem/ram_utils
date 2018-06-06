@@ -1,14 +1,17 @@
 Changes
 =======
+
 Version 2.1.11
 --------------
-**2018-06-??**
+
+**2018-06-05**
 
 * Switched deliberation period algorithm to code developed by @LoganJF #202
 * Changed encoding_sample_weight parameter from 2.5 to 4.25
 
 Version 2.1.10
 --------------
+
 **2018-05-15**
 
 * Updated parameters for TICL_FR ramulator configs
@@ -20,6 +23,7 @@ Version 2.1.10
 
 Version 2.1.9
 -------------
+
 **2018-04-09**
 
 * Fixed logging to avoid duplicated messages #164
