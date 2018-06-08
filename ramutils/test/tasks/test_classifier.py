@@ -26,9 +26,9 @@ class TestCrossValidation:
         # Note: These expected outputs will change if *any* of the inputs
         # change, i.e. classifier, powers, events, or parameters
         expected_output = {
-            'R1350D': 0.5486,
+            'R1350D': 0.5528,
             'R1353N': 0.8790,
-            'R1354E': 0.6292,
+            'R1354E': 0.6327,
         }
         params = params().to_dict()
         classifier = joblib.load(
@@ -55,7 +55,7 @@ class TestCrossValidation:
         # Note: These expected outputs will change if *any* of the inputs
         # change, i.e. classifier, powers, events, or parameters
         expected_output = {
-            'R1350D': 0.6053,
+            'R1350D': 0.6078,
             'R1353N': 0.7352,
             'R1354E': 0.5505,
         }
