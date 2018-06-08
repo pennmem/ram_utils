@@ -2,8 +2,8 @@ Changes
 =======
 
 
-Version 2.1.11b
----------------
+Version 2.2.0
+-------------
 **2018-06-08**
 
 * Changed encoding_multiplier parameter to 4.375

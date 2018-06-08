@@ -1,7 +1,7 @@
 from collections import namedtuple
 import logging
 
-__version__ = "2.1.11b"
+__version__ = "2.2.0"
 
 version_info = namedtuple('VersionInfo', 'major,minor,patch')(
     *__version__.split('.'))
