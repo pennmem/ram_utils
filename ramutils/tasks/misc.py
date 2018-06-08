@@ -18,6 +18,7 @@ from ramutils.hmm import save_foresplot, save_traceplot
 from ramutils.utils import is_stim_experiment as is_stim_experiment_core
 from ramutils.utils import get_completed_sessions
 from ramutils.utils import encode_file
+from ramutils.utils import extract_experiment_series
 from ramutils.log import get_logger
 
 logger = get_logger()
@@ -178,7 +179,7 @@ def save_all_output(subject, experiment, session_summaries, math_summaries,
 
 @task(cache=False)
 def load_existing_results(subject, experiment, sessions, stim_report, db_loc,
-                          rootdir='/'):
+                          joint_report, rootdir='/'):
     """ Load previously-saved data creating during report generation
 
     Parameters:
@@ -220,7 +221,16 @@ def load_existing_results(subject, experiment, sessions, stim_report, db_loc,
                                       "_{session}_{data_type}.{file_type}")
 
     if sessions is None:
-        sessions = get_completed_sessions(subject, experiment, rootdir=rootdir)
+        if joint_report and 'FR' in experiment:
+            series_num = extract_experiment_series(experiment)
+            fr_sessions = get_completed_sessions(subject, 'FR'+series_num,
+                                                 rootdir)
+            catfr_sessions = get_completed_sessions(subject, 'catFR'+series_num,
+                                                    rootdir)
+            catfr_sessions = set(str(100 + int(s)) for s in catfr_sessions)
+            sessions = fr_sessions | catfr_sessions
+        else:
+            sessions = get_completed_sessions(subject, experiment, rootdir=rootdir)
 
     session_str = get_session_str(sessions)
     target_selection_table = None
