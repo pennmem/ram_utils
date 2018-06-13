@@ -19,7 +19,7 @@ def make_report(subject, experiment, paths, joint_report=False,
                 retrain=False, stim_params=None, exp_params=None,
                 sessions=None, vispath=None, rerun=False,
                 trigger_electrode=None, use_classifier_excluded_leads=False,
-                pipeline_name="report"):
+                pipeline_name="report", clinical=False):
     """ Constructs a report and saves out all the necessary data to re-construct the report
 
     This pipeline should be used for generating single session reports for both record-only and
@@ -59,6 +59,9 @@ def make_report(subject, experiment, paths, joint_report=False,
         classifier training
     pipeline_name : str
         Name to use for status updates.
+    clinical: bool
+        If True, builds a demo clinical report instead of the internal RAM
+        report
 
     Returns
     -------
@@ -117,7 +120,8 @@ def make_report(subject, experiment, paths, joint_report=False,
                                          pre_built_results['target_selection_table'],
                                          pre_built_results['classifier_evaluation_results'],
                                          paths.dest,
-                                         hmm_results=pre_built_results['hmm_results'])
+                                         hmm_results=pre_built_results['hmm_results'],
+                                         clinical=clinical)
             return report.compute()
 
     final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
@@ -182,7 +186,8 @@ def make_report(subject, experiment, paths, joint_report=False,
     report = build_static_report(subject, experiment, data.session_summaries,
                                  data.math_summaries, data.target_selection_table,
                                  data.classifier_evaluation_results,
-                                 hmm_results=output, dest=paths.dest)
+                                 hmm_results=output, dest=paths.dest,
+                                 clinical=clinical)
 
     if vispath is not None:
         report.visualize(filename=vispath)

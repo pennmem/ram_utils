@@ -14,7 +14,8 @@ __all__ = [
 @task(cache=False)
 def build_static_report(subject, experiment, session_summaries, math_summaries,
                         delta_hfa_table, classifier_summaries, dest,
-                        hmm_results={}, save=True, aggregated_report=False):
+                        hmm_results={}, save=True, aggregated_report=False,
+                        clinical=False):
     """ Given a set of summary objects, generate a static HTML report """
 
     # Subject IDs are at most 8 characters, so this is a quick check to see
@@ -24,7 +25,8 @@ def build_static_report(subject, experiment, session_summaries, math_summaries,
 
     generator = ReportGenerator(subject, experiment, session_summaries, math_summaries,
                                 delta_hfa_table, classifier_summaries,
-                                dest=dest, hmm_results=hmm_results)
+                                dest=dest, hmm_results=hmm_results,
+                                clinical=clinical)
     report = generator.generate()
 
     sessions = [str(summary.session_number) for summary in session_summaries]
