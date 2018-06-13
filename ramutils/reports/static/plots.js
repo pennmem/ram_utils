@@ -103,9 +103,10 @@ var ramutils = (function (mod, Plotly) {
      * @param {Object} nonStimRecalls
      * @param {Object} stimRecalls
      * @param {Object} stimEvents
+     * @param {bool} plot_stim_events
      */
-    plotRecallSummary: function (nonStimRecalls, stimRecalls, stimEvents) {
-      const data = [
+    plotRecallSummary: function (nonStimRecalls, stimRecalls, stimEvents, plot_stim_events = true) {
+      let data = [
         {
           x: nonStimRecalls.listno,
           y: nonStimRecalls.recalled,
@@ -122,13 +123,15 @@ var ramutils = (function (mod, Plotly) {
           marker: {size: 12},
           name: 'Stim recalls'
         },
-        {
+      ]
+      if (plot_stim_events == true) {
+        data.push({
           x: stimEvents.listno,
           y: stimEvents.count,
           type: 'bar',
           name: 'Stim events'
-        }
-      ];
+        })
+      };
 
       const layout = {
         title: 'Number of Items Stimulated and Number of Items Recalled',
