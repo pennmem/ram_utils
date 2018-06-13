@@ -7,6 +7,10 @@
 {% include 'clinical_patient_summary.html' %}
 {% include 'clinical_targets.html' %}
 
+{% if multistim %}
+  {% include 'clinical_behavioral_modulation.html' %}
+{% endif %}
+
 {% include 'clinical_behavioral.html' %}
 {% include 'clinical_classifier_performance.html' %}
 {% include 'clinical_stim_behavior.html' %}

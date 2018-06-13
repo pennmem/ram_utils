@@ -1,21 +1,30 @@
- <div class="card mb-2">
-    <div class="card-header">Serial Position Curve</div>
+<div class="card-deck mb-2">
+  <div class="card">
+      <div class="card-header">Serial Position Curve</div>
+      <div class="card-body">
+        <div class="plot serialpos-curve">
+          <figure>
+            <div id="serialpos-plot-placeholder"></div>
+            <figcaption>
+              'stim' and 'non-stim' refer to stim lists and non-stim lists. 'First recall' indicates the plot is based only on
+              the serial position of the first recalled word. 'Overall' means that the recall order is not taken into account.
+            </figcaption>
+            <script>
+              window.addEventListener('load', () => {
+                let plot_data = JSON.parse('{{ plot_data }}');
+                ramutils.plots.plotSerialpos(plot_data.serialpos.serialpos, plot_data.serialpos.overall, plot_data.serialpos.first, plot_first = false);
+              });
+            </script>
+          </figure>
+        </div>
+      </div>
+  </div>
+  <div class="card">
+    <div class="card-header">Stimulation and Serial Position</div>
     <div class="card-body">
-      <div class="plot serialpos-curve">
-        <figure>
-          <div id="serialpos-plot-placeholder"></div>
-          <figcaption>
-            'stim' and 'non-stim' refer to stim lists and non-stim lists. 'First recall' indicates the plot is based only on
-            the serial position of the first recalled word. 'Overall' means that the recall order is not taken into account.
-          </figcaption>
-          <script>
-            window.addEventListener('load', () => {
-              let plot_data = JSON.parse('{{ plot_data }}');
-              ramutils.plots.plotSerialpos(plot_data.serialpos.serialpos, plot_data.serialpos.overall, plot_data.serialpos.first);
-            });
-          </script>
-        </figure>
+      <figure>
+        <div id="stim-probability-placeholder"></div>
+      </figure>
     </div>
- </div>
-
+  </div>
 </div>

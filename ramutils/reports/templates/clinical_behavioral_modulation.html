@@ -1,0 +1,23 @@
+<div class="card-deck mb-2">
+  {% for target in recall_tests %}
+    <div class="card">
+      <div class="card-header">{{ target["target"] }}</div>
+      <div class="card-body">
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            List
+            <span class="badge badge-primary">{{ "{:.1f}".format(target["list"]["delta_recall"]) }}%</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            Item
+            <span class="badge badge-primary">{{ "{:.1f}".format(target["item"]["delta_recall"]) }}%</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            Post-Stim Item
+            <span class="badge badge-primary">{{ "{:.1f}".format(target["post_stim_item"]["delta_recall"]) }}%</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  {% endfor %}
+</div>
