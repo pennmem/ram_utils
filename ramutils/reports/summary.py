@@ -1029,9 +1029,16 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
             df = df[df.list > -1]
 
         results = []
+        n_correct_recalls = df.recalled.sum()
+        n_items = len(df)
         for name, group in df.groupby(['stimAnodeTag', 'stimCathodeTag',
                                        'amplitude', 'stim_duration',
                                        'pulse_freq']):
+            if name[0].find(",") != -1:
+                target_name = "Multi-Site"
+            else:
+                target_name = "-".join([name[0], name[1]])
+            single_target_results = {"target": target_name}
             parameters = "/".join([str(n) for n in name])
 
             # Stim lists vs. non-stim lists
@@ -1047,13 +1054,16 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
                 n_correct_stim_list_recalls, n_correct_nonstim_list_recalls],
                 [n_stim_list_words, n_nonstim_list_words])
 
-            results.append({"parameters": parameters,
-                            "comparison": "Stim Lists vs. Non-stim Lists",
-                            "stim": (n_correct_stim_list_recalls,
-                                     n_stim_list_words),
-                            "non-stim": (n_correct_nonstim_list_recalls, n_nonstim_list_words),
-                            "t-stat": tstat_list,
-                            "p-value": pval_list})
+            single_target_results['list'] = {
+                "parameters": parameters,
+                "comparison": "Stim Lists vs. Non-stim Lists",
+                "stim": (n_correct_stim_list_recalls,
+                         n_stim_list_words),
+                "non-stim": (n_correct_nonstim_list_recalls, n_nonstim_list_words),
+                "delta_recall": 100 * ((n_correct_stim_list_recalls/n_stim_list_words) -
+                                 (n_correct_nonstim_list_recalls/n_nonstim_list_words)) / (n_correct_recalls / n_items),
+                "t-stat": tstat_list,
+                "p-value": pval_list}
 
             # stim items vs. non-stim low biomarker items
             n_correct_stim_item_recalls = group[group.is_stim_item == True].recalled.sum(
@@ -1071,13 +1081,15 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
                 [n_correct_stim_item_recalls, n_correct_nonstim_item_recalls],
                 [n_stim_items, n_nonstim_items])
 
-            results.append({
+            single_target_results['item'] = {
                 "parameters": parameters,
                 "comparison": "Stim Items vs. Low Biomarker Non-stim Items",
                 "stim": (n_correct_stim_item_recalls, n_stim_items),
                 "non-stim": (n_correct_nonstim_item_recalls, n_nonstim_items),
+                "delta_recall": 100 * ((n_correct_stim_item_recalls/n_stim_items) -
+                                 (n_correct_nonstim_item_recalls/n_nonstim_items)) / (n_correct_recalls / n_items),
                 "t-stat": tstat_list,
-                "p-value": pval_list})
+                "p-value": pval_list}
 
             # post stim items vs. non-stim low biomarker items
             n_correct_post_stim_item_recalls = group[group.is_post_stim_item == True].recalled.sum(
@@ -1089,14 +1101,17 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
                 [n_correct_post_stim_item_recalls, n_correct_nonstim_item_recalls],
                 [n_post_stim_items, n_nonstim_items])
 
-            results.append({
+            single_target_results['post_stim_item'] = {
                 "parameters": parameters,
                 "comparison": "Post-stim Items vs. Low Biomarker Non-stim Items",
                 "stim": (n_correct_post_stim_item_recalls, n_post_stim_items),
                 "non-stim": (n_correct_nonstim_item_recalls, n_nonstim_items),
+                "delta_recall": 100 * ((n_correct_post_stim_item_recalls/n_post_stim_items) -
+                                 (n_correct_nonstim_item_recalls/n_nonstim_items)) / (n_correct_recalls / n_items),
                 "t-stat": tstat_list,
-                "p-value": pval_list})
-
+                "p-value": pval_list
+            }
+            results.append(single_target_results)
         return results
 
     @staticmethod

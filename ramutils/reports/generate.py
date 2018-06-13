@@ -377,14 +377,22 @@ class ReportGenerator(object):
         Rendered stimulation report as a string
 
         """
+        stim_params = FRStimSessionSummary.stim_parameters(self.session_summaries)
+        multistim = False
+        if len(stim_params) > 1:
+            multistim = True
+
+        if self.clinical:
+            stim_params = stim_params[:-1] # do not pass along the joint site
+
         return self._render(
             experiment,
             stim=True,
+            multistim=multistim,
             date=self.session_summaries[0].session_datetime,
             combined_summary=self._make_combined_summary(),
             classifiers=self._make_classifier_data(),
-            stim_params=FRStimSessionSummary.stim_parameters(
-                self.session_summaries),
+            stim_params=stim_params,
             recall_tests=FRStimSessionSummary.recall_test_results(
                 self.session_summaries, experiment),
             feature_data=self._make_feature_plots(),
