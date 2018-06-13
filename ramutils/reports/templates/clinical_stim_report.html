@@ -1,0 +1,13 @@
+{% extends 'clinical_base.html' %}
+{% block title %}
+  Stimulation Report for John Doe
+{% endblock %}
+
+{% block report %}
+{% include 'clinical_patient_summary.html' %}
+{% include 'clinical_targets.html' %}
+
+{% include 'clinical_behavioral.html' %}
+{% include 'clinical_classifier_performance.html' %}
+{% include 'clinical_stim_behavior.html' %}
+{% endblock %}
