@@ -11,11 +11,11 @@ memory.cachedir = "~"
 
 
 paths = FilePaths(
-    root='/',
+    root='/Volumes/RHINO/',
     dest='/scratch/zduey/',
-    data_db='/scratch/zduey/'
+    data_db='/scratch/report_database/'
 )
 
 params = FRParameters()
-make_report("R1001P", "FR1", paths, exp_params=params, stim_params=None,
-            joint_report=False, rerun=False, sessions=None)
+make_report("R1384J", "FR5", paths, exp_params=params, stim_params=None,
+            joint_report=False, rerun=False, sessions=[0], clinical=True)
