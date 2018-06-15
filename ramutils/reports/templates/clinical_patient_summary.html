@@ -13,26 +13,30 @@
         </li>
         <li class="list-group-item d-flex justify-content-between align-items-center">
           Type
-          {% if multistim %}
-           <span class="badge badge-primary">Multi-Target</span>
-          {% else %}
-          <span class="badge badge-primary">Single-Target</span>
-          {% endif %}
+          <span class="badge badge-primary">Target Selection</span>
         </li>
       </ul>
     </div>
   </div>
   <div class="card">
-    <div class="card-header">Stimulation Results</div>
+    <div class="card-header">Targets</div>
     <div class="card-body">
       <ul class="list-group list-group-flush">
         <li class="list-group-item d-flex justify-content-between align-items-center">
-          List Level Change
-          <span class="badge badge-primary badge-success">60%</span>
+          LA10-LA11
+          <span class="badge badge-primary badge-success">Left Middle Temporal</span>
         </li>
         <li class="list-group-item d-flex justify-content-between align-items-center">
-          Item Level Change
-          <span class="badge badge-primary badge-success">23%</span>
+          LF4-LF5
+          <span class="badge badge-primary badge-success">Left Superior Frontal</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          RFI4-RFI5
+          <span class="badge badge-primary badge-success">Right Superior Frontal</span>
+        </li>
+         <li class="list-group-item d-flex justify-content-between align-items-center">
+         RMI1-RMI2
+          <span class="badge badge-primary badge-warning">Right Caudal Middle Frontal</span>
         </li>
       </ul>
     </div>
@@ -42,12 +46,12 @@
     <div class="card-body">
       <ul class="list-group list-group-flush">
         <li class="list-group-item d-flex justify-content-between align-items-center">
-          AUC
-          <span class="badge badge-success">{{ "{:.3f}".format(classifiers['metadata'][0]['auc']) }}</span>
+          Performance
+          <span class="badge badge-success">Excellent</span>
         </li>
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          Generalization
-          <span class="badge badge-success">{{ "{:.3f}".format(classifiers['metadata'][0]['pvalue']) }}</span>
+         <li class="list-group-item d-flex justify-content-between align-items-center">
+          Estimated Memory Improvement
+          <span class="badge badge-success">26%</span>
         </li>
       </ul>
     </div>

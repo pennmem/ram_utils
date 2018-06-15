@@ -315,7 +315,7 @@ class ReportGenerator(object):
 
         """
         if self.clinical:
-            template = self._env.get_template('clinical_stim_report.html')
+            template = self._env.get_template('clinical_target_selection.html')
         else:
             template = self._env.get_template(experiment.lower() + '.html')
         return template.render(
@@ -381,9 +381,6 @@ class ReportGenerator(object):
         multistim = False
         if len(stim_params) > 1:
             multistim = True
-
-        if self.clinical:
-            stim_params = stim_params[:-1] # do not pass along the joint site
 
         return self._render(
             experiment,
