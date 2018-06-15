@@ -1,13 +1,20 @@
 Changes
 =======
 
+
+Version 2.2.0
+-------------
+**2018-06-08**
+
+* Changed encoding_multiplier parameter to 4.375
+
 Version 2.1.11
 --------------
 
 **2018-06-05**
 
 * Switched deliberation period algorithm to code developed by @LoganJF #202
-* Changed encoding_sample_weight parameter from 2.5 to 4.25
+* Changed encoding_multiplier parameter from 2.5 to 4.25
 
 Version 2.1.10
 --------------
