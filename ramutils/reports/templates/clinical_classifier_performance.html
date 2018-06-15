@@ -34,9 +34,9 @@
       let rocData = plot_data["roc"];
       let tercData = plot_data["tercile"];
       let tags = [''];
-      let low = [64];
-      let mid = [16];
-      let high = [-4];
+      let low = [-64];
+      let mid = [-8];
+      let high = [42];
       ramutils.plots.plotClassifierPerformance(rocData.fpr, rocData.tpr, low, mid, high, tags);
     });
   </script>
