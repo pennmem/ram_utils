@@ -100,7 +100,9 @@ def make_report(subject, experiment, paths, joint_report=False,
     if not rerun:
         print('Loading results from %s'%paths.data_db)
         pre_built_results = load_existing_results(subject, experiment, sessions, stim_report,
-                                                  paths.data_db, rootdir=paths.root).compute()
+                                                  paths.data_db,
+                                                  joint_report,
+                                                  rootdir=paths.root).compute()
 
         # Check if only None values were returned. Processing will continue
         # undeterred
