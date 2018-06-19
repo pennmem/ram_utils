@@ -23,7 +23,7 @@ install:
   - conda update -q conda
   - conda info -a
   - conda install -y -n base conda-build
-  - python maint/build.py --no-convert --python $TRAVIS_PYTHON_VERSION
+  - conda build --output-folder=build/ --python $TRAVIS_PYTHON_VERSION conda.recipe/
   - conda create -n ramutils python=$TRAVIS_PYTHON_VERSION
   - conda activate ramutils
   - conda install -y -c pennmem build/linux-64/ramutils-*.tar.bz2
