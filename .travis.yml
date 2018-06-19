@@ -20,14 +20,15 @@ install:
   - source ~/.bashrc
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
+  - conda config --add channels conda-forge
+  - conda config --add channels pennmem
   - conda update -q conda
   - conda info -a
-  - conda install -y -n base conda-build
+  - conda install -n base conda-build
   - conda build --output-folder=build/ --python $TRAVIS_PYTHON_VERSION conda.recipe/
   - conda create -n ramutils python=$TRAVIS_PYTHON_VERSION
   - conda activate ramutils
-  - conda install -y -c pennmem build/linux-64/ramutils-*.tar.bz2
-  # - conda install -y -c pennmem -c conda-forge --file=requirements.txt
+  - conda install build/linux-64/ramutils-*.tar.bz2
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
       conda install -y mock futures;
     fi
