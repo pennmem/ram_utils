@@ -22,15 +22,17 @@ install:
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
   - conda info -a
+  - conda install -y -n base conda-build
+  - python maint/build.py --no-convert --python $TRAVIS_PYTHON_VERSION
   - conda create -n ramutils python=$TRAVIS_PYTHON_VERSION
   - conda activate ramutils
-  - conda install -y -c pennmem -c conda-forge --file=requirements.txt
+  - conda install -y -c pennmem build/linux-64/ramutils-*.tar.bz2
+  # - conda install -y -c pennmem -c conda-forge --file=requirements.txt
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
       conda install -y mock futures;
     fi
   - python --version
   - pip install codecov
-  - python setup.py install
 script:
   - python -m pytest -m "not rhino" --cov
 after_success:
