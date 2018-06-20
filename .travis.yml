@@ -1,6 +1,5 @@
 language: python
 python:
-  - "2.7"
   - "3.6"
 notifications:
   email: false
@@ -10,26 +9,23 @@ install:
   - sudo apt-get update
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
-    else
-      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-    fi
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
   - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
+  - echo ". /home/travis/miniconda/etc/profile.d/conda.sh" >> ~/.bashrc
+  - source ~/.bashrc
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
+  - conda config --add channels conda-forge
+  - conda config --add channels pennmem
   - conda update -q conda
   - conda info -a
+  - conda install -n base conda-build
+  - conda build --output-folder=build/ --python $TRAVIS_PYTHON_VERSION conda.recipe/
   - conda create -n ramutils python=$TRAVIS_PYTHON_VERSION
-  - source activate ramutils
-  - conda install -y -c pennmem -c conda-forge --file=requirements.txt
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      conda install -y mock futures;
-    fi
+  - conda activate ramutils
+  - conda install build/linux-64/ramutils-*.tar.bz2
   - python --version
-  - pip install codecov
-  - python setup.py install
+  - conda install --file=requirements.txt
 script:
   - python -m pytest -m "not rhino" --cov
 after_success:

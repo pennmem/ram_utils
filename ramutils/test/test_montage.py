@@ -1,7 +1,8 @@
-import pytest
 import functools
-
 from pkg_resources import resource_filename
+import pytest
+
+from numpy.testing import assert_equal
 
 from ramutils.montage import *
 from ramutils.parameters import StimParameters, FilePaths
@@ -148,21 +149,27 @@ class TestMontage:
         with open(datafile('/input/configs/{}_pairs_from_ec.json'.format(subject))) as f:
             pairs_from_ec = json.load(f)
 
-        metadata_table = build_montage_metadata_table(subject,
-                                                      'FR1',
-                                                      [0],
-                                                      pairs_from_ec,
-                                                      root=datafile(''))
-        old_metadata_table = pd.read_csv(
+        table = build_montage_metadata_table(subject,
+                                             'FR1',
+                                             [0],
+                                             pairs_from_ec,
+                                             root=datafile(''))
+        old = pd.read_csv(
             datafile('/input/montage/{}_montage_metadata.csv'.format(subject)))
 
         # Check correspondence my merging
-        merged = metadata_table.merge(old_metadata_table, how='outer',
-                                      indicator=True)
-        assert 'left_only' not in merged._merge
-        assert 'right_only' not in merged._merge
+        # merged = table.merge(old, how='outer', indicator=True)
+        # assert 'left_only' not in merged._merge
+        # assert 'right_only' not in merged._merge
+        # ^-- I'm not really sure what correspondence we were supposed to be
+        # checking here, so instead I'm just going to check that relevant fields
+        # give the same values - MVD 2018-06-20
 
-        return
+        assert_equal(table.channel_1.values.astype(int), old.channel_1.values)
+        assert_equal(table.channel_2.values.astype(int), old.channel_2.values)
+        assert_equal(table.label.dropna().values, old.label.dropna().values)
+        assert_equal(table.location.dropna().values,
+                     old.location.dropna().values)
 
     @pytest.mark.rhino
     @pytest.mark.parametrize('subject, experiment', [
