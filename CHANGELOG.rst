@@ -1,12 +1,16 @@
 Changes
 =======
 
-
 Version 2.2.0
 -------------
-**2018-06-08**
 
-* Changed encoding_multiplier parameter to 4.375
+**2018-06-20**
+
+* Changed encoding_multiplier parameter to 4.375 (#215)
+* Fixed building of joint reports (#217)
+* Added more flexibility in version requirements and dropped testing on legacy
+  Python 2.7 (#220)
+
 
 Version 2.1.11
 --------------

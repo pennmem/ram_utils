@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ramutils.events &mdash; Ramutils 2.1.11 documentation</title>
+  <title>ramutils.events &mdash; Ramutils 2.2.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Ramutils 2.1.11 documentation" href="../../index.html"/>
+    <link rel="top" title="Ramutils 2.2.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                2.1
+                2.2
               </div>
             
           
@@ -425,9 +425,11 @@
 
     <span class="k">if</span> <span class="s1">&#39;phase&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">events</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
         <span class="n">events</span> <span class="o">=</span> <span class="n">add_field</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="s1">&#39;phase&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">)</span>
-
+    <span class="k">if</span> <span class="s1">&#39;matched&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">events</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
+        <span class="n">events</span> <span class="o">=</span> <span class="n">add_field</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="s1">&#39;matched&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">)</span>
     <span class="n">events</span> <span class="o">=</span> <span class="n">add_field</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="s1">&#39;item_name&#39;</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">)</span>
     <span class="n">events</span> <span class="o">=</span> <span class="n">add_field</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="s1">&#39;category_num&#39;</span><span class="p">,</span> <span class="mi">999</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">events</span></div>
 
 
@@ -1894,7 +1896,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'2.1.11',
+            VERSION:'2.2.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
