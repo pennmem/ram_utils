@@ -1,6 +1,5 @@
 language: python
 python:
-  - "2.7"
   - "3.6"
 notifications:
   email: false
@@ -10,11 +9,7 @@ install:
   - sudo apt-get update
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
-    else
-      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-    fi
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
   - bash miniconda.sh -b -p $HOME/miniconda
   - echo ". /home/travis/miniconda/etc/profile.d/conda.sh" >> ~/.bashrc
   - source ~/.bashrc
@@ -29,9 +24,6 @@ install:
   - conda create -n ramutils python=$TRAVIS_PYTHON_VERSION
   - conda activate ramutils
   - conda install build/linux-64/ramutils-*.tar.bz2
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      conda install mock futures;
-    fi
   - python --version
   - conda install --file=requirements.txt
 script:
