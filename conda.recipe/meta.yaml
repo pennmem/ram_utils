@@ -24,10 +24,10 @@ build:
   # Variables that are accessible by default are documented at:
   # https://conda.io/docs/user-guide/tasks/build-packages/environment-variables.html
   #
-   script_env:
-     # Specified to build a conda package with the latest revision on Travis CI.
-     # Otherwise, packages only get built for the latest git version tag.
-     - TRAVIS_CI
+  script_env:
+    # Specified to build a conda package with the latest revision on Travis CI.
+    # Otherwise, packages only get built for the latest git version tag.
+    - TRAVIS_CI
 
 # Common dependencies that need to be listed in both the build and run
 # subsections of the requirements section.
