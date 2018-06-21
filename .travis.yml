@@ -4,6 +4,9 @@ python:
 notifications:
   email: false
 
+env:
+  - TRAVIS_CI=1
+
 # conda setup copied from the conda docs
 install:
   - sudo apt-get update
