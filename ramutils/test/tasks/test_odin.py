@@ -5,6 +5,7 @@ import functools
 import json
 import os
 import os.path as osp
+from unittest.mock import Mock, patch
 from zipfile import ZipFile
 
 from pkg_resources import resource_string, resource_filename
@@ -18,7 +19,6 @@ from ramutils.tasks.odin import (
     generate_ramulator_config, generate_electrode_config
 )
 from ramutils.montage import generate_pairs_from_electrode_config
-from ramutils.test import Mock, patch
 import ramutils.test.test_data
 from ramutils.utils import touch, mkdir_p
 
