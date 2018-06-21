@@ -25,6 +25,10 @@ setup(
     url='https://github.com/pennmem/ramutils',
     packages=find_packages(exclude=["MatlabIO"]),
     include_package_data=True,
+    package_data={
+        "ramutils.data": ["*"],
+        "ramutils.test.test_data": ["*"],
+    },
     install_requires=requirements,
     zip_safe=False,
     keywords='ramutils',
