@@ -30,6 +30,8 @@ install:
   - python --version
   - conda install --file=requirements.txt
 script:
+  - mkdir tmp
+  - cd tmp
   - python -m ramutils.test -m "not rhino" --cov
 after_success:
   - codecov
