@@ -4,9 +4,13 @@
 package:
   name: ramutils # {{ setup_data['name'] }}
   version: {{ setup_data['version'] }}
+
+{% if environ.get("TRAVIS_CI", 0) %}
 source:
   git_url: ../
-{% if not environ.get("TRAVIS_CI", 0) %}
+{% else %}
+source:
+  git_url: ../
   git_rev: {{ 'v' + setup_data['version'] }}  # always use tagged version
 {% endif %}
 
