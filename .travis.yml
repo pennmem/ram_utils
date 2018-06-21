@@ -29,6 +29,7 @@ install:
   - conda install build/linux-64/ramutils-*.tar.bz2
   - python --version
   - conda install --file=requirements.txt
+  - pip install codecov
 script:
   - maint/run_tests_ci.sh
 after_success:
