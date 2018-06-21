@@ -24,6 +24,7 @@ setup(
     author="Penn Computational Memory Lab",
     url='https://github.com/pennmem/ramutils',
     packages=find_packages(exclude=["MatlabIO"]),
+    package_data={"ramutils": ["test/data"]},
     include_package_data=True,
     install_requires=requirements,
     zip_safe=False,
