@@ -33,4 +33,4 @@ install:
 script:
   - maint/run_tests_ci.sh
 after_success:
-  - codecov
+  - codecov --root test_directory/
