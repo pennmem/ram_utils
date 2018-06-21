@@ -1,4 +1,5 @@
 import pytest
+from tempfile import gettempdir
 
 
 def pytest_addoption(parser):
@@ -10,12 +11,12 @@ def pytest_addoption(parser):
 
 @pytest.fixture
 def rhino_root(request):
-    return request.config.getoption("--rhino-root")
+    return request.config.getoption("--rhino-root", default="/")
 
 
 @pytest.fixture
 def output_dest(request):
-    return request.config.getoption("--output-dest")
+    return request.config.getoption("--output-dest", default=gettempdir())
 
 
 def pytest_generate_tests(metafunc):
