@@ -27,6 +27,6 @@ install:
   - python --version
   - conda install --file=requirements.txt
 script:
-  - python -m pytest -m "not rhino" --cov
+  - python -m ramutils.test -m "not rhino" --cov
 after_success:
   - codecov
