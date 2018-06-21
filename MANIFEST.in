@@ -2,4 +2,4 @@ include *.rst
 include *.txt
 include ramutils/data/*
 recursive-exclude MatlabIO *
-recursive-include ramutils *.html *.js *.css *.npy *.npz *.png *.pkl *.hdf5 *.txt *.zip *.json
+recursive-include ramutils *.html *.js *.css *.npy *.npz *.png *.pkl *.hdf5 *.txt *.zip *.json *.csv *.mat
