@@ -2,4 +2,5 @@
 set -e
 mkdir test_directory
 cd test_directory
-python -m ramutils.test -m "not rhino" --cov -v
+PROJECT=$HOME/miniconda/envs/ramutils/lib/python3.6/site-packages/ramutils
+python -m ramutils.test -m "not rhino" --cov=$PROJECT -v
