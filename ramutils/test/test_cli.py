@@ -150,6 +150,31 @@ class TestExpConf:
 
         create_expconf(args)
 
+    @pytest.mark.rhino
+    @pytest.mark.parametrize("subject,anodes,cathodes,target_amplitudes,xfail", [
+        ("R1384J", ["LF7", "LS8"], ["LF8", "LS9"], [0.5, 0.5], False),
+        ("R1384J", ["{}"] * 7, ["{}"] * 7, [0.5] * 7, True)
+    ])
+    def test_create_expconf_locsearch(self, subject, anodes, cathodes,
+                                      target_amplitudes, xfail, rhino_root,
+                                      output_dest):
+        args = [
+            "-s", subject,
+            "-x", "LocationSearch",
+            "--root", rhino_root,
+            "-d", output_dest,
+        ]
+        args += ["--anodes"] + anodes
+        args += ["--cathodes"] + cathodes
+        args += ["--target-amplitudes"] + [str(ampl) for ampl in target_amplitudes]
+        args += ["--default-area", "5"]
+
+        if xfail:
+            with pytest.raises(ValidationError):
+                create_expconf(args)
+        else:
+            create_expconf(args)
+
 
 class TestCreateReports:
     @pytest.mark.rhino

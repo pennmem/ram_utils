@@ -42,6 +42,7 @@ EXPERIMENTS = {
     # Experiments that allow multiple stim locations
     'multistim': [
         'AmplitudeDetermination',
+        'LocationSearch',
         'PS4_FR5',
         'PS4_CatFR5',
         'FR6',
