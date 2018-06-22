@@ -134,10 +134,11 @@ def make_ramulator_config(subject, experiment, paths, stim_params, sessions=None
     validate_pairs(subject, ec_pairs, trigger_pairs).compute()
 
     # Special case handling of no-classifier tasks
-    no_classifier_experiments = EXPERIMENTS['record_only'] + [
-        'AmplitudeDetermination',
-        'PS5_FR',
-        'PS5_CatFR',
+    no_classifier_experiments = EXPERIMENTS["record_only"] + [
+        "AmplitudeDetermination",
+        "PS5_FR",
+        "PS5_CatFR",
+        "LocationSearch",
     ]
     if experiment in no_classifier_experiments:
         container = None
@@ -153,7 +154,7 @@ def make_ramulator_config(subject, experiment, paths, stim_params, sessions=None
         with PipelineCallback(pipeline_name):
             return config_path.compute()
 
-    if ("FR" not in experiment) and ("PAL" not in experiment):
+    if "FR" not in experiment and "PAL" not in experiment:
         raise RuntimeError("Only PAL, FR, and catFR experiments are currently"
                            "implemented")
     kwargs = exp_params.to_dict()

@@ -20,6 +20,7 @@ EXPERIMENTS = {
         'PS4_catFR',
         'PS5_FR',
         'PS5_CatFR',
+        "LocationSearch",
     ],
     'open_loop': [
         'FR2',

@@ -184,6 +184,15 @@ def _make_experiment_specific_data_section(experiment, stim_params,
     if experiment.startswith('PS5'):
         esd['trigger'] = {'pairs': trigger_pairs}
 
+    # LocationSearch-specific section
+    if experiment == "LocationSearch":
+        esd["location_search"] = {
+            "stim_events_per_channel": 5,
+            "num_sham_channels": 1,
+            "isi_min": 2750,
+            "isi_max": 3250
+        }
+
     return esd
 
 
@@ -361,8 +370,8 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
 
     """
     no_classifier_experiments = (
-        ['AmplitudeDetermination'] + EXPERIMENTS['record_only'] +
-        ['PS5_FR', 'PS5_CatFR']
+        ["AmplitudeDetermination", "LocationSearch"] +
+        EXPERIMENTS["record_only"] + ["PS5_FR", "PS5_CatFR"]
     )
 
     if container is None and experiment not in no_classifier_experiments:
