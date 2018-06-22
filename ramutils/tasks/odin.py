@@ -236,8 +236,7 @@ def _make_experiment_specs_section(experiment):
             "post_stim_buffer_time": 499,
             "post_stim_wait_time": 100,
         })
-
-    if 'TICL' in experiment:
+    elif 'TICL' in experiment:
         specs.update({
             "biomarker_sample_time_length": 525,
             "buffer_time": 524,
@@ -247,6 +246,18 @@ def _make_experiment_specs_section(experiment):
             "post_stim_biomarker_sample_time_length": 525,
             "refractory_duration": 0,
 
+        })
+    elif experiment == "LocationSearch":
+        specs.update({
+            "biomarker_sample_start_time_offset": 0,
+            "biomarker_sample_time_length": 525,
+            "buffer_time": 524,
+            "experiment_type": "LocationSearch",
+            "post_stim_biomarker_sample_time_length": 525,
+            "post_stim_buffer_time": 524,
+            "post_stim_wait_time": 30,
+            "stim_duration": 500,
+            "refractory_duration": 0,
         })
 
     return specs
