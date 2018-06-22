@@ -4,9 +4,11 @@ python:
 notifications:
   email: false
 
+env:
+  - TRAVIS_CI=1
+
 # conda setup copied from the conda docs
 install:
-  - sudo apt-get update
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
@@ -26,7 +28,9 @@ install:
   - conda install build/linux-64/ramutils-*.tar.bz2
   - python --version
   - conda install --file=requirements.txt
+  - pip install codecov
 script:
-  - python -m ramutils.test -m "not rhino" --cov
+  - maint/run_tests_ci.sh
 after_success:
-  - codecov
+  - ls test_directory
+  - codecov --file test_directory/.coverage

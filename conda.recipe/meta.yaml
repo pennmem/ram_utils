@@ -4,9 +4,15 @@
 package:
   name: ramutils # {{ setup_data['name'] }}
   version: {{ setup_data['version'] }}
+
+{% if environ.get("TRAVIS_CI", 0) %}
+source:
+  git_url: ../
+{% else %}
 source:
   git_url: ../
   git_rev: {{ 'v' + setup_data['version'] }}  # always use tagged version
+{% endif %}
 
 build:
   # If this is a new build for the same version, increment the build number by
@@ -18,8 +24,10 @@ build:
   # Variables that are accessible by default are documented at:
   # https://conda.io/docs/user-guide/tasks/build-packages/environment-variables.html
   #
-  # script_env:
-  #   - ENV_VAR_HERE
+  script_env:
+    # Specified to build a conda package with the latest revision on Travis CI.
+    # Otherwise, packages only get built for the latest git version tag.
+    - TRAVIS_CI
 
 # Common dependencies that need to be listed in both the build and run
 # subsections of the requirements section.
