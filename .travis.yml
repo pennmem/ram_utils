@@ -9,7 +9,6 @@ env:
 
 # conda setup copied from the conda docs
 install:
-  - sudo apt-get update
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
@@ -33,4 +32,5 @@ install:
 script:
   - maint/run_tests_ci.sh
 after_success:
-  - codecov
+  - ls test_directory
+  - codecov --file test_directory/.coverage
