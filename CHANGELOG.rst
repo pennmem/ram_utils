@@ -1,6 +1,14 @@
 Changes
 =======
 
+Version Next
+------------
+
+* Made `ramutils.test` executable (#225)
+* Updated CI testing to always build and use the conda package (#227)
+* Added support for generating LocationSearch experiment configs (#228)
+
+
 Version 2.2.0
 -------------
 

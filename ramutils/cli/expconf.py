@@ -71,6 +71,12 @@ def validate_stim_settings(args):
             raise ValidationError(
                 "Number of anodes doesn't match number of cathodes")
 
+        if args.experiment == "LocationSearch":
+            if len(args.anodes) > 6:
+                raise ValidationError(
+                    "LocationSearch is limited to a maximum of 6 stim channels"
+                )
+
         if args.experiment != "AmplitudeDetermination" and not args.experiment.startswith('PS'):
             if args.target_amplitudes is None:
                 raise RuntimeError("--target-amplitudes is required")
@@ -145,7 +151,7 @@ def create_expconf(input_args=None):
                            'neuroradiology', 'current_processed', 'pairs.json')
 
     # Determine params based on experiment type
-    if args.experiment == 'AmplitudeDetermination':
+    if args.experiment in ["AmplitudeDetermination", "LocationSearch"]:
         exp_params = None
     elif "FR" in args.experiment or "DBOY" in args.experiment:
         # TODO: check if DBOY needs these

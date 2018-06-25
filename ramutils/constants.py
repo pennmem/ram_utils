@@ -20,6 +20,7 @@ EXPERIMENTS = {
         'PS4_catFR',
         'PS5_FR',
         'PS5_CatFR',
+        "LocationSearch",
     ],
     'open_loop': [
         'FR2',
@@ -41,6 +42,7 @@ EXPERIMENTS = {
     # Experiments that allow multiple stim locations
     'multistim': [
         'AmplitudeDetermination',
+        'LocationSearch',
         'PS4_FR5',
         'PS4_CatFR5',
         'FR6',

@@ -184,6 +184,15 @@ def _make_experiment_specific_data_section(experiment, stim_params,
     if experiment.startswith('PS5'):
         esd['trigger'] = {'pairs': trigger_pairs}
 
+    # LocationSearch-specific section
+    if experiment == "LocationSearch":
+        esd["location_search"] = {
+            "stim_events_per_channel": 5,
+            "num_sham_channels": 1,
+            "isi_min": 2750,
+            "isi_max": 3250
+        }
+
     return esd
 
 
@@ -227,8 +236,7 @@ def _make_experiment_specs_section(experiment):
             "post_stim_buffer_time": 499,
             "post_stim_wait_time": 100,
         })
-
-    if 'TICL' in experiment:
+    elif 'TICL' in experiment:
         specs.update({
             "biomarker_sample_time_length": 525,
             "buffer_time": 524,
@@ -238,6 +246,18 @@ def _make_experiment_specs_section(experiment):
             "post_stim_biomarker_sample_time_length": 525,
             "refractory_duration": 0,
 
+        })
+    elif experiment == "LocationSearch":
+        specs.update({
+            "biomarker_sample_start_time_offset": 0,
+            "biomarker_sample_time_length": 525,
+            "buffer_time": 524,
+            "experiment_type": "LocationSearch",
+            "post_stim_biomarker_sample_time_length": 525,
+            "post_stim_buffer_time": 524,
+            "post_stim_wait_time": 30,
+            "stim_duration": 500,
+            "refractory_duration": 0,
         })
 
     return specs
@@ -361,8 +381,8 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
 
     """
     no_classifier_experiments = (
-        ['AmplitudeDetermination'] + EXPERIMENTS['record_only'] +
-        ['PS5_FR', 'PS5_CatFR']
+        ["AmplitudeDetermination", "LocationSearch"] +
+        EXPERIMENTS["record_only"] + ["PS5_FR", "PS5_CatFR"]
     )
 
     if container is None and experiment not in no_classifier_experiments:
