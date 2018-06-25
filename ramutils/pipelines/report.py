@@ -143,13 +143,6 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                          sessions=sessions,
                                                          **kwargs).compute()
 
-    target_selection_table = pd.DataFrame(columns=['type', 'contact0',
-                                                   'contact1', 'label',
-                                                   'hfa_p_value', 'hfa_tstat',
-                                                   '110_p_value', '110_tstat',
-                                                   'mni_x', 'mni_y', 'mni_z',
-                                                   'controllability'])
-
     if not stim_report:
         data = generate_data_for_nonstim_report(subject, experiment, sessions,
                                                 joint_report, paths, ec_pairs,
