@@ -467,8 +467,19 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
                           "classifier may not be 100% reproducible", UserWarning)
 
     filename_tmpl = '{subject:s}_{experiment:s}{pairs:s}{date:s}'
-    pair_str = '_' + "_".join([pair.label for pair in stim_params]
-                              ) + '_' if len(stim_params) else '_'
+
+    if experiment != "LocationSearch":
+        pair_str = '_' + "_".join([pair.label for pair in stim_params]
+                                  ) + '_' if len(stim_params) else '_'
+    else:
+        # These names get very long for LocationSearch experiments, so just
+        # include the anode labels. This allows for at least some level of
+        # human readability in cases where we might have more than one set of
+        # stim pairs to test.
+        pair_str = ("_" +
+                    "_".join([pair.anode_label for pair in stim_params]) +
+                    "_")
+
     zip_prefix = os.path.join(dest, filename_tmpl.format(
         subject=subject,
         experiment=experiment,
