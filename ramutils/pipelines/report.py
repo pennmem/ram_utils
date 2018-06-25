@@ -4,10 +4,9 @@ from collections import namedtuple
 import pandas as pd
 
 from ramutils.tasks import *
-from ramutils.utils import extract_experiment_series, encode_file
+from ramutils.utils import extract_experiment_series
 from ramutils.events import dataframe_to_recarray
 from .hooks import PipelineCallback
-from ramutils.log import get_logger
 
 ReportData = namedtuple('ReportData', 'session_summaries, math_summaries, '
                                       'target_selection_table, classifier_evaluation_results,'
@@ -86,7 +85,7 @@ def make_report(subject, experiment, paths, joint_report=False,
         stim_params.extend(classifier_excluded_leads)
     excluded_pairs = reduce_pairs(ec_pairs, stim_params, return_excluded=True)
 
-    # PS4 is such a special beast, that we just return it's own sub-pipeline
+    # PS4 is such a special beast, that we just return its own sub-pipeline
     # in order to simplify the branching logic for generating all other reports
     if "PS4" in experiment:
         return generate_ps4_report(subject, experiment, sessions, ec_pairs,
@@ -95,10 +94,9 @@ def make_report(subject, experiment, paths, joint_report=False,
     kwargs = exp_params.to_dict()
 
     stim_report = is_stim_experiment(experiment).compute()
-    series_num = extract_experiment_series(experiment)
 
     if not rerun:
-        print('Loading results from %s'%paths.data_db)
+        print('Loading results from %s' % paths.data_db)
         pre_built_results = load_existing_results(subject, experiment, sessions, stim_report,
                                                   paths.data_db,
                                                   joint_report,
