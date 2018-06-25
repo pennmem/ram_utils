@@ -292,6 +292,11 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
     Ramulator.
 
     """
+    no_task_laptop = [
+        "AmplitudeDetermination",
+        "LocationSearch",
+    ]
+
     # FIXME: Remove this hard-coding
     config = {
         'subject': subject,
@@ -335,7 +340,9 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
             "max_session_length": 120,
             "sampling_rate": 1000,
             "odin_lib_debug_level": 0,
-            "connect_to_task_laptop": True if experiment != 'AmplitudeDetermination' else False
+            "connect_to_task_laptop": (
+                True if experiment not in no_task_laptop else False
+            )
         }
     }
 
