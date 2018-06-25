@@ -217,13 +217,10 @@ if __name__ == "__main__":
     # ])
 
     create_expconf(args + [
-        '-s', 'R1384J', '-x', 'CatFR6',
-        '--anodes', 'LF7', 'LS8',
-        '--cathodes', 'LF8', 'LS9',
-        '--target-amplitudes', '0.5', '0.5',
-        # '--min-amplitudes', '0.1', '0.1',
-        # '--max-amplitudes', '0.5', '0.5',
-        # '--trigger-pairs', 'RPMS1_RPMS2',
+        '-s', 'R1378T', '-x', 'LocationSearch',
+        '--anodes', "LC8", "LF7", "LQ11", "LB10", "LV1", "LO15",
+        '--cathodes', "LC9", "LF8", "LQ12", "LB11", "LV2", "LO16",
+        '--target-amplitudes', "0.5", "0.5", "0.5", "0.5", "0.5", "0.5",
         '--default-area', '5.024',
     ])
 

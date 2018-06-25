@@ -187,7 +187,7 @@ def _make_experiment_specific_data_section(experiment, stim_params,
     # LocationSearch-specific section
     if experiment == "LocationSearch":
         esd["location_search"] = {
-            "stim_events_per_channel": 5,
+            "stim_events_per_channel": 30,
             "num_sham_channels": 1,
             "isi_min": 2750,
             "isi_max": 3250
@@ -292,6 +292,11 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
     Ramulator.
 
     """
+    no_task_laptop = [
+        "AmplitudeDetermination",
+        "LocationSearch",
+    ]
+
     # FIXME: Remove this hard-coding
     config = {
         'subject': subject,
@@ -335,7 +340,9 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
             "max_session_length": 120,
             "sampling_rate": 1000,
             "odin_lib_debug_level": 0,
-            "connect_to_task_laptop": True if experiment != 'AmplitudeDetermination' else False
+            "connect_to_task_laptop": (
+                True if experiment not in no_task_laptop else False
+            )
         }
     }
 
@@ -467,8 +474,19 @@ def generate_ramulator_config(subject, experiment, container, stim_params,
                           "classifier may not be 100% reproducible", UserWarning)
 
     filename_tmpl = '{subject:s}_{experiment:s}{pairs:s}{date:s}'
-    pair_str = '_' + "_".join([pair.label for pair in stim_params]
-                              ) + '_' if len(stim_params) else '_'
+
+    if experiment != "LocationSearch":
+        pair_str = '_' + "_".join([pair.label for pair in stim_params]
+                                  ) + '_' if len(stim_params) else '_'
+    else:
+        # These names get very long for LocationSearch experiments, so just
+        # include the anode labels. This allows for at least some level of
+        # human readability in cases where we might have more than one set of
+        # stim pairs to test.
+        pair_str = ("_" +
+                    "_".join([pair.anode_label for pair in stim_params]) +
+                    "_")
+
     zip_prefix = os.path.join(dest, filename_tmpl.format(
         subject=subject,
         experiment=experiment,
