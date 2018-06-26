@@ -1167,6 +1167,13 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
 
         return delta_recall
 
+    def nstims(self, task_phase):
+        """
+        Number of stim events within t
+        :param task_phase:
+        :return:
+        """
+
 
 class FR5SessionSummary(FRStimSessionSummary):
     """ FR5-specific summary """
