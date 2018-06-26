@@ -209,6 +209,29 @@ You will likely also need to set the environment variable::
 
     MKL_THREADING_LAYER=GNU
 
+Running the full test suite on rhino
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To manually run the full test suite on rhino, first create a conda environment
+as described above. Build and install the conda package with the appropriate
+version of Python, for example:
+
+.. code-block:: shell-session
+
+    $ maint/build.py -p 3.6
+    $ conda activate ramutils_dev
+    (ramutils_dev) $ conda install build/ramutils-*-py36*.bz2
+
+Next, run the ``maint/run_tests_rhino.sh`` script:
+
+..code-block:: shell-session
+
+    (ramutils_dev) $ maint/run_tests_rhino.sh
+
+
+Older testing info
+^^^^^^^^^^^^^^^^^^
+
 To run the full testing suite from a local copy of the repository, create
 a development environment as outlined above, then execute the following from
 top level of the repository:
