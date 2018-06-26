@@ -1,9 +1,12 @@
-# Requirements to be installed with `conda install -c pennmem --file>=requirements.txt`
+# Testing and development requirements to be installed with the following
+# command:
+#     `conda install -c pennmem -c conda-forge --file requirements.txt`
 
 dask>=0.15.3
 graphviz>=2.38.0
 h5py>=2.7.0
 hdf5>=1.10.1
+jq=1.5
 mkl-service>=1.1.2
 mock>=2.0.0
 numpy>=1.13.3
@@ -24,7 +27,7 @@ gitpython>=2.1.3
 # Available in the pennmem channel
 bptools>=1.3.0
 classiflib>=0.1.2
-ptsa=1.1.4
+ptsa>=1.1.4,<3
 traitschema>=1.1.3
 
 # Required only for building docs:
