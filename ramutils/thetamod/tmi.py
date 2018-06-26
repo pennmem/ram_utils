@@ -1,13 +1,16 @@
+import cmlreaders
 import copy
-
-from mne.time_frequency import psd_multitaper
 import numpy as np
 import pandas as pd
+import statsmodels.formula.api as sm
+from mne.time_frequency import psd_multitaper
 from scipy.special import logit
 from scipy.stats import ttest_rel, pearsonr
-import statsmodels.formula.api as sm
-import cmlreaders
-from . import artifact
+
+
+__all__ = ['get_stim_events', 'get_eeg', 'get_stim_channels',
+           'compute_psd', 'regress_distance', 'compute_tmi']
+
 
 def get_stim_events(reader):
     """Get all stim events.
@@ -61,40 +64,6 @@ def get_stim_channels(pairs, stim_events):
     indices = [pairs[pairs.label == label].index[0] for label in labels]
 
     return indices
-
-
-def get_eeg_ptsa(which,reader,stim_events,buffer=50,window=900,
-                 stim_duration=500):
-    from ptsa.data import readers, filters
-    if which not in ("pre", "post"):
-        raise ValueError("Specify 'pre' or 'post'")
-
-    if which == "pre":
-        rel_start = -(buffer + window)
-        rel_stop = -buffer
-    else:
-        rel_start = buffer + stim_duration
-        rel_stop = buffer + stim_duration + window
-
-    idx = cmlreaders.get_data_index(rootdir=reader.rootdir)
-    pair_file = idx.loc[(idx.subject == reader.subject)
-                        & (idx.experiment == reader.experiment)
-                        & (idx.session == reader.session)].pairs.unique()[0]
-
-    talreader = readers.TalReader(filename=pair_file)
-    channels = talreader.get_monopolar_channels()
-
-    eeg = readers.EEGReader(events=stim_events, channels=channels,
-                            start_time=rel_start, end_time=rel_stop).read()
-
-    if 'bipolar_pairs' not in eeg.dims:
-        eeg = filters.MonopolarToBipolarMapper(
-            time_series=eeg, bipolar_pairs=talreader.get_bipolar_pairs()
-        ).filter()
-    eeg = filters.ButterworthFilter(time_series=eeg, freqs=[58., 62.],
-                                    filt_type='stop').filter()
-
-    return eeg
 
 
 def get_eeg(which, reader, stim_events, buffer=50, window=900,
@@ -188,38 +157,6 @@ def compute_psd(eegs, fmin=5., fmax=8.):
     return powers
 
 
-def get_distances(pairs):
-    """Get distances as an adjacency matrix.
-
-    Parameters
-    ----------
-    pairs : pd.DataFrame
-        A DataFrame as returned by cmlreaders.
-
-    Returns
-    -------
-    distmat : np.ndarray
-        Adjacency matrix using exp(-distance / 120).
-
-    """
-    # positions matrix shaped as N_channels x 3
-    pos = np.array([
-        [row["ind.{}".format(c)] for c in ("x", "y", "z")]
-        for _, row in pairs.sort_values(by=['contact_1', 'contact_2']).iterrows()
-    ])
-
-    distmat = np.empty((len(pos), len(pos)))
-
-    for i, d1 in enumerate(pos):
-        for j, d2 in enumerate(pos):
-            if i <= j:
-                distmat[i, j] = np.linalg.norm(d1 - d2, axis=0)
-                distmat[j, i] = np.linalg.norm(d1 - d2, axis=0)
-
-    distmat = 1 / np.exp(distmat / 120.)
-    return distmat
-
-
 def regress_distance(pre_psd, post_psd, conn, distmat, stim_channel_idxs,
                      nperms=1000, event_mask=None, artifact_channels=None):
     """Do regression on channel distances.
@@ -290,8 +227,6 @@ def regress_distance(pre_psd, post_psd, conn, distmat, stim_channel_idxs,
         X[:, 1] = logit_conn[tmask]
         X[:, 2] = np.ones(size)  # intercept
 
-        # print(conn[stim_channel_idx])
-        # print(X)
         assert np.isfinite(X).all()
         assert np.isfinite(y).all()
 
@@ -326,7 +261,7 @@ def compute_tmi(regression_results_list):
 
     Parameters
     ----------
-    regression_results : List[dict]
+    regression_results_list : List[dict]
         Results from :func:`regress_distance`.
 
     Returns

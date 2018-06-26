@@ -65,17 +65,11 @@ def make_task(func, *args, **kwargs):
         the :func:`task` decorator.
 
     """
-    try:
-        cache = kwargs.pop('cache')
-    except KeyError:
-        cache = True
+    cache = kwargs.pop('cache', True)
+    log_args = kwargs.pop('log_args', False)
+    nout = kwargs.pop('nout', None)
 
-    try:
-        log_args = kwargs.pop('log_args')
-    except KeyError:
-        log_args = False
-
-    @task(cache, log_args)
+    @task(cache, log_args, nout)
     @functools.wraps(func)
     def wrapped(*a, **k):
         return func(*a, **k)
