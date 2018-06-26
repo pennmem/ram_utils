@@ -1224,6 +1224,55 @@ def get_stim_list_mask(events):
     return stim_list_mask
 
 
+def add_list_phase_info(events):
+    """
+    Adds a list_phase field to an event structure that says which
+    phase of the list (ENCODING, DISTRACT, RETRIEVAL,...) that event is
+    part of.
+
+    Parameters
+    ----------
+    events: np.recarray
+        All event or task events
+
+    """
+    if 'list_phase' in events.dtype.names:
+        return events
+
+    dtype_desc = events.type.dtype.str
+
+    phases = np.empty(len(events), dtype=dtype_desc)
+
+    lstphases = ['']
+    for ev in events:
+        if ev['type'].endswith('_START'):
+            lstphases.append(ev['type'].rpartition('_')[0])
+        elif 'TRIAL' in ev['type']:
+            lstphases.append(ev['type'].replace('TRIAL','ENCODING'))
+        else:
+            lstphases.append(lstphases[-1])
+    phases[:] = lstphases[1:]
+
+    new_events = append_fields(events, [('list_phase', dtype_desc)])
+    new_events['list_phase'] = phases
+
+    # Certain special cases for older experiments
+
+    word_events = new_events[(new_events.type == 'WORD')
+                             | (new_events.type == 'PRACTICE_WORD')]
+    word_events.list_phase = [t.replace('WORD', 'ENCODING')
+                              for t in word_events.type]
+    new_events[(new_events.type == 'WORD')
+               | (new_events.type == 'PRACTICE_WORD')] = word_events
+
+    retrieval_events = new_events[(new_events.list_phase == 'REC')
+                                  | (new_events.type == 'REC_WORD') ]
+    retrieval_events.list_phase = 'RETRIEVAL'
+    new_events[(new_events.list_phase == 'REC')
+               | (new_events.type == 'REC_WORD')] = retrieval_events
+    return new_events
+
+
 def extract_stim_information(all_events, task_events):
     """ Identify stim items, post stim items, and stimulation parameters
 

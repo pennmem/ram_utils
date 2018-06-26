@@ -9,6 +9,7 @@ from sklearn.externals import joblib
 from ramutils.parameters import FRParameters
 from ramutils.retrieval import create_matched_events
 from ramutils.utils import load_event_test_data
+import numpy.testing
 
 datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
 
@@ -63,6 +64,22 @@ class TestEvents:
             assert n_sessions == 1
 
         return
+
+    def test_add_list_phase_info(self):
+        fr_events = load_events(self.subject, 'FR1', rootdir=self.rootdir)
+
+        fr_events = add_list_phase_info(fr_events)
+
+        np.testing.assert_allclose(
+            fr_events[fr_events.type == 'WORD'].list_phase == 'ENCODING',
+            True)
+        np.testing.assert_allclose(
+            fr_events[fr_events.type == 'PROB'].list_phase == 'DISTRACT',
+            True)
+
+        np.testing.assert_allclose(
+            fr_events[fr_events.type == 'REC_WORD'].list_phase == 'RETRIEVAL',
+            True)
 
     def test_concatenate_events_for_single_experiment(self):
         fr_events = load_events(self.subject, 'FR1', rootdir=self.rootdir)
