@@ -25,6 +25,7 @@ from ramutils.utils import extract_subject_montage, get_completed_sessions, extr
 from ramutils.exc import *
 from ramutils.retrieval import create_matched_events,append_fields
 
+
 def load_events(subject, experiment, file_type='all_events',
                 sessions=None, rootdir='/'):
     """ Load events for a specific subject and experiment. If no events are
@@ -366,8 +367,10 @@ def dataframe_to_recarray(dataframe, dtypes):
     """
         Convert from dataframe to recarray maintaining the original datatypes
     """
+    names = [dt[0] for dt in dtypes]
     events = dataframe.to_records(index=False)
-    events = events.astype(dtypes)
+    # Make sure that all the columns are in the correct order
+    events = events[names].astype(dtypes)
     events.dtype.names = [str(name) for name in events.dtype.names]
     return events
 
