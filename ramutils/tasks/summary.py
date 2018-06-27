@@ -241,9 +241,8 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
         # parameters do not change within a list
         stim_param_df = stim_param_df.drop_duplicates(
             subset=['session', 'list'])
-        del stim_param_df['item_name']
         stim_df = stim_df.merge(
-            stim_param_df, on=['session', 'list'], how='left')
+            stim_param_df, on=['session', 'list', 'item_name'], how='left')
 
         # Add region from pairs_data. TODO: This won't scale to multi-site stim
         stim_df['label'] = (stim_df['stimAnodeTag'] + "-" +
