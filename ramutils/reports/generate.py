@@ -288,6 +288,9 @@ class ReportGenerator(object):
         elif all(['PS5' in exp for exp in self.experiments]):
             return self.generate_ps5_report()
 
+        elif all(['TICL_FR' in exp for exp in self.experiments]):
+            return self.generate_closed_loop_fr_report('TICL_FR')
+
         elif series == '1':
             joint = False
             if any(['catFR' in exp for exp in self.experiments]):
