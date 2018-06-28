@@ -20,6 +20,12 @@
   window.addEventListener('load', () => {
     let plot_data = JSON.parse('{{ plot_data }}');
     const classifierOutput = plot_data["classifier_output"];
+    {% if experiment == 'TICL_FR' %}
+    for (phase in classifierOutput){
+        ramutils.plots.plotClassifierOutputDistros(classifierOutput[phase]['pre_stim'], classifierOutput[phase]['post_stim']);
+    }
+    {% else %}
     ramutils.plots.plotClassifierOutputDistros(classifierOutput['pre_stim'], classifierOutput['post_stim']);
+    {% endfor %}
   });
 </script>

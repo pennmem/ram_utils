@@ -913,14 +913,14 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         return combined_df
 
     @staticmethod
-    def all_post_stim_prob_recall(summaries):
+    def all_post_stim_prob_recall(summaries, phase=None):
         post_stim_prob_recall = [
             summary.post_stim_prob_recall for summary in summaries]
         post_stim_prob_recall = np.concatenate(post_stim_prob_recall).tolist()
         return post_stim_prob_recall
 
     @staticmethod
-    def pre_stim_prob_recall(summaries):
+    def pre_stim_prob_recall(summaries, phase=None):
         """ Classifier output in the pre-stim period for items that were eventually stimulated """
         df = FRStimSessionSummary.combine_sessions(summaries)
         pre_stim_probs = df[df['is_stim_item'] ==
@@ -1167,12 +1167,6 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
 
         return delta_recall
 
-    def nstims(self, task_phase):
-        """
-        Number of stim events within t
-        :param task_phase:
-        :return:
-        """
 
 
 class FR5SessionSummary(FRStimSessionSummary):
@@ -1189,6 +1183,60 @@ class FR5SessionSummary(FRStimSessionSummary):
                                       raw_events=raw_events,
                                       post_stim_prob_recall=post_stim_prob_recall,
                                       model_metadata=model_metadata)
+
+
+class TICLFRSessionSummary(FRStimSessionSummary):
+
+    def nstims(self, task_phase):
+        """
+        Number of stim events within t
+        :param task_phase:
+        :return:
+        """
+
+        return (self.raw_events[self.raw_events.type=='STIM_ON'
+                ].phase == task_phase).sum()
+
+    def classifier_output(self, phase, position):
+        """
+
+        :param phase: either "ENCODING", "DISTRACT", or "RETRIEVAL"
+        :param position: either "pre" or "post"
+        :return:
+        """
+        biomarker_events = self.raw_events[(
+            (self.raw_events['type'] == 'BIOMARKER')
+            & (self.raw_events['stim_params']['biomarker_value']>=0)
+            )]
+
+        in_phase = biomarker_events['phase'] == phase
+        this_position = biomarker_events['stim_params']['position'] == position
+
+        if position == 'post':
+            return biomarker_events[in_phase & this_position]['stim_params']['biomarker_value']
+        else: # Only want """real""" pre-stim events, i.e. ones with a matching
+              # post-stim event
+            ids = biomarker_events[in_phase & this_position]['stim_params']['id']
+            has_match = np.in1d(ids,
+                                biomarker_events[~this_position
+                                ]['stim_params']['id'])
+            return biomarker_events[
+                (in_phase & this_position)
+            ][has_match]['stim_params']['biomarker_value']
+
+    @staticmethod
+    def pre_stim_prob_recall(summaries, phase=None):
+        return np.concatenate([
+            summary.classifier_output(phase, 'pre')
+            for summary in summaries
+        ])
+
+    @staticmethod
+    def all_post_stim_prob_recall(summaries, phase=None):
+        return np.concatenate([
+                                  summary.classifier_output(phase, 'post')
+                                  for summary in summaries
+                              ])
 
 
 class PSSessionSummary(SessionSummary):
