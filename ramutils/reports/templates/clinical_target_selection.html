@@ -1,0 +1,11 @@
+{% extends 'clinical_base.html' %}
+{% block title %}
+  Clinical Report: Target Selection
+{% endblock %}
+
+{% block report %}
+{% include 'clinical_patient_summary.html' %}
+{% include 'clinical_target_selection_table.html' %}
+
+{% include 'clinical_classifier_performance.html' %}
+{% endblock %}

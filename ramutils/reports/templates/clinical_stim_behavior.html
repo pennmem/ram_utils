@@ -1,0 +1,25 @@
+<div class="card-group mb-2">
+  <div class="card">
+      <div class="card-header">Stimulation and Recall</div>
+      <div class="card-body">
+        <figure>
+        <div id="stim-recall-placeholder"></div>
+        <figcaption>
+          Blue circles represent the number of recalled items from non-stim lists.
+          Orange circles represent the number of recalled items from stim lists.
+        </figcaption>
+        </figure>
+      </div>
+  </div>
+</div>
+
+ <script>
+  window.addEventListener('load', () => {
+    let plot_data = JSON.parse('{{ plot_data }}');
+    const summary = plot_data["recall_summary"];
+    const probs = plot_data["stim_probability"];
+
+    ramutils.plots.plotRecallSummary(summary['nonstim'], summary['stim'], summary['stim_events'], plot_stim_events = false);
+    ramutils.plots.plotStimProbability(probs['serialpos'], probs['probability']);
+  });
+</script>

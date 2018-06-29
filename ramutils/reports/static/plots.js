@@ -9,12 +9,18 @@ var ramutils = (function (mod, Plotly) {
      * @param {Array} serialPos - Serial positions (x-axis)
      * @param {Object} overallProbs - Overall probabilities per serial position
      * @param {Object} firstProbs - Probability of first recall per serial position
+     * @param {Object} plot_first -- If true, plot probability of first recall
      */
-    plotSerialpos: function (serialPos, overallProbs, firstProbs) {
+    plotSerialpos: function (serialPos, overallProbs, firstProbs, plot_first = true) {
       const mode = "lines+markers";
       let data = [];
+      max_prob = 0
 
       for (let name in overallProbs) {
+        current_max = Math.max(...overallProbs[name])
+        if (current_max > max_prob) {
+          max_prob =  current_max
+        };
         data.push({
           x: serialPos,
           y: overallProbs[name],
@@ -23,14 +29,20 @@ var ramutils = (function (mod, Plotly) {
         });
       }
 
-      for (let name in firstProbs) {
-        data.push({
-          x: serialPos,
-          y: firstProbs[name],
-          mode: mode,
-          name: name
-        });
-      }
+      if (plot_first) {
+        for (let name in firstProbs) {
+          current_max = Math.max(...firstProbs[name])
+          if (current_max > max_prob) {
+            max_prob =  current_max
+          };
+          data.push({
+            x: serialPos,
+            y: firstProbs[name],
+            mode: mode,
+            name: name
+          });
+        }
+      };
 
       const layout = {
         title: "Probability of Recall as a Function of Serial Position",
@@ -40,7 +52,7 @@ var ramutils = (function (mod, Plotly) {
         },
         yaxis: {
           title: 'Probability',
-          range: [0, 1]
+          range: [0, max_prob + 0.01]
         }
       };
 
@@ -103,9 +115,10 @@ var ramutils = (function (mod, Plotly) {
      * @param {Object} nonStimRecalls
      * @param {Object} stimRecalls
      * @param {Object} stimEvents
+     * @param {bool} plot_stim_events
      */
-    plotRecallSummary: function (nonStimRecalls, stimRecalls, stimEvents) {
-      const data = [
+    plotRecallSummary: function (nonStimRecalls, stimRecalls, stimEvents, plot_stim_events = true) {
+      let data = [
         {
           x: nonStimRecalls.listno,
           y: nonStimRecalls.recalled,
@@ -122,13 +135,15 @@ var ramutils = (function (mod, Plotly) {
           marker: {size: 12},
           name: 'Stim recalls'
         },
-        {
+      ]
+      if (plot_stim_events == true) {
+        data.push({
           x: stimEvents.listno,
           y: stimEvents.count,
           type: 'bar',
           name: 'Stim events'
-        }
-      ];
+        })
+      };
 
       const layout = {
         title: 'Number of Items Stimulated and Number of Items Recalled',

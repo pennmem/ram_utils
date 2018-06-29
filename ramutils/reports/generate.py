@@ -4,16 +4,15 @@ from datetime import datetime
 import json
 import os.path as osp
 import random
-import itertools
 
 from itertools import compress
 from jinja2 import Environment, PackageLoader
 import numpy as np
-from pkg_resources import resource_listdir, resource_string
+from pkg_resources import resource_listdir, resource_filename, resource_string
 
 from ramutils import __version__
 from ramutils.reports.summary import FRSessionSummary, MathSummary, FRStimSessionSummary
-from ramutils.events import extract_experiment_from_events, extract_subject
+from ramutils.events import extract_experiment_from_events
 from ramutils.utils import extract_experiment_series
 
 
@@ -68,9 +67,12 @@ class ReportGenerator(object):
     """
 
     def __init__(self, subject, experiment, session_summaries, math_summaries,
-                 target_selection_table, classifier_summaries, hmm_results=None, dest='.'):
+                 target_selection_table, classifier_summaries, hmm_results=None,
+                 dest='.', clinical=False):
         self.subject = subject
         self.experiment = experiment
+        self.clinical = clinical
+
         self.session_summaries = session_summaries
         self.math_summaries = math_summaries
         self.target_selection_table = target_selection_table
@@ -301,7 +303,7 @@ class ReportGenerator(object):
             raise NotImplementedError("Unsupported report type")
 
     def _render(self, experiment, **kwargs):
-        """Convenience method to wrap common keyword arguments passed to the
+        """ Convenience method to wrap common keyword arguments passed to the
         template renderer.
 
         Parameters
@@ -311,7 +313,20 @@ class ReportGenerator(object):
             Additional keyword arguments that are passed to the render method.
 
         """
-        template = self._env.get_template(experiment.lower() + '.html')
+        if self.clinical:
+            from base64 import b64encode
+
+            template = self._env.get_template('clinical_target_selection.html')
+
+            for hemi in ["left", "right"]:
+                with open(resource_filename("ramutils.reports.static",
+                                            "r1384j_{}.png".format(hemi)), "rb") as infile:
+                    encoded = b64encode(infile.read())
+                img_string = "data:image/png;base64,{}".format(encoded.decode())
+                kwargs["{}_hemisphere_image".format(hemi)] = img_string
+        else:
+            template = self._env.get_template(experiment.lower() + '.html')
+
         return template.render(
             version=self.version,
             subject=self.subject,
@@ -364,20 +379,26 @@ class ReportGenerator(object):
         )
 
     def generate_closed_loop_fr_report(self, experiment):
-        """ Generate an FR5 report
+        """ Generate a closed loop stimulation report
 
         Returns
         -------
-        Rendered FR5 report as a string.
+        Rendered stimulation report as a string
 
         """
+        stim_params = FRStimSessionSummary.stim_parameters(self.session_summaries)
+        multistim = False
+        if len(stim_params) > 1:
+            multistim = True
+
         return self._render(
             experiment,
             stim=True,
+            multistim=multistim,
+            date=self.session_summaries[0].session_datetime,
             combined_summary=self._make_combined_summary(),
             classifiers=self._make_classifier_data(),
-            stim_params=FRStimSessionSummary.stim_parameters(
-                self.session_summaries),
+            stim_params=stim_params,
             recall_tests=FRStimSessionSummary.recall_test_results(
                 self.session_summaries, experiment),
             feature_data=self._make_feature_plots(),

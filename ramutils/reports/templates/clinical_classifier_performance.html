@@ -1,0 +1,43 @@
+ <div class="card mb-2">
+    <div class="card-header">Classifier Performance</div>
+    <div class="card-body">
+      <div class="plot roc-curve">
+        <figure>
+          <div id="classifier-performance-plot-placeholder"></div>
+          <figcaption>
+            <b>(Left)</b> ROC curve.<b>(Right)</b> Subject
+            recall performance represented as percentage deviation from the (subject)
+            mean, separated by tercile of the classifier encoding efficiency estimate
+            for each encoded word.
+          </figcaption>
+        </figure>
+     </div>
+       <ul class="list-group list-group-flush">
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            AUC
+            <span class="badge badge-success">.76</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            P-Value
+            <span class="badge badge-success"><0.001</span>
+       </ul>
+    </div>
+   <script>
+    window.addEventListener('load', () => {
+      $('#classifier_summary').DataTable({
+        'searching': false,
+        'paging': false,
+        'ordering': false
+        });
+
+      let plot_data = JSON.parse('{{ plot_data }}');
+      let rocData = plot_data["roc"];
+      let tercData = plot_data["tercile"];
+      let tags = [''];
+      let low = [-64];
+      let mid = [-8];
+      let high = [42];
+      ramutils.plots.plotClassifierPerformance(rocData.fpr, rocData.tpr, low, mid, high, tags);
+    });
+  </script>
+ </div>
