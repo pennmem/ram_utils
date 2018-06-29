@@ -1,3 +1,4 @@
+ramutils/test/test_data/*.png
 out.html
 .cache/
 ramutils/test/plotting/sample_plots/
@@ -9,7 +10,6 @@ scratch/
 *.pdf
 *.synctex.gz
 *.swp
-*.png
 *.zip
 *.ipynb_checkpoints/
 

@@ -4,16 +4,15 @@ from datetime import datetime
 import json
 import os.path as osp
 import random
-import itertools
 
 from itertools import compress
 from jinja2 import Environment, PackageLoader
 import numpy as np
-from pkg_resources import resource_listdir, resource_string
+from pkg_resources import resource_listdir, resource_filename, resource_string
 
 from ramutils import __version__
 from ramutils.reports.summary import FRSessionSummary, MathSummary, FRStimSessionSummary
-from ramutils.events import extract_experiment_from_events, extract_subject
+from ramutils.events import extract_experiment_from_events
 from ramutils.utils import extract_experiment_series
 
 
@@ -315,9 +314,19 @@ class ReportGenerator(object):
 
         """
         if self.clinical:
+            from base64 import b64encode
+
             template = self._env.get_template('clinical_target_selection.html')
+
+            for hemi in ["left", "right"]:
+                with open(resource_filename("ramutils.reports.static",
+                                            "r1384j_{}.png".format(hemi)), "rb") as infile:
+                    encoded = b64encode(infile.read())
+                img_string = "data:image/png;base64,{}".format(encoded.decode())
+                kwargs["{}_hemisphere_image".format(hemi)] = img_string
         else:
             template = self._env.get_template(experiment.lower() + '.html')
+
         return template.render(
             version=self.version,
             subject=self.subject,

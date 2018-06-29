@@ -1,19 +1,14 @@
-from __future__ import print_function
-
-import os.path
-from ramutils.parameters import FilePaths, FRParameters, PS5Parameters
+from ramutils.parameters import FilePaths, FRParameters
 from ramutils.pipelines.report import make_report
 
 from ramutils.tasks import memory
 
-memory.cachedir = "~"
-
-
+memory.cachedir = "scratch/ramutils_test"
 
 paths = FilePaths(
-    root='/Volumes/RHINO/',
-    dest='/scratch/zduey/',
-    data_db='/scratch/report_database/'
+    root="~/mnt/rhino",
+    dest="scratch/ramutils_test/",
+    data_db="/scratch/report_database",
 )
 
 params = FRParameters()
