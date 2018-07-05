@@ -1,0 +1,23 @@
+<table id="TMI-table" class="table table-striped table-hover">
+      <thead>
+        <tr>
+            <th> Stim site</th>
+            <th> TMI </th>
+        </tr>
+      </thead>
+    <tbody>
+    {% for row in tmi_table %}
+    <tr class={{ "sme-positive" if row['TMI']>0 else "sme-negative" }}>
+        <td>{{ row['site'] }}</td>
+        <td>{{ row['TMI'] }} </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<script>
+  window.addEventListener('load', () => {
+    $(document).ready( function () {
+      $('#TMI-table').DataTable();
+      });
+  });
+</script>
