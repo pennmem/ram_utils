@@ -249,7 +249,7 @@ class ReportGenerator(object):
         if biomarker_delta:
             if self.experiment == 'TICL_FR':
                 plot_data['classifier_output'] = {
-                    {
+                    phase: {
                         'pre_stim':TICLFRSessionSummary.pre_stim_prob_recall(self.session_summaries,phase),
                         'post_stim': TICLFRSessionSummary.all_post_stim_prob_recall(self.session_summaries,phase)
                     }
