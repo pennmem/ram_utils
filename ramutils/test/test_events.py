@@ -421,3 +421,21 @@ class TestEvents:
                 current = np.nan_to_num(current_repetitions_dict[subject])
                 old = np.nan_to_num(ratios)
                 assert np.allclose(current, old)
+
+
+def test_extract_biomarker():
+    events = np.rec.array(
+        np.load(datafile('ticl_fr_events.npz'))['events']
+    )
+    biomarker_events = events[events.type=='BIOMARKER']
+    biomarker_events_extracted = extract_biomarker_information(events)
+
+    numpy.testing.assert_equal( biomarker_events.stim_params.position,
+                  biomarker_events_extracted.position)
+    numpy.testing.assert_equal(biomarker_events.stim_params.id,
+                               biomarker_events_extracted.id)
+    numpy.testing.assert_equal(biomarker_events.stim_params.biomarker_value,
+                               biomarker_events_extracted.biomarker_value
+    )
+    numpy.testing.assert_equal(biomarker_events.phase,
+                               biomarker_events_extracted.phase)
