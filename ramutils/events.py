@@ -1412,10 +1412,10 @@ def extract_biomarker_information(events):
     biomarker_df['position'] = biomarker_events['stim_params']['position']
     biomarker_df['biomarker_value'] = biomarker_events['stim_params']['biomarker_value']
     biomarker_df['id'] = biomarker_events['stim_params']['id']
-    biomarker_dtypes = [('position', 'S64'),
-                        ('phase', 'S64'),
+    biomarker_dtypes = [('position', 'U64'),
+                        ('phase', 'U64'),
                         ('biomarker_value', float),
-                        ('id', 'S64')]
+                        ('id', 'U64')]
     return dataframe_to_recarray(biomarker_df,biomarker_dtypes)
 
 
