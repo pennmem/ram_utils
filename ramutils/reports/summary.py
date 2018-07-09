@@ -39,6 +39,7 @@ __all__ = [
     'CatFRSessionSummary',
     'FRStimSessionSummary',
     'FR5SessionSummary',
+    'TICLFRSessionSummary',
     'PSSessionSummary',
     'MathSummary'
 ]
@@ -1187,12 +1188,28 @@ class FR5SessionSummary(FRStimSessionSummary):
 
 class TICLFRSessionSummary(FRStimSessionSummary):
 
+    biomarker_events = ArrayOrNone
+
+    def populate(self, events, bipolar_pairs,
+                 excluded_pairs, normalized_powers, post_stim_prob_recall=None,
+                 raw_events=None, model_metadata={}, post_stim_eeg=None,
+                 biomarker_events=None):
+
+        FRStimSessionSummary.populate(self, events, bipolar_pairs,
+                     excluded_pairs, normalized_powers,
+                     post_stim_prob_recall,
+                     raw_events, model_metadata, post_stim_eeg,
+                     )
+        self.biomarker_events = biomarker_events
+
     def nstims(self, task_phase):
         """
         Number of stim events within t
         :param task_phase:
         :return:
         """
+        if self.raw_events is None:
+            return  0
 
         return (self.raw_events[self.raw_events.type=='STIM_ON'
                 ].phase == task_phase).sum()
@@ -1204,39 +1221,38 @@ class TICLFRSessionSummary(FRStimSessionSummary):
         :param position: either "pre" or "post"
         :return:
         """
-        biomarker_events = self.raw_events[(
-            (self.raw_events['type'] == 'BIOMARKER')
-            & (self.raw_events['stim_params']['biomarker_value']>=0)
-            )]
+        biomarker_events = self.biomarker_events[
+            self.biomarker_events['biomarker_value'] >= 0
+            ]
 
         in_phase = biomarker_events['phase'] == phase
-        this_position = biomarker_events['stim_params']['position'] == position
+        this_position = biomarker_events['position'] == position
 
         if position == 'post':
-            return biomarker_events[in_phase & this_position]['stim_params']['biomarker_value']
+            return biomarker_events[in_phase & this_position]['biomarker_value']
         else: # Only want """real""" pre-stim events, i.e. ones with a matching
               # post-stim event
-            ids = biomarker_events[in_phase & this_position]['stim_params']['id']
+            ids = biomarker_events[in_phase & this_position]['id']
             has_match = np.in1d(ids,
                                 biomarker_events[~this_position
-                                ]['stim_params']['id'])
+                                ]['id'])
             return biomarker_events[
                 (in_phase & this_position)
-            ][has_match]['stim_params']['biomarker_value']
+            ][has_match]['biomarker_value']
 
     @staticmethod
     def pre_stim_prob_recall(summaries, phase=None):
         return np.concatenate([
             summary.classifier_output(phase, 'pre')
             for summary in summaries
-        ])
+        ]).tolist()
 
     @staticmethod
     def all_post_stim_prob_recall(summaries, phase=None):
         return np.concatenate([
                                   summary.classifier_output(phase, 'post')
                                   for summary in summaries
-                              ])
+                              ]).tolist()
 
 
 class PSSessionSummary(SessionSummary):
