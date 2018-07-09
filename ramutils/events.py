@@ -176,12 +176,13 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
     # because the columns to subset differs by task
     if "FR" in experiment:
         events, stim_params = separate_stim_events(events)
-        events = insert_baseline_retrieval_events(events,
-                                                  start_time,
-                                                  end_time,
-                                                  duration,
-                                                  pre,
-                                                  post)
+        if "TICL" not in experiment:
+            events = insert_baseline_retrieval_events(events,
+                                                      start_time,
+                                                      end_time,
+                                                      duration,
+                                                      pre,
+                                                      post)
         events = remove_intrusions(events)
         events = update_recall_outcome_for_retrieval_events(events)
         events = normalize_fr_events(events)
@@ -1402,6 +1403,20 @@ def extract_stim_information(all_events, task_events):
     stim_df = pd.DataFrame.from_dict(stim_param_data)
 
     return is_stim_item, is_post_stim_item, stim_df
+
+def extract_biomarker_information(events):
+    biomarker_events = events[events['type']=='BIOMARKER']
+    biomarker_df = pd.DataFrame(columns=['position', 'phase',
+                                        'biomarker_value', 'id'])
+    biomarker_df['phase'] = biomarker_events['phase']
+    biomarker_df['position'] = biomarker_events['stim_params']['position']
+    biomarker_df['biomarker_value'] = biomarker_events['stim_params']['biomarker_value']
+    biomarker_df['id'] = biomarker_events['stim_params']['id']
+    biomarker_dtypes = [('position', 'S64'),
+                        ('phase', 'S64'),
+                        ('biomarker_value', float),
+                        ('id', 'S64')]
+    return dataframe_to_recarray(biomarker_df,biomarker_dtypes)
 
 
 def correct_fr2_stim_item_identification(stim_param_df):
