@@ -7,11 +7,13 @@ import numpy as np
 import pandas as pd
 
 from ._wrapper import task
-from ramutils.events import validate_single_experiment, select_math_events, \
-    extract_experiment_from_events, extract_sessions, select_session_events, \
-    select_stim_table_events, extract_stim_information, \
-    select_encoding_events, extract_event_metadata, dataframe_to_recarray, \
-    get_encoding_mask, correct_fr2_stim_item_identification
+from ramutils.events import (
+    validate_single_experiment, select_math_events,
+    extract_experiment_from_events, extract_sessions, select_session_events,
+    select_stim_table_events, extract_stim_information,
+    select_encoding_events, extract_event_metadata, dataframe_to_recarray,
+    get_encoding_mask, correct_fr2_stim_item_identification,
+    extract_biomarker_information)
 from ramutils.exc import *
 from ramutils.log import get_logger
 from ramutils.reports.summary import *
@@ -280,6 +282,18 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
                 stim_events, bipolar_pairs,
                 excluded_pairs, trigger_output, raw_events=all_session_events,
                 post_stim_prob_recall=post_stim_trigger_output)
+        elif experiment == "TICL_FR":
+            biomarker_events = extract_biomarker_information(
+                all_session_stim_events)
+            stim_events = dataframe_to_recarray(stim_df,expected_dtypes)
+            stim_session_summary = TICLFRSessionSummary()
+            stim_session_summary.populate(
+                stim_events, bipolar_pairs,
+                excluded_pairs, trigger_output,
+                raw_events=all_session_events,
+                biomarker_events=biomarker_events,
+            )
+
         else:
             raise UnsupportedExperimentError('Experiment not supported')
 
