@@ -12,6 +12,7 @@ from traits.api import ListInt, ListFloat, ListBool
 
 from ramutils.reports.summary import *
 from ramutils.tasks.events import build_ps_data
+from ramutils.events import  extract_biomarker_information
 datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
 
 
@@ -314,6 +315,8 @@ class TestTiclFRSessionSummary:
         cls.events = ticlfr_events()
         cls.sample_summary = TICLFRSessionSummary()
         cls.sample_summary.raw_events = cls.events
+        cls.sample_summary.biomarker_events = extract_biomarker_information(
+            cls.events)
 
     @pytest.mark.parametrize("phase", ["ENCODING", "DISTRACT", "RETRIEVAL"])
     def test_nstims(self, phase):
