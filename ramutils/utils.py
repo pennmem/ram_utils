@@ -228,7 +228,8 @@ def is_stim_experiment(experiment):
 
     if 'PS5' in experiment:
         return True
-
+    elif 'TICL' in experiment:
+        return True
     elif experiment_series != '1':
         return True
 

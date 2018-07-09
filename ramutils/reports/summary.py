@@ -1242,16 +1242,27 @@ class TICLFRSessionSummary(FRStimSessionSummary):
 
     @staticmethod
     def pre_stim_prob_recall(summaries, phase=None):
+        if phase is None:
+            phases = ['ENCODING', 'DISTRACT', 'RETRIEVAL']
+        else:
+            phases = [phase]
+
         return np.concatenate([
-            summary.classifier_output(phase, 'pre')
-            for summary in summaries
+            summary.classifier_output(phase_, 'pre')
+            for summary in summaries for phase_ in phases
         ]).tolist()
 
     @staticmethod
     def all_post_stim_prob_recall(summaries, phase=None):
+        if phase is None:
+            phases = ['ENCODING', 'DISTRACT', 'RETRIEVAL']
+        else:
+            phases = [phase]
+
         return np.concatenate([
-                                  summary.classifier_output(phase, 'post')
+                                  summary.classifier_output(phase_, 'post')
                                   for summary in summaries
+                                  for phase_ in phases
                               ]).tolist()
 
 
