@@ -293,7 +293,11 @@ def load_existing_results(subject, experiment, sessions, stim_report, db_loc,
                                               file_type='h5'))
                 math_summaries.append(math_summary)
 
-                session_summary = FRStimSessionSummary.from_hdf(
+                if 'TICL' in experiment:
+                    klass = TICLFRSessionSummary
+                else:
+                    klass = FRStimSessionSummary
+                session_summary = klass.from_hdf(
                     base_output_format.format(session=str(session),
                                               data_type='session_summary',
                                               file_type='h5'))
