@@ -376,11 +376,11 @@ class ReportGenerator(object):
         )
 
     def generate_closed_loop_fr_report(self, experiment):
-        """ Generate an FR5 report
+        """ Generate an FR5-like report
 
         Returns
         -------
-        Rendered FR5 report as a string.
+        Rendered FR5-like report as a string.
 
         """
         return self._render(

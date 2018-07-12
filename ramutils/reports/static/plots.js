@@ -341,8 +341,10 @@ var ramutils = (function (mod, Plotly) {
      * Plot classifier output distributions.
      * @param {Array} preStim - classifier output pre-stim
      * @param {Array} postStim - classifier output post-stim
+     * @param {String} plotName - hyphenated suffix of the <div> element
+       the plot will live in
      */
-    plotClassifierOutputDistros: function (preStim, postStim, name) {
+    plotClassifierOutputDistros: function (preStim, postStim, plotName) {
       let delta = [];
       for (let i in preStim) {
         delta.push(postStim[i] - preStim[i]);
@@ -373,9 +375,9 @@ var ramutils = (function (mod, Plotly) {
 
       let div_name='classifier-output-placeholder';
 
-      if(name){
-        div_name = div_name + '-' + name.toString();
-        layout.title = name;
+      if(plotName){
+        div_name = div_name + '-' + plotName.toString();
+        layout.title = plotName;
       }
 
       Plotly.plot(div_name, data, layout);
