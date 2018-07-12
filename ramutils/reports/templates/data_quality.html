@@ -1,7 +1,13 @@
 <div>
   <h2>Data quality metrics</h2>
   <figure>
+    {% if experiment == 'TICL_FR' %}
+    {% for phase in ['ENCODING','DISTRACT','RETRIEVAL'] %}
+    <div id="{{ 'classifier-output-placeholder-%s'%phase }}"></div>
+    {% endfor %}
+    {% else %}
     <div id="classifier-output-placeholder"></div>
+    {% endif %}
     {% if experiment == 'PS5' %}
     <figcaption>
       Raw power at the triggering electrode before and after stimulation and the
@@ -22,10 +28,12 @@
     const classifierOutput = plot_data["classifier_output"];
     {% if experiment == 'TICL_FR' %}
     for (phase in classifierOutput){
-        ramutils.plots.plotClassifierOutputDistros(classifierOutput[phase]['pre_stim'], classifierOutput[phase]['post_stim']);
+        ramutils.plots.plotClassifierOutputDistros(classifierOutput[phase]['pre_stim'],
+         classifierOutput[phase]['post_stim'], phase);
     }
     {% else %}
-    ramutils.plots.plotClassifierOutputDistros(classifierOutput['pre_stim'], classifierOutput['post_stim']);
+    ramutils.plots.plotClassifierOutputDistros(classifierOutput['pre_stim'],
+    classifierOutput['post_stim'],'');
     {% endif %}
   });
 </script>
