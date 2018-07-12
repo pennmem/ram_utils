@@ -233,7 +233,8 @@ class TestCreateReports:
         ('R1345D', 'FR5', [0]),
         ('R1364C', 'PS4_FR', [1]),
         ('R1001P', 'FR2', [0]),
-        ('R1384J', 'PS5_CatFR', [0])
+        ('R1384J', 'PS5_CatFR', [0]),
+        ('R1427T', 'TICL_FR',[0])
     ])
     def test_create_stim_session_report(self, subject, experiment, sessions,
                                         rerun, rhino_root, output_dest):
