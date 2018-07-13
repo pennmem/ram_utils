@@ -302,8 +302,8 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
 
         # Do a quick quality check here to see that the number of stim items
         # matches the size of the post_stim_prob_recall. We do not calculate
-        # post stim prob recall for FR2, so do not check in that case
-        if (experiment not in ['FR2', 'catFR2']):
+        # post stim prob recall for FR2 or TICL, so do not check in that case
+        if experiment not in ['FR2', 'catFR2', 'TICL_FR', 'TICL_catFR']:
             num_stim_items = FRStimSessionSummary.pre_stim_prob_recall([stim_session_summary])
             num_post_stim_prob_recall = FRStimSessionSummary.all_post_stim_prob_recall([stim_session_summary])
             if len(num_stim_items) != len(num_post_stim_prob_recall):

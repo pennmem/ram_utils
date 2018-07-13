@@ -44,13 +44,14 @@ def test_generate_fr1_report():
     with open('out.html', 'w') as rfile:
         rfile.write(report)
 
-def test_generate_ticl_report(rhino_root):
+def test_generate_ticl_report():
     event_file = resource_filename('ramutils.test.test_data',
                                    'ticl_fr_events.npz')
     ticl_events = np.rec.array(np.load(event_file)['events'])
     summary = TICLFRSessionSummary()
     summary.biomarker_events = extract_biomarker_information(ticl_events)
     summary.raw_events = ticl_events[['type', 'stim_list', 'phase']]
+    summary._events = ticl_events
     session_summaries = [summary]
     plot_data = json.dumps(
         {'classifier_output': {
