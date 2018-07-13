@@ -155,6 +155,11 @@ def make_report(subject, experiment, paths, joint_report=False,
                                             excluded_pairs, all_events,
                                             task_events, stim_data, paths,
                                             **kwargs)
+    elif "LocationSearch" in experiment:
+        data = generate_data_for_location_search_report(
+            subject, experiment, pairs_metadata_table, excluded_pairs,
+            all_events, paths
+        )
 
     else:
         data = generate_data_for_stim_report(subject, experiment, joint_report,
@@ -429,6 +434,30 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
                       retrained_classifier, behavioral_results)
 
     return data
+
+
+def generate_data_for_location_search_report(subject, experiment,
+                                             pairs_metadata_table,
+                                             excluded_pairs,
+                                             all_events,
+                                             paths):
+    connectivity = get_resting_connectivity(
+        subject, rootdir=paths.root
+    )
+    stim_events = all_events[all_events.type == 'STIM_ON']
+    pre_psd, post_psd, emask, cmask = get_psd_data(
+        stim_events, paths.root)
+
+    session_summaries = summarize_location_search_sessions(stim_events,
+                                                           pairs_metadata_table,
+                                                           excluded_pairs,
+                                                           connectivity,
+                                                           pre_psd,
+                                                           post_psd,
+                                                           emask,
+                                                           cmask
+                                                           )
+    return ReportData(session_summaries, *([None]*6))
 
 
 def generate_data_for_ps5_report(subject, experiment, joint_report,

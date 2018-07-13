@@ -20,7 +20,8 @@ from ramutils.exc import TooManySessionsError
 from ramutils.parameters import ExperimentParameters
 from ramutils.powers import save_power_plot, save_eeg_by_channel_plot
 from ramutils.utils import encode_file
-from ramutils.montage import generate_pairs_for_classifier
+from ramutils.montage import generate_pairs_for_classifier, get_distances
+from ramutils.thetamod import tmi
 
 from traitschema import Schema
 from traits.api import Array, ArrayOrNone, Float, Unicode, Bool, Bytes, CArray
@@ -41,6 +42,7 @@ __all__ = [
     'FR5SessionSummary',
     'TICLFRSessionSummary',
     'PSSessionSummary',
+    'LocationSearchSessionSummary',
     'MathSummary'
 ]
 
@@ -1003,16 +1005,20 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
     def stim_parameters(summaries):
         """ Returns a list of unique stimulation parameters used during the experiment """
         df = FRStimSessionSummary.stim_params_by_list(summaries)
+        return FRStimSessionSummary.aggregate_stim_params_over_list(df)
+
+    @staticmethod
+    def aggregate_stim_params_over_list(df):
         df['location'] = df['location'].replace(np.nan, '--')
-        stim_columns = ['stimAnodeTag', 'stimCathodeTag', 'location', 'amplitude',
+        stim_columns = ['stimAnodeTag', 'stimCathodeTag', 'location',
+                        'amplitude',
                         'stim_duration', 'pulse_freq']
         grouped = (df.groupby(by=(stim_columns + ['is_stim_list']))
-                     .agg({'is_stim_item': 'sum',
-                           'subject': 'count'})
-                     .rename(columns={'is_stim_item': 'n_stimulations',
-                                      'subject': 'n_trials'})
-                     .reset_index())
-
+                   .agg({'is_stim_item': 'sum',
+                         'subject': 'count'})
+                   .rename(columns={'is_stim_item': 'n_stimulations',
+                                    'subject': 'n_trials'})
+                   .reset_index())
         return list(grouped.T.to_dict().values())
 
     @staticmethod
@@ -1411,3 +1417,66 @@ class PSSessionSummary(SessionSummary):
                 location_summaries[loc_tag] = location_summary
 
         return location_summaries
+
+
+class LocationSearchSessionSummary(SessionSummary):
+
+    connectivity = Array
+    pre_psd = Array
+    post_psd = Array
+    bad_events_mask = CArray
+    bad_channels_mask = CArray
+    _regressions = ArrayOrNone
+
+
+    @property
+    def distmat(self):
+        return get_distances(self.bipolar_pairs)
+
+    @property
+    def stim_channel_idxs(self):
+        return tmi.get_stim_channels(self.bipolar_pairs,self.events)
+
+    @property
+    def regressions(self):
+        if self._regressions is None:
+            self._regresssions = tmi.regress_distance(self._pre_psd,self._post_psd,
+                                    self._connectivity, self.distmat,
+                                    self.stim_channel_idxs)
+        return self._regressions
+
+    @property
+    def tmi(self):
+        return tmi.compute_tmi(self.regressions)
+
+    @staticmethod
+    def stim_params_by_list(summaries):
+        stim_params_table = FRStimSessionSummary.stim_params_by_list(summaries)
+        stim_channel_labels = [summary.bipolar_pairs[idx]['label']
+                               for summary in summaries
+                               for idx in summary.stim_channel_idx
+                               ]
+        tmi_list = [tmi_val['zscore'] for summary in summaries
+                    for tmi_val in summary.tmi]
+        for (stim_channel,tmi_val) in zip(stim_channel_labels,tmi_list):
+            anode,cathode = stim_channel.split('-')
+            stim_params_table.loc[(stim_params_table.stimAnodeLabel==anode) &
+                                  (stim_params_table.stimCathodeLabel==cathode),
+            'tmi'] = tmi_val
+
+        return stim_params_table
+
+    @staticmethod
+    def stim_params(summaries):
+        df = LocationSearchSessionSummary.stim_params_by_list(summaries)
+        return FRStimSessionSummary.aggregate_stim_params_over_list(df)
+
+    def populate(self,events, bipolar_pairs, excluded_pairs,
+                 connectivity, pre_psd, post_psd, bad_events_mask, bad_channel_mask):
+        SessionSummary.populate(self, events,bipolar_pairs,excluded_pairs,
+                                None)
+        self.connectivity = connectivity
+        self.post_psd = post_psd
+        self.pre_psd = pre_psd
+        self.bad_channels_mask = bad_channel_mask
+        self.bad_events_mask = bad_events_mask

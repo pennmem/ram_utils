@@ -14,3 +14,4 @@ from .summary import *
 from .montage import *
 from .reports import *
 from .behavioral_analysis import *
+from .thetamod import *

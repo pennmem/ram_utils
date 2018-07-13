@@ -4,9 +4,7 @@ import mne
 import numpy as np
 import pandas as pd
 
-import cmlreaders
-from cmlreaders.readers.eeg import milliseconds_to_events, \
-    samples_to_milliseconds
+from cmlreaders.convert import milliseconds_to_events, samples_to_milliseconds
 
 __all__ = [
     'countdown_to_resting',
@@ -77,7 +75,7 @@ def countdown_to_resting(events, samplerate=1000):
     to_millis = functools.partial(samples_to_milliseconds,
                                   sample_rate=samplerate)
     msoffsets = []
-    eegfiles=  []
+    eegfiles = []
     for _, event in events.iterrows():
         msoffsets += [to_millis(event.eegoffset) + s * 1000 for s in (1, 4, 7)]
         eegfiles += [event.eegfile] * 3
@@ -110,6 +108,7 @@ def read_eeg_data(reader, events, reref=True):
     This assumes a countdown phase of at least 10 seconds in length.
 
     """
+    from ptsa.data.filters import ButterworthFilter
     if reref:
         scheme = reader.load('pairs').sort_values(by=['contact_1', 'contact_2'])
     else:
@@ -117,7 +116,9 @@ def read_eeg_data(reader, events, reref=True):
 
     eeg = reader.load_eeg(events=events, rel_start=0, rel_stop=1000,
                           scheme=scheme)
-
+    eeg.data = ButterworthFilter(time_series=eeg.to_ptsa(),
+                                 freq_range=[58.,62.], filt_type='stop', order=4).filter().data
+    eeg = eeg.resample(256.)
     return eeg
 
 
@@ -156,5 +157,4 @@ def get_resting_state_connectivity(array, samplerate):
     # Symmetrize average network
     mu = cons_rec
     mu_full = np.nansum(np.array([mu, mu.T]), 0)
-    mu_full[np.diag_indices_from(mu_full)] = np.finfo(mu_full.dtype).eps
     return mu_full

@@ -7,20 +7,68 @@ from cmlreaders import CMLReader, get_data_index
 from cmlreaders.timeseries import TimeSeries
 
 import ramutils.montage
-from ramutils.thetamod import connectivity, tmi, artifact
+import ramutils.events
 
-__all__ = ['compute_tmi']
+from ramutils.thetamod import connectivity, tmi, artifact
+from ramutils.exc import TooManySessionsError
+
+__all__ = ['get_resting_connectivity',
+           'get_psd_data',
+           'compute_tmi']
+
+
+@task(nout=4)
+def get_psd_data(stim_events, rootdir):
+    """
+
+    Parameters
+    ----------
+    stim_events: np.rec.array
+    rootdir: str
+
+    Returns
+    -------
+    pre_psd:
+        pre-stim power spectral density
+    post_psd:
+        post-stim power spectral density
+    bad_events_mask:
+        Boolean array indicating saturated events, as
+        determined by analysis of post-stim EEG
+    bad_channel_mask:
+        Boolean array indicating bad channels,
+    """
+    subject, experiment, sessions = ramutils.events.extract_event_metadata(
+        stim_events
+    )
+    reader = get_reader(subject,experiment,sessions[0],rootdir)
+    pre_eeg, post_eeg = (tmi.get_eeg(which, reader, stim_events)
+                         for which in ('pre', 'post'))
+    pre_psd = tmi.compute_psd(pre_eeg)
+    post_psd = tmi.compute_psd(post_eeg)
+    bad_events_mask = artifact.get_bad_events_mask(post_eeg.data,
+                                                    stim_events)
+
+    bad_channel_mask = artifact.get_channel_exclusion_mask(pre_eeg.data,
+                                                           post_eeg.data,
+                                                           pre_eeg.samplerate)
+
+    return pre_psd, post_psd, bad_events_mask, bad_channel_mask
 
 
 @task()
-def compute_tmi(subject: str, experiment: str, session: int,
+def compute_tmi(stim_events: np.ndarray, pairs,
                 rootdir: str):
 
-        reader = get_reader(subject, experiment, session, rootdir)
-        pairs = reader.load("pairs").sort_values(by=["contact_1",
-                                                     "contact_2"])
+        subject = ramutils.events.extract_subject(stim_events)
+        experiment = ramutils.events.extract_experiment_from_events(stim_events)
+        sessions = ramutils.events.extract_sessions(stim_events)
+        if len(sessions) != 1:
+            raise TooManySessionsError
 
-        stim_events = make_task(tmi.get_stim_events, reader)
+        session = sessions[0]
+
+        reader = get_reader(subject, experiment, session, rootdir)
         stim_channels = make_task(tmi.get_stim_channels,
                                   pairs, stim_events)
 
@@ -28,12 +76,12 @@ def compute_tmi(subject: str, experiment: str, session: int,
             make_task(tmi.get_eeg, which, reader, stim_events, cache=False)
             for which in ("pre", "post")
         ]
+        pre_psd = make_task(tmi.compute_psd, pre_eeg)
+        post_psd = make_task(tmi.compute_psd, post_eeg)
 
         bad_events_mask = make_task(artifact.get_bad_events_mask, post_eeg.data,
                                     stim_events)
 
-        pre_psd = make_task(tmi.compute_psd, pre_eeg)
-        post_psd = make_task(tmi.compute_psd, post_eeg)
         distmat = make_task(ramutils.montage.get_distances, pairs)
         conn = make_task(get_resting_connectivity)
 
@@ -70,7 +118,7 @@ def get_reader(subject: Optional[str] = None,
     return CMLReader(subject, experiment, session,
                      montage=montage, rootdir=rootdir)
 
-
+@task()
 def get_resting_connectivity(subject, rootdir) -> np.ndarray:
     """Compute resting state connectivity."""
     df = get_data_index(rootdir=rootdir)
