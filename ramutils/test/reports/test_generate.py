@@ -44,6 +44,7 @@ def test_generate_fr1_report():
     with open('out.html', 'w') as rfile:
         rfile.write(report)
 
+@pytest.mark.rhino
 def test_generate_ticl_report():
     event_file = resource_filename('ramutils.test.test_data',
                                    'ticl_fr_events.npz')
