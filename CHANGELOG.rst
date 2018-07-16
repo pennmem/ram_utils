@@ -1,12 +1,14 @@
 Changes
 =======
 
-Version Next
-------------
+Version 2.2.1
+-------------
 
 * Made `ramutils.test` executable (#225)
 * Updated CI testing to always build and use the conda package (#227)
 * Added support for generating LocationSearch experiment configs (#228)
+* Added support for generating TICL_FR reports
+* Now using PTSA v2.0.0 (#237)
 
 
 Version 2.2.0

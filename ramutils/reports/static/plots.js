@@ -341,8 +341,10 @@ var ramutils = (function (mod, Plotly) {
      * Plot classifier output distributions.
      * @param {Array} preStim - classifier output pre-stim
      * @param {Array} postStim - classifier output post-stim
+     * @param {String} plotName - hyphenated suffix of the <div> element
+       the plot will live in
      */
-    plotClassifierOutputDistros: function (preStim, postStim) {
+    plotClassifierOutputDistros: function (preStim, postStim, plotName) {
       let delta = [];
       for (let i in preStim) {
         delta.push(postStim[i] - preStim[i]);
@@ -366,12 +368,19 @@ var ramutils = (function (mod, Plotly) {
         }
       ];
 
-      const layout = {
+      let layout = {
         // barmode: 'overlay',
         yaxis: {title: 'Frequency'}
       };
 
-      Plotly.plot('classifier-output-placeholder', data, layout);
+      let div_name='classifier-output-placeholder';
+
+      if(plotName){
+        div_name = div_name + '-' + plotName.toString();
+        layout.title = plotName;
+      }
+
+      Plotly.plot(div_name, data, layout);
     },
     /** Plot the feature matrix
     * @params {Array} features

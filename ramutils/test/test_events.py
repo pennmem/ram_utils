@@ -9,6 +9,7 @@ from sklearn.externals import joblib
 from ramutils.parameters import FRParameters
 from ramutils.retrieval import create_matched_events
 from ramutils.utils import load_event_test_data
+import numpy.testing
 
 datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
 
@@ -63,6 +64,22 @@ class TestEvents:
             assert n_sessions == 1
 
         return
+
+    def test_add_list_phase_info(self):
+        fr_events = load_events(self.subject, 'FR1', rootdir=self.rootdir)
+
+        fr_events = add_list_phase_info(fr_events)
+
+        np.testing.assert_allclose(
+            fr_events[fr_events.type == 'WORD'].list_phase == 'ENCODING',
+            True)
+        np.testing.assert_allclose(
+            fr_events[fr_events.type == 'PROB'].list_phase == 'DISTRACT',
+            True)
+
+        np.testing.assert_allclose(
+            fr_events[fr_events.type == 'REC_WORD'].list_phase == 'RETRIEVAL',
+            True)
 
     def test_concatenate_events_for_single_experiment(self):
         fr_events = load_events(self.subject, 'FR1', rootdir=self.rootdir)
@@ -404,3 +421,21 @@ class TestEvents:
                 current = np.nan_to_num(current_repetitions_dict[subject])
                 old = np.nan_to_num(ratios)
                 assert np.allclose(current, old)
+
+
+def test_extract_biomarker():
+    events = np.rec.array(
+        np.load(datafile('ticl_fr_events.npz'))['events']
+    )
+    biomarker_events = events[events.type=='BIOMARKER']
+    biomarker_events_extracted = extract_biomarker_information(events)
+
+    numpy.testing.assert_equal( biomarker_events.stim_params.position,
+                  biomarker_events_extracted.position)
+    numpy.testing.assert_equal(biomarker_events.stim_params.id,
+                               biomarker_events_extracted.id)
+    numpy.testing.assert_equal(biomarker_events.stim_params.biomarker_value,
+                               biomarker_events_extracted.biomarker_value
+    )
+    numpy.testing.assert_equal(biomarker_events.phase,
+                               biomarker_events_extracted.phase)

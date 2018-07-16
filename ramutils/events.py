@@ -25,6 +25,7 @@ from ramutils.utils import extract_subject_montage, get_completed_sessions, extr
 from ramutils.exc import *
 from ramutils.retrieval import create_matched_events,append_fields
 
+
 def load_events(subject, experiment, file_type='all_events',
                 sessions=None, rootdir='/'):
     """ Load events for a specific subject and experiment. If no events are
@@ -175,12 +176,13 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
     # because the columns to subset differs by task
     if "FR" in experiment:
         events, stim_params = separate_stim_events(events)
-        events = insert_baseline_retrieval_events(events,
-                                                  start_time,
-                                                  end_time,
-                                                  duration,
-                                                  pre,
-                                                  post)
+        if "TICL" not in experiment:
+            events = insert_baseline_retrieval_events(events,
+                                                      start_time,
+                                                      end_time,
+                                                      duration,
+                                                      pre,
+                                                      post)
         events = remove_intrusions(events)
         events = update_recall_outcome_for_retrieval_events(events)
         events = normalize_fr_events(events)
@@ -366,8 +368,10 @@ def dataframe_to_recarray(dataframe, dtypes):
     """
         Convert from dataframe to recarray maintaining the original datatypes
     """
+    names = [dt[0] for dt in dtypes]
     events = dataframe.to_records(index=False)
-    events = events.astype(dtypes)
+    # Make sure that all the columns are in the correct order
+    events = events[names].astype(dtypes)
     events.dtype.names = [str(name) for name in events.dtype.names]
     return events
 
@@ -1221,6 +1225,55 @@ def get_stim_list_mask(events):
     return stim_list_mask
 
 
+def add_list_phase_info(events):
+    """
+    Adds a list_phase field to an event structure that says which
+    phase of the list (ENCODING, DISTRACT, RETRIEVAL,...) that event is
+    part of.
+
+    Parameters
+    ----------
+    events: np.recarray
+        All event or task events
+
+    """
+    if 'list_phase' in events.dtype.names:
+        return events
+
+    dtype_desc = events.type.dtype.str
+
+    phases = np.empty(len(events), dtype=dtype_desc)
+
+    lstphases = []
+    for ev in events:
+        if ev['type'].endswith('_START'):
+            lstphases.append(ev['type'].rpartition('_')[0])
+        elif 'TRIAL' in ev['type']:
+            lstphases.append(ev['type'].replace('TRIAL','ENCODING'))
+        else:
+            lstphases.append(lstphases[-1])
+    phases[:] = lstphases
+
+    new_events = append_fields(events, [('list_phase', dtype_desc)])
+    new_events['list_phase'] = phases
+
+    # Certain special cases for older experiments
+
+    word_events = new_events[(new_events.type == 'WORD')
+                             | (new_events.type == 'PRACTICE_WORD')]
+    word_events.list_phase = [t.replace('WORD', 'ENCODING')
+                              for t in word_events.type]
+    new_events[(new_events.type == 'WORD')
+               | (new_events.type == 'PRACTICE_WORD')] = word_events
+
+    retrieval_events = new_events[(new_events.list_phase == 'REC')
+                                  | (new_events.type == 'REC_WORD') ]
+    retrieval_events.list_phase = 'RETRIEVAL'
+    new_events[(new_events.list_phase == 'REC')
+               | (new_events.type == 'REC_WORD')] = retrieval_events
+    return new_events
+
+
 def extract_stim_information(all_events, task_events):
     """ Identify stim items, post stim items, and stimulation parameters
 
@@ -1350,6 +1403,20 @@ def extract_stim_information(all_events, task_events):
     stim_df = pd.DataFrame.from_dict(stim_param_data)
 
     return is_stim_item, is_post_stim_item, stim_df
+
+def extract_biomarker_information(events):
+    biomarker_events = events[events['type']=='BIOMARKER']
+    biomarker_df = pd.DataFrame(columns=['position', 'phase',
+                                        'biomarker_value', 'id'])
+    biomarker_df['phase'] = biomarker_events['phase']
+    biomarker_df['position'] = biomarker_events['stim_params']['position']
+    biomarker_df['biomarker_value'] = biomarker_events['stim_params']['biomarker_value']
+    biomarker_df['id'] = biomarker_events['stim_params']['id']
+    biomarker_dtypes = [('position', 'U64'),
+                        ('phase', 'U64'),
+                        ('biomarker_value', float),
+                        ('id', 'U64')]
+    return dataframe_to_recarray(biomarker_df,biomarker_dtypes)
 
 
 def correct_fr2_stim_item_identification(stim_param_df):

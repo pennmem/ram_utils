@@ -1,0 +1,26 @@
+{% extends 'stim_recall_analysis.html' %}
+{% block stim_recall_plot %}
+    <h5> Number of stimulation periods by task phase</h5>
+    <table id="stim_count_table" class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <td> Session Number </td>
+                <td> Encoding </td>
+                <td> Distractor </td>
+                <td> Retrieval </td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for summary in summaries %}
+            <tr>
+                <td> {{ summary.session_number }} </td>
+                <td> {{ summary.nstims("ENCODING") }}</td>
+                <td> {{ summary.nstims("DISTRACT") }} </td>
+                <td> {{ summary.nstims("RETRIEVAL") }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+{% block recall_diff_plot %}
+{% endblock %}

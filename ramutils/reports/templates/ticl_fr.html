@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}
+  {{ subject }} RAM TICL_FR Report
+{% endblock %}
+
+{% block report %}
+{% include 'stim_summary.html' %}
+{% include 'session_summary.html' %}
+{% include 'math_summary.html' %}
+
+{% include 'serialpos_curve.html' %}
+{% include 'classifier.html' %}
+{% include 'ticl_stim_recall_analysis.html' %}
+{% include 'hmm.html' %}
+{% include 'data_quality.html' %}
+{% include 'post_stim_eeg_plot.html' %}
+{% endblock %}
+<o></o>

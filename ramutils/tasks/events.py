@@ -1,7 +1,7 @@
 """Partial pipelines for processing events that is used by full pipelines."""
 
 from ramutils.events import load_events, clean_events, select_word_events, \
-    concatenate_events_across_experiments
+    concatenate_events_across_experiments, add_list_phase_info
 from ramutils.events import get_word_event_mask as get_word_event_mask_core
 from ramutils.events import get_repetition_ratio_dict as \
     get_repetition_ratio_dict_core
@@ -161,6 +161,8 @@ def build_test_data(subject, experiment, paths, joint_report, sessions=None,
 
     if len(all_events) == 0:
         raise RuntimeError('No events found')
+    all_events, task_events = [add_list_phase_info(evs) for evs in
+                               (all_events, task_events)]
 
     return all_events, task_events, stim_params
 

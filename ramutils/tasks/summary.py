@@ -7,11 +7,13 @@ import numpy as np
 import pandas as pd
 
 from ._wrapper import task
-from ramutils.events import validate_single_experiment, select_math_events, \
-    extract_experiment_from_events, extract_sessions, select_session_events, \
-    select_stim_table_events, extract_stim_information, \
-    select_encoding_events, extract_event_metadata, dataframe_to_recarray, \
-    get_encoding_mask, correct_fr2_stim_item_identification
+from ramutils.events import (
+    validate_single_experiment, select_math_events,
+    extract_experiment_from_events, extract_sessions, select_session_events,
+    select_stim_table_events, extract_stim_information,
+    select_encoding_events, extract_event_metadata, dataframe_to_recarray,
+    get_encoding_mask, correct_fr2_stim_item_identification,
+    extract_biomarker_information)
 from ramutils.exc import *
 from ramutils.log import get_logger
 from ramutils.reports.summary import *
@@ -242,7 +244,7 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
         stim_param_df = stim_param_df.drop_duplicates(
             subset=['session', 'list'])
         stim_df = stim_df.merge(
-            stim_param_df, on=['session', 'list'], how='left')
+            stim_param_df, on=['session', 'list', 'item_name'], how='left')
 
         # Add region from pairs_data. TODO: This won't scale to multi-site stim
         stim_df['label'] = (stim_df['stimAnodeTag'] + "-" +
@@ -280,6 +282,19 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
                 stim_events, bipolar_pairs,
                 excluded_pairs, trigger_output, raw_events=all_session_events,
                 post_stim_prob_recall=post_stim_trigger_output)
+        elif experiment == "TICL_FR":
+            biomarker_events = extract_biomarker_information(
+                all_session_stim_events)
+            stim_events = dataframe_to_recarray(stim_df,expected_dtypes)
+            stim_session_summary = TICLFRSessionSummary()
+            stim_session_summary.populate(
+                stim_events, bipolar_pairs,
+                excluded_pairs, trigger_output,
+                raw_events=all_session_events,
+                biomarker_events=biomarker_events,
+                post_stim_eeg=post_stim_eeg,
+            )
+
         else:
             raise UnsupportedExperimentError('Experiment not supported')
 
@@ -287,8 +302,8 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
 
         # Do a quick quality check here to see that the number of stim items
         # matches the size of the post_stim_prob_recall. We do not calculate
-        # post stim prob recall for FR2, so do not check in that case
-        if (experiment not in ['FR2', 'catFR2']):
+        # post stim prob recall for FR2 or TICL, so do not check in that case
+        if experiment not in ['FR2', 'catFR2', 'TICL_FR', 'TICL_catFR']:
             num_stim_items = FRStimSessionSummary.pre_stim_prob_recall([stim_session_summary])
             num_post_stim_prob_recall = FRStimSessionSummary.all_post_stim_prob_recall([stim_session_summary])
             if len(num_stim_items) != len(num_post_stim_prob_recall):

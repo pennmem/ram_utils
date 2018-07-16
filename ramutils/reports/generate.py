@@ -4,7 +4,6 @@ from datetime import datetime
 import json
 import os.path as osp
 import random
-import itertools
 
 from itertools import compress
 from jinja2 import Environment, PackageLoader
@@ -12,7 +11,8 @@ import numpy as np
 from pkg_resources import resource_listdir, resource_string
 
 from ramutils import __version__
-from ramutils.reports.summary import FRSessionSummary, MathSummary, FRStimSessionSummary
+from ramutils.reports.summary import (FRSessionSummary, MathSummary,
+                                      FRStimSessionSummary, TICLFRSessionSummary)
 from ramutils.events import extract_experiment_from_events, extract_subject
 from ramutils.utils import extract_experiment_series
 
@@ -247,10 +247,19 @@ class ReportGenerator(object):
                                             for summary in self.session_summaries]
 
         if biomarker_delta:
-            plot_data['classifier_output'] = {
-                'pre_stim': FRStimSessionSummary.pre_stim_prob_recall(self.session_summaries),
-                'post_stim': FRStimSessionSummary.all_post_stim_prob_recall(self.session_summaries)
-            }
+            if self.experiment == 'TICL_FR':
+                plot_data['classifier_output'] = {
+                    phase: {
+                        'pre_stim':TICLFRSessionSummary.pre_stim_prob_recall(self.session_summaries,phase),
+                        'post_stim': TICLFRSessionSummary.all_post_stim_prob_recall(self.session_summaries,phase)
+                    }
+                    for phase in ['ENCODING', 'DISTRACT', 'RETRIEVAL']
+                }
+            else:
+                plot_data['classifier_output'] = {
+                    'pre_stim': FRStimSessionSummary.pre_stim_prob_recall(self.session_summaries),
+                    'post_stim': FRStimSessionSummary.all_post_stim_prob_recall(self.session_summaries)
+                }
 
         if classifier:
             plot_data['roc'] = {
@@ -278,6 +287,9 @@ class ReportGenerator(object):
 
         elif all(['PS5' in exp for exp in self.experiments]):
             return self.generate_ps5_report()
+
+        elif all(['TICL_FR' in exp for exp in self.experiments]):
+            return self.generate_closed_loop_fr_report('TICL_FR')
 
         elif series == '1':
             joint = False
@@ -364,11 +376,11 @@ class ReportGenerator(object):
         )
 
     def generate_closed_loop_fr_report(self, experiment):
-        """ Generate an FR5 report
+        """ Generate an FR5-like report
 
         Returns
         -------
-        Rendered FR5 report as a string.
+        Rendered FR5-like report as a string.
 
         """
         return self._render(

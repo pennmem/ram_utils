@@ -39,6 +39,7 @@ __all__ = [
     'CatFRSessionSummary',
     'FRStimSessionSummary',
     'FR5SessionSummary',
+    'TICLFRSessionSummary',
     'PSSessionSummary',
     'MathSummary'
 ]
@@ -913,14 +914,14 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         return combined_df
 
     @staticmethod
-    def all_post_stim_prob_recall(summaries):
+    def all_post_stim_prob_recall(summaries, phase=None):
         post_stim_prob_recall = [
             summary.post_stim_prob_recall for summary in summaries]
         post_stim_prob_recall = np.concatenate(post_stim_prob_recall).tolist()
         return post_stim_prob_recall
 
     @staticmethod
-    def pre_stim_prob_recall(summaries):
+    def pre_stim_prob_recall(summaries, phase=None):
         """ Classifier output in the pre-stim period for items that were eventually stimulated """
         df = FRStimSessionSummary.combine_sessions(summaries)
         pre_stim_probs = df[df['is_stim_item'] ==
@@ -1168,6 +1169,7 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         return delta_recall
 
 
+
 class FR5SessionSummary(FRStimSessionSummary):
     """ FR5-specific summary """
 
@@ -1182,6 +1184,86 @@ class FR5SessionSummary(FRStimSessionSummary):
                                       raw_events=raw_events,
                                       post_stim_prob_recall=post_stim_prob_recall,
                                       model_metadata=model_metadata)
+
+
+class TICLFRSessionSummary(FRStimSessionSummary):
+
+    biomarker_events = ArrayOrNone
+
+    def populate(self, events, bipolar_pairs,
+                 excluded_pairs, normalized_powers, post_stim_prob_recall=None,
+                 raw_events=None, model_metadata={}, post_stim_eeg=None,
+                 biomarker_events=None):
+
+        FRStimSessionSummary.populate(self, events, bipolar_pairs,
+                     excluded_pairs, normalized_powers,
+                     post_stim_prob_recall,
+                     raw_events, model_metadata, post_stim_eeg,
+                     )
+        self.biomarker_events = biomarker_events
+
+    def nstims(self, task_phase):
+        """
+        Number of stim events within t
+        :param task_phase:
+        :return:
+        """
+        if self.raw_events is None:
+            return  0
+
+        return (self.raw_events[self.raw_events.type=='STIM_ON'
+                ].phase == task_phase).sum()
+
+    def classifier_output(self, phase, position):
+        """
+
+        :param phase: either "ENCODING", "DISTRACT", or "RETRIEVAL"
+        :param position: either "pre" or "post"
+        :return:
+        """
+        biomarker_events = self.biomarker_events[
+            self.biomarker_events['biomarker_value'] >= 0
+            ]
+
+        in_phase = biomarker_events['phase'] == phase
+        this_position = biomarker_events['position'] == position
+
+        if position == 'post':
+            return biomarker_events[in_phase & this_position]['biomarker_value']
+        else: # Only want """real""" pre-stim events, i.e. ones with a matching
+              # post-stim event
+            ids = biomarker_events[in_phase & this_position]['id']
+            has_match = np.in1d(ids,
+                                biomarker_events[~this_position
+                                ]['id'])
+            return biomarker_events[
+                (in_phase & this_position)
+            ][has_match]['biomarker_value']
+
+    @staticmethod
+    def pre_stim_prob_recall(summaries, phase=None):
+        if phase is None:
+            phases = ['ENCODING', 'DISTRACT', 'RETRIEVAL']
+        else:
+            phases = [phase]
+
+        return np.concatenate([
+            summary.classifier_output(phase_, 'pre')
+            for summary in summaries for phase_ in phases
+        ]).tolist()
+
+    @staticmethod
+    def all_post_stim_prob_recall(summaries, phase=None):
+        if phase is None:
+            phases = ['ENCODING', 'DISTRACT', 'RETRIEVAL']
+        else:
+            phases = [phase]
+
+        return np.concatenate([
+                                  summary.classifier_output(phase_, 'post')
+                                  for summary in summaries
+                                  for phase_ in phases
+                              ]).tolist()
 
 
 class PSSessionSummary(SessionSummary):

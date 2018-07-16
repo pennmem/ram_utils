@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from ptsa.data.filters import (
     MonopolarToBipolarMapper,
-    MorletWaveletFilterCpp
+    MorletWaveletFilter
 )
 from ptsa.data.readers import EEGReader
 from scipy.stats import zscore, ttest_ind
@@ -47,7 +47,7 @@ def compute_single_session_powers(session, all_events, start_time, end_time,
                        order=filt_order)
     with timer("Total wavelet decomposition time: %f s"):
         eeg.data = np.ascontiguousarray(eeg.data)
-        wavelet_filter = MorletWaveletFilterCpp(time_series=eeg,
+        wavelet_filter = MorletWaveletFilter(time_series=eeg,
                                                 freqs=freqs,
                                                 output='power',
                                                 width=width,

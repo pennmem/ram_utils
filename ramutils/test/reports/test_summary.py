@@ -12,6 +12,7 @@ from traits.api import ListInt, ListFloat, ListBool
 
 from ramutils.reports.summary import *
 from ramutils.tasks.events import build_ps_data
+from ramutils.events import  extract_biomarker_information
 datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
 
 
@@ -22,6 +23,12 @@ def fr5_events():
     events = np.rec.array(np.load(filename)['events'])
     return events[events.session == 0]
 
+@pytest.fixture(scope='session')
+def ticlfr_events():
+    """TICL_FR events for R1427T"""
+    filename = datafile('ticl_fr_events.npz')
+    events = np.rec.array(np.load(filename)['events'])
+    return events
 
 @pytest.fixture(scope='session')
 def math_events():
@@ -233,16 +240,6 @@ class TestStimSessionSummary:
         assert len(df[df.phase == 'NON-STIM']) == 72
 
 
-class TestFRStimSessionSummary:
-    @pytest.mark.skip
-    def test_num_nonstim_lists(self, fr5_events, bipolar_pairs,
-                               excluded_pairs, normalized_powers):
-        summary = FRStimSessionSummary()
-        summary.populate(fr5_events, bipolar_pairs,
-                         excluded_pairs, normalized_powers)
-        assert summary.num_nonstim_lists == 2
-
-
 class TestClassifierSummary:
     @classmethod
     def setup_class(cls):
@@ -310,6 +307,47 @@ class TestStimSessionSummary:
     def setup_class(cls):
         cls.sample_summary_table = pd.read_csv(datafile(
             "/input/summaries/sample_stim_session_summary.csv"))
+
+
+class TestTiclFRSessionSummary:
+    @classmethod
+    def setup_class(cls):
+        cls.events = ticlfr_events()
+        cls.sample_summary = TICLFRSessionSummary()
+        cls.sample_summary.raw_events = cls.events
+        cls.sample_summary.biomarker_events = extract_biomarker_information(
+            cls.events)
+
+    @pytest.mark.parametrize("phase", ["ENCODING", "DISTRACT", "RETRIEVAL"])
+    def test_nstims(self, phase):
+        assert self.sample_summary.nstims(phase) > 0
+
+    @pytest.mark.parametrize("phase", ["ENCODING", "DISTRACT", "RETRIEVAL"])
+    @pytest.mark.parametrize("position", ["pre", "post"])
+    def test_classifier_output(self,phase, position):
+        output_list = self.sample_summary.classifier_output(phase,position)
+        assert len(output_list) > 0
+        assert all(x >= 0 for x in output_list)
+
+    @pytest.mark.parametrize("phase", ["ENCODING", "DISTRACT", "RETRIEVAL", None])
+    def test_pre_stim_prob_recall(self, phase):
+        output_list = TICLFRSessionSummary.pre_stim_prob_recall(
+            [self.sample_summary], phase)
+        assert len(output_list) > 0
+        assert all(x >= 0 for x in output_list)
+        assert len(output_list) == len(TICLFRSessionSummary.all_post_stim_prob_recall(
+            [self.sample_summary], phase
+        ))
+
+    @pytest.mark.parametrize("phase",
+                             ["ENCODING", "DISTRACT", "RETRIEVAL", None])
+    def test_post_stim_prob_recall(self,phase):
+        output_list = TICLFRSessionSummary.all_post_stim_prob_recall(
+            [self.sample_summary], phase
+        )
+
+        assert len(output_list) > 0
+        assert all(x >= 0 for x in output_list)
 
 
 class TestFRStimSessionSummary:
