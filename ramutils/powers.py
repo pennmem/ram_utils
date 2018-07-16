@@ -47,14 +47,14 @@ def compute_single_session_powers(session, all_events, start_time, end_time,
                        order=filt_order)
     with timer("Total wavelet decomposition time: %f s"):
         eeg.data = np.ascontiguousarray(eeg.data)
-        wavelet_filter = MorletWaveletFilter(time_series=eeg,
+        wavelet_filter = MorletWaveletFilter(timeseries=eeg,
                                                 freqs=freqs,
                                                 output='power',
                                                 width=width,
                                                 cpus=25)  # FIXME: why 25?
         # At this point, pow mat has dimensions: frequency, bipolar_pairs,
         # events, time
-        sess_pow_mat, phase_mat = wavelet_filter.filter()
+        sess_pow_mat = wavelet_filter.filter()
 
     sess_pow_mat = sess_pow_mat.remove_buffer(buffer_time).data + np.finfo(
         np.float).eps/2.
@@ -124,7 +124,7 @@ def load_single_session_eeg(session, all_events, start_time, end_time, bipolar_p
             updated_events = updated_events[ev_order]
             updated_events = np.rec.array(updated_events)
 
-        eeg = MonopolarToBipolarMapper(time_series=eeg,
+        eeg = MonopolarToBipolarMapper(timeseries=eeg,
                                        bipolar_pairs=bipolar_pairs).filter()
     return eeg, updated_events
 
