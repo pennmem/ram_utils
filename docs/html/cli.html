@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Command-line usage &mdash; Ramutils 2.2.0 documentation</title>
+  <title>Command-line usage &mdash; Ramutils 2.2.1 documentation</title>
   
 
   
@@ -24,27 +24,19 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Ramutils 2.2.0 documentation" href="index.html"/>
-        <link rel="next" title="Miscellaneous utilities" href="misc.html"/>
-        <link rel="prev" title="Pipelines" href="pipeline.html"/> 
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Miscellaneous utilities" href="misc.html" />
+    <link rel="prev" title="Pipelines" href="pipeline.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -118,7 +110,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Ramutils</a>
@@ -126,9 +118,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -194,13 +187,13 @@
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">For generating configuration files in production, always use the
-<code class="docutils literal"><span class="pre">RAM_clinical</span></code> account on rhino.</p>
+<code class="docutils literal notranslate"><span class="pre">RAM_clinical</span></code> account on rhino.</p>
 </div>
 <div class="section" id="ramulator-configuration-generation">
 <h2>Ramulator configuration generation<a class="headerlink" href="#ramulator-configuration-generation" title="Permalink to this headline">¶</a></h2>
 <p>Ramulator experiment configuration files for stimulation experiments are
-generated via the <code class="docutils literal"><span class="pre">ramulator-conf</span></code> script:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">ramulator</span><span class="o">-</span><span class="n">conf</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">root</span> <span class="n">ROOT</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">dest</span> <span class="n">DEST</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">cachedir</span> <span class="n">CACHEDIR</span><span class="p">]</span>
+generated via the <code class="docutils literal notranslate"><span class="pre">ramulator-conf</span></code> script:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">ramulator</span><span class="o">-</span><span class="n">conf</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">root</span> <span class="n">ROOT</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">dest</span> <span class="n">DEST</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">cachedir</span> <span class="n">CACHEDIR</span><span class="p">]</span>
                       <span class="o">--</span><span class="n">subject</span> <span class="n">SUBJECT</span> <span class="p">[</span><span class="o">--</span><span class="n">use</span><span class="o">-</span><span class="n">cached</span><span class="p">]</span> <span class="o">--</span><span class="n">experiment</span>
                       <span class="p">{</span><span class="n">AmplitudeDetermination</span><span class="p">,</span><span class="n">PS4_FR5</span><span class="p">,</span><span class="n">PS4_CatFR5</span><span class="p">,</span><span class="n">PS5_FR</span><span class="p">,</span><span class="n">PS5_CatFR</span><span class="p">,</span><span class="n">FR3</span><span class="p">,</span><span class="n">CatFR3</span><span class="p">,</span><span class="n">PAL3</span><span class="p">,</span><span class="n">FR5</span><span class="p">,</span><span class="n">CatFR5</span><span class="p">,</span><span class="n">PAL5</span><span class="p">,</span><span class="n">FR6</span><span class="p">,</span><span class="n">CatFR6</span><span class="p">,</span><span class="n">FR1</span><span class="p">,</span><span class="n">CatFR1</span><span class="p">,</span><span class="n">PAL1</span><span class="p">,</span><span class="n">DBOY1</span><span class="p">}</span>
                       <span class="p">[</span><span class="o">--</span><span class="n">vispath</span> <span class="n">VISPATH</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">version</span><span class="p">]</span>
@@ -264,21 +257,21 @@ generated via the <code class="docutils literal"><span class="pre">ramulator-con
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">All paths are relative to the root path <em>except</em> for <code class="docutils literal"><span class="pre">cachedir</span></code>. This is
+<p class="last">All paths are relative to the root path <em>except</em> for <code class="docutils literal notranslate"><span class="pre">cachedir</span></code>. This is
 treated differently due to an issue on macOS and sshfs-mounted filesystems.</p>
 </div>
 <p>Anodes, cathodes, and amplitudes must all be specified in the same order. In
-other words, if using stim channels <code class="docutils literal"><span class="pre">LAD8_LAD9</span></code>, <code class="docutils literal"><span class="pre">LAH1_LAH2</span></code> with amplitudes
+other words, if using stim channels <code class="docutils literal notranslate"><span class="pre">LAD8_LAD9</span></code>, <code class="docutils literal notranslate"><span class="pre">LAH1_LAH2</span></code> with amplitudes
 0.5 mA, the relevant options would be given as:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">--</span><span class="n">anodes</span> <span class="n">LAD8</span> <span class="n">LAH1</span> <span class="o">--</span><span class="n">cathodes</span> <span class="n">LAD9</span> <span class="n">LAH2</span> <span class="o">--</span><span class="n">target</span><span class="o">-</span><span class="n">amplitudes</span> <span class="mf">0.5</span> <span class="mf">0.5</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">--</span><span class="n">anodes</span> <span class="n">LAD8</span> <span class="n">LAH1</span> <span class="o">--</span><span class="n">cathodes</span> <span class="n">LAD9</span> <span class="n">LAH2</span> <span class="o">--</span><span class="n">target</span><span class="o">-</span><span class="n">amplitudes</span> <span class="mf">0.5</span> <span class="mf">0.5</span>
 </pre></div>
 </div>
 <div class="section" id="specifying-surface-areas">
 <h3>Specifying surface areas<a class="headerlink" href="#specifying-surface-areas" title="Permalink to this headline">¶</a></h3>
-<p>Surface areas for contacts are defined in an <code class="docutils literal"><span class="pre">area.txt</span></code> file which by default
-should live in the same directory as <code class="docutils literal"><span class="pre">jacksheet.txt</span></code> (for example,
-<code class="docutils literal"><span class="pre">/data/eeg/R1374T/docs</span></code> on <code class="docutils literal"><span class="pre">rhino</span></code>). The format for this file is:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">lead</span> <span class="n">label</span> <span class="mi">1</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">surface</span> <span class="n">area</span> <span class="ow">in</span> <span class="n">mm</span><span class="o">**</span><span class="mi">2</span><span class="o">&gt;</span>
+<p>Surface areas for contacts are defined in an <code class="docutils literal notranslate"><span class="pre">area.txt</span></code> file which by default
+should live in the same directory as <code class="docutils literal notranslate"><span class="pre">jacksheet.txt</span></code> (for example,
+<code class="docutils literal notranslate"><span class="pre">/data/eeg/R1374T/docs</span></code> on <code class="docutils literal notranslate"><span class="pre">rhino</span></code>). The format for this file is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">lead</span> <span class="n">label</span> <span class="mi">1</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">surface</span> <span class="n">area</span> <span class="ow">in</span> <span class="n">mm</span><span class="o">**</span><span class="mi">2</span><span class="o">&gt;</span>
 <span class="o">&lt;</span><span class="n">lead</span> <span class="n">label</span> <span class="mi">2</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">surface</span> <span class="n">area</span> <span class="ow">in</span> <span class="n">mm</span><span class="o">**</span><span class="mi">2</span><span class="o">&gt;</span>
 <span class="o">&lt;...&gt;</span>
 </pre></div>
@@ -287,8 +280,8 @@ should live in the same directory as <code class="docutils literal"><span class=
 This assumes that contacts are labeled in such a way that a label is unique for
 a given sized contact. In other words, for combined macro/micro contacts, the
 macro contacts <strong>must</strong> be labeled differently than the micro contacts. An
-example <code class="docutils literal"><span class="pre">area.txt</span></code> file for subject R1347D would look like:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">ROFD</span> <span class="mf">6.1839</span>
+example <code class="docutils literal notranslate"><span class="pre">area.txt</span></code> file for subject R1347D would look like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ROFD</span> <span class="mf">6.1839</span>
 <span class="n">LOFD</span> <span class="mf">6.1839</span>
 <span class="n">RAD</span> <span class="mf">6.1839</span>
 <span class="n">LAD</span> <span class="mf">6.1839</span>
@@ -308,15 +301,15 @@ example <code class="docutils literal"><span class="pre">area.txt</span></code> 
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">Alternatively in this case, the <code class="docutils literal"><span class="pre">--default-surface-area</span></code> (or <code class="docutils literal"><span class="pre">-A</span></code>)
+<p class="last">Alternatively in this case, the <code class="docutils literal notranslate"><span class="pre">--default-surface-area</span></code> (or <code class="docutils literal notranslate"><span class="pre">-A</span></code>)
 option could be used since all contacts share the same surface area.</p>
 </div>
 <p>The logic for determining what to use for surface areas is as follows:</p>
 <ul class="simple">
-<li>Use the file specified with the <code class="docutils literal"><span class="pre">--area-file</span></code> option if given</li>
+<li>Use the file specified with the <code class="docutils literal notranslate"><span class="pre">--area-file</span></code> option if given</li>
 <li>If not found, use the default surface area (0.001 if not specified, otherwise
-the value specified with the <code class="docutils literal"><span class="pre">--default-surface-area</span></code> option)</li>
-<li>If no <code class="docutils literal"><span class="pre">--area-file</span></code> option is given, try to load <code class="docutils literal"><span class="pre">area.txt</span></code> from the docs
+the value specified with the <code class="docutils literal notranslate"><span class="pre">--default-surface-area</span></code> option)</li>
+<li>If no <code class="docutils literal notranslate"><span class="pre">--area-file</span></code> option is given, try to load <code class="docutils literal notranslate"><span class="pre">area.txt</span></code> from the docs
 directory</li>
 <li>If no area file is found, use the default surface area as described above</li>
 </ul>
@@ -331,13 +324,13 @@ dimension is 170 but corresponding boolean dimension is 168</div></blockquote>
 <p>This is likely caused by trying to autogenerate an electrode config file which
 doesn’t match with what was actually used in experiments. The workaround is to
 explicitly pass an electrode config file that is generated manually with the
-<code class="docutils literal"><span class="pre">--electrode-config-file</span></code> option.</p>
+<code class="docutils literal notranslate"><span class="pre">--electrode-config-file</span></code> option.</p>
 </div>
 </div>
 <div class="section" id="report-generation">
 <h2>Report generation<a class="headerlink" href="#report-generation" title="Permalink to this headline">¶</a></h2>
-<p>Reports are generated with the <code class="docutils literal"><span class="pre">ram-report</span></code> command-line script:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">ram</span><span class="o">-</span><span class="n">report</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">root</span> <span class="n">ROOT</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">dest</span> <span class="n">DEST</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">cachedir</span> <span class="n">CACHEDIR</span><span class="p">]</span>
+<p>Reports are generated with the <code class="docutils literal notranslate"><span class="pre">ram-report</span></code> command-line script:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">ram</span><span class="o">-</span><span class="n">report</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">root</span> <span class="n">ROOT</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">dest</span> <span class="n">DEST</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">cachedir</span> <span class="n">CACHEDIR</span><span class="p">]</span>
                   <span class="o">--</span><span class="n">subject</span> <span class="n">SUBJECT</span> <span class="p">[</span><span class="o">--</span><span class="n">force</span><span class="o">-</span><span class="n">rerun</span><span class="p">]</span> <span class="o">--</span><span class="n">experiment</span>
                   <span class="p">{</span><span class="n">FR1</span><span class="p">,</span><span class="n">CatFR1</span><span class="p">,</span><span class="n">PAL1</span><span class="p">,</span><span class="n">PS4_FR5</span><span class="p">,</span><span class="n">PS4_CatFR5</span><span class="p">,</span><span class="n">FR3</span><span class="p">,</span><span class="n">CatFR3</span><span class="p">,</span><span class="n">PAL3</span><span class="p">,</span><span class="n">FR5</span><span class="p">,</span><span class="n">CatFR5</span><span class="p">,</span><span class="n">PAL5</span><span class="p">,</span><span class="n">FR6</span><span class="p">,</span><span class="n">CatFR6</span><span class="p">,</span><span class="n">AmplitudeDetermination</span><span class="p">,</span><span class="n">PS4_FR5</span><span class="p">,</span><span class="n">PS4_CatFR5</span><span class="p">,</span><span class="n">FR6</span><span class="p">,</span><span class="n">CatFR6</span><span class="p">}</span>
                   <span class="p">[</span><span class="o">--</span><span class="n">vispath</span> <span class="n">VISPATH</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">sessions</span> <span class="n">SESSIONS</span> <span class="p">[</span><span class="n">SESSIONS</span> <span class="o">...</span><span class="p">]]</span>
@@ -372,9 +365,7 @@ explicitly pass an electrode config file that is generated manually with the
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -396,7 +387,7 @@ explicitly pass an electrode config file that is generated manually with the
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -414,7 +405,8 @@ explicitly pass an electrode config file that is generated manually with the
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.2.0',
+            VERSION:'2.2.1',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -428,19 +420,13 @@ explicitly pass an electrode config file that is generated manually with the
 
   
 
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

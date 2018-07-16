@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ramutils.tasks.summary &mdash; Ramutils 2.2.0 documentation</title>
+  <title>ramutils.tasks.summary &mdash; Ramutils 2.2.1 documentation</title>
   
 
   
@@ -24,26 +24,17 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../../genindex.html"/>
-        <link rel="search" title="Search" href="../../../search.html"/>
-    <link rel="top" title="Ramutils 2.2.0 documentation" href="../../../index.html"/>
-        <link rel="up" title="Module code" href="../../index.html"/> 
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
 
   
   <script src="../../../_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -109,7 +100,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">Ramutils</a>
@@ -117,9 +108,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -149,8 +141,6 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
-        
       </li>
     
   </ul>
@@ -171,11 +161,13 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="kn">from</span> <span class="nn">._wrapper</span> <span class="k">import</span> <span class="n">task</span>
-<span class="kn">from</span> <span class="nn">ramutils.events</span> <span class="k">import</span> <span class="n">validate_single_experiment</span><span class="p">,</span> <span class="n">select_math_events</span><span class="p">,</span> \
-    <span class="n">extract_experiment_from_events</span><span class="p">,</span> <span class="n">extract_sessions</span><span class="p">,</span> <span class="n">select_session_events</span><span class="p">,</span> \
-    <span class="n">select_stim_table_events</span><span class="p">,</span> <span class="n">extract_stim_information</span><span class="p">,</span> \
-    <span class="n">select_encoding_events</span><span class="p">,</span> <span class="n">extract_event_metadata</span><span class="p">,</span> <span class="n">dataframe_to_recarray</span><span class="p">,</span> \
-    <span class="n">get_encoding_mask</span><span class="p">,</span> <span class="n">correct_fr2_stim_item_identification</span>
+<span class="kn">from</span> <span class="nn">ramutils.events</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">validate_single_experiment</span><span class="p">,</span> <span class="n">select_math_events</span><span class="p">,</span>
+    <span class="n">extract_experiment_from_events</span><span class="p">,</span> <span class="n">extract_sessions</span><span class="p">,</span> <span class="n">select_session_events</span><span class="p">,</span>
+    <span class="n">select_stim_table_events</span><span class="p">,</span> <span class="n">extract_stim_information</span><span class="p">,</span>
+    <span class="n">select_encoding_events</span><span class="p">,</span> <span class="n">extract_event_metadata</span><span class="p">,</span> <span class="n">dataframe_to_recarray</span><span class="p">,</span>
+    <span class="n">get_encoding_mask</span><span class="p">,</span> <span class="n">correct_fr2_stim_item_identification</span><span class="p">,</span>
+    <span class="n">extract_biomarker_information</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">ramutils.exc</span> <span class="k">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">ramutils.log</span> <span class="k">import</span> <span class="n">get_logger</span>
 <span class="kn">from</span> <span class="nn">ramutils.reports.summary</span> <span class="k">import</span> <span class="o">*</span>
@@ -406,7 +398,7 @@
         <span class="n">stim_param_df</span> <span class="o">=</span> <span class="n">stim_param_df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span>
             <span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">])</span>
         <span class="n">stim_df</span> <span class="o">=</span> <span class="n">stim_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
-            <span class="n">stim_param_df</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">],</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
+            <span class="n">stim_param_df</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="s1">&#39;item_name&#39;</span><span class="p">],</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
 
         <span class="c1"># Add region from pairs_data. TODO: This won&#39;t scale to multi-site stim</span>
         <span class="n">stim_df</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">stim_df</span><span class="p">[</span><span class="s1">&#39;stimAnodeTag&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span>
@@ -444,6 +436,19 @@
                 <span class="n">stim_events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span>
                 <span class="n">excluded_pairs</span><span class="p">,</span> <span class="n">trigger_output</span><span class="p">,</span> <span class="n">raw_events</span><span class="o">=</span><span class="n">all_session_events</span><span class="p">,</span>
                 <span class="n">post_stim_prob_recall</span><span class="o">=</span><span class="n">post_stim_trigger_output</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">experiment</span> <span class="o">==</span> <span class="s2">&quot;TICL_FR&quot;</span><span class="p">:</span>
+            <span class="n">biomarker_events</span> <span class="o">=</span> <span class="n">extract_biomarker_information</span><span class="p">(</span>
+                <span class="n">all_session_stim_events</span><span class="p">)</span>
+            <span class="n">stim_events</span> <span class="o">=</span> <span class="n">dataframe_to_recarray</span><span class="p">(</span><span class="n">stim_df</span><span class="p">,</span><span class="n">expected_dtypes</span><span class="p">)</span>
+            <span class="n">stim_session_summary</span> <span class="o">=</span> <span class="n">TICLFRSessionSummary</span><span class="p">()</span>
+            <span class="n">stim_session_summary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span>
+                <span class="n">stim_events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span>
+                <span class="n">excluded_pairs</span><span class="p">,</span> <span class="n">trigger_output</span><span class="p">,</span>
+                <span class="n">raw_events</span><span class="o">=</span><span class="n">all_session_events</span><span class="p">,</span>
+                <span class="n">biomarker_events</span><span class="o">=</span><span class="n">biomarker_events</span><span class="p">,</span>
+                <span class="n">post_stim_eeg</span><span class="o">=</span><span class="n">post_stim_eeg</span><span class="p">,</span>
+            <span class="p">)</span>
+
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">UnsupportedExperimentError</span><span class="p">(</span><span class="s1">&#39;Experiment not supported&#39;</span><span class="p">)</span>
 
@@ -451,8 +456,8 @@
 
         <span class="c1"># Do a quick quality check here to see that the number of stim items</span>
         <span class="c1"># matches the size of the post_stim_prob_recall. We do not calculate</span>
-        <span class="c1"># post stim prob recall for FR2, so do not check in that case</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">experiment</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;FR2&#39;</span><span class="p">,</span> <span class="s1">&#39;catFR2&#39;</span><span class="p">]):</span>
+        <span class="c1"># post stim prob recall for FR2 or TICL, so do not check in that case</span>
+        <span class="k">if</span> <span class="n">experiment</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;FR2&#39;</span><span class="p">,</span> <span class="s1">&#39;catFR2&#39;</span><span class="p">,</span> <span class="s1">&#39;TICL_FR&#39;</span><span class="p">,</span> <span class="s1">&#39;TICL_catFR&#39;</span><span class="p">]:</span>
             <span class="n">num_stim_items</span> <span class="o">=</span> <span class="n">FRStimSessionSummary</span><span class="o">.</span><span class="n">pre_stim_prob_recall</span><span class="p">([</span><span class="n">stim_session_summary</span><span class="p">])</span>
             <span class="n">num_post_stim_prob_recall</span> <span class="o">=</span> <span class="n">FRStimSessionSummary</span><span class="o">.</span><span class="n">all_post_stim_prob_recall</span><span class="p">([</span><span class="n">stim_session_summary</span><span class="p">])</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">num_stim_items</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">num_post_stim_prob_recall</span><span class="p">):</span>
@@ -488,9 +493,7 @@
 </pre></div>
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -503,7 +506,7 @@
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -521,7 +524,8 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'2.2.0',
+            VERSION:'2.2.1',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -535,19 +539,13 @@
 
   
 
-  
-  
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

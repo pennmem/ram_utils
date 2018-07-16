@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Pipelines &mdash; Ramutils 2.2.0 documentation</title>
+  <title>Pipelines &mdash; Ramutils 2.2.1 documentation</title>
   
 
   
@@ -24,27 +24,19 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Ramutils 2.2.0 documentation" href="index.html"/>
-        <link rel="next" title="Command-line usage" href="cli.html"/>
-        <link rel="prev" title="Event processing" href="events.html"/> 
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Command-line usage" href="cli.html" />
+    <link rel="prev" title="Event processing" href="events.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -124,7 +116,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Ramutils</a>
@@ -132,9 +124,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -331,9 +324,9 @@ a particular subject completed of a particular experiment.</li>
 
 <div class="section" id="defining-tasks">
 <h3>Defining tasks<a class="headerlink" href="#defining-tasks" title="Permalink to this headline">¶</a></h3>
-<p>Tasks are created by using the <a class="reference internal" href="#ramutils.tasks.task" title="ramutils.tasks.task"><code class="xref py py-func docutils literal"><span class="pre">ramutils.tasks.task()</span></code></a> decorator or wrapping
-a function with <a class="reference internal" href="#ramutils.tasks.make_task" title="ramutils.tasks.make_task"><code class="xref py py-func docutils literal"><span class="pre">ramutils.tasks.make_task()</span></code></a>. These simply apply the
-<code class="xref py py-func docutils literal"><span class="pre">dask.delayed()</span></code> and (optionally) <code class="docutils literal"><span class="pre">joblib</span></code> caching decorators. The former
+<p>Tasks are created by using the <a class="reference internal" href="#ramutils.tasks.task" title="ramutils.tasks.task"><code class="xref py py-func docutils literal notranslate"><span class="pre">ramutils.tasks.task()</span></code></a> decorator or wrapping
+a function with <a class="reference internal" href="#ramutils.tasks.make_task" title="ramutils.tasks.make_task"><code class="xref py py-func docutils literal notranslate"><span class="pre">ramutils.tasks.make_task()</span></code></a>. These simply apply the
+<code class="xref py py-func docutils literal notranslate"><span class="pre">dask.delayed()</span></code> and (optionally) <code class="docutils literal notranslate"><span class="pre">joblib</span></code> caching decorators. The former
 is important for adding the ability to parallelize a pipeline (for tasks that
 can run independently) while the latter allows for resuming a pipeline when
 something goes wrong or if only changing one parameter which does not affect all
@@ -371,7 +364,7 @@ more than 1.</li>
 <li><strong>func</strong> (<em>callable</em>) – Function to wrap</li>
 <li><strong>args</strong> – Arguments for the function</li>
 <li><strong>kwargs</strong> – Keyword arugments for the function plus keyword arguments accepted by
-the <code class="xref py py-func docutils literal"><span class="pre">task()</span></code> decorator.</li>
+the <a class="reference internal" href="#ramutils.tasks.task" title="ramutils.tasks.task"><code class="xref py py-func docutils literal notranslate"><span class="pre">task()</span></code></a> decorator.</li>
 </ul>
 </td>
 </tr>
@@ -382,7 +375,7 @@ the <code class="xref py py-func docutils literal"><span class="pre">task()</spa
 </div>
 <div class="section" id="reference">
 <h3>Reference<a class="headerlink" href="#reference" title="Permalink to this headline">¶</a></h3>
-<p>Common tasks come predefined in the <code class="xref py py-mod docutils literal"><span class="pre">ramutils.tasks</span></code> package and are
+<p>Common tasks come predefined in the <code class="xref py py-mod docutils literal notranslate"><span class="pre">ramutils.tasks</span></code> package and are
 documented below.</p>
 </div>
 </div>
@@ -402,7 +395,7 @@ documented below.</p>
 <li><strong>events</strong> (<em>np.recarray</em>) – </li>
 <li><strong>n_permutations</strong> (<em>int</em>) – </li>
 <li><strong>tag</strong> (<em>str</em>) – Tag to assign the resulting classifier summary (default:
-<code class="docutils literal"><span class="pre">'classifier'</span></code>)</li>
+<code class="docutils literal notranslate"><span class="pre">'classifier'</span></code>)</li>
 <li><strong>kwargs</strong> (<em>dict</em>) – Extra keyword arguments that are passed to get_sample_weights. See
 that function for more details</li>
 </ul>
@@ -473,7 +466,7 @@ evaluated. Can be done in the case of FR2 where post stim events</li>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>A dictionary of summary objects that are needed in subsequent parts
 of the processing pipeline. The dictionary will be in the following
 format:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="s1">&#39;cross_session_summary&#39;</span><span class="p">:</span> <span class="n">MultiSessionClassifierSummary</span><span class="p">,</span>
     <span class="s1">&#39;classifier_summaries&#39;</span><span class="p">:</span> <span class="n">List</span> <span class="n">of</span> <span class="n">ClassifierSummary</span> <span class="n">objects</span><span class="p">,</span>
     <span class="s1">&#39;encoding_classifier_summaries&#39;</span><span class="p">:</span> <span class="n">List</span> <span class="n">of</span> <span class="n">ClassifierSummary</span>
@@ -612,9 +605,9 @@ the static plots in the html reports during report generation</td>
 where data_type is a generic name for the type of data being saved. The following data types
 map to a summary object:</p>
 <ul class="simple">
-<li>sessions_summary: <a class="reference internal" href="data.html#ramutils.reports.summary.SessionSummary" title="ramutils.reports.summary.SessionSummary"><code class="xref py py-class docutils literal"><span class="pre">ramutils.reports.summary.SessionSummary</span></code></a></li>
-<li>math_summary: <a class="reference internal" href="data.html#ramutils.reports.summary.MathSummary" title="ramutils.reports.summary.MathSummary"><code class="xref py py-class docutils literal"><span class="pre">ramutils.reports.summary.MathSummary</span></code></a></li>
-<li>classifier_[tag]: <a class="reference internal" href="data.html#ramutils.reports.summary.ClassifierSummary" title="ramutils.reports.summary.ClassifierSummary"><code class="xref py py-class docutils literal"><span class="pre">ramutils.reports.summary.ClassifierSummary</span></code></a></li>
+<li>sessions_summary: <a class="reference internal" href="data.html#ramutils.reports.summary.SessionSummary" title="ramutils.reports.summary.SessionSummary"><code class="xref py py-class docutils literal notranslate"><span class="pre">ramutils.reports.summary.SessionSummary</span></code></a></li>
+<li>math_summary: <a class="reference internal" href="data.html#ramutils.reports.summary.MathSummary" title="ramutils.reports.summary.MathSummary"><code class="xref py py-class docutils literal notranslate"><span class="pre">ramutils.reports.summary.MathSummary</span></code></a></li>
+<li>classifier_[tag]: <a class="reference internal" href="data.html#ramutils.reports.summary.ClassifierSummary" title="ramutils.reports.summary.ClassifierSummary"><code class="xref py py-class docutils literal notranslate"><span class="pre">ramutils.reports.summary.ClassifierSummary</span></code></a></li>
 </ul>
 </dd></dl>
 
@@ -672,7 +665,7 @@ area file can be found.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>paths</strong> – Updated <code class="xref py py-class docutils literal"><span class="pre">FilePaths</span></code> object with path to the electrode config file
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>paths</strong> – Updated <code class="xref py py-class docutils literal notranslate"><span class="pre">FilePaths</span></code> object with path to the electrode config file
 defined.</p>
 </td>
 </tr>
@@ -690,9 +683,9 @@ config files.</p>
 <dt id="ramutils.tasks.odin.generate_ramulator_config">
 <code class="descclassname">ramutils.tasks.odin.</code><code class="descname">generate_ramulator_config</code><span class="sig-paren">(</span><em>subject</em>, <em>experiment</em>, <em>container</em>, <em>stim_params</em>, <em>paths</em>, <em>pairs=None</em>, <em>excluded_pairs=None</em>, <em>exp_params=None</em>, <em>extended_blanking=True</em>, <em>trigger_pairs=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/odin.html#generate_ramulator_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.odin.generate_ramulator_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create configuration files for Ramulator.</p>
-<p>In hardware bipolar mode, the neurorad pipeline generates a <code class="docutils literal"><span class="pre">pairs.json</span></code>
+<p>In hardware bipolar mode, the neurorad pipeline generates a <code class="docutils literal notranslate"><span class="pre">pairs.json</span></code>
 file that differs from the electrode configured pairs. It is up to the user
-of the pipeline to ensure that the path to the correct <code class="docutils literal"><span class="pre">pairs.json</span></code> is
+of the pipeline to ensure that the path to the correct <code class="docutils literal notranslate"><span class="pre">pairs.json</span></code> is
 supplied (although Ramulator does not use it in this case).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -707,7 +700,7 @@ supplied (although Ramulator does not use it in this case).</p>
 <li><strong>excluded_pairs</strong> (<em>dict</em>) – Pairs excluded from the classifier (pairs that contain a stim contact
 and possibly some others)</li>
 <li><strong>exp_params</strong> (<a class="reference internal" href="data.html#ramutils.parameters.ExperimentParameters" title="ramutils.parameters.ExperimentParameters"><em>ExperimentParameters</em></a>) – All parameters used in training the classifier. This is partially
-redundant with some data stored in the <code class="docutils literal"><span class="pre">container</span></code> object.</li>
+redundant with some data stored in the <code class="docutils literal notranslate"><span class="pre">container</span></code> object.</li>
 <li><strong>extended_blanking</strong> (<em>bool</em>) – Whether or not to enable the ENS extended blanking (default: True).</li>
 <li><strong>trigger_pairs</strong> (<em>List</em><em>[</em><em>str</em><em>] or </em><em>None</em>) – Pairs to be used for triggering stim in PS5.</li>
 </ul>
@@ -754,7 +747,7 @@ checks for single-experiment events</li>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">list</p>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">TooManyExperimentsError</span></code> – If the events span more than one session.</p>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TooManyExperimentsError</span></code> – If the events span more than one session.</p>
 </td>
 </tr>
 </tbody>
@@ -818,9 +811,7 @@ multiple experiments should be allowed</li>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -842,7 +833,7 @@ multiple experiments should be allowed</li>
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -860,7 +851,8 @@ multiple experiments should be allowed</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.2.0',
+            VERSION:'2.2.1',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -874,19 +866,13 @@ multiple experiments should be allowed</li>
 
   
 
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

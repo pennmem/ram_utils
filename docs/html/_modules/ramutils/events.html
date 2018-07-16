@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ramutils.events &mdash; Ramutils 2.2.0 documentation</title>
+  <title>ramutils.events &mdash; Ramutils 2.2.1 documentation</title>
   
 
   
@@ -24,26 +24,17 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../genindex.html"/>
-        <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Ramutils 2.2.0 documentation" href="../../index.html"/>
-        <link rel="up" title="Module code" href="../index.html"/> 
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
 
   
   <script src="../../_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -109,7 +100,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">Ramutils</a>
@@ -117,9 +108,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -148,8 +140,6 @@
     
     
       <li class="wy-breadcrumbs-aside">
-        
-            
         
       </li>
     
@@ -188,6 +178,7 @@
 <span class="kn">from</span> <span class="nn">ramutils.utils</span> <span class="k">import</span> <span class="n">extract_subject_montage</span><span class="p">,</span> <span class="n">get_completed_sessions</span><span class="p">,</span> <span class="n">extract_experiment_series</span>
 <span class="kn">from</span> <span class="nn">ramutils.exc</span> <span class="k">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">ramutils.retrieval</span> <span class="k">import</span> <span class="n">create_matched_events</span><span class="p">,</span><span class="n">append_fields</span>
+
 
 <div class="viewcode-block" id="load_events"><a class="viewcode-back" href="../../events.html#ramutils.events.load_events">[docs]</a><span class="k">def</span> <span class="nf">load_events</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">file_type</span><span class="o">=</span><span class="s1">&#39;all_events&#39;</span><span class="p">,</span>
                 <span class="n">sessions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rootdir</span><span class="o">=</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
@@ -339,12 +330,13 @@
     <span class="c1"># because the columns to subset differs by task</span>
     <span class="k">if</span> <span class="s2">&quot;FR&quot;</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">:</span>
         <span class="n">events</span><span class="p">,</span> <span class="n">stim_params</span> <span class="o">=</span> <span class="n">separate_stim_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
-        <span class="n">events</span> <span class="o">=</span> <span class="n">insert_baseline_retrieval_events</span><span class="p">(</span><span class="n">events</span><span class="p">,</span>
-                                                  <span class="n">start_time</span><span class="p">,</span>
-                                                  <span class="n">end_time</span><span class="p">,</span>
-                                                  <span class="n">duration</span><span class="p">,</span>
-                                                  <span class="n">pre</span><span class="p">,</span>
-                                                  <span class="n">post</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;TICL&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">:</span>
+            <span class="n">events</span> <span class="o">=</span> <span class="n">insert_baseline_retrieval_events</span><span class="p">(</span><span class="n">events</span><span class="p">,</span>
+                                                      <span class="n">start_time</span><span class="p">,</span>
+                                                      <span class="n">end_time</span><span class="p">,</span>
+                                                      <span class="n">duration</span><span class="p">,</span>
+                                                      <span class="n">pre</span><span class="p">,</span>
+                                                      <span class="n">post</span><span class="p">)</span>
         <span class="n">events</span> <span class="o">=</span> <span class="n">remove_intrusions</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
         <span class="n">events</span> <span class="o">=</span> <span class="n">update_recall_outcome_for_retrieval_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
         <span class="n">events</span> <span class="o">=</span> <span class="n">normalize_fr_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
@@ -530,8 +522,10 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert from dataframe to recarray maintaining the original datatypes</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">dt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">dt</span> <span class="ow">in</span> <span class="n">dtypes</span><span class="p">]</span>
     <span class="n">events</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">to_records</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">events</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtypes</span><span class="p">)</span>
+    <span class="c1"># Make sure that all the columns are in the correct order</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="n">events</span><span class="p">[</span><span class="n">names</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtypes</span><span class="p">)</span>
     <span class="n">events</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">events</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">events</span></div>
 
@@ -1385,6 +1379,55 @@
     <span class="k">return</span> <span class="n">stim_list_mask</span></div>
 
 
+<div class="viewcode-block" id="add_list_phase_info"><a class="viewcode-back" href="../../events.html#ramutils.events.add_list_phase_info">[docs]</a><span class="k">def</span> <span class="nf">add_list_phase_info</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a list_phase field to an event structure that says which</span>
+<span class="sd">    phase of the list (ENCODING, DISTRACT, RETRIEVAL,...) that event is</span>
+<span class="sd">    part of.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    events: np.recarray</span>
+<span class="sd">        All event or task events</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s1">&#39;list_phase&#39;</span> <span class="ow">in</span> <span class="n">events</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">events</span>
+
+    <span class="n">dtype_desc</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">str</span>
+
+    <span class="n">phases</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">events</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype_desc</span><span class="p">)</span>
+
+    <span class="n">lstphases</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ev</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;_START&#39;</span><span class="p">):</span>
+            <span class="n">lstphases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ev</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="s1">&#39;TRIAL&#39;</span> <span class="ow">in</span> <span class="n">ev</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]:</span>
+            <span class="n">lstphases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ev</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;TRIAL&#39;</span><span class="p">,</span><span class="s1">&#39;ENCODING&#39;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lstphases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lstphases</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">phases</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">lstphases</span>
+
+    <span class="n">new_events</span> <span class="o">=</span> <span class="n">append_fields</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;list_phase&#39;</span><span class="p">,</span> <span class="n">dtype_desc</span><span class="p">)])</span>
+    <span class="n">new_events</span><span class="p">[</span><span class="s1">&#39;list_phase&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">phases</span>
+
+    <span class="c1"># Certain special cases for older experiments</span>
+
+    <span class="n">word_events</span> <span class="o">=</span> <span class="n">new_events</span><span class="p">[(</span><span class="n">new_events</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;WORD&#39;</span><span class="p">)</span>
+                             <span class="o">|</span> <span class="p">(</span><span class="n">new_events</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;PRACTICE_WORD&#39;</span><span class="p">)]</span>
+    <span class="n">word_events</span><span class="o">.</span><span class="n">list_phase</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;WORD&#39;</span><span class="p">,</span> <span class="s1">&#39;ENCODING&#39;</span><span class="p">)</span>
+                              <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">word_events</span><span class="o">.</span><span class="n">type</span><span class="p">]</span>
+    <span class="n">new_events</span><span class="p">[(</span><span class="n">new_events</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;WORD&#39;</span><span class="p">)</span>
+               <span class="o">|</span> <span class="p">(</span><span class="n">new_events</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;PRACTICE_WORD&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">word_events</span>
+
+    <span class="n">retrieval_events</span> <span class="o">=</span> <span class="n">new_events</span><span class="p">[(</span><span class="n">new_events</span><span class="o">.</span><span class="n">list_phase</span> <span class="o">==</span> <span class="s1">&#39;REC&#39;</span><span class="p">)</span>
+                                  <span class="o">|</span> <span class="p">(</span><span class="n">new_events</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;REC_WORD&#39;</span><span class="p">)</span> <span class="p">]</span>
+    <span class="n">retrieval_events</span><span class="o">.</span><span class="n">list_phase</span> <span class="o">=</span> <span class="s1">&#39;RETRIEVAL&#39;</span>
+    <span class="n">new_events</span><span class="p">[(</span><span class="n">new_events</span><span class="o">.</span><span class="n">list_phase</span> <span class="o">==</span> <span class="s1">&#39;REC&#39;</span><span class="p">)</span>
+               <span class="o">|</span> <span class="p">(</span><span class="n">new_events</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;REC_WORD&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">retrieval_events</span>
+    <span class="k">return</span> <span class="n">new_events</span></div>
+
+
 <div class="viewcode-block" id="extract_stim_information"><a class="viewcode-back" href="../../events.html#ramutils.events.extract_stim_information">[docs]</a><span class="k">def</span> <span class="nf">extract_stim_information</span><span class="p">(</span><span class="n">all_events</span><span class="p">,</span> <span class="n">task_events</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Identify stim items, post stim items, and stimulation parameters</span>
 
@@ -1514,6 +1557,20 @@
     <span class="n">stim_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">stim_param_data</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">is_stim_item</span><span class="p">,</span> <span class="n">is_post_stim_item</span><span class="p">,</span> <span class="n">stim_df</span></div>
+
+<span class="k">def</span> <span class="nf">extract_biomarker_information</span><span class="p">(</span><span class="n">events</span><span class="p">):</span>
+    <span class="n">biomarker_events</span> <span class="o">=</span> <span class="n">events</span><span class="p">[</span><span class="n">events</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;BIOMARKER&#39;</span><span class="p">]</span>
+    <span class="n">biomarker_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">,</span> <span class="s1">&#39;phase&#39;</span><span class="p">,</span>
+                                        <span class="s1">&#39;biomarker_value&#39;</span><span class="p">,</span> <span class="s1">&#39;id&#39;</span><span class="p">])</span>
+    <span class="n">biomarker_df</span><span class="p">[</span><span class="s1">&#39;phase&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">biomarker_events</span><span class="p">[</span><span class="s1">&#39;phase&#39;</span><span class="p">]</span>
+    <span class="n">biomarker_df</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">biomarker_events</span><span class="p">[</span><span class="s1">&#39;stim_params&#39;</span><span class="p">][</span><span class="s1">&#39;position&#39;</span><span class="p">]</span>
+    <span class="n">biomarker_df</span><span class="p">[</span><span class="s1">&#39;biomarker_value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">biomarker_events</span><span class="p">[</span><span class="s1">&#39;stim_params&#39;</span><span class="p">][</span><span class="s1">&#39;biomarker_value&#39;</span><span class="p">]</span>
+    <span class="n">biomarker_df</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">biomarker_events</span><span class="p">[</span><span class="s1">&#39;stim_params&#39;</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+    <span class="n">biomarker_dtypes</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;position&#39;</span><span class="p">,</span> <span class="s1">&#39;U64&#39;</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s1">&#39;phase&#39;</span><span class="p">,</span> <span class="s1">&#39;U64&#39;</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s1">&#39;biomarker_value&#39;</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;U64&#39;</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">dataframe_to_recarray</span><span class="p">(</span><span class="n">biomarker_df</span><span class="p">,</span><span class="n">biomarker_dtypes</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="correct_fr2_stim_item_identification"><a class="viewcode-back" href="../../events.html#ramutils.events.correct_fr2_stim_item_identification">[docs]</a><span class="k">def</span> <span class="nf">correct_fr2_stim_item_identification</span><span class="p">(</span><span class="n">stim_param_df</span><span class="p">):</span>
@@ -1863,9 +1920,7 @@
 </pre></div>
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -1878,7 +1933,7 @@
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -1896,7 +1951,8 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'2.2.0',
+            VERSION:'2.2.1',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -1910,19 +1966,13 @@
 
   
 
-  
-  
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

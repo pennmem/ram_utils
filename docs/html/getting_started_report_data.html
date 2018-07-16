@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Getting Statrted: RAM Report Data &mdash; Ramutils 2.2.0 documentation</title>
+  <title>Getting Statrted: RAM Report Data &mdash; Ramutils 2.2.1 documentation</title>
   
 
   
@@ -24,27 +24,19 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Ramutils 2.2.0 documentation" href="index.html"/>
-        <link rel="next" title="Serializable data structures" href="data.html"/>
-        <link rel="prev" title="ramutils" href="index.html"/> 
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Serializable data structures" href="data.html" />
+    <link rel="prev" title="ramutils" href="index.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
@@ -120,7 +112,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Ramutils</a>
@@ -128,9 +120,10 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
 
@@ -400,11 +393,11 @@ for interacting with the saved data including:</p>
 <div class="section" id="Finding-Data">
 <h2>Finding Data<a class="headerlink" href="#Finding-Data" title="Permalink to this headline">¶</a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">ramutils.tasks.misc</span> <span class="k">import</span> <span class="n">load_existing_results</span>
 </pre></div>
 </div>
@@ -419,11 +412,11 @@ You can still use MorletWaveletFilter
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">rhino_root</span> <span class="o">=</span> <span class="s1">&#39;/Volumes/RHINO/&#39;</span>
 <span class="n">report_db_location</span> <span class="o">=</span> <span class="s2">&quot;/Volumes/RHINO/scratch/report_database/&quot;</span>
 </pre></div>
@@ -437,11 +430,11 @@ returned whose keys indicate the type of underlying data. The values are
 a list of the summary objects, one per session. For this example, we are
 loading a single session.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="c1"># .compute() is required because load_existing_results is actual a task, which</span>
 <span class="c1"># is lazily evaluated by default</span>
 <span class="n">results_dict</span> <span class="o">=</span> <span class="n">load_existing_results</span><span class="p">(</span><span class="n">subject</span><span class="o">=</span><span class="s1">&#39;R1389J&#39;</span><span class="p">,</span> <span class="n">experiment</span><span class="o">=</span><span class="s1">&#39;catFR5&#39;</span><span class="p">,</span>
@@ -460,11 +453,11 @@ loading a single session.</p>
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>Out[3]:
 </pre></div>
 </div>
-<div class="output_area highlight-none"><div class="highlight"><pre>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
 <span></span>[&#39;target_selection_table&#39;,
  &#39;classifier_evaluation_results&#39;,
  &#39;session_summaries&#39;,
@@ -474,11 +467,11 @@ loading a single session.</p>
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">classifier_data</span> <span class="o">=</span> <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;classifier_evaluation_results&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data is saved as a </span><span class="si">{}</span><span class="s2"> object.</span><span class="se">\n</span><span class="s2">AUC for this session: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">classifier_data</span><span class="p">),</span> <span class="n">classifier_data</span><span class="o">.</span><span class="n">auc</span><span class="p">))</span>
 </pre></div>
@@ -494,11 +487,11 @@ AUC for this session: 0.6512345679012346
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">session_data</span> <span class="o">=</span> <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;session_summaries&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data is saved as a </span><span class="si">{}</span><span class="s2"> object.</span><span class="se">\n</span><span class="s2">Session Completed On: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">session_data</span><span class="p">),</span>
                                                                        <span class="n">session_data</span><span class="o">.</span><span class="n">session_datetime</span><span class="p">))</span>
@@ -515,11 +508,11 @@ Session Completed On: 2018-02-28 16:47:02.190000+00:00
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">math_data</span> <span class="o">=</span> <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;math_summaries&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data is saved as a </span><span class="si">{}</span><span class="s2"> object.</span><span class="se">\n</span><span class="s2">Subject answer </span><span class="si">{}</span><span class="s2">% math problems correctly&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">math_data</span><span class="p">),</span>
                                                                                           <span class="n">math_data</span><span class="o">.</span><span class="n">percent_correct</span><span class="p">))</span>
@@ -539,11 +532,11 @@ Subject answer 79.76190476190476% math problems correctly
 <div class="section" id="Loading-Multiple-Files-of-a-Single-Type">
 <h2>Loading Multiple Files of a Single Type<a class="headerlink" href="#Loading-Multiple-Files-of-a-Single-Type" title="Permalink to this headline">¶</a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">glob</span>
 
@@ -563,11 +556,11 @@ Found 58 FR5 or catFR5 session summaries
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">session_summaries</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">for</span> <span class="n">summary_loc</span> <span class="ow">in</span> <span class="n">fr5_session_summary_locations</span><span class="p">:</span>
     <span class="n">summary</span> <span class="o">=</span> <span class="n">FRStimSessionSummary</span><span class="o">.</span><span class="n">from_hdf</span><span class="p">(</span><span class="n">summary_loc</span><span class="p">)</span>
@@ -584,11 +577,11 @@ despite residing in the same directory. ramutils has a utility function
 for extracting this metadata from the file path, which can be handy when
 combining multiple files of a single type or across types</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">ramutils.utils</span> <span class="k">import</span> <span class="n">extract_report_info_from_path</span>
 
 <span class="n">metadata</span> <span class="o">=</span> <span class="n">extract_report_info_from_path</span><span class="p">(</span><span class="n">fr5_session_summary_locations</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -597,11 +590,11 @@ combining multiple files of a single type or across types</p>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>Out[9]:
 </pre></div>
 </div>
-<div class="output_area highlight-none"><div class="highlight"><pre>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
 <span></span>{&#39;subject&#39;: &#39;R1275D&#39;,
  &#39;experiment&#39;: &#39;FR5&#39;,
  &#39;montage&#39;: 0,
@@ -623,18 +616,18 @@ Oftentimes, this analysis is done across subjects and experiments.
 Luckily, there is a helper method to make it rather trivial to combine
 this item-level information and return a Pandas Dataframe</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">combined_item_df</span> <span class="o">=</span> <span class="n">FRStimSessionSummary</span><span class="o">.</span><span class="n">combine_sessions</span><span class="p">(</span><span class="n">session_summaries</span><span class="p">)</span>
 <span class="n">combined_item_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>Out[10]:
 </pre></div>
 </div>
@@ -810,21 +803,21 @@ this item-level information and return a Pandas Dataframe</p>
 per session, we should have around 17,400 rows in our dataset, unless
 some sessions were incomplete</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="nb">len</span><span class="p">(</span><span class="n">combined_item_df</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>Out[11]:
 </pre></div>
 </div>
-<div class="output_area highlight-none"><div class="highlight"><pre>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
 <span></span>16548
 </pre></div>
 </div>
@@ -849,11 +842,11 @@ etc.) that is saved to the report database directory.</p>
 by looking at the
 <a class="reference external" href="https://pennmem.github.io/classiflib/html/index.html">documentation</a></p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="c1"># Reloading the used classifier</span>
 <span class="kn">from</span> <span class="nn">ramutils.classifier.utils</span> <span class="k">import</span> <span class="n">reload_classifier</span>
 
@@ -863,21 +856,21 @@ by looking at the
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>Out[12]:
 </pre></div>
 </div>
-<div class="output_area highlight-none"><div class="highlight"><pre>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
 <span></span>(997, 872)
 </pre></div>
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="c1"># Loading the classifier from the reports database</span>
 <span class="kn">from</span> <span class="nn">classiflib.container</span> <span class="k">import</span> <span class="n">ClassifierContainer</span>
 
@@ -888,11 +881,11 @@ by looking at the
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>Out[13]:
 </pre></div>
 </div>
-<div class="output_area highlight-none"><div class="highlight"><pre>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
 <span></span>(997, 968)
 </pre></div>
 </div>
@@ -904,11 +897,11 @@ artifact detection (12 * 8 = 968 - 972).</p>
 <p>Once a classifier has been loaded, the main use cases are to make out of
 sample predictions and check on the AUC from the training session.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
 
@@ -943,11 +936,11 @@ Training AUC: 0.61
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>Out[14]:
 </pre></div>
 </div>
-<div class="output_area highlight-none"><div class="highlight"><pre>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
 <span></span>&lt;matplotlib.axes._subplots.AxesSubplot at 0x1c76ae7400&gt;
 </pre></div>
 </div>
@@ -976,11 +969,11 @@ as its input. In this case, we have some behavioral measure of recall
 performance that we want to calculate that is not part of the standard
 set of methods.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [15]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="k">def</span> <span class="nf">normalized_item_delta_recall</span><span class="p">(</span><span class="n">summary</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Calculate normalized delta recall at the item level</span>
 
@@ -1014,11 +1007,11 @@ set of methods.</p>
 different methods. This first method uses list comprehension, and the
 second uses the session summary objects embedded in a pandas dataframe.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [16]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">normalized_delta_recall</span> <span class="o">=</span> <span class="p">[</span><span class="n">normalized_item_delta_recall</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span> <span class="k">for</span> <span class="n">summary</span> <span class="ow">in</span> <span class="n">session_summaries</span><span class="p">]</span>
 </pre></div>
 </div>
@@ -1026,11 +1019,11 @@ second uses the session summary objects embedded in a pandas dataframe.</p>
 <p>Ok, so great. Now we have this list of values that we wanted to extract.
 We can do some simple things with it:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [17]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Average item-level delta recall: </span><span class="si">{:.2f}</span><span class="s2">%&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">normalized_delta_recall</span><span class="p">))))</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Biggest item-level delta recall: </span><span class="si">{:.2f}</span><span class="s2">%&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">normalized_delta_recall</span><span class="p">)))</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Biggest adverse item-level delta recall: </span><span class="si">{:.2f}</span><span class="s2">%&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">normalized_delta_recall</span><span class="p">)))</span>
@@ -1055,11 +1048,11 @@ other value? This is no longer straightforward to do with the list-based
 method. Instead, let’s get these summary objects into a pandas dataframe
 and really let the analyses run wild.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [18]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="n">session_data</span> <span class="o">=</span> <span class="p">{</span>
@@ -1102,11 +1095,11 @@ and really let the analyses run wild.</p>
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [19]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">session_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">session_data</span><span class="p">)</span>
 <span class="n">session_df</span> <span class="o">=</span> <span class="n">session_df</span><span class="p">[[</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;experiment&#39;</span><span class="p">,</span> <span class="s1">&#39;montage&#39;</span><span class="p">,</span> <span class="s1">&#39;session&#39;</span><span class="p">,</span>
                          <span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="s1">&#39;session_summary&#39;</span><span class="p">,</span> <span class="s1">&#39;electrode_type&#39;</span><span class="p">,</span> <span class="s1">&#39;location&#39;</span><span class="p">,</span>
@@ -1116,7 +1109,7 @@ and really let the analyses run wild.</p>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>Out[19]:
 </pre></div>
 </div>
@@ -1227,18 +1220,18 @@ doing our analyses that were previously much more complicated. Let’s
 start by creating a new variable in the dataset to represent the
 normalized item-level delta recall metric that we calculated before.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [20]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">session_df</span><span class="p">[</span><span class="s1">&#39;delta_recall&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">session_df</span><span class="p">[</span><span class="s1">&#39;session_summary&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">normalized_item_delta_recall</span><span class="p">)</span>
 <span class="n">session_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>Out[20]:
 </pre></div>
 </div>
@@ -1353,11 +1346,11 @@ normalized item-level delta recall metric that we calculated before.</p>
 as well stop reading this tutorial. For the sake of completeness, let’s
 replicate what we did before… and more…</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [21]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Average item-level delta recall: </span><span class="si">{:.2f}</span><span class="s2">%&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">session_df</span><span class="p">[</span><span class="s1">&#39;delta_recall&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()))</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Biggest item-level delta recall: </span><span class="si">{:.2f}</span><span class="s2">%&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">session_df</span><span class="p">[</span><span class="s1">&#39;delta_recall&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()))</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Biggest adverse item-level delta recall: </span><span class="si">{:.2f}</span><span class="s2">%&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">session_df</span><span class="p">[</span><span class="s1">&#39;delta_recall&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()))</span>
@@ -1375,17 +1368,17 @@ Biggest adverse item-level delta recall: -60.29%
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [22]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">session_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;experiment&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">({</span><span class="s1">&#39;delta_recall&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;min&#39;</span><span class="p">,</span> <span class="s1">&#39;max&#39;</span><span class="p">]})</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>Out[22]:
 </pre></div>
 </div>
@@ -1441,17 +1434,17 @@ Biggest adverse item-level delta recall: -60.29%
 </div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [23]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">session_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;location&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">({</span><span class="s1">&#39;delta_recall&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;min&#39;</span><span class="p">,</span> <span class="s1">&#39;max&#39;</span><span class="p">]})</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>Out[23]:
 </pre></div>
 </div>
@@ -1613,11 +1606,11 @@ summary object of interest and then rely on the merging mechanics
 available through pandas to get all of this data into a single data
 structure.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [24]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">ramutils.reports.summary</span> <span class="k">import</span> <span class="n">ClassifierSummary</span>
 
 <span class="c1"># Repeat the process for getting summary objects into a dataframe that we used for the session summaries</span>
@@ -1651,17 +1644,17 @@ structure.</p>
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [25]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">classifier_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>Out[25]:
 </pre></div>
 </div>
@@ -1752,18 +1745,18 @@ structure.</p>
 classifier dataframe and the session summary dataframe. This is
 intentional, as we need it in order to merge the two. Let’s do that now.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [26]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">combined_df</span> <span class="o">=</span> <span class="n">session_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">classifier_df</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
 <span class="n">combined_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>Out[26]:
 </pre></div>
 </div>
@@ -1897,28 +1890,28 @@ should not have changed and that we should have a classifier summary
 corresponding to each session summary. In general, it is a good idea to
 check these assumptions before proceeding with any anlayses.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [27]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">combined_df</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">session_df</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">classifier_df</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [28]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="c1"># Check if we are missing any classifier summaries</span>
 <span class="n">combined_df</span><span class="p">[</span><span class="n">combined_df</span><span class="p">[</span><span class="s1">&#39;classifier_summary&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span> <span class="o">==</span> <span class="kc">True</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>Out[28]:
 </pre></div>
 </div>
@@ -1966,11 +1959,11 @@ check these assumptions before proceeding with any anlayses.</p>
 can now ask a wider set of question. For example, how does classifier
 performance correlated with delta recall?</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [29]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">sns</span><span class="o">.</span><span class="n">jointplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;auc&#39;</span><span class="p">,</span>
               <span class="n">y</span><span class="o">=</span><span class="s1">&#39;delta_recall&#39;</span><span class="p">,</span>
               <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;reg&quot;</span><span class="p">,</span>
@@ -1988,11 +1981,11 @@ performance correlated with delta recall?</p>
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>Out[29]:
 </pre></div>
 </div>
-<div class="output_area highlight-none"><div class="highlight"><pre>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
 <span></span>&lt;seaborn.axisgrid.JointGrid at 0x1cb803f7b8&gt;
 </pre></div>
 </div>
@@ -2005,11 +1998,11 @@ performance correlated with delta recall?</p>
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [30]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="c1"># Trained Classifier Dataset</span>
 <span class="kn">import</span> <span class="nn">classiflib</span>
 
@@ -2039,38 +2032,38 @@ performance correlated with delta recall?</p>
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [31]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">combined_df</span> <span class="o">=</span> <span class="n">combined_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">trained_classifier_df</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <p>Let’s again check that the merge has worked as expected</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [32]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">combined_df</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">session_df</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [33]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">combined_df</span><span class="p">[</span><span class="n">combined_df</span><span class="p">[</span><span class="s1">&#39;classifier&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span> <span class="o">==</span> <span class="kc">True</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>Out[33]:
 </pre></div>
 </div>
@@ -2117,17 +2110,17 @@ performance correlated with delta recall?</p>
 </div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [34]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">combined_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>Out[34]:
 </pre></div>
 </div>
@@ -2283,11 +2276,11 @@ over all sessions in a particular experiment, or some other aggregation.
 If we start with our standard session-level dataframe created using
 pandas magic, this becomes rather trivial to do.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [35]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3"><div class="highlight"><pre>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">subject_df</span> <span class="o">=</span> <span class="p">(</span><span class="n">session_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;experiment&#39;</span><span class="p">])</span>
                         <span class="o">.</span><span class="n">agg</span><span class="p">({</span><span class="s1">&#39;session_summary&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">set</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">values</span><span class="p">)),</span>
                               <span class="s1">&#39;session&#39;</span><span class="p">:</span> <span class="s1">&#39;count&#39;</span><span class="p">,</span>
@@ -2298,7 +2291,7 @@ pandas magic, this becomes rather trivial to do.</p>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none"><div class="highlight"><pre>
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>Out[35]:
 </pre></div>
 </div>
@@ -2386,9 +2379,7 @@ objects and returns some value of interest.</p>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
   
@@ -2410,7 +2401,7 @@ objects and returns some value of interest.</p>
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -2428,7 +2419,8 @@ objects and returns some value of interest.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.2.0',
+            VERSION:'2.2.1',
+            LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -2442,19 +2434,13 @@ objects and returns some value of interest.</p>
 
   
 
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>
