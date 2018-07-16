@@ -1244,7 +1244,7 @@ def add_list_phase_info(events):
 
     phases = np.empty(len(events), dtype=dtype_desc)
 
-    lstphases = ['']
+    lstphases = []
     for ev in events:
         if ev['type'].endswith('_START'):
             lstphases.append(ev['type'].rpartition('_')[0])
@@ -1252,7 +1252,7 @@ def add_list_phase_info(events):
             lstphases.append(ev['type'].replace('TRIAL','ENCODING'))
         else:
             lstphases.append(lstphases[-1])
-    phases[:] = lstphases[1:]
+    phases[:] = lstphases
 
     new_events = append_fields(events, [('list_phase', dtype_desc)])
     new_events['list_phase'] = phases
