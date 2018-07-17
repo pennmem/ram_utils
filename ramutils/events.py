@@ -1250,8 +1250,10 @@ def add_list_phase_info(events):
             lstphases.append(ev['type'].rpartition('_')[0])
         elif 'TRIAL' in ev['type']:
             lstphases.append(ev['type'].replace('TRIAL','ENCODING'))
-        else:
+        elif lstphases:
             lstphases.append(lstphases[-1])
+        else:
+            lstphases.append('')
     phases[:] = lstphases
 
     new_events = append_fields(events, [('list_phase', dtype_desc)])
