@@ -103,7 +103,7 @@ def load_single_session_eeg(session, all_events, start_time, end_time, bipolar_p
         updated_events = np.rec.array(updated_events)
 
     # Use bipolar pairs if they exist and recording is not already bipolar
-    if 'bipolar_pairs' not in eeg.coords:
+    if eeg.channels.dtype.names is None:
         monopolar_channels = extract_monopolar_from_bipolar(bipolar_pairs)
         eeg_reader = EEGReader(events=session_events,
                                start_time=start_time,
