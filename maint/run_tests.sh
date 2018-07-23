@@ -9,7 +9,7 @@ conda env remove -n ramutils_test -y
 
 echo "Creating environment"
 set -e
-conda create -y -n ramutils_test python=3
+conda create -y -n ramutils_test python=3.6
 source activate ramutils_test
 conda install -y -c pennmem -c conda-forge --file=$BASEDIR/requirements.txt
 
