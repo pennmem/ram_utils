@@ -5,20 +5,14 @@ package:
   name: ramutils # {{ setup_data['name'] }}
   version: {{ setup_data['version'] }}
 
-{% if environ.get("TRAVIS_CI", 0) %}
 source:
   git_url: ../
-{% else %}
-source:
-  git_url: ../
-  git_rev: {{ 'v' + setup_data['version'] }}  # always use tagged version
-{% endif %}
 
 build:
   # If this is a new build for the same version, increment the build number by
   # setting the PKG_BUILDNUM environment variable. Without setting, this
   # defaults to 0.
-  number: {{ environ.get("PKG_BUILDNUM", 0) }}
+  number: 1
 
   # Specify additional env vars pass through.
   # Variables that are accessible by default are documented at:
