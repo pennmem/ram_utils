@@ -62,7 +62,7 @@ def test_generate_electrode_config(tmpdir):
 
 
 @pytest.mark.parametrize('experiment', ['AmplitudeDetermination', 'FR6'])
-def test_generate_ramulator_config(experiment):
+def test_generate_ramulator_config(experiment, output_dest):
     subject = 'R1354E'
 
     root = osp.join(osp.dirname(ramutils.test.test_data.__file__))
@@ -71,7 +71,7 @@ def test_generate_ramulator_config(experiment):
     # Since we're putting configs in a timestamped directory, we need to find it
     # before we can save the mocked classifier
     def save_classifier():
-        output_dir = osp.join(root, 'output')
+        output_dir = osp.join(output_dest, 'output')
         subdirs = [
             osp.join(output_dir, d)
             for d in os.listdir(output_dir)
@@ -106,8 +106,8 @@ def test_generate_ramulator_config(experiment):
         # don't have to worry about the fact that the subjects aren't the same.
         # All we are really doing in this test is verifying that stuff is saved.
         pairs='/input/configs/R1328E_pairs.json',
-        dest='output'
     )
+    paths.dest = os.path.join(output_dest, 'output')
 
     getpath = functools.partial(resource_filename, 'ramutils.test.test_data')
     with open(getpath('/input/configs/R1328E_excluded_pairs.json'), 'r') as f:
@@ -120,7 +120,8 @@ def test_generate_ramulator_config(experiment):
     else:
         raise RuntimeError("invalid experiment")
 
-    with patch.object(container, 'save', side_effect=lambda *_, **__: save_classifier()):
+    with patch.object(container, 'save',
+                      side_effect=lambda *_, **__: save_classifier()):
         path = generate_ramulator_config(subject, experiment, container,
                                          stim_params, paths,
                                          excluded_pairs=excluded_pairs,

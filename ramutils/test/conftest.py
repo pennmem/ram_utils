@@ -5,18 +5,18 @@ from tempfile import gettempdir
 def pytest_addoption(parser):
     parser.addoption("--rhino-root", action="store", default="/",
                      help="Mount point for RHINO")
-    parser.addoption("--output-dest", action="store",
+    parser.addoption("--output-dest", action="store", default=gettempdir(),
                      help="Where to store testing output")
 
 
 @pytest.fixture
 def rhino_root(request):
-    return request.config.getoption("--rhino-root", default="/")
+    return request.config.getoption("--rhino-root")
 
 
 @pytest.fixture
 def output_dest(request):
-    return request.config.getoption("--output-dest", default=gettempdir())
+    return request.config.getoption("--output-dest")
 
 
 def pytest_generate_tests(metafunc):
