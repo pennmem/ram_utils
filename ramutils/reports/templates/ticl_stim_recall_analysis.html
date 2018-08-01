@@ -1,4 +1,31 @@
 {% extends 'stim_recall_analysis.html' %}
+  {% block memory_modulation_table %}
+  <table id="memory_modulation_table" class="table table-striped table-hover">
+    <thead>
+    <tr>
+      <th>Parameters</th>
+      <th>Comparison</th>
+      <th>Stim</th>
+      <th>Non-stim</th>
+      <th>t-stat</th>
+      <th>p-value</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for test in recall_tests[:1] %}
+      <tr>
+        <td>{{test['parameters']}}</td>
+        <td>{{ test['comparison'] }}</td>
+        <td>{{ test['stim'][0] }}/{{ test['stim'][1] }} ({{ "{:.1f}".format(100 * (test['stim'][0] / test['stim'][1])) }}%)</td>
+        <td>{{ test['non-stim'][0] }}/{{ test['non-stim'][1] }} ({{ "{:.1f}".format(100 * (test['non-stim'][0] / test['non-stim'][1])) }}%)</td>
+        <td>{{ "{:.2f}".format(test['t-stat']) }}</td>
+        <td>{{ "{:.3f}".format(test['p-value']) }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% endblock %}
+
 {% block stim_recall_plot %}
     <h5> Number of stimulation periods by task phase</h5>
     <table id="stim_count_table" class="table table-striped table-hover">
