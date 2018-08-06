@@ -426,7 +426,9 @@ def load_eeg(all_events, start_time, end_time, bipolar_pairs):
     return full_eeg
 
 
-def save_eeg_by_channel_plot(bipolar_pairs, full_eeg, time=None, full_path=None):
+def save_eeg_by_channel_plot(bipolar_pairs, full_eeg,
+                             used_pair_mask=None,
+                             time=None, full_path=None):
     from matplotlib import pyplot as plt
     if full_path is None:
         full_path = io.BytesIO()
@@ -439,7 +441,13 @@ def save_eeg_by_channel_plot(bipolar_pairs, full_eeg, time=None, full_path=None)
     for i in range(0, len(bipolar_pairs)):
         plt.subplot(xlen, ylen, i + 1)
         plt.plot(time, full_eeg[i].squeeze().T, color='grey', alpha=0.05)
-        plt.ylim(-30000, 30000)
+        if used_pair_mask is not None:
+            if not used_pair_mask[i]:
+                ax = plt.gca()
+                for spine in ax.spines.values():
+                    spine.set_color('purple')
+                    width = spine.get_linewidth()
+                    spine.set_linewidth(width*3)
         plt.xlabel('%s' % (bipolar_pairs[i]))
     plt.tight_layout()
     plt.savefig(full_path,

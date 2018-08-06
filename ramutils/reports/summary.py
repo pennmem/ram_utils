@@ -20,7 +20,7 @@ from ramutils.exc import TooManySessionsError
 from ramutils.parameters import ExperimentParameters
 from ramutils.powers import save_power_plot, save_eeg_by_channel_plot
 from ramutils.utils import encode_file
-from ramutils.montage import generate_pairs_for_classifier
+from ramutils.montage import generate_pairs_for_classifier,get_used_pair_mask
 
 from traitschema import Schema
 from traits.api import Array, ArrayOrNone, Float, Unicode, Bool, Bytes, CArray
@@ -873,7 +873,11 @@ class StimSessionSummary(SessionSummary):
             pairs = ['%s-\n%s' % (pair['label0'], pair['label1'])
                      for pair in generate_pairs_for_classifier(self.bipolar_pairs, [])
                      ]
-            return encode_file(save_eeg_by_channel_plot(pairs, self._post_stim_eeg))
+            used_pair_mask = get_used_pair_mask(self.bipolar_pairs,
+                                                self.excluded_pairs)
+            return encode_file(save_eeg_by_channel_plot(pairs,
+                                                        self._post_stim_eeg,
+                                                        used_pair_mask))
 
     @property
     def subject(self):

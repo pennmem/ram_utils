@@ -5,7 +5,8 @@
         <div class="eeg-plot-img">
         <figure>
           <img class="img-thumbnail" src="data:image/png;base64,{{ summary.post_stim_eeg_plot }}">
-          <figcaption> Post-stim EEG by channel </figcaption>
+          <figcaption> Post-stim EEG by channel. Purple border indicates
+              channels excluded during artifact detection routine. </figcaption>
         </figure>
         </div>
         {% endfor %}
