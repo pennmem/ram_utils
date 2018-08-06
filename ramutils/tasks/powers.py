@@ -9,7 +9,7 @@ from ramutils.powers import get_trigger_frequency_mask as \
 from ramutils.controllability import calculate_modal_controllability, load_connectivity_matrix
 from ramutils.tasks import task
 from ramutils.powers import load_eeg as load_eeg_core
-
+from functools import wraps
 
 logger = get_logger()
 
@@ -24,6 +24,7 @@ __all__ = [
 
 
 @task()
+@wraps(reduce_powers_core)
 def reduce_powers(powers, channel_mask, n_frequencies, frequency_mask=None):
     reduced_powers = reduce_powers_core(powers, channel_mask, n_frequencies,
                                         frequency_mask=frequency_mask)
@@ -37,6 +38,7 @@ def subset_powers(powers, mask):
 
 
 @task(nout=2,cache=False)
+@wraps(compute_normalized_powers_core)
 def compute_normalized_powers(events, **kwargs):
     normalized_powers, updated_events = compute_normalized_powers_core(events,
                                                                        **kwargs)
@@ -71,11 +73,13 @@ def create_target_selection_table(pairs_metadata_table, normalized_powers,
 
 
 @task()
+@wraps(get_trigger_frequency_mask_core)
 def get_trigger_frequency_mask(trigger_frequency, frequencies):
     return get_trigger_frequency_mask_core(trigger_frequency, frequencies)
 
 
 @task()
+@wraps(load_eeg_core)
 def load_post_stim_eeg(events, **kwargs):
     return load_eeg_core(events,
                          start_time=kwargs['post_stim_start_time'],
