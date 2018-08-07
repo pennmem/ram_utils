@@ -271,8 +271,8 @@ def reduce_pairs(pairs, stim_params, return_excluded=False):
 
 
 def get_used_pair_mask(all_pairs, excluded_pairs):
-    """ Create a dictionary mapping electrode names to a boolean for if they
-    should be included or not in classifier training/evaluation
+    """ Create a boolean mask indicating which electrodes should be included
+    in classifier training/evaluation.
 
     Parameters
     ----------
@@ -281,9 +281,8 @@ def get_used_pair_mask(all_pairs, excluded_pairs):
 
     Returns
     -------
-    dict
-        Mapping between pair names in all_pairs and a boolean to
-        identify if the contact should be excluded
+    mask : List[bool]
+        Boolean mask of channels to include.
 
     """
     extracted_pairs = extract_pairs_dict(all_pairs)
@@ -293,8 +292,7 @@ def get_used_pair_mask(all_pairs, excluded_pairs):
                            "the mask")
 
     pair_list = extracted_pairs.keys()
-    mask = [False if (label in excluded_pairs) else True for
-            label in pair_list]
+    mask = [label not in excluded_pairs for label in pair_list]
 
     return mask
 
