@@ -147,8 +147,6 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
                             post_stim_trigger_output=None,
                             post_stim_eeg=None):
     """ Construct stim session summaries """
-    import pdb
-    pdb.set_trace()
     sessions = extract_sessions(task_events)
     stim_table_events = select_stim_table_events(stim_params)
     location_data = pairs_data[['label', 'location']]

@@ -441,7 +441,11 @@ def save_eeg_by_channel_plot(bipolar_pairs, full_eeg,
         plt.subplot(xlen, ylen, i + 1)
         txtcolor='black'
         if used_pair_mask is not None and not used_pair_mask[i]:
-            txtcolor='red'
+            ax = plt.gca()
+            txtcolor='magenta'
+            for spine in ax.spines.values():
+                spine.set_linewidth(6*spine.get_linewidth())
+                spine.set_edgecolor('magenta')
 
         plt.plot(time, full_eeg[i].squeeze().T, color='grey', alpha=0.05)
         plt.xlabel('%s' % (bipolar_pairs[i]), color=txtcolor)
