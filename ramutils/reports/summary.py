@@ -9,7 +9,7 @@ import pandas as pd
 import pytz
 import pickle
 import base64
-
+from collections import OrderedDict
 import io
 
 from ramutils.utils import safe_divide
@@ -873,7 +873,13 @@ class StimSessionSummary(SessionSummary):
             pairs = ['%s-\n%s' % (pair['label0'], pair['label1'])
                      for pair in generate_pairs_for_classifier(self.bipolar_pairs, [])
                      ]
-            used_pair_mask = get_used_pair_mask(self.bipolar_pairs,
+            bipolar_pairs = pd.DataFrame.from_dict(
+                self.bipolar_pairs[self.subject]['pairs']
+            )
+            bipolar_pairs = bipolar_pairs.T.sort_values(by=['channel_1','channel_2'])
+            bipolar_pairs = bipolar_pairs.T.to_dict(into=OrderedDict)
+            bipolar_pairs = OrderedDict({self.subject: {'pairs': bipolar_pairs}})
+            used_pair_mask = get_used_pair_mask(bipolar_pairs,
                                                 self.excluded_pairs)
             return encode_file(save_eeg_by_channel_plot(pairs,
                                                         self._post_stim_eeg,

@@ -7,6 +7,8 @@ from ramutils.montage import build_montage_metadata_table
 from ramutils.montage import get_pairs as get_pairs_core
 from ramutils.montage import get_trigger_electrode_mask as \
     get_trigger_electrode_mask_core
+from ramutils.montage import extract_rejected_pairs as \
+    extract_rejected_pairs_core
 from ramutils.montage import get_classifier_excluded_leads as get_classifier_excluded_leads_core
 
 
@@ -17,7 +19,8 @@ __all__ = [
     'generate_montage_metadata_table',
     'get_trigger_electrode_mask',
     'get_pairs',
-    'get_classifier_excluded_leads'
+    'get_classifier_excluded_leads',
+    'extract_rejected_pairs'
 ]
 
 
@@ -57,3 +60,10 @@ def get_trigger_electrode_mask(montage_metadata_table, electrode_label):
 @task()
 def get_pairs(subject, experiment, sessions, paths):
     return get_pairs_core(subject, experiment, sessions, paths)
+
+
+@task()
+def extract_rejected_pairs(subject,used_classifiers,
+                           ec_pairs, used_pair_mask):
+    return extract_rejected_pairs_core(subject,used_classifiers,
+                                       ec_pairs, used_pair_mask)

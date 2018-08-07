@@ -434,21 +434,17 @@ def save_eeg_by_channel_plot(bipolar_pairs, full_eeg,
         full_path = io.BytesIO()
     if time is None:
         time = np.arange(full_eeg.shape[-1])
-
     ylen = int(np.sqrt(full_eeg.shape[0]))
     xlen = int(len(bipolar_pairs) / ylen) + 1
     plt.figure(figsize=(20, 15))
     for i in range(0, len(bipolar_pairs)):
         plt.subplot(xlen, ylen, i + 1)
+        txtcolor='black'
+        if used_pair_mask is not None and not used_pair_mask[i]:
+            txtcolor='red'
+
         plt.plot(time, full_eeg[i].squeeze().T, color='grey', alpha=0.05)
-        if used_pair_mask is not None:
-            if not used_pair_mask[i]:
-                ax = plt.gca()
-                for spine in ax.spines.values():
-                    spine.set_color('purple')
-                    width = spine.get_linewidth()
-                    spine.set_linewidth(width*3)
-        plt.xlabel('%s' % (bipolar_pairs[i]))
+        plt.xlabel('%s' % (bipolar_pairs[i]), color=txtcolor)
     plt.tight_layout()
     plt.savefig(full_path,
                 format='png',
