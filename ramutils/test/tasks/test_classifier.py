@@ -1,12 +1,14 @@
-import pytest
 import functools
+import os
+from pkg_resources import resource_filename
+
 import numpy as np
+import pytest
 
 from ramutils.parameters import FRParameters, PALParameters
 from ramutils.tasks.classifier import summarize_classifier
 from ramutils.utils import load_event_test_data
 
-from pkg_resources import resource_filename
 from sklearn.externals import joblib
 
 
@@ -14,6 +16,8 @@ datafile = functools.partial(resource_filename,
                              'ramutils.test.test_data.input')
 
 
+@pytest.mark.skipif(os.environ.get("TRAVIS_CI", None) is not None,
+                    reason="consumes too many resources on TravisCI")
 @pytest.mark.slow
 class TestCrossValidation:
     @pytest.mark.parametrize('subject, params', [
