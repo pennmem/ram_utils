@@ -134,11 +134,9 @@ var ramutils = (function (mod, Plotly) {
         title: 'Number of Items Stimulated and Number of Items Recalled',
         xaxis: {
           title: 'List number',
-          range: [0, Math.max(...stimEvents.listno) + 0.5]
         },
         yaxis: {
           title: 'Number of items',
-          range: [0, Math.max(...stimEvents.count) + 0.5]
         }
       };
 
