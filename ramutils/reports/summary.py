@@ -558,6 +558,11 @@ class SessionSummary(Summary):
         self._excluded_pairs = json.dumps(new_excluded_pairs)
 
     @property
+    def n_pairs(self):
+        """ Returns the number of bipolar pairs in the recording"""
+        return len(self.bipolar_pairs[self.subject]['pairs'])
+
+    @property
     def normalized_powers(self):
         """ Powers normalized to 0 mean and unit variance """
         return self._normalized_powers

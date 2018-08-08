@@ -2,6 +2,8 @@
     {% if summaries.__len__() %}
     <h2> Post-stim EEG</h2>
         {% for summary in summaries %}
+        {{ summary.excluded_pairs.__len__() }}/{{ summary.n_pairs }} channels
+        rejected due to artifact.
         <div class="eeg-plot-img">
         <figure>
           <img class="img-thumbnail" src="data:image/png;base64,{{ summary.post_stim_eeg_plot }}">
