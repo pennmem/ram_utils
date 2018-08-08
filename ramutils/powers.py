@@ -436,7 +436,7 @@ def save_eeg_by_channel_plot(bipolar_pairs, full_eeg,
         time = np.arange(full_eeg.shape[-1])
     ylen = int(np.sqrt(full_eeg.shape[0]))
     xlen = int(len(bipolar_pairs) / ylen) + 1
-    plt.figure(figsize=(20, 15))
+    plt.figure(figsize=(xlen*2, ylen*2))
     for i in range(0, len(bipolar_pairs)):
         plt.subplot(xlen, ylen, i + 1)
         txtcolor='black'
@@ -447,7 +447,7 @@ def save_eeg_by_channel_plot(bipolar_pairs, full_eeg,
                 spine.set_linewidth(6*spine.get_linewidth())
                 spine.set_edgecolor('magenta')
 
-        plt.plot(time, full_eeg[i].squeeze().T, color='grey', alpha=0.05)
+        plt.plot(time, full_eeg[i].squeeze().T, color='grey', alpha=0.15)
         plt.xlabel('%s' % (bipolar_pairs[i]), color=txtcolor)
     plt.tight_layout()
     plt.savefig(full_path,
