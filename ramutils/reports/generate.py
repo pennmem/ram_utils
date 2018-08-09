@@ -245,6 +245,13 @@ class ReportGenerator(object):
             }
             plot_data['post_stim_plots'] = [summary.post_stim_eeg_plot
                                             for summary in self.session_summaries]
+            if self.experiment == 'TICL_FR':
+                good_tstats, bad_tstats = TICLFRSessionSummary.stim_tstats_by_condition(self.session_summaries)
+                plot_data['stim_tstat'] = {
+                    'good_tstats': good_tstats,
+                    'bad_tstats': bad_tstats
+                }
+
 
         if biomarker_delta:
             if self.experiment == 'TICL_FR':

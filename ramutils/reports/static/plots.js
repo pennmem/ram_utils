@@ -517,6 +517,19 @@ var ramutils = (function (mod, Plotly) {
 
       Plotly.plot('ps4-delta-classifier-placeholder', deltaClassifierData, layout_top);
       Plotly.plot('ps4-post-classifier-placeholder', postStimClassifierData, layout_bottom);
+    },
+    plotStimTStatHistogram: function(stim_tstat_data){
+        let good_trace = {
+            x: stim_tstat_data.good_tstats,
+            type: "histogram",
+        };
+        let bad_trace = {
+            x: stim_tstat_data.bad_tstats,
+            type: "histogram",
+        };
+        let data=[good_trace, bad_trace];
+        let layout = {barmode: "stack"}
+        Plotly.plot("stim-tstat-histogram", data, layout)
     }
   };
 

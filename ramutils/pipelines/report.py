@@ -414,8 +414,8 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
     excluded_pairs = extract_rejected_pairs(subject, used_classifiers, ec_pairs,
                                             used_pair_mask)
 
-    pairs_metadata_table['stim_tstats'] = get_tstats(
-        all_events[all_events['type'] == 'STIM_ON'])
+    pairs_metadata_table['stim_tstats'], pairs_metadata_table['stim_pvals'] = get_tstats(
+        all_events[all_events['type'] == 'STIM_ON'], return_pvalues=True)
 
     session_summaries = summarize_stim_sessions(all_events, final_task_events,
                                                 stim_data, pairs_metadata_table,

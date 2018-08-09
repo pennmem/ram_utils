@@ -30,7 +30,7 @@ def get_tstats(stim_events, return_pvalues=False):
     # Only use stim events from artifact detection period
     stim_events = stim_events[stim_events['list'] == -999]
     if len(stim_events) == 0:
-        return None
+        return (None, None) if return_pvalues else None
 
     pre_stim_eeg = ramutils.powers.load_eeg(
         stim_events,

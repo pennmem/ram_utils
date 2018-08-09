@@ -293,7 +293,7 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
                 raw_events=all_session_events,
                 biomarker_events=biomarker_events,
                 post_stim_eeg=post_stim_eeg,
-                stim_tstats=pairs_data['stim_tstats'].values
+                stim_tstats=pairs_data[['stim_tstats','stim_pvals']].to_records()
             )
 
         else:
