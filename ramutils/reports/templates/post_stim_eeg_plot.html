@@ -6,10 +6,11 @@
         rejected due to artifact.
     <figure>
         <div class="eeg-plot-img">
-            {% for plotstr in summary.post_stim_eeg_plot %}
+            {% for plotstr in enumerate(summary.post_stim_eeg_plot) %}
             <div>
                 <img class="img-thumbnail" src="data:image/png;base64,{{ plotstr }}">
             </div>
+            {% endfor %}
         </div>
     <figcaption> Post-stim EEG by channel. Purple border indicates
       channels excluded during artifact detection routine. </figcaption>
