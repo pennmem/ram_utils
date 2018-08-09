@@ -31,3 +31,8 @@ figcaption {
 #footer-spacer {
   padding-bottom: 5em;
 }
+
+.eeg-plot-img {
+  display: flex;
+  flex-flow: row wrap;
+}

@@ -886,9 +886,10 @@ class StimSessionSummary(SessionSummary):
             bipolar_pairs = OrderedDict({self.subject: {'pairs': bipolar_pairs}})
             used_pair_mask = get_used_pair_mask(bipolar_pairs,
                                                 self.excluded_pairs)
-            return encode_file(save_eeg_by_channel_plot(pairs,
-                                                        self._post_stim_eeg,
-                                                        used_pair_mask))
+            return [encode_file(save_eeg_by_channel_plot(pairs[i:i+1],
+                                                        self._post_stim_eeg[i:i+1],
+                                                        used_pair_mask[i:i+1]))
+                    for i in range(len(pairs))]
 
     @property
     def subject(self):
