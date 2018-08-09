@@ -6,6 +6,7 @@ import pandas as pd
 from ramutils.events import dataframe_to_recarray
 from ramutils.tasks import *
 from ramutils.utils import extract_experiment_series
+from ramutils.stim_artifact import get_tstats
 from .hooks import PipelineCallback
 
 ReportData = namedtuple('ReportData', 'session_summaries, math_summaries, '
@@ -412,6 +413,9 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
                                                       **kwargs)
     excluded_pairs = extract_rejected_pairs(subject, used_classifiers, ec_pairs,
                                             used_pair_mask)
+
+    pairs_metadata_table['stim_tstats'] = get_tstats(
+        all_events[all_events['type'] == 'STIM_ON'])
 
     session_summaries = summarize_stim_sessions(all_events, final_task_events,
                                                 stim_data, pairs_metadata_table,

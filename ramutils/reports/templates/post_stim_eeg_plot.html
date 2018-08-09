@@ -5,17 +5,24 @@
         {{ summary.excluded_pairs.__len__() }}/{{ summary.n_pairs }} channels
         rejected due to artifact.
     <figure>
-        <div class="eeg-plot-img">
-            {% for plotstr in enumerate(summary.post_stim_eeg_plot) %}
-            <div>
+        <div class="eeg-plot-container">
+            {% for plotstr in summary.post_stim_eeg_plot %}
+            <div class="hashovertext eeg-plot-img">
                 <img class="img-thumbnail" src="data:image/png;base64,{{ plotstr }}">
+                {% if experiment=='TICL_FR' %}
+                <span class="hovertext">{{ 't=%.2f'%summary.stim_tstats[loop.index0] }} </span>
+                {% endif %}
             </div>
             {% endfor %}
         </div>
     <figcaption> Post-stim EEG by channel. Purple border indicates
-      channels excluded during artifact detection routine. </figcaption>
+        channels excluded during artifact detection routine.
+        <br>{% if experiment == 'TICL_FR' %}
+        Mouse over to see t-statistic from artifact detection {% endif %}
+    </figcaption>
     </figure>
 
         {% endfor %}
     {% endif %}
 </div>
+

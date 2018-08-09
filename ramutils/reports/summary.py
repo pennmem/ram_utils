@@ -1205,11 +1205,12 @@ class FR5SessionSummary(FRStimSessionSummary):
 class TICLFRSessionSummary(FRStimSessionSummary):
 
     biomarker_events = ArrayOrNone
+    stim_tstats = CArray
 
     def populate(self, events, bipolar_pairs,
                  excluded_pairs, normalized_powers, post_stim_prob_recall=None,
                  raw_events=None, model_metadata={}, post_stim_eeg=None,
-                 biomarker_events=None):
+                 biomarker_events=None, stim_tstats=None):
 
         FRStimSessionSummary.populate(self, events, bipolar_pairs,
                      excluded_pairs, normalized_powers,
@@ -1217,6 +1218,7 @@ class TICLFRSessionSummary(FRStimSessionSummary):
                      raw_events, model_metadata, post_stim_eeg,
                      )
         self.biomarker_events = biomarker_events
+        self.stim_tstats = stim_tstats
 
     def nstims(self, task_phase):
         """

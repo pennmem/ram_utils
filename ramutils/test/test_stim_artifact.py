@@ -20,6 +20,6 @@ def test_get_tstats(rhino_root):
     stim_events = events[events.type == 'STIM_ON']
     assert sum(stim_events.list == -999) == 30
 
-    tstats, pvals = stim_artifact.get_tstats(stim_events)
+    tstats, pvals = stim_artifact.get_tstats(stim_events, return_pvalues=True)
     assert len(tstats) == len(pairs)
     assert sum(pvals < 0.001) == 140

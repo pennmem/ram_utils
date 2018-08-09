@@ -32,7 +32,7 @@ figcaption {
   padding-bottom: 5em;
 }
 
-.eeg-plot-img {
+.eeg-plot-container {
   display: flex;
   flex-flow: row wrap;
 }
@@ -40,4 +40,30 @@ figcaption {
 .eeg-plot-img .img-thumbnail {
     height: 8rem;
     width: 8rem;
+}
+
+.hashovertext {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+}
+
+/* Tooltip text */
+.hashovertext .hovertext {
+    visibility: hidden;
+    width: 90px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
+    top: -25%;
+    left: 25%;
+
+    position: absolute;
+    z-index: 1;
+}
+
+.hashovertext:hover .hovertext {
+    visibility: visible;
 }

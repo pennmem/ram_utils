@@ -10,7 +10,7 @@ from ramutils.montage import get_trigger_electrode_mask as \
 from ramutils.montage import extract_rejected_pairs as \
     extract_rejected_pairs_core
 from ramutils.montage import get_classifier_excluded_leads as get_classifier_excluded_leads_core
-
+from ramutils.stim_artifact import get_tstats
 
 __all__ = [
     'generate_pairs_for_classifier',
@@ -20,7 +20,8 @@ __all__ = [
     'get_trigger_electrode_mask',
     'get_pairs',
     'get_classifier_excluded_leads',
-    'extract_rejected_pairs'
+    'extract_rejected_pairs',
+    'get_artifact_tstats',
 ]
 
 
@@ -67,3 +68,8 @@ def extract_rejected_pairs(subject,used_classifiers,
                            ec_pairs, used_pair_mask):
     return extract_rejected_pairs_core(subject,used_classifiers,
                                        ec_pairs, used_pair_mask)
+
+
+@task()
+def get_artifact_tstats(stim_events):
+    return get_tstats(stim_events)[0]
