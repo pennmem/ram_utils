@@ -698,9 +698,11 @@ def generate_pairs_from_electrode_config(subject, experiment, session, paths):
 
 
 def extract_rejected_pairs(subject, used_classifiers, ec_pairs, used_pair_mask):
+    used_pair_mask = np.array(used_pair_mask)
     for classifier in used_classifiers:
-        used_pair_mask &= compare_recorded_with_all_pairs(ec_pairs,
-                                                          classifier.pairs)
+        if classifier is not None:
+            used_pair_mask &= compare_recorded_with_all_pairs(ec_pairs,
+                                                              classifier.pairs)
     rejected_pairs = generate_pairs_for_classifier(ec_pairs, {})[
         ~used_pair_mask]
     rejected_pairs_as_stim_params = make_stim_params(
