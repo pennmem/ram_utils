@@ -1,8 +1,24 @@
 Changes
 =======
 
+Version 2.2.3
+-------------
+**Upcoming**
+
+* Tests now save data to temporary directory by default
+* `reload_classifier` to load retrained classifier when it exists
+* Post-stim EEG plot shows which channels were rejected by artifact detection
+* TICL_FR report now renders the stim recall plot
+
+Version 2.2.2
+-------------
+**2018-07-18**
+
+* Bugfixes for PTSA 2.0 support
+
 Version 2.2.1
 -------------
+**2018-07-16**
 
 * Made `ramutils.test` executable (#225)
 * Updated CI testing to always build and use the conda package (#227)

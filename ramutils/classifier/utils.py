@@ -38,17 +38,21 @@ def reload_classifier(subject, task, session, mount_point='/', base_path=None):
                                  'session_{}'.format(str(session)),
                                  'host_pc')
 
-    timestamped_dirs = glob(base_path + "/*")
-    if len(timestamped_dirs) < 1:
+    config_paths = glob(os.path.join(base_path,'*', 'config_files'))
+    if len(config_paths) < 1:
         # expected host_pc folder does not exist
         return None
 
-    if len(timestamped_dirs) > 1:
+    if len(config_paths) > 1:
         # Return the original classifier
-        config_path = os.path.join(timestamped_dirs[0], 'config_files')
+        retrained_classifier_paths = glob(os.path.join(
+            base_path, '*', 'config_files', 'retrained_classifier'))
+        if len(retrained_classifier_paths):
+            config_path = sorted(retrained_classifier_paths)[-1]
+        else:
+            config_path = sorted(config_paths)[-1]
         classifier_path = glob(os.path.join(config_path,
                                             '*classifier*.zip'))
-
         # No container was found, likely because it is the old .pkl version
         if len(classifier_path) == 0:
             return None
@@ -56,7 +60,7 @@ def reload_classifier(subject, task, session, mount_point='/', base_path=None):
         orig_classifier_container = ClassifierContainer.load(classifier_path)
         return orig_classifier_container
 
-    timestamped_path = timestamped_dirs[0]
+
 
     # FIXME: this needs a data quality check to confirm that all classifiers in
     # a session are the same!
@@ -64,7 +68,7 @@ def reload_classifier(subject, task, session, mount_point='/', base_path=None):
     # classifiers can be different depending on artifact detection. In
     # reality, stim sessions should never be restarted (apart from issues
     # getting things started in the first place).
-    config_path = os.path.join(timestamped_path, 'config_files')
+    config_path = config_paths[-1]
     if 'retrained_classifier' in os.listdir(config_path):
         classifier_path = glob(os.path.join(config_path,
                                             'retrained_classifier',

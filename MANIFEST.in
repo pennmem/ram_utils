@@ -4,3 +4,4 @@ include ramutils/data/*
 recursive-exclude MatlabIO *
 recursive-include ramutils/reports *.html *.js *.css
 recursive-include ramutils/test/test_data *.npy *.npz *.png *.pkl *.hdf5 *.txt *.zip *.json *.csv *.mat *.bin
+recursive-exclude ramutils/test/test_data/output *

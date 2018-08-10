@@ -332,7 +332,7 @@ def compare_recorded_with_all_pairs(all_pairs, classifier_pairs):
         if pair not in used_pairs:
             pair_mask[i] = False
 
-    return pair_mask
+    return np.array(pair_mask)
 
 
 def extract_pairs_dict(pairs):
@@ -695,3 +695,21 @@ def generate_pairs_from_electrode_config(subject, experiment, session, paths):
                                              rootdir=paths.root)
 
     return pairs_from_ec
+
+
+def extract_rejected_pairs(subject, used_classifiers, ec_pairs, used_pair_mask):
+    used_pair_mask = np.array(used_pair_mask)
+    for classifier in used_classifiers:
+        if classifier is not None:
+            used_pair_mask &= compare_recorded_with_all_pairs(ec_pairs,
+                                                              classifier.pairs)
+    rejected_pairs = generate_pairs_for_classifier(ec_pairs, {})[
+        ~used_pair_mask]
+    rejected_pairs_as_stim_params = make_stim_params(
+        subject, rejected_pairs.label0.astype(str),
+        rejected_pairs.label1.astype(str),
+        target_amplitudes=[0]*len(rejected_pairs))
+    rejected_pairs = reduce_pairs(ec_pairs,
+                                  rejected_pairs_as_stim_params,
+                                  return_excluded=True)
+    return rejected_pairs

@@ -9,7 +9,7 @@ import pandas as pd
 import pytz
 import pickle
 import base64
-
+from collections import OrderedDict
 import io
 
 from ramutils.utils import safe_divide
@@ -20,7 +20,7 @@ from ramutils.exc import TooManySessionsError
 from ramutils.parameters import ExperimentParameters
 from ramutils.powers import save_power_plot, save_eeg_by_channel_plot
 from ramutils.utils import encode_file
-from ramutils.montage import generate_pairs_for_classifier
+from ramutils.montage import generate_pairs_for_classifier,get_used_pair_mask
 
 from traitschema import Schema
 from traits.api import Array, ArrayOrNone, Float, Unicode, Bool, Bytes, CArray
@@ -558,6 +558,11 @@ class SessionSummary(Summary):
         self._excluded_pairs = json.dumps(new_excluded_pairs)
 
     @property
+    def n_pairs(self):
+        """ Returns the number of bipolar pairs in the recording"""
+        return len(self.bipolar_pairs[self.subject]['pairs'])
+
+    @property
     def normalized_powers(self):
         """ Powers normalized to 0 mean and unit variance """
         return self._normalized_powers
@@ -873,7 +878,17 @@ class StimSessionSummary(SessionSummary):
             pairs = ['%s-\n%s' % (pair['label0'], pair['label1'])
                      for pair in generate_pairs_for_classifier(self.bipolar_pairs, [])
                      ]
-            return encode_file(save_eeg_by_channel_plot(pairs, self._post_stim_eeg))
+            bipolar_pairs = pd.DataFrame.from_dict(
+                self.bipolar_pairs[self.subject]['pairs']
+            )
+            bipolar_pairs = bipolar_pairs.T.sort_values(by=['channel_1','channel_2'])
+            bipolar_pairs = bipolar_pairs.T.to_dict(into=OrderedDict)
+            bipolar_pairs = OrderedDict({self.subject: {'pairs': bipolar_pairs}})
+            used_pair_mask = get_used_pair_mask(bipolar_pairs,
+                                                self.excluded_pairs)
+            return encode_file(save_eeg_by_channel_plot(pairs,
+                                                        self._post_stim_eeg,
+                                                        used_pair_mask))
 
     @property
     def subject(self):

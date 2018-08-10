@@ -56,13 +56,17 @@
     $('#memory_modulation_table').DataTable();
 
     let plot_data = JSON.parse('{{ plot_data }}');
-    const summary = plot_data["recall_summary"];
+    let summary = plot_data["recall_summary"];
     const probs = plot_data["stim_probability"];
     const recallDifference = plot_data["recall_difference"];
-
+    {% if experiment == "TICL_FR" %}
+    summary.stim_events.count = summary.stim_events.count.map(a=>0);
+    {% endif %}
 
     ramutils.plots.plotRecallSummary(summary['nonstim'], summary['stim'], summary['stim_events']);
+    {% if experiment != "TICL_FR" %}
     ramutils.plots.plotStimProbability(probs['serialpos'], probs['probability']);
+    {% endif %}
     ramutils.plots.plotRecallDifference(recallDifference['stim'], recallDifference['post_stim']);
   });
 </script>

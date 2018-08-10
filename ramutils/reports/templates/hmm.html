@@ -3,24 +3,30 @@
   <h2>Estimated Effect of Stimulation</h2>
   <figure>
   <div class="row">
+      {% block list_effect %}
       <div class="col-md-4">
         <figure>
           <img class="img-thumbnail" src="data:image/png;base64,{{ hmm_results['list'] }}">
           <figcaption>Stim Lists vs. Non-Stim Lists</figcaption>
         </figure>
       </div>
+      {% endblock %}
+      {% block item_effect_stim %}
        <div class="col-md-4">
         <figure>
           <img class="img-thumbnail" src="data:image/png;base64,{{ hmm_results['stim_item'] }}">
           <figcaption>Stim Items vs. Low Biomarker Non-Stim Items</figcaption>
         </figure>
       </div>
+      {% endblock %}
+      {% block item_effect_poststim %}
       <div class="col-md-4">
         <figure>
           <img class="img-thumbnail" src="data:image/png;base64,{{ hmm_results['post_stim_item'] }}">
           <figcaption>Post-Stim Items vs. Low Biomarker Non-Stim Items</figcaption>
         </figure>
       </div>
+      {% endblock %}
   </div>
     <figcaption>
         Filled circles represent point estimates for the effect of stimulation, while horizontal lines are the

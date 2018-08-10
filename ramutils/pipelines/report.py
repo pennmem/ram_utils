@@ -3,11 +3,10 @@ from collections import namedtuple
 
 import pandas as pd
 
-from ramutils.tasks import *
-from ramutils.utils import extract_experiment_series, encode_file
 from ramutils.events import dataframe_to_recarray
+from ramutils.tasks import *
+from ramutils.utils import extract_experiment_series
 from .hooks import PipelineCallback
-from ramutils.log import get_logger
 
 ReportData = namedtuple('ReportData', 'session_summaries, math_summaries, '
                                       'target_selection_table, classifier_evaluation_results,'
@@ -411,6 +410,8 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
                                                       post_stim_powers=post_stim_powers,
                                                       pairs=pairinfo,
                                                       **kwargs)
+    excluded_pairs = extract_rejected_pairs(subject, used_classifiers, ec_pairs,
+                                            used_pair_mask)
 
     session_summaries = summarize_stim_sessions(all_events, final_task_events,
                                                 stim_data, pairs_metadata_table,

@@ -289,7 +289,7 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
             stim_session_summary = TICLFRSessionSummary()
             stim_session_summary.populate(
                 stim_events, bipolar_pairs,
-                excluded_pairs, trigger_output,
+                excluded_pairs, session_powers,
                 raw_events=all_session_events,
                 biomarker_events=biomarker_events,
                 post_stim_eeg=post_stim_eeg,
