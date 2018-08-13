@@ -1222,10 +1222,11 @@ class TICLFRSessionSummary(FRStimSessionSummary):
 
     @classmethod
     def stim_tstats_by_condition(cls, session_summaries):
-        good_tstats = [summary.stim_tstats[summary.stim_pvals > 0.001]
-                       for summary in session_summaries]
-        bad_tstats = [summary.stim_tstats[summary.stim_pvals < 0.001]
-                       for summary in session_summaries]
+        good_tstats = [x for summary in session_summaries
+                       for x in
+                       summary.stim_tstats[summary.stim_pvals > 0.001]]
+        bad_tstats = [x for summary in session_summaries
+                      for x in summary.stim_tstats[summary.stim_pvals < 0.001]]
         return good_tstats, bad_tstats
 
     def nstims(self, task_phase):
@@ -1268,11 +1269,11 @@ class TICLFRSessionSummary(FRStimSessionSummary):
 
     @property
     def stim_tstats(self):
-        return self._stim_tstats.stim_tstats
+        return self._stim_tstats['stim_tstats']
 
     @property
     def stim_pvals(self):
-        return self._stim_tstats.stim_pvals
+        return self._stim_tstats['stim_pvals']
 
     @staticmethod
     def pre_stim_prob_recall(summaries, phase=None):

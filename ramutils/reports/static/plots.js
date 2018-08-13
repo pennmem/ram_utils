@@ -522,13 +522,19 @@ var ramutils = (function (mod, Plotly) {
         let good_trace = {
             x: stim_tstat_data.good_tstats,
             type: "histogram",
+            name: "Accepted channels"
         };
         let bad_trace = {
             x: stim_tstat_data.bad_tstats,
             type: "histogram",
+            name: "Rejected channels"
         };
         let data=[good_trace, bad_trace];
-        let layout = {barmode: "stack"}
+        let layout = {
+             barmode: "stack",
+             xaxis: {name: "T-statistic"},
+             yaxis: {name: "Channel count"}
+             };
         Plotly.plot("stim-tstat-histogram", data, layout)
     }
   };

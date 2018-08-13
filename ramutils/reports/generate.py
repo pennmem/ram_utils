@@ -249,7 +249,7 @@ class ReportGenerator(object):
                 good_tstats, bad_tstats = TICLFRSessionSummary.stim_tstats_by_condition(self.session_summaries)
                 plot_data['stim_tstat'] = {
                     'good_tstats': good_tstats,
-                    'bad_tstats': bad_tstats
+                    'bad_tstats': bad_tstats,
                 }
 
 
