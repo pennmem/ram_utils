@@ -1,9 +1,18 @@
 Changes
 =======
 
+Version 2.2.4
+-------------
+**TBD**
+
+* Added histogram of T-statistics from artifact detection to TICL_FR
+* Added artifact detection T-statistics when hovering over post-stim EEG plot
+* Added support for generating LocationSearch reports (unstable)
+
+
 Version 2.2.3
 -------------
-**Upcoming**
+**2018-08-10**
 
 * Tests now save data to temporary directory by default
 * `reload_classifier` to load retrained classifier when it exists
