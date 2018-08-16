@@ -4,7 +4,7 @@ import numpy as np
 
 from ramutils.tasks import task, make_task
 from cmlreaders import CMLReader, get_data_index
-from cmlreaders.timeseries import TimeSeries
+from cmlreaders.eeg_container import EEGContainer
 
 import ramutils.montage
 import ramutils.events
@@ -138,7 +138,7 @@ def get_resting_connectivity(subject, rootdir) -> np.ndarray:
         eeg = connectivity.read_eeg_data(reader, resting, reref=reref)
         eeg_data.append(eeg)
 
-    eegs = TimeSeries.concatenate(eeg_data)
+    eegs = EEGContainer.concatenate(eeg_data)
     conn = connectivity.get_resting_state_connectivity(eegs.to_mne(),
                                                        eegs.samplerate)
     return conn

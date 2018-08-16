@@ -1,10 +1,7 @@
 import numpy as np
 from cmlreaders.path_finder import PathFinder
-import os
-from glob import glob
 from scipy.stats import ttest_rel
 from scipy.stats import levene
-import itertools
 
 """
 Three-stage filter for rejecting artifactual signals:
