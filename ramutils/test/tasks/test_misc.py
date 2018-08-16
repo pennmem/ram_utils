@@ -40,8 +40,10 @@ def test_build_report_from_cached_results():
 
     # Check that non-existent data returns all None values
     prior_results = load_existing_results(
-        'R1345D', 'FR1', [1], False, datafile('input/report_db'),
-        datafile('')).compute()
+        'R1345D', 'FR1', [1], False,
+        db_loc=datafile('input/report_db'),
+        joint_report=False,
+        rootdir=datafile('')).compute()
 
     results = [v for k, v in prior_results.items()]
 

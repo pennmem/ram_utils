@@ -4,6 +4,7 @@ from datetime import datetime
 import json
 import os.path as osp
 import random
+import itertools
 
 from itertools import compress
 from jinja2 import Environment, PackageLoader
@@ -12,7 +13,8 @@ from pkg_resources import resource_listdir, resource_string
 
 from ramutils import __version__
 from ramutils.reports.summary import (FRSessionSummary, MathSummary,
-                                      FRStimSessionSummary, TICLFRSessionSummary)
+                                      FRStimSessionSummary, TICLFRSessionSummary,
+                                      LocationSearchSessionSummary)
 from ramutils.events import extract_experiment_from_events, extract_subject
 from ramutils.utils import extract_experiment_series
 
@@ -63,7 +65,8 @@ class ReportGenerator(object):
 
     Supported reports:
 
-    * FR1, catFR1, FR2, catFR2, FR3, catFR3, FR5, catFR5, PS4, PS5, FR6, catFR6
+    * FR1, catFR1, FR2, catFR2, FR3, catFR3, FR5, catFR5, PS4, PS5, FR6, catFR6,
+      TICL_FR, LocationSearch
 
     """
 
@@ -295,6 +298,9 @@ class ReportGenerator(object):
         elif all(['PS5' in exp for exp in self.experiments]):
             return self.generate_ps5_report()
 
+        elif all(['LocationSearch' in exp for exp in self.experiments]):
+            return self.generate_location_search_report()
+
         elif all(['TICL_FR' in exp for exp in self.experiments]):
             return self.generate_closed_loop_fr_report('TICL_FR')
 
@@ -461,3 +467,16 @@ class ReportGenerator(object):
             plot_data=self._make_plot_data(stim=True, classifier=False,
                                            biomarker_delta=True)
         )
+
+    def generate_location_search_report(self):
+        """ Generate a LocationSearch report
+
+        Returns
+        -------
+        Rendered LocationSearch report as a string
+        """
+        return self._render('LocationSearch',
+                            stim=True,
+                            stim_params=LocationSearchSessionSummary.stim_params(
+                                self.session_summaries
+                            ))

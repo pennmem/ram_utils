@@ -86,7 +86,7 @@ def make_report(subject, experiment, paths, joint_report=False,
         stim_params.extend(classifier_excluded_leads)
     excluded_pairs = reduce_pairs(ec_pairs, stim_params, return_excluded=True)
 
-    # PS4 is such a special beast, that we just return it's own sub-pipeline
+    # PS4 is such a special beast, that we just return its own sub-pipeline
     # in order to simplify the branching logic for generating all other reports
     if "PS4" in experiment:
         return generate_ps4_report(subject, experiment, sessions, ec_pairs,
@@ -98,7 +98,7 @@ def make_report(subject, experiment, paths, joint_report=False,
     series_num = extract_experiment_series(experiment)
 
     if not rerun:
-        print('Loading results from %s'%paths.data_db)
+        print('Loading results from %s' % paths.data_db)
         pre_built_results = load_existing_results(subject, experiment, sessions, stim_report,
                                                   paths.data_db,
                                                   joint_report,
@@ -164,6 +164,11 @@ def make_report(subject, experiment, paths, joint_report=False,
                                             excluded_pairs, all_events,
                                             task_events, stim_data, paths,
                                             **kwargs)
+    elif "LocationSearch" in experiment:
+        data = generate_data_for_location_search_report(
+            subject, experiment, pairs_metadata_table, excluded_pairs,
+            all_events, paths
+        )
 
     else:
         data = generate_data_for_stim_report(subject, experiment, joint_report,
@@ -443,6 +448,30 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
                       retrained_classifier, behavioral_results)
 
     return data
+
+
+def generate_data_for_location_search_report(subject, experiment,
+                                             pairs_metadata_table,
+                                             excluded_pairs,
+                                             all_events,
+                                             paths):
+    connectivity = get_resting_connectivity(
+        subject, rootdir=paths.root
+    )
+    stim_events = all_events[all_events.type == 'STIM_ON']
+    pre_psd, post_psd, emask, cmask = get_psd_data(
+        stim_events, paths.root)
+
+    session_summaries = summarize_location_search_sessions(stim_events,
+                                                           pairs_metadata_table,
+                                                           excluded_pairs,
+                                                           connectivity,
+                                                           pre_psd,
+                                                           post_psd,
+                                                           emask,
+                                                           cmask
+                                                           )
+    return ReportData(session_summaries, *([None]*6))
 
 
 def generate_data_for_ps5_report(subject, experiment, joint_report,

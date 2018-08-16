@@ -25,6 +25,7 @@ __all__ = [
     'summarize_math',
     'summarize_stim_sessions',
     'summarize_ps_sessions',
+    'summarize_location_search_sessions',
 ]
 
 
@@ -336,4 +337,22 @@ def summarize_ps_sessions(ps_events, bipolar_pairs, excluded_pairs):
         summary.populate(session_events, bipolar_pairs, excluded_pairs, None)
         session_summaries.append(summary)
 
+    return session_summaries
+
+
+@task()
+def summarize_location_search_sessions(stim_events, bipolar_pairs, excluded_pairs,
+                                       connectivity, pre_psd, post_psd,
+                                       bad_event_mask, bad_channel_mask, ):
+    session_summaries = []
+    sessions = extract_sessions(stim_events)
+    for session in sessions:
+        sess_mask = (stim_events.session == session)
+        summary = LocationSearchSessionSummary()
+        summary.populate(
+            stim_events[sess_mask], bipolar_pairs, excluded_pairs,
+            connectivity, pre_psd, post_psd,
+            bad_event_mask, bad_channel_mask
+        )
+        session_summaries.append(summary)
     return session_summaries
