@@ -831,6 +831,7 @@ class StimSessionSummary(SessionSummary):
                                     default=np.array([]))
     _model_metadata = Bytes(desc="traces for Bayesian multilevel models")
     _post_stim_eeg = ArrayOrNone(desc='raw post-stim EEG')
+    _stim_tstats = CArray
 
     @property
     def post_stim_prob_recall(self):
@@ -858,7 +859,9 @@ class StimSessionSummary(SessionSummary):
 
     def populate(self, events, bipolar_pairs, excluded_pairs,
                  normalized_powers, post_stim_prob_recall=None,
-                 raw_events=None, model_metadata={}, post_stim_eeg=None):
+                 raw_events=None, model_metadata={}, post_stim_eeg=None,
+                 stim_tstats=None):
+
         """ Populate stim data from events """
         SessionSummary.populate(self, events,
                                 bipolar_pairs,
@@ -871,6 +874,19 @@ class StimSessionSummary(SessionSummary):
             self.model_metadata = model_metadata
         if post_stim_eeg is not None:
             self._post_stim_eeg = post_stim_eeg
+        if stim_tstats is not None:
+            self._stim_tstats = stim_tstats
+
+
+    @classmethod
+    def stim_tstats_by_condition(cls, session_summaries):
+        good_tstats = [x for summary in session_summaries
+                       for x in
+                       summary.stim_tstats[summary.stim_pvals > 0.001]]
+        bad_tstats = [x for summary in session_summaries
+                      for x in summary.stim_tstats[summary.stim_pvals < 0.001]]
+        return good_tstats, bad_tstats
+
 
     @property
     def post_stim_eeg_plot(self):
@@ -904,7 +920,8 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
 
     def populate(self, events, bipolar_pairs,
                  excluded_pairs, normalized_powers, post_stim_prob_recall=None,
-                 raw_events=None, model_metadata={}, post_stim_eeg=None):
+                 raw_events=None, model_metadata={}, post_stim_eeg=None,
+                 stim_tstats=None):
         FRSessionSummary.populate(self,
                                   events,
                                   bipolar_pairs,
@@ -918,7 +935,8 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
                                     post_stim_prob_recall=post_stim_prob_recall,
                                     raw_events=raw_events,
                                     model_metadata=model_metadata,
-                                    post_stim_eeg=post_stim_eeg)
+                                    post_stim_eeg=post_stim_eeg,
+                                    stim_tstats=stim_tstats)
 
     @staticmethod
     def combine_sessions(summaries):
@@ -1211,7 +1229,6 @@ class FR5SessionSummary(FRStimSessionSummary):
 class TICLFRSessionSummary(FRStimSessionSummary):
 
     biomarker_events = ArrayOrNone
-    _stim_tstats = CArray
 
     def populate(self, events, bipolar_pairs,
                  excluded_pairs, normalized_powers, post_stim_prob_recall=None,
@@ -1219,21 +1236,11 @@ class TICLFRSessionSummary(FRStimSessionSummary):
                  biomarker_events=None, stim_tstats=None):
 
         FRStimSessionSummary.populate(self, events, bipolar_pairs,
-                     excluded_pairs, normalized_powers,
-                     post_stim_prob_recall,
-                     raw_events, model_metadata, post_stim_eeg,
-                     )
+                                      excluded_pairs, normalized_powers,
+                                      post_stim_prob_recall,
+                                      raw_events, model_metadata, post_stim_eeg,
+                                      stim_tstats=stim_tstats)
         self.biomarker_events = biomarker_events
-        self._stim_tstats = stim_tstats
-
-    @classmethod
-    def stim_tstats_by_condition(cls, session_summaries):
-        good_tstats = [x for summary in session_summaries
-                       for x in
-                       summary.stim_tstats[summary.stim_pvals > 0.001]]
-        bad_tstats = [x for summary in session_summaries
-                      for x in summary.stim_tstats[summary.stim_pvals < 0.001]]
-        return good_tstats, bad_tstats
 
     def nstims(self, task_phase):
         """
@@ -1454,7 +1461,7 @@ class PSSessionSummary(SessionSummary):
         return location_summaries
 
 
-class LocationSearchSessionSummary(SessionSummary):
+class LocationSearchSessionSummary(StimSessionSummary):
 
     connectivity = Array
     pre_psd = Array
@@ -1507,9 +1514,10 @@ class LocationSearchSessionSummary(SessionSummary):
         return FRStimSessionSummary.aggregate_stim_params_over_list(df)
 
     def populate(self,events, bipolar_pairs, excluded_pairs,
-                 connectivity, pre_psd, post_psd, bad_events_mask, bad_channel_mask):
-        SessionSummary.populate(self, events,bipolar_pairs,excluded_pairs,
-                                None)
+                 connectivity, pre_psd, post_psd, bad_events_mask, bad_channel_mask,
+                 stim_tstats=None):
+        StimSessionSummary.populate(self, events, bipolar_pairs, excluded_pairs,
+                                    None, stim_tstats=stim_tstats)
         self.connectivity = connectivity
         self.post_psd = post_psd
         self.pre_psd = pre_psd
