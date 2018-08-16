@@ -7,7 +7,11 @@
       </thead>
     <tbody>
     {% for row in tmi_table %}
-    <tr class={{ "sme-positive" if row['TMI']>0 else "sme-negative" }}>
+    {% if row['TMI'] > 0 %}
+    <tr class="sme-positive">
+    {% else %}
+    <tr class="sme-negative">
+    {% endif %}
         <td>{{ row['site'] }}</td>
         <td>{{ row['TMI'] }} </td>
     </tr>
