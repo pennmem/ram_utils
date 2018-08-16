@@ -23,6 +23,7 @@ traitlets>=4.3.2
 traits>=4.6.0
 xarray>=0.9.6
 gitpython>=2.1.3
+mne>=0.16
 
 # Available in the pennmem channel
 bptools>=1.3.0
