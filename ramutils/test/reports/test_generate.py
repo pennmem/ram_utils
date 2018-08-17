@@ -45,6 +45,7 @@ def test_generate_fr1_report():
         rfile.write(report)
 
 @pytest.mark.rhino
+@pytest.mark.skip("outdated")
 def test_generate_ticl_report():
     event_file = resource_filename('ramutils.test.test_data',
                                    'ticl_fr_events.npz')
