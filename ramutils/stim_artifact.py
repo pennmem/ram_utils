@@ -14,7 +14,8 @@ def get_tstats(stim_events, return_pvalues=False):
     ----------
     stim_events: np.rec.array
       Stimulation events for a session
-
+    return_pvalues: bool
+      If `true`, return p-values along with t-statistics
     Returns
     -------
     t: np.ndarray
@@ -29,7 +30,7 @@ def get_tstats(stim_events, return_pvalues=False):
 
     # Only use stim events from artifact detection period
     stim_events = stim_events[stim_events['list'] == -999]
-    if len(stim_events) == 0:
+    if len(stim_events) < 30: #TODO: MAKE THIS A CONFIG PARAMETER -- SEE TICL_FR expconf generator
         return (None, None) if return_pvalues else None
 
     pre_stim_eeg = ramutils.powers.load_eeg(
