@@ -5,7 +5,7 @@ import json
 import pandas as pd
 
 
-def get_tstats(stim_events, return_pvalues=False):
+def get_tstats(stim_events, pairs, return_pvalues=False):
     """
     Computes ttest on the average EEG value pre-stim vs post-stim.
     TODO: import from artdet; define parameters centrally
@@ -37,13 +37,13 @@ def get_tstats(stim_events, return_pvalues=False):
         stim_events,
         start_time=-(length+offset),
         end_time=-offset,
-        bipolar_pairs=None
+        bipolar_pairs=pairs
     )
     post_stim_eeg = ramutils.powers.load_eeg(
         stim_events,
         start_time=stim_duration+offset,
         end_time=stim_duration+length+offset,
-        bipolar_pairs=None
+        bipolar_pairs=pairs
     )
 
     means = [interval.mean(-1) for interval in [post_stim_eeg, pre_stim_eeg]]
