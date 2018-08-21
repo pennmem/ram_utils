@@ -70,6 +70,6 @@ def extract_rejected_pairs(subject,used_classifiers,
                                        ec_pairs, used_pair_mask)
 
 
-@task()
-def get_artifact_tstats(stim_events):
-    return get_tstats(stim_events)[0]
+@task(nout=2)
+def get_artifact_tstats(stim_events, pairs, return_pvalues):
+    return get_tstats(stim_events, pairs, return_pvalues)
