@@ -12,14 +12,14 @@ def test_get_tstats(rhino_root):
     events = ramutils.events.load_events(
         subject, experiment, sessions=sessions, rootdir=rhino_root
     )
-    pairs = ramutils.montage.extract_pairs_dict(
-        ramutils.montage.get_pairs(subject, experiment,
+    pairs = ramutils.montage.get_pairs(subject, experiment,
                                        sessions,
                                        paths)
-    )
+
     stim_events = events[events.type == 'STIM_ON']
     assert sum(stim_events.list == -999) == 30
 
     tstats, pvals = stim_artifact.get_tstats(stim_events, pairs, return_pvalues=True)
+    pairs = ramutils.montage.extract_pairs_dict(pairs)
     assert len(tstats) == len(pairs)
     assert sum(pvals < 0.001) == 140
