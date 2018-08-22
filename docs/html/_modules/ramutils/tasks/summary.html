@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ramutils.tasks.summary &mdash; Ramutils 2.2.1 documentation</title>
+  <title>ramutils.tasks.summary &mdash; Ramutils 2.2.4 documentation</title>
   
 
   
@@ -179,6 +179,7 @@
     <span class="s1">&#39;summarize_math&#39;</span><span class="p">,</span>
     <span class="s1">&#39;summarize_stim_sessions&#39;</span><span class="p">,</span>
     <span class="s1">&#39;summarize_ps_sessions&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;summarize_location_search_sessions&#39;</span><span class="p">,</span>
 <span class="p">]</span>
 
 
@@ -443,10 +444,11 @@
             <span class="n">stim_session_summary</span> <span class="o">=</span> <span class="n">TICLFRSessionSummary</span><span class="p">()</span>
             <span class="n">stim_session_summary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span>
                 <span class="n">stim_events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span>
-                <span class="n">excluded_pairs</span><span class="p">,</span> <span class="n">trigger_output</span><span class="p">,</span>
+                <span class="n">excluded_pairs</span><span class="p">,</span> <span class="n">session_powers</span><span class="p">,</span>
                 <span class="n">raw_events</span><span class="o">=</span><span class="n">all_session_events</span><span class="p">,</span>
                 <span class="n">biomarker_events</span><span class="o">=</span><span class="n">biomarker_events</span><span class="p">,</span>
                 <span class="n">post_stim_eeg</span><span class="o">=</span><span class="n">post_stim_eeg</span><span class="p">,</span>
+                <span class="n">stim_tstats</span><span class="o">=</span><span class="n">pairs_data</span><span class="p">[[</span><span class="s1">&#39;stim_tstats&#39;</span><span class="p">,</span><span class="s1">&#39;stim_pvals&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">to_records</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
@@ -490,6 +492,24 @@
         <span class="n">session_summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">session_summaries</span></div>
+
+
+<span class="nd">@task</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">summarize_location_search_sessions</span><span class="p">(</span><span class="n">stim_events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span>
+                                       <span class="n">connectivity</span><span class="p">,</span> <span class="n">pre_psd</span><span class="p">,</span> <span class="n">post_psd</span><span class="p">,</span>
+                                       <span class="n">bad_event_mask</span><span class="p">,</span> <span class="n">bad_channel_mask</span><span class="p">,</span> <span class="p">):</span>
+    <span class="n">session_summaries</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">sessions</span> <span class="o">=</span> <span class="n">extract_sessions</span><span class="p">(</span><span class="n">stim_events</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">sessions</span><span class="p">:</span>
+        <span class="n">sess_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">stim_events</span><span class="o">.</span><span class="n">session</span> <span class="o">==</span> <span class="n">session</span><span class="p">)</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="n">LocationSearchSessionSummary</span><span class="p">()</span>
+        <span class="n">summary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span>
+            <span class="n">stim_events</span><span class="p">[</span><span class="n">sess_mask</span><span class="p">],</span> <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span>
+            <span class="n">connectivity</span><span class="p">,</span> <span class="n">pre_psd</span><span class="p">,</span> <span class="n">post_psd</span><span class="p">,</span>
+            <span class="n">bad_event_mask</span><span class="p">,</span> <span class="n">bad_channel_mask</span>
+        <span class="p">)</span>
+        <span class="n">session_summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">session_summaries</span>
 </pre></div>
 
            </div>
@@ -524,7 +544,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'2.2.1',
+            VERSION:'2.2.4',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',

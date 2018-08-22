@@ -1,0 +1,716 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ramutils.powers &mdash; Ramutils 2.2.4 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Ramutils
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started_report_data.html">Getting Statrted: RAM Report Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../data.html">Serializable data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../classifier.html">Classifier training, cross validation, and utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../events.html">Event processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pipeline.html">Pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli.html">Command-line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../misc.html">Miscellaneous utilities</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Ramutils</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>ramutils.powers</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for ramutils.powers</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Helper functions for computing powers from a set of EEG signals &quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">ptsa.data.filters</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">MonopolarToBipolarMapper</span><span class="p">,</span>
+    <span class="n">MorletWaveletFilter</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">ptsa.data.readers</span> <span class="k">import</span> <span class="n">EEGReader</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">zscore</span><span class="p">,</span> <span class="n">ttest_ind</span>
+<span class="kn">from</span> <span class="nn">statsmodels.sandbox.stats.multicomp</span> <span class="k">import</span> <span class="n">multipletests</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">List</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="kn">from</span> <span class="nn">ramutils.log</span> <span class="k">import</span> <span class="n">get_logger</span>
+<span class="kn">from</span> <span class="nn">ramutils.utils</span> <span class="k">import</span> <span class="n">timer</span>
+<span class="kn">from</span> <span class="nn">ramutils.events</span> <span class="k">import</span> <span class="n">get_recall_events_mask</span><span class="p">,</span> <span class="n">extract_sessions</span><span class="p">,</span> \
+    <span class="n">partition_events</span><span class="p">,</span> <span class="n">concatenate_events_for_single_experiment</span><span class="p">,</span> \
+    <span class="n">get_partition_masks</span>
+<span class="kn">from</span> <span class="nn">ramutils.montage</span> <span class="k">import</span> <span class="n">generate_pairs_for_ptsa</span><span class="p">,</span> <span class="n">extract_monopolar_from_bipolar</span>
+
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">compute_single_session_powers</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">all_events</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">,</span>
+                                  <span class="n">buffer_time</span><span class="p">,</span> <span class="n">freqs</span><span class="p">,</span> <span class="n">log_powers</span><span class="p">,</span>
+                                  <span class="n">filt_order</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">normalize</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute powers for a single session &quot;&quot;&quot;</span>
+    <span class="c1"># PTSA will sometimes modify events when reading the eeg, so we ultimately</span>
+    <span class="c1"># need to return the updated events. In case no events are removed, return</span>
+    <span class="c1"># the original set of events</span>
+    <span class="n">eeg</span><span class="p">,</span> <span class="n">updated_events</span> <span class="o">=</span> <span class="n">load_single_session_eeg</span><span class="p">(</span><span class="n">session</span><span class="p">,</span>
+                                                  <span class="n">all_events</span><span class="p">,</span>
+                                                  <span class="n">start_time</span><span class="p">,</span>
+                                                  <span class="n">end_time</span><span class="p">,</span>
+                                                  <span class="n">bipolar_pairs</span><span class="p">)</span>
+
+    <span class="n">eeg</span> <span class="o">=</span> <span class="n">eeg</span><span class="o">.</span><span class="n">add_mirror_buffer</span><span class="p">(</span><span class="n">buffer_time</span><span class="p">)</span>
+
+    <span class="c1"># Butterworth filter to remove line noise</span>
+    <span class="n">eeg</span> <span class="o">=</span> <span class="n">eeg</span><span class="o">.</span><span class="n">filtered</span><span class="p">(</span><span class="n">freq_range</span><span class="o">=</span><span class="p">[</span><span class="mf">58.</span><span class="p">,</span> <span class="mf">62.</span><span class="p">],</span>
+                       <span class="n">filt_type</span><span class="o">=</span><span class="s1">&#39;stop&#39;</span><span class="p">,</span>
+                       <span class="n">order</span><span class="o">=</span><span class="n">filt_order</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">timer</span><span class="p">(</span><span class="s2">&quot;Total wavelet decomposition time: </span><span class="si">%f</span><span class="s2"> s&quot;</span><span class="p">):</span>
+        <span class="n">eeg</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">eeg</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">wavelet_filter</span> <span class="o">=</span> <span class="n">MorletWaveletFilter</span><span class="p">(</span><span class="n">timeseries</span><span class="o">=</span><span class="n">eeg</span><span class="p">,</span>
+                                                <span class="n">freqs</span><span class="o">=</span><span class="n">freqs</span><span class="p">,</span>
+                                                <span class="n">output</span><span class="o">=</span><span class="s1">&#39;power&#39;</span><span class="p">,</span>
+                                                <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
+                                                <span class="n">cpus</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>  <span class="c1"># FIXME: why 25?</span>
+        <span class="c1"># At this point, pow mat has dimensions: frequency, bipolar_pairs,</span>
+        <span class="c1"># events, time</span>
+        <span class="n">sess_pow_mat</span> <span class="o">=</span> <span class="n">wavelet_filter</span><span class="o">.</span><span class="n">filter</span><span class="p">()</span>
+
+    <span class="n">sess_pow_mat</span> <span class="o">=</span> <span class="n">sess_pow_mat</span><span class="o">.</span><span class="n">remove_buffer</span><span class="p">(</span><span class="n">buffer_time</span><span class="p">)</span><span class="o">.</span><span class="n">data</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span><span class="o">/</span><span class="mf">2.</span>
+
+    <span class="k">if</span> <span class="n">log_powers</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">sess_pow_mat</span><span class="p">,</span> <span class="n">sess_pow_mat</span><span class="p">)</span>
+
+    <span class="c1"># Re-ordering dimensions to be events, frequencies, electrodes with the</span>
+    <span class="c1"># mean calculated over the time dimension</span>
+    <span class="n">updated_session_events</span> <span class="o">=</span> <span class="n">updated_events</span><span class="p">[</span><span class="n">updated_events</span><span class="o">.</span><span class="n">session</span> <span class="o">==</span> <span class="n">session</span><span class="p">]</span>
+    <span class="n">sess_pow_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">sess_pow_mat</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">sess_pow_mat</span> <span class="o">=</span> <span class="n">sess_pow_mat</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">updated_session_events</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">normalize</span><span class="p">:</span>
+        <span class="n">sess_pow_mat</span> <span class="o">=</span> <span class="n">zscore</span><span class="p">(</span><span class="n">sess_pow_mat</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">sess_pow_mat</span><span class="p">,</span> <span class="n">updated_events</span>
+
+
+<span class="k">def</span> <span class="nf">load_single_session_eeg</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">all_events</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">):</span>
+    <span class="n">updated_events</span> <span class="o">=</span> <span class="n">all_events</span>
+    <span class="n">session_events</span> <span class="o">=</span> <span class="n">all_events</span><span class="p">[</span><span class="n">all_events</span><span class="o">.</span><span class="n">session</span> <span class="o">==</span> <span class="n">session</span><span class="p">]</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Loading EEG data for session </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
+    <span class="n">eeg_reader</span> <span class="o">=</span> <span class="n">EEGReader</span><span class="p">(</span><span class="n">events</span><span class="o">=</span><span class="n">session_events</span><span class="p">,</span>
+                           <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span>
+                           <span class="n">end_time</span><span class="o">=</span><span class="n">end_time</span><span class="p">,</span>
+                           <span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">eeg</span> <span class="o">=</span> <span class="n">eeg_reader</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="c1"># recording was done in bipolar mode, and the channels are different than</span>
+    <span class="c1"># what we expect</span>
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+        <span class="n">eeg_reader</span><span class="o">.</span><span class="n">channels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+        <span class="n">eeg</span> <span class="o">=</span> <span class="n">eeg_reader</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">eeg_reader</span><span class="o">.</span><span class="n">removed_bad_data</span><span class="p">():</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;PTSA EEG reader elected to remove some bad events&#39;</span><span class="p">)</span>
+        <span class="c1"># TODO: Use the event utility functions here</span>
+        <span class="n">updated_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">all_events</span><span class="p">[</span><span class="n">all_events</span><span class="o">.</span><span class="n">session</span> <span class="o">!=</span> <span class="n">session</span><span class="p">],</span>
+             <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">eeg</span><span class="p">[</span><span class="s1">&#39;events&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">))))</span>
+        <span class="n">event_fields</span> <span class="o">=</span> <span class="n">updated_events</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;mstime&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">event_fields</span><span class="p">)</span>
+        <span class="n">ev_order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">updated_events</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+        <span class="n">updated_events</span> <span class="o">=</span> <span class="n">updated_events</span><span class="p">[</span><span class="n">ev_order</span><span class="p">]</span>
+        <span class="n">updated_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">updated_events</span><span class="p">)</span>
+
+    <span class="c1"># Use bipolar pairs if they exist and recording is not already bipolar</span>
+    <span class="k">if</span> <span class="n">eeg</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">monopolar_channels</span> <span class="o">=</span> <span class="n">extract_monopolar_from_bipolar</span><span class="p">(</span><span class="n">bipolar_pairs</span><span class="p">)</span>
+        <span class="n">eeg_reader</span> <span class="o">=</span> <span class="n">EEGReader</span><span class="p">(</span><span class="n">events</span><span class="o">=</span><span class="n">session_events</span><span class="p">,</span>
+                               <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span>
+                               <span class="n">end_time</span><span class="o">=</span><span class="n">end_time</span><span class="p">,</span>
+                               <span class="n">channels</span><span class="o">=</span><span class="n">monopolar_channels</span><span class="p">)</span>
+        <span class="n">eeg</span> <span class="o">=</span> <span class="n">eeg_reader</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="c1"># Check for removal of bad data again and update events</span>
+        <span class="k">if</span> <span class="n">eeg_reader</span><span class="o">.</span><span class="n">removed_bad_data</span><span class="p">():</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;PTSA EEG reader elected to remove some bad events&#39;</span><span class="p">)</span>
+            <span class="c1"># TODO: Use the event utility functions here</span>
+            <span class="n">updated_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">all_events</span><span class="p">[</span><span class="n">all_events</span><span class="o">.</span><span class="n">session</span> <span class="o">!=</span> <span class="n">session</span><span class="p">],</span>
+                 <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">eeg</span><span class="p">[</span><span class="s1">&#39;events&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">))))</span>
+            <span class="n">event_fields</span> <span class="o">=</span> <span class="n">updated_events</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span>
+            <span class="n">order</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+                <span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="s1">&#39;mstime&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">event_fields</span><span class="p">)</span>
+            <span class="n">ev_order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">updated_events</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+            <span class="n">updated_events</span> <span class="o">=</span> <span class="n">updated_events</span><span class="p">[</span><span class="n">ev_order</span><span class="p">]</span>
+            <span class="n">updated_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">updated_events</span><span class="p">)</span>
+
+        <span class="n">eeg</span> <span class="o">=</span> <span class="n">MonopolarToBipolarMapper</span><span class="p">(</span><span class="n">timeseries</span><span class="o">=</span><span class="n">eeg</span><span class="p">,</span>
+                                       <span class="n">bipolar_pairs</span><span class="o">=</span><span class="n">bipolar_pairs</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">eeg</span><span class="p">,</span> <span class="n">updated_events</span>
+
+
+<span class="k">def</span> <span class="nf">compute_powers</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">,</span> <span class="n">buffer_time</span><span class="p">,</span> <span class="n">freqs</span><span class="p">,</span>
+                   <span class="n">log_powers</span><span class="p">,</span> <span class="n">filt_order</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                   <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute powers (or log powers) using a Morlet wavelet filter and</span>
+<span class="sd">        Butterworth Filter to get rid of line noise</span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    events: np.recarray</span>
+<span class="sd">        Events to consider when computing powers</span>
+<span class="sd">    start_time: float</span>
+<span class="sd">        Start of the period in the EEG to consider for each event</span>
+<span class="sd">    end_time: float</span>
+<span class="sd">        End of the period to consider</span>
+<span class="sd">    buffer_time: float</span>
+<span class="sd">        Buffer time</span>
+<span class="sd">    freqs: array_like</span>
+<span class="sd">        List of frequencies to use when applying Wavelet Filter</span>
+<span class="sd">    log_powers: bool</span>
+<span class="sd">        Whether to take the logarithm of the powers</span>
+<span class="sd">    filt_order: Int</span>
+<span class="sd">        Filter order to use in Butterworth filter</span>
+<span class="sd">    width: Int</span>
+<span class="sd">        Wavelet width to use in Wavelet Filter</span>
+<span class="sd">    normalize: bool</span>
+<span class="sd">        Whether power matrix should be zscored using mean and std. dev by</span>
+<span class="sd">        electrode (row)</span>
+<span class="sd">    bipolar_pairs: OrderedDoct</span>
+<span class="sd">        OrderedDict of bipolar pairs to use if converting a monopolar EEG</span>
+<span class="sd">        recording to bipolar recording</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    np.ndarray</span>
+<span class="sd">        Calculated powers of shape n_events X (freqs * n_channels) where</span>
+<span class="sd">        n_channels is determined when loading the EEG</span>
+<span class="sd">    np.recarray</span>
+<span class="sd">        Set of events after &#39;bad&#39; events were removed while loading the EEG.</span>
+<span class="sd">        Currently, removal of these events is a side effect of loading the</span>
+<span class="sd">        EEG, so the &#39;cleaned&#39; events must be caught. In an ideal world,</span>
+<span class="sd">        this side effect would not exist and bad events would be remove prior</span>
+<span class="sd">        to computing powers.</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">bipolar_pairs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> \
+            <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">recarray</span><span class="p">)):</span>
+        <span class="n">bipolar_pairs</span> <span class="o">=</span> <span class="n">generate_pairs_for_ptsa</span><span class="p">(</span><span class="n">bipolar_pairs</span><span class="p">)</span>
+
+    <span class="n">sessions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">session</span><span class="p">)</span>
+    <span class="n">pow_mat</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">with</span> <span class="n">timer</span><span class="p">(</span><span class="s2">&quot;Total time for computing powers: </span><span class="si">%f</span><span class="s2">&quot;</span><span class="p">):</span>
+        <span class="n">updated_events</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">sess</span> <span class="ow">in</span> <span class="n">sessions</span><span class="p">:</span>
+            <span class="n">powers</span><span class="p">,</span> <span class="n">updated_events</span> <span class="o">=</span> <span class="n">compute_single_session_powers</span><span class="p">(</span><span class="n">sess</span><span class="p">,</span>
+                                                                   <span class="n">updated_events</span><span class="p">,</span>
+                                                                   <span class="n">start_time</span><span class="p">,</span>
+                                                                   <span class="n">end_time</span><span class="p">,</span>
+                                                                   <span class="n">buffer_time</span><span class="p">,</span>
+                                                                   <span class="n">freqs</span><span class="p">,</span>
+                                                                   <span class="n">log_powers</span><span class="p">,</span>
+                                                                   <span class="n">filt_order</span><span class="p">,</span>
+                                                                   <span class="n">width</span><span class="p">,</span>
+                                                                   <span class="n">normalize</span><span class="p">,</span>
+                                                                   <span class="n">bipolar_pairs</span><span class="p">)</span>
+            <span class="n">pow_mat</span> <span class="o">=</span> <span class="n">powers</span> <span class="k">if</span> <span class="n">pow_mat</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">pow_mat</span><span class="p">,</span>
+                                                                     <span class="n">powers</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">pow_mat</span><span class="p">,</span> <span class="n">updated_events</span>
+
+
+<div class="viewcode-block" id="compute_normalized_powers"><a class="viewcode-back" href="../../pipeline.html#ramutils.tasks.powers.compute_normalized_powers">[docs]</a><span class="k">def</span> <span class="nf">compute_normalized_powers</span><span class="p">(</span><span class="n">events</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Compute powers by session, encoding/retrieval, and FR vs. PAL</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    There are different start times, end time, and buffer times for each</span>
+<span class="sd">    subset type, so those are passed in as kwargs and looked up prior to</span>
+<span class="sd">    calling the more general compute_powers function</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">event_partitions</span> <span class="o">=</span> <span class="n">partition_events</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+    <span class="n">cleaned_event_partitions</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">power_partitions</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="s1">&#39;bipolar_pairs&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;bipolar_pairs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">for</span> <span class="n">subset_name</span><span class="p">,</span> <span class="n">event_subset</span> <span class="ow">in</span> <span class="n">event_partitions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">event_subset</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="n">subset_name</span> <span class="o">==</span> <span class="s1">&#39;fr_encoding&#39;</span><span class="p">:</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;encoding_start_time&#39;</span><span class="p">]</span>
+            <span class="n">end_time</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;encoding_end_time&#39;</span><span class="p">]</span>
+            <span class="n">buffer_time</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;encoding_buf&#39;</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="n">subset_name</span> <span class="o">==</span> <span class="s1">&#39;fr_retrieval&#39;</span><span class="p">:</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;retrieval_start_time&#39;</span><span class="p">]</span>
+            <span class="n">end_time</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;retrieval_end_time&#39;</span><span class="p">]</span>
+            <span class="n">buffer_time</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;retrieval_buf&#39;</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="n">subset_name</span> <span class="o">==</span> <span class="s1">&#39;pal_encoding&#39;</span><span class="p">:</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;pal_start_time&#39;</span><span class="p">]</span>
+            <span class="n">end_time</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;pal_end_time&#39;</span><span class="p">]</span>
+            <span class="n">buffer_time</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;pal_buf_time&#39;</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="n">subset_name</span> <span class="o">==</span> <span class="s1">&#39;pal_retrieval&#39;</span><span class="p">:</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;pal_retrieval_start_time&#39;</span><span class="p">]</span>
+            <span class="n">end_time</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;pal_retrieval_end_time&#39;</span><span class="p">]</span>
+            <span class="n">buffer_time</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;pal_retrieval_buf&#39;</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="n">subset_name</span> <span class="o">==</span> <span class="s1">&#39;post_stim&#39;</span><span class="p">:</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;post_stim_start_time&#39;</span><span class="p">]</span>
+            <span class="n">end_time</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;post_stim_end_time&#39;</span><span class="p">]</span>
+            <span class="n">buffer_time</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;post_stim_buf&#39;</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Unexpected event subset was encountered&quot;</span><span class="p">)</span>
+
+        <span class="n">powers</span><span class="p">,</span> <span class="n">cleaned_events</span> <span class="o">=</span> <span class="n">compute_powers</span><span class="p">(</span><span class="n">event_subset</span><span class="p">,</span>
+                                                <span class="n">start_time</span><span class="p">,</span>
+                                                <span class="n">end_time</span><span class="p">,</span>
+                                                <span class="n">buffer_time</span><span class="p">,</span>
+                                                <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;freqs&#39;</span><span class="p">],</span>
+                                                <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;log_powers&#39;</span><span class="p">],</span>
+                                                <span class="n">filt_order</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;filt_order&#39;</span><span class="p">],</span>
+                                                <span class="n">normalize</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span>
+                                                    <span class="s1">&#39;normalize_powers&#39;</span><span class="p">],</span>
+                                                <span class="n">width</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">],</span>
+                                                <span class="n">bipolar_pairs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span>
+                                                    <span class="s1">&#39;bipolar_pairs&#39;</span><span class="p">])</span>
+        <span class="n">cleaned_event_partitions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cleaned_events</span><span class="p">)</span>
+        <span class="n">power_partitions</span><span class="p">[</span><span class="n">subset_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">powers</span>
+
+    <span class="n">cleaned_events</span> <span class="o">=</span> <span class="n">concatenate_events_for_single_experiment</span><span class="p">(</span>
+        <span class="n">cleaned_event_partitions</span><span class="p">)</span>
+
+    <span class="n">partition_masks</span> <span class="o">=</span> <span class="n">get_partition_masks</span><span class="p">(</span><span class="n">cleaned_events</span><span class="p">)</span>
+
+    <span class="c1"># Ensure that the rows of the power matrix match the order of the events.</span>
+    <span class="c1"># This works by creating masks for each of the event types from the</span>
+    <span class="c1"># sorted events structure</span>
+    <span class="n">n_features</span> <span class="o">=</span> <span class="n">powers</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">normalized_powers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">cleaned_events</span><span class="p">),</span> <span class="n">n_features</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">subset_name</span><span class="p">,</span> <span class="n">power_subset</span> <span class="ow">in</span> <span class="n">power_partitions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">partition_event_mask</span> <span class="o">=</span> <span class="n">partition_masks</span><span class="p">[</span><span class="n">subset_name</span><span class="p">]</span>
+        <span class="n">normalized_powers</span><span class="p">[</span><span class="n">partition_event_mask</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">power_subset</span>
+
+    <span class="k">return</span> <span class="n">normalized_powers</span><span class="p">,</span> <span class="n">cleaned_events</span></div>
+
+
+<div class="viewcode-block" id="reduce_powers"><a class="viewcode-back" href="../../pipeline.html#ramutils.tasks.powers.reduce_powers">[docs]</a><span class="k">def</span> <span class="nf">reduce_powers</span><span class="p">(</span><span class="n">powers</span><span class="p">,</span> <span class="n">channel_mask</span><span class="p">,</span> <span class="n">n_frequencies</span><span class="p">,</span> <span class="n">frequency_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Create a subset of the full power matrix by excluding certain electrodes</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    powers: np.ndarray</span>
+<span class="sd">        Original power matrix</span>
+<span class="sd">    channel_mask: array_like</span>
+<span class="sd">        Boolean array of size n_channels</span>
+<span class="sd">    n_frequencies: int</span>
+<span class="sd">        Number of frequencies used in calculating the power matrix. This is</span>
+<span class="sd">        needed to be able to properly reshape the array</span>
+<span class="sd">    frequency_mask: array_like</span>
+<span class="sd">        Boolean array of size n_frequencies</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    np.ndarray</span>
+<span class="sd">        Subsetted power matrix</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">frequency_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">frequency_mask</span><span class="p">)</span> <span class="o">!=</span> <span class="n">n_frequencies</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Size of frequency mask must match number of &quot;</span>
+                           <span class="s2">&quot;frequencies&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Reshape into 3-dimensional array (n_events, n_electrodes, n_frequencies)</span>
+    <span class="n">reduced_powers</span> <span class="o">=</span> <span class="n">powers</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">powers</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_frequencies</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">frequency_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">reduced_powers</span> <span class="o">=</span> <span class="n">reduced_powers</span><span class="p">[:,</span> <span class="n">channel_mask</span><span class="p">,</span> <span class="n">frequency_mask</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">reduced_powers</span> <span class="o">=</span> <span class="n">reduced_powers</span><span class="p">[:,</span> <span class="n">channel_mask</span><span class="p">,</span> <span class="p">:]</span>
+
+    <span class="c1"># Reshape back to 2D representation so it can be used as a feature matrix</span>
+    <span class="n">reduced_powers</span> <span class="o">=</span> <span class="n">reduced_powers</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">reduced_powers</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">reduced_powers</span></div>
+
+
+<div class="viewcode-block" id="get_trigger_frequency_mask"><a class="viewcode-back" href="../../pipeline.html#ramutils.tasks.powers.get_trigger_frequency_mask">[docs]</a><span class="k">def</span> <span class="nf">get_trigger_frequency_mask</span><span class="p">(</span><span class="n">trigger_frequency</span><span class="p">,</span> <span class="n">frequencies</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a boolean mask identifying a single frequency in a list of</span>
+<span class="sd">        frequencies</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="kc">True</span> <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span> <span class="o">==</span> <span class="n">trigger_frequency</span> <span class="k">else</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">freq</span> <span class="ow">in</span>
+            <span class="n">frequencies</span><span class="p">]</span></div>
+
+
+<span class="k">def</span> <span class="nf">normalize_powers_by_session</span><span class="p">(</span><span class="n">pow_mat</span><span class="p">,</span> <span class="n">events</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; z-score powers within session. Utility function used by legacy reports</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pow_mat: np.ndarray</span>
+<span class="sd">        Power matrix, i.e. the data matrix for the classifier (features)</span>
+<span class="sd">    events: pd.DataFrame</span>
+<span class="sd">        Behavioral events data</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pow_mat: np.ndarray</span>
+<span class="sd">        Normalized power matrix (features)</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This function can be removed once the legacy reporting pipeline is fully</span>
+<span class="sd">    replaced since those are the only places where it is currently used</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">sessions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">session</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">sess</span> <span class="ow">in</span> <span class="n">sessions</span><span class="p">:</span>
+        <span class="n">sess_event_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">session</span> <span class="o">==</span> <span class="n">sess</span><span class="p">)</span>
+        <span class="n">pow_mat</span><span class="p">[</span><span class="n">sess_event_mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">zscore</span><span class="p">(</span><span class="n">pow_mat</span><span class="p">[</span><span class="n">sess_event_mask</span><span class="p">],</span>
+                                          <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                          <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">pow_mat</span>
+
+
+<span class="k">def</span> <span class="nf">reshape_powers_to_3d</span><span class="p">(</span><span class="n">powers</span><span class="p">,</span> <span class="n">n_frequencies</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make power matrix a 3D structure:</span>
+<span class="sd">        n_events x n_electrodes x n_frequencies</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">reshaped_powers</span> <span class="o">=</span> <span class="n">powers</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">powers</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_frequencies</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">reshaped_powers</span>
+
+
+<span class="k">def</span> <span class="nf">reshape_powers_to_2d</span><span class="p">(</span><span class="n">powers</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make power matrix a 2D structure</span>
+<span class="sd">        n_events x (n_electrodes x n_frequencies)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">reshaped_powers</span> <span class="o">=</span> <span class="n">powers</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">powers</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">reshaped_powers</span>
+
+
+<span class="k">def</span> <span class="nf">save_power_plot</span><span class="p">(</span><span class="n">powers</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">full_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plots the feature matrix to a file path or file-like object</span>
+<span class="sd">    :param powers:</span>
+<span class="sd">    :param full_path:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">reshape_powers_to_2d</span><span class="p">(</span><span class="n">powers</span><span class="p">),</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;RdBu_r&#39;</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,)</span>
+    <span class="n">cmin</span><span class="p">,</span> <span class="n">cmax</span> <span class="o">=</span> <span class="n">powers</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">powers</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">clim</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">cmin</span><span class="p">),</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cmax</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">clim</span><span class="p">(</span><span class="o">-</span><span class="n">clim</span><span class="p">,</span> <span class="n">clim</span><span class="p">)</span>
+    <span class="n">cbar</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+    <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Z-Score&#39;</span><span class="p">)</span>
+    <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_label_position</span><span class="p">(</span><span class="s1">&#39;top&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Event Number&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Feature Number&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Session </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">session</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span>
+                <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">,</span>
+                <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span>
+                <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">full_path</span>
+
+
+<span class="k">def</span> <span class="nf">load_eeg</span><span class="p">(</span><span class="n">all_events</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">bipolar_pairs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> \
+            <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">recarray</span><span class="p">)):</span>
+        <span class="n">bipolar_pairs</span> <span class="o">=</span> <span class="n">generate_pairs_for_ptsa</span><span class="p">(</span><span class="n">bipolar_pairs</span><span class="p">)</span>
+
+    <span class="n">full_eeg</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">all_events</span><span class="o">.</span><span class="n">session</span><span class="p">):</span>
+        <span class="n">eeg</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">load_single_session_eeg</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">all_events</span><span class="p">,</span>
+                                         <span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">)</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">eeg</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">full_eeg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eeg</span><span class="p">)</span>
+    <span class="n">full_eeg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">e</span><span class="o">.</span><span class="n">data</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">full_eeg</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">full_eeg</span>
+
+
+<span class="k">def</span> <span class="nf">save_eeg_by_channel_plot</span><span class="p">(</span><span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">full_eeg</span><span class="p">,</span>
+                             <span class="n">used_pair_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                             <span class="n">time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">full_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+    <span class="k">if</span> <span class="n">full_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">full_path</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">full_eeg</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">ylen</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">full_eeg</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">xlen</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bipolar_pairs</span><span class="p">)</span> <span class="o">/</span> <span class="n">ylen</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">xlen</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span> <span class="n">ylen</span><span class="o">*</span><span class="mi">2</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">bipolar_pairs</span><span class="p">)):</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">xlen</span><span class="p">,</span> <span class="n">ylen</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">txtcolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span>
+        <span class="k">if</span> <span class="n">used_pair_mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">used_pair_mask</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+            <span class="n">txtcolor</span><span class="o">=</span><span class="s1">&#39;magenta&#39;</span>
+            <span class="k">for</span> <span class="n">spine</span> <span class="ow">in</span> <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">spine</span><span class="o">.</span><span class="n">set_linewidth</span><span class="p">(</span><span class="mi">6</span><span class="o">*</span><span class="n">spine</span><span class="o">.</span><span class="n">get_linewidth</span><span class="p">())</span>
+                <span class="n">spine</span><span class="o">.</span><span class="n">set_edgecolor</span><span class="p">(</span><span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">full_eeg</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;grey&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.15</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">bipolar_pairs</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">color</span><span class="o">=</span><span class="n">txtcolor</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span>
+                <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">,</span>
+                <span class="n">dpi</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+                <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">full_path</span>
+
+
+<span class="k">def</span> <span class="nf">calculate_delta_hfa_table</span><span class="p">(</span><span class="n">pairs_metadata_table</span><span class="p">,</span> <span class="n">normalized_powers</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span>
+                              <span class="n">frequencies</span><span class="p">,</span> <span class="n">hfa_cutoff</span><span class="o">=</span><span class="mi">65</span><span class="p">,</span> <span class="n">trigger_freq</span><span class="o">=</span><span class="mi">110</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate tstats and pvalues from a ttest comparing HFA activity of</span>
+<span class="sd">        recalled versus non-recalled items</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">powers_3d</span> <span class="o">=</span> <span class="n">reshape_powers_to_3d</span><span class="p">(</span><span class="n">normalized_powers</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">frequencies</span><span class="p">))</span>
+    <span class="n">hfa_mask</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span> <span class="k">if</span> <span class="n">freq</span> <span class="o">&gt;</span> <span class="n">hfa_cutoff</span> <span class="k">else</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">freq</span> <span class="ow">in</span> <span class="n">frequencies</span><span class="p">]</span>
+    <span class="n">hfa_powers</span> <span class="o">=</span> <span class="n">powers_3d</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">hfa_mask</span><span class="p">]</span>
+
+    <span class="c1"># Average powers across frequencies. New shape is n_events x n_electrodes</span>
+    <span class="n">hfa_powers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">hfa_powers</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">recall_mask</span> <span class="o">=</span> <span class="n">get_recall_events_mask</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+    <span class="n">recalled_pow_mat</span> <span class="o">=</span> <span class="n">hfa_powers</span><span class="p">[</span><span class="n">recall_mask</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">non_recalled_pow_mat</span> <span class="o">=</span> <span class="n">hfa_powers</span><span class="p">[</span><span class="o">~</span><span class="n">recall_mask</span><span class="p">,</span> <span class="p">:]</span>
+
+    <span class="n">tstats</span><span class="p">,</span> <span class="n">pvals</span> <span class="o">=</span> <span class="n">ttest_ind</span><span class="p">(</span><span class="n">recalled_pow_mat</span><span class="p">,</span> <span class="n">non_recalled_pow_mat</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">sig_mask</span><span class="p">,</span> <span class="n">pvals</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">multipletests</span><span class="p">(</span><span class="n">pvals</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;fdr_bh&#39;</span><span class="p">)</span>
+
+    <span class="n">pairs_metadata_table</span><span class="p">[</span><span class="s1">&#39;hfa_t_stat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tstats</span>
+    <span class="n">pairs_metadata_table</span><span class="p">[</span><span class="s1">&#39;hfa_p_value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pvals</span>
+
+    <span class="c1"># Repeat for 110hz. Actual frequency is a decimal, so convert to int when</span>
+    <span class="c1">#  checking for equality</span>
+    <span class="n">trigger_freq_mask</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span> <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span> <span class="o">==</span> <span class="n">trigger_freq</span> <span class="k">else</span> <span class="kc">False</span> <span class="k">for</span>
+                         <span class="n">freq</span> <span class="ow">in</span> <span class="n">frequencies</span><span class="p">]</span>
+    <span class="n">single_freq_powers</span> <span class="o">=</span> <span class="n">powers_3d</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">trigger_freq_mask</span><span class="p">]</span>
+    <span class="n">single_freq_powers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">single_freq_powers</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">recalled_single_freq_powers</span> <span class="o">=</span> <span class="n">single_freq_powers</span><span class="p">[</span><span class="n">recall_mask</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">non_recalled_single_freq_powers</span> <span class="o">=</span> <span class="n">single_freq_powers</span><span class="p">[</span><span class="o">~</span><span class="n">recall_mask</span><span class="p">,</span> <span class="p">:]</span>
+
+    <span class="n">tstats</span><span class="p">,</span> <span class="n">pvals</span> <span class="o">=</span> <span class="n">ttest_ind</span><span class="p">(</span><span class="n">recalled_single_freq_powers</span><span class="p">,</span>
+                              <span class="n">non_recalled_single_freq_powers</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">sig_mask</span><span class="p">,</span> <span class="n">pvals</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">multipletests</span><span class="p">(</span><span class="n">pvals</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;fdr_bh&#39;</span><span class="p">)</span>
+    <span class="n">pairs_metadata_table</span><span class="p">[</span><span class="s1">&#39;110_t_stat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tstats</span>
+    <span class="n">pairs_metadata_table</span><span class="p">[</span><span class="s1">&#39;110_p_value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pvals</span>
+
+    <span class="c1"># Pairs that do not have a label do not need to have the stats displayed</span>
+    <span class="n">pairs_metadata_table</span> <span class="o">=</span> <span class="n">pairs_metadata_table</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">pairs_metadata_table</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'2.2.4',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
