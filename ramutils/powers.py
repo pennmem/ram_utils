@@ -435,7 +435,7 @@ def save_eeg_by_channel_plot(bipolar_pairs, full_eeg,
     if time is None:
         time = np.arange(full_eeg.shape[-1])
     ylen = int(np.sqrt(full_eeg.shape[0]))
-    xlen = int(len(bipolar_pairs) / ylen) + 1
+    xlen = int(len(bipolar_pairs) / ylen)
     plt.figure(figsize=(xlen*2, ylen*2))
     for i in range(0, len(bipolar_pairs)):
         plt.subplot(xlen, ylen, i + 1)

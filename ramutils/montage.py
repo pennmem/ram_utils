@@ -697,6 +697,37 @@ def generate_pairs_from_electrode_config(subject, experiment, session, paths):
     return pairs_from_ec
 
 
+def get_distances(pairs):
+    """Get distances as an adjacency matrix.
+
+    Parameters
+    ----------
+    pairs : pd.DataFrame
+        A DataFrame describing a set of bipolar pairs
+
+    Returns
+    -------
+    distmat : np.ndarray
+        Adjacency matrix using exp(-distance / 120).
+
+    """
+    # positions matrix shaped as N_channels x 3
+    pos = np.array([
+        [row["ind.{}".format(c)] for c in ("x", "y", "z")]
+        for _, row in pairs.sort_values(by=['contact_1', 'contact_2']).iterrows()
+    ])
+
+    distmat = np.empty((len(pos), len(pos)))
+
+    for i, d1 in enumerate(pos):
+        for j, d2 in enumerate(pos):
+            if i <= j:
+                distmat[i, j] = np.linalg.norm(d1 - d2, axis=0)
+                distmat[j, i] = np.linalg.norm(d1 - d2, axis=0)
+
+    distmat = 1 / np.exp(distmat / 120.)
+    return distmat
+
 def extract_rejected_pairs(subject, used_classifiers, ec_pairs, used_pair_mask):
     used_pair_mask = np.array(used_pair_mask)
     for classifier in used_classifiers:

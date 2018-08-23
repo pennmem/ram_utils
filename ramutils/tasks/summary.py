@@ -25,6 +25,7 @@ __all__ = [
     'summarize_math',
     'summarize_stim_sessions',
     'summarize_ps_sessions',
+    'summarize_location_search_sessions',
 ]
 
 
@@ -293,6 +294,7 @@ def summarize_stim_sessions(all_events, task_events, stim_params, pairs_data,
                 raw_events=all_session_events,
                 biomarker_events=biomarker_events,
                 post_stim_eeg=post_stim_eeg,
+                stim_tstats=pairs_data[['stim_tstats','stim_pvals']].to_records(index=False)
             )
 
         else:
@@ -335,4 +337,22 @@ def summarize_ps_sessions(ps_events, bipolar_pairs, excluded_pairs):
         summary.populate(session_events, bipolar_pairs, excluded_pairs, None)
         session_summaries.append(summary)
 
+    return session_summaries
+
+
+@task()
+def summarize_location_search_sessions(stim_events, bipolar_pairs, excluded_pairs,
+                                       connectivity, pre_psd, post_psd,
+                                       bad_event_mask, bad_channel_mask, ):
+    session_summaries = []
+    sessions = extract_sessions(stim_events)
+    for session in sessions:
+        sess_mask = (stim_events.session == session)
+        summary = LocationSearchSessionSummary()
+        summary.populate(
+            stim_events[sess_mask], bipolar_pairs, excluded_pairs,
+            connectivity, pre_psd, post_psd,
+            bad_event_mask, bad_channel_mask
+        )
+        session_summaries.append(summary)
     return session_summaries

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Pipelines &mdash; Ramutils 2.2.1 documentation</title>
+  <title>Pipelines &mdash; Ramutils 2.2.4 documentation</title>
   
 
   
@@ -719,6 +719,50 @@ redundant with some data stored in the <code class="docutils literal notranslate
 </div>
 <div class="section" id="module-ramutils.tasks.powers">
 <span id="power-computation-tasks"></span><h2>Power computation tasks<a class="headerlink" href="#module-ramutils.tasks.powers" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ramutils.tasks.powers.reduce_powers">
+<code class="descclassname">ramutils.tasks.powers.</code><code class="descname">reduce_powers</code><span class="sig-paren">(</span><em>powers</em>, <em>channel_mask</em>, <em>n_frequencies</em>, <em>frequency_mask=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/powers.html#reduce_powers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.powers.reduce_powers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a subset of the full power matrix by excluding certain electrodes</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>powers</strong> (<em>np.ndarray</em>) – Original power matrix</li>
+<li><strong>channel_mask</strong> (<em>array_like</em>) – Boolean array of size n_channels</li>
+<li><strong>n_frequencies</strong> (<em>int</em>) – Number of frequencies used in calculating the power matrix. This is
+needed to be able to properly reshape the array</li>
+<li><strong>frequency_mask</strong> (<em>array_like</em>) – Boolean array of size n_frequencies</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Subsetted power matrix</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.tasks.powers.compute_normalized_powers">
+<code class="descclassname">ramutils.tasks.powers.</code><code class="descname">compute_normalized_powers</code><span class="sig-paren">(</span><em>events</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/powers.html#compute_normalized_powers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.powers.compute_normalized_powers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute powers by session, encoding/retrieval, and FR vs. PAL</p>
+<p class="rubric">Notes</p>
+<p>There are different start times, end time, and buffer times for each
+subset type, so those are passed in as kwargs and looked up prior to
+calling the more general compute_powers function</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ramutils.tasks.powers.get_trigger_frequency_mask">
+<code class="descclassname">ramutils.tasks.powers.</code><code class="descname">get_trigger_frequency_mask</code><span class="sig-paren">(</span><em>trigger_frequency</em>, <em>frequencies</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/powers.html#get_trigger_frequency_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.powers.get_trigger_frequency_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a boolean mask identifying a single frequency in a list of
+frequencies</p>
+</dd></dl>
+
 </div>
 <div class="section" id="module-ramutils.tasks.summary">
 <span id="report-summary-tasks"></span><h2>Report summary tasks<a class="headerlink" href="#module-ramutils.tasks.summary" title="Permalink to this headline">¶</a></h2>
@@ -851,7 +895,7 @@ multiple experiments should be allowed</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.2.1',
+            VERSION:'2.2.4',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',

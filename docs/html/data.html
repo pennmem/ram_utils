@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Serializable data structures &mdash; Ramutils 2.2.1 documentation</title>
+  <title>Serializable data structures &mdash; Ramutils 2.2.4 documentation</title>
   
 
   
@@ -630,6 +630,12 @@ n_frequencies * n_bipolar_pairs)</li>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="ramutils.reports.summary.SessionSummary.n_pairs">
+<code class="descname">n_pairs</code><a class="headerlink" href="#ramutils.reports.summary.SessionSummary.n_pairs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the number of bipolar pairs in the recording</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="ramutils.reports.summary.SessionSummary.normalized_powers">
 <code class="descname">normalized_powers</code><a class="headerlink" href="#ramutils.reports.summary.SessionSummary.normalized_powers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Powers normalized to 0 mean and unit variance</p>
@@ -850,7 +856,7 @@ values are the repetition ratio for that subject averaged over the session</p>
 <dd><p>SessionSummary data specific to sessions with stimulation.</p>
 <dl class="method">
 <dt id="ramutils.reports.summary.StimSessionSummary.populate">
-<code class="descname">populate</code><span class="sig-paren">(</span><em>events</em>, <em>bipolar_pairs</em>, <em>excluded_pairs</em>, <em>normalized_powers</em>, <em>post_stim_prob_recall=None</em>, <em>raw_events=None</em>, <em>model_metadata={}</em>, <em>post_stim_eeg=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#StimSessionSummary.populate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.StimSessionSummary.populate" title="Permalink to this definition">¶</a></dt>
+<code class="descname">populate</code><span class="sig-paren">(</span><em>events</em>, <em>bipolar_pairs</em>, <em>excluded_pairs</em>, <em>normalized_powers</em>, <em>post_stim_prob_recall=None</em>, <em>raw_events=None</em>, <em>model_metadata={}</em>, <em>post_stim_eeg=None</em>, <em>stim_tstats=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#StimSessionSummary.populate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.StimSessionSummary.populate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Populate stim data from events</p>
 </dd></dl>
 
@@ -905,7 +911,7 @@ the same comparison, but for post-stim items</p>
 
 <dl class="method">
 <dt id="ramutils.reports.summary.FRStimSessionSummary.populate">
-<code class="descname">populate</code><span class="sig-paren">(</span><em>events</em>, <em>bipolar_pairs</em>, <em>excluded_pairs</em>, <em>normalized_powers</em>, <em>post_stim_prob_recall=None</em>, <em>raw_events=None</em>, <em>model_metadata={}</em>, <em>post_stim_eeg=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.populate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.populate" title="Permalink to this definition">¶</a></dt>
+<code class="descname">populate</code><span class="sig-paren">(</span><em>events</em>, <em>bipolar_pairs</em>, <em>excluded_pairs</em>, <em>normalized_powers</em>, <em>post_stim_prob_recall=None</em>, <em>raw_events=None</em>, <em>model_metadata={}</em>, <em>post_stim_eeg=None</em>, <em>stim_tstats=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/reports/summary.html#FRStimSessionSummary.populate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.reports.summary.FRStimSessionSummary.populate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Populate data from events.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1058,7 +1064,7 @@ containing additional metadata about the results from stimulating at that locati
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.2.1',
+            VERSION:'2.2.4',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',

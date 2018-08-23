@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}
+{{ subject }} RAM LocationSearch Report
+{% endblock %}
+
+{% block report %}
+<h1> {{ subject }} RAM Location Search Report</h1>
+{% include "stim_summary.html" %}
+{% include "thetamod_table.html" %}
+{% include "stim_tstat.html" %}
+{% include "post_stim_eeg_plot.html" %}
+{% endblock %}

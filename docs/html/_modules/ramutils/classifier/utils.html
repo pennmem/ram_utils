@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ramutils.classifier.utils &mdash; Ramutils 2.2.1 documentation</title>
+  <title>ramutils.classifier.utils &mdash; Ramutils 2.2.4 documentation</title>
   
 
   
@@ -192,17 +192,21 @@
                                  <span class="s1">&#39;session_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">session</span><span class="p">)),</span>
                                  <span class="s1">&#39;host_pc&#39;</span><span class="p">)</span>
 
-    <span class="n">timestamped_dirs</span> <span class="o">=</span> <span class="n">glob</span><span class="p">(</span><span class="n">base_path</span> <span class="o">+</span> <span class="s2">&quot;/*&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timestamped_dirs</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="n">config_paths</span> <span class="o">=</span> <span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;config_files&#39;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">config_paths</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="c1"># expected host_pc folder does not exist</span>
         <span class="k">return</span> <span class="kc">None</span>
 
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timestamped_dirs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">config_paths</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="c1"># Return the original classifier</span>
-        <span class="n">config_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">timestamped_dirs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;config_files&#39;</span><span class="p">)</span>
+        <span class="n">retrained_classifier_paths</span> <span class="o">=</span> <span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">base_path</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;config_files&#39;</span><span class="p">,</span> <span class="s1">&#39;retrained_classifier&#39;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">retrained_classifier_paths</span><span class="p">):</span>
+            <span class="n">config_path</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">retrained_classifier_paths</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">config_path</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">config_paths</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">classifier_path</span> <span class="o">=</span> <span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config_path</span><span class="p">,</span>
                                             <span class="s1">&#39;*classifier*.zip&#39;</span><span class="p">))</span>
-
         <span class="c1"># No container was found, likely because it is the old .pkl version</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">classifier_path</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -210,7 +214,7 @@
         <span class="n">orig_classifier_container</span> <span class="o">=</span> <span class="n">ClassifierContainer</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">classifier_path</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">orig_classifier_container</span>
 
-    <span class="n">timestamped_path</span> <span class="o">=</span> <span class="n">timestamped_dirs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
 
     <span class="c1"># FIXME: this needs a data quality check to confirm that all classifiers in</span>
     <span class="c1"># a session are the same!</span>
@@ -218,7 +222,7 @@
     <span class="c1"># classifiers can be different depending on artifact detection. In</span>
     <span class="c1"># reality, stim sessions should never be restarted (apart from issues</span>
     <span class="c1"># getting things started in the first place).</span>
-    <span class="n">config_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">timestamped_path</span><span class="p">,</span> <span class="s1">&#39;config_files&#39;</span><span class="p">)</span>
+    <span class="n">config_path</span> <span class="o">=</span> <span class="n">config_paths</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="k">if</span> <span class="s1">&#39;retrained_classifier&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">config_path</span><span class="p">):</span>
         <span class="n">classifier_path</span> <span class="o">=</span> <span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">config_path</span><span class="p">,</span>
                                             <span class="s1">&#39;retrained_classifier&#39;</span><span class="p">,</span>
@@ -336,7 +340,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../../',
-            VERSION:'2.2.1',
+            VERSION:'2.2.4',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',

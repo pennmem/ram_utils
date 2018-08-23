@@ -1,0 +1,8 @@
+<h3> Distribution of Artifact Detection T-statistics</h3>
+<div id="stim-tstat-histogram"></div>
+
+<script>
+    let plot_data = JSON.parse('{{ plot_data }}');
+    let artifact_stim_data = plot_data['stim_tstat'];
+    ramutils.plots.plotStimTStatHistogram(artifact_stim_data);
+</script>

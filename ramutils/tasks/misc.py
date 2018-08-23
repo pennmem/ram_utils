@@ -110,7 +110,6 @@ def save_all_output(subject, experiment, session_summaries, math_summaries,
 
     session_str = '_'.join([str(summary.session_number) for summary in
                             session_summaries])
-
     # Agg reports could have hundreds of sessions, so do not save them
     # as part of the file name
     if agg_report:
