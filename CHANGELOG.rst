@@ -7,7 +7,7 @@ Version 2.2.4
 
 * Added histogram of T-statistics from artifact detection to TICL_FR
 * Added artifact detection T-statistics when hovering over post-stim EEG plot
-* Added support for generating LocationSearch reports (unstable)
+* Added support for generating LocationSearch reports (prototype)
 
 
 Version 2.2.3
