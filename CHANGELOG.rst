@@ -3,7 +3,7 @@ Changes
 
 Version 2.2.4
 -------------
-**TBD**
+**2018-08-23**
 
 * Added histogram of T-statistics from artifact detection to TICL_FR
 * Added artifact detection T-statistics when hovering over post-stim EEG plot
