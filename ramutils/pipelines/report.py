@@ -8,6 +8,7 @@ from ramutils.tasks import *
 from ramutils.utils import extract_experiment_series
 from ramutils.stim_artifact import get_tstats
 from .hooks import PipelineCallback
+import json
 
 ReportData = namedtuple('ReportData', 'session_summaries, math_summaries, '
                                       'target_selection_table, classifier_evaluation_results,'
@@ -454,13 +455,17 @@ def generate_data_for_location_search_report(subject, experiment,
                                              pairs_metadata_table,
                                              excluded_pairs,
                                              all_events,
+                                             stim_data,
                                              paths):
     connectivity = get_resting_connectivity(
         subject, rootdir=paths.root
     )
     stim_events = all_events[all_events.type == 'STIM_ON']
+
     pre_psd, post_psd, emask, cmask = get_psd_data(
-        stim_events, paths.root)
+        pd.DataFrame(stim_events), paths.root)
+
+    pairs_metadata_table = pairs_metadata_table.to_dict()
 
     session_summaries = summarize_location_search_sessions(stim_events,
                                                            pairs_metadata_table,
@@ -471,7 +476,8 @@ def generate_data_for_location_search_report(subject, experiment,
                                                            emask,
                                                            cmask
                                                            )
-    return ReportData(session_summaries, *([None]*6))
+    return ReportData(session_summaries, [], None,
+                      [], None, dict(), None, dict())
 
 
 def generate_data_for_ps5_report(subject, experiment, joint_report,

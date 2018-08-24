@@ -81,7 +81,10 @@ def countdown_to_resting(events, samplerate=1000):
         eegfiles += [event.eegfile] * 3
     new_offsets = milliseconds_to_events(msoffsets, samplerate)
     new_events = pd.DataFrame({'eegfile': eegfiles,
-                              'eegoffset': new_offsets.values.squeeze()})
+                              'eegoffset': new_offsets.values.squeeze(),
+                               'subject': events.subject.unique()[0],
+                               'experiment': events.experiment.unique()[0],
+                               'session': events.session.unique()[0]})
     return new_events
 
 
@@ -116,7 +119,7 @@ def read_eeg_data(reader, events, reref=True):
 
     eeg = reader.load_eeg(events=events, rel_start=0, rel_stop=1000,
                           scheme=scheme)
-    eeg.data = ButterworthFilter(time_series=eeg.to_ptsa(),
+    eeg.data = ButterworthFilter(timeseries=eeg.to_ptsa(),
                                  freq_range=[58.,62.], filt_type='stop', order=4).filter().data
     eeg = eeg.resample(256.)
     return eeg

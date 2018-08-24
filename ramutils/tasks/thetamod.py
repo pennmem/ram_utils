@@ -130,7 +130,7 @@ def get_resting_connectivity(subject, rootdir) -> np.ndarray:
     # Read EEG data for "resting" events
     eeg_data = []
     for session in sessions:
-        reader = get_reader(experiment="FR1", session=session)
+        reader = get_reader(subject=subject, experiment="FR1", session=session)
         rate = reader.load('sources')['sample_rate']
         reref = not reader.load('sources')['name'].endswith('.h5')
         events = connectivity.get_countdown_events(reader)

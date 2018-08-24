@@ -7,7 +7,7 @@ from ramutils.events import get_repetition_ratio_dict as \
     get_repetition_ratio_dict_core
 from ramutils.events import get_post_stim_events_mask as \
     get_post_stim_events_mask_core
-from ramutils.events import remove_practice_lists
+from ramutils.events import remove_practice_lists, separate_stim_events
 from ramutils.tasks import task
 from ramutils.utils import extract_experiment_series
 
@@ -147,6 +147,13 @@ def build_test_data(subject, experiment, paths, joint_report, sessions=None,
             pre=kwargs['pre_event_buf'], post=kwargs['post_event_buf'],
             return_stim_events=True)
 
+    elif 'LocationSearch' in experiment:
+        import pdb
+        pdb.set_trace()
+
+        all_events = load_events(subject,experiment,sessions=sessions,
+                                 file_type='task_events', rootdir=paths.root)
+        task_events, stim_params = separate_stim_events(all_events)
     else:
         all_events = load_events(subject, experiment, sessions=sessions,
                                  rootdir=paths.root)

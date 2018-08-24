@@ -302,8 +302,7 @@ def separate_stim_events(events, pal=False, stim=True, cat=False):
 
     # Historically, some event files do not have a phase field, but we need
     # it if it is there
-    if 'phase' not in events.dtype.names:
-        stim_cols.remove('phase')
+    stim_cols = [col for col in stim_cols if col in all_fields]
 
     all_fields.remove('stim_params')
 

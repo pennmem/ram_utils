@@ -1021,9 +1021,10 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         stim_columns = ['stimAnodeTag', 'stimCathodeTag', 'location',
                         'amplitude', 'stim_duration', 'pulse_freq']
         non_stim_columns = [c for c in df.columns if c not in stim_columns]
+        static_columns = [c for c in ['subject', 'experiment', 'session', 'list']
+                          if c in df.columns]
 
-        stim_param_by_list = (df[(stim_columns + ['subject', 'experiment',
-                                                  'session', 'list'])]
+        stim_param_by_list = (df[(stim_columns + static_columns)]
                               .drop_duplicates()
                               .dropna(how='all'))
 
@@ -1482,9 +1483,10 @@ class LocationSearchSessionSummary(StimSessionSummary):
     @property
     def regressions(self):
         if self._regressions is None:
-            self._regresssions = tmi.regress_distance(self._pre_psd,self._post_psd,
-                                    self._connectivity, self.distmat,
-                                    self.stim_channel_idxs)
+            self._regresssions = tmi.regress_distance(
+                self._pre_psd,self._post_psd,
+                self._connectivity, self.distmat,
+                self.stim_channel_idxs)
         return self._regressions
 
     @property
@@ -1500,11 +1502,11 @@ class LocationSearchSessionSummary(StimSessionSummary):
                                ]
         tmi_list = [tmi_val['zscore'] for summary in summaries
                     for tmi_val in summary.tmi]
-        for (stim_channel,tmi_val) in zip(stim_channel_labels,tmi_list):
+        for (stim_channel, tmi_val) in zip(stim_channel_labels, tmi_list):
             anode,cathode = stim_channel.split('-')
-            stim_params_table.loc[(stim_params_table.stimAnodeLabel==anode) &
-                                  (stim_params_table.stimCathodeLabel==cathode),
-            'tmi'] = tmi_val
+            stim_params_table.loc[(stim_params_table.stimAnodeLabel == anode) &
+                                  (stim_params_table.stimCathodeLabel == cathode),
+                                  'tmi'] = tmi_val
 
         return stim_params_table
 
