@@ -169,8 +169,8 @@ def make_report(subject, experiment, paths, joint_report=False,
         import dask.config
         dask.config.set(scheduler="synchronous")
         data = generate_data_for_location_search_report(
-            subject, experiment, pairs_metadata_table, excluded_pairs,
-            all_events, stim_data, paths
+            subject, experiment, pairs_metadata_table, ec_pairs,excluded_pairs,
+            all_events, stim_data, paths, **kwargs
         )
 
     else:
@@ -455,10 +455,11 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
 
 def generate_data_for_location_search_report(subject, experiment,
                                              pairs_metadata_table,
+                                             ec_pairs,
                                              excluded_pairs,
                                              all_events,
                                              stim_data,
-                                             paths):
+                                             paths, **kwargs):
     connectivity = get_resting_connectivity(
         subject, rootdir=paths.root
     )
@@ -467,6 +468,11 @@ def generate_data_for_location_search_report(subject, experiment,
     pre_psd, post_psd, emask, cmask = get_psd_data(
         pd.DataFrame(stim_events), paths.root)
 
+    post_stim_eeg = load_post_stim_eeg(all_events,bipolar_pairs=ec_pairs, **kwargs)
+
+    pairs_metadata_table['stim_tstats'], pairs_metadata_table['stim_pvals'] = get_artifact_tstats(
+        all_events[all_events['type'] == 'STIM_ON'], ec_pairs, return_pvalues=True, before_experiment=False).compute()
+
     session_summaries = summarize_location_search_sessions(stim_data,
                                                            pairs_metadata_table,
                                                            excluded_pairs,
@@ -474,7 +480,8 @@ def generate_data_for_location_search_report(subject, experiment,
                                                            pre_psd,
                                                            post_psd,
                                                            emask,
-                                                           cmask
+                                                           cmask,
+                                                           post_stim_eeg=post_stim_eeg,
                                                            )
     return ReportData(session_summaries, [], None,
                       [], None, dict(), None, dict())

@@ -5,7 +5,7 @@ import json
 import pandas as pd
 
 
-def get_tstats(stim_events, pairs, return_pvalues=False):
+def get_tstats(stim_events, pairs, return_pvalues=False, before_experiment=True):
     """
     Computes ttest on the average EEG value pre-stim vs post-stim.
     TODO: import from artdet; define parameters centrally
@@ -28,10 +28,11 @@ def get_tstats(stim_events, pairs, return_pvalues=False):
     offset = 0.040
     stim_duration = 0.500
 
-    # Only use stim events from artifact detection period
-    stim_events = stim_events[stim_events['list'] == -999]
-    if len(stim_events) < 30: #TODO: MAKE THIS A CONFIG PARAMETER -- SEE TICL_FR expconf generator
-        return (None, None) if return_pvalues else None
+    if before_experiment:
+        # Only use stim events from artifact detection period
+        stim_events = stim_events[stim_events['list'] == -999]
+        if len(stim_events) < 30: #TODO: MAKE THIS A CONFIG PARAMETER -- SEE TICL_FR expconf generator
+            return (None, None) if return_pvalues else None
 
     pre_stim_eeg = ramutils.powers.load_eeg(
         stim_events,

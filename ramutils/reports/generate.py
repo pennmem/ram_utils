@@ -475,8 +475,10 @@ class ReportGenerator(object):
         -------
         Rendered LocationSearch report as a string
         """
+        stim_params = LocationSearchSessionSummary.stim_params(
+            self.session_summaries
+        )
         return self._render('location_search',
                             stim=True,
-                            stim_params=LocationSearchSessionSummary.stim_params(
-                                self.session_summaries
-                            ))
+                            stim_params=stim_params,
+                            )

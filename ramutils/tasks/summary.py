@@ -343,10 +343,10 @@ def summarize_ps_sessions(ps_events, bipolar_pairs, excluded_pairs):
 @task()
 def summarize_location_search_sessions(stim_events, pairs_metadata_table, excluded_pairs,
                                        connectivity, pre_psd, post_psd,
-                                       bad_event_mask, bad_channel_mask, ):
+                                       bad_event_mask, bad_channel_mask,post_stim_eeg):
     session_summaries = []
-    sessions = extract_sessions(stim_events)
-    bipolar_pairs = pairs_metadata_table.to_dict(orient='index')
+    subject , experiment, sessions = extract_event_metadata(stim_events)
+    bipolar_pairs = {subject: {'pairs': pairs_metadata_table.to_dict(orient='index')}}
     locations = pairs_metadata_table[['location', 'label']]
     locations.index = pairs_metadata_table.channel_1.astype(int)
     locations = pd.DataFrame(locations)
@@ -383,7 +383,9 @@ def summarize_location_search_sessions(stim_events, pairs_metadata_table, exclud
         summary.populate(
             sess_events, bipolar_pairs, excluded_pairs,
             connectivity, pre_psd, post_psd,
-            bad_event_mask, bad_channel_mask
+            bad_event_mask, bad_channel_mask,
+            post_stim_eeg = post_stim_eeg,
+            stim_tstats= pairs_metadata_table[['stim_tstats', 'stim_pvals']].to_records(index=False)
         )
         session_summaries.append(summary)
     return session_summaries

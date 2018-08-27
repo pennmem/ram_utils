@@ -1473,7 +1473,7 @@ class LocationSearchSessionSummary(StimSessionSummary):
 
     @property
     def bipolar_pairs_frame(self):
-        bpdict = self.bipolar_pairs
+        bpdict = self.bipolar_pairs[self.subject]['pairs']
         bpdf = pd.DataFrame.from_dict(bpdict,orient='index')
         bpdf.channel_1 = bpdf.channel_1.astype(int)
         bpdf.channel_2 = bpdf.channel_2.astype(int)
@@ -1486,11 +1486,6 @@ class LocationSearchSessionSummary(StimSessionSummary):
     @property
     def stim_channel_idxs(self):
         return tmi.get_stim_channels(self.bipolar_pairs_frame, self.events, 'stimAnodeTag', 'stimCathodeTag')
-
-
-    @property
-    def n_pairs(self):
-        return len(self.bipolar_pairs)
 
     @property
     def regressions(self):
@@ -1521,15 +1516,15 @@ class LocationSearchSessionSummary(StimSessionSummary):
             anode,cathode = stim_channel.split('-')
             stim_params_table.loc[(stim_params_table.stimAnodeTag == anode) &
                                   (stim_params_table.stimCathodeTag == cathode),
-                                  'tmi'] = tmi_val
+                                  'TMI'] = tmi_val
 
-        return stim_params_table.dropna()
+        return stim_params_table.dropna().to_records()
 
     def populate(self,events, bipolar_pairs, excluded_pairs,
                  connectivity, pre_psd, post_psd, bad_events_mask, bad_channel_mask,
-                 stim_tstats=None):
+                 stim_tstats=None,**kwargs):
         StimSessionSummary.populate(self, events, bipolar_pairs, excluded_pairs,
-                                    None, stim_tstats=stim_tstats)
+                                    None, stim_tstats=stim_tstats,**kwargs)
         self.connectivity = connectivity
         self.post_psd = post_psd
         self.pre_psd = pre_psd

@@ -71,5 +71,5 @@ def extract_rejected_pairs(subject,used_classifiers,
 
 
 @task(nout=2)
-def get_artifact_tstats(stim_events, pairs, return_pvalues):
-    return get_tstats(stim_events, pairs, return_pvalues)
+def get_artifact_tstats(stim_events, pairs, return_pvalues, before_experiment=True):
+    return get_tstats(stim_events, pairs, return_pvalues, before_experiment)
