@@ -166,9 +166,11 @@ def make_report(subject, experiment, paths, joint_report=False,
                                             task_events, stim_data, paths,
                                             **kwargs)
     elif "LocationSearch" in experiment:
+        import dask.config
+        dask.config.set(scheduler="synchronous")
         data = generate_data_for_location_search_report(
             subject, experiment, pairs_metadata_table, excluded_pairs,
-            all_events, paths
+            all_events, stim_data, paths
         )
 
     else:
@@ -465,9 +467,7 @@ def generate_data_for_location_search_report(subject, experiment,
     pre_psd, post_psd, emask, cmask = get_psd_data(
         pd.DataFrame(stim_events), paths.root)
 
-    pairs_metadata_table = pairs_metadata_table.to_dict()
-
-    session_summaries = summarize_location_search_sessions(stim_events,
+    session_summaries = summarize_location_search_sessions(stim_data,
                                                            pairs_metadata_table,
                                                            excluded_pairs,
                                                            connectivity,

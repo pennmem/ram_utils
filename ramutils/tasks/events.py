@@ -148,9 +148,6 @@ def build_test_data(subject, experiment, paths, joint_report, sessions=None,
             return_stim_events=True)
 
     elif 'LocationSearch' in experiment:
-        import pdb
-        pdb.set_trace()
-
         all_events = load_events(subject,experiment,sessions=sessions,
                                  file_type='task_events', rootdir=paths.root)
         task_events, stim_params = separate_stim_events(all_events)

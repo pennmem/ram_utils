@@ -713,8 +713,8 @@ def get_distances(pairs):
     """
     # positions matrix shaped as N_channels x 3
     pos = np.array([
-        [row["ind.{}".format(c)] for c in ("x", "y", "z")]
-        for _, row in pairs.sort_values(by=['contact_1', 'contact_2']).iterrows()
+        [row["mni_{}".format(c)] for c in ("x", "y", "z")]
+        for _, row in pairs.sort_values(by=['channel_1', 'channel_2']).iterrows()
     ])
 
     distmat = np.empty((len(pos), len(pos)))

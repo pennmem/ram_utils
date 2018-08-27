@@ -341,16 +341,47 @@ def summarize_ps_sessions(ps_events, bipolar_pairs, excluded_pairs):
 
 
 @task()
-def summarize_location_search_sessions(stim_events, bipolar_pairs, excluded_pairs,
+def summarize_location_search_sessions(stim_events, pairs_metadata_table, excluded_pairs,
                                        connectivity, pre_psd, post_psd,
                                        bad_event_mask, bad_channel_mask, ):
     session_summaries = []
     sessions = extract_sessions(stim_events)
+    bipolar_pairs = pairs_metadata_table.to_dict(orient='index')
+    locations = pairs_metadata_table[['location', 'label']]
+    locations.index = pairs_metadata_table.channel_1.astype(int)
+    locations = pd.DataFrame(locations)
+    expected_dtypes = [('subject', '<U256'),
+                       ('experiment', '<U256'),
+                       ('session', '<i8'),
+                       ('type', '<U256'),
+                       ('mstime', '<i8'),
+                       ('amplitude', '<U256'),
+                       ('pulse_freq', '<U256'),
+                       ('stim_duration', '<U256'),
+                       ('stimAnodeTag', '<U256'),
+                       ('stimCathodeTag', '<U256'),
+                       ('location', '<U256'),
+                       ('label', '<U256'),
+                       ]
     for session in sessions:
         sess_mask = (stim_events.session == session)
+        sess_events = stim_events[sess_mask]
+        stim_param_df = pd.DataFrame(sess_events['stim_params'])[['amplitude', 'pulse_freq', 'stim_duration',
+                                                                  'anode_label', 'cathode_label','anode_number']]
+        stim_param_df = stim_param_df.merge(locations, how='left', left_on='anode_number', right_index=True)
+
+        stim_param_df.rename(columns={'anode_label': 'stimAnodeTag',
+                                      'cathode_label': 'stimCathodeTag',}, inplace=True)
+
+        stim_param_df.drop(columns= 'anode_number', inplace=True)
+        events_df = pd.DataFrame(sess_events)
+        events_df.drop(columns=['stim_params', 'eegoffset', 'phase',], inplace=True)
+        events_df = events_df.merge(stim_param_df,left_index=True, right_index=True,)
+
+        sess_events = dataframe_to_recarray(events_df,expected_dtypes)
         summary = LocationSearchSessionSummary()
         summary.populate(
-            stim_events[sess_mask], bipolar_pairs, excluded_pairs,
+            sess_events, bipolar_pairs, excluded_pairs,
             connectivity, pre_psd, post_psd,
             bad_event_mask, bad_channel_mask
         )

@@ -1471,21 +1471,33 @@ class LocationSearchSessionSummary(StimSessionSummary):
     bad_channels_mask = CArray
     _regressions = ArrayOrNone
 
+    @property
+    def bipolar_pairs_frame(self):
+        bpdict = self.bipolar_pairs
+        bpdf = pd.DataFrame.from_dict(bpdict,orient='index')
+        bpdf.channel_1 = bpdf.channel_1.astype(int)
+        bpdf.channel_2 = bpdf.channel_2.astype(int)
+        return bpdf.sort_values(by=['channel_1', 'channel_2']).reset_index()
 
     @property
     def distmat(self):
-        return get_distances(self.bipolar_pairs)
+        return get_distances(self.bipolar_pairs_frame)
 
     @property
     def stim_channel_idxs(self):
-        return tmi.get_stim_channels(self.bipolar_pairs,self.events)
+        return tmi.get_stim_channels(self.bipolar_pairs_frame, self.events, 'stimAnodeTag', 'stimCathodeTag')
+
+
+    @property
+    def n_pairs(self):
+        return len(self.bipolar_pairs)
 
     @property
     def regressions(self):
         if self._regressions is None:
-            self._regresssions = tmi.regress_distance(
-                self._pre_psd,self._post_psd,
-                self._connectivity, self.distmat,
+            self._regressions, _ = tmi.regress_distance(
+                self.pre_psd,self.post_psd,
+                self.connectivity, self.distmat,
                 self.stim_channel_idxs)
         return self._regressions
 
@@ -1494,26 +1506,24 @@ class LocationSearchSessionSummary(StimSessionSummary):
         return tmi.compute_tmi(self.regressions)
 
     @staticmethod
-    def stim_params_by_list(summaries):
-        stim_params_table = FRStimSessionSummary.stim_params_by_list(summaries)
-        stim_channel_labels = [summary.bipolar_pairs[idx]['label']
+    def stim_params(summaries):
+        df = FRStimSessionSummary.combine_sessions(summaries)
+        stim_columns = FRStimSessionSummary().stim_columns
+        stim_columns = [c for c in stim_columns if c in df.columns]
+        stim_params_table = df[stim_columns].drop_duplicates().dropna(how='all')
+        stim_channel_labels = [summary.bipolar_pairs_frame.iloc[idx]['label']
                                for summary in summaries
-                               for idx in summary.stim_channel_idx
+                               for idx in summary.stim_channel_idxs
                                ]
         tmi_list = [tmi_val['zscore'] for summary in summaries
                     for tmi_val in summary.tmi]
         for (stim_channel, tmi_val) in zip(stim_channel_labels, tmi_list):
             anode,cathode = stim_channel.split('-')
-            stim_params_table.loc[(stim_params_table.stimAnodeLabel == anode) &
-                                  (stim_params_table.stimCathodeLabel == cathode),
+            stim_params_table.loc[(stim_params_table.stimAnodeTag == anode) &
+                                  (stim_params_table.stimCathodeTag == cathode),
                                   'tmi'] = tmi_val
 
-        return stim_params_table
-
-    @staticmethod
-    def stim_params(summaries):
-        df = LocationSearchSessionSummary.stim_params_by_list(summaries)
-        return FRStimSessionSummary.aggregate_stim_params_over_list(df)
+        return stim_params_table.dropna()
 
     def populate(self,events, bipolar_pairs, excluded_pairs,
                  connectivity, pre_psd, post_psd, bad_events_mask, bad_channel_mask,
