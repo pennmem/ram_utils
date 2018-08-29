@@ -11,7 +11,7 @@ from ramutils.retrieval import create_matched_events
 from ramutils.utils import load_event_test_data
 import numpy.testing
 
-datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
+datafile = functools.partial(resource_filename, 'test.test_data')
 
 
 class TestEvents:

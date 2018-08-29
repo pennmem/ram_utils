@@ -12,7 +12,7 @@ from ramutils.parameters import FRParameters, PALParameters, FilePaths
 
 
 datafile = functools.partial(resource_filename,
-                             'ramutils.test.test_data.input.events')
+                             'test.test_data.input.events')
 
 
 class TestEvents:

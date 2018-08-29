@@ -13,7 +13,7 @@ from traits.api import ListInt, ListFloat, ListBool
 from ramutils.reports.summary import *
 from ramutils.tasks.events import build_ps_data
 from ramutils.events import  extract_biomarker_information
-datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
+datafile = functools.partial(resource_filename, 'test.test_data')
 
 
 @pytest.fixture(scope='session')

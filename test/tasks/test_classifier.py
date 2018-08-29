@@ -13,7 +13,7 @@ from sklearn.externals import joblib
 
 
 datafile = functools.partial(resource_filename,
-                             'ramutils.test.test_data.input')
+                             'test.test_data.input')
 
 
 @pytest.mark.skipif(os.environ.get("TRAVIS_CI", None) is not None,

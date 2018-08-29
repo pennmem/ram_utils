@@ -10,7 +10,7 @@ from ramutils.classifier.weighting import \
     get_fr_sample_weights, get_pal_sample_weights, get_sample_weights
 
 datafile = functools.partial(resource_filename,
-                             'ramutils.test.test_data.input')
+                             'test.test_data.input')
 
 
 @pytest.mark.parametrize("event_file, exp_scheme", [

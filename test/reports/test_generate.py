@@ -18,9 +18,9 @@ def test_generate_fr1_report():
 
     """
     events_file = resource_filename(
-        'ramutils.test.test_data', 'R1111M_task_events.npz')
+        'test.test_data', 'R1111M_task_events.npz')
     math_events_file = resource_filename(
-        'ramutils.test.test_data', 'R1111M_math_events.npz')
+        'test.test_data', 'R1111M_math_events.npz')
 
     events = np.rec.array(np.load(events_file)['events'])
     math_events = np.rec.array(np.load(math_events_file)['events'])
@@ -47,7 +47,7 @@ def test_generate_fr1_report():
 @pytest.mark.rhino
 @pytest.mark.skip("outdated")
 def test_generate_ticl_report():
-    event_file = resource_filename('ramutils.test.test_data',
+    event_file = resource_filename('test.test_data',
                                    'ticl_fr_events.npz')
     ticl_events = np.rec.array(np.load(event_file)['events'])
     summary = TICLFRSessionSummary()

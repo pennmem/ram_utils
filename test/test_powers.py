@@ -13,7 +13,7 @@ from ramutils.parameters import FRParameters, PALParameters
 from ramutils.utils import load_event_test_data
 
 datafile = functools.partial(resource_filename,
-                             'ramutils.test.test_data.input')
+                             'test.test_data.input')
 
 
 @pytest.mark.rhino

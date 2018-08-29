@@ -9,7 +9,7 @@ from pkg_resources import resource_filename
 
 
 datafile = functools.partial(resource_filename,
-                             'ramutils.test.test_data')
+                             'test.test_data')
 
 
 @pytest.mark.rhino

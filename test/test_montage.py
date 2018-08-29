@@ -7,7 +7,7 @@ from numpy.testing import assert_equal
 from ramutils.montage import *
 from ramutils.parameters import StimParameters, FilePaths
 
-datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
+datafile = functools.partial(resource_filename, 'test.test_data')
 
 
 class TestMontage:

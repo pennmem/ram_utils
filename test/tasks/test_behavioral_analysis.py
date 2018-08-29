@@ -9,7 +9,7 @@ from ramutils.reports.summary import FRStimSessionSummary
 
 
 datafile = functools.partial(
-    resource_filename, 'ramutils.test.test_data.input')
+    resource_filename, 'test.test_data.input')
 
 
 @pytest.fixture(scope='session')

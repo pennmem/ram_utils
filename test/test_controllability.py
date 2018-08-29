@@ -9,7 +9,7 @@ from pkg_resources import resource_filename
 from scipy.io import loadmat
 
 datafile = functools.partial(resource_filename,
-                             'ramutils.test.test_data')
+                             'test.test_data')
 
 
 @pytest.mark.parametrize('subject, expected_failure', [

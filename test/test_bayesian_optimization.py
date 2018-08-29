@@ -6,7 +6,7 @@ from pkg_resources import resource_filename
 from ramutils.bayesian_optimization import choose_location
 
 datafile = functools.partial(resource_filename,
-                             'ramutils.test.test_data.input')
+                             'test.test_data.input')
 
 
 def test_choose_location():

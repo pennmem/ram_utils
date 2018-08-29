@@ -19,15 +19,15 @@ from ramutils.tasks.odin import (
     generate_ramulator_config, generate_electrode_config
 )
 from ramutils.montage import generate_pairs_from_electrode_config
-import ramutils.test.test_data
+import test.test_data
 from ramutils.utils import touch, mkdir_p
 
 
-datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
+datafile = functools.partial(resource_filename, 'test.test_data')
 
 
 def jsondata(s):
-    return json.loads(resource_string('ramutils.test.test_data', s))
+    return json.loads(resource_string('test.test_data', s))
 
 
 def test_generate_electrode_config(tmpdir):
@@ -45,11 +45,11 @@ def test_generate_electrode_config(tmpdir):
     mkdir_p(str(tmpdir.join(dest)))
 
     with open(osp.join(docs_dir, 'jacksheet.txt'), 'wb') as f:
-        f.write(resource_string('ramutils.test.test_data',
+        f.write(resource_string('test.test_data',
                                 '{}_jacksheet.txt'.format(subject)))
 
     with open(osp.join(docs_dir, 'area.txt'), 'wb') as f:
-        f.write(resource_string('ramutils.test.test_data',
+        f.write(resource_string('test.test_data',
                                 '{}_area.txt'.format(subject)))
 
     paths = FilePaths(root=str(tmpdir), dest=dest)
@@ -65,7 +65,7 @@ def test_generate_electrode_config(tmpdir):
 def test_generate_ramulator_config(experiment, output_dest):
     subject = 'R1354E'
 
-    root = osp.join(osp.dirname(ramutils.test.test_data.__file__))
+    root = osp.join(osp.dirname(test.test_data.__file__))
     container = Mock(ClassifierContainer)
 
     # Since we're putting configs in a timestamped directory, we need to find it
@@ -109,7 +109,7 @@ def test_generate_ramulator_config(experiment, output_dest):
     )
     paths.dest = os.path.join(output_dest, 'output')
 
-    getpath = functools.partial(resource_filename, 'ramutils.test.test_data')
+    getpath = functools.partial(resource_filename, 'test.test_data')
     with open(getpath('/input/configs/R1328E_excluded_pairs.json'), 'r') as f:
         excluded_pairs = json.load(f)
 
