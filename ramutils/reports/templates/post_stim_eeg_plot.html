@@ -2,14 +2,14 @@
     {% if summaries.__len__() %}
     <h2> Post-stim EEG</h2>
         {% for summary in summaries %}
-        {{ summary.excluded_pairs.__len__() }}/{{ summary.n_pairs }} channels
+        {{ summary.n_excluded_pairs }} / {{ summary.n_pairs }} channels
         rejected due to artifact.
     <figure>
         <div class="eeg-plot-container">
             {% for plotstr in summary.post_stim_eeg_plot %}
             <div class="hashovertext eeg-plot-img">
                 <img class="img-thumbnail" src="data:image/png;base64,{{ plotstr }}">
-                {% if experiment=='TICL_FR' %}
+                {% if summary.stim_tstats.__len__() > 0 %}
                 <span class="hovertext">{{ 't=%.2f'%summary.stim_tstats[loop.index0] }} </span>
                 {% endif %}
             </div>

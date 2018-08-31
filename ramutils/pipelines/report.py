@@ -423,7 +423,7 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
                                             used_pair_mask)
 
     pairs_metadata_table['stim_tstats'], pairs_metadata_table['stim_pvals'] = get_artifact_tstats(
-        all_events[all_events['type'] == 'STIM_ON'], ec_pairs, return_pvalues=True).compute()
+        all_events[all_events['type'] == 'STIM_ON'], ec_pairs, 0.04, 0.4, return_pvalues=True).compute()
 
     session_summaries = summarize_stim_sessions(all_events, final_task_events,
                                                 stim_data, pairs_metadata_table,
@@ -471,7 +471,8 @@ def generate_data_for_location_search_report(subject, experiment,
     post_stim_eeg = load_post_stim_eeg(all_events,bipolar_pairs=ec_pairs, **kwargs)
 
     pairs_metadata_table['stim_tstats'], pairs_metadata_table['stim_pvals'] = get_artifact_tstats(
-        all_events[all_events['type'] == 'STIM_ON'], ec_pairs, return_pvalues=True, before_experiment=False).compute()
+        all_events[all_events['type'] == 'STIM_ON'], ec_pairs,
+        0.05, 0.3, return_pvalues=True, before_experiment=False).compute()
 
     session_summaries = summarize_location_search_sessions(stim_data,
                                                            pairs_metadata_table,

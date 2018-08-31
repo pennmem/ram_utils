@@ -831,7 +831,9 @@ class StimSessionSummary(SessionSummary):
                                     default=np.array([]))
     _model_metadata = Bytes(desc="traces for Bayesian multilevel models")
     _post_stim_eeg = ArrayOrNone(desc='raw post-stim EEG')
-    _stim_tstats = CArray
+    _stim_tstats = CArray(default=np.array([],
+                                           dtype=[('stim_tstat', float),
+                                                  ('stim_pval', float)]))
 
     @property
     def post_stim_prob_recall(self):
@@ -887,6 +889,26 @@ class StimSessionSummary(SessionSummary):
                       for x in summary.stim_tstats[summary.stim_pvals < 0.001]]
         return good_tstats, bad_tstats
 
+    @property
+    def stim_tstats(self):
+        return self._stim_tstats['stim_tstats']
+
+    @property
+    def stim_pvals(self):
+        return self._stim_tstats['stim_pvals']
+
+    @property
+    def used_pair_mask(self):
+        bipolar_pairs = pd.DataFrame.from_dict(
+            self.bipolar_pairs[self.subject]['pairs']
+        )
+        bipolar_pairs = bipolar_pairs.T.sort_values(by=['channel_1', 'channel_2'])
+        bipolar_pairs = bipolar_pairs.T.to_dict(into=OrderedDict)
+        bipolar_pairs = OrderedDict({self.subject: {'pairs': bipolar_pairs}})
+        return get_used_pair_mask(bipolar_pairs, self.excluded_pairs)
+
+    def n_excluded_pairs(self):
+        return (~self.used_pair_mask).sum()
 
     @property
     def post_stim_eeg_plot(self):
@@ -896,14 +918,8 @@ class StimSessionSummary(SessionSummary):
             pairs = ['%s-\n%s' % (pair['label0'], pair['label1'])
                      for pair in generate_pairs_for_classifier(self.bipolar_pairs, [])
                      ]
-            bipolar_pairs = pd.DataFrame.from_dict(
-                self.bipolar_pairs[self.subject]['pairs']
-            )
-            bipolar_pairs = bipolar_pairs.T.sort_values(by=['channel_1','channel_2'])
-            bipolar_pairs = bipolar_pairs.T.to_dict(into=OrderedDict)
-            bipolar_pairs = OrderedDict({self.subject: {'pairs': bipolar_pairs}})
-            used_pair_mask = get_used_pair_mask(bipolar_pairs,
-                                                self.excluded_pairs)
+
+            used_pair_mask = self.used_pair_mask
             return [encode_file(save_eeg_by_channel_plot(pairs[i:i+1],
                                                         self._post_stim_eeg[i:i+1],
                                                         used_pair_mask[i:i+1]))
@@ -1281,13 +1297,6 @@ class TICLFRSessionSummary(FRStimSessionSummary):
                 (in_phase & this_position)
             ][has_match]['biomarker_value']
 
-    @property
-    def stim_tstats(self):
-        return self._stim_tstats['stim_tstats']
-
-    @property
-    def stim_pvals(self):
-        return self._stim_tstats['stim_pvals']
 
     @staticmethod
     def pre_stim_prob_recall(summaries, phase=None):
@@ -1486,6 +1495,14 @@ class LocationSearchSessionSummary(StimSessionSummary):
     @property
     def stim_channel_idxs(self):
         return tmi.get_stim_channels(self.bipolar_pairs_frame, self.events, 'stimAnodeTag', 'stimCathodeTag')
+
+    @property
+    def used_pair_mask(self):
+        return ~self.bad_channels_mask
+
+    @property
+    def n_excluded_pairs(self):
+        return self.bad_channels_mask.sum()
 
     @property
     def regressions(self):

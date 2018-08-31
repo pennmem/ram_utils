@@ -5,7 +5,7 @@ import json
 import pandas as pd
 
 
-def get_tstats(stim_events, pairs, return_pvalues=False, before_experiment=True):
+def get_tstats(stim_events, pairs, start_time, duration, return_pvalues=False, before_experiment=True,):
     """
     Computes ttest on the average EEG value pre-stim vs post-stim.
     TODO: import from artdet; define parameters centrally
@@ -14,8 +14,16 @@ def get_tstats(stim_events, pairs, return_pvalues=False, before_experiment=True)
     ----------
     stim_events: np.rec.array
       Stimulation events for a session
+    pairs: dict
+      bipolar pairs
+    start_time: int
+      time after stim offset/before stim onset to begin (seconds)
+    duration: int
+      Length of eeg to evaluate (seconds)
     return_pvalues: bool
       If `true`, return p-values along with t-statistics
+    before_experiment:
+      If `true`, only include stim events before the first list
     Returns
     -------
     t: np.ndarray
@@ -24,8 +32,6 @@ def get_tstats(stim_events, pairs, return_pvalues=False, before_experiment=True)
       p-values by channel
     """
 
-    length = 0.400
-    offset = 0.040
     stim_duration = 0.500
 
     if before_experiment:
@@ -36,14 +42,14 @@ def get_tstats(stim_events, pairs, return_pvalues=False, before_experiment=True)
 
     pre_stim_eeg = ramutils.powers.load_eeg(
         stim_events,
-        start_time=-(length+offset),
-        end_time=-offset,
+        start_time=-(start_time+duration),
+        end_time=-start_time,
         bipolar_pairs=pairs
     )
     post_stim_eeg = ramutils.powers.load_eeg(
         stim_events,
-        start_time=stim_duration+offset,
-        end_time=stim_duration+length+offset,
+        start_time=stim_duration+start_time,
+        end_time=stim_duration+start_time+duration,
         bipolar_pairs=pairs
     )
 
