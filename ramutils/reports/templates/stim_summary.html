@@ -18,7 +18,17 @@
     </thead>
     <tbody>
     {% for stim_param in stim_params %}
-      <tr>
+    {% if experiment == "location_search" %}
+    {% if stim_param['TMI'] > 2 %}
+    <tr class="sme-positive">
+    {% elif stim_param['TMI'] < -2 %}
+    <tr class="sme-negative">
+    {% else %}
+    <tr>
+    {% endif %}
+    {% else %}
+    <tr>
+    {% endif %}
         <td>{{ stim_param['stimAnodeTag'] }}</td>
         <td>{{ stim_param['stimCathodeTag'] }}</td>
         <td>{{ stim_param['location'] }}</td>
@@ -35,6 +45,17 @@
     </tbody>
   </table>
     <script>
+      (function () {
+    document.querySelectorAll('tr.sme-positive').forEach((el) => {
+      el.title = 'Significant positive effect';
+    });
+    document.querySelectorAll('tr.sme-negative').forEach((el) => {
+      el.title = 'Significant negative effect';
+    });
+    document.querySelectorAll('tr.sme-no-effect').forEach((el) => {
+      el.title = 'No significant effect';
+    });
+  })();
     window.addEventListener('load', () => {
       $('#stim_summary').DataTable();
     });
