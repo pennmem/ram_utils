@@ -465,24 +465,19 @@ def generate_data_for_location_search_report(subject, experiment,
     )
     stim_events = all_events[all_events.type == 'STIM_ON']
 
-    pre_psd, post_psd, emask, cmask = get_psd_data(
-        pd.DataFrame(stim_events), paths.root)
-
-    post_stim_eeg = load_post_stim_eeg(all_events,bipolar_pairs=ec_pairs, **kwargs)
+    post_stim_eeg = load_post_stim_eeg(stim_events, bipolar_pairs=ec_pairs, **kwargs)
 
     pairs_metadata_table['stim_tstats'], pairs_metadata_table['stim_pvals'] = get_artifact_tstats(
         all_events[all_events['type'] == 'STIM_ON'], ec_pairs,
         0.05, 0.3, return_pvalues=True, before_experiment=False).compute()
 
-    session_summaries = summarize_location_search_sessions(stim_data,
+    session_summaries = summarize_location_search_sessions(all_events,
+                                                           stim_data,
                                                            pairs_metadata_table,
                                                            excluded_pairs,
                                                            connectivity,
-                                                           pre_psd,
-                                                           post_psd,
-                                                           emask,
-                                                           cmask,
                                                            post_stim_eeg=post_stim_eeg,
+                                                           rootdir=paths.root
                                                            )
     return ReportData(session_summaries, [], None,
                       [], None, dict(), None, dict())
