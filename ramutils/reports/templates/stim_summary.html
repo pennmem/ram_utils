@@ -26,7 +26,7 @@
         <td>{{ stim_param['stim_duration'] }}</td>
         <td>{{ stim_param['pulse_freq'] }}</td>
         {% if experiment=="location_search" %}
-        <td>{{ stim_param['TMI'] }}</td>
+        <td>{{ '{:.2f}'.format(stim_param['TMI']) }}</td>
         {% else %}
         <td>{{ stim_param['n_stimulations'] }} / {{ stim_param['n_trials'] }} ({{ '{:.1f}'.format(100 * (stim_param['n_stimulations'] / stim_param['n_trials'])) }}%)</td>
         {% endif %}
