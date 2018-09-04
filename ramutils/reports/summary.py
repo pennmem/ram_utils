@@ -1515,7 +1515,7 @@ class LocationSearchSessionSummary(StimSessionSummary):
 
     @property
     def stim_tag(self):
-        return '-'.join(*LocationSearchSessionSummary.stim_params([self])[0][['stimAnodeTag', 'stimCathodeTag']])
+        return '-'.join(LocationSearchSessionSummary.stim_params([self])[0][['stimAnodeTag', 'stimCathodeTag']])
 
     @property
     def id(self):
