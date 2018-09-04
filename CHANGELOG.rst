@@ -1,6 +1,15 @@
 Changes
 =======
 
+Version 2.3.0
+-------------
+**2018-9-9**
+
+
+* Fixed bug in LocationSearch report in which TMI was always computed using all power values
+* Added post-stim EEG plot to LocationSearchReport for each stim location
+* Added coloring to stim table based on sign and magnitude of TMI values
+
 Version 2.2.4
 -------------
 **2018-08-23**
