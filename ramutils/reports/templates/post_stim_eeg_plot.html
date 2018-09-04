@@ -1,10 +1,11 @@
 <div class="eeg-plot>">
     {% if summaries.__len__() %}
     <h2> Post-stim EEG</h2>
-        {% for summary in summaries %}
-        {{ summary.n_excluded_pairs }} / {{ summary.n_pairs }} channels
-        rejected due to artifact.
-    <figure>
+    {% for summary in summaries %}
+      <h4> {{ summary.id }} </h4>
+      {{ summary.n_excluded_pairs }} / {{ summary.n_pairs }} channels
+      rejected due to artifact.
+      <figure>
         <div class="eeg-plot-container">
             {% for plotstr in summary.post_stim_eeg_plot %}
             <div class="hashovertext eeg-plot-img">
@@ -15,14 +16,13 @@
             </div>
             {% endfor %}
         </div>
-    <figcaption> Post-stim EEG by channel. Purple border indicates
-        channels excluded during artifact detection routine.
-        <br>{% if experiment == 'TICL_FR' %}
-        Mouse over to see t-statistic from artifact detection {% endif %}
-    </figcaption>
-    </figure>
-
-        {% endfor %}
+        <figcaption> Post-stim EEG by channel. Purple border indicates
+          channels excluded during artifact detection routine.
+          <br>{% if experiment == 'TICL_FR' %}
+          Mouse over to see t-statistic from artifact detection {% endif %}
+        </figcaption>
+      </figure>
+    {% endfor %}
     {% endif %}
 </div>
 

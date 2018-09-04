@@ -1514,6 +1514,14 @@ class LocationSearchSessionSummary(StimSessionSummary):
         return self._regressions
 
     @property
+    def stim_tag(self):
+        return '-'.join(*LocationSearchSessionSummary.stim_params([self])[0][['stimAnodeTag', 'stimCathodeTag']])
+
+    @property
+    def id(self):
+        return ":".join([self.subject, self.experiment,self.session_number,self.stim_tag])
+
+    @property
     def tmi(self):
         return tmi.compute_tmi(self.regressions)
 
