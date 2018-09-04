@@ -272,7 +272,7 @@ def regress_distance(pre_psd, post_psd, conn, distmat, stim_channel_idxs,
         t[artifact_channels] = np.nan
 
     if event_mask is not None:
-        t[np.sum(event_mask, 0) > 20] = np.nan
+        t[np.sum(event_mask, 0) > 20] = np.nan #TODO: parametrize this threshold
 
     tmask = np.isfinite(t)
 

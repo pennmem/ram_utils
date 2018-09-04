@@ -1515,8 +1515,9 @@ class LocationSearchSessionSummary(StimSessionSummary):
             self._regressions, _ = tmi.regress_distance(
                 self.pre_psd,self.post_psd,
                 self.connectivity, self.distmat,
-                self.stim_channel_idxs, self._bad_events_mask,
-            self._bad_channels_mask)
+                self.stim_channel_idxs,
+                event_mask=self._bad_events_mask,
+                artifact_channels=self._bad_channels_mask)
         return self._regressions
 
     @property
