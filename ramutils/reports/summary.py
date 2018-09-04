@@ -1476,8 +1476,8 @@ class LocationSearchSessionSummary(StimSessionSummary):
     connectivity = Array
     pre_psd = Array
     post_psd = Array
-    bad_events_mask = CArray
-    bad_channels_mask = CArray
+    _bad_events_mask = CArray
+    _bad_channels_mask = CArray
     _regressions = ArrayOrNone
 
     @property
@@ -1497,6 +1497,11 @@ class LocationSearchSessionSummary(StimSessionSummary):
         return tmi.get_stim_channels(self.bipolar_pairs_frame, self.events, 'stimAnodeTag', 'stimCathodeTag')
 
     @property
+    def bad_channels_mask(self):
+        # TODO: paramtrize the 20 here
+        return self._bad_channels_mask | ((self._bad_events_mask.sum(0) > 20).squeeze())
+
+    @property
     def used_pair_mask(self):
         return ~self.bad_channels_mask
 
@@ -1510,7 +1515,8 @@ class LocationSearchSessionSummary(StimSessionSummary):
             self._regressions, _ = tmi.regress_distance(
                 self.pre_psd,self.post_psd,
                 self.connectivity, self.distmat,
-                self.stim_channel_idxs)
+                self.stim_channel_idxs, self._bad_events_mask,
+            self._bad_channels_mask)
         return self._regressions
 
     @property
@@ -1553,5 +1559,5 @@ class LocationSearchSessionSummary(StimSessionSummary):
         self.connectivity = connectivity
         self.post_psd = post_psd
         self.pre_psd = pre_psd
-        self.bad_channels_mask = bad_channel_mask
-        self.bad_events_mask = bad_events_mask
+        self._bad_channels_mask = bad_channel_mask
+        self._bad_events_mask = bad_events_mask
