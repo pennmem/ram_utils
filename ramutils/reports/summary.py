@@ -831,9 +831,8 @@ class StimSessionSummary(SessionSummary):
                                     default=np.array([]))
     _model_metadata = Bytes(desc="traces for Bayesian multilevel models")
     _post_stim_eeg = ArrayOrNone(desc='raw post-stim EEG')
-    _stim_tstats = CArray(default=np.array([],
-                                           dtype=[('stim_tstat', float),
-                                                  ('stim_pval', float)]))
+    _stim_tstats = CArray(dtype=[('stim_tstats', float),('stim_pvals', float)],
+                          desc='t-statistics from artifact detection')
 
     @property
     def post_stim_prob_recall(self):
