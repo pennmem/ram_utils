@@ -16,9 +16,9 @@ def get_tstats(stim_events, pairs, start_time, duration, return_pvalues=False, b
       Stimulation events for a session
     pairs: dict
       bipolar pairs
-    start_time: int
+    start_time: float
       time after stim offset/before stim onset to begin (seconds)
-    duration: int
+    duration: float
       Length of eeg to evaluate (seconds)
     return_pvalues: bool
       If `true`, return p-values along with t-statistics
