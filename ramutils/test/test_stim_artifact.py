@@ -19,7 +19,7 @@ def test_get_tstats(rhino_root):
     stim_events = events[events.type == 'STIM_ON']
     assert sum(stim_events.list == -999) == 30
 
-    tstats, pvals = stim_artifact.get_tstats(stim_events, pairs, return_pvalues=True)
+    tstats, pvals = stim_artifact.get_tstats(stim_events, pairs, 0.04, 0.4, return_pvalues=True)
     pairs = ramutils.montage.extract_pairs_dict(pairs)
     assert len(tstats) == len(pairs)
     assert sum(pvals < 0.001) == 140
