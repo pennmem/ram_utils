@@ -227,6 +227,7 @@ class TestCreateReports:
     @pytest.mark.output
     @pytest.mark.parametrize('rerun', [True, False])
     @pytest.mark.parametrize('subject, experiment, sessions', [
+        ('R1436J', 'LocationSearch', [5]),
         ('R1111M', 'FR2', [0]),
         ('R1154D', 'FR3', [0]),
         ('R1374T', 'CatFR5', [0]),

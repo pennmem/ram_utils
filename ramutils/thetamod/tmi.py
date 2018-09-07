@@ -27,15 +27,17 @@ def get_stim_events(reader):
     return stim_events
 
 
-def get_stim_channels(pairs, stim_events):
+def get_stim_channels(pairs, stim_events, anode_name_field='anode_label', cathode_name_field='cathod_label'):
     """Extract unique stim channels from stim events.
 
     Parameters
     ----------
-    pairs : pd.DataFrame
+    pairs : np.recarray
         Channel info.
     stim_events : pd.DataFrame
         Stimulation events.
+    anode_name_field, cathode_name_field:
+        The names of the columns containing the anode and cathode names respectively
 
     Returns
     -------
@@ -43,17 +45,17 @@ def get_stim_channels(pairs, stim_events):
         List of channel indices for each stim channel.
 
     """
-    if ('anode_label' not in stim_events.columns) and (
-            'cathode_label' not in stim_events.columns):
+    if (anode_name_field not in stim_events.dtype.names) and (
+            cathode_name_field not in stim_events.dtype.names):
         stim_params = pd.DataFrame([
             row for row in stim_events[stim_events.type == "STIM_ON"].stim_params
         ])
 
     else:
-        stim_params = stim_events[stim_events.type == "STIM_ON"]
+        stim_params = pd.DataFrame(stim_events[stim_events.type == "STIM_ON"])
 
     labels = np.unique([
-        "{}-{}".format(row.anode_label, row.cathode_label)
+        "{}-{}".format(row[anode_name_field], row[cathode_name_field])
         for _, row in stim_params.iterrows()
     ])
 
@@ -270,7 +272,7 @@ def regress_distance(pre_psd, post_psd, conn, distmat, stim_channel_idxs,
         t[artifact_channels] = np.nan
 
     if event_mask is not None:
-        t[np.sum(event_mask, 0) > 20] = np.nan
+        t[np.sum(event_mask, 0) > 20] = np.nan #TODO: parametrize this threshold
 
     tmask = np.isfinite(t)
 
@@ -278,6 +280,7 @@ def regress_distance(pre_psd, post_psd, conn, distmat, stim_channel_idxs,
         raise ValueError("Too few electrodes to compute TMI")
 
     results = []
+
     for stim_channel_idx in stim_channel_idxs:
         X, coefs, rval, y = do_regression(conn, distmat, stim_channel_idx, t,
                                           tmask)

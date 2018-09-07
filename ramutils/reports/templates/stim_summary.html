@@ -9,30 +9,53 @@
       <th>Amplitude [mA]</th>
       <th>Duration [ms]</th>
       <th>Pulse Frequency [Hz]</th>
-      <th>Stimulation Frequency</th>
-      {% if experiment == "LocationSearch" %}
+      {% if experiment == "location_search" %}
       <th> TMI </th>
+      {% else %}
+      <th>Stimulation Frequency</th>
       {% endif %}
     </tr>
     </thead>
     <tbody>
     {% for stim_param in stim_params %}
-      <tr>
+    {% if experiment == "location_search" %}
+    {% if stim_param['TMI'] > 2 %}
+    <tr class="sme-positive">
+    {% elif stim_param['TMI'] < -2 %}
+    <tr class="sme-negative">
+    {% else %}
+    <tr>
+    {% endif %}
+    {% else %}
+    <tr>
+    {% endif %}
         <td>{{ stim_param['stimAnodeTag'] }}</td>
         <td>{{ stim_param['stimCathodeTag'] }}</td>
         <td>{{ stim_param['location'] }}</td>
         <td>{{ stim_param['amplitude'] }}</td>
         <td>{{ stim_param['stim_duration'] }}</td>
         <td>{{ stim_param['pulse_freq'] }}</td>
+        {% if experiment=="location_search" %}
+        <td>{{ '{:.2f}'.format(stim_param['TMI']) }}</td>
+        {% else %}
         <td>{{ stim_param['n_stimulations'] }} / {{ stim_param['n_trials'] }} ({{ '{:.1f}'.format(100 * (stim_param['n_stimulations'] / stim_param['n_trials'])) }}%)</td>
-        {% if experiment=="LocationSearch" %}
-        <td>{{ stim_param['TMI'] }}</td>
         {% endif %}
       </tr>
     {% endfor %}
     </tbody>
   </table>
     <script>
+      (function () {
+    document.querySelectorAll('tr.sme-positive').forEach((el) => {
+      el.title = 'Significant positive effect';
+    });
+    document.querySelectorAll('tr.sme-negative').forEach((el) => {
+      el.title = 'Significant negative effect';
+    });
+    document.querySelectorAll('tr.sme-no-effect').forEach((el) => {
+      el.title = 'No significant effect';
+    });
+  })();
     window.addEventListener('load', () => {
       $('#stim_summary').DataTable();
     });

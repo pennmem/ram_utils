@@ -69,7 +69,7 @@ def create_report(input_args=None):
 
     if 'PS5' in args.experiment:
         exp_params = PS5Parameters()
-    elif 'FR' in args.experiment:
+    elif 'FR' in args.experiment or 'LocationSearch' in args.experiment:
         exp_params = FRParameters()
     elif 'PAL' in args.experiment:
         raise NotImplementedError("PAL experiments are not supported yet")

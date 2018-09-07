@@ -11,6 +11,7 @@ from ramutils.montage import extract_rejected_pairs as \
     extract_rejected_pairs_core
 from ramutils.montage import get_classifier_excluded_leads as get_classifier_excluded_leads_core
 from ramutils.stim_artifact import get_tstats
+from functools import wraps
 
 __all__ = [
     'generate_pairs_for_classifier',
@@ -71,5 +72,6 @@ def extract_rejected_pairs(subject,used_classifiers,
 
 
 @task(nout=2)
-def get_artifact_tstats(stim_events, pairs, return_pvalues):
-    return get_tstats(stim_events, pairs, return_pvalues)
+@wraps(get_tstats)
+def get_artifact_tstats(*args, **kwargs):
+    return get_tstats(*args, **kwargs)

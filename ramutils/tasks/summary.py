@@ -17,6 +17,7 @@ from ramutils.events import (
 from ramutils.exc import *
 from ramutils.log import get_logger
 from ramutils.reports.summary import *
+from ramutils.tasks.thetamod import get_psd_data
 
 logger = get_logger()
 
@@ -341,18 +342,51 @@ def summarize_ps_sessions(ps_events, bipolar_pairs, excluded_pairs):
 
 
 @task()
-def summarize_location_search_sessions(stim_events, bipolar_pairs, excluded_pairs,
-                                       connectivity, pre_psd, post_psd,
-                                       bad_event_mask, bad_channel_mask, ):
+def summarize_location_search_sessions(all_events, stim_params, pairs_metadata_table, excluded_pairs,
+                                       connectivity, post_stim_eeg, rootdir='/'):
     session_summaries = []
-    sessions = extract_sessions(stim_events)
-    for session in sessions:
-        sess_mask = (stim_events.session == session)
+    subject , experiment, sessions = extract_event_metadata(all_events)
+    bipolar_pairs = {subject: {'pairs': pairs_metadata_table.to_dict(orient='index')}}
+    locations = pairs_metadata_table[['location', 'label']]
+    locations.index = pairs_metadata_table.channel_1.astype(int)
+    locations = pd.DataFrame(locations)
+    expected_dtypes = [('subject', '<U256'),
+                       ('experiment', '<U256'),
+                       ('eegoffset', '<i8'),
+                       ('session', '<i8'),
+                       ('type', '<U256'),
+                       ('mstime', '<i8'),
+                       ('amplitude', '<U256'),
+                       ('pulse_freq', '<U256'),
+                       ('stim_duration', '<U256'),
+                       ('stimAnodeTag', '<U256'),
+                       ('stimCathodeTag', '<U256'),
+                       ('location', '<U256'),
+                       ('label', '<U256'),
+                       ]
+    stim_param_df = pd.DataFrame(stim_params['stim_params'])[['amplitude', 'pulse_freq', 'stim_duration',
+                                                              'anode_label', 'cathode_label', 'anode_number']]
+    stim_param_df = stim_param_df.merge(locations, how='left', left_on='anode_number', right_index=True)
+
+    stim_param_df.rename(columns={'anode_label': 'stimAnodeTag',
+                                  'cathode_label': 'stimCathodeTag', }, inplace=True)
+
+    stim_param_df.drop(columns='anode_number', inplace=True)
+    events_df = pd.DataFrame(all_events)
+    events_df = events_df.loc[events_df['type'] == 'STIM_ON']
+    events_df.drop(columns=['phase', ], inplace=True)
+    events_df = events_df.merge(stim_param_df, how='left', left_index=True, right_index=True,).reset_index(drop=True)
+    for _, target_df in events_df.groupby(['session', 'stimAnodeTag', 'stimCathodeTag']):
+        idxs = target_df.index.tolist()
+        target_events = dataframe_to_recarray(target_df, expected_dtypes)
+        pre_psd, post_psd, emask, cmask = get_psd_data(target_df, rootdir).compute()
         summary = LocationSearchSessionSummary()
         summary.populate(
-            stim_events[sess_mask], bipolar_pairs, excluded_pairs,
+            target_events, bipolar_pairs, excluded_pairs,
             connectivity, pre_psd, post_psd,
-            bad_event_mask, bad_channel_mask
+            emask, cmask,
+            post_stim_eeg=post_stim_eeg[:, idxs, :],
+            stim_tstats=pairs_metadata_table[['stim_tstats', 'stim_pvals']].to_records(index=False)
         )
         session_summaries.append(summary)
     return session_summaries

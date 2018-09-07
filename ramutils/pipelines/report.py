@@ -8,6 +8,7 @@ from ramutils.tasks import *
 from ramutils.utils import extract_experiment_series
 from ramutils.stim_artifact import get_tstats
 from .hooks import PipelineCallback
+import json
 
 ReportData = namedtuple('ReportData', 'session_summaries, math_summaries, '
                                       'target_selection_table, classifier_evaluation_results,'
@@ -165,9 +166,11 @@ def make_report(subject, experiment, paths, joint_report=False,
                                             task_events, stim_data, paths,
                                             **kwargs)
     elif "LocationSearch" in experiment:
+        import dask.config
+        dask.config.set(scheduler="synchronous")
         data = generate_data_for_location_search_report(
-            subject, experiment, pairs_metadata_table, excluded_pairs,
-            all_events, paths
+            subject, experiment, pairs_metadata_table, ec_pairs,excluded_pairs,
+            all_events, stim_data, paths, **kwargs
         )
 
     else:
@@ -420,7 +423,7 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
                                             used_pair_mask)
 
     pairs_metadata_table['stim_tstats'], pairs_metadata_table['stim_pvals'] = get_artifact_tstats(
-        all_events[all_events['type'] == 'STIM_ON'], ec_pairs, return_pvalues=True).compute()
+        all_events[all_events['type'] == 'STIM_ON'], ec_pairs, 0.04, 0.4, return_pvalues=True).compute()
 
     session_summaries = summarize_stim_sessions(all_events, final_task_events,
                                                 stim_data, pairs_metadata_table,
@@ -452,26 +455,32 @@ def generate_data_for_stim_report(subject, experiment, joint_report, retrain,
 
 def generate_data_for_location_search_report(subject, experiment,
                                              pairs_metadata_table,
+                                             ec_pairs,
                                              excluded_pairs,
                                              all_events,
-                                             paths):
+                                             stim_data,
+                                             paths, **kwargs):
     connectivity = get_resting_connectivity(
         subject, rootdir=paths.root
     )
     stim_events = all_events[all_events.type == 'STIM_ON']
-    pre_psd, post_psd, emask, cmask = get_psd_data(
-        stim_events, paths.root)
 
-    session_summaries = summarize_location_search_sessions(stim_events,
+    post_stim_eeg = load_post_stim_eeg(stim_events, bipolar_pairs=ec_pairs, **kwargs)
+
+    pairs_metadata_table['stim_tstats'], pairs_metadata_table['stim_pvals'] = get_artifact_tstats(
+        all_events[all_events['type'] == 'STIM_ON'], ec_pairs,
+        0.05, 0.3, return_pvalues=True, before_experiment=False).compute()
+
+    session_summaries = summarize_location_search_sessions(all_events,
+                                                           stim_data,
                                                            pairs_metadata_table,
                                                            excluded_pairs,
                                                            connectivity,
-                                                           pre_psd,
-                                                           post_psd,
-                                                           emask,
-                                                           cmask
+                                                           post_stim_eeg=post_stim_eeg,
+                                                           rootdir=paths.root
                                                            )
-    return ReportData(session_summaries, *([None]*6))
+    return ReportData(session_summaries, [], None,
+                      [], None, dict(), None, dict())
 
 
 def generate_data_for_ps5_report(subject, experiment, joint_report,

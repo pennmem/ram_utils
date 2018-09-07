@@ -831,7 +831,8 @@ class StimSessionSummary(SessionSummary):
                                     default=np.array([]))
     _model_metadata = Bytes(desc="traces for Bayesian multilevel models")
     _post_stim_eeg = ArrayOrNone(desc='raw post-stim EEG')
-    _stim_tstats = CArray
+    _stim_tstats = CArray(dtype=[('stim_tstats', float),('stim_pvals', float)],
+                          desc='t-statistics from artifact detection')
 
     @property
     def post_stim_prob_recall(self):
@@ -887,6 +888,26 @@ class StimSessionSummary(SessionSummary):
                       for x in summary.stim_tstats[summary.stim_pvals < 0.001]]
         return good_tstats, bad_tstats
 
+    @property
+    def stim_tstats(self):
+        return self._stim_tstats['stim_tstats']
+
+    @property
+    def stim_pvals(self):
+        return self._stim_tstats['stim_pvals']
+
+    @property
+    def used_pair_mask(self):
+        bipolar_pairs = pd.DataFrame.from_dict(
+            self.bipolar_pairs[self.subject]['pairs']
+        )
+        bipolar_pairs = bipolar_pairs.T.sort_values(by=['channel_1', 'channel_2'])
+        bipolar_pairs = bipolar_pairs.T.to_dict(into=OrderedDict)
+        bipolar_pairs = OrderedDict({self.subject: {'pairs': bipolar_pairs}})
+        return get_used_pair_mask(bipolar_pairs, self.excluded_pairs)
+
+    def n_excluded_pairs(self):
+        return (~self.used_pair_mask).sum()
 
     @property
     def post_stim_eeg_plot(self):
@@ -896,14 +917,8 @@ class StimSessionSummary(SessionSummary):
             pairs = ['%s-\n%s' % (pair['label0'], pair['label1'])
                      for pair in generate_pairs_for_classifier(self.bipolar_pairs, [])
                      ]
-            bipolar_pairs = pd.DataFrame.from_dict(
-                self.bipolar_pairs[self.subject]['pairs']
-            )
-            bipolar_pairs = bipolar_pairs.T.sort_values(by=['channel_1','channel_2'])
-            bipolar_pairs = bipolar_pairs.T.to_dict(into=OrderedDict)
-            bipolar_pairs = OrderedDict({self.subject: {'pairs': bipolar_pairs}})
-            used_pair_mask = get_used_pair_mask(bipolar_pairs,
-                                                self.excluded_pairs)
+
+            used_pair_mask = self.used_pair_mask
             return [encode_file(save_eeg_by_channel_plot(pairs[i:i+1],
                                                         self._post_stim_eeg[i:i+1],
                                                         used_pair_mask[i:i+1]))
@@ -1021,9 +1036,10 @@ class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
         stim_columns = ['stimAnodeTag', 'stimCathodeTag', 'location',
                         'amplitude', 'stim_duration', 'pulse_freq']
         non_stim_columns = [c for c in df.columns if c not in stim_columns]
+        static_columns = [c for c in ['subject', 'experiment', 'session', 'list']
+                          if c in df.columns]
 
-        stim_param_by_list = (df[(stim_columns + ['subject', 'experiment',
-                                                  'session', 'list'])]
+        stim_param_by_list = (df[(stim_columns + static_columns)]
                               .drop_duplicates()
                               .dropna(how='all'))
 
@@ -1280,13 +1296,6 @@ class TICLFRSessionSummary(FRStimSessionSummary):
                 (in_phase & this_position)
             ][has_match]['biomarker_value']
 
-    @property
-    def stim_tstats(self):
-        return self._stim_tstats['stim_tstats']
-
-    @property
-    def stim_pvals(self):
-        return self._stim_tstats['stim_pvals']
 
     @staticmethod
     def pre_stim_prob_recall(summaries, phase=None):
@@ -1466,60 +1475,89 @@ class LocationSearchSessionSummary(StimSessionSummary):
     connectivity = Array
     pre_psd = Array
     post_psd = Array
-    bad_events_mask = CArray
-    bad_channels_mask = CArray
+    _bad_events_mask = CArray
+    _bad_channels_mask = CArray
     _regressions = ArrayOrNone
 
+    @property
+    def bipolar_pairs_frame(self):
+        bpdict = self.bipolar_pairs[self.subject]['pairs']
+        bpdf = pd.DataFrame.from_dict(bpdict,orient='index')
+        bpdf.channel_1 = bpdf.channel_1.astype(int)
+        bpdf.channel_2 = bpdf.channel_2.astype(int)
+        return bpdf.sort_values(by=['channel_1', 'channel_2']).reset_index()
 
     @property
     def distmat(self):
-        return get_distances(self.bipolar_pairs)
+        return get_distances(self.bipolar_pairs_frame)
 
     @property
     def stim_channel_idxs(self):
-        return tmi.get_stim_channels(self.bipolar_pairs,self.events)
+        return tmi.get_stim_channels(self.bipolar_pairs_frame, self.events, 'stimAnodeTag', 'stimCathodeTag')
+
+    @property
+    def bad_channels_mask(self):
+        # TODO: paramtrize the 20 here
+        return self._bad_channels_mask | ((self._bad_events_mask.sum(0) > 20).squeeze())
+
+    @property
+    def used_pair_mask(self):
+        return ~self.bad_channels_mask
+
+    @property
+    def n_excluded_pairs(self):
+        return self.bad_channels_mask.sum()
 
     @property
     def regressions(self):
         if self._regressions is None:
-            self._regresssions = tmi.regress_distance(self._pre_psd,self._post_psd,
-                                    self._connectivity, self.distmat,
-                                    self.stim_channel_idxs)
+            self._regressions, _ = tmi.regress_distance(
+                self.pre_psd,self.post_psd,
+                self.connectivity, self.distmat,
+                self.stim_channel_idxs,
+                event_mask=self._bad_events_mask,
+                artifact_channels=self._bad_channels_mask)
         return self._regressions
+
+    @property
+    def stim_tag(self):
+        return '-'.join(LocationSearchSessionSummary.stim_params([self])[0][['stimAnodeTag', 'stimCathodeTag']])
+
+    @property
+    def id(self):
+        return ":".join([self.subject, self.experiment,self.session_number,self.stim_tag])
 
     @property
     def tmi(self):
         return tmi.compute_tmi(self.regressions)
 
     @staticmethod
-    def stim_params_by_list(summaries):
-        stim_params_table = FRStimSessionSummary.stim_params_by_list(summaries)
-        stim_channel_labels = [summary.bipolar_pairs[idx]['label']
+    def stim_params(summaries):
+        df = FRStimSessionSummary.combine_sessions(summaries)
+        stim_columns = FRStimSessionSummary().stim_columns
+        stim_columns = [c for c in stim_columns if c in df.columns]
+        stim_params_table = df[stim_columns].drop_duplicates().dropna(how='all')
+        stim_channel_labels = [summary.bipolar_pairs_frame.iloc[idx]['label']
                                for summary in summaries
-                               for idx in summary.stim_channel_idx
+                               for idx in summary.stim_channel_idxs
                                ]
         tmi_list = [tmi_val['zscore'] for summary in summaries
                     for tmi_val in summary.tmi]
-        for (stim_channel,tmi_val) in zip(stim_channel_labels,tmi_list):
+        for (stim_channel, tmi_val) in zip(stim_channel_labels, tmi_list):
             anode,cathode = stim_channel.split('-')
-            stim_params_table.loc[(stim_params_table.stimAnodeLabel==anode) &
-                                  (stim_params_table.stimCathodeLabel==cathode),
-            'tmi'] = tmi_val
+            stim_params_table.loc[(stim_params_table.stimAnodeTag == anode) &
+                                  (stim_params_table.stimCathodeTag == cathode),
+                                  'TMI'] = tmi_val
 
-        return stim_params_table
-
-    @staticmethod
-    def stim_params(summaries):
-        df = LocationSearchSessionSummary.stim_params_by_list(summaries)
-        return FRStimSessionSummary.aggregate_stim_params_over_list(df)
+        return stim_params_table.dropna().to_records()
 
     def populate(self,events, bipolar_pairs, excluded_pairs,
                  connectivity, pre_psd, post_psd, bad_events_mask, bad_channel_mask,
-                 stim_tstats=None):
+                 stim_tstats=None,**kwargs):
         StimSessionSummary.populate(self, events, bipolar_pairs, excluded_pairs,
-                                    None, stim_tstats=stim_tstats)
+                                    None, stim_tstats=stim_tstats,**kwargs)
         self.connectivity = connectivity
         self.post_psd = post_psd
         self.pre_psd = pre_psd
-        self.bad_channels_mask = bad_channel_mask
-        self.bad_events_mask = bad_events_mask
+        self._bad_channels_mask = bad_channel_mask
+        self._bad_events_mask = bad_events_mask

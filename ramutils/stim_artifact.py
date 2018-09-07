@@ -5,7 +5,7 @@ import json
 import pandas as pd
 
 
-def get_tstats(stim_events, pairs, return_pvalues=False):
+def get_tstats(stim_events, pairs, start_time, duration, return_pvalues=False, before_experiment=True,):
     """
     Computes ttest on the average EEG value pre-stim vs post-stim.
     TODO: import from artdet; define parameters centrally
@@ -14,8 +14,16 @@ def get_tstats(stim_events, pairs, return_pvalues=False):
     ----------
     stim_events: np.rec.array
       Stimulation events for a session
+    pairs: dict
+      bipolar pairs
+    start_time: float
+      time after stim offset/before stim onset to begin (seconds)
+    duration: float
+      Length of eeg to evaluate (seconds)
     return_pvalues: bool
       If `true`, return p-values along with t-statistics
+    before_experiment:
+      If `true`, only include stim events before the first list
     Returns
     -------
     t: np.ndarray
@@ -24,25 +32,24 @@ def get_tstats(stim_events, pairs, return_pvalues=False):
       p-values by channel
     """
 
-    length = 0.400
-    offset = 0.040
     stim_duration = 0.500
 
-    # Only use stim events from artifact detection period
-    stim_events = stim_events[stim_events['list'] == -999]
-    if len(stim_events) < 30: #TODO: MAKE THIS A CONFIG PARAMETER -- SEE TICL_FR expconf generator
-        return (None, None) if return_pvalues else None
+    if before_experiment:
+        # Only use stim events from artifact detection period
+        stim_events = stim_events[stim_events['list'] == -999]
+        if len(stim_events) < 30: #TODO: MAKE THIS A CONFIG PARAMETER -- SEE TICL_FR expconf generator
+            return (None, None) if return_pvalues else None
 
     pre_stim_eeg = ramutils.powers.load_eeg(
         stim_events,
-        start_time=-(length+offset),
-        end_time=-offset,
+        start_time=-(start_time+duration),
+        end_time=-start_time,
         bipolar_pairs=pairs
     )
     post_stim_eeg = ramutils.powers.load_eeg(
         stim_events,
-        start_time=stim_duration+offset,
-        end_time=stim_duration+length+offset,
+        start_time=stim_duration+start_time,
+        end_time=stim_duration+start_time+duration,
         bipolar_pairs=pairs
     )
 
