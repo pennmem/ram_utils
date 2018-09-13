@@ -906,8 +906,9 @@ class StimSessionSummary(SessionSummary):
         bipolar_pairs = OrderedDict({self.subject: {'pairs': bipolar_pairs}})
         return get_used_pair_mask(bipolar_pairs, self.excluded_pairs)
 
+    @property
     def n_excluded_pairs(self):
-        return (~self.used_pair_mask).sum()
+        return len(self.used_pair_mask) - sum(self.used_pair_mask)
 
     @property
     def post_stim_eeg_plot(self):
