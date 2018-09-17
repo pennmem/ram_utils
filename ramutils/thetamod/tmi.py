@@ -222,7 +222,8 @@ def get_distances(pairs):
 
 
 def regress_distance(pre_psd, post_psd, conn, distmat, stim_channel_idxs,
-                     nperms=1000, event_mask=None, artifact_channels=None):
+                     nperms=1000, event_mask=None, artifact_channels=None,
+                     tmax = 10.0):
     """Do regression on channel distances.
 
     Parameters
@@ -267,6 +268,9 @@ def regress_distance(pre_psd, post_psd, conn, distmat, stim_channel_idxs,
     t, p = ttest_rel(post_psd, pre_psd, axis=0, nan_policy='omit')
 
     t[t == 0] = np.nan
+
+    #Anything above `tmax` presumed to be artifactual
+    t[t > tmax] = np.nan
 
     if artifact_channels is not None:
         t[artifact_channels] = np.nan
