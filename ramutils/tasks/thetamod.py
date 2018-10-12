@@ -118,25 +118,26 @@ def get_reader(subject: Optional[str] = None,
     return CMLReader(subject, experiment, session,
                      montage=montage, rootdir=rootdir)
 
+
 @task()
 def get_resting_connectivity(subject, rootdir) -> np.ndarray:
     """Compute resting state connectivity."""
     df = get_data_index(rootdir=rootdir)
-    sessions = df[(df.subject == subject) &
-                  (df.experiment == "FR1")].session.unique()
 
-    if len(sessions) == 0:
-        raise RuntimeError("No FR1 sessions exist for %s"%subject)
     # Read EEG data for "resting" events
     eeg_data = []
-    for session in sessions:
-        reader = get_reader(subject=subject, experiment="FR1", session=session)
-        rate = reader.load('sources')['sample_rate']
-        reref = not reader.load('sources')['name'].endswith('.h5')
-        events = connectivity.get_countdown_events(reader)
-        resting = connectivity.countdown_to_resting(events, rate)
-        eeg = connectivity.read_eeg_data(reader, resting, reref=reref)
-        eeg_data.append(eeg)
+    for experiment in ['FR1', 'catFR1']:
+        sessions = df[(df.subject == subject) &
+                      (df.experiment == experiment)].session.unique()
+
+        for session in sessions:
+            reader = get_reader(subject=subject, experiment=experiment, session=session)
+            rate = reader.load('sources')['sample_rate']
+            reref = not reader.load('sources')['name'].endswith('.h5')
+            events = connectivity.get_countdown_events(reader)
+            resting = connectivity.countdown_to_resting(events, rate)
+            eeg = connectivity.read_eeg_data(reader, resting, reref=reref)
+            eeg_data.append(eeg)
 
     eegs = EEGContainer.concatenate(eeg_data)
     conn = connectivity.get_resting_state_connectivity(eegs.to_mne(),
