@@ -6,6 +6,7 @@ import json
 import os.path
 import shutil
 import warnings
+from ramutils.parameters import ExperimentSpecs,PS4ExperimentSpecs,TICLExperimentSpecs,LocationSearchExperimentSpecs
 
 try:
     from typing import List
@@ -208,59 +209,21 @@ def _make_experiment_specs_section(experiment):
     ``experiment_specs`` dict
 
     """
-    # TODO: These should all be retrieved from the Parameter classes
     if experiment in EXPERIMENTS['record_only']:
         return {}
 
-    # FIXME: values below shouldn't be hardcoded
-    specs = {
-        "version": "3.0.0",
-        "experiment_type": experiment,
-        "biomarker_sample_start_time_offset": 0,
-        "biomarker_sample_time_length": 1366,
-        "buffer_time": 1365,
-        "stim_duration": 500,
-        "freq_min": 6,
-        "freq_max": 180,
-        "num_freqs": 8,
-        "num_items": 300,
-    }
-
-    # FIXME: values below shouldn't be hardcoded
     if 'PS4' in experiment:
-        specs.update({
-            "retrieval_biomarker_sample_start_time_offset": 0,
-            "retrieval_biomarker_sample_time_length": 525,
-            "retrieval_buffer_time": 524,
-            "post_stim_biomarker_sample_time_length": 500,
-            "post_stim_buffer_time": 499,
-            "post_stim_wait_time": 100,
-        })
+        specs = PS4ExperimentSpecs()
+
     elif 'TICL' in experiment:
-        specs.update({
-            "biomarker_sample_time_length": 525,
-            "buffer_time": 524,
-            "version": "5.0.0",
-            "post_stim_wait_time": 30,
-            "post_stim_buffer_time": 524,
-            "post_stim_biomarker_sample_time_length": 525,
-            "refractory_duration": 0,
-
-        })
+        specs = TICLExperimentSpecs()
     elif experiment == "LocationSearch":
-        specs.update({
-            "biomarker_sample_start_time_offset": 0,
-            "biomarker_sample_time_length": 525,
-            "buffer_time": 524,
-            "experiment_type": "LocationSearch",
-            "post_stim_biomarker_sample_time_length": 525,
-            "post_stim_buffer_time": 524,
-            "post_stim_wait_time": 30,
-            "stim_duration": 500,
-            "refractory_duration": 0,
-        })
+        specs = LocationSearchExperimentSpecs()
+    else:
+        specs = ExperimentSpecs()
+    specs.experiment_type = experiment
 
-    return specs
+    return specs.to_dict()
 
 
 def _make_ramulator_config_json(subject, experiment, electrode_config_file,
