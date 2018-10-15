@@ -166,3 +166,50 @@ class PALParameters(FRParameters):
 class PS5Parameters(FRParameters):
     """ PS5 experiment parameters """
     normalize_powers = Bool(False)
+
+
+# Fields for experiment configs
+class ExperimentSpecs(Schema):
+
+    version = String("3.0.0", desc="experiment version")
+    experiment_type = String()
+    biomarker_sample_start_time_offset = Int(0)
+    biomarker_sample_time_length = Int(1366)
+    buffer_time = Int(1365)
+    stim_duration = Int(500)
+    freq_min = Int(6)
+    freq_max = Int(180)
+    num_freqs = Int(8)
+    num_items = Int(300)
+
+
+class PS4ExperimentSpecs(ExperimentSpecs):
+    retrieval_biomarker_sample_start_time_offset = Int(0),
+    retrieval_biomarker_sample_time_length =  Int(525),
+    retrieval_buffer_time = Int(524),
+    post_stim_biomarker_sample_time_length = Int( 500),
+    post_stim_buffer_time = Int( 499)
+    post_stim_wait_time =  Int(100)
+
+
+class TICLExperimentSpecs(ExperimentSpecs):
+    biomarker_sample_time_length = Int(525)
+    buffer_time = Int(524)
+    version = String("5.0.0")
+    post_stim_wait_time = Int(30)
+    post_stim_buffer_time = Int(524)
+    post_stim_biomarker_sample_length = Int(525)
+    refractory_duration = Int(0)
+
+
+class LocationSearchExperimentSpecs(ExperimentSpecs):
+    biomarker_sample_start_time_offset = Int(0)
+    biomarker_sample_time_length = Int(525)
+    buffer_time = Int(524)
+    experiment_type = String("LocationSearch")
+    post_stim_biomarker_sample_length = Int(525)
+    post_stim_buffer_time = Int(524)
+    post_stim_wait_time = Int(30)
+    refractory_duration = Int(0)
+
+
