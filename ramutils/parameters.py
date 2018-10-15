@@ -169,6 +169,8 @@ class PS5Parameters(FRParameters):
 
 
 # Fields for experiment configs
+
+
 class ExperimentSpecs(Schema):
 
     version = String("3.0.0", desc="experiment version")
@@ -185,11 +187,11 @@ class ExperimentSpecs(Schema):
 
 class PS4ExperimentSpecs(ExperimentSpecs):
     retrieval_biomarker_sample_start_time_offset = Int(0),
-    retrieval_biomarker_sample_time_length =  Int(525),
+    retrieval_biomarker_sample_time_length = Int(525),
     retrieval_buffer_time = Int(524),
     post_stim_biomarker_sample_time_length = Int( 500),
     post_stim_buffer_time = Int( 499)
-    post_stim_wait_time =  Int(100)
+    post_stim_wait_time = Int(100)
 
 
 class TICLExperimentSpecs(ExperimentSpecs):
@@ -213,3 +215,20 @@ class LocationSearchExperimentSpecs(ExperimentSpecs):
     refractory_duration = Int(0)
 
 
+class ArtifactDetectionParams(Schema):
+    """
+    Settings for pre-task artifact detection
+    """
+    allow_artifact_detection = Bool(False)
+    pre_start = Int(-440)
+    pre_stop = Int(-40)
+    post_start = Int(250)
+    post_stop = Int(650)
+    sham_events = Int(30)
+    stim_events = Int(30)
+    isi_min = Int(1500)
+    isi_max = Int (2000)
+    method = String("ttest")  # zscore (Uma's method) or ttest (Ethan's method)
+    std_threshold = Int(2)
+    event_threshold = Float(0.5),
+    ttest_threshold = Float( 0.001)

@@ -6,7 +6,7 @@ import json
 import os.path
 import shutil
 import warnings
-from ramutils.parameters import ExperimentSpecs,PS4ExperimentSpecs,TICLExperimentSpecs,LocationSearchExperimentSpecs
+import ramutils.parameters # ExperimentSpecs,PS4ExperimentSpecs,TICLExperimentSpecs,LocationSearchExperimentSpecs
 
 try:
     from typing import List
@@ -213,14 +213,14 @@ def _make_experiment_specs_section(experiment):
         return {}
 
     if 'PS4' in experiment:
-        specs = PS4ExperimentSpecs()
+        specs = ramutils.parameters.PS4ExperimentSpecs()
 
     elif 'TICL' in experiment:
-        specs = TICLExperimentSpecs()
+        specs = ramutils.parameters.TICLExperimentSpecs()
     elif experiment == "LocationSearch":
-        specs = LocationSearchExperimentSpecs()
+        specs = ramutils.parameters.LocationSearchExperimentSpecs()
     else:
-        specs = ExperimentSpecs()
+        specs = ramutils.parameters.ExperimentSpecs()
     specs.experiment_type = experiment
 
     return specs.to_dict()
@@ -299,21 +299,9 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
 
 
 def _make_artifact_detection_section(experiment):
-    return {
-        "allow_artifact_detection": not experiment.startswith('PS4'),
-        "pre_start": -440,
-        "pre_stop": -40,
-        "post_start": 40,
-        "post_stop": 440,
-        "sham_events": 30,
-        "stim_events": 30,
-        "isi_min": 1500,
-        "isi_max": 2000,
-        "method": "ttest",  # zscore (Uma's method) or ttest (Ethan's method)
-        "std_threshold": 2,
-        "event_threshold": 0.5,
-        "ttest_threshold": 0.001,
-    }
+    params = ramutils.parameters.ArtifactDetectionParams()
+    params.allow_artifact_detection = not experiment.startswith('PS4')
+    return params.to_dict()
 
 
 @task(cache=False)
