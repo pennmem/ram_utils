@@ -77,7 +77,10 @@ class RamArgumentParser(ArgumentParser):
         """
         from ramutils.tasks import memory
 
-        memory.cachedir = cachedir
+        try:
+            memory.cachedir = cachedir
+        except AttributeError: # joblib v0.12+
+            memory.location = cachedir
 
         if not use_cached and os.path.isdir(cachedir):
             memory.clear()
