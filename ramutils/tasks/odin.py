@@ -272,21 +272,7 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
                                                        classifier_version,
                                                        trigger_pairs),
             'experiment_specs': _make_experiment_specs_section(experiment),
-            'artifact_detection': {
-                "allow_artifact_detection": True,
-                "pre_start": -440,
-                "pre_stop": -40,
-                "post_start": 40,
-                "post_stop": 440,
-                "sham_events": 30,
-                "stim_events": 30,
-                "isi_min": 1500,
-                "isi_max": 2000,
-                "method": "ttest",  # zscore (Uma's method) or ttest (Ethan's method)
-                "std_threshold": 2,
-                "event_threshold": 0.5,
-                "ttest_threshold": 0.001,
-            },
+            'artifact_detection': _make_artifact_detection_section(experiment),
         },
 
         "biomarker_threshold": 0.5,
@@ -310,6 +296,24 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
     }
 
     return json.dumps(config, indent=2, sort_keys=True)
+
+
+def _make_artifact_detection_section(experiment):
+    return {
+        "allow_artifact_detection": not experiment.startswith('PS4'),
+        "pre_start": -440,
+        "pre_stop": -40,
+        "post_start": 40,
+        "post_stop": 440,
+        "sham_events": 30,
+        "stim_events": 30,
+        "isi_min": 1500,
+        "isi_max": 2000,
+        "method": "ttest",  # zscore (Uma's method) or ttest (Ethan's method)
+        "std_threshold": 2,
+        "event_threshold": 0.5,
+        "ttest_threshold": 0.001,
+    }
 
 
 @task(cache=False)
