@@ -78,9 +78,9 @@ class RamArgumentParser(ArgumentParser):
         from ramutils.tasks import memory
 
         try:
+            memory.store_backend.location = cachedir
+        except AttributeError: # joblib v0.11-
             memory.cachedir = cachedir
-        except AttributeError: # joblib v0.12+
-            memory.location = cachedir
 
         if not use_cached and os.path.isdir(cachedir):
             memory.clear()
