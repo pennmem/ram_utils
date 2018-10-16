@@ -300,7 +300,7 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
 
 def _make_artifact_detection_section(experiment):
     params = ramutils.parameters.ArtifactDetectionParams()
-    params.allow_artifact_detection = not experiment.startswith('PS4')
+    params.allow_artifact_detection = experiment.startswith('PS4')
     return params.to_dict()
 
 
