@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Getting Statrted: RAM Report Data &mdash; Ramutils 2.2.4 documentation</title>
+  <title>Getting Started: RAM Report Data &mdash; Ramutils 2.3.0 documentation</title>
   
 
   
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                2.2
+                2.3
               </div>
             
           
@@ -84,7 +84,7 @@
             
               <p class="caption"><span class="caption-text">Contents</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Statrted: RAM Report Data</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started: RAM Report Data</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#Finding-Data">Finding Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#Loading-Multiple-Files-of-a-Single-Type">Loading Multiple Files of a Single Type</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#Extracting-Metadata-from-the-File-Path">Extracting Metadata from the File Path</a></li>
@@ -146,7 +146,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Getting Statrted: RAM Report Data</li>
+      <li>Getting Started: RAM Report Data</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -348,8 +348,8 @@ div.nboutput div.output_area.stderr {
     margin-right: 4px;  /* make room for the exclamation icon */
 }
 </style>
-<div class="section" id="Getting-Statrted:-RAM-Report-Data">
-<h1>Getting Statrted: RAM Report Data<a class="headerlink" href="#Getting-Statrted:-RAM-Report-Data" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="Getting-Started:-RAM-Report-Data">
+<h1>Getting Started: RAM Report Data<a class="headerlink" href="#Getting-Started:-RAM-Report-Data" title="Permalink to this headline">¶</a></h1>
 <p>In the process of generating reports for both record-only and
 stimulation sessions, the RAM reporting pipeline produces a number of
 summary data files. These files contain all of the information requried
@@ -398,7 +398,7 @@ for interacting with the saved data including:</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">ramutils.tasks.misc</span> <span class="k">import</span> <span class="n">load_existing_results</span>
+<span></span>from ramutils.tasks.misc import load_existing_results
 </pre></div>
 </div>
 </div>
@@ -417,15 +417,15 @@ You can still use MorletWaveletFilter
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">rhino_root</span> <span class="o">=</span> <span class="s1">&#39;/Volumes/RHINO/&#39;</span>
-<span class="n">report_db_location</span> <span class="o">=</span> <span class="s2">&quot;/Volumes/RHINO/scratch/report_database/&quot;</span>
+<span></span>rhino_root = &#39;/Volumes/RHINO/&#39;
+report_db_location = &quot;/Volumes/RHINO/scratch/report_database/&quot;
 </pre></div>
 </div>
 </div>
 <p>For loading all saved data associated with a single subject/experiment
 combination (either a single session or multiple sessions), you can use
-the load_existing_results helper function. Internally, this function
-is used to load data for producing aggregate reports. A dictionary is
+the load_existing_results helper function. Internally, this function is
+used to load data for producing aggregate reports. A dictionary is
 returned whose keys indicate the type of underlying data. The values are
 a list of the summary objects, one per session. For this example, we are
 loading a single session.</p>
@@ -435,12 +435,12 @@ loading a single session.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># .compute() is required because load_existing_results is actual a task, which</span>
-<span class="c1"># is lazily evaluated by default</span>
-<span class="n">results_dict</span> <span class="o">=</span> <span class="n">load_existing_results</span><span class="p">(</span><span class="n">subject</span><span class="o">=</span><span class="s1">&#39;R1389J&#39;</span><span class="p">,</span> <span class="n">experiment</span><span class="o">=</span><span class="s1">&#39;catFR5&#39;</span><span class="p">,</span>
-                                     <span class="n">sessions</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">stim_report</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                                     <span class="n">db_loc</span><span class="o">=</span><span class="n">report_db_location</span><span class="p">,</span> <span class="n">rootdir</span><span class="o">=</span><span class="n">rhino_root</span><span class="p">)</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
-<span class="nb">list</span><span class="p">(</span><span class="n">results_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+<span></span># .compute() is required because load_existing_results is actual a task, which
+# is lazily evaluated by default
+results_dict = load_existing_results(subject=&#39;R1389J&#39;, experiment=&#39;catFR5&#39;,
+                                     sessions=[1], stim_report=True,
+                                     db_loc=report_db_location, rootdir=rhino_root).compute()
+list(results_dict.keys())
 </pre></div>
 </div>
 </div>
@@ -472,8 +472,8 @@ loading a single session.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">classifier_data</span> <span class="o">=</span> <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;classifier_evaluation_results&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data is saved as a </span><span class="si">{}</span><span class="s2"> object.</span><span class="se">\n</span><span class="s2">AUC for this session: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">classifier_data</span><span class="p">),</span> <span class="n">classifier_data</span><span class="o">.</span><span class="n">auc</span><span class="p">))</span>
+<span></span>classifier_data = results_dict[&#39;classifier_evaluation_results&#39;][0]
+print(&quot;Data is saved as a {} object.\nAUC for this session: {}&quot;.format(type(classifier_data), classifier_data.auc))
 </pre></div>
 </div>
 </div>
@@ -492,9 +492,9 @@ AUC for this session: 0.6512345679012346
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">session_data</span> <span class="o">=</span> <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;session_summaries&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data is saved as a </span><span class="si">{}</span><span class="s2"> object.</span><span class="se">\n</span><span class="s2">Session Completed On: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">session_data</span><span class="p">),</span>
-                                                                       <span class="n">session_data</span><span class="o">.</span><span class="n">session_datetime</span><span class="p">))</span>
+<span></span>session_data = results_dict[&#39;session_summaries&#39;][0]
+print(&quot;Data is saved as a {} object.\nSession Completed On: {}&quot;.format(type(session_data),
+                                                                       session_data.session_datetime))
 </pre></div>
 </div>
 </div>
@@ -513,9 +513,9 @@ Session Completed On: 2018-02-28 16:47:02.190000+00:00
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">math_data</span> <span class="o">=</span> <span class="n">results_dict</span><span class="p">[</span><span class="s1">&#39;math_summaries&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data is saved as a </span><span class="si">{}</span><span class="s2"> object.</span><span class="se">\n</span><span class="s2">Subject answer </span><span class="si">{}</span><span class="s2">% math problems correctly&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">math_data</span><span class="p">),</span>
-                                                                                          <span class="n">math_data</span><span class="o">.</span><span class="n">percent_correct</span><span class="p">))</span>
+<span></span>math_data = results_dict[&#39;math_summaries&#39;][0]
+print(&quot;Data is saved as a {} object.\nSubject answer {}% math problems correctly&quot;.format(type(math_data),
+                                                                                          math_data.percent_correct))
 </pre></div>
 </div>
 </div>
@@ -537,13 +537,13 @@ Subject answer 79.76190476190476% math problems correctly
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">glob</span>
+<span></span>import os
+import glob
 
-<span class="kn">from</span> <span class="nn">ramutils.reports.summary</span> <span class="k">import</span> <span class="n">FRStimSessionSummary</span>
+from ramutils.reports.summary import FRStimSessionSummary
 
-<span class="n">fr5_session_summary_locations</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">report_db_location</span><span class="p">,</span> <span class="s1">&#39;*FR5*session_summary*&#39;</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Found </span><span class="si">{}</span><span class="s2"> FR5 or catFR5 session summaries&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fr5_session_summary_locations</span><span class="p">)))</span>
+fr5_session_summary_locations = glob.glob(os.path.join(report_db_location, &#39;*FR5*session_summary*&#39;))
+print(&quot;Found {} FR5 or catFR5 session summaries&quot;.format(len(fr5_session_summary_locations)))
 </pre></div>
 </div>
 </div>
@@ -561,10 +561,10 @@ Found 58 FR5 or catFR5 session summaries
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">session_summaries</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="k">for</span> <span class="n">summary_loc</span> <span class="ow">in</span> <span class="n">fr5_session_summary_locations</span><span class="p">:</span>
-    <span class="n">summary</span> <span class="o">=</span> <span class="n">FRStimSessionSummary</span><span class="o">.</span><span class="n">from_hdf</span><span class="p">(</span><span class="n">summary_loc</span><span class="p">)</span>
-    <span class="n">session_summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
+<span></span>session_summaries = []
+for summary_loc in fr5_session_summary_locations:
+    summary = FRStimSessionSummary.from_hdf(summary_loc)
+    session_summaries.append(summary)
 </pre></div>
 </div>
 </div>
@@ -582,10 +582,10 @@ combining multiple files of a single type or across types</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">ramutils.utils</span> <span class="k">import</span> <span class="n">extract_report_info_from_path</span>
+<span></span>from ramutils.utils import extract_report_info_from_path
 
-<span class="n">metadata</span> <span class="o">=</span> <span class="n">extract_report_info_from_path</span><span class="p">(</span><span class="n">fr5_session_summary_locations</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="n">metadata</span>
+metadata = extract_report_info_from_path(fr5_session_summary_locations[0])
+metadata
 </pre></div>
 </div>
 </div>
@@ -621,8 +621,8 @@ this item-level information and return a Pandas Dataframe</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">combined_item_df</span> <span class="o">=</span> <span class="n">FRStimSessionSummary</span><span class="o">.</span><span class="n">combine_sessions</span><span class="p">(</span><span class="n">session_summaries</span><span class="p">)</span>
-<span class="n">combined_item_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span></span>combined_item_df = FRStimSessionSummary.combine_sessions(session_summaries)
+combined_item_df.head()
 </pre></div>
 </div>
 </div>
@@ -808,7 +808,7 @@ some sessions were incomplete</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="nb">len</span><span class="p">(</span><span class="n">combined_item_df</span><span class="p">)</span>
+<span></span>len(combined_item_df)
 </pre></div>
 </div>
 </div>
@@ -847,11 +847,11 @@ by looking at the
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Reloading the used classifier</span>
-<span class="kn">from</span> <span class="nn">ramutils.classifier.utils</span> <span class="k">import</span> <span class="n">reload_classifier</span>
+<span></span># Reloading the used classifier
+from ramutils.classifier.utils import reload_classifier
 
-<span class="n">classifier_container</span> <span class="o">=</span> <span class="n">reload_classifier</span><span class="p">(</span><span class="s1">&#39;R1387E&#39;</span><span class="p">,</span> <span class="s1">&#39;catFR5&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mount_point</span><span class="o">=</span><span class="s1">&#39;/Volumes/RHINO/&#39;</span><span class="p">)</span>
-<span class="n">classifier_container</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">shape</span> <span class="c1"># n_events x n_features power matrix</span>
+classifier_container = reload_classifier(&#39;R1387E&#39;, &#39;catFR5&#39;, 1, mount_point=&#39;/Volumes/RHINO/&#39;)
+classifier_container.features.shape # n_events x n_features power matrix
 </pre></div>
 </div>
 </div>
@@ -871,12 +871,12 @@ by looking at the
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Loading the classifier from the reports database</span>
-<span class="kn">from</span> <span class="nn">classiflib.container</span> <span class="k">import</span> <span class="n">ClassifierContainer</span>
+<span></span># Loading the classifier from the reports database
+from classiflib.container import ClassifierContainer
 
-<span class="n">retrained_classifier_loc</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">report_db_location</span><span class="p">,</span> <span class="s1">&#39;R1387E_catFR5_all_retrained_classifier*&#39;</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">classifier_container</span> <span class="o">=</span> <span class="n">ClassifierContainer</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">retrained_classifier_loc</span><span class="p">)</span>
-<span class="n">classifier_container</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">shape</span>
+retrained_classifier_loc = glob.glob(os.path.join(report_db_location, &#39;R1387E_catFR5_all_retrained_classifier*&#39;))[0]
+classifier_container = ClassifierContainer.load(retrained_classifier_loc)
+classifier_container.features.shape
 </pre></div>
 </div>
 </div>
@@ -902,19 +902,19 @@ sample predictions and check on the AUC from the training session.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span></span>import numpy as np
+import seaborn as sns
 
-<span class="o">%</span><span class="k">matplotlib</span> inline
+%matplotlib inline
 
-<span class="n">classifier</span> <span class="o">=</span> <span class="n">classifier_container</span><span class="o">.</span><span class="n">classifier</span>
+classifier = classifier_container.classifier
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Training AUC: </span><span class="si">{:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">classifier_container</span><span class="o">.</span><span class="n">classifier_info</span><span class="p">[</span><span class="s1">&#39;auc&#39;</span><span class="p">]))</span>
+print(&quot;Training AUC: {:.2f}&quot;.format(classifier_container.classifier_info[&#39;auc&#39;]))
 
-<span class="c1"># Create 100 random new events and calculated predicted probabilities</span>
-<span class="n">out_of_sample_powers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">classifier_container</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-<span class="n">predicted_probs</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">out_of_sample_powers</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
-<span class="n">sns</span><span class="o">.</span><span class="n">distplot</span><span class="p">(</span><span class="n">predicted_probs</span><span class="p">)</span>
+# Create 100 random new events and calculated predicted probabilities
+out_of_sample_powers = np.random.normal(size=(100, classifier_container.features.shape[1]))
+predicted_probs = classifier.predict_proba(out_of_sample_powers)[:, 1]
+sns.distplot(predicted_probs)
 </pre></div>
 </div>
 </div>
@@ -974,32 +974,32 @@ set of methods.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">def</span> <span class="nf">normalized_item_delta_recall</span><span class="p">(</span><span class="n">summary</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Calculate normalized delta recall at the item level</span>
+<span></span>def normalized_item_delta_recall(summary):
+    &quot;&quot;&quot; Calculate normalized delta recall at the item level
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    summary: ramutils.reports.summary.FRStimSessionSummary</span>
-<span class="sd">        Helper class containing events, powers, montage, and other information needed to analyze a single</span>
-<span class="sd">        stimulation session</span>
+    Parameters
+    ----------
+    summary: ramutils.reports.summary.FRStimSessionSummary
+        Helper class containing events, powers, montage, and other information needed to analyze a single
+        stimulation session
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    normalized_delta_recall: float</span>
-<span class="sd">        Item-level measure of the change in recall performance due to stimulation. Calculated by</span>
-<span class="sd">        comparing the recall rates for stimulated items with items for non-stim lists that would</span>
-<span class="sd">        have been stimulated</span>
+    Returns
+    -------
+    normalized_delta_recall: float
+        Item-level measure of the change in recall performance due to stimulation. Calculated by
+        comparing the recall rates for stimulated items with items for non-stim lists that would
+        have been stimulated
 
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">list</span><span class="p">:</span>
-        <span class="n">summary</span> <span class="o">=</span> <span class="p">[</span><span class="n">summary</span><span class="p">]</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">FRStimSessionSummary</span><span class="o">.</span><span class="n">combine_sessions</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
-    <span class="n">nonstim_low_bio_recall</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">classifier_output</span> <span class="o">&lt;</span> <span class="n">df</span><span class="o">.</span><span class="n">thresh</span><span class="p">)</span> <span class="o">&amp;</span>
-                                <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">is_stim_list</span> <span class="o">==</span> <span class="kc">False</span><span class="p">)]</span><span class="o">.</span><span class="n">recalled</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-    <span class="n">stim_recall</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">is_stim_item</span> <span class="o">==</span> <span class="kc">True</span><span class="p">]</span><span class="o">.</span><span class="n">recalled</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-    <span class="n">overall_recall</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">recalled</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-    <span class="n">normalized_delta_recall</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="p">((</span><span class="n">stim_recall</span> <span class="o">-</span> <span class="n">nonstim_low_bio_recall</span><span class="p">)</span> <span class="o">/</span> <span class="n">overall_recall</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">normalized_delta_recall</span>
+    &quot;&quot;&quot;
+    if type(summary) != list:
+        summary = [summary]
+    df = FRStimSessionSummary.combine_sessions(summary)
+    nonstim_low_bio_recall = df[(df.classifier_output &lt; df.thresh) &amp;
+                                (df.is_stim_list == False)].recalled.mean()
+    stim_recall = df[df.is_stim_item == True].recalled.mean()
+    overall_recall = df.recalled.mean()
+    normalized_delta_recall = 100 * ((stim_recall - nonstim_low_bio_recall) / overall_recall)
+    return normalized_delta_recall
 </pre></div>
 </div>
 </div>
@@ -1012,7 +1012,7 @@ second uses the session summary objects embedded in a pandas dataframe.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">normalized_delta_recall</span> <span class="o">=</span> <span class="p">[</span><span class="n">normalized_item_delta_recall</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span> <span class="k">for</span> <span class="n">summary</span> <span class="ow">in</span> <span class="n">session_summaries</span><span class="p">]</span>
+<span></span>normalized_delta_recall = [normalized_item_delta_recall(summary) for summary in session_summaries]
 </pre></div>
 </div>
 </div>
@@ -1024,9 +1024,9 @@ We can do some simple things with it:</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Average item-level delta recall: </span><span class="si">{:.2f}</span><span class="s2">%&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">normalized_delta_recall</span><span class="p">))))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Biggest item-level delta recall: </span><span class="si">{:.2f}</span><span class="s2">%&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">normalized_delta_recall</span><span class="p">)))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Biggest adverse item-level delta recall: </span><span class="si">{:.2f}</span><span class="s2">%&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">normalized_delta_recall</span><span class="p">)))</span>
+<span></span>print(&quot;Average item-level delta recall: {:.2f}%&quot;.format(np.nanmean(np.array(normalized_delta_recall))))
+print(&quot;Biggest item-level delta recall: {:.2f}%&quot;.format(max(normalized_delta_recall)))
+print(&quot;Biggest adverse item-level delta recall: {:.2f}%&quot;.format(min(normalized_delta_recall)))
 </pre></div>
 </div>
 </div>
@@ -1053,44 +1053,43 @@ and really let the analyses run wild.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span></span>import pandas as pd
 
-<span class="n">session_data</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="p">[],</span>
-    <span class="s1">&#39;experiment&#39;</span><span class="p">:</span> <span class="p">[],</span>
-    <span class="s1">&#39;session&#39;</span><span class="p">:</span> <span class="p">[],</span>
-    <span class="s1">&#39;session_summary&#39;</span><span class="p">:</span> <span class="p">[],</span>
-    <span class="s1">&#39;montage&#39;</span><span class="p">:</span> <span class="p">[],</span>
-    <span class="s1">&#39;anode&#39;</span><span class="p">:</span> <span class="p">[],</span>
-    <span class="s1">&#39;cathode&#39;</span><span class="p">:</span> <span class="p">[],</span>
-    <span class="s1">&#39;electrode_type&#39;</span><span class="p">:</span> <span class="p">[],</span>
-    <span class="s1">&#39;location&#39;</span><span class="p">:</span> <span class="p">[],</span>
-    <span class="s1">&#39;amplitude&#39;</span><span class="p">:</span> <span class="p">[],</span>
-    <span class="s1">&#39;pulse_freq&#39;</span><span class="p">:</span> <span class="p">[],</span>
-    <span class="s1">&#39;stim_duration&#39;</span><span class="p">:</span> <span class="p">[],</span>
-    <span class="s1">&#39;date&#39;</span><span class="p">:</span> <span class="p">[]</span>
-<span class="p">}</span>
+session_data = {
+    &#39;subject&#39;: [],
+    &#39;experiment&#39;: [],
+    &#39;session&#39;: [],
+    &#39;session_summary&#39;: [],
+    &#39;montage&#39;: [],
+    &#39;anode&#39;: [],
+    &#39;cathode&#39;: [],
+    &#39;electrode_type&#39;: [],
+    &#39;location&#39;: [],
+    &#39;amplitude&#39;: [],
+    &#39;pulse_freq&#39;: [],
+    &#39;stim_duration&#39;: [],
+    &#39;date&#39;: []
+}
 
-<span class="k">for</span> <span class="n">session_summary_loc</span> <span class="ow">in</span> <span class="n">fr5_session_summary_locations</span><span class="p">:</span>
-    <span class="n">metadata</span> <span class="o">=</span> <span class="n">extract_report_info_from_path</span><span class="p">(</span><span class="n">session_summary_loc</span><span class="p">)</span>
-    <span class="n">session_summary</span> <span class="o">=</span> <span class="n">FRStimSessionSummary</span><span class="o">.</span><span class="n">from_hdf</span><span class="p">(</span><span class="n">session_summary_loc</span><span class="p">)</span>
-    <span class="n">session_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_records</span><span class="p">(</span><span class="n">session_summary</span><span class="o">.</span><span class="n">_events</span><span class="p">)</span>
-    <span class="n">stim_params</span> <span class="o">=</span> <span class="n">FRStimSessionSummary</span><span class="o">.</span><span class="n">stim_parameters</span><span class="p">([</span><span class="n">session_summary</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+for session_summary_loc in fr5_session_summary_locations:
+    metadata = extract_report_info_from_path(session_summary_loc)
+    session_summary = FRStimSessionSummary.from_hdf(session_summary_loc)
+    session_df = pd.DataFrame.from_records(session_summary._events)
+    stim_params = FRStimSessionSummary.stim_parameters([session_summary])[0]
 
-    <span class="n">session_data</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">])</span>
-    <span class="n">session_data</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">])</span>
-    <span class="n">session_data</span><span class="p">[</span><span class="s1">&#39;session&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;sessions&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-    <span class="n">session_data</span><span class="p">[</span><span class="s1">&#39;session_summary&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">session_summary</span><span class="p">)</span>
-    <span class="n">session_data</span><span class="p">[</span><span class="s1">&#39;montage&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;montage&#39;</span><span class="p">])</span>
-    <span class="n">session_data</span><span class="p">[</span><span class="s1">&#39;anode&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stim_params</span><span class="p">[</span><span class="s1">&#39;stimAnodeTag&#39;</span><span class="p">])</span>
-    <span class="n">session_data</span><span class="p">[</span><span class="s1">&#39;cathode&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stim_params</span><span class="p">[</span><span class="s1">&#39;stimCathodeTag&#39;</span><span class="p">])</span>
-    <span class="n">session_data</span><span class="p">[</span><span class="s1">&#39;electrode_type&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-    <span class="n">session_data</span><span class="p">[</span><span class="s1">&#39;location&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stim_params</span><span class="p">[</span><span class="s1">&#39;location&#39;</span><span class="p">])</span>
-    <span class="n">session_data</span><span class="p">[</span><span class="s1">&#39;amplitude&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">stim_params</span><span class="p">[</span><span class="s1">&#39;amplitude&#39;</span><span class="p">]))</span>
-    <span class="n">session_data</span><span class="p">[</span><span class="s1">&#39;pulse_freq&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">stim_params</span><span class="p">[</span><span class="s1">&#39;pulse_freq&#39;</span><span class="p">]))</span>
-    <span class="n">session_data</span><span class="p">[</span><span class="s1">&#39;stim_duration&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">stim_params</span><span class="p">[</span><span class="s1">&#39;stim_duration&#39;</span><span class="p">]))</span>
-    <span class="n">session_data</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">session_summary</span><span class="o">.</span><span class="n">session_datetime</span><span class="p">)</span>
-
+    session_data[&#39;subject&#39;].append(metadata[&#39;subject&#39;])
+    session_data[&#39;experiment&#39;].append(metadata[&#39;experiment&#39;])
+    session_data[&#39;session&#39;].append(metadata[&#39;sessions&#39;][0])
+    session_data[&#39;session_summary&#39;].append(session_summary)
+    session_data[&#39;montage&#39;].append(metadata[&#39;montage&#39;])
+    session_data[&#39;anode&#39;].append(stim_params[&#39;stimAnodeTag&#39;])
+    session_data[&#39;cathode&#39;].append(stim_params[&#39;stimCathodeTag&#39;])
+    session_data[&#39;electrode_type&#39;].append(&#39;&#39;)
+    session_data[&#39;location&#39;].append(stim_params[&#39;location&#39;])
+    session_data[&#39;amplitude&#39;].append(float(stim_params[&#39;amplitude&#39;]))
+    session_data[&#39;pulse_freq&#39;].append(float(stim_params[&#39;pulse_freq&#39;]))
+    session_data[&#39;stim_duration&#39;].append(float(stim_params[&#39;stim_duration&#39;]))
+    session_data[&#39;date&#39;].append(session_summary.session_datetime)
 </pre></div>
 </div>
 </div>
@@ -1100,11 +1099,11 @@ and really let the analyses run wild.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">session_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">session_data</span><span class="p">)</span>
-<span class="n">session_df</span> <span class="o">=</span> <span class="n">session_df</span><span class="p">[[</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;experiment&#39;</span><span class="p">,</span> <span class="s1">&#39;montage&#39;</span><span class="p">,</span> <span class="s1">&#39;session&#39;</span><span class="p">,</span>
-                         <span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="s1">&#39;session_summary&#39;</span><span class="p">,</span> <span class="s1">&#39;electrode_type&#39;</span><span class="p">,</span> <span class="s1">&#39;location&#39;</span><span class="p">,</span>
-                         <span class="s1">&#39;pulse_freq&#39;</span><span class="p">,</span> <span class="s1">&#39;stim_duration&#39;</span><span class="p">]]</span>
-<span class="n">session_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span></span>session_df = pd.DataFrame.from_dict(session_data)
+session_df = session_df[[&#39;subject&#39;, &#39;experiment&#39;, &#39;montage&#39;, &#39;session&#39;,
+                         &#39;date&#39;, &#39;session_summary&#39;, &#39;electrode_type&#39;, &#39;location&#39;,
+                         &#39;pulse_freq&#39;, &#39;stim_duration&#39;]]
+session_df.head()
 </pre></div>
 </div>
 </div>
@@ -1225,8 +1224,8 @@ normalized item-level delta recall metric that we calculated before.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">session_df</span><span class="p">[</span><span class="s1">&#39;delta_recall&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">session_df</span><span class="p">[</span><span class="s1">&#39;session_summary&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">normalized_item_delta_recall</span><span class="p">)</span>
-<span class="n">session_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span></span>session_df[&#39;delta_recall&#39;] = session_df[&#39;session_summary&#39;].apply(normalized_item_delta_recall)
+session_df.head()
 </pre></div>
 </div>
 </div>
@@ -1351,9 +1350,9 @@ replicate what we did before… and more…</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Average item-level delta recall: </span><span class="si">{:.2f}</span><span class="s2">%&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">session_df</span><span class="p">[</span><span class="s1">&#39;delta_recall&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Biggest item-level delta recall: </span><span class="si">{:.2f}</span><span class="s2">%&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">session_df</span><span class="p">[</span><span class="s1">&#39;delta_recall&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Biggest adverse item-level delta recall: </span><span class="si">{:.2f}</span><span class="s2">%&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">session_df</span><span class="p">[</span><span class="s1">&#39;delta_recall&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()))</span>
+<span></span>print(&quot;Average item-level delta recall: {:.2f}%&quot;.format(session_df[&#39;delta_recall&#39;].mean()))
+print(&quot;Biggest item-level delta recall: {:.2f}%&quot;.format(session_df[&#39;delta_recall&#39;].max()))
+print(&quot;Biggest adverse item-level delta recall: {:.2f}%&quot;.format(session_df[&#39;delta_recall&#39;].min()))
 </pre></div>
 </div>
 </div>
@@ -1373,7 +1372,7 @@ Biggest adverse item-level delta recall: -60.29%
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">session_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;experiment&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">({</span><span class="s1">&#39;delta_recall&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;min&#39;</span><span class="p">,</span> <span class="s1">&#39;max&#39;</span><span class="p">]})</span>
+<span></span>session_df.groupby(by=&#39;experiment&#39;).agg({&#39;delta_recall&#39;: [&#39;mean&#39;, &#39;min&#39;, &#39;max&#39;]})
 </pre></div>
 </div>
 </div>
@@ -1439,7 +1438,7 @@ Biggest adverse item-level delta recall: -60.29%
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">session_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;location&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">({</span><span class="s1">&#39;delta_recall&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;min&#39;</span><span class="p">,</span> <span class="s1">&#39;max&#39;</span><span class="p">]})</span>
+<span></span>session_df.groupby(by=&#39;location&#39;).agg({&#39;delta_recall&#39;: [&#39;mean&#39;, &#39;min&#39;, &#39;max&#39;]})
 </pre></div>
 </div>
 </div>
@@ -1611,35 +1610,35 @@ structure.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">ramutils.reports.summary</span> <span class="k">import</span> <span class="n">ClassifierSummary</span>
+<span></span>from ramutils.reports.summary import ClassifierSummary
 
-<span class="c1"># Repeat the process for getting summary objects into a dataframe that we used for the session summaries</span>
-<span class="n">classifier_summaries</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">report_db_location</span><span class="p">,</span> <span class="s1">&#39;*FR5*classifier_session*&#39;</span><span class="p">))</span>
+# Repeat the process for getting summary objects into a dataframe that we used for the session summaries
+classifier_summaries = glob.glob(os.path.join(report_db_location, &#39;*FR5*classifier_session*&#39;))
 
-<span class="n">classifier_summary_data</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="p">[],</span>
-    <span class="s1">&#39;experiment&#39;</span><span class="p">:</span> <span class="p">[],</span>
-    <span class="s1">&#39;session&#39;</span><span class="p">:</span> <span class="p">[],</span>
-    <span class="s1">&#39;classifier_summary&#39;</span><span class="p">:</span> <span class="p">[],</span>
-    <span class="s1">&#39;montage&#39;</span><span class="p">:</span> <span class="p">[],</span>
-    <span class="s1">&#39;auc&#39;</span><span class="p">:</span> <span class="p">[],</span>
-    <span class="s1">&#39;pvalue&#39;</span><span class="p">:</span> <span class="p">[]</span>
-<span class="p">}</span>
+classifier_summary_data = {
+    &#39;subject&#39;: [],
+    &#39;experiment&#39;: [],
+    &#39;session&#39;: [],
+    &#39;classifier_summary&#39;: [],
+    &#39;montage&#39;: [],
+    &#39;auc&#39;: [],
+    &#39;pvalue&#39;: []
+}
 
-<span class="k">for</span> <span class="n">summary_dir</span> <span class="ow">in</span> <span class="n">classifier_summaries</span><span class="p">:</span>
-    <span class="n">summary</span> <span class="o">=</span> <span class="n">ClassifierSummary</span><span class="o">.</span><span class="n">from_hdf</span><span class="p">(</span><span class="n">summary_dir</span><span class="p">)</span>
-    <span class="n">metadata</span> <span class="o">=</span> <span class="n">extract_report_info_from_path</span><span class="p">(</span><span class="n">summary_dir</span><span class="p">)</span>
-    <span class="n">classifier_summary_data</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">])</span>
-    <span class="n">classifier_summary_data</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">])</span>
-    <span class="n">classifier_summary_data</span><span class="p">[</span><span class="s1">&#39;session&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;sessions&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-    <span class="n">classifier_summary_data</span><span class="p">[</span><span class="s1">&#39;classifier_summary&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
-    <span class="n">classifier_summary_data</span><span class="p">[</span><span class="s1">&#39;montage&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;montage&#39;</span><span class="p">])</span>
-    <span class="n">classifier_summary_data</span><span class="p">[</span><span class="s1">&#39;auc&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">summary</span><span class="o">.</span><span class="n">auc</span><span class="p">)</span>
-    <span class="n">classifier_summary_data</span><span class="p">[</span><span class="s1">&#39;pvalue&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">summary</span><span class="o">.</span><span class="n">pvalue</span><span class="p">)</span>
+for summary_dir in classifier_summaries:
+    summary = ClassifierSummary.from_hdf(summary_dir)
+    metadata = extract_report_info_from_path(summary_dir)
+    classifier_summary_data[&#39;subject&#39;].append(metadata[&#39;subject&#39;])
+    classifier_summary_data[&#39;experiment&#39;].append(metadata[&#39;experiment&#39;])
+    classifier_summary_data[&#39;session&#39;].append(metadata[&#39;sessions&#39;][0])
+    classifier_summary_data[&#39;classifier_summary&#39;].append(summary)
+    classifier_summary_data[&#39;montage&#39;].append(metadata[&#39;montage&#39;])
+    classifier_summary_data[&#39;auc&#39;].append(summary.auc)
+    classifier_summary_data[&#39;pvalue&#39;].append(summary.pvalue)
 
-<span class="n">classifier_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">classifier_summary_data</span><span class="p">)</span>
-<span class="n">classifier_df</span> <span class="o">=</span> <span class="n">classifier_df</span><span class="p">[[</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;experiment&#39;</span><span class="p">,</span> <span class="s1">&#39;montage&#39;</span><span class="p">,</span> <span class="s1">&#39;session&#39;</span><span class="p">,</span>
-                               <span class="s1">&#39;classifier_summary&#39;</span><span class="p">,</span> <span class="s1">&#39;pvalue&#39;</span><span class="p">,</span> <span class="s1">&#39;auc&#39;</span><span class="p">]]</span>
+classifier_df = pd.DataFrame.from_dict(classifier_summary_data)
+classifier_df = classifier_df[[&#39;subject&#39;, &#39;experiment&#39;, &#39;montage&#39;, &#39;session&#39;,
+                               &#39;classifier_summary&#39;, &#39;pvalue&#39;, &#39;auc&#39;]]
 </pre></div>
 </div>
 </div>
@@ -1649,7 +1648,7 @@ structure.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">classifier_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span></span>classifier_df.head()
 </pre></div>
 </div>
 </div>
@@ -1750,8 +1749,8 @@ intentional, as we need it in order to merge the two. Let’s do that now.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">combined_df</span> <span class="o">=</span> <span class="n">session_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">classifier_df</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
-<span class="n">combined_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span></span>combined_df = session_df.merge(classifier_df, how=&#39;left&#39;)
+combined_df.head()
 </pre></div>
 </div>
 </div>
@@ -1895,7 +1894,7 @@ check these assumptions before proceeding with any anlayses.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">combined_df</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">session_df</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">classifier_df</span><span class="p">)</span>
+<span></span>assert len(combined_df) == len(session_df) == len(classifier_df)
 </pre></div>
 </div>
 </div>
@@ -1905,8 +1904,8 @@ check these assumptions before proceeding with any anlayses.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Check if we are missing any classifier summaries</span>
-<span class="n">combined_df</span><span class="p">[</span><span class="n">combined_df</span><span class="p">[</span><span class="s1">&#39;classifier_summary&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span> <span class="o">==</span> <span class="kc">True</span><span class="p">]</span>
+<span></span># Check if we are missing any classifier summaries
+combined_df[combined_df[&#39;classifier_summary&#39;].isnull() == True]
 </pre></div>
 </div>
 </div>
@@ -1964,10 +1963,10 @@ performance correlated with delta recall?</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">sns</span><span class="o">.</span><span class="n">jointplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;auc&#39;</span><span class="p">,</span>
-              <span class="n">y</span><span class="o">=</span><span class="s1">&#39;delta_recall&#39;</span><span class="p">,</span>
-              <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;reg&quot;</span><span class="p">,</span>
-              <span class="n">data</span><span class="o">=</span><span class="n">combined_df</span><span class="p">)</span>
+<span></span>sns.jointplot(x=&#39;auc&#39;,
+              y=&#39;delta_recall&#39;,
+              kind=&quot;reg&quot;,
+              data=combined_df)
 </pre></div>
 </div>
 </div>
@@ -2003,31 +2002,31 @@ performance correlated with delta recall?</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Trained Classifier Dataset</span>
-<span class="kn">import</span> <span class="nn">classiflib</span>
+<span></span># Trained Classifier Dataset
+import classiflib
 
-<span class="n">retrained_classifiers</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">report_db_location</span><span class="p">,</span> <span class="s1">&#39;*retrained_classifier*&#39;</span><span class="p">))</span>
-<span class="n">training_classifier_summary_data</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="p">[],</span>
-    <span class="s1">&#39;montage&#39;</span><span class="p">:</span> <span class="p">[],</span>
-    <span class="s1">&#39;training_auc&#39;</span><span class="p">:</span> <span class="p">[],</span>
-    <span class="s1">&#39;classifier&#39;</span><span class="p">:</span> <span class="p">[]</span>
-<span class="p">}</span>
-<span class="k">for</span> <span class="n">classifier_loc</span> <span class="ow">in</span> <span class="n">retrained_classifiers</span><span class="p">:</span>
-    <span class="n">metadata</span> <span class="o">=</span> <span class="n">extract_report_info_from_path</span><span class="p">(</span><span class="n">classifier_loc</span><span class="p">)</span>
-    <span class="n">subject</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">]</span>
-    <span class="n">montage</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;montage&#39;</span><span class="p">]</span>
+retrained_classifiers = glob.glob(os.path.join(report_db_location, &#39;*retrained_classifier*&#39;))
+training_classifier_summary_data = {
+    &#39;subject&#39;: [],
+    &#39;montage&#39;: [],
+    &#39;training_auc&#39;: [],
+    &#39;classifier&#39;: []
+}
+for classifier_loc in retrained_classifiers:
+    metadata = extract_report_info_from_path(classifier_loc)
+    subject = metadata[&#39;subject&#39;]
+    montage = metadata[&#39;montage&#39;]
 
-    <span class="c1"># Only add the retrained classifier if one has not already been added</span>
-    <span class="c1"># for the given subject</span>
-    <span class="k">if</span> <span class="n">subject</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">training_classifier_summary_data</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">]:</span>
-        <span class="n">classifier</span> <span class="o">=</span> <span class="n">classiflib</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">ClassifierContainer</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">classifier_loc</span><span class="p">)</span>
-        <span class="n">training_classifier_summary_data</span><span class="p">[</span><span class="s1">&#39;training_auc&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">classifier</span><span class="o">.</span><span class="n">classifier_info</span><span class="p">[</span><span class="s1">&#39;auc&#39;</span><span class="p">])</span>
-        <span class="n">training_classifier_summary_data</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subject</span><span class="p">)</span>
-        <span class="n">training_classifier_summary_data</span><span class="p">[</span><span class="s1">&#39;montage&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">montage</span><span class="p">)</span>
-        <span class="n">training_classifier_summary_data</span><span class="p">[</span><span class="s1">&#39;classifier&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">classifier</span><span class="p">)</span>
+    # Only add the retrained classifier if one has not already been added
+    # for the given subject
+    if subject not in training_classifier_summary_data[&#39;subject&#39;]:
+        classifier = classiflib.container.ClassifierContainer.load(classifier_loc)
+        training_classifier_summary_data[&#39;training_auc&#39;].append(classifier.classifier_info[&#39;auc&#39;])
+        training_classifier_summary_data[&#39;subject&#39;].append(subject)
+        training_classifier_summary_data[&#39;montage&#39;].append(montage)
+        training_classifier_summary_data[&#39;classifier&#39;].append(classifier)
 
-<span class="n">trained_classifier_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">training_classifier_summary_data</span><span class="p">)</span>
+trained_classifier_df = pd.DataFrame.from_dict(training_classifier_summary_data)
 </pre></div>
 </div>
 </div>
@@ -2037,7 +2036,7 @@ performance correlated with delta recall?</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">combined_df</span> <span class="o">=</span> <span class="n">combined_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">trained_classifier_df</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
+<span></span>combined_df = combined_df.merge(trained_classifier_df, how=&#39;left&#39;)
 </pre></div>
 </div>
 </div>
@@ -2048,7 +2047,7 @@ performance correlated with delta recall?</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">combined_df</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">session_df</span><span class="p">)</span>
+<span></span>assert len(combined_df) == len(session_df)
 </pre></div>
 </div>
 </div>
@@ -2058,7 +2057,7 @@ performance correlated with delta recall?</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">combined_df</span><span class="p">[</span><span class="n">combined_df</span><span class="p">[</span><span class="s1">&#39;classifier&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span> <span class="o">==</span> <span class="kc">True</span><span class="p">]</span>
+<span></span>combined_df[combined_df[&#39;classifier&#39;].isnull() == True]
 </pre></div>
 </div>
 </div>
@@ -2115,7 +2114,7 @@ performance correlated with delta recall?</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">combined_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span></span>combined_df.head()
 </pre></div>
 </div>
 </div>
@@ -2281,12 +2280,12 @@ pandas magic, this becomes rather trivial to do.</p>
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">subject_df</span> <span class="o">=</span> <span class="p">(</span><span class="n">session_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;experiment&#39;</span><span class="p">])</span>
-                        <span class="o">.</span><span class="n">agg</span><span class="p">({</span><span class="s1">&#39;session_summary&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">set</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">values</span><span class="p">)),</span>
-                              <span class="s1">&#39;session&#39;</span><span class="p">:</span> <span class="s1">&#39;count&#39;</span><span class="p">,</span>
-                              <span class="s1">&#39;delta_recall&#39;</span><span class="p">:</span> <span class="s1">&#39;mean&#39;</span><span class="p">})</span>
-                        <span class="o">.</span><span class="n">reset_index</span><span class="p">())</span>
-<span class="n">subject_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span></span>subject_df = (session_df.groupby(by=[&#39;subject&#39;, &#39;experiment&#39;])
+                        .agg({&#39;session_summary&#39;: lambda x: set(np.hstack(x.values)),
+                              &#39;session&#39;: &#39;count&#39;,
+                              &#39;delta_recall&#39;: &#39;mean&#39;})
+                        .reset_index())
+subject_df.head()
 </pre></div>
 </div>
 </div>
@@ -2369,9 +2368,9 @@ pandas magic, this becomes rather trivial to do.</p>
 <p>We now have a basic dataset that is at the subject level where our delta
 recall measure that we have been interested is now the average across
 sessions that the subject completed. The other nice thing that we’ve
-done is that our session_summary field has not gone away, but rather,
-it now contains the set of all session summary objects associated with
-the sessions that the subject completed. This leaves us free to continue
+done is that our session_summary field has not gone away, but rather, it
+now contains the set of all session summary objects associated with the
+sessions that the subject completed. This leaves us free to continue
 writing functions that take a summary object or a list of summary
 objects and returns some value of interest.</p>
 </div>
@@ -2397,7 +2396,7 @@ objects and returns some value of interest.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017.
+        &copy; Copyright 2017
 
     </p>
   </div>
@@ -2416,21 +2415,14 @@ objects and returns some value of interest.</p>
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'2.2.4',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ramutils.tasks.summary &mdash; Ramutils 2.2.4 documentation</title>
+  <title>ramutils.tasks.summary &mdash; Ramutils 2.3.0 documentation</title>
   
 
   
@@ -56,7 +56,7 @@
             
             
               <div class="version">
-                2.2
+                2.3
               </div>
             
           
@@ -82,7 +82,7 @@
             
               <p class="caption"><span class="caption-text">Contents</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../getting_started_report_data.html">Getting Statrted: RAM Report Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started_report_data.html">Getting Started: RAM Report Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../data.html">Serializable data structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../classifier.html">Classifier training, cross validation, and utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../events.html">Event processing</a></li>
@@ -171,6 +171,7 @@
 <span class="kn">from</span> <span class="nn">ramutils.exc</span> <span class="k">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">ramutils.log</span> <span class="k">import</span> <span class="n">get_logger</span>
 <span class="kn">from</span> <span class="nn">ramutils.reports.summary</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">ramutils.tasks.thetamod</span> <span class="k">import</span> <span class="n">get_psd_data</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">()</span>
 
@@ -495,18 +496,51 @@
 
 
 <span class="nd">@task</span><span class="p">()</span>
-<span class="k">def</span> <span class="nf">summarize_location_search_sessions</span><span class="p">(</span><span class="n">stim_events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span>
-                                       <span class="n">connectivity</span><span class="p">,</span> <span class="n">pre_psd</span><span class="p">,</span> <span class="n">post_psd</span><span class="p">,</span>
-                                       <span class="n">bad_event_mask</span><span class="p">,</span> <span class="n">bad_channel_mask</span><span class="p">,</span> <span class="p">):</span>
+<span class="k">def</span> <span class="nf">summarize_location_search_sessions</span><span class="p">(</span><span class="n">all_events</span><span class="p">,</span> <span class="n">stim_params</span><span class="p">,</span> <span class="n">pairs_metadata_table</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span>
+                                       <span class="n">connectivity</span><span class="p">,</span> <span class="n">post_stim_eeg</span><span class="p">,</span> <span class="n">rootdir</span><span class="o">=</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
     <span class="n">session_summaries</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">sessions</span> <span class="o">=</span> <span class="n">extract_sessions</span><span class="p">(</span><span class="n">stim_events</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">sessions</span><span class="p">:</span>
-        <span class="n">sess_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">stim_events</span><span class="o">.</span><span class="n">session</span> <span class="o">==</span> <span class="n">session</span><span class="p">)</span>
+    <span class="n">subject</span> <span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">sessions</span> <span class="o">=</span> <span class="n">extract_event_metadata</span><span class="p">(</span><span class="n">all_events</span><span class="p">)</span>
+    <span class="n">bipolar_pairs</span> <span class="o">=</span> <span class="p">{</span><span class="n">subject</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;pairs&#39;</span><span class="p">:</span> <span class="n">pairs_metadata_table</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">)}}</span>
+    <span class="n">locations</span> <span class="o">=</span> <span class="n">pairs_metadata_table</span><span class="p">[[</span><span class="s1">&#39;location&#39;</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">]]</span>
+    <span class="n">locations</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pairs_metadata_table</span><span class="o">.</span><span class="n">channel_1</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">locations</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">locations</span><span class="p">)</span>
+    <span class="n">expected_dtypes</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                       <span class="p">(</span><span class="s1">&#39;experiment&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                       <span class="p">(</span><span class="s1">&#39;eegoffset&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                       <span class="p">(</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                       <span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                       <span class="p">(</span><span class="s1">&#39;mstime&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;i8&#39;</span><span class="p">),</span>
+                       <span class="p">(</span><span class="s1">&#39;amplitude&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                       <span class="p">(</span><span class="s1">&#39;pulse_freq&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                       <span class="p">(</span><span class="s1">&#39;stim_duration&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                       <span class="p">(</span><span class="s1">&#39;stimAnodeTag&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                       <span class="p">(</span><span class="s1">&#39;stimCathodeTag&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                       <span class="p">(</span><span class="s1">&#39;location&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                       <span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;U256&#39;</span><span class="p">),</span>
+                       <span class="p">]</span>
+    <span class="n">stim_param_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">stim_params</span><span class="p">[</span><span class="s1">&#39;stim_params&#39;</span><span class="p">])[[</span><span class="s1">&#39;amplitude&#39;</span><span class="p">,</span> <span class="s1">&#39;pulse_freq&#39;</span><span class="p">,</span> <span class="s1">&#39;stim_duration&#39;</span><span class="p">,</span>
+                                                              <span class="s1">&#39;anode_label&#39;</span><span class="p">,</span> <span class="s1">&#39;cathode_label&#39;</span><span class="p">,</span> <span class="s1">&#39;anode_number&#39;</span><span class="p">]]</span>
+    <span class="n">stim_param_df</span> <span class="o">=</span> <span class="n">stim_param_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">locations</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">left_on</span><span class="o">=</span><span class="s1">&#39;anode_number&#39;</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">stim_param_df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;anode_label&#39;</span><span class="p">:</span> <span class="s1">&#39;stimAnodeTag&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;cathode_label&#39;</span><span class="p">:</span> <span class="s1">&#39;stimCathodeTag&#39;</span><span class="p">,</span> <span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">stim_param_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="s1">&#39;anode_number&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">events_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">all_events</span><span class="p">)</span>
+    <span class="n">events_df</span> <span class="o">=</span> <span class="n">events_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">events_df</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;STIM_ON&#39;</span><span class="p">]</span>
+    <span class="n">events_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;phase&#39;</span><span class="p">,</span> <span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">events_df</span> <span class="o">=</span> <span class="n">events_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">stim_param_df</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">left_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">target_df</span> <span class="ow">in</span> <span class="n">events_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;stimAnodeTag&#39;</span><span class="p">,</span> <span class="s1">&#39;stimCathodeTag&#39;</span><span class="p">]):</span>
+        <span class="n">idxs</span> <span class="o">=</span> <span class="n">target_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">target_events</span> <span class="o">=</span> <span class="n">dataframe_to_recarray</span><span class="p">(</span><span class="n">target_df</span><span class="p">,</span> <span class="n">expected_dtypes</span><span class="p">)</span>
+        <span class="n">pre_psd</span><span class="p">,</span> <span class="n">post_psd</span><span class="p">,</span> <span class="n">emask</span><span class="p">,</span> <span class="n">cmask</span> <span class="o">=</span> <span class="n">get_psd_data</span><span class="p">(</span><span class="n">target_df</span><span class="p">,</span> <span class="n">rootdir</span><span class="p">)</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
         <span class="n">summary</span> <span class="o">=</span> <span class="n">LocationSearchSessionSummary</span><span class="p">()</span>
         <span class="n">summary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span>
-            <span class="n">stim_events</span><span class="p">[</span><span class="n">sess_mask</span><span class="p">],</span> <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span>
+            <span class="n">target_events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span>
             <span class="n">connectivity</span><span class="p">,</span> <span class="n">pre_psd</span><span class="p">,</span> <span class="n">post_psd</span><span class="p">,</span>
-            <span class="n">bad_event_mask</span><span class="p">,</span> <span class="n">bad_channel_mask</span>
+            <span class="n">emask</span><span class="p">,</span> <span class="n">cmask</span><span class="p">,</span>
+            <span class="n">post_stim_eeg</span><span class="o">=</span><span class="n">post_stim_eeg</span><span class="p">[:,</span> <span class="n">idxs</span><span class="p">,</span> <span class="p">:],</span>
+            <span class="n">stim_tstats</span><span class="o">=</span><span class="n">pairs_metadata_table</span><span class="p">[[</span><span class="s1">&#39;stim_tstats&#39;</span><span class="p">,</span> <span class="s1">&#39;stim_pvals&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">to_records</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="n">session_summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">session_summaries</span>
@@ -522,7 +556,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017.
+        &copy; Copyright 2017
 
     </p>
   </div>
@@ -541,21 +575,14 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../../',
-            VERSION:'2.2.4',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 
