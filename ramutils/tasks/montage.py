@@ -27,27 +27,32 @@ __all__ = [
 
 
 @task()
+@wraps(generate_pairs_for_classifier_core)
 def generate_pairs_for_classifier(pairs, excluded_pairs):
     return generate_pairs_for_classifier_core(pairs, excluded_pairs)
 
 
 @task()
+@wraps(reduce_pairs_core)
 def reduce_pairs(pairs, stim_params, return_excluded=False):
     return reduce_pairs_core(pairs, stim_params,
                              return_excluded=return_excluded)
 
 
 @task(cache=False)
+@wraps(get_used_pair_mask_core)
 def get_used_pair_mask(all_pairs, excluded_pairs):
     return get_used_pair_mask_core(all_pairs, excluded_pairs)
 
 
 @task()
+@wraps(get_classifier_excluded_leads_core)
 def get_classifier_excluded_leads(subject, ec_pairs, rootdir):
     return get_classifier_excluded_leads_core(subject, ec_pairs, rootdir=rootdir)
 
 
 @task()
+@wraps(build_montage_metadata_table)
 def generate_montage_metadata_table(subject, experiment, sessions, all_pairs,
                                     root):
     return build_montage_metadata_table(subject, experiment, sessions,
@@ -55,16 +60,19 @@ def generate_montage_metadata_table(subject, experiment, sessions, all_pairs,
 
 
 @task()
+@wraps(get_trigger_electrode_mask_core)
 def get_trigger_electrode_mask(montage_metadata_table, electrode_label):
     return get_trigger_electrode_mask_core(montage_metadata_table, electrode_label)
 
 
 @task()
+@wraps(get_pairs_core)
 def get_pairs(subject, experiment, sessions, paths):
     return get_pairs_core(subject, experiment, sessions, paths)
 
 
 @task()
+@wraps(extract_rejected_pairs_core)
 def extract_rejected_pairs(subject,used_classifiers,
                            ec_pairs, used_pair_mask):
     return extract_rejected_pairs_core(subject,used_classifiers,
