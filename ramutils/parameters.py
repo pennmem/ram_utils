@@ -172,6 +172,9 @@ class PS5Parameters(FRParameters):
 
 
 class ExperimentSpecs(Schema):
+    """
+    Commont values for the "experiment_specs" section of the experiment config file
+    """
 
     version = String("3.0.0", desc="experiment version")
     experiment_type = String()
@@ -186,6 +189,9 @@ class ExperimentSpecs(Schema):
 
 
 class PS4ExperimentSpecs(ExperimentSpecs):
+    """
+    PS4-specific values for the "experiment_specs" section of the experiment config file
+    """
     retrieval_biomarker_sample_start_time_offset = Int(0),
     retrieval_biomarker_sample_time_length = Int(525),
     retrieval_buffer_time = Int(524),
@@ -195,6 +201,10 @@ class PS4ExperimentSpecs(ExperimentSpecs):
 
 
 class TICLExperimentSpecs(ExperimentSpecs):
+    """
+    TICLFR-specific values for the "experiment_specs" section of the experiment config file
+
+    """
     biomarker_sample_time_length = Int(525)
     buffer_time = Int(524)
     version = String("5.0.0")
@@ -205,6 +215,9 @@ class TICLExperimentSpecs(ExperimentSpecs):
 
 
 class LocationSearchExperimentSpecs(ExperimentSpecs):
+    """
+    LocationSearch-specific values for the "experiment_specs" section of the experiment config file
+    """
     biomarker_sample_start_time_offset = Int(0)
     biomarker_sample_time_length = Int(525)
     buffer_time = Int(524)
