@@ -582,8 +582,8 @@ def get_classifier_excluded_leads(subject, all_pairs, rootdir='/'):
     -----------
     subject: str
         Subject identifier
-
-    paths: FilePaths object including RHINO root directory
+    paths: FilePaths
+        FilePaths object including RHINO root directory
 
     Returns:
     --------
