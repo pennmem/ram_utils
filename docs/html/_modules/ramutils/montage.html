@@ -1,0 +1,954 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ramutils.montage &mdash; Ramutils 2.3.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Ramutils
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started_report_data.html">Getting Started: RAM Report Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../data.html">Serializable data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../classifier.html">Classifier training, cross validation, and utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../events.html">Event processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pipeline.html">Pipelines and Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli.html">Command-line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../misc.html">Miscellaneous utilities</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Ramutils</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>ramutils.montage</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for ramutils.montage</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Set of utility functions for working with electrode-related data &quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">from</span> <span class="nn">glob</span> <span class="k">import</span> <span class="n">glob</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">path</span> <span class="k">as</span> <span class="n">osp</span>
+
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">bptools.jacksheet</span> <span class="k">import</span> <span class="n">read_jacksheet</span>
+<span class="kn">from</span> <span class="nn">bptools.transform</span> <span class="k">import</span> <span class="n">SeriesTransformation</span>
+<span class="kn">from</span> <span class="nn">bptools.util</span> <span class="k">import</span> <span class="n">standardize_label</span>
+<span class="kn">from</span> <span class="nn">classiflib</span> <span class="k">import</span> <span class="n">dtypes</span>
+<span class="kn">from</span> <span class="nn">ptsa.data.readers</span> <span class="k">import</span> <span class="n">JsonIndexReader</span>
+
+<span class="kn">from</span> <span class="nn">ramutils.parameters</span> <span class="k">import</span> <span class="n">StimParameters</span>
+<span class="kn">from</span> <span class="nn">ramutils.utils</span> <span class="k">import</span> <span class="n">extract_subject_montage</span><span class="p">,</span> <span class="n">touch</span><span class="p">,</span> <span class="n">bytes_to_str</span><span class="p">,</span> <span class="n">tempdir</span>
+<span class="kn">from</span> <span class="nn">ramutils.log</span> <span class="k">import</span> <span class="n">get_logger</span>
+<span class="kn">from</span> <span class="nn">ramutils.constants</span> <span class="k">import</span> <span class="n">MTL_LOC_DICT</span><span class="p">,</span> <span class="n">DK_LOC_DICT</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">make_stim_params</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">anodes</span><span class="p">,</span> <span class="n">cathodes</span><span class="p">,</span> <span class="n">min_amplitudes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                     <span class="n">max_amplitudes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">target_amplitudes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="n">root</span><span class="o">=</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Construct :class:`StimParameters` objects from anode and cathode labels</span>
+<span class="sd">    for a specific subject.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    subject : str</span>
+<span class="sd">    anodes : List[str]</span>
+<span class="sd">        anode labels</span>
+<span class="sd">    cathodes : List[str]</span>
+<span class="sd">        cathode labels</span>
+<span class="sd">    min_amplitudes : List[float]</span>
+<span class="sd">        Minimum stim amplitudes (when applicable)</span>
+<span class="sd">    max_amplitudes : List[float]</span>
+<span class="sd">        Maximum stim amplitudes (when applicable)</span>
+<span class="sd">    target_amplitudes : List[float]</span>
+<span class="sd">        Target stim amplitudes (when applicable)</span>
+<span class="sd">    root : str</span>
+<span class="sd">        root directory to search for jacksheet</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    stim_params : List[StimParameters]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;eeg&#39;</span><span class="p">,</span> <span class="n">subject</span><span class="p">,</span> <span class="s1">&#39;docs&#39;</span><span class="p">,</span> <span class="s1">&#39;jacksheet.txt&#39;</span><span class="p">)</span>
+    <span class="n">stim_params</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">anodes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">stim_params</span>
+
+    <span class="n">jacksheet</span> <span class="o">=</span> <span class="n">read_jacksheet</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="n">valid_labels</span> <span class="o">=</span> <span class="n">jacksheet</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">values</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">anodes</span><span class="p">)):</span>
+        <span class="n">anode</span> <span class="o">=</span> <span class="n">anodes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">cathode</span> <span class="o">=</span> <span class="n">cathodes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">anode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_labels</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s2">&quot;Label </span><span class="si">{}</span><span class="s2"> could not be found in the jacksheet&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">anode</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">cathode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_labels</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s2">&quot;Label </span><span class="si">{}</span><span class="s2"> could not be found in the jacksheet&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cathode</span><span class="p">))</span>
+
+        <span class="n">anode_idx</span> <span class="o">=</span> <span class="n">jacksheet</span><span class="p">[</span><span class="n">jacksheet</span><span class="o">.</span><span class="n">label</span> <span class="o">==</span> <span class="n">anode</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">cathode_idx</span> <span class="o">=</span> <span class="n">jacksheet</span><span class="p">[</span><span class="n">jacksheet</span><span class="o">.</span><span class="n">label</span> <span class="o">==</span> <span class="n">cathode</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="n">StimParameters</span><span class="p">(</span>
+            <span class="n">anode_label</span><span class="o">=</span><span class="n">anode</span><span class="p">,</span>
+            <span class="n">cathode_label</span><span class="o">=</span><span class="n">cathode</span><span class="p">,</span>
+            <span class="n">anode</span><span class="o">=</span><span class="n">anode_idx</span><span class="p">,</span>
+            <span class="n">cathode</span><span class="o">=</span><span class="n">cathode_idx</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">min_amplitudes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">params</span><span class="o">.</span><span class="n">min_amplitude</span> <span class="o">=</span> <span class="n">min_amplitudes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">params</span><span class="o">.</span><span class="n">max_amplitude</span> <span class="o">=</span> <span class="n">max_amplitudes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">params</span><span class="o">.</span><span class="n">target_amplitude</span> <span class="o">=</span> <span class="n">target_amplitudes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="n">stim_params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">stim_params</span>
+
+
+<span class="k">def</span> <span class="nf">build_montage_metadata_table</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">sessions</span><span class="p">,</span> <span class="n">all_pairs</span><span class="p">,</span>
+                                 <span class="n">root</span><span class="o">=</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Create a dataframe containing atlas labels, locations, and coordinates</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    subject: str</span>
+<span class="sd">        Subject ID</span>
+<span class="sd">    experiment: str</span>
+<span class="sd">        Experiment</span>
+<span class="sd">    all_pairs: OrderedDict</span>
+<span class="sd">        Full set of bipolar pairs that will be augmented with their metadata</span>
+<span class="sd">    root: str</span>
+<span class="sd">        Base path for RHINO</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pairs_from_json</span> <span class="o">=</span> <span class="n">load_pairs_from_json</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span>
+                                           <span class="n">sessions</span><span class="p">,</span> <span class="n">rootdir</span><span class="o">=</span><span class="n">root</span><span class="p">)</span>
+
+    <span class="c1"># Check if mni coordinates are present, since this is the case only since</span>
+    <span class="c1"># neurorad v2.0</span>
+    <span class="n">first_channel</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">pairs_from_json</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">mni_available</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;mni&#39;</span> <span class="ow">in</span> <span class="n">pairs_from_json</span><span class="p">[</span><span class="n">first_channel</span><span class="p">][</span><span class="s1">&#39;atlases&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="c1"># Standardize labels from json so that lookup will be easier</span>
+    <span class="n">pairs_from_json</span> <span class="o">=</span> <span class="p">{</span><span class="n">standardize_label</span><span class="p">(</span>
+        <span class="n">key</span><span class="p">):</span> <span class="n">val</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">pairs_from_json</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+    <span class="c1"># If all_pairs is an ordered dict, this loop will preserve the ordering</span>
+    <span class="n">all_pair_labels</span> <span class="o">=</span> <span class="n">all_pairs</span><span class="p">[</span><span class="n">subject</span><span class="p">][</span><span class="s1">&#39;pairs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">all_pair_labels</span><span class="p">:</span>
+        <span class="n">standardized_pair</span> <span class="o">=</span> <span class="n">standardize_label</span><span class="p">(</span><span class="n">pair</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">standardized_pair</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pairs_from_json</span><span class="p">:</span>
+            <span class="c1"># Log some warning here about not finding the contact</span>
+            <span class="k">continue</span>
+        <span class="n">channel_1</span> <span class="o">=</span> <span class="n">pairs_from_json</span><span class="p">[</span><span class="n">standardized_pair</span><span class="p">][</span><span class="s1">&#39;channel_1&#39;</span><span class="p">]</span>
+        <span class="n">channel_2</span> <span class="o">=</span> <span class="n">pairs_from_json</span><span class="p">[</span><span class="n">standardized_pair</span><span class="p">][</span><span class="s1">&#39;channel_2&#39;</span><span class="p">]</span>
+        <span class="n">all_pairs</span><span class="p">[</span><span class="n">subject</span><span class="p">][</span><span class="s1">&#39;pairs&#39;</span><span class="p">][</span><span class="n">pair</span><span class="p">][</span><span class="s1">&#39;channel_1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">channel_1</span><span class="p">)</span>
+        <span class="n">all_pairs</span><span class="p">[</span><span class="n">subject</span><span class="p">][</span><span class="s1">&#39;pairs&#39;</span><span class="p">][</span><span class="n">pair</span><span class="p">][</span><span class="s1">&#39;channel_2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">channel_2</span><span class="p">)</span>
+        <span class="c1"># types should be same for both electrodes</span>
+        <span class="n">all_pairs</span><span class="p">[</span><span class="n">subject</span><span class="p">][</span><span class="s1">&#39;pairs&#39;</span><span class="p">][</span><span class="n">pair</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pairs_from_json</span><span class="p">[</span><span class="n">standardized_pair</span><span class="p">][</span><span class="s1">&#39;type_1&#39;</span><span class="p">]</span>
+        <span class="n">all_pairs</span><span class="p">[</span><span class="n">subject</span><span class="p">][</span><span class="s1">&#39;pairs&#39;</span><span class="p">][</span><span class="n">pair</span><span class="p">][</span><span class="s1">&#39;location&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">extract_atlas_location</span><span class="p">(</span>
+            <span class="n">pairs_from_json</span><span class="p">[</span><span class="n">standardized_pair</span><span class="p">])</span>
+        <span class="n">all_pairs</span><span class="p">[</span><span class="n">subject</span><span class="p">][</span><span class="s1">&#39;pairs&#39;</span><span class="p">][</span><span class="n">pair</span><span class="p">][</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pair</span>
+        <span class="n">all_pairs</span><span class="p">[</span><span class="n">subject</span><span class="p">][</span><span class="s1">&#39;pairs&#39;</span><span class="p">][</span><span class="n">pair</span><span class="p">][</span><span class="s1">&#39;region&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_region_name</span><span class="p">(</span>
+            <span class="n">all_pairs</span><span class="p">[</span><span class="n">subject</span><span class="p">][</span><span class="s1">&#39;pairs&#39;</span><span class="p">][</span><span class="n">pair</span><span class="p">][</span><span class="s1">&#39;location&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">mni_available</span><span class="p">:</span>
+            <span class="n">all_pairs</span><span class="p">[</span><span class="n">subject</span><span class="p">][</span><span class="s1">&#39;pairs&#39;</span><span class="p">][</span><span class="n">pair</span><span class="p">][</span><span class="s1">&#39;mni_x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pairs_from_json</span><span class="p">[</span>
+                <span class="n">standardized_pair</span><span class="p">][</span><span class="s1">&#39;atlases&#39;</span><span class="p">][</span><span class="s1">&#39;mni&#39;</span><span class="p">][</span><span class="s1">&#39;x&#39;</span><span class="p">]</span>
+            <span class="n">all_pairs</span><span class="p">[</span><span class="n">subject</span><span class="p">][</span><span class="s1">&#39;pairs&#39;</span><span class="p">][</span><span class="n">pair</span><span class="p">][</span><span class="s1">&#39;mni_y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pairs_from_json</span><span class="p">[</span>
+                <span class="n">standardized_pair</span><span class="p">][</span><span class="s1">&#39;atlases&#39;</span><span class="p">][</span><span class="s1">&#39;mni&#39;</span><span class="p">][</span><span class="s1">&#39;y&#39;</span><span class="p">]</span>
+            <span class="n">all_pairs</span><span class="p">[</span><span class="n">subject</span><span class="p">][</span><span class="s1">&#39;pairs&#39;</span><span class="p">][</span><span class="n">pair</span><span class="p">][</span><span class="s1">&#39;mni_z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pairs_from_json</span><span class="p">[</span>
+                <span class="n">standardized_pair</span><span class="p">][</span><span class="s1">&#39;atlases&#39;</span><span class="p">][</span><span class="s1">&#39;mni&#39;</span><span class="p">][</span><span class="s1">&#39;z&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Constructing the dataframe will not preserve the order from the</span>
+    <span class="c1"># OrderedDict</span>
+    <span class="n">pairs_metadata</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">all_pairs</span><span class="p">[</span><span class="n">subject</span><span class="p">][</span><span class="s1">&#39;pairs&#39;</span><span class="p">],</span>
+                                            <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Give some sort of default value when mni coordinates are not present</span>
+    <span class="k">if</span> <span class="n">mni_available</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">pairs_metadata</span><span class="p">[</span><span class="s1">&#39;mni_x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">pairs_metadata</span><span class="p">[</span><span class="s1">&#39;mni_y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">pairs_metadata</span><span class="p">[</span><span class="s1">&#39;mni_z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">pairs_metadata</span> <span class="o">=</span> <span class="n">pairs_metadata</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">all_pair_labels</span><span class="p">)</span>
+    <span class="n">pairs_metadata</span> <span class="o">=</span> <span class="n">pairs_metadata</span><span class="p">[[</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;channel_1&#39;</span><span class="p">,</span> <span class="s1">&#39;channel_2&#39;</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">,</span>
+                                     <span class="s1">&#39;region&#39;</span><span class="p">,</span> <span class="s1">&#39;location&#39;</span><span class="p">,</span>
+                                     <span class="s1">&#39;mni_x&#39;</span><span class="p">,</span> <span class="s1">&#39;mni_y&#39;</span><span class="p">,</span> <span class="s1">&#39;mni_z&#39;</span><span class="p">]]</span>
+
+    <span class="k">return</span> <span class="n">pairs_metadata</span>
+
+
+<span class="k">def</span> <span class="nf">get_trigger_electrode_mask</span><span class="p">(</span><span class="n">montage_metadata_table</span><span class="p">,</span> <span class="n">contact_label</span><span class="p">):</span>
+    <span class="c1"># Make sure labels are not the index, but are instead numeric</span>
+    <span class="n">montage_metadata_table</span> <span class="o">=</span> <span class="n">montage_metadata_table</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">contact_label</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">montage_metadata_table</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> not found. Check that label exists in the &#39;</span>
+                           <span class="s1">&#39;electrode config file.&#39;</span><span class="p">)</span>
+    <span class="n">montage_metadata_table</span><span class="p">[</span><span class="s1">&#39;is_trigger_electrode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">montage_metadata_table</span><span class="p">[</span>
+        <span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">contact_label</span><span class="p">)</span>
+    <span class="n">trigger_electrode_mask</span> <span class="o">=</span> <span class="n">montage_metadata_table</span><span class="p">[</span>
+        <span class="s1">&#39;is_trigger_electrode&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">trigger_electrode_mask</span>
+
+
+<div class="viewcode-block" id="generate_pairs_for_classifier"><a class="viewcode-back" href="../../pipeline.html#ramutils.tasks.montage.generate_pairs_for_classifier">[docs]</a><span class="k">def</span> <span class="nf">generate_pairs_for_classifier</span><span class="p">(</span><span class="n">pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create recarray of electrode pairs for the classifier container</span>
+
+<span class="sd">    :param pairs: JSON-format object containing all electrode pairs in the</span>
+<span class="sd">        montage</span>
+<span class="sd">    :param excluded_pairs: array-like containing pairs excluded from the montage</span>
+<span class="sd">    :returns: recarray containing all pairs minus excluded pairs</span>
+<span class="sd">    :rtype: np.recarray</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pairs</span> <span class="o">=</span> <span class="n">extract_pairs_dict</span><span class="p">(</span><span class="n">pairs</span><span class="p">)</span>
+    <span class="n">used_pairs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">pairs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">excluded_pairs</span>
+    <span class="p">}</span>
+
+    <span class="n">pairs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">fromrecords</span><span class="p">([(</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;channel_1&#39;</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;channel_2&#39;</span><span class="p">],</span>
+                                 <span class="n">pair</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pair</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+                                <span class="k">for</span> <span class="n">pair</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">used_pairs</span><span class="o">.</span><span class="n">items</span><span class="p">()],</span>
+                               <span class="n">dtype</span><span class="o">=</span><span class="n">dtypes</span><span class="o">.</span><span class="n">pairs</span><span class="p">)</span>
+
+    <span class="n">pairs</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;contact0&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">pairs</span></div>
+
+
+<span class="k">def</span> <span class="nf">generate_pairs_for_ptsa</span><span class="p">(</span><span class="n">pairs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Convert bipolar pairs into a format expected by PTSA methods &quot;&quot;&quot;</span>
+    <span class="n">classifier_fmt_pairs</span> <span class="o">=</span> <span class="n">generate_pairs_for_classifier</span><span class="p">(</span><span class="n">pairs</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="n">final_pairs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">rec</span> <span class="ow">in</span> <span class="n">classifier_fmt_pairs</span><span class="p">:</span>
+        <span class="n">final_pairs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;</span><span class="si">{:03d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rec</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                            <span class="s1">&#39;</span><span class="si">{:03d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rec</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
+
+    <span class="n">final_pairs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rec</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">final_pairs</span><span class="p">,</span>
+                                        <span class="n">dtype</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;ch0&#39;</span><span class="p">,</span> <span class="s1">&#39;S3&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;ch1&#39;</span><span class="p">,</span> <span class="s1">&#39;S3&#39;</span><span class="p">)]))</span>
+    <span class="k">return</span> <span class="n">final_pairs</span>
+
+
+<span class="k">def</span> <span class="nf">extract_monopolar_from_bipolar</span><span class="p">(</span><span class="n">bipolar_pairs_array</span><span class="p">):</span>
+    <span class="n">unique_monopolar_channels</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">rec</span> <span class="ow">in</span> <span class="n">bipolar_pairs_array</span><span class="p">:</span>
+        <span class="n">rec0</span> <span class="o">=</span> <span class="n">rec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">rec1</span> <span class="o">=</span> <span class="n">rec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">rec0</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">unique_monopolar_channels</span><span class="p">:</span>
+            <span class="n">unique_monopolar_channels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rec0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">rec1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">unique_monopolar_channels</span><span class="p">:</span>
+            <span class="n">unique_monopolar_channels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rec1</span><span class="p">)</span>
+
+    <span class="n">final_channels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">unique_monopolar_channels</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;S3&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">final_channels</span>
+
+
+<div class="viewcode-block" id="reduce_pairs"><a class="viewcode-back" href="../../pipeline.html#ramutils.tasks.montage.reduce_pairs">[docs]</a><span class="k">def</span> <span class="nf">reduce_pairs</span><span class="p">(</span><span class="n">pairs</span><span class="p">,</span> <span class="n">stim_params</span><span class="p">,</span> <span class="n">return_excluded</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Remove stim pairs from the pairs.json dict.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pairs : OrderedDict</span>
+<span class="sd">        Full pairs.json as a dict</span>
+<span class="sd">    stim_params : List[StimParameters]</span>
+<span class="sd">    return_excluded :  bool</span>
+<span class="sd">        Whether excluded pairs should be returned instead of reduced pairs</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    OrderedDict</span>
+<span class="sd">        pairs with stim pairs removed, or removed pairs if return_excluded is True</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">stim_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">stim_params</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">pairs</span> <span class="o">=</span> <span class="n">extract_pairs_dict</span><span class="p">(</span><span class="n">pairs</span><span class="p">)</span>
+    <span class="n">contacts</span> <span class="o">=</span> <span class="p">[(</span><span class="n">p</span><span class="o">.</span><span class="n">anode</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">cathode</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">stim_params</span><span class="p">]</span>
+    <span class="n">reduced_pairs</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+    <span class="n">excluded_pairs</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">pairs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">pair</span><span class="p">[</span><span class="s1">&#39;channel_1&#39;</span><span class="p">],</span> <span class="n">pair</span><span class="p">[</span><span class="s1">&#39;channel_2&#39;</span><span class="p">])</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">contacts</span><span class="p">:</span>
+            <span class="n">reduced_pairs</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">pair</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">excluded_pairs</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">pair</span>
+
+    <span class="k">if</span> <span class="n">return_excluded</span><span class="p">:</span>
+        <span class="n">reduced_pairs</span> <span class="o">=</span> <span class="n">excluded_pairs</span>
+    <span class="k">return</span> <span class="n">reduced_pairs</span></div>
+
+
+<div class="viewcode-block" id="get_used_pair_mask"><a class="viewcode-back" href="../../pipeline.html#ramutils.tasks.montage.get_used_pair_mask">[docs]</a><span class="k">def</span> <span class="nf">get_used_pair_mask</span><span class="p">(</span><span class="n">all_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Create a boolean mask indicating which electrodes should be included</span>
+<span class="sd">    in classifier training/evaluation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    all_pairs: OrderedDict</span>
+<span class="sd">    excluded_pairs: OrderedDict</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    mask : List[bool]</span>
+<span class="sd">        Boolean mask of channels to include.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">extracted_pairs</span> <span class="o">=</span> <span class="n">extract_pairs_dict</span><span class="p">(</span><span class="n">all_pairs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">extracted_pairs</span><span class="p">)</span> <span class="o">!=</span> <span class="n">OrderedDict</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;all pairs must be an orderd dict so that the &quot;</span>
+                           <span class="s2">&quot;ordering can be correctly preserved when creating &quot;</span>
+                           <span class="s2">&quot;the mask&quot;</span><span class="p">)</span>
+
+    <span class="n">pair_list</span> <span class="o">=</span> <span class="n">extracted_pairs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="p">[</span><span class="n">label</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">excluded_pairs</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">pair_list</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">mask</span></div>
+
+
+<span class="k">def</span> <span class="nf">compare_recorded_with_all_pairs</span><span class="p">(</span><span class="n">all_pairs</span><span class="p">,</span> <span class="n">classifier_pairs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Returns a mask for if an electrode in all_pairs is present in</span>
+<span class="sd">    classifier_pairs</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    all_pairs: OrderedDict</span>
+<span class="sd">        The full set of possible pairs based on the electrode config</span>
+<span class="sd">    classifier_pairs: np.recarray</span>
+<span class="sd">        Pairs used for classification (usually extracted from classifier</span>
+<span class="sd">        container)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    array_like</span>
+<span class="sd">        Boolean array of the same size as all_pairs indicating if each pair</span>
+<span class="sd">        was used for classification</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">used_pairs</span> <span class="o">=</span> <span class="n">classifier_pairs</span><span class="p">[[</span><span class="s2">&quot;contact0&quot;</span><span class="p">,</span> <span class="s2">&quot;contact1&quot;</span><span class="p">]]</span>
+    <span class="n">used_pairs</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">b</span><span class="p">))</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">used_pairs</span><span class="p">]</span>
+
+    <span class="n">recorded_pairs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">subject</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">all_pairs</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">all_pairs</span><span class="p">[</span><span class="n">subject</span><span class="p">][</span><span class="s1">&#39;pairs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">channel_1</span> <span class="o">=</span> <span class="n">all_pairs</span><span class="p">[</span><span class="n">subject</span><span class="p">][</span><span class="s1">&#39;pairs&#39;</span><span class="p">][</span><span class="n">pair</span><span class="p">][</span><span class="s1">&#39;channel_1&#39;</span><span class="p">]</span>
+        <span class="n">channel_2</span> <span class="o">=</span> <span class="n">all_pairs</span><span class="p">[</span><span class="n">subject</span><span class="p">][</span><span class="s1">&#39;pairs&#39;</span><span class="p">][</span><span class="n">pair</span><span class="p">][</span><span class="s1">&#39;channel_2&#39;</span><span class="p">]</span>
+        <span class="n">pair_nums</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">channel_1</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">channel_2</span><span class="p">))</span>
+        <span class="n">recorded_pairs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pair_nums</span><span class="p">)</span>
+
+    <span class="n">pair_mask</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">recorded_pairs</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">pair</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">recorded_pairs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">pair</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">used_pairs</span><span class="p">:</span>
+            <span class="n">pair_mask</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pair_mask</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">extract_pairs_dict</span><span class="p">(</span><span class="n">pairs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Extract a dictionary of pairs from the standard json structure</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pairs: OrderedDict</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    OrderedDict</span>
+<span class="sd">        Dictionary of pairs that will preserve ordering</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">pairs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="c1"># Handle empty dictionary case</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pairs</span>
+
+    <span class="c1"># Remove &#39;version&#39; information. TODO: Make this more flexible</span>
+    <span class="k">if</span> <span class="s1">&#39;version&#39;</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+        <span class="n">keys</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;version&#39;</span><span class="p">)</span>
+    <span class="n">subject</span> <span class="o">=</span> <span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">pairs</span> <span class="o">=</span> <span class="n">pairs</span><span class="p">[</span><span class="n">subject</span><span class="p">][</span><span class="s1">&#39;pairs&#39;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">pairs</span>
+
+
+<span class="k">def</span> <span class="nf">load_pairs_from_json</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">sessions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">just_pairs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                         <span class="n">rootdir</span><span class="o">=</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Load montage information from pairs.json file</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    subject: str</span>
+<span class="sd">        Subject ID</span>
+<span class="sd">    experiment: str</span>
+<span class="sd">        Experiment</span>
+<span class="sd">    just_pairs: Bool</span>
+<span class="sd">        If True, strip out any other metadata contained in the json file</span>
+<span class="sd">    rootdir: str</span>
+<span class="sd">        Mount point for RHINO</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict</span>
+<span class="sd">        Dictionary containing metadata for all pairs in the given subjects&#39;</span>
+<span class="sd">        montage</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">json_reader</span> <span class="o">=</span> <span class="n">JsonIndexReader</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rootdir</span><span class="p">,</span>
+                                               <span class="s2">&quot;protocols&quot;</span><span class="p">,</span>
+                                               <span class="s2">&quot;r1.json&quot;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">sessions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sessions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">all_pairs_paths</span> <span class="o">=</span> <span class="n">json_reader</span><span class="o">.</span><span class="n">aggregate_values</span><span class="p">(</span><span class="s1">&#39;pairs&#39;</span><span class="p">,</span>
+                                                           <span class="n">subject_alias</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
+                                                           <span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">,</span>
+                                                           <span class="n">session</span><span class="o">=</span><span class="n">sessions</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="c1"># For PS4 sessions, the experiment is listed as FR5/catFR5, so we need to look it up</span>
+            <span class="c1"># based on original_experiment field instead</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_pairs_paths</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">all_pairs_paths</span> <span class="o">=</span> <span class="n">json_reader</span><span class="o">.</span><span class="n">aggregate_values</span><span class="p">(</span><span class="s1">&#39;pairs&#39;</span><span class="p">,</span>
+                                                               <span class="n">subject_alias</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
+                                                               <span class="n">original_experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">,</span>
+                                                               <span class="n">session</span><span class="o">=</span><span class="n">sessions</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">all_pairs_paths</span> <span class="o">=</span> <span class="n">json_reader</span><span class="o">.</span><span class="n">aggregate_values</span><span class="p">(</span><span class="s1">&#39;pairs&#39;</span><span class="p">,</span>
+                                                           <span class="n">subject_alias</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
+                                                           <span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">all_pairs_paths</span> <span class="o">=</span> <span class="n">json_reader</span><span class="o">.</span><span class="n">aggregate_values</span><span class="p">(</span><span class="s1">&#39;pairs&#39;</span><span class="p">,</span>
+                                                       <span class="n">subject_alias</span><span class="o">=</span><span class="n">subject</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_pairs_paths</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;No pairs.json found for subject </span><span class="si">{}</span><span class="s2"> &quot;</span>
+                           <span class="s2">&quot;and experiment </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">))</span>
+
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_pairs_paths</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Multiple montages are possible&#39;</span><span class="p">)</span>
+
+    <span class="c1"># For simplicity, just load the first file since they *should* all be the</span>
+    <span class="c1"># same</span>
+    <span class="n">bp_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rootdir</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">all_pairs_paths</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">bp_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">pair_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">object_pairs_hook</span><span class="o">=</span><span class="n">OrderedDict</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">just_pairs</span><span class="p">:</span>
+        <span class="n">pair_data</span> <span class="o">=</span> <span class="n">extract_pairs_dict</span><span class="p">(</span><span class="n">pair_data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pair_data</span>
+
+    <span class="c1"># Update the subject_id not be standard format</span>
+    <span class="n">stored_subject</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">pair_data</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">stored_subject</span> <span class="o">!=</span> <span class="n">subject</span><span class="p">:</span>
+        <span class="n">pair_data</span><span class="p">[</span><span class="n">subject</span><span class="p">]</span> <span class="o">=</span> <span class="n">pair_data</span><span class="p">[</span><span class="n">stored_subject</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">pair_data</span><span class="p">[</span><span class="n">stored_subject</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">pair_data</span>
+
+
+<span class="k">def</span> <span class="nf">extract_atlas_location</span><span class="p">(</span><span class="n">bp_data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Extract atlas based on electrode type and what locations are available</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bp_data: dict</span>
+<span class="sd">        Dictionary containing metadata for a single electrode (monopolar or bipolar)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    str</span>
+<span class="sd">        Atlas location for the given contact</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">atlases</span> <span class="o">=</span> <span class="n">bp_data</span><span class="p">[</span><span class="s1">&#39;atlases&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Sort of a waterfall here: Stein, then WB for depths, then ind</span>
+    <span class="k">if</span> <span class="s1">&#39;stein&#39;</span> <span class="ow">in</span> <span class="n">atlases</span><span class="p">:</span>
+        <span class="n">loc_tag</span> <span class="o">=</span> <span class="n">atlases</span><span class="p">[</span><span class="s1">&#39;stein&#39;</span><span class="p">][</span><span class="s1">&#39;region&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">loc_tag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">loc_tag</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">loc_tag</span> <span class="o">!=</span> <span class="s1">&#39;None&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">loc_tag</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">bp_data</span><span class="p">[</span><span class="s1">&#39;type_1&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;D&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="s1">&#39;wb&#39;</span> <span class="ow">in</span> <span class="n">atlases</span><span class="p">):</span>
+        <span class="n">wb_loc</span> <span class="o">=</span> <span class="n">atlases</span><span class="p">[</span><span class="s1">&#39;wb&#39;</span><span class="p">][</span><span class="s1">&#39;region&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">wb_loc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">wb_loc</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">wb_loc</span> <span class="o">!=</span> <span class="s1">&#39;None&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">wb_loc</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;ind&#39;</span> <span class="ow">in</span> <span class="n">atlases</span><span class="p">:</span>
+            <span class="n">ind_loc</span> <span class="o">=</span> <span class="n">atlases</span><span class="p">[</span><span class="s1">&#39;ind&#39;</span><span class="p">][</span><span class="s1">&#39;region&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">ind_loc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">ind_loc</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">ind_loc</span> <span class="o">!=</span> <span class="s1">&#39;None&#39;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;Left &#39;</span> <span class="k">if</span> <span class="n">atlases</span><span class="p">[</span><span class="s1">&#39;ind&#39;</span><span class="p">][</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.0</span> <span class="k">else</span> <span class="s1">&#39;Right &#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">ind_loc</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s1">&#39;Missing coordinates for an electrode. Likely a neurorad pipeline error&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="s1">&#39;--&#39;</span>
+
+
+<span class="k">def</span> <span class="nf">get_region_name</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">MTL_LOC_DICT</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">MTL_LOC_DICT</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">k</span>
+
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">DK_LOC_DICT</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">DK_LOC_DICT</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">k</span>
+
+    <span class="k">return</span> <span class="s1">&#39;Other&#39;</span>
+
+
+<div class="viewcode-block" id="get_pairs"><a class="viewcode-back" href="../../pipeline.html#ramutils.tasks.montage.get_pairs">[docs]</a><span class="k">def</span> <span class="nf">get_pairs</span><span class="p">(</span><span class="n">subject_id</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">sessions</span><span class="p">,</span> <span class="n">paths</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Determine how we should figure out what pairs to use.</span>
+
+<span class="sd">    Option 1: In the case of hardware bipolar recordings with the ENS, EEG</span>
+<span class="sd">    data is stored in the HDF5 file which contains the Odin electrode config</span>
+<span class="sd">    data so we can use this.</span>
+
+<span class="sd">    Option 2: For monopolar recordings, we can just read the pairs.json from</span>
+<span class="sd">    localization.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    subject_id : str</span>
+<span class="sd">        Subject ID</span>
+<span class="sd">    experiment : str</span>
+<span class="sd">        Experiment type</span>
+<span class="sd">    sessions: list</span>
+<span class="sd">        List of sessions to use</span>
+<span class="sd">    paths : FilePaths</span>
+<span class="sd">        Object for storing important file paths</span>
+<span class="sd">    localization : int</span>
+<span class="sd">        Localization number</span>
+<span class="sd">    montage : int</span>
+<span class="sd">        Montage number</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    all_pairs : dict</span>
+<span class="sd">        All pairs used in the experiment.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This should only be used for getting pairs when building a report. For</span>
+<span class="sd">    config generation, use generate_pairs_from_electrode_config. To use</span>
+<span class="sd">    get_pairs, you would need to determine an open loop experiment that the</span>
+<span class="sd">    subject completed and use that experiment instead of the experiment whose</span>
+<span class="sd">    config file is being generated.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Use * for session so we don&#39;t have to assume session numbers start at 0</span>
+    <span class="n">subject</span><span class="p">,</span><span class="n">montage</span> <span class="o">=</span> <span class="n">extract_subject_montage</span><span class="p">(</span><span class="n">subject_id</span><span class="p">)</span>
+    <span class="n">reader</span> <span class="o">=</span> <span class="n">JsonIndexReader</span><span class="p">(</span><span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">paths</span><span class="o">.</span><span class="n">root</span><span class="p">,</span><span class="s1">&#39;protocols&#39;</span><span class="p">,</span><span class="s1">&#39;r1.json&#39;</span><span class="p">))</span>
+    <span class="n">event_path</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">aggregate_values</span><span class="p">(</span>
+        <span class="s1">&#39;task_events&#39;</span><span class="p">,</span><span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span><span class="n">montage</span><span class="o">=</span><span class="n">montage</span><span class="p">,</span><span class="n">experiment</span><span class="o">=</span><span class="n">experiment</span><span class="p">)</span>
+        <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">beh_root</span> <span class="o">=</span> <span class="n">event_path</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;behavioral&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">eeg_dir</span> <span class="o">=</span> <span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">beh_root</span><span class="p">,</span><span class="s1">&#39;ephys&#39;</span><span class="p">,</span> <span class="s1">&#39;current_processed&#39;</span><span class="p">,</span> <span class="s1">&#39;noreref&#39;</span><span class="p">,</span> <span class="s1">&#39;*.h5&#39;</span><span class="p">)</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="n">glob</span><span class="p">(</span><span class="n">eeg_dir</span><span class="p">)</span>
+
+    <span class="c1"># Read HDF5 file to get pairs</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hfile</span><span class="p">:</span>
+            <span class="n">config_str</span> <span class="o">=</span> <span class="n">hfile</span><span class="p">[</span><span class="s1">&#39;/config_files/electrode_config&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="c1"># This will create a temporary directory that is removed when the</span>
+        <span class="c1"># program exists the scope of the &#39;with&#39; statement</span>
+        <span class="k">with</span> <span class="n">tempdir</span><span class="p">()</span> <span class="k">as</span> <span class="n">temp_path</span><span class="p">:</span>
+            <span class="n">config_path</span> <span class="o">=</span> <span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp_path</span><span class="p">,</span> <span class="s1">&#39;electrode_config.csv&#39;</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">config_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">config_str</span><span class="p">)</span>
+
+            <span class="n">paths</span><span class="o">.</span><span class="n">electrode_config_file</span> <span class="o">=</span> <span class="n">config_path</span>
+
+            <span class="c1"># generate_pairs_from_electrode_config panics if the .bin file isn&#39;t</span>
+            <span class="c1"># found, so we have to make sure it&#39;s there</span>
+            <span class="n">touch</span><span class="p">(</span><span class="n">config_path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;.bin&#39;</span><span class="p">))</span>
+
+            <span class="n">all_pairs</span> <span class="o">=</span> <span class="n">generate_pairs_from_electrode_config</span><span class="p">(</span><span class="n">subject_id</span><span class="p">,</span>
+                                                             <span class="n">experiment</span><span class="p">,</span>
+                                                             <span class="n">sessions</span><span class="p">,</span>
+                                                             <span class="n">paths</span><span class="p">)</span>
+
+    <span class="c1"># No HDF5 file exists, meaning this was a monopolar recording... read</span>
+    <span class="c1"># pairs.json instead</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">all_pairs</span> <span class="o">=</span> <span class="n">load_pairs_from_json</span><span class="p">(</span><span class="n">subject_id</span><span class="p">,</span>
+                                         <span class="n">experiment</span><span class="p">,</span>
+                                         <span class="n">sessions</span><span class="o">=</span><span class="n">sessions</span><span class="p">,</span>
+                                         <span class="n">just_pairs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                         <span class="n">rootdir</span><span class="o">=</span><span class="n">paths</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">all_pairs</span></div>
+
+
+<div class="viewcode-block" id="get_classifier_excluded_leads"><a class="viewcode-back" href="../../pipeline.html#ramutils.tasks.montage.get_classifier_excluded_leads">[docs]</a><span class="k">def</span> <span class="nf">get_classifier_excluded_leads</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">all_pairs</span><span class="p">,</span> <span class="n">rootdir</span><span class="o">=</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Identify channels to be excluded using the classifier_excluded_leads.txt file</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    -----------</span>
+<span class="sd">    subject: str</span>
+<span class="sd">        Subject identifier</span>
+<span class="sd">    paths: FilePaths</span>
+<span class="sd">        FilePaths object including RHINO root directory</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    --------</span>
+<span class="sd">    excluded_contacts: List of contacts in the same format as what is returned by make_stim_params</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">classifier_excluded_leads_path</span> <span class="o">=</span> <span class="n">osp</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="n">rootdir</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;eeg&#39;</span><span class="p">,</span> <span class="n">subject</span><span class="p">,</span> <span class="s1">&#39;tal&#39;</span><span class="p">,</span> <span class="s1">&#39;classifier_excluded_leads.txt&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">osp</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">classifier_excluded_leads_path</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="s2">&quot;No classifier_excluded_leads.txt file found for </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">subject</span><span class="p">))</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">classifier_excluded_leads_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">file_contents</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">excluded_labels</span> <span class="o">=</span> <span class="n">file_contents</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">excluded_labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">label</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">excluded_labels</span> <span class="k">if</span> <span class="n">label</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Find all bipolar pairs where any of the excluded labels appear</span>
+    <span class="n">excluded_anodes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">excluded_cathodes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">all_pairs</span><span class="p">[</span><span class="n">subject</span><span class="p">][</span><span class="s1">&#39;pairs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">excluded_label_mask</span> <span class="o">=</span> <span class="p">[(</span><span class="n">pair</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">excluded</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                               <span class="k">for</span> <span class="n">excluded</span> <span class="ow">in</span> <span class="n">excluded_labels</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">excluded_label_mask</span><span class="p">):</span>
+            <span class="n">anode</span> <span class="o">=</span> <span class="n">pair</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">excluded_anodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">anode</span><span class="p">)</span>
+            <span class="n">cathode</span> <span class="o">=</span> <span class="n">pair</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">excluded_cathodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cathode</span><span class="p">)</span>
+
+    <span class="c1"># This may seem a bit odd, but it returns the labels in a format that is easy to use by other functions</span>
+    <span class="c1"># in ramutils</span>
+    <span class="n">excluded_contacts</span> <span class="o">=</span> <span class="n">make_stim_params</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">excluded_anodes</span><span class="p">,</span> <span class="n">excluded_cathodes</span><span class="p">,</span>
+                                         <span class="n">target_amplitudes</span><span class="o">=</span><span class="p">[</span>
+                                             <span class="mf">0.5</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">excluded_labels</span><span class="p">),</span>
+                                         <span class="n">root</span><span class="o">=</span><span class="n">rootdir</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">excluded_contacts</span></div>
+
+
+<span class="k">def</span> <span class="nf">generate_pairs_from_electrode_config</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">paths</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Load and verify the validity of the Odin electrode configuration file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    subject : str</span>
+<span class="sd">        Subject ID</span>
+<span class="sd">    experiment: str</span>
+<span class="sd">        Experiment</span>
+<span class="sd">    paths: FilePaths</span>
+<span class="sd">        Object containing common file paths used for building reports/configs</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pairs_from_ec : dict</span>
+<span class="sd">        Minimal pairs.json based on the electrode configuration</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    RuntimeError</span>
+<span class="sd">        If the csv or bin file are not found</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">prefix</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">paths</span><span class="o">.</span><span class="n">electrode_config_file</span><span class="p">)</span>
+    <span class="n">csv_filename</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span>
+    <span class="n">bin_filename</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="s1">&#39;.bin&#39;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">csv_filename</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> not found!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">csv_filename</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">bin_filename</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> not found!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bin_filename</span><span class="p">))</span>
+
+    <span class="c1"># Create SeriesTransformation object to determine if this is monopolar,</span>
+    <span class="c1"># mixed-mode, or bipolar</span>
+    <span class="c1"># FIXME: load excluded pairs</span>
+    <span class="n">xform</span> <span class="o">=</span> <span class="n">SeriesTransformation</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">csv_filename</span><span class="p">,</span> <span class="n">paths</span><span class="o">.</span><span class="n">pairs</span><span class="p">)</span>
+
+    <span class="c1"># Odin electrode configuration</span>
+    <span class="n">ec</span> <span class="o">=</span> <span class="n">xform</span><span class="o">.</span><span class="n">elec_conf</span>
+
+    <span class="c1"># This will mimic pairs.json (but only with labels).</span>
+    <span class="n">pairs_dict</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+
+    <span class="c1"># FIXME: move the following logic into bptools</span>
+    <span class="c1"># Hardware bipolar mode</span>
+    <span class="n">pairs_from_ec</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">xform</span><span class="o">.</span><span class="n">monopolar_possible</span><span class="p">():</span>
+        <span class="n">contacts</span> <span class="o">=</span> <span class="n">ec</span><span class="o">.</span><span class="n">contacts_as_recarray</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">ec</span><span class="o">.</span><span class="n">sense_channels</span><span class="p">:</span>
+            <span class="n">anode</span><span class="p">,</span> <span class="n">cathode</span> <span class="o">=</span> <span class="n">ch</span><span class="o">.</span><span class="n">contact</span><span class="p">,</span> <span class="n">ch</span><span class="o">.</span><span class="n">ref</span>
+            <span class="n">aname</span> <span class="o">=</span> <span class="n">bytes_to_str</span><span class="p">(</span>
+                <span class="n">contacts</span><span class="p">[</span><span class="n">contacts</span><span class="o">.</span><span class="n">jack_box_num</span> <span class="o">==</span> <span class="n">anode</span><span class="p">]</span><span class="o">.</span><span class="n">contact_name</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">cname</span> <span class="o">=</span> <span class="n">bytes_to_str</span><span class="p">(</span>
+                <span class="n">contacts</span><span class="p">[</span><span class="n">contacts</span><span class="o">.</span><span class="n">jack_box_num</span> <span class="o">==</span> <span class="n">cathode</span><span class="p">]</span><span class="o">.</span><span class="n">contact_name</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">-</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">aname</span><span class="p">,</span> <span class="n">cname</span><span class="p">)</span>
+            <span class="n">pairs_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;channel_1&#39;</span><span class="p">:</span> <span class="n">anode</span><span class="p">,</span>
+                <span class="s1">&#39;channel_2&#39;</span><span class="p">:</span> <span class="n">cathode</span>
+            <span class="p">}</span>
+
+        <span class="c1"># Note this is different from neurorad pipeline pairs.json because</span>
+        <span class="c1"># the electrode configuration trumps it</span>
+        <span class="n">pairs_from_ec</span> <span class="o">=</span> <span class="p">{</span><span class="n">subject</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;pairs&#39;</span><span class="p">:</span> <span class="n">pairs_dict</span><span class="p">}}</span>
+
+    <span class="c1"># For monopolar, fall back to pairs.json</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">pairs_from_ec</span> <span class="o">=</span> <span class="n">load_pairs_from_json</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span>
+                                             <span class="n">experiment</span><span class="p">,</span>
+                                             <span class="n">sessions</span><span class="o">=</span><span class="n">session</span><span class="p">,</span>
+                                             <span class="n">just_pairs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                             <span class="n">rootdir</span><span class="o">=</span><span class="n">paths</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">pairs_from_ec</span>
+
+
+<span class="k">def</span> <span class="nf">get_distances</span><span class="p">(</span><span class="n">pairs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get distances as an adjacency matrix.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pairs : pd.DataFrame</span>
+<span class="sd">        A DataFrame describing a set of bipolar pairs</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    distmat : np.ndarray</span>
+<span class="sd">        Adjacency matrix using exp(-distance / 120).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># positions matrix shaped as N_channels x 3</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;mni_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">c</span><span class="p">)]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">pairs</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;channel_1&#39;</span><span class="p">,</span> <span class="s1">&#39;channel_2&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">iterrows</span><span class="p">()</span>
+    <span class="p">])</span>
+
+    <span class="n">distmat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">pos</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">pos</span><span class="p">)))</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">d1</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pos</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">d2</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pos</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">j</span><span class="p">:</span>
+                <span class="n">distmat</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">d1</span> <span class="o">-</span> <span class="n">d2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">distmat</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">d1</span> <span class="o">-</span> <span class="n">d2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">distmat</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">distmat</span> <span class="o">/</span> <span class="mf">120.</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">distmat</span>
+
+<span class="k">def</span> <span class="nf">extract_rejected_pairs</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">used_classifiers</span><span class="p">,</span> <span class="n">ec_pairs</span><span class="p">,</span> <span class="n">used_pair_mask</span><span class="p">):</span>
+    <span class="n">used_pair_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">used_pair_mask</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">classifier</span> <span class="ow">in</span> <span class="n">used_classifiers</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">classifier</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">used_pair_mask</span> <span class="o">&amp;=</span> <span class="n">compare_recorded_with_all_pairs</span><span class="p">(</span><span class="n">ec_pairs</span><span class="p">,</span>
+                                                              <span class="n">classifier</span><span class="o">.</span><span class="n">pairs</span><span class="p">)</span>
+    <span class="n">rejected_pairs</span> <span class="o">=</span> <span class="n">generate_pairs_for_classifier</span><span class="p">(</span><span class="n">ec_pairs</span><span class="p">,</span> <span class="p">{})[</span>
+        <span class="o">~</span><span class="n">used_pair_mask</span><span class="p">]</span>
+    <span class="n">rejected_pairs_as_stim_params</span> <span class="o">=</span> <span class="n">make_stim_params</span><span class="p">(</span>
+        <span class="n">subject</span><span class="p">,</span> <span class="n">rejected_pairs</span><span class="o">.</span><span class="n">label0</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">),</span>
+        <span class="n">rejected_pairs</span><span class="o">.</span><span class="n">label1</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">),</span>
+        <span class="n">target_amplitudes</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">rejected_pairs</span><span class="p">))</span>
+    <span class="n">rejected_pairs</span> <span class="o">=</span> <span class="n">reduce_pairs</span><span class="p">(</span><span class="n">ec_pairs</span><span class="p">,</span>
+                                  <span class="n">rejected_pairs_as_stim_params</span><span class="p">,</span>
+                                  <span class="n">return_excluded</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rejected_pairs</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

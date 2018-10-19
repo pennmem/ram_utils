@@ -86,7 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../data.html">Serializable data structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../classifier.html">Classifier training, cross validation, and utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../events.html">Event processing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../pipeline.html">Pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pipeline.html">Pipelines and Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cli.html">Command-line usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../misc.html">Miscellaneous utilities</a></li>
 </ul>
@@ -326,6 +326,9 @@
 
 
 <span class="k">class</span> <span class="nc">ExperimentSpecs</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Commont values for the &quot;experiment_specs&quot; section of the experiment config file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">version</span> <span class="o">=</span> <span class="n">String</span><span class="p">(</span><span class="s2">&quot;3.0.0&quot;</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;experiment version&quot;</span><span class="p">)</span>
     <span class="n">experiment_type</span> <span class="o">=</span> <span class="n">String</span><span class="p">()</span>
@@ -340,6 +343,9 @@
 
 
 <span class="k">class</span> <span class="nc">PS4ExperimentSpecs</span><span class="p">(</span><span class="n">ExperimentSpecs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    PS4-specific values for the &quot;experiment_specs&quot; section of the experiment config file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">retrieval_biomarker_sample_start_time_offset</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
     <span class="n">retrieval_biomarker_sample_time_length</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">525</span><span class="p">),</span>
     <span class="n">retrieval_buffer_time</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">524</span><span class="p">),</span>
@@ -349,6 +355,10 @@
 
 
 <span class="k">class</span> <span class="nc">TICLExperimentSpecs</span><span class="p">(</span><span class="n">ExperimentSpecs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    TICLFR-specific values for the &quot;experiment_specs&quot; section of the experiment config file</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">biomarker_sample_time_length</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">525</span><span class="p">)</span>
     <span class="n">buffer_time</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">524</span><span class="p">)</span>
     <span class="n">version</span> <span class="o">=</span> <span class="n">String</span><span class="p">(</span><span class="s2">&quot;5.0.0&quot;</span><span class="p">)</span>
@@ -359,6 +369,9 @@
 
 
 <span class="k">class</span> <span class="nc">LocationSearchExperimentSpecs</span><span class="p">(</span><span class="n">ExperimentSpecs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    LocationSearch-specific values for the &quot;experiment_specs&quot; section of the experiment config file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">biomarker_sample_start_time_offset</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">biomarker_sample_time_length</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">525</span><span class="p">)</span>
     <span class="n">buffer_time</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">524</span><span class="p">)</span>

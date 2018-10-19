@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Pipelines &mdash; Ramutils 2.3.0 documentation</title>
+  <title>Pipelines and Tasks &mdash; Ramutils 2.3.0 documentation</title>
   
 
   
@@ -88,19 +88,20 @@
 <li class="toctree-l1"><a class="reference internal" href="data.html">Serializable data structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="classifier.html">Classifier training, cross validation, and utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="events.html">Event processing</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Pipelines</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#existing-pipelines">Existing Pipelines</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Pipelines and Tasks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#existing-pipelines">Existing Pipelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tasks">Tasks</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#defining-tasks">Defining tasks</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reference">Reference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ramutils.tasks.classifier">Classifier tasks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ramutils.tasks.events">Events tasks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ramutils.tasks.misc">Miscellaneous tasks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ramutils.tasks.montage">Montage tasks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ramutils.tasks.odin">Odin/Ramulator tasks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ramutils.tasks.powers">Power computation tasks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-ramutils.tasks.summary">Report summary tasks</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#module-ramutils.tasks.classifier">Classifier tasks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-ramutils.tasks.events">Events tasks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-ramutils.tasks.misc">Miscellaneous tasks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-ramutils.tasks.montage">Montage tasks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-ramutils.tasks.odin">Odin/Ramulator tasks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-ramutils.tasks.powers">Power computation tasks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-ramutils.tasks.summary">Report summary tasks</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line usage</a></li>
@@ -150,7 +151,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Pipelines</li>
+      <li>Pipelines and Tasks</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -188,8 +189,8 @@
     margin-right: 4px;  /* make room for the exclamation icon */
 }
 </style>
-<div class="section" id="pipelines">
-<h1>Pipelines<a class="headerlink" href="#pipelines" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="pipelines-and-tasks">
+<h1>Pipelines and Tasks<a class="headerlink" href="#pipelines-and-tasks" title="Permalink to this headline">¶</a></h1>
 <p>Experiment configuration file generation and post-experiment reporting is done
 via a series of tasks that are built up into a pipeline using <a class="reference external" href="http://dask.pydata.org/en/latest/index.html">dask</a>.</p>
 <div class="section" id="existing-pipelines">
@@ -234,6 +235,16 @@ classifier training</li>
 </table>
 </dd></dl>
 
+<p>The main steps of this pipeline are:</p>
+<ul class="simple">
+<li><code class="xref py py-func docutils literal notranslate"><span class="pre">generate_pairs_from_electrode_config()</span></code></li>
+<li><a class="reference internal" href="#ramutils.tasks.events.build_training_data" title="ramutils.tasks.events.build_training_data"><code class="xref py py-func docutils literal notranslate"><span class="pre">build_training_data()</span></code></a></li>
+<li><a class="reference internal" href="#ramutils.tasks.powers.compute_normalized_powers" title="ramutils.tasks.powers.compute_normalized_powers"><code class="xref py py-func docutils literal notranslate"><span class="pre">compute_normalized_powers()</span></code></a></li>
+<li><code class="xref py py-func docutils literal notranslate"><span class="pre">train_classifier()</span></code></li>
+<li><a class="reference internal" href="#ramutils.tasks.classifier.summarize_classifier" title="ramutils.tasks.classifier.summarize_classifier"><code class="xref py py-func docutils literal notranslate"><span class="pre">summarize_classifier()</span></code></a></li>
+<li><a class="reference internal" href="#ramutils.tasks.classifier.serialize_classifier" title="ramutils.tasks.classifier.serialize_classifier"><code class="xref py py-func docutils literal notranslate"><span class="pre">serialize_classifier()</span></code></a></li>
+<li><a class="reference internal" href="#ramutils.tasks.odin.generate_ramulator_config" title="ramutils.tasks.odin.generate_ramulator_config"><code class="xref py py-func docutils literal notranslate"><span class="pre">generate_ramulator_config()</span></code></a></li>
+</ul>
 <dl class="function">
 <dt id="ramutils.pipelines.report.make_report">
 <code class="descclassname">ramutils.pipelines.report.</code><code class="descname">make_report</code><span class="sig-paren">(</span><em>subject</em>, <em>experiment</em>, <em>paths</em>, <em>joint_report=False</em>, <em>retrain=False</em>, <em>stim_params=None</em>, <em>exp_params=None</em>, <em>sessions=None</em>, <em>vispath=None</em>, <em>rerun=False</em>, <em>trigger_electrode=None</em>, <em>use_classifier_excluded_leads=False</em>, <em>pipeline_name='report'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/pipelines/report.html#make_report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.pipelines.report.make_report" title="Permalink to this definition">¶</a></dt>
@@ -281,6 +292,30 @@ classifier training</li>
 report rather than the report itself.</p>
 </dd></dl>
 
+<p>The main steps of this pipeline are:</p>
+<ul class="simple">
+<li><a class="reference internal" href="#ramutils.tasks.montage.generate_montage_metadata_table" title="ramutils.tasks.montage.generate_montage_metadata_table"><code class="xref py py-func docutils literal notranslate"><span class="pre">generate_montage_metadata_table()</span></code></a></li>
+<li><a class="reference internal" href="#ramutils.tasks.events.build_test_data" title="ramutils.tasks.events.build_test_data"><code class="xref py py-func docutils literal notranslate"><span class="pre">build_test_data()</span></code></a></li>
+<li><a class="reference internal" href="#ramutils.tasks.events.build_training_data" title="ramutils.tasks.events.build_training_data"><code class="xref py py-func docutils literal notranslate"><span class="pre">build_training_data()</span></code></a></li>
+<li><a class="reference internal" href="#ramutils.tasks.powers.compute_normalized_powers" title="ramutils.tasks.powers.compute_normalized_powers"><code class="xref py py-func docutils literal notranslate"><span class="pre">compute_normalized_powers()</span></code></a></li>
+<li>Non-stim reports:<ul>
+<li><code class="xref py py-func docutils literal notranslate"><span class="pre">train_classifier()</span></code></li>
+<li><a class="reference internal" href="#ramutils.tasks.classifier.summarize_classifier" title="ramutils.tasks.classifier.summarize_classifier"><code class="xref py py-func docutils literal notranslate"><span class="pre">summarize_classifier()</span></code></a> (Encoding + retrieval)</li>
+<li><a class="reference internal" href="#ramutils.tasks.classifier.summarize_classifier" title="ramutils.tasks.classifier.summarize_classifier"><code class="xref py py-func docutils literal notranslate"><span class="pre">summarize_classifier()</span></code></a> (Encoding only)</li>
+<li><a class="reference internal" href="#ramutils.tasks.summary.summarize_nonstim_sessions" title="ramutils.tasks.summary.summarize_nonstim_sessions"><code class="xref py py-func docutils literal notranslate"><span class="pre">summarize_nonstim_sessions()</span></code></a></li>
+</ul>
+</li>
+<li>Stim reports:<ul>
+<li><a class="reference internal" href="#ramutils.tasks.classifier.reload_used_classifiers" title="ramutils.tasks.classifier.reload_used_classifiers"><code class="xref py py-func docutils literal notranslate"><span class="pre">reload_used_classifiers()</span></code></a></li>
+<li><a class="reference internal" href="#ramutils.tasks.classifier.post_hoc_classifier_evaluation" title="ramutils.tasks.classifier.post_hoc_classifier_evaluation"><code class="xref py py-func docutils literal notranslate"><span class="pre">post_hoc_classifier_evaluation()</span></code></a></li>
+<li><a class="reference internal" href="#ramutils.tasks.summary.summarize_stim_sessions" title="ramutils.tasks.summary.summarize_stim_sessions"><code class="xref py py-func docutils literal notranslate"><span class="pre">summarize_stim_sessions()</span></code></a></li>
+<li><code class="xref py py-func docutils literal notranslate"><span class="pre">estimate_effects_of_stim()</span></code></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ramutils.tasks.summary.summarize_math" title="ramutils.tasks.summary.summarize_math"><code class="xref py py-func docutils literal notranslate"><span class="pre">summarize_math()</span></code></a></li>
+<li><a class="reference internal" href="#ramutils.tasks.misc.save_all_output" title="ramutils.tasks.misc.save_all_output"><code class="xref py py-func docutils literal notranslate"><span class="pre">save_all_output()</span></code></a></li>
+<li><code class="xref py py-func docutils literal notranslate"><span class="pre">build_static_report()</span></code></li>
+</ul>
 <dl class="function">
 <dt id="ramutils.pipelines.aggregated_report.make_aggregated_report">
 <code class="descclassname">ramutils.pipelines.aggregated_report.</code><code class="descname">make_aggregated_report</code><span class="sig-paren">(</span><em>subjects=None</em>, <em>experiments=None</em>, <em>sessions=None</em>, <em>fit_model=True</em>, <em>paths=None</em>, <em>pipeline_name='aggregate'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/pipelines/aggregated_report.html#make_aggregated_report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.pipelines.aggregated_report.make_aggregated_report" title="Permalink to this definition">¶</a></dt>
@@ -322,11 +357,14 @@ a particular subject completed of a particular experiment.</li>
 </table>
 </dd></dl>
 
+</div>
+<div class="section" id="tasks">
+<h2>Tasks<a class="headerlink" href="#tasks" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="defining-tasks">
 <h3>Defining tasks<a class="headerlink" href="#defining-tasks" title="Permalink to this headline">¶</a></h3>
 <p>Tasks are created by using the <a class="reference internal" href="#ramutils.tasks.task" title="ramutils.tasks.task"><code class="xref py py-func docutils literal notranslate"><span class="pre">ramutils.tasks.task()</span></code></a> decorator or wrapping
 a function with <a class="reference internal" href="#ramutils.tasks.make_task" title="ramutils.tasks.make_task"><code class="xref py py-func docutils literal notranslate"><span class="pre">ramutils.tasks.make_task()</span></code></a>. These simply apply the
-<code class="xref py py-func docutils literal notranslate"><span class="pre">dask.delayed()</span></code> and (optionally) <code class="docutils literal notranslate"><span class="pre">joblib</span></code> caching decorators. The former
+<a href="#id1"><span class="problematic" id="id2">:func:`dask.delayed`_</span></a> and (optionally) <a href="#id3"><span class="problematic" id="id4">:module:`joblib`_</span></a> caching decorators. The former
 is important for adding the ability to parallelize a pipeline (for tasks that
 can run independently) while the latter allows for resuming a pipeline when
 something goes wrong or if only changing one parameter which does not affect all
@@ -378,9 +416,8 @@ the <a class="reference internal" href="#ramutils.tasks.task" title="ramutils.ta
 <p>Common tasks come predefined in the <code class="xref py py-mod docutils literal notranslate"><span class="pre">ramutils.tasks</span></code> package and are
 documented below.</p>
 </div>
-</div>
 <div class="section" id="module-ramutils.tasks.classifier">
-<span id="classifier-tasks"></span><h2>Classifier tasks<a class="headerlink" href="#module-ramutils.tasks.classifier" title="Permalink to this headline">¶</a></h2>
+<span id="classifier-tasks"></span><h3>Classifier tasks<a class="headerlink" href="#module-ramutils.tasks.classifier" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="ramutils.tasks.classifier.summarize_classifier">
 <code class="descclassname">ramutils.tasks.classifier.</code><code class="descname">summarize_classifier</code><span class="sig-paren">(</span><em>classifier</em>, <em>pow_mat</em>, <em>events</em>, <em>n_permutations</em>, <em>tag='classifier'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/classifier.html#summarize_classifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.classifier.summarize_classifier" title="Permalink to this definition">¶</a></dt>
@@ -527,7 +564,7 @@ will have None as the entry for that session.</p>
 
 </div>
 <div class="section" id="module-ramutils.tasks.events">
-<span id="events-tasks"></span><h2>Events tasks<a class="headerlink" href="#module-ramutils.tasks.events" title="Permalink to this headline">¶</a></h2>
+<span id="events-tasks"></span><h3>Events tasks<a class="headerlink" href="#module-ramutils.tasks.events" title="Permalink to this headline">¶</a></h3>
 <p>Partial pipelines for processing events that is used by full pipelines.</p>
 <dl class="function">
 <dt id="ramutils.tasks.events.build_test_data">
@@ -544,7 +581,7 @@ evaluation, i.e. the test data</p>
 
 </div>
 <div class="section" id="module-ramutils.tasks.misc">
-<span id="miscellaneous-tasks"></span><h2>Miscellaneous tasks<a class="headerlink" href="#module-ramutils.tasks.misc" title="Permalink to this headline">¶</a></h2>
+<span id="miscellaneous-tasks"></span><h3>Miscellaneous tasks<a class="headerlink" href="#module-ramutils.tasks.misc" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="ramutils.tasks.misc.read_index">
 <code class="descclassname">ramutils.tasks.misc.</code><code class="descname">read_index</code><span class="sig-paren">(</span><em>mount_point='/'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/tasks/misc.html#read_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.misc.read_index" title="Permalink to this definition">¶</a></dt>
@@ -639,7 +676,7 @@ it will be assumed that db_loc contains the root directory.</dd>
 
 </div>
 <div class="section" id="module-ramutils.tasks.montage">
-<span id="montage-tasks"></span><h2>Montage tasks<a class="headerlink" href="#module-ramutils.tasks.montage" title="Permalink to this headline">¶</a></h2>
+<span id="montage-tasks"></span><h3>Montage tasks<a class="headerlink" href="#module-ramutils.tasks.montage" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="ramutils.tasks.montage.generate_pairs_for_classifier">
 <code class="descclassname">ramutils.tasks.montage.</code><code class="descname">generate_pairs_for_classifier</code><span class="sig-paren">(</span><em>pairs</em>, <em>excluded_pairs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/montage.html#generate_pairs_for_classifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.montage.generate_pairs_for_classifier" title="Permalink to this definition">¶</a></dt>
@@ -781,8 +818,9 @@ config file is being generated.</p>
 <dl class="docutils">
 <dt>subject: str</dt>
 <dd>Subject identifier</dd>
+<dt>paths: FilePaths</dt>
+<dd>FilePaths object including RHINO root directory</dd>
 </dl>
-<p>paths: FilePaths object including RHINO root directory</p>
 <p>excluded_contacts: List of contacts in the same format as what is returned by make_stim_params</p>
 </dd></dl>
 
@@ -818,7 +856,7 @@ TODO: import from artdet; define parameters centrally</p>
 
 </div>
 <div class="section" id="module-ramutils.tasks.odin">
-<span id="odin-ramulator-tasks"></span><h2>Odin/Ramulator tasks<a class="headerlink" href="#module-ramutils.tasks.odin" title="Permalink to this headline">¶</a></h2>
+<span id="odin-ramulator-tasks"></span><h3>Odin/Ramulator tasks<a class="headerlink" href="#module-ramutils.tasks.odin" title="Permalink to this headline">¶</a></h3>
 <p>Tasks specific to the Medtronic Odin ENS.</p>
 <dl class="function">
 <dt id="ramutils.tasks.odin.generate_electrode_config">
@@ -894,7 +932,7 @@ redundant with some data stored in the <code class="docutils literal notranslate
 
 </div>
 <div class="section" id="module-ramutils.tasks.powers">
-<span id="power-computation-tasks"></span><h2>Power computation tasks<a class="headerlink" href="#module-ramutils.tasks.powers" title="Permalink to this headline">¶</a></h2>
+<span id="power-computation-tasks"></span><h3>Power computation tasks<a class="headerlink" href="#module-ramutils.tasks.powers" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="ramutils.tasks.powers.reduce_powers">
 <code class="descclassname">ramutils.tasks.powers.</code><code class="descname">reduce_powers</code><span class="sig-paren">(</span><em>powers</em>, <em>channel_mask</em>, <em>n_frequencies</em>, <em>frequency_mask=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ramutils/powers.html#reduce_powers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ramutils.tasks.powers.reduce_powers" title="Permalink to this definition">¶</a></dt>
@@ -941,7 +979,7 @@ frequencies</p>
 
 </div>
 <div class="section" id="module-ramutils.tasks.summary">
-<span id="report-summary-tasks"></span><h2>Report summary tasks<a class="headerlink" href="#module-ramutils.tasks.summary" title="Permalink to this headline">¶</a></h2>
+<span id="report-summary-tasks"></span><h3>Report summary tasks<a class="headerlink" href="#module-ramutils.tasks.summary" title="Permalink to this headline">¶</a></h3>
 <p>Tasks related to summarizing an experiment. Used primarily in reporting
 results.</p>
 <dl class="function">
@@ -1026,6 +1064,7 @@ multiple experiments should be allowed</li>
 </table>
 </dd></dl>
 
+</div>
 </div>
 </div>
 

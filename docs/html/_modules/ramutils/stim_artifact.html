@@ -1,0 +1,299 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ramutils.stim_artifact &mdash; Ramutils 2.3.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Ramutils
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started_report_data.html">Getting Started: RAM Report Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../data.html">Serializable data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../classifier.html">Classifier training, cross validation, and utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../events.html">Event processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pipeline.html">Pipelines and Tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli.html">Command-line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../misc.html">Miscellaneous utilities</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Ramutils</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>ramutils.stim_artifact</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for ramutils.stim_artifact</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">ramutils.powers</span>
+<span class="kn">import</span> <span class="nn">scipy.stats</span>
+<span class="kn">import</span> <span class="nn">cmlreaders</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+
+<span class="k">def</span> <span class="nf">get_tstats</span><span class="p">(</span><span class="n">stim_events</span><span class="p">,</span> <span class="n">pairs</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">return_pvalues</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">before_experiment</span><span class="o">=</span><span class="kc">True</span><span class="p">,):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes ttest on the average EEG value pre-stim vs post-stim.</span>
+<span class="sd">    TODO: import from artdet; define parameters centrally</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    stim_events: np.rec.array</span>
+<span class="sd">      Stimulation events for a session</span>
+<span class="sd">    pairs: dict</span>
+<span class="sd">      bipolar pairs</span>
+<span class="sd">    start_time: float</span>
+<span class="sd">      time after stim offset/before stim onset to begin (seconds)</span>
+<span class="sd">    duration: float</span>
+<span class="sd">      Length of eeg to evaluate (seconds)</span>
+<span class="sd">    return_pvalues: bool</span>
+<span class="sd">      If `true`, return p-values along with t-statistics</span>
+<span class="sd">    before_experiment:</span>
+<span class="sd">      If `true`, only include stim events before the first list</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    t: np.ndarray</span>
+<span class="sd">      T-statistics by channel</span>
+<span class="sd">    p: np.ndarray</span>
+<span class="sd">      p-values by channel</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">stim_duration</span> <span class="o">=</span> <span class="mf">0.500</span>
+
+    <span class="k">if</span> <span class="n">before_experiment</span><span class="p">:</span>
+        <span class="c1"># Only use stim events from artifact detection period</span>
+        <span class="n">stim_events</span> <span class="o">=</span> <span class="n">stim_events</span><span class="p">[</span><span class="n">stim_events</span><span class="p">[</span><span class="s1">&#39;list&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">999</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stim_events</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">30</span><span class="p">:</span> <span class="c1">#TODO: MAKE THIS A CONFIG PARAMETER -- SEE TICL_FR expconf generator</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">return_pvalues</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="n">pre_stim_eeg</span> <span class="o">=</span> <span class="n">ramutils</span><span class="o">.</span><span class="n">powers</span><span class="o">.</span><span class="n">load_eeg</span><span class="p">(</span>
+        <span class="n">stim_events</span><span class="p">,</span>
+        <span class="n">start_time</span><span class="o">=-</span><span class="p">(</span><span class="n">start_time</span><span class="o">+</span><span class="n">duration</span><span class="p">),</span>
+        <span class="n">end_time</span><span class="o">=-</span><span class="n">start_time</span><span class="p">,</span>
+        <span class="n">bipolar_pairs</span><span class="o">=</span><span class="n">pairs</span>
+    <span class="p">)</span>
+    <span class="n">post_stim_eeg</span> <span class="o">=</span> <span class="n">ramutils</span><span class="o">.</span><span class="n">powers</span><span class="o">.</span><span class="n">load_eeg</span><span class="p">(</span>
+        <span class="n">stim_events</span><span class="p">,</span>
+        <span class="n">start_time</span><span class="o">=</span><span class="n">stim_duration</span><span class="o">+</span><span class="n">start_time</span><span class="p">,</span>
+        <span class="n">end_time</span><span class="o">=</span><span class="n">stim_duration</span><span class="o">+</span><span class="n">start_time</span><span class="o">+</span><span class="n">duration</span><span class="p">,</span>
+        <span class="n">bipolar_pairs</span><span class="o">=</span><span class="n">pairs</span>
+    <span class="p">)</span>
+
+    <span class="n">means</span> <span class="o">=</span> <span class="p">[</span><span class="n">interval</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">interval</span> <span class="ow">in</span> <span class="p">[</span><span class="n">post_stim_eeg</span><span class="p">,</span> <span class="n">pre_stim_eeg</span><span class="p">]]</span>
+    <span class="n">t</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">ttest_rel</span><span class="p">(</span><span class="o">*</span><span class="n">means</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">return_pvalues</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">t</span><span class="p">,</span> <span class="n">p</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">t</span>
+
+
+<span class="k">def</span> <span class="nf">get_artifact_detection_info</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span><span class="n">experiment</span><span class="p">,</span><span class="n">session</span><span class="p">,</span> <span class="n">paths</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Loads artifact detection information from Ramulator event log</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    subject</span>
+<span class="sd">    experiment</span>
+<span class="sd">    session</span>
+<span class="sd">    paths</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    artifact_info: dict</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Requires cmlreaders</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">finder</span> <span class="o">=</span> <span class="n">cmlreaders</span><span class="o">.</span><span class="n">PathFinder</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span>
+                                   <span class="n">rootdir</span><span class="o">=</span><span class="n">paths</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">finder</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;event_log&#39;</span><span class="p">))</span> <span class="k">as</span> <span class="n">event_log_file</span><span class="p">:</span>
+        <span class="n">event_log</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">event_log_file</span><span class="p">)</span>
+    <span class="n">event_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_records</span><span class="p">(</span><span class="n">event_log</span><span class="p">[</span><span class="s1">&#39;events&#39;</span><span class="p">])</span>
+    <span class="n">artifact_rows</span> <span class="o">=</span> <span class="n">event_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">event_df</span><span class="o">.</span><span class="n">event_label</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;ARTIFACT_DETECTION&#39;</span><span class="p">))]</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;event_label&#39;</span><span class="p">)</span>
+    <span class="n">artifact_rows</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;ARTIFACT_DETECTION_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                           <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">artifact_rows</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">artifact_rows</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;msg_stub&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
