@@ -243,5 +243,5 @@ class ArtifactDetectionParams(Schema):
     isi_max = Int (2000)
     method = String("ttest")  # zscore (Uma's method) or ttest (Ethan's method)
     std_threshold = Int(2)
-    event_threshold = Float(0.5),
+    event_threshold = Float(0.5)
     ttest_threshold = Float( 0.001)
