@@ -210,7 +210,7 @@ class TICLExperimentSpecs(ExperimentSpecs):
     version = String("5.0.0")
     post_stim_wait_time = Int(30)
     post_stim_buffer_time = Int(524)
-    post_stim_biomarker_sample_length = Int(525)
+    post_stim_biomarker_sample_time_length = Int(525)
     refractory_duration = Int(0)
 
 
@@ -222,7 +222,7 @@ class LocationSearchExperimentSpecs(ExperimentSpecs):
     biomarker_sample_time_length = Int(525)
     buffer_time = Int(524)
     experiment_type = String("LocationSearch")
-    post_stim_biomarker_sample_length = Int(525)
+    post_stim_biomarker_sample_time_length = Int(525)
     post_stim_buffer_time = Int(524)
     post_stim_wait_time = Int(30)
     refractory_duration = Int(0)
