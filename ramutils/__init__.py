@@ -3,7 +3,7 @@ import logging
 import warnings
 
 
-__version__ = "2.3.0"
+__version__ = "2.3.1"
 
 version_info = namedtuple('VersionInfo', 'major,minor,patch')(
     *__version__.split('.'))

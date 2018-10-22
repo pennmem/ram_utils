@@ -1,6 +1,14 @@
 Changes
 =======
 
+Version 2.3.1
+-------------
+**2018-10-22**
+
+* LocationSearch report now uses both FR1 and catFR1 experiments to compute connectivity
+* Artifact detection only enabled for PS4 experiments
+* Refactored sections of the experiment config into ramutils.parameters
+
 Version 2.3.0
 -------------
 **2018-9-9**
