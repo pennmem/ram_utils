@@ -192,11 +192,11 @@ class PS4ExperimentSpecs(ExperimentSpecs):
     """
     PS4-specific values for the "experiment_specs" section of the experiment config file
     """
-    retrieval_biomarker_sample_start_time_offset = Int(0),
-    retrieval_biomarker_sample_time_length = Int(525),
-    retrieval_buffer_time = Int(524),
-    post_stim_biomarker_sample_time_length = Int( 500),
-    post_stim_buffer_time = Int( 499)
+    retrieval_biomarker_sample_start_time_offset = Int(0)
+    retrieval_biomarker_sample_time_length = Int(525)
+    retrieval_buffer_time = Int(524)
+    post_stim_biomarker_sample_time_length = Int(500)
+    post_stim_buffer_time = Int(499)
     post_stim_wait_time = Int(100)
 
 
