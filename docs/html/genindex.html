@@ -9,7 +9,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Index &mdash; Ramutils 2.2.4 documentation</title>
+  <title>Index &mdash; Ramutils 2.3.0 documentation</title>
   
 
   
@@ -57,7 +57,7 @@
             
             
               <div class="version">
-                2.2
+                2.3
               </div>
             
           
@@ -83,11 +83,11 @@
             
               <p class="caption"><span class="caption-text">Contents</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="getting_started_report_data.html">Getting Statrted: RAM Report Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started_report_data.html">Getting Started: RAM Report Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="data.html">Serializable data structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="classifier.html">Classifier training, cross validation, and utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="events.html">Event processing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipelines and Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cli.html">Command-line usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="misc.html">Miscellaneous utilities</a></li>
 </ul>
@@ -215,6 +215,8 @@
 </li>
       <li><a href="data.html#ramutils.reports.summary.CatFRSessionSummary">CatFRSessionSummary (class in ramutils.reports.summary)</a>
 </li>
+      <li><a href="cli.html#center">center (built-in class)</a>
+</li>
       <li><a href="data.html#ramutils.reports.summary.ClassifierSummary.classifier_activation">classifier_activation (ramutils.reports.summary.ClassifierSummary attribute)</a>
 </li>
       <li><a href="data.html#ramutils.reports.summary.ClassifierSummary">ClassifierSummary (class in ramutils.reports.summary)</a>
@@ -225,10 +227,10 @@
 </li>
       <li><a href="events.html#ramutils.events.combine_retrieval_events">combine_retrieval_events() (in module ramutils.events)</a>
 </li>
-      <li><a href="data.html#ramutils.reports.summary.FRStimSessionSummary.combine_sessions">combine_sessions() (ramutils.reports.summary.FRStimSessionSummary static method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="data.html#ramutils.reports.summary.FRStimSessionSummary.combine_sessions">combine_sessions() (ramutils.reports.summary.FRStimSessionSummary static method)</a>
+</li>
       <li><a href="misc.html#ramutils.utils.combine_tag_names">combine_tag_names() (in module ramutils.utils)</a>
 </li>
       <li><a href="misc.html#ramutils.exc.CommandLineError">CommandLineError</a>
@@ -335,11 +337,19 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pipeline.html#ramutils.tasks.odin.generate_electrode_config">generate_electrode_config() (in module ramutils.tasks.odin)</a>
 </li>
+      <li><a href="pipeline.html#ramutils.tasks.montage.generate_montage_metadata_table">generate_montage_metadata_table() (in module ramutils.tasks.montage)</a>
+</li>
+      <li><a href="pipeline.html#ramutils.tasks.montage.generate_pairs_for_classifier">generate_pairs_for_classifier() (in module ramutils.tasks.montage)</a>
+</li>
       <li><a href="pipeline.html#ramutils.tasks.odin.generate_ramulator_config">generate_ramulator_config() (in module ramutils.tasks.odin)</a>
 </li>
       <li><a href="events.html#ramutils.events.get_all_retrieval_events_mask">get_all_retrieval_events_mask() (in module ramutils.events)</a>
 </li>
+      <li><a href="pipeline.html#ramutils.tasks.montage.get_artifact_tstats">get_artifact_tstats() (in module ramutils.tasks.montage)</a>
+</li>
       <li><a href="events.html#ramutils.events.get_baseline_retrieval_mask">get_baseline_retrieval_mask() (in module ramutils.events)</a>
+</li>
+      <li><a href="pipeline.html#ramutils.tasks.montage.get_classifier_excluded_leads">get_classifier_excluded_leads() (in module ramutils.tasks.montage)</a>
 </li>
       <li><a href="misc.html#ramutils.utils.get_completed_sessions">get_completed_sessions() (in module ramutils.utils)</a>
 </li>
@@ -353,10 +363,12 @@
 </li>
       <li><a href="events.html#ramutils.events.get_nonstim_events_mask">get_nonstim_events_mask() (in module ramutils.events)</a>
 </li>
-      <li><a href="events.html#ramutils.events.get_pal_retrieval_events_mask">get_pal_retrieval_events_mask() (in module ramutils.events)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pipeline.html#ramutils.tasks.montage.get_pairs">get_pairs() (in module ramutils.tasks.montage)</a>
+</li>
+      <li><a href="events.html#ramutils.events.get_pal_retrieval_events_mask">get_pal_retrieval_events_mask() (in module ramutils.events)</a>
+</li>
       <li><a href="events.html#ramutils.events.get_partition_masks">get_partition_masks() (in module ramutils.events)</a>
 </li>
       <li><a href="events.html#ramutils.events.get_recall_events_mask">get_recall_events_mask() (in module ramutils.events)</a>
@@ -374,6 +386,8 @@
       <li><a href="events.html#ramutils.events.get_time_between_events">get_time_between_events() (in module ramutils.events)</a>
 </li>
       <li><a href="pipeline.html#ramutils.tasks.powers.get_trigger_frequency_mask">get_trigger_frequency_mask() (in module ramutils.tasks.powers)</a>
+</li>
+      <li><a href="pipeline.html#ramutils.tasks.montage.get_used_pair_mask">get_used_pair_mask() (in module ramutils.tasks.montage)</a>
 </li>
       <li><a href="events.html#ramutils.events.get_vocalization_mask">get_vocalization_mask() (in module ramutils.events)</a>
 </li>
@@ -631,6 +645,8 @@
 </li>
       <li><a href="data.html#ramutils.reports.summary.FRStimSessionSummary.recalls_by_list">recalls_by_list() (ramutils.reports.summary.FRStimSessionSummary static method)</a>
 </li>
+      <li><a href="pipeline.html#ramutils.tasks.montage.reduce_pairs">reduce_pairs() (in module ramutils.tasks.montage)</a>
+</li>
       <li><a href="pipeline.html#ramutils.tasks.powers.reduce_powers">reduce_powers() (in module ramutils.tasks.powers)</a>
 </li>
       <li><a href="data.html#ramutils.reports.summary.ClassifierSummary.regions">regions (ramutils.reports.summary.ClassifierSummary attribute)</a>
@@ -844,7 +860,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017.
+        &copy; Copyright 2017
 
     </p>
   </div>
@@ -863,21 +879,14 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'2.2.4',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 

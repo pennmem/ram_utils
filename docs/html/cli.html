@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Command-line usage &mdash; Ramutils 2.2.4 documentation</title>
+  <title>Command-line usage &mdash; Ramutils 2.3.0 documentation</title>
   
 
   
@@ -29,7 +29,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Miscellaneous utilities" href="misc.html" />
-    <link rel="prev" title="Pipelines" href="pipeline.html" /> 
+    <link rel="prev" title="Pipelines and Tasks" href="pipeline.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                2.2
+                2.3
               </div>
             
           
@@ -84,11 +84,11 @@
             
               <p class="caption"><span class="caption-text">Contents</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="getting_started_report_data.html">Getting Statrted: RAM Report Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started_report_data.html">Getting Started: RAM Report Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="data.html">Serializable data structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="classifier.html">Classifier training, cross validation, and utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="events.html">Event processing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipelines and Tasks</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Command-line usage</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#ramulator-configuration-generation">Ramulator configuration generation</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#specifying-surface-areas">Specifying surface areas</a></li>
@@ -189,6 +189,16 @@
 <p class="last">For generating configuration files in production, always use the
 <code class="docutils literal notranslate"><span class="pre">RAM_clinical</span></code> account on rhino.</p>
 </div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Except for <code class="docutils literal notranslate"><span class="pre">cachedir</span></code>, which is treated differently due to an issue on macOS and sshfs-mounted filesystems,</p>
+<dl class="class">
+<dt id="center">
+<em class="property">class </em><code class="descname">center</code><a class="headerlink" href="#center" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p class="last">All paths are relative to the root path</p>
+</div>
 <div class="section" id="ramulator-configuration-generation">
 <h2>Ramulator configuration generation<a class="headerlink" href="#ramulator-configuration-generation" title="Permalink to this headline">¶</a></h2>
 <p>Ramulator experiment configuration files for stimulation experiments are
@@ -214,8 +224,8 @@ generated via the <code class="docutils literal notranslate"><span class="pre">r
 <span class="n">optional</span> <span class="n">arguments</span><span class="p">:</span>
   <span class="o">-</span><span class="n">h</span><span class="p">,</span> <span class="o">--</span><span class="n">help</span>            <span class="n">show</span> <span class="n">this</span> <span class="n">help</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span>
   <span class="o">--</span><span class="n">root</span> <span class="n">ROOT</span>           <span class="n">path</span> <span class="n">to</span> <span class="n">rhino</span> <span class="n">root</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="o">/</span><span class="p">)</span>
-  <span class="o">--</span><span class="n">dest</span> <span class="n">DEST</span><span class="p">,</span> <span class="o">-</span><span class="n">d</span> <span class="n">DEST</span>  <span class="n">directory</span> <span class="n">to</span> <span class="n">write</span> <span class="n">output</span> <span class="n">to</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span>
-                        <span class="n">scratch</span><span class="o">/</span><span class="n">ramutils</span><span class="p">)</span>
+  <span class="o">--</span><span class="n">dest</span> <span class="n">DEST</span><span class="p">,</span> <span class="o">-</span><span class="n">d</span> <span class="n">DEST</span>  <span class="n">directory</span> <span class="n">to</span> <span class="n">write</span> <span class="n">output</span> <span class="n">to</span> <span class="n">relative</span> <span class="n">to</span> <span class="n">ROOT</span>
+                        <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="n">scratch</span><span class="o">/</span><span class="n">ramutils</span><span class="p">)</span>
   <span class="o">--</span><span class="n">cachedir</span> <span class="n">CACHEDIR</span>   <span class="n">absolute</span> <span class="n">path</span> <span class="k">for</span> <span class="n">caching</span> <span class="nb">dir</span>
   <span class="o">--</span><span class="n">subject</span> <span class="n">SUBJECT</span><span class="p">,</span> <span class="o">-</span><span class="n">s</span> <span class="n">SUBJECT</span>
                         <span class="n">subject</span> <span class="n">ID</span>
@@ -254,11 +264,6 @@ generated via the <code class="docutils literal notranslate"><span class="pre">r
                         <span class="n">path</span> <span class="n">to</span> <span class="n">area</span><span class="o">.</span><span class="n">txt</span> <span class="n">file</span> <span class="n">relative</span> <span class="n">to</span> <span class="n">root</span>
   <span class="o">--</span><span class="n">clear</span><span class="o">-</span><span class="n">log</span>           <span class="n">clear</span> <span class="n">the</span> <span class="n">log</span>
 </pre></div>
-</div>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">All paths are relative to the root path <em>except</em> for <code class="docutils literal notranslate"><span class="pre">cachedir</span></code>. This is
-treated differently due to an issue on macOS and sshfs-mounted filesystems.</p>
 </div>
 <p>Anodes, cathodes, and amplitudes must all be specified in the same order. In
 other words, if using stim channels <code class="docutils literal notranslate"><span class="pre">LAD8_LAD9</span></code>, <code class="docutils literal notranslate"><span class="pre">LAH1_LAH2</span></code> with amplitudes
@@ -343,8 +348,8 @@ explicitly pass an electrode config file that is generated manually with the
 <span class="n">optional</span> <span class="n">arguments</span><span class="p">:</span>
   <span class="o">-</span><span class="n">h</span><span class="p">,</span> <span class="o">--</span><span class="n">help</span>            <span class="n">show</span> <span class="n">this</span> <span class="n">help</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span>
   <span class="o">--</span><span class="n">root</span> <span class="n">ROOT</span>           <span class="n">path</span> <span class="n">to</span> <span class="n">rhino</span> <span class="n">root</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="o">/</span><span class="p">)</span>
-  <span class="o">--</span><span class="n">dest</span> <span class="n">DEST</span><span class="p">,</span> <span class="o">-</span><span class="n">d</span> <span class="n">DEST</span>  <span class="n">directory</span> <span class="n">to</span> <span class="n">write</span> <span class="n">output</span> <span class="n">to</span> <span class="p">(</span><span class="n">default</span><span class="p">:</span>
-                        <span class="n">scratch</span><span class="o">/</span><span class="n">ramutils</span><span class="p">)</span>
+  <span class="o">--</span><span class="n">dest</span> <span class="n">DEST</span><span class="p">,</span> <span class="o">-</span><span class="n">d</span> <span class="n">DEST</span>  <span class="n">directory</span> <span class="n">to</span> <span class="n">write</span> <span class="n">output</span> <span class="n">to</span> <span class="n">relative</span> <span class="n">to</span> <span class="n">ROOT</span>
+                        <span class="p">(</span><span class="n">default</span><span class="p">:</span> <span class="n">scratch</span><span class="o">/</span><span class="n">ramutils</span><span class="p">)</span>
   <span class="o">--</span><span class="n">cachedir</span> <span class="n">CACHEDIR</span>   <span class="n">absolute</span> <span class="n">path</span> <span class="k">for</span> <span class="n">caching</span> <span class="nb">dir</span>
   <span class="o">--</span><span class="n">subject</span> <span class="n">SUBJECT</span><span class="p">,</span> <span class="o">-</span><span class="n">s</span> <span class="n">SUBJECT</span>
                         <span class="n">subject</span> <span class="n">ID</span>
@@ -374,7 +379,7 @@ explicitly pass an electrode config file that is generated manually with the
         <a href="misc.html" class="btn btn-neutral float-right" title="Miscellaneous utilities" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="pipeline.html" class="btn btn-neutral" title="Pipelines" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="pipeline.html" class="btn btn-neutral" title="Pipelines and Tasks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -383,7 +388,7 @@ explicitly pass an electrode config file that is generated manually with the
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017.
+        &copy; Copyright 2017
 
     </p>
   </div>
@@ -402,21 +407,14 @@ explicitly pass an electrode config file that is generated manually with the
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'2.2.4',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 

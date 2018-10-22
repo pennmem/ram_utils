@@ -166,3 +166,82 @@ class PALParameters(FRParameters):
 class PS5Parameters(FRParameters):
     """ PS5 experiment parameters """
     normalize_powers = Bool(False)
+
+
+# Fields for experiment configs
+
+
+class ExperimentSpecs(Schema):
+    """
+    Commont values for the "experiment_specs" section of the experiment config file
+    """
+
+    version = String("3.0.0", desc="experiment version")
+    experiment_type = String()
+    biomarker_sample_start_time_offset = Int(0)
+    biomarker_sample_time_length = Int(1366)
+    buffer_time = Int(1365)
+    stim_duration = Int(500)
+    freq_min = Int(6)
+    freq_max = Int(180)
+    num_freqs = Int(8)
+    num_items = Int(300)
+
+
+class PS4ExperimentSpecs(ExperimentSpecs):
+    """
+    PS4-specific values for the "experiment_specs" section of the experiment config file
+    """
+    retrieval_biomarker_sample_start_time_offset = Int(0)
+    retrieval_biomarker_sample_time_length = Int(525)
+    retrieval_buffer_time = Int(524)
+    post_stim_biomarker_sample_time_length = Int(500)
+    post_stim_buffer_time = Int(499)
+    post_stim_wait_time = Int(100)
+
+
+class TICLExperimentSpecs(ExperimentSpecs):
+    """
+    TICLFR-specific values for the "experiment_specs" section of the experiment config file
+
+    """
+    biomarker_sample_time_length = Int(525)
+    buffer_time = Int(524)
+    version = String("5.0.0")
+    post_stim_wait_time = Int(30)
+    post_stim_buffer_time = Int(524)
+    post_stim_biomarker_sample_time_length = Int(525)
+    refractory_duration = Int(0)
+
+
+class LocationSearchExperimentSpecs(ExperimentSpecs):
+    """
+    LocationSearch-specific values for the "experiment_specs" section of the experiment config file
+    """
+    biomarker_sample_start_time_offset = Int(0)
+    biomarker_sample_time_length = Int(525)
+    buffer_time = Int(524)
+    experiment_type = String("LocationSearch")
+    post_stim_biomarker_sample_time_length = Int(525)
+    post_stim_buffer_time = Int(524)
+    post_stim_wait_time = Int(30)
+    refractory_duration = Int(0)
+
+
+class ArtifactDetectionParams(Schema):
+    """
+    Settings for pre-task artifact detection
+    """
+    allow_artifact_detection = Bool(False)
+    pre_start = Int(-440)
+    pre_stop = Int(-40)
+    post_start = Int(250)
+    post_stop = Int(650)
+    sham_events = Int(30)
+    stim_events = Int(30)
+    isi_min = Int(1500)
+    isi_max = Int (2000)
+    method = String("ttest")  # zscore (Uma's method) or ttest (Ethan's method)
+    std_threshold = Int(2)
+    event_threshold = Float(0.5)
+    ttest_threshold = Float( 0.001)

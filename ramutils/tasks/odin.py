@@ -6,6 +6,7 @@ import json
 import os.path
 import shutil
 import warnings
+import ramutils.parameters # ExperimentSpecs,PS4ExperimentSpecs,TICLExperimentSpecs,LocationSearchExperimentSpecs
 
 try:
     from typing import List
@@ -208,59 +209,21 @@ def _make_experiment_specs_section(experiment):
     ``experiment_specs`` dict
 
     """
-    # TODO: These should all be retrieved from the Parameter classes
     if experiment in EXPERIMENTS['record_only']:
         return {}
 
-    # FIXME: values below shouldn't be hardcoded
-    specs = {
-        "version": "3.0.0",
-        "experiment_type": experiment,
-        "biomarker_sample_start_time_offset": 0,
-        "biomarker_sample_time_length": 1366,
-        "buffer_time": 1365,
-        "stim_duration": 500,
-        "freq_min": 6,
-        "freq_max": 180,
-        "num_freqs": 8,
-        "num_items": 300,
-    }
-
-    # FIXME: values below shouldn't be hardcoded
     if 'PS4' in experiment:
-        specs.update({
-            "retrieval_biomarker_sample_start_time_offset": 0,
-            "retrieval_biomarker_sample_time_length": 525,
-            "retrieval_buffer_time": 524,
-            "post_stim_biomarker_sample_time_length": 500,
-            "post_stim_buffer_time": 499,
-            "post_stim_wait_time": 100,
-        })
+        specs = ramutils.parameters.PS4ExperimentSpecs()
+
     elif 'TICL' in experiment:
-        specs.update({
-            "biomarker_sample_time_length": 525,
-            "buffer_time": 524,
-            "version": "5.0.0",
-            "post_stim_wait_time": 30,
-            "post_stim_buffer_time": 524,
-            "post_stim_biomarker_sample_time_length": 525,
-            "refractory_duration": 0,
-
-        })
+        specs = ramutils.parameters.TICLExperimentSpecs()
     elif experiment == "LocationSearch":
-        specs.update({
-            "biomarker_sample_start_time_offset": 0,
-            "biomarker_sample_time_length": 525,
-            "buffer_time": 524,
-            "experiment_type": "LocationSearch",
-            "post_stim_biomarker_sample_time_length": 525,
-            "post_stim_buffer_time": 524,
-            "post_stim_wait_time": 30,
-            "stim_duration": 500,
-            "refractory_duration": 0,
-        })
+        specs = ramutils.parameters.LocationSearchExperimentSpecs()
+    else:
+        specs = ramutils.parameters.ExperimentSpecs()
+    specs.experiment_type = experiment
 
-    return specs
+    return specs.to_dict()
 
 
 def _make_ramulator_config_json(subject, experiment, electrode_config_file,
@@ -309,21 +272,7 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
                                                        classifier_version,
                                                        trigger_pairs),
             'experiment_specs': _make_experiment_specs_section(experiment),
-            'artifact_detection': {
-                "allow_artifact_detection": True,
-                "pre_start": -440,
-                "pre_stop": -40,
-                "post_start": 40,
-                "post_stop": 440,
-                "sham_events": 30,
-                "stim_events": 30,
-                "isi_min": 1500,
-                "isi_max": 2000,
-                "method": "ttest",  # zscore (Uma's method) or ttest (Ethan's method)
-                "std_threshold": 2,
-                "event_threshold": 0.5,
-                "ttest_threshold": 0.001,
-            },
+            'artifact_detection': _make_artifact_detection_section(experiment),
         },
 
         "biomarker_threshold": 0.5,
@@ -347,6 +296,12 @@ def _make_ramulator_config_json(subject, experiment, electrode_config_file,
     }
 
     return json.dumps(config, indent=2, sort_keys=True)
+
+
+def _make_artifact_detection_section(experiment):
+    params = ramutils.parameters.ArtifactDetectionParams()
+    params.allow_artifact_detection = experiment.startswith('PS4')
+    return params.to_dict()
 
 
 @task(cache=False)

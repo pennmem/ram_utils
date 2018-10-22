@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ramutils.reports.summary &mdash; Ramutils 2.2.4 documentation</title>
+  <title>ramutils.reports.summary &mdash; Ramutils 2.3.0 documentation</title>
   
 
   
@@ -56,7 +56,7 @@
             
             
               <div class="version">
-                2.2
+                2.3
               </div>
             
           
@@ -82,11 +82,11 @@
             
               <p class="caption"><span class="caption-text">Contents</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../getting_started_report_data.html">Getting Statrted: RAM Report Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started_report_data.html">Getting Started: RAM Report Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../data.html">Serializable data structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../classifier.html">Classifier training, cross validation, and utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../events.html">Event processing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html">Pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html">Pipelines and Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../cli.html">Command-line usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../misc.html">Miscellaneous utilities</a></li>
 </ul>
@@ -985,7 +985,8 @@
                                     <span class="n">default</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([]))</span>
     <span class="n">_model_metadata</span> <span class="o">=</span> <span class="n">Bytes</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s2">&quot;traces for Bayesian multilevel models&quot;</span><span class="p">)</span>
     <span class="n">_post_stim_eeg</span> <span class="o">=</span> <span class="n">ArrayOrNone</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s1">&#39;raw post-stim EEG&#39;</span><span class="p">)</span>
-    <span class="n">_stim_tstats</span> <span class="o">=</span> <span class="n">CArray</span>
+    <span class="n">_stim_tstats</span> <span class="o">=</span> <span class="n">CArray</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;stim_tstats&#39;</span><span class="p">,</span> <span class="nb">float</span><span class="p">),(</span><span class="s1">&#39;stim_pvals&#39;</span><span class="p">,</span> <span class="nb">float</span><span class="p">)],</span>
+                          <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;t-statistics from artifact detection&#39;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">post_stim_prob_recall</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1041,6 +1042,27 @@
                       <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">summary</span><span class="o">.</span><span class="n">stim_tstats</span><span class="p">[</span><span class="n">summary</span><span class="o">.</span><span class="n">stim_pvals</span> <span class="o">&lt;</span> <span class="mf">0.001</span><span class="p">]]</span>
         <span class="k">return</span> <span class="n">good_tstats</span><span class="p">,</span> <span class="n">bad_tstats</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stim_tstats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stim_tstats</span><span class="p">[</span><span class="s1">&#39;stim_tstats&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stim_pvals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stim_tstats</span><span class="p">[</span><span class="s1">&#39;stim_pvals&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">used_pair_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">bipolar_pairs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bipolar_pairs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">subject</span><span class="p">][</span><span class="s1">&#39;pairs&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">bipolar_pairs</span> <span class="o">=</span> <span class="n">bipolar_pairs</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;channel_1&#39;</span><span class="p">,</span> <span class="s1">&#39;channel_2&#39;</span><span class="p">])</span>
+        <span class="n">bipolar_pairs</span> <span class="o">=</span> <span class="n">bipolar_pairs</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">into</span><span class="o">=</span><span class="n">OrderedDict</span><span class="p">)</span>
+        <span class="n">bipolar_pairs</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">({</span><span class="bp">self</span><span class="o">.</span><span class="n">subject</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;pairs&#39;</span><span class="p">:</span> <span class="n">bipolar_pairs</span><span class="p">}})</span>
+        <span class="k">return</span> <span class="n">get_used_pair_mask</span><span class="p">(</span><span class="n">bipolar_pairs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">excluded_pairs</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_excluded_pairs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">used_pair_mask</span><span class="p">)</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">used_pair_mask</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">post_stim_eeg_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1050,14 +1072,8 @@
             <span class="n">pairs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">-</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pair</span><span class="p">[</span><span class="s1">&#39;label0&#39;</span><span class="p">],</span> <span class="n">pair</span><span class="p">[</span><span class="s1">&#39;label1&#39;</span><span class="p">])</span>
                      <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">generate_pairs_for_classifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bipolar_pairs</span><span class="p">,</span> <span class="p">[])</span>
                      <span class="p">]</span>
-            <span class="n">bipolar_pairs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">bipolar_pairs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">subject</span><span class="p">][</span><span class="s1">&#39;pairs&#39;</span><span class="p">]</span>
-            <span class="p">)</span>
-            <span class="n">bipolar_pairs</span> <span class="o">=</span> <span class="n">bipolar_pairs</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;channel_1&#39;</span><span class="p">,</span><span class="s1">&#39;channel_2&#39;</span><span class="p">])</span>
-            <span class="n">bipolar_pairs</span> <span class="o">=</span> <span class="n">bipolar_pairs</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">into</span><span class="o">=</span><span class="n">OrderedDict</span><span class="p">)</span>
-            <span class="n">bipolar_pairs</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">({</span><span class="bp">self</span><span class="o">.</span><span class="n">subject</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;pairs&#39;</span><span class="p">:</span> <span class="n">bipolar_pairs</span><span class="p">}})</span>
-            <span class="n">used_pair_mask</span> <span class="o">=</span> <span class="n">get_used_pair_mask</span><span class="p">(</span><span class="n">bipolar_pairs</span><span class="p">,</span>
-                                                <span class="bp">self</span><span class="o">.</span><span class="n">excluded_pairs</span><span class="p">)</span>
+
+            <span class="n">used_pair_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">used_pair_mask</span>
             <span class="k">return</span> <span class="p">[</span><span class="n">encode_file</span><span class="p">(</span><span class="n">save_eeg_by_channel_plot</span><span class="p">(</span><span class="n">pairs</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span>
                                                         <span class="bp">self</span><span class="o">.</span><span class="n">_post_stim_eeg</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span>
                                                         <span class="n">used_pair_mask</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span>
@@ -1175,9 +1191,10 @@
         <span class="n">stim_columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;stimAnodeTag&#39;</span><span class="p">,</span> <span class="s1">&#39;stimCathodeTag&#39;</span><span class="p">,</span> <span class="s1">&#39;location&#39;</span><span class="p">,</span>
                         <span class="s1">&#39;amplitude&#39;</span><span class="p">,</span> <span class="s1">&#39;stim_duration&#39;</span><span class="p">,</span> <span class="s1">&#39;pulse_freq&#39;</span><span class="p">]</span>
         <span class="n">non_stim_columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">stim_columns</span><span class="p">]</span>
+        <span class="n">static_columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;experiment&#39;</span><span class="p">,</span> <span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">]</span>
+                          <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
 
-        <span class="n">stim_param_by_list</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[(</span><span class="n">stim_columns</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;experiment&#39;</span><span class="p">,</span>
-                                                  <span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">])]</span>
+        <span class="n">stim_param_by_list</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[(</span><span class="n">stim_columns</span> <span class="o">+</span> <span class="n">static_columns</span><span class="p">)]</span>
                               <span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span>
                               <span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">))</span>
 
@@ -1434,13 +1451,6 @@
                 <span class="p">(</span><span class="n">in_phase</span> <span class="o">&amp;</span> <span class="n">this_position</span><span class="p">)</span>
             <span class="p">][</span><span class="n">has_match</span><span class="p">][</span><span class="s1">&#39;biomarker_value&#39;</span><span class="p">]</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">stim_tstats</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stim_tstats</span><span class="p">[</span><span class="s1">&#39;stim_tstats&#39;</span><span class="p">]</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">stim_pvals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stim_tstats</span><span class="p">[</span><span class="s1">&#39;stim_pvals&#39;</span><span class="p">]</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">pre_stim_prob_recall</span><span class="p">(</span><span class="n">summaries</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -1620,63 +1630,92 @@
     <span class="n">connectivity</span> <span class="o">=</span> <span class="n">Array</span>
     <span class="n">pre_psd</span> <span class="o">=</span> <span class="n">Array</span>
     <span class="n">post_psd</span> <span class="o">=</span> <span class="n">Array</span>
-    <span class="n">bad_events_mask</span> <span class="o">=</span> <span class="n">CArray</span>
-    <span class="n">bad_channels_mask</span> <span class="o">=</span> <span class="n">CArray</span>
+    <span class="n">_bad_events_mask</span> <span class="o">=</span> <span class="n">CArray</span>
+    <span class="n">_bad_channels_mask</span> <span class="o">=</span> <span class="n">CArray</span>
     <span class="n">_regressions</span> <span class="o">=</span> <span class="n">ArrayOrNone</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bipolar_pairs_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">bpdict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bipolar_pairs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">subject</span><span class="p">][</span><span class="s1">&#39;pairs&#39;</span><span class="p">]</span>
+        <span class="n">bpdf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">bpdict</span><span class="p">,</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">)</span>
+        <span class="n">bpdf</span><span class="o">.</span><span class="n">channel_1</span> <span class="o">=</span> <span class="n">bpdf</span><span class="o">.</span><span class="n">channel_1</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">bpdf</span><span class="o">.</span><span class="n">channel_2</span> <span class="o">=</span> <span class="n">bpdf</span><span class="o">.</span><span class="n">channel_2</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">bpdf</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;channel_1&#39;</span><span class="p">,</span> <span class="s1">&#39;channel_2&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">distmat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">get_distances</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bipolar_pairs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">get_distances</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bipolar_pairs_frame</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">stim_channel_idxs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">tmi</span><span class="o">.</span><span class="n">get_stim_channels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bipolar_pairs</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tmi</span><span class="o">.</span><span class="n">get_stim_channels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bipolar_pairs_frame</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="p">,</span> <span class="s1">&#39;stimAnodeTag&#39;</span><span class="p">,</span> <span class="s1">&#39;stimCathodeTag&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bad_channels_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># TODO: paramtrize the 20 here</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bad_channels_mask</span> <span class="o">|</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_bad_events_mask</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">20</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">())</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">used_pair_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">bad_channels_mask</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_excluded_pairs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bad_channels_mask</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">regressions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_regressions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_regresssions</span> <span class="o">=</span> <span class="n">tmi</span><span class="o">.</span><span class="n">regress_distance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pre_psd</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_post_psd</span><span class="p">,</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">_connectivity</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distmat</span><span class="p">,</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">stim_channel_idxs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_regressions</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">tmi</span><span class="o">.</span><span class="n">regress_distance</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pre_psd</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">post_psd</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">connectivity</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distmat</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stim_channel_idxs</span><span class="p">,</span>
+                <span class="n">event_mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bad_events_mask</span><span class="p">,</span>
+                <span class="n">artifact_channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bad_channels_mask</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_regressions</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stim_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;-&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">LocationSearchSessionSummary</span><span class="o">.</span><span class="n">stim_params</span><span class="p">([</span><span class="bp">self</span><span class="p">])[</span><span class="mi">0</span><span class="p">][[</span><span class="s1">&#39;stimAnodeTag&#39;</span><span class="p">,</span> <span class="s1">&#39;stimCathodeTag&#39;</span><span class="p">]])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;:&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">subject</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">session_number</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">stim_tag</span><span class="p">])</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">tmi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">tmi</span><span class="o">.</span><span class="n">compute_tmi</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">regressions</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">stim_params_by_list</span><span class="p">(</span><span class="n">summaries</span><span class="p">):</span>
-        <span class="n">stim_params_table</span> <span class="o">=</span> <span class="n">FRStimSessionSummary</span><span class="o">.</span><span class="n">stim_params_by_list</span><span class="p">(</span><span class="n">summaries</span><span class="p">)</span>
-        <span class="n">stim_channel_labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">summary</span><span class="o">.</span><span class="n">bipolar_pairs</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
+    <span class="k">def</span> <span class="nf">stim_params</span><span class="p">(</span><span class="n">summaries</span><span class="p">):</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">FRStimSessionSummary</span><span class="o">.</span><span class="n">combine_sessions</span><span class="p">(</span><span class="n">summaries</span><span class="p">)</span>
+        <span class="n">stim_columns</span> <span class="o">=</span> <span class="n">FRStimSessionSummary</span><span class="p">()</span><span class="o">.</span><span class="n">stim_columns</span>
+        <span class="n">stim_columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">stim_columns</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+        <span class="n">stim_params_table</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">stim_columns</span><span class="p">]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)</span>
+        <span class="n">stim_channel_labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">summary</span><span class="o">.</span><span class="n">bipolar_pairs_frame</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
                                <span class="k">for</span> <span class="n">summary</span> <span class="ow">in</span> <span class="n">summaries</span>
-                               <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">summary</span><span class="o">.</span><span class="n">stim_channel_idx</span>
+                               <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">summary</span><span class="o">.</span><span class="n">stim_channel_idxs</span>
                                <span class="p">]</span>
         <span class="n">tmi_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">tmi_val</span><span class="p">[</span><span class="s1">&#39;zscore&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">summary</span> <span class="ow">in</span> <span class="n">summaries</span>
                     <span class="k">for</span> <span class="n">tmi_val</span> <span class="ow">in</span> <span class="n">summary</span><span class="o">.</span><span class="n">tmi</span><span class="p">]</span>
-        <span class="k">for</span> <span class="p">(</span><span class="n">stim_channel</span><span class="p">,</span><span class="n">tmi_val</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">stim_channel_labels</span><span class="p">,</span><span class="n">tmi_list</span><span class="p">):</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">stim_channel</span><span class="p">,</span> <span class="n">tmi_val</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">stim_channel_labels</span><span class="p">,</span> <span class="n">tmi_list</span><span class="p">):</span>
             <span class="n">anode</span><span class="p">,</span><span class="n">cathode</span> <span class="o">=</span> <span class="n">stim_channel</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
-            <span class="n">stim_params_table</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">stim_params_table</span><span class="o">.</span><span class="n">stimAnodeLabel</span><span class="o">==</span><span class="n">anode</span><span class="p">)</span> <span class="o">&amp;</span>
-                                  <span class="p">(</span><span class="n">stim_params_table</span><span class="o">.</span><span class="n">stimCathodeLabel</span><span class="o">==</span><span class="n">cathode</span><span class="p">),</span>
-            <span class="s1">&#39;tmi&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmi_val</span>
+            <span class="n">stim_params_table</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">stim_params_table</span><span class="o">.</span><span class="n">stimAnodeTag</span> <span class="o">==</span> <span class="n">anode</span><span class="p">)</span> <span class="o">&amp;</span>
+                                  <span class="p">(</span><span class="n">stim_params_table</span><span class="o">.</span><span class="n">stimCathodeTag</span> <span class="o">==</span> <span class="n">cathode</span><span class="p">),</span>
+                                  <span class="s1">&#39;TMI&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmi_val</span>
 
-        <span class="k">return</span> <span class="n">stim_params_table</span>
-
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">stim_params</span><span class="p">(</span><span class="n">summaries</span><span class="p">):</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">LocationSearchSessionSummary</span><span class="o">.</span><span class="n">stim_params_by_list</span><span class="p">(</span><span class="n">summaries</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">FRStimSessionSummary</span><span class="o">.</span><span class="n">aggregate_stim_params_over_list</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">stim_params_table</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">to_records</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span>
                  <span class="n">connectivity</span><span class="p">,</span> <span class="n">pre_psd</span><span class="p">,</span> <span class="n">post_psd</span><span class="p">,</span> <span class="n">bad_events_mask</span><span class="p">,</span> <span class="n">bad_channel_mask</span><span class="p">,</span>
-                 <span class="n">stim_tstats</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                 <span class="n">stim_tstats</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">StimSessionSummary</span><span class="o">.</span><span class="n">populate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">bipolar_pairs</span><span class="p">,</span> <span class="n">excluded_pairs</span><span class="p">,</span>
-                                    <span class="kc">None</span><span class="p">,</span> <span class="n">stim_tstats</span><span class="o">=</span><span class="n">stim_tstats</span><span class="p">)</span>
+                                    <span class="kc">None</span><span class="p">,</span> <span class="n">stim_tstats</span><span class="o">=</span><span class="n">stim_tstats</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">connectivity</span> <span class="o">=</span> <span class="n">connectivity</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">post_psd</span> <span class="o">=</span> <span class="n">post_psd</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pre_psd</span> <span class="o">=</span> <span class="n">pre_psd</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bad_channels_mask</span> <span class="o">=</span> <span class="n">bad_channel_mask</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bad_events_mask</span> <span class="o">=</span> <span class="n">bad_events_mask</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bad_channels_mask</span> <span class="o">=</span> <span class="n">bad_channel_mask</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bad_events_mask</span> <span class="o">=</span> <span class="n">bad_events_mask</span>
 </pre></div>
 
            </div>
@@ -1689,7 +1728,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017.
+        &copy; Copyright 2017
 
     </p>
   </div>
@@ -1708,21 +1747,14 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../../',
-            VERSION:'2.2.4',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 

@@ -1,5 +1,5 @@
-Pipelines
-=========
+Pipelines and Tasks
+===================
 
 Experiment configuration file generation and post-experiment reporting is done
 via a series of tasks that are built up into a pipeline using dask_.
@@ -7,21 +7,63 @@ via a series of tasks that are built up into a pipeline using dask_.
 .. _dask: http://dask.pydata.org/en/latest/index.html
 
 Existing Pipelines
-^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^
 .. autofunction:: ramutils.pipelines.ramulator_config.make_ramulator_config
+
+The main steps of this pipeline are:
+
+- :func:`~ramutils.montage.generate_pairs_from_electrode_config`
+- :func:`~ramutils.tasks.events.build_training_data`
+- :func:`~ramutils.tasks.powers.compute_normalized_powers`
+- :func:`~ramutils.tasks.classifier.train_classifier`
+- :func:`~ramutils.tasks.classifier.summarize_classifier`
+- :func:`~ramutils.tasks.classifier.serialize_classifier`
+- :func:`~ramutils.tasks.odin.generate_ramulator_config`
+
 .. autofunction:: ramutils.pipelines.report.make_report
+
+The main steps of this pipeline are:
+
+- :func:`~ramutils.tasks.montage.generate_montage_metadata_table`
+- :func:`~ramutils.tasks.events.build_test_data`
+- :func:`~ramutils.tasks.events.build_training_data`
+- :func:`~ramutils.tasks.powers.compute_normalized_powers`
+- Non-stim reports:
+
+  - :func:`~ramutils.tasks.classifier.train_classifier`
+  - :func:`~ramutils.tasks.classifier.summarize_classifier` (Encoding + retrieval)
+  - :func:`~ramutils.tasks.classifier.summarize_classifier` (Encoding only)
+  - :func:`~ramutils.tasks.summary.summarize_nonstim_sessions`
+- Stim reports:
+
+  - :func:`~ramutils.tasks.classifier.reload_used_classifiers`
+  - :func:`~ramutils.tasks.classifier.post_hoc_classifier_evaluation`
+  - :func:`~ramutils.tasks.summary.summarize_stim_sessions`
+  - :func:`~ramutils.tasks.behavioral_analysis.estimate_effects_of_stim`
+- :func:`~ramutils.tasks.summary.summarize_math`
+- :func:`~ramutils.tasks.misc.save_all_output`
+- :func:`~ramutils.tasks.reports.build_static_report`
+
+
+
 .. autofunction:: ramutils.pipelines.aggregated_report.make_aggregated_report
+
+Tasks
+^^^^^
 
 Defining tasks
 --------------
 
 Tasks are created by using the :func:`ramutils.tasks.task` decorator or wrapping
 a function with :func:`ramutils.tasks.make_task`. These simply apply the
-:func:`dask.delayed` and (optionally) ``joblib`` caching decorators. The former
+`dask.delayed`_ and (optionally) `joblib`_ caching decorators. The former
 is important for adding the ability to parallelize a pipeline (for tasks that
 can run independently) while the latter allows for resuming a pipeline when
 something goes wrong or if only changing one parameter which does not affect all
 tasks.
+
+.. _dask.delayed: http://docs.dask.org/en/latest/delayed.html
+.. _joblib: https://joblib.readthedocs.io/en/latest/memory.html
 
 .. autofunction:: ramutils.tasks.task
 
@@ -34,43 +76,43 @@ Common tasks come predefined in the :mod:`ramutils.tasks` package and are
 documented below.
 
 Classifier tasks
-^^^^^^^^^^^^^^^^
+----------------
 
 .. automodule:: ramutils.tasks.classifier
     :members:
 
 Events tasks
-^^^^^^^^^^^^
+------------
 
 .. automodule:: ramutils.tasks.events
     :members:
 
 Miscellaneous tasks
-^^^^^^^^^^^^^^^^^^^
+-------------------
 
 .. automodule:: ramutils.tasks.misc
     :members:
 
 Montage tasks
-^^^^^^^^^^^^^
+-------------
 
 .. automodule:: ramutils.tasks.montage
     :members:
 
 Odin/Ramulator tasks
-^^^^^^^^^^^^^^^^^^^^
+--------------------
 
 .. automodule:: ramutils.tasks.odin
     :members:
 
 Power computation tasks
-^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------
 
 .. automodule:: ramutils.tasks.powers
     :members:
 
 Report summary tasks
-^^^^^^^^^^^^^^^^^^^^
+--------------------
 
 .. automodule:: ramutils.tasks.summary
     :members:

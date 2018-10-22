@@ -18,7 +18,7 @@ class RamArgumentParser(ArgumentParser):
         self.add_argument('--root', default='/',
                           help='path to rhino root (default: /)')
         self.add_argument('--dest', '-d', default='scratch/ramutils',
-                          help='directory to write output to (default: scratch/ramutils)')
+                          help='directory to write output to relative to ROOT \n (default: scratch/ramutils)')
         self.add_argument('--cachedir', default=default_cache_dir,
                           help='absolute path for caching dir')
         self.add_argument('--use-cached', action='store_true',
@@ -77,7 +77,10 @@ class RamArgumentParser(ArgumentParser):
         """
         from ramutils.tasks import memory
 
-        memory.cachedir = cachedir
+        try:
+            memory.store_backend.location = cachedir
+        except AttributeError: # joblib v0.11-
+            memory.cachedir = cachedir
 
         if not use_cached and os.path.isdir(cachedir):
             memory.clear()

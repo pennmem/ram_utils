@@ -6,6 +6,14 @@ Command-line usage
     For generating configuration files in production, always use the
     ``RAM_clinical`` account on rhino.
 
+.. note::
+
+    Except for ``cachedir``, which is treated differently due to an issue on macOS and sshfs-mounted filesystems,
+
+    .. class:: center
+
+    All paths are relative to the root path
+
 Ramulator configuration generation
 ----------------------------------
 
@@ -33,8 +41,8 @@ generated via the ``ramulator-conf`` script::
     optional arguments:
       -h, --help            show this help message and exit
       --root ROOT           path to rhino root (default: /)
-      --dest DEST, -d DEST  directory to write output to (default:
-                            scratch/ramutils)
+      --dest DEST, -d DEST  directory to write output to relative to ROOT
+                            (default: scratch/ramutils)
       --cachedir CACHEDIR   absolute path for caching dir
       --subject SUBJECT, -s SUBJECT
                             subject ID
@@ -73,10 +81,6 @@ generated via the ``ramulator-conf`` script::
                             path to area.txt file relative to root
       --clear-log           clear the log
 
-.. note::
-
-    All paths are relative to the root path *except* for ``cachedir``. This is
-    treated differently due to an issue on macOS and sshfs-mounted filesystems.
 
 Anodes, cathodes, and amplitudes must all be specified in the same order. In
 other words, if using stim channels ``LAD8_LAD9``, ``LAH1_LAH2`` with amplitudes
@@ -166,8 +170,8 @@ Reports are generated with the ``ram-report`` command-line script::
     optional arguments:
       -h, --help            show this help message and exit
       --root ROOT           path to rhino root (default: /)
-      --dest DEST, -d DEST  directory to write output to (default:
-                            scratch/ramutils)
+      --dest DEST, -d DEST  directory to write output to relative to ROOT
+                            (default: scratch/ramutils)
       --cachedir CACHEDIR   absolute path for caching dir
       --subject SUBJECT, -s SUBJECT
                             subject ID

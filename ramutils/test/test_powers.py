@@ -100,7 +100,7 @@ def test_reduce_powers():
 
     # Case 3: Select a susbset of electrodes
     some_electrodes_masks = [
-        np.array(np.random.random_integers(0, 1, size=n_electrodes)).astype(
+        np.array(np.random.randint(0, 2, size=n_electrodes)).astype(
             bool) for
         _ in range(10)]
     expected_sizes = [np.sum(mask) for mask in some_electrodes_masks]

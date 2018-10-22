@@ -52,9 +52,11 @@ def make_stim_params(subject, anodes, cathodes, min_amplitudes=None,
 
     """
     path = os.path.join(root, 'data', 'eeg', subject, 'docs', 'jacksheet.txt')
-    jacksheet = read_jacksheet(path)
-
     stim_params = []
+    if len(anodes) == 0:
+        return stim_params
+
+    jacksheet = read_jacksheet(path)
 
     valid_labels = jacksheet.label.values
     for i in range(len(anodes)):
@@ -580,8 +582,8 @@ def get_classifier_excluded_leads(subject, all_pairs, rootdir='/'):
     -----------
     subject: str
         Subject identifier
-
-    paths: FilePaths object including RHINO root directory
+    paths: FilePaths
+        FilePaths object including RHINO root directory
 
     Returns:
     --------

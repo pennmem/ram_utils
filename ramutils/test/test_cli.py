@@ -7,7 +7,7 @@ from ramutils.cli import *
 from ramutils.cli.expconf import *
 from ramutils.cli.report import *
 from ramutils.cli.aggregated_report import *
-
+import subprocess
 
 def test_make_parser():
     parser = make_parser('test')
@@ -220,7 +220,7 @@ class TestCreateReports:
         if use_classifier_excluded_leads:
             args += ['-u']
 
-        create_report(args)
+        subprocess.check_call(["python", "-m", "ramutils.cli.report"] + args)
         return
 
     @pytest.mark.rhino
@@ -257,7 +257,7 @@ class TestCreateReports:
         if experiment == 'PS5_CatFR':
             args += ['--trigger-electrode', 'LF1-LF2']
 
-        create_report(args)
+        subprocess.check_call(["python", "-m", "ramutils.cli.report"] + args)
         return
 
     @pytest.mark.rhino

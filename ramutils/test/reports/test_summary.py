@@ -16,19 +16,19 @@ from ramutils.events import  extract_biomarker_information
 datafile = functools.partial(resource_filename, 'ramutils.test.test_data')
 
 
-@pytest.fixture(scope='session')
-def fr5_events():
+def _fr5_events():
     """FR5 events for R1345D."""
     filename = datafile('fr5-events.npz')
     events = np.rec.array(np.load(filename)['events'])
     return events[events.session == 0]
 
-@pytest.fixture(scope='session')
-def ticlfr_events():
+
+def _ticlfr_events():
     """TICL_FR events for R1427T"""
     filename = datafile('ticl_fr_events.npz')
     events = np.rec.array(np.load(filename)['events'])
     return events
+
 
 @pytest.fixture(scope='session')
 def math_events():
@@ -38,19 +38,22 @@ def math_events():
     return events
 
 
-@pytest.fixture(scope='session')
-def bipolar_pairs():
+def _bipolar_pairs():
     return {}
 
 
-@pytest.fixture(scope='session')
-def excluded_pairs():
+def _excluded_pairs():
     return {}
 
 
-@pytest.fixture(scope='session')
-def normalized_powers():
+def _normalized_powers():
     return np.array([[1, 2], [3, 4]])
+
+fr5_events = pytest.fixture(scope='session')(_fr5_events)
+ticlfr_events = pytest.fixture(scope='session')(_ticlfr_events)
+bipolar_pairs = pytest.fixture(scope='session')(_bipolar_pairs)
+excluded_pairs = pytest.fixture(scope='session')(_excluded_pairs)
+normalized_powers = pytest.fixture(scope='session')(_normalized_powers)
 
 
 @pytest.fixture()
@@ -183,10 +186,10 @@ class TestFRSessionSummary:
     @classmethod
     def setup_class(cls):
         cls.summary = FRSessionSummary()
-        events = fr5_events()
-        pairs = bipolar_pairs()
-        excluded = excluded_pairs()
-        powers = normalized_powers()
+        events = _fr5_events()
+        pairs = _bipolar_pairs()
+        excluded = _excluded_pairs()
+        powers = _normalized_powers()
         cls.summary.populate(events, pairs, excluded, powers)
 
     def test_num_lists(self):
@@ -212,11 +215,11 @@ class TestCatFRSessionSummary:
     @classmethod
     def setup_class(cls):
         cls.summary = CatFRSessionSummary()
-        events = fr5_events()
-        raw_events = fr5_events()
-        pairs = bipolar_pairs()
-        excluded = excluded_pairs()
-        powers = normalized_powers()
+        events = _fr5_events()
+        raw_events = _fr5_events()
+        pairs = _bipolar_pairs()
+        excluded = _excluded_pairs()
+        powers = _normalized_powers()
         cls.summary.populate(events, pairs, excluded,
                              powers, raw_events=raw_events)
 
@@ -246,7 +249,7 @@ class TestClassifierSummary:
         cls.subject = 'TEST_SUBJECT'
         cls.experiment = 'TEST'
         cls.sessions = ['NA']
-        cls.recalls = np.random.random_integers(0, 1, 100)
+        cls.recalls = np.random.randint(0, 2, 100)
         cls.predicted_probabilities = np.random.normal(.5, .03, size=100)
         cls.permuation_aucs = np.random.normal(.5, .01, size=200)
         cls.freqs = np.arange(10)
@@ -312,7 +315,7 @@ class TestStimSessionSummary:
 class TestTiclFRSessionSummary:
     @classmethod
     def setup_class(cls):
-        cls.events = ticlfr_events()
+        cls.events = _ticlfr_events()
         cls.sample_summary = TICLFRSessionSummary()
         cls.sample_summary.raw_events = cls.events
         cls.sample_summary.biomarker_events = extract_biomarker_information(
@@ -357,9 +360,9 @@ class TestFRStimSessionSummary:
             "/input/summaries/sample_stim_session_summary.csv"))
         cls.sample_events = cls.sample_summary_table.to_records(index=False)
         cls.sample_summary = FRStimSessionSummary()
-        pairs = bipolar_pairs()
-        excluded = excluded_pairs()
-        powers = normalized_powers()
+        pairs = _bipolar_pairs()
+        excluded = _excluded_pairs()
+        powers = _normalized_powers()
         cls.sample_summary.populate(cls.sample_events, pairs, excluded, powers)
 
     def test_num_nonstim_lists(self):
@@ -455,7 +458,7 @@ class TestPSSessionSummary:
     @pytest.mark.xfail(reason='PS Events to dataframe not implemented')
     def test_to_dataframe(self, ps_events, bipolar_pairs, excluded_pairs):
         self.sample_summary.populate(
-            ps_events, bipolar_pairs, excluded_pairs, normalized_powers)
+            ps_events, bipolar_pairs, excluded_pairs, _normalized_powers)
         df = self.sample_summary.to_dataframe()
         assert len(df) == 3068
 

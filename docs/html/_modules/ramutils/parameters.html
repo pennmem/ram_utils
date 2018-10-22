@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ramutils.parameters &mdash; Ramutils 2.2.4 documentation</title>
+  <title>ramutils.parameters &mdash; Ramutils 2.3.0 documentation</title>
   
 
   
@@ -56,7 +56,7 @@
             
             
               <div class="version">
-                2.2
+                2.3
               </div>
             
           
@@ -82,11 +82,11 @@
             
               <p class="caption"><span class="caption-text">Contents</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../getting_started_report_data.html">Getting Statrted: RAM Report Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started_report_data.html">Getting Started: RAM Report Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../data.html">Serializable data structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../classifier.html">Classifier training, cross validation, and utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../events.html">Event processing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../pipeline.html">Pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pipeline.html">Pipelines and Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cli.html">Command-line usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../misc.html">Miscellaneous utilities</a></li>
 </ul>
@@ -320,6 +320,85 @@
 <div class="viewcode-block" id="PS5Parameters"><a class="viewcode-back" href="../../data.html#ramutils.parameters.PS5Parameters">[docs]</a><span class="k">class</span> <span class="nc">PS5Parameters</span><span class="p">(</span><span class="n">FRParameters</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; PS5 experiment parameters &quot;&quot;&quot;</span>
     <span class="n">normalize_powers</span> <span class="o">=</span> <span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<span class="c1"># Fields for experiment configs</span>
+
+
+<span class="k">class</span> <span class="nc">ExperimentSpecs</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Commont values for the &quot;experiment_specs&quot; section of the experiment config file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">version</span> <span class="o">=</span> <span class="n">String</span><span class="p">(</span><span class="s2">&quot;3.0.0&quot;</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;experiment version&quot;</span><span class="p">)</span>
+    <span class="n">experiment_type</span> <span class="o">=</span> <span class="n">String</span><span class="p">()</span>
+    <span class="n">biomarker_sample_start_time_offset</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">biomarker_sample_time_length</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">1366</span><span class="p">)</span>
+    <span class="n">buffer_time</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">1365</span><span class="p">)</span>
+    <span class="n">stim_duration</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>
+    <span class="n">freq_min</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+    <span class="n">freq_max</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">180</span><span class="p">)</span>
+    <span class="n">num_freqs</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+    <span class="n">num_items</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">300</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">PS4ExperimentSpecs</span><span class="p">(</span><span class="n">ExperimentSpecs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    PS4-specific values for the &quot;experiment_specs&quot; section of the experiment config file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">retrieval_biomarker_sample_start_time_offset</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+    <span class="n">retrieval_biomarker_sample_time_length</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">525</span><span class="p">),</span>
+    <span class="n">retrieval_buffer_time</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">524</span><span class="p">),</span>
+    <span class="n">post_stim_biomarker_sample_time_length</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span> <span class="mi">500</span><span class="p">),</span>
+    <span class="n">post_stim_buffer_time</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span> <span class="mi">499</span><span class="p">)</span>
+    <span class="n">post_stim_wait_time</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">TICLExperimentSpecs</span><span class="p">(</span><span class="n">ExperimentSpecs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    TICLFR-specific values for the &quot;experiment_specs&quot; section of the experiment config file</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">biomarker_sample_time_length</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">525</span><span class="p">)</span>
+    <span class="n">buffer_time</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">524</span><span class="p">)</span>
+    <span class="n">version</span> <span class="o">=</span> <span class="n">String</span><span class="p">(</span><span class="s2">&quot;5.0.0&quot;</span><span class="p">)</span>
+    <span class="n">post_stim_wait_time</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+    <span class="n">post_stim_buffer_time</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">524</span><span class="p">)</span>
+    <span class="n">post_stim_biomarker_sample_length</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">525</span><span class="p">)</span>
+    <span class="n">refractory_duration</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">LocationSearchExperimentSpecs</span><span class="p">(</span><span class="n">ExperimentSpecs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    LocationSearch-specific values for the &quot;experiment_specs&quot; section of the experiment config file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">biomarker_sample_start_time_offset</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">biomarker_sample_time_length</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">525</span><span class="p">)</span>
+    <span class="n">buffer_time</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">524</span><span class="p">)</span>
+    <span class="n">experiment_type</span> <span class="o">=</span> <span class="n">String</span><span class="p">(</span><span class="s2">&quot;LocationSearch&quot;</span><span class="p">)</span>
+    <span class="n">post_stim_biomarker_sample_length</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">525</span><span class="p">)</span>
+    <span class="n">post_stim_buffer_time</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">524</span><span class="p">)</span>
+    <span class="n">post_stim_wait_time</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+    <span class="n">refractory_duration</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">ArtifactDetectionParams</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Settings for pre-task artifact detection</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">allow_artifact_detection</span> <span class="o">=</span> <span class="n">Bool</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">pre_start</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="o">-</span><span class="mi">440</span><span class="p">)</span>
+    <span class="n">pre_stop</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="o">-</span><span class="mi">40</span><span class="p">)</span>
+    <span class="n">post_start</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">250</span><span class="p">)</span>
+    <span class="n">post_stop</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">650</span><span class="p">)</span>
+    <span class="n">sham_events</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+    <span class="n">stim_events</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+    <span class="n">isi_min</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">1500</span><span class="p">)</span>
+    <span class="n">isi_max</span> <span class="o">=</span> <span class="n">Int</span> <span class="p">(</span><span class="mi">2000</span><span class="p">)</span>
+    <span class="n">method</span> <span class="o">=</span> <span class="n">String</span><span class="p">(</span><span class="s2">&quot;ttest&quot;</span><span class="p">)</span>  <span class="c1"># zscore (Uma&#39;s method) or ttest (Ethan&#39;s method)</span>
+    <span class="n">std_threshold</span> <span class="o">=</span> <span class="n">Int</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">event_threshold</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span>
+    <span class="n">ttest_threshold</span> <span class="o">=</span> <span class="n">Float</span><span class="p">(</span> <span class="mf">0.001</span><span class="p">)</span>
 </pre></div>
 
            </div>
@@ -332,7 +411,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017.
+        &copy; Copyright 2017
 
     </p>
   </div>
@@ -351,21 +430,14 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../',
-            VERSION:'2.2.4',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 

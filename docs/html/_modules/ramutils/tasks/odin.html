@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ramutils.tasks.odin &mdash; Ramutils 2.2.4 documentation</title>
+  <title>ramutils.tasks.odin &mdash; Ramutils 2.3.0 documentation</title>
   
 
   
@@ -56,7 +56,7 @@
             
             
               <div class="version">
-                2.2
+                2.3
               </div>
             
           
@@ -82,11 +82,11 @@
             
               <p class="caption"><span class="caption-text">Contents</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../getting_started_report_data.html">Getting Statrted: RAM Report Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started_report_data.html">Getting Started: RAM Report Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../data.html">Serializable data structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../classifier.html">Classifier training, cross validation, and utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../events.html">Event processing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html">Pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pipeline.html">Pipelines and Tasks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../cli.html">Command-line usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../misc.html">Miscellaneous utilities</a></li>
 </ul>
@@ -160,6 +160,7 @@
 <span class="kn">import</span> <span class="nn">os.path</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">ramutils.parameters</span> <span class="c1"># ExperimentSpecs,PS4ExperimentSpecs,TICLExperimentSpecs,LocationSearchExperimentSpecs</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">List</span>
@@ -362,59 +363,21 @@
 <span class="sd">    ``experiment_specs`` dict</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># TODO: These should all be retrieved from the Parameter classes</span>
     <span class="k">if</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="n">EXPERIMENTS</span><span class="p">[</span><span class="s1">&#39;record_only&#39;</span><span class="p">]:</span>
         <span class="k">return</span> <span class="p">{}</span>
 
-    <span class="c1"># FIXME: values below shouldn&#39;t be hardcoded</span>
-    <span class="n">specs</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;3.0.0&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;experiment_type&quot;</span><span class="p">:</span> <span class="n">experiment</span><span class="p">,</span>
-        <span class="s2">&quot;biomarker_sample_start_time_offset&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="s2">&quot;biomarker_sample_time_length&quot;</span><span class="p">:</span> <span class="mi">1366</span><span class="p">,</span>
-        <span class="s2">&quot;buffer_time&quot;</span><span class="p">:</span> <span class="mi">1365</span><span class="p">,</span>
-        <span class="s2">&quot;stim_duration&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>
-        <span class="s2">&quot;freq_min&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
-        <span class="s2">&quot;freq_max&quot;</span><span class="p">:</span> <span class="mi">180</span><span class="p">,</span>
-        <span class="s2">&quot;num_freqs&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
-        <span class="s2">&quot;num_items&quot;</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span>
-    <span class="p">}</span>
-
-    <span class="c1"># FIXME: values below shouldn&#39;t be hardcoded</span>
     <span class="k">if</span> <span class="s1">&#39;PS4&#39;</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">:</span>
-        <span class="n">specs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
-            <span class="s2">&quot;retrieval_biomarker_sample_start_time_offset&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="s2">&quot;retrieval_biomarker_sample_time_length&quot;</span><span class="p">:</span> <span class="mi">525</span><span class="p">,</span>
-            <span class="s2">&quot;retrieval_buffer_time&quot;</span><span class="p">:</span> <span class="mi">524</span><span class="p">,</span>
-            <span class="s2">&quot;post_stim_biomarker_sample_time_length&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>
-            <span class="s2">&quot;post_stim_buffer_time&quot;</span><span class="p">:</span> <span class="mi">499</span><span class="p">,</span>
-            <span class="s2">&quot;post_stim_wait_time&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
-        <span class="p">})</span>
+        <span class="n">specs</span> <span class="o">=</span> <span class="n">ramutils</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">PS4ExperimentSpecs</span><span class="p">()</span>
+
     <span class="k">elif</span> <span class="s1">&#39;TICL&#39;</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">:</span>
-        <span class="n">specs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
-            <span class="s2">&quot;biomarker_sample_time_length&quot;</span><span class="p">:</span> <span class="mi">525</span><span class="p">,</span>
-            <span class="s2">&quot;buffer_time&quot;</span><span class="p">:</span> <span class="mi">524</span><span class="p">,</span>
-            <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;5.0.0&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;post_stim_wait_time&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
-            <span class="s2">&quot;post_stim_buffer_time&quot;</span><span class="p">:</span> <span class="mi">524</span><span class="p">,</span>
-            <span class="s2">&quot;post_stim_biomarker_sample_time_length&quot;</span><span class="p">:</span> <span class="mi">525</span><span class="p">,</span>
-            <span class="s2">&quot;refractory_duration&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-
-        <span class="p">})</span>
+        <span class="n">specs</span> <span class="o">=</span> <span class="n">ramutils</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">TICLExperimentSpecs</span><span class="p">()</span>
     <span class="k">elif</span> <span class="n">experiment</span> <span class="o">==</span> <span class="s2">&quot;LocationSearch&quot;</span><span class="p">:</span>
-        <span class="n">specs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
-            <span class="s2">&quot;biomarker_sample_start_time_offset&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="s2">&quot;biomarker_sample_time_length&quot;</span><span class="p">:</span> <span class="mi">525</span><span class="p">,</span>
-            <span class="s2">&quot;buffer_time&quot;</span><span class="p">:</span> <span class="mi">524</span><span class="p">,</span>
-            <span class="s2">&quot;experiment_type&quot;</span><span class="p">:</span> <span class="s2">&quot;LocationSearch&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;post_stim_biomarker_sample_time_length&quot;</span><span class="p">:</span> <span class="mi">525</span><span class="p">,</span>
-            <span class="s2">&quot;post_stim_buffer_time&quot;</span><span class="p">:</span> <span class="mi">524</span><span class="p">,</span>
-            <span class="s2">&quot;post_stim_wait_time&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
-            <span class="s2">&quot;stim_duration&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>
-            <span class="s2">&quot;refractory_duration&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="p">})</span>
+        <span class="n">specs</span> <span class="o">=</span> <span class="n">ramutils</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">LocationSearchExperimentSpecs</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">specs</span> <span class="o">=</span> <span class="n">ramutils</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ExperimentSpecs</span><span class="p">()</span>
+    <span class="n">specs</span><span class="o">.</span><span class="n">experiment_type</span> <span class="o">=</span> <span class="n">experiment</span>
 
-    <span class="k">return</span> <span class="n">specs</span>
+    <span class="k">return</span> <span class="n">specs</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
 
 
 <span class="k">def</span> <span class="nf">_make_ramulator_config_json</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">experiment</span><span class="p">,</span> <span class="n">electrode_config_file</span><span class="p">,</span>
@@ -463,21 +426,7 @@
                                                        <span class="n">classifier_version</span><span class="p">,</span>
                                                        <span class="n">trigger_pairs</span><span class="p">),</span>
             <span class="s1">&#39;experiment_specs&#39;</span><span class="p">:</span> <span class="n">_make_experiment_specs_section</span><span class="p">(</span><span class="n">experiment</span><span class="p">),</span>
-            <span class="s1">&#39;artifact_detection&#39;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;allow_artifact_detection&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="s2">&quot;pre_start&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">440</span><span class="p">,</span>
-                <span class="s2">&quot;pre_stop&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">40</span><span class="p">,</span>
-                <span class="s2">&quot;post_start&quot;</span><span class="p">:</span> <span class="mi">40</span><span class="p">,</span>
-                <span class="s2">&quot;post_stop&quot;</span><span class="p">:</span> <span class="mi">440</span><span class="p">,</span>
-                <span class="s2">&quot;sham_events&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
-                <span class="s2">&quot;stim_events&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
-                <span class="s2">&quot;isi_min&quot;</span><span class="p">:</span> <span class="mi">1500</span><span class="p">,</span>
-                <span class="s2">&quot;isi_max&quot;</span><span class="p">:</span> <span class="mi">2000</span><span class="p">,</span>
-                <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;ttest&quot;</span><span class="p">,</span>  <span class="c1"># zscore (Uma&#39;s method) or ttest (Ethan&#39;s method)</span>
-                <span class="s2">&quot;std_threshold&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-                <span class="s2">&quot;event_threshold&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
-                <span class="s2">&quot;ttest_threshold&quot;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">,</span>
-            <span class="p">},</span>
+            <span class="s1">&#39;artifact_detection&#39;</span><span class="p">:</span> <span class="n">_make_artifact_detection_section</span><span class="p">(</span><span class="n">experiment</span><span class="p">),</span>
         <span class="p">},</span>
 
         <span class="s2">&quot;biomarker_threshold&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
@@ -501,6 +450,12 @@
     <span class="p">}</span>
 
     <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_make_artifact_detection_section</span><span class="p">(</span><span class="n">experiment</span><span class="p">):</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">ramutils</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">ArtifactDetectionParams</span><span class="p">()</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">allow_artifact_detection</span> <span class="o">=</span> <span class="n">experiment</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;PS4&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">params</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
 
 
 <div class="viewcode-block" id="generate_ramulator_config"><a class="viewcode-back" href="../../../pipeline.html#ramutils.tasks.odin.generate_ramulator_config">[docs]</a><span class="nd">@task</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -663,7 +618,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017.
+        &copy; Copyright 2017
 
     </p>
   </div>
@@ -682,21 +637,14 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../../',
-            VERSION:'2.2.4',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 
