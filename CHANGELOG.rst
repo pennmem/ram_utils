@@ -7,6 +7,7 @@ Version 2.3.1
 
 * LocationSearch report now uses both FR1 and catFR1 experiments to compute connectivity
 * Artifact detection only enabled for PS4 experiments
+* Moved post-stim biomarker period to begin 250 ms post-stim, rather than 40 ms
 * Refactored sections of the experiment config into ramutils.parameters
 
 Version 2.3.0
