@@ -1139,8 +1139,9 @@ def extract_subject(events, add_localization=False):
         montage = np.unique(events[events.montage != ''].montage).tolist()
         if montage[0] != '0.0':
             localization = montage[0][0]
-            subject = "_".join([subject, localization])
-
+            #subject = "_".join([subject, localization]) # I think this is wrong for our naming convention (paw)
+            montage_id = montage[0][2]
+            subject = "_".join([subject, montage_id]) # this follows our naming convention
     return subject
 
 
