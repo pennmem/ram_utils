@@ -304,6 +304,9 @@ class ReportGenerator(object):
         elif all(['TICL_FR' in exp for exp in self.experiments]):
             return self.generate_closed_loop_fr_report('TICL_FR')
 
+        elif all(['repFR1' in exp for exp in self.experiments):
+            return self.generate_repfr1_report()
+
         elif series == '1':
             joint = False
             if any(['catFR' in exp for exp in self.experiments]):
@@ -346,6 +349,7 @@ class ReportGenerator(object):
             **kwargs
         )
 
+
     def generate_record_only_report(self, joint):
         """ Generate report for record only experiments
 
@@ -387,6 +391,16 @@ class ReportGenerator(object):
                                            biomarker_delta=False)
 
         )
+
+    def generate_repfr1_report(self):
+        return self._render(
+                'repFR1',
+                stim=False,
+                combined_summary=self._make_combined_summary(),
+                plot_data=self._make_plot_data(stim=False, classifier=False, biomarker_delta=False), # TODO
+                sme_table=self._make_target_selection_table(), # TODO
+                feature_data=self._make_feature_plots()  # TODO
+            )
 
     def generate_closed_loop_fr_report(self, experiment):
         """ Generate an FR5-like report

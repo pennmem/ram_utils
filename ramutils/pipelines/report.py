@@ -93,6 +93,12 @@ def make_report(subject, experiment, paths, joint_report=False,
         return generate_ps4_report(subject, experiment, sessions, ec_pairs,
                                    excluded_pairs, paths)
 
+    if 'repFR' in experiment:
+        return generate_repFR_report()
+
+    if 'DBOY' in experiment:
+        return generate_dboy_report()
+
     kwargs = exp_params.to_dict()
 
     stim_report = is_stim_experiment(experiment).compute()

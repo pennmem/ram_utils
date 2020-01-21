@@ -19,6 +19,7 @@ def build_static_report(subject, experiment, session_summaries, math_summaries,
 
     # Subject IDs are at most 8 characters, so this is a quick check to see
     # if multiple subjects are included
+    # FIXME: this is amazingly terrible
     if aggregated_report and len(subject) > 8:
         subject = "Multi-subject"
 

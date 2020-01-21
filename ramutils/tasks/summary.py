@@ -52,8 +52,10 @@ def summarize_math(events, joint=False):
         validate_single_experiment(events)
 
     math_events = select_math_events(events)
+    
     if len(math_events) == 0:
-        raise RuntimeError("No math events found when trying to summarize math "
+        pass # need to let repFR pass, and don't know of an instance when this protection is needed
+        #raise RuntimeError("No math events found when trying to summarize math "
                            "distractor period")
 
     sessions = extract_sessions(math_events)
@@ -130,6 +132,16 @@ def summarize_nonstim_sessions(all_events, task_events,
                              session_powers,
                              raw_events=session_all_events,
                              repetition_ratio_dict=repetition_ratio_dict)
+        elif experiment in ['repFR1']:
+            #raise NotImplementedError("repFR1 not implemented")
+            summary = repFRSessionSummary()
+            summary.populate(session_task_events,
+                              bipolar_pairs,
+                              excluded_pairs,
+                              session_powers,
+                              raw_events=session_all_events)
+        elif experiment in ['DBOY1']:
+            raise NotImplementedError("Courier not implemented")
         else:
             raise UnsupportedExperimentError(
                 "Unsupported experiment: {}".format(experiment))

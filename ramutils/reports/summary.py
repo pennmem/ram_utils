@@ -37,6 +37,7 @@ __all__ = [
     'SessionSummary',
     'StimSessionSummary',
     'FRSessionSummary',
+    'repFRSessionSummary',
     'CatFRSessionSummary',
     'FRStimSessionSummary',
     'FR5SessionSummary',
@@ -641,8 +642,50 @@ class SessionSummary(Summary):
         self.normalized_powers = normalized_powers
 
 
+class repFRSessionSummary(FRSessionSummary):
+    # TODO: make all repeat handling consistent with
+    # base class(es)
+
+    def populate(self, events, bipolar_pairs, excluded_pairs, 
+                 normalized_powers, raw_events=raw_events):
+       FRSessionSummary.populate(self, events, bipolar_pairs, excluded_pairs, 
+                                 normalized_powers, raw_events=raw_events)
+    
+    @property
+    def num_correct(self):
+        return len(self.events[(self.events.type == 'WORD') & (self.events.recalled) & ~(self.events.is_repeat)])
+
+    @property
+    def num_words(self):
+        """returns number of unique words presented"""
+        return len(self.events[(self.events.type == 'WORD') & ~(self.events.is_repeat)])
+
+    @staticmethod
+    def serialpos_probabilities(self, summaries, first=False):
+        if first:
+            #TODO
+            firstpos = np.zeros(len(events.serialpos.unique()), dtype=np.float)
+            for listno in events.list.unique():
+                try:
+                    nonzero = events[(events.list == listno) & (
+                        events.recalled == 1)].serialpos.iloc[0]
+                except IndexError:  # no items recalled this list
+                    continue
+                thispos = np.zeros(firstpos.shape, firstpos.dtype)
+                thispos[nonzero - 1] = 1
+                firstpos += thispos
+            return (firstpos / events.list.max()).tolist()
+            pass
+        else:
+            recalls_by_repeat = self.events[self.events.type == 'WORD'].groupby(["serialpos", "repeats"]).recalled.mean().to_numpy()
+            all_recalls = self.events[self.events.type == 'WORD'].groupby(["serialpos"]).recalled.mean().to_numpy()
+
+            return np.concatenate((all_recalls[None,  :], recalls_by_repeat), axis=0)
+
+
 class FRSessionSummary(SessionSummary):
     """Free recall session summary data."""
+
 
     def populate(self, events, bipolar_pairs, excluded_pairs,
                  normalized_powers, raw_events=None):
@@ -929,6 +972,7 @@ class StimSessionSummary(SessionSummary):
     def subject(self):
         """ Subject ID associated with the session """
         return extract_subject(self.events, add_localization=False)
+
 
 
 class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
