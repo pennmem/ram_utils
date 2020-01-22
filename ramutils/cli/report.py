@@ -33,7 +33,6 @@ parser.add_argument('--report_db_location',
 parser.add_argument('--trigger-electrode', '-t', type=str,
                     help='Label of the electrode to use for triggering '
                          'stimulation in PS5')
-#TODO: dest argument
 
 logger = get_logger("reports")
 

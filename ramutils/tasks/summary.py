@@ -55,8 +55,7 @@ def summarize_math(events, joint=False):
     
     if len(math_events) == 0:
         pass # need to let repFR pass, and don't know of an instance when this protection is needed
-        #raise RuntimeError("No math events found when trying to summarize math "
-                           "distractor period")
+        #raise RuntimeError("No math events found when trying to summarize math "distractor period")
 
     sessions = extract_sessions(math_events)
     summaries = []

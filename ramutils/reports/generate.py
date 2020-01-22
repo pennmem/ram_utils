@@ -304,7 +304,7 @@ class ReportGenerator(object):
         elif all(['TICL_FR' in exp for exp in self.experiments]):
             return self.generate_closed_loop_fr_report('TICL_FR')
 
-        elif all(['repFR1' in exp for exp in self.experiments):
+        elif all(['repFR1' in exp for exp in self.experiments]):
             return self.generate_repfr1_report()
 
         elif series == '1':

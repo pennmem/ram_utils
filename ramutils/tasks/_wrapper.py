@@ -1,5 +1,5 @@
 import functools
-rom tempfile import gettempdir
+from tempfile import gettempdir
 
 from dask import delayed
 from sklearn.externals import joblib

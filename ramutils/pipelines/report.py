@@ -3,6 +3,8 @@ from collections import namedtuple
 
 import pandas as pd
 
+# TODO: import experiments file
+from ramutils.pipelines.experiments import generate_data_for_repfr_report, generate_data_for_dboy_report
 from ramutils.events import dataframe_to_recarray
 from ramutils.tasks import *
 from ramutils.utils import extract_experiment_series
@@ -14,6 +16,12 @@ ReportData = namedtuple('ReportData', 'session_summaries, math_summaries, '
                                       'target_selection_table, classifier_evaluation_results,'
                                       'trained_classifier, repetition_ratio_dict, '
                                       'retrained_classifier, behavioral_results')
+
+experiment_mapping = {
+            'repFR': generate_data_for_repfr_report, 
+            'DBOY': generate_data_for_dboy_report,
+            # TODO: ps4, other experiments
+        }
 
 
 def make_report(subject, experiment, paths, joint_report=False,
@@ -87,17 +95,54 @@ def make_report(subject, experiment, paths, joint_report=False,
         stim_params.extend(classifier_excluded_leads)
     excluded_pairs = reduce_pairs(ec_pairs, stim_params, return_excluded=True)
 
+
+    final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
+    used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
+    pairs_metadata_table = generate_montage_metadata_table(subject,
+                                                           experiment,
+                                                           sessions,
+                                                           ec_pairs,
+                                                           root=paths.root).compute()
+
+    # all_events are used for producing math summaries. Task events are only
+    # used by the stim reports. Non-stim reports create a different set of
+    # events. Stim params are used in building the stim session
+    # summaries. PS experiments do not have an all_events.json file,
+    # which is what these subsets are built from, so PS has it's own
+    # build_*_data function
+    all_events, task_events, stim_data = build_test_data(subject,
+                                                         experiment,
+                                                         paths,
+                                                         joint_report,
+                                                         sessions=sessions,
+                                                         **kwargs).compute()
+
+    target_selection_table = pd.DataFrame(columns=['type', 'contact0',
+                                                   'contact1', 'label',
+                                                   'hfa_p_value', 'hfa_tstat',
+                                                   '110_p_value', '110_tstat',
+                                                   'mni_x', 'mni_y', 'mni_z',
+                                                   'controllability'])
+
+
     # PS4 is such a special beast, that we just return its own sub-pipeline
     # in order to simplify the branching logic for generating all other reports
     if "PS4" in experiment:
         return generate_ps4_report(subject, experiment, sessions, ec_pairs,
                                    excluded_pairs, paths)
 
+    # TODO: turn into dictionary lookup
     if 'repFR' in experiment:
-        return generate_repFR_report()
+        # TODO: don't need to use these parameters
+        data = generate_data_for_repfr_report(subject, experiment, sessions, 
+                                                joint_report, paths, ec_pairs,
+                                                used_pair_mask, excluded_pairs,
+                                                final_pairs, pairs_metadata_table,
+                                                all_events, **kwargs)
 
     if 'DBOY' in experiment:
-        return generate_dboy_report()
+        # return generate_dboy_report()
+        pass
 
     kwargs = exp_params.to_dict()
 
@@ -128,34 +173,6 @@ def make_report(subject, experiment, paths, joint_report=False,
                                          paths.dest,
                                          hmm_results=pre_built_results['hmm_results'])
             return report.compute()
-
-    final_pairs = generate_pairs_for_classifier(ec_pairs, excluded_pairs)
-    used_pair_mask = get_used_pair_mask(ec_pairs, excluded_pairs)
-    pairs_metadata_table = generate_montage_metadata_table(subject,
-                                                           experiment,
-                                                           sessions,
-                                                           ec_pairs,
-                                                           root=paths.root).compute()
-
-    # all_events are used for producing math summaries. Task events are only
-    # used by the stim reports. Non-stim reports create a different set of
-    # events. Stim params are used in building the stim session
-    # summaries. PS experiments do not have an all_events.json file,
-    # which is what these subsets are built from, so PS has it's own
-    # build_*_data function
-    all_events, task_events, stim_data = build_test_data(subject,
-                                                         experiment,
-                                                         paths,
-                                                         joint_report,
-                                                         sessions=sessions,
-                                                         **kwargs).compute()
-
-    target_selection_table = pd.DataFrame(columns=['type', 'contact0',
-                                                   'contact1', 'label',
-                                                   'hfa_p_value', 'hfa_tstat',
-                                                   '110_p_value', '110_tstat',
-                                                   'mni_x', 'mni_y', 'mni_z',
-                                                   'controllability'])
 
     if not stim_report:
         data = generate_data_for_nonstim_report(subject, experiment, sessions,

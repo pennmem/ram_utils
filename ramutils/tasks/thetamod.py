@@ -57,7 +57,7 @@ def get_psd_data(stim_events, rootdir):
 
 
 @task()
-def compute_tmi(stim_events: np.ndarray, pairs,
+def compute_tmi(stim_events: np.ndarray, pairs, \
                 rootdir: str):
 
         subject = ramutils.events.extract_subject(stim_events)
