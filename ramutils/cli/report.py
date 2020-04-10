@@ -29,7 +29,7 @@ parser.add_argument('--rerun', '-C', action="store_true", default=False,
                     help='do not use previously generated output')
 parser.add_argument('--report_db_location',
                     help='location of report data database',
-                    type=str, default="/scratch/report_database/")
+                    type=str, default="/data10/RAM/report_database/")
 parser.add_argument('--trigger-electrode', '-t', type=str,
                     help='Label of the electrode to use for triggering '
                          'stimulation in PS5')

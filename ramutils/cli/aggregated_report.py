@@ -17,7 +17,7 @@ parser.add_argument('--fit-model', '-f', action='store_true', default=False,
                     help='Fit model to estimate behavioral effects of stim (very slow)')
 parser.add_argument('--report_db_location',
                     help='location of report data database',
-                    type=str, default="/scratch/report_database/")
+                    type=str, default="/data10/RAM/report_database/")
 
 logger = get_logger("reports")
 

@@ -10,7 +10,7 @@ memory.cachedir = "/Users/zduey/tmp/"
 paths = FilePaths(
     root='/Volumes/RHINO/',
     dest='/scratch/zduey/',
-    data_db='/scratch/report_database/'
+    data_db='/data10/RAM/report_database/'
 )
 
 make_aggregated_report(None, ['FR5', 'CatFR5'], None, fit_model=False, paths=paths)

@@ -71,7 +71,7 @@ def save_all_output(subject, experiment, session_summaries, math_summaries,
         List of ClassifierSummary objects
     save_location: str
         Destination for data to be saved. Typically in
-        /scratch/report_database/ on RHINO
+        /data10/RAM/report_database/ on RHINO
     retrained_classifier: ClassifierContainer
         Serialized representation of the retrained classifier
     target_selection_table pd.DataFrame
