@@ -741,8 +741,6 @@ class FRSessionSummary(SessionSummary):
             return group.recalled.mean().tolist()
 
 class repFRSessionSummary(FRSessionSummary):
-    # TODO: make all repeat handling consistent with
-    # base class(es)
 
     def populate(self, events, bipolar_pairs, excluded_pairs, 
                  normalized_powers, raw_events=None):
@@ -750,35 +748,66 @@ class repFRSessionSummary(FRSessionSummary):
                                  normalized_powers, raw_events=raw_events)
     
     @property
+    def presentation_counts(self):
+        return list(self.events.repeats.unique())
+
+    @property
     def num_correct(self):
-        return len(self.events[(self.events.type == 'WORD') & (self.events.recalled) & ~(self.events.is_repeat)])
+        return len(self.events[(self.events.type == 'WORD') & (self.events.recalled == 1) & (self.events.is_repeat == False)])
 
     @property
     def num_words(self):
         """returns number of unique words presented"""
-        return len(self.events[(self.events.type == 'WORD') & ~(self.events.is_repeat)])
+        return len(self.events[(self.events.type == 'WORD') & (self.events.is_repeat == False)])
+
+    def get_num_words(self, repeats):
+        return len(self.events[(self.events.type == 'WORD') & (self.events.repeats == repeats) 
+                        & (self.events.is_repeat == False)])
+
+
+    def get_num_correct(self, repeats):
+        return len(self.events[(self.events.type == 'WORD') & (self.events.repeats == repeats)
+                        &(self.events.recalled == 1) & (self.events.is_repeat == False)])
+
 
     @staticmethod
-    def serialpos_probabilities(self, summaries, first=False):
+    def serialpos_probabilities(summaries, first=False):
+        events = pd.concat([pd.DataFrame(s.events)
+                            for s in summaries])
+        events = events[events.type == 'WORD']
         if first:
-            #TODO
-            firstpos = np.zeros(len(events.serialpos.unique()), dtype=np.float)
+            #TODO: make list length configurable
+
+            firstpos = np.full((4, 27), dtype=np.float)
             for listno in events.list.unique():
                 try:
                     nonzero = events[(events.list == listno) & (
                         events.recalled == 1)].serialpos.iloc[0]
                 except IndexError:  # no items recalled this list
                     continue
+
                 thispos = np.zeros(firstpos.shape, firstpos.dtype)
                 thispos[nonzero - 1] = 1
                 firstpos += thispos
             return (firstpos / events.list.max()).tolist()
-            pass
         else:
-            recalls_by_repeat = self.events[self.events.type == 'WORD'].groupby(["serialpos", "repeats"]).recalled.mean().to_numpy()
-            all_recalls = self.events[self.events.type == 'WORD'].groupby(["serialpos"]).recalled.mean().to_numpy()
+            # TODO: make this configurable
+            # NOTE: this includes the practice list
 
-            return np.concatenate((all_recalls[None,  :], recalls_by_repeat), axis=0)
+            summary = np.full((4, 27), np.nan)
+            recalls_by_repeat = events[events.type == 'WORD'].groupby(["repeats", "serialpos"]).recalled.mean()
+
+            new_index = pd.MultiIndex.from_product(recalls_by_repeat.index.levels)
+            recalls_by_repeat = recalls_by_repeat.reindex(new_index)
+            recalls_by_repeat = recalls_by_repeat.fillna(np.nan)
+
+            summary[1,:] = recalls_by_repeat[(1,)]
+            summary[2,:] = recalls_by_repeat[(2,)]
+            summary[3,:] = recalls_by_repeat[(3,)]
+
+            summary[0,:] = events[events.type == 'WORD'].groupby(["serialpos"]).recalled.mean().values
+
+            return summary
 
 
 class CatFRSessionSummary(FRSessionSummary):

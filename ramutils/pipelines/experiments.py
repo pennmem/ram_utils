@@ -22,11 +22,13 @@ def generate_data_for_repfr_report(subject, experiment, sessions,
                                      final_pairs, pairs_metadata_table,
                                      all_events, **kwargs):
     '''
-    Architecture for experiments moving forward. Thus function defines the
+    Architecture for experiments moving forward. This function defines the
     data processing for the repFR paradigm. All versions (non stim, open
     loop stim, closed loop stim) are all handled by branches from this
     function. The end result is returned as a ReportData named tuple that
     contains null values for the data not generated for this paradigm.
+
+    At some point, this function should become a class to handle stim versions
     '''
 
     if joint_report:
@@ -36,11 +38,16 @@ def generate_data_for_repfr_report(subject, experiment, sessions,
 
     kwargs['encoding_only'] = False
 
+    # FIXME: why do I need this?
+    kwargs['combine_events'] = False
+    all_task_events = build_training_data(subject,
+                                          experiment,
+                                          paths,
+                                          sessions=sessions,
+                                          **kwargs)
+
     powers, final_task_events = compute_normalized_powers(
         all_task_events, bipolar_pairs=ec_pairs, **kwargs)
-
-    reduced_powers = reduce_powers(powers, used_pair_mask,
-                                   len(kwargs['freqs']))
 
     trained_classifier = None
     classifier_evaluation_results = None # TODO: will be implemented at a later point

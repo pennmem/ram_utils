@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}
+  {{ subject }} RAM RepFR1 Report
+{% endblock %}
+
+{% block report %}
+{% include 'session_summary.html' %}
+{% include 'repeat_session_summary.html' %}
+{% include 'serialpos_curve.html' %}
+
+{% include 'feature_plot_img.html' %}
+{% include 'sme.html' %}
+{% endblock %}

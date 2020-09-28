@@ -203,6 +203,7 @@ def extract_experiment_series(experiment):
         return '2.1'
 
     # This can happen if the experiment is extracted from an empty recarray
+    # FIXME: raise an error!?
     if experiment == '':
         return None
 

@@ -15,6 +15,7 @@ var ramutils = (function (mod, Plotly) {
       let data = [];
 
       for (let name in overallProbs) {
+        console.log(name);
         data.push({
           x: serialPos,
           y: overallProbs[name],
@@ -36,7 +37,7 @@ var ramutils = (function (mod, Plotly) {
         title: "Probability of Recall as a Function of Serial Position",
         xaxis: {
           title: 'Serial position',
-          range: [0.9, 12.1]
+          range: [0.9, serialPos.length + .1]
         },
         yaxis: {
           title: 'Probability',
@@ -536,7 +537,17 @@ var ramutils = (function (mod, Plotly) {
              yaxis: {name: "Channel count"}
              };
         Plotly.plot("stim-tstat-histogram", data, layout)
+    },
+    barPlot: function(data, labels) {
+        let plot_data = [{
+            x: labels,
+            y: data,
+            type: 'bar'
+        }];
+
+        Plotly.newPlot("barplot-placeholder", plot_data)
     }
+
   };
 
   return mod;

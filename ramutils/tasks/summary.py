@@ -131,7 +131,7 @@ def summarize_nonstim_sessions(all_events, task_events,
                              session_powers,
                              raw_events=session_all_events,
                              repetition_ratio_dict=repetition_ratio_dict)
-        elif experiment in ['repFR1']:
+        elif experiment in ['RepFR1']:
             #raise NotImplementedError("repFR1 not implemented")
             summary = repFRSessionSummary()
             summary.populate(session_task_events,

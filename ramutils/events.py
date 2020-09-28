@@ -48,6 +48,7 @@ def load_events(subject, experiment, file_type='all_events',
         experiment, and session(s)
 
     """
+
     json_reader = JsonIndexReader(os.path.join(rootdir,
                                                "protocols",
                                                "r1.json"))
@@ -136,6 +137,7 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
     This function should be called on an experiment by experiment basis and
     should not be used to clean cross-experiment datasets
     """
+
     experiments = extract_experiment_from_events(events)
     series_num = extract_experiment_series(experiments[0])
 
@@ -157,7 +159,9 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
                            ' datasets')
     experiment = experiments[0]
 
+
     events = remove_negative_offsets(events)
+
     events = remove_voice_detection(events)
 
     # Only for PS5 do we want to keep the practice list around so we can know
@@ -168,8 +172,11 @@ def clean_events(events, start_time=None, end_time=None, duration=None,
 
     else:
         events = events[events.list >= -1]
-
+    
     events = remove_incomplete_lists(events)
+
+    # FIXME: simplify logic so subsetting only happens if
+    # combining experiments
     events = select_column_subset(events, all_relevant=True)
 
     # separate_stim_events is called within the task-specific functions
@@ -426,6 +433,7 @@ def remove_incomplete_lists(events):
         list_has_end = [any([l['type'] == 'REC_END' for l in list_group]) or
                         listno == -999 for listno, list_group in groupby(
             final_sess_events, lambda x:x.list)]
+
         final_sess_events = np.concatenate([e for (e, a) in zip(
             events_by_list, list_has_end) if a])
 
@@ -620,11 +628,12 @@ def get_required_columns(all_relevant=False, pal=False, stim=False, cat=False):
     if cat & pal:
         raise RuntimeError('cat and pal cannot be selected at the same time')
 
+    # FIXME: this hack isn't a substitute for doing this right in event_filter
     columns = [
         'serialpos', 'session', 'subject', 'rectime', 'experiment',
         'mstime', 'type', 'eegoffset', 'recalled', 'intrusion',
         'montage', 'list', 'stim_list', 'eegfile', 'msoffset', 'item_name',
-        'iscorrect', 'phase', 'matched'
+        'iscorrect', 'phase', 'matched', 'is_repeat', 'repeats'
     ]
 
     if all_relevant:
@@ -1487,6 +1496,7 @@ def validate_single_session(events):
 
 def extract_sample_rate_from_eeg(events):
     """ Extract the samplerate used for the given set of events by loading EEG """
+
     eeg_reader = EEGReader(events=events[:2], start_time=0.0, end_time=1.0)
     eeg = eeg_reader.read()
     samplerate = float(eeg['samplerate'])
@@ -1639,7 +1649,12 @@ def get_all_retrieval_events_mask(events):
 
 def get_recall_events_mask(events):
     """ Create a boolean mask for any recall events """
-    recall_mask = (events.recalled == 1)
+    recall_mask = (events.recalled == 1) & (events.type == 'WORD') #& (events.is_repeat == False)
+    return recall_mask
+
+def get_non_recall_events_mask(events):
+    """ Create a boolean mask for any recall events """
+    recall_mask = (events.recalled != 1) & (events.type == 'WORD') #& (events.is_repeat == False)
     return recall_mask
 
 

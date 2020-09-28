@@ -18,7 +18,7 @@ ReportData = namedtuple('ReportData', 'session_summaries, math_summaries, '
                                       'retrained_classifier, behavioral_results')
 
 experiment_mapping = {
-            'repFR': generate_data_for_repfr_report, 
+            'RepFR': generate_data_for_repfr_report, 
             'DBOY': generate_data_for_dboy_report,
             # TODO: ps4, other experiments
         }
@@ -87,6 +87,7 @@ def make_report(subject, experiment, paths, joint_report=False,
 
     ec_pairs = get_pairs(subject, experiment, sessions, paths)
 
+    # FIXME
     if use_classifier_excluded_leads:
         classifier_excluded_leads = get_classifier_excluded_leads(
             subject, ec_pairs, paths.root).compute()
@@ -110,6 +111,14 @@ def make_report(subject, experiment, paths, joint_report=False,
     # summaries. PS experiments do not have an all_events.json file,
     # which is what these subsets are built from, so PS has it's own
     # build_*_data function
+
+    # PS4 is such a special beast, that we just return its own sub-pipeline
+    # in order to simplify the branching logic for generating all other reports
+    if "PS4" in experiment:
+        return generate_ps4_report(subject, experiment, sessions, ec_pairs,
+                                   excluded_pairs, paths)
+
+    kwargs = exp_params.to_dict()
     all_events, task_events, stim_data = build_test_data(subject,
                                                          experiment,
                                                          paths,
@@ -125,26 +134,35 @@ def make_report(subject, experiment, paths, joint_report=False,
                                                    'controllability'])
 
 
-    # PS4 is such a special beast, that we just return its own sub-pipeline
-    # in order to simplify the branching logic for generating all other reports
-    if "PS4" in experiment:
-        return generate_ps4_report(subject, experiment, sessions, ec_pairs,
-                                   excluded_pairs, paths)
 
     # TODO: turn into dictionary lookup
-    if 'repFR' in experiment:
+    if 'RepFR' in experiment:
         # TODO: don't need to use these parameters
         data = generate_data_for_repfr_report(subject, experiment, sessions, 
                                                 joint_report, paths, ec_pairs,
                                                 used_pair_mask, excluded_pairs,
                                                 final_pairs, pairs_metadata_table,
                                                 all_events, **kwargs)
+        
+        '''
+        output = save_all_output(subject, experiment, data.session_summaries,
+                             data.math_summaries, data.classifier_evaluation_results,
+                             paths.data_db,
+                             target_selection_table=data.target_selection_table,
+                             behavioral_results=data.behavioral_results).compute()
+        '''
+
+        report = build_static_report(subject, experiment, data.session_summaries,
+                                 data.math_summaries, data.target_selection_table,
+                                 data.classifier_evaluation_results,
+                                  dest=paths.dest)
+
+        return report.compute()
 
     if 'DBOY' in experiment:
         # return generate_dboy_report()
         pass
 
-    kwargs = exp_params.to_dict()
 
     stim_report = is_stim_experiment(experiment).compute()
     series_num = extract_experiment_series(experiment)

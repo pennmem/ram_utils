@@ -14,7 +14,7 @@ from pkg_resources import resource_listdir, resource_string
 from ramutils import __version__
 from ramutils.reports.summary import (FRSessionSummary, MathSummary,
                                       FRStimSessionSummary, TICLFRSessionSummary,
-                                      LocationSearchSessionSummary)
+                                      LocationSearchSessionSummary, repFRSessionSummary)
 from ramutils.events import extract_experiment_from_events, extract_subject
 from ramutils.utils import extract_experiment_series
 
@@ -155,8 +155,20 @@ class ReportGenerator(object):
             'n_words': sum([summary.num_words for summary in self.session_summaries]),
             'n_correct': sum([summary.num_correct for summary in self.session_summaries]),
             'n_pli': sum([summary.num_prior_list_intrusions for summary in self.session_summaries]),
-            'n_eli': sum([summary.num_extra_list_intrusions for summary in self.session_summaries])
+            'n_eli': sum([summary.num_extra_list_intrusions for summary in self.session_summaries]),
         }
+
+    def _make_repfr_summary(self):
+            summary = self._make_combined_summary()
+
+            summary['presentation_counts'] = [1,2,3]
+            summary.update({"{}p_words".format(p): sum([s.get_num_words(p) for s in self.session_summaries]) 
+                            for p in summary['presentation_counts']})
+
+            summary.update({"{}p_correct".format(p): sum([s.get_num_correct(p) for s in self.session_summaries]) 
+                            for p in summary['presentation_counts']})
+
+            return summary
 
     def _make_classifier_data(self):
         classifier_data = {
@@ -183,7 +195,30 @@ class ReportGenerator(object):
         """ Build up a large dictionary of data for various plots from plot-specific components """
 
         plot_data = {}
-        if not stim:
+        # TODO: another place to fix the workarounds
+        if "RepFR" in self.experiment:
+            serialpos_data = repFRSessionSummary.serialpos_probabilities(
+                    self.session_summaries, first=False)
+
+            # first_serialpos_data = repFRSessionSummary.serialpos_probabilities(
+            #         self.session_summaries, first=True)
+
+            def replace_nan(x): return None if np.isnan(x) else x 
+
+            plot_data['serialpos'] = {
+                #TODO: make this based on experiment configs
+                'serialpos': list(range(1, 28)),
+                'overall': {
+                    # 'Overall': [replace_nan(a) for a in serialpos_data[0]],
+                    'One Presentation': [replace_nan(a) for a in serialpos_data[1]],
+                    # 'Two Presentations': [replace_nan(a) for a in serialpos_data[2]],
+                    # 'Three Presentations': [replace_nan(a) for a in serialpos_data[3]]
+                },
+                # 'first': {
+                #     'One Presentation': [replace_nan(a) for a in first_serialpos_data[1]],
+                # }
+            }
+        elif not stim:
             plot_data['serialpos'] = {
                 'serialpos': list(range(1, 13)),
                 'overall': {
@@ -304,7 +339,8 @@ class ReportGenerator(object):
         elif all(['TICL_FR' in exp for exp in self.experiments]):
             return self.generate_closed_loop_fr_report('TICL_FR')
 
-        elif all(['repFR1' in exp for exp in self.experiments]):
+        # TODO: make this a neater mapping for other experiments
+        elif all(['RepFR1' in exp for exp in self.experiments]):
             return self.generate_repfr1_report()
 
         elif series == '1':
@@ -393,10 +429,18 @@ class ReportGenerator(object):
         )
 
     def generate_repfr1_report(self):
+        """
+        Generate a repfr report without stim.
+
+        Returns
+        -------
+        Rendered report as an html string, eventually.
+
+        """
         return self._render(
                 'repFR1',
                 stim=False,
-                combined_summary=self._make_combined_summary(),
+                combined_summary=self._make_repfr_summary(), # TODO
                 plot_data=self._make_plot_data(stim=False, classifier=False, biomarker_delta=False), # TODO
                 sme_table=self._make_target_selection_table(), # TODO
                 feature_data=self._make_feature_plots()  # TODO

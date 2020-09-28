@@ -17,7 +17,7 @@ except ImportError:
 
 from ramutils.log import get_logger
 from ramutils.utils import timer
-from ramutils.events import get_recall_events_mask, extract_sessions, \
+from ramutils.events import get_recall_events_mask, get_non_recall_events_mask, extract_sessions, \
     partition_events, concatenate_events_for_single_experiment, \
     get_partition_masks
 from ramutils.montage import generate_pairs_for_ptsa, extract_monopolar_from_bipolar
@@ -464,6 +464,8 @@ def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events,
         Calculate tstats and pvalues from a ttest comparing HFA activity of
         recalled versus non-recalled items
     """
+
+
     powers_3d = reshape_powers_to_3d(normalized_powers, len(frequencies))
     hfa_mask = [True if freq > hfa_cutoff else False for freq in frequencies]
     hfa_powers = powers_3d[:, :, hfa_mask]
@@ -472,8 +474,16 @@ def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events,
     hfa_powers = np.nanmean(hfa_powers, axis=-1)
 
     recall_mask = get_recall_events_mask(events)
+    non_recall_mask = get_non_recall_events_mask(events)
+
+
+    print("powers.py")
+    print(sum(recall_mask))
+    print(sum(non_recall_mask))
+
+
     recalled_pow_mat = hfa_powers[recall_mask, :]
-    non_recalled_pow_mat = hfa_powers[~recall_mask, :]
+    non_recalled_pow_mat = hfa_powers[non_recall_mask, :]
 
     tstats, pvals = ttest_ind(recalled_pow_mat, non_recalled_pow_mat, axis=0)
     sig_mask, pvals, _, _ = multipletests(pvals, method='fdr_bh')
@@ -489,7 +499,7 @@ def calculate_delta_hfa_table(pairs_metadata_table, normalized_powers, events,
     single_freq_powers = np.nanmean(single_freq_powers, axis=-1)
 
     recalled_single_freq_powers = single_freq_powers[recall_mask, :]
-    non_recalled_single_freq_powers = single_freq_powers[~recall_mask, :]
+    non_recalled_single_freq_powers = single_freq_powers[non_recall_mask, :]
 
     tstats, pvals = ttest_ind(recalled_single_freq_powers,
                               non_recalled_single_freq_powers, axis=0)
