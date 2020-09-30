@@ -1649,12 +1649,12 @@ def get_all_retrieval_events_mask(events):
 
 def get_recall_events_mask(events):
     """ Create a boolean mask for any recall events """
-    recall_mask = (events.recalled == 1) & (events.type == 'WORD') #& (events.is_repeat == False)
+    recall_mask = (events.recalled == 1) #& (events.type == 'WORD') #& (events.is_repeat == False)
     return recall_mask
 
 def get_non_recall_events_mask(events):
     """ Create a boolean mask for any recall events """
-    recall_mask = (events.recalled != 1) & (events.type == 'WORD') #& (events.is_repeat == False)
+    recall_mask = (events.recalled != 1) #& (events.type == 'WORD') #& (events.is_repeat == False)
     return recall_mask
 
 
