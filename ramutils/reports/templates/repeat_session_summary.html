@@ -1,0 +1,46 @@
+<div>
+  <h2>Repeat summary</h2>
+
+  <h3>All sessions</h3>
+  <table class="table table-striped table-hover">
+
+    {% for p in combined_summary['presentation_counts'] %}
+        <tr>
+          <th scope="row"; padding=20px>    Total Number Correct ({{p}}p)</th>
+          <td>{{ combined_summary[p|string + 'p_correct'] }} / {{  combined_summary[p|string + 'p_words'] }} ({{ '{:.1f}%'.format(100 * combined_summary[p|string + 'p_correct'] / combined_summary[p|string + 'p_words']) }})</td>
+        </tr>
+    {% endfor %}
+  </table>
+
+  <figure>
+    <div id="barplot-placeholder"></div>
+    <figcaption>
+        Visualization of the above recall percentages
+    </figcaption>
+    <script>
+      window.addEventListener('load', () => {
+        let plot_data = [
+            {% for p in combined_summary['presentation_counts'] %}
+                {{ combined_summary[p|string + 'p_correct'] / combined_summary[p|string + 'p_words']}},
+            {% endfor %}
+        ];
+
+        let labels = [
+            {% for p in combined_summary['presentation_counts'] %}
+                "{{p}}p",
+            {% endfor %}
+        ];
+        console.log(labels)
+        console.log(plot_data)
+        
+        ramutils.plots.barPlot(plot_data, labels);
+      });
+    </script>
+  </figure>
+
+</div>
+<script>
+   window.addEventListener('load', () => {
+    $('#session_summary_table').DataTable();
+   });
+</script>

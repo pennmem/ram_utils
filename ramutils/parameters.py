@@ -1,4 +1,4 @@
-"""Common experimental/model parameters."""
+"Common experimental/model parameters."""
 
 import os.path
 import numpy as np

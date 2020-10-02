@@ -12,6 +12,7 @@ EXPERIMENTS = {
         'CatFR1',
         'PAL1',
         'DBOY1',
+        'RepFR1'
     ],
     'ps': [
         'PS4_FR5',

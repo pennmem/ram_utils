@@ -73,6 +73,7 @@ def build_training_data(subject, experiment, paths, sessions=None, **kwargs):
     elif "FR" in experiment and not kwargs['combine_events']:
         free_recall_events = load_events(subject, experiment, sessions=sessions,
                                          rootdir=paths.root)
+
         free_recall_events = clean_events(free_recall_events,
                                           start_time=kwargs['baseline_removal_start_time'],
                                           end_time=kwargs['retrieval_time'],

@@ -37,6 +37,7 @@ __all__ = [
     'SessionSummary',
     'StimSessionSummary',
     'FRSessionSummary',
+    'repFRSessionSummary',
     'CatFRSessionSummary',
     'FRStimSessionSummary',
     'FR5SessionSummary',
@@ -640,9 +641,9 @@ class SessionSummary(Summary):
         self.excluded_pairs = excluded_pairs
         self.normalized_powers = normalized_powers
 
-
 class FRSessionSummary(SessionSummary):
     """Free recall session summary data."""
+
 
     def populate(self, events, bipolar_pairs, excluded_pairs,
                  normalized_powers, raw_events=None):
@@ -738,6 +739,75 @@ class FRSessionSummary(SessionSummary):
         else:
             group = events.groupby('serialpos')
             return group.recalled.mean().tolist()
+
+class repFRSessionSummary(FRSessionSummary):
+
+    def populate(self, events, bipolar_pairs, excluded_pairs, 
+                 normalized_powers, raw_events=None):
+       FRSessionSummary.populate(self, events, bipolar_pairs, excluded_pairs, 
+                                 normalized_powers, raw_events=raw_events)
+    
+    @property
+    def presentation_counts(self):
+        return list(self.events.repeats.unique())
+
+    @property
+    def num_correct(self):
+        return len(self.events[(self.events.type == 'WORD') & (self.events.recalled == 1) & (self.events.is_repeat == False)])
+
+    @property
+    def num_words(self):
+        """returns number of unique words presented"""
+        return len(self.events[(self.events.type == 'WORD') & (self.events.is_repeat == False)])
+
+    def get_num_words(self, repeats):
+        return len(self.events[(self.events.type == 'WORD') & (self.events.repeats == repeats) 
+                        & (self.events.is_repeat == False)])
+
+
+    def get_num_correct(self, repeats):
+        return len(self.events[(self.events.type == 'WORD') & (self.events.repeats == repeats)
+                        &(self.events.recalled == 1) & (self.events.is_repeat == False)])
+
+
+    @staticmethod
+    def serialpos_probabilities(summaries, first=False):
+        events = pd.concat([pd.DataFrame(s.events)
+                            for s in summaries])
+        events = events[events.type == 'WORD']
+        if first:
+            #TODO: make list length configurable
+
+            firstpos = np.full((4, 27), dtype=np.float)
+            for listno in events.list.unique():
+                try:
+                    nonzero = events[(events.list == listno) & (
+                        events.recalled == 1)].serialpos.iloc[0]
+                except IndexError:  # no items recalled this list
+                    continue
+
+                thispos = np.zeros(firstpos.shape, firstpos.dtype)
+                thispos[nonzero - 1] = 1
+                firstpos += thispos
+            return (firstpos / events.list.max()).tolist()
+        else:
+            # TODO: make this configurable
+            # NOTE: this includes the practice list
+
+            summary = np.full((4, 27), np.nan)
+            recalls_by_repeat = events[events.type == 'WORD'].groupby(["repeats", "serialpos"]).recalled.mean()
+
+            new_index = pd.MultiIndex.from_product(recalls_by_repeat.index.levels)
+            recalls_by_repeat = recalls_by_repeat.reindex(new_index)
+            recalls_by_repeat = recalls_by_repeat.fillna(np.nan)
+
+            summary[1,:] = recalls_by_repeat[(1,)]
+            summary[2,:] = recalls_by_repeat[(2,)]
+            summary[3,:] = recalls_by_repeat[(3,)]
+
+            summary[0,:] = events[events.type == 'WORD'].groupby(["serialpos"]).recalled.mean().values
+
+            return summary
 
 
 class CatFRSessionSummary(FRSessionSummary):
@@ -929,6 +999,7 @@ class StimSessionSummary(SessionSummary):
     def subject(self):
         """ Subject ID associated with the session """
         return extract_subject(self.events, add_localization=False)
+
 
 
 class FRStimSessionSummary(FRSessionSummary, StimSessionSummary):
