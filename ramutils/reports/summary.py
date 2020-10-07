@@ -753,12 +753,12 @@ class repFRSessionSummary(FRSessionSummary):
 
     @property
     def num_correct(self):
-        return len(self.events[(self.events.type == 'WORD') & (self.events.recalled == 1) & (self.events.is_repeat == False)])
+        return len(self.events[(self.events.serialpos >= 3) & (self.events.serialpos <= 23) & (self.events.type == 'WORD') & (self.events.recalled == 1) & (self.events.is_repeat == False)])
 
     @property
     def num_words(self):
         """returns number of unique words presented"""
-        return len(self.events[(self.events.type == 'WORD') & (self.events.is_repeat == False)])
+        return len(self.events[(self.events.serialpos >= 3) & (self.events.serialpos <= 23) & (self.events.type == 'WORD')  & (self.events.is_repeat == False)])
 
     def get_num_words(self, repeats):
         return len(self.events[(self.events.type == 'WORD') & (self.events.repeats == repeats) 
