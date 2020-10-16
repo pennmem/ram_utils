@@ -46,7 +46,8 @@ def make_ramulator_config(subject, experiment, paths, stim_params, sessions=None
                           localization=0, montage=0, default_surface_area=0.001,
                           trigger_pairs=None, use_common_reference=False,
                           use_classifier_excluded_leads=False,
-                          pipeline_name="ramulator-conf"):
+                          pipeline_name="ramulator-conf",
+                          ignore_labels=[]):
     """ Generate configuration files for a Ramulator experiment
 
     Parameters
@@ -83,6 +84,8 @@ def make_ramulator_config(subject, experiment, paths, stim_params, sessions=None
         classifier training
     pipeline_name : str
         Name to use for status updates.
+    ignore_labels: list or tuple
+        Labels to ignore from the jacksheet
 
     Returns
     -------
@@ -109,7 +112,8 @@ def make_ramulator_config(subject, experiment, paths, stim_params, sessions=None
         paths = generate_electrode_config(subject, paths, anodes, cathodes,
                                           localization, montage,
                                           default_surface_area,
-                                          use_common_reference).compute()
+                                          use_common_reference,
+                                          ignore_labels).compute()
 
     # Note: All of these pairs variables are of type OrderedDict, which is
     # crucial for preserving the initial order of the electrodes in the
@@ -150,7 +154,8 @@ def make_ramulator_config(subject, experiment, paths, stim_params, sessions=None
                                                 pairs=ec_pairs,
                                                 excluded_pairs=excluded_pairs,
                                                 extended_blanking=extended_blanking,
-                                                trigger_pairs=trigger_pairs)
+                                                trigger_pairs=trigger_pairs,
+                                                ignore_labels=ignore_labels)
         with PipelineCallback(pipeline_name):
             return config_path.compute()
 
@@ -200,7 +205,8 @@ def make_ramulator_config(subject, experiment, paths, stim_params, sessions=None
                                             pairs=ec_pairs,
                                             excluded_pairs=excluded_pairs,
                                             exp_params=exp_params,
-                                            extended_blanking=extended_blanking)
+                                            extended_blanking=extended_blanking,
+                                            ignore_labels=ignore_labels)
 
     if vispath is not None:
         config_path.visualize(filename=vispath)

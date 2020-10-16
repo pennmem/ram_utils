@@ -32,6 +32,7 @@ parser.add_argument('--electrode-config-file', '-e', type=str,
                     help='path to existing electrode config CSV file')
 parser.add_argument('--anodes', '-a', nargs='+', help='stim anode labels')
 parser.add_argument('--cathodes', '-c', nargs='+', help='stim cathode labels')
+parser.add_argument('--ignore-labels', nargs='*', help='labels to ignore fromt the jacksheet', default=[])
 parser.add_argument('--min-amplitudes', nargs='+', type=float,
                     help='minimum stim amplitudes')
 parser.add_argument('--max-amplitudes', nargs='+', type=float,
@@ -199,7 +200,8 @@ def create_expconf(input_args=None):
                               default_surface_area=default_surface_area,
                               trigger_pairs=args.trigger_pairs,
                               use_common_reference=args.use_common_reference,
-                              use_classifier_excluded_leads=args.use_classifier_excluded_leads)
+                              use_classifier_excluded_leads=args.use_classifier_excluded_leads,
+                              ignore_labels=args.ignore_labels)
         memory.clear()  # clear cached intermediate results on successful build
 
 
