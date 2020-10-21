@@ -49,8 +49,28 @@ def generate_data_for_repfr_report(subject, experiment, sessions,
     powers, final_task_events = compute_normalized_powers(
         all_task_events, bipolar_pairs=ec_pairs, **kwargs)
 
-    trained_classifier = None
-    classifier_evaluation_results = None # TODO: will be implemented at a later point
+    reduced_powers = reduce_powers(powers, used_pair_mask,
+                                   len(kwargs['freqs']))
+
+    sample_weights = get_sample_weights(final_task_events, **kwargs)
+
+    classifier = train_classifier(reduced_powers,
+                                  final_task_events,
+                                  sample_weights,
+                                  kwargs['C'],
+                                  kwargs['penalty_type'],
+                                  kwargs['solver'])
+
+    joint_classifier_summary = None
+
+    trained_classifier = serialize_classifier(classifier,
+                                              final_pairs,
+                                              reduced_powers,
+                                              final_task_events,
+                                              sample_weights,
+                                              joint_classifier_summary,
+                                              subject)
+
 
     pairinfo = dataframe_to_recarray(pairs_metadata_table[['label',
                                                            'location',
@@ -59,10 +79,35 @@ def generate_data_for_repfr_report(subject, experiment, sessions,
                                       ('location', 'S256'),
                                       ('region', 'S256')])[used_pair_mask.compute()]
 
+
+
+    kwargs['scheme'] = 'EQUAL'
+
+    encoding_only_mask = get_word_event_mask(final_task_events, True)
+    final_encoding_task_events = subset_events(final_task_events,
+                                               encoding_only_mask)
+    encoding_reduced_powers = subset_powers(reduced_powers, encoding_only_mask)
+
+    encoding_sample_weights = get_sample_weights(final_encoding_task_events,
+                                                 **kwargs)
+
+    encoding_classifier = train_classifier(encoding_reduced_powers,
+                                           final_encoding_task_events,
+                                           encoding_sample_weights,
+                                           kwargs['C'],
+                                           kwargs['penalty_type'],
+                                           kwargs['solver'])
+
+    encoding_classifier_summary = summarize_classifier(
+        encoding_classifier, encoding_reduced_powers,
+        final_encoding_task_events, kwargs['n_perm'], pairs=pairinfo,
+        tag='Encoding', **kwargs)
+
     target_selection_table = create_target_selection_table(
         pairs_metadata_table, powers, final_task_events, kwargs['freqs'],
         hfa_cutoff=kwargs['hfa_cutoff'], trigger_freq=kwargs['trigger_freq'],
         root=paths.root)
+
 
     session_summaries = summarize_nonstim_sessions(all_events,
                                                    final_task_events,
@@ -75,6 +120,8 @@ def generate_data_for_repfr_report(subject, experiment, sessions,
     math_summaries = None # NOTE: as designed, this task has no math
     
     behavioral_results = None # NOTE: only for stim experiments
+
+    classifier_evaluation_results = [encoding_classifier_summary]
 
     data = ReportData(session_summaries, math_summaries, target_selection_table,
                     classifier_evaluation_results, trained_classifier, repetition_ratio_dict,
