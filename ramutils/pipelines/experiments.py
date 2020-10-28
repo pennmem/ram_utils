@@ -142,6 +142,7 @@ def generate_data_for_repfr_report(subject, experiment, sessions,
 
     kwargs['scheme'] = 'EQUAL'
 
+    powers, final_task_events = compute_normalized_powers(all_events, bipolar_pairs=ec_pairs, **kwargs)
     target_selection_table = create_target_selection_table(
             pairs_metadata_table, powers, final_task_events, kwargs['freqs'],
             hfa_cutoff=kwargs['hfa_cutoff'], trigger_freq=kwargs['trigger_freq'],
