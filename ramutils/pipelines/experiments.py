@@ -134,13 +134,10 @@ def generate_data_for_repfr_report(subject, experiment, sessions,
         encoding_classifier_summary = summarize_classifier(
                 encoding_classifier, encoding_reduced_powers,
                 final_encoding_task_events, kwargs['n_perm'], pairs=pairinfo,
-                tag='{}p Encoding'.format(p), **kwargs)
+                tag='{}p Encoding'.format(p), scheme='EQUAL', **kwargs)
 
         classifiers.append(encoding_classifier)
         classifier_summaries.append(encoding_classifier_summary)
-
-
-    kwargs['scheme'] = 'EQUAL'
 
     target_selection_table = create_target_selection_table(
             pairs_metadata_table, powers, final_task_events, kwargs['freqs'],
