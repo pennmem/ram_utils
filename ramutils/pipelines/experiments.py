@@ -121,6 +121,7 @@ def generate_data_for_repfr_report(subject, experiment, sessions,
         encoding_reduced_powers = subset_powers(reduced_powers, encoding_only_mask)
 
         encoding_sample_weights = get_sample_weights(final_encoding_task_events,
+                                                     scheme='EQUAL',
                                                      **kwargs)
 
         encoding_classifier = train_classifier(encoding_reduced_powers,
